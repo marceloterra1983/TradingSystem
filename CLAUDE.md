@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 <!-- OPENSPEC:START -->
 
 # OpenSpec Instructions
@@ -22,13 +20,10 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 <!-- OPENSPEC:END -->
 
->>>>>>> master
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-<<<<<<< HEAD
-=======
 > **Canonical Source for AI Agents**  
 > `CLAUDE.md` é a fonte única de instruções para qualquer agente de IA neste projeto. O arquivo `AGENTS.md` na raiz é um link simbólico para este documento, garantindo que atualizações em um se reflitam automaticamente no outro.
 
@@ -116,34 +111,12 @@ claude
 -   `.claude/commands/` - Custom commands
 -   `.claude/mcp-servers.json` - MCP configuration
 
->>>>>>> master
 ## Permissions
 
 Claude Code has the following permissions in this project:
 
 ```json
 {
-<<<<<<< HEAD
-  "permissions": {
-    "allow": [
-      "Bash",
-      "Read",
-      "Write",
-      "Edit",
-      "Glob",
-      "Grep",
-      "Task",
-      "WebFetch",
-      "WebSearch",
-      "BashOutput",
-      "KillShell",
-      "NotebookEdit",
-      "TodoWrite",
-      "SlashCommand",
-      "ExitPlanMode"
-    ]
-  }
-=======
     "permissions": {
         "allow": [
             "Bash",
@@ -163,7 +136,6 @@ Claude Code has the following permissions in this project:
             "ExitPlanMode"
         ]
     }
->>>>>>> master
 }
 ```
 
@@ -171,55 +143,12 @@ Claude Code has the following permissions in this project:
 
 **Local Trading System** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for market data capture, ML-based analysis, and automated order execution. 100% on-premise, no cloud dependencies.
 
-<<<<<<< HEAD
-**Stack:** C# (.NET 8.0) + Python (3.11+) + React
-**Platform:** Windows 11 x64 + RTX 5090 GPU (NATIVE ONLY - NO DOCKER)
-=======
 **Stack:** C# (.NET 8.0) + Python (3.11+) + React + Node.js
 **Platform:** Hybrid: Native Windows (Core Trading) + Docker Compose Auxiliary Services (Linux/WSL)
->>>>>>> master
 **Architecture:** Microservices + Event-Driven + Domain-Driven Design
 
 ## ⚠️ CRITICAL DEPLOYMENT REQUIREMENT
 
-<<<<<<< HEAD
-**THIS PROJECT MUST ALWAYS RUN NATIVELY ON WINDOWS. NEVER USE DOCKER.**
-
-**Reasons:**
-1. **ProfitDLL is Windows-native 64-bit DLL** - Cannot run in Docker containers without significant performance penalty
-2. **Latency requirements (< 500ms)** - Docker adds 10-50ms overhead unacceptable for high-frequency trading
-3. **Disk I/O performance** - Direct NVMe/SSD access required for Parquet writes (Docker I/O is ~30% slower)
-4. **Resource allocation** - 100% CPU/RAM must be available for trading processes (Docker Desktop uses 1-2GB overhead)
-5. **Production stability** - Native Windows services are more reliable for 24/7 trading operations
-
-**If any AI agent suggests Docker, reject the suggestion and use native Windows deployment only.**
-
-## 🏗️ Project Structure
-
-```
-TradingSystem/
-├── docs/                           # Documentation
-│   ├── architecture/              # ADRs, diagrams
-│   ├── api/                       # OpenAPI specs
-│   ├── prd/                       # Product requirements
-│   └── profitdll/                 # ProfitDLL docs + examples
-├── src/                           # Source code
-│   ├── Core/                      # Domain + Application (DDD)
-│   │   ├── TradingSystem.Domain/
-│   │   └── TradingSystem.Application/
-│   ├── Services/                  # Microservices
-│   │   ├── DataCapture/           # C# + ProfitDLL
-│   │   ├── AnalyticsPipeline/     # Python + ML
-│   │   ├── APIGateway/            # FastAPI
-│   │   ├── OrderManager/          # C# + Risk Engine
-│   │   └── Dashboard/             # React + Tailwind
-│   └── Shared/                    # Shared libraries
-├── tests/                         # E2E, Integration, Load
-├── infrastructure/                # Docker, Scripts, Monitoring
-├── config/                        # Environment configs
-├── data/                          # Parquet, Logs, Models (gitignored)
-└── tools/                         # Dev tools, replay
-=======
 ### Core Trading Services (Native Windows)
 
 **The core trading services (Data Capture and Order Manager) MUST RUN NATIVELY ON WINDOWS.**
@@ -305,27 +234,11 @@ TradingSystem/
     └── workflows/
         ├── code-quality.yml      # Linting, formatting
         └── docs-deploy.yml       # Documentation deployment
->>>>>>> master
 ```
 
 ## 🎯 Architecture Principles
 
 ### Clean Architecture (Layered)
-<<<<<<< HEAD
-- **Domain Layer** → Entities, Value Objects, Aggregates, Business Rules
-- **Application Layer** → Use Cases, Commands, Queries, Services
-- **Infrastructure Layer** → ProfitDLL, WebSocket, Parquet, HTTP Clients
-- **Presentation Layer** → Controllers, APIs, Dashboard Components
-
-### Domain-Driven Design (DDD)
-- **Aggregates**: `OrderAggregate`, `TradeAggregate`, `PositionAggregate`
-- **Value Objects**: `Price`, `Symbol`, `Quantity`, `Timestamp`
-- **Domain Events**: `OrderFilledEvent`, `SignalGeneratedEvent`, `PositionUpdatedEvent`
-- **Repositories**: `ITradeRepository`, `IOrderRepository`, `ISignalRepository`
-- **Ubiquitous Language**: Trade, Order, Signal, Position, Risk, Execution
-
-### Microservices Architecture
-=======
 
 -   **Domain Layer** → Entities, Value Objects, Aggregates, Business Rules
 -   **Application Layer** → Use Cases, Commands, Queries, Services
@@ -342,7 +255,6 @@ TradingSystem/
 
 ### Microservices Architecture
 
->>>>>>> master
 Each service has single responsibility, independent deployment as Windows processes/services, communicates via WebSocket (data) + HTTP (commands).
 
 ## 🔄 System Data Flow
@@ -352,23 +264,6 @@ Each service has single responsibility, independent deployment as Windows proces
    ↓
 2. DataCapture validates & serializes → JSON
    ↓
-<<<<<<< HEAD
-3. WebSocket Publisher → ws://analytics:9001
-   ↓
-4. AnalyticsPipeline consumes
-   ↓
-5. Feature Engineering + ML (Cause-Effect Model)
-   ↓
-6. Signal generated → POST /api/v1/signals (Gateway)
-   ↓
-7. Gateway validates & routes → OrderManager
-   ↓
-8. OrderManager: Risk checks → Execute via ProfitDLL
-   ↓
-9. OrderCallback updates positions
-   ↓
-10. Dashboard real-time update (WebSocket)
-=======
 3. WebSocket Publisher streams to internal consumers
    ↓
 4. Gateway receives and validates trading commands (HTTP)
@@ -378,37 +273,11 @@ Each service has single responsibility, independent deployment as Windows proces
 6. OrderCallback updates positions
    ↓
 7. Dashboard real-time update (WebSocket)
->>>>>>> master
 ```
 
 ## 🔌 ProfitDLL Integration
 
 ### Critical Requirements
-<<<<<<< HEAD
-- **MUST compile in x64 mode** - ProfitDLL is 64-bit only
-- DLL reference: `DOCS_PRFITDLL/DLLs/Win64/ProfitDLL.dll`
-- Example code: `DOCS_PRFITDLL/Exemplo C#/` and `Exemplo Python/`
-
-### Authentication
-- `DLLInitializeMarketLogin` - Market data only
-- `DLLInitializeLogin` - Market data + order routing
-- Requires: activation_key, username, password
-
-### Connection States (TStateCallback)
-- State 0: Login (0=OK, 1=Invalid, 2=Wrong Password)
-- State 1: Broker (0=Disconnected, 2=Connected, 5=HCS Connected)
-- State 2: Market (4=Connected, 3=Not Logged)
-- State 3: Activation (0=Valid, else Invalid)
-
-### Key Callbacks (MUST keep alive - GC prevention)
-- `TStateCallback` - Connection state
-- `TConnectorTradeCallback` - Trade events
-- `TOfferBookCallback` - Order book updates
-- `TConnectorOrderCallback` - Order execution
-- `TConnectorPriceDepthCallback` - Aggregated book
-
-### Subscription Pattern
-=======
 
 -   **MUST compile in x64 mode** - ProfitDLL is 64-bit only
 -   DLL reference: `project-hub/systems/documentacao/ProfitDLL/DLLs/Win64/ProfitDLL.dll`
@@ -438,7 +307,6 @@ Each service has single responsibility, independent deployment as Windows proces
 
 ### Subscription Pattern
 
->>>>>>> master
 ```csharp
 // Wait for connection
 if (bMarketConnected && bAtivo) {
@@ -449,41 +317,15 @@ if (bMarketConnected && bAtivo) {
 ```
 
 ### Order Execution
-<<<<<<< HEAD
-- Market orders: `Price = -1`
-- Stop orders: Set both `Price` and `StopPrice`
-- Position types: `1 = DayTrade`, `2 = Consolidated`
-- Error codes: `NL_OK = 0x00000000`, negative = error
-=======
 
 -   Market orders: `Price = -1`
 -   Stop orders: Set both `Price` and `StopPrice`
 -   Position types: `1 = DayTrade`, `2 = Consolidated`
 -   Error codes: `NL_OK = 0x00000000`, negative = error
->>>>>>> master
 
 ## 📡 Communication Protocols
 
 ### WebSocket (Market Data)
-<<<<<<< HEAD
-- Port: `9001`
-- Format: JSON
-- Fields: `symbol`, `price`, `volume`, `aggressor`, `timestamp`
-- Buffer: 10,000 msgs (FIFO overflow)
-- Auto-reconnect: Every 5s
-
-### HTTP REST (Commands)
-- **API Gateway**: `http://localhost:8000`
-- **Order Manager**: `http://localhost:5055`
-- **Dashboard**: `http://localhost:5173`
-
-### Key Endpoints
-- `POST /api/v1/execute` - Execute order
-- `POST /api/v1/risk/kill-switch` - Emergency stop
-- `GET /api/v1/signals/latest` - Recent signals
-- `GET /api/v1/positions` - Current positions
-- `GET /api/v1/metrics` - Performance metrics
-=======
 
 -   Port: `9001`
 -   Format: JSON
@@ -518,7 +360,6 @@ if (bMarketConnected && bAtivo) {
 -   `GET /api/v1/signals/latest` - Recent signals
 -   `GET /api/v1/positions` - Current positions
 -   `GET /api/v1/metrics` - Performance metrics
->>>>>>> master
 
 ## 🤖 ML Cause-and-Effect Model
 
@@ -528,69 +369,6 @@ if (bMarketConnected && bAtivo) {
 **Window**: Rolling k ticks or seconds
 **Algorithm**: `SGDClassifier.partial_fit()` (incremental learning)
 **Classification**:
-<<<<<<< HEAD
-- `ret_fut > +threshold` → BUY
-- `ret_fut < -threshold` → SELL
-- Neutral zone → HOLD
-**Feedback**: Model adjusts based on actual trade outcomes
-
-## 🛡️ Risk Management
-
-- Global kill switch: `/api/v1/risk/kill-switch`
-- Daily loss limit (configured in `.env`)
-- Max position size
-- Trading hours restriction (9:00-18:00 default)
-- Auto-pause on connection errors/high latency
-- All executions audited (timestamp + justification)
-
-## 💾 Data Storage
-
-- **Format**: Parquet (columnar, compressed)
-- **Structure**: `/data/parquet/{asset}/{date}/trades.parquet`
-- **Logs**: JSONL structured (`/data/logs/{service}/{date}.jsonl`)
-- **Models**: `/data/models/{model_name}/{version}.pkl`
-- **Backups**: Incremental daily (`/data/backups/{date}/`)
-
-## 🚀 Development Commands
-
-### Build & Run (ALWAYS NATIVE - NO DOCKER)
-
-```powershell
-# .NET Solution (x64 REQUIRED)
-dotnet restore TradingSystem.sln
-dotnet build TradingSystem.sln -c Release --arch x64
-
-# Python Services
-cd src/Services/AnalyticsPipeline
-poetry install
-poetry run python src/main.py
-
-cd ../APIGateway
-poetry install
-poetry run uvicorn src.main:app --reload --port 8000
-
-# React Dashboard
-cd ../Dashboard
-npm install
-npm run dev
-
-# Start All Services (use PowerShell script)
-.\infrastructure\scripts\start-all-services.ps1
-```
-
-### Production Deployment (Windows Services)
-
-```powershell
-# Install as Windows Services (run as Administrator)
-.\infrastructure\scripts\install-windows-services.ps1
-
-# Start all services
-sc.exe start TradingSystem-DataCapture
-sc.exe start TradingSystem-Analytics
-sc.exe start TradingSystem-Gateway
-sc.exe start TradingSystem-OrderManager
-sc.exe start TradingSystem-Dashboard
-=======
 
 -   `ret_fut > +threshold` → BUY
 -   `ret_fut < -threshold` → SELL
@@ -725,25 +503,11 @@ Compose files are located under `infrastructure/compose/`, `infrastructure/monit
 sc.exe start TradingSystem-DataCapture
 sc.exe start TradingSystem-Gateway
 sc.exe start TradingSystem-OrderManager
->>>>>>> master
 ```
 
 ### Testing
 
 ```bash
-<<<<<<< HEAD
-# .NET Tests
-dotnet test TradingSystem.sln
-
-# Python Tests
-poetry run pytest tests/ --cov=src
-
-# E2E Tests
-dotnet test tests/e2e/
-
-# Load Tests
-locust -f tests/load/locustfile.py
-=======
 # Frontend Tests
 cd frontend/apps/dashboard
 npm run test
@@ -786,68 +550,10 @@ curl http://localhost:3500/api/health/full | jq '.overallHealth'
 
 # Check cache status
 curl -I http://localhost:3500/api/health/full | grep X-Cache-Status
->>>>>>> master
 ```
 
 ## 📝 Development Guidelines
 
-<<<<<<< HEAD
-### When working with ProfitDLL callbacks:
-- Store delegates as **static fields** to prevent GC
-- Use `[MarshalAs(UnmanagedType.LPWStr)]` for strings
-- Match `CallingConvention.StdCall`
-- Never do heavy work inside callbacks (use queues)
-
-### When adding ML features:
-- Add to `src/Services/AnalyticsPipeline/src/infrastructure/ml/feature_engineering.py`
-- Update signal generation logic
-- Test with replay before live
-
-### When modifying orders:
-- Always test in simulation mode
-- Verify risk checks enforced
-- Ensure audit logging complete
-- Never bypass kill switch
-
-### Code Style:
-- C#: PascalCase, 4 spaces, follow `.editorconfig`
-- Python: snake_case, Black formatter (88 chars)
-- TypeScript: camelCase, 2 spaces, ESLint rules
-- Commits: Conventional Commits (`feat:`, `fix:`, `chore:`)
-
-## 🔐 Security & Configuration
-
-- **Never commit**: `.env`, `appsettings.*.json`, credentials
-- **Use**: `config/development/.env.example` as template
-- **Encrypt**: Credentials in production (`ENCRYPT_CREDENTIALS=true`)
-- **Audit**: All orders logged with timestamp + reason
-- **Sandbox**: Local execution only, no external APIs
-
-## 📚 Documentation
-
-- **PRDs**: [docs/prd/](docs/prd/) - Product requirements
-- **Architecture**: [docs/architecture/](docs/architecture/) - ADRs, diagrams
-- **API Specs**: [docs/api/](docs/api/) - OpenAPI schemas
-- **ProfitDLL**: [docs/profitdll/](docs/profitdll/) - Integration guides
-
-## 🔗 Reference Code
-
-- C# ProfitDLL init: `DOCS_PRFITDLL/Exemplo C#/Program.cs:928-961`
-- C# Callbacks: `DOCS_PRFITDLL/Exemplo C#/Program.cs:102-122`
-- Python init: `DOCS_PRFITDLL/Exemplo Python/main.py:721-758`
-- Python orders: `DOCS_PRFITDLL/Exemplo Python/main.py:848-922`
-
-## ⚠️ Important Reminders
-
-- ✅ Always build x64 (ProfitDLL requirement)
-- ✅ Check connection state before operations
-- ✅ Validate asset format: "TICKER:EXCHANGE"
-- ✅ Use UTC timezone, adjust for market hours
-- ✅ Test with replay data before live
-- ❌ Never skip risk checks
-- ❌ Never hardcode credentials
-- ❌ Never process heavy logic in callbacks
-=======
 ### ⚠️ CRITICAL: Environment Variables Configuration
 
 **RULE: ALL applications, services, and containers MUST use the centralized `.env` file from project root.**
@@ -1016,4 +722,3 @@ bash scripts/env/validate-env.sh
 -   ❌ Never skip risk checks
 -   ❌ Never hardcode credentials
 -   ❌ Never process heavy logic in callbacks
->>>>>>> master
