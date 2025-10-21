@@ -1,0 +1,258 @@
+.facetFilters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--ifm-color-emphasis-200);
+}
+
+.filtersHeader h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.activeCount {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+  background-color: var(--ifm-color-primary-lightest);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.clearAllButton {
+  background: transparent;
+  border: 1px solid var(--ifm-color-danger);
+  color: var(--ifm-color-danger);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clearAllButton:hover {
+  background-color: var(--ifm-color-danger);
+  color: white;
+}
+
+/* Filter section */
+.filterSection {
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-100);
+  padding-bottom: 0.5rem;
+}
+
+.filterTitle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-800);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.filterTitle:hover {
+  background-color: var(--ifm-color-emphasis-50);
+  border-radius: 4px;
+}
+
+.expandIcon {
+  font-size: 10px;
+  color: var(--ifm-color-emphasis-600);
+  transition: transform 0.2s;
+}
+
+.filterOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.filterOption:hover {
+  background-color: var(--ifm-color-emphasis-50);
+}
+
+.filterOption input[type='radio'],
+.filterOption input[type='checkbox'] {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.filterOption input[type='radio']:disabled,
+.filterOption input[type='checkbox']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.filterLabel {
+  flex: 1;
+  font-size: 14px;
+  color: var(--ifm-font-color-base);
+}
+
+.filterOption input:disabled ~ .filterLabel {
+  color: var(--ifm-color-emphasis-500);
+  text-decoration: line-through;
+}
+
+.filterCount {
+  background-color: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-700);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Tags filter specific */
+.selectedTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tagRemove {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.tagRemove:hover {
+  opacity: 0.7;
+}
+
+.tagSearch {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  font-size: 13px;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.tagSearch:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+}
+
+.showMoreButton {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  color: var(--ifm-color-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.showMoreButton:hover {
+  background-color: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-primary);
+}
+
+/* Dark mode */
+[data-theme='dark'] .filterTitle:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .filterOption:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .filterCount {
+  background-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] .tagSearch {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+[data-theme='dark'] .showMoreButton {
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+[data-theme='dark'] .showMoreButton:hover {
+  background-color: var(--ifm-color-primary-darkest);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .filtersHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .activeFilters {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+
+
+
+

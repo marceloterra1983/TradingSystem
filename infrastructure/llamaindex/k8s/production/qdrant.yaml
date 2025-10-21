@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+  namespace: llamaindex-production
+spec:
+  serviceName: qdrant-service
+  replicas: 3  # Production uses 3 replicas for high availability
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - qdrant
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: qdrant
+        image: qdrant/qdrant:latest
+        ports:
+        - containerPort: 6333
+          name: http
+        - containerPort: 6334
+          name: grpc
+        volumeMounts:
+        - name: qdrant-storage
+          mountPath: /qdrant/storage
+        env:
+        - name: QDRANT_ALLOW_RECOVERY
+          value: "true"
+        - name: QDRANT_ENABLE_TLS
+          value: "true"  # Enable TLS in production
+        - name: QDRANT_LOG_LEVEL
+          value: "INFO"
+        - name: QDRANT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: QDRANT_API_KEY
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 6333
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 6333
+          initialDelaySeconds: 30
+          periodSeconds: 20
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+  volumeClaimTemplates:
+  - metadata:
+      name: qdrant-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard-ssd"  # Use SSD storage in production
+      resources:
+        requests:
+          storage: 100Gi  # More storage for production
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-service
+  namespace: llamaindex-production
+spec:
+  selector:
+    app: qdrant
+  ports:
+  - name: http
+    port: 6333
+    targetPort: 6333
+  - name: grpc
+    port: 6334
+    targetPort: 6334
+  type: ClusterIP

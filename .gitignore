@@ -1,0 +1,354 @@
+<<<<<<< HEAD
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+=======
+# .gitignore for TradingSystem
+# Organized by category for better maintenance
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# ============================================
+# IDEs and Editors
+# ============================================
+# Visual Studio
+.vs/
+>>>>>>> master
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+<<<<<<< HEAD
+.vs/
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/dist/
+**/build/
+=======
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Grok settings (contains API keys)
+.grok/user-settings.json
+
+# ============================================
+# Build Outputs
+# ============================================
+# .NET
+**/bin/
+**/obj/
+**/out/
+>>>>>>> master
+*.dll
+*.exe
+*.pdb
+*.cache
+
+<<<<<<< HEAD
+# Python
+=======
+# Frontend
+**/dist/
+**/build/
+**/.next/
+**/.nuxt/
+
+# ============================================
+# Python
+# ============================================
+>>>>>>> master
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+<<<<<<< HEAD
+=======
+
+# Virtual environments
+>>>>>>> master
+.venv/
+venv/
+ENV/
+env/
+<<<<<<< HEAD
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.tox/
+
+# Node
+=======
+
+# Testing and coverage
+.pytest_cache/
+.mypy_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+
+# Package builds
+*.egg-info/
+dist/
+build/
+
+# ============================================
+# Node.js / JavaScript
+# ============================================
+>>>>>>> master
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+<<<<<<< HEAD
+
+# Data & Logs (sensitive)
+/data/**
+!/data/.gitkeep
+/logs/**
+!/logs/.gitkeep
+
+# Secrets & Config
+*.env
+*.env.local
+*.env.production
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+*.pfx
+*.key
+*.pem
+
+# ML Models & Data
+*.pkl
+*.h5
+*.pt
+*.onnx
+/models/**
+!/models/.gitkeep
+
+# Backups
+=======
+.npm/
+.yarn/
+
+# ============================================
+# Data & Runtime Files (SENSITIVE)
+# ============================================
+# Data storage
+# Backend runtime data (não versionar)
+backend/data/runtime/**
+backend/data/backups/**
+
+# Schemas devem ser versionados (allow)
+!backend/data/schemas/
+!/data/.gitkeep
+
+# Logs
+/logs/**
+!/logs/.gitkeep
+*.log
+
+# Parquet files (market data)
+*.parquet
+*.parquet.gzip
+
+# ============================================
+# Secrets & Configuration (CRITICAL)
+# ============================================
+# Environment files
+*.env
+*.env.local
+*.env.development
+*.env.production
+.env.*.local
+
+# Environment variables with secrets
+.env
+
+# Keep example files
+!.env.example
+!.env.*.example
+!**/.env.example
+!config/.env.defaults
+!config/container-images.env
+
+# Sensitive configs
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+
+# Certificates and keys
+*.pfx
+*.key
+*.pem
+*.cer
+*.crt
+
+# ============================================
+# ML Models & Training Data
+# ============================================
+# Model files
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.pb
+
+# Model storage
+/models/**
+!/models/.gitkeep
+
+# ============================================
+# Backups
+# ============================================
+>>>>>>> master
+*.bak
+*.backup
+/backups/**
+!/backups/.gitkeep
+<<<<<<< HEAD
+
+# Parquet files
+*.parquet
+*.parquet.gzip
+
+# Test coverage
+coverage/
+*.coverage
+htmlcov/
+.coverage.*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.swp
+*~
+
+# ProfitDLL specific
+ProfitDLL.dll
+# Keep only references in DOCS_PRFITDLL
+!DOCS_PRFITDLL/**/ProfitDLL.dll
+=======
+/.backup-*/
+/*.backup-*/
+
+# ============================================
+# Infrastructure Inventory Snapshots
+# ============================================
+/docker-containers*.xlsx
+/*-inventory*.xlsx
+!docs/reports/inventory/docker-containers*.xlsx
+!docs/reports/inventory/*-inventory*.xlsx
+
+# ============================================
+# Generated Documentation (Build Artifacts)
+# ============================================
+frontend/apps/dashboard/public/docs/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+/*-COMPLETE.md
+/*-SUMMARY.md
+/*-REPORT.md
+/*_READY.md
+/PHASE*-*.md
+/COMMIT_MESSAGE*.md
+/STATUS-*.md
+/VALIDATION-*.md
+/FREEZE-*.md
+/QUICK-START-*.md
+!CHANGELOG.md
+!README.md
+!CONTRIBUTING.md
+!QUICK-START.md
+!/reiniciar
+
+# ============================================
+# ProfitDLL Integration
+# ============================================
+# Exclude ProfitDLL.dll globally
+ProfitDLL.dll
+
+# But keep reference copies in docs
+!docs/integrations/profitdll/**/ProfitDLL.dll
+
+# ============================================
+# Old Structure (v2.1 Cleanup)
+# ============================================
+# Removed in restructuring v2.1
+/src/
+/project-hub/
+
+# ============================================
+# Database Files
+# ============================================
+# LowDB (JSON databases)
+db.json
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep example/template databases
+!**/db.example.json
+!**/template.db
+
+# ============================================
+# Uploads & User Content
+# ============================================
+/uploads/**
+!/uploads/.gitkeep
+
+# ============================================
+# Frontend specific
+# ============================================
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.next/
+frontend/**/.nuxt/
+
+# ============================================
+# Cypress Testing
+# ============================================
+# Dashboard Cypress artifacts
+frontend/apps/dashboard/cypress.env.json
+frontend/apps/dashboard/cypress/videos/
+frontend/apps/dashboard/cypress/screenshots/
+frontend/apps/dashboard/cypress/downloads/
+
+backups/rename-containers-*/env-backup/
+
+# dados locais
+/data/
+>>>>>>> master

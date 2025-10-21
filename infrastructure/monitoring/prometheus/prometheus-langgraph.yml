@@ -1,0 +1,60 @@
+# Prometheus Configuration for LangGraph Monitoring
+# Add this to your main prometheus.yml or use as standalone config
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'tradingsystem'
+    environment: 'production'
+
+# LangGraph Service Scraping
+scrape_configs:
+  # LangGraph Metrics
+  - job_name: 'langgraph'
+    static_configs:
+      - targets: ['langgraph:8111']  # Docker network
+        labels:
+          service: 'langgraph'
+          stack: 'ai-tools'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Agno Agents Metrics
+  - job_name: 'agno-agents'
+    static_configs:
+      - targets: ['agno-agents:8200']
+        labels:
+          service: 'agno-agents'
+          stack: 'ai-tools'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # QuestDB Metrics (if exposed)
+  - job_name: 'questdb'
+    static_configs:
+      - targets: ['questdb:9003']  # Metrics port
+        labels:
+          service: 'questdb'
+          stack: 'ai-tools'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # PostgreSQL Exporter (if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          stack: 'ai-tools'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+# Alert Rules
+rule_files:
+  - '/etc/prometheus/rules/langgraph_alerts.yml'
+

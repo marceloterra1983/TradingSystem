@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradingSystem - Brand Assets Preview</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, system-ui, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #64748b;
+      margin-bottom: 48px;
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+      border-radius: 2px;
+    }
+
+    .logo-showcase {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .logo-item {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .logo-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .logo-display {
+      padding: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .logo-display:hover {
+      border-color: #3b82f6;
+      background: #f8fafc;
+    }
+
+    .logo-display.dark {
+      background: #0f172a;
+      border-color: #1e293b;
+    }
+
+    .logo-display.dark:hover {
+      border-color: #3b82f6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .color-card {
+      padding: 24px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .color-code {
+      margin-top: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .toggle-theme {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 24px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .toggle-theme:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    body.dark-mode {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    body.dark-mode .section {
+      background: #1e293b;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark-mode h1 {
+      color: #f1f5f9;
+    }
+
+    body.dark-mode .section-title {
+      color: #f1f5f9;
+    }
+
+    body.dark-mode .logo-display {
+      border-color: #334155;
+      background: #0f172a;
+    }
+
+    body.dark-mode .logo-display:hover {
+      background: #1e293b;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .spec-item {
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 6px;
+      border-left: 3px solid #3b82f6;
+    }
+
+    body.dark-mode .spec-item {
+      background: #0f172a;
+    }
+
+    .spec-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .spec-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      font-family: 'Courier New', monospace;
+    }
+
+    body.dark-mode .spec-value {
+      color: #f1f5f9;
+    }
+
+    @media (max-width: 768px) {
+      .toggle-theme {
+        top: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+
+      .section {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-theme" onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
+
+  <div class="container">
+    <h1>TradingSystem Brand Assets</h1>
+    <p class="subtitle">Logo variations and design specifications</p>
+
+    <!-- Full Logo -->
+    <div class="section">
+      <h2 class="section-title">Primary Logo (Light)</h2>
+      <div class="logo-showcase">
+        <div class="logo-item">
+          <div class="logo-label">Full Logo with Tagline</div>
+          <div class="logo-display">
+            <img src="logo.svg" alt="TradingSystem Logo" style="max-width: 100%; height: auto;">
+          </div>
+          <div class="specs">
+            <div class="spec-item">
+              <div class="spec-label">Dimensions</div>
+              <div class="spec-value">400 × 80 px</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">File Format</div>
+              <div class="spec-value">SVG</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Use Case</div>
+              <div class="spec-value">Headers, Docs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Logo -->
+    <div class="section">
+      <h2 class="section-title">Primary Logo (Dark)</h2>
+      <div class="logo-showcase">
+        <div class="logo-item">
+          <div class="logo-label">Full Logo - Dark Mode</div>
+          <div class="logo-display dark">
+            <img src="logo-dark.svg" alt="TradingSystem Logo Dark" style="max-width: 100%; height: auto;">
+          </div>
+          <div class="specs">
+            <div class="spec-item">
+              <div class="spec-label">Dimensions</div>
+              <div class="spec-value">400 × 80 px</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Background</div>
+              <div class="spec-value">#0f172a+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact Logo -->
+    <div class="section">
+      <h2 class="section-title">Compact Version</h2>
+      <div class="logo-showcase">
+        <div class="logo-item">
+          <div class="logo-label">Compact Logo (No Tagline)</div>
+          <div class="logo-display">
+            <img src="logo-compact.svg" alt="TradingSystem Logo Compact" style="max-width: 100%; height: auto;">
+          </div>
+          <div class="specs">
+            <div class="spec-item">
+              <div class="spec-label">Dimensions</div>
+              <div class="spec-value">280 × 60 px</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Use Case</div>
+              <div class="spec-value">Navbar, Mobile</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Icon Only -->
+    <div class="section">
+      <h2 class="section-title">Icon Only</h2>
+      <div class="logo-showcase">
+        <div class="logo-item">
+          <div class="logo-label">Icon (Candlestick Chart)</div>
+          <div class="logo-display">
+            <img src="logo-icon.svg" alt="TradingSystem Icon" style="max-width: 100%; height: auto;">
+          </div>
+          <div class="specs">
+            <div class="spec-item">
+              <div class="spec-label">Dimensions</div>
+              <div class="spec-value">60 × 80 px</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Use Case</div>
+              <div class="spec-value">Favicon, App Icon</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Palette -->
+    <div class="section">
+      <h2 class="section-title">Color Palette</h2>
+      <div class="grid">
+        <div class="color-card" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+          Blue Gradient
+          <div class="color-code">#3b82f6 → #1d4ed8</div>
+        </div>
+        <div class="color-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+          Green Gradient
+          <div class="color-code">#10b981 → #059669</div>
+        </div>
+        <div class="color-card" style="background: #f59e0b;">
+          Amber Accent
+          <div class="color-code">#f59e0b</div>
+        </div>
+        <div class="color-card" style="background: #1e293b;">
+          Slate 800 (Text)
+          <div class="color-code">#1e293b</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="section">
+      <h2 class="section-title">Typography</h2>
+      <div style="margin-top: 24px;">
+        <div style="font-size: 48px; font-weight: 700; margin-bottom: 16px;">
+          Trading<span style="color: #3b82f6;">System</span>
+        </div>
+        <div style="font-size: 14px; color: #64748b; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 32px;">
+          HIGH-FREQUENCY ALGORITHMIC TRADING
+        </div>
+        <div class="specs">
+          <div class="spec-item">
+            <div class="spec-label">Font Family</div>
+            <div class="spec-value">Inter, Segoe UI</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Title Weight</div>
+            <div class="spec-value">700 (Bold)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Tagline Weight</div>
+            <div class="spec-value">500 (Medium)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Letter Spacing</div>
+            <div class="spec-value">-0.02em / 0.05em</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Guidelines -->
+    <div class="section">
+      <h2 class="section-title">Usage Guidelines</h2>
+      <div style="line-height: 1.8; color: #64748b;">
+        <p style="margin-bottom: 16px;"><strong style="color: #1e293b;">✅ DO's:</strong></p>
+        <ul style="margin-left: 24px; margin-bottom: 24px;">
+          <li>Use on solid, high-contrast backgrounds</li>
+          <li>Scale proportionally (maintain aspect ratio)</li>
+          <li>Use official color versions when possible</li>
+          <li>Maintain minimum clear space around logo</li>
+        </ul>
+
+        <p style="margin-bottom: 16px;"><strong style="color: #1e293b;">❌ DON'Ts:</strong></p>
+        <ul style="margin-left: 24px;">
+          <li>Don't distort or stretch the logo</li>
+          <li>Don't change colors or gradients</li>
+          <li>Don't add effects (shadows, outlines)</li>
+          <li>Don't place on busy backgrounds</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    // Auto-detect system theme preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>

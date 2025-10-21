@@ -1,0 +1,160 @@
+@startuml
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+skinparam defaultFontName Courier
+skinparam defaultFontSize 12
+
+title Health Check Architecture - Complete Flow
+
+actor User/System
+participant "health-check-all.sh\n(Orchestrator)" as Script
+participant "health.sh\n(Library)" as Library
+participant "Local Services\n(Node.js)" as Services
+participant "Docker Daemon" as Docker
+participant "TimescaleDB\n(PostgreSQL)" as Database
+participant "Service Launcher\n(Port 3500)" as API
+participant "Dashboard\n(React)" as Dashboard
+participant "Prometheus" as Prometheus
+
+== Direct Script Execution (CLI) ==
+User/System -> Script: Execute with `--format json`
+activate Script
+Script -> Script: Parse arguments\nSet HEALTH_TRACK_LATENCY=true
+Script -> Library: check_all_local_services()
+activate Library
+loop each configured service
+  Library -> Services: Port + HTTP health check
+  activate Services
+  Services --> Library: Status + latency data
+  deactivate Services
+end
+Library --> Script: HEALTH_LOCAL_RESULTS
+Script -> Library: check_all_docker_stacks()
+loop each Docker stack
+  Library -> Docker: docker ps + docker inspect
+  activate Docker
+  Docker --> Library: Container status + health
+  deactivate Docker
+end
+Library --> Script: HEALTH_DOCKER_RESULTS
+Script -> Library: check_database_connectivity()
+Library -> Database: pg_isready probe
+activate Database
+Database --> Library: Connection status
+deactivate Database
+Library --> Script: HEALTH_DATABASE_RESULTS
+Script -> Script: calculate_overall_health() -> healthy/degraded/critical
+Script -> Script: generate_remediation_suggestions()
+Script -> Library: generate_health_summary(--format json)
+Library --> Script: JSON payload
+Script --> User/System: Print JSON + exit code (0/1/2)
+deactivate Script
+
+== API Endpoint Flow ==
+Dashboard -> API: GET /api/health/full
+activate API
+API -> API: Validate cache (TTL 60s)
+alt Cache Valid (HIT)
+  API -> API: Return cached response
+  API --> Dashboard: 200 OK\nX-Cache-Status: HIT\nX-Cache-Age: <seconds
+else Cache Invalid (MISS)
+  API -> Script: execFile('health-check-all.sh', ['--format','json'])
+  activate Script
+  Script -> Library: check_all_local_services()
+  activate Library
+  loop each configured service
+    Library -> Services: Port + HTTP health check
+    activate Services
+    Services --> Library: Status + latency data
+    deactivate Services
+  end
+  Library --> Script: HEALTH_LOCAL_RESULTS
+  Script -> Library: check_all_docker_stacks()
+  loop each Docker stack
+    Library -> Docker: docker ps + docker inspect
+    activate Docker
+    Docker --> Library: Container status + health
+    deactivate Docker
+  end
+  Library --> Script: HEALTH_DOCKER_RESULTS
+  Script -> Library: check_database_connectivity()
+  Library -> Database: pg_isready probe
+  activate Database
+  Database --> Library: Connection status
+  deactivate Database
+  Library --> Script: HEALTH_DATABASE_RESULTS
+  Script -> Script: calculate_overall_health()
+  Script -> Script: generate_remediation_suggestions()
+  Script -> Library: generate_health_summary(--format json)
+  Library --> Script: JSON payload
+  Script --> API: stdout JSON
+  deactivate Script
+  deactivate Library
+  API -> API: Parse JSON + update cache\nRecord metrics (<5s fresh)
+  API --> Dashboard: 200 OK\nX-Cache-Status: MISS\nX-Cache-Age: 0
+end
+deactivate API
+Dashboard -> Dashboard: Render status + remediation tips
+
+== Prometheus Metrics Export ==
+Prometheus -> Script: Execute with `--format prometheus`
+activate Script
+Script -> Library: check_all_local_services()
+activate Library
+loop each configured service
+  Library -> Services: Port + HTTP health check
+  activate Services
+  Services --> Library: Status + latency data
+  deactivate Services
+end
+Library --> Script: HEALTH_LOCAL_RESULTS
+Script -> Library: check_all_docker_stacks()
+loop each Docker stack
+  Library -> Docker: docker ps + docker inspect
+  activate Docker
+  Docker --> Library: Container status + health
+  deactivate Docker
+end
+Library --> Script: HEALTH_DOCKER_RESULTS
+Script -> Library: check_database_connectivity()
+Library -> Database: pg_isready probe
+activate Database
+Database --> Library: Connection status
+deactivate Database
+Library --> Script: HEALTH_DATABASE_RESULTS
+Script -> Script: compute_latency_percentiles()
+Script -> Library: generate_health_summary(--format prometheus)
+Library --> Script: Prometheus exposition
+Script -> Script: append_prometheus_extras()
+Script --> Prometheus: tradingsystem_* metrics
+deactivate Script
+Prometheus -> Prometheus: Store results (scrape interval 60s)
+
+note right of Services
+Critical services: Dashboard, Service Launcher, TimescaleDB.
+Failures escalate overall status to critical.
+end note
+
+note over API
+Cache TTL: 60 seconds balances freshness vs performance.
+<10ms response on cache hit; 2-5s on cache miss.
+end note
+
+note over Script
+Exit codes: 0=healthy, 1=degraded, 2=critical.
+Used by CI/CD and monitoring automations.
+end note
+
+note over Library
+Latency percentiles (p50, p95, p99) captured
+for services, containers, databases, and overall.
+end note
+
+note over Dashboard
+Remediation suggestions include start commands,
+log inspection paths, and documentation references.
+end note
+
+@enduml

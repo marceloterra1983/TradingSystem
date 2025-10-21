@@ -1,0 +1,18 @@
+# Environment files
+.env
+
+# Firecrawl source (large repo, can be cloned on demand)
+# Uncomment if you don't want to commit the source
+# firecrawl-source/
+
+# Docker volumes (if any local volumes created)
+data/
+volumes/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.bak
+*~

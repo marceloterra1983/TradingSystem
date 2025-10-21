@@ -1,0 +1,713 @@
+asyncapi: 3.0.0
+info:
+  title: TradingSystem WebSocket API
+  description: |
+    TradingSystem WebSocket API for real-time market data, trading signals, and system events.
+    
+    This API provides real-time streaming for:
+    - Market Data (B3 market data, price updates, order book)
+    - Trading Signals (generated signals, ML predictions)
+    - Order Events (order execution, position updates)
+    - System Events (connection status, health checks, notifications)
+    
+    ## WebSocket Connections
+    - Market Data Stream: ws://localhost:9001
+    - Signals Stream: ws://localhost:9002
+    - Order Events Stream: ws://localhost:9003
+    - System Events Stream: ws://localhost:9004
+  version: 1.0.0
+  contact:
+    name: TradingSystem Team
+    email: support@tradingsystem.local
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  production:
+    host: localhost
+    protocol: ws
+    description: Production WebSocket server
+
+channels:
+  # ========================================
+  # MARKET DATA CHANNELS
+  # ========================================
+  market-data/trades:
+    address: market-data/trades
+    title: Market Trades Stream
+    description: Real-time market trade data stream
+    messages:
+      trade:
+        $ref: '#/components/messages/TradeMessage'
+
+  market-data/quotes:
+    address: market-data/quotes
+    title: Market Quotes Stream
+    description: Real-time market quote data stream
+    messages:
+      quote:
+        $ref: '#/components/messages/QuoteMessage'
+
+  market-data/orderbook:
+    address: market-data/orderbook
+    title: Order Book Stream
+    description: Real-time order book updates
+    messages:
+      orderbook:
+        $ref: '#/components/messages/OrderBookMessage'
+
+  market-data/adjustments:
+    address: market-data/adjustments
+    title: Market Adjustments Stream
+    description: Real-time market adjustment notifications
+    messages:
+      adjustment:
+        $ref: '#/components/messages/AdjustmentMessage'
+
+  # ========================================
+  # TRADING SIGNALS CHANNELS
+  # ========================================
+  signals/generated:
+    address: signals/generated
+    title: Generated Trading Signals
+    description: Real-time trading signals from ML models
+    messages:
+      signal:
+        $ref: '#/components/messages/TradingSignalMessage'
+
+  signals/telegram:
+    address: signals/telegram
+    title: Telegram Signals Stream
+    description: Real-time signals from Telegram channels
+    messages:
+      telegramSignal:
+        $ref: '#/components/messages/TelegramSignalMessage'
+
+  signals/predictions:
+    address: signals/predictions
+    title: ML Predictions Stream
+    description: Real-time ML model predictions
+    messages:
+      prediction:
+        $ref: '#/components/messages/PredictionMessage'
+
+  # ========================================
+  # ORDER EVENTS CHANNELS
+  # ========================================
+  orders/execution:
+    address: orders/execution
+    title: Order Execution Events
+    description: Real-time order execution events
+    messages:
+      orderExecution:
+        $ref: '#/components/messages/OrderExecutionMessage'
+
+  orders/status:
+    address: orders/status
+    title: Order Status Updates
+    description: Real-time order status updates
+    messages:
+      orderStatus:
+        $ref: '#/components/messages/OrderStatusMessage'
+
+  positions/updates:
+    address: positions/updates
+    title: Position Updates
+    description: Real-time position updates
+    messages:
+      position:
+        $ref: '#/components/messages/PositionMessage'
+
+  # ========================================
+  # SYSTEM EVENTS CHANNELS
+  # ========================================
+  system/health:
+    address: system/health
+    title: System Health Events
+    description: Real-time system health monitoring
+    messages:
+      health:
+        $ref: '#/components/messages/HealthMessage'
+
+  system/connections:
+    address: system/connections
+    title: Connection Status Events
+    description: Real-time connection status updates
+    messages:
+      connection:
+        $ref: '#/components/messages/ConnectionMessage'
+
+  system/notifications:
+    address: system/notifications
+    title: System Notifications
+    description: Real-time system notifications and alerts
+    messages:
+      notification:
+        $ref: '#/components/messages/NotificationMessage'
+
+components:
+  messages:
+    # ========================================
+    # MARKET DATA MESSAGES
+    # ========================================
+    TradeMessage:
+      name: TradeMessage
+      title: Market Trade
+      summary: Real-time market trade data
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TradeData'
+
+    QuoteMessage:
+      name: QuoteMessage
+      title: Market Quote
+      summary: Real-time market quote data
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/QuoteData'
+
+    OrderBookMessage:
+      name: OrderBookMessage
+      title: Order Book Update
+      summary: Real-time order book updates
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderBookData'
+
+    AdjustmentMessage:
+      name: AdjustmentMessage
+      title: Market Adjustment
+      summary: Market adjustment notification
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AdjustmentData'
+
+    # ========================================
+    # TRADING SIGNALS MESSAGES
+    # ========================================
+    TradingSignalMessage:
+      name: TradingSignalMessage
+      title: Trading Signal
+      summary: Generated trading signal from ML models
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TradingSignalData'
+
+    TelegramSignalMessage:
+      name: TelegramSignalMessage
+      title: Telegram Signal
+      summary: Signal from Telegram channel
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TelegramSignalData'
+
+    PredictionMessage:
+      name: PredictionMessage
+      title: ML Prediction
+      summary: ML model prediction
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PredictionData'
+
+    # ========================================
+    # ORDER EVENTS MESSAGES
+    # ========================================
+    OrderExecutionMessage:
+      name: OrderExecutionMessage
+      title: Order Execution
+      summary: Order execution event
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderExecutionData'
+
+    OrderStatusMessage:
+      name: OrderStatusMessage
+      title: Order Status
+      summary: Order status update
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/OrderStatusData'
+
+    PositionMessage:
+      name: PositionMessage
+      title: Position Update
+      summary: Position update event
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PositionData'
+
+    # ========================================
+    # SYSTEM EVENTS MESSAGES
+    # ========================================
+    HealthMessage:
+      name: HealthMessage
+      title: Health Event
+      summary: System health monitoring event
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/HealthData'
+
+    ConnectionMessage:
+      name: ConnectionMessage
+      title: Connection Event
+      summary: Connection status update
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ConnectionData'
+
+    NotificationMessage:
+      name: NotificationMessage
+      title: System Notification
+      summary: System notification or alert
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/NotificationData'
+
+  schemas:
+    # ========================================
+    # MARKET DATA SCHEMAS
+    # ========================================
+    TradeData:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: Asset symbol
+          example: "WIN$N"
+        exchange:
+          type: string
+          description: Exchange code
+          example: "BVMF"
+        price:
+          type: number
+          format: double
+          description: Trade price
+        volume:
+          type: integer
+          description: Trade volume
+        timestamp:
+          type: string
+          format: date-time
+          description: Trade timestamp
+        tradeId:
+          type: string
+          description: Unique trade identifier
+        aggressor:
+          type: string
+          enum: [buy, sell]
+          description: Trade aggressor side
+
+    QuoteData:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: Asset symbol
+        exchange:
+          type: string
+          description: Exchange code
+        bidPrice:
+          type: number
+          format: double
+          description: Best bid price
+        askPrice:
+          type: number
+          format: double
+          description: Best ask price
+        bidSize:
+          type: integer
+          description: Best bid size
+        askSize:
+          type: integer
+          description: Best ask size
+        timestamp:
+          type: string
+          format: date-time
+          description: Quote timestamp
+
+    OrderBookData:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: Asset symbol
+        exchange:
+          type: string
+          description: Exchange code
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceLevel'
+          description: Bid price levels
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceLevel'
+          description: Ask price levels
+        timestamp:
+          type: string
+          format: date-time
+          description: Order book timestamp
+        sequence:
+          type: integer
+          description: Sequence number
+
+    PriceLevel:
+      type: object
+      properties:
+        price:
+          type: number
+          format: double
+          description: Price level
+        quantity:
+          type: integer
+          description: Quantity at price level
+        orders:
+          type: integer
+          description: Number of orders at price level
+
+    AdjustmentData:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: Asset symbol
+        adjustmentType:
+          type: string
+          enum: [bonus, split, merger, dividend]
+          description: Type of adjustment
+        ratio:
+          type: number
+          format: double
+          description: Adjustment ratio
+        effectiveDate:
+          type: string
+          format: date
+          description: Effective date of adjustment
+        timestamp:
+          type: string
+          format: date-time
+          description: Notification timestamp
+
+    # ========================================
+    # TRADING SIGNALS SCHEMAS
+    # ========================================
+    TradingSignalData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Signal ID
+        symbol:
+          type: string
+          description: Asset symbol
+        signalType:
+          type: string
+          enum: [buy, sell, hold, alert]
+          description: Signal type
+        price:
+          type: number
+          format: double
+          description: Suggested price
+        quantity:
+          type: integer
+          description: Suggested quantity
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Signal confidence
+        strategy:
+          type: string
+          description: Strategy name
+        model:
+          type: string
+          description: ML model that generated the signal
+        features:
+          type: object
+          description: Features used for signal generation
+        reasoning:
+          type: string
+          description: Signal reasoning
+        timestamp:
+          type: string
+          format: date-time
+          description: Signal timestamp
+        expiresAt:
+          type: string
+          format: date-time
+          description: Signal expiration time
+
+    TelegramSignalData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Signal ID
+        channel:
+          type: string
+          description: Source Telegram channel
+        message:
+          type: string
+          description: Original message content
+        asset:
+          type: string
+          description: Asset symbol (extracted)
+        signalType:
+          type: string
+          enum: [buy, sell, hold, alert, unknown]
+          description: Extracted signal type
+        price:
+          type: number
+          format: double
+          description: Extracted price (if available)
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Extraction confidence
+        ingestedAt:
+          type: string
+          format: date-time
+          description: Ingestion timestamp
+        timestamp:
+          type: string
+          format: date-time
+          description: Original message timestamp
+
+    PredictionData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Prediction ID
+        symbol:
+          type: string
+          description: Asset symbol
+        model:
+          type: string
+          description: ML model name
+        prediction:
+          type: string
+          enum: [up, down, sideways]
+          description: Price direction prediction
+        probability:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Prediction probability
+        timeHorizon:
+          type: string
+          description: Prediction time horizon
+        features:
+          type: object
+          description: Features used for prediction
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Overall confidence
+        timestamp:
+          type: string
+          format: date-time
+          description: Prediction timestamp
+
+    # ========================================
+    # ORDER EVENTS SCHEMAS
+    # ========================================
+    OrderExecutionData:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Order ID
+        symbol:
+          type: string
+          description: Asset symbol
+        side:
+          type: string
+          enum: [buy, sell]
+          description: Order side
+        orderType:
+          type: string
+          enum: [market, limit, stop, stop_limit]
+          description: Order type
+        quantity:
+          type: integer
+          description: Order quantity
+        price:
+          type: number
+          format: double
+          description: Order price
+        filledQuantity:
+          type: integer
+          description: Filled quantity
+        averagePrice:
+          type: number
+          format: double
+          description: Average fill price
+        remainingQuantity:
+          type: integer
+          description: Remaining quantity
+        status:
+          type: string
+          enum: [new, pending, partially_filled, filled, cancelled, rejected]
+          description: Order status
+        timestamp:
+          type: string
+          format: date-time
+          description: Execution timestamp
+        exchangeOrderId:
+          type: string
+          description: Exchange order ID
+
+    OrderStatusData:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Order ID
+        status:
+          type: string
+          enum: [new, pending, partially_filled, filled, cancelled, rejected]
+          description: New order status
+        reason:
+          type: string
+          description: Status change reason
+        timestamp:
+          type: string
+          format: date-time
+          description: Status update timestamp
+
+    PositionData:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: Asset symbol
+        positionType:
+          type: string
+          enum: [long, short, net]
+          description: Position type
+        quantity:
+          type: integer
+          description: Position quantity
+        averagePrice:
+          type: number
+          format: double
+          description: Average entry price
+        marketPrice:
+          type: number
+          format: double
+          description: Current market price
+        unrealizedPnL:
+          type: number
+          format: double
+          description: Unrealized profit/loss
+        realizedPnL:
+          type: number
+          format: double
+          description: Realized profit/loss
+        timestamp:
+          type: string
+          format: date-time
+          description: Position update timestamp
+
+    # ========================================
+    # SYSTEM EVENTS SCHEMAS
+    # ========================================
+    HealthData:
+      type: object
+      properties:
+        service:
+          type: string
+          description: Service name
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: Health status
+        checks:
+          type: object
+          description: Health check results
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [pass, fail, warn]
+              message:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+
+    ConnectionData:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          description: Connection identifier
+        type:
+          type: string
+          description: Connection type
+        status:
+          type: string
+          enum: [connected, disconnected, connecting, error]
+          description: Connection status
+        endpoint:
+          type: string
+          description: Connection endpoint
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+        error:
+          type: string
+          description: Error message (if applicable)
+        timestamp:
+          type: string
+          format: date-time
+          description: Status update timestamp
+
+    NotificationData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Notification ID
+        level:
+          type: string
+          enum: [info, warning, error, critical]
+          description: Notification level
+        title:
+          type: string
+          description: Notification title
+        message:
+          type: string
+          description: Notification message
+        source:
+          type: string
+          description: Notification source
+        category:
+          type: string
+          description: Notification category
+        timestamp:
+          type: string
+          format: date-time
+          description: Notification timestamp
+        expiresAt:
+          type: string
+          format: date-time
+          description: Notification expiration time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for WebSocket authentication

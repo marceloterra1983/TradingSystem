@@ -1,0 +1,6 @@
+# Stub file - canonical spec is at docs/context/backend/api/specs/documentation-api.openapi.yaml
+# This file is deprecated and will be removed in a future version.
+# Please use the canonical spec for all OpenAPI documentation needs.
+#
+# To include this spec in your tooling, use:
+# $ref: 'docs/context/backend/api/specs/documentation-api.openapi.yaml'

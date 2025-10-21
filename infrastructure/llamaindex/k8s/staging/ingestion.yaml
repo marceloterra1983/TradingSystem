@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llamaindex-ingestion
+  namespace: llamaindex-staging
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: llamaindex-ingestion
+  template:
+    metadata:
+      labels:
+        app: llamaindex-ingestion
+    spec:
+      containers:
+      - name: ingestion
+        image: ghcr.io/your-repo/llamaindex-ingestion:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: OPENAI_API_KEY
+        envFrom:
+        - configMapRef:
+            name: llamaindex-config
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llamaindex-ingestion-service
+  namespace: llamaindex-staging
+spec:
+  selector:
+    app: llamaindex-ingestion
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP

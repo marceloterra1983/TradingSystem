@@ -1,0 +1,18 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "python_version": "3.12",
+  "dependencies": ["langgraph>=0.2.0", "langchain>=0.3.0", "httpx>=0.27.0"],
+  "graphs": {
+    "trading": "src.interfaces.workflows.trading_workflow:trading_graph",
+    "docs": "src.interfaces.workflows.docs_workflow:docs_graph"
+  },
+  "env": {
+    "LANGGRAPH_CLI_EXPORT": "1",
+    "../../.env": true
+  },
+  "dockerfile_lines": [
+    "COPY requirements.txt .",
+    "RUN pip install -r requirements.txt"
+  ],
+  "image_distro": "debian"
+}

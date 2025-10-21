@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("WEBSCRAPER_DATABASE_URL")
+}
+
+model ScrapeJob {
+  id             String    @default(uuid())
+  type           String    @db.VarChar(16)
+  url            String    @db.Text
+  status         String    @db.VarChar(16)
+  firecrawlJobId String?   @map("firecrawl_job_id") @db.VarChar(128)
+  templateId     String?   @map("template_id")
+  scheduleId     String?   @map("schedule_id")
+  options        Json
+  results        Json?
+  error          String?   @db.Text
+  startedAt      DateTime  @default(now()) @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  duration       Int?      @map("duration_seconds")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  template Template?     @relation(fields: [templateId], references: [id])
+  schedule JobSchedule?  @relation(fields: [scheduleId], references: [id])
+
+  @@id([id, startedAt])
+  @@index([id], map: "idx_scrape_jobs_id_lookup")
+  @@index([status, startedAt(sort: Desc)], map: "idx_scrape_jobs_status")
+  @@index([status, type, startedAt(sort: Desc)], map: "idx_scrape_jobs_status_type_started")
+  @@index([type], map: "idx_scrape_jobs_type")
+  @@index([templateId], map: "idx_scrape_jobs_template")
+  @@index([scheduleId], map: "idx_scrape_jobs_schedule")
+  @@index([createdAt(sort: Desc)], map: "idx_scrape_jobs_created_at")
+  @@map("scrape_jobs")
+}
+
+model Template {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  description String?       @db.Text
+  urlPattern  String?       @map("url_pattern")
+  options     Json
+  usageCount  Int           @default(0) @map("usage_count")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  jobs        ScrapeJob[]
+  schedules   JobSchedule[]
+
+  @@index([name])
+  @@map("scrape_templates")
+}
+
+model JobSchedule {
+  id              String    @id @default(uuid())
+  name            String    @db.Text
+  description     String?   @db.Text
+  templateId      String?   @map("template_id")
+  url             String    @db.Text
+  scheduleType    String    @map("schedule_type") @db.VarChar(16)
+  cronExpression  String?   @map("cron_expression") @db.Text
+  intervalSeconds Int?      @map("interval_seconds")
+  scheduledAt     DateTime? @map("scheduled_at")
+  enabled         Boolean   @default(true)
+  lastRunAt       DateTime? @map("last_run_at")
+  nextRunAt       DateTime? @map("next_run_at")
+  runCount        Int       @default(0) @map("run_count")
+  failureCount    Int       @default(0) @map("failure_count")
+  options         Json
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  template Template? @relation(fields: [templateId], references: [id])
+  jobs     ScrapeJob[]
+
+  @@index([enabled, nextRunAt], map: "idx_job_schedules_enabled_next_run")
+  @@index([templateId], map: "idx_job_schedules_template")
+  @@index([lastRunAt(sort: Desc)], map: "idx_job_schedules_last_run")
+  @@map("job_schedules")
+}
+
+model ExportJob {
+  id            String    @id @default(uuid())
+  name          String    @db.Text
+  description   String?   @db.Text
+  exportType    String    @map("export_type") @db.VarChar(16)
+  formats       String[]  @db.Text
+  filters       Json?
+  status        String    @db.VarChar(16)
+  filePaths     Json?     @map("file_paths")
+  rowCount      Int?      @map("row_count")
+  fileSizeBytes BigInt?   @map("file_size_bytes")
+  error         String?   @db.Text
+  startedAt     DateTime  @default(now()) @map("started_at")
+  completedAt   DateTime? @map("completed_at")
+  expiresAt     DateTime  @default(dbgenerated("NOW() + INTERVAL '24 hours'")) @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([expiresAt], map: "idx_export_jobs_expires")
+  @@index([exportType])
+  @@map("export_jobs")
+}

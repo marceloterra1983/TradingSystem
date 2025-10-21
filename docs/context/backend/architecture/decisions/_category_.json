@@ -1,0 +1,7 @@
+{
+  "label": "ADRs",
+  "link": {
+    "type": "doc",
+    "id": "backend/architecture/decisions/README"
+  }
+}

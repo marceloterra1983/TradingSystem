@@ -1,0 +1,58 @@
+{
+  "name": "tradingsystem-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "prestart": "node scripts/sync-spec.js",
+    "start": "docusaurus start",
+    "dev": "NODE_OPTIONS=\"--max-old-space-size=4096\" docusaurus start --port 3004",
+    "dev:clean": "docusaurus clear && NODE_OPTIONS=\"--max-old-space-size=4096\" docusaurus start --port 3004",
+    "prebuild": "node scripts/sync-spec.js",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "typecheck": "tsc",
+    "search:reindex": "curl -X POST http://localhost:3400/api/v1/docs/reindex",
+    "search:test": "curl 'http://localhost:3400/api/v1/docs/search?q=dark+mode&domain=frontend'"
+  },
+  "dependencies": {
+    "@akebifiky/remark-simple-plantuml": "^1.0.2",
+    "@docusaurus/core": "3.9.1",
+    "@docusaurus/preset-classic": "3.9.1",
+    "@docusaurus/theme-mermaid": "3.9.1",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.263.1",
+    "prism-react-renderer": "^2.3.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.9.1",
+    "@docusaurus/tsconfig": "3.9.1",
+    "@docusaurus/types": "3.9.1",
+    "typescript": "~5.6.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 5 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}

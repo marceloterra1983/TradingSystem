@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingSystem Documentation - Gemini CLI Style</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar - Gemini CLI Style -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <svg class="navbar-logo" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.9"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+                </svg>
+                <span class="navbar-title">TradingSystem</span>
+            </div>
+            
+            <div class="navbar-menu">
+                <a href="#docs" class="navbar-link active">Docs</a>
+                <a href="#api" class="navbar-link">API</a>
+                <a href="#guides" class="navbar-link">Guides</a>
+                <a href="#about" class="navbar-link">About</a>
+            </div>
+            
+            <div class="navbar-actions">
+                <button class="search-button" id="searchBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <span>Search</span>
+                    <kbd class="kbd">Ctrl K</kbd>
+                </button>
+                
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                
+                <a href="https://github.com/tradingsystem" class="github-link" aria-label="GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar - Gemini CLI Style -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <div class="sidebar-category">
+                        <button class="category-header" data-category="getting-started">
+                            <span>GETTING STARTED</span>
+                            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="category-items active">
+                            <a href="#introduction" class="sidebar-link active">
+                                <span>Introduction</span>
+                            </a>
+                            <a href="#installation" class="sidebar-link">
+                                <span>Installation</span>
+                            </a>
+                            <a href="#quick-start" class="sidebar-link">
+                                <span>Quick Start</span>
+                            </a>
+                            <a href="#configuration" class="sidebar-link">
+                                <span>Configuration</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-category">
+                        <button class="category-header" data-category="core-concepts">
+                            <span>CORE CONCEPTS</span>
+                            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="category-items active">
+                            <a href="#architecture" class="sidebar-link">
+                                <span>Architecture</span>
+                            </a>
+                            <a href="#services" class="sidebar-link">
+                                <span>Services</span>
+                            </a>
+                            <a href="#apis" class="sidebar-link">
+                                <span>APIs</span>
+                            </a>
+                            <a href="#databases" class="sidebar-link">
+                                <span>Databases</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-category">
+                        <button class="category-header" data-category="guides">
+                            <span>GUIDES</span>
+                            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="category-items">
+                            <a href="#backend-guide" class="sidebar-link">
+                                <span>Backend Development</span>
+                            </a>
+                            <a href="#frontend-guide" class="sidebar-link">
+                                <span>Frontend Development</span>
+                            </a>
+                            <a href="#deployment" class="sidebar-link">
+                                <span>Deployment</span>
+                            </a>
+                            <a href="#testing" class="sidebar-link">
+                                <span>Testing</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-category">
+                        <button class="category-header" data-category="reference">
+                            <span>REFERENCE</span>
+                            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="category-items">
+                            <a href="#api-reference" class="sidebar-link">
+                                <span>API Reference</span>
+                            </a>
+                            <a href="#cli-commands" class="sidebar-link">
+                                <span>CLI Commands</span>
+                            </a>
+                            <a href="#environment-vars" class="sidebar-link">
+                                <span>Environment Variables</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content">
+            <article class="article">
+                <header class="article-header">
+                    <h1>Introduction to TradingSystem</h1>
+                    <p class="article-meta">Last updated: October 19, 2025</p>
+                </header>
+
+                <div class="article-content">
+                    <p class="lead">
+                        Welcome to TradingSystem documentation. This guide will help you understand and work with our trading platform built with Clean Architecture and DDD principles.
+                    </p>
+
+                    <div class="admonition admonition-note">
+                        <div class="admonition-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="admonition-content">
+                            <p class="admonition-title">Note</p>
+                            <p>This documentation is for TradingSystem v2.0+. For older versions, see the <a href="#legacy">legacy docs</a>.</p>
+                        </div>
+                    </div>
+
+                    <h2 id="what-is-tradingsystem">What is TradingSystem?</h2>
+                    <p>
+                        TradingSystem is a comprehensive trading platform that integrates with Nelogica's ProfitDLL for market data capture, 
+                        ML-based analysis, and automated order execution. The system is designed to run 100% on-premise with no cloud dependencies.
+                    </p>
+
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li><strong>Real-time Market Data</strong> - Direct integration with ProfitDLL</li>
+                        <li><strong>ML Analysis</strong> - Cause-and-effect model for signal generation</li>
+                        <li><strong>Risk Management</strong> - Built-in safety mechanisms and kill switches</li>
+                        <li><strong>Clean Architecture</strong> - Domain-driven design with clear separation of concerns</li>
+                        <li><strong>Microservices</strong> - Independent, scalable services</li>
+                    </ul>
+
+                    <h2 id="architecture">Architecture Overview</h2>
+                    <p>
+                        The system follows Clean Architecture principles with four distinct layers:
+                    </p>
+
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-lang">plaintext</span>
+                            <button class="copy-button" data-copy="architecture">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                        <pre><code id="architecture">┌─────────────────────────────────────────┐
+│         Presentation Layer              │
+│  (Controllers, APIs, Dashboard)         │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│         Application Layer               │
+│  (Use Cases, Commands, Queries)         │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│           Domain Layer                  │
+│  (Entities, Value Objects, Rules)       │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│        Infrastructure Layer             │
+│  (ProfitDLL, WebSocket, Database)       │
+└─────────────────────────────────────────┘</code></pre>
+                    </div>
+
+                    <h2 id="getting-started">Getting Started</h2>
+                    <p>
+                        Follow these steps to set up your development environment:
+                    </p>
+
+                    <h3>Prerequisites</h3>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-lang">bash</span>
+                            <button class="copy-button" data-copy="prerequisites">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                        <pre><code id="prerequisites"># Node.js 20+
+node --version
+
+# .NET 8.0
+dotnet --version
+
+# Python 3.11+
+python --version
+
+# Docker & Docker Compose
+docker --version
+docker compose version</code></pre>
+                    </div>
+
+                    <h3>Installation</h3>
+                    <div class="code-block">
+                        <div class="code-block-header">
+                            <span class="code-block-lang">bash</span>
+                            <button class="copy-button" data-copy="installation">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                        <pre><code id="installation"># Clone the repository
+git clone https://github.com/tradingsystem/tradingsystem.git
+cd tradingsystem
+
+# Install frontend dependencies
+cd frontend/apps/dashboard
+npm install
+
+# Install backend dependencies
+cd ../../backend/api/workspace
+npm install
+
+# Start services
+bash scripts/services/start-all.sh</code></pre>
+                    </div>
+
+                    <div class="admonition admonition-warning">
+                        <div class="admonition-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="admonition-content">
+                            <p class="admonition-title">Warning</p>
+                            <p>Core trading services MUST run natively on Windows due to ProfitDLL requirements. See the <a href="#deployment">deployment guide</a> for details.</p>
+                        </div>
+                    </div>
+
+                    <h2 id="next-steps">Next Steps</h2>
+                    <div class="card-grid">
+                        <a href="#quick-start" class="feature-card">
+                            <div class="feature-icon">📚</div>
+                            <h3>Quick Start Guide</h3>
+                            <p>Get up and running in 5 minutes with our quick start tutorial.</p>
+                        </a>
+                        
+                        <a href="#architecture" class="feature-card">
+                            <div class="feature-icon">🏗️</div>
+                            <h3>Architecture</h3>
+                            <p>Learn about the system architecture and design patterns.</p>
+                        </a>
+                        
+                        <a href="#api-reference" class="feature-card">
+                            <div class="feature-icon">🔌</div>
+                            <h3>API Reference</h3>
+                            <p>Complete API documentation for all services.</p>
+                        </a>
+                        
+                        <a href="#deployment" class="feature-card">
+                            <div class="feature-icon">🚀</div>
+                            <h3>Deployment</h3>
+                            <p>Deploy TradingSystem to production environments.</p>
+                        </a>
+                    </div>
+                </div>
+
+                <footer class="article-footer">
+                    <div class="article-nav">
+                        <a href="#installation" class="article-nav-link article-nav-next">
+                            <span class="article-nav-label">Next</span>
+                            <span class="article-nav-title">Installation →</span>
+                        </a>
+                    </div>
+                </footer>
+            </article>
+
+            <!-- Table of Contents -->
+            <aside class="toc">
+                <div class="toc-content">
+                    <h4 class="toc-title">ON THIS PAGE</h4>
+                    <nav class="toc-nav">
+                        <a href="#what-is-tradingsystem" class="toc-link active">What is TradingSystem?</a>
+                        <a href="#architecture" class="toc-link">Architecture Overview</a>
+                        <a href="#getting-started" class="toc-link">Getting Started</a>
+                        <a href="#next-steps" class="toc-link">Next Steps</a>
+                    </nav>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-modal-backdrop" id="searchBackdrop"></div>
+        <div class="search-modal-content">
+            <div class="search-input-wrapper">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation..." id="searchInput" autofocus>
+                <kbd class="kbd">Esc</kbd>
+            </div>
+            
+            <div class="search-results" id="searchResults">
+                <div class="search-empty">
+                    <p>Start typing to search...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>

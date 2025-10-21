@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: TradingSystem DocsSpecs API
+  version: 1.0.0
+  description: API documentation service
+servers:
+  - url: http://localhost:3000
+    description: Local server
+paths:
+  /:
+    get:
+      summary: Get API status
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  version:
+                    type: string
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK

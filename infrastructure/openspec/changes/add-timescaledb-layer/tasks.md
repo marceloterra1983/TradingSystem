@@ -1,0 +1,7 @@
+- [x] Provisionar stack Docker Compose `data-timescale` (PostgreSQL 15 + TimescaleDB) com sizing definido (CPU/RAM/IOPS) e TLS/credenciais gerenciadas
+- [x] Configurar infraestrutura: volumes persistentes, backup incremental, alertas Prometheus/Grafana, runbooks de restauração
+- [x] Projetar esquema TimescaleDB (hypertables para sinais, execuções, métricas derivadas) + políticas de retenção/compressão
+- [x] Executar seed inicial a partir de dados históricos relevantes e validar consistência QuestDB ↔ TimescaleDB
+- [x] Implementar pipeline de replicação assíncrona (jobs ETL/serviço dedicado) com monitoramento de atraso e tratamento de falhas
+- [x] Atualizar documentação (`guides/data/`, `docs/context/backend/data/`) detalhando arquitetura dual, scripts de manutenção e plano de fallback
+- [x] Realizar testes de carga/consultas analíticas e revisar plano de rollback caso TimescaleDB fique indisponível

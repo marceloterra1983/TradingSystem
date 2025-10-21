@@ -1,0 +1,436 @@
+# TradingSystem Market Symbols Heuristics
+# This file defines market symbols, conventions, and metadata for normalization and validation
+
+markets:
+  # ========================================
+  # FUTURES CONTRACTS
+  # ========================================
+  futures:
+    # Mini Ibovespa Futures
+    - symbol: WIN
+      desc: "Mini Ibovespa Futures"
+      multiplier: 0.2
+      currency: BRL
+      exchange: BVMF
+      tickSize: 5
+      contractMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+      examples: ["WINN25", "WINQ25", "WINZ25", "WINF26"]
+    
+    # Full Ibovespa Futures  
+    - symbol: IND
+      desc: "Full Ibovespa Futures"
+      multiplier: 1.0
+      currency: BRL
+      exchange: BVMF
+      tickSize: 25
+      contractMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+      examples: ["INDN25", "INDQ25", "INDZ25", "INDF26"]
+    
+    # Mini Dollar Futures
+    - symbol: WDO
+      desc: "Mini Dollar Futures"
+      multiplier: 10.0
+      currency: BRL
+      exchange: BVMF
+      tickSize: 0.5
+      contractMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+      examples: ["WDON25", "WDOQ25", "WDOZ25", "WDOF26"]
+    
+    # Full Dollar Futures
+    - symbol: DOL
+      desc: "Full Dollar Futures"
+      multiplier: 50.0
+      currency: BRL
+      exchange: BVMF
+      tickSize: 2.5
+      contractMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+      examples: ["DOLN25", "DOLQ25", "DOLZ25", "DOLF26"]
+
+  # ========================================
+  # EQUITIES
+  # ========================================
+  equities:
+    # Major Brazilian Stocks
+    - symbol: PETR4
+      desc: "Petrobras PN"
+      sector: "Oil & Gas"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRPETRACNPR6"
+      lotSize: 100
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: VALE3
+      desc: "Vale ON"
+      sector: "Mining"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRSALTNACNOR6"
+      lotSize: 100
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: ITUB4
+      desc: "Itaú PN"
+      sector: "Banking"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRITUBACNOR6"
+      lotSize: 100
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: BBDC4
+      desc: "Bradesco PN"
+      sector: "Banking"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRBBDCACNOR6"
+      lotSize: 100
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: WEGE3
+      desc: "WEG ON"
+      sector: "Industrial"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRSWEGACNOR6"
+      lotSize: 100
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+
+    # ETFs
+    - symbol: BOVA11
+      desc: "ETF Ibovespa"
+      sector: "ETF"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRBBOVCTF006"
+      lotSize: 1
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: SMAL11
+      desc: "ETF Small Cap"
+      sector: "ETF"
+      currency: BRL
+      exchange: BVMF
+      isin: "BRSMLLCTF006"
+      lotSize: 1
+      tickSize: 0.01
+      tradingHours:
+        start: "10:00"
+        end: "17:55"
+        timezone: "America/Sao_Paulo"
+
+  # ========================================
+  # INDICES
+  # ========================================
+  indices:
+    - symbol: IBOV
+      desc: "Ibovespa Index"
+      type: "benchmark"
+      currency: BRL
+      exchange: BVMF
+      constituents: ~80
+      calculation: "Value-weighted"
+      rebalance: "quarterly"
+    
+    - symbol: IFIX
+      desc: "Real Estate Fund Index"
+      type: "sector"
+      currency: BRL
+      exchange: BVMF
+      constituents: ~100
+      calculation: "Value-weighted"
+      rebalance: "quarterly"
+    
+    - symbol: BDRX
+      desc: "BDR Index"
+      type: "sector"
+      currency: BRL
+      exchange: BVMF
+      constituents: ~50
+      calculation: "Value-weighted"
+      rebalance: "quarterly"
+
+  # ========================================
+  # FOREIGN EXCHANGE
+  # ========================================
+  fx:
+    - symbol: USDBRL
+      desc: "USD/BRL Spot"
+      type: "spot"
+      currency: BRL
+      source: "B3"
+      tickSize: 0.0001
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+    
+    - symbol: EURBRL
+      desc: "EUR/BRL Spot"
+      type: "spot"
+      currency: BRL
+      source: "B3"
+      tickSize: 0.0001
+      tradingHours:
+        start: "09:00"
+        end: "18:00"
+        timezone: "America/Sao_Paulo"
+
+# ========================================
+# MARKET CONVENTIONS
+# ========================================
+conventions:
+  # Symbol formatting rules
+  symbol_case: upper
+  symbol_separators: ["$", "-"]
+  
+  # Option conventions (B3-specific)
+  option_style: "B3-default"
+  option_separator: "$"
+  call_put_codes:
+    call: "C"
+    put: "P"
+  
+  # Contract month codes
+  month_codes:
+    "F": "01"  # January
+    "G": "02"  # February
+    "H": "03"  # March
+    "J": "04"  # April
+    "K": "05"  # May
+    "M": "06"  # June
+    "N": "07"  # July
+    "Q": "08"  # August
+    "U": "09"  # September
+    "V": "10"  # October
+    "X": "11"  # November
+    "Z": "12"  # December
+  
+  # Year codes (last digit)
+  year_codes:
+    "5": "2025"
+    "6": "2026"
+    "7": "2027"
+    "8": "2028"
+    "9": "2029"
+    "0": "2030"
+  
+  # Timezone configuration
+  timezone: "America/Sao_Paulo"
+  
+  # Trading sessions
+  sessions:
+    pre_market:
+      start: "09:00"
+      end: "09:45"
+      name: "Pre-Market"
+    
+    regular:
+      start: "09:45"
+      end: "17:55"
+      name: "Regular Session"
+    
+    post_market:
+      start: "17:55"
+      end: "18:00"
+      name: "Post-Market"
+
+# ========================================
+# NORMALIZATION RULES
+# ========================================
+normalization:
+  # Symbol pattern matching
+  patterns:
+    futures:
+      regex: '^[A-Z]{3}[A-Z]\d{2}$'
+      examples: ["WINZ25", "WDOF26", "INDN25"]
+    
+    equities:
+      regex: '^[A-Z]{4}\d{1}$'
+      examples: ["PETR4", "VALE3", "ITUB4"]
+    
+    etfs:
+      regex: '^[A-Z]{4,6}\d{2}$'
+      examples: ["BOVA11", "SMAL11"]
+    
+    options:
+      regex: '^[A-Z]{4,6}\$[A-Z]\d{2}[CP]\d{8}$'
+      examples: ["PETR4$J25C00002000", "VALE3$F25P00001000"]
+    
+    indices:
+      regex: '^[A-Z]{4,6}$'
+      examples: ["IBOV", "IFIX", "BDRX"]
+    
+    fx:
+      regex: '^[A-Z]{3}[A-Z]{3}$'
+      examples: ["USDBRL", "EURBRL"]
+  
+  # Data validation rules
+  validation:
+    price:
+      min: 0
+      max: 1000000
+      precision: 2
+    
+    volume:
+      min: 0
+      max: 1000000000
+      precision: 0
+    
+    quantity:
+      min: 1
+      max: 1000000
+      precision: 0
+    
+    timestamp:
+      format: "iso8601"
+      timezone: "UTC"
+    
+    percentage:
+      min: 0
+      max: 100
+      precision: 2
+
+# ========================================
+# DATA QUALITY RULES
+# ========================================
+quality:
+  # Duplicate detection
+  duplicates:
+    enabled: true
+    window: "1s"
+    fields: ["symbol", "timestamp", "price", "volume"]
+  
+  # Outlier detection
+  outliers:
+    enabled: true
+    method: "iqr"
+    threshold: 3.0
+    window: 100
+  
+  # Missing data handling
+  missing_data:
+    action: "flag"
+    required_fields: ["symbol", "timestamp", "price"]
+    optional_fields: ["volume", "bid", "ask"]
+  
+  # Data freshness
+  freshness:
+    max_delay: "30s"
+    warning_threshold: "10s"
+    critical_threshold: "30s"
+
+# ========================================
+# ENRICHMENT DATA
+# ========================================
+enrichment:
+  # Sector classification
+  sectors:
+    mapping:
+      PETR4: "Energy"
+      VALE3: "Materials"
+      ITUB4: "Financial Services"
+      BBDC4: "Financial Services"
+      WEGE3: "Industrials"
+      BOVA11: "Equity ETF"
+      SMAL11: "Equity ETF"
+    
+    categories:
+      - "Energy"
+      - "Materials"
+      - "Financial Services"
+      - "Industrials"
+      - "Consumer Discretionary"
+      - "Consumer Staples"
+      - "Health Care"
+      - "Information Technology"
+      - "Communication Services"
+      - "Utilities"
+      - "Real Estate"
+      - "Equity ETF"
+      - "Bond ETF"
+      - "Commodity ETF"
+  
+  # Market classification
+  market_cap:
+    large_cap: "> 10B BRL"
+    mid_cap: "2B - 10B BRL"
+    small_cap: "300M - 2B BRL"
+    micro_cap: "< 300M BRL"
+  
+  # Risk classification
+  risk:
+    low: ["ETFs", "Blue Chips"]
+    medium: ["Mid Caps", "Sector Leaders"]
+    high: ["Small Caps", "Emerging Sectors"]
+    very_high: ["Micro Caps", "High Volatility"]
+
+# ========================================
+# REFERENCE DATA
+# ========================================
+reference:
+  # Exchange holidays (example - should be updated annually)
+  holidays:
+    "2025-01-01": "New Year's Day"
+    "2025-02-10": "Carnival Monday"
+    "2025-02-11": "Carnival Tuesday"
+    "2025-03-31": "Easter Monday"
+    "2025-04-21": "Tiradentes Day"
+    "2025-05-01": "Labor Day"
+    "2025-06-19": "Corpus Christi"
+    "2025-09-07": "Independence Day"
+    "2025-10-12": "Our Lady of Aparecida"
+    "2025-11-02": "All Souls' Day"
+    "2025-11-15": "Republic Day"
+    "2025-12-25": "Christmas Day"
+  
+  # Corporate action codes
+  corporate_actions:
+    "BONUS": "Bonus Issue"
+    "SPLIT": "Stock Split"
+    "DIVIDEND": "Dividend Payment"
+    "MERGER": "Merger/Acquisition"
+    "SPINOFF": "Spin-off"
+    "RIGHTS": "Rights Issue"
+    "SUSPENSION": "Trading Suspension"
+    "RELISTING": "Relisting"

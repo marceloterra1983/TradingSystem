@@ -1,0 +1,106 @@
+.apiEndpoint {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.method {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  color: white;
+}
+
+.method.get {
+  background-color: #10b981;
+}
+
+.method.post {
+  background-color: #3b82f6;
+}
+
+.method.put {
+  background-color: #f59e0b;
+}
+
+.method.delete {
+  background-color: #ef4444;
+}
+
+.method.patch {
+  background-color: #8b5cf6;
+}
+
+.path {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+}
+
+.description {
+  color: var(--ifm-color-content);
+  margin-bottom: 1rem;
+}
+
+.section {
+  margin-top: 1.5rem;
+}
+
+.section h4 {
+  color: var(--ifm-color-primary);
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.json {
+  background-color: rgba(99, 102, 241, 0.05);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  color: var(--ifm-color-content);
+}
+
+[data-theme='dark'] .json {
+  background-color: rgba(129, 140, 248, 0.1);
+}
+
+.section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.section table th,
+.section table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.section table th {
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.section table code {
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}

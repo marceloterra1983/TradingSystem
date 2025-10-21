@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llamaindex-config
+  namespace: llamaindex-staging
+data:
+  LOG_LEVEL: "INFO"
+  ENVIRONMENT: "staging"
+  QDRANT_HOST: "qdrant-service"
+  QDRANT_PORT: "6333"
+  METRICS_PORT: "9090"
+  RATE_LIMIT_REQUESTS: "100"
+  RATE_LIMIT_PERIOD: "60"
+  CACHE_TYPE: "redis"
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  CACHE_TTL: "3600"
+  MAX_CHUNK_SIZE: "512"
+  CHUNK_OVERLAP: "50"
+  EMBEDDING_MODEL: "text-embedding-ada-002"

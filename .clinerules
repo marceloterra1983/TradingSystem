@@ -1,0 +1,182 @@
+# Cline Configuration - TradingSystem
+
+# Configuração de regras e permissões para Cline (Claude Dev)
+
+## 🔓 Permissões (Full Access Mode)
+
+### Auto-approve All Actions
+
+**Mode**: Development (Bypass Permissions)
+**Auto-approve**: YES for all tools and commands
+
+### Allowed Operations (No Confirmation Required)
+
+-   ✅ Read files
+-   ✅ Write files
+-   ✅ Edit files
+-   ✅ Execute bash commands
+-   ✅ Create/delete files and directories
+-   ✅ Run scripts
+-   ✅ Git operations
+-   ✅ Web fetch/search
+-   ✅ Install packages
+-   ✅ Modify configuration files
+
+### Security Notes
+
+⚠️ **This configuration enables FULL permissions without confirmation!**
+
+**Use only in trusted development environments:**
+
+-   ✅ Local development
+-   ✅ With Git backups
+-   ✅ Non-production data
+
+**DO NOT use with:**
+
+-   ❌ Sensitive data
+-   ❌ Production environments
+-   ❌ Untrusted code
+
+## 📚 Project Context
+
+### Main Documentation
+
+Follow all guidelines from `CLAUDE.md` including:
+
+-   Architecture principles (Clean Architecture + DDD)
+-   Code style (C#, Python, TypeScript)
+-   Commit conventions (Conventional Commits)
+-   Documentation standards (YAML frontmatter + PlantUML)
+-   Language: Brazilian Portuguese (ptbr)
+
+### Project Structure
+
+-   **Backend**: `backend/` - APIs, services, data
+-   **Frontend**: `frontend/` - React apps, components
+-   **Docs**: `docs/` - Docusaurus documentation
+-   **Infrastructure**: `infrastructure/` - Docker, monitoring
+
+### Active Services
+
+-   Dashboard: http://localhost:3103
+-   Docusaurus: http://localhost:3004
+-   APIs: Ports 3200-3600
+
+### Key Directories
+
+-   Allowed: `/home/marce/projetos/TradingSystem`
+-   Git repo: `/home/marce/projetos/TradingSystem/.git`
+-   Node modules: Auto-managed by package managers
+
+## 🎯 Custom Commands Available
+
+Use these commands (from `.claude/commands/`):
+
+-   `/git-workflows` - Git operations
+-   `/docker-compose` - Docker management
+-   `/health-check` - System health
+-   `/service-launcher` - Service management
+-   `/scripts` - Project automation
+
+## 🔌 MCP Servers
+
+Available MCP servers:
+
+1. fs-wsl - Filesystem access
+2. git-tradingsystem - Git operations
+3. fetch - HTTP requests
+4. memory - Persistent memory
+5. sequential-thinking - Extended reasoning
+6. time - Date/time info
+7. everything - Universal search
+
+## ⚙️ Development Workflow
+
+### Standard Operations
+
+1. Always use Git for version control
+2. Follow Conventional Commits (feat:, fix:, docs:, etc.)
+3. Test changes before committing
+4. Review diffs before pushing
+5. Keep documentation updated
+
+### Code Style
+
+-   **C#**: PascalCase, 4 spaces
+-   **Python**: snake_case, Black formatter (88 chars)
+-   **TypeScript/JavaScript**: camelCase, 2 spaces, ESLint
+-   **Commits**: Conventional Commits format
+
+### Documentation Requirements
+
+All documentation MUST include:
+
+-   YAML frontmatter (title, tags, domain, type, summary, status, last_review)
+-   PlantUML diagrams for architecture/design docs
+-   Both source (.puml) and embedded rendering in markdown
+
+## 🛡️ Security & Compliance
+
+### Always Do
+
+-   ✅ Review changes before commits
+-   ✅ Use Git for backups
+-   ✅ Follow code style guidelines
+-   ✅ Document significant changes
+-   ✅ Test functionality
+
+### Never Do
+
+-   ❌ Commit credentials or API keys
+-   ❌ Skip risk checks in trading code
+-   ❌ Modify production configs without review
+-   ❌ Ignore linter errors
+-   ❌ Bypass kill switches in trading system
+
+## 📖 Reference Documentation
+
+-   Main guidelines: `CLAUDE.md`
+-   Structure guide: `docs/DIRECTORY-STRUCTURE.md`
+-   Documentation standard: `docs/DOCUMENTATION-STANDARD.md`
+-   API Hub: `docs/context/shared/integrations/frontend-backend-api-hub.md`
+
+## 🚀 Quick Commands
+
+### Health Check
+
+```bash
+bash scripts/maintenance/health-check-all.sh
+```
+
+### Start Services
+
+```bash
+bash scripts/services/start-all.sh
+```
+
+### Stop Services
+
+```bash
+bash scripts/services/stop-all.sh
+```
+
+### Validate Environment
+
+```bash
+bash scripts/env/validate-env.sh
+```
+
+---
+
+**Configuration Mode**: 🚀 Development (Full Permissions)  
+**Last Updated**: 2025-10-18  
+**Cline Version**: Latest (saoudrizwan.claude-dev)  
+**Status**: ✅ Active
+
+
+
+
+
+
+

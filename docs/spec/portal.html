@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>TradingSystem API Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --tab-bg: #f1f1f1;
+            --pre-bg: #f4f4f4;
+            --border-color: #cccccc;
+            --button-hover: #dddddd;
+            --error-color: #ff0000;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #ffffff;
+                --tab-bg: #333333;
+                --pre-bg: #2a2a2a;
+                --border-color: #555555;
+                --button-hover: #444444;
+                --error-color: #ff6666;
+            }
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--tab-bg);
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .toolbar__title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .toolbar__spacer {
+            flex: 1 1 auto;
+        }
+        
+        .toolbar__button {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .toolbar__button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .tab {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--tab-bg);
+            border-radius: 6px 6px 0 0;
+        }
+        
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: var(--text-color);
+        }
+        
+        .tab button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .tab button.active {
+            background-color: var(--bg-color);
+            border-bottom: 2px solid #10b981;
+        }
+        
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            background-color: var(--bg-color);
+        }
+        
+        pre {
+            background-color: var(--pre-bg);
+            padding: 15px;
+            overflow: auto;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .error {
+            color: var(--error-color);
+            padding: 10px;
+            background-color: var(--pre-bg);
+            border-radius: 6px;
+            border: 1px solid var(--error-color);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-color);
+        }
+        
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="toolbar" role="navigation" aria-label="Spec toolbar">
+        <span class="toolbar__title">TradingSystem API Specs</span>
+        <span class="toolbar__spacer" aria-hidden="true"></span>
+        <a class="toolbar__button" href="./openapi.yaml" download role="button" aria-label="Download OpenAPI">
+            ⬇️ Download OpenAPI
+        </a>
+        <a class="toolbar__button" href="./asyncapi.yaml" download role="button" aria-label="Download AsyncAPI">
+            ⬇️ Download AsyncAPI
+        </a>
+    </header>
+
+    <h1>TradingSystem API Specifications</h1>
+    
+    <div class="tab">
+        <button class="tablinks active" onclick="openSpec(event, 'OpenAPI')">REST (OpenAPI)</button>
+        <button class="tablinks" onclick="openSpec(event, 'AsyncAPI')">WebSockets (AsyncAPI)</button>
+    </div>
+
+    <div id="OpenAPI" class="tabcontent" style="display: block;">
+        <h2>OpenAPI Specification</h2>
+        <div id="openapi-content" class="loading">Loading OpenAPI specification...</div>
+    </div>
+
+    <div id="AsyncAPI" class="tabcontent">
+        <h2>AsyncAPI Specification</h2>
+        <div id="asyncapi-content" class="loading">Loading AsyncAPI specification...</div>
+    </div>
+
+    <script>
+        function openSpec(evt, specName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(specName).style.display = "block";
+            evt.currentTarget.className += " active";
+            
+            loadSpec(specName.toLowerCase());
+        }
+
+        async function loadSpec(specType) {
+            const contentId = specType + '-content';
+            const contentDiv = document.getElementById(contentId);
+            const url = '/' + specType + '.yaml';
+            
+            contentDiv.className = 'loading';
+            contentDiv.innerHTML = 'Loading ' + specType + ' specification...';
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                const text = await response.text();
+                contentDiv.className = '';
+                contentDiv.innerHTML = '<pre>' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+            } catch (error) {
+                contentDiv.className = 'error';
+                contentDiv.innerHTML = 'Error loading ' + specType + ': ' + error.message + '<br><br>Try refreshing the page or check the server logs.';
+            }
+        }
+
+        // Load default tab
+        loadSpec('openapi');
+    </script>
+</body>
+</html>

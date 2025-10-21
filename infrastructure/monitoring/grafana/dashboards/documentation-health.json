@@ -1,0 +1,419 @@
+{
+  "dashboard": {
+    "title": "Documentation Health Dashboard",
+    "tags": ["documentation", "quality", "health"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "uid": "docs-health",
+    "refresh": "5m",
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "domain",
+          "label": "Domain",
+          "type": "custom",
+          "options": [
+            { "text": "All", "value": "all", "selected": true },
+            { "text": "Frontend", "value": "frontend" },
+            { "text": "Backend", "value": "backend" },
+            { "text": "Ops", "value": "ops" },
+            { "text": "Shared", "value": "shared" }
+          ],
+          "current": {
+            "text": "All",
+            "value": "all"
+          }
+        },
+        {
+          "name": "threshold_days",
+          "label": "Outdated Threshold (days)",
+          "type": "constant",
+          "current": {
+            "text": "90",
+            "value": "90"
+          }
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Overall Health Score",
+        "type": "gauge",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 6 },
+        "targets": [
+          {
+            "expr": "docs_health_score",
+            "legendFormat": "Health Score"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 60, "color": "orange" },
+                { "value": 70, "color": "yellow" },
+                { "value": 80, "color": "light-green" },
+                { "value": 90, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Documents",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 3 },
+        "targets": [
+          {
+            "expr": "sum(docs_total_files)",
+            "legendFormat": "Total Files"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Link Success Rate",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 3 },
+        "targets": [
+          {
+            "expr": "docs_links_success_rate",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 95, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Frontmatter Compliance",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 3 },
+        "targets": [
+          {
+            "expr": "(docs_frontmatter_complete / sum(docs_total_files)) * 100",
+            "legendFormat": "Compliance"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 98, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Issues by Type",
+        "type": "bargauge",
+        "gridPos": { "x": 6, "y": 3, "w": 9, "h": 6 },
+        "targets": [
+          {
+            "expr": "docs_frontmatter_missing",
+            "legendFormat": "Missing Frontmatter"
+          },
+          {
+            "expr": "sum(docs_links_broken)",
+            "legendFormat": "Broken Links"
+          },
+          {
+            "expr": "docs_outdated_count",
+            "legendFormat": "Outdated Docs"
+          },
+          {
+            "expr": "docs_duplicate_groups",
+            "legendFormat": "Duplicate Groups"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 5, "color": "yellow" },
+                { "value": 20, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Domain Distribution",
+        "type": "piechart",
+        "gridPos": { "x": 15, "y": 3, "w": 9, "h": 6 },
+        "targets": [
+          {
+            "expr": "docs_total_files",
+            "legendFormat": "{{domain}}"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["value", "percent"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Health Score Over Time",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 6, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "docs_health_score",
+            "legendFormat": "Health Score"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "transparent" },
+                { "value": 80, "color": "yellow" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Broken Links Trend",
+        "type": "timeseries",
+        "gridPos": { "x": 8, "y": 6, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(docs_links_broken)",
+            "legendFormat": "Broken Links"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Outdated Documents Trend",
+        "type": "timeseries",
+        "gridPos": { "x": 16, "y": 6, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "docs_outdated_count",
+            "legendFormat": "Outdated Docs"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Recent Audit Runs",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 14, "w": 12, "h": 4 },
+        "targets": [
+          {
+            "expr": "increase(docs_audit_runs_total[24h])",
+            "legendFormat": "Audits (24h)"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Issues Fixed (Last 7 Days)",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 14, "w": 12, "h": 4 },
+        "targets": [
+          {
+            "expr": "increase(docs_issues_fixed_total[7d])",
+            "legendFormat": "{{issue_type}}",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Value" },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Fixes"
+                }
+              ]
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true,
+                "instance": true
+              },
+              "renameByName": {
+                "issue_type": "Issue Type",
+                "Value": "Fixes"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Audit Runs",
+          "datasource": "Prometheus",
+          "expr": "changes(docs_audit_runs_total[1m]) > 0",
+          "tagKeys": "audit",
+          "textFormat": "Audit Executed",
+          "iconColor": "blue"
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}

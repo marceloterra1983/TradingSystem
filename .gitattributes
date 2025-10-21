@@ -1,0 +1,143 @@
+<<<<<<< HEAD
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.cs     text diff=csharp
+*.py     text diff=python
+*.js     text
+*.jsx    text
+*.ts     text
+*.tsx    text
+*.json   text
+*.xml    text
+
+# Documentation
+*.md     text
+*.txt    text
+README   text
+LICENSE  text
+
+# Scripts
+*.sh     text eol=lf
+=======
+# Git attributes for TradingSystem
+# Ensures consistent line endings and diff handling across platforms
+
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Source code - backend (.NET)
+*.cs     text diff=csharp
+*.csproj text diff=csharp
+*.sln    text diff=csharp
+
+# Source code - Python
+*.py     text diff=python
+*.pyi    text diff=python
+
+# Source code - frontend
+*.js     text diff=javascript
+*.jsx    text diff=javascript
+*.ts     text diff=typescript
+*.tsx    text diff=typescript
+*.json   text
+*.xml    text
+*.html   text diff=html
+*.css    text diff=css
+
+# Documentation
+*.md     text diff=markdown
+*.txt    text
+README   text
+LICENSE  text
+CHANGELOG text
+
+# Scripts - always LF for bash/sh (cross-platform compatibility)
+*.sh     text eol=lf
+*.bash   text eol=lf
+
+# Scripts - always CRLF for Windows
+>>>>>>> master
+*.ps1    text eol=crlf
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+<<<<<<< HEAD
+# Configs
+*.config text
+*.yml    text
+*.yaml   text
+
+# Binary files
+=======
+# Configuration files
+*.config text
+*.yml    text
+*.yaml   text
+*.toml   text
+*.ini    text
+.env.*   text
+.editorconfig text
+.gitignore text
+.gitattributes text
+
+# Binary files - executables and libraries
+>>>>>>> master
+*.dll    binary
+*.exe    binary
+*.so     binary
+*.dylib  binary
+<<<<<<< HEAD
+*.pdf    binary
+=======
+*.lib    binary
+*.a      binary
+
+# Binary files - documents
+*.pdf    binary
+*.docx   binary
+*.xlsx   binary
+*.pptx   binary
+
+# Binary files - images
+>>>>>>> master
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+<<<<<<< HEAD
+*.parquet binary
+*.pkl    binary
+*.h5     binary
+*.pt     binary
+=======
+*.svg    binary
+*.webp   binary
+
+# Binary files - data and ML models
+*.parquet binary
+*.pkl    binary
+*.pickle binary
+*.h5     binary
+*.hdf5   binary
+*.pt     binary
+*.pth    binary
+*.onnx   binary
+*.pb     binary
+
+# Binary files - archives
+*.zip    binary
+*.tar    binary
+*.gz     binary
+*.7z     binary
+*.rar    binary
+
+# Binary files - fonts
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
+*.otf    binary
+>>>>>>> master

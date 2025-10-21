@@ -1,0 +1,6 @@
+- [x] Confirmar estado atual: dependências QuestDB/LowDB no serviço Workspace, variáveis `.env`, consumidores e documentação relacionada
+- [x] Provisionar/validar banco PostgreSQL `workspace` (usuário, permissões, migrations Prisma) e registrar plano de seed/migração de dados
+- [x] Refatorar serviço `frontend/apps/workspace` para usar PostgreSQL como estratégia padrão (config, repositórios, métricas, scripts, testes)
+- [ ] Ajustar clientes/integradores (Dashboard, Agno Agents, scripts de automação) para utilizar o backend atualizado e validar smoke tests
+- [ ] Atualizar documentação + specs OpenSpec (nova capability Workspace ou deltas, README, env guides) e executar `openspec validate --strict`
+- [ ] Preparar plano de rollout/rollback documentado (backup final QuestDB, migração LowDB→PostgreSQL, checklist de pós-deploy)

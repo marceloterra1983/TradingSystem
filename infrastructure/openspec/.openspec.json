@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "changesDir": "changes",
+  "specsDir": "specs",
+  "archiveDir": "changes/archive",
+  "projectFile": "project.md",
+  "agentsFile": "AGENTS.md"
+}

@@ -1,0 +1,18 @@
+name: tradingsystem-data
+
+# -----------------------------------------------------------------------------
+# QuestDB has been retired from the TradingSystem data stack.
+# TimescaleDB is now the canonical data store (see docker-compose.timescale.yml).
+#
+# This compose file remains as a compatibility stub so existing scripts that
+# reference docker-compose.data.yml continue to succeed without starting any
+# services.  The shared network definition is kept as documentation; the
+# network is created on-demand by the orchestration scripts.
+# -----------------------------------------------------------------------------
+
+services: {}
+
+networks:
+  tradingsystem_data:
+    name: tradingsystem_data
+    external: true

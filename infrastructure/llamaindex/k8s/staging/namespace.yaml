@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llamaindex-staging
+  labels:
+    name: llamaindex-staging
+    environment: staging
