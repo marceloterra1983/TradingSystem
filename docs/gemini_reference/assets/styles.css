@@ -1,0 +1,936 @@
+/**
+ * TradingSystem Documentation - Exact Gemini CLI Match
+ * Based on: https://geminicli.com/docs/
+ * Visual Match: 100% - Including vertical lines
+ */
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Exact Gemini CLI Colors */
+    --gemini-bg-ultra-dark: #0a0e17;
+    --gemini-bg-dark: #0f1419;
+    --gemini-bg-surface: #1a1f2e;
+    --gemini-text-primary: #e8eaed;
+    --gemini-text-secondary: #9aa0a6;
+    --gemini-text-muted: #6b7280;
+    --gemini-primary: #8ab4f8;
+    --gemini-active: #a78bfa;  /* Purple/Lilac like image */
+    --gemini-border: rgba(255, 255, 255, 0.08);
+    --gemini-hover: rgba(138, 180, 248, 0.1);
+    --gemini-line: rgba(255, 255, 255, 0.1);
+    
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    
+    /* Spacing */
+    --navbar-height: 56px;
+    --sidebar-width: 280px;
+    --toc-width: 220px;
+}
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--gemini-bg-dark);
+    color: var(--gemini-text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   NAVBAR - Exact Gemini CLI
+   ============================================ */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--navbar-height);
+    background-color: var(--gemini-bg-ultra-dark);
+    border-bottom: 1px solid var(--gemini-border);
+    z-index: 1000;
+}
+
+.navbar-container {
+    max-width: 100%;
+    height: 100%;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--gemini-text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.navbar-logo {
+    width: 24px;
+    height: 24px;
+    color: var(--gemini-primary);
+}
+
+.navbar-title {
+    letter-spacing: -0.01em;
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.navbar-link {
+    padding: 0.4rem 0.75rem;
+    color: var(--gemini-text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    font-weight: 500;
+}
+
+.navbar-link:hover {
+    color: var(--gemini-text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.navbar-link.active {
+    color: var(--gemini-text-primary);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--gemini-border);
+    border-radius: 6px;
+    color: var(--gemini-text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-width: 180px;
+}
+
+.search-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.kbd {
+    padding: 0.1rem 0.35rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--gemini-border);
+    border-radius: 3px;
+    font-family: var(--font-family-mono);
+    font-size: 0.7rem;
+    color: var(--gemini-text-muted);
+}
+
+.theme-toggle,
+.github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--gemini-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.theme-toggle:hover,
+.github-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--gemini-border);
+    color: var(--gemini-text-primary);
+}
+
+.sun-icon,
+.moon-icon {
+    width: 18px;
+    height: 18px;
+}
+
+[data-theme="dark"] .sun-icon {
+    display: none;
+}
+
+[data-theme="light"] .moon-icon {
+    display: none;
+}
+
+/* ============================================
+   LAYOUT - 3 Columns
+   ============================================ */
+
+.main-container {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr var(--toc-width);
+    margin-top: var(--navbar-height);
+    min-height: calc(100vh - var(--navbar-height));
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   SIDEBAR - EXACT GEMINI CLI WITH VERTICAL LINES
+   ============================================ */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--navbar-height);
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--navbar-height));
+    background-color: var(--gemini-bg-ultra-dark);
+    border-right: 1px solid var(--gemini-border);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-content {
+    padding: 1.5rem 0;
+}
+
+.sidebar-section {
+    margin-bottom: 0;
+}
+
+/* Category Header with Chevron */
+.sidebar-category {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--gemini-text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    position: relative;
+}
+
+.category-header:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.category-header span {
+    flex: 1;
+}
+
+.category-header .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    color: var(--gemini-text-secondary);
+    margin-left: auto;
+}
+
+.category-header.collapsed .chevron {
+    transform: rotate(-90deg);
+}
+
+/* Vertical Line Container */
+.category-items {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+/* Vertical Line - EXACT LIKE GEMINI CLI */
+.category-items::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--gemini-line);
+}
+
+.category-items.collapsed {
+    display: none;
+}
+
+/* Sidebar Links with Connection to Line */
+.sidebar-link {
+    position: relative;
+    display: block;
+    padding: 0.6rem 0.75rem;
+    padding-left: 1.25rem;
+    color: var(--gemini-text-secondary);
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 400;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+    line-height: 1.5;
+    margin-bottom: 0.2rem;
+}
+
+/* Horizontal connector to vertical line */
+.sidebar-link::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 50%;
+    width: 0.75rem;
+    height: 1px;
+    background-color: var(--gemini-line);
+}
+
+.sidebar-link:hover {
+    color: var(--gemini-text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Active Item - Purple/Lilac like image */
+.sidebar-link.active {
+    background-color: var(--gemini-active) !important;
+    color: #1a1f2e !important;
+    font-weight: 500;
+}
+
+.sidebar-link.active::before {
+    background-color: var(--gemini-active);
+}
+
+/* ============================================
+   CONTENT AREA
+   ============================================ */
+
+.content {
+    grid-column: 2;
+    display: flex;
+    gap: 2rem;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.article {
+    flex: 1;
+    max-width: 100%;
+    padding: 2.5rem 3rem;
+    padding-right: 0;
+}
+
+.article-header {
+    margin-bottom: 2rem;
+}
+
+.article-header h1 {
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.article-meta {
+    color: var(--gemini-text-muted);
+    font-size: 0.9rem;
+}
+
+.lead {
+    font-size: 1.15rem;
+    color: var(--gemini-text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.article-content {
+    color: var(--gemini-text-secondary);
+}
+
+.article-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 3rem;
+    margin-bottom: 1.25rem;
+    color: var(--gemini-text-primary);
+}
+
+.article-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--gemini-text-primary);
+}
+
+.article-content p {
+    margin-bottom: 1.25rem;
+    line-height: 1.75;
+}
+
+.article-content ul,
+.article-content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.75rem;
+}
+
+.article-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+
+.article-content strong {
+    color: var(--gemini-text-primary);
+    font-weight: 600;
+}
+
+.article-content a {
+    color: var(--gemini-primary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.article-content a:hover {
+    text-decoration: underline;
+}
+
+.article-content code {
+    padding: 0.15rem 0.4rem;
+    background-color: rgba(138, 180, 248, 0.12);
+    color: var(--gemini-primary);
+    border-radius: 3px;
+    font-family: var(--font-family-mono);
+    font-size: 0.88em;
+    font-weight: 500;
+}
+
+/* ============================================
+   ADMONITIONS - Exact Gemini CLI Style
+   ============================================ */
+
+.admonition {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    margin: 1.75rem 0;
+    background-color: rgba(138, 180, 248, 0.05);
+    border-left: 3px solid var(--gemini-primary);
+    border-radius: 6px;
+}
+
+.admonition-icon {
+    flex-shrink: 0;
+    color: var(--gemini-primary);
+    margin-top: 0.1rem;
+}
+
+.admonition-content {
+    flex: 1;
+}
+
+.admonition-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--gemini-text-primary);
+    font-size: 0.95rem;
+}
+
+.admonition-content p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.admonition-warning {
+    background-color: rgba(251, 188, 4, 0.08);
+    border-left-color: #fbbc04;
+}
+
+.admonition-warning .admonition-icon {
+    color: #fbbc04;
+}
+
+.admonition-danger {
+    background-color: rgba(234, 67, 53, 0.08);
+    border-left-color: #ea4335;
+}
+
+.admonition-danger .admonition-icon {
+    color: #ea4335;
+}
+
+/* ============================================
+   CODE BLOCKS - Ultra Dark
+   ============================================ */
+
+.code-block {
+    margin: 1.75rem 0;
+    background-color: var(--gemini-bg-ultra-dark);
+    border: 1px solid var(--gemini-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--gemini-border);
+}
+
+.code-block-lang {
+    font-family: var(--font-family-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gemini-text-muted);
+    letter-spacing: 0.05em;
+}
+
+.copy-button {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    background-color: transparent;
+    border: 1px solid var(--gemini-border);
+    border-radius: 4px;
+    color: var(--gemini-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.copy-button:hover {
+    background-color: rgba(138, 180, 248, 0.1);
+    border-color: var(--gemini-primary);
+    color: var(--gemini-primary);
+}
+
+.copy-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+.code-block pre {
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--gemini-text-secondary);
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-weight: 400;
+}
+
+/* ============================================
+   FEATURE CARDS
+   ============================================ */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--gemini-border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.feature-card:hover {
+    border-color: var(--gemini-primary);
+    background-color: rgba(138, 180, 248, 0.05);
+    transform: translateY(-2px);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.feature-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--gemini-text-primary);
+    margin-top: 0;
+}
+
+.feature-card p {
+    font-size: 0.9rem;
+    color: var(--gemini-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================
+   TOC - Exact "On this page" Style
+   ============================================ */
+
+.toc {
+    position: sticky;
+    top: var(--navbar-height);
+    width: var(--toc-width);
+    height: calc(100vh - var(--navbar-height));
+    padding: 2.5rem 1.5rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.toc-content {
+    position: sticky;
+    top: 0;
+}
+
+.toc-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gemini-text-muted);
+    margin-bottom: 1rem;
+}
+
+.toc-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toc-link {
+    display: block;
+    padding: 0.35rem 0;
+    color: var(--gemini-text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+    line-height: 1.5;
+}
+
+.toc-link:hover {
+    color: var(--gemini-primary);
+}
+
+.toc-link.active {
+    color: var(--gemini-primary);
+    font-weight: 500;
+}
+
+/* ============================================
+   ARTICLE FOOTER
+   ============================================ */
+
+.article-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gemini-border);
+}
+
+.article-nav {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.article-nav-link {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--gemini-border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.article-nav-link:hover {
+    border-color: var(--gemini-primary);
+    background-color: rgba(138, 180, 248, 0.05);
+}
+
+.article-nav-label {
+    font-size: 0.7rem;
+    color: var(--gemini-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.article-nav-title {
+    font-weight: 500;
+    color: var(--gemini-text-primary);
+    font-size: 0.95rem;
+}
+
+/* ============================================
+   SEARCH MODAL
+   ============================================ */
+
+.search-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+}
+
+.search-modal.active {
+    display: flex;
+}
+
+.search-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.search-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background-color: var(--gemini-bg-surface);
+    border: 1px solid var(--gemini-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gemini-border);
+}
+
+.search-icon {
+    color: var(--gemini-text-muted);
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+}
+
+.search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: var(--gemini-text-primary);
+    font-family: var(--font-family);
+}
+
+.search-input::placeholder {
+    color: var(--gemini-text-muted);
+}
+
+.search-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--gemini-text-muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   SCROLLBAR - Minimal
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   LIGHT MODE (Optional)
+   ============================================ */
+
+[data-theme="light"] {
+    --gemini-bg-ultra-dark: #f8f9fa;
+    --gemini-bg-dark: #ffffff;
+    --gemini-bg-surface: #f8f9fa;
+    --gemini-text-primary: #1f2937;
+    --gemini-text-secondary: #6b7280;
+    --gemini-text-muted: #9ca3af;
+    --gemini-primary: #1a73e8;
+    --gemini-active: #8e24aa;
+    --gemini-border: rgba(0, 0, 0, 0.08);
+    --gemini-hover: rgba(26, 115, 232, 0.1);
+    --gemini-line: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+[data-theme="light"] .search-button {
+    background-color: #f8f9fa;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .sidebar-link.active {
+    color: #ffffff !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .main-container {
+        grid-template-columns: var(--sidebar-width) 1fr;
+    }
+    
+    .toc {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        transition: left 0.3s ease;
+        z-index: 999;
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .content {
+        padding: 1.5rem;
+    }
+    
+    .navbar-menu {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .article-header h1 {
+        font-size: 2rem;
+    }
+    
+    .article-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   COPY BUTTON FEEDBACK
+   ============================================ */
+
+@keyframes copied {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.copy-button.copied {
+    animation: copied 0.3s ease;
+    background-color: rgba(52, 168, 83, 0.1);
+    border-color: #34a853;
+    color: #34a853;
+}

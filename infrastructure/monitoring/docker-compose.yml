@@ -1,0 +1,186 @@
+name: monitoring
+
+# Monitoring Stack - Prometheus + Grafana + Alertmanager + Alert Router
+# TradingSystem v2.1
+
+services:
+  # ============================================================================
+  # Prometheus - Metrics collection and alerting
+  # ============================================================================
+  prometheus:
+    container_name: mon-prometheus
+    image: "${IMG_MON_PROMETHEUS:-img-mon-prometheus}:${IMG_VERSION:-2025.10.19}"
+    platform: linux/amd64
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules/:/etc/prometheus/rules/:ro
+      - prometheus-data:/prometheus
+    networks:
+      - monitoring
+    # Enable host.docker.internal on Linux for scraping host services
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=prometheus'
+      - 'com.tradingsystem.description=Metrics collection and alerting'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9090/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # Alertmanager - Alert routing and management
+  # ============================================================================
+  alertmanager:
+    container_name: mon-alertmanager
+    image: "${IMG_MON_ALERTMANAGER:-img-mon-alertmanager}:${IMG_VERSION:-2025.10.19}"
+    platform: linux/amd64
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - '9093:9093'
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=alertmanager'
+      - 'com.tradingsystem.description=Alert routing and management'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9093/-/healthy']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - prometheus
+
+  # ============================================================================
+  # Grafana - Metrics visualization
+  # ============================================================================
+  grafana:
+    container_name: mon-grafana
+    image: "${IMG_MON_GRAFANA:-img-mon-grafana}:${IMG_VERSION:-2025.10.19}"
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - ../../.env
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=grafana'
+      - 'com.tradingsystem.description=Metrics visualization and dashboards'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - prometheus
+
+  # ============================================================================
+  # Alert Router - GitHub issue creation from alerts
+  # ============================================================================
+  alert-router:
+    container_name: mon-alert-router
+    image: "${IMG_MON_ALERT_ROUTER:-img-mon-alert-router}:${IMG_VERSION:-2025.10.19}"
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    env_file:
+      - ../../.env
+    environment:
+      - PORT=8080
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_OWNER=${GITHUB_OWNER:-marceloterra}
+      - GITHUB_REPO=${GITHUB_REPO:-TradingSystem}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=alert-router'
+      - 'com.tradingsystem.description=Routes alerts to GitHub and Slack'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - alertmanager
+
+  # ============================================================================
+  # Node Exporter - Host metrics (Linux)
+  # ============================================================================
+  node-exporter:
+    container_name: mon-node-exporter
+    image: "${IMG_MON_NODE_EXPORTER:-img-mon-node-exporter}:${IMG_VERSION:-2025.10.19}"
+    restart: unless-stopped
+    platform: linux/amd64
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - '9100:9100'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=node-exporter'
+      - 'com.tradingsystem.description=Linux host metrics exporter'
+    profiles:
+      - linux
+
+# Networks
+networks:
+  monitoring:
+    name: Monitoring_default
+    driver: bridge
+
+# Volumes
+volumes:
+  prometheus-data:
+  alertmanager-data:
+  grafana-data:

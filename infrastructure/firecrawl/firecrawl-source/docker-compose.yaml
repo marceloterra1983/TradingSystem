@@ -1,0 +1,149 @@
+x-common-service: &common-service
+  # Image built via scripts/docker/build-images.sh
+  image: "${IMG_FIRECRAWL_API:-img-firecrawl-api}:${IMG_VERSION:-2025.10.19}"
+  env_file:
+    - ../../../.env
+
+  ulimits:
+    nofile:
+      soft: 65535
+      hard: 65535
+  networks:
+    - firecrawl
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+x-common-env: &common-env
+  REDIS_URL: ${FIRECRAWL_REDIS_URL:-redis://firecrawl-redis:6379}
+  REDIS_RATE_LIMIT_URL: ${FIRECRAWL_REDIS_URL:-redis://firecrawl-redis:6379}
+  PLAYWRIGHT_MICROSERVICE_URL: ${FIRECRAWL_PLAYWRIGHT_URL:-http://firecrawl-playwright:3000/scrape}
+  NUQ_DATABASE_URL: ${FIRECRAWL_NUQ_DATABASE_URL:-postgres://postgres:postgres@firecrawl-postgres:5432/postgres}
+  USE_DB_AUTHENTICATION: ${FIRECRAWL_USE_DB_AUTHENTICATION:-false}
+  OPENAI_API_KEY: ${OPENAI_API_KEY}
+  OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+  MODEL_NAME: ${MODEL_NAME}
+  MODEL_EMBEDDING_NAME: ${MODEL_EMBEDDING_NAME}
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+  SLACK_WEBHOOK_URL: ${FIRECRAWL_SLACK_WEBHOOK_URL}
+  BULL_AUTH_KEY: ${FIRECRAWL_BULL_AUTH_KEY:-tradingsystem-firecrawl-2025}
+  TEST_API_KEY: ${FIRECRAWL_TEST_API_KEY}
+  POSTHOG_API_KEY: ${FIRECRAWL_POSTHOG_API_KEY}
+  POSTHOG_HOST: ${FIRECRAWL_POSTHOG_HOST}
+  SUPABASE_ANON_TOKEN: ${FIRECRAWL_SUPABASE_ANON_TOKEN}
+  SUPABASE_URL: ${FIRECRAWL_SUPABASE_URL}
+  SUPABASE_SERVICE_TOKEN: ${FIRECRAWL_SUPABASE_SERVICE_TOKEN}
+  SELF_HOSTED_WEBHOOK_URL: ${FIRECRAWL_SELF_HOSTED_WEBHOOK_URL}
+  SERPER_API_KEY: ${FIRECRAWL_SERPER_API_KEY}
+  SEARCHAPI_API_KEY: ${FIRECRAWL_SEARCHAPI_API_KEY}
+  LOGGING_LEVEL: ${FIRECRAWL_LOGGING_LEVEL:-info}
+  PROXY_SERVER: ${FIRECRAWL_PROXY_SERVER}
+  PROXY_USERNAME: ${FIRECRAWL_PROXY_USERNAME}
+  PROXY_PASSWORD: ${FIRECRAWL_PROXY_PASSWORD}
+  SEARXNG_ENDPOINT: ${FIRECRAWL_SEARXNG_ENDPOINT}
+  SEARXNG_ENGINES: ${FIRECRAWL_SEARXNG_ENGINES}
+  SEARXNG_CATEGORIES: ${FIRECRAWL_SEARXNG_CATEGORIES}
+  ALLOW_LOCAL_WEBHOOKS: ${FIRECRAWL_ALLOW_LOCAL_WEBHOOKS:-true}
+
+services:
+  firecrawl-playwright:
+    image: "${IMG_FIRECRAWL_PLAYWRIGHT:-img-firecrawl-playwright}:${IMG_VERSION:-2025.10.19}"
+    env_file:
+      - ../../../.env
+    container_name: firecrawl-playwright
+    platform: linux/amd64
+    environment:
+      PORT: 3000
+      PROXY_SERVER: ${FIRECRAWL_PROXY_SERVER}
+      PROXY_USERNAME: ${FIRECRAWL_PROXY_USERNAME}
+      PROXY_PASSWORD: ${FIRECRAWL_PROXY_PASSWORD}
+      BLOCK_MEDIA: ${FIRECRAWL_BLOCK_MEDIA:-false}
+    networks:
+      - firecrawl
+    labels:
+      - com.tradingsystem.stack=firecrawl
+      - com.tradingsystem.service=firecrawl-playwright
+      - com.tradingsystem.description=Browser automation service for web scraping
+
+  firecrawl-api:
+    <<: *common-service
+    platform: linux/amd64
+    environment:
+      <<: *common-env
+      HOST: ${FIRECRAWL_HOST:-0.0.0.0}
+      PORT: ${FIRECRAWL_INTERNAL_PORT:-3002}
+      EXTRACT_WORKER_PORT: ${FIRECRAWL_EXTRACT_WORKER_PORT:-3004}
+      WORKER_PORT: ${FIRECRAWL_WORKER_PORT:-3005}
+      ENV: local
+    depends_on:
+      firecrawl-redis:
+        condition: service_healthy
+      firecrawl-playwright:
+        condition: service_started
+    container_name: firecrawl-api
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          node -e "async function check(){try{const res=await fetch('http://localhost:${FIRECRAWL_INTERNAL_PORT:-3002}/v0/health/readiness');if(!res.ok)process.exit(1);}catch(e){process.exit(1);}process.exit(0);}check();"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    ports:
+      - "${FIRECRAWL_PORT:-3002}:${FIRECRAWL_INTERNAL_PORT:-3002}"
+    command: node dist/src/harness.js --start-docker
+    labels:
+      - com.tradingsystem.stack=firecrawl
+      - com.tradingsystem.service=firecrawl-api
+      - com.tradingsystem.description=Main Firecrawl API service for web scraping
+
+  firecrawl-redis:
+    # NOTE: If you want to use Valkey (open source) instead of Redis (source available),
+    # uncomment the Valkey statement and comment out the Redis statement.
+    # Using Valkey with Firecrawl is untested and not guaranteed to work. Use with caution.
+    image: "${IMG_FIRECRAWL_REDIS:-img-firecrawl-redis}:${IMG_VERSION:-2025.10.19}"
+    # image: valkey/valkey:alpine
+    env_file:
+      - ../../../.env
+    container_name: firecrawl-redis
+    platform: linux/amd64
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - firecrawl
+    command: redis-server --bind 0.0.0.0
+    labels:
+      - com.tradingsystem.stack=firecrawl
+      - com.tradingsystem.service=firecrawl-redis
+      - com.tradingsystem.description=Redis cache for Firecrawl queue management
+  
+  firecrawl-postgres:
+    image: "${IMG_FIRECRAWL_POSTGRES:-img-firecrawl-postgres}:${IMG_VERSION:-2025.10.19}"
+    env_file:
+      - ../../../.env
+    container_name: firecrawl-postgres
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: ${FIRECRAWL_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${FIRECRAWL_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${FIRECRAWL_POSTGRES_DB:-postgres}
+    networks:
+      - firecrawl
+    # Port 5432 commented out to avoid conflicts with host PostgreSQL/TimescaleDB (uses 5433)
+    # PostgreSQL is only accessed internally by Firecrawl services via Docker network
+    # ports:
+    #   - "${FIRECRAWL_POSTGRES_PORT:-5434}:5432"
+    labels:
+      - com.tradingsystem.stack=firecrawl
+      - com.tradingsystem.service=firecrawl-postgres
+      - com.tradingsystem.description=Internal PostgreSQL database for Firecrawl
+
+networks:
+  firecrawl:
+    driver: bridge
+    name: tradingsystem_firecrawl

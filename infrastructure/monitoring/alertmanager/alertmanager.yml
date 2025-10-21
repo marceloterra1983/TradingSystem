@@ -1,0 +1,38 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: alert-router-default
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: alert-router-critical
+    - matchers:
+        - severity = "warning"
+      receiver: alert-router-warning
+    - matchers:
+        - severity = "info"
+      receiver: alert-router-info
+
+receivers:
+  - name: alert-router-default
+    webhook_configs:
+      - url: 'http://alert-router:8080/github'
+        send_resolved: true
+
+  - name: alert-router-critical
+    webhook_configs:
+      - url: 'http://alert-router:8080/github'
+        send_resolved: true
+
+  - name: alert-router-warning
+    webhook_configs:
+      - url: 'http://alert-router:8080/github'
+        send_resolved: true
+
+  - name: alert-router-info
+    webhook_configs:
+      - url: 'http://alert-router:8080/github'
+        send_resolved: true
+
+templates: []

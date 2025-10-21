@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# ============================================================================
+# Documentation Frontmatter Validation
+# ============================================================================
+# Validates YAML frontmatter in staged markdown files
+# Uses: scripts/docs/validate-frontmatter.py
+# Fails commit if validation errors found
+
+echo "\n🔍 Validating documentation frontmatter..."
+
+# Get staged markdown files
+STAGED_MD_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(md|mdx)$' || true)
+
+if [ -n "$STAGED_MD_FILES" ]; then
+  echo "📝 Found $(echo "$STAGED_MD_FILES" | wc -l) staged markdown file(s)"
+
+  if bash scripts/docs/validate-frontmatter-staged.sh; then
+    echo "✅ Frontmatter validation passed"
+  else
+    echo "❌ Frontmatter validation failed"
+    echo "   Fix the issues above and try again."
+    echo "   See: docs/DOCUMENTATION-STANDARD.md for requirements"
+    exit 1
+  fi
+else
+  echo "ℹ️  No markdown files staged, skipping frontmatter validation"
+fi
+
+echo ""
+
+# ============================================================================
+# Frontend Code Quality (ESLint + TypeScript)
+# ============================================================================
+# Only runs if frontend files are staged
+
+STAGED_FRONTEND_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '^frontend/apps/dashboard/src/' || true)
+
+if [ -n "$STAGED_FRONTEND_FILES" ]; then
+  echo "🔍 Running frontend code quality checks..."
+
+  # Run ESLint on staged files
+  cd frontend/apps/dashboard
+  npm run lint
+
+  # Run TypeScript type check
+  npm run type-check
+
+  echo "✅ Frontend code quality checks passed"
+  echo ""
+else
+  echo "ℹ️  No frontend files staged, skipping code quality checks"
+  echo ""
+fi

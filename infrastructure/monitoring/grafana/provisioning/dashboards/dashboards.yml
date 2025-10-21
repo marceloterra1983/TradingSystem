@@ -1,0 +1,12 @@
+apiVersion: 1
+
+disableDeletion: false
+allowUiUpdates: true
+
+providers:
+  - name: TradingSystem Dashboards
+    folder: TradingSystem
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
+      recursive: true

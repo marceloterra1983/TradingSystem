@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llamaindex-query
+  namespace: llamaindex-staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: llamaindex-query
+  template:
+    metadata:
+      labels:
+        app: llamaindex-query
+    spec:
+      containers:
+      - name: query
+        image: ghcr.io/your-repo/llamaindex-query:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: OPENAI_API_KEY
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: JWT_SECRET_KEY
+        envFrom:
+        - configMapRef:
+            name: llamaindex-config
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llamaindex-query-service
+  namespace: llamaindex-staging
+spec:
+  selector:
+    app: llamaindex-query
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llamaindex-query-ingress
+  namespace: llamaindex-staging
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+  - hosts:
+    - api-staging.llamaindex.yourdomain.com
+    secretName: llamaindex-query-tls-staging
+  rules:
+  - host: api-staging.llamaindex.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: llamaindex-query-service
+            port:
+              number: 8000

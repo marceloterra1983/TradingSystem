@@ -1,0 +1,16 @@
+# ShellCheck configuration for TradingSystem
+# https://github.com/koalaman/shellcheck/wiki/Directive
+
+# Disable specific checks that are too strict for our use case
+disable=SC1090  # Can't follow non-constant source (we use dynamic sourcing)
+disable=SC1091  # Not following: file not included (external dependencies)
+
+# Enable all optional checks for better code quality
+enable=all
+
+# Source path for includes (helps shellcheck find sourced files)
+source-path=SCRIPTDIR
+
+# External sources (libraries that shellcheck should ignore)
+external-sources=true
+

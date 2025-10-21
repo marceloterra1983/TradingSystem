@@ -1,0 +1,114 @@
+// Prisma schema for Documentation API
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DOCUMENTATION_DATABASE_URL")
+}
+
+model DocumentationIdea {
+  id                  String                @id @default(uuid())
+  title               String                @db.VarChar(255)
+  description         String?               @db.Text
+  status              String                @db.VarChar(50) @default("backlog")
+  category            String                @db.VarChar(100)
+  priority            String                @db.VarChar(50) @default("medium")
+  assignedTo          String?               @map("assigned_to") @db.VarChar(255)
+  createdBy           String                @map("created_by") @db.VarChar(255)
+  systemId            String?               @map("system_id") @db.VarChar(255)
+  tags                Json                  @default("[]")
+  estimatedHours      Int?                  @map("estimated_hours")
+  actualHours         Int?                  @map("actual_hours")
+  dueDate             DateTime?             @map("due_date")
+  completedAt         DateTime?             @map("completed_at")
+  designatedTimestamp DateTime?             @map("designated_timestamp")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+
+  system DocumentationSystem? @relation(fields: [systemId], references: [id])
+  files  DocumentationFile[]
+
+  @@map("documentation_ideas")
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+  @@index([assignedTo])
+  @@index([createdBy])
+}
+
+model DocumentationSystem {
+  id                  String               @id @default(uuid())
+  name                String               @db.VarChar(255)
+  description         String?              @db.Text
+  type                String               @db.VarChar(100)
+  url                 String?              @db.VarChar(512)
+  status              String               @db.VarChar(50) @default("unknown")
+  lastChecked         DateTime?            @map("last_checked")
+  responseTimeMs      Int?                 @map("response_time_ms")
+  version             String?              @db.VarChar(100)
+  owner               String?              @db.VarChar(255)
+  tags                Json                 @default("[]")
+  metadata            Json?
+  icon                String?              @db.VarChar(255)
+  color               String?              @db.VarChar(100)
+  host                String?              @db.VarChar(255)
+  port                Int?
+  createdBy           String?              @map("created_by") @db.VarChar(255)
+  designatedTimestamp DateTime?            @map("designated_timestamp")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+
+  ideas DocumentationIdea[]
+  files DocumentationFile[]
+
+  @@map("documentation_systems")
+  @@index([status])
+  @@index([type])
+  @@index([owner])
+}
+
+model DocumentationFile {
+  id                  String               @id @default(uuid())
+  filename            String               @db.VarChar(255)
+  originalName        String               @map("original_name") @db.VarChar(255)
+  mimeType            String               @map("mime_type") @db.VarChar(255)
+  sizeBytes           BigInt               @map("size_bytes") @db.BigInt
+  filePath            String               @map("file_path") @db.VarChar(1024)
+  description         String?              @db.Text
+  ideaId              String?              @map("idea_id") @db.VarChar(255)
+  systemId            String?              @map("system_id") @db.VarChar(255)
+  uploadedBy          String?              @map("uploaded_by") @db.VarChar(255)
+  isPublic            Boolean              @map("is_public") @default(false)
+  downloadCount       Int                  @map("download_count") @default(0)
+  checksum            String?              @db.VarChar(255)
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  designatedTimestamp DateTime?            @map("designated_timestamp")
+
+  idea    DocumentationIdea?   @relation(fields: [ideaId], references: [id])
+  system  DocumentationSystem? @relation(fields: [systemId], references: [id])
+
+  @@map("documentation_files")
+  @@index([ideaId])
+  @@index([systemId])
+  @@index([uploadedBy])
+}
+
+model DocumentationAuditLog {
+  id         String   @id @default(uuid())
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String   @map("entity_id") @db.VarChar(255)
+  action     String   @db.VarChar(50)
+  userId     String?  @map("user_id") @db.VarChar(255)
+  changes    Json?
+  ipAddress  String?  @map("ip_address") @db.VarChar(255)
+  userAgent  String?  @map("user_agent") @db.VarChar(255)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("documentation_audit_log")
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+}

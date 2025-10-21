@@ -1,0 +1,308 @@
+# OpenSpec Agent Jobs Configuration
+# This file defines automated jobs for the OpenSpec agent to manage
+# API specifications, documentation ingestion, and validation
+
+jobs:
+  # ========================================
+  # DOCUMENTATION INGESTION JOBS
+  # ========================================
+  ingest-docusaurus:
+    description: Extract and enrich specs from Docusaurus documentation
+    schedule: "0 */2 * * *"  # Every 2 hours
+    steps:
+      - name: Extract knowledge from Docusaurus
+        cmd: "python docs/ingest/from_docusaurus.py --root docs/docusaurus --symbols docs/ingest/assets/symbols.yaml --out docs/spec"
+        timeout: 300  # 5 minutes
+        retries: 2
+        
+      - name: Validate extracted data
+        cmd: "python scripts/docs_health.py --spec docs/spec/openapi.yaml --async docs/spec/asyncapi.yaml --out docs/public/status.json"
+        timeout: 60  # 1 minute
+        
+      - name: Update changelog
+        cmd: "python scripts/version_specs.py --sync --spec-dir docs/spec"
+        timeout: 30
+        
+    notifications:
+      on_failure:
+        - type: email
+          recipients: ["admin@tradingsystem.local"]
+        - type: slack
+          channel: "#docs-alerts"
+      on_success:
+        - type: slack
+          channel: "#docs-updates"
+          message: "✅ Docusaurus ingestion completed successfully"
+
+  # ========================================
+  # SPECIFICATION VALIDATION JOBS
+  # ========================================
+  validate-specs:
+    description: Validate OpenAPI and AsyncAPI specifications with Spectral
+    schedule: "0 */4 * * *"  # Every 4 hours
+    triggers:
+      - webhook: "spec-update"
+      - schedule: "0 */4 * * *"
+    steps:
+      - name: Check Spectral installation
+        cmd: "npm list -g @stoplight/spectral-cli || npm install -g @stoplight/spectral-cli"
+        timeout: 120
+        
+      - name: Validate OpenAPI specification
+        cmd: "spectral lint docs/spec/openapi.yaml --ruleset docs/spectral.yaml --format json > docs/validation/openapi-validation.json"
+        timeout: 60
+        
+      - name: Validate AsyncAPI specification
+        cmd: "spectral lint docs/spec/asyncapi.yaml --ruleset docs/spectral.yaml --format json > docs/validation/asyncapi-validation.json"
+        timeout: 60
+        
+      - name: Generate validation report
+        cmd: "python scripts/validate_specs.py --spec-dir docs/spec --output docs/public/validation-report.json"
+        timeout: 60
+        
+      - name: Update health status
+        cmd: "python scripts/docs_health.py --spec docs/spec/openapi.yaml --async docs/spec/asyncapi.yaml --out docs/public/status.json"
+        timeout: 30
+        
+    notifications:
+      on_failure:
+        - type: email
+          recipients: ["api-team@tradingsystem.local"]
+          subject: "❌ API Specification Validation Failed"
+        - type: github
+          action: create_issue
+          title: "API Specification Validation Issues"
+          labels: ["bug", "documentation", "api"]
+
+  # ========================================
+  # SPECIFICATION PUBLISHING JOBS
+  # ========================================
+  publish-specs:
+    description: Publish specifications to various channels
+    schedule: "0 6 * * *"  # Daily at 6 AM
+    triggers:
+      - manual: true
+    steps:
+      - name: Validate before publishing
+        cmd: "python scripts/validate_specs.py --spec-dir docs/spec --output docs/validation/pre-publish-validation.json"
+        timeout: 60
+        
+      - name: Generate Redoc documentation
+        cmd: |
+          mkdir -p docs/dist
+          npx redoc-cli build docs/spec/openapi.yaml --output docs/dist/openapi-redoc.html
+          npx @asyncapi/cli generate fromFile docs/spec/asyncapi.yaml @asyncapi/html-template -o docs/dist/asyncapi-docs.html
+        timeout: 120
+        
+      - name: Create specification bundle
+        cmd: |
+          mkdir -p docs/dist/bundle
+          cp docs/spec/*.yaml docs/dist/bundle/
+          cp docs/ingest/assets/symbols.yaml docs/dist/bundle/
+          tar -czf docs/dist/trading-system-specs-$(date +%Y%m%d).tar.gz -C docs/dist/bundle .
+        timeout: 30
+        
+      - name: Update version metadata
+        cmd: "python scripts/version_specs.py --status --spec-dir docs/spec"
+        timeout: 30
+        
+    notifications:
+      on_success:
+        - type: email
+          recipients: ["stakeholders@tradingsystem.local"]
+          subject: "✅ TradingSystem API Specifications Published"
+        - type: slack
+          channel: "#api-updates"
+          message: "📚 New API specifications published and available"
+
+  # ========================================
+  # HEALTH MONITORING JOBS
+  # ========================================
+  docs-health-check:
+    description: Monitor documentation system health
+    schedule: "*/15 * * * *"  # Every 15 minutes
+    steps:
+      - name: Check specification health
+        cmd: "python scripts/docs_health.py --spec docs/spec/openapi.yaml --async docs/spec/asyncapi.yaml --out docs/public/status.json"
+        timeout: 30
+        
+      - name: Check file accessibility
+        cmd: |
+          curl -f http://localhost:3101/docs/spec/openapi.yaml > /dev/null || echo "OpenAPI spec not accessible"
+          curl -f http://localhost:3101/docs/spec/asyncapi.yaml > /dev/null || echo "AsyncAPI spec not accessible"
+          curl -f http://localhost:3101/docs/public/redoc.html > /dev/null || echo "Redoc not accessible"
+        timeout: 30
+        
+      - name: Check frontend integration
+        cmd: |
+          curl -f http://localhost:3101/docs/public/status.json > /dev/null && echo "DocsSPECS status OK"
+        timeout: 30
+        
+    notifications:
+      on_failure:
+        - type: slack
+          channel: "#alerts"
+          message: "🚨 Documentation health check failed"
+        - type: pagerduty
+          severity: "warning"
+
+  # ========================================
+  # VERSION MANAGEMENT JOBS
+  # ========================================
+  auto-version-bump:
+    description: Automatically bump versions based on changes
+    triggers:
+      - webhook: "git-push"
+      - schedule: "0 8 * * 1,3,5"  # Mon, Wed, Fri at 8 AM
+    steps:
+      - name: Detect specification changes
+        cmd: |
+          git diff --name-only HEAD~1 | grep -E "(openapi|asyncapi)\\.yaml$" > /dev/null && echo "specs_changed=true" || echo "specs_changed=false"
+        timeout: 30
+        
+      - name: Auto-bump patch version if specs changed
+        cmd: |
+          if [ "$specs_changed" = "true" ]; then
+            python scripts/version_specs.py --bump patch --spec all --changes "Automated version bump for specification changes"
+          fi
+        timeout: 30
+        
+      - name: Update changelog
+        cmd: "python scripts/version_specs.py --sync --spec-dir docs/spec"
+        timeout: 30
+        
+    notifications:
+      on_success:
+        - type: slack
+          channel: "#api-updates"
+          condition: "specs_changed=true"
+          message: "🔖 API specifications automatically versioned"
+
+  # ========================================
+  # CLEANUP AND MAINTENANCE JOBS
+  # ========================================
+  cleanup-temp-files:
+    description: Clean up temporary files and old reports
+    schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+    steps:
+      - name: Clean old validation reports
+        cmd: |
+          find docs/validation -name "*.json" -mtime +7 -delete
+          find docs/validation -name "*.html" -mtime +7 -delete
+        timeout: 30
+        
+      - name: Clean old bundles
+        cmd: |
+          find docs/dist -name "*.tar.gz" -mtime +30 -delete
+        timeout: 30
+        
+      - name: Clean old extracted data
+        cmd: |
+          find docs/spec -name "extracted_data_*.json" -mtime +14 -delete
+        timeout: 30
+
+  # ========================================
+  # INTEGRATION TEST JOBS
+  # ========================================
+  integration-tests:
+    description: Run integration tests against specifications
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    triggers:
+      - webhook: "spec-update"
+    steps:
+      - name: Generate test clients from OpenAPI
+        cmd: |
+          npx @openapitools/openapi-generator-cli generate \
+            -i docs/spec/openapi.yaml \
+            -g python \
+            -o /tmp/test-client \
+            --additional-properties=generateClientCode=true
+        timeout: 120
+        
+      - name: Test client against live APIs
+        cmd: |
+          cd /tmp/test-client && python -m pytest tests/ -v --tb=short
+        timeout: 300
+        
+      - name: Test WebSocket endpoints
+        cmd: |
+          python scripts/test_websocket_endpoints.py --spec docs/spec/asyncapi.yaml
+        timeout: 180
+        
+    notifications:
+      on_failure:
+        - type: github
+          action: create_issue
+          title: "API Integration Tests Failed"
+          labels: ["bug", "test-failure"]
+
+# ========================================
+# GLOBAL CONFIGURATION
+# ========================================
+global:
+  # Environment variables
+  env:
+    NODE_ENV: "production"
+    SPECTRAL_RULES_PATH: "docs/spectral.yaml"
+    DOCS_DIR: "docs"
+    SPEC_DIR: "docs/spec"
+    
+  # Default timeouts and retries
+  defaults:
+    timeout: 300
+    retries: 2
+    retry_delay: 30
+    
+  # Notification settings
+  notifications:
+    slack:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      default_channel: "#docs-ops"
+      
+    email:
+      smtp_server: "${SMTP_SERVER}"
+      smtp_port: 587
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+      
+    github:
+      token: "${GITHUB_TOKEN}"
+      repo: "TradingSystem"
+      owner: "tradingsystem"
+      
+  # Artifact retention
+  artifacts:
+    retention_days: 30
+    cleanup_schedule: "0 3 * * *"  # Daily at 3 AM
+
+# ========================================
+# WORKFLOW DEFINITIONS
+# ========================================
+workflows:
+  # Documentation update workflow
+  docs-update:
+    triggers:
+      - webhook: "docs-update"
+    jobs:
+      - ingest-docusaurus
+      - validate-specs
+      - docs-health-check
+      
+  # API release workflow
+  api-release:
+    triggers:
+      - manual: true
+      - webhook: "api-release"
+    jobs:
+      - validate-specs
+      - integration-tests
+      - publish-specs
+      
+  # Daily maintenance workflow
+  daily-maintenance:
+    triggers:
+      - schedule: "0 3 * * *"  # Daily at 3 AM
+    jobs:
+      - docs-health-check
+      - cleanup-temp-files
+      - auto-version-bump

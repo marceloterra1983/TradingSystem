@@ -1,0 +1,112 @@
+@startuml
+title Agno Agents - Signal Orchestration Sequence
+
+actor Trader
+participant "FastAPI\nRoutes" as API
+participant "SignalOrchestrator\nAgent" as Orchestrator
+participant "MarketAnalysis\nAgent" as MarketAgent
+participant "RiskManagement\nAgent" as RiskAgent
+participant "WorkspaceClient" as Workspace
+participant "TPCapitalClient" as TPCapital
+participant "B3Client" as B3
+participant "B3WebSocket" as B3WS
+participant "Prometheus" as Metrics
+
+== Real-time Data Stream ==
+B3WS -> MarketAgent : Real-time price updates
+activate MarketAgent
+MarketAgent -> MarketAgent : Buffer incoming messages
+deactivate MarketAgent
+
+== Analysis Request ==
+Trader -> API : POST /api/v1/agents/analyze\n{symbols: ["PETR4", "VALE3"]}
+activate API
+API -> API : Validate payload (Pydantic)
+API -> Orchestrator : orchestrate_analysis(request)
+activate Orchestrator
+
+Orchestrator -> Metrics : track_agent_execution("SignalOrchestratorAgent")
+Orchestrator -> MarketAgent : analyze_market(symbols)
+activate MarketAgent
+
+== Parallel Data Fetching ==
+par Fetch B3 Data
+  MarketAgent -> B3 : get_b3_data("PETR4")
+  activate B3
+  B3 -> B3 : Query QuestDB
+  B3 --> MarketAgent : {snapshots, indicators, gamma}
+  deactivate B3
+else Fetch TP Capital Signals
+  MarketAgent -> TPCapital : get_tp_capital_signals()
+  activate TPCapital
+  TPCapital -> TPCapital : Query QuestDB
+  TPCapital --> MarketAgent : [{signal_type, asset, confidence}]
+  deactivate TPCapital
+else Fetch Workspace Ideas
+  MarketAgent -> Workspace : get_ideas()
+  activate Workspace
+  Workspace --> MarketAgent : [{title, category, tags}]
+  deactivate Workspace
+end
+
+== Signal Generation ==
+MarketAgent -> MarketAgent : Correlate datasets (LLM / heuristics)
+MarketAgent -> MarketAgent : Calculate confidence & size
+MarketAgent -> Metrics : track_decision("MarketAnalysisAgent", "GENERATE")
+MarketAgent --> Orchestrator : [MarketSignal(PETR4, BUY, 0.85), MarketSignal(VALE3, HOLD, 0.60)]
+deactivate MarketAgent
+
+== Risk Validation Loop ==
+loop For each MarketSignal
+  Orchestrator -> RiskAgent : validate_signal(signal)
+  activate RiskAgent
+  RiskAgent -> RiskAgent : check_daily_loss_limit()
+  RiskAgent -> RiskAgent : check_position_size(symbol, size)
+  RiskAgent -> RiskAgent : check_trading_hours()
+  alt All checks pass
+    RiskAgent -> RiskAgent : Create RiskAssessment(approved=true)
+    RiskAgent -> Metrics : track_decision("RiskManagementAgent", "APPROVE")
+    RiskAgent --> Orchestrator : RiskAssessment(approved=true)
+  else Violation detected
+    RiskAgent -> RiskAgent : Create RiskAssessment(approved=false, reasons=[...])
+    RiskAgent -> Metrics : track_decision("RiskManagementAgent", "REJECT")
+    RiskAgent --> Orchestrator : RiskAssessment(approved=false)
+  end
+  deactivate RiskAgent
+end
+
+== Result Aggregation ==
+Orchestrator -> Orchestrator : Aggregate approved signals
+Orchestrator -> Orchestrator : Compute total_time
+Orchestrator -> Metrics : track_decision("SignalOrchestratorAgent", "ORCHESTRATE")
+Orchestrator --> API : OrchestrationResponse{result:{approved_signals:[...]}, agents_involved:["MarketAnalysis","RiskManagement"], total_time:1.85}
+deactivate Orchestrator
+
+API -> Metrics : api_requests_total.inc()
+API -> Metrics : api_request_duration.observe(1.85)
+API --> Trader : 200 OK {signals:[...], analysis_time:1.85}
+deactivate API
+
+== Error Handling (Alternative Flow) ==
+alt External API failure
+  B3 --> MarketAgent : HTTPError(503)
+  MarketAgent -> MarketAgent : Retry with exponential backoff
+  alt Retry succeeds
+    B3 --> MarketAgent : 200 OK
+  else Circuit breaker opens
+    MarketAgent -> Metrics : track_error("MarketAnalysisAgent", "CircuitBreakerError")
+    MarketAgent --> Orchestrator : Error("B3 API unavailable")
+    Orchestrator --> API : 503 Service Unavailable
+    API --> Trader : 503 {error:"B3 API unavailable"}
+  end
+end
+
+note over Trader, Metrics
+  KPIs monitorados:
+  - Tempo total de orquestração ~1.85s (meta <500ms p95)
+  - Decisões aprovadas vs. rejeitadas
+  - Saúde de dependências via dependency_status
+  - Erros de circuito para alertas críticos
+end note
+
+@enduml

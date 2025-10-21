@@ -1,0 +1,109 @@
+name: langgraph-dev
+
+# LangGraph Development Environment
+# Purpose: Isolated development environment with LangSmith Studio integration
+# Network: tradingsystem_langgraph_dev (isolated)
+# Ports: 8112 (LangGraph), 6380 (Redis), 5443 (PostgreSQL)
+# Data: Separate from production services
+
+services:
+  infra-langgraph-dev:
+    container_name: infra-langgraph-dev
+    image: img-infra-langgraph-dev:${IMG_VERSION:-2025.10.19}
+    build:
+      context: ../langgraph
+      dockerfile: Dockerfile
+    command: ["python", "server.py"]  # Explicit command for dev environment
+    ports:
+      - "8112:8111"  # External 8112, internal 8111 (LangGraph API)
+    environment:
+      # Load from centralized .env file
+      - LANGGRAPH_ENV=development
+      - LANGGRAPH_PORT=8111
+      - REDIS_URI=redis://infra-redis-dev:6379
+      - DATABASE_URI=postgres://langgraph:langgraph_dev_password@infra-postgres-dev:5432/langgraph_dev?sslmode=disable
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-true}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-langgraph-dev}
+      # Service URLs (from production configuration - updated for container access)
+      - AGNO_API_URL=http://host.docker.internal:3500
+      - DOCS_API_URL=http://host.docker.internal:3400
+      - FIRECRAWL_PROXY_URL=http://host.docker.internal:3600
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../backend/data/runtime/langgraph-dev:/app/data  # Persistent data
+      - ../../infrastructure/langgraph/langgraph.json:/app/langgraph.json  # LangGraph CLI configuration
+    networks:
+      - langgraph-dev
+    depends_on:
+      infra-redis-dev:
+        condition: service_healthy
+      infra-postgres-dev:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    labels:
+      stack: infra-langgraph-dev
+      service: infra-langgraph-dev
+      description: "LangGraph dev with Studio integration"
+
+  infra-redis-dev:
+    image: img-infra-redis-dev:${IMG_VERSION:-2025.10.19}
+    container_name: infra-redis-dev
+    ports:
+      - "6380:6379"  # External 6380, internal 6379 (avoid conflicts)
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - langgraph-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    labels:
+      stack: infra-langgraph-dev
+      service: infra-redis-dev
+
+  infra-postgres-dev:
+    image: img-infra-postgres-dev:${IMG_VERSION:-2025.10.19}
+    container_name: infra-postgres-dev
+    ports:
+      - "5443:5432"  # External 5443, internal 5432 (avoid conflict with production)
+    environment:
+      - POSTGRES_DB=langgraph_dev
+      - POSTGRES_USER=langgraph
+      - POSTGRES_PASSWORD=langgraph_dev_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - langgraph_postgres_dev_data:/var/lib/postgresql/data
+      - ../../backend/data/postgresql/schemas:/docker-entrypoint-initdb.d:ro
+    networks:
+      - langgraph-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langgraph"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      stack: infra-langgraph-dev
+      service: infra-postgres-dev
+
+networks:
+  langgraph-dev:
+    driver: bridge
+    name: tradingsystem_langgraph_dev
+
+volumes:
+  langgraph_postgres_dev_data:

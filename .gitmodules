@@ -1,0 +1,6 @@
+[submodule "infrastructure/Agent-MCP"]
+	path = infrastructure/Agent-MCP
+	url = https://github.com/rinadelph/Agent-MCP.git
+[submodule "infrastructure/firecrawl/firecrawl-source"]
+	path = infrastructure/firecrawl/firecrawl-source
+	url = https://github.com/mendableai/firecrawl.git

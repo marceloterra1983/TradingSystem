@@ -1,0 +1,328 @@
+---
+title: Dark Mode Component Patterns
+sidebar_position: 3
+tags: [frontend, ui, dark-mode, patterns, components, best-practices]
+domain: frontend
+type: guide
+summary: Common dark mode patterns, best practices, and configuration objects for TradingSystem components
+status: active
+last_review: 2025-10-18
+---
+
+import BrowserOnly from "@docusaurus/BrowserOnly";
+
+# Dark Mode Component Patterns
+
+> Part of the [Dark Mode Implementation Hub](../dark-mode.md)
+
+## ⚠️ IMPORTANT: Dark Mode is Mandatory
+
+**All new components, pages, and features MUST include dark mode support from the start.**
+
+When creating any new page or component, you MUST apply dark mode classes to ALL color-related properties.
+
+## Basic Pattern
+
+```tsx
+<div className="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Title</h1>
+
+    <p className="text-gray-600 dark:text-gray-400">Description text</p>
+
+    <button className="bg-cyan-500 hover:bg-cyan-600 dark:bg-cyan-600 dark:hover:bg-cyan-500">
+        Action
+    </button>
+</div>
+```
+
+## Common Patterns
+
+### Pattern 1: Standard Color Mapping (Most Common)
+
+<details>
+<summary>Show full color mapping pattern</summary>
+
+```tsx
+// Light mode: 50/100/200 shades
+// Dark mode: 950/900/800 shades
+
+// Backgrounds
+bg-{color}-50 dark:bg-{color}-950   // Lightest background
+bg-{color}-100 dark:bg-{color}-900  // Medium background
+
+// Borders
+border-{color}-200 dark:border-{color}-800
+
+// Text
+text-{color}-600 dark:text-{color}-400  // Primary colored text
+text-{color}-700 dark:text-{color}-300  // Darker colored text
+text-{color}-800 dark:text-{color}-200  // Darkest colored text
+```
+
+</details>
+
+### Pattern 2: Neutral Grays
+
+```tsx
+// Page backgrounds
+bg-gray-50 dark:bg-gray-950
+
+// Card backgrounds
+bg-white dark:bg-gray-900
+
+// Borders
+border-gray-200 dark:border-gray-700
+border-gray-300 dark:border-gray-600
+
+// Text
+text-gray-900 dark:text-gray-100  // Primary text
+text-gray-600 dark:text-gray-400  // Secondary text
+text-gray-500 dark:text-gray-500  // Muted text
+```
+
+### Pattern 3: Interactive States
+
+```tsx
+// Buttons
+bg-cyan-500 hover:bg-cyan-600 dark:bg-cyan-600 dark:hover:bg-cyan-500
+
+// Cards/Links
+hover:bg-gray-100 dark:hover:bg-gray-800
+
+// Active states
+bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300
+```
+
+### Pattern 4: Configuration Objects
+
+<details>
+<summary>Show full configuration pattern</summary>
+
+```tsx
+// Centralized color configurations for categories/status/priority
+const CATEGORY_CONFIG = {
+    documentation: {
+        label: "Documentação",
+        icon: FileText,
+        color: "text-blue-600 dark:text-blue-400",
+        bgColor:
+            "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
+    },
+    "data-collection": {
+        label: "Coleta de Dados",
+        icon: Database,
+        color: "text-green-600 dark:text-green-400",
+        bgColor:
+            "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
+    },
+    "ml-analysis": {
+        label: "Análise ML",
+        icon: Brain,
+        color: "text-purple-600 dark:text-purple-400",
+        bgColor:
+            "bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800",
+    },
+    "risk-management": {
+        label: "Gestão de Riscos",
+        icon: Shield,
+        color: "text-red-600 dark:text-red-400",
+        bgColor: "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
+    },
+};
+
+// Usage
+<div className={CATEGORY_CONFIG[category].bgColor}>
+    <Icon className={CATEGORY_CONFIG[category].color} />
+</div>;
+```
+
+</details>
+
+### Pattern 5: Native Form Elements
+
+<details>
+<summary>Show full form element pattern</summary>
+
+```tsx
+// Inputs, Selects, Textareas - Complete pattern
+<input
+    className="w-full rounded-md border border-gray-300 dark:border-gray-600
+             bg-white dark:bg-gray-800
+             px-3 py-2 text-sm
+             text-gray-900 dark:text-gray-100
+             placeholder:text-gray-400 dark:placeholder:text-gray-500
+             focus:border-cyan-500 dark:focus:border-cyan-400
+             focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:focus:ring-cyan-400"
+/>
+```
+
+</details>
+
+## Best Practices
+
+### ✅ DO's
+
+1. **Always add dark mode classes** when styling with colors
+
+    ```tsx
+    className = "bg-white dark:bg-gray-900";
+    ```
+
+2. **Use semantic color scales** (gray-50 → gray-950)
+
+    ```tsx
+    // Light backgrounds
+    className = "bg-gray-50 dark:bg-gray-950";
+
+    // Card/surface backgrounds
+    className = "bg-white dark:bg-gray-900";
+
+    // Borders
+    className = "border-gray-200 dark:border-gray-700";
+    ```
+
+3. **Test both themes** when developing new features
+
+4. **Use opacity for overlays**
+
+    ```tsx
+    className = "bg-white/80 dark:bg-gray-900/80";
+    ```
+
+5. **Provide visual feedback** for interactive elements
+
+    ```tsx
+    className = "hover:bg-gray-100 dark:hover:bg-gray-800";
+    ```
+
+6. **Apply dark mode to ALL colored elements**
+
+    ```tsx
+    // Category/status indicators
+    className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400"
+
+    // Icons
+    <Icon className="text-green-600 dark:text-green-400" />
+
+    // Form elements
+    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+    ```
+
+7. **Use consistent color mapping across light/dark modes**
+
+<details>
+<summary>Show color mapping example</summary>
+
+```tsx
+// Light mode uses shade 50-200 range, Dark mode uses shade 950-800 range
+const colorClasses = {
+    blue: "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
+    green: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800",
+    red: "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
+    // etc...
+};
+```
+
+</details>
+
+### ❌ DON'Ts
+
+1. **Don't use absolute colors** without dark variants
+
+    ```tsx
+    ❌ className="bg-white"
+    ✅ className="bg-white dark:bg-gray-900"
+    ```
+
+2. **Don't forget borders and text colors**
+
+    ```tsx
+    ❌ className="border text-gray-900"
+    ✅ className="border dark:border-gray-700 text-gray-900 dark:text-gray-100"
+    ```
+
+3. **Don't use images/logos without theme-specific versions**
+
+    ```tsx
+    ❌ <img src="/logo.svg" />
+    ✅ <img src={resolvedTheme === 'dark' ? '/logo-dark.svg' : '/logo.svg'} />
+    ```
+
+4. **Don't assume system preference** - always provide manual toggle
+
+## Component-Specific Themes
+
+For components that need theme awareness:
+
+<details>
+<summary>Show theme-aware component example</summary>
+
+```tsx
+import { useTheme } from "@/contexts/ThemeContext";
+
+function Chart() {
+    const { resolvedTheme } = useTheme();
+
+    const chartColors =
+        resolvedTheme === "dark"
+            ? {
+                  background: "#111827",
+                  text: "#f3f4f6",
+                  gridLines: "#374151",
+              }
+            : {
+                  background: "#ffffff",
+                  text: "#111827",
+                  gridLines: "#e5e7eb",
+              };
+
+    return <ChartComponent colors={chartColors} />;
+}
+```
+
+</details>
+
+## Quick Reference: Color Shade Mapping
+
+```
+Light Mode → Dark Mode Mapping
+─────────────────────────────────
+bg-{color}-50   → dark:bg-{color}-950
+bg-{color}-100  → dark:bg-{color}-900
+bg-{color}-200  → dark:bg-{color}-800
+
+border-{color}-200 → dark:border-{color}-800
+border-{color}-300 → dark:border-{color}-700
+
+text-{color}-600 → dark:text-{color}-400
+text-{color}-700 → dark:text-{color}-300
+text-{color}-800 → dark:text-{color}-200
+text-{color}-900 → dark:text-{color}-100
+
+Special Cases:
+─────────────
+bg-white     → dark:bg-gray-900
+bg-gray-50   → dark:bg-gray-950
+text-gray-900 → dark:text-gray-100
+```
+
+---
+
+## Next Steps
+
+-   **Implement in components** → [Implementation Checklist](./04-implementation-checklist.md)
+-   **See working examples** → [Real-World Examples](./06-real-world-examples.mdx)
+-   **Debug issues** → [Testing & Troubleshooting](./05-testing-troubleshooting.mdx)
+
+## Related Guides
+
+-   [Dark Mode Hub](../dark-mode.md) - Complete navigation
+-   [Quick Reference Card](../dark-mode-quick-reference.md) - Fast lookup
+-   [Technical Implementation](./02-technical-implementation.md) - Architecture details
+
+---
+
+**Part of**: Dark Mode Implementation Hub
+**Version**: 3.0.0
+**Last Updated**: 2025-10-18
+

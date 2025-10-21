@@ -1,0 +1,492 @@
+# DEPRECATED: This file is outdated and kept for backward compatibility only.
+# Canonical spec: ./specs/documentation-api.openapi.yaml
+# Known issues: Wrong port (5175 vs 3400), missing stats/search/file endpoints
+# Last updated: 2025-10-18 (deprecation notice only)
+
+openapi: 3.0.3
+info:
+  title: TradingSystem Documentation API
+  version: 0.1.0
+  description: >
+    Express API for managing documentation systems, ideas and uploaded artefacts used by the TradingSystem dashboard.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+x-deprecated: true
+x-deprecation-message: |
+  This specification file is deprecated and outdated. Please use the canonical version at:
+  docs/context/backend/api/specs/documentation-api.openapi.yaml
+  
+  This file contains outdated information (wrong port, missing endpoints).
+  It will be removed in a future version.
+servers:
+  - url: http://localhost:5175
+    description: Local development
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      operationId: documentationHealth
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is reachable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  service:
+                    type: string
+                    example: documentation-api
+                  timestamp:
+                    type: string
+                    format: date-time
+        '429':
+          description: Too many health checks issued
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      error:
+                        type: string
+                        example: health check rate limit exceeded
+  /api/systems:
+    get:
+      summary: List documentation systems
+      operationId: listDocumentationSystems
+      tags: [Systems]
+      responses:
+        '200':
+          description: Systems retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Register a documentation system
+      operationId: createDocumentationSystem
+      tags: [Systems]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemCreateRequest'
+      responses:
+        '201':
+          description: System registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemMutationResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/items:
+    get:
+      summary: List documentation ideas
+      operationId: listDocumentationIdeas
+      tags: [Ideas]
+      responses:
+        '200':
+          description: Ideas retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create documentation idea
+      operationId: createDocumentationIdea
+      tags: [Ideas]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdeaCreateRequest'
+      responses:
+        '201':
+          description: Idea created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaMutationResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+  /api/items/{id}:
+    put:
+      summary: Update documentation idea
+      operationId: updateDocumentationIdea
+      tags: [Ideas]
+      parameters:
+        - $ref: '#/components/parameters/IdeaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdeaUpdateRequest'
+      responses:
+        '200':
+          description: Idea updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaMutationResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete documentation idea
+      operationId: deleteDocumentationIdea
+      tags: [Ideas]
+      parameters:
+        - $ref: '#/components/parameters/IdeaId'
+      responses:
+        '200':
+          description: Idea deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaMutationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/items/{id}/files:
+    post:
+      summary: Upload attachment for an idea
+      operationId: uploadIdeaFile
+      tags: [Files]
+      parameters:
+        - $ref: '#/components/parameters/IdeaId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: File stored and linked to idea
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMutationResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/files/{id}:
+    delete:
+      summary: Delete uploaded file metadata
+      operationId: deleteIdeaFile
+      tags: [Files]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identifier of the file entry
+      responses:
+        '200':
+          description: File entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMutationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/stats:
+    get:
+      summary: Fetch aggregated dashboard statistics
+      operationId: getDocumentationStats
+      tags: [Stats]
+      responses:
+        '200':
+          description: Aggregated stats per category, priority and status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters:
+    IdeaId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Idea identifier
+  schemas:
+    BaseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+    System:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          description: Free-form status indicator (e.g. online, degraded, offline)
+        port:
+          type: integer
+        host:
+          type: string
+        url:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SystemCreateRequest:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        port:
+          type: integer
+        host:
+          type: string
+        url:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    SystemListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            count:
+              type: integer
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/System'
+    SystemMutationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/System'
+    Idea:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        category:
+          type: string
+        priority:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+    IdeaCreateRequest:
+      type: object
+      required: [title, description]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        category:
+          type: string
+        priority:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    IdeaUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IdeaCreateRequest'
+    IdeaListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            count:
+              type: integer
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Idea'
+    IdeaMutationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Idea'
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+        ideaId:
+          type: string
+        originalName:
+          type: string
+        storedName:
+          type: string
+        size:
+          type: integer
+          format: int64
+        mimeType:
+          type: string
+        url:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+    FileMutationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/File'
+    StatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                byStatus:
+                  type: object
+                  additionalProperties:
+                    type: integer
+                byCategory:
+                  type: object
+                  additionalProperties:
+                    type: integer
+                byPriority:
+                  type: object
+                  additionalProperties:
+                    type: integer
+  responses:
+    ValidationError:
+      description: Payload failed validation
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        msg:
+                          type: string
+                        param:
+                          type: string
+                        location:
+                          type: string
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: invalid parameters
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string

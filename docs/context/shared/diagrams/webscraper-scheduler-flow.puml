@@ -1,0 +1,56 @@
+@startuml
+title WebScraper Scheduler Execution Flow
+
+actor User
+participant "WebScraper API\n(SchedulerService)" as Scheduler
+database "TimescaleDB" as DB
+participant "Firecrawl Proxy" as Proxy
+participant "Firecrawl Service" as Firecrawl
+
+== Schedule Creation ==
+User -> Scheduler: POST /api/v1/schedules
+Scheduler -> DB: INSERT job_schedules
+DB --> Scheduler: Schedule created
+Scheduler -> Scheduler: addSchedule(schedule)
+Scheduler -> Proxy: (optional health check)
+
+== Successful Execution ==
+Scheduler -> Scheduler: Cron/Interval trigger
+Scheduler -> DB: SELECT schedule + template
+DB --> Scheduler: Schedule with options
+Scheduler -> Scheduler: Merge template + schedule options
+Scheduler -> Proxy: POST /api/v1/(scrape|crawl)
+Proxy -> Firecrawl: Forward request
+Firecrawl --> Proxy: Results payload
+Proxy --> Scheduler: { success, data }
+Scheduler -> DB: INSERT scrape_jobs
+Scheduler -> DB: UPDATE job_schedules\n(lastRunAt, nextRunAt, runCount)
+
+== Retry with Failure ==
+Scheduler -> Scheduler: Execution failed
+Scheduler -> Scheduler: Retry with exponential delay (1s, 2s, 4s)
+loop Retry Attempts <= 3
+  Scheduler -> Proxy: POST /api/v1/(scrape|crawl)
+  Proxy --> Scheduler: { success: false, error }
+end
+Scheduler -> DB: UPDATE job_schedules\n(failureCount += 1)
+Scheduler -> Scheduler: Disable if failures >= threshold
+
+== Queue Handling ==
+Scheduler -> Scheduler: Queue execution if maxConcurrency reached
+Scheduler -> Scheduler: Deduplicate queued schedule IDs
+Scheduler -> Scheduler: Dequeue when slots available
+
+== Auto-Disable ==
+Scheduler -> Scheduler: Check failureCount threshold
+Scheduler -> DB: UPDATE job_schedules\n(enabled = false)
+Scheduler -> Scheduler: removeSchedule(scheduleId)
+
+note over Scheduler
+Metrics emitted:
+- webscraper_schedules_total
+- webscraper_schedule_executions_total
+- webscraper_schedule_execution_duration_seconds
+end note
+
+@enduml

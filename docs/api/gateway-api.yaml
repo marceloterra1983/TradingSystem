@@ -1,0 +1,390 @@
+openapi: 3.0.3
+info:
+  title: TradingSystem API Gateway
+  description: |
+    API Gateway for the Local Trading System.
+    Provides endpoints for signals, positions, metrics, and risk management.
+  version: 1.0.0
+  contact:
+    name: Marcelo Terra
+    email: marcelo@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: http://localhost:8000/api/v1
+    description: Production server
+
+tags:
+  - name: Signals
+    description: Trading signal operations
+  - name: Positions
+    description: Position management
+  - name: Metrics
+    description: Performance metrics
+  - name: Risk
+    description: Risk management
+
+paths:
+  /signals/latest:
+    get:
+      tags:
+        - Signals
+      summary: Get latest trading signals
+      description: Retrieve the most recent trading signals with confidence scores
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of signals to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: symbol
+          in: query
+          description: Filter by asset symbol (e.g., WINZ25)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /signals:
+    post:
+      tags:
+        - Signals
+      summary: Submit a new trading signal
+      description: Create a new trading signal from analytics pipeline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalInput'
+      responses:
+        '201':
+          description: Signal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /positions:
+    get:
+      tags:
+        - Positions
+      summary: Get current positions
+      description: Retrieve all open trading positions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+
+  /positions/{symbol}:
+    get:
+      tags:
+        - Positions
+      summary: Get position by symbol
+      description: Retrieve position details for a specific asset
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: Asset symbol (e.g., WINZ25)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get performance metrics
+      description: Retrieve aggregated performance metrics
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+
+  /execute:
+    post:
+      tags:
+        - Orders
+      summary: Execute trading order
+      description: Send order to Order Manager for execution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '202':
+          description: Order accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Order rejected by risk engine
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /risk/kill-switch:
+    post:
+      tags:
+        - Risk
+      summary: Activate emergency kill switch
+      description: Immediately halt all trading operations
+      responses:
+        '200':
+          description: Kill switch activated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "activated"
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    Signal:
+      type: object
+      required:
+        - id
+        - symbol
+        - direction
+        - confidence
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        symbol:
+          type: string
+          example: "WINZ25"
+        direction:
+          type: string
+          enum: [BUY, SELL, HOLD]
+          example: "BUY"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.78
+        price:
+          type: number
+          format: double
+          example: 127850.0
+        reason:
+          type: string
+          example: "Aggressor flow bullish + volatility spike"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-01-04T10:30:15.123Z"
+
+    SignalInput:
+      type: object
+      required:
+        - symbol
+        - direction
+        - confidence
+      properties:
+        symbol:
+          type: string
+          example: "WINZ25"
+        direction:
+          type: string
+          enum: [BUY, SELL, HOLD]
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        features:
+          type: object
+          description: Feature values used for prediction
+
+    Position:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: "WINZ25"
+        quantity:
+          type: integer
+          example: 5
+        side:
+          type: string
+          enum: [LONG, SHORT]
+          example: "LONG"
+        avgPrice:
+          type: number
+          format: double
+          example: 127500.0
+        currentPrice:
+          type: number
+          format: double
+          example: 128000.0
+        pnl:
+          type: number
+          format: double
+          example: 2500.0
+        pnlPercent:
+          type: number
+          format: float
+          example: 0.39
+
+    Metrics:
+      type: object
+      properties:
+        totalTrades:
+          type: integer
+          example: 42
+        hitRate:
+          type: number
+          format: float
+          example: 0.64
+        avgProfit:
+          type: number
+          format: double
+          example: 850.50
+        maxDrawdown:
+          type: number
+          format: double
+          example: -3200.0
+        sharpeRatio:
+          type: number
+          format: float
+          example: 1.8
+
+    OrderRequest:
+      type: object
+      required:
+        - symbol
+        - side
+        - quantity
+      properties:
+        symbol:
+          type: string
+          example: "WINZ25"
+        side:
+          type: string
+          enum: [BUY, SELL]
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+        price:
+          type: number
+          format: double
+          example: 127850.0
+          description: "Use -1 for market orders"
+        orderType:
+          type: string
+          enum: [MARKET, LIMIT, STOP]
+          default: MARKET
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "ORD-20250104-001"
+        status:
+          type: string
+          enum: [PENDING, ACCEPTED, REJECTED]
+        message:
+          type: string
+          example: "Order accepted for processing"
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "RISK_LIMIT_EXCEEDED"
+        message:
+          type: string
+          example: "Daily loss limit reached"
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - ApiKeyAuth: []

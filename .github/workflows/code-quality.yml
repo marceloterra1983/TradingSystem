@@ -1,0 +1,195 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop, feature/** ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 9 AM UTC (6 AM BRT)
+    - cron: '0 9 * * *'
+
+jobs:
+  freeze_guard:
+    name: Freeze Guard
+    runs-on: ubuntu-latest
+    outputs:
+      active: ${{ steps.detect.outputs.active }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - id: detect
+        name: Detect freeze status
+        shell: bash
+        run: |
+          status_line=$(grep -i '^\*\*Status' FREEZE-NOTICE.md 2>/dev/null | head -n1 | tr -d '\r')
+          if echo "$status_line" | grep -qiE 'ACTIVE|IN PROGRESS|ONGOING|PHASE'; then
+            echo "active=true" >> "$GITHUB_OUTPUT"
+            echo "Freeze active: $status_line"
+          else
+            echo "active=false" >> "$GITHUB_OUTPUT"
+            echo "No active freeze detected."
+          fi
+
+  eslint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    needs: freeze_guard
+    if: ${{ needs.freeze_guard.outputs.active != 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/apps/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/apps/dashboard
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend/apps/dashboard
+        run: npm run lint
+
+      - name: Generate ESLint report
+        if: always()
+        working-directory: frontend/apps/dashboard
+        run: npm run lint:report || true
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report
+          path: frontend/apps/dashboard/eslint-report.json
+
+  type-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    needs: freeze_guard
+    if: ${{ needs.freeze_guard.outputs.active != 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/apps/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/apps/dashboard
+        run: npm ci
+
+      - name: Run TypeScript type check
+        working-directory: frontend/apps/dashboard
+        run: npm run type-check
+
+  container-security:
+    name: Container CVE Scan
+    runs-on: ubuntu-latest
+    needs: freeze_guard
+    if: ${{ needs.freeze_guard.outputs.active != 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Docker Scout
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Build project images for scan
+        env:
+          IMG_VERSION: "ci-${{ github.run_id }}"
+        run: |
+          chmod +x scripts/docker/build-images.sh
+          bash scripts/docker/build-images.sh
+
+      - name: Scan images for critical/high CVEs
+        env:
+          IMG_VERSION: "ci-${{ github.run_id }}"
+        run: |
+          set -euo pipefail
+          mapfile -t images < <(docker images --format '{{.Repository}}:{{.Tag}}' | grep "^img-.*:${IMG_VERSION}$" || true)
+          if [ "${#images[@]}" -eq 0 ]; then
+            echo "::error::No img-* images built for scan (IMG_VERSION=${IMG_VERSION})"
+            exit 1
+          fi
+
+          failures=0
+          for image in "${images[@]}"; do
+            echo "🔍 Scanning $image for critical/high CVEs"
+            if ! docker scout cves "$image" --exit-code --only-severity critical,high; then
+              echo "::error::$image has critical/high CVEs"
+              failures=1
+            fi
+          done
+
+          if [ "$failures" -ne 0 ]; then
+            echo "::error::Container security scan failed"
+            exit 1
+          fi
+
+  security-check:
+    name: Security & Config Check
+    runs-on: ubuntu-latest
+    needs: freeze_guard
+    if: ${{ needs.freeze_guard.outputs.active != 'true' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for sensitive files in git
+        run: |
+          echo "🔍 Checking for sensitive files that should not be tracked..."
+          
+          # Check if cypress.env.json is tracked
+          if git ls-files --error-unmatch frontend/apps/dashboard/cypress.env.json 2>/dev/null; then
+            echo "❌ ERROR: cypress.env.json is tracked by git!"
+            echo "This file may contain sensitive data and should not be in version control."
+            echo "Please run: git rm --cached frontend/apps/dashboard/cypress.env.json"
+            exit 1
+          else
+            echo "✅ cypress.env.json is not tracked (correct)"
+          fi
+          
+          # Check if .env files are tracked (additional safety)
+          if git ls-files --error-unmatch '**/.env' 2>/dev/null; then
+            echo "❌ ERROR: .env file(s) found in git!"
+            echo "Environment files should not be in version control."
+            exit 1
+          else
+            echo "✅ No .env files tracked (correct)"
+          fi
+          
+          echo "✅ All security checks passed!"
+
+  summary:
+    name: Quality Summary
+    runs-on: ubuntu-latest
+    needs: [freeze_guard, eslint, type-check, security-check]
+    if: ${{ always() && needs.freeze_guard.outputs.active != 'true' }}
+
+    steps:
+      - name: Create summary
+        run: |
+          echo "## Code Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ESLint: ${{ needs.eslint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript: ${{ needs.type-check.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Check: ${{ needs.security-check.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the artifacts for detailed reports." >> $GITHUB_STEP_SUMMARY

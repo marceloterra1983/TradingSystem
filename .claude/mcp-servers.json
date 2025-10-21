@@ -1,0 +1,78 @@
+{
+  "mcpServers": {
+    "fs-tradingsystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/marce/projetos/TradingSystem"
+      ],
+      "description": "Filesystem access for TradingSystem project",
+      "disabled": false
+    },
+    "git-tradingsystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "/home/marce/projetos/TradingSystem"
+      ],
+      "description": "Git operations for TradingSystem project",
+      "disabled": false
+    },
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "description": "HTTP fetch capabilities",
+      "disabled": false
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory",
+        "/home/marce/.mcp-memory"
+      ],
+      "description": "Persistent memory for context",
+      "disabled": false
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "description": "Sequential thinking capabilities",
+      "disabled": false
+    },
+    "time": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-time"
+      ],
+      "description": "Time and date information",
+      "disabled": false
+    },
+    "everything": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything"
+      ],
+      "description": "Universal search capabilities",
+      "disabled": false
+    }
+  }
+}
+
+
+
+
+
+
+
+

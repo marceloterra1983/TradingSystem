@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'trading-system'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'analytics-pipeline'
+    static_configs:
+      - targets: ['analytics:9001']
+    metrics_path: '/metrics'
+
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['gateway:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'datacapture'
+    static_configs:
+      - targets: ['datacapture:8080']
+    metrics_path: '/metrics'
+
+  - job_name: 'ordermanager'
+    static_configs:
+      - targets: ['ordermanager:5055']
+    metrics_path: '/metrics'

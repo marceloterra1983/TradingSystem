@@ -1,0 +1,156 @@
+@startuml Frontend Component Architecture
+!theme plain
+title Dashboard Frontend - Component Architecture
+skinparam componentStyle rectangle
+
+!define UI_COLOR #E5FFE5
+!define STATE_COLOR #E5F5FF
+!define SERVICE_COLOR #FFE5E5
+!define UTIL_COLOR #FFF5E5
+
+' UI Layer
+package "Presentation Layer" as PresentationLayer UI_COLOR {
+    package "Pages" {
+        component [DashboardPage] as Dashboard
+        component [ConnectionsPage] as Connections
+        component [BancoIdeiasPage] as BancoIdeias
+        component [EscopoPage] as Escopo
+        component [TPCapitalSignalsPage] as Signals
+    }
+
+    package "Layout Components" {
+        component [Layout] as Layout
+        component [Sidebar] as Sidebar
+        component [Header] as Header
+        component [PageContent] as Content
+    }
+
+    package "UI Components (shadcn/ui)" {
+        component [Button] as Button
+        component [Card] as Card
+        component [Dialog] as Dialog
+        component [Input] as Input
+        component [Table] as Table
+        component [Badge] as Badge
+        component [CollapsibleCard] as CollapsibleCard
+    }
+
+    package "Feature Components" {
+        component [TelegramBotTableCard] as BotTable
+        component [TelegramChannelTableCard] as ChannelTable
+        component [IdeaKanbanBoard] as KanbanBoard
+        component [SignalTable] as SignalTable
+    }
+}
+
+' State Management Layer
+package "State Management" as StateLayer STATE_COLOR {
+    component [useLayoutStore\n(Zustand)] as LayoutStore
+    component [useUserStore\n(Zustand)] as UserStore
+    component [useNotificationStore\n(Zustand)] as NotificationStore
+
+    note right of LayoutStore
+        **Persisted State**
+        - sidebarCollapsed
+        - theme (light/dark/system)
+        - layout preferences
+    end note
+}
+
+' Service Layer
+package "Service Layer" as ServiceLayer SERVICE_COLOR {
+    component [ideaBankService] as IdeaBankService
+    component [telegramService] as TelegramService
+    component [signalsService] as SignalsService
+    component [localStorage] as LocalStorage
+
+    note right of LocalStorage
+        **MVP Storage**
+        - telegram.bots
+        - telegram.channels
+        - layout-storage
+        (Migration to backend Q1 2026)
+    end note
+}
+
+' Utilities & Hooks
+package "Utilities & Hooks" as UtilLayer UTIL_COLOR {
+    component [useApi] as useApi
+    component [useWebSocket] as useWebSocket
+    component [cn (classnames)] as cn
+    component [formatters] as formatters
+}
+
+' Routing
+package "Routing (React Router v6)" {
+    component [BrowserRouter] as Router
+    component [Routes] as Routes
+    component [Route] as Route
+}
+
+' External APIs
+cloud "Backend APIs" {
+    interface "API Gateway\nhttp://localhost:8000" as GatewayAPI
+    interface "Idea Bank API\nhttp://localhost:3200" as IdeaBankAPI
+    interface "Telegram API\n(future)" as TelegramAPI
+}
+
+' Relationships - Routing
+Router --> Routes
+Routes --> Route
+Route --> Layout
+Layout --> Sidebar
+Layout --> Header
+Layout --> Content
+
+' Relationships - Pages to Layout
+Content --> Dashboard
+Content --> Connections
+Content --> BancoIdeias
+Content --> Escopo
+Content --> Signals
+
+' Relationships - Pages to Feature Components
+Connections --> BotTable
+Connections --> ChannelTable
+BancoIdeias --> KanbanBoard
+Signals --> SignalTable
+
+' Relationships - Feature Components to UI Components
+BotTable --> Table
+BotTable --> Dialog
+BotTable --> Button
+ChannelTable --> Table
+ChannelTable --> Dialog
+KanbanBoard --> Card
+KanbanBoard --> Badge
+SignalTable --> Table
+CollapsibleCard --> Card
+
+' Relationships - Components to State
+Sidebar --> LayoutStore : "read/write"
+Header --> LayoutStore : "read/write"
+Dashboard --> UserStore : "read"
+Connections --> NotificationStore : "write"
+
+' Relationships - Feature Components to Services
+BotTable --> LocalStorage : "loadJSON/saveJSON"
+ChannelTable --> LocalStorage : "loadJSON/saveJSON"
+KanbanBoard --> IdeaBankService : "fetch/create/update"
+SignalTable --> SignalsService : "fetch signals"
+
+' Relationships - Services to APIs
+IdeaBankService --> IdeaBankAPI : "HTTP/REST"
+SignalsService --> GatewayAPI : "HTTP/REST"
+TelegramService ..> TelegramAPI : "Future"
+
+' Relationships - Hooks
+useApi --> GatewayAPI : "fetch wrapper"
+useWebSocket --> GatewayAPI : "ws://..."
+
+' Component Reuse
+Dashboard --> Card
+Dashboard --> Button
+Escopo --> CollapsibleCard
+
+@enduml

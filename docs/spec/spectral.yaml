@@ -1,0 +1,350 @@
+# Spectral Linting Configuration for TradingSystem API Specifications
+# This file defines rules and validation for OpenAPI and AsyncAPI specifications
+
+extends:
+  - spectral:oas
+  - spectral:asyncapi
+
+# Custom rules for TradingSystem
+rules:
+  # General OpenAPI rules
+  oas3-api-servers:
+    description: APIs should have servers defined
+    severity: error
+    given: $.servers
+    then:
+      field: length
+      function: greaterThan
+      functionOptions:
+        value: 0
+
+  # Operation rules
+  operation-operationId:
+    description: Operations should have operationId
+    severity: warn
+    given: "$.paths.*.[get,post,put,delete,patch]"
+    then:
+      field: operationId
+      function: truthy
+
+  operation-description:
+    description: Operations should have descriptions
+    severity: warn
+    given: "$.paths.*.[get,post,put,delete,patch]"
+    then:
+      field: description
+      function: truthy
+
+  # Response rules
+  operation-success-response:
+    description: Operations should have at least one 2xx response
+    severity: error
+    given: "$.paths.*.[get,post,put,delete,patch]"
+    then:
+      field: responses
+      function: pattern
+      functionOptions:
+        match: "^[23]\\d{2}$"
+
+  # Schema rules
+  schema-description:
+    description: Schemas should have descriptions
+    severity: warn
+    given: "$.components.schemas.*"
+    then:
+      field: description
+      function: truthy
+
+  schema-example:
+    description: Schemas should have examples
+    severity: info
+    given: "$.components.schemas.*"
+    then:
+      field: example
+      function: truthy
+
+  # Parameter rules
+  parameter-description:
+    description: Parameters should have descriptions
+    severity: warn
+    given: "$.paths.*.[get,post,put,delete,patch].parameters.*"
+    then:
+      field: description
+      function: truthy
+
+  # TradingSystem specific rules
+  trading-system-cors-headers:
+    description: Should document CORS headers
+    severity: info
+    given: "$.paths.*.[get,post,put,delete,patch].responses['200'].headers"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            "Access-Control-Allow-Origin":
+              type: string
+            "Access-Control-Allow-Methods":
+              type: string
+            "Access-Control-Allow-Headers":
+              type: string
+
+  trading-system-health-endpoint:
+    description: Should have health endpoint
+    severity: warn
+    given: $.paths
+    then:
+      function: pattern
+      functionOptions:
+        match: "^/health"
+
+  trading-system-error-responses:
+    description: Operations should document error responses
+    severity: warn
+    given: "$.paths.*.[get,post,put,delete,patch]"
+    then:
+      field: responses
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - "200"
+          properties:
+            "400":
+              type: object
+            "500":
+              type: object
+
+  trading-system-pagination:
+    description: List endpoints should support pagination
+    severity: info
+    given: "$.paths.*.get"
+    then:
+      function: field
+      functionOptions:
+        field: parameters
+      match:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              enum: [limit, offset, page]
+        contains:
+          properties:
+            name:
+              enum: [limit]
+
+  trading-system-timestamps:
+    description: Response schemas should include timestamp fields
+    severity: info
+    given: "$.components.schemas.*"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+  trading-system-correlation-id:
+    description: Error responses should include correlation ID
+    severity: info
+    given: "$.paths.*.[get,post,put,delete,patch].responses.*[45]\\d{2}"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            content:
+              type: object
+              properties:
+                "application/json":
+                  type: object
+                  properties:
+                    schema:
+                      type: object
+                      properties:
+                        correlationId:
+                          type: string
+
+  # AsyncAPI specific rules
+  asyncapi-info-description:
+    description: AsyncAPI should have info description
+    severity: error
+    given: $.info.description
+    then:
+      function: truthy
+
+  asyncapi-channel-description:
+    description: Channels should have descriptions
+    severity: warn
+    given: "$.channels.*"
+    then:
+      field: description
+      function: truthy
+
+  asyncapi-message-description:
+    description: Messages should have descriptions
+    severity: warn
+    given: "$.channels.*.messages.*"
+    then:
+      field: description
+      function: truthy
+
+  # Market data specific rules
+  trading-system-symbol-validation:
+    description: Symbol fields should include validation examples
+    severity: info
+    given: "$.components.schemas.*"
+    then:
+      function: pattern
+      functionOptions:
+        match: "symbol|asset|instrument"
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            example:
+              enum: ["WINZ25", "PETR4", "VALE3", "ITUB4"]
+            pattern:
+              enum: ["^[A-Z]{4}\\d{1}$", "^[A-Z]{3}[A-Z]\\d{2}$"]
+
+  trading-system-price-fields:
+    description: Price fields should have proper format and validation
+    severity: info
+    given: "$.components.schemas.*"
+    then:
+      function: pattern
+      functionOptions:
+        match: "price|Price"
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            type:
+              const: number
+            format:
+              const: double
+            minimum:
+              const: 0
+
+  trading-system-volume-fields:
+    description: Volume fields should have proper type and validation
+    severity: info
+    given: "$.components.schemas.*"
+    then:
+      function: pattern
+      functionOptions:
+        match: "volume|Volume|quantity|Quantity"
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            type:
+              const: integer
+            minimum:
+              const: 0
+
+# Override default Spectral rules
+overrides:
+  - extends: spectral:oas
+    rules:
+      # Relax some rules for internal APIs
+      oas3-api-servers:
+        severity: warn
+      operation-tags:
+        severity: info
+      info-contact:
+        severity: info
+      info-license:
+        severity: info
+
+# Custom functions for TradingSystem validation
+functions:
+  # Function to check if endpoint follows trading system naming conventions
+  trading-system-endpoint-format:
+    description: Check if endpoint follows TradingSystem naming conventions
+    type: function
+    function: |
+      function(endpoint) {
+        const patterns = [
+          /^\/health$/, // Health endpoints
+          /^\/api\/v\d+\//, // Versioned API endpoints
+          /^\/[a-z\-]+$/, // Simple endpoints
+          /^\/[a-z\-]+\/\{[a-zA-Z]+\}$/, // Endpoints with path parameters
+        ];
+        
+        return patterns.some(pattern => pattern.test(endpoint));
+      }
+
+  # Function to validate market symbols
+  validate-market-symbol:
+    description: Validate Brazilian market symbol format
+    type: function
+    function: |
+      function(symbol) {
+        const equityPattern = /^[A-Z]{4}\d{1}$/; // PETR4, VALE3
+        const futurePattern = /^[A-Z]{3}[A-Z]\d{2}$/; // WINZ25, WDOF26
+        const etfPattern = /^[A-Z]{4,6}\d{2}$/; // BOVA11, SMAL11
+        const indexPattern = /^[A-Z]{4,6}$/; // IBOV, IFIX
+        
+        return equityPattern.test(symbol) || 
+               futurePattern.test(symbol) || 
+               etfPattern.test(symbol) || 
+               indexPattern.test(symbol);
+      }
+
+# Custom formatters and reporters
+formatters:
+  # JSON formatter for CI/CD integration
+  json:
+    type: json
+    
+  # JUnit formatter for test results
+  junit:
+    type: junit
+    
+  # GitHub Actions formatter
+  github:
+    type: github
+    
+  # Custom TradingSystem formatter
+  trading-system:
+    type: custom
+    format: |
+      TradingSystem API Validation Report
+      =====================================
+      
+      Summary:
+      - Total Issues: {{results.length}}
+      - Errors: {{results.filter(r => r.severity === 0).length}}
+      - Warnings: {{results.filter(r => r.severity === 1).length}}
+      - Info: {{results.filter(r => r.severity === 2).length}}
+      
+      Issues by Category:
+      {{#each (groupBy results 'rule')}}
+      - {{@key}}: {{this.length}}
+      {{/each}}
+      
+      {{#each results}}
+      [{{severity}}] {{path}}: {{message}}
+      {{#if source}}
+        Source: {{source}}
+      {{/if}}
+      
+      {{/each}}

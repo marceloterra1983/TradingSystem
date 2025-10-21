@@ -1,0 +1,58 @@
+# Regras Linux - TradingSystem
+
+## Comandos para Desenvolvimento no Linux
+
+### Iniciar Ambiente
+```bash
+./infrastructure/scripts/start-trading-system-dev.sh --start-monitoring
+```
+
+### Parar Ambiente
+```bash
+pkill node
+cd infrastructure/monitoring && docker compose down
+```
+
+### Verificar Status
+```bash
+lsof -i :3200 :5173 :9999
+docker ps
+```
+
+### Logs
+```bash
+docker compose logs -f
+tail -f backend/api/idea-bank/logs/app.log
+```
+
+## Convenções
+
+### Separadores de Caminho
+- Linux: `/`
+- Scripts: Usar caminhos relativos quando possível
+
+### Permissões
+- Scripts bash devem ser executáveis: `chmod +x`
+- Verificar permissões de diretórios data/
+
+### Docker
+- Sempre usar COMPOSE_PROFILES=linux para monitoring stack
+- Usuário deve estar no grupo docker
+
+### Terminal
+- Prioridade: gnome-terminal > konsole > xterm
+- Fallback: background execution
+
+## Documentação
+
+- START-HERE-LINUX.md - Ponto de partida
+- LINUX-SETUP-CHECKLIST.md - Checklist completo
+- LINUX-MIGRATION-SUMMARY.md - Resumo técnico
+- docs/context/ops/linux-migration-guide.md - Guia detalhado
+
+
+
+
+
+
+

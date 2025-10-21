@@ -1,0 +1,23 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^9.37.0",
+    "husky": "^9.0.11",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "express-rate-limit": "^8.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "lint": "cd frontend/apps/dashboard && npm run lint",
+    "type-check": "cd frontend/apps/dashboard && npm run type-check",
+    "validate-docs": "python3 scripts/docs/validate-frontmatter.py --docs-dir ./docs/context ./docs",
+    "validate-docs-staged": "bash scripts/docs/validate-frontmatter-staged.sh"
+  }
+}
+

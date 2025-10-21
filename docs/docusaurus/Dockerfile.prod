@@ -1,0 +1,44 @@
+# ============================================================================
+# Docusaurus - Production Dockerfile
+# Multi-stage build for optimized static site serving
+# ============================================================================
+
+# Stage 1: Build
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build static site
+RUN npm run build
+
+# Stage 2: Production (Nginx)
+FROM nginx:alpine AS production
+
+# Copy built static files
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy custom nginx config (if exists)
+COPY nginx.conf /etc/nginx/conf.d/default.conf 2>/dev/null || true
+
+# Expose port
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+
+# Nginx runs as root by default (handles port 80)
+# Static files don't need special permissions
+
+CMD ["nginx", "-g", "daemon off;"]
+

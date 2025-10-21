@@ -1,0 +1,51 @@
+<svg width="400" height="80" viewBox="0 0 400 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradientes mais suaves e harmoniosos para modo escuro -->
+    <linearGradient id="gradient1-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+    <!-- Gradiente para a linha de tendência mais suave -->
+    <linearGradient id="trendGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Logo Icon - Cores mais suaves para modo escuro -->
+  <g id="icon-dark">
+    <!-- Barra 1 -->
+    <rect x="8" y="48" width="6" height="20" rx="1" fill="url(#gradient1-dark)"/>
+    <line x1="11" y1="42" x2="11" y2="48" stroke="url(#gradient1-dark)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="11" y1="68" x2="11" y2="72" stroke="url(#gradient1-dark)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Barra 2 -->
+    <rect x="20" y="32" width="6" height="28" rx="1" fill="url(#gradient2-dark)"/>
+    <line x1="23" y1="24" x2="23" y2="32" stroke="url(#gradient2-dark)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="23" y1="60" x2="23" y2="68" stroke="url(#gradient2-dark)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Barra 3 -->
+    <rect x="32" y="40" width="6" height="24" rx="1" fill="url(#gradient1-dark)"/>
+    <line x1="35" y1="34" x2="35" y2="40" stroke="url(#gradient1-dark)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="35" y1="64" x2="35" y2="70" stroke="url(#gradient1-dark)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Barra 4 -->
+    <rect x="44" y="28" width="6" height="32" rx="1" fill="url(#gradient2-dark)"/>
+    <line x1="47" y1="20" x2="47" y2="28" stroke="url(#gradient2-dark)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="47" y1="60" x2="47" y2="68" stroke="url(#gradient2-dark)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Linha de tendência com gradiente suave -->
+    <path d="M 8 64 Q 23 48 35 52 T 50 32" stroke="url(#trendGradient)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Texto: TradingSystem (Cores harmoniosas para modo escuro) -->
+  <g id="text-content">
+    <text x="70" y="50" font-family="'Inter', 'Segoe UI', -apple-system, system-ui, sans-serif" font-size="32" font-weight="700" letter-spacing="-0.02em">
+      <tspan fill="#f8fafc">Trading</tspan><tspan fill="#a5b4fc">System</tspan>
+    </text>
+  </g>
+</svg>

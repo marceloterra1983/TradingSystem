@@ -1,0 +1,202 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llamaindex-query
+  namespace: llamaindex-production
+spec:
+  replicas: 5  # More replicas for production
+  selector:
+    matchLabels:
+      app: llamaindex-query
+  template:
+    metadata:
+      labels:
+        app: llamaindex-query
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - llamaindex-query
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: query
+        image: ghcr.io/your-repo/llamaindex-query:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: OPENAI_API_KEY
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llamaindex-secrets
+              key: JWT_SECRET_KEY
+        envFrom:
+        - configMapRef:
+            name: llamaindex-config
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      securityContext:
+        fsGroup: 1000
+      serviceAccountName: llamaindex-query
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llamaindex-query-service
+  namespace: llamaindex-production
+  labels:
+    app: llamaindex-query
+spec:
+  selector:
+    app: llamaindex-query
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llamaindex-query-ingress
+  namespace: llamaindex-production
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+spec:
+  tls:
+  - hosts:
+    - api.llamaindex.yourdomain.com
+    secretName: llamaindex-query-tls
+  rules:
+  - host: api.llamaindex.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: llamaindex-query-service
+            port:
+              number: 8000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: llamaindex-query-pdb
+  namespace: llamaindex-production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: llamaindex-query
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: llamaindex-query
+  namespace: llamaindex-production
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: llamaindex-query
+  namespace: llamaindex-production
+spec:
+  selector:
+    matchLabels:
+      app: llamaindex-query
+  endpoints:
+  - port: metrics
+    interval: 30s
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: llamaindex-query-hpa
+  namespace: llamaindex-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: llamaindex-query
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
