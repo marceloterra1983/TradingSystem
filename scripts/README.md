@@ -114,6 +114,12 @@ scripts/
 │   ├── uninstall-docker-wsl.sh
 │   └── rewrite-history.sh
 │
+├── healthcheck/          # 🩺 Diagnósticos e verificações de runtime
+│   ├── hc-tradingsystem-status.sh
+│   ├── hc-tp-capital-complete.sh
+│   ├── hc-tp-capital-quick.sh
+│   └── README.md
+│
 ├── backup/               # 💼 Backup utilities
 ├── dev/                  # 🛠️ Development scripts
 ├── env/                  # 🌍 Environment management
@@ -609,7 +615,60 @@ bash scripts/maintenance/rewrite-history.sh
 
 ---
 
+### 🩺 Healthcheck
+
+#### `hc-tradingsystem-status.sh`
+
+Relatório completo da saúde do TradingSystem (serviços, Docker, recursos, JSON opcional).
+
+```bash
+bash scripts/healthcheck/hc-tradingsystem-status.sh --quick
+```
+
+#### `hc-tp-capital-quick.sh` & `hc-tp-capital-complete.sh`
+
+Diagnósticos rápidos e completos do serviço TP Capital (portas, logs, dependências).
+
+```bash
+bash scripts/healthcheck/hc-tp-capital-quick.sh
+bash scripts/healthcheck/hc-tp-capital-complete.sh
+```
+
+---
+
 ### 🔧 Utilities
+
+#### `copy-terminal-output.sh`
+
+**🆕 NOVO:** Copia rapidamente comandos e suas saídas do terminal para o clipboard.
+
+**Localização:** `scripts/`
+
+**Quick Start:**
+```bash
+# Instalação única
+bash scripts/install-terminal-copy-shortcuts.sh
+source ~/.bashrc  # ou ~/.zshrc
+
+# Uso diário
+ls -la
+copyout            # Copia 'ls -la' + saída (50 linhas)
+copyout 100        # Copia comando + 100 linhas
+copycmd            # Copia apenas o comando
+copylog            # Copia apenas a saída
+coprun docker ps   # Executa e copia automaticamente
+```
+
+**Atalhos de Teclado (Cursor Terminal):**
+- `Ctrl+Shift+Alt+C` → Executar `copyout`
+- `Ctrl+Alt+C` → Executar `copycmd`
+- `Ctrl+Alt+O` → Executar `copylog`
+
+**Documentação Completa:**
+- [COPY-TERMINAL-GUIDE.md](./COPY-TERMINAL-GUIDE.md) - Guia completo
+- [QUICK-REFERENCE-COPY.md](./QUICK-REFERENCE-COPY.md) - Referência rápida
+
+---
 
 #### `validate.sh`
 

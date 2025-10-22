@@ -16,3 +16,15 @@ else
     echo "Comando copiado para clipboard!"
 fi
 
+
+
+
+
+
+
+
+
+
+
+
+

@@ -22,3 +22,15 @@ echo ""
 echo "✅ Terminal Keeper instalado!"
 echo "📝 Recarregue o Cursor para ativar"
 
+
+
+
+
+
+
+
+
+
+
+
+
