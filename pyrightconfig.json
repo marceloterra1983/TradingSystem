@@ -1,0 +1,33 @@
+{
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.git",
+    "**/venv",
+    "**/env",
+    "**/.venv",
+    "**/dist",
+    "**/build",
+    "**/coverage",
+    "**/logs",
+    "**/data",
+    "**/backups",
+    "**/archive",
+    "**/infrastructure/firecrawl",
+    "**/infrastructure/ollama",
+    "**/tools",
+    "**/docs_v2",
+    "**/docs",
+    "**/ProfitDLL",
+    "**/frontend",
+    "**/backend/api",
+    "**/apps"
+  ],
+  "ignore": [
+    "**/node_modules/**",
+    "**/__pycache__/**"
+  ],
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.11"
+}
