@@ -1,3 +1,14 @@
+---
+title: 🚨 Environment Configuration - MANDATORY RULES
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🚨 Environment Configuration - MANDATORY RULES
+status: active
+last_review: 2025-10-22
+---
+
 # 🚨 Environment Configuration - MANDATORY RULES
 
 > **CRITICAL: Read this BEFORE creating any new service, API, or application!**

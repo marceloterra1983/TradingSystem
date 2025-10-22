@@ -9,13 +9,13 @@ Adicione ao seu `~/.bashrc`:
 
 ```bash
 # TradingSystem - Universal Startup
-alias start='bash /home/marce/projetos/TradingSystem/start-tradingsystem'
-alias start-docker='bash /home/marce/projetos/TradingSystem/start-tradingsystem --docker'
-alias start-services='bash /home/marce/projetos/TradingSystem/start-tradingsystem --services'
-alias start-minimal='bash /home/marce/projetos/TradingSystem/start-tradingsystem --minimal'
-alias stop='bash /home/marce/projetos/TradingSystem/scripts/services/stop-all.sh && bash /home/marce/projetos/TradingSystem/scripts/docker/stop-stacks.sh'
-alias status='bash /home/marce/projetos/TradingSystem/scripts/services/status.sh'
-alias health='bash /home/marce/projetos/TradingSystem/scripts/maintenance/health-check-all.sh'
+alias start='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh'
+alias start-docker='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --docker'
+alias start-services='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --services'
+alias start-minimal='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --minimal'
+alias stop='bash /home/marce/projetos/TradingSystem/scripts/shutdown/stop-tradingsystem.sh'
+alias status='bash /home/marce/projetos/TradingSystem/scripts/healthcheck/hc-tradingsystem-status.sh --quick'
+alias health='bash /home/marce/projetos/TradingSystem/scripts/healthcheck/hc-tradingsystem-status.sh'
 alias logs='tail -f /tmp/tradingsystem-logs/*.log'
 ```
 
@@ -110,4 +110,3 @@ sudo systemctl restart docker
 ---
 
 **Pronto!** Agora você pode iniciar o TradingSystem completo de qualquer lugar com um único comando. 🎉
-

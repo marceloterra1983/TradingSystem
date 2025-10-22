@@ -1,3 +1,14 @@
+---
+title: Tema Gemini CLI - Docusaurus
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Tema Gemini CLI - Docusaurus
+status: active
+last_review: 2025-10-22
+---
+
 # Tema Gemini CLI - Docusaurus
 
 ## 🎨 Visão Geral

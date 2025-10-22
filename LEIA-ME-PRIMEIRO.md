@@ -5,7 +5,7 @@
 Copie e cole no seu terminal:
 
 ```bash
-cd /home/marce/projetos/TradingSystem && bash START-HEALTH-DASHBOARD.sh
+cd /home/marce/projetos/TradingSystem && bash scripts/START-HEALTH-DASHBOARD.sh
 ```
 
 **Isso irá:**
@@ -88,7 +88,7 @@ cd /home/marce/projetos/TradingSystem
 
 ### Passo 2: Executar script
 ```bash
-bash START-HEALTH-DASHBOARD.sh
+bash scripts/START-HEALTH-DASHBOARD.sh
 ```
 
 ### Passo 3: Aguardar mensagem
@@ -128,7 +128,7 @@ Leia: `HEALTH-DASHBOARD-SETUP.md` para detalhes avançados.
 
 Execute e me envie a saída:
 ```bash
-bash START-HEALTH-DASHBOARD.sh 2>&1 | tee output.log
+bash scripts/START-HEALTH-DASHBOARD.sh 2>&1 | tee output.log
 ```
 
 Depois compartilhe o arquivo `output.log`

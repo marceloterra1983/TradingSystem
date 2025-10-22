@@ -1,3 +1,14 @@
+---
+title: "ADR-001: Adoção de Clean Architecture"
+sidebar_position: 1
+tags: [architecture, documentation]
+domain: shared
+type: adr
+summary: "ADR-001: Adoção de Clean Architecture"
+status: active
+last_review: 2025-10-22
+---
+
 # ADR-001: Adoção de Clean Architecture
 
 **Status:** Aceito

@@ -1,3 +1,14 @@
+---
+title: "Phase 3: Docusaurus Installation & Build Guide"
+sidebar_position: 1
+tags: [guide, documentation]
+domain: shared
+type: guide
+summary: "Phase 3: Docusaurus Installation & Build Guide"
+status: active
+last_review: 2025-10-22
+---
+
 # Phase 3: Docusaurus Installation & Build Guide
 
 **Purpose:** Install dependencies, verify plugins, and test production build

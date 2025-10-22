@@ -1,3 +1,14 @@
+---
+title: Contributing to TradingSystem
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Contributing to TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # Contributing to TradingSystem
 
 <<<<<<< HEAD

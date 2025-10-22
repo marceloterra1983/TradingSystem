@@ -1,3 +1,14 @@
+---
+title: Shell Scripts Refactoring - Relatórios
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: 📊 Shell Scripts Refactoring - Relatórios
+status: active
+last_review: 2025-10-22
+---
+
 # 📊 Shell Scripts Refactoring - Relatórios
 
 **Data:** 15 de Outubro de 2025  

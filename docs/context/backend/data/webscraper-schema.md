@@ -1,3 +1,18 @@
+---
+title: Overview
+sidebar_position: 1
+tags: [backend, documentation]
+domain: backend
+type: reference
+summary: o ---
+title: WebScraper Database Schema
+sidebarposition: 30
+tags: [backend, data, schema,...
+status: active
+last_review: 2025-10-22
+---
+
+
 o ---
 title: WebScraper Database Schema
 sidebar_position: 30

@@ -1,3 +1,15 @@
+---
+title: Documentation Audit Report
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Documentation Audit Report
+Date: 2025-10-19
+status: active
+last_review: 2025-10-22
+---
+
 # Documentation Audit Report
 **Date:** 2025-10-19
 

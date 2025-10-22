@@ -1,3 +1,14 @@
+---
+title: ✅ Documentation Frontmatter Standardization - COMPLETE
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: ✅ Documentation Frontmatter Standardization - COMPLETE
+status: active
+last_review: 2025-10-22
+---
+
 # ✅ Documentation Frontmatter Standardization - COMPLETE
 
 **Date Completed**: 2025-10-17  

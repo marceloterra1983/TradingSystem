@@ -1,3 +1,14 @@
+---
+title: Docusaurus Backup Verification Checklist
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus Backup Verification Checklist
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus Backup Verification Checklist
 
 **Purpose**: Verify backup integrity before proceeding with restoration  

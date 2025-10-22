@@ -4,9 +4,12 @@ date: 2025-10-18
 author: AI Assistant
 tags: [service-launcher, openspec, proposal, fix, refactoring]
 status: ready-for-review
-related_docs:
-  - docs/reports/service-launcher-audit-plan.md
-  - infrastructure/openspec/changes/fix-service-launcher-critical-issues/
+related_docs: 
+sidebar_position: 1
+domain: shared
+type: reference
+summary: Documentation
+last_review: 2025-10-22
 ---
 
 # 🚀 Service Launcher - Proposta OpenSpec Completa
@@ -336,6 +339,7 @@ Antes de iniciar implementação:
 **Status**: 📝 Aguardando aprovação para iniciar implementação
 
 **Última atualização**: 2025-10-18
+
 
 
 

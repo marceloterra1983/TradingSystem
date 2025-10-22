@@ -1,3 +1,14 @@
+---
+title: 🎉 Refatoração Completa de Scripts Shell - TradingSystem
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🎉 Refatoração Completa de Scripts Shell - TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # 🎉 Refatoração Completa de Scripts Shell - TradingSystem
 
 **Data:** 15 de Outubro de 2025  

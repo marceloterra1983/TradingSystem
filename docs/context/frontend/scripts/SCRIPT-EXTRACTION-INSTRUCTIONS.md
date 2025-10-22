@@ -6,6 +6,7 @@ type: "instructions"
 summary: "Instruções para criar script de extração automática de CSS via Firecrawl"
 status: "ready"
 last_review: "2025-10-19"
+sidebar_position: 1
 ---
 
 # Script de Extração: Gemini CLI Style

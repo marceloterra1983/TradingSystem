@@ -1,3 +1,14 @@
+---
+title: ✅ Migração de Scripts da Raiz - CONCLUÍDA
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: ✅ Migração de Scripts da Raiz - CONCLUÍDA
+status: active
+last_review: 2025-10-22
+---
+
 # ✅ Migração de Scripts da Raiz - CONCLUÍDA
 
 **Data:** 2025-10-15  

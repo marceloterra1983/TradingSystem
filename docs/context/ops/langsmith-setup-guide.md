@@ -6,6 +6,7 @@ type: guide
 summary: Guia completo para configurar LangSmith API Key e fazer onboarding inicial
 status: active
 last_review: 2025-10-19
+sidebar_position: 1
 ---
 
 # LangSmith Setup Guide - Passo a Passo

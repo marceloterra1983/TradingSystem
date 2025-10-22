@@ -4,6 +4,11 @@ date: 2025-10-18
 author: AI Assistant
 tags: [service-launcher, audit, planning, refactoring]
 status: draft
+sidebar_position: 1
+domain: shared
+type: reference
+summary: Documentation
+last_review: 2025-10-22
 ---
 
 # 🔍 Service Launcher - Plano de Auditoria e Correção Completo
@@ -1106,6 +1111,7 @@ Quando houver tempo:
 2. ⏳ Aprovar prioridades
 3. ⏳ Criar tasks no projeto
 4. ⏳ Iniciar Sprint 1 (P0)
+
 
 
 

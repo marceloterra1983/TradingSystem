@@ -1,3 +1,14 @@
+---
+title: Infrastructure Inventory Reports
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: Infrastructure Inventory Reports
+status: active
+last_review: 2025-10-22
+---
+
 # Infrastructure Inventory Reports
 
 This directory stores infrastructure inventory snapshots in tabular formats such as Excel and CSV files. These reports capture point-in-time states for containers, services, ports, and runtime characteristics.

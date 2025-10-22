@@ -13,7 +13,7 @@ status: active
 last_review: 2025-10-17
 language: en
 translated_from: ../pt/README.md
-translated_at: '2025-10-10T03:13:38.166649+00:00'
+translated_at: "2025-10-10T03:13:38.166649+00:00"
 translation_source_hash: e99f31de26ad47e3dec50b895c92246e525d4e0b
 translation_source_language: pt
 ---

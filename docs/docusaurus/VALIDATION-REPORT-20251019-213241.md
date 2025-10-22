@@ -1,3 +1,14 @@
+---
+title: Docusaurus Validation Report
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus Validation Report
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus Validation Report
 
 **Generated**: 2025-10-20 00:32:41 UTC  

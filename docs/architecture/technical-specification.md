@@ -1,3 +1,14 @@
+---
+title: Technical Specification - TradingSystem
+sidebar_position: 1
+tags: [architecture, documentation]
+domain: shared
+type: reference
+summary: Technical Specification - TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # Technical Specification - TradingSystem
 
 **Version:** 2.0

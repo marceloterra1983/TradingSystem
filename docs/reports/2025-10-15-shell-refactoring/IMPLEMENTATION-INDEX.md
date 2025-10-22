@@ -1,3 +1,14 @@
+---
+title: 📑 Índice de Implementação - Refatoração de Scripts Shell
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 📑 Índice de Implementação - Refatoração de Scripts Shell
+status: active
+last_review: 2025-10-22
+---
+
 # 📑 Índice de Implementação - Refatoração de Scripts Shell
 
 **Projeto:** TradingSystem  

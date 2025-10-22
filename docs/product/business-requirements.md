@@ -1,3 +1,14 @@
+---
+title: Business Requirements - TradingSystem
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Business Requirements - TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # Business Requirements - TradingSystem
 
 **Version:** 1.0

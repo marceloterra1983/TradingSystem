@@ -6,6 +6,7 @@ type: "guide"
 summary: "Guia passo a passo para implementar o tema do Gemini CLI no nosso Docusaurus"
 status: "active"
 last_review: "2025-10-19"
+sidebar_position: 1
 ---
 
 # Guia de Migração: Tema Gemini CLI para Docusaurus

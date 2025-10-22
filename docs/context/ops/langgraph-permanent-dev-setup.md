@@ -6,6 +6,7 @@ type: guide
 summary: Guide for running LangGraph development environment (port 8112) permanently alongside production
 status: active
 last_review: 2025-10-19
+sidebar_position: 1
 ---
 
 # LangGraph Development Environment - Permanent Setup

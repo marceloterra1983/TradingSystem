@@ -6,6 +6,7 @@ type: guide
 summary: "Migration of root wrapper scripts to symlinks for better maintainability"
 status: implemented
 last_review: 2025-10-20
+sidebar_position: 1
 ---
 
 # Root Wrapper Symlink Migration

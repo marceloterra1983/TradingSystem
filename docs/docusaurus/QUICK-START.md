@@ -1,3 +1,14 @@
+---
+title: Quick Start - Tema Gemini CLI
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Quick Start - Tema Gemini CLI
+status: active
+last_review: 2025-10-22
+---
+
 # Quick Start - Tema Gemini CLI
 
 ## 🚀 Iniciando o Docusaurus

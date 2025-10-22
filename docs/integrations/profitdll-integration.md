@@ -1,3 +1,14 @@
+---
+title: ProfitDLL Integration Guide
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: ProfitDLL Integration Guide
+status: active
+last_review: 2025-10-22
+---
+
 # ProfitDLL Integration Guide
 
 **Version:** 1.0
