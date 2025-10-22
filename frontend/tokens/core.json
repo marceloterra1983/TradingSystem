@@ -1,0 +1,22 @@
+{
+  "color": {
+    "primary": {
+      "value": "#9333EA",
+      "description": "Gemini CLI primary accent"
+    },
+    "success": {
+      "value": "#10B981",
+      "description": "Success state"
+    }
+  },
+  "spacing": {
+    "sm": {
+      "value": "8px",
+      "description": "Small spacing"
+    },
+    "md": {
+      "value": "16px",
+      "description": "Medium spacing"
+    }
+  }
+}

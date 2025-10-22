@@ -402,3 +402,4 @@ teste/.obsidian/
 # envs locais
 .env.backup-*
 .env.test
+frontend/tokens/

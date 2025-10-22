@@ -1,0 +1,22 @@
+---
+id: build-ci
+title: Build & CI Checklist
+description: Build, test, and deployment expectations for frontend pull requests.
+tags: [frontend, engineering, ci]
+sidebar_label: Build & CI
+last_update:
+  author: platform
+  date: 2025-10-22
+---
+
+## Build Steps
+
+- Run `npm install` inside each app workspace (dashboard, webscraper, TP Capital) to sync dependencies.
+- Execute `npm run build` to validate production bundles.
+- Ensure environment variables referenced in `.env.example` are documented before releasing.
+
+## CI Integrations
+
+- CI must run linting (`npm run lint`) and tests (`npm run test`) before build.
+- `npm run docs:auto` should run when PRs touch documentation or design tokens to keep generated files current.
+- Include PRD and Frontend impact notes in pull requests so reviewers can trace required documentation changes.
