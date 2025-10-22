@@ -1,0 +1,39 @@
+{
+  "name": "terminal-copy-button",
+  "displayName": "Terminal Copy Button",
+  "description": "Adds a status bar button to copy the last terminal command and output",
+  "version": "1.0.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "terminalCopyButton.copyLastOutput",
+        "title": "Copy Last Terminal Command and Output"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "terminalCopyButton.copyLastOutput",
+        "key": "alt+q",
+        "mac": "alt+q",
+        "when": "terminalFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "node extension.js"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
