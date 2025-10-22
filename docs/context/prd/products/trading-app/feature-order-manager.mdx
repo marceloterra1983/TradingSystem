@@ -1,0 +1,54 @@
+---
+id: trading-app-feature-order-manager
+title: PRD — Order Manager Safeguards
+description: Product requirements for automated order execution safeguards.
+tags: [prd, trading-app, order-manager]
+sidebar_label: Order Manager Safeguards
+last_update:
+  author: product
+  date: 2025-10-22
+---
+
+## 1. Summary
+
+Outline how the automated order manager enforces risk controls before sending orders to ProfitDLL.
+
+## 2. Goals
+
+- Enforce daily loss limits and position sizing before each order.
+- Provide operators with actionable feedback when orders are rejected.
+
+## 3. Non-Goals
+
+- Does not redesign the ProfitDLL integration layer.
+
+## 4. Background
+
+- Existing dashboards lack visibility into rejected orders and breach reasons.
+
+## 5. User Stories
+
+- `As a risk analyst, I need clear rejection reasons so I can adjust trading parameters quickly.`
+
+## 6. Acceptance Criteria
+
+- Order manager rejects requests exceeding configured limits with structured error payloads.
+- Rejections are surfaced in the dashboard with actionable messaging.
+
+## 7. Dependencies
+
+- SDD: /sdd/trading/order-manager
+- API: /redoc/order-manager
+- Frontend: /frontend/engineering/conventions
+
+## 8. UX/UI References
+
+- Link to dashboard wireframes once ready.
+
+## 9. Metrics
+
+- Track rejection counts per rule.
+
+## 10. Open Questions
+
+- Should we persist per-order audit logs or aggregate summaries?

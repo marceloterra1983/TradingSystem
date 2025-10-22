@@ -1,0 +1,31 @@
+---
+id: conventions
+title: Engineering Conventions
+description: Coding conventions and folder structures for TradingSystem frontends.
+tags: [frontend, engineering, conventions]
+sidebar_label: Conventions
+last_update:
+  author: frontend
+  date: 2025-10-22
+---
+
+## Project Structure
+
+- Apps live under `frontend/apps/<app-name>` with `src/` containing `components`, `hooks`, `store`, `utils`, and `types`.
+- Shared assets reside in `frontend/shared`.
+
+## Imports & Styling
+
+- Prefer absolute imports via the configured Vite aliases (`@/components`, `@/utils`).
+- Use the `cn` helper when composing Tailwind utility classes.
+- Keep component-level styles colocated via CSS modules or Tailwind class composition.
+
+## shadcn/ui Usage
+
+- Install primitives via `npx shadcn-ui@latest add <component>`.
+- Extend tokens in `frontend/dashboard/src/styles/theme.ts` and sync them into [Design Tokens](../design-system/tokens.mdx).
+
+## Documentation
+
+- Update PRDs and frontend docs together when introducing new user-visible behaviour.
+- Reference ADRs (`../architecture/decisions/`) for structural changes.
