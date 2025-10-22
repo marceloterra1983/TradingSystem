@@ -1,3 +1,14 @@
+---
+title: Docusaurus Cleanup Checklist - Phase 2
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus Cleanup Checklist - Phase 2
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus Cleanup Checklist - Phase 2
 
 **Purpose:** Safe removal of build artifacts while preserving source code

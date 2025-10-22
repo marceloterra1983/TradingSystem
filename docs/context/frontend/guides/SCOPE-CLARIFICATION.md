@@ -7,6 +7,7 @@ summary: "IMPORTANTE: Mudanças aplicam-se APENAS ao Docusaurus (porta 3004)"
 status: "active"
 last_review: "2025-10-19"
 priority: "high"
+sidebar_position: 1
 ---
 
 # ⚠️ Esclarecimento de Escopo: Tema Gemini CLI

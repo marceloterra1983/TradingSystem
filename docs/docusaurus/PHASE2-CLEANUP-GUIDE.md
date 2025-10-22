@@ -1,3 +1,14 @@
+---
+title: "Phase 2: Docusaurus Cleanup Guide"
+sidebar_position: 1
+tags: [guide, documentation]
+domain: shared
+type: guide
+summary: "Phase 2: Docusaurus Cleanup Guide"
+status: active
+last_review: 2025-10-22
+---
+
 # Phase 2: Docusaurus Cleanup Guide
 
 **Purpose:** Safe removal of build artifacts while preserving source code

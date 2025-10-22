@@ -6,6 +6,7 @@ type: guide
 summary: "Complete solution for Docker Compose orphan container warnings"
 status: implemented
 last_review: 2025-10-20
+sidebar_position: 1
 ---
 
 # Docker Compose Orphan Containers - Definitive Solution

@@ -6,6 +6,7 @@ type: "guide"
 summary: "Guia completo do comando universal de startup que orquestra todos os serviços do TradingSystem (Docker + Node.js) com um único comando de terminal"
 status: "stable"
 last_review: "2025-10-20"
+sidebar_position: 1
 ---
 
 # Comando Universal de Startup - TradingSystem
@@ -215,26 +216,26 @@ graph TD
 
 ```
 TradingSystem/
-├── start-tradingsystem                           # Wrapper principal
-├── install-shortcuts.sh                          # Instalador de aliases
 ├── scripts/startup/
-│   ├── start-tradingsystem-full.sh              # Script completo
+│   ├── start-tradingsystem.sh                   # Entrypoint (wrapper de conveniência)
+│   ├── start-tradingsystem-full.sh              # Orquestração completa
 │   ├── start-trading-system-dev.sh              # Script legado
-│   └── README.md                                 # Documentação detalhada
+│   └── README.md                                # Documentação detalhada
+├── scripts/install-shortcuts.sh                 # Instalador de aliases
 └── docs/context/ops/
-    └── universal-startup-command.md              # Este documento
+    └── universal-startup-command.md             # Este documento
 ```
 
 ### Aliases no `~/.bashrc`
 
 ```bash
-alias ts-start='bash /home/marce/projetos/TradingSystem/start-tradingsystem'
-alias ts-start-docker='bash /home/marce/projetos/TradingSystem/start-tradingsystem --docker'
-alias ts-start-services='bash /home/marce/projetos/TradingSystem/start-tradingsystem --services'
-alias ts-start-minimal='bash /home/marce/projetos/TradingSystem/start-tradingsystem --minimal'
-alias ts-stop='bash /home/marce/projetos/TradingSystem/scripts/services/stop-all.sh && bash /home/marce/projetos/TradingSystem/scripts/docker/stop-stacks.sh'
-alias ts-status='bash /home/marce/projetos/TradingSystem/scripts/services/status.sh'
-alias ts-health='bash /home/marce/projetos/TradingSystem/scripts/maintenance/health-check-all.sh'
+alias ts-start='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh'
+alias ts-start-docker='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --docker'
+alias ts-start-services='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --services'
+alias ts-start-minimal='bash /home/marce/projetos/TradingSystem/scripts/startup/start-tradingsystem.sh --minimal'
+alias ts-stop='bash /home/marce/projetos/TradingSystem/scripts/shutdown/stop-tradingsystem.sh'
+alias ts-status='bash /home/marce/projetos/TradingSystem/scripts/healthcheck/hc-tradingsystem-status.sh --quick'
+alias ts-health='bash /home/marce/projetos/TradingSystem/scripts/healthcheck/hc-tradingsystem-status.sh'
 alias ts-logs='tail -f /tmp/tradingsystem-logs/*.log'
 
 # Aliases curtos
@@ -442,4 +443,3 @@ Ao adicionar novos serviços ao startup:
 ---
 
 **Pronto!** Agora você pode iniciar o TradingSystem completo com um único comando de qualquer lugar! 🎉
-

@@ -1,3 +1,14 @@
+---
+title: Especificação Técnica - Gemini CLI Documentation Theme
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Especificação Técnica - Gemini CLI Documentation Theme
+status: active
+last_review: 2025-10-22
+---
+
 # Especificação Técnica - Gemini CLI Documentation Theme
 
 ## 📋 Visão Geral

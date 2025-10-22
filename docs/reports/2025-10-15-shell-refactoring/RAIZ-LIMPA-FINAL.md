@@ -1,3 +1,14 @@
+---
+title: 🎉 RAIZ DO PROJETO 100% LIMPA
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🎉 RAIZ DO PROJETO 100% LIMPA
+status: active
+last_review: 2025-10-22
+---
+
 # 🎉 RAIZ DO PROJETO 100% LIMPA
 
 **Data:** 15/10/2025  

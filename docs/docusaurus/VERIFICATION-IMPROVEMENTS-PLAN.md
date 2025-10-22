@@ -1,3 +1,14 @@
+---
+title: Docusaurus Verification Scripts - Implementation Plan
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus Verification Scripts - Implementation Plan
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus Verification Scripts - Implementation Plan
 
 **Date**: 2025-10-19  

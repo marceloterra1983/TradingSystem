@@ -1,3 +1,14 @@
+---
+title: Deployment Guide - TradingSystem
+sidebar_position: 1
+tags: [guide, documentation]
+domain: shared
+type: guide
+summary: Deployment Guide - TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # Deployment Guide - TradingSystem
 
 **Version:** 2.0

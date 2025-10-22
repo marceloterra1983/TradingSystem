@@ -1,3 +1,14 @@
+---
+title: Como Ver o Tema Gemini CLI no Docusaurus
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Como Ver o Tema Gemini CLI no Docusaurus
+status: active
+last_review: 2025-10-22
+---
+
 # Como Ver o Tema Gemini CLI no Docusaurus
 
 ## 🚀 Passo a Passo para Iniciar

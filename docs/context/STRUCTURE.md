@@ -1,3 +1,24 @@
+---
+title: Structure
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: .:
+AGENTS.md
+CLAUDE.md
+config
+CONTRIBUTING.md
+data
+DLL.code-workspace
+docs
+DOCS_PRFITDLL
+infrastruct...
+status: active
+last_review: 2025-10-22
+---
+
+
 .:
 AGENTS.md
 CLAUDE.md

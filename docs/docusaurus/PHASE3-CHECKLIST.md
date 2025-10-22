@@ -1,3 +1,14 @@
+---
+title: "Phase 3: Installation & Build Checklist"
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: "Phase 3: Installation & Build Checklist"
+status: active
+last_review: 2025-10-22
+---
+
 # Phase 3: Installation & Build Checklist
 
 **Purpose:** Quick reference for Phase 3 execution

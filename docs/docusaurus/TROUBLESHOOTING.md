@@ -1,3 +1,14 @@
+---
+title: Troubleshooting - Gemini CLI Theme
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🔧 Troubleshooting - Gemini CLI Theme
+status: active
+last_review: 2025-10-22
+---
+
 # 🔧 Troubleshooting - Gemini CLI Theme
 
 ## ✅ Status Atual

@@ -1,3 +1,14 @@
+---
+title: TradingSystem Documentation Prototype - Gemini CLI Style
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: TradingSystem Documentation Prototype - Gemini CLI Style
+status: active
+last_review: 2025-10-22
+---
+
 # TradingSystem Documentation Prototype - Gemini CLI Style
 
 ## 🎨 Sobre Este Protótipo

@@ -6,6 +6,7 @@ type: guide
 summary: Guia completo de instalação e configuração do Claude Code CLI globalmente no WSL2, com integração ao Cursor e compartilhamento de configurações entre CLI e IDE.
 status: active
 last_review: 2025-10-18
+sidebar_position: 1
 ---
 
 # Claude Code CLI - Instalação e Configuração Global

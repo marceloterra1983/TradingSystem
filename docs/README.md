@@ -1,3 +1,14 @@
+---
+title: Readme
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: a# 📚 TradingSystem Docusaurus
+status: active
+last_review: 2025-10-22
+---
+
 a# 📚 TradingSystem Docusaurus
 
 > **Single entry portal** for all TradingSystem documentation  

@@ -6,6 +6,7 @@ type: "guide"
 summary: "Registro oficial da remoção do Claude Code e da integração Z.AI dos ambientes WSL2."
 status: "deprecated"
 last_review: "2025-10-18"
+sidebar_position: 1
 ---
 
 # Claude Code com Z.AI (Desativado)

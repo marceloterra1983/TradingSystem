@@ -6,6 +6,7 @@ type: "analysis"
 summary: "Análise detalhada do design system do Gemini CLI para adaptação ao nosso Docusaurus"
 status: "in-progress"
 last_review: "2025-10-19"
+sidebar_position: 1
 ---
 
 # Análise Completa do Estilo Gemini CLI

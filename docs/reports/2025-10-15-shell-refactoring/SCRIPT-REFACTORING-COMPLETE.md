@@ -1,3 +1,14 @@
+---
+title: 🎉 Shell Scripts Refactoring - CONCLUÍDO
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🎉 Shell Scripts Refactoring - CONCLUÍDO
+status: active
+last_review: 2025-10-22
+---
+
 # 🎉 Shell Scripts Refactoring - CONCLUÍDO
 
 **Data:** 2025-10-15  

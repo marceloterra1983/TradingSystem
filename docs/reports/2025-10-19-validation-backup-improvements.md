@@ -1,3 +1,14 @@
+---
+title: Docusaurus Validation & Backup Script Improvements
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus Validation & Backup Script Improvements
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus Validation & Backup Script Improvements
 
 **Date**: 2025-10-19  

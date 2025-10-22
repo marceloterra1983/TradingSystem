@@ -1,40 +1,14 @@
-<<<<<<< HEAD
 # 🚀 TradingSystem - Local Intelligent Trading Platform
-=======
-u# 🚀 TradingSystem - Local Intelligent Trading Platform
->>>>>>> master
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-<<<<<<< HEAD
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-> **Local trading system** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for real-time market data capture, ML-based cause-and-effect analysis, and automated order execution. 100% on-premise, no cloud dependencies.
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Features](#-features)
-- [Architecture](#️-architecture)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Development](#️-development)
-- [Deployment](#-deployment)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing)
-- [License](#-license)
-=======
-[![Docs Links](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml/badge.svg)](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml)
-
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Docs Links](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml/badge.svg)](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml)
 [![Docs Links](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml/badge.svg)](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml)
 
 > **Local trading system** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for real-time market data capture, ML-based cause-and-effect analysis, and automated order execution. 100% on-premise, no cloud dependencies.
 
-> **🚨 DEVELOPERS:** Before creating ANY new service, read **[ENV-RULES.md](ENV-RULES.md)** - Centralized `.env` is MANDATORY!
+> **🚨 DEVELOPERS:** Before creating ANY new service, read **[ENV-RULES.md](docs/context/ENV-RULES.md)** - Centralized `.env` is MANDATORY!
 
 ## 📋 Table of Contents
 
@@ -66,59 +40,11 @@ u# 🚀 TradingSystem - Local Intelligent Trading Platform
 -   [📁 Project Structure](#-project-structure)
 
 > **🚨 First Time Here?** Read [Environment Configuration](#️-environment-configuration) BEFORE doing anything else!
->>>>>>> master
 
 ## 🎯 Overview
 
 TradingSystem is a professional-grade, locally-hosted trading platform that:
 
-<<<<<<< HEAD
-- 📊 **Captures** real-time market data via ProfitDLL (Nelogica)
-- 🤖 **Analyzes** using machine learning (cause-and-effect modeling)
-- 📈 **Generates** trading signals with probability-based decisions
-- ⚡ **Executes** automated orders with comprehensive risk management
-- 📉 **Visualizes** everything in a real-time dashboard
-
-### Key Highlights
-
-- ✅ **100% Local Execution** - No cloud dependencies, complete privacy
-- ✅ **Low Latency** - < 500ms from data capture to decision
-- ✅ **Scalable Architecture** - Clean Architecture + DDD + Microservices
-- ✅ **Risk Management** - Kill switch, daily limits, position controls
-- ✅ **Full Audit Trail** - Every decision logged with timestamp + justification
-
-## ✨ Features
-
-### Market Data Capture
-- Real-time tick data via ProfitDLL callbacks
-- Order book (bid/ask) streaming
-- Historical data retrieval
-- Multi-asset subscription
-- Auto-reconnection on disconnect
-
-### ML-Powered Analysis
-- **Cause-and-Effect Model** - Identifies market pattern relationships
-- **Incremental Learning** - `SGDClassifier` with online updates
-- **Feature Engineering** - Aggressor flow, volatility, book delta, volume anomalies
-- **Signal Generation** - BUY/SELL/HOLD with confidence scores
-- **Backtesting** - Replay historical data for strategy validation
-
-### Order Execution & Risk
-- Automated order placement (Market, Limit, Stop)
-- Position tracking (Day Trade / Consolidated)
-- **Risk Engine**:
-  - Daily loss limits
-  - Max position size
-  - Trading hours restriction
-  - Global kill switch
-- Order lifecycle management (FILLED, PARTIAL, CANCELED)
-
-### Observability
-- Structured logging (JSONL)
-- Prometheus metrics
-- Grafana dashboards
-- Real-time performance monitoring
-=======
 -   📊 **Captures** real-time market data via ProfitDLL (Nelogica)
 -   🤖 **Analyzes** using machine learning (cause-and-effect modeling)
 -   📈 **Generates** trading signals with probability-based decisions
@@ -173,27 +99,12 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
 -   Prometheus metrics
 -   Grafana dashboards
 -   Real-time performance monitoring
->>>>>>> master
 
 ## 🏗️ Architecture
 
 ### High-Level Design
 
 ```
-<<<<<<< HEAD
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  ProfitDLL  │───→│  Analytics   │───→│ API Gateway │
-│   (C#)      │    │  Pipeline    │    │  (FastAPI)  │
-└─────────────┘    │  (Python+ML) │    └─────────────┘
-                   └──────────────┘           │
-                          │                   ▼
-                          │            ┌─────────────┐
-                          ▼            │   Order     │
-                   ┌──────────────┐    │  Manager    │
-                   │  Dashboard   │    │   (C#)      │
-                   │  (React)     │    └─────────────┘
-                   └──────────────┘
-=======
                              Nginx Reverse Proxy
                          (tradingsystem.local:80)
                                     │
@@ -208,41 +119,10 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
                                  │
                          Same Origin Access
                        (No CORS Required)
->>>>>>> master
 ```
 
 ### Principles
 
-<<<<<<< HEAD
-- **Clean Architecture** - Layered design (Domain → Application → Infrastructure → Presentation)
-- **Domain-Driven Design** - Aggregates, Value Objects, Domain Events, Repositories
-- **Microservices** - Independent services with single responsibility
-- **Event-Driven** - WebSocket (data streams) + HTTP (commands)
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Backend Services** | C# (.NET 8.0), Python 3.11+ |
-| **ML & Analytics** | scikit-learn, Polars, NumPy |
-| **API Layer** | FastAPI, ASP.NET Core Web API |
-| **Frontend** | React 18, TypeScript, Tailwind CSS |
-| **Data Storage** | Parquet (Apache Arrow), JSONL |
-| **Messaging** | WebSockets, HTTP REST |
-| **Monitoring** | Prometheus, Grafana |
-| **Orchestration** | Docker, Docker Compose |
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **OS**: Windows 11 x64
-- **.NET SDK**: 8.0 or higher
-- **Python**: 3.11 or higher
-- **Node.js**: 18 or higher
-- **Docker Desktop**: Latest (for containerized deployment)
-- **ProfitDLL License**: Active Data Solution subscription
-=======
 -   **Clean Architecture** - Layered design (Domain → Application → Infrastructure → Presentation)
 -   **Domain-Driven Design** - Aggregates, Value Objects, Domain Events, Repositories
 -   **Microservices** - Independent services with single responsibility
@@ -444,227 +324,16 @@ Refer back to the [Operations Quick Start Guides](docs/context/ops/onboarding/ST
 -   **Hardware**: RTX GPU recommended for ML (optional)
 
 > **💡 Dual Platform Support:** .NET/ProfitDLL services run natively on Windows; Node.js APIs and development tools run on Linux/WSL; auxiliary containers are orchestrated locally via Docker Compose.
->>>>>>> master
 
 ### Installation
 
 1. **Clone the repository**
-<<<<<<< HEAD
-=======
 
->>>>>>> master
 ```bash
 git clone https://github.com/marceloterra/TradingSystem.git
 cd TradingSystem
 ```
 
-<<<<<<< HEAD
-2. **Configure environment**
-```bash
-# Copy example config
-cp config/development/.env.example config/development/.env
-
-# Edit with your credentials
-# PROFIT_USER=your_email
-# PROFIT_PASSWORD=your_password
-# PROFIT_ACTIVATION_KEY=your_key
-```
-
-3. **Build .NET services**
-```bash
-dotnet restore TradingSystem.sln
-dotnet build TradingSystem.sln -c Release --arch x64
-```
-
-4. **Setup Python services**
-```bash
-cd src/Services/AnalyticsPipeline
-poetry install
-
-cd ../APIGateway
-poetry install
-```
-
-5. **Setup Dashboard**
-```bash
-cd src/Services/Dashboard
-npm install
-```
-
-### Run Services
-
-#### Option 1: Docker Compose (Recommended)
-```bash
-cd infrastructure/docker
-docker-compose up -d
-```
-
-#### Option 2: Manual Start
-
-```bash
-# Terminal 1: Data Capture
-cd src/Services/DataCapture/TradingSystem.DataCapture
-dotnet run
-
-# Terminal 2: Analytics Pipeline
-cd src/Services/AnalyticsPipeline
-poetry run python src/main.py
-
-# Terminal 3: API Gateway
-cd src/Services/APIGateway
-poetry run uvicorn src.main:app --reload
-
-# Terminal 4: Order Manager
-cd src/Services/OrderManager/TradingSystem.OrderManager
-dotnet run
-
-# Terminal 5: Dashboard
-cd src/Services/Dashboard
-npm run dev
-```
-
-### Access Points
-
-- **Dashboard**: http://localhost:5173
-- **API Gateway**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3000
-
-## 📁 Project Structure
-
-```
-TradingSystem/
-├── docs/                    # Documentation
-│   ├── architecture/       # ADRs, diagrams (PlantUML)
-│   ├── api/               # OpenAPI specs
-│   ├── prd/               # Product requirements
-│   └── profitdll/         # ProfitDLL integration guides
-├── src/
-│   ├── Core/              # Domain + Application layers (DDD)
-│   ├── Services/          # Microservices
-│   │   ├── DataCapture/      # C# + ProfitDLL
-│   │   ├── AnalyticsPipeline/ # Python + ML
-│   │   ├── APIGateway/        # FastAPI
-│   │   ├── OrderManager/      # C# + Risk Engine
-│   │   └── Dashboard/         # React + Tailwind
-│   └── Shared/            # Cross-cutting concerns
-├── tests/                 # E2E, Integration, Load tests
-├── infrastructure/        # Docker, monitoring, scripts
-├── config/               # Environment configurations
-├── data/                 # Local storage (gitignored)
-└── tools/                # Dev tools, data replay
-```
-
-## 🛠️ Development
-
-### Build Commands
-
-```bash
-# Restore dependencies
-dotnet restore TradingSystem.sln
-
-# Build (x64 REQUIRED for ProfitDLL)
-dotnet build TradingSystem.sln -c Release --arch x64
-
-# Run tests
-dotnet test TradingSystem.sln
-
-# Python linting
-cd src/Services/AnalyticsPipeline
-poetry run black src/
-poetry run ruff check src/
-
-# TypeScript linting
-cd src/Services/Dashboard
-npm run lint
-```
-
-### Testing
-
-```bash
-# Unit tests (.NET)
-dotnet test src/Core/TradingSystem.Domain.Tests/
-
-# Unit tests (Python)
-poetry run pytest tests/unit/ --cov=src
-
-# Integration tests
-dotnet test tests/integration/
-
-# E2E tests
-dotnet test tests/e2e/
-
-# Load tests
-locust -f tests/load/locustfile.py --host=http://localhost:8000
-```
-
-### Code Style
-
-- **C#**: PascalCase, 4 spaces (see `.editorconfig`)
-- **Python**: snake_case, Black (88 chars), Type hints
-- **TypeScript**: camelCase, 2 spaces, ESLint
-- **Commits**: Conventional Commits (`feat:`, `fix:`, `chore:`)
-
-## 🚢 Deployment
-
-### Local Production
-
-```bash
-# Build release
-dotnet build TradingSystem.sln -c Release --arch x64
-
-# Run with production config
-export ASPNETCORE_ENVIRONMENT=Production
-dotnet run --project src/Services/DataCapture/TradingSystem.DataCapture
-```
-
-### Docker Production
-
-```bash
-cd infrastructure/docker
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-## 📚 Documentation
-
-- **[CLAUDE.md](CLAUDE.md)** - Developer guide for Claude Code
-- **[AGENTS.md](AGENTS.md)** - Repository guidelines
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
-- **[PRDs](docs/prd/)** - Product requirements documents
-- **[Architecture](docs/architecture/)** - System design & ADRs
-- **[API Specs](docs/api/)** - OpenAPI documentation
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Code of Conduct
-- Development workflow
-- Pull request process
-- Coding standards
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Nelogica** - ProfitDLL integration
-- **scikit-learn** - Machine learning library
-- **FastAPI** - Modern Python web framework
-- **React** - UI library
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/marceloterra">Marcelo Terra</a>
-</p>
-
-<p align="center">
-  <sub>⚠️ This is a trading system. Use at your own risk. Always test thoroughly before live trading.</sub>
-</p>
-=======
 2. **Quick Start Setup**
 
 ```bash
@@ -745,5 +414,3 @@ npm run dev
 ## 📁 Project Structure
 
 [Rest of the README remains unchanged...]
-
->>>>>>> master

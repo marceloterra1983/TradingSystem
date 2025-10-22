@@ -1,3 +1,14 @@
+---
+title: Product Vision - TradingSystem
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Product Vision - TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # Product Vision - TradingSystem
 
 **Version:** 1.0

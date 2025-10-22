@@ -1,3 +1,14 @@
+---
+title: Frontmatter Standardization Progress Report
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Frontmatter Standardization Progress Report
+status: active
+last_review: 2025-10-22
+---
+
 # Frontmatter Standardization Progress Report
 
 **Date**: 2025-10-17  

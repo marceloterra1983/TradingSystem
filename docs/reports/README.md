@@ -1,3 +1,14 @@
+---
+title: Relatórios do Projeto TradingSystem
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: 📊 Relatórios do Projeto TradingSystem
+status: active
+last_review: 2025-10-22
+---
+
 # 📊 Relatórios do Projeto TradingSystem
 
 Esta pasta centraliza todos os relatórios técnicos, auditorias e documentação de implementações do projeto TradingSystem.

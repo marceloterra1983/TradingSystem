@@ -1,3 +1,14 @@
+---
+title: Symlinks de Compatibilidade - Scripts da Raiz
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Symlinks de Compatibilidade - Scripts da Raiz
+status: active
+last_review: 2025-10-22
+---
+
 # Symlinks de Compatibilidade - Scripts da Raiz
 
 Este documento descreve os symlinks criados para manter compatibilidade com scripts legados na raiz do projeto.

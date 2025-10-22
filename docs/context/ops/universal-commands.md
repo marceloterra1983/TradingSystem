@@ -7,6 +7,7 @@ summary: "Guia completo dos comandos universais start e stop para gerenciar o Tr
 status: active
 last_review: 2025-10-20
 last_update: 2025-10-20
+sidebar_position: 1
 ---
 
 # Comandos Universais do TradingSystem
@@ -252,15 +253,15 @@ Os comandos respeitam as seguintes variáveis:
 
 ### Start
 
--   **Wrapper**: `/home/marce/projetos/TradingSystem/start-tradingsystem`
--   **Script principal**: `scripts/startup/start-tradingsystem-full.sh`
+-   **Entrypoint**: `scripts/startup/start-tradingsystem.sh`
+-   **Full workflow**: `scripts/startup/start-tradingsystem-full.sh`
 -   **Docker**: `scripts/docker/start-stacks.sh`
 -   **Services**: `scripts/services/start-all.sh`
 
 ### Stop
 
--   **Wrapper**: `/home/marce/projetos/TradingSystem/stop-tradingsystem`
--   **Script principal**: `scripts/shutdown/stop-tradingsystem-full.sh`
+-   **Entrypoint**: `scripts/shutdown/stop-tradingsystem.sh`
+-   **Full workflow**: `scripts/shutdown/stop-tradingsystem-full.sh`
 -   **Docker**: `scripts/docker/stop-stacks.sh`
 -   **Services**: `scripts/services/stop-all.sh`
 

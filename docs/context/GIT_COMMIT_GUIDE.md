@@ -1,3 +1,14 @@
+---
+title: Service Launcher - Guia de Commit
+sidebar_position: 1
+tags: [guide, documentation]
+domain: shared
+type: guide
+summary: Service Launcher - Guia de Commit
+status: active
+last_review: 2025-10-22
+---
+
 # Service Launcher - Guia de Commit
 
 ## 🎯 Opção 1: Commit Único (Recomendado)

@@ -1,3 +1,14 @@
+---
+title: 🎊 Reorganização TradingSystem v2.1.1 - FINAL REPORT
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 🎊 Reorganização TradingSystem v2.1.1 - FINAL REPORT
+status: active
+last_review: 2025-10-22
+---
+
 # 🎊 Reorganização TradingSystem v2.1.1 - FINAL REPORT
 
 > **Relatório final** de todas as reorganizações e otimizações do projeto

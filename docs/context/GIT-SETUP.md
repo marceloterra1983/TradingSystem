@@ -1,3 +1,14 @@
+---
+title: Git Setup - Quick Guide
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Git Setup - Quick Guide
+status: active
+last_review: 2025-10-22
+---
+
 # Git Setup - Quick Guide
 
 ## ⚠️ Git Identity Not Configured
@@ -83,30 +94,10 @@ Once Git identity is configured, you can make the commit:
 cd /home/marce/projetos/TradingSystem
 
 # Stage files
-git add \
-  reiniciar \
-  start-tradingsystem \
-  stop-tradingsystem \
-  scripts/startup/start-tradingsystem-full.sh \
-  scripts/shutdown/stop-tradingsystem-full.sh \
-  scripts/maintenance/create-root-symlinks.sh \
-  scripts/git/configure-identity.sh \
-  docs/context/ops/SYMLINK-MIGRATION.md \
-  VERIFICATION-COMMENTS-IMPLEMENTED.md \
-  GIT-SETUP.md
+git add path/to/your/changes
 
 # Commit
-git commit -m "refactor: convert root wrappers to symlinks with robust path resolution
-
-- Convert reiniciar, start-tradingsystem, stop-tradingsystem to symlinks
-- Update start-tradingsystem-full.sh with symlink-safe path resolution
-- Update stop-tradingsystem-full.sh with symlink-safe path resolution
-- Add migration script: scripts/maintenance/create-root-symlinks.sh
-- Add Git identity configuration script: scripts/git/configure-identity.sh
-- Add documentation: docs/context/ops/SYMLINK-MIGRATION.md
-
-Fixes: Incorrect ROOT_DIR computation when called via symlink
-Implements: Verification comments 1 and 2"
+git commit -m "chore: describe your change"
 
 # Verify commit
 git log -1 --stat

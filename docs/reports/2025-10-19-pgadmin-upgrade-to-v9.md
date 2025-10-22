@@ -6,6 +6,7 @@ type: changelog
 summary: Upgrade do pgAdmin de versão 8.11 para 9.0 com script automatizado
 status: completed
 last_review: 2025-10-19
+sidebar_position: 1
 ---
 
 # pgAdmin Upgrade: 8.11 → 9.0

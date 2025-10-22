@@ -6,6 +6,7 @@ type: "index"
 summary: "Índice central de toda documentação frontend do TradingSystem"
 status: "active"
 last_review: "2025-10-19"
+sidebar_position: 1
 ---
 
 # Frontend Documentation Hub

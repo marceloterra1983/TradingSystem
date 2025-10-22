@@ -1,3 +1,14 @@
+---
+title: Guia de Migração de Tema - Docusaurus
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Guia de Migração de Tema - Docusaurus
+status: active
+last_review: 2025-10-22
+---
+
 # Guia de Migração de Tema - Docusaurus
 
 ## 🎯 Objetivo

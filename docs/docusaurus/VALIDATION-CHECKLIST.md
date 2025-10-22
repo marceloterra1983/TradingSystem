@@ -1,3 +1,14 @@
+---
+title: Docusaurus File Integrity Validation Checklist
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: Docusaurus File Integrity Validation Checklist
+status: active
+last_review: 2025-10-22
+---
+
 # Docusaurus File Integrity Validation Checklist
 
 **Purpose**: Pre-backup validation to ensure all critical files are present and valid  

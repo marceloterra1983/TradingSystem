@@ -1,3 +1,14 @@
+---
+title: Readme
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: Docusaurus Workspace Notes
+status: active
+last_review: 2025-10-22
+---
+
 ## Docusaurus Workspace Notes
 
 - React and ReactDOM are pinned to **18.2.0** to avoid potential compatibility issues with community plugins while React 19 support stabilises. If upgrades are attempted, run the full docs build and smoke-test the mermaid/PlantUML plugins before committing.

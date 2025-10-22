@@ -416,7 +416,10 @@ def main():
         logging.debug(f"Processing: {file_path}")
 
         frontmatter, content = extract_frontmatter(file_path)
-        relative_path = str(file_path.relative_to(Path.cwd()))
+        try:
+            relative_path = str(file_path.relative_to(Path.cwd()))
+        except ValueError:
+            relative_path = str(file_path)
 
         if frontmatter is None:
             results.append({

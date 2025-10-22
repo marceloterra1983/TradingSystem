@@ -6,6 +6,7 @@ type: "checklist"
 summary: "Checklist passo-a-passo para implementar o tema Gemini CLI no Docusaurus"
 status: "ready"
 last_review: "2025-10-19"
+sidebar_position: 1
 ---
 
 # ✅ Checklist Rápido: Implementação Tema Gemini CLI

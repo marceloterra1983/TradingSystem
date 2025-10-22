@@ -7,6 +7,7 @@ summary: "Resumo executivo da análise e plano de implementação do tema Gemini
 status: "ready-for-implementation"
 last_review: "2025-10-19"
 priority: "high"
+sidebar_position: 1
 ---
 
 # Resumo Executivo: Adaptação do Tema Gemini CLI
