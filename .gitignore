@@ -352,3 +352,23 @@ backups/rename-containers-*/env-backup/
 # dados locais
 /data/
 >>>>>>> master
+
+.env.backup-*
+.env.test
+
+# tooling local e editores
+.agent/
+.claude/
+.cursor/
+.obsidian/
+.specify/
+.factory/
+.grok/
+teste/.obsidian/
+.claude-plugin
+.cursorrules-linux
+.clinerules
+
+# envs locais
+.env.backup-*
+.env.test
