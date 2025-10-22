@@ -356,7 +356,6 @@ backups/rename-containers-*/env-backup/
 .env.backup-*
 .env.test
 
-# tooling local e editores
 .agent/
 .claude/
 .cursor/
@@ -369,7 +368,21 @@ teste/.obsidian/
 .cursorrules-linux
 .clinerules
 
-# envs locais
+.env.backup-*
+.env.test
+
+.agent/
+.claude/
+.cursor/
+.obsidian/
+.specify/
+.factory/
+.grok/
+teste/.obsidian/
+.claude-plugin
+.cursorrules-linux
+.clinerules
+
 .env.backup-*
 .env.test
 
