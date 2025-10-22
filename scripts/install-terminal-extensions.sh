@@ -27,3 +27,15 @@ fi
 
 echo "Extensões instaladas!"
 
+
+
+
+
+
+
+
+
+
+
+
+

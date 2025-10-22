@@ -1,3 +1,14 @@
+---
+title: 📋 Guia Rápido - OpenSpec
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: reference
+summary: 📋 Guia Rápido - OpenSpec
+status: active
+last_review: 2025-10-22
+---
+
 # 📋 Guia Rápido - OpenSpec
 
 **Status**: ✅ OpenSpec configurado em `infrastructure/openspec/`

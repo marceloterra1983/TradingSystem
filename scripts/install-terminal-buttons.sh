@@ -34,3 +34,15 @@ echo "🔗 Links diretos:"
 echo "https://marketplace.visualstudio.com/search?term=terminal%20button&target=VSCode"
 echo "https://marketplace.visualstudio.com/search?term=terminal%20copy&target=VSCode"
 echo "https://marketplace.visualstudio.com/search?term=terminal%20commands&target=VSCode"
+
+
+
+
+
+
+
+
+
+
+
+
