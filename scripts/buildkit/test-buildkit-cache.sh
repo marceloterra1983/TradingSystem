@@ -28,13 +28,13 @@ CMD ["cat", "/app/test.txt"]
 EOF
 
 echo "Primeira build (sem cache)..."
-time ./infrastructure/scripts/buildkit-wrapper-cached.sh build \
+time ./scripts/buildkit/buildkit-wrapper-cached.sh build \
     "$TEST_DIR" \
     "$TEST_DIR" \
     "buildkit-cache-test:latest"
 
 echo "Segunda build (com cache)..."
-time ./infrastructure/scripts/buildkit-wrapper-cached.sh build \
+time ./scripts/buildkit/buildkit-wrapper-cached.sh build \
     "$TEST_DIR" \
     "$TEST_DIR" \
     "buildkit-cache-test:v2"
@@ -49,7 +49,7 @@ echo "Teste do cache BuildKit concluído!"
 
 # Testar build com cache do registry
 echo "Testando build com cache do registry..."
-time ./infrastructure/scripts/buildkit-wrapper-cached.sh build-registry \
+time ./scripts/buildkit/buildkit-wrapper-cached.sh build-registry \
     "$TEST_DIR" \
     "$TEST_DIR" \
     "buildkit-cache-test:registry"
