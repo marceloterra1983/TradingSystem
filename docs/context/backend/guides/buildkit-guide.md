@@ -28,7 +28,7 @@ This guide covers the BuildKit build system implementation in the TradingSystem 
 ### Basic Build
 ```bash
 # Use the wrapper script for simple builds
-./infrastructure/scripts/buildkit-wrapper-cached.sh build \
+./scripts/buildkit/buildkit-wrapper-cached.sh build \
     context_dir \
     dockerfile_dir \
     image_name:tag
@@ -37,7 +37,7 @@ This guide covers the BuildKit build system implementation in the TradingSystem 
 ### Build with Registry Cache
 ```bash
 # Use registry cache for distributed builds
-./infrastructure/scripts/buildkit-wrapper-cached.sh build-registry \
+./scripts/buildkit/buildkit-wrapper-cached.sh build-registry \
     context_dir \
     dockerfile_dir \
     image_name:tag
@@ -72,7 +72,7 @@ Our tests show significant performance improvements:
 - Health monitoring
 
 ### 4. Build Wrapper
-Unified interface for all build operations in `infrastructure/scripts/buildkit-wrapper-cached.sh`:
+Unified interface for all build operations in `scripts/buildkit/buildkit-wrapper-cached.sh`:
 - Local builds
 - Registry cache builds
 - Cache management
@@ -174,7 +174,7 @@ storage:
 3. **Cache Not Working**
    ```bash
    # Clear corrupted cache
-   ./infrastructure/scripts/buildkit-wrapper-cached.sh clean-cache
+   ./scripts/buildkit/buildkit-wrapper-cached.sh clean-cache
    ```
 
 ### Monitoring
@@ -199,16 +199,16 @@ storage:
 ### buildkit-wrapper-cached.sh
 ```bash
 # Build with local cache
-./infrastructure/scripts/buildkit-wrapper-cached.sh build context dockerfile tag
+./scripts/buildkit/buildkit-wrapper-cached.sh build context dockerfile tag
 
 # Build with registry cache
-./infrastructure/scripts/buildkit-wrapper-cached.sh build-registry context dockerfile tag
+./scripts/buildkit/buildkit-wrapper-cached.sh build-registry context dockerfile tag
 
 # Clean cache
-./infrastructure/scripts/buildkit-wrapper-cached.sh clean-cache
+./scripts/buildkit/buildkit-wrapper-cached.sh clean-cache
 
 # Show debug info
-./infrastructure/scripts/buildkit-wrapper-cached.sh debug
+./scripts/buildkit/buildkit-wrapper-cached.sh debug
 ```
 
 ## Related Links

@@ -9,7 +9,7 @@ mkdir -p $TEST_DIR
 
 # Executar build com wrapper
 echo "Executando build de teste..."
-./infrastructure/scripts/buildkit-wrapper.sh build \
+./scripts/buildkit/buildkit-wrapper.sh build \
     "$TEST_DIR" \
     "$TEST_DIR" \
     "buildkit-test:latest"
@@ -24,7 +24,7 @@ echo "Teste do BuildKit concluído!"
 
 # Exibir informações do BuildKit
 echo "Informações do BuildKit:"
-./infrastructure/scripts/buildkit-wrapper.sh debug
+./scripts/buildkit/buildkit-wrapper.sh debug
 
 echo "Workers do BuildKit:"
-./infrastructure/scripts/buildkit-wrapper.sh workers
+./scripts/buildkit/buildkit-wrapper.sh workers
