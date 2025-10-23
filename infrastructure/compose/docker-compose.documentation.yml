@@ -1,0 +1,20 @@
+name: documentation
+
+services:
+  docs-api:
+    image: "${IMG_DOCS_API:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: docs-api
+    ports:
+      - "${DOCS_API_PORT:-3400}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  docs-api-viewer:
+    image: "${IMG_DOCS_API_VIEWER:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: docs-api-viewer
+    ports:
+      - "${DOCSPECS_PORT:-3101}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
