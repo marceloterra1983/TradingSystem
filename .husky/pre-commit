@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-
 # ============================================================================
 # Documentation Frontmatter Validation
 # ============================================================================
@@ -7,7 +6,7 @@
 # Uses: scripts/docs/validate-frontmatter.py
 # Fails commit if validation errors found
 
-echo "\n🔍 Validating documentation frontmatter..."
+echo "🔍 Validating documentation frontmatter..."
 
 # Get staged markdown files
 STAGED_MD_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(md|mdx)$' || true)
