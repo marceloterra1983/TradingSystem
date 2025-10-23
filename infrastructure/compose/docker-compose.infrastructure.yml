@@ -1,0 +1,38 @@
+name: infrastructure
+
+services:
+  langgraph:
+    image: "${IMG_INFRA_LANGGRAPH:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: infra-langgraph
+    ports:
+      - "${LANGGRAPH_PORT:-8111}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  llamaindex-ingestion:
+    image: "${IMG_INFRA_LLAMAINDEX_INGESTION:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: infra-llamaindex-ingestion
+    ports:
+      - "${LLAMAINDEX_INGESTION_PORT:-8201}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  llamaindex-query:
+    image: "${IMG_INFRA_LLAMAINDEX_QUERY:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: infra-llamaindex-query
+    ports:
+      - "${LLAMAINDEX_QUERY_PORT:-8202}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  agno-agents:
+    image: "${IMG_INFRA_AGNO_AGENTS:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: infra-agno-agents
+    ports:
+      - "${AGNO_AGENTS_PORT:-8200}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env

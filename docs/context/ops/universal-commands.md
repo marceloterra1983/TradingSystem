@@ -6,7 +6,6 @@ type: guide
 summary: "Guia completo dos comandos universais start e stop para gerenciar o TradingSystem"
 status: active
 last_review: 2025-10-20
-last_update: 2025-10-20
 sidebar_position: 1
 ---
 

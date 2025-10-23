@@ -1,0 +1,132 @@
+name: database
+
+services:
+  timescaledb:
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
+    container_name: data-timescaledb
+    ports:
+      - "${TIMESCALEDB_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${TIMESCALEDB_DB:-trading}
+      POSTGRES_USER: ${TIMESCALEDB_USER:-timescale}
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-changeme}
+      TIMESCALEDB_TELEMETRY: 'off'
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  timescaledb-backup:
+    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
+    container_name: data-timescaledb-backup
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: backup
+      POSTGRES_USER: backup
+      POSTGRES_PASSWORD: backup
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  timescaledb-exporter:
+    image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter}:${IMG_VERSION:-latest}"
+    container_name: data-timescaledb-exporter
+    ports:
+      - "${TIMESCALEDB_EXPORTER_PORT:-9187}:9187"
+    environment:
+      DATA_SOURCE_URI: 'timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
+      DATA_SOURCE_USER: ${TIMESCALEDB_USER:-timescale}
+      DATA_SOURCE_PASS: ${TIMESCALEDB_PASSWORD:-changeme}
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+    depends_on:
+      - timescaledb
+
+  timescaledb-pgadmin:
+    image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-dpage/pgadmin4}:${IMG_VERSION:-latest}"
+    container_name: data-timescaledb-pgadmin
+    ports:
+      - "${PGADMIN_HOST_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  timescaledb-pgweb:
+    image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb}:${IMG_VERSION:-latest}"
+    container_name: data-timescaledb-pgweb
+    ports:
+      - "${PGWEB_PORT:-8081}:8081"
+    environment:
+      DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+    depends_on:
+      - timescaledb
+
+  timescaledb-adminer:
+    image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer}:${IMG_VERSION:-latest}"
+    container_name: data-timescaledb-adminer
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: timescaledb
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+    depends_on:
+      - timescaledb
+
+  postgress-langgraph:
+    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres}:${IMG_VERSION:-15}"
+    container_name: data-postgress-langgraph
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tradingsystem}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  qdrant:
+    image: "${IMG_DATA_QDRANT:-qdrant/qdrant}:${IMG_VERSION:-latest}"
+    container_name: data-qdrant
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    environment:
+      QDRANT_ALLOW_RECOVERY: true
+      QDRANT_ENABLE_TLS: false
+      QDRANT_LOG_LEVEL: INFO
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  questdb:
+    image: "${IMG_DATA_QUESTDB:-questdb/questdb}:${IMG_VERSION:-latest}"
+    container_name: data-questdb
+    ports:
+      - "${QUESTDB_HTTP_PORT_NEW:-9000}:9000"
+      - "${QUESTDB_PG_PORT_NEW:-9009}:9009"
+      - "${QUESTDB_ILP_PORT:-8812}:8812"
+    environment:
+      QDB_TELEMETRY_ENABLED: false
+      QDB_LOG_LEVEL: INFO
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  frontend-apps:
+    image: "${IMG_DATA_FRONTEND_APPS:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: data-frontend-apps
+    ports:
+      - "${FRONTEND_APPS_PORT:-3001}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env

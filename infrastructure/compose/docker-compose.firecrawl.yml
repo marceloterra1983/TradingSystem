@@ -1,0 +1,42 @@
+name: firecrawl
+
+services:
+  firecrawl-api:
+    image: "${IMG_FIRECRAWL_API:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: firecrawl-api
+    ports:
+      - "${FIRECRAWL_API_PORT:-3002}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  firecrawl-postgres:
+    image: "${IMG_FIRECRAWL_POSTGRES:-postgres}:${IMG_VERSION:-15}"
+    container_name: firecrawl-postgres
+    ports:
+      - "${FIRECRAWL_POSTGRES_PORT:-5436}:5432"
+    environment:
+      POSTGRES_DB: firecrawl
+      POSTGRES_USER: firecrawl
+      POSTGRES_PASSWORD: firecrawl
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  firecrawl-redis:
+    image: "${IMG_FIRECRAWL_REDIS:-redis}:${IMG_VERSION:-latest}"
+    container_name: firecrawl-redis
+    ports:
+      - "${FIRECRAWL_REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  firecrawl-playwright:
+    image: "${IMG_FIRECRAWL_PLAYWRIGHT:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: firecrawl-playwright
+    ports:
+      - "${FIRECRAWL_PLAYWRIGHT_PORT:-3003}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env

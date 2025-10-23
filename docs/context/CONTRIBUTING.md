@@ -11,7 +11,6 @@ last_review: 2025-10-22
 
 # Contributing to TradingSystem
 
-<<<<<<< HEAD
 Thank you for your interest in contributing to TradingSystem! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
@@ -290,7 +289,6 @@ Contributors will be recognized in:
 - Project documentation
 
 Thank you for contributing to TradingSystem! 🎉
-=======
 Thank you for your interest in contributing to TradingSystem! This document provides guidelines and best practices for contributing to the project.
 
 ## 📋 Table of Contents
@@ -999,4 +997,3 @@ Your contributions make TradingSystem better! If you have questions:
 **Last Updated**: 2025-10-15  
 **Version**: 2.1  
 **Maintained By**: DevOps Team
->>>>>>> master

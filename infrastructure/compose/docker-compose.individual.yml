@@ -1,0 +1,20 @@
+name: individual
+
+services:
+  ollama:
+    image: "${IMG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
+    container_name: ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  registry:
+    image: "${IMG_OUTROS_CONTAINERS_REGISTRY:-registry}:${IMG_VERSION:-2}"
+    container_name: individual-containers-registry
+    ports:
+      - "${REGISTRY_PORT:-5000}:5000"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
