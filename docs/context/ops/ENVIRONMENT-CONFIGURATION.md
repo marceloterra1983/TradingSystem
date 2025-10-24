@@ -179,7 +179,6 @@ The React/Vite dashboard automatically loads these variables from the root `.env
 | `VITE_DOCUMENTATION_PROXY_TARGET` | Override Documentation API proxy target | `http://localhost:3400` |
 | `VITE_SERVICE_LAUNCHER_PROXY_TARGET` | Override Service Launcher proxy target | `http://localhost:3500` |
 | `VITE_FIRECRAWL_PROXY_TARGET` | Override Firecrawl proxy target | `http://localhost:3600` |
-| `VITE_WEBSCRAPER_PROXY_TARGET` | Override Webscraper API proxy target | `http://localhost:3700/api/v1` |
 | `VITE_DOCUSAURUS_PROXY_TARGET` | Override Docs Hub proxy target (supports subpaths) | `http://localhost:3004` |
 | `VITE_MCP_PROXY_TARGET` | Override local MCP server proxy target | `http://localhost:3847` |
 

@@ -53,7 +53,6 @@ workspace-api             ● Running       123456     3200
 b3-market-data            ● Running       123457     3302      
 service-launcher          ● Running       123458     3500      
 firecrawl-proxy           ● Running       123459     3600      
-webscraper-api            ● Running       123460     3700      
 frontend-dashboard        ● Running       123461     3103      
 docusaurus                ● Running       123462     3004      
 
@@ -230,7 +229,6 @@ status --json
 2. **b3-market-data** (3302) - Dados do mercado B3
 3. **service-launcher** (3500) - Orquestrador de serviços
 4. **firecrawl-proxy** (3600) - Proxy Firecrawl
-5. **webscraper-api** (3700) - API WebScraper
 6. **frontend-dashboard** (3103) - Dashboard React
 7. **docusaurus** (3004) - Documentação
 
@@ -387,7 +385,6 @@ status-quick
 status-services
 
 # Se um serviço estiver parado, iniciar manualmente
-cd backend/api/webscraper-api
 npm run dev
 ```
 

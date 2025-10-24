@@ -21,7 +21,6 @@ Este resumo apresenta os blocos principais de infraestrutura que sustentam o Tra
 | Firecrawl Stack | Web scraping/crawling local para enriquecimento de documentação. | [Firecrawl Stack Overview](./firecrawl-stack.md) |
 | Centralized `.env` | Padroniza configuração de todos os serviços. | [Centralized ENV Implementation Plan](./CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md) |
 | Observabilidade | Prometheus, Grafana, Alertmanager, logs estruturados. | [Prometheus Setup](../monitoring/prometheus-setup.md), [Grafana Dashboards](../monitoring/grafana-dashboards.md) |
-| Dados de Apoio | QuestDB e TimescaleDB para sinais, logs e scraping. | [Trading Core Schema](../../backend/data/schemas/trading-core/overview.md), [WebScraper Schema](../../backend/data/schemas/webscraper-schema-sql.md) |
 
 ## Fluxo de Implantação
 

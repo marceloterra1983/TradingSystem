@@ -17,8 +17,7 @@ sidebar_position: 1
 
 ### 📱 Aplicações
 
--   **[Dashboard](../../apps/dashboard/README.md)** - Aplicação React principal (Port 3103)
--   **[WebScraper](../../apps/WebScraper/README.md)** - Ferramenta de web scraping
+-   **[Dashboard](../../dashboard/README.md)** - Aplicação React principal (Port 3103)
 -   **[TP Capital](../../apps/tp-capital/README.md)** - Interface TP Capital (Port 3200)
 -   **[B3 Market Data](../../apps/b3-market-data/README.md)** - Interface B3 (Port 3302)
 
@@ -60,10 +59,10 @@ cat docs/context/frontend/guides/gemini-cli-theme-migration.md
 
 ### Biblioteca de Componentes
 
--   **[Button Standards](../../apps/dashboard/src/components/ui/BUTTON-STANDARDS.md)** - Padrões de botões
--   **[Collapsible Card](../../apps/dashboard/src/components/ui/collapsible-card-standardization.md)** - Cards colapsáveis
--   **[Toast Documentation](../../apps/dashboard/src/components/ui/TOAST-DOCUMENTATION.md)** - Sistema de notificações
--   **[UI Components README](../../apps/dashboard/src/components/ui/README.md)** - Visão geral de componentes
+-   **[Button Standards](../../dashboard/src/components/ui/BUTTON-STANDARDS.md)** - Padrões de botões
+-   **[Collapsible Card](../../dashboard/src/components/ui/collapsible-card-standardization.md)** - Cards colapsáveis
+-   **[Toast Documentation](../../dashboard/src/components/ui/TOAST-DOCUMENTATION.md)** - Sistema de notificações
+-   **[UI Components README](../../dashboard/src/components/ui/README.md)** - Visão geral de componentes
 
 ### Componentes Disponíveis
 
@@ -99,7 +98,7 @@ cat docs/context/frontend/guides/gemini-cli-theme-migration.md
 ### Guias de Implementação
 
 -   **[Gemini CLI Theme Migration](./guides/gemini-cli-theme-migration.md)** - Migração de tema
--   **[Component Development](../../apps/dashboard/src/components/ui/README.md)** - Desenvolvimento de componentes
+-   **[Component Development](../../dashboard/src/components/ui/README.md)** - Desenvolvimento de componentes
 
 ## 🏗️ Arquitetura Frontend
 
@@ -117,7 +116,6 @@ frontend/
 │   │   │   ├── utils/            # Utilities
 │   │   │   └── types/            # TypeScript types
 │   │   └── public/               # Static assets
-│   ├── WebScraper/               # Web scraping tool
 │   ├── tp-capital/               # TP Capital interface
 │   └── b3-market-data/           # B3 interface
 │
@@ -185,7 +183,7 @@ Code: 14px / 400 weight
 ### Executar Dashboard Localmente
 
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm install
 npm run dev
 # Acesse: http://localhost:3103
@@ -204,7 +202,7 @@ npm run start -- --port 3004
 
 ```bash
 # Dashboard
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run build
 
 # Docusaurus
@@ -217,7 +215,7 @@ npm run build
 ### Dashboard
 
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run test              # Vitest
 npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
@@ -320,11 +318,11 @@ Ver: [API Hub](../shared/integrations/frontend-backend-api-hub.md)
 
 1. Revise o [Resumo Executivo Gemini CLI](./GEMINI-CLI-THEME-EXECUTIVE-SUMMARY.md)
 2. Consulte o [Guia de Migração](./guides/gemini-cli-theme-migration.md)
-3. Veja os [UI Components](../../apps/dashboard/src/components/ui/)
+3. Veja os [UI Components](../../dashboard/src/components/ui/)
 
 ### Para Implementação
 
-1. Leia o [Dashboard README](../../apps/dashboard/README.md)
+1. Leia o [Dashboard README](../../dashboard/README.md)
 2. Consulte a [API Hub](../shared/integrations/frontend-backend-api-hub.md)
 3. Verifique os [Environment Variables](../ops/ENVIRONMENT-CONFIGURATION.md)
 
@@ -345,7 +343,7 @@ Ver: [API Hub](../shared/integrations/frontend-backend-api-hub.md)
 
 ### Adicionar Novo Componente
 
-1. Seguir [Button Standards](../../apps/dashboard/src/components/ui/BUTTON-STANDARDS.md)
+1. Seguir [Button Standards](../../dashboard/src/components/ui/BUTTON-STANDARDS.md)
 2. Incluir TypeScript types
 3. Adicionar testes
 4. Documentar no README do componente

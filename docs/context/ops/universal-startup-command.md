@@ -163,7 +163,6 @@ tail -f /tmp/tradingsystem-logs/workspace-api.log
 | Docusaurus       | 3004  | Documentação (Docusaurus)          |
 | Service Launcher | 3500  | Orquestrador (Express)             |
 | Firecrawl Proxy  | 3600  | Proxy Firecrawl (Express)          |
-| WebScraper API   | 3700  | API WebScraper (Express)           |
 
 ## 🔄 Fluxo de Execução
 

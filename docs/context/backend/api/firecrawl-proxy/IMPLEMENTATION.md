@@ -82,5 +82,4 @@ Vitest and Supertest provide coverage across request validation logic and upstre
 
 - [Firecrawl Proxy API Reference](../firecrawl-proxy.md)
 - [Firecrawl Stack Overview](../../../ops/tools/firecrawl-stack.md)
-- [Scraping Dashboard Feature](../../../frontend/features/webscraper-app.md)
 - [Service Startup Guide](../../../ops/onboarding/START-SERVICES.md)

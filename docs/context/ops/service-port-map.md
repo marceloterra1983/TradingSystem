@@ -37,7 +37,6 @@ Após a remoção do Traefik, cada serviço expõe sua própria porta diretament
 | TimescaleDB Exporter | `data-timescaledb-exporter` | http://localhost:9187 | Métricas Prometheus |
 | TimescaleDB pgAdmin | `data-timescaledb-pgadmin` | http://localhost:5050 | Administração PostgreSQL |
 | TimescaleDB pgWeb | `data-timescaledb-pgweb` | http://localhost:8081 | Cliente web leve |
-| Frontend Apps DB | `data-frontend-apps` | postgres://localhost:5444 | PostgreSQL unificado (schemas: documentation, workspace, webscraper) |
 | Prometheus | `mon-prometheus` | http://localhost:9090 | Console de métricas |
 | Alertmanager | `mon-alertmanager` | http://localhost:9093 | Pipeline de alertas |
 | Grafana | `mon-grafana` | http://localhost:3000 | Dashboards pré-provisionados |

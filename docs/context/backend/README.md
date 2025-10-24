@@ -72,7 +72,6 @@ last_review: 2025-10-18
 | --------------------- | ----------- | ------------ | ------------------------------------------------------------------------------------ |
 | **Idea Bank API**     | OpenAPI 3.1 | 8 endpoints  | [api/idea-bank.openapi.yaml](api/idea-bank.openapi.yaml)                             |
 | **Documentation API** | OpenAPI 3.1 | 12 endpoints | [api/specs/documentation-api.openapi.yaml](api/specs/documentation-api.openapi.yaml) |
-| **WebScraper API**    | Markdown    | 6 endpoints  | [api/webscraper-api.md](api/webscraper-api.md)                                       |
 
 ---
 
@@ -88,7 +87,6 @@ last_review: 2025-10-18
 | ---------------- | ----------------------------------------------------- | ----------- | -------------------------------------------------------------- |
 | **Trading Core** | trades, positions, tp_capital_signals, b3_market_data | QuestDB     | [Trading Core Overview](data/schemas/trading-core/overview.md) |
 | **Logging**      | service_logs, audit_logs                              | QuestDB     | [Logging Overview](data/schemas/logging/overview.md)           |
-| **WebScraper**   | scrape_jobs, scrape_results                           | TimescaleDB | [WebScraper Schema](data/schemas/webscraper-schema-sql.md)     |
 
 ### Data Operations
 
@@ -208,7 +206,6 @@ dotnet run
 **Data & Schemas:**
 
 -   [Trading Core Schema Overview](data/schemas/trading-core/overview.md) - QuestDB trading schemas
--   [WebScraper Schema](data/schemas/webscraper-schema-sql.md) - TimescaleDB scraping schemas
 -   [Data Quality Runbook](data/operations/data-quality-runbook.md) - Data quality procedures
 -   [Backup & Restore Guide](data/operations/backup-restore.md) - Database backup procedures
 

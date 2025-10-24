@@ -190,7 +190,6 @@ start && sleep 15 && status-quick
 2. b3-market-data (3302)
 3. service-launcher (3500)
 4. firecrawl-proxy (3600)
-5. webscraper-api (3700)
 6. frontend-dashboard (3103)
 7. docusaurus (3004)
 
