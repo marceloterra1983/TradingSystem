@@ -62,11 +62,11 @@ done
 # Service definitions (name:path)
 declare -A SERVICES=(
     ["workspace"]="backend/api/workspace"
-    ["tp-capital-signals"]="frontend/apps/tp-capital"
-    ["b3-market-data"]="frontend/apps/b3-market-data"
+    ["tp-capital-signals"]="apps/tp-capital"
+    ["b3-market-data"]="apps/b3-market-data"
     ["documentation-api"]="backend/api/documentation-api"
-    ["status"]="frontend/apps/status"
-    ["dashboard"]="frontend/apps/dashboard"
+    ["status"]="apps/status"
+    ["dashboard"]="frontend/dashboard"
     ["docs"]="docs/docusaurus"
 )
 
@@ -131,15 +131,15 @@ else
     log_info "1. Backend API Services"
     hr
     install_deps "workspace" "backend/api/workspace"
-    install_deps "tp-capital-signals" "frontend/apps/tp-capital"
-    install_deps "b3-market-data" "frontend/apps/b3-market-data"
+    install_deps "tp-capital-signals" "apps/tp-capital"
+    install_deps "b3-market-data" "apps/b3-market-data"
     install_deps "documentation-api" "backend/api/documentation-api"
-    install_deps "status" "frontend/apps/status"
+    install_deps "status" "apps/status"
     echo ""
     
     log_info "2. Frontend Applications"
     hr
-    install_deps "dashboard" "frontend/apps/dashboard"
+    install_deps "dashboard" "frontend/dashboard"
     echo ""
     
     log_info "3. Documentation"

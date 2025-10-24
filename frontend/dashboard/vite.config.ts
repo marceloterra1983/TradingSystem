@@ -83,7 +83,7 @@ export default defineConfig(({ mode }) => {
   );
   const tpCapitalProxy = resolveProxy(
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
-    'http://localhost:3201',
+    'http://localhost:4005',
   );
   const b3Proxy = resolveProxy(
     env.VITE_B3_PROXY_TARGET || env.VITE_B3_API_URL,
@@ -104,11 +104,6 @@ export default defineConfig(({ mode }) => {
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
     'http://localhost:3600',
-  );
-  const webscraperProxy = resolveProxy(
-    env.VITE_WEBSCRAPER_PROXY_TARGET || env.VITE_WEBSCRAPER_API_URL,
-    'http://localhost:3700',
-    '/api/v1',
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
 
@@ -174,11 +169,6 @@ export default defineConfig(({ mode }) => {
           target: firecrawlProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/firecrawl/, firecrawlProxy.basePath),
-        },
-        '/api/webscraper': {
-          target: webscraperProxy.target,
-          changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/webscraper/, webscraperProxy.basePath),
         },
         '/docs': docsProxyConfig,
       },

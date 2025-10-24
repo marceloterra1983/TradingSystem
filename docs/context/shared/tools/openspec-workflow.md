@@ -82,7 +82,7 @@ Precisamos monitorar a saúde dos bots Telegram em tempo real.
 
 ## Impact
 - Affected specs: telegram-bot
-- Affected code: frontend/apps/tp-capital/, frontend/apps/dashboard/
+- Affected code: apps/tp-capital/, frontend/dashboard/
 EOF
 
 # 5. Criar tasks.md
@@ -97,7 +97,7 @@ cat > openspec/changes/$CHANGE/tasks.md << 'EOF'
 - [ ] 2.2 Adicionar indicador visual (verde/vermelho)
 
 ## 3. Documentação
-- [ ] 3.1 Atualizar docs/context/frontend/apps/tp-capital/
+- [ ] 3.1 Atualizar docs/context/apps/tp-capital/
 EOF
 
 # 6. Criar delta spec

@@ -11,13 +11,13 @@ export interface ApiConfig {
   documentationApi: string;
   serviceLauncherApi: string;
   firecrawlProxyApi: string;
-  webscraperApi: string;
   docsUrl: string;
   docsApiUrl: string;
   questdbConsoleUrl: string;
   questdbUiUrl: string;
   pgAdminUrl: string;
   pgWebUrl: string;
+  adminerUrl: string;
 }
 
 export type ApiService =
@@ -26,8 +26,7 @@ export type ApiService =
   | 'b3Market'
   | 'documentation'
   | 'serviceLauncher'
-  | 'firecrawlProxy'
-  | 'webscraper';
+  | 'firecrawlProxy';
 
 // Unified domain configuration
 const resolveEnv = (...keys: string[]): string | undefined => {
@@ -65,9 +64,6 @@ const unifiedConfig: ApiConfig = {
   firecrawlProxyApi: `${
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
   }/api/firecrawl`,
-  webscraperApi: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
-  }/api/webscraper`,
   docsUrl: `${
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
   }/docs`,
@@ -79,10 +75,10 @@ const unifiedConfig: ApiConfig = {
       `${
         import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
       }/questdb-console`,
-      'http://localhost:9002',
+      'http://localhost:9000',
       'http://localhost:8813',
-      'http://localhost:9000'
-    ) || 'http://localhost:9002',
+      'http://localhost:9002'
+    ) || 'http://localhost:9000',
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -96,6 +92,7 @@ const unifiedConfig: ApiConfig = {
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
 };
 
 // Direct port configuration (legacy)
@@ -111,16 +108,15 @@ const directConfig: ApiConfig = {
     import.meta.env.VITE_SERVICE_LAUNCHER_API_URL || '/api/launcher',
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || 'http://localhost:3600',
-  webscraperApi: import.meta.env.VITE_WEBSCRAPER_API_URL || '/api/webscraper',
   docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || 'http://localhost:3004',
   docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3101',
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
-      'http://localhost:9002',
+      'http://localhost:9000',
       'http://localhost:8813',
-      'http://localhost:9000'
-    ) || 'http://localhost:9002',
+      'http://localhost:9002'
+    ) || 'http://localhost:9000',
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -130,6 +126,7 @@ const directConfig: ApiConfig = {
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
 };
 
 // Get current configuration based on environment
@@ -167,8 +164,6 @@ export function getApiUrl(service: ApiService): string {
       return apiConfig.serviceLauncherApi;
     case 'firecrawlProxy':
       return apiConfig.firecrawlProxyApi;
-    case 'webscraper':
-      return apiConfig.webscraperApi;
     default:
       throw new Error(`Unknown service: ${service}`);
   }

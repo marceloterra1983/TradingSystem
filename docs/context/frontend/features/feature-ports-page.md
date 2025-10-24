@@ -16,7 +16,7 @@ last_review: 2025-10-17
 The **Ports Page** provides centralized monitoring and management of all system services running across the TradingSystem infrastructure. It displays 16 services across 4 categories with real-time health checking, auto-refresh capabilities, and quick access shortcuts.
 
 **Location**: `/ports`
-**Component**: `PortsPage.tsx` (`frontend/apps/dashboard/src/components/pages/PortsPage.tsx`)
+**Component**: `PortsPage.tsx` (`frontend/dashboard/src/components/pages/PortsPage.tsx`)
 **Route**: Accessible from main navigation → "Configurações" (Settings) section
 
 ## Features
@@ -391,7 +391,7 @@ app.use(cors({
 **Solution**:
 
 ```bash
-cd frontend/apps/service-launcher
+cd apps/service-launcher
 npm install
 npm start
 ```
@@ -403,7 +403,7 @@ npm start
 
 ## Related Documentation
 
-- Laucher API reference: consulte `frontend/apps/service-launcher/README.md` no repositório.
+- Laucher API reference: consulte `apps/service-launcher/README.md` no repositório.
 - [Dados & integrações backend](../../backend/data/README.md)
 - [Monitoramento com Prometheus/Grafana](../../ops/monitoring/prometheus-setup.md)
 - [Playbook de deployment](../../ops/deployment/deployment.md)

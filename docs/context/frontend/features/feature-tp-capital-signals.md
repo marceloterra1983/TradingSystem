@@ -15,9 +15,9 @@ last_review: 2025-10-17
 
 The **TP CAPITAL | OPCOES** page provides a live view of TP Capital Telegram signals stored in QuestDB and exposes ingestion logs for operators. It consumes the TP-Capital API and renders data inside the Banco de Dados hub.
 
-- **Location**: `frontend/apps/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
+- **Location**: `frontend/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
 - **Route**: `/banco-dados/tp-capital-opcoes`
-- **Backend**: `frontend/apps/tp-capital` (port `4005`)
+- **Backend**: `apps/tp-capital` (port `4005`)
 - **QuestDB Tables**: `tp_capital_signals`, `tp_capital_signals_deleted`
 
 ## Component Structure

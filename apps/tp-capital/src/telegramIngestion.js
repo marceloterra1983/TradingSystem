@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf';
 import { config } from './config.js';
 import { logger } from './logger.js';
 import { parseSignal } from './parseSignal.js';
-import { questdbClient } from './questdbClient.js';
+import { timescaleClient } from './timescaleClient.js';
 
 export function createTelegramIngestion() {
   if (!config.telegram.ingestionBotToken) {
@@ -34,7 +34,7 @@ export function createTelegramIngestion() {
         source: 'forwarder'
       });
 
-      await questdbClient.writeSignal(signal);
+      await timescaleClient.insertSignal(signal);
       logger.info({ asset: signal.asset, channel: signal.channel }, 'Signal ingested');
 
       if (post.chat?.id) {
@@ -72,10 +72,16 @@ export function createTelegramIngestion() {
       });
       logger.info({ url: config.telegram.webhook.url }, 'Telegram webhook configured');
     } else {
-      await bot.launch({
-        allowedUpdates: ['channel_post', 'my_chat_member', 'edited_channel_post']
-      });
-      logger.info('Telegram ingestion bot started in polling mode');
+      try {
+        await bot.launch({
+          allowedUpdates: ['channel_post', 'my_chat_member', 'edited_channel_post'],
+          dropPendingUpdates: true
+        });
+        logger.info('Telegram ingestion bot started in polling mode');
+      } catch (error) {
+        logger.error({ err: error }, 'Failed to launch ingestion bot');
+        throw error;
+      }
     }
   };
 

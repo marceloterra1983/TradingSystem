@@ -413,7 +413,7 @@ if (bMarketConnected && bAtivo) {
 
 ```bash
 # Executar instalador de shortcuts
-bash /home/marce/projetos/TradingSystem/install-shortcuts.sh
+bash install-shortcuts.sh
 
 # Recarregar shell
 source ~/.bashrc  # ou source ~/.zshrc

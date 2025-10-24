@@ -4,7 +4,7 @@
     {
       "id": "tp-capital-signals",
       "type": "backend",
-      "path": "frontend/apps/tp-capital",
+      "path": "apps/tp-capital",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
@@ -28,7 +28,7 @@
     {
       "id": "b3-market-data",
       "type": "backend",
-      "path": "frontend/apps/b3-market-data",
+      "path": "apps/b3-market-data",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
@@ -52,7 +52,7 @@
     {
       "id": "status",
       "type": "backend",
-      "path": "frontend/apps/status",
+      "path": "apps/status",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
@@ -64,7 +64,7 @@
     {
       "id": "dashboard",
       "type": "frontend",
-      "path": "frontend/apps/dashboard",
+      "path": "frontend/dashboard",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",

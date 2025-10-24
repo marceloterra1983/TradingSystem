@@ -1,6 +1,33 @@
 name: firecrawl
 
 services:
+  # Firecrawl Proxy - TradingSystem Gateway (Port 3600) - Placeholder with health
+  firecrawl-proxy:
+    image: "${IMG_FIRECRAWL_PROXY:-img-firecrawl-proxy}:${IMG_VERSION:-latest}"
+    container_name: firecrawl-proxy
+    platform: linux/amd64
+    build:
+      context: ../firecrawl
+      dockerfile: Dockerfile.proxy
+    ports:
+      - "${FIRECRAWL_PROXY_PORT:-3600}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+    networks:
+      - firecrawl_network
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    labels:
+      - "com.tradingsystem.stack=firecrawl"
+      - "com.tradingsystem.service=firecrawl-proxy"
+
+  # Firecrawl Core API (Port 3002) - Internal only
   firecrawl-api:
     image: "${IMG_FIRECRAWL_API:-nginx}:${IMG_VERSION:-alpine}"
     container_name: firecrawl-api
@@ -9,6 +36,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    networks:
+      - firecrawl_network
 
   firecrawl-postgres:
     image: "${IMG_FIRECRAWL_POSTGRES:-postgres}:${IMG_VERSION:-15}"
@@ -22,6 +51,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    networks:
+      - firecrawl_network
 
   firecrawl-redis:
     image: "${IMG_FIRECRAWL_REDIS:-redis}:${IMG_VERSION:-latest}"
@@ -31,6 +62,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    networks:
+      - firecrawl_network
 
   firecrawl-playwright:
     image: "${IMG_FIRECRAWL_PLAYWRIGHT:-nginx}:${IMG_VERSION:-alpine}"
@@ -40,3 +73,11 @@ services:
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    networks:
+      - firecrawl_network
+
+networks:
+  firecrawl_network:
+    driver: bridge
+  tradingsystem_backend:
+    external: true

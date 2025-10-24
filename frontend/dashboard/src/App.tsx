@@ -3,6 +3,7 @@ import { Layout } from './components/layout/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastContainer } from './components/ui/toast';
 import { TooltipProvider } from './components/ui/tooltip';
+import { useServiceAutoRecovery } from './hooks/useServiceAutoRecovery';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,6 +16,9 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  // Ativa auto-recovery global para serviços críticos
+  useServiceAutoRecovery();
+
   return (
     <ThemeProvider defaultTheme="system">
       <QueryClientProvider client={queryClient}>

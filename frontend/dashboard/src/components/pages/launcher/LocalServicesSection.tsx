@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
@@ -16,6 +16,7 @@ import {
   Server,
   XCircle,
   Rocket,
+  Play,
 } from 'lucide-react';
 import { getApiUrl } from '../../../config/api';
 import { formatTimestampShort } from '../../../utils/dateUtils';
@@ -200,6 +201,8 @@ function summarizeServiceDetail(details?: ServiceStatusDetails | null): string |
 }
 
 export function LocalServicesSection() {
+  const queryClient = useQueryClient();
+  
   const {
     data = FALLBACK_SUMMARY,
     isLoading,
@@ -213,6 +216,19 @@ export function LocalServicesSection() {
     refetchInterval: 15000,
     staleTime: 10000,
     placeholderData: FALLBACK_SUMMARY,
+  });
+
+  const startServiceMutation = useMutation({
+    mutationFn: async (serviceId: string) => {
+      const response = await fetch(
+        `${SERVICE_LAUNCHER_BASE_URL}/api/auto-start/${serviceId}`,
+        { method: 'POST' }
+      );
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['service-launcher-status'] });
+    }
   });
 
   const overallStatus = resolveServiceStatus(data?.overallStatus);
@@ -404,6 +420,23 @@ export function LocalServicesSection() {
                         <span className={`text-xs font-semibold ${meta.textClass}`}>
                           {meta.label}
                         </span>
+                        {status === 'down' && service.id && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (service.id) {
+                                startServiceMutation.mutate(service.id);
+                              }
+                            }}
+                            disabled={startServiceMutation.isPending}
+                            className="ml-2 h-7 px-2"
+                            title={`Iniciar ${service.name}`}
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            Iniciar
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );

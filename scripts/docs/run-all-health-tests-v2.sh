@@ -265,9 +265,15 @@ run_diagnostics() {
 run_api_tests() {
     log_step "3: API Endpoint Tests"
     
-    local api_test_script="${SCRIPT_DIR}/test-health-api.sh"
+    # Script test-health-api.sh foi removido (redundante com troubleshoot-health-dashboard.sh)
+    # Funcionalidade agora integrada em troubleshoot-health-dashboard.sh
+    local api_test_script="${SCRIPT_DIR}/troubleshoot-health-dashboard.sh"
     
-    run_script_with_timeout "API Tests" "${api_test_script}" 30
+    if [[ -f "${api_test_script}" ]]; then
+        run_script_with_timeout "API Tests" "${api_test_script}" 30
+    else
+        log_warning "Script de teste de API não encontrado, pulando..."
+    fi
 }
 
 # ------------------------------------------------------------------------------

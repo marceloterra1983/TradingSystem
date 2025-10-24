@@ -17,7 +17,7 @@ Brief introduction explaining:
 - **Purpose**: What problem does this page solve?
 - **Target Users**: Who uses this page? (developers, traders, admins, etc.)
 - **Location**: Route/URL path (e.g., `/banco-dados/market-overview`)
-- **Component**: File path (e.g., `frontend/apps/dashboard/src/components/pages/MarketOverviewPage.tsx`)
+- **Component**: File path (e.g., `frontend/dashboard/src/components/pages/MarketOverviewPage.tsx`)
 
 ## Features
 

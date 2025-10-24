@@ -355,7 +355,7 @@ type BotRecord = {
 **Frontend (Static Files):**
 - React Dashboard (Build Output)
   - Built with: `npm run build`
-  - Output: `frontend/apps/dashboard/dist`
+  - Output: `frontend/dashboard/dist`
   - Served by: IIS or nginx
   - Port: 80/443 (HTTPS)
 

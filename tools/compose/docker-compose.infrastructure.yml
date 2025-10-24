@@ -2,13 +2,23 @@ name: tools
 
 services:
   langgraph:
-    image: "${IMG_TOOLS_LANGGRAPH:-nginx}:${IMG_VERSION:-alpine}"
+    image: "${IMG_TOOLS_LANGGRAPH:-img-infra-langgraph}:${IMG_VERSION:-latest}"
     container_name: tools-langgraph
+    build:
+      context: ../langgraph
+      dockerfile: Dockerfile
     ports:
-      - "${LANGGRAPH_PORT:-8111}:80"
+      - "${LANGGRAPH_PORT:-8111}:8111"
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    environment:
+      - AGNO_API_URL=http://tools-agno-agents:8200
+      - DOCS_API_URL=http://docs-api:80
+      - FIRECRAWL_PROXY_URL=http://firecrawl-proxy:80
+    networks:
+      - tools_default
+      - tradingsystem_backend
 
   llamaindex-ingestion:
     image: "${IMG_TOOLS_LLAMAINDEX_INGESTION:-nginx}:${IMG_VERSION:-alpine}"
@@ -29,10 +39,22 @@ services:
       - ../../config/docker.env
 
   agno-agents:
-    image: "${IMG_TOOLS_AGNO_AGENTS:-nginx}:${IMG_VERSION:-alpine}"
+    image: "${IMG_TOOLS_AGNO_AGENTS:-img-infra-agno-agents}:${IMG_VERSION:-latest}"
     container_name: tools-agno-agents
+    build:
+      context: ../agno-agents
+      dockerfile: Dockerfile
     ports:
-      - "${AGNO_AGENTS_PORT:-8200}:80"
+      - "${AGNO_AGENTS_PORT:-8200}:8200"
     restart: unless-stopped
     env_file:
       - ../../config/docker.env
+    networks:
+      - tools_default
+      - tradingsystem_backend
+
+networks:
+  tools_default:
+    driver: bridge
+  tradingsystem_backend:
+    external: true

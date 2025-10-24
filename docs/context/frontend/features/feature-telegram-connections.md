@@ -15,9 +15,9 @@ last_review: 2025-10-17
 
 The **Connections** page centralises the configuration of Telegram bots and channels used by the TP Capital ingestion pipeline. Operators can add, edit, soft-delete, and monitor Telegram assets stored in QuestDB through the TP-Capital API.
 
-- **Location**: `frontend/apps/dashboard/src/components/pages/ConnectionsPage.tsx`
+- **Location**: `frontend/dashboard/src/components/pages/ConnectionsPage.tsx`
 - **Route**: `/connections`
-- **Backend**: `frontend/apps/tp-capital` (port `4005`)
+- **Backend**: `apps/tp-capital` (port `4005`)
 - **QuestDB Tables**: `telegram_bots`, `telegram_channels`
 
 ## Component Tree

@@ -1,6 +1,6 @@
 // Load environment variables from project root (following TradingSystem standard)
 const path = require('path');
-const projectRoot = path.resolve(__dirname, '../../../');
+const projectRoot = path.resolve(__dirname, '../../');
 
 require(path.join(projectRoot, 'backend/shared/config/load-env.cjs'));
 
@@ -706,6 +706,103 @@ app.post('/launch', (req, res) => {
     return res.status(500).json({
       success: false,
       error: error.message,
+    });
+  }
+});
+
+// Service configuration mapping for auto-start
+const SERVICE_START_CONFIGS = {
+  'workspace-api': {
+    workingDir: path.join(projectRoot, 'backend/api/workspace'),
+    command: 'npm run dev',
+    displayName: 'Workspace API'
+  },
+  'documentation-api': {
+    workingDir: path.join(projectRoot, 'backend/api/documentation-api'),
+    command: 'npm run dev',
+    displayName: 'Documentation API'
+  },
+  'tp-capital-signals-api': {
+    workingDir: path.join(projectRoot, 'apps/tp-capital'),
+    command: 'npm run dev',
+    displayName: 'TP Capital API'
+  },
+  'b3-market-data-api': {
+    workingDir: path.join(projectRoot, 'backend/api/b3'),
+    command: 'npm run dev',
+    displayName: 'B3 API'
+  },
+  'firecrawl-proxy': {
+    workingDir: path.join(projectRoot, 'backend/api/firecrawl-proxy'),
+    command: 'npm run dev',
+    displayName: 'Firecrawl Proxy'
+  }
+};
+
+// Rate limiting for auto-start (prevent rapid restarts)
+const autoStartAttempts = new Map();
+const AUTO_START_COOLDOWN_MS = 30000; // 30 seconds
+
+app.post('/api/auto-start/:serviceId', (req, res) => {
+  const { serviceId } = req.params;
+  const config = SERVICE_START_CONFIGS[serviceId];
+
+  if (!config) {
+    return res.status(404).json({
+      success: false,
+      error: `Service configuration not found: ${serviceId}`
+    });
+  }
+
+  // Check cooldown
+  const lastAttempt = autoStartAttempts.get(serviceId);
+  if (lastAttempt && Date.now() - lastAttempt < AUTO_START_COOLDOWN_MS) {
+    const remainingSeconds = Math.ceil((AUTO_START_COOLDOWN_MS - (Date.now() - lastAttempt)) / 1000);
+    return res.status(429).json({
+      success: false,
+      error: `Auto-start cooldown active. Try again in ${remainingSeconds}s`
+    });
+  }
+
+  logger.info({ serviceId, event: 'auto_start_attempt' }, `Auto-starting service: ${config.displayName}`);
+
+  try {
+    const terminal = terminalDetector.detectTerminal();
+    if (!terminal) {
+      logger.error({ serviceId, event: 'auto_start_error' }, 'No terminal detected');
+      return res.status(500).json({
+        success: false,
+        error: 'No supported terminal found'
+      });
+    }
+
+    const result = terminalLauncher.launchByType(
+      terminal.type,
+      config.displayName,
+      config.workingDir,
+      config.command
+    );
+
+    autoStartAttempts.set(serviceId, Date.now());
+    metrics.recordServiceLaunch(serviceId, result.method, true);
+
+    logger.info(
+      { serviceId, method: result.method, event: 'auto_start_success' },
+      `Service auto-started: ${config.displayName}`
+    );
+
+    return res.json({
+      success: true,
+      message: `${config.displayName} auto-started`,
+      serviceId,
+      terminal: terminal.type
+    });
+  } catch (error) {
+    logger.error({ serviceId, err: error, event: 'auto_start_error' }, 'Auto-start failed');
+    metrics.recordServiceLaunch(serviceId, 'unknown', false);
+    return res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });

@@ -781,7 +781,7 @@ DocumentationPage (Main Container)
 
 ### Page Layout: DocumentationPage.tsx
 
-**Location:** `frontend/apps/dashboard/src/components/pages/DocumentationPage.tsx`
+**Location:** `frontend/dashboard/src/components/pages/DocumentationPage.tsx`
 
 ```typescript
 import { useState } from 'react';
@@ -1450,7 +1450,7 @@ export const useDocumentationStore = create<DocumentationState>((set) => ({
 
 ### Routing Integration
 
-**Update:** `frontend/apps/dashboard/src/App.tsx`
+**Update:** `frontend/dashboard/src/App.tsx`
 
 ```typescript
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -1468,7 +1468,7 @@ function App() {
 }
 ```
 
-**Update Navigation:** `frontend/apps/dashboard/src/data/navigation.tsx`
+**Update Navigation:** `frontend/dashboard/src/data/navigation.tsx`
 
 ```typescript
 export const navigationGroups = [

@@ -39,7 +39,7 @@ CustomizablePageLayout
 
 ### 1. CustomizablePageLayout
 
-**Location**: `frontend/apps/dashboard/src/components/layout/CustomizablePageLayout.tsx`
+**Location**: `frontend/dashboard/src/components/layout/CustomizablePageLayout.tsx`
 
 Main wrapper component that combines title, controls, and draggable grid.
 
@@ -73,7 +73,7 @@ export function MyPage() {
 
 ### 2. DraggableGridLayout
 
-**Location**: `frontend/apps/dashboard/src/components/layout/DraggableGridLayout.tsx`
+**Location**: `frontend/dashboard/src/components/layout/DraggableGridLayout.tsx`
 
 Implements the drag-and-drop grid using `@dnd-kit`.
 
@@ -97,7 +97,7 @@ Implements the drag-and-drop grid using `@dnd-kit`.
 
 ### 3. LayoutControls
 
-**Location**: `frontend/apps/dashboard/src/components/layout/LayoutControls.tsx`
+**Location**: `frontend/dashboard/src/components/layout/LayoutControls.tsx`
 
 Control bar for layout management.
 
@@ -109,7 +109,7 @@ Control bar for layout management.
 
 ### 4. CollapsibleCard
 
-**Location**: `frontend/apps/dashboard/src/components/ui/collapsible-card.tsx`
+**Location**: `frontend/dashboard/src/components/ui/collapsible-card.tsx`
 
 Card component with built-in collapse/expand functionality.
 
@@ -144,7 +144,7 @@ export function MySection() {
 
 ### 5. useCustomLayout Hook
 
-**Location**: `frontend/apps/dashboard/src/components/layout/useCustomLayout.tsx`
+**Location**: `frontend/dashboard/src/components/layout/useCustomLayout.tsx`
 
 React hook for layout state management and persistence.
 
@@ -297,7 +297,7 @@ Respects user selection (1-4 columns)
 ### ✅ Implemented Pages
 
 #### 1. EscopoPage
-**File**: `frontend/apps/dashboard/src/components/pages/EscopoPageNew.tsx`
+**File**: `frontend/dashboard/src/components/pages/EscopoPageNew.tsx`
 
 7 collapsible sections: Overview, Objectives, Architecture, Tech Stack, Systems, Requirements, Constraints
 
@@ -320,17 +320,17 @@ return (
 ```
 
 #### 2. ConnectionsPage
-**File**: `frontend/apps/dashboard/src/components/pages/ConnectionsPageNew.tsx`
+**File**: `frontend/dashboard/src/components/pages/ConnectionsPageNew.tsx`
 
 5 sections: ProfitDLL Status, WebSocket, Service Status, Connection History, Network Monitor
 
 #### 3. BancoIdeiasPage
-**File**: `frontend/apps/dashboard/src/components/pages/BancoIdeiasPageNew.tsx`
+**File**: `frontend/dashboard/src/components/pages/BancoIdeiasPageNew.tsx`
 
 6 sections: Idea Board, Quick Stats, Filters, Priority Matrix, Recent Activity, Archive
 
 #### 4. SettingsPage
-**File**: `frontend/apps/dashboard/src/components/pages/SettingsPage.tsx`
+**File**: `frontend/dashboard/src/components/pages/SettingsPage.tsx`
 
 7 sections: User Profile, Notifications, Appearance, Language, Security, Data Storage, Performance
 

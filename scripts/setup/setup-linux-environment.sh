@@ -67,7 +67,7 @@ mkdir -p backend/data/runtime/context7
 mkdir -p backend/data/runtime/exa
 mkdir -p backend/data/runtime/langgraph
 mkdir -p backend/data/backups
-mkdir -p frontend/apps/tp-capital/logs
+mkdir -p apps/tp-capital/logs
 mkdir -p backend/api/idea-bank/uploads
 mkdir -p backend/api/documentation-api/uploads
 echo "   ✅ Directories created"
@@ -91,7 +91,7 @@ check_env_file() {
 
 ENV_FILES_MISSING=false
 
-check_env_file "frontend/apps/tp-capital/tools/tp-capital-signals.env.example" "frontend/apps/tp-capital/tools/tp-capital-signals.env" || ENV_FILES_MISSING=true
+check_env_file "apps/tp-capital/tools/tp-capital-signals.env.example" "apps/tp-capital/tools/tp-capital-signals.env" || ENV_FILES_MISSING=true
 
 echo ""
 
@@ -123,8 +123,8 @@ echo "   This step is optional - dependencies will be installed when services st
 
 MODULES_TO_CHECK=(
     "backend/api/idea-bank"
-    "frontend/apps/service-launcher"
-    "frontend/apps/dashboard"
+    "apps/service-launcher"
+    "frontend/dashboard"
     "docs"
 )
 

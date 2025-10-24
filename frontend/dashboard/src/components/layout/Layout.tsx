@@ -2,6 +2,7 @@ import * as React from 'react';
 import { LayoutSidebar } from './LayoutSidebar';
 import { LayoutHeader } from './LayoutHeader';
 import { PageContent } from './PageContent';
+import { ServiceStatusBanner } from '../ServiceStatusBanner';
 import { getPageById, getDefaultPage } from '../../data/navigation';
 import { isBrowser, safeLocalStorageGet, safeLocalStorageSet } from '../../utils/browser';
 
@@ -122,6 +123,9 @@ export function Layout({ defaultPageId }: LayoutProps) {
           currentPage={currentPage}
           onToggleSidebar={handleToggleCollapse}
         />
+
+        {/* Service Status Banner */}
+        <ServiceStatusBanner />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4">

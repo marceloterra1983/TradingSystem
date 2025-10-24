@@ -46,7 +46,7 @@ echo "📊 Issue #1: Fixing Dashboard Container..."
 echo "Problem: Invalid --host option passed to npm-run-all"
 echo ""
 
-DASHBOARD_DIR="$PROJECT_ROOT/frontend/apps/dashboard"
+DASHBOARD_DIR="$PROJECT_ROOT/frontend/dashboard"
 DASHBOARD_PKG="$DASHBOARD_DIR/package.json"
 
 if [ -f "$DASHBOARD_PKG" ]; then

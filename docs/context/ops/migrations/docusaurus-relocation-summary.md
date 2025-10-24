@@ -84,7 +84,7 @@ docs: {
 
 ### 5. **Dashboard** (Phase 6)
 **Updated:**
-- `frontend/apps/dashboard/src/components/pages/DocsPage.tsx`
+- `frontend/dashboard/src/components/pages/DocsPage.tsx`
   - Changed `docs/` → `docs/docusaurus/` in instructions
 
 ### 6. **Documentation** (Phase 7)

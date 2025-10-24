@@ -69,7 +69,7 @@ Base structure:
 ## 4. TP-Capital (QuestDB)
 
 - Tables: `tp_capital_signals` (active dataset) and `tp_capital_signals_deleted` (soft-deleted archive).
-- Managed by `frontend/apps/tp-capital`, which exposes REST endpoints consumed by the dashboard (`/signals`, `/telegram/bots`, `/telegram/channels`).
+- Managed by `apps/tp-capital`, which exposes REST endpoints consumed by the dashboard (`/signals`, `/telegram/bots`, `/telegram/channels`).
 - Partitioned by day with designated timestamp `ts`; primary filters: `channel`, `signal_type`, `ingested_at`.
 - See [tp-capital-signals.md](tables/tp-capital-signals.md) for detailed column definitions and API shape.
 

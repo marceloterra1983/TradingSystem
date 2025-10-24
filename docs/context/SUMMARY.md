@@ -82,14 +82,14 @@ npm run check:bundle   # Analyze bundle sizes
 
 ### Development (✅ Ready Now)
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run dev
 # Access: http://localhost:3103/
 ```
 
 ### Production Build (✅ Working!)
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run build       # Build in 3.37s
 npm run preview     # Test locally
 ```

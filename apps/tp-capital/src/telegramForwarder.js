@@ -113,18 +113,24 @@ export function createTelegramForwarder() {
       logger.warn('Webhook mode not implemented for forwarder bot, falling back to polling');
     }
 
-    await bot.launch({
-      allowedUpdates: ['channel_post', 'edited_channel_post', 'my_chat_member']
-    });
+    try {
+      await bot.launch({
+        allowedUpdates: ['channel_post', 'edited_channel_post', 'my_chat_member'],
+        dropPendingUpdates: true
+      });
 
-    logger.info(
-      {
-        sourceChannels: config.telegram.forwarderSourceChannels,
-        destinationChannel: config.telegram.destinationChannelId,
-        mode: 'polling',
-      },
-      'Telegram forwarder bot started'
-    );
+      logger.info(
+        {
+          sourceChannels: config.telegram.forwarderSourceChannels,
+          destinationChannel: config.telegram.destinationChannelId,
+          mode: 'polling',
+        },
+        'Telegram forwarder bot started'
+      );
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to launch forwarder bot');
+      throw error;
+    }
   };
 
   return { bot, launch };
