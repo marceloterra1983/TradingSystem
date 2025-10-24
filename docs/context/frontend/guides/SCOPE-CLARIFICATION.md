@@ -49,7 +49,7 @@ docs/docusaurus/
 
 ### Dashboard React (Porta 3103)
 
-**Localização**: `frontend/apps/dashboard/`
+**Localização**: `frontend/dashboard/`
 
 **Permanece INALTERADO**:
 
@@ -64,9 +64,8 @@ docs/docusaurus/
 
 **NENHUMA mudança em**:
 
--   ❌ WebScraper (`frontend/apps/WebScraper/`)
--   ❌ TP Capital (`frontend/apps/tp-capital/`)
--   ❌ B3 Market Data (`frontend/apps/b3-market-data/`)
+-   ❌ TP Capital (`apps/tp-capital/`)
+-   ❌ B3 Market Data (`apps/b3-market-data/`)
 
 ### Backend & APIs
 
@@ -118,7 +117,7 @@ docs/docusaurus/
 ### Dashboard (Mantém)
 
 ```css
-/* frontend/apps/dashboard/src/index.css */
+/* frontend/dashboard/src/index.css */
 Primary: Blue (#3B82F6)
 Font: System fonts
 Framework: Tailwind CSS
@@ -140,7 +139,7 @@ Components: Docusaurus theme
 ### Antes de Começar
 
 -   [ ] Confirmar que vai modificar APENAS Docusaurus
--   [ ] Não tocar no dashboard (`frontend/apps/dashboard/`)
+-   [ ] Não tocar no dashboard (`frontend/dashboard/`)
 -   [ ] Não modificar outras aplicações
 -   [ ] Criar branch específico: `feature/docusaurus-gemini-theme`
 
@@ -164,7 +163,7 @@ Components: Docusaurus theme
 
 ```bash
 # Terminal 1
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run dev
 
 # Abrir: http://localhost:3103
@@ -209,7 +208,6 @@ TradingSystem/
 ├── frontend/                      # ❌ NÃO MEXER
 │   ├── apps/
 │   │   ├── dashboard/            # ❌ Dashboard - MANTÉM
-│   │   ├── WebScraper/           # ❌ MANTÉM
 │   │   ├── tp-capital/           # ❌ MANTÉM
 │   │   └── b3-market-data/       # ❌ MANTÉM
 │   └── shared/                   # ❌ MANTÉM
@@ -283,7 +281,7 @@ Antes de começar a implementação, confirme:
 
 ### ⚠️ Não Faça
 
--   ❌ Modificar `frontend/apps/dashboard/`
+-   ❌ Modificar `frontend/dashboard/`
 -   ❌ Instalar pacotes no dashboard
 -   ❌ Copiar CSS entre projetos
 -   ❌ Mudar Tailwind config do dashboard

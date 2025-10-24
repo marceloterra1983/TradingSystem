@@ -151,7 +151,6 @@ curl -X POST 'http://localhost:3400/api/v1/docs/reindex' | jq
 
 #### Tags (50+ values)
 
-- Top tags: frontend, backend, api, guide, deployment, ui, layout, dark-mode, webscraper, documentation, etc.
 - Multi-select supported (combine multiple tags with AND logic)
 
 ### Search Analytics

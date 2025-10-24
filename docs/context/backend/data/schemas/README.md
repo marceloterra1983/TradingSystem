@@ -15,6 +15,5 @@ last_review: 2025-10-17
 |--------|------|
 | Trading Core | [Overview](trading-core/overview.md), [Trades table](trading-core/tables/trades.md), [Positions table](trading-core/tables/positions.md) |
 | Logging | [Overview](logging/overview.md) |
-| **WebScraper** | **[Schema Documentation](../webscraper-schema.md)** |
 
 Add more domains as the storage layer evolves.

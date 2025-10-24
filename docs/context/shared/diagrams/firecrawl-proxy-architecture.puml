@@ -8,7 +8,6 @@ skinparam defaultFontSize 12
 title Firecrawl Proxy - Component Architecture
 
 rectangle "Dashboard (React)\nPort 3103" as Dashboard #E5FFE5 {
-  component "WebScraperPanel" as WebScraperPanel
   component "CrawlHistoryPanel" as CrawlHistoryPanel
   component "firecrawlService.ts" as FirecrawlServiceTS
   component "useFirecrawl Hooks" as FirecrawlHooks

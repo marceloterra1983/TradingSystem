@@ -68,7 +68,6 @@ Some dashboard features depend on auxiliary stacks that must be running before v
 - **Firecrawl stack** (`tools/firecrawl/firecrawl-source/docker-compose.yaml`): start `firecrawl-api`, `firecrawl-redis`, `firecrawl-postgres`, `firecrawl-playwright` e exponha o proxy na porta **3600**.
 - **QuestDB core** (`tools/compose/docker-compose.data.yml`): garanta HTTP **9000** (e console **9002**) para dashboards B3 e logs TP Capital.
 - **Telegram ingestion**: configure tokens/IDs válidos em `.env.local` (ou `.env`) para autenticar a API TP Capital.
-- **TimescaleDB** (`tools/compose/docker-compose.timescale.yml`): necessário para migrações Workspace/WebScraper e dashboards baseados em TimescaleDB.
 
 If any of these components estiver offline, as páginas correspondentes (B3, TP Capital, Workspace, Firecrawl) exibem dados de fallback e alertas até que as integrações respondam.
 

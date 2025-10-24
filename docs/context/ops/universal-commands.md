@@ -91,8 +91,6 @@ start --minimal --skip-docs      # Dashboard + Workspace apenas
 | B3 Market Data   | 3302  | Dados de mercado           |
 | Service Launcher | 3500  | Orquestração de serviços   |
 | Firecrawl Proxy  | 3600  | Proxy para Firecrawl       |
-| WebScraper API   | 3700  | Web scraping backend       |
-| WebScraper UI    | 3800  | Web scraping frontend      |
 
 ## Comando `stop`
 

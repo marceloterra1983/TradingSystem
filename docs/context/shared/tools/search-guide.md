@@ -126,7 +126,6 @@ Search by topic or category using tags. You can select multiple tags (AND logic 
 
 -   `frontend`, `backend`, `api`, `guide`
 -   `deployment`, `ui`, `layout`
--   `dark-mode`, `webscraper`, `documentation`
 -   And 40+ more...
 
 **Example:** Find documents about UI and dark mode  

@@ -17,11 +17,11 @@ This guide consolidates the contracts that connect the React dashboard to the ba
 
 | Frontend surface | Backend service | Base URL (default) | Key endpoints | Spec / code |
 |------------------|-----------------|--------------------|---------------|-------------|
-| Workspace board (`frontend/apps/dashboard/src/services/libraryService.ts#L4`) | Workspace API (`backend/api/workspace`) | `http://localhost:3200/api/items` | `GET/POST/PUT/DELETE /items` | [workspace.openapi.yaml](../../backend/api/specs/workspace.openapi.yaml) |
-| B3 Market monitor (`frontend/apps/dashboard/src/components/pages/B3MarketPage.tsx#L16`) | B3 API (`frontend/apps/b3-market-data`) | `http://localhost:3302` | `GET /overview`, `/adjustments`, `/gamma-levels`, `/dxy` | [B3 Integration Plan](../../backend/architecture/b3-integration-plan.md) |
-| Web scraping (`frontend/apps/dashboard/src/services/firecrawlService.ts`) | Firecrawl Proxy (`backend/api/firecrawl-proxy`) | `http://localhost:3600/api/v1` | `POST /scrape`, `POST /crawl`, `GET /crawl/:id` | [Firecrawl Proxy API](../../backend/api/firecrawl-proxy.md) |
-| TP Capital signals (`frontend/apps/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx#L17`) | TP-Capital (`frontend/apps/tp-capital`) | `http://localhost:3200` | `GET /signals`, `GET /logs`, `DELETE /signals`, `GET /bots` | [TP Capital API Guide](../../backend/guides/guide-tp-capital.md) |
-| Trading control (cards pending) (`frontend/apps/dashboard/src/services/apiService.ts#L5`) | Trading Gateway API (planned .NET orchestration) | `http://localhost:8000` | `/api/v1/positions`, `/api/v1/orders`, `/api/v1/signals`, `/api/v1/risk/*` | Implementation planned in `backend/services/gateway` |
+| Workspace board (`frontend/dashboard/src/services/libraryService.ts#L4`) | Workspace API (`backend/api/workspace`) | `http://localhost:3200/api/items` | `GET/POST/PUT/DELETE /items` | [workspace.openapi.yaml](../../backend/api/specs/workspace.openapi.yaml) |
+| B3 Market monitor (`frontend/dashboard/src/components/pages/B3MarketPage.tsx#L16`) | B3 API (`apps/b3-market-data`) | `http://localhost:3302` | `GET /overview`, `/adjustments`, `/gamma-levels`, `/dxy` | [B3 Integration Plan](../../backend/architecture/b3-integration-plan.md) |
+| Web scraping (`frontend/dashboard/src/services/firecrawlService.ts`) | Firecrawl Proxy (`backend/api/firecrawl-proxy`) | `http://localhost:3600/api/v1` | `POST /scrape`, `POST /crawl`, `GET /crawl/:id` | [Firecrawl Proxy API](../../backend/api/firecrawl-proxy.md) |
+| TP Capital signals (`frontend/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx#L17`) | TP-Capital (`apps/tp-capital`) | `http://localhost:3200` | `GET /signals`, `GET /logs`, `DELETE /signals`, `GET /bots` | [TP Capital API Guide](../../backend/guides/guide-tp-capital.md) |
+| Trading control (cards pending) (`frontend/dashboard/src/services/apiService.ts#L5`) | Trading Gateway API (planned .NET orchestration) | `http://localhost:8000` | `/api/v1/positions`, `/api/v1/orders`, `/api/v1/signals`, `/api/v1/risk/*` | Implementation planned in `backend/services/gateway` |
 
 ## Service notes
 
@@ -138,7 +138,6 @@ Prometheus exposition including:
 ### Frontend Integration (Dashboard)
 - **Service**: `firecrawlService.ts` wraps the proxy API through `getApiUrl('firecrawlProxy')` with safe defaults.
 - **Hooks**: `useFirecrawl.ts` provides `useScrape`, `useCrawl`, `useCrawlStatus`, and `useFirecrawlHealth` built on React Query.
-- **Components**: `WebScraperPanel.tsx` handles forms and validation; `CrawlHistoryPanel.tsx` tracks jobs with polling and previews.
 - **Page**: `FirecrawlPage.tsx` (Apps section) renders panels inside `CustomizablePageLayout` (`pageId="firecrawl"`).
 - **Navigation**: Registered under Apps → `#/firecrawl`, uses CustomizablePageLayout drag-and-drop grid.
 - **Validation**: `utils/validation.ts` mirrors backend rules for URL/format/limit/depth constraints.
@@ -158,7 +157,7 @@ Prometheus exposition including:
 
 ## Environment variables
 
-> **Central rule**: Configure every variable in the **root** `.env`. Service-specific `.env` files (including `frontend/apps/dashboard/.env`) are not allowed. Vite automatically reads `VITE_*` entries from the root file, so no extra steps are needed client side. See `docs/context/ops/ENVIRONMENT-CONFIGURATION.md` for the full standard.
+> **Central rule**: Configure every variable in the **root** `.env`. Service-specific `.env` files (including `frontend/dashboard/.env`) are not allowed. Vite automatically reads `VITE_*` entries from the root file, so no extra steps are needed client side. See `docs/context/ops/ENVIRONMENT-CONFIGURATION.md` for the full standard.
 
 Example entries for the root `.env`:
 ```bash

@@ -55,7 +55,6 @@ last_review: "2025-10-18"
 | **shadcn/ui** | Coleção de componentes React reutilizáveis baseados em Radix UI e Tailwind CSS. | Biblioteca de UI do Dashboard. Ver `frontend/references/design-system.md`. |
 | **Spectral** | Ferramenta de linting para especificações OpenAPI/AsyncAPI. | Usado para validação de specs. Ver `docs/DOCSPECS-IMPLEMENTATION-GUIDE.md`. |
 | **Tailwind CSS** | Framework CSS utility-first para estilização rápida. | Versão 3.4. Ver `frontend/guides/dark-mode.md`. |
-| **TimescaleDB** | Extensão PostgreSQL para dados time-series. | Usado para WebScraper. Ver `backend/data/guides/timescaledb-operations.md`. |
 | **TypeScript** | Superset tipado de JavaScript. | Versão 5.3. Usado no Dashboard. Ver `frontend/architecture/overview.md`. |
 | **Vite** | Build tool moderno e rápido para projetos frontend. | Versão 5.x. Ver `frontend/README.md`. |
 | **Vitest** | Framework de testes unitários para Vite. | Usado no Dashboard. Ver `frontend/guides/`. |

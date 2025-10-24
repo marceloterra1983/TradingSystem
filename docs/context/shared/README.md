@@ -85,9 +85,6 @@ last_review: 2025-10-18
 
 | Diagram                                                                   | Description               | Format   |
 | ------------------------------------------------------------------------- | ------------------------- | -------- |
-| [webscraper-flow.puml](diagrams/webscraper-flow.puml)                     | WebScraper data flow      | PlantUML |
-| [webscraper-scheduler-flow.puml](diagrams/webscraper-scheduler-flow.puml) | WebScraper scheduler flow | PlantUML |
-| [webscraper-export-flow.puml](diagrams/webscraper-export-flow.puml)       | WebScraper export flow    | PlantUML |
 
 ### Sequence Diagrams
 
@@ -101,7 +98,6 @@ last_review: 2025-10-18
 
 | Diagram                                                                                     | Description                  | Format   |
 | ------------------------------------------------------------------------------------------- | ---------------------------- | -------- |
-| [webscraper-architecture.puml](diagrams/webscraper-architecture.puml)                       | WebScraper architecture      | PlantUML |
 | [firecrawl-proxy-architecture.puml](diagrams/firecrawl-proxy-architecture.puml)             | Firecrawl proxy architecture | PlantUML |
 | [agno-agents-component-architecture.puml](diagrams/agno-agents-component-architecture.puml) | Agno agents components       | PlantUML |
 | [database-ui-tools-architecture.puml](diagrams/database-ui-tools-architecture.puml)         | Database UI tools            | PlantUML |
@@ -117,7 +113,6 @@ last_review: 2025-10-18
 
 | Diagram                                             | Description    | Format   |
 | --------------------------------------------------- | -------------- | -------- |
-| [webscraper-erd.puml](diagrams/webscraper-erd.puml) | WebScraper ERD | PlantUML |
 
 ### ADR Diagrams
 
