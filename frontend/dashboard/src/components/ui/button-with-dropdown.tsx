@@ -82,19 +82,18 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       return;
     }
 
-    const valueToSelect =
-      selectedValue && selectedValue.trim() !== ''
-        ? selectedValue
-        : options[0]?.value;
-
-    if (valueToSelect) {
-      onSelect(valueToSelect);
+    // Se há apenas uma opção, sempre seleciona essa opção ao clicar
+    if (options.length === 1) {
+      const singleValue = options[0]?.value;
+      if (singleValue) {
+        onSelect(singleValue);
+      }
+      return;
     }
 
-    if (options.length > 1) {
-      setIsOpen((previous) => !previous);
-    }
-  }, [disabled, onSelect, options, selectedValue]);
+    // Se há múltiplas opções, toggle o dropdown
+    setIsOpen((previous) => !previous);
+  }, [disabled, onSelect, options]);
 
   return (
     <div ref={dropdownRef} className="relative inline-block">

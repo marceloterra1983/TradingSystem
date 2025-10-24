@@ -11,7 +11,7 @@ last_review: 2025-10-17
 
 # `tp_capital_signals`
 
-QuestDB time-series table populated by `frontend/apps/tp-capital`. The ingestion service receives Telegram messages, normalizes them, persists the record, and exposes REST endpoints consumed by the dashboard (`/signals`, `/logs`, `/telegram/bots`, `/telegram/channels`).
+QuestDB time-series table populated by `apps/tp-capital`. The ingestion service receives Telegram messages, normalizes them, persists the record, and exposes REST endpoints consumed by the dashboard (`/signals`, `/logs`, `/telegram/bots`, `/telegram/channels`).
 
 ## Column reference
 

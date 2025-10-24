@@ -24,12 +24,12 @@ if [[ -f "$PROJECT_ROOT/.env" ]]; then
 fi
 
 declare -A SERVICE_PATHS=(
-    ["Dashboard"]="frontend/apps/dashboard"
+    ["Dashboard"]="frontend/dashboard"
     ["Workspace API"]="backend/api/workspace"
-    ["TP Capital"]="frontend/apps/tp-capital"
-    ["B3 Market Data"]="frontend/apps/b3-market-data"
+    ["TP Capital"]="apps/tp-capital"
+    ["B3 Market Data"]="apps/b3-market-data"
     ["Documentation API"]="backend/api/documentation-api"
-    ["Status API"]="frontend/apps/status"
+    ["Status API"]="apps/status"
     ["Firecrawl Proxy"]="backend/api/firecrawl-proxy"
     ["WebScraper API"]="backend/api/webscraper-api"
     ["Docusaurus"]="docs"

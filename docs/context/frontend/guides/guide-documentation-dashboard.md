@@ -20,12 +20,12 @@ Provide an interactive hub for documentation, the Idea Bank, and light analytics
 - Node.js 18+
 - npm
 - Idea Bank API running (`backend/api/idea-bank`, port `3200`)
-- TP-Capital API running (`frontend/apps/tp-capital`, port `4005`, QuestDB reachable)
+- TP-Capital API running (`apps/tp-capital`, port `4005`, QuestDB reachable)
 
 ## 3. Setup
 
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm install
 npm run dev
 ```

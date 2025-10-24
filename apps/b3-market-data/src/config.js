@@ -1,4 +1,4 @@
-import '../../../../backend/shared/config/load-env.js';
+import '../../../backend/shared/config/load-env.js';
 
 const env = (key, defaultValue) => {
   const value = process.env[key];

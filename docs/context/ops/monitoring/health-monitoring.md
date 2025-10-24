@@ -15,7 +15,7 @@ last_review: "2025-10-18"
 - ✅ Consolidated results from local services, Docker stacks, and databases with remediation hints
 - ✅ Multiple output formats (text, JSON, Prometheus) for operators, automation, and observability pipelines
 - ✅ Cached comprehensive status via `/api/health/full` for low-latency integrations
-- 📚 Related docs: [Service Launcher README](../../../../frontend/apps/service-launcher/README.md), [Prometheus Setup](./prometheus-setup.md), [Alerting Policy](./alerting-policy.md)
+- 📚 Related docs: [Service Launcher README](../../../../apps/service-launcher/README.md), [Prometheus Setup](./prometheus-setup.md), [Alerting Policy](./alerting-policy.md)
 
 The TradingSystem health monitoring stack combines shell tooling, reusable libraries, and HTTP endpoints to provide operators and automation with a unified view of platform health. This guide explains how the pieces fit together, how to consume the outputs, and how to troubleshoot when something goes wrong.
 
@@ -505,7 +505,7 @@ sudo systemctl enable --now health-check.timer
 
 - Pattern-matching engine in `health.sh` maps failures to actionable steps.
 - Output includes commands such as:
-  - Service restart: `npm --prefix frontend/apps/dashboard run start`
+  - Service restart: `npm --prefix frontend/dashboard run start`
   - Container restart: `docker compose -f tools/compose/docker-compose.infra.yml restart grafana`
   - Database recovery: `docker compose -f tools/compose/docker-compose.data.yml up -d timescaledb`
   - Port collision investigation: `lsof -i :3500`
@@ -581,7 +581,7 @@ health_check:
 
 ## Related Documentation
 
-- [Service Launcher README](../../../../frontend/apps/service-launcher/README.md)
+- [Service Launcher README](../../../../apps/service-launcher/README.md)
 - [Prometheus Setup Guide](./prometheus-setup.md)
 - [Alerting Policy](./alerting-policy.md)
 - [Service Startup Guide](../service-startup-guide.md)

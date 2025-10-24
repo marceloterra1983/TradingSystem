@@ -133,43 +133,6 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
-  
-  // WebScraper API
-  {
-    name: 'WebScraper API',
-    baseUrl: 'http://localhost:3700',
-    icon: Server,
-    color: 'text-teal-600 dark:text-teal-400',
-    endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check endpoint' },
-      { method: 'GET', path: '/api/jobs', description: 'List scraping jobs' },
-      { method: 'GET', path: '/api/jobs/:id', description: 'Get job details' },
-      { method: 'POST', path: '/api/jobs', description: 'Create new scraping job' },
-      { method: 'POST', path: '/api/jobs/:id/rerun', description: 'Rerun a job' },
-      { method: 'DELETE', path: '/api/jobs/:id', description: 'Delete a job' },
-      { method: 'GET', path: '/api/templates', description: 'List scraping templates' },
-      { method: 'GET', path: '/api/templates/:id', description: 'Get template details' },
-      { method: 'POST', path: '/api/templates', description: 'Create new template' },
-      { method: 'PUT', path: '/api/templates/:id', description: 'Update template' },
-      { method: 'DELETE', path: '/api/templates/:id', description: 'Delete template' },
-      { method: 'GET', path: '/api/templates/export', description: 'Export templates' },
-      { method: 'POST', path: '/api/templates/import', description: 'Import templates' },
-      { method: 'GET', path: '/api/schedules', description: 'List scheduled jobs' },
-      { method: 'GET', path: '/api/schedules/:id', description: 'Get schedule details' },
-      { method: 'GET', path: '/api/schedules/:id/history', description: 'Get schedule history' },
-      { method: 'POST', path: '/api/schedules', description: 'Create new schedule' },
-      { method: 'PUT', path: '/api/schedules/:id', description: 'Update schedule' },
-      { method: 'PATCH', path: '/api/schedules/:id/toggle', description: 'Toggle schedule active/inactive' },
-      { method: 'DELETE', path: '/api/schedules/:id', description: 'Delete schedule' },
-      { method: 'GET', path: '/api/exports', description: 'List exports' },
-      { method: 'GET', path: '/api/exports/:id', description: 'Get export details' },
-      { method: 'GET', path: '/api/exports/:id/download/:format', description: 'Download export (json/csv/xlsx)' },
-      { method: 'POST', path: '/api/exports', description: 'Create new export' },
-      { method: 'DELETE', path: '/api/exports/:id', description: 'Delete export' },
-      { method: 'GET', path: '/api/statistics', description: 'Get scraping statistics' },
-      { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
-    ],
-  },
 ];
 
 export function EndpointsSection() {

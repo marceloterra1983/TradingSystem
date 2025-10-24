@@ -191,7 +191,7 @@ import { UncheckButton } from '../ui/action-buttons';
 
 ### 1. BancoIdeiasPage ✅
 
-**File:** `frontend/apps/dashboard/src/components/pages/BancoIdeiasPage.tsx`
+**File:** `frontend/dashboard/src/components/pages/BancoIdeiasPage.tsx`
 
 **Changes:**
 - Created `IdeaActions` component using `ActionButtons`
@@ -233,7 +233,7 @@ import { UncheckButton } from '../ui/action-buttons';
 
 ### 2. ConnectionsPage ✅
 
-**File:** `frontend/apps/dashboard/src/components/pages/ConnectionsPage.tsx`
+**File:** `frontend/dashboard/src/components/pages/ConnectionsPage.tsx`
 
 **Changes:**
 - Updated bot table actions to use `ActionButtons` (Edit, Delete, Check)

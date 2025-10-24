@@ -1,6 +1,6 @@
 const DEFAULT_TYPE = 'Swing Trade';
 
-const TARGET_REGEX = /ALVO\s*(\d+)\s*[:=-]\s*([0-9]+(?:\.[0-9]+)?)/gi;
+const TARGET_REGEX = /ALVO\s*(\d+)\s*[:=-]\s*([0-9]+(?:[.,][0-9]+)?)/gi;
 
 export function parseSignal(messageText, overrides = {}) {
   if (!messageText) {
@@ -8,7 +8,8 @@ export function parseSignal(messageText, overrides = {}) {
   }
 
   const normalized = messageText.replace(/\r/gi, '').trim();
-  const numericFriendly = normalized
+  const uppercased = normalized.toUpperCase();
+  const numericFriendly = uppercased
     .replace(/\.(?=\d{3}(?:\D|$))/g, '')
     .replace(/(\d),(?=\d)/g, '$1.');
 
@@ -16,11 +17,17 @@ export function parseSignal(messageText, overrides = {}) {
   const channel = overrides.channel || 'Desconhecido';
   const signalType = overrides.signalType || DEFAULT_TYPE;
 
-  const assetMatch = normalized.match(/([A-Z]{4,}[0-9]{0,3})/);
-  const asset = overrides.asset || (assetMatch ? assetMatch[1] : 'UNKNOWN');
+  // Prioriza asset após "ATIVO:" ou código com números (ex: PETR4, KLBNK177)
+  const assetAfterLabel = uppercased.match(/ATIV[OA]\s*[:=-]?\s*([A-Z]{3,}[0-9]+)/);
+  const assetWithNumbers = uppercased.match(/([A-Z]{4,}[0-9]+)/);
+  const assetFallback = uppercased.match(/([A-Z]{4,})/);
+  const asset = overrides.asset || 
+    (assetAfterLabel ? assetAfterLabel[1] : 
+     assetWithNumbers ? assetWithNumbers[1] : 
+     assetFallback ? assetFallback[1] : 'UNKNOWN');
 
   const buyRangeMatch = numericFriendly.match(
-    /COMPRA(?:\s*\w+)?\s*(?:DE|MIN)?\s*[:=-]\s*([0-9]+(?:\.[0-9]+)?)(?:\s*(?:A|ATE|ATÉ|ATe|AT\u00C9|\u00E0|AT\u00E9|-|\u2013|AT\u0020|AT\u00C9)\s*([0-9]+(?:\.[0-9]+)?))?/i
+    /COMPRA(?:\s*\w+)?\s*(?:DE|MIN)?\s*[:=-]\s*([0-9]+(?:\.[0-9]+)?)(?:\s*(?:A|ATE|ATÉ|ATe|AT\u00C9|\u00E0|AT\u00E9|-|\u2013|AT\u0020|AT\u00C9)\s*([0-9]+(?:\.[0-9]+)?))?/
   );
   const buyMin = overrides.buyMin || (buyRangeMatch ? Number(buyRangeMatch[1]) : null);
   const buyMax =
@@ -35,24 +42,34 @@ export function parseSignal(messageText, overrides = {}) {
     targets[index] = Number(targetMatch[2]);
   }
 
-  const targetFinalMatch = numericFriendly.match(/ALVO\s*(FINAL|GERAL)[:=-]\s*([0-9]+(?:\.[0-9]+)?)/i);
+  const targetFinalMatch = numericFriendly.match(/ALVO\s*(FINAL|GERAL)\s*[:=-]\s*([0-9]+(?:\.[0-9]+)?)/);
   const targetFinal = overrides.targetFinal || (targetFinalMatch ? Number(targetFinalMatch[2]) : targets[Object.keys(targets).length] || null);
 
-  const stopMatch = numericFriendly.match(/STOP[:=-]\s*([0-9]+(?:\.[0-9]+)?)/i);
+  const stopMatch = numericFriendly.match(/STOP\s*[:=-]\s*([0-9]+(?:\.[0-9]+)?)/);
+
   const stop = overrides.stop || (stopMatch ? Number(stopMatch[1]) : null);
 
   return {
+    ts: new Date(timestamp),
     timestamp,
     channel,
+    signal_type: signalType,
     signalType,
     asset,
+    buy_min: buyMin,
+    buy_max: buyMax,
     buyMin,
     buyMax,
+    target_1: overrides.target1 ?? targets[1] ?? null,
+    target_2: overrides.target2 ?? targets[2] ?? null,
     target1: overrides.target1 ?? targets[1] ?? null,
     target2: overrides.target2 ?? targets[2] ?? null,
+    target_final: targetFinal,
     targetFinal,
     stop,
+    raw_message: normalized,
     rawMessage: normalized,
-    source: overrides.source || 'forwarder'
+    source: overrides.source || 'forwarder',
+    ingested_at: new Date()
   };
 }

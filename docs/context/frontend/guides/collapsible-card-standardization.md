@@ -88,7 +88,7 @@ Standardize all dashboard pages with substantive content to use `CollapsibleCard
 
 ### 1. BancoIdeiasPage (4 sections)
 
-**File:** `frontend/apps/dashboard/src/components/pages/BancoIdeiasPage.tsx`
+**File:** `frontend/dashboard/src/components/pages/BancoIdeiasPage.tsx`
 
 | Section | Card ID | Description |
 |---------|---------|-------------|
@@ -129,7 +129,7 @@ Standardize all dashboard pages with substantive content to use `CollapsibleCard
 
 ### 2. ConnectionsPage (3 sections)
 
-**File:** `frontend/apps/dashboard/src/components/pages/ConnectionsPage.tsx`
+**File:** `frontend/dashboard/src/components/pages/ConnectionsPage.tsx`
 
 | Section | Card ID | Description |
 |---------|---------|-------------|
@@ -143,7 +143,7 @@ Standardize all dashboard pages with substantive content to use `CollapsibleCard
 
 ### 3. TPCapitalOpcoesPage (1 section)
 
-**File:** `frontend/apps/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
+**File:** `frontend/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
 
 | Section | Card ID | Description |
 |---------|---------|-------------|
@@ -292,7 +292,7 @@ Smooth collapse/expand animation via Tailwind:
 
 ## Reference Implementation
 
-**Best Practice Example:** [EscopoPage.tsx](https://github.com/marceloterra1983/TradingSystem/blob/main/frontend/apps/dashboard/src/components/pages/EscopoPage.tsx)
+**Best Practice Example:** [EscopoPage.tsx](https://github.com/marceloterra1983/TradingSystem/blob/main/frontend/dashboard/src/components/pages/EscopoPage.tsx)
 
 This page demonstrates:
 - ✅ 7 collapsible sections with unique cardIds

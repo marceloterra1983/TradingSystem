@@ -25,8 +25,8 @@ EXPOSE 8111
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8111/health || exit 1
 
-# Run the application (CLI-compatible)
-CMD ["langgraph", "up"]
+# Run the application with FastAPI/Uvicorn
+CMD ["python", "server.py"]
 
 
 

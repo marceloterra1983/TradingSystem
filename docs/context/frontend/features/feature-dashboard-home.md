@@ -18,7 +18,7 @@ The **Dashboard Home** page serves as the central hub and landing page for the T
 - **Purpose**: Centralized monitoring dashboard for trading operations
 - **Target Users**: Traders, portfolio managers, system operators
 - **Location**: `/` (root route)
-- **Component**: `DashboardPage.tsx` (`frontend/apps/dashboard/src/components/pages/DashboardPage.tsx`)
+- **Component**: `DashboardPage.tsx` (`frontend/dashboard/src/components/pages/DashboardPage.tsx`)
 
 ## Features
 
@@ -341,7 +341,7 @@ interface Signal {
 
 ### Mock Data Location
 
-**Zustand Store**: `frontend/apps/dashboard/src/store/appStore.ts`
+**Zustand Store**: `frontend/dashboard/src/store/appStore.ts`
 
 ```typescript
 interface TradingState {

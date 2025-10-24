@@ -1,6 +1,14 @@
 import dotenv from 'dotenv';
 import path from 'node:path';
-import '../../../../backend/shared/config/load-env.js';
+import { fileURLToPath } from 'node:url';
+import '../../../backend/shared/config/load-env.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load local .env file first (higher priority)
+const localEnvPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: localEnvPath, override: true });
 
 const customEnvPath = process.env.TP_CAPITAL_ENV_PATH;
 if (customEnvPath) {
@@ -25,12 +33,13 @@ export const config = {
       secretToken: process.env.TELEGRAM_WEBHOOK_SECRET || ''
     }
   },
-  questdb: {
-    host: process.env.QUESTDB_HOST || 'localhost',
-    httpPort: Number(process.env.QUESTDB_HTTP_PORT || 9000),
-    ilpPort: Number(process.env.QUESTDB_ILP_PORT || 9009),
-    user: process.env.QUESTDB_USER || 'admin',
-    password: process.env.QUESTDB_PASSWORD || 'quest'
+  timescale: {
+    host: process.env.TIMESCALEDB_HOST || 'localhost',
+    port: Number(process.env.TIMESCALEDB_PORT || 5433),
+    database: process.env.TIMESCALEDB_DATABASE || 'APPS-TPCAPITAL',
+    schema: process.env.TIMESCALEDB_SCHEMA || 'tp_capital',
+    user: process.env.TIMESCALEDB_USER || 'timescale',
+    password: process.env.TIMESCALEDB_PASSWORD || 'change_me_timescale'
   },
   server: {
     port: Number(process.env.PORT || 4005)
@@ -41,7 +50,8 @@ export function validateConfig(logger) {
   if (!config.telegram.ingestionBotToken) {
     logger.warn('TELEGRAM_INGESTION_BOT_TOKEN is not defined. Telegram ingestion disabled.');
   }
-  if (!config.questdb.host) {
-    throw new Error('QUESTDB_HOST must be provided');
+  if (!config.timescale.host) {
+    throw new Error('TIMESCALEDB_HOST must be provided');
   }
+  logger.info({ timescale: { host: config.timescale.host, port: config.timescale.port, database: config.timescale.database } }, 'TimescaleDB configuration loaded');
 }

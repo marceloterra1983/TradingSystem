@@ -230,7 +230,7 @@ See: [Documentation Standard - Core Requirements](../../DOCUMENTATION-STANDARD.m
 
 ## 3. Manual CLI Commands
 
-Run anytime from `frontend/apps/dashboard/`:
+Run anytime from `frontend/dashboard/`:
 
 ```bash
 # Check for errors

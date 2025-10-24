@@ -253,3 +253,4 @@ frontend/apps/dashboard/cypress/downloads/
 # Miscellaneous
 # ============================================
 reiniciar.log
+logs/services/*.log

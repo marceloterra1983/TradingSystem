@@ -93,9 +93,9 @@ echo ""
 log_info "5. Configurando arquivos de ambiente..."
 
 ENV_FILES=(
-    "frontend/apps/dashboard/.env"
+    "frontend/dashboard/.env"
     "backend/api/workspace/.env"
-    "frontend/apps/tp-capital/.env"
+    "apps/tp-capital/.env"
 )
 
 for env_file in "${ENV_FILES[@]}"; do

@@ -52,7 +52,7 @@ Logs ficam em `/tmp/tradingsystem-logs/`.
 
 ## 🤖 Telegram Bots (referência segura)
 
-- Tokens e chat IDs ficam no arquivo `.env.local` do serviço `frontend/apps/tp-capital`.
+- Tokens e chat IDs ficam no arquivo `.env.local` do serviço `apps/tp-capital`.
 - Variáveis principais:
   - `TELEGRAM_FORWARDER_BOT_TOKEN`
   - `TELEGRAM_INGESTION_BOT_TOKEN`

@@ -4,7 +4,7 @@ import { ButtonWithDropdown } from '../ui/button-with-dropdown';
 import { Button } from '../ui/button';
 import { apiConfig } from '../../config/api';
 
-type DatabaseViewKey = 'questdbConsole' | 'pgAdmin' | 'pgWeb';
+type DatabaseViewKey = 'questdbConsole' | 'pgAdmin' | 'pgWeb' | 'adminer';
 
 interface EndpointOption {
   label: string;
@@ -45,6 +45,7 @@ const databaseViews: Record<DatabaseViewKey, DatabaseViewDefinition> = {
     openLabel: 'Abrir QuestDB',
     iframeTitle: 'QuestDB',
     endpoints: buildEndpointOptions(apiConfig.questdbConsoleUrl, [
+      { label: 'Port 9000', url: 'http://localhost:9000' },
       { label: 'Port 9002', url: 'http://localhost:9002' },
     ]),
   },
@@ -64,12 +65,21 @@ const databaseViews: Record<DatabaseViewKey, DatabaseViewDefinition> = {
     sandbox:
       'allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-downloads',
   },
+  adminer: {
+    label: 'Adminer',
+    openLabel: 'Abrir Adminer',
+    iframeTitle: 'Adminer',
+    endpoints: buildEndpointOptions(apiConfig.adminerUrl),
+    sandbox:
+      'allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-downloads',
+  },
 };
 
 const databaseViewOrder: DatabaseViewKey[] = [
   'questdbConsole',
   'pgAdmin',
   'pgWeb',
+  'adminer',
 ];
 const defaultSandbox =
   'allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-downloads';
@@ -84,6 +94,7 @@ export function DatabasePageNew() {
     questdbConsole: databaseViews.questdbConsole.endpoints[0]?.url ?? '',
     pgAdmin: databaseViews.pgAdmin.endpoints[0]?.url ?? '',
     pgWeb: databaseViews.pgWeb.endpoints[0]?.url ?? '',
+    adminer: databaseViews.adminer.endpoints[0]?.url ?? '',
   });
 
   const viewDefinition = databaseViews[activeView];

@@ -59,7 +59,7 @@ State machine showing layout initialization (localStorage check), state transiti
 
 Create individual components for each section of your page. **Always use `CollapsibleCard`** for compatibility with the layout system.
 
-**File**: `frontend/apps/dashboard/src/components/pages/MyPageSections.tsx`
+**File**: `frontend/dashboard/src/components/pages/MyPageSections.tsx`
 
 ```tsx
 import {
@@ -158,7 +158,7 @@ export function SettingsSection() {
 
 Create the main page component that assembles all sections.
 
-**File**: `frontend/apps/dashboard/src/components/pages/MyPageNew.tsx`
+**File**: `frontend/dashboard/src/components/pages/MyPageNew.tsx`
 
 ```tsx
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
@@ -213,7 +213,7 @@ export function MyPageNew() {
 
 Add your page to the navigation configuration.
 
-**File**: `frontend/apps/dashboard/src/data/navigation.tsx`
+**File**: `frontend/dashboard/src/data/navigation.tsx`
 
 ```tsx
 // Import your page component
@@ -251,7 +251,7 @@ import { Sparkles } from 'lucide-react';
 
 1. **Start the development server**:
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run dev
 ```
 

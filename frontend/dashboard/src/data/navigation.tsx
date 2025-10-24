@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   BookOpen,
   BarChart3,
-  Globe,
   BrainCircuit,
   Server,
   Gauge,
@@ -24,9 +23,6 @@ const B3MarketPage = React.lazy(
 );
 const TPCapitalOpcoesPage = React.lazy(
   () => import('../components/pages/TPCapitalOpcoesPage')
-);
-const FirecrawlPage = React.lazy(
-  () => import('../components/pages/FirecrawlPage')
 );
 const DocusaurusPageNew = React.lazy(
   () => import('../components/pages/DocusaurusPage')
@@ -130,7 +126,7 @@ export interface Section {
  * Implementation:
  * - Create sections with CollapsibleCard components
  * - Use CustomizablePageLayout to wrap sections
- * - See: frontend/apps/dashboard/src/components/layout/README.md
+ * - See: frontend/README.md (seção "Sistema de Layout Customizável")
  *
  * ⚠️ LEGACY: Accordion Pattern (parts)
  * -------------------------------------
@@ -189,18 +185,6 @@ export const NAVIGATION_DATA: Section[] = [
         // ✅ CustomizablePageLayout - 2 sections: CRUD table + Kanban board
         customContent: <WorkspacePageNew />,
       },
-      {
-        id: 'firecrawl',
-        title: 'Web Scraper',
-        header: {
-          title: 'Web Scraper',
-          subtitle:
-            'AI-powered web scraping and content extraction. Full standalone app at http://localhost:3800',
-        },
-        parts: [],
-        customContent: <FirecrawlPage />,
-        icon: <Globe className="h-4 w-4" />,
-      },
     ],
   },
 
@@ -229,7 +213,7 @@ export const NAVIGATION_DATA: Section[] = [
         header: {
           title: 'Database Tools',
           subtitle:
-            'QuestDB Console, QuestDB UI, pgAdmin e pgweb em um único painel',
+            'QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel',
         },
         parts: [],
         customContent: <DatabasePageNew />,

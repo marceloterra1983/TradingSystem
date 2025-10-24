@@ -7,8 +7,8 @@ import { dirname, join, relative } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Navigate from frontend/apps/dashboard/scripts to project root
-const projectRoot = join(__dirname, '../../../..');
+// Navigate from frontend/dashboard/scripts to project root
+const projectRoot = join(__dirname, '../../..');
 const docsSource = join(projectRoot, 'docs/context/shared/product/prd');
 const docsTarget = join(__dirname, '../public/docs/context/shared/product/prd');
 

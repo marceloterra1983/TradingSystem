@@ -1,5 +1,4 @@
 import type { ScrapeOptions, CrawlOptions } from '../services/firecrawlService';
-import type { TemplateInput } from '../types/webscraper';
 
 export function isValidUrl(url: string): boolean {
   if (!url) return false;
@@ -193,40 +192,3 @@ export function validateCrawlOptions(options: Partial<CrawlOptions>): Validation
   };
 }
 
-export function validateTemplate(template: TemplateInput): ValidationResult {
-  const errors: Record<string, string> = {};
-  const warnings: Record<string, string> = {};
-
-  if (!template.name || template.name.trim().length < 3) {
-    errors.name = 'Template name must be at least 3 characters long';
-  } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(template.name)) {
-    errors.name = 'Template name can only contain letters, numbers, spaces, hyphen and underscore.';
-  }
-
-  if (template.description && template.description.length > 500) {
-    errors.description = 'Description cannot exceed 500 characters.';
-  }
-
-  if (template.urlPattern) {
-    try {
-      new RegExp(template.urlPattern);
-      Object.assign(warnings, analysePattern(template.urlPattern));
-    } catch {
-      errors.urlPattern = 'Invalid URL pattern. Please provide a valid regular expression.';
-    }
-  } else {
-    warnings.urlPattern = 'No URL pattern provided. Template will match any URL.';
-  }
-
-  const optionsValidation = validateScrapeOptions(template.options, { requireUrl: false });
-  Object.assign(errors, optionsValidation.errors);
-  if (optionsValidation.warnings) {
-    Object.assign(warnings, optionsValidation.warnings);
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-    warnings: Object.keys(warnings).length ? warnings : undefined,
-  };
-}

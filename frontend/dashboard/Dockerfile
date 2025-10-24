@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-WORKDIR /workspace/frontend/apps/dashboard
+WORKDIR /workspace/frontend/dashboard
 
 # Copy package files
 COPY package*.json ./

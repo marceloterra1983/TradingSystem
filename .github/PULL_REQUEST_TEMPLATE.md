@@ -61,7 +61,7 @@ This migration was executed in 6 phases:
 
 ### Test Suites
 - [ ] DocsAPI tests pass: `cd backend/api/documentation-api && npm run test`
-- [ ] Dashboard tests pass: `cd frontend/apps/dashboard && npm run test`
+- [ ] Dashboard tests pass: `cd apps/dashboard && npm run test`
 - [ ] Firecrawl Proxy integration tests pass: `cd backend/api/firecrawl-proxy && npm run test:integration`
 - [ ] LangGraph validation passes: `bash infrastructure/langgraph/validate-deployment.sh`
 

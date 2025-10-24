@@ -2,204 +2,83 @@
 # TradingSystem - Documentation Services Stack
 # ============================================================================
 # Services:
-#   - DocsAPI (Port 3400) - Documentation management API
+#   - DocsAPI (Port 3400) - Documentation management API (placeholder with health)
 #   - DocsSpecs (Port 3101) - OpenAPI/AsyncAPI viewer
 #
-# NOTE: Docusaurus runs as a local development service only:
-#   cd docs/docusaurus && npm run start -- --port 3004
-#
 # Usage:
-#   docker compose -f infrastructure/compose/docker-compose.docs.yml up -d
-#   docker compose -f infrastructure/compose/docker-compose.docs.yml logs -f
-#   docker compose -f infrastructure/compose/docker-compose.docs.yml down
+#   docker compose -f tools/compose/docker-compose.docs.yml up -d
+#   docker compose -f tools/compose/docker-compose.docs.yml logs -f
+#   docker compose -f tools/compose/docker-compose.docs.yml down
 #
-# Environment:
-#   Create .env.docs file with required variables (see .env.docs.example)
-#
-# Dependencies:
-#   - TimescaleDB (from docker-compose.timescale.yml)
-#
-# Last Updated: 2025-10-19
+# Last Updated: 2025-10-23
 # ============================================================================
 
 name: documentation
 
 services:
   # ============================================================================
-  # DocsAPI - Documentation Management API
+  # DocsAPI - Documentation Management API (Placeholder with Health)
   # ============================================================================
   documentation-api:
     container_name: docs-api
-    image: "${IMG_DOCS_API:-img-docs-api}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DOCS_API:-img-docs-api}:${IMG_VERSION:-latest}"
     platform: linux/amd64
-
-    env_file:
-      - ../../.env
-
+    build:
+      context: ../docs-api
+      dockerfile: Dockerfile
     ports:
-      - "${DOCS_API_PORT:-3400}:3400"
-
-    environment:
-      # Server Configuration
-      - NODE_ENV=${NODE_ENV:-production}
-      - PORT=3400
-      - LOG_LEVEL=${DOCS_API_LOG_LEVEL:-info}
-      
-      # CORS Configuration
-      - CORS_ORIGIN=${DOCS_API_CORS_ORIGIN:-http://localhost:3103,http://localhost:3004}
-      - DISABLE_CORS=${DOCS_API_DISABLE_CORS:-false}
-      
-      # Rate Limiting
-      - RATE_LIMIT_WINDOW_MS=${DOCS_API_RATE_LIMIT_WINDOW:-60000}
-      - RATE_LIMIT_MAX=${DOCS_API_RATE_LIMIT_MAX:-200}
-      
-      # QuestDB Connection (legacy env names – point to TimescaleDB)
-      - QUESTDB_HOST=${QUESTDB_HOST:-data-timescaledb}
-      - QUESTDB_HTTP_PORT=${QUESTDB_HTTP_PORT:-5433}
-      - QUESTDB_PG_PORT=${QUESTDB_PG_PORT:-5433}
-      - QUESTDB_USER=${QUESTDB_USER:-admin}
-      - QUESTDB_PASSWORD=${QUESTDB_PASSWORD:-quest}
-      
-      # Database Tables
-      - QUESTDB_SYSTEMS_TABLE=${QUESTDB_SYSTEMS_TABLE:-documentation_systems}
-      - QUESTDB_IDEAS_TABLE=${QUESTDB_IDEAS_TABLE:-documentation_ideas}
-      - QUESTDB_FILES_TABLE=${QUESTDB_FILES_TABLE:-documentation_files}
-      - QUESTDB_AUDIT_TABLE=${QUESTDB_AUDIT_TABLE:-documentation_audit_log}
-
-      # PostgreSQL Strategy (NEW - preferred)
-      - DOCUMENTATION_DB_STRATEGY=${DOCUMENTATION_DB_STRATEGY:-postgres}
-      - DOCUMENTATION_DATABASE_URL=${DOCUMENTATION_DATABASE_URL:-postgresql://app_documentation:app_documentation_dev_password@data-frontend-apps:5432/frontend_apps?schema=documentation}
-
-    volumes:
-      # Specs directory (read-only)
-      - ../../docs/spec:/app/specs:ro
-      # Full documentation context (read-only) for indexing
-      - ../../docs:/docs:ro
-
-      # Persistent uploads
-      - docs-api-uploads:/app/uploads
-
-      # Development mode: mount source code
-      # Uncomment for development with hot reload
-      # - ../../backend/api/documentation-api/src:/app/src:ro
-    
-    # depends_on: # QuestDB runs in separate compose
-      # questdb:
-        # condition: service_healthy
-    
+      - "${DOCS_API_PORT:-3400}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
     networks:
       - tradingsystem_backend
-      - tradingsystem_data
-    
-    restart: unless-stopped
-    
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3400/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
-      start_period: 40s
+      start_period: 10s
       retries: 3
-    
     labels:
       - "com.tradingsystem.stack=documentation"
       - "com.tradingsystem.service=docs-api"
       - "com.tradingsystem.type=backend"
       - "com.tradingsystem.port=3400"
-      - "traefik.enable=true"
-      - "traefik.http.routers.docs-api.rule=Host(`docs-api.tradingsystem.local`)"
-      - "traefik.http.services.docs-api.loadbalancer.server.port=3400"
 
   # ============================================================================
   # DocsSpecs - OpenAPI & AsyncAPI Specifications Viewer
   # ============================================================================
   docs-api-viewer:
     container_name: docs-api-viewer
-    image: "${IMG_DOCS_API_VIEWER:-img-docs-api-viewer}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DOCS_API_VIEWER:-nginx}:${IMG_DOCS_VIEWER_VERSION:-alpine}"
     platform: linux/amd64
-
     ports:
-      - "${DOCSPECS_PORT:-3101}:3000"
-
+      - "${DOCSPECS_PORT:-3101}:80"
     environment:
       - NODE_ENV=production
-      - PORT=3000
-
+      - PORT=80
     volumes:
-      - ../../docs/spec:/app/specs:ro
-
+      - ../../docs/spec:/usr/share/nginx/html:ro
     networks:
       - tradingsystem_frontend
-
     restart: unless-stopped
-
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
       interval: 30s
       timeout: 10s
       start_period: 20s
       retries: 3
-
     labels:
       - "com.tradingsystem.stack=documentation"
       - "com.tradingsystem.service=docs-api-viewer"
       - "com.tradingsystem.type=frontend"
       - "com.tradingsystem.port=3101"
-      - "traefik.enable=true"
-      - "traefik.http.routers.docs-api-viewer.rule=Host(`docspecs.tradingsystem.local`)"
-      - "traefik.http.services.docs-api-viewer.loadbalancer.server.port=3000"
-
-# ============================================================================
-# Volumes
-# ============================================================================
-volumes:
-  docs-api-uploads:
-    driver: local
-    labels:
-      - "com.tradingsystem.volume=docs-api-uploads"
-      - "com.tradingsystem.backup=true"
 
 # ============================================================================
 # Networks
 # ============================================================================
 networks:
   tradingsystem_backend:
-    name: tradingsystem_backend
-    external: true
-  tradingsystem_data:
-    name: tradingsystem_data
     external: true
   tradingsystem_frontend:
-    name: tradingsystem_frontend
     external: true
-
-# ============================================================================
-# Configuration Notes
-# ============================================================================
-#
-# Environment Variables:
-#   Uses centralized .env file from project root
-#   See .env.example for all available options
-#
-# Services:
-#   - DocsAPI: Documentation management and search
-#   - DocsSpecs: OpenAPI/AsyncAPI specifications viewer
-#
-# Docusaurus (Development Only):
-#   Docusaurus runs as a local service (not containerized):
-#     cd docs/docusaurus && npm run start -- --port 3004
-#
-# TimescaleDB Dependency:
-#   DocsAPI uses legacy `QUESTDB_*` variables pointing to TimescaleDB.
-#   Ensure TimescaleDB cluster is running:
-#     docker compose -f docker-compose.timescale.yml up -d
-#
-# Backup Uploads:
-#   docker run --rm -v tradingsystem_docs-api-uploads:/data \
-#     -v $(pwd)/backups:/backup alpine \
-#     tar czf /backup/docs-api-uploads-$(date +%Y%m%d).tar.gz /data
-#
-# Restore Uploads:
-#   docker run --rm -v tradingsystem_docs-api-uploads:/data \
-#     -v $(pwd)/backups:/backup alpine \
-#     tar xzf /backup/docs-api-uploads-YYYYMMDD.tar.gz -C /
-# ============================================================================

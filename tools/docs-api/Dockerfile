@@ -1,32 +1,33 @@
-# Use pinned Node.js Alpine image for security and size
-FROM node:18.17.0-alpine
+# Simple Dockerfile for DocsAPI placeholder with health endpoint
+FROM nginx:alpine
 
-# Create a non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S docsapi -u 1001
+# Install wget for healthcheck
+RUN apk add --no-cache wget
 
-# Set working directory
-WORKDIR /app
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy package files
-COPY package*.json ./
+# Create health endpoint file
+RUN mkdir -p /usr/share/nginx/html && \
+    echo '{"status":"healthy","service":"docs-api"}' > /usr/share/nginx/html/health.json && \
+    echo '{"service":"DocsAPI","version":"1.0.0","status":"placeholder"}' > /usr/share/nginx/html/index.json
 
-# Install dependencies
-RUN npm ci --only=production
+# Configure nginx
+RUN echo 'server { \
+    listen 80; \
+    server_name _; \
+    \
+    location /health { \
+        default_type application/json; \
+        alias /usr/share/nginx/html/health.json; \
+    } \
+    \
+    location / { \
+        default_type application/json; \
+        alias /usr/share/nginx/html/index.json; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Copy source code
-COPY . .
+EXPOSE 80
 
-# Change ownership to non-root user
-RUN chown -R docsapi:nodejs /app
-USER docsapi
-
-# Expose port
-EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
-
-# Start the app
-CMD ["node", "server.js"]
+CMD ["nginx", "-g", "daemon off;"]
