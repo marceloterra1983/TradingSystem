@@ -4,7 +4,7 @@ set -e
 echo "Setting up BuildKit distributed cache..."
 
 # Start registry container
-docker compose --env-file .env -f infrastructure/docker-compose.cache.yml up -d
+docker compose --env-file .env -f tools/docker-compose.cache.yml up -d
 
 # Wait for registry to be ready
 echo "Waiting for registry to be ready..."
@@ -81,7 +81,7 @@ echo "Cache setup completed! You can now use the cache with:"
 echo "buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --export-cache type=registry,ref=localhost:5000/cache,mode=max --import-cache type=registry,ref=localhost:5000/cache"
 
 # Setup Prometheus monitoring for cache metrics
-cat << EOF > infrastructure/monitoring/prometheus/buildkit.yml
+cat << EOF > tools/monitoring/prometheus/buildkit.yml
 scrape_configs:
   - job_name: 'buildkit'
     static_configs:

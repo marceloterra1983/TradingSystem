@@ -547,7 +547,7 @@ export async function handleScheduleUpdated(schedule) {
   await refreshScheduleGauge();
 }
 
-export async function handleScheduleDeleted(scheduleId, scheduleType, enabled) {
+export async function handleScheduleDeleted(scheduleId, _scheduleType, _enabled) {
   removeSchedule(scheduleId);
   await refreshScheduleGauge();
 }

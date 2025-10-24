@@ -10,18 +10,18 @@ domain: ops
 type: runbook
 summary: Execution plan for purging dependency artifacts and updating submodules without disrupting contributors
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 ## Objectives
 
 - Remove historical `node_modules` blobs to reduce repository size and clone time.
-- Finalize submodule baseline for `infrastructure/Agent-MCP` and `infrastructure/firecrawl/firecrawl-source`.
+- Finalize submodule baseline for `tools/Agent-MCP` and `tools/firecrawl/firecrawl-source`.
 - Provide clear instructions for contributors and CI after the force-push.
 
 ## Timeline
 
-Use `infrastructure/scripts/rewrite-history.sh` during the maintenance window to automate the filter-repo steps.
+Use `tools/scripts/rewrite-history.sh` during the maintenance window to automate the filter-repo steps.
 
 
 1. **T-3 days**: Announce maintenance window on internal channels. Share summary of upcoming changes and link to this runbook.

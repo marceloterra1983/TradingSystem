@@ -6,8 +6,8 @@ DEFAULT_ENV_FILE="$ROOT_DIR/config/.env.defaults"
 CONTAINER_IMAGES_FILE="$ROOT_DIR/config/container-images.env"
 LEGACY_ENV_FILE="$ROOT_DIR/.env"
 LOCAL_ENV_FILE="$ROOT_DIR/.env.local"
-SCHEMA_FILE="$ROOT_DIR/infrastructure/timescaledb/webscraper-schema.sql"
-SEED_FILE="$ROOT_DIR/infrastructure/timescaledb/webscraper-seed.sql"
+SCHEMA_FILE="$ROOT_DIR/backend/data/timescaledb/webscraper-schema.sql"
+SEED_FILE="$ROOT_DIR/backend/data/timescaledb/webscraper-seed.sql"
 
 if ! command -v psql >/dev/null 2>&1; then
   echo "psql is required but not installed. Install PostgreSQL client tools first."

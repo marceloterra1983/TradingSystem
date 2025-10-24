@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Implementation details for the Firecrawl Proxy Express service that mediates requests to the Firecrawl scraping stack.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Firecrawl Proxy Implementation Guide
@@ -18,7 +18,7 @@ The Firecrawl Proxy is a Node.js/Express service that validates and forwards scr
 - **Port:** `3600`
 - **Upstream:** `http://localhost:3002` (Firecrawl core)
 - **Purpose:** Harden public interactions with Firecrawl by adding validation, throttling, and observability.
-- **Deployment:** Docker Compose service `firecrawl-proxy` (see [Firecrawl Stack Overview](../../../ops/infrastructure/firecrawl-stack.md)).
+- **Deployment:** Docker Compose service `firecrawl-proxy` (see [Firecrawl Stack Overview](../../../ops/tools/firecrawl-stack.md)).
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Ensure the Firecrawl stack is running locally (`docker compose -f infrastructure/firecrawl/docker-compose.yml up -d`) before issuing scrape or crawl requests.
+Ensure the Firecrawl stack is running locally (`docker compose -f tools/firecrawl/docker-compose.yml up -d`) before issuing scrape or crawl requests.
 
 ## API Endpoints
 
@@ -81,6 +81,6 @@ Vitest and Supertest provide coverage across request validation logic and upstre
 ## Related Documentation
 
 - [Firecrawl Proxy API Reference](../firecrawl-proxy.md)
-- [Firecrawl Stack Overview](../../../ops/infrastructure/firecrawl-stack.md)
+- [Firecrawl Stack Overview](../../../ops/tools/firecrawl-stack.md)
 - [Scraping Dashboard Feature](../../../frontend/features/webscraper-app.md)
 - [Service Startup Guide](../../../ops/onboarding/START-SERVICES.md)

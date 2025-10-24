@@ -6,7 +6,7 @@ domain: shared
 type: reference
 summary: Contributing to TradingSystem
 status: active
-last_review: 2025-10-22
+last_review: "2025-10-22"
 ---
 
 # Contributing to TradingSystem
@@ -376,7 +376,7 @@ export const config = {
 #### For Vite/React Applications:
 
 ```javascript
-// frontend/apps/my-app/vite.config.ts
+// apps/my-app/vite.config.ts
 import { defineConfig } from 'vite';
 
 // ✅ Vite automatically loads .env from project root
@@ -451,7 +451,7 @@ bash scripts/env/validate-env.sh
 
 # 4. Install dependencies
 # Frontend
-cd frontend/apps/dashboard && npm install
+cd frontend/dashboard && npm install
 
 # Backend APIs (example)
 cd backend/api/workspace && npm install
@@ -716,7 +716,7 @@ export const config = {
 #### 5. Create Docker Compose (if needed)
 
 ```yaml
-# infrastructure/compose/docker-compose.my-service.yml
+# tools/compose/docker-compose.my-service.yml
 version: '3.8'
 
 services:
@@ -742,12 +742,12 @@ bash scripts/env/validate-env.sh
 npm run dev
 
 # Test Docker (if applicable)
-docker-compose -f infrastructure/compose/docker-compose.my-service.yml config
+docker-compose -f tools/compose/docker-compose.my-service.yml config
 ```
 
 #### 7. Document
 
-- Add service to `infrastructure/README.md`
+- Add service to `tools/README.md`
 - Add to `docs/context/backend/api/` (if backend)
 - Add to `docs/context/frontend/` (if frontend)
 - Update this CONTRIBUTING.md if new patterns
@@ -773,13 +773,13 @@ bash scripts/env/migrate-env.sh
 
 ```bash
 # Start specific stack
-docker-compose -f infrastructure/compose/docker-compose.*.yml up -d
+docker-compose -f tools/compose/docker-compose.*.yml up -d
 
 # Start all stacks
 bash scripts/docker/start-stacks.sh
 
 # View logs
-docker-compose -f infrastructure/compose/docker-compose.*.yml logs -f
+docker-compose -f tools/compose/docker-compose.*.yml logs -f
 ```
 
 ---
@@ -931,7 +931,7 @@ npm run dev
 
 - **Environment Guide**: `docs/context/ops/ENVIRONMENT-CONFIGURATION.md`
 - **Migration Guide**: `docs/context/ops/COMPLETE-ENV-CONSOLIDATION-GUIDE.md`
-- **Infrastructure**: `infrastructure/README.md`
+- **Infrastructure**: `tools/README.md`
 - **Frontend**: `frontend/README.md`
 - **CLAUDE.md**: Complete guide for AI assistants (also valid for humans!)
 

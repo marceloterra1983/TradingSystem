@@ -192,11 +192,11 @@ log_step "Building Docker images"
 
 if [[ "$DRY_RUN" == "false" ]]; then
     log_info "Building DocsAPI image..."
-    docker compose --env-file "$PROJECT_ROOT/.env" -f infrastructure/compose/docker-compose.docs.yml build docs-api
+    docker compose --env-file "$PROJECT_ROOT/.env" -f tools/compose/docker-compose.docs.yml build docs-api
     log_success "DocsAPI image built"
     
     log_info "Building Docusaurus production image..."
-    docker compose --env-file "$PROJECT_ROOT/.env" -f infrastructure/compose/docker-compose.docs.yml build docusaurus
+    docker compose --env-file "$PROJECT_ROOT/.env" -f tools/compose/docker-compose.docs.yml build docusaurus
     log_success "Docusaurus image built"
 else
     log_info "[DRY-RUN] Would build Docker images"
@@ -210,7 +210,7 @@ log_step "Ensuring TimescaleDB is running"
 if ! docker ps --format '{{.Names}}' | grep -q '^data-timescaledb$'; then
     if [[ "$DRY_RUN" == "false" ]]; then
         log_info "Starting TimescaleDB..."
-        docker compose --env-file "$PROJECT_ROOT/.env" -f infrastructure/compose/docker-compose.timescale.yml up -d timescaledb
+        docker compose --env-file "$PROJECT_ROOT/.env" -f tools/compose/docker-compose.timescale.yml up -d timescaledb
 
         log_info "Waiting for TimescaleDB to accept connections..."
         timeout=60
@@ -248,7 +248,7 @@ log_info "QuestDB schema bootstrap has been retired. Please run TimescaleDB migr
 log_step "Starting DocsAPI container"
 
 if [[ "$DRY_RUN" == "false" ]]; then
-    docker compose --env-file "$PROJECT_ROOT/.env" -f infrastructure/compose/docker-compose.docs.yml up -d docs-api
+    docker compose --env-file "$PROJECT_ROOT/.env" -f tools/compose/docker-compose.docs.yml up -d docs-api
     
     log_info "Waiting for DocsAPI to be healthy..."
     timeout=60
@@ -264,7 +264,7 @@ if [[ "$DRY_RUN" == "false" ]]; then
     
     if [[ $elapsed -ge $timeout ]]; then
         log_error "DocsAPI failed to become healthy within ${timeout}s"
-        log_info "Check logs: docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml logs docs-api"
+        log_info "Check logs: docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs docs-api"
         exit 1
     fi
 else
@@ -290,9 +290,9 @@ echo "  • AsyncAPI:     http://localhost:3400/spec/asyncapi.yaml"
 echo ""
 
 log_info "🔧 Management Commands:"
-echo "  • View logs:    docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml logs -f docs-api"
-echo "  • Restart:      docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml restart docs-api"
-echo "  • Stop:         docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml down"
+echo "  • View logs:    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs -f docs-api"
+echo "  • Restart:      docker compose --env-file .env -f tools/compose/docker-compose.docs.yml restart docs-api"
+echo "  • Stop:         docker compose --env-file .env -f tools/compose/docker-compose.docs.yml down"
 echo "  • Stats:        docker stats docs-api"
 echo ""
 
@@ -301,7 +301,7 @@ echo "  • Use LOCAL service for development (hot reload):"
 echo "    cd docs/docusaurus && npm run start -- --port 3004"
 echo ""
 echo "  • Use DOCKER for production:"
-echo "    docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml --profile production up -d"
+echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml --profile production up -d"
 echo ""
 
 if [[ "$SKIP_BACKUP" == "false" && "$DRY_RUN" == "false" ]]; then

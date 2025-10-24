@@ -6,7 +6,7 @@ domain: shared
 type: guide
 summary: Service Launcher - Guia de Commit
 status: active
-last_review: 2025-10-22
+last_review: "2025-10-22"
 ---
 
 # Service Launcher - Guia de Commit
@@ -17,24 +17,24 @@ last_review: 2025-10-22
 cd /home/marce/projetos/TradingSystem
 
 # Stage todos os arquivos modificados/criados
-git add frontend/apps/service-launcher/server.js
-git add frontend/apps/service-launcher/package.json
-git add frontend/apps/service-launcher/package-lock.json
-git add frontend/apps/service-launcher/README.md
-git add frontend/apps/service-launcher/ENV_VARIABLES.md
-git add frontend/apps/service-launcher/IMPLEMENTATION_NOTES.md
-git add frontend/apps/service-launcher/src/utils/logger.js
-git add frontend/apps/service-launcher/tests/endpoints.test.js
-git add frontend/apps/service-launcher/tests/config.test.js
-git add frontend/apps/service-launcher/docs/ARCHITECTURE.md
-git add frontend/apps/service-launcher/docs/diagrams/
+git add apps/service-launcher/server.js
+git add apps/service-launcher/package.json
+git add apps/service-launcher/package-lock.json
+git add apps/service-launcher/README.md
+git add apps/service-launcher/ENV_VARIABLES.md
+git add apps/service-launcher/IMPLEMENTATION_NOTES.md
+git add apps/service-launcher/src/utils/logger.js
+git add apps/service-launcher/tests/endpoints.test.js
+git add apps/service-launcher/tests/config.test.js
+git add apps/service-launcher/docs/ARCHITECTURE.md
+git add apps/service-launcher/docs/diagrams/
 
 git add docs/context/backend/api/service-launcher/README.md
 git add docs/reports/service-launcher-audit-plan.md
 git add docs/reports/service-launcher-openspec-proposal.md
 git add docs/reports/service-launcher-implementation-summary.md
 
-git add infrastructure/openspec/changes/fix-service-launcher-critical-issues/
+git add tools/openspec/changes/fix-service-launcher-critical-issues/
 
 # Commit usando mensagem do arquivo
 git commit -F COMMIT_MESSAGE.md
@@ -49,7 +49,7 @@ git push origin HEAD
 
 ### Commit 1: Critical Fixes (P0)
 ```bash
-git add frontend/apps/service-launcher/server.js
+git add apps/service-launcher/server.js
 
 git commit -m "fix(service-launcher): corrigir porta default e .env loading (P0)
 
@@ -61,12 +61,12 @@ BREAKING CHANGE: Porta default mudou de 9999 para 3500
 - fix: Corrigir nome 'Laucher' → 'Launcher' em código
 - test: Validado com curl http://localhost:3500/health
 
-Refs: infrastructure/openspec/changes/fix-service-launcher-critical-issues/"
+Refs: tools/openspec/changes/fix-service-launcher-critical-issues/"
 ```
 
 ### Commit 2: Documentation (P1)
 ```bash
-git add frontend/apps/service-launcher/ENV_VARIABLES.md
+git add apps/service-launcher/ENV_VARIABLES.md
 git add docs/context/backend/api/service-launcher/README.md
 
 git commit -m "docs(service-launcher): documentar variáveis SERVICE_LAUNCHER_* (P1)
@@ -80,8 +80,8 @@ Refs: #service-launcher"
 
 ### Commit 3: Structured Logging (P2)
 ```bash
-git add frontend/apps/service-launcher/src/utils/logger.js
-git add frontend/apps/service-launcher/server.js
+git add apps/service-launcher/src/utils/logger.js
+git add apps/service-launcher/server.js
 
 git commit -m "feat(service-launcher): implementar logging estruturado com Pino (P2)
 
@@ -96,9 +96,9 @@ Refs: #service-launcher"
 
 ### Commit 4: Test Suite (P2)
 ```bash
-git add frontend/apps/service-launcher/tests/endpoints.test.js
-git add frontend/apps/service-launcher/tests/config.test.js
-git add frontend/apps/service-launcher/package.json
+git add apps/service-launcher/tests/endpoints.test.js
+git add apps/service-launcher/tests/config.test.js
+git add apps/service-launcher/package.json
 
 git commit -m "test(service-launcher): adicionar suite de testes completa (P2)
 
@@ -116,9 +116,9 @@ Refs: #service-launcher"
 
 ### Commit 5: Documentation (P2)
 ```bash
-git add frontend/apps/service-launcher/README.md
-git add frontend/apps/service-launcher/docs/
-git add frontend/apps/service-launcher/IMPLEMENTATION_NOTES.md
+git add apps/service-launcher/README.md
+git add apps/service-launcher/docs/
+git add apps/service-launcher/IMPLEMENTATION_NOTES.md
 
 git commit -m "docs(service-launcher): reescrever docs com YAML frontmatter e PlantUML (P2)
 
@@ -134,7 +134,7 @@ Refs: #service-launcher"
 
 ### Commit 6: OpenSpec & Reports
 ```bash
-git add infrastructure/openspec/changes/fix-service-launcher-critical-issues/
+git add tools/openspec/changes/fix-service-launcher-critical-issues/
 git add docs/reports/service-launcher-*.md
 git add COMMIT_MESSAGE.md
 git add GIT_COMMIT_GUIDE.md
@@ -158,10 +158,10 @@ Refs: #openspec, #service-launcher"
 git status
 
 # 2. Ver diff das mudanças principais
-git diff frontend/apps/service-launcher/server.js | head -50
+git diff apps/service-launcher/server.js | head -50
 
 # 3. Rodar testes
-cd frontend/apps/service-launcher
+cd apps/service-launcher
 npm test
 
 # 4. Verificar serviço funcionando
@@ -204,24 +204,24 @@ gh pr create \
 
 ### Código Fonte (5 arquivos)
 ```bash
-frontend/apps/service-launcher/server.js              # Modificado
-frontend/apps/service-launcher/package.json           # Modificado
-frontend/apps/service-launcher/src/utils/logger.js   # Novo
+apps/service-launcher/server.js              # Modificado
+apps/service-launcher/package.json           # Modificado
+apps/service-launcher/src/utils/logger.js   # Novo
 ```
 
 ### Testes (2 arquivos)
 ```bash
-frontend/apps/service-launcher/tests/endpoints.test.js  # Novo
-frontend/apps/service-launcher/tests/config.test.js     # Modificado
+apps/service-launcher/tests/endpoints.test.js  # Novo
+apps/service-launcher/tests/config.test.js     # Modificado
 ```
 
 ### Documentação do Serviço (6 arquivos)
 ```bash
-frontend/apps/service-launcher/README.md                 # Modificado
-frontend/apps/service-launcher/ENV_VARIABLES.md          # Novo
-frontend/apps/service-launcher/IMPLEMENTATION_NOTES.md   # Novo
-frontend/apps/service-launcher/docs/ARCHITECTURE.md      # Novo
-frontend/apps/service-launcher/docs/diagrams/*.puml      # Novo (3 files)
+apps/service-launcher/README.md                 # Modificado
+apps/service-launcher/ENV_VARIABLES.md          # Novo
+apps/service-launcher/IMPLEMENTATION_NOTES.md   # Novo
+apps/service-launcher/docs/ARCHITECTURE.md      # Novo
+apps/service-launcher/docs/diagrams/*.puml      # Novo (3 files)
 ```
 
 ### Documentação Central (4 arquivos)
@@ -234,10 +234,10 @@ docs/reports/service-launcher-implementation-summary.md  # Novo
 
 ### OpenSpec (4 arquivos)
 ```bash
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/design.md
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/tasks.md
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md
+tools/openspec/changes/fix-service-launcher-critical-issues/proposal.md
+tools/openspec/changes/fix-service-launcher-critical-issues/design.md
+tools/openspec/changes/fix-service-launcher-critical-issues/tasks.md
+tools/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md
 ```
 
 ### Git Guides (2 arquivos)

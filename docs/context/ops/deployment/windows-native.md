@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Steps to build and publish TradingSystem services on Windows
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Windows Native Deployment
@@ -25,7 +25,7 @@ last_review: 2025-10-17
 
 ## Install / Run as Services
 
-- Use PowerShell scripts under `infrastructure/scripts/` (e.g., `install-windows-services.ps1`) to register Windows services.
+- Use PowerShell scripts under `tools/scripts/` (e.g., `install-windows-services.ps1`) to register Windows services.
 - Ensure services run under dedicated accounts with least privilege.
 
 ## Verification

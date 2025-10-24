@@ -51,14 +51,14 @@ INFRASTRUCTURE_DIR="$(dirname "$SCRIPT_DIR")"
 REPO_ROOT="$(dirname "$INFRASTRUCTURE_DIR")"
 ENV_FILE="$REPO_ROOT/.env"
 
-# Start service launcher if not skipped
+# Start status service if not skipped
 if [ "$SKIP_SERVICE_LAUNCHER" = false ]; then
-    SERVICE_LAUNCHER_SCRIPT="$SCRIPT_DIR/start-service-launcher.sh"
-    if [ -f "$SERVICE_LAUNCHER_SCRIPT" ]; then
-        echo "[Init] Ensuring Laucher API is running (port 3500)..."
-        bash "$SERVICE_LAUNCHER_SCRIPT"
+    STATUS_SCRIPT="$SCRIPT_DIR/start-status.sh"
+    if [ -f "$STATUS_SCRIPT" ]; then
+        echo "[Init] Ensuring Status API is running (port 3500)..."
+        bash "$STATUS_SCRIPT"
     else
-        echo "⚠️  [Init] Service launcher script not found at $SERVICE_LAUNCHER_SCRIPT"
+        echo "⚠️  [Init] Status script not found at $STATUS_SCRIPT"
     fi
 fi
 
@@ -132,7 +132,7 @@ fi
 
 # Start monitoring stack with Docker
 if [ "$START_MONITORING" = true ]; then
-    MONITORING_PATH="$REPO_ROOT/infrastructure/monitoring"
+    MONITORING_PATH="$REPO_ROOT/tools/monitoring"
     if ! command -v docker &> /dev/null; then
         echo "⚠️  [Monitoring] Docker is not available. Skipping monitoring stack startup."
     elif [ ! -d "$MONITORING_PATH" ]; then
@@ -142,12 +142,12 @@ if [ "$START_MONITORING" = true ]; then
             gnome-terminal --tab --title="Monitoring Stack" -- bash -c "
                 cd '$MONITORING_PATH'
                 echo '[Monitoring] Starting Prometheus stack (docker compose up -d)...'
-                COMPOSE_PROFILES=linux docker compose --env-file '$ENV_FILE' -f '$REPO_ROOT/infrastructure/monitoring/docker-compose.yml' up -d --build
+                COMPOSE_PROFILES=linux docker compose --env-file '$ENV_FILE' -f '$REPO_ROOT/tools/monitoring/docker-compose.yml' up -d --build
                 exec bash
             "
         else
             echo "[Monitoring] Starting Prometheus stack..."
-            COMPOSE_PROFILES=linux docker compose --env-file "$ENV_FILE" -f "$REPO_ROOT/infrastructure/monitoring/docker-compose.yml" up -d --build
+            COMPOSE_PROFILES=linux docker compose --env-file "$ENV_FILE" -f "$REPO_ROOT/tools/monitoring/docker-compose.yml" up -d --build
         fi
         echo "[Monitoring] launch command dispatched."
     fi
@@ -165,12 +165,12 @@ if [ "$START_DOCS_DOCKER" = true ]; then
             gnome-terminal --tab --title="Docs Docker" -- bash -c "
                 cd '$DOCS_DOCKER_PATH'
                 echo '[Docs Docker] Starting stack (docker compose up -d docs-api)...'
-                docker compose --env-file '$ENV_FILE' -f '$REPO_ROOT/infrastructure/compose/docker-compose.docs.yml' up -d --build docs-api
+                docker compose --env-file '$ENV_FILE' -f '$REPO_ROOT/tools/compose/docker-compose.docs.yml' up -d --build docs-api
                 exec bash
             "
         else
             echo "[Docs Docker] Starting stack..."
-            docker compose --env-file "$ENV_FILE" -f "$REPO_ROOT/infrastructure/compose/docker-compose.docs.yml" up -d --build docs-api
+            docker compose --env-file "$ENV_FILE" -f "$REPO_ROOT/tools/compose/docker-compose.docs.yml" up -d --build docs-api
         fi
         echo "[Docs Docker] launch command dispatched."
     fi

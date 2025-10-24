@@ -91,7 +91,7 @@ check_env_file() {
 
 ENV_FILES_MISSING=false
 
-check_env_file "frontend/apps/tp-capital/infrastructure/tp-capital-signals.env.example" "frontend/apps/tp-capital/infrastructure/tp-capital-signals.env" || ENV_FILES_MISSING=true
+check_env_file "frontend/apps/tp-capital/tools/tp-capital-signals.env.example" "frontend/apps/tp-capital/tools/tp-capital-signals.env" || ENV_FILES_MISSING=true
 
 echo ""
 

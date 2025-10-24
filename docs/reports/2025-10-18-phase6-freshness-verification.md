@@ -307,7 +307,7 @@ Spot-checked recently updated files for technical accuracy:
 **✅ agno-agents-guide.md (2025-10-17)**:
 
 -   Port correct (8200)
--   Agent descriptions match implementation in `infrastructure/agno-agents/src/interfaces/agents/`
+-   Agent descriptions match implementation in `tools/agno-agents/src/interfaces/agents/`
 -   Environment variables match root `.env.example`
 -   API endpoints match FastAPI routes
 -   References to ADR-0002 and PRD are correct

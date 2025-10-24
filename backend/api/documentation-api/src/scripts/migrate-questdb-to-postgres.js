@@ -19,7 +19,7 @@ import questdbClient from '../utils/questDBClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../../../../');
+const _projectRoot = path.resolve(__dirname, '../../../../');
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const SKIP_EXISTING = process.argv.includes('--skip-existing');

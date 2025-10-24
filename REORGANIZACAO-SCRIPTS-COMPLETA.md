@@ -7,7 +7,7 @@
 
 Realizada revisão completa e limpeza dos scripts do projeto TradingSystem, incluindo:
 
-1. ✅ Migração de todos os scripts de `infrastructure/scripts` para `scripts/`
+1. ✅ Migração de todos os scripts de `tools/scripts` para `scripts/`
 2. ✅ Organização de scripts soltos em subpastas apropriadas
 3. ✅ Remoção de scripts obsoletos e arquivos temporários
 4. ✅ Atualização de referências em scripts e documentação
@@ -18,7 +18,7 @@ Realizada revisão completa e limpeza dos scripts do projeto TradingSystem, incl
 - **Total de Scripts Shell**: 136 arquivos `.sh`
 - **Pastas Organizadas**: 22 diretórios
 - **Total de Arquivos**: 183 (scripts + documentação)
-- **Scripts Movidos de infrastructure/**: 15 arquivos
+- **Scripts Movidos de tools/**: 15 arquivos
 - **Scripts Reorganizados na raiz**: 17 arquivos
 - **Arquivos Removidos**: 3 (obsoletos)
 
@@ -60,7 +60,7 @@ Realizada revisão completa e limpeza dos scripts do projeto TradingSystem, incl
 - `service-manifest.js`
 
 ### Removido
-- ❌ `infrastructure/scripts/` - Pasta completamente removida
+- ❌ `tools/scripts/` - Pasta completamente removida
 - ❌ `scripts/scripts/` - Pasta duplicada vazia
 - ❌ `scripts/install.sh` - Script obsoleto
 - ❌ `scripts/inventory-20251013.txt` - Arquivo temporário
@@ -96,7 +96,7 @@ scripts/
 
 ### Arquivos Atualizados
 1. `docs/context/backend/guides/buildkit-guide.md`
-   - Todos os caminhos atualizados de `infrastructure/scripts/` para `scripts/buildkit/`
+   - Todos os caminhos atualizados de `tools/scripts/` para `scripts/buildkit/`
 
 2. `scripts/buildkit/test-buildkit-sudo.sh`
    - Referências aos wrappers atualizadas
@@ -113,7 +113,7 @@ scripts/
 
 1. **🎯 Estrutura Centralizada**
    - Todos os scripts agora em `scripts/` na raiz
-   - Fim da confusão entre `infrastructure/scripts` e `scripts/`
+   - Fim da confusão entre `tools/scripts` e `scripts/`
 
 2. **📁 Melhor Organização**
    - 22 pastas temáticas bem definidas
@@ -143,7 +143,7 @@ scripts/
    - [ ] Comunicar mudanças para equipe
 
 2. **Médio Prazo**
-   - [ ] Atualizar documentação em `docs/` que ainda referencie `infrastructure/scripts/`
+   - [ ] Atualizar documentação em `docs/` que ainda referencie `tools/scripts/`
    - [ ] Criar índice interativo de scripts
    - [ ] Adicionar testes automatizados para scripts críticos
 

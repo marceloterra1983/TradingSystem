@@ -34,10 +34,10 @@ TradingSystem/
 ├── frontend/apps/service-launcher/.env      ← Config Launcher
 ├── backend/api/workspace/.env               ← Config Library
 ├── frontend/apps/tp-capital/.env    ← Config TP Capital
-├── infrastructure/llamaindex/.env         ← Config LlamaIndex
-├── infrastructure/compose/.env.timescaledb ← Config TimescaleDB
-├── infrastructure/compose/.env.ai-tools    ← Config AI Tools
-└── frontend/apps/tp-capital/infrastructure/.env          ← Config TP (outro)
+├── tools/llamaindex/.env         ← Config LlamaIndex
+├── tools/compose/.env.timescaledb ← Config TimescaleDB
+├── tools/compose/.env.ai-tools    ← Config AI Tools
+└── frontend/apps/tp-capital/tools/.env          ← Config TP (outro)
 
 ❌ 10 arquivos espalhados
 ❌ Configurações duplicadas (PORT, CORS_ORIGIN, LOG_LEVEL, etc.)
@@ -148,15 +148,15 @@ TradingSystem/
 
 ### 3. Docker Compose Files Atualizados (3 arquivos)
 
-✅ **`infrastructure/compose/docker-compose.timescale.yml`**
+✅ **`tools/compose/docker-compose.timescale.yml`**
 - 4 serviços: timescaledb, backup, exporter, pgadmin
 - `env_file: - ../../.env`
 
-✅ **`infrastructure/compose/docker-compose.infra.yml`**
+✅ **`tools/compose/docker-compose.infra.yml`**
 - 2 serviços: llamaindex-ingestion, llamaindex-query
 - `env_file: - ../../.env`
 
-✅ **`infrastructure/monitoring/docker-compose.yml`**
+✅ **`tools/monitoring/docker-compose.yml`**
 - 2 serviços: grafana, alert-router
 - `env_file: - ../.env`
 
@@ -188,7 +188,7 @@ TradingSystem/
    - Guia completo de uso
    - Quick start, validação, troubleshooting
 
-2. ✅ **`docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`** (746 linhas)
+2. ✅ **`docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`** (746 linhas)
    - Plano de implementação detalhado
    - Cronograma, riscos, critérios de sucesso
 
@@ -262,8 +262,8 @@ cd backend/api/workspace && npm run dev
 # 4. Se tudo funcionar, remover .env locais
 rm frontend/apps/dashboard/.env.OLD.backup
 rm backend/api/*/.env
-rm infrastructure/llamaindex/.env
-rm infrastructure/compose/.env
+rm tools/llamaindex/.env
+rm tools/compose/.env
 ```
 
 ---
@@ -279,7 +279,7 @@ Durante a consolidação, identificamos **credenciais reais** que estavam em arq
 - `TELEGRAM_FORWARDER_BOT_TOKEN` - Token real
 - Channel IDs reais
 
-⚠️ **LlamaIndex** (`infrastructure/llamaindex/.env`):
+⚠️ **LlamaIndex** (`tools/llamaindex/.env`):
 - `OPENAI_API_KEY` - API key real da OpenAI
 
 **Ação Tomada**:
@@ -363,7 +363,7 @@ TradingSystem/
 ├── docs/context/ops/  ⭐ Documentação
 │   ├── ENVIRONMENT-CONFIGURATION.md
 │   ├── COMPLETE-ENV-CONSOLIDATION-GUIDE.md
-│   └── infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md
+│   └── tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md
 │
 ├── frontend/apps/dashboard/
 │   ├── ENV-MIGRATION-NOTE.md  ⭐ Nota de migração
@@ -373,7 +373,7 @@ TradingSystem/
 │   ├── src/config.js  ⭐ Atualizado para carregar .env da raiz
 │   └── .env  ⏳ Pode ser removido após validação
 │
-└── infrastructure/
+└── tools/
     ├── compose/*.yml  ⭐ Todos apontam para ../../.env
     └── monitoring/docker-compose.yml  ⭐ Aponta para ../.env
 ```
@@ -434,14 +434,14 @@ bash scripts/env/migrate-env.sh
 4. `scripts/env/migrate-env.sh` - Migração
 5. `docs/context/ops/ENVIRONMENT-CONFIGURATION.md` - Guia uso
 6. `docs/context/ops/COMPLETE-ENV-CONSOLIDATION-GUIDE.md` - Guia técnico
-7. `docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md` - Plano
+7. `docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md` - Plano
 8. `frontend/apps/dashboard/ENV-MIGRATION-NOTE.md` - Nota migração
 9. `backend/shared/config/load-env.js` - Módulo reutilizável
 
 ### Modificados (7 arquivos)
-1. `infrastructure/compose/docker-compose.timescale.yml`
-2. `infrastructure/compose/docker-compose.infra.yml`
-3. `infrastructure/monitoring/docker-compose.yml`
+1. `tools/compose/docker-compose.timescale.yml`
+2. `tools/compose/docker-compose.infra.yml`
+3. `tools/monitoring/docker-compose.yml`
 4. `frontend/apps/b3-market-data/src/config.js`
 5. `backend/api/workspace/src/config.js`
 6. `README.md` - Seção de environment
@@ -506,7 +506,7 @@ bash scripts/env/validate-env.sh
 chmod 600 .env
 
 # 5. Deploy
-docker-compose -f infrastructure/compose/*.yml up -d
+docker-compose -f tools/compose/*.yml up -d
 ```
 
 ---
@@ -591,8 +591,8 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3004
 
 - 📖 **Guia do Usuário**: `docs/context/ops/ENVIRONMENT-CONFIGURATION.md`
 - 🔧 **Guia Técnico**: `docs/context/ops/COMPLETE-ENV-CONSOLIDATION-GUIDE.md`
-- 📋 **Plano Original**: `docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
-- 🏗️ **Infrastructure**: `infrastructure/README.md`
+- 📋 **Plano Original**: `docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
+- 🏗️ **Infrastructure**: `tools/README.md`
 - 📘 **README Principal**: `README.md` (seção Environment)
 
 ---

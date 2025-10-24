@@ -134,7 +134,7 @@ echo "🚨 Issue #3: Fixing Alertmanager Configuration..."
 echo "Problem: Invalid/empty webhook URL in alertmanager.yml"
 echo ""
 
-ALERTMANAGER_CONFIG="$PROJECT_ROOT/infrastructure/monitoring/alertmanager/alertmanager.yml"
+ALERTMANAGER_CONFIG="$PROJECT_ROOT/tools/monitoring/alertmanager/alertmanager.yml"
 
 if [ -f "$ALERTMANAGER_CONFIG" ]; then
     # Backup original
@@ -173,7 +173,7 @@ EOF
     print_status "Created new alertmanager.yml with default receiver"
 
     # Restart monitoring stack
-    cd "$PROJECT_ROOT/infrastructure/monitoring"
+    cd "$PROJECT_ROOT/tools/monitoring"
     print_status "Restarting monitoring stack..."
     docker compose restart alertmanager
     sleep 3

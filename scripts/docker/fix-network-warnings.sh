@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMPOSE_FILE="${REPO_ROOT}/infrastructure/compose/docker-compose.langgraph-dev.yml"
+COMPOSE_FILE="${REPO_ROOT}/tools/compose/docker-compose.langgraph-dev.yml"
 
 # Colors
 GREEN='\033[0;32m'
@@ -74,7 +74,7 @@ main() {
     
     # Restart the stack to apply changes
     log_info "Restarting LangGraph Dev stack..."
-    cd "${REPO_ROOT}/infrastructure/compose"
+    cd "${REPO_ROOT}/tools/compose"
     docker compose -f docker-compose.langgraph-dev.yml down
     docker compose -f docker-compose.langgraph-dev.yml up -d
     

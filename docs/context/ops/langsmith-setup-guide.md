@@ -5,7 +5,7 @@ domain: ops
 type: guide
 summary: Guia completo para configurar LangSmith API Key e fazer onboarding inicial
 status: active
-last_review: 2025-10-19
+last_review: "2025-10-19"
 sidebar_position: 1
 ---
 
@@ -161,7 +161,7 @@ Ctrl + S (salvar)
 bash scripts/langgraph/stop-dev.sh
 
 # Ou manualmente:
-docker compose -f infrastructure/compose/docker-compose.langgraph-dev.yml down
+docker compose -f tools/compose/docker-compose.langgraph-dev.yml down
 ```
 
 ### 4.2 Iniciar com Nova Configuração
@@ -307,7 +307,7 @@ docker logs infra-langgraph-dev -f
 **Soluções:**
 ```bash
 # Reiniciar com configuração limpa
-docker compose -f infrastructure/compose/docker-compose.langgraph-dev.yml down
+docker compose -f tools/compose/docker-compose.langgraph-dev.yml down
 bash scripts/langgraph/start-dev.sh
 ```
 
@@ -466,7 +466,7 @@ E reinicie o container.
 ## Related Documentation
 
 - **[LangGraph Permanent Dev Setup](langgraph-permanent-dev-setup.md)** - Setup do ambiente dev
-- **[LangGraph README](../../../infrastructure/langgraph/README.md)** - Documentação completa do serviço
+- **[LangGraph README](../../../tools/langgraph/README.md)** - Documentação completa do serviço
 - **[LangSmith Docs](https://docs.smith.langchain.com)** - Documentação oficial
 - **[LangGraph Studio Guide](../backend/guides/langgraph-studio-guide.md)** - Guia de uso do Studio
 

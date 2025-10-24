@@ -22,7 +22,7 @@ Successfully fixed all external relative links in documentation files that were 
 
 ## Files Updated
 
-### 1. `docs/context/ops/infrastructure/reverse-proxy-setup.md`
+### 1. `docs/context/ops/tools/reverse-proxy-setup.md`
 
 **Total Changes**: 8 link conversions + replacement of "your-org" placeholders
 
@@ -103,5 +103,5 @@ The link changes themselves are syntactically correct and follow the established
 
 - Documentation Standard: `docs/DOCUMENTATION-STANDARD.md`
 - Directory Structure: `docs/DIRECTORY-STRUCTURE.md`
-- Reverse Proxy Setup: `docs/context/ops/infrastructure/reverse-proxy-setup.md`
+- Reverse Proxy Setup: `docs/context/ops/tools/reverse-proxy-setup.md`
 - Firecrawl Proxy API: `docs/context/backend/api/firecrawl-proxy.md`

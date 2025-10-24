@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Como operar a ingestão em QuestDB com camada analítica em TimescaleDB mantendo replicação assíncrona
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 ## Visão Geral
@@ -18,8 +18,8 @@ QuestDB (ingestão) ──(ETL assíncrono)──▶ TimescaleDB (analytics)
 ```
 
 ## Provisionamento
-- Stack: `infrastructure/compose/docker-compose.timescale.yml`
-- Helper: `infrastructure/scripts/setup-timescaledb-stack.sh`
+- Stack: `tools/compose/docker-compose.timescale.yml`
+- Helper: `tools/scripts/setup-timescaledb-stack.sh`
 - Rede dedicada: `data-timescale-network`
 - Exporter Prometheus (porta 9187) e container de backup incluídos.
 
@@ -33,14 +33,14 @@ pgAdmin 4 está disponível em `http://localhost:5050` (usuário/senha definidos
 - Para novos datasets, adicionar hypertable e stream correspondente no script de sync.
 
 ## Retenção & Compressão
-- `infrastructure/timescaledb/maintenance.sql` cria políticas:
+- `backend/data/timescaledb/maintenance.sql` cria políticas:
   - Compressão após 7 dias
   - Retenção de 90 dias (sinais/execuções) e 180 dias (métricas)
 - QuestDB mantém retenção independente; alinhar janelas nas rotinas em `docs/context/backend/data/operations/retention-policy.md`.
 
 ## Backup
 - Automatizado via `timescaledb-backup` (cron default `0 2 * * *`).
-- Manual: `bash infrastructure/scripts/backup-timescaledb.sh`.
+- Manual: `bash tools/scripts/backup-timescaledb.sh`.
 - Dumps são armazenados em `timescaledb-backups` (volume persistente). Configure rotação via `TIMESCALEDB_BACKUP_CRON`.
 
 ## Consultas

@@ -6,7 +6,7 @@ domain: ops
 type: reference
 summary: Step-by-step checklist to validate a fresh TradingSystem workstation on Linux or WSL2
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Linux / WSL Setup Checklist
@@ -17,8 +17,8 @@ Mark off each item as you complete it; every section includes verification comma
 ## 1. Prepare Scripts
 
 ```bash
-chmod +x infrastructure/scripts/*.sh
-ls -la infrastructure/scripts/*.sh
+chmod +x tools/scripts/*.sh
+ls -la tools/scripts/*.sh
 ```
 
 ✅ Expected: every script displays execute permissions (`-rwxr-xr-x`).
@@ -49,7 +49,7 @@ ls -la infrastructure/scripts/*.sh
 ## 3. Directory Layout
 
 ```bash
-mkdir -p frontend/apps/tp-capital/logs
+mkdir -p apps/tp-capital/logs
 mkdir -p backend/api/idea-bank/uploads
 mkdir -p backend/api/documentation-api/uploads
 ```
@@ -58,7 +58,7 @@ mkdir -p backend/api/documentation-api/uploads
 
 - TP-Capital:
   ```bash
-  cd frontend/apps/tp-capital/infrastructure
+  cd apps/tp-capital/infrastructure
   cp tp-capital-signals.env.example tp-capital-signals.env
   ```
 - Populate secrets (tokens, webhook URLs) manually.
@@ -69,7 +69,7 @@ Append to `~/.bashrc` (or `~/.zshrc`):
 
 ```bash
 export TRADING_SYSTEM_ROOT="$HOME/projetos/TradingSystem"
-export PATH="$TRADING_SYSTEM_ROOT/infrastructure/scripts:$PATH"
+export PATH="$TRADING_SYSTEM_ROOT/tools/scripts:$PATH"
 export COMPOSE_PROFILES=linux
 ```
 
@@ -79,8 +79,8 @@ Reload with `source ~/.bashrc` and confirm using `echo $TRADING_SYSTEM_ROOT`.
 
 ```bash
 cd backend/api/idea-bank && npm install && cd -
-cd frontend/apps/service-launcher && npm install && cd -
-cd frontend/apps/dashboard && npm install && cd -
+cd apps/service-launcher && npm install && cd -
+cd frontend/dashboard && npm install && cd -
 cd docs && npm install && cd -
 ```
 
@@ -102,19 +102,19 @@ docker ps
 
 - Service launcher:
   ```bash
-  ./infrastructure/scripts/start-service-launcher.sh
+  ./tools/scripts/start-service-launcher.sh
   curl http://localhost:9999/health
   pkill -f "node.*service-launcher"
   ```
 - Full dev stack:
   ```bash
-  ./infrastructure/scripts/start-trading-system-dev.sh
+  ./tools/scripts/start-trading-system-dev.sh
   lsof -i :3200
   lsof -i :5173
   ```
 - Monitoring stack:
   ```bash
-  cd infrastructure/monitoring
+  cd tools/monitoring
   COMPOSE_PROFILES=linux docker compose up -d
   docker ps
   docker compose down
@@ -142,7 +142,7 @@ git config --global core.autocrlf input
   ```bash
   tar -czf ~/trading-system-backup-$(date +%Y%m%d).tar.gz \
     data/ \
-    frontend/apps/tp-capital/infrastructure/tp-capital-signals.env
+    apps/tp-capital/tools/tp-capital-signals.env
   ls -lh ~/trading-system-backup-*.tar.gz
   ```
 
@@ -150,7 +150,7 @@ git config --global core.autocrlf input
 
 | Symptom | Fix |
 |---------|-----|
-| Scripts fail with `permission denied` | Re-run `chmod +x infrastructure/scripts/*.sh`. |
+| Scripts fail with `permission denied` | Re-run `chmod +x tools/scripts/*.sh`. |
 | Docker requires `sudo` | Add yourself to the `docker` group and re-login. |
 | Port already in use | `lsof -i :<PORT>` then `kill -9 <PID>`. |
 | Strange npm errors | Remove `node_modules` and `package-lock.json`, re-run `npm install`. |

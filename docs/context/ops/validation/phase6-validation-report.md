@@ -3,10 +3,10 @@ title: Phase 6 Validation Report
 sidebar_position: 100
 tags: [ops, validation, migration, containers, testing]
 domain: ops
-type: report
+type: reference
 summary: Comprehensive validation report for container renaming migration Phase 6
-status: in-progress
-last_review: 2025-10-18
+status: active
+last_review: "2025-10-18"
 ---
 
 # Phase 6 Validation Report
@@ -143,7 +143,7 @@ last_review: 2025-10-18
 - **Output**: [Summary or link to full log]
 
 ### LangGraph Validation
-- **Command**: `bash infrastructure/langgraph/validate-deployment.sh`
+- **Command**: `bash tools/langgraph/validate-deployment.sh`
 - **Duration**: [X seconds]
 - **Checks**: Container status, API endpoints, database tables, workflow execution
 - **Passed**: [X/Y]

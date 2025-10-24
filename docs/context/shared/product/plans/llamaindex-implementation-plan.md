@@ -6,7 +6,7 @@ domain: shared
 type: guide
 summary: Comprehensive implementation plan for integrating LlamaIndex RAG capabilities into TradingSystem
 status: draft
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # LlamaIndex Implementation Plan
@@ -208,7 +208,7 @@ This plan outlines the strategic implementation of LlamaIndex as the core Retrie
 **Tasks:**
 1. **Qdrant Deployment**
    ```bash
-   # Add to infrastructure/compose/docker-compose.ai.yml
+   # Add to tools/compose/docker-compose.ai.yml
    qdrant:
      image: qdrant/qdrant:v1.7.4
      ports:
@@ -498,7 +498,7 @@ class TradingSystemQueryEngine:
 **React Component Example:**
 
 ```tsx
-// frontend/apps/dashboard/src/components/AIAssistant/QueryPanel.tsx
+// frontend/dashboard/src/components/AIAssistant/QueryPanel.tsx
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -551,7 +551,7 @@ export const QueryPanel = () => {
 **Docker Compose Configuration:**
 
 ```yaml
-# infrastructure/compose/docker-compose.ai.yml
+# tools/compose/docker-compose.ai.yml
 services:
   qdrant:
     image: qdrant/qdrant:v1.7.4

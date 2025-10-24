@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Operational guide for TimescaleDB including setup, maintenance, and troubleshooting
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # TimescaleDB Operations Guide
@@ -14,28 +14,28 @@ last_review: 2025-10-17
 > Guia rápido para operar a camada analítica PostgreSQL + TimescaleDB mantendo o QuestDB como ingestão primária.
 
 ## Provisionamento
-- Stack Docker Compose: `infrastructure/compose/docker-compose.timescale.yml`
-- Helper: `infrastructure/scripts/setup-timescaledb-stack.sh`
+- Stack Docker Compose: `tools/compose/docker-compose.timescale.yml`
+- Helper: `tools/scripts/setup-timescaledb-stack.sh`
 - Variáveis: utilize o `.env` na raiz do projeto (`cp .env.example .env`) e configure credenciais seguras, portas e cron de backup; os serviços referenciam esse arquivo compartilhado via `env_file: ../../.env`.
 
 ```bash
 # subir stack
-bash infrastructure/scripts/setup-timescaledb-stack.sh up
+bash tools/scripts/setup-timescaledb-stack.sh up
 
 # reiniciar stack
-bash infrastructure/scripts/setup-timescaledb-stack.sh restart
+bash tools/scripts/setup-timescaledb-stack.sh restart
 ```
 
 ## Schema e manutenção
-- SQL inicial: `infrastructure/timescaledb/schema.sql`
-- Políticas de compressão/retention: `infrastructure/timescaledb/maintenance.sql`
-- Seed opcional: `infrastructure/timescaledb/seed.sql`
+- SQL inicial: `backend/data/timescaledb/schema.sql`
+- Políticas de compressão/retention: `backend/data/timescaledb/maintenance.sql`
+- Seed opcional: `backend/data/timescaledb/seed.sql`
 
 Aplique via `psql`:
 
 ```bash
-psql "$TIMESCALEDB_DSN" -f infrastructure/timescaledb/schema.sql
-psql "$TIMESCALEDB_DSN" -f infrastructure/timescaledb/maintenance.sql
+psql "$TIMESCALEDB_DSN" -f backend/data/timescaledb/schema.sql
+psql "$TIMESCALEDB_DSN" -f backend/data/timescaledb/maintenance.sql
 ```
 
 ## Replicação QuestDB → TimescaleDB
@@ -57,7 +57,7 @@ TIMESCALEDB_STREAM=tp_capital_signals
 
 ## Backup e restore
 - Automático: container `timescaledb-backup` gera dumps diários em `/backups`
-- Manual: `bash infrastructure/scripts/backup-timescaledb.sh`
+- Manual: `bash tools/scripts/backup-timescaledb.sh`
 
 Restore:
 

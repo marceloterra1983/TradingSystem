@@ -6,7 +6,7 @@ domain: ops
 type: overview
 summary: Central hub for operations, deployment, monitoring, and incident management with comprehensive index
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 # Operations Hub
@@ -121,12 +121,12 @@ last_review: 2025-10-18
 
 ## ⚙️ Infrastructure
 
-**Location**: `ops/infrastructure/`
+**Location**: `ops/tools/`
 
 | Document                                                                                        | Purpose                         | Tags                                       |
 | ----------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------ |
-| [CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md](infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md) | Centralized .env implementation | `environment`, `configuration`, `plan`     |
-| [reverse-proxy-setup.md](infrastructure/reverse-proxy-setup.md)                                 | Reverse proxy configuration     | `reverse-proxy`, `nginx`, `infrastructure` |
+| [CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md](tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md) | Centralized .env implementation | `environment`, `configuration`, `plan`     |
+| [reverse-proxy-setup.md](tools/reverse-proxy-setup.md)                                 | Reverse proxy configuration     | `reverse-proxy`, `nginx`, `infrastructure` |
 
 ---
 
@@ -214,7 +214,7 @@ last_review: 2025-10-18
 | **Prometheus**        | 9090        | `mon-prometheus`         | Monitoring                                           | Active   |
 | **Grafana**           | 3000        | `mon-grafana`            | Visualization                                        | Active   |
 
-> 📌 Naming conventions for all containers are documented in [Container Naming Convention](infrastructure/container-naming.md).
+> 📌 Naming conventions for all containers are documented in [Container Naming Convention](tools/container-naming.md).
 
 ---
 
@@ -287,8 +287,8 @@ last_review: 2025-10-18
 **Infrastructure:**
 
 -   [Environment Configuration](ENVIRONMENT-CONFIGURATION.md) - Centralized .env management
--   [Reverse Proxy Setup](infrastructure/reverse-proxy-setup.md) - Nginx configuration
--   [Container Naming Convention](infrastructure/container-naming.md) - Docker naming standards
+-   [Reverse Proxy Setup](tools/reverse-proxy-setup.md) - Nginx configuration
+-   [Container Naming Convention](tools/container-naming.md) - Docker naming standards
 
 **Troubleshooting:**
 

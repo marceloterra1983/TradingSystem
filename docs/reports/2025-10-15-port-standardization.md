@@ -49,7 +49,7 @@ baseUrl: 'http://localhost:3103'
 
 ### Arquivos com Porta Incorreta (3101)
 
-1. `backend/manifest.json` - Manifestava porta 3101
+1. `config/services-manifest.json` - Manifestava porta 3101
 2. `scripts/services/start-all.sh` - Documentação e código
 3. `scripts/services/stop-all.sh` - Arrays de portas
 4. `scripts/services/status.sh` - Verificações de porta
@@ -84,7 +84,7 @@ baseUrl: 'http://localhost:3103'
 ## ✅ Arquivos Corrigidos
 
 ### 1. Configuração Central
-- ✅ `backend/manifest.json` (3101 → 3103)
+- ✅ `config/services-manifest.json` (3101 → 3103)
 
 ### 2. Scripts de Gerenciamento
 - ✅ `scripts/services/start-all.sh`
@@ -178,7 +178,7 @@ Para confirmar que tudo está correto:
 cat frontend/apps/dashboard/vite.config.ts | grep "port:"
 
 # 2. Verificar porta no manifest
-cat backend/manifest.json | grep -A 10 '"dashboard"'
+cat config/services-manifest.json | grep -A 10 '"dashboard"'
 
 # 3. Verificar scripts
 grep -r "3103" scripts/services/
@@ -194,7 +194,7 @@ cd frontend/apps/dashboard && npm run dev
 
 - **Vite Config:** `frontend/apps/dashboard/vite.config.ts`
 - **Package.json:** `frontend/apps/dashboard/package.json`
-- **Manifest:** `backend/manifest.json`
+- **Manifest:** `config/services-manifest.json`
 - **Documentação Principal:** `CLAUDE.md`
 
 ---

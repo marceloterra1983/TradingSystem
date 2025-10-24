@@ -49,7 +49,7 @@ TradingSystem/
 ├── backend/             # Backend services & APIs
 ├── docs/                # Documentation hub (Docusaurus)
 ├── frontend/            # Frontend applications
-├── infrastructure/      # DevOps & infrastructure
+├── tools/      # DevOps & infrastructure
 ├── node_modules/        # Node.js dependencies (root)
 └── scripts/             # Automation scripts
 ```
@@ -78,7 +78,7 @@ backend/
 
 **Descrição:** APIs Node.js/Express para diferentes domínios
 
-**Portas de Serviços (fonte de verdade - backend/manifest.json):**
+**Portas de Serviços (fonte de verdade - config/services-manifest.json):**
 
 -   Library API: 3200
 -   TP Capital Signals: 3200
@@ -108,7 +108,7 @@ backend/
 
 -   **Função:** Ingestão de sinais do Telegram e persistência em QuestDB
 -   **Stack:** Express + Telegraf (Telegram Bot) + QuestDB
--   **Status:** ✅ **Active** (canonical implementation per `backend/manifest.json`)
+-   **Status:** ✅ **Active** (canonical implementation per `config/services-manifest.json`)
 -   **Principais arquivos:**
     -   `src/server.js` - Main server
     -   `src/routes/` - API endpoints
@@ -169,7 +169,7 @@ backend/
 -   **Principais arquivos:**
     -   Python sync scripts
 
-**Nota:** LlamaIndex foi movido para `infrastructure/llamaindex/` (veja seção AI & ML Tools)
+**Nota:** LlamaIndex foi movido para `tools/llamaindex/` (veja seção AI & ML Tools)
 
 ### `/backend/data/` - Data Layer
 
@@ -215,7 +215,7 @@ frontend/
 
 **Descrição:** Dashboard principal do TradingSystem (React + Vite + TypeScript)
 
-**Nota de Porta:** Vite usa 5173 por padrão, mas o projeto está configurado para **3103** (via `backend/manifest.json`) para evitar conflitos com outros serviços.
+**Nota de Porta:** Vite usa 5173 por padrão, mas o projeto está configurado para **3103** (via `config/services-manifest.json`) para evitar conflitos com outros serviços.
 
 #### Estrutura Principal
 
@@ -350,7 +350,7 @@ docs/context/
 │   ├── checklists/      # Operational checklists
 │   ├── deployment/      # Deployment procedures
 │   ├── incidents/       # Incident postmortems
-│   ├── infrastructure/  # Infrastructure documentation
+│   ├── tools/  # Infrastructure documentation
 │   ├── migrations/      # System migration guides
 │   ├── monitoring/      # Monitoring setup & dashboards
 │   ├── repository/      # Repository management
@@ -403,12 +403,12 @@ docs/docusaurus/
 
 ## 🏗️ Infrastructure
 
-### `/infrastructure/` - DevOps & Infrastructure Root
+### `/tools/` - DevOps & Infrastructure Root
 
 **Descrição:** Toda a infraestrutura, containerização e configurações DevOps
 
 ```
-infrastructure/
+tools/
 ├── compose/             # Docker Compose files
 ├── monitoring/          # Monitoring stack (Prometheus, Grafana)
 ├── nginx-proxy/         # Nginx reverse proxy configs
@@ -423,12 +423,12 @@ infrastructure/
 └── firecrawl/           # Firecrawl web scraping tool
 ```
 
-### `/infrastructure/compose/` - Docker Compose Stacks
+### `/tools/compose/` - Docker Compose Stacks
 
 **Descrição:** Arquivos Docker Compose para diferentes stacks
 
 ```
-infrastructure/compose/
+tools/compose/
 ├── docker-compose.infra.yml      # Infrastructure stack (Traefik, Portainer)
 ├── docker-compose.data.yml       # Data stack (QuestDB)
 ├── docker-compose.timescale.yml  # TimescaleDB stack
@@ -436,12 +436,12 @@ infrastructure/compose/
 └── traefik.yml                   # Traefik configuration
 ```
 
-### `/infrastructure/monitoring/` - Monitoring Stack
+### `/tools/monitoring/` - Monitoring Stack
 
 **Descrição:** Prometheus, Grafana e AlertManager
 
 ```
-infrastructure/monitoring/
+tools/monitoring/
 ├── prometheus/          # Prometheus configuration
 │   └── rules/           # Alerting rules
 ├── grafana/             # Grafana configuration
@@ -454,52 +454,52 @@ infrastructure/monitoring/
 └── docker-compose.yml   # Monitoring stack compose
 ```
 
-### `/infrastructure/nginx-proxy/` - Nginx Reverse Proxy
+### `/tools/nginx-proxy/` - Nginx Reverse Proxy
 
 **Descrição:** Configurações de reverse proxy para unified domain
 
 ```
-infrastructure/nginx-proxy/
+tools/nginx-proxy/
 ├── tradingsystem.conf   # Main Nginx configuration
 └── VPS-MIGRATION-GUIDE.md
 ```
 
-### `/infrastructure/scripts/` - Automation Scripts
+### `/tools/scripts/` - Automation Scripts
 
 **Descrição:** Scripts de automação de infraestrutura
 
-### `/infrastructure/systemd/` - Systemd Services
+### `/tools/systemd/` - Systemd Services
 
 **Descrição:** Definições de serviços Linux (para Windows Services futuros)
 
-### `/infrastructure/firecrawl/` - Firecrawl Integration
+### `/tools/firecrawl/` - Firecrawl Integration
 
 **Descrição:** Ferramenta de web scraping e crawling
 
 ```
-infrastructure/firecrawl/
+tools/firecrawl/
 └── firecrawl-source/    # Firecrawl source code
     ├── examples/        # Usage examples
     └── apps/            # Firecrawl applications
 ```
 
-### `/infrastructure/langgraph/` - LangGraph Service
+### `/tools/langgraph/` - LangGraph Service
 
 **Descrição:** Multi-agent workflow orchestration (Port 8111)
 
 ```
-infrastructure/langgraph/
+tools/langgraph/
 ├── Dockerfile           # Container definition
 ├── requirements.txt     # Python dependencies
 └── server.py            # FastAPI server
 ```
 
-### `/infrastructure/llamaindex/` - LlamaIndex RAG Service
+### `/tools/llamaindex/` - LlamaIndex RAG Service
 
 **Descrição:** Document indexing & retrieval com LlamaIndex
 
 ```
-infrastructure/llamaindex/
+tools/llamaindex/
 ├── ingestion_service/   # Document ingestion pipeline
 ├── query_service/       # Query & retrieval API (Port 3450)
 ├── Dockerfile.ingestion # Ingestion container
@@ -518,18 +518,18 @@ infrastructure/llamaindex/
 -   Semantic search & retrieval
 -   RAG (Retrieval-Augmented Generation)
 
-### `/infrastructure/agno-agents/` - Agno Multi-Agent Framework
+### `/tools/agno-agents/` - Agno Multi-Agent Framework
 
 **Descrição:** Sistema multi-agente para trading automatizado usando framework Agno
 
 ```
-infrastructure/agno-agents/
+tools/agno-agents/
 ├── src/                    # Source code
 │   ├── domain/             # Domain models
 │   ├── application/        # Application services & agents
 │   │   ├── agents/         # MarketAnalysisAgent, RiskManagementAgent, SignalOrchestrator
 │   │   └── services/       # Business services
-│   ├── infrastructure/     # Integrations & adapters (Workspace, TP Capital, B3)
+│   ├── tools/     # Integrations & adapters (Workspace, TP Capital, B3)
 │   └── interfaces/         # FastAPI endpoints
 ├── tests/                  # Unit & integration tests
 ├── Dockerfile              # Container definition
@@ -551,14 +551,14 @@ infrastructure/agno-agents/
 
 ## 🤖 AI & ML Tools
 
-**Nota:** Todas as ferramentas AI/ML estão consolidadas em `infrastructure/`. Veja seção **Infrastructure** acima para:
+**Nota:** Todas as ferramentas AI/ML estão consolidadas em `tools/`. Veja seção **Infrastructure** acima para:
 
--   **Agno Agents** (`infrastructure/agno-agents/`) - Multi-agent framework with MarketAnalysisAgent, RiskManagementAgent, SignalOrchestrator - Port 8200
--   **LangGraph** (`infrastructure/langgraph/`) - Multi-agent orchestration - Port 8111
--   **LlamaIndex** (`infrastructure/llamaindex/`) - RAG service - Port 3450
--   **Firecrawl** (`infrastructure/firecrawl/`) - Web scraping tool - Port 3002
+-   **Agno Agents** (`tools/agno-agents/`) - Multi-agent framework with MarketAnalysisAgent, RiskManagementAgent, SignalOrchestrator - Port 8200
+-   **LangGraph** (`tools/langgraph/`) - Multi-agent orchestration - Port 8111
+-   **LlamaIndex** (`tools/llamaindex/`) - RAG service - Port 3450
+-   **Firecrawl** (`tools/firecrawl/`) - Web scraping tool - Port 3002
 -   **Context7** - Context integration _(Planned - runtime data will be created at `backend/data/runtime/context7/` when enabled)_
--   **Infrastructure Services Compose**: `infrastructure/compose/docker-compose.infra.yml`
+-   **Infrastructure Services Compose**: `tools/compose/docker-compose.infra.yml`
 
 **Deprecated/Removed:**
 
@@ -766,9 +766,9 @@ docs/context/frontend/          # Documentação frontend
 ### Para DevOps
 
 ```
-infrastructure/compose/         # Docker stacks
-infrastructure/monitoring/      # Monitoring setup
-infrastructure/scripts/         # Automation
+tools/compose/         # Docker stacks
+tools/monitoring/      # Monitoring setup
+tools/scripts/         # Automation
 docs/context/ops/              # Operational docs
 ```
 
@@ -783,10 +783,10 @@ docs/context/shared/tools/templates/ # Document templates
 ### Para AI/ML
 
 ```
-infrastructure/langgraph/      # LangGraph orchestration
-infrastructure/llamaindex/     # RAG service
-infrastructure/compose/docker-compose.infra.yml  # Infrastructure services stack
-infrastructure/agno-agents/    # Agno multi-agent framework
+tools/langgraph/      # LangGraph orchestration
+tools/llamaindex/     # RAG service
+tools/compose/docker-compose.infra.yml  # Infrastructure services stack
+tools/agno-agents/    # Agno multi-agent framework
 ```
 
 ---

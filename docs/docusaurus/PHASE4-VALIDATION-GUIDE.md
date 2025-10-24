@@ -196,7 +196,7 @@ Start API if not running:
 cd backend/api/documentation-api
 npm run dev
 # Or via Docker:
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d
+docker compose -f tools/compose/docker-compose.docs.yml up -d
 ```
 
 **Tests:**

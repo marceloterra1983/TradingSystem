@@ -16,7 +16,7 @@ COMPOSE_ARGS=()
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
-COMPOSE_FILE="${REPO_ROOT}/infrastructure/compose/docker-compose.langgraph-dev.yml"
+COMPOSE_FILE="${REPO_ROOT}/tools/compose/docker-compose.langgraph-dev.yml"
 
 detect_compose() {
     if command -v docker >/dev/null 2>&1; then

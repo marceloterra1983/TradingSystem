@@ -20,7 +20,7 @@ Esta proposta OpenSpec implementa todas as correções e melhorias identificadas
 
 ### ✅ Status da Proposta
 - **Change ID**: `fix-service-launcher-critical-issues`
-- **Localização**: `infrastructure/openspec/changes/fix-service-launcher-critical-issues/`
+- **Localização**: `tools/openspec/changes/fix-service-launcher-critical-issues/`
 - **Status**: ✅ Pronta para revisão
 - **Formato**: OpenSpec compliant
 
@@ -37,7 +37,7 @@ Esta proposta OpenSpec implementa todas as correções e melhorias identificadas
 
 ### Estrutura OpenSpec
 ```
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/
+tools/openspec/changes/fix-service-launcher-critical-issues/
 ├── proposal.md          # Por quê, o quê, impacto, rollout
 ├── design.md            # Decisões técnicas, trade-offs, migração
 ├── tasks.md             # 8 fases de implementação detalhadas
@@ -101,7 +101,7 @@ infrastructure/openspec/changes/fix-service-launcher-critical-issues/
 - ✅ Plano de rollout em 3 fases
 - ✅ Guia de migração para porta 9999 → 3500
 
-**Leia**: [`infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md`](/infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md)
+**Leia**: [`tools/openspec/changes/fix-service-launcher-critical-issues/proposal.md`](/tools/openspec/changes/fix-service-launcher-critical-issues/proposal.md)
 
 ### 2. design.md (~400 linhas)
 **Conteúdo**: Decisões técnicas detalhadas
@@ -117,7 +117,7 @@ infrastructure/openspec/changes/fix-service-launcher-critical-issues/
 - ✅ Plano de migração em 3 fases
 - ✅ 4 Open Questions documentadas
 
-**Leia**: [`infrastructure/openspec/changes/fix-service-launcher-critical-issues/design.md`](/infrastructure/openspec/changes/fix-service-launcher-critical-issues/design.md)
+**Leia**: [`tools/openspec/changes/fix-service-launcher-critical-issues/design.md`](/tools/openspec/changes/fix-service-launcher-critical-issues/design.md)
 
 ### 3. tasks.md (~200 linhas)
 **Conteúdo**: Implementação passo a passo
@@ -136,7 +136,7 @@ infrastructure/openspec/changes/fix-service-launcher-critical-issues/
 - ✅ Ordem de execução claramente definida
 - ✅ Validações após cada fase
 
-**Leia**: [`infrastructure/openspec/changes/fix-service-launcher-critical-issues/tasks.md`](/infrastructure/openspec/changes/fix-service-launcher-critical-issues/tasks.md)
+**Leia**: [`tools/openspec/changes/fix-service-launcher-critical-issues/tasks.md`](/tools/openspec/changes/fix-service-launcher-critical-issues/tasks.md)
 
 ### 4. specs/service-launcher/spec.md (~450 linhas)
 **Conteúdo**: Requirements formais com scenarios
@@ -160,7 +160,7 @@ infrastructure/openspec/changes/fix-service-launcher-critical-issues/
   - Formato WHEN/THEN/AND
   - Cobertura de success, error e edge cases
 
-**Leia**: [`infrastructure/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md`](/infrastructure/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md)
+**Leia**: [`tools/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md`](/tools/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md)
 
 ---
 
@@ -230,14 +230,14 @@ infrastructure/openspec/changes/fix-service-launcher-critical-issues/
 **Opção A: MVP Rápido (5.5-6.5h)**
 ```bash
 # Fazer apenas P0 + P1
-cd infrastructure/openspec/changes/fix-service-launcher-critical-issues
+cd tools/openspec/changes/fix-service-launcher-critical-issues
 # Seguir tasks.md sections 1-3
 ```
 
 **Opção B: Qualidade Completa (15.5-20.5h)**
 ```bash
 # Fazer P0 + P1 + P2
-cd infrastructure/openspec/changes/fix-service-launcher-critical-issues
+cd tools/openspec/changes/fix-service-launcher-critical-issues
 # Seguir tasks.md sections 1-6
 ```
 
@@ -251,7 +251,7 @@ cd infrastructure/openspec/changes/fix-service-launcher-critical-issues
 ### 4. Validação OpenSpec
 ```bash
 # Após aprovação, validar formalmente
-cd infrastructure/openspec
+cd tools/openspec
 openspec validate fix-service-launcher-critical-issues --strict
 ```
 
@@ -271,7 +271,7 @@ openspec validate fix-service-launcher-critical-issues --strict
 - **[Service Launcher Audit Plan](./service-launcher-audit-plan.md)** - Análise completa original (11 problemas identificados)
 - **[CLAUDE.md](../../CLAUDE.md)** - Padrões do projeto TradingSystem
 - **[DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md)** - Formato de documentação oficial
-- **[OpenSpec AGENTS.md](../../infrastructure/openspec/AGENTS.md)** - Guia OpenSpec completo
+- **[OpenSpec AGENTS.md](../../tools/openspec/AGENTS.md)** - Guia OpenSpec completo
 
 ### Código Afetado
 - `frontend/apps/service-launcher/server.js` - Main logic
@@ -330,8 +330,8 @@ Antes de iniciar implementação:
 ## 📞 Contato
 
 **Dúvidas sobre a proposta?**
-- Revisar: `infrastructure/openspec/changes/fix-service-launcher-critical-issues/`
-- Consultar: [OpenSpec AGENTS.md](../../infrastructure/openspec/AGENTS.md)
+- Revisar: `tools/openspec/changes/fix-service-launcher-critical-issues/`
+- Consultar: [OpenSpec AGENTS.md](../../tools/openspec/AGENTS.md)
 - Referir ao: [Audit Plan original](./service-launcher-audit-plan.md)
 
 ---

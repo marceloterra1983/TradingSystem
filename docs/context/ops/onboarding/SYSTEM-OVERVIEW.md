@@ -6,7 +6,7 @@ domain: ops
 type: overview
 summary: Visão executiva da plataforma TradingSystem com foco em serviços, portas e responsabilidades operacionais.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # TradingSystem - Visão Geral
@@ -60,10 +60,10 @@ flowchart LR
 
 ## Operações Essenciais
 
-- **Proxy Nginx**: Centraliza acesso em `tradingsystem.local`. Ver [Nginx Reverse Proxy Playbook](../infrastructure/nginx-proxy.md).
+- **Proxy Nginx**: Centraliza acesso em `tradingsystem.local`. Ver [Nginx Reverse Proxy Playbook](../tools/nginx-proxy.md).
 - **Ambientação**: Sempre usar `.env` raiz. Ver [ENVIRONMENT-CONFIGURATION.md](../ENVIRONMENT-CONFIGURATION.md).
 - **Observabilidade**: Prometheus/Grafana monitoram serviços; alertas configurados para latência e status.
-- **Firecrawl**: Disponível via proxy (`:3600`). Infra detalhada em [Firecrawl Stack Overview](../infrastructure/firecrawl-stack.md).
+- **Firecrawl**: Disponível via proxy (`:3600`). Infra detalhada em [Firecrawl Stack Overview](../tools/firecrawl-stack.md).
 
 ## Próximos Passos para Novos Operadores
 

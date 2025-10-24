@@ -6,7 +6,7 @@ domain: ops
 type: reference
 summary: Official container naming convention, prefixes, categories, and process for adding new containers
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 # Container Naming Convention
@@ -40,57 +40,57 @@ Consistent container names make automation, monitoring, and incident response pr
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
 | QuestDB (legacy) | - | Container removido (dados migrados para TimescaleDB) | - |
-| `data-timescaledb` | 5433 → 5432 | TimescaleDB (PostgreSQL 15) | `infrastructure/compose/docker-compose.timescale.yml` |
-| `data-timescaledb-backup` | Internal | Nightly pg_dump backup runner | `infrastructure/compose/docker-compose.timescale.yml` |
-| `data-timescaledb-exporter` | 9187 | Prometheus exporter for TimescaleDB | `infrastructure/compose/docker-compose.timescale.yml` |
-| `data-timescaledb-pgadmin` | 5050 | pgAdmin UI for TimescaleDB | `infrastructure/compose/docker-compose.timescale.yml` |
-| `data-timescaledb-pgweb` | 8081 | Lightweight Postgres web client | `infrastructure/compose/docker-compose.timescale.yml` |
+| `data-timescaledb` | 5433 → 5432 | TimescaleDB (PostgreSQL 15) | `tools/compose/docker-compose.timescale.yml` |
+| `data-timescaledb-backup` | Internal | Nightly pg_dump backup runner | `tools/compose/docker-compose.timescale.yml` |
+| `data-timescaledb-exporter` | 9187 | Prometheus exporter for TimescaleDB | `tools/compose/docker-compose.timescale.yml` |
+| `data-timescaledb-pgadmin` | 5050 | pgAdmin UI for TimescaleDB | `tools/compose/docker-compose.timescale.yml` |
+| `data-timescaledb-pgweb` | 8081 | Lightweight Postgres web client | `tools/compose/docker-compose.timescale.yml` |
 
 ### AI & Infrastructure (`infra-*`)
 
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
-| `infra-langgraph` | 8111 | LangGraph production server | `infrastructure/compose/docker-compose.infra.yml` |
-| `data-qdrant` | 6333, 6334 | Vector database for embeddings | `infrastructure/compose/docker-compose.infra.yml` |
-| `infra-llamaindex-ingestion` | Internal | LlamaIndex ingestion pipeline | `infrastructure/compose/docker-compose.infra.yml` |
-| `infra-llamaindex-query` | 3450 | LlamaIndex query API | `infrastructure/compose/docker-compose.infra.yml` |
-| `infra-agno-agents` | 8200 | Agno multi-agent service | `infrastructure/compose/docker-compose.infra.yml` |
-| `data-postgress-langgraph` | 5432 | Postgres for LangGraph checkpoints | `infrastructure/compose/docker-compose.infra.yml` |
-| `data-questdb` | 9002, 9010, 8813 | QuestDB for AI tooling telemetry | `infrastructure/compose/docker-compose.infra.yml` |
+| `infra-langgraph` | 8111 | LangGraph production server | `tools/compose/docker-compose.infra.yml` |
+| `data-qdrant` | 6333, 6334 | Vector database for embeddings | `tools/compose/docker-compose.infra.yml` |
+| `infra-llamaindex-ingestion` | Internal | LlamaIndex ingestion pipeline | `tools/compose/docker-compose.infra.yml` |
+| `infra-llamaindex-query` | 3450 | LlamaIndex query API | `tools/compose/docker-compose.infra.yml` |
+| `infra-agno-agents` | 8200 | Agno multi-agent service | `tools/compose/docker-compose.infra.yml` |
+| `data-postgress-langgraph` | 5432 | Postgres for LangGraph checkpoints | `tools/compose/docker-compose.infra.yml` |
+| `data-questdb` | 9002, 9010, 8813 | QuestDB for AI tooling telemetry | `tools/compose/docker-compose.infra.yml` |
 
 ### Monitoring (`mon-*`)
 
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
-| `mon-prometheus` | 9090 | Metrics collection & alert rules | `infrastructure/monitoring/docker-compose.yml` |
-| `mon-alertmanager` | 9093 | Alert routing (email, Slack, GitHub) | `infrastructure/monitoring/docker-compose.yml` |
-| `mon-grafana` | 3000 | Observability dashboards | `infrastructure/monitoring/docker-compose.yml` |
-| `mon-alert-router` | 8080 | GitHub issue + Slack notifier bridge | `infrastructure/monitoring/docker-compose.yml` |
+| `mon-prometheus` | 9090 | Metrics collection & alert rules | `tools/monitoring/docker-compose.yml` |
+| `mon-alertmanager` | 9093 | Alert routing (email, Slack, GitHub) | `tools/monitoring/docker-compose.yml` |
+| `mon-grafana` | 3000 | Observability dashboards | `tools/monitoring/docker-compose.yml` |
+| `mon-alert-router` | 8080 | GitHub issue + Slack notifier bridge | `tools/monitoring/docker-compose.yml` |
 
 ### Documentation (`docs-*`)
 
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
-| `docs-api` | 3400 | Documentation management API | `infrastructure/compose/docker-compose.docs.yml` |
-| `docs-docusaurus` | 3004 → 80 | Static documentation hub | `infrastructure/compose/docker-compose.docs.yml` |
-| `docs-api-viewer` | 3101 → 3000 | OpenAPI/AsyncAPI viewer | `infrastructure/compose/docker-compose.docs.yml` |
+| `docs-api` | 3400 | Documentation management API | `tools/compose/docker-compose.docs.yml` |
+| `docs-docusaurus` | 3004 → 80 | Static documentation hub | `tools/compose/docker-compose.docs.yml` |
+| `docs-api-viewer` | 3101 → 3000 | OpenAPI/AsyncAPI viewer | `tools/compose/docker-compose.docs.yml` |
 
 ### Firecrawl Stack (`firecrawl-*`)
 
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
-| `firecrawl-api` | 3002 | Main Firecrawl upstream API | `infrastructure/firecrawl/firecrawl-source/docker-compose.yaml` |
-| `firecrawl-playwright` | Internal (3000) | Playwright browser service | `infrastructure/firecrawl/firecrawl-source/docker-compose.yaml` |
-| `firecrawl-redis` | Internal (6379) | Queue + rate limiting cache | `infrastructure/firecrawl/firecrawl-source/docker-compose.yaml` |
-| `firecrawl-postgres` | Internal (5432) | nuq PostgreSQL state database | `infrastructure/firecrawl/firecrawl-source/docker-compose.yaml` |
+| `firecrawl-api` | 3002 | Main Firecrawl upstream API | `tools/firecrawl/firecrawl-source/docker-compose.yaml` |
+| `firecrawl-playwright` | Internal (3000) | Playwright browser service | `tools/firecrawl/firecrawl-source/docker-compose.yaml` |
+| `firecrawl-redis` | Internal (6379) | Queue + rate limiting cache | `tools/firecrawl/firecrawl-source/docker-compose.yaml` |
+| `firecrawl-postgres` | Internal (5432) | nuq PostgreSQL state database | `tools/firecrawl/firecrawl-source/docker-compose.yaml` |
 
 ### LangGraph Dev Sandbox
 
 | Container | Ports | Description | Compose File |
 |-----------|-------|-------------|--------------|
-| `infra-langgraph-dev` | 8112 → 8111 | LangGraph development server | `infrastructure/compose/docker-compose.langgraph-dev.yml` |
-| `infra-redis-dev` | 6380 → 6379 | Redis cache for LangGraph dev | `infrastructure/compose/docker-compose.langgraph-dev.yml` |
-| `infra-postgres-dev` | 5443 → 5432 | Postgres for LangGraph dev | `infrastructure/compose/docker-compose.langgraph-dev.yml` |
+| `infra-langgraph-dev` | 8112 → 8111 | LangGraph development server | `tools/compose/docker-compose.langgraph-dev.yml` |
+| `infra-redis-dev` | 6380 → 6379 | Redis cache for LangGraph dev | `tools/compose/docker-compose.langgraph-dev.yml` |
+| `infra-postgres-dev` | 5443 → 5432 | Postgres for LangGraph dev | `tools/compose/docker-compose.langgraph-dev.yml` |
 
 ## Process for Adding a New Container
 
@@ -102,7 +102,7 @@ Consistent container names make automation, monitoring, and incident response pr
 5. **Document ports** and dependencies in the relevant README or ops guide.
 6. **Add to monitoring**: update Prometheus scrape configs or dashboard targets.
 7. **Update documentation**: this guide, [service-port-map.md](../service-port-map.md), `SERVICES-STATUS-REPORT.md`, and `SERVICES-RUNNING.md`.
-8. **Dashboard integration**: add the container to `frontend/apps/dashboard/src/components/pages/launcher/DockerContainersSection.tsx`.
+8. **Dashboard integration**: add the container to `frontend/dashboard/src/components/pages/launcher/DockerContainersSection.tsx`.
 9. **Automation scripts**: update any scripts under `scripts/services/` or `scripts/maintenance/` that manage container lists.
 
 ## Image Build Workflow
@@ -144,7 +144,7 @@ Consistent container names make automation, monitoring, and incident response pr
 - [Service Port Map](../service-port-map.md)
 - [Ops README](../README.md)
 - [Firecrawl Stack Overview](firecrawl-stack.md)
-- [Frontend Dashboard Docker section](../../../../frontend/apps/dashboard/src/components/pages/launcher/DockerContainersSection.tsx)
+- [Frontend Dashboard Docker section](../../../../frontend/dashboard/src/components/pages/launcher/DockerContainersSection.tsx)
 - [Automation scripts index](../../../../scripts/README.md)
 
 ## Troubleshooting

@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Complete guide for configuring TradingSystem environment variables
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Environment Configuration Guide
@@ -259,9 +259,9 @@ Before starting services, always validate your configuration:
 bash scripts/env/validate-env.sh
 
 # Test Docker Compose configuration
-docker compose -f infrastructure/compose/docker-compose.timescale.yml config
-docker compose -f infrastructure/compose/docker-compose.infra.yml config
-docker compose -f infrastructure/monitoring/docker-compose.yml config
+docker compose -f tools/compose/docker-compose.timescale.yml config
+docker compose -f tools/compose/docker-compose.infra.yml config
+docker compose -f tools/monitoring/docker-compose.yml config
 ```
 
 ## 🚨 Security Best Practices
@@ -353,11 +353,11 @@ bash scripts/env/migrate-env.sh
 bash scripts/env/validate-env.sh
 
 # 4. Test services
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d
+docker compose -f tools/compose/docker-compose.timescale.yml up -d
 
 # 5. If successful, remove old files
-rm infrastructure/compose/.env.timescaledb
-rm infrastructure/compose/.env.ai-tools
+rm tools/compose/.env.timescaledb
+rm tools/compose/.env.ai-tools
 ```
 
 ### Production Deployment
@@ -378,7 +378,7 @@ chmod 600 .env
 chown root:root .env  # If running as root
 
 # 5. Deploy services
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d
+docker compose -f tools/compose/docker-compose.timescale.yml up -d
 ```
 
 ## 🐛 Troubleshooting
@@ -425,8 +425,8 @@ nano .env
 **Solution**:
 ```bash
 # Check path in compose file (should be relative to compose file location)
-# infrastructure/compose/docker-compose.*.yml should use: ../../.env
-# infrastructure/monitoring/docker-compose.yml should use: ../.env
+# tools/compose/docker-compose.*.yml should use: ../../.env
+# tools/monitoring/docker-compose.yml should use: ../.env
 
 # Test configuration
 docker compose -f path/to/compose.yml config
@@ -434,10 +434,10 @@ docker compose -f path/to/compose.yml config
 
 ## 📚 Additional Resources
 
-- **Implementation Plan**: `docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
-- **Infrastructure README**: `infrastructure/README.md`
-- **Security Guide**: `infrastructure/README.md#security`
-- **Docker Compose Files**: `infrastructure/compose/`
+- **Implementation Plan**: `docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
+- **Infrastructure README**: `tools/README.md`
+- **Security Guide**: `tools/README.md#security`
+- **Docker Compose Files**: `tools/compose/`
 
 ## ✅ Checklist
 
@@ -459,4 +459,4 @@ Before deploying to production, verify:
 
 **Last Updated**: 2025-10-15  
 **Maintained By**: DevOps Team  
-**Questions?** See `docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
+**Questions?** See `docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`

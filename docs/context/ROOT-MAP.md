@@ -6,12 +6,12 @@ domain: shared
 type: index
 summary: Visão rápida e atualizada da estrutura do TradingSystem.
 status: active
-last_review: 2025-10-22
+last_review: "2025-10-22"
 ---
 
 - backend/: APIs e serviços
 - frontend/: dashboard React
-- infrastructure/: IaC e libs
+- tools/: IaC e libs
 - ProfitDLL/: bindings x64
 - docs/: Docusaurus, contexto e openspec
 - scripts/: instalação, start/stop, healthcheck

@@ -86,7 +86,7 @@ verify_documentation_api_running() {
     else
         warning "Documentation API not running on port ${API_PORT}"
         info "Start with: cd backend/api/documentation-api && npm run dev"
-        info "Or via Docker: docker compose -f infrastructure/compose/docker-compose.docs.yml up -d"
+        info "Or via Docker: docker compose -f tools/compose/docker-compose.docs.yml up -d"
         return 1
     fi
 }

@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Playbook to migrate the TradingSystem workspace from Windows to Linux or WSL2
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Linux / WSL Migration Guide
@@ -29,7 +29,7 @@ Use it when spinning up a fresh workstation or when moving existing services awa
    ```bash
    git clone git@github.com:marceloterra1983/TradingSystem.git ~/projetos/TradingSystem
    cd ~/projetos/TradingSystem
-   chmod +x infrastructure/scripts/*.sh
+   chmod +x tools/scripts/*.sh
    ```
 2. **Install workstation prerequisites**
    ```bash
@@ -52,23 +52,23 @@ Use it when spinning up a fresh workstation or when moving existing services awa
    Log out and log back in for the new group to take effect.
 5. **Bootstrap project dependencies**
    ```bash
-   ./infrastructure/scripts/setup-linux-environment.sh
+   ./tools/scripts/setup-linux-environment.sh
    ```
    The script installs npm dependencies for the active services, copies `.env` templates, and creates required data folders.
 6. **Configure service-specific `.env` files**
-   - `frontend/apps/tp-capital/infrastructure/tp-capital-signals.env`
+   - `apps/tp-capital/tools/tp-capital-signals.env`
    - Additional secrets (Telegram, QuestDB) as needed.
 7. **Verify scripts and containers run successfully**
    ```bash
-   ./infrastructure/scripts/start-service-launcher.sh
-   ./infrastructure/scripts/start-trading-system-dev.sh --start-monitoring
+   ./tools/scripts/start-service-launcher.sh
+   ./tools/scripts/start-trading-system-dev.sh --start-monitoring
    ```
 
 For a detailed step-by-step checklist with validation commands, see [ops/checklists/linux-setup](checklists/linux-setup.md).
 
 ## Key Bash Scripts
 
-All cross-platform launcher scripts now live in `infrastructure/scripts/`.  
+All cross-platform launcher scripts now live in `tools/scripts/`.  
 They supersede the legacy PowerShell tooling.
 
 | Script | Purpose |
@@ -108,7 +108,7 @@ backend/api/
 
 To keep long-running services alive inside Linux/WSL:
 
-1. Copy the unit files from `infrastructure/systemd/` to `~/.config/systemd/user/`.
+1. Copy the unit files from `tools/systemd/` to `~/.config/systemd/user/`.
 2. Enable and start the services:
    ```bash
    systemctl --user daemon-reload
@@ -124,10 +124,10 @@ WSL2 requires the distribution to run with `systemd=true` (see Microsoft docs).
 
 ## Monitoring Stack (Linux Profile)
 
-The observability stack (`infrastructure/monitoring/docker-compose.yml`) exposes an additional `linux` profile to activate `node-exporter`.
+The observability stack (`tools/monitoring/docker-compose.yml`) exposes an additional `linux` profile to activate `node-exporter`.
 
 ```bash
-cd infrastructure/monitoring
+cd tools/monitoring
 COMPOSE_PROFILES=linux docker compose up -d
 ```
 
@@ -142,7 +142,7 @@ Access points:
 ```bash
 tar -czf ~/trading-system-backup-$(date +%Y%m%d).tar.gz \
   data/ \
-  frontend/apps/tp-capital/infrastructure/tp-capital-signals.env
+  apps/tp-capital/tools/tp-capital-signals.env
 ```
 
 Restore by extracting the archive back into `$TRADING_SYSTEM_ROOT`.
@@ -151,7 +151,7 @@ Restore by extracting the archive back into `$TRADING_SYSTEM_ROOT`.
 
 | Issue | Resolution |
 |-------|------------|
-| Scripts refuse to execute | `chmod +x infrastructure/scripts/*.sh` |
+| Scripts refuse to execute | `chmod +x tools/scripts/*.sh` |
 | Docker requires `sudo` | `sudo usermod -aG docker $USER` and re-login |
 | Ports already in use | `lsof -i :<PORT>` then `kill -9 <PID>` |
 | npm install failures | Remove `node_modules` + `package-lock.json`, rerun `npm install` |
@@ -161,5 +161,5 @@ More scenarios live under `ops/troubleshooting/`.
 ## Related Documents
 
 - [ops/checklists/linux-setup](checklists/linux-setup.md) — interactive setup checklist.
-- `infrastructure/scripts/README.md`
+- `tools/scripts/README.md`
 - `LINUX-MIGRATION-SUMMARY.md` *(document located at the repository root for historical context)*

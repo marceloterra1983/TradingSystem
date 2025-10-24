@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Complete setup guide for Cursor IDE on Linux including configuration and troubleshooting
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # 🎯 Configuração do Cursor para Linux - Guia Rápido
@@ -278,7 +278,7 @@ Ctrl+Shift+P → Tasks: Run Task → Make Scripts Executable
 
 Ou manualmente no terminal:
 ```bash
-chmod +x infrastructure/scripts/*.sh
+chmod +x tools/scripts/*.sh
 ```
 
 ---
@@ -364,7 +364,7 @@ Tudo está configurado e pronto para uso! 🚀
 Adicione ao `~/.bashrc`:
 ```bash
 alias tsd='cd ~/projetos/TradingSystem'
-alias tsd-start='tsd && ./infrastructure/scripts/start-trading-system-dev.sh --start-monitoring'
+alias tsd-start='tsd && ./tools/scripts/start-trading-system-dev.sh --start-monitoring'
 ```
 
 ### Usar Tasks Frequentemente

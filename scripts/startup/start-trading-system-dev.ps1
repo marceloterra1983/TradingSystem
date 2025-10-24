@@ -20,12 +20,12 @@ $infrastructureDirectory = Split-Path -Parent $scriptDirectory
 $repoRoot = Split-Path -Parent $infrastructureDirectory
 
 if (-not $SkipServiceLauncher) {
-  $serviceLauncherScript = Join-Path $scriptDirectory 'start-service-launcher.ps1'
-  if (Test-Path -LiteralPath $serviceLauncherScript) {
-    Write-Host '[Init] Ensuring Laucher API is running (port 3500)...' -ForegroundColor Cyan
-    & $serviceLauncherScript
+  $statusScript = Join-Path $scriptDirectory 'start-status.ps1'
+  if (Test-Path -LiteralPath $statusScript) {
+    Write-Host '[Init] Ensuring Status API is running (port 3500)...' -ForegroundColor Cyan
+    & $statusScript
   } else {
-    Write-Warning "[Init] Service launcher script not found at $serviceLauncherScript"
+    Write-Warning "[Init] Status script not found at $statusScript"
   }
 }
 

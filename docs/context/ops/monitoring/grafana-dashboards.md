@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Dashboards provisionados e planejados no Grafana
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Grafana Dashboards
@@ -17,4 +17,4 @@ last_review: 2025-10-17
 | Idea Bank API (planejado) | Fila por status, SLA por prioridade | Prometheus + métricas de domínio |
 | Documentation API (planejado) | Upload success rate, tempo de indexação | Prometheus |
 
-Os arquivos JSON ficam em infrastructure/monitoring/grafana/dashboards/ e são provisionados automaticamente via docker-compose.
+Os arquivos JSON ficam em tools/monitoring/grafana/dashboards/ e são provisionados automaticamente via docker-compose.

@@ -34,7 +34,7 @@ if [ "$API_RESPONSE" = "200" ]; then
 else
     echo "⚠️  Documentation API not responding (HTTP $API_RESPONSE)"
     echo "   Starting Documentation API..."
-    docker compose -f infrastructure/compose/docker-compose.docs.yml up -d documentation-api
+    docker compose -f tools/compose/docker-compose.docs.yml up -d documentation-api
     sleep 5
     
     # Check again

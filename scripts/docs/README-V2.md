@@ -490,7 +490,7 @@ python3 scripts/docs/check-links-v2.py --disable-cache
 
 - [Health Monitoring Guide](../../docs/context/ops/monitoring/health-monitoring.md)
 - [Documentation Standard](../../docs/DOCUMENTATION-STANDARD.md)
-- [Container Naming](../../docs/context/ops/infrastructure/container-naming.md)
+- [Container Naming](../../docs/context/ops/tools/container-naming.md)
 
 ---
 

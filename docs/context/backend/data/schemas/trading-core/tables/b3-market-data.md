@@ -6,12 +6,12 @@ domain: backend
 type: reference
 summary: Proposed QuestDB schema set for consolidated B3 market data ingested into TradingSystem
 status: draft
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # B3 Tables (QuestDB)
 
-The legacy B3 stack persisted JSON/CSV artefacts under `infrastructure/b3/data/processed`. To integrate with TradingSystem we normalize the feeds into QuestDB append-only tables. This document captures the target schema definitions that Phase 2 of the integration plan will implement.
+The legacy B3 stack persisted JSON/CSV artefacts under `tools/b3/data/processed`. To integrate with TradingSystem we normalize the feeds into QuestDB append-only tables. This document captures the target schema definitions that Phase 2 of the integration plan will implement.
 
 ## `b3_snapshots`
 
@@ -177,4 +177,4 @@ Normalized DXY points from `dxy_coleta.csv`.
 - Produce migration scripts that upsert CSV/JSON data into these tables (`ops` checklist to follow).
 - Decide retention policies (likely 180 days for intraday snapshots, 730 days for daily aggregates).
 - Implement read models / REST endpoints in the integrated backend to replace `json_server.py`.
-- Initial automation lives in `infrastructure/b3/sql/schema.sql` (DDL), `infrastructure/b3/scripts/migrate_to_questdb.py` (CSV/JSON importer) and the runtime ingestor at `infrastructure/b3/app/core/questdb_ingest.py` invoked from the scheduler.
+- Initial automation lives in `tools/b3/sql/schema.sql` (DDL), `tools/b3/scripts/migrate_to_questdb.py` (CSV/JSON importer) and the runtime ingestor at `tools/b3/app/core/questdb_ingest.py` invoked from the scheduler.

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import firecrawlConfig, { getFirecrawlUrl } from '../config/firecrawl.js';
+import firecrawlConfig from '../config/firecrawl.js';
 import { logger } from '../config/logger.js';
 import { recordCrawlJob, recordCrawlStatusCheck, recordScrape } from '../metrics.js';
 

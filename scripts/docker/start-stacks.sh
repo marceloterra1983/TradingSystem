@@ -126,7 +126,7 @@ start_phase() {
 
   case "${phase}" in
     infra-core)
-      local compose="infrastructure/compose/docker-compose.infra.yml"
+      local compose="tools/compose/docker-compose.infra.yml"
       if has_compose_services "${compose}"; then
         compose_cmd -f "${REPO_ROOT}/${compose}" up -d
       else
@@ -135,7 +135,7 @@ start_phase() {
       ;;
     data)
       ensure_network "tradingsystem_data"
-      local compose="infrastructure/compose/docker-compose.data.yml"
+      local compose="tools/compose/docker-compose.data.yml"
       if has_compose_services "${compose}"; then
         compose_cmd -f "${REPO_ROOT}/${compose}" up -d
       else
@@ -143,7 +143,7 @@ start_phase() {
       fi
       ;;
     timescale)
-      local compose="infrastructure/compose/docker-compose.timescale.yml"
+      local compose="tools/compose/docker-compose.timescale.yml"
       if has_compose_services "${compose}"; then
         ensure_network "tradingsystem_data"
         compose_cmd -f "${REPO_ROOT}/${compose}" up -d
@@ -152,7 +152,7 @@ start_phase() {
       fi
       ;;
     frontend-apps)
-      local compose="infrastructure/compose/docker-compose.frontend-apps.yml"
+      local compose="tools/compose/docker-compose.frontend-apps.yml"
       if has_compose_services "${compose}"; then
         ensure_network "tradingsystem_data"
         compose_cmd -f "${REPO_ROOT}/${compose}" up -d
@@ -161,17 +161,17 @@ start_phase() {
       fi
       ;;
     monitoring)
-      compose_cmd -f "${REPO_ROOT}/infrastructure/monitoring/docker-compose.yml" up -d --build
+      compose_cmd -f "${REPO_ROOT}/tools/monitoring/docker-compose.yml" up -d --build
       ;;
     docs)
-      compose_cmd -f "${REPO_ROOT}/infrastructure/compose/docker-compose.docs.yml" up -d --build
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.docs.yml" up -d --build
       ;;
     infra)
-      compose_cmd -f "${REPO_ROOT}/infrastructure/compose/docker-compose.infra.yml" up -d --build
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.infra.yml" up -d --build
       ;;
     langgraph-dev)
       echo -e "${BLUE}🔬 Starting LangGraph Development Environment${NC}"
-      local compose="infrastructure/compose/docker-compose.langgraph-dev.yml"
+      local compose="tools/compose/docker-compose.langgraph-dev.yml"
       if has_compose_services "${compose}"; then
         compose_cmd -f "${REPO_ROOT}/${compose}" up -d --build
         echo -e "${GREEN}✓ LangGraph dev started on port 8112${NC}"
@@ -182,7 +182,7 @@ start_phase() {
       fi
       ;;
     firecrawl)
-      local firecrawl_dir="${REPO_ROOT}/infrastructure/firecrawl/firecrawl-source"
+      local firecrawl_dir="${REPO_ROOT}/tools/firecrawl/firecrawl-source"
       if [[ ! -d "${firecrawl_dir}" ]]; then
         echo -e "${RED}❌ Firecrawl submodule missing at ${firecrawl_dir}.${NC}"
         echo -e "${YELLOW}Run: git submodule update --init --recursive${NC}"

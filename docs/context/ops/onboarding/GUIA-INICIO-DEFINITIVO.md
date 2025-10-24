@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Guia completo e definitivo para iniciar o TradingSystem do zero
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # 🚀 GUIA DEFINITIVO - Como Iniciar o TradingSystem
@@ -72,11 +72,11 @@ Use quando quiser controlar quais serviços sobem.
 
 ```bash
 # Frontend
-cd /home/marce/projetos/TradingSystem/frontend/apps/dashboard
+cd /home/marce/projetos/TradingSystem/frontend/dashboard
 npm run dev
 
 # TP-Capital
-cd /home/marce/projetos/TradingSystem/frontend/apps/tp-capital
+cd /home/marce/projetos/TradingSystem/apps/tp-capital
 npm run dev
 
 # Idea Bank API
@@ -84,7 +84,7 @@ cd /home/marce/projetos/TradingSystem/backend/api/idea-bank
 npm run dev
 
 # B3 API
-cd /home/marce/projetos/TradingSystem/frontend/apps/b3-market-data
+cd /home/marce/projetos/TradingSystem/apps/b3-market-data
 npm run dev
 
 # Documentation Hub
@@ -112,7 +112,7 @@ Para reiniciar, execute novamente `bash start-all-services.sh` ou o comando do s
 
 - Containers de suporte (QuestDB, Grafana, Prometheus, etc.) sobem via Docker Compose.
 - Scripts recomendados: `bash start-all-stacks.sh` e `bash stop-all-stacks.sh`.
-- Compose files: `infrastructure/compose/`, `infrastructure/monitoring/`, `frontend/compose/`, `ai/compose/`.
+- Compose files: `tools/compose/`, `tools/monitoring/`, `frontend/compose/`, `ai/compose/`.
 
 ---
 

@@ -12,7 +12,7 @@ domain: backend
 type: adr
 summary: Agno framework adopted for implementing intelligent trading agents with coordinated decision-making
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 decision_date: 2025-10-16
 ---
 
@@ -181,7 +181,7 @@ end note
 ## Implementation Notes
 
 ### Required Changes
-1. Create `infrastructure/agno-agents/` service following Clean Architecture structure.
+1. Create `tools/agno-agents/` service following Clean Architecture structure.
 2. Implement MarketAnalysisAgent, RiskManagementAgent, and SignalOrchestratorAgent using Agno.
 3. Build HTTP client adapters (`WorkspaceClient`, `TPCapitalClient`, `B3Client`) with httpx, retry, and circuit breaker.
 4. Add `B3WebSocketConsumer` for real-time data streaming.
@@ -216,8 +216,8 @@ If the Agno service encounters critical issues, operators can revert to manual a
 - **Related ADRs:** [ADR-0001 — Use LowDB for MVP Persistence](2025-10-09-adr-0001-use-lowdb.md)
 - **Related Documentation:**
   - Guide: [`docs/context/backend/guides/agno-agents-guide.md`](../../guides/agno-agents-guide.md)
-  - Service README: [`infrastructure/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/agno-agents/README.md)
-  - Prometheus alerts: [`infrastructure/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/monitoring/prometheus/rules/alert-rules.yml)
+  - Service README: [`tools/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/tools/agno-agents/README.md)
+  - Prometheus alerts: [`tools/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/tools/monitoring/prometheus/rules/alert-rules.yml)
 
 ## References
 - [Agno Framework](https://github.com/agno-agi/agno)

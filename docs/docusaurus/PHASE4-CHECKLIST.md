@@ -144,7 +144,7 @@ curl http://localhost:3400/health
 cd backend/api/documentation-api
 npm run dev
 # Or via Docker:
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d
+docker compose -f tools/compose/docker-compose.docs.yml up -d
 ```
 
 **Search Integration:**

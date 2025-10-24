@@ -5,8 +5,8 @@ tags: [agno, agents, trading, automacao, multi-agent, prd]
 domain: shared
 type: prd
 summary: Sistema multi-agente usando Agno Framework para análise de mercado, gestão de risco e orquestração de sinais de trading com integração às APIs Workspace, TP Capital e B3.
-status: approved
-last_review: 2025-10-18
+status: active
+last_review: "2025-10-18"
 language: pt
 ---
 
@@ -296,18 +296,18 @@ sequenceDiagram
 
 -   **ADR-0002:** [Adoção do Agno Framework](../../../../backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md) - Decisão arquitetural e justificativa
 -   **Guia de Implementação:** [Agno Agents Guide](../../../../backend/guides/agno-agents-guide.md) - Guia completo de desenvolvimento
--   **README do Serviço:** [infrastructure/agno-agents/README.md](../../../../../infrastructure/agno-agents/README.md) - Documentação técnica do serviço
--   **Alertas Prometheus:** [alert-rules.yml](../../../../../infrastructure/monitoring/prometheus/rules/alert-rules.yml) - Regras de alerta configuradas
+-   **README do Serviço:** [tools/agno-agents/README.md](../../../../../tools/agno-agents/README.md) - Documentação técnica do serviço
+-   **Alertas Prometheus:** [alert-rules.yml](../../../../../tools/monitoring/prometheus/rules/alert-rules.yml) - Regras de alerta configuradas
 
 ### Diagramas de Arquitetura
 
 -   **Before/After Architecture:** Incluídos no ADR-0002 (PlantUML)
--   **Component Architecture:** Ver `infrastructure/agno-agents/src/` para estrutura Clean Architecture
+-   **Component Architecture:** Ver `tools/agno-agents/src/` para estrutura Clean Architecture
 -   **Sequence Diagram:** Ver seção "Fluxo do Usuário" acima
 
 ### Configuração
 
--   **Variáveis de Ambiente:** Ver `.env.example` em `infrastructure/agno-agents/`
+-   **Variáveis de Ambiente:** Ver `.env.example` em `tools/agno-agents/`
 -   **Portas:** Serviço escuta em `:8200`
 -   **Dependências:** Workspace (:3100), TP Capital (:3200), B3 (:3302), B3 WebSocket (:3302/ws)
 
@@ -362,7 +362,7 @@ O serviço segue Clean Architecture com 4 camadas:
 -   `ports.py`: Interfaces para adapters externos (IWorkspaceClient, ITPCapitalClient, IB3Client)
 -   `dto.py`: Data Transfer Objects para requests/responses
 
-**Infrastructure Layer** (`src/infrastructure/`):
+**Infrastructure Layer** (`src/tools/`):
 
 -   `adapters/workspace_client.py`: HTTP client para Workspace API
 -   `adapters/tp_capital_client.py`: HTTP client para TP Capital API
@@ -420,7 +420,7 @@ CIRCUIT_BREAKER_TIMEOUT=60
 
 ### Prometheus Alerts
 
-Alertas configurados em `infrastructure/monitoring/prometheus/rules/alert-rules.yml`:
+Alertas configurados em `tools/monitoring/prometheus/rules/alert-rules.yml`:
 
 -   **AgnoAgentsDown** (critical): Serviço não responde por 2 minutos
 -   **AgnoAgentErrorsHigh** (warning): Taxa de erro > 0.1 erros/segundo por 5 minutos
@@ -430,7 +430,7 @@ Alertas configurados em `infrastructure/monitoring/prometheus/rules/alert-rules.
 
 ### Testes
 
-Suite de testes em `infrastructure/agno-agents/tests/`:
+Suite de testes em `tools/agno-agents/tests/`:
 
 -   `test_domain.py`: Testes de entidades e value objects
 -   `test_adapters.py`: Testes de HTTP clients com mocks
@@ -443,6 +443,6 @@ Suite de testes em `infrastructure/agno-agents/tests/`:
 Executar testes:
 
 ```bash
-cd infrastructure/agno-agents
+cd tools/agno-agents
 pytest --cov=src --cov-report=html
 ```

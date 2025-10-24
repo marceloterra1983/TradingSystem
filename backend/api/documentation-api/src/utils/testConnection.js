@@ -17,7 +17,7 @@ async function testConnection() {
     }
 
     // Test schema files exist
-    const schemaFiles = [
+    const _schemaFiles = [
       '01_documentation_systems.sql',
       '02_documentation_ideas.sql',
       '03_documentation_files.sql',

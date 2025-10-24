@@ -12,7 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMPOSE_FILE="${PROJECT_ROOT}/infrastructure/docker-compose.cache.yml"
+COMPOSE_FILE="${PROJECT_ROOT}/tools/docker-compose.cache.yml"
 
 # Cores para output
 RED='\033[0;31m'
@@ -44,8 +44,8 @@ if ! docker network inspect buildkit-net &>/dev/null; then
 fi
 
 log_info "Verificando arquivo de configuração do registry..."
-if [[ ! -f "${PROJECT_ROOT}/infrastructure/registry/config.yml" ]]; then
-    log_error "Arquivo de configuração não encontrado: ${PROJECT_ROOT}/infrastructure/registry/config.yml"
+if [[ ! -f "${PROJECT_ROOT}/tools/registry/config.yml" ]]; then
+    log_error "Arquivo de configuração não encontrado: ${PROJECT_ROOT}/tools/registry/config.yml"
     exit 1
 fi
 

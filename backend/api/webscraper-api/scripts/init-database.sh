@@ -13,8 +13,8 @@ elif [[ -n ${1:-} ]]; then
   exit 1
 fi
 
-SCHEMA_SQL="$ROOT_DIR/infrastructure/timescaledb/webscraper-schema.sql"
-SEED_SQL="$ROOT_DIR/infrastructure/timescaledb/webscraper-seed.sql"
+SCHEMA_SQL="$ROOT_DIR/backend/data/timescaledb/webscraper-schema.sql"
+SEED_SQL="$ROOT_DIR/backend/data/timescaledb/webscraper-seed.sql"
 
 log() {
   printf '==> %s\n' "$1"

@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Plano completo para centralizar todas as variáveis de ambiente do projeto em um único arquivo .env na raiz
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Plano de Implementação: Centralização de Variáveis de Ambiente
@@ -30,11 +30,11 @@ Centralizar **todas** as variáveis de ambiente de aplicações, serviços, cont
 
 | Arquivo | Localização | Serviços | Status |
 |---------|-------------|----------|--------|
-| `.env.timescaledb` | `infrastructure/compose/` | TimescaleDB, PgAdmin, Backup, Exporter | ⚠️ Múltiplas referências |
-| `.env.ai-tools` | `infrastructure/compose/` | LlamaIndex, Qdrant | ⚠️ Múltiplas referências |
-| `.env` (monitoring) | `infrastructure/monitoring/` | Prometheus, Grafana, Alertmanager | ❌ Não existe ainda |
+| `.env.timescaledb` | `tools/compose/` | TimescaleDB, PgAdmin, Backup, Exporter | ⚠️ Múltiplas referências |
+| `.env.ai-tools` | `tools/compose/` | LlamaIndex, Qdrant | ⚠️ Múltiplas referências |
+| `.env` (monitoring) | `tools/monitoring/` | Prometheus, Grafana, Alertmanager | ❌ Não existe ainda |
 | `.env` (APIs) | `backend/api/*/` | Idea Bank, TP Capital, B3, Documentation, Laucher | ❌ Diversos arquivos |
-| `.env` (frontend) | `frontend/apps/dashboard/` | Dashboard React | ❌ Não existe ainda |
+| `.env` (frontend) | `frontend/dashboard/` | Dashboard React | ❌ Não existe ainda |
 
 ### Variáveis Mapeadas por Categoria
 
@@ -128,7 +128,7 @@ TradingSystem/
 │       ├── validate-env.sh      # Valida variáveis obrigatórias
 │       ├── setup-env.sh         # Setup inicial interativo
 │       └── sync-env.sh          # Sincroniza para desenvolvimento
-└── infrastructure/compose/
+└── tools/compose/
     ├── docker-compose.*.yml     # Referenciam ../.env (raiz)
     └── ...
 ```
@@ -476,9 +476,9 @@ export default {
 
 #### 3.2 Atualizar Frontend
 
-**`frontend/apps/dashboard/.env`** → Remover, usar raiz
+**`frontend/dashboard/.env`** → Remover, usar raiz
 
-**`frontend/apps/dashboard/vite.config.ts`**:
+**`frontend/dashboard/vite.config.ts`**:
 
 ```typescript
 import { defineConfig, loadEnv } from 'vite';
@@ -604,17 +604,17 @@ fi
 # Start from template
 cp .env.example .env
 
-# Merge from infrastructure/compose/.env.timescaledb if exists
-if [ -f "infrastructure/compose/.env.timescaledb" ]; then
+# Merge from tools/compose/.env.timescaledb if exists
+if [ -f "tools/compose/.env.timescaledb" ]; then
     echo "📥 Merging TimescaleDB variables..."
     # Extract and merge variables
-    grep -E "^TIMESCALEDB_|^PGADMIN_" infrastructure/compose/.env.timescaledb >> .env.tmp || true
+    grep -E "^TIMESCALEDB_|^PGADMIN_" tools/compose/.env.timescaledb >> .env.tmp || true
 fi
 
-# Merge from infrastructure/compose/.env.ai-tools if exists
-if [ -f "infrastructure/compose/.env.ai-tools" ]; then
+# Merge from tools/compose/.env.ai-tools if exists
+if [ -f "tools/compose/.env.ai-tools" ]; then
     echo "📥 Merging AI Tools variables..."
-    grep -E "^OPENAI_|^QDRANT_|^RATE_LIMIT_|^LOG_LEVEL" infrastructure/compose/.env.ai-tools >> .env.tmp || true
+    grep -E "^OPENAI_|^QDRANT_|^RATE_LIMIT_|^LOG_LEVEL" tools/compose/.env.ai-tools >> .env.tmp || true
 fi
 
 # Deduplicate and merge
@@ -627,7 +627,7 @@ fi
 
 echo "✅ Migration complete!"
 echo "📝 Review .env file and adjust as needed"
-echo "🗑️  Old .env files can be removed from infrastructure/compose/"
+echo "🗑️  Old .env files can be removed from tools/compose/"
 ```
 
 ## 📋 Checklist de Implementação
@@ -640,24 +640,24 @@ echo "🗑️  Old .env files can be removed from infrastructure/compose/"
 - [ ] Atualizar `.gitignore`
 
 ### Atualização de Compose Files
-- [ ] `infrastructure/compose/docker-compose.infra.yml`
-- [ ] `infrastructure/compose/docker-compose.data.yml`
-- [ ] `infrastructure/compose/docker-compose.timescale.yml`
-- [ ] `infrastructure/compose/docker-compose.infra.yml`
-- [ ] `infrastructure/monitoring/docker-compose.yml`
+- [ ] `tools/compose/docker-compose.infra.yml`
+- [ ] `tools/compose/docker-compose.data.yml`
+- [ ] `tools/compose/docker-compose.timescale.yml`
+- [ ] `tools/compose/docker-compose.infra.yml`
+- [ ] `tools/monitoring/docker-compose.yml`
 - [ ] `frontend/compose/docker-compose.frontend.yml`
 
 ### Atualização de Serviços
 - [ ] `backend/api/idea-bank/` - Carregar .env da raiz
-- [ ] `frontend/apps/tp-capital/` - Carregar .env da raiz
-- [ ] `frontend/apps/b3-market-data/` - Carregar .env da raiz
+- [ ] `apps/tp-capital/` - Carregar .env da raiz
+- [ ] `apps/b3-market-data/` - Carregar .env da raiz
 - [ ] `backend/api/documentation-api/` - Carregar .env da raiz
-- [ ] `frontend/apps/service-launcher/` - Carregar .env da raiz
-- [ ] `frontend/apps/dashboard/` - Vite config para carregar da raiz
+- [ ] `apps/service-launcher/` - Carregar .env da raiz
+- [ ] `frontend/dashboard/` - Vite config para carregar da raiz
 
 ### Documentação
 - [ ] Criar `docs/context/ops/ENVIRONMENT-CONFIGURATION.md`
-- [ ] Atualizar `infrastructure/README.md`
+- [ ] Atualizar `tools/README.md`
 - [ ] Atualizar `README.md` principal
 - [ ] Atualizar `CLAUDE.md` com novo processo
 

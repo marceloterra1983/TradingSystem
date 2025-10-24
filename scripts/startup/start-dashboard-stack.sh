@@ -8,14 +8,14 @@ TPCAPITAL_DIR="$ROOT_DIR/frontend/apps/tp-capital"
 B3_DIR="$ROOT_DIR/frontend/apps/b3-market-data"
 WEB_SCRAPER_API_DIR="$ROOT_DIR/backend/api/webscraper-api"
 FIRECRAWL_PROXY_DIR="$ROOT_DIR/backend/api/firecrawl-proxy"
-SERVICE_LAUNCHER_DIR="$ROOT_DIR/frontend/apps/service-launcher"
+STATUS_DIR="$ROOT_DIR/frontend/apps/status"
 DASHBOARD_DIR="$ROOT_DIR/frontend/apps/dashboard"
 WEB_SCRAPER_APP_DIR="$ROOT_DIR/frontend/apps/WebScraper"
 
-FIRECRAWL_COMPOSE="$ROOT_DIR/infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
-TIMESCALE_COMPOSE="$ROOT_DIR/infrastructure/compose/docker-compose.timescale.yml"
-DOCS_COMPOSE="$ROOT_DIR/infrastructure/compose/docker-compose.docs.yml"
-IMAGES_OVERRIDE="$ROOT_DIR/infrastructure/compose/docker-compose.images.override.yml"
+FIRECRAWL_COMPOSE="$ROOT_DIR/tools/firecrawl/firecrawl-source/docker-compose.yaml"
+TIMESCALE_COMPOSE="$ROOT_DIR/tools/compose/docker-compose.timescale.yml"
+DOCS_COMPOSE="$ROOT_DIR/tools/compose/docker-compose.docs.yml"
+IMAGES_OVERRIDE="$ROOT_DIR/tools/compose/docker-compose.images.override.yml"
 
 DEFAULT_ENV_FILE="$ROOT_DIR/config/.env.defaults"
 CONTAINER_IMAGES_FILE="$ROOT_DIR/config/container-images.env"
@@ -235,7 +235,7 @@ ensure_node_modules_if_present "$TPCAPITAL_DIR" "TP Capital API"
 ensure_node_modules_if_present "$B3_DIR" "B3 Market Data API"
 ensure_node_modules_if_present "$WEB_SCRAPER_API_DIR" "WebScraper API"
 ensure_node_modules_if_present "$FIRECRAWL_PROXY_DIR" "Firecrawl Proxy API"
-ensure_node_modules_if_present "$SERVICE_LAUNCHER_DIR" "Service Launcher API"
+ensure_node_modules_if_present "$STATUS_DIR" "Status API"
 ensure_node_modules_if_present "$DASHBOARD_DIR" "Dashboard App"
 ensure_node_modules_if_present "$WEB_SCRAPER_APP_DIR" "WebScraper App"
 
@@ -246,7 +246,7 @@ start_service "TP Capital API" "$TPCAPITAL_DIR" "env PORT=${TP_CAPITAL_PORT:-400
 start_service "B3 Market Data API" "$B3_DIR" "env PORT=${B3_API_PORT:-3302} npm start" "$LOG_DIR/b3-market.log"
 start_service "WebScraper API" "$WEB_SCRAPER_API_DIR" "env PORT=${WEBSCRAPER_API_PORT:-3700} npm start" "$LOG_DIR/webscraper.log"
 start_service "Firecrawl Proxy" "$FIRECRAWL_PROXY_DIR" "env PORT=${FIRECRAWL_PROXY_PORT:-3600} npm start" "$LOG_DIR/firecrawl-proxy.log"
-start_service "Service Launcher" "$SERVICE_LAUNCHER_DIR" "env PORT=${SERVICE_LAUNCHER_PORT:-3500} npm start" "$LOG_DIR/service-launcher.log"
+start_service "Status API" "$STATUS_DIR" "env PORT=${STATUS_PORT:-3500} npm start" "$LOG_DIR/status.log"
 start_service "Dashboard App" "$DASHBOARD_DIR" "env PORT=${VITE_DASHBOARD_PORT:-3103} npm run dev" "$LOG_DIR/dashboard.log"
 start_service "WebScraper App" "$WEB_SCRAPER_APP_DIR" "env PORT=${WEBSCRAPER_APP_PORT:-3800} npm run dev" "$LOG_DIR/webscraper-app.log"
 
@@ -259,7 +259,7 @@ Workspace API:         http://localhost:${WORKSPACE_PORT:-3200}
 TP Capital API:        http://localhost:${TP_CAPITAL_PORT:-4005}
 B3 Market API:         http://localhost:${B3_API_PORT:-3302}
 WebScraper API:        http://localhost:${WEBSCRAPER_API_PORT:-3700}
-Service Launcher API:  http://localhost:${SERVICE_LAUNCHER_PORT:-3500}
+Status API:            http://localhost:${STATUS_PORT:-3500}
 Dashboard App:         http://localhost:${VITE_DASHBOARD_PORT:-3103}
 WebScraper App:        http://localhost:${WEBSCRAPER_APP_PORT:-3800}
 

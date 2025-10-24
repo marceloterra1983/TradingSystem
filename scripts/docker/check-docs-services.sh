@@ -44,7 +44,7 @@ if docker ps --format '{{.Names}}' | grep -q docs-api; then
 else
     echo -e "  Status: ${RED}❌ Not Running${NC}"
     echo "  Type:   🐳 Docker Container (Expected)"
-    echo "  Hint:   docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml up -d"
+    echo "  Hint:   docker compose --env-file .env -f tools/compose/docker-compose.docs.yml up -d"
 fi
 
 echo ""
@@ -90,7 +90,7 @@ if docker ps --format '{{.Names}}' | grep -q '^data-timescaledb$'; then
 else
     echo -e "  Status: ${RED}❌ Not Running${NC}"
     echo "  Type:   🐳 Docker Container (Required for DocsAPI)"
-    echo "  Hint:   docker compose --env-file .env -f infrastructure/compose/docker-compose.timescale.yml up -d timescaledb"
+    echo "  Hint:   docker compose --env-file .env -f tools/compose/docker-compose.timescale.yml up -d timescaledb"
 fi
 
 echo ""
@@ -113,13 +113,13 @@ echo "║                  Management Commands                        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  Start DocsAPI:"
-echo "    docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml up -d"
+echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml up -d"
 echo ""
 echo "  Test DocsAPI:"
 echo "    bash scripts/docker/test-docs-api.sh"
 echo ""
 echo "  View logs:"
-echo "    docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml logs -f"
+echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs -f"
 echo ""
 echo "  Start Docusaurus (DEV):"
 echo "    cd docs/docusaurus && npm run start -- --port 3004"

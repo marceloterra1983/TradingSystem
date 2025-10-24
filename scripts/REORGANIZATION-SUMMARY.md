@@ -1,14 +1,14 @@
 # Scripts Reorganization Summary
 
 **Data:** 15 de Outubro de 2025  
-**Objetivo:** Consolidar todos os scripts de `infrastructure/scripts` para `scripts/` na raiz do projeto
+**Objetivo:** Consolidar todos os scripts de `tools/scripts` para `scripts/` na raiz do projeto
 
 ---
 
 ## ✅ Tarefas Concluídas
 
 ### 1. Análise e Categorização ✓
-- ✅ Analisados todos os scripts em `infrastructure/scripts`
+- ✅ Analisados todos os scripts em `tools/scripts`
 - ✅ Analisados todos os scripts em `scripts/` (raiz)
 - ✅ Identificadas categorias e duplicações
 
@@ -25,7 +25,7 @@
 
 ### 3. Migração de Scripts ✓
 
-**De `infrastructure/scripts/` para `scripts/startup/`:**
+**De `tools/scripts/` para `scripts/startup/`:**
 - ✅ start-trading-system-dev.ps1
 - ✅ start-trading-system-dev.sh
 - ✅ start-service-launcher.ps1
@@ -35,19 +35,19 @@
 - ✅ register-trading-system-dev-startup.ps1
 - ✅ welcome-message.sh
 
-**De `infrastructure/scripts/` para `scripts/database/`:**
+**De `tools/scripts/` para `scripts/database/`:**
 - ✅ backup-timescaledb.sh
 - ✅ restore-questdb.sh
 - ✅ setup-timescaledb-stack.sh
 - ✅ questdb-restore-tables.sql
 
-**De `infrastructure/scripts/` para `scripts/maintenance/`:**
+**De `tools/scripts/` para `scripts/maintenance/`:**
 - ✅ fix-docker-issues.sh
 - ✅ health-checks.sh
 - ✅ rewrite-history.sh
 - ✅ maintenance/uninstall-docker-wsl.sh
 
-**De `infrastructure/scripts/setup/` para `scripts/setup/`:**
+**De `tools/scripts/setup/` para `scripts/setup/`:**
 - ✅ setup-linux-environment.sh
 - ✅ configure-sudo-docker.sh
 
@@ -62,14 +62,14 @@
 **Arquivos atualizados:**
 - ✅ `CLAUDE.md` - Script de instalação de Windows Services
 - ✅ `CONTRIBUTING.md` - Lista de scripts de infraestrutura
-- ✅ `infrastructure/infrastructure.md` - Referência à pasta de scripts
-- ✅ `infrastructure/timescaledb/README.md` - Script de backup
+- ✅ `tools/infrastructure.md` - Referência à pasta de scripts
+- ✅ `backend/data/timescaledb/README.md` - Script de backup
 - ✅ `scripts/setup/setup-linux-environment.sh` - Auto-referências e exemplos
 - ✅ `scripts/QUICK-REFERENCE.md` - Todos os exemplos de uso
 - ✅ `scripts/README.md` - Documentação completa
 
 ### 6. Limpeza ✓
-- ✅ Removida pasta `infrastructure/scripts/` completamente
+- ✅ Removida pasta `tools/scripts/` completamente
 - ✅ Removido `scripts/README-infrastructure.md` duplicado
 
 ---
@@ -120,7 +120,7 @@ scripts/
 - ✅ Fácil navegação e descoberta
 
 ### 2. Melhor Manutenibilidade
-- ✅ Sem duplicação entre `infrastructure/scripts` e `scripts/`
+- ✅ Sem duplicação entre `tools/scripts` e `scripts/`
 - ✅ Documentação consolidada e atualizada
 - ✅ Referências consistentes em todo o projeto
 
@@ -144,7 +144,7 @@ scripts/
 .\infrastructure\scripts\start-trading-system-dev.ps1 -StartMonitoring
 
 # Linux
-./infrastructure/scripts/start-trading-system-dev.sh --start-monitoring
+./tools/scripts/start-trading-system-dev.sh --start-monitoring
 ```
 
 ### Depois da Reorganização
@@ -197,7 +197,7 @@ Ao adicionar novos scripts:
 
 ## ⚠️ Notas Importantes
 
-- ✅ Pasta `infrastructure/scripts` foi **completamente removida**
+- ✅ Pasta `tools/scripts` foi **completamente removida**
 - ✅ Todas as referências foram atualizadas
 - ✅ Scripts mantêm mesma funcionalidade, apenas mudou localização
 - ✅ Documentação consolidada e melhorada

@@ -11,7 +11,7 @@ last_review: 2025-10-22
 
 # 📋 Guia Rápido - OpenSpec
 
-**Status**: ✅ OpenSpec configurado em `infrastructure/openspec/`
+**Status**: ✅ OpenSpec configurado em `tools/openspec/`
 
 ---
 
@@ -21,13 +21,13 @@ last_review: 2025-10-22
 
 ```bash
 # Ver todas as changes em andamento
-openspec list --root infrastructure/openspec
+openspec list --root tools/openspec
 
 # Ver com mais detalhes
-openspec list --long --root infrastructure/openspec
+openspec list --long --root tools/openspec
 
 # Ver em JSON (para scripts)
-openspec list --json --root infrastructure/openspec
+openspec list --json --root tools/openspec
 ```
 
 ---
@@ -36,13 +36,13 @@ openspec list --json --root infrastructure/openspec
 
 ```bash
 # Ver todas as especificações
-openspec list --specs --root infrastructure/openspec
+openspec list --specs --root tools/openspec
 
 # Ver com mais detalhes
-openspec spec list --long --root infrastructure/openspec
+openspec spec list --long --root tools/openspec
 
 # Ver em JSON
-openspec spec list --json --root infrastructure/openspec
+openspec spec list --json --root tools/openspec
 ```
 
 ---
@@ -51,16 +51,16 @@ openspec spec list --json --root infrastructure/openspec
 
 ```bash
 # Ver detalhes de uma change
-openspec show add-agent-integration-platform --root infrastructure/openspec
+openspec show add-agent-integration-platform --root tools/openspec
 
 # Ver detalhes de uma spec
-openspec show dashboard --type spec --root infrastructure/openspec
+openspec show dashboard --type spec --root tools/openspec
 
 # Ver apenas os deltas (mudanças propostas)
-openspec show add-agent-integration-platform --json --deltas-only --root infrastructure/openspec
+openspec show add-agent-integration-platform --json --deltas-only --root tools/openspec
 
 # Ver diferenças (diff)
-openspec diff add-agent-integration-platform --root infrastructure/openspec
+openspec diff add-agent-integration-platform --root tools/openspec
 ```
 
 ---
@@ -69,13 +69,13 @@ openspec diff add-agent-integration-platform --root infrastructure/openspec
 
 ```bash
 # Validar uma change específica
-openspec validate add-agent-integration-platform --root infrastructure/openspec
+openspec validate add-agent-integration-platform --root tools/openspec
 
 # Validação estrita (recomendado)
-openspec validate add-agent-integration-platform --strict --root infrastructure/openspec
+openspec validate add-agent-integration-platform --strict --root tools/openspec
 
 # Validar todas as changes
-openspec validate --root infrastructure/openspec
+openspec validate --root tools/openspec
 ```
 
 ---
@@ -84,13 +84,13 @@ openspec validate --root infrastructure/openspec
 
 ```bash
 # Arquivar change completada
-openspec archive add-agent-integration-platform --root infrastructure/openspec
+openspec archive add-agent-integration-platform --root tools/openspec
 
 # Arquivar sem atualizar specs (tooling-only changes)
-openspec archive add-agent-integration-platform --skip-specs --root infrastructure/openspec
+openspec archive add-agent-integration-platform --skip-specs --root tools/openspec
 
 # Modo não-interativo (sem confirmação)
-openspec archive add-agent-integration-platform --yes --root infrastructure/openspec
+openspec archive add-agent-integration-platform --yes --root tools/openspec
 ```
 
 ---
@@ -116,7 +116,7 @@ openspec archive add-agent-integration-platform --yes --root infrastructure/open
 
 **Ver detalhes**:
 ```bash
-openspec show add-agent-integration-platform --root infrastructure/openspec
+openspec show add-agent-integration-platform --root tools/openspec
 ```
 
 ---
@@ -133,13 +133,13 @@ openspec show add-agent-integration-platform --root infrastructure/openspec
 
 **Ver spec**:
 ```bash
-openspec show dashboard --type spec --root infrastructure/openspec
+openspec show dashboard --type spec --root tools/openspec
 ```
 
 **Ver arquivos diretamente**:
 ```bash
-cat infrastructure/openspec/specs/dashboard/spec.md
-cat infrastructure/openspec/specs/service-launcher/spec.md
+cat tools/openspec/specs/dashboard/spec.md
+cat tools/openspec/specs/service-launcher/spec.md
 ```
 
 ---
@@ -158,11 +158,11 @@ cat infrastructure/openspec/specs/service-launcher/spec.md
 
 ### Criar Alias (Opcional)
 
-Para não precisar digitar `--root infrastructure/openspec` toda vez:
+Para não precisar digitar `--root tools/openspec` toda vez:
 
 ```bash
 # Adicionar ao ~/.bashrc ou ~/.zshrc
-alias ospec='openspec --root /home/marce/projetos/TradingSystem/infrastructure/openspec'
+alias ospec='openspec --root /home/marce/projetos/TradingSystem/tools/openspec'
 
 # Depois pode usar:
 ospec list
@@ -176,16 +176,16 @@ ospec show dashboard --type spec
 
 ```bash
 # Ver todas as changes
-ls infrastructure/openspec/changes/
+ls tools/openspec/changes/
 
 # Ver todas as specs
-ls infrastructure/openspec/specs/
+ls tools/openspec/specs/
 
 # Ver change específica
-cat infrastructure/openspec/changes/add-agent-integration-platform/proposal.md
+cat tools/openspec/changes/add-agent-integration-platform/proposal.md
 
 # Ver spec específica
-cat infrastructure/openspec/specs/dashboard/spec.md
+cat tools/openspec/specs/dashboard/spec.md
 ```
 
 ---
@@ -196,16 +196,16 @@ cat infrastructure/openspec/specs/dashboard/spec.md
 
 ```bash
 # Buscar todos os requirements
-rg -n "Requirement:" infrastructure/openspec/specs
+rg -n "Requirement:" tools/openspec/specs
 
 # Buscar scenarios
-rg -n "Scenario:" infrastructure/openspec/specs
+rg -n "Scenario:" tools/openspec/specs
 
 # Buscar por palavra-chave
-rg -i "authentication" infrastructure/openspec/specs
+rg -i "authentication" tools/openspec/specs
 
 # Buscar em changes ativas
-rg -n "Requirement:" infrastructure/openspec/changes
+rg -n "Requirement:" tools/openspec/changes
 ```
 
 ---
@@ -215,29 +215,29 @@ rg -n "Requirement:" infrastructure/openspec/changes
 ### Ver Spec do Dashboard
 
 ```bash
-openspec show dashboard --type spec --root infrastructure/openspec
+openspec show dashboard --type spec --root tools/openspec
 
 # Ou ler diretamente
-cat infrastructure/openspec/specs/dashboard/spec.md
+cat tools/openspec/specs/dashboard/spec.md
 ```
 
 ### Ver Change Específica
 
 ```bash
-openspec show add-service-launcher-health-summary --root infrastructure/openspec
+openspec show add-service-launcher-health-summary --root tools/openspec
 
 # Ver apenas proposta
-cat infrastructure/openspec/changes/add-service-launcher-health-summary/proposal.md
+cat tools/openspec/changes/add-service-launcher-health-summary/proposal.md
 
 # Ver tasks
-cat infrastructure/openspec/changes/add-service-launcher-health-summary/tasks.md
+cat tools/openspec/changes/add-service-launcher-health-summary/tasks.md
 ```
 
 ### Ver Diferenças (Diff)
 
 ```bash
 # Ver o que vai mudar
-openspec diff add-service-launcher-health-summary --root infrastructure/openspec
+openspec diff add-service-launcher-health-summary --root tools/openspec
 ```
 
 ---
@@ -246,27 +246,27 @@ openspec diff add-service-launcher-health-summary --root infrastructure/openspec
 
 ### 1. Listar o que existe
 ```bash
-openspec list --specs --root infrastructure/openspec
+openspec list --specs --root tools/openspec
 ```
 
 ### 2. Ver detalhes de uma spec
 ```bash
-openspec show service-launcher --type spec --root infrastructure/openspec
+openspec show service-launcher --type spec --root tools/openspec
 ```
 
 ### 3. Listar changes ativas
 ```bash
-openspec list --root infrastructure/openspec
+openspec list --root tools/openspec
 ```
 
 ### 4. Ver proposta de mudança
 ```bash
-openspec show add-service-launcher-health-summary --root infrastructure/openspec
+openspec show add-service-launcher-health-summary --root tools/openspec
 ```
 
 ### 5. Validar antes de implementar
 ```bash
-openspec validate add-service-launcher-health-summary --strict --root infrastructure/openspec
+openspec validate add-service-launcher-health-summary --strict --root tools/openspec
 ```
 
 ---
@@ -274,7 +274,7 @@ openspec validate add-service-launcher-health-summary --strict --root infrastruc
 ## 📚 Estrutura dos Arquivos
 
 ```
-infrastructure/openspec/
+tools/openspec/
 ├── project.md              # Convenções do projeto
 ├── specs/                  # O que ESTÁ construído
 │   ├── dashboard/
@@ -297,20 +297,20 @@ infrastructure/openspec/
 
 ## 💡 Dicas
 
-### Sempre use `--root infrastructure/openspec`
+### Sempre use `--root tools/openspec`
 
 O OpenSpec está em um subdiretório, então sempre adicione o flag `--root`:
 
 ```bash
-openspec list --root infrastructure/openspec
-openspec show dashboard --type spec --root infrastructure/openspec
-openspec validate my-change --root infrastructure/openspec
+openspec list --root tools/openspec
+openspec show dashboard --type spec --root tools/openspec
+openspec validate my-change --root tools/openspec
 ```
 
 ### Ou navegue até o diretório
 
 ```bash
-cd infrastructure/openspec
+cd tools/openspec
 openspec list
 openspec list --specs
 openspec show dashboard --type spec
@@ -324,16 +324,16 @@ openspec show dashboard --type spec
 
 ```bash
 # Ver estrutura
-tree -L 2 infrastructure/openspec/
+tree -L 2 tools/openspec/
 
 # Contar specs
-ls infrastructure/openspec/specs/ | wc -l
+ls tools/openspec/specs/ | wc -l
 
 # Contar changes ativas
-ls infrastructure/openspec/changes/ | grep -v archive | wc -l
+ls tools/openspec/changes/ | grep -v archive | wc -l
 
 # Ver últimas changes arquivadas
-ls -lt infrastructure/openspec/changes/archive/ | head -5
+ls -lt tools/openspec/changes/archive/ | head -5
 ```
 
 ---
@@ -343,19 +343,19 @@ ls -lt infrastructure/openspec/changes/archive/ | head -5
 ```bash
 # 1. Listar specs existentes
 cd /home/marce/projetos/TradingSystem
-openspec list --specs --root infrastructure/openspec
+openspec list --specs --root tools/openspec
 
 # 2. Ver spec do service-launcher
-openspec show service-launcher --type spec --root infrastructure/openspec
+openspec show service-launcher --type spec --root tools/openspec
 
 # 3. Ver change que adiciona health summary
-openspec show add-service-launcher-health-summary --root infrastructure/openspec
+openspec show add-service-launcher-health-summary --root tools/openspec
 
 # 4. Ver diferenças propostas
-openspec diff add-service-launcher-health-summary --root infrastructure/openspec
+openspec diff add-service-launcher-health-summary --root tools/openspec
 
 # 5. Validar change
-openspec validate add-service-launcher-health-summary --strict --root infrastructure/openspec
+openspec validate add-service-launcher-health-summary --strict --root tools/openspec
 ```
 
 ---
@@ -363,24 +363,24 @@ openspec validate add-service-launcher-health-summary --strict --root infrastruc
 ## 📚 Recursos
 
 ### Documentação
-- `infrastructure/openspec/AGENTS.md` - Instruções completas para agentes
-- `infrastructure/openspec/project.md` - Convenções do projeto
+- `tools/openspec/AGENTS.md` - Instruções completas para agentes
+- `tools/openspec/project.md` - Convenções do projeto
 
 ### Arquivos Importantes
 ```bash
 # Ver convenções
-cat infrastructure/openspec/project.md
+cat tools/openspec/project.md
 
 # Ver instruções para agentes
-cat infrastructure/openspec/AGENTS.md
+cat tools/openspec/AGENTS.md
 
 # Ver config
-cat infrastructure/openspec/.openspec.json
+cat tools/openspec/.openspec.json
 ```
 
 ---
 
 **Criado**: 2025-10-16  
 **Status**: ✅ Guia completo com todos os comandos OpenSpec  
-**Localização**: OpenSpec está em `infrastructure/openspec/`
+**Localização**: OpenSpec está em `tools/openspec/`
 

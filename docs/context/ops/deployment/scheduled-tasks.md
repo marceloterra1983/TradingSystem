@@ -6,14 +6,14 @@ domain: ops
 type: runbook
 summary: Documentation for scheduled tasks used in TradingSystem operations
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Scheduled Tasks
 
 ## Startup automation
 
-- Script: `infrastructure/scripts/register-trading-system-dev-startup.ps1`.
+- Script: `tools/scripts/register-trading-system-dev-startup.ps1`.
 - Registers task TradingSystem Dev Startup that calls `start-trading-system-dev.ps1` at logon.
 
 ## Backup automation (planned)

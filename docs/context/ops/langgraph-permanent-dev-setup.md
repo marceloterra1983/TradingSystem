@@ -5,7 +5,7 @@ domain: ops
 type: guide
 summary: Guide for running LangGraph development environment (port 8112) permanently alongside production
 status: active
-last_review: 2025-10-19
+last_review: "2025-10-19"
 sidebar_position: 1
 ---
 
@@ -153,7 +153,7 @@ bash scripts/langgraph/stop-dev.sh
 bash scripts/langgraph/start-dev.sh
 
 # Remove volumes (data loss!)
-docker compose -f infrastructure/compose/docker-compose.langgraph-dev.yml down -v
+docker compose -f tools/compose/docker-compose.langgraph-dev.yml down -v
 ```
 
 ### Logs & Monitoring
@@ -305,7 +305,7 @@ docker exec infra-langgraph-dev env | grep LANGSMITH
 docker logs infra-langgraph-dev -f | grep -i langsmith
 
 # 4. Restart with fresh environment
-docker compose -f infrastructure/compose/docker-compose.langgraph-dev.yml down
+docker compose -f tools/compose/docker-compose.langgraph-dev.yml down
 bash scripts/langgraph/start-dev.sh
 ```
 
@@ -329,7 +329,7 @@ docker logs infra-redis-dev --tail 30
 docker network inspect tradingsystem_langgraph_dev
 
 # Recreate with fresh volumes
-docker compose -f infrastructure/compose/docker-compose.langgraph-dev.yml down -v
+docker compose -f tools/compose/docker-compose.langgraph-dev.yml down -v
 bash scripts/langgraph/start-dev.sh
 ```
 
@@ -383,7 +383,7 @@ lsof -i :5443
 ## Configuration Files
 
 ### Docker Compose
-- **File**: [infrastructure/compose/docker-compose.langgraph-dev.yml](../../../infrastructure/compose/docker-compose.langgraph-dev.yml)
+- **File**: [tools/compose/docker-compose.langgraph-dev.yml](../../../tools/compose/docker-compose.langgraph-dev.yml)
 - **Network**: `tradingsystem_langgraph_dev` (isolated)
 - **Volumes**: `langgraph_postgres_dev_data` (persistent)
 
@@ -419,9 +419,9 @@ lsof -i :5443
 
 ## Related Documentation
 
-- **[LangGraph README](../../../infrastructure/langgraph/README.md)** - Complete service documentation
+- **[LangGraph README](../../../tools/langgraph/README.md)** - Complete service documentation
 - **[LangSmith Studio Guide](../backend/guides/langgraph-studio-guide.md)** - Studio integration details
-- **[Development Guide](../../../infrastructure/langgraph/DEVELOPMENT.md)** - Development vs production comparison
+- **[Development Guide](../../../tools/langgraph/DEVELOPMENT.md)** - Development vs production comparison
 - **[Docker Startup Script](../../../scripts/docker/start-stacks.sh)** - Main orchestration script
 
 ---

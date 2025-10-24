@@ -157,7 +157,7 @@ validate_fixes() {
     
     # Check for Docker warnings
     log_info "Checking for Docker warnings..."
-    local warnings=$(docker compose -f "${REPO_ROOT}/infrastructure/compose/docker-compose.langgraph-dev.yml" config 2>&1 | grep -i "warn" || true)
+    local warnings=$(docker compose -f "${REPO_ROOT}/tools/compose/docker-compose.langgraph-dev.yml" config 2>&1 | grep -i "warn" || true)
     if [ -n "$warnings" ]; then
         log_warn "Still found warnings:"
         echo "$warnings"

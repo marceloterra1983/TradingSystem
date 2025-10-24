@@ -6,7 +6,7 @@ domain: shared
 type: reference
 summary: 🚨 Environment Configuration - MANDATORY RULES
 status: active
-last_review: 2025-10-22
+last_review: "2025-10-22"
 ---
 
 # 🚨 Environment Configuration - MANDATORY RULES
@@ -83,7 +83,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 ### Docker Compose?
 
 ```yaml
-# infrastructure/compose/docker-compose.my-service.yml
+# tools/compose/docker-compose.my-service.yml
 services:
   my-service:
     env_file:
@@ -95,7 +95,7 @@ services:
 ## 📖 Full Documentation
 
 - **Complete Guide**: [`docs/context/ops/ENVIRONMENT-CONFIGURATION.md`](docs/context/ops/ENVIRONMENT-CONFIGURATION.md)
-- **Backend Rules**: [`backend/ENV-CONFIGURATION-RULES.md`](backend/ENV-CONFIGURATION-RULES.md)
+- **Backend Rules**: [`config/ENV-CONFIGURATION-RULES.md`](config/ENV-CONFIGURATION-RULES.md)
 - **Contributing**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - **CLAUDE.md**: For AI assistants (section: Development Guidelines)
 

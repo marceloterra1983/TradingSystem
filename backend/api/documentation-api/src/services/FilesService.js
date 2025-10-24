@@ -122,7 +122,7 @@ class FilesService {
       // Check if file exists on disk
       try {
         await fs.access(fileRecord.file_path);
-      } catch (error) {
+      } catch (_error) {
         logger.warn('File not found on disk', {
           id,
           filename: fileRecord.filename,

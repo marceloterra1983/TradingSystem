@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PID_FILE="$ROOT_DIR/scripts/.runtime/dashboard-stack/pids"
 LOG_DIR="$ROOT_DIR/scripts/.runtime/dashboard-stack/logs"
-TIMESCALE_COMPOSE="$ROOT_DIR/infrastructure/compose/docker-compose.timescale.yml"
-FIRECRAWL_COMPOSE="$ROOT_DIR/infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
-DOCS_COMPOSE="$ROOT_DIR/infrastructure/compose/docker-compose.docs.yml"
-IMAGES_OVERRIDE="$ROOT_DIR/infrastructure/compose/docker-compose.images.override.yml"
+TIMESCALE_COMPOSE="$ROOT_DIR/tools/compose/docker-compose.timescale.yml"
+FIRECRAWL_COMPOSE="$ROOT_DIR/tools/firecrawl/firecrawl-source/docker-compose.yaml"
+DOCS_COMPOSE="$ROOT_DIR/tools/compose/docker-compose.docs.yml"
+IMAGES_OVERRIDE="$ROOT_DIR/tools/compose/docker-compose.images.override.yml"
 
 DEFAULT_ENV_FILE="$ROOT_DIR/config/.env.defaults"
 CONTAINER_IMAGES_FILE="$ROOT_DIR/config/container-images.env"
@@ -52,7 +52,7 @@ patterns=(
   "frontend/apps/b3-market-data"
   "backend/api/webscraper-api"
   "backend/api/firecrawl-proxy"
-  "frontend/apps/service-launcher"
+  "frontend/apps/status"
   "frontend/apps/dashboard"
   "frontend/apps/WebScraper"
 )

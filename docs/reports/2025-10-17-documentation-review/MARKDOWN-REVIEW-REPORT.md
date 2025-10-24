@@ -64,7 +64,7 @@ last_review: 2025-10-17
 ### 1. `GLM-README.md`
 - **Destino:** `docs/context/shared/tools/glm-readme.md`
 - **Motivo:** Documentação de ferramenta específica
-- **Nota:** Já existe doc completa em `infrastructure/glm/`
+- **Nota:** Já existe doc completa em `tools/glm/`
 
 ### 2. `OPENSPEC-WORKFLOW-GUIDE.md`
 - **Destino:** `docs/context/shared/tools/openspec-workflow.md`

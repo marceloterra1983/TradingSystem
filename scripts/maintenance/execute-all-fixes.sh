@@ -110,7 +110,7 @@ fi
 
 section "Task 2/2: Fixing LangGraph Dev Naming"
 
-COMPOSE_FILE="${REPO_ROOT}/infrastructure/compose/docker-compose.langgraph-dev.yml"
+COMPOSE_FILE="${REPO_ROOT}/tools/compose/docker-compose.langgraph-dev.yml"
 BUILD_SCRIPT="${REPO_ROOT}/scripts/docker/build-images.sh"
 BACKUP_DIR="${REPO_ROOT}/.backups/naming-fix-$(date +%Y%m%d-%H%M%S)"
 

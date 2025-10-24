@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Step-by-step guide to consolidate ALL .env files into single root .env
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Complete .env Consolidation Guide
@@ -19,15 +19,15 @@ Consolidar **TODOS** os 10+ arquivos `.env` espalhados pelo projeto em um **úni
 
 | # | Localização | Serviço | Status |
 |---|-------------|---------|--------|
-| 1 | `frontend/apps/dashboard/.env` | Dashboard React | 🔄 Migrado |
-| 2 | `frontend/apps/b3-market-data/.env` | B3 API | 🔄 Migrado |
+| 1 | `frontend/dashboard/.env` | Dashboard React | 🔄 Migrado |
+| 2 | `apps/b3-market-data/.env` | B3 API | 🔄 Migrado |
 | 3 | `backend/api/documentation-api/.env` | DocsAPI | ⏳ Pendente |
-| 4 | `frontend/apps/service-launcher/.env` | Laucher | ⏳ Pendente |
+| 4 | `apps/service-launcher/.env` | Laucher | ⏳ Pendente |
 | 5 | `backend/api/workspace/.env` | Library/Idea Bank | 🔄 Migrado |
-| 6 | `frontend/apps/tp-capital/.env` | TP Capital | ⏳ Pendente |
-| 7 | `infrastructure/llamaindex/.env` | LlamaIndex | ⏳ Pendente |
-| 8 | `infrastructure/compose/.env` | TimescaleDB | ✅ N/A (temp) |
-| 9 | `infrastructure/firecrawl/.env` | Firecrawl | ⚠️ Terceiros |
+| 6 | `apps/tp-capital/.env` | TP Capital | ⏳ Pendente |
+| 7 | `tools/llamaindex/.env` | LlamaIndex | ⏳ Pendente |
+| 8 | `tools/compose/.env` | TimescaleDB | ✅ N/A (temp) |
+| 9 | `tools/firecrawl/.env` | Firecrawl | ⚠️ Terceiros |
 
 **Total**: 8 arquivos a consolidar (excluindo firecrawl de terceiros)
 
@@ -46,17 +46,17 @@ bash scripts/env/validate-env.sh
 
 # 3. Teste cada serviço
 # Frontend
-cd frontend/apps/dashboard && npm run dev
+cd frontend/dashboard && npm run dev
 
 # Backend APIs (em terminais separados)
-cd frontend/apps/b3-market-data && npm run dev
+cd apps/b3-market-data && npm run dev
 cd backend/api/workspace && npm run dev
-cd frontend/apps/tp-capital && npm run dev
+cd apps/tp-capital && npm run dev
 
 # 4. Se tudo funcionar, remova os .env locais
-rm frontend/apps/dashboard/.env.OLD.backup
+rm frontend/dashboard/.env.OLD.backup
 rm backend/api/*/.env
-rm infrastructure/llamaindex/.env
+rm tools/llamaindex/.env
 ```
 
 ### Opção 2: Script Interativo
@@ -77,7 +77,7 @@ bash scripts/env/migrate-env.sh
 
 **Antes**:
 ```
-frontend/apps/dashboard/.env  ← Carregado automaticamente
+frontend/dashboard/.env  ← Carregado automaticamente
 ```
 
 **Depois**:
@@ -246,14 +246,14 @@ Nada a fazer! Vite carrega automaticamente.
 
 ```bash
 # Após validar que tudo funciona
-rm frontend/apps/dashboard/.env
-rm frontend/apps/b3-market-data/.env
+rm frontend/dashboard/.env
+rm apps/b3-market-data/.env
 rm backend/api/documentation-api/.env
-rm frontend/apps/service-launcher/.env
+rm apps/service-launcher/.env
 rm backend/api/workspace/.env
-rm frontend/apps/tp-capital/.env
-rm infrastructure/llamaindex/.env
-rm infrastructure/compose/.env
+rm apps/tp-capital/.env
+rm tools/llamaindex/.env
+rm tools/compose/.env
 ```
 
 ---
@@ -270,7 +270,7 @@ bash scripts/env/validate-env.sh
 ### Teste 2: Dashboard
 
 ```bash
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run dev
 
 # Abrir http://localhost:3103
@@ -281,7 +281,7 @@ npm run dev
 
 ```bash
 # Testar cada API individualmente
-cd frontend/apps/b3-market-data
+cd apps/b3-market-data
 npm run dev
 # Deve iniciar na porta 3302
 
@@ -294,10 +294,10 @@ npm run dev
 
 ```bash
 # Testar TimescaleDB stack
-docker-compose -f infrastructure/compose/docker-compose.timescale.yml config
+docker-compose -f tools/compose/docker-compose.timescale.yml config
 # Não deve dar erros de variáveis faltando
 
-docker-compose -f infrastructure/compose/docker-compose.timescale.yml up -d
+docker-compose -f tools/compose/docker-compose.timescale.yml up -d
 # Deve iniciar com sucesso
 ```
 
@@ -437,8 +437,8 @@ graph TD
 ### 1. Tokens Reais NO Backup
 
 Os seguintes arquivos contêm **tokens reais**:
-- `frontend/apps/tp-capital/.env` - Bots Telegram
-- `infrastructure/llamaindex/.env` - OpenAI API key
+- `apps/tp-capital/.env` - Bots Telegram
+- `tools/llamaindex/.env` - OpenAI API key
 
 **ACTION**:
 ```bash
@@ -506,8 +506,8 @@ LIBRARY_PORT=3102
 ## 📖 Referências
 
 - **Guia de Configuração**: `docs/context/ops/ENVIRONMENT-CONFIGURATION.md`
-- **Plano de Implementação**: `docs/context/ops/infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
-- **Infrastructure README**: `infrastructure/README.md`
+- **Plano de Implementação**: `docs/context/ops/tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md`
+- **Infrastructure README**: `tools/README.md`
 - **Scripts**: `scripts/env/`
 
 ---

@@ -194,7 +194,7 @@ The following links are broken or unreachable:
 
 #### [`docs/context/backend/api/firecrawl-proxy.md`](../context/backend/api/firecrawl-proxy.md)
 
--   🔴 Line 373: [Firecrawl Infrastructure Guide](../../../infrastructure/firecrawl/README.md) - File not found
+-   🔴 Line 373: [Firecrawl Infrastructure Guide](../../../tools/firecrawl/README.md) - File not found
 -   🔴 Line 374: [Proxy Implementation README](../../../backend/api/firecrawl-proxy/README.md) - File not found
 
 #### [`docs/context/backend/api/webscraper-api.md`](../context/backend/api/webscraper-api.md)
@@ -208,17 +208,17 @@ The following links are broken or unreachable:
 
 #### [`docs/context/backend/data/webscraper-schema.md`](../context/backend/data/webscraper-schema.md)
 
--   ✅ Line 366: [`infrastructure/timescaledb/webscraper-schema.sql`](../../../infrastructure/timescaledb/webscraper-schema.sql) - File exists and is complete
+-   ✅ Line 366: [`tools/timescaledb/webscraper-schema.sql`](../../../tools/timescaledb/webscraper-schema.sql) - File exists and is complete
 
 #### [`docs/context/backend/guides/agno-agents-guide.md`](../context/backend/guides/agno-agents-guide.md)
 
--   🟡 Line 237: [`infrastructure/agno-agents/README.md`](../../../../../infrastructure/agno-agents/README.md) - Invalid path
--   🟡 Line 238: [`infrastructure/monitoring/prometheus/rules/alert-rules.yml`](../../../../../infrastructure/monitoring/prometheus/rules/alert-rules.yml) - Invalid path
+-   🟡 Line 237: [`tools/agno-agents/README.md`](../../../../../tools/agno-agents/README.md) - Invalid path
+-   🟡 Line 238: [`tools/monitoring/prometheus/rules/alert-rules.yml`](../../../../../tools/monitoring/prometheus/rules/alert-rules.yml) - Invalid path
 
-#### [`docs/context/ops/infrastructure/reverse-proxy-setup.md`](../context/ops/infrastructure/reverse-proxy-setup.md)
+#### [`docs/context/ops/tools/reverse-proxy-setup.md`](../context/ops/tools/reverse-proxy-setup.md)
 
--   🔴 Line 260: [Nginx Configuration](../../infrastructure/nginx-proxy/README.md) - File not found
--   🔴 Line 261: [VPS Migration Guide](../../infrastructure/nginx-proxy/VPS-MIGRATION-GUIDE.md) - File not found
+-   🔴 Line 260: [Nginx Configuration](../../tools/nginx-proxy/README.md) - File not found
+-   🔴 Line 261: [VPS Migration Guide](../../tools/nginx-proxy/VPS-MIGRATION-GUIDE.md) - File not found
 -   🔴 Line 262: [Service Architecture](../architecture/overview.md) - File not found
 
 #### ✅ RESOLVIDO - Frontend Guides (10 links) - 2025-10-18
@@ -1048,7 +1048,7 @@ Post-audit verification confirmed that 12 links previously reported as broken ha
 **Trading Agents PRD (2 links)**
 
 -   `docs/context/shared/product/prd/pt/agno-integration-prd.md` - File exists and has been updated to reflect trading agents implementation
--   `infrastructure/timescaledb/webscraper-schema.sql` - File exists and is complete with all tables, indexes, and policies
+-   `tools/timescaledb/webscraper-schema.sql` - File exists and is complete with all tables, indexes, and policies
 
 **Impact**
 

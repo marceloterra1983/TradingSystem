@@ -6,7 +6,7 @@ domain: shared
 type: reference
 summary: Executive summary of deployment, monitoring, and operational procedures
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Operations Summary
@@ -115,7 +115,7 @@ last_review: 2025-10-17
 
 **Automated Daily Backup**:
 - **Schedule**: 2:00 AM daily (PowerShell scheduled task)
-- **Script**: `infrastructure/scripts/backup-trading-data.ps1`
+- **Script**: `tools/scripts/backup-trading-data.ps1`
 - **What**: LowDB JSON files, Parquet files (last 7 days), Logs (last 7 days)
 - **Where**: `C:\TradingSystem\backups\{date}\`
 - **Retention**: 30 days of daily backups
@@ -142,7 +142,7 @@ last_review: 2025-10-17
 
 ## 🔧 Automation Scripts
 
-Location: `infrastructure/scripts/`
+Location: `tools/scripts/`
 
 ### Startup & Shutdown
 - `start-all-services.ps1` - Start all TradingSystem services

@@ -6,12 +6,12 @@ domain: shared
 type: reference
 summary: GLM usage guide for Claude CLI with Z.ai API integration
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # GLM - Claude CLI com API Z.ai
 
-> **Documentação completa em:** `infrastructure/glm/`
+> **Documentação completa em:** `tools/glm/`
 
 ## 🚀 Uso Rápido
 
@@ -34,11 +34,11 @@ glm
 
 ## 📚 Documentação
 
-Toda documentação está organizada em `infrastructure/glm/`:
+Toda documentação está organizada em `tools/glm/`:
 
-- **[infrastructure/glm/README.md](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/README.md)** - Documentação principal
-- **[infrastructure/glm/GLM-INDEX.md](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/GLM-INDEX.md)** - Índice completo
-- **[infrastructure/glm/GLM-QUICK-START.txt](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/GLM-QUICK-START.txt)** - Guia visual
+- **[tools/glm/README.md](https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/README.md)** - Documentação principal
+- **[tools/glm/GLM-INDEX.md](https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/GLM-INDEX.md)** - Índice completo
+- **[tools/glm/GLM-QUICK-START.txt](https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/GLM-QUICK-START.txt)** - Guia visual
 
 ## 🎯 O que é GLM?
 
@@ -49,8 +49,8 @@ Comando personalizado que executa Claude Code com:
 
 ## 📁 Arquivos na Raiz
 
-- `glm` - Wrapper executável (chama [`infrastructure/glm/glm.sh`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/glm.sh))
-- `glm-modos` - Wrapper do menu interativo (chama [`infrastructure/glm/glm-modos.sh`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/glm-modos.sh))
+- `glm` - Wrapper executável (chama [`tools/glm/glm.sh`](https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/glm.sh))
+- `glm-modos` - Wrapper do menu interativo (chama [`tools/glm/glm-modos.sh`](https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/glm-modos.sh))
 - `GLM-README.md` - Este arquivo
 
 ## 🔧 Configuração
@@ -76,9 +76,9 @@ glm                                # De qualquer lugar
 ## 📖 Mais Informações
 
 Veja a documentação completa em:
-- https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/README.md
-- https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/glm/GLM-INDEX.md
+- https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/README.md
+- https://github.com/marceloterra/TradingSystem/blob/main/tools/glm/GLM-INDEX.md
 
 ---
 
-**Versão:** 1.2.0 | **Localização:** `infrastructure/glm/`
+**Versão:** 1.2.0 | **Localização:** `tools/glm/`

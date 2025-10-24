@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Detailed guide for starting and stopping TradingSystem services
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # TradingSystem Services Startup Guide
@@ -36,22 +36,22 @@ Use esta abordagem quando quiser depurar ou subir apenas partes do sistema.
 
 ```bash
 # Dashboard (Porta 3103)
-cd /home/marce/projetos/TradingSystem/frontend/apps/dashboard
+cd /home/marce/projetos/TradingSystem/frontend/dashboard
 npm install         # se ainda não tiver rodado
 npm run dev
 
 # TP-Capital (Porta 3200)
-cd /home/marce/projetos/TradingSystem/frontend/apps/tp-capital
+cd /home/marce/projetos/TradingSystem/apps/tp-capital
 npm install
 npm run dev
 
 # Workspace (Porta 3100)
-cd /home/marce/projetos/TradingSystem/frontend/apps/workspace
+cd /home/marce/projetos/TradingSystem/apps/workspace
 npm install
 npm run dev
 
 # B3 (Porta 3302)
-cd /home/marce/projetos/TradingSystem/frontend/apps/b3-market-data
+cd /home/marce/projetos/TradingSystem/apps/b3-market-data
 npm install
 npm run dev
 
@@ -93,7 +93,7 @@ curl http://localhost:3302/health
 QuestDB, Grafana, Prometheus e demais serviços de suporte rodam via Docker Compose.  
 - Start completo: `bash start-all-stacks.sh`  
 - Stop completo: `bash stop-all-stacks.sh`  
-- Compose files: `infrastructure/compose/`, `infrastructure/monitoring/`, `frontend/compose/`, `ai/compose/`
+- Compose files: `tools/compose/`, `tools/monitoring/`, `frontend/compose/`, `ai/compose/`
 
 ---
 

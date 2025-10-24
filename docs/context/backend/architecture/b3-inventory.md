@@ -6,7 +6,7 @@ domain: backend
 type: reference
 summary: Complete inventory of B3 market data service components, endpoints, and infrastructure
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # B3 Service Inventory
@@ -17,7 +17,7 @@ last_review: 2025-10-17
 
 - **Purpose:** Collects and publishes Brazilian B3 market data plus GammaLevels analytics.
 - **Current Runtime:** Python 3.11 stack with custom scrapers (Playwright/Selenium/BeautifulSoup).
-- **Deployment:** (Removido) Standalone Docker Compose stack (`infrastructure/b3/docker-compose.yml`) executava:
+- **Deployment:** (Removido) Standalone Docker Compose stack (`tools/b3/docker-compose.yml`) executava:
   - `b3-sistema` (API + data processing, exposed on `8082`)
   - `b3-cron` (scheduler for collectors)
   - `b3-dashboard` (Next.js 15 UI)
@@ -79,12 +79,12 @@ last_review: 2025-10-17
 
 1. **Backend Migration**
    - Move core services into `backend/api/b3-*` modules.
-   - Introduce QuestDB client library (reuse `frontend/apps/tp-capital/src/questdbClient.ts` ideas translated to Node).
-   - Replace `json_server.py` with the shared Express service (`frontend/apps/b3-market-data`).
+   - Introduce QuestDB client library (reuse `apps/tp-capital/src/questdbClient.ts` ideas translated to Node).
+   - Replace `json_server.py` with the shared Express service (`apps/b3-market-data`).
 
 2. **Dashboard Consolidation**
    - Retire `b3-dashboard` Next.js app.
- - Deliver a single page in `frontend/apps/dashboard` using shared layout/components.
+ - Deliver a single page in `frontend/dashboard` using shared layout/components.
   - Provide React Query hooks hitting the new `b3-market-data` API endpoints.
 
 3. **Infrastructure Alignment**
@@ -105,5 +105,5 @@ last_review: 2025-10-17
 - [ ] Confirm ownership of each collector module and contact points.
 - [ ] Inventory external endpoints used for scraping (rate limits, auth).
 - [ ] Document QuestDB schema proposal and data retention policy.
-- [ ] Draft migration checklist for replacing file writes with QuestDB ingestion (see `infrastructure/b3/scripts/migrate_to_questdb.py`).
+- [ ] Draft migration checklist for replacing file writes with QuestDB ingestion (see `tools/b3/scripts/migrate_to_questdb.py`).
 - [ ] Evaluate effort to convert cron jobs into reusable scheduler within TradingSystem.

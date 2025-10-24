@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Passo a passo para mover o reverse proxy Nginx do ambiente local para uma VPS dedicada mantendo o domínio interno tradingsystem.local.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # VPS Migration Guide - Nginx Proxy
@@ -45,11 +45,11 @@ sudo chown -R tradingsystem:tradingsystem .
 
 ```bash
 cd /opt/tradingsystem
-sudo cp infrastructure/nginx-proxy/nginx.conf /etc/nginx/nginx.conf
-sudo cp infrastructure/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
+sudo cp tools/nginx-proxy/nginx.conf /etc/nginx/nginx.conf
+sudo cp tools/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
 sudo ln -sf /etc/nginx/sites-available/tradingsystem.conf /etc/nginx/sites-enabled/tradingsystem.conf
 sudo mkdir -p /etc/nginx/includes/tradingsystem
-sudo cp infrastructure/nginx-proxy/*-proxy.conf /etc/nginx/includes/tradingsystem/
+sudo cp tools/nginx-proxy/*-proxy.conf /etc/nginx/includes/tradingsystem/
 ```
 
 Certifique-se de que os serviços backend estejam acessíveis pelo endereço interno configurado (VPN, túnel, wireguard etc.).

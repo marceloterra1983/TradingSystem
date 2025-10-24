@@ -6,7 +6,7 @@ domain: shared
 type: reference
 summary: Central glossary for acronyms and project terminology
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 # Glossary
@@ -20,7 +20,7 @@ last_review: 2025-10-18
 | **Runbook** | Procedimento operacional padronizado (ex.: restart, incident response). | Repositório em `shared/runbooks/`. |
 | **ProfitDLL** | Biblioteca 64-bit da Nelogica usada para capturar dados de mercado em tempo real. | Requisito chave para execução nativa em Windows. Ver `CLAUDE.md` para detalhes. |
 | **LowDB** | Banco de dados JSON file-based usado como solução MVP para Idea Bank & Documentation API. | Migração futura para PostgreSQL documentada em `backend/data/migrations/`. |
-| **QuestDB** | Banco de dados time-series usado para persistir sinais do Telegram (TP Capital) com partições diárias. | Operado pelo serviço `frontend/apps/tp-capital`; documentação em `backend/data/schemas/trading-core/tables/tp-capital-signals.md`. |
+| **QuestDB** | Banco de dados time-series usado para persistir sinais do Telegram (TP Capital) com partições diárias. | Operado pelo serviço `apps/tp-capital`; documentação em `backend/data/schemas/trading-core/tables/tp-capital-signals.md`. |
 | **Idea Bank API** | Serviço Express/Node (porta 3200) que gerencia ideias (CRUD) com validação via express-validator. | Documentado em `backend/guides/guide-idea-bank-api.md`. |
 | **Documentation API** | Serviço Express/Node (porta 3400) para gerenciar sistemas, ideias e uploads de documentação. | Vide `backend/guides/guide-documentation-api.md`. |
 | **TP-Capital API** | Serviço Node/Express (porta 3200) responsável por ingerir mensagens do Telegram, normalizar payloads e gravar no QuestDB. | Fornece endpoints `/signals`, `/logs`, `/telegram/bots`, `/telegram/channels` consumidos pelo dashboard. |
@@ -36,7 +36,7 @@ last_review: 2025-10-18
 | **Customizable Layout** | Sistema de layout drag-and-drop com grid 1-4 colunas e persistência em localStorage. | Ver `frontend/features/customizable-layout.md`. |
 | **Dark Mode** | Tema escuro implementado com Tailwind CSS `dark:` classes. | Ver `frontend/guides/dark-mode.md` (596 linhas). |
 | **DDD** | Domain-Driven Design. Abordagem de design focada no domínio de negócio com Aggregates, Value Objects, Domain Events. | Aplicado em serviços core. Ver `backend/architecture/overview.md`. |
-| **Docker Compose** | Ferramenta para orquestrar múltiplos containers Docker. | Usado para serviços auxiliares (QuestDB, monitoring, AI tools). Ver `infrastructure/compose/`. |
+| **Docker Compose** | Ferramenta para orquestrar múltiplos containers Docker. | Usado para serviços auxiliares (QuestDB, monitoring, AI tools). Ver `tools/compose/`. |
 | **Firecrawl** | Serviço de web scraping. Proxy em porta 3600. | Ver `backend/api/firecrawl-proxy.md`. |
 | **FlexSearch** | Biblioteca de busca full-text em JavaScript. | Usada no Documentation API (porta 3400). |
 | **Grafana** | Plataforma de visualização e dashboards para métricas. | Porta 3000. Ver `ops/monitoring/grafana-dashboards.md`. |

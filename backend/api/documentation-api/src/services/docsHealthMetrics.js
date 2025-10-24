@@ -1,7 +1,7 @@
 import promClient from 'prom-client';
 
 // Use the default registry for all metrics
-const register = promClient.register;
+const _register = promClient.register;
 
 // Gauges - Current state metrics
 const healthScore = new promClient.Gauge({
@@ -214,7 +214,7 @@ class DocsHealthMetrics {
 
       // Diagram metrics
       const totalDiagrams = frontmatter.diagrams_count || 0;
-      const guidesWithDiagrams = frontmatter.guides_with_diagrams || 0;
+      const _guidesWithDiagrams = frontmatter.guides_with_diagrams || 0;
       const guidesWithoutDiagrams = frontmatter.guides_without_diagrams || 0;
 
       this.diagramsTotal.set(totalDiagrams);

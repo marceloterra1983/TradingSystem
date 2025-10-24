@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Step-by-step onboarding path for running TradingSystem services from Linux or WSL2.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Quick Start (Linux/WSL)
@@ -66,7 +66,7 @@ npm run start -- --host 0.0.0.0 --port 3004
 
 ```bash
 # Terminal 2 – Dashboard (Port 3103)
-cd frontend/apps/dashboard
+cd frontend/dashboard
 npm run dev -- --host 0.0.0.0 --port 3103
 ```
 
@@ -77,10 +77,10 @@ Both commands expose services on all interfaces so they are reachable from the W
 When you need QuestDB, Grafana, or other backend services, start the Docker Compose stacks from WSL:
 
 ```bash
-bash infrastructure/scripts/start-all-stacks.sh
+bash tools/scripts/start-all-stacks.sh
 ```
 
-Stop them with `bash infrastructure/scripts/stop-all-stacks.sh` when finished.
+Stop them with `bash tools/scripts/stop-all-stacks.sh` when finished.
 
 ## 7. Access the Portals
 

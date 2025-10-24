@@ -28,7 +28,7 @@ async function resolveDotenv() {
         const serviceRequire = createRequire(servicePackageJson);
         return serviceRequire('dotenv');
       }
-    } catch (serviceError) {
+    } catch (_serviceError) {
       // Ignore and fall through to final attempt
     }
 

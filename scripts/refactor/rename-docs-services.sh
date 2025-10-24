@@ -32,7 +32,7 @@ declare -a FILES=(
     "docs/DIRECTORY-STRUCTURE.md"
     "frontend/README.md"
     "backend/README.md"
-    "infrastructure/README.md"
+    "tools/README.md"
     "frontend/apps/b3-market-data/README.md"
     "frontend/apps/service-launcher/README.md"
     "frontend/apps/tp-capital/README.md"

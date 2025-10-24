@@ -8,7 +8,7 @@
 #   bash scripts/docker/upgrade-pgadmin.sh
 #
 # Documentação:
-#   - Container Naming: docs/context/ops/infrastructure/container-naming.md
+#   - Container Naming: docs/context/ops/tools/container-naming.md
 #   - Build Images: scripts/docker/build-images.sh
 # ==============================================================================
 
@@ -16,7 +16,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMPOSE_FILE="${PROJECT_ROOT}/infrastructure/compose/docker-compose.timescale.yml"
+COMPOSE_FILE="${PROJECT_ROOT}/tools/compose/docker-compose.timescale.yml"
 IMG_VERSION="${IMG_VERSION:-2025.10.19}"
 PLATFORM="${PLATFORM:-linux/amd64}"
 
@@ -154,7 +154,7 @@ fi
 # ==============================================================================
 
 log_step "6/7 - Recriando container pgAdmin com versão 9.0..."
-cd "${PROJECT_ROOT}/infrastructure/compose"
+cd "${PROJECT_ROOT}/tools/compose"
 export IMG_VERSION
 docker compose -f docker-compose.timescale.yml up -d timescaledb-pgadmin
 
@@ -233,7 +233,7 @@ if [[ "${NEW_IMAGE}" == *"${IMG_VERSION}"* ]]; then
     log_detail "1. Acesse http://localhost:${PGADMIN_PORT} e faça login"
     log_detail "2. Verifique se as conexões existentes funcionam"
     log_detail "3. Explore o novo layout 'Workspace' em Settings → Preferences"
-    log_detail "4. Execute 'docker compose -f infrastructure/compose/docker-compose.timescale.yml ps' para verificar status"
+    log_detail "4. Execute 'docker compose -f tools/compose/docker-compose.timescale.yml ps' para verificar status"
     echo ""
     exit 0
 else

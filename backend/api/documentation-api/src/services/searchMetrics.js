@@ -1,7 +1,7 @@
 import promClient from 'prom-client';
 
 // Use the default registry for all metrics
-const register = promClient.register;
+const _register = promClient.register;
 
 const searchCounter = new promClient.Counter({
   name: 'docs_search_requests_total',

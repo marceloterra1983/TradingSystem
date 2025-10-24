@@ -373,5 +373,5 @@ Ao adicionar novos scripts:
 ---
 
 **Última Atualização:** 15 de Outubro de 2025  
-**Estrutura Reorganizada:** Scripts consolidados de `infrastructure/scripts` para `scripts/`
+**Estrutura Reorganizada:** Scripts consolidados de `tools/scripts` para `scripts/`
 

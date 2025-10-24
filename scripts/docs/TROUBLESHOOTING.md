@@ -125,7 +125,7 @@ npm run start -- --port 3005
 docker ps --filter "name=docs-documentation-api"
 
 # Start container
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d documentation-api
+docker compose -f tools/compose/docker-compose.docs.yml up -d documentation-api
 
 # Check logs
 docker logs docs-documentation-api --tail 50

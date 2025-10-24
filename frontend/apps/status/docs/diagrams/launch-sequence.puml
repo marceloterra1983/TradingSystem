@@ -1,0 +1,132 @@
+@startuml Service Launcher - Launch Sequence
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title Service Launcher - Service Launch Sequence
+
+actor User as user
+participant "Dashboard UI\n:3103" as dash
+participant "Service Launcher\n:3500" as launcher
+participant "Terminal\n(wt.exe or cmd)" as terminal
+participant "New Service\nProcess" as service
+database Logger as log
+
+== Launch Request ==
+
+user -> dash: Click "Run" button
+activate dash
+
+dash -> launcher: POST /launch\n{\n  "serviceName": "Dashboard",\n  "workingDir": "/path/to/dashboard",\n  "command": "npm run dev"\n}
+activate launcher
+
+launcher -> log: Log launch request
+activate log
+log --> launcher: Logged
+deactivate log
+
+== Validate Request ==
+
+launcher -> launcher: Validate required fields\n(serviceName, workingDir, command)
+
+alt Missing fields
+    launcher --> dash: 400 Bad Request\n{"error": "Missing required fields"}
+    dash --> user: Show error message
+else Valid request
+    
+    == Detect Terminal Type ==
+    
+    launcher -> launcher: Check OS platform\n(Windows/Linux)
+    
+    alt Windows + Windows Terminal Available
+        launcher -> terminal: Execute wt.exe\nwt -w 0 new-tab\n  --title "Dashboard"\n  --startingDirectory "/path/to/dashboard"\n  powershell -NoExit -Command "npm run dev"
+        activate terminal
+        
+        terminal -> service: Spawn service process
+        activate service
+        service --> terminal: Process running
+        deactivate service
+        
+        terminal --> launcher: Terminal opened
+        deactivate terminal
+        
+        launcher -> log: Log success (Windows Terminal)
+        activate log
+        log --> launcher: Logged
+        deactivate log
+        
+        launcher --> dash: 200 OK\n{"success": true,\n "message": "Dashboard launched in Windows Terminal"}
+        
+    else Windows Fallback (cmd)
+        launcher -> terminal: Execute cmd.exe\ncmd /c start powershell -NoExit\n  -Command "Set-Location '/path'; npm run dev"
+        activate terminal
+        
+        terminal -> service: Spawn service process
+        activate service
+        service --> terminal: Process running
+        deactivate service
+        
+        terminal --> launcher: Terminal opened
+        deactivate terminal
+        
+        launcher -> log: Log success (PowerShell)
+        activate log
+        log --> launcher: Logged
+        deactivate log
+        
+        launcher --> dash: 200 OK\n{"success": true,\n "message": "Dashboard launched in PowerShell"}
+        
+    else Linux
+        launcher -> terminal: Execute gnome-terminal/konsole\ngnome-terminal --\n  bash -c "cd /path && npm run dev"
+        activate terminal
+        
+        terminal -> service: Spawn service process
+        activate service
+        service --> terminal: Process running
+        deactivate service
+        
+        terminal --> launcher: Terminal opened
+        deactivate terminal
+        
+        launcher -> log: Log success (Linux Terminal)
+        activate log
+        log --> launcher: Logged
+        deactivate log
+        
+        launcher --> dash: 200 OK\n{"success": true,\n "message": "Dashboard launched in terminal"}
+    end
+    
+end
+
+deactivate launcher
+
+dash --> user: Show success notification\n"Dashboard launched successfully"
+deactivate dash
+
+note right of service
+**Service runs independently**
+in its own terminal window.
+User can see output and 
+interact with the service.
+end note
+
+note left of launcher
+**Launch is fire-and-forget**
+Service Launcher spawns
+terminal but doesn't track
+the service process after.
+end note
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+
+
+

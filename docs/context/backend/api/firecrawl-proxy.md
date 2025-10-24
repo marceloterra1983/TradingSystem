@@ -6,7 +6,7 @@ domain: backend
 type: reference
 summary: Complete API specification for the Firecrawl Proxy service including endpoints, validation rules, use cases, and integration examples
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Overview
@@ -323,7 +323,7 @@ For rapid setup and testing, see the **[Quick Start guide](https://github.com/yo
 ### Production Deployment
 For production deployment procedures including systemd service setup, PM2 configuration, and Docker deployment, see:
 - **[Firecrawl Proxy - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md#production-deployment)**
-- **[Firecrawl Infrastructure - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#production-deployment)**
+- **[Firecrawl Infrastructure - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#production-deployment)**
 
 ### Testing
 The proxy includes comprehensive test suites:
@@ -334,7 +334,7 @@ See: **[Testing Guide](https://github.com/your-org/TradingSystem/blob/main/backe
 
 ### Service Management
 The proxy integrates with the TradingSystem service orchestration:
-- Registered in `backend/manifest.json`
+- Registered in `config/services-manifest.json`
 - Monitored by Service Launcher (port 3500)
 - Health checks via `/health` endpoint
 - Automatic restart on failure
@@ -380,7 +380,7 @@ Monitor the underlying Firecrawl stack:
 - Playwright browser resource usage
 - PostgreSQL query performance
 
-See: **[Firecrawl Infrastructure - Monitoring](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#monitoring)**
+See: **[Firecrawl Infrastructure - Monitoring](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#monitoring)**
 
 ## Testing
 - **Unit tests** (`npm run test` inside `backend/api/firecrawl-proxy`)
@@ -417,8 +417,8 @@ See: **[Firecrawl Proxy - Advanced Troubleshooting](https://github.com/your-org/
 ### Infrastructure Issues
 
 If the proxy reports `firecrawl.reachable: false`, troubleshoot the core Firecrawl stack:
-- **[Firecrawl Infrastructure - Troubleshooting](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#troubleshooting)**
-- **[Firecrawl Infrastructure - Monitoring](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#monitoring)**
+- **[Firecrawl Infrastructure - Troubleshooting](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#troubleshooting)**
+- **[Firecrawl Infrastructure - Monitoring](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#monitoring)**
 
 Diagnostic commands:
 ```bash
@@ -450,7 +450,7 @@ The Firecrawl core stack should be secured:
 - Network isolation (Redis not exposed publicly)
 - Proxy usage for IP rotation
 
-See: **[Firecrawl Infrastructure - Security Considerations](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#security-considerations)**
+See: **[Firecrawl Infrastructure - Security Considerations](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#security-considerations)**
 
 # References
 
@@ -458,12 +458,12 @@ See: **[Firecrawl Infrastructure - Security Considerations](https://github.com/y
 
 ### Implementation Guides
 - **[Firecrawl Proxy Implementation](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md)** - Complete implementation guide with quick start, testing, deployment, and troubleshooting
-- **[Firecrawl Infrastructure Setup](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md)** - Core Firecrawl stack deployment, configuration, and maintenance
+- **[Firecrawl Infrastructure Setup](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md)** - Core Firecrawl stack deployment, configuration, and maintenance
 
 ### Architecture & Integration
 - **[Backend API Catalogue](README.md)** - Overview of all backend APIs
 - **[Frontend ↔ Backend API Hub](../../shared/integrations/frontend-backend-api-hub.md)** - API integration patterns
-- **[Reverse Proxy Setup](../../ops/infrastructure/reverse-proxy-setup.md)** - Nginx integration and unified domain architecture
+- **[Reverse Proxy Setup](../../ops/tools/reverse-proxy-setup.md)** - Nginx integration and unified domain architecture
 
 ### Operations
 - **[Environment Configuration](../../ops/ENVIRONMENT-CONFIGURATION.md)** - Centralized environment variable management

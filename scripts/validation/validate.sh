@@ -94,8 +94,8 @@ log_info "Searching for shell scripts in: $SEARCH_PATH"
 
 # Paths to exclude
 EXCLUDE_PATTERNS=(
-    "infrastructure/firecrawl"
-    "infrastructure/Agent-MCP/agent_mcp/templates"
+    "tools/firecrawl"
+    "tools/Agent-MCP/agent_mcp/templates"
     "node_modules"
     ".git"
     "external"

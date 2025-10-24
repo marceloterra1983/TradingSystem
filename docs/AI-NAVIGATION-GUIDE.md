@@ -181,7 +181,7 @@ last_review: 2025-10-17
 - `deployment/` - Deployment playbooks
 - `monitoring/` - Monitoring setup
 - `incidents/` - Incident runbooks
-- `infrastructure/` - Infrastructure setup
+- `tools/` - Infrastructure setup
 - `troubleshooting/` - Common issues
 
 **Most important files**:

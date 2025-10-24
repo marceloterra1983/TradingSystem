@@ -17,7 +17,7 @@ beforeAll(async () => {
       proxyAvailable = false;
       console.warn('[integration] Firecrawl Proxy health check failed - skipping tests');
     }
-  } catch (error) {
+  } catch (_error) {
     proxyAvailable = false;
     console.warn('[integration] Firecrawl Proxy not reachable - skipping integration tests');
   }

@@ -10,7 +10,7 @@ domain: ops
 type: reference
 summary: Proposed structure and data fields for the shared service manifest driving scripts and CI
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 ## Motivation
@@ -25,7 +25,7 @@ last_review: 2025-10-17
 | --- | --- | --- |
 | `id` | Unique identifier used across scripts/CI. | `tp-capital-signals` |
 | `type` | `backend`, `frontend`, `docs`, `infra`, etc. | `backend` |
-| `path` | Relative path to project directory. | `frontend/apps/tp-capital` |
+| `path` | Relative path to project directory. | `apps/tp-capital` |
 | `start` | Command to start in development mode. | `npm run dev` |
 | `build` | Production build command (optional). | `npm run build` |
 | `test` | Primary test command (optional). | `npm test` |
@@ -37,15 +37,15 @@ last_review: 2025-10-17
 
 | id | path | port | workspace |
 | --- | --- | --- | --- |
-| `tp-capital-signals` | `frontend/apps/tp-capital` | 3200 | true |
-| `b3-market-data` | `frontend/apps/b3-market-data` | 3302 | true |
+| `tp-capital-signals` | `apps/tp-capital` | 3200 | true |
+| `b3-market-data` | `apps/b3-market-data` | 3302 | true |
 | `documentation-api` | `backend/api/documentation-api` | 3400 | true |
-| `service-launcher` | `frontend/apps/service-launcher` | 3500 | true |
-| `dashboard` | `frontend/apps/dashboard` | 3103 | true |
+| `service-launcher` | `apps/service-launcher` | 3500 | true |
+| `dashboard` | `frontend/dashboard` | 3103 | true |
 | `docs-hub` | `docs/docusaurus` | 3004 | true |
-| `alert-router` | `infrastructure/monitoring/alert-router` | n/a | true |
-| `agent-mcp` | `infrastructure/Agent-MCP` | 8080 | false |
-| `firecrawl` | `infrastructure/firecrawl/firecrawl-source` | 3002 | false (submodule) |
+| `alert-router` | `tools/monitoring/alert-router` | n/a | true |
+| `agent-mcp` | `tools/Agent-MCP` | 8080 | false |
+| `firecrawl` | `tools/firecrawl/firecrawl-source` | 3002 | false (submodule) |
 
 > Submodule services should have `workspace: false` and `managed: external` flags to skip workspace scripts while still exposing metadata for dashboards.
 
@@ -58,7 +58,7 @@ last_review: 2025-10-17
     {
       "id": "tp-capital-signals",
       "type": "backend",
-      "path": "frontend/apps/tp-capital",
+      "path": "apps/tp-capital",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
@@ -74,7 +74,7 @@ JSON eases consumption from shell, Node, and Python tools. Frontend dashboard ca
 
 ## Next Steps
 
-- Confirm the final schema (`version`, required fields) and store under `backend/manifest.json`.
+- Confirm the final schema (`version`, required fields) and store under `config/services-manifest.json`.
 - Update `scripts/start-services.sh` and other helpers to read the manifest using `jq` or a Node helper.
 - Create a CI assertion (GitHub Action or lint script) that validates manifest entries reference real paths and env templates.
 

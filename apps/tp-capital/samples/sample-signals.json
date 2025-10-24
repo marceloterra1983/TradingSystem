@@ -1,0 +1,54 @@
+[
+  {
+    "timestamp": "2025-10-07T17:25:59Z",
+    "channel": "Desconhecido",
+    "signalType": "Swing Trade",
+    "asset": "BEEFW655",
+    "buyMin": 0.25,
+    "buyMax": 0.27,
+    "target1": 0.35,
+    "target2": 0.56,
+    "targetFinal": 2.0,
+    "stop": 0.16,
+    "rawMessage": "DATA 07/10/2025 17:25:59\nCANAL Desconhecido\nTIPO Swing Trade\nATIVO BEEFW655\nCOMPRA 0.25-0.27\nALVO 1 0.35\nALVO 2 0.56\nALVO FINAL 2.00\nSTOP 0.16"
+  },
+  {
+    "timestamp": "2025-10-06T15:44:14Z",
+    "channel": "Desconhecido",
+    "signalType": "Swing Trade",
+    "asset": "BEEFW655",
+    "buyMin": 0.25,
+    "buyMax": 0.27,
+    "target1": 0.35,
+    "target2": 0.56,
+    "targetFinal": 2.0,
+    "stop": 0.16,
+    "rawMessage": "Signal example 2"
+  },
+  {
+    "timestamp": "2025-10-06T15:44:01Z",
+    "channel": "Desconhecido",
+    "signalType": "Swing Trade",
+    "asset": "ABEVK122",
+    "buyMin": 0.52,
+    "buyMax": 0.54,
+    "target1": 0.65,
+    "target2": 1.1,
+    "targetFinal": 2.0,
+    "stop": 0.3,
+    "rawMessage": "Signal example 3"
+  },
+  {
+    "timestamp": "2025-10-06T15:43:52Z",
+    "channel": "Desconhecido",
+    "signalType": "Swing Trade",
+    "asset": "VALEW591",
+    "buyMin": 0.79,
+    "buyMax": 0.82,
+    "target1": 0.92,
+    "target2": 1.7,
+    "targetFinal": 2.5,
+    "stop": 0.55,
+    "rawMessage": "Signal example 4"
+  }
+]

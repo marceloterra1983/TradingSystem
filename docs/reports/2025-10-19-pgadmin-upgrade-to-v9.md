@@ -23,7 +23,7 @@ Upgrade do pgAdmin de **versão 8.11 → 9.0** no container `data-timescaledb-pg
 
 ### 1. Arquivo Atualizado
 
-**[infrastructure/compose/docker-compose.timescale.yml](../../infrastructure/compose/docker-compose.timescale.yml)**
+**[tools/compose/docker-compose.timescale.yml](../../tools/compose/docker-compose.timescale.yml)**
 
 ```diff
   timescaledb-pgadmin:
@@ -126,7 +126,7 @@ export IMG_VERSION="2025.10.19"
 bash scripts/docker/build-images.sh
 
 # 2. Recriar apenas o pgAdmin
-cd infrastructure/compose
+cd tools/compose
 docker compose -f docker-compose.timescale.yml up -d --force-recreate timescaledb-pgadmin
 
 # 3. Verificar
@@ -139,7 +139,7 @@ docker logs data-timescaledb-pgadmin --tail 30
 cd /home/marce/projetos/TradingSystem
 
 # 1. Parar e remover container
-cd infrastructure/compose
+cd tools/compose
 docker compose -f docker-compose.timescale.yml stop timescaledb-pgadmin
 docker compose -f docker-compose.timescale.yml rm -f timescaledb-pgadmin
 
@@ -209,7 +209,7 @@ export IMG_VERSION="2025.10.19"
 bash scripts/docker/build-images.sh
 
 # 3. Parar e remover container
-cd infrastructure/compose
+cd tools/compose
 docker compose -f docker-compose.timescale.yml stop timescaledb-pgadmin
 docker compose -f docker-compose.timescale.yml rm -f timescaledb-pgadmin
 
@@ -232,14 +232,14 @@ docker compose -f docker-compose.timescale.yml up -d timescaledb-pgadmin
 
 ```bash
 # 1. Parar container
-docker compose -f infrastructure/compose/docker-compose.timescale.yml stop timescaledb-pgadmin
+docker compose -f tools/compose/docker-compose.timescale.yml stop timescaledb-pgadmin
 
 # 2. Retaguear imagem antiga
 docker pull --platform linux/amd64 dpage/pgadmin4:8.11
 docker tag dpage/pgadmin4:8.11 img-data-timescaledb-pgadmin:2025.10.19
 
 # 3. Recriar container
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d --force-recreate timescaledb-pgadmin
+docker compose -f tools/compose/docker-compose.timescale.yml up -d --force-recreate timescaledb-pgadmin
 ```
 
 ## 🔗 Variáveis de Ambiente
@@ -264,7 +264,7 @@ IMG_VERSION=2025.10.19  # Usado por todos os containers do projeto
 **Notas:**
 - `IMG_VERSION` é global para todos os containers do projeto
 - Se não definida, usa default `2025.10.19` do compose file
-- Seguindo padrão documentado em [container-naming.md](../context/ops/infrastructure/container-naming.md)
+- Seguindo padrão documentado em [container-naming.md](../context/ops/tools/container-naming.md)
 
 ## 📚 Referências
 
@@ -275,7 +275,7 @@ IMG_VERSION=2025.10.19  # Usado por todos os containers do projeto
 - **Docker Hub:** https://hub.docker.com/r/dpage/pgadmin4
 
 ### Documentação do TradingSystem
-- **Container Naming Convention:** [container-naming.md](../context/ops/infrastructure/container-naming.md)
+- **Container Naming Convention:** [container-naming.md](../context/ops/tools/container-naming.md)
 - **Build Images Script:** [build-images.sh](../../scripts/docker/build-images.sh)
 - **Environment Configuration:** [ENVIRONMENT-CONFIGURATION.md](../context/ops/ENVIRONMENT-CONFIGURATION.md)
 - **Service Port Map:** [service-port-map.md](../context/ops/service-port-map.md)

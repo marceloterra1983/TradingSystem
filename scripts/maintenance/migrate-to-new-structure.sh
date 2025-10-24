@@ -92,10 +92,10 @@ done
 section "Removing Unused Scripts"
 
 # Firecrawl scripts (if not used)
-if [[ -d "$PROJECT_ROOT/infrastructure/firecrawl" ]]; then
-    log_warning "Firecrawl scripts found in infrastructure/firecrawl"
+if [[ -d "$PROJECT_ROOT/tools/firecrawl" ]]; then
+    log_warning "Firecrawl scripts found in tools/firecrawl"
     log_warning "These will NOT be removed automatically"
-    log_warning "If not needed, manually remove: rm -rf infrastructure/firecrawl"
+    log_warning "If not needed, manually remove: rm -rf tools/firecrawl"
 fi
 
 section "Summary"

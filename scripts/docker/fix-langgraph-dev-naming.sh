@@ -32,7 +32,7 @@ readonly NC='\033[0m'
 # Paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMPOSE_FILE="${REPO_ROOT}/infrastructure/compose/docker-compose.langgraph-dev.yml"
+COMPOSE_FILE="${REPO_ROOT}/tools/compose/docker-compose.langgraph-dev.yml"
 BUILD_SCRIPT="${REPO_ROOT}/scripts/docker/build-images.sh"
 BACKUP_DIR="${REPO_ROOT}/.backups/naming-fix-$(date +%Y%m%d-%H%M%S)"
 

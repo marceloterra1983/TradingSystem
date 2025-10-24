@@ -58,7 +58,7 @@ echo "   sudo tee /etc/buildkit/buildkitd.toml << 'EOF'
 EOF"
 echo
 echo "4. Iniciar registry local (não requer sudo):"
-echo "   docker compose --env-file .env -f infrastructure/docker-compose.cache.yml up -d"
+echo "   docker compose --env-file .env -f tools/docker-compose.cache.yml up -d"
 echo
 echo "5. Reiniciar serviço BuildKit:"
 echo "   sudo systemctl restart buildkit"
@@ -80,7 +80,7 @@ read -r response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
 then
     echo "Iniciando registry local..."
-    docker compose --env-file .env -f infrastructure/docker-compose.cache.yml up -d
+    docker compose --env-file .env -f tools/docker-compose.cache.yml up -d
 
     echo "Aguardando registry ficar disponível..."
     timeout 30 bash -c 'until curl -s -f http://localhost:5000/v2/ > /dev/null 2>&1; do sleep 1; done'
