@@ -9,12 +9,12 @@ const projectRoot = path.resolve(__dirname, '..', '..', '..', '..');
 
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
-  port: Number(process.env.WORKSPACE_PORT ?? process.env.PORT ?? 3102),
+  port: Number(process.env.WORKSPACE_PORT ?? process.env.PORT ?? 3200),
   logLevel: process.env.LOG_LEVEL ?? 'info',
   dbStrategy: (process.env.LIBRARY_DB_STRATEGY ?? 'lowdb').toLowerCase(),
   lowdbPath:
     process.env.DB_PATH ??
-    path.join(projectRoot, 'data', 'workspace', 'library.json'),
+    path.join(projectRoot, 'backend', 'data', 'workspace', 'library.json'),
 };
 
 

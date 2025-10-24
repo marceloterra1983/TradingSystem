@@ -141,9 +141,9 @@ Adding New Variables workflow
 
 ---
 
-### 6. **backend/ENV-CONFIGURATION-RULES.md** ⭐⭐
+### 6. **config/ENV-CONFIGURATION-RULES.md** ⭐⭐
 
-**Localização**: `backend/ENV-CONFIGURATION-RULES.md`  
+**Localização**: `config/ENV-CONFIGURATION-RULES.md`  
 **Audiência**: **Desenvolvedores Backend**
 
 **Conteúdo Completo**:
@@ -345,20 +345,20 @@ CONTRIBUTING.md
 
 ENV-RULES.md
 ├── Links to: ENVIRONMENT-CONFIGURATION.md
-├── Links to: backend/ENV-CONFIGURATION-RULES.md
+├── Links to: config/ENV-CONFIGURATION-RULES.md
 └── Links to: CONTRIBUTING.md
 
 frontend/README.md
 └── Links to: ENVIRONMENT-CONFIGURATION.md
 
-backend/ENV-CONFIGURATION-RULES.md
+config/ENV-CONFIGURATION-RULES.md
 ├── Links to: ENV-RULES.md
 ├── Links to: ENVIRONMENT-CONFIGURATION.md
 └── Links to: CONTRIBUTING.md
 
 NEW-SERVICE-TEMPLATE.md
 ├── Links to: ENV-RULES.md
-├── Links to: backend/ENV-CONFIGURATION-RULES.md
+├── Links to: config/ENV-CONFIGURATION-RULES.md
 └── Links to: ENVIRONMENT-CONFIGURATION.md
 ```
 
@@ -374,7 +374,7 @@ NEW-SERVICE-TEMPLATE.md
 - [x] CLAUDE.md com seção CRITICAL
 - [x] CONTRIBUTING.md com seção completa
 - [x] frontend/README.md com regra destacada
-- [x] backend/ENV-CONFIGURATION-RULES.md criado
+- [x] config/ENV-CONFIGURATION-RULES.md criado
 - [x] NEW-SERVICE-TEMPLATE.md com templates
 - [x] ENVIRONMENT-CONFIGURATION.md (guia completo)
 
@@ -463,7 +463,7 @@ Layer 6: AI Assistant Rules (CLAUDE.md)
 **Primeiro contato**:
 1. README.md → 🚨 Warning
 2. ENV-RULES.md → Quick reference
-3. backend/ENV-CONFIGURATION-RULES.md → Guia completo
+3. config/ENV-CONFIGURATION-RULES.md → Guia completo
 4. NEW-SERVICE-TEMPLATE.md → Template pronto
 
 **Templates com código correto**: Copiar e colar!
@@ -473,7 +473,7 @@ Layer 6: AI Assistant Rules (CLAUDE.md)
 **Primeiro contato**:
 1. README.md → 🚨 Warning
 2. ENV-RULES.md → Quick reference
-3. backend/ENV-CONFIGURATION-RULES.md → Exemplo Python
+3. config/ENV-CONFIGURATION-RULES.md → Exemplo Python
 4. NEW-SERVICE-TEMPLATE.md → Template Python
 
 **Exemplo funcional**: Pronto para usar!
@@ -482,7 +482,7 @@ Layer 6: AI Assistant Rules (CLAUDE.md)
 
 **Primeiro contato**:
 1. README.md → 🚨 Warning
-2. infrastructure/README.md → Seção Security
+2. tools/README.md → Seção Security
 3. ENVIRONMENT-CONFIGURATION.md → Guia DevOps
 4. Docker Compose examples → Todos corretos
 
@@ -621,7 +621,7 @@ README.md (⭐⭐⭐ Entry Point)
 ├── frontend/README.md
 │   └── Frontend-specific rules
 │
-├── backend/ENV-CONFIGURATION-RULES.md
+├── config/ENV-CONFIGURATION-RULES.md
 │   └── Backend-specific rules
 │       └── NEW-SERVICE-TEMPLATE.md
 │           └── Complete working templates
@@ -629,7 +629,7 @@ README.md (⭐⭐⭐ Entry Point)
 └── docs/context/ops/
     ├── ENVIRONMENT-CONFIGURATION.md (User Guide)
     ├── COMPLETE-ENV-CONSOLIDATION-GUIDE.md (Technical Guide)
-    └── infrastructure/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md (Implementation)
+    └── tools/CENTRALIZED-ENV-IMPLEMENTATION-PLAN.md (Implementation)
 ```
 
 ---

@@ -1,0 +1,38 @@
+name: tools
+
+services:
+  langgraph:
+    image: "${IMG_TOOLS_LANGGRAPH:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: tools-langgraph
+    ports:
+      - "${LANGGRAPH_PORT:-8111}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  llamaindex-ingestion:
+    image: "${IMG_TOOLS_LLAMAINDEX_INGESTION:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: tools-llamaindex-ingestion
+    ports:
+      - "${LLAMAINDEX_INGESTION_PORT:-8201}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  llamaindex-query:
+    image: "${IMG_TOOLS_LLAMAINDEX_QUERY:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: tools-llamaindex-query
+    ports:
+      - "${LLAMAINDEX_QUERY_PORT:-8202}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env
+
+  agno-agents:
+    image: "${IMG_TOOLS_AGNO_AGENTS:-nginx}:${IMG_VERSION:-alpine}"
+    container_name: tools-agno-agents
+    ports:
+      - "${AGNO_AGENTS_PORT:-8200}:80"
+    restart: unless-stopped
+    env_file:
+      - ../../config/docker.env

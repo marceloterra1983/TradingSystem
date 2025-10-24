@@ -77,10 +77,10 @@ last_review: 2025-10-22
 8. ✅ `docs/reports/service-launcher-implementation-summary.md` (este arquivo)
 
 ### OpenSpec
-1. ✅ `infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md`
-2. ✅ `infrastructure/openspec/changes/fix-service-launcher-critical-issues/design.md`
-3. ✅ `infrastructure/openspec/changes/fix-service-launcher-critical-issues/tasks.md`
-4. ✅ `infrastructure/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md`
+1. ✅ `tools/openspec/changes/fix-service-launcher-critical-issues/proposal.md`
+2. ✅ `tools/openspec/changes/fix-service-launcher-critical-issues/design.md`
+3. ✅ `tools/openspec/changes/fix-service-launcher-critical-issues/tasks.md`
+4. ✅ `tools/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md`
 
 **Total de arquivos criados/modificados:** 15 arquivos
 
@@ -536,10 +536,10 @@ Coverage:    66.46% statements
 - [Audit Plan](./service-launcher-audit-plan.md) - Análise inicial
 
 ### OpenSpec
-- [Proposal](../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md)
-- [Design](../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/design.md)
-- [Tasks](../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/tasks.md)
-- [Spec](../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md)
+- [Proposal](../../tools/openspec/changes/fix-service-launcher-critical-issues/proposal.md)
+- [Design](../../tools/openspec/changes/fix-service-launcher-critical-issues/design.md)
+- [Tasks](../../tools/openspec/changes/fix-service-launcher-critical-issues/tasks.md)
+- [Spec](../../tools/openspec/changes/fix-service-launcher-critical-issues/specs/service-launcher/spec.md)
 
 ### Service Code
 - [server.js](../../frontend/apps/service-launcher/server.js)

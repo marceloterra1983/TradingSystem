@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: "Complete guide for using LangSmith Studio to debug and monitor LangGraph workflows"
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 # LangSmith Studio Integration Guide
@@ -29,7 +29,7 @@ Before setting up LangSmith Studio integration, ensure you have:
 - **LangSmith Account** - Sign up at https://smith.langchain.com
 - **API Key** - Generate at https://smith.langchain.com/settings
 - **Docker Compose** - For development environment setup
-- **Existing LangGraph Service** - See `infrastructure/langgraph/README.md`
+- **Existing LangGraph Service** - See `tools/langgraph/README.md`
 - **Environment Configuration** - Root `.env` file with LangSmith variables
 
 ## Environment Setup
@@ -48,7 +48,7 @@ For production monitoring and debugging:
 
 2. **Restart Production Service**:
    ```bash
-   docker compose -f infrastructure/compose/docker-compose.infra.yml restart langgraph
+   docker compose -f tools/compose/docker-compose.infra.yml restart langgraph
    ```
 
 3. **Verify Service Health**:
@@ -407,8 +407,8 @@ end note
 
 ## Related Documentation
 
-- **[LangGraph Service](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/langgraph/README.md)** - Complete service documentation
-- **[Development vs Production Comparison](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/langgraph/DEVELOPMENT.md)** - Environment setup guide
+- **[LangGraph Service](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/langgraph/README.md)** - Complete service documentation
+- **[Development vs Production Comparison](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/langgraph/DEVELOPMENT.md)** - Environment setup guide
 - **[LangGraph Implementation Guide](./langgraph-implementation-guide.md)** - Architecture and implementation details
 - **[LangSmith Official Docs](https://docs.smith.langchain.com)** - Platform documentation
 - **[LangGraph Studio Docs](https://docs.langchain.com/langgraph-platform/local-server)** - Studio-specific features
@@ -434,7 +434,7 @@ LANGSMITH_PROJECT=langgraph-dev  # or langgraph-production
 bash scripts/langgraph/start-dev.sh
 
 # Production environment
-docker compose -f infrastructure/compose/docker-compose.infra.yml restart langgraph
+docker compose -f tools/compose/docker-compose.infra.yml restart langgraph
 
 # Health checks
 curl http://localhost:8112/health  # Development

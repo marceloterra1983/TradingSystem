@@ -21,7 +21,7 @@ router.get(
       search: req.query.search
     };
 
-    const pagination = {
+    const _pagination = {
       limit: req.query.limit ? parseInt(req.query.limit) : 20,
       offset: req.query.offset ? parseInt(req.query.offset) : 0
     };

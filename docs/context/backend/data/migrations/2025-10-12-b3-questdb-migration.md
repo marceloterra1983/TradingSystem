@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Migration steps to move the B3 data pipeline from file-based storage to QuestDB
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Migration Plan — B3 ➜ QuestDB
@@ -19,7 +19,7 @@ last_review: 2025-10-17
 
 ## Prerequisites
 
-- QuestDB instance running (shared `frontend/apps/tp-capital/infrastructure` service).
+- QuestDB instance running (shared `apps/tp-capital/infrastructure` service).
 - Finalised table DDL executed (`b3_snapshots`, `b3_indicators`, `b3_vol_surface`, `b3_gamma_levels`, `b3_adjustments`, `b3_indicators_daily`, `b3_dxy_ticks`).
 - Access credentials for GammaLevels and other external sources verified.
 
@@ -27,11 +27,11 @@ last_review: 2025-10-17
 
 1. **Schema Deployment**
    - Apply DDL scripts to QuestDB (either via REST `/exec` or sqltool).
-   - Version-control the SQL under `infrastructure/b3/sql/` (new folder).
+   - Version-control the SQL under `tools/b3/sql/` (new folder).
 
 2. **Historical Backfill**
    - Convert existing CSV/JSON files into QuestDB-friendly CSV or ILP streams.
-   - Use `infrastructure/b3/scripts/migrate_to_questdb.py` (wraps QuestDB `/imp` endpoint) or custom loaders to import:
+   - Use `tools/b3/scripts/migrate_to_questdb.py` (wraps QuestDB `/imp` endpoint) or custom loaders to import:
      - `data/processed/ajustes_b3.csv` → `b3_adjustments`
      - `indicadores_b3.csv` → `b3_indicators_daily`
      - `superficie_volatilidade_b3.csv` → `b3_vol_surface`
@@ -51,7 +51,7 @@ last_review: 2025-10-17
    - Add new aggregated endpoints tailored for the single TradingSystem dashboard page.
 
 5. **Dashboard Integration**
-   - Build the `B3` page in `frontend/apps/dashboard` consuming the new backend endpoints.
+   - Build the `B3` page in `frontend/dashboard` consuming the new backend endpoints.
    - Add navigation entry and document the KPIs/visualizations.
 
 6. **Cutover**

@@ -6,7 +6,7 @@ domain: shared
 type: guide
 summary: Complete guide for using documentation health dashboards (Docusaurus and Grafana) to monitor and improve documentation quality
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 # Documentation Health Dashboard Guide
@@ -358,7 +358,7 @@ curl -X POST http://localhost:3400/api/v1/docs/health/update-metrics \
 
 4. Restart Prometheus if needed:
    ```bash
-   docker compose -f infrastructure/monitoring/docker-compose.yml restart prometheus
+   docker compose -f tools/monitoring/docker-compose.yml restart prometheus
    ```
 
 ### API Errors (CORS, 404, 500)

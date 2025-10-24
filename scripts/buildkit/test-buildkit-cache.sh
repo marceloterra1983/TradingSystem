@@ -4,7 +4,7 @@ set -e
 echo "Testando BuildKit com cache..."
 
 # Criar diretório de teste
-TEST_DIR="infrastructure/tests/buildkit-test"
+TEST_DIR="tools/tests/buildkit-test"
 mkdir -p $TEST_DIR
 
 # Criar Dockerfile com múltiplas camadas para testar cache

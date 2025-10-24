@@ -78,7 +78,7 @@ check_dependencies "/home/marce/projetos/TradingSystem/backend/api/workspace" "W
 check_dependencies "/home/marce/projetos/TradingSystem/frontend/apps/tp-capital" "TP-Capital" || true
 check_dependencies "/home/marce/projetos/TradingSystem/frontend/apps/b3-market-data" "B3" || true
 # DocsAPI runs as Docker container (see docker-compose.docs.yml)
-check_dependencies "/home/marce/projetos/TradingSystem/frontend/apps/service-launcher" "Laucher" || true
+check_dependencies "/home/marce/projetos/TradingSystem/frontend/apps/status" "Status" || true
 echo ""
 
 echo "3. Checking Configuration Files..."
@@ -88,7 +88,7 @@ check_env_file "/home/marce/projetos/TradingSystem/backend/api/workspace" "Works
 check_env_file "/home/marce/projetos/TradingSystem/frontend/apps/tp-capital" "TP-Capital" || true
 check_env_file "/home/marce/projetos/TradingSystem/frontend/apps/b3-market-data" "B3" || true
 # DocsAPI runs as Docker container (see docker-compose.docs.yml)
-check_env_file "/home/marce/projetos/TradingSystem/frontend/apps/service-launcher" "Laucher" || true
+check_env_file "/home/marce/projetos/TradingSystem/frontend/apps/status" "Status" || true
 echo ""
 
 echo "4. Checking Running Node Processes..."
@@ -117,8 +117,8 @@ echo "  cd frontend/apps/dashboard && npm install"
 echo "  cd backend/api/workspace && npm install"
 echo "  cd frontend/apps/tp-capital && npm install"
 echo "  cd frontend/apps/b3-market-data && npm install"
-echo "  # DocsAPI: docker compose -f infrastructure/compose/docker-compose.docs.yml up -d"
-echo "  cd frontend/apps/service-launcher && npm install"
+echo "  # DocsAPI: docker compose -f tools/compose/docker-compose.docs.yml up -d"
+echo "  cd frontend/apps/status && npm install"
 echo ""
 echo "To start services:"
 echo "  bash scripts/start-all-services.sh"

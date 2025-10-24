@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Complete implementation guide for LangGraph workflow orchestration service
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # LangGraph Implementation Guide
@@ -180,11 +180,11 @@ deactivate API
 ### 2. Clean Architecture Structure
 
 ```
-infrastructure/langgraph/src/
+tools/langgraph/src/
 ├── domain/                  # Core business logic
 │   └── models.py           # Entities & Value Objects
 ├── application/            # Use cases (future)
-├── infrastructure/         # External integrations
+├── tools/         # External integrations
 │   ├── adapters/
 │   │   ├── agno_client.py       # HTTP → Agno Agents
 │   │   ├── docs_client.py       # HTTP → DocsAPI
@@ -337,7 +337,7 @@ ENABLE_METRICS=true
 cd /home/marce/projetos/TradingSystem
 
 # Build and start
-docker compose -f infrastructure/compose/docker-compose.infra.yml up -d langgraph
+docker compose -f tools/compose/docker-compose.infra.yml up -d langgraph
 
 # Verify
 docker logs infra-langgraph --tail 50
@@ -349,7 +349,7 @@ curl http://localhost:8111/health | jq
 ### 5. Local Development
 
 ```bash
-cd infrastructure/langgraph
+cd tools/langgraph
 
 # Install dependencies
 pip install -r requirements.txt
@@ -497,7 +497,7 @@ GROUP BY workflow_name, error_message;
 
 
 - [ADR-0002 - Agno Framework](../../architecture/decisions/2025-10-16-adr-0002-agno-framework.md)
-- [LangGraph README](../../../../infrastructure/langgraph/README.md)
+- [LangGraph README](../../../../tools/langgraph/README.md)
 - [Agno Agents Guide](./agno-agents-guide.md)
 
 ---

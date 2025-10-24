@@ -1,6 +1,5 @@
 import express from 'express';
 import FilesService from '../services/FilesService.js';
-import { validation, handleValidationErrors } from '../middleware/validation.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { upload, handleUploadError } from '../middleware/upload.js';
 import { logger } from '../config/logger.js';
@@ -88,7 +87,7 @@ router.post(
     const errors = [];
 
     // Process each file
-    for (const [index, file] of req.files.entries()) {
+    for (const [_index, file] of req.files.entries()) {
       try {
         // Validate file
         FilesService.validateFile(file);

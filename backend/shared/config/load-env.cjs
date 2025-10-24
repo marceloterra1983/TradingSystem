@@ -14,7 +14,7 @@ try {
     } else {
       throw primaryError;
     }
-  } catch (serviceError) {
+  } catch (_serviceError) {
     throw primaryError;
   }
 }

@@ -31,7 +31,7 @@ Stop-Process -Name node -Force
 **Linux:**
 ```bash
 # Parar Docker
-cd infrastructure/monitoring && docker compose down
+cd tools/monitoring && docker compose down
 cd ../tp-capital && docker compose down
 
 # Parar Node
@@ -141,7 +141,7 @@ Adicione ao `~/.bashrc`:
 ```bash
 alias tsd='cd ~/projetos/TradingSystem'
 alias tsd-start='tsd && bash scripts/startup/start-trading-system-dev.sh --start-monitoring'
-alias tsd-stop='pkill node && cd ~/projetos/TradingSystem/infrastructure/monitoring && docker compose down'
+alias tsd-stop='pkill node && cd ~/projetos/TradingSystem/tools/monitoring && docker compose down'
 alias tsd-logs='docker compose logs -f'
 alias tsd-status='lsof -i :3100 && lsof -i :3103 && docker ps'
 ```
@@ -170,7 +170,7 @@ function tsd-stop {
 
 | Problema | Solução |
 |----------|---------|
-| Script não executa (Linux) | `chmod +x infrastructure/scripts/*.sh` |
+| Script não executa (Linux) | `chmod +x tools/scripts/*.sh` |
 | Docker requer sudo | `sudo usermod -aG docker $USER` (logout/login) |
 | Porta em uso | Ver "Matar Processo em Porta" acima |
 | node_modules corrompido | `rm -rf node_modules && npm install` |

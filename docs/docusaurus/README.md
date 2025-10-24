@@ -6,7 +6,7 @@ domain: shared
 type: index
 summary: Docusaurus Workspace Notes
 status: active
-last_review: 2025-10-22
+last_review: "2025-10-22"
 ---
 
 ## Docusaurus Workspace Notes
@@ -392,7 +392,7 @@ HEALTH_REFRESH_INTERVAL=300000  # 5 minutes
 **Grafana Dashboard Import**:
 ```bash
 # Dashboard JSON location
-infrastructure/monitoring/grafana/dashboards/documentation-health.json
+tools/monitoring/grafana/dashboards/documentation-health.json
 
 # Import via Grafana UI
 # Dashboards → Import → Upload JSON file
@@ -481,7 +481,7 @@ docker run -d \
   tradingsystem-docs:latest
 
 # Via docker-compose (recommended)
-# Add to infrastructure/compose/docker-compose.docs.yml
+# Add to tools/compose/docker-compose.docs.yml
 services:
   docusaurus:
     image: tradingsystem-docs:latest

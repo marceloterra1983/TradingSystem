@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Unified startup script guide for managing all TradingSystem services with health checks and logging
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # TradingSystem Service Startup Guide
@@ -65,10 +65,10 @@ graph TD
 
 Some dashboard features depend on auxiliary stacks that must be running before validation:
 
-- **Firecrawl stack** (`infrastructure/firecrawl/firecrawl-source/docker-compose.yaml`): start `firecrawl-api`, `firecrawl-redis`, `firecrawl-postgres`, `firecrawl-playwright` e exponha o proxy na porta **3600**.
-- **QuestDB core** (`infrastructure/compose/docker-compose.data.yml`): garanta HTTP **9000** (e console **9002**) para dashboards B3 e logs TP Capital.
+- **Firecrawl stack** (`tools/firecrawl/firecrawl-source/docker-compose.yaml`): start `firecrawl-api`, `firecrawl-redis`, `firecrawl-postgres`, `firecrawl-playwright` e exponha o proxy na porta **3600**.
+- **QuestDB core** (`tools/compose/docker-compose.data.yml`): garanta HTTP **9000** (e console **9002**) para dashboards B3 e logs TP Capital.
 - **Telegram ingestion**: configure tokens/IDs válidos em `.env.local` (ou `.env`) para autenticar a API TP Capital.
-- **TimescaleDB** (`infrastructure/compose/docker-compose.timescale.yml`): necessário para migrações Workspace/WebScraper e dashboards baseados em TimescaleDB.
+- **TimescaleDB** (`tools/compose/docker-compose.timescale.yml`): necessário para migrações Workspace/WebScraper e dashboards baseados em TimescaleDB.
 
 If any of these components estiver offline, as páginas correspondentes (B3, TP Capital, Workspace, Firecrawl) exibem dados de fallback e alertas até que as integrações respondam.
 
@@ -170,7 +170,7 @@ docusaurus               3004     UP         12350
 
 **Note**: `documentation-api` runs as a Docker container. Start with:
 ```bash
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d
+docker compose -f tools/compose/docker-compose.docs.yml up -d
 ```
 
 ### View Logs
@@ -366,10 +366,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd frontend/apps/tp-capital && npm install
+          cd apps/tp-capital && npm install
           cd ../b3-market-data && npm install
           cd ../service-launcher && npm install
-          cd ../../../frontend/apps/dashboard && npm install
+          cd ../../../frontend/dashboard && npm install
           # documentation-api runs as Docker container (see docker-compose.docs.yml)
 
       - name: Start services
@@ -429,6 +429,6 @@ Example response:
 ## Related Documentation
 
 - [Launcher API Guide](../backend/api/service-launcher/README.md)
-- [Infrastructure Overview](infrastructure/overview.md)
+- [Infrastructure Overview](tools/overview.md)
 - [Monitoring Setup](monitoring/prometheus-setup.md)
 - [Production Deployment](deployment/windows-native.md)

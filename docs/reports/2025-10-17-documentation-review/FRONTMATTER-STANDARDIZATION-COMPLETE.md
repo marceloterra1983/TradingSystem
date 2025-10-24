@@ -156,7 +156,7 @@ last_review: 0 files missing ✅
 - ✅ ops/deployment/* (4 files)
 - ✅ ops/development/* (4 files)
 - ✅ ops/incidents/* (5 files)
-- ✅ ops/infrastructure/* (2 files)
+- ✅ ops/tools/* (2 files)
 - ✅ ops/migrations/* (1 file)
 - ✅ ops/monitoring/* (4 files)
 - ✅ ops/onboarding/* (9 files)

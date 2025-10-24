@@ -29,18 +29,18 @@ declare -A SERVICE_PATHS=(
     ["TP Capital"]="frontend/apps/tp-capital"
     ["B3 Market Data"]="frontend/apps/b3-market-data"
     ["Documentation API"]="backend/api/documentation-api"
-    ["Service Launcher"]="frontend/apps/service-launcher"
+    ["Status API"]="frontend/apps/status"
     ["Firecrawl Proxy"]="backend/api/firecrawl-proxy"
     ["WebScraper API"]="backend/api/webscraper-api"
     ["Docusaurus"]="docs"
 )
 
 declare -A STACK_COMPOSE_FILES=(
-    ["data-timescale"]="infrastructure/compose/docker-compose.timescale.yml"
-    ["monitoring"]="infrastructure/monitoring/docker-compose.yml"
-    ["docs"]="infrastructure/compose/docker-compose.docs.yml"
-    ["infra"]="infrastructure/compose/docker-compose.infra.yml"
-    ["firecrawl"]="infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
+    ["data-timescale"]="tools/compose/docker-compose.timescale.yml"
+    ["monitoring"]="tools/monitoring/docker-compose.yml"
+    ["docs"]="tools/compose/docker-compose.docs.yml"
+    ["infra"]="tools/compose/docker-compose.infra.yml"
+    ["firecrawl"]="tools/firecrawl/firecrawl-source/docker-compose.yaml"
 )
 
 declare -a CRITICAL_SERVICES=("timescaledb" "Service Launcher" "Dashboard")

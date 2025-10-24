@@ -13,7 +13,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 COMPOSE_CMD=()
-COMPOSE_FILE="${ROOT_DIR}/infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
+COMPOSE_FILE="${ROOT_DIR}/tools/firecrawl/firecrawl-source/docker-compose.yaml"
 REMOVE_VOLUMES=false
 
 section() {

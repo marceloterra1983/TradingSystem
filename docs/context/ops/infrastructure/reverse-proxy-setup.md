@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Unified domain architecture using Nginx as reverse proxy for all Trading System services
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Reverse Proxy Architecture
@@ -76,13 +76,13 @@ graph LR
 
 3. Set up Nginx configuration:
     ```bash
-    sudo cp infrastructure/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
+    sudo cp tools/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
     sudo ln -s /etc/nginx/sites-available/tradingsystem.conf /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
     ```
 
-> **📖 Detailed Setup Guide**: For comprehensive setup instructions including production deployment, SSL/TLS configuration, and advanced troubleshooting, see **[Nginx Proxy README](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md)**
+> **📖 Detailed Setup Guide**: For comprehensive setup instructions including production deployment, SSL/TLS configuration, and advanced troubleshooting, see **[Nginx Proxy README](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md)**
 
 4. Configure services for unified domain:
    ```bash
@@ -120,7 +120,7 @@ curl -I http://tradingsystem.local/health
 ### Configuration Files
 - **Main config**: `/etc/nginx/sites-available/tradingsystem.conf`
 - **Symlink**: `/etc/nginx/sites-enabled/tradingsystem.conf`
-- **Source**: `infrastructure/nginx-proxy/tradingsystem.conf`
+- **Source**: `tools/nginx-proxy/tradingsystem.conf`
 - **Logs**: `/var/log/nginx/tradingsystem-*.log`
 
 ### Service URLs
@@ -276,8 +276,8 @@ sudo systemctl reload nginx
 ### Advanced Troubleshooting
 
 For comprehensive troubleshooting including WebSocket issues, performance optimization, SSL/TLS problems, and production deployment scenarios, see:
-- **[Nginx Proxy README - Troubleshooting](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#troubleshooting)**
-- **[Nginx Proxy README - Production Deployment](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#production-deployment)**
+- **[Nginx Proxy README - Troubleshooting](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#troubleshooting)**
+- **[Nginx Proxy README - Production Deployment](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#production-deployment)**
 
 **Quick diagnostics:**
 ```bash
@@ -316,8 +316,8 @@ curl http://tradingsystem.local/api/launcher/health
 
 ### SSL/TLS Setup
 For production deployment with HTTPS, follow the SSL/TLS setup guide in:
-- **[Nginx Proxy README - Production Deployment](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#production-deployment)**
-- **[VPS Migration Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/VPS-MIGRATION-GUIDE.md)**
+- **[Nginx Proxy README - Production Deployment](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#production-deployment)**
+- **[VPS Migration Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/VPS-MIGRATION-GUIDE.md)**
 
 ### Performance Tuning
 For high-traffic scenarios, optimize Nginx configuration:
@@ -326,7 +326,7 @@ For high-traffic scenarios, optimize Nginx configuration:
 - Keepalive settings
 - Caching strategies
 
-See: **[Nginx Proxy README - Performance Tuning](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#production-deployment)**
+See: **[Nginx Proxy README - Performance Tuning](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#production-deployment)**
 
 ### Monitoring
 Integrate Nginx with existing monitoring stack:
@@ -335,7 +335,7 @@ Integrate Nginx with existing monitoring stack:
 - Response time monitoring
 - Upstream health checks
 
-See: **[Nginx Proxy README - Monitoring](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#monitoring-and-observability)**
+See: **[Nginx Proxy README - Monitoring](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#monitoring-and-observability)**
 
 ### Security
 Harden Nginx configuration for production:
@@ -344,7 +344,7 @@ Harden Nginx configuration for production:
 - Security headers (already configured)
 - DDoS protection
 
-See: **[Nginx Proxy README - Security Hardening](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md#production-deployment)**
+See: **[Nginx Proxy README - Security Hardening](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md#production-deployment)**
 
 ## Next Steps
 
@@ -369,14 +369,14 @@ See: **[Nginx Proxy README - Security Hardening](https://github.com/marceloterra
 ## Related Documents
 
 ### Infrastructure Documentation
-- **[Nginx Proxy README](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/README.md)** - Complete setup guide, troubleshooting, and configuration management
-- **[Nginx Configuration File](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/tradingsystem.conf)** - Active proxy configuration
-- **[VPS Migration Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/nginx-proxy/VPS-MIGRATION-GUIDE.md)** - Production deployment procedures
+- **[Nginx Proxy README](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/README.md)** - Complete setup guide, troubleshooting, and configuration management
+- **[Nginx Configuration File](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/tradingsystem.conf)** - Active proxy configuration
+- **[VPS Migration Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/nginx-proxy/VPS-MIGRATION-GUIDE.md)** - Production deployment procedures
 
 ### Service Documentation
 - **[Workspace API](https://github.com/marceloterra1983/TradingSystem/blob/main/backend/api/workspace/README.md)** - Library API (Port 3102)
-- **[TP Capital API](https://github.com/marceloterra1983/TradingSystem/blob/main/frontend/apps/tp-capital/README.md)** - TP Capital signals (Port 3200)
-- **[B3 Market Data API](https://github.com/marceloterra1983/TradingSystem/blob/main/frontend/apps/b3-market-data/README.md)** - B3 data service (Port 3302)
+- **[TP Capital API](https://github.com/marceloterra1983/TradingSystem/blob/main/apps/tp-capital/README.md)** - TP Capital signals (Port 3200)
+- **[B3 Market Data API](https://github.com/marceloterra1983/TradingSystem/blob/main/apps/b3-market-data/README.md)** - B3 data service (Port 3302)
 - **[Documentation API](https://github.com/marceloterra1983/TradingSystem/blob/main/backend/api/documentation-api/README.md)** - Documentation management (Port 3400)
 - **[Firecrawl Proxy API](https://github.com/marceloterra1983/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md)** - Web scraping proxy (Port 3600)
 - **[Service Launcher](https://github.com/marceloterra1983/TradingSystem/blob/main/backend/api/service-launcher/README.md)** - Service orchestration

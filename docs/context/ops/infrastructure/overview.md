@@ -6,7 +6,7 @@ domain: ops
 type: overview
 summary: Visão resumida da infraestrutura de apoio do TradingSystem (proxy, scraping, observabilidade, dados).
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Infrastructure Overview
@@ -27,10 +27,10 @@ Este resumo apresenta os blocos principais de infraestrutura que sustentam o Tra
 
 1. **Provisionar VPS ou host local** com Docker, Node.js e Nginx.
 2. **Sincronizar repositório** (`/opt/tradingsystem`) e carregar `.env` centralizado.
-3. **Aplicar Nginx** com arquivos de `infrastructure/nginx-proxy`.
+3. **Aplicar Nginx** com arquivos de `tools/nginx-proxy`.
 4. **Subir stacks**:
    - `bash start-all-stacks.sh` (serviços auxiliares)
-   - `bash infrastructure/scripts/start-all-services.sh` (APIs em Node)
+   - `bash tools/scripts/start-all-services.sh` (APIs em Node)
 5. **Verificar saúde** via `http://tradingsystem.local/api/status` (Service Launcher) e dashboards Grafana.
 
 ## Checklists Recomendados
@@ -42,9 +42,9 @@ Este resumo apresenta os blocos principais de infraestrutura que sustentam o Tra
 
 ## Próximos Passos
 
-- Automatizar backups (`infrastructure/scripts`).
+- Automatizar backups (`tools/scripts`).
 - Configurar TLS interno (mkcert/step-ca) para `tradingsystem.local`.
-- Versionar configurações críticas em `infrastructure/`.
+- Versionar configurações críticas em `tools/`.
 
 ---
 

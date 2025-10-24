@@ -203,19 +203,19 @@ SELECT add_continuous_aggregate_policy('scrape_jobs_daily_stats',
 ### Direct Execution
 
 ```bash
-psql "$TIMESCALEDB_URL" -f infrastructure/timescaledb/webscraper-schema.sql
+psql "$TIMESCALEDB_URL" -f backend/data/timescaledb/webscraper-schema.sql
 ```
 
 ### With Custom Chunk Interval
 
 ```bash
-psql "$TIMESCALEDB_URL" -v chunk_interval_days=14 -f infrastructure/timescaledb/webscraper-schema.sql
+psql "$TIMESCALEDB_URL" -v chunk_interval_days=14 -f backend/data/timescaledb/webscraper-schema.sql
 ```
 
 ### With Custom Schema Name
 
 ```bash
-psql "$TIMESCALEDB_URL" -v schema_name=public -f infrastructure/timescaledb/webscraper-schema.sql
+psql "$TIMESCALEDB_URL" -v schema_name=public -f backend/data/timescaledb/webscraper-schema.sql
 ```
 
 ### Via Init Script
@@ -310,7 +310,7 @@ Todas as tabelas têm trigger `set_updated_at` que atualiza automaticamente `upd
 ## Related Documentation
 
 -   **Schema Documentation**: [webscraper-schema.md](../webscraper-schema.md) - Documentação completa do schema com queries e performance notes
--   **Seed Data**: [webscraper-seed.sql](../../../../../infrastructure/timescaledb/webscraper-seed.sql) - Dados de exemplo para desenvolvimento
+-   **Seed Data**: [webscraper-seed.sql](../../../../../backend/data/timescaledb/webscraper-seed.sql) - Dados de exemplo para desenvolvimento
 -   **Init Script**: [init-database.sh](../../../../../scripts/webscraper/init-database.sh) - Script de inicialização automatizada
 -   **API Documentation**: [webscraper-api.md](../../api/webscraper-api.md) - Documentação da API que usa este schema
 -   **Frontend Feature**: [webscraper-app.md](../../../frontend/features/webscraper-app.md) - Interface do usuário

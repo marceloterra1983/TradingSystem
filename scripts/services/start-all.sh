@@ -131,7 +131,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # Service definitions (name:path:port:command)
-# NOTE: documentation-api runs as Docker container (see infrastructure/compose/docker-compose.docs.yml)
+# NOTE: documentation-api runs as Docker container (see tools/compose/docker-compose.docs.yml)
 declare -A SERVICES=(
     ["workspace-api"]="backend/api/workspace:3200:npm run dev"
     ["tp-capital"]="frontend/apps/tp-capital:3200:npm run dev"
@@ -139,7 +139,7 @@ declare -A SERVICES=(
     ["webscraper-api"]="backend/api/webscraper-api:3700:npm run dev"
     ["webscraper-ui"]="frontend/apps/WebScraper:3800:npm run dev"
     ["firecrawl-proxy"]="backend/api/firecrawl-proxy:3600:npm run dev"
-    ["service-launcher"]="frontend/apps/service-launcher:3500:npm start"
+    ["status"]="frontend/apps/status:3500:npm start"
     ["frontend-dashboard"]="frontend/apps/dashboard:3103:npm run dev"
     ["docusaurus"]="docs/docusaurus:3004:npm run start -- --port 3004"
 )
@@ -249,7 +249,7 @@ main() {
 
     # Start backend services
     if [[ "$SKIP_BACKEND" == "false" ]]; then
-        for service in workspace-api tp-capital b3-market-data firecrawl-proxy webscraper-api service-launcher; do
+        for service in workspace-api tp-capital b3-market-data firecrawl-proxy webscraper-api status; do
             if ! start_service "$service"; then
                 failed_services+=("$service")
             fi

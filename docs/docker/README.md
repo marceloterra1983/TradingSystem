@@ -11,7 +11,7 @@ TradingSystem/
 ├── config/
 │   ├── container-images.env      # Configuração das imagens Docker
 │   └── docker.env               # Variáveis de ambiente centralizadas
-├── infrastructure/
+├── tools/
 │   └── compose/
 │       ├── docker-compose.database.yml      # Grupo Database
 │       ├── docker-compose.documentation.yml # Grupo Documentation
@@ -111,7 +111,7 @@ Use o script `docker-manager.sh` para gerenciar os containers:
 
 ```bash
 # Iniciar grupo específico
-cd infrastructure/compose
+cd tools/compose
 docker compose -f docker-compose.database.yml up -d
 
 # Parar grupo específico

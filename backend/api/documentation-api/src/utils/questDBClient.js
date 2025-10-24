@@ -52,7 +52,7 @@ class QuestDBClient {
         try {
           await this.executeQuery('SELECT 1 as test', [connection]);
           return true;
-        } catch (error) {
+        } catch (_error) {
           return false;
         }
       }
@@ -218,7 +218,10 @@ class QuestDBClient {
     const columns = result.columns || [];
     const dataset = result.dataset[0] || {};
 
-    return rows.map((_, index) => {
+    // Get row count from first column's data length
+    const rowCount = columns.length > 0 ? (dataset[columns[0].name]?.length || 0) : 0;
+    
+    return Array.from({ length: rowCount }, (_, index) => {
       const row = {};
       columns.forEach(column => {
         row[column.name] = dataset[column.name]?.[index] || null;

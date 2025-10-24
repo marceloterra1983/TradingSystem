@@ -73,10 +73,10 @@ if confirm "Deseja instalar e configurar Nginx?"; then
     fi
     
     # Nginx config
-    if [[ -f "$PROJECT_ROOT/infrastructure/nginx-proxy/tradingsystem.conf" ]]; then
+    if [[ -f "$PROJECT_ROOT/tools/nginx-proxy/tradingsystem.conf" ]]; then
         if [[ ! -f "/etc/nginx/sites-enabled/tradingsystem.conf" ]]; then
             log_info "Configurando Nginx..."
-            sudo cp "$PROJECT_ROOT/infrastructure/nginx-proxy/tradingsystem.conf" /etc/nginx/sites-available/
+            sudo cp "$PROJECT_ROOT/tools/nginx-proxy/tradingsystem.conf" /etc/nginx/sites-available/
             sudo ln -s /etc/nginx/sites-available/tradingsystem.conf /etc/nginx/sites-enabled/
             sudo nginx -t && sudo systemctl reload nginx
             log_success "Nginx configurado"

@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Integration plan for B3 market data service with QuestDB and real-time streaming
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # B3 Integration Plan
@@ -22,14 +22,14 @@ last_review: 2025-10-17
 - Separate Python codebase (`../b3/`) with API, cron jobs, a legacy dashboard and container tooling.
 - Data persisted across local files and SQLite/PostgreSQL depending on the service.
 - Docker stack expõe três serviços (`b3-sistema`, `b3-dashboard`, `b3-cron`) usando portas diretas no host.
-- No shared schema/ingress pipeline with `frontend/apps/tp-capital/infrastructure` QuestDB instance.
+- No shared schema/ingress pipeline with `apps/tp-capital/infrastructure` QuestDB instance.
 
 ## Phase 1 — Discovery & Alignment
 
 1. Catalogue B3 services, entry points, dependencies and environment variables.
 2. Document existing data models (orders, signals, market snapshots) and the current persistence layer.
 3. Define integration boundaries with the TradingSystem backend (DDD contexts, messaging contracts).
-4. Decide target directory structure (e.g. `backend/api/b3-*`, `infrastructure/b3/`).
+4. Decide target directory structure (e.g. `backend/api/b3-*`, `tools/b3/`).
 
 **Deliverables:** architecture notes, inventory checklist, dependency graph.
 See also: [`b3-service inventory`](./b3-inventory.md) for the current component snapshot and QuestDB gaps.
@@ -45,17 +45,17 @@ See also: [`b3-service inventory`](./b3-inventory.md) for the current component 
 
 ## Phase 3 — Backend Refactor
 
-1. Move the B3 API code into `frontend/apps/b3-market-data` (Node 20 + Express).
+1. Move the B3 API code into `apps/b3-market-data` (Node 20 + Express).
 2. Align logging, configuration, dependency injection with existing backend conventions.
 3. Introduce a shared library/package for QuestDB access (reuse TP Capital/TanStack patterns where possible).
 4. Re-implement cron jobs as either Python worker or scheduled job inside the new folder.
 5. Provide REST endpoints that expose aggregates required by the dashboard page.
 
-**Deliverables:** integrated backend services (`frontend/apps/b3-market-data`), QuestDB client module (`infrastructure/b3/app/core/questdb_ingest.py`), tests (unit + integration).
+**Deliverables:** integrated backend services (`apps/b3-market-data`), QuestDB client module (`tools/b3/app/core/questdb_ingest.py`), tests (unit + integration).
 
 ## Phase 4 — Dashboard Page
 
-1. Design a single `B3` page in `frontend/apps/dashboard` (follow existing layout conventions).
+1. Design a single `B3` page in `frontend/dashboard` (follow existing layout conventions).
 2. Consume the new backend endpoints via React Query; display KPIs, charts and event timelines.
 3. Add navigation entry, routing and feature documentation updates.
 4. Implement lightweight smoke tests (Playwright or Vitest component tests) for the page.
@@ -64,7 +64,7 @@ See also: [`b3-service inventory`](./b3-inventory.md) for the current component 
 
 ## Phase 5 — Infrastructure & Tooling
 
-1. Create `infrastructure/b3/docker-compose.yml` that reuses shared QuestDB network/volumes.
+1. Create `tools/b3/docker-compose.yml` that reuses shared QuestDB network/volumes.
 2. Update `compose.dev.yml` with a `b3` profile; ensure services share the `questdb` service.
 3. Provide README and .env examples that align with TradingSystem conventions.
 4. Substituir referências a Traefik por instruções genéricas de proxy reverso quando necessário (nginx/Caddy).

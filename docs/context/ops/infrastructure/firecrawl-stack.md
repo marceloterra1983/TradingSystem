@@ -6,7 +6,7 @@ domain: ops
 type: reference
 summary: Deployment guide and architecture notes for the Firecrawl scraping stack and reverse proxy.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Firecrawl Stack Overview
@@ -34,10 +34,10 @@ last_review: 2025-10-17
 
 ```bash
 # Start Firecrawl stack (requires root .env)
-docker compose -f infrastructure/firecrawl/firecrawl-source/docker-compose.yaml --env-file .env up -d
+docker compose -f tools/firecrawl/firecrawl-source/docker-compose.yaml --env-file .env up -d
 
 # Follow logs for API and proxy
-docker compose -f infrastructure/firecrawl/firecrawl-source/docker-compose.yaml logs -f firecrawl-api firecrawl-proxy
+docker compose -f tools/firecrawl/firecrawl-source/docker-compose.yaml logs -f firecrawl-api firecrawl-proxy
 ```
 
 ### Environment Configuration

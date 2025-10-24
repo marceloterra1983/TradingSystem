@@ -9,7 +9,7 @@
 #
 # Author: TradingSystem Team
 # Last Modified: 2025-10-18
-# Based on: infrastructure/scripts/health-checks.sh
+# Based on: tools/scripts/health-checks.sh
 
 # Prevent multiple sourcing
 [[ -n "${_HEALTH_SH_LOADED:-}" ]] && return 0

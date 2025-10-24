@@ -12,7 +12,7 @@ domain: backend
 type: guide
 summary: Installation, configuration, and usage guide for the Agno multi-agent trading system
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Agno Agents Implementation Guide
@@ -24,7 +24,7 @@ The **Agno Agents** service é um microserviço em **Python 3.12** que utiliza o
 - **RiskManagementAgent** — valida cada recomendação contra limites diários, tamanho máximo de posição e janela de negociação.
 - **SignalOrchestratorAgent** — coordena o fluxo entre os agentes, agrega respostas e expõe endpoints REST.
 
-O serviço integra as APIs existentes (Workspace :3100, TP Capital :3200, B3 :3302) e consome dados em tempo real via WebSocket do B3. A arquitetura segue Clean Architecture (domain/application/infrastructure/interfaces) com monitoramento baseado em Prometheus (`GET /metrics`) e logs estruturados.
+O serviço integra as APIs existentes (Workspace :3100, TP Capital :3200, B3 :3302) e consome dados em tempo real via WebSocket do B3. A arquitetura segue Clean Architecture (domain/application/tools/interfaces) com monitoramento baseado em Prometheus (`GET /metrics`) e logs estruturados.
 
 ## 2. Prerequisites
 - Python **3.12** ou superior.
@@ -37,7 +37,7 @@ O serviço integra as APIs existentes (Workspace :3100, TP Capital :3200, B3 :33
 
 ### 3.1 Local Development
 ```bash
-cd infrastructure/agno-agents
+cd tools/agno-agents
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -63,7 +63,7 @@ python -m src.main
 ### 3.2 Docker Deployment
 ```bash
 # Construir/levantar pilha dos agentes
-docker compose -f infrastructure/compose/docker-compose.infra.yml up -d agno-agents
+docker compose -f tools/compose/docker-compose.infra.yml up -d agno-agents
 
 # Logs em tempo real
 docker logs -f infra-agno-agents
@@ -92,7 +92,7 @@ curl http://localhost:8200/health?detailed=true
 
 ## 5. Project Structure
 ```
-infrastructure/agno-agents/
+tools/agno-agents/
 ├── src/
 │   ├── domain/              # Entidades e value objects
 │   │   ├── entities.py      # MarketSignal, RiskAssessment, AgentDecision
@@ -100,7 +100,7 @@ infrastructure/agno-agents/
 │   ├── application/         # DTOs, ports
 │   │   ├── dto.py
 │   │   └── ports.py
-│   ├── infrastructure/
+│   ├── tools/
 │   │   ├── adapters/
 │   │   │   ├── workspace_client.py
 │   │   │   ├── tp_capital_client.py
@@ -235,8 +235,8 @@ Escopo de testes:
 
 ## 14. Related Documentation
 - 🏗️ ADR: [`docs/context/backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md`](../architecture/decisions/2025-10-16-adr-0002-agno-framework.md)
-- 📘 README do serviço: [`infrastructure/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/agno-agents/README.md)
-- 📊 Alertas Prometheus: [`infrastructure/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/monitoring/prometheus/rules/alert-rules.yml)
+- 📘 README do serviço: [`tools/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/tools/agno-agents/README.md)
+- 📊 Alertas Prometheus: [`tools/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/tools/monitoring/prometheus/rules/alert-rules.yml)
 - 🔍 Swagger/OpenAPI: [http://localhost:8200/docs](http://localhost:8200/docs)
 
 ---

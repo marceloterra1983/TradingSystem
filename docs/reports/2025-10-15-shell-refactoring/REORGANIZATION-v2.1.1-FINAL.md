@@ -35,12 +35,12 @@ last_review: 2025-10-22
 ## 📊 4 Fases de Reorganização
 
 ### Fase 1: AI/ML Tools → Infrastructure ✅
-**Objetivo:** Consolidar todos serviços AI/ML em `infrastructure/`
+**Objetivo:** Consolidar todos serviços AI/ML em `tools/`
 
 **Ações:**
-- ✅ Criado `infrastructure/langgraph/` (Dockerfile, server.py, requirements.txt)
-- ✅ Movido `backend/services/llamaindex/` → `infrastructure/llamaindex/`
-- ✅ Consolidado docker-compose em `infrastructure/compose/docker-compose.infra.yml`
+- ✅ Criado `tools/langgraph/` (Dockerfile, server.py, requirements.txt)
+- ✅ Movido `backend/services/llamaindex/` → `tools/llamaindex/`
+- ✅ Consolidado docker-compose em `tools/compose/docker-compose.infra.yml`
 - ✅ Removida pasta `/ai/` duplicada
 
 **Resultado:** Stack AI/ML unificado (LangGraph + LlamaIndex + Qdrant)
@@ -79,7 +79,7 @@ last_review: 2025-10-22
 
 **Ações:**
 - ✅ Criada pasta `/home/marce/projetos/infra/` para infraestrutura compartilhada
-- ✅ Movido `infrastructure/glm/` → `/home/marce/projetos/infra/glm/`
+- ✅ Movido `tools/glm/` → `/home/marce/projetos/infra/glm/`
 - ✅ Movidos arquivos `glm` e `glm-modos` da raiz
 - ✅ Criado README em `/home/marce/projetos/infra/`
 
@@ -139,7 +139,7 @@ TradingSystem/
 │   ├── compose/
 │   └── docs/
 │
-├── infrastructure/              # EXPANDIDO
+├── tools/              # EXPANDIDO
 │   ├── langgraph/               # NOVO - Multi-agent orchestration
 │   ├── llamaindex/              # MOVIDO - RAG service
 │   ├── compose/
@@ -189,13 +189,13 @@ TradingSystem/
 4. **`docs/COMMIT-CHECKLIST-v2.1.md`** - Checklist para commit
 
 ### 📖 Por Fase (4)
-1. **`infrastructure/AI-ML-REORGANIZATION.md`** - Fase 1
+1. **`tools/AI-ML-REORGANIZATION.md`** - Fase 1
 2. **`backend/data/DATA-UNIFICATION-SUMMARY.md`** - Fase 2
 3. **`backend/CLEANUP-SUMMARY.md`** - Fase 3
 4. **`docs/GLM-MIGRATION.md`** - Fase 4
 
 ### 📘 Guias de Referência (3)
-1. **`infrastructure/README.md`** - Infrastructure guide
+1. **`tools/README.md`** - Infrastructure guide
 2. **`backend/data/README.md`** - Data layer guide
 3. **`/home/marce/projetos/infra/README.md`** - External infra guide
 
@@ -208,8 +208,8 @@ TradingSystem/
 ## ✅ Checklist de Validação Final
 
 ### Fase 1: AI/ML ✅
-- [x] LangGraph em infrastructure/langgraph/
-- [x] LlamaIndex em infrastructure/llamaindex/
+- [x] LangGraph em tools/langgraph/
+- [x] LlamaIndex em tools/llamaindex/
 - [x] Docker compose consolidado
 - [x] Pasta /ai/ removida
 - [x] Scripts atualizados
@@ -294,8 +294,8 @@ git add .
 git commit -m "refactor: complete project reorganization v2.1.1
 
 PHASE 1 - AI/ML Tools Consolidation:
-- Create infrastructure/langgraph/ (Dockerfile, server.py, requirements)
-- Move backend/services/llamaindex/ to infrastructure/llamaindex/
+- Create tools/langgraph/ (Dockerfile, server.py, requirements)
+- Move backend/services/llamaindex/ to tools/llamaindex/
 - Consolidate docker-compose.infra.yml
 - Remove /ai/ directory
 
@@ -311,7 +311,7 @@ PHASE 3 - Backend Cleanup:
 - Deprecate Gemini documentation
 
 PHASE 4 - External Infrastructure:
-- Move infrastructure/glm/ to /home/marce/projetos/infra/glm/
+- Move tools/glm/ to /home/marce/projetos/infra/glm/
 - Create shared infrastructure folder
 - Externalize GLM for multi-project use
 
@@ -417,7 +417,7 @@ Clareza:         55% → 95%  (+73%)
 **`docs/REORGANIZATION-COMPLETE-SUMMARY.md`** - Sumário detalhado das 4 fases
 
 ### 🎯 Por Fase
-1. **AI/ML:** `infrastructure/AI-ML-REORGANIZATION.md`
+1. **AI/ML:** `tools/AI-ML-REORGANIZATION.md`
 2. **Data:** `backend/data/DATA-UNIFICATION-SUMMARY.md`
 3. **Cleanup:** `backend/CLEANUP-SUMMARY.md`
 4. **GLM:** `docs/GLM-MIGRATION.md`

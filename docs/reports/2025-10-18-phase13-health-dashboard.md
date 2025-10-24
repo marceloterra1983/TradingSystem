@@ -118,7 +118,7 @@ Weighted average with 40% frontmatter, 30% links, 30% duplicates.
 
 #### 1. Grafana Dashboard
 
-**Location**: `infrastructure/monitoring/grafana/dashboards/documentation-health.json`
+**Location**: `tools/monitoring/grafana/dashboards/documentation-health.json`
 
 **Panels** (11 total):
 
@@ -240,7 +240,7 @@ Reusable card component with:
 
 #### Prometheus Configuration
 
-**Location**: `infrastructure/monitoring/prometheus/prometheus.yml`
+**Location**: `tools/monitoring/prometheus/prometheus.yml`
 
 **Changes**:
 - Fixed `docs-api` job name → `documentation-api`
@@ -503,8 +503,8 @@ All performance targets met or exceeded.
 - [Automated Code Quality Guide](../context/ops/automated-code-quality.md)
 - [Documentation Standard](../DOCUMENTATION-STANDARD.md)
 - [Audit Scripts README](../../scripts/docs/README.md)
-- [Grafana Dashboard JSON](../../infrastructure/monitoring/grafana/dashboards/documentation-health.json)
-- [Prometheus Config](../../infrastructure/monitoring/prometheus/prometheus.yml)
+- [Grafana Dashboard JSON](../../tools/monitoring/grafana/dashboards/documentation-health.json)
+- [Prometheus Config](../../tools/monitoring/prometheus/prometheus.yml)
 
 ## Conclusion
 

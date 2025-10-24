@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Common Docker container startup issues and their solutions, documented from production incidents
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Container Startup Issues - Troubleshooting Guide
@@ -19,7 +19,7 @@ This document catalogs common Docker container startup issues encountered in the
 |---------|-------------|-----------|
 | Docusaurus | YAML frontmatter parsing error | Quote special characters in frontmatter values |
 | tp-capital-ingestion | Dependency not running | Start QuestDB first, then ingestion service |
-| b3-market-data | Wrong image/network | Rebuild from frontend/apps, attach to the active QuestDB network |
+| b3-market-data | Wrong image/network | Rebuild from apps, attach to the active QuestDB network |
 | Firecrawl | Containers stopped | Restart with `docker start` command |
 
 ## 📚 Detailed Solutions
@@ -163,11 +163,11 @@ docker logs apps-b3-market-data
 ```
 
 **Root Cause:**
-The container was built from the wrong location (`infrastructure/b3/services/b3-market-data-api`) which has complex dependencies on:
+The container was built from the wrong location (`tools/b3/services/b3-market-data-api`) which has complex dependencies on:
 - `b3-system` service (Python API that wasn't running)
 - Separate `b3_network` (isolated from QuestDB)
 
-The simpler version in `frontend/apps/b3-market-data` only needs QuestDB.
+The simpler version in `apps/b3-market-data` only needs QuestDB.
 
 **Solution:**
 
@@ -178,7 +178,7 @@ docker rm apps-b3-market-data
 
 2. **Build from the correct location:**
 ```bash
-cd frontend/apps/b3-market-data
+cd apps/b3-market-data
 docker build -t b3-market-data-simple:latest .
 ```
 
@@ -219,8 +219,8 @@ curl http://localhost:4010/overview
 
 | Location | Dependencies | Use Case |
 |----------|-------------|----------|
-| `frontend/apps/b3-market-data` | QuestDB only | ✅ Simple API for dashboard |
-| `infrastructure/b3/services/b3-market-data-api` | QuestDB + b3-system + traefik | Production B3 ecosystem |
+| `apps/b3-market-data` | QuestDB only | ✅ Simple API for dashboard |
+| `tools/b3/services/b3-market-data-api` | QuestDB + b3-system + traefik | Production B3 ecosystem |
 
 ---
 
@@ -273,7 +273,7 @@ curl -X POST "http://localhost:3002/v1/scrape" \
 **Alternative (if docker start fails):**
 ```bash
 cd /home/marce/projetos/TradingSystem
-docker compose -f infrastructure/firecrawl/firecrawl-source/docker-compose.yaml --env-file .env up -d
+docker compose -f tools/firecrawl/firecrawl-source/docker-compose.yaml --env-file .env up -d
 ```
 
 **Prevention:**
@@ -392,7 +392,7 @@ Contact the infrastructure team if:
 
 ## 📚 Related Documentation
 
-- Resumo dos serviços Docker: consulte `infrastructure/DOCKER-SERVICES-SUMMARY.md` no repositório.
+- Resumo dos serviços Docker: consulte `tools/DOCKER-SERVICES-SUMMARY.md` no repositório.
 - [Monitoramento (Prometheus/Grafana)](../monitoring/prometheus-setup.md)
 - [Service Ports Reference](../../frontend/features/feature-ports-page.md)
 - [Incident Response Playbook](../incidents/incidents.md)

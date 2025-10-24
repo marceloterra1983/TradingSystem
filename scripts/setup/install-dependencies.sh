@@ -39,7 +39,7 @@ Services:
     - tp-capital-signals
     - b3-market-data
     - documentation-api
-    - service-launcher
+    - status
   
   Frontend:
     - dashboard
@@ -65,7 +65,7 @@ declare -A SERVICES=(
     ["tp-capital-signals"]="frontend/apps/tp-capital"
     ["b3-market-data"]="frontend/apps/b3-market-data"
     ["documentation-api"]="backend/api/documentation-api"
-    ["service-launcher"]="frontend/apps/service-launcher"
+    ["status"]="frontend/apps/status"
     ["dashboard"]="frontend/apps/dashboard"
     ["docs"]="docs/docusaurus"
 )
@@ -134,7 +134,7 @@ else
     install_deps "tp-capital-signals" "frontend/apps/tp-capital"
     install_deps "b3-market-data" "frontend/apps/b3-market-data"
     install_deps "documentation-api" "backend/api/documentation-api"
-    install_deps "service-launcher" "frontend/apps/service-launcher"
+    install_deps "status" "frontend/apps/status"
     echo ""
     
     log_info "2. Frontend Applications"

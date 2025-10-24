@@ -6,7 +6,7 @@ domain: shared
 type: reference
 summary: Complete file list for commit of reorganization v2.1.0
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # 📝 Commit Checklist - Reorganization v2.1.0
@@ -21,12 +21,12 @@ last_review: 2025-10-17
 ## ✅ Arquivos Criados (10)
 
 ### Infrastructure
-- [x] `infrastructure/langgraph/Dockerfile`
-- [x] `infrastructure/langgraph/requirements.txt`
-- [x] `infrastructure/langgraph/server.py`
-- [x] `infrastructure/compose/docker-compose.infra.yml`
-- [x] `infrastructure/README.md`
-- [x] `infrastructure/AI-ML-REORGANIZATION.md`
+- [x] `tools/langgraph/Dockerfile`
+- [x] `tools/langgraph/requirements.txt`
+- [x] `tools/langgraph/server.py`
+- [x] `tools/compose/docker-compose.infra.yml`
+- [x] `tools/README.md`
+- [x] `tools/AI-ML-REORGANIZATION.md`
 
 ### Backend
 - [x] `backend/data/README.md`
@@ -45,7 +45,7 @@ last_review: 2025-10-17
 ### Scripts
 - [x] `start-all-stacks.sh`
 - [x] `stop-all-stacks.sh`
-- [x] `infrastructure/scripts/setup-linux-environment.sh`
+- [x] `tools/scripts/setup-linux-environment.sh`
 
 ### Configuração
 - [x] `.gitignore`
@@ -56,7 +56,7 @@ last_review: 2025-10-17
 - [x] `docs/context/backend/guides/gemini-installation-wsl.md` (deprecated)
 
 ### Docker
-- [x] `infrastructure/compose/docker-compose.infra.yml` (substituiu ai/compose/)
+- [x] `tools/compose/docker-compose.infra.yml` (substituiu ai/compose/)
 
 ---
 
@@ -76,7 +76,7 @@ last_review: 2025-10-17
 
 ## 🔄 Movimentações (4)
 
-- [x] `backend/services/llamaindex/` → `infrastructure/llamaindex/`
+- [x] `backend/services/llamaindex/` → `tools/llamaindex/`
 - [x] `data/context7/` → `backend/data/runtime/context7/`
 - [x] `data/exa/` → `backend/data/runtime/exa/`
 - [x] `data/langgraph/` → `backend/data/runtime/langgraph/`
@@ -96,9 +96,9 @@ git add .
 git commit -m "refactor: project reorganization v2.1.0 - clean architecture
 
 PHASE 1 - AI/ML Tools Consolidation:
-- Create infrastructure/langgraph/ service (Dockerfile, server.py, requirements.txt)
-- Move backend/services/llamaindex/ to infrastructure/llamaindex/
-- Consolidate docker-compose.infra.yml in infrastructure/compose/
+- Create tools/langgraph/ service (Dockerfile, server.py, requirements.txt)
+- Move backend/services/llamaindex/ to tools/llamaindex/
+- Consolidate docker-compose.infra.yml in tools/compose/
 - Remove /ai/ directory (duplicated)
 
 PHASE 2 - Data Layer Unification:
@@ -131,7 +131,7 @@ IMPACT:
 - 0% breaking changes
 - 100% backward compatible
 
-BREAKING CHANGE: Docker compose path changed from ai/compose/ to infrastructure/compose/
+BREAKING CHANGE: Docker compose path changed from ai/compose/ to tools/compose/
 See docs/REORGANIZATION-INDEX.md for complete documentation.
 "
 ```
@@ -150,11 +150,11 @@ See docs/REORGANIZATION-INDEX.md for complete documentation.
 ### Testes
 ```bash
 # Validar docker compose
-docker compose -f infrastructure/compose/docker-compose.infra.yml config
+docker compose -f tools/compose/docker-compose.infra.yml config
 
 # Verificar estrutura
 find backend/data -type d
-find infrastructure/langgraph infrastructure/llamaindex
+find tools/langgraph tools/llamaindex
 
 # Testar scripts
 bash start-all-stacks.sh

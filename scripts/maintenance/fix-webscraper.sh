@@ -43,7 +43,7 @@ echo ""
 echo "🗄️  Step 4: Checking database..."
 if ! docker ps | grep -q "data-frontend-apps"; then
     echo "   ❌ Database container 'data-frontend-apps' is not running!"
-    echo "   Please start it with: docker compose -f infrastructure/compose/docker-compose.frontend-apps.yml up -d"
+    echo "   Please start it with: docker compose -f tools/compose/docker-compose.frontend-apps.yml up -d"
     exit 1
 fi
 echo "   ✅ Database container is running"

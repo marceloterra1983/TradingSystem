@@ -110,19 +110,27 @@ backend/data/backups/**
 # ============================================
 # Secrets & Configuration (Critical)
 # ============================================
-*.env
+# Root .env files - only .env.local is gitignored
 *.env.local
-*.env.development
-*.env.production
 .env.*.local
-.env
 .env.backup-*
 .env.test
+
+# Service-level .env files (should NOT exist per project rules)
+# These are blocked to prevent accidental commits
+backend/api/**/.env
+backend/services/**/.env
+frontend/apps/**/.env
+
+# Allow template and default files
 !**/.env.example
 !.env.example
 !.env.*.example
 !config/.env.defaults
 !config/container-images.env
+!config/docker.env
+
+# Other sensitive files
 appsettings.Development.json
 appsettings.Production.json
 secrets.json
@@ -218,6 +226,11 @@ db.json
 # ============================================
 /uploads/**
 !/uploads/.gitkeep
+backend/api/*/uploads/*
+!backend/api/*/uploads/.gitkeep
+backend/api/*/db/*
+!backend/api/*/db/.gitkeep
+!backend/api/*/db/migrations/
 
 # ============================================
 # Frontend Specific

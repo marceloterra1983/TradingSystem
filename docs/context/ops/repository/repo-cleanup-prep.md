@@ -10,7 +10,7 @@ domain: ops
 type: reference
 summary: Captures prerequisites for history cleanup and submodule conversion, including local deltas and upstream references
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 ## Agent-MCP Local Delta
@@ -43,4 +43,4 @@ last_review: 2025-10-17
 
 ## Tooling
 
-- Script: `infrastructure/scripts/rewrite-history.sh` automates the filter-repo process (see history rewrite plan).
+- Script: `tools/scripts/rewrite-history.sh` automates the filter-repo process (see history rewrite plan).

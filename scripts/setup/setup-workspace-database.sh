@@ -8,7 +8,7 @@ echo ""
 # Check if container is running
 if ! docker ps | grep -q "data-frontend-apps"; then
     echo "❌ Database container 'data-frontend-apps' is not running!"
-    echo "   Start it with: docker compose -f infrastructure/compose/docker-compose.frontend-apps.yml up -d"
+    echo "   Start it with: docker compose -f tools/compose/docker-compose.frontend-apps.yml up -d"
     exit 1
 fi
 

@@ -23,7 +23,7 @@ const mapFirecrawlError = (error) => {
   return null;
 };
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   const firecrawlMapping = mapFirecrawlError(err);
 
   let statusCode =

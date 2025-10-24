@@ -1,6 +1,6 @@
 #!/bin/bash
 # Shared health check functions for TradingSystem services
-# Usage: source "$PROJECT_ROOT/infrastructure/scripts/health-checks.sh"
+# Usage: source "$PROJECT_ROOT/tools/scripts/health-checks.sh"
 
 # Check MCP server health using multiple fallback endpoints
 # Args: $1 - port number

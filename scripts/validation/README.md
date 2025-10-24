@@ -120,7 +120,7 @@ bash scripts/docker/start-stacks.sh
 - [VALIDATION-CHECKLIST.md](../../VALIDATION-CHECKLIST.md) - Complete validation checklist
 - [FREEZE-NOTICE.md](../../FREEZE-NOTICE.md) - Operational freeze status
 - [Phase 6 Validation Report](../../docs/context/ops/validation/phase6-validation-report.md) - Detailed results
-- [Container Naming Convention](../../docs/context/ops/infrastructure/container-naming.md) - Naming standards
+- [Container Naming Convention](../../docs/context/ops/tools/container-naming.md) - Naming standards
 
 ## Support
 

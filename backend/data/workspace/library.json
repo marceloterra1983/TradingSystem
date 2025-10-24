@@ -1,0 +1,69 @@
+{
+  "items": [
+    {
+      "id": "1f9b6598-6e08-4825-a686-638a5d6b0e4a",
+      "title": "Teste API",
+      "description": "Item de teste para verificar API",
+      "category": "dashboard",
+      "priority": "medium",
+      "status": "new",
+      "tags": [
+        "teste"
+      ],
+      "createdAt": "2025-10-23T22:45:24.940Z",
+      "updatedAt": null
+    },
+    {
+      "id": "9cea3147-a560-43b8-b12a-20093fe15f33",
+      "title": "Teste via Dashboard",
+      "description": "Teste do proxy",
+      "category": "dashboard",
+      "priority": "low",
+      "status": "new",
+      "tags": [
+        "proxy"
+      ],
+      "createdAt": "2025-10-23T22:46:06.213Z",
+      "updatedAt": null
+    },
+    {
+      "id": "0172a227-fc17-488b-9d6c-6411aaa5f666",
+      "title": "Implementar dark mode",
+      "description": "Adicionar suporte completo a tema escuro em toda aplicação",
+      "category": "dashboard",
+      "priority": "high",
+      "status": "new",
+      "tags": [
+        "ui",
+        "ux"
+      ],
+      "createdAt": "2025-10-23T22:46:19.740Z",
+      "updatedAt": null
+    },
+    {
+      "id": "0c160b10-4aed-4bca-9f96-704f31d3ccf9",
+      "title": "Otimizar queries SQL",
+      "description": "Melhorar performance das queries do TimescaleDB",
+      "category": "banco-dados",
+      "priority": "critical",
+      "status": "new",
+      "tags": [
+        "performance",
+        "database"
+      ],
+      "createdAt": "2025-10-23T22:46:19.745Z",
+      "updatedAt": null
+    },
+    {
+      "id": "239bf2c1-5d99-40f1-ba9a-d47e04a20be6",
+      "title": "teste",
+      "description": "teste",
+      "category": "documentacao",
+      "priority": "medium",
+      "status": "new",
+      "tags": [],
+      "createdAt": "2025-10-23T22:50:04.610Z",
+      "updatedAt": null
+    }
+  ]
+}

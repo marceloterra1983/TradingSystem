@@ -15,6 +15,7 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "cd frontend/apps/dashboard && npm run lint",
+    "lint:fix": "eslint . --fix",
     "type-check": "cd frontend/apps/dashboard && npm run type-check",
     "validate-docs": "python3 scripts/docs/validate-frontmatter.py --docs-dir ./docs/context ./docs",
     "validate-docs-staged": "bash scripts/docs/validate-frontmatter-staged.sh"

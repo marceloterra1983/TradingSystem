@@ -113,7 +113,7 @@ The following links are broken or unreachable:
 #### [`docs/context/backend/api/firecrawl-proxy.md`](../context/backend/api/firecrawl-proxy.md)
 - 🟡 Line 321: [Quick Start guide](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md#quick-start) - HTTP 404
 - 🟡 Line 325: [Firecrawl Proxy - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md#production-deployment) - HTTP 404
-- 🟡 Line 326: [Firecrawl Infrastructure - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/infrastructure/firecrawl/README.md#production-deployment) - HTTP 404
+- 🟡 Line 326: [Firecrawl Infrastructure - Production Deployment](https://github.com/your-org/TradingSystem/blob/main/tools/firecrawl/README.md#production-deployment) - HTTP 404
 - 🟡 Line 333: [Testing Guide](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md#testing) - HTTP 404
 - 🟡 Line 342: [Service Management](https://github.com/your-org/TradingSystem/blob/main/backend/api/firecrawl-proxy/README.md#service-management) - HTTP 404
 - ... and 10 more broken links in this file
@@ -125,25 +125,25 @@ The following links are broken or unreachable:
 - 🟡 Line 441: [`init-database.sh`](https://github.com/marceloterra/TradingSystem/blob/main/backend/api/webscraper-api/scripts/init-database.sh) - HTTP 404
 
 #### [`docs/context/backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md`](../context/backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md)
-- 🟡 Line 220: [`infrastructure/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/agno-agents/README.md) - HTTP 404
-- 🟡 Line 221: [`infrastructure/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/monitoring/prometheus/rules/alert-rules.yml) - HTTP 404
+- 🟡 Line 220: [`tools/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/tools/agno-agents/README.md) - HTTP 404
+- 🟡 Line 221: [`tools/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/tools/monitoring/prometheus/rules/alert-rules.yml) - HTTP 404
 
 #### [`docs/context/backend/data/guides/database-ui-tools.md`](../context/backend/data/guides/database-ui-tools.md)
-- 🟡 Line 24: [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md) - HTTP 404
-- 🟡 Line 354: [TimescaleDB infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md) - HTTP 404
-- 🟡 Line 508: [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md) - HTTP 404
+- 🟡 Line 24: [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/tools/timescaledb/README.md) - HTTP 404
+- 🟡 Line 354: [TimescaleDB infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/tools/timescaledb/README.md) - HTTP 404
+- 🟡 Line 508: [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/tools/timescaledb/README.md) - HTTP 404
 
 #### [`docs/context/backend/guides/agno-agents-guide.md`](../context/backend/guides/agno-agents-guide.md)
-- 🟡 Line 239: [`infrastructure/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/agno-agents/README.md) - HTTP 404
-- 🟡 Line 240: [`infrastructure/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/monitoring/prometheus/rules/alert-rules.yml) - HTTP 404
+- 🟡 Line 239: [`tools/agno-agents/README.md`](https://github.com/marceloterra/TradingSystem/blob/main/tools/agno-agents/README.md) - HTTP 404
+- 🟡 Line 240: [`tools/monitoring/prometheus/rules/alert-rules.yml`](https://github.com/marceloterra/TradingSystem/blob/main/tools/monitoring/prometheus/rules/alert-rules.yml) - HTTP 404
 
 #### [`docs/context/backend/guides/langgraph-implementation-guide.md`](../context/backend/guides/langgraph-implementation-guide.md)
 - 🔴 Line 498: [PRD - Agno Integration](../../../shared/product/prd/pt/agno-integration-prd.md) - File not found
 - 🔴 Line 499: [ADR-0002 - Agno Framework](../../architecture/decisions/2025-10-16-adr-0002-agno-framework.md) - File not found
 
 #### [`docs/context/backend/guides/langgraph-studio-guide.md`](../context/backend/guides/langgraph-studio-guide.md)
-- 🟡 Line 410: [LangGraph Service](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/langgraph/README.md) - HTTP 404
-- 🟡 Line 411: [Development vs Production Comparison](https://github.com/marceloterra1983/TradingSystem/blob/main/infrastructure/langgraph/DEVELOPMENT.md) - HTTP 404
+- 🟡 Line 410: [LangGraph Service](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/langgraph/README.md) - HTTP 404
+- 🟡 Line 411: [Development vs Production Comparison](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/langgraph/DEVELOPMENT.md) - HTTP 404
 
 #### [`docs/context/frontend/architecture/decisions/2025-10-11-adr-0001-use-zustand-for-state-management.md`](../context/frontend/architecture/decisions/2025-10-11-adr-0001-use-zustand-for-state-management.md)
 - 🟡 Line 189: [React State Management in 2024](https://blog.logrocket.com/react-state-management-2024/) - HTTP 404
@@ -293,7 +293,7 @@ The following files have identical names in different directories:
 - [`docs/context/backend/data/schemas/logging/overview.md`](../context/backend/data/schemas/logging/overview.md)
 - [`docs/context/backend/data/schemas/trading-core/overview.md`](../context/backend/data/schemas/trading-core/overview.md)
 - [`docs/context/frontend/architecture/overview.md`](../context/frontend/architecture/overview.md)
-- [`docs/context/ops/infrastructure/overview.md`](../context/ops/infrastructure/overview.md)
+- [`docs/context/ops/tools/overview.md`](../context/ops/tools/overview.md)
 
 **Filename: `glossary.md`** (2 files)
 - [`docs/context/backend/data/glossary.md`](../context/backend/data/glossary.md)

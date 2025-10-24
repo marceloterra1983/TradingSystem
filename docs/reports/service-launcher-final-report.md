@@ -157,7 +157,7 @@ docs/reports/
 
 **OpenSpec Proposal:**
 ```
-infrastructure/openspec/changes/fix-service-launcher-critical-issues/
+tools/openspec/changes/fix-service-launcher-critical-issues/
 ├── proposal.md              (~70 linhas)
 ├── design.md                (~400 linhas)
 ├── tasks.md                 (~200 linhas)
@@ -521,10 +521,10 @@ konsole --workdir "/path" --hold -e bash -c "command"
 19. `docs/reports/service-launcher-final-report.md`
 
 **OpenSpec (4):**
-20. `infrastructure/openspec/.../proposal.md`
-21. `infrastructure/openspec/.../design.md`
-22. `infrastructure/openspec/.../tasks.md`
-23. `infrastructure/openspec/.../specs/service-launcher/spec.md`
+20. `tools/openspec/.../proposal.md`
+21. `tools/openspec/.../design.md`
+22. `tools/openspec/.../tasks.md`
+23. `tools/openspec/.../specs/service-launcher/spec.md`
 
 **Git Guides (2):**
 24. `COMMIT_MESSAGE.md`
@@ -641,7 +641,7 @@ konsole:             ~120-250ms
 - Config: [ENV_VARIABLES.md](../../../frontend/apps/service-launcher/ENV_VARIABLES.md)
 
 **OpenSpec:**
-- Proposal: [infrastructure/openspec/changes/fix-service-launcher-critical-issues/](../../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/)
+- Proposal: [tools/openspec/changes/fix-service-launcher-critical-issues/](../../../tools/openspec/changes/fix-service-launcher-critical-issues/)
 
 ---
 
@@ -693,7 +693,7 @@ scrape_configs:
 # 1. Fazer commit
 git add frontend/apps/service-launcher/
 git add docs/
-git add infrastructure/openspec/
+git add tools/openspec/
 git commit -F COMMIT_MESSAGE.md
 
 # 2. Push

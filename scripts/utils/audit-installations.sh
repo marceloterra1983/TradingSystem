@@ -12,7 +12,7 @@ NODE_PROJECTS=(
   "backend/api/workspace"
   "frontend/apps/b3-market-data"
   "backend/api/documentation-api"
-  "frontend/apps/service-launcher"
+  "frontend/apps/status"
   "frontend/apps/tp-capital"
 )
 

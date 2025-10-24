@@ -13,7 +13,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 COMPOSE_CMD=()
-COMPOSE_FILE="${ROOT_DIR}/infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
+COMPOSE_FILE="${ROOT_DIR}/tools/firecrawl/firecrawl-source/docker-compose.yaml"
 
 section() {
   echo -e "${BLUE}═══════════════════════════════════════════════${NC}"
@@ -54,8 +54,8 @@ start_firecrawl() {
 
   cd "$ROOT_DIR"
 
-  if [[ ! -d "infrastructure/firecrawl/firecrawl-source" ]]; then
-    echo -e "${RED}❌ Firecrawl submodule not found (infrastructure/firecrawl/firecrawl-source).${NC}"
+  if [[ ! -d "tools/firecrawl/firecrawl-source" ]]; then
+    echo -e "${RED}❌ Firecrawl submodule not found (tools/firecrawl/firecrawl-source).${NC}"
     echo -e "${YELLOW}Run:${NC} git submodule update --init --recursive"
     exit 1
   fi

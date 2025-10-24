@@ -6,7 +6,7 @@ domain: ops
 type: runbook
 summary: Guia operacional para subir e manter o stack de monitoramento Prometheus/Grafana do TradingSystem
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Prometheus Setup
@@ -32,7 +32,7 @@ Este documento descreve como inicializar e operar o stack de monitoramento adota
 ## Subindo o stack
 
 ```powershell
-cd infrastructure/monitoring
+cd tools/monitoring
 $env:SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/...'
 $env:GITHUB_TOKEN = 'ghp_xxx'
 $env:GITHUB_OWNER = 'org-ou-usuario'
@@ -51,12 +51,12 @@ Serviços expostos:
 
 > Para expor o `alert-router` externamente, adicione um mapeamento como `"7085:8080"` ao serviço correspondente no `docker compose` local e atualize o webhook configurado no Alertmanager, quando necessário.
 
-> O script `infrastructure/scripts/start-trading-system-dev.ps1 -StartMonitoring` dispara o mesmo comando em uma janela separada.
+> O script `tools/scripts/start-trading-system-dev.ps1 -StartMonitoring` dispara o mesmo comando em uma janela separada.
 
 ## Estrutura de arquivos
 
 ```
-infrastructure/monitoring/
+tools/monitoring/
 ├─ docker-compose.yml          # Define Prometheus, Alertmanager, Grafana, alert-router
 ├─ prometheus/
 │  ├─ prometheus.yml           # Jobs de scrape + alertmanager

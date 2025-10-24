@@ -380,7 +380,7 @@ export class SystemsService {
     try {
       new URL(string);
       return string.startsWith('http://') || string.startsWith('https://');
-    } catch (_) {
+    } catch (_err) {
       return false;
     }
   }

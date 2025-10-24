@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Configuração padronizada do Nginx para expor os serviços do TradingSystem sob um único domínio interno.
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Nginx Reverse Proxy Playbook
@@ -29,7 +29,7 @@ last_review: 2025-10-17
 ## Estrutura de Arquivos
 
 ```text
-infrastructure/nginx-proxy/
+tools/nginx-proxy/
 ├── nginx.conf                    # Include principal
 ├── tradingsystem.conf            # Virtual host (tradingsystem.local)
 ├── api-proxy.conf                # Regras para APIs HTTP
@@ -51,11 +51,11 @@ infrastructure/nginx-proxy/
 
 2. **Copiar arquivos**
    ```bash
-   sudo cp infrastructure/nginx-proxy/nginx.conf /etc/nginx/nginx.conf
-   sudo cp infrastructure/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
+   sudo cp tools/nginx-proxy/nginx.conf /etc/nginx/nginx.conf
+   sudo cp tools/nginx-proxy/tradingsystem.conf /etc/nginx/sites-available/
    sudo ln -sf /etc/nginx/sites-available/tradingsystem.conf /etc/nginx/sites-enabled/tradingsystem.conf
    sudo mkdir -p /etc/nginx/includes/tradingsystem
-   sudo cp infrastructure/nginx-proxy/*-proxy.conf /etc/nginx/includes/tradingsystem/
+   sudo cp tools/nginx-proxy/*-proxy.conf /etc/nginx/includes/tradingsystem/
    ```
 
 3. **Aplicar e testar**

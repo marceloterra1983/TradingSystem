@@ -6,7 +6,7 @@ domain: backend
 type: reference
 summary: Complete template for creating new backend services with proper .env configuration
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # New Backend Service Template
@@ -49,7 +49,7 @@ last_review: 2025-10-17
 ### Phase 5: Documentation
 - [ ] Create service README
 - [ ] Document in `docs/context/backend/api/`
-- [ ] Update `infrastructure/README.md` (port table)
+- [ ] Update `tools/README.md` (port table)
 - [ ] Add to main README service list
 
 ---
@@ -264,7 +264,7 @@ npm run dev
 ## 🐳 Docker Compose Template
 
 ```yaml
-# infrastructure/compose/docker-compose.my-service.yml
+# tools/compose/docker-compose.my-service.yml
 version: '3.8'
 
 services:
@@ -351,8 +351,8 @@ npm run dev
 curl http://localhost:6000/health
 
 # 4. Test Docker (if created)
-docker-compose -f infrastructure/compose/docker-compose.my-service.yml config
-docker-compose -f infrastructure/compose/docker-compose.my-service.yml up -d
+docker-compose -f tools/compose/docker-compose.my-service.yml config
+docker-compose -f tools/compose/docker-compose.my-service.yml up -d
 ```
 
 ---

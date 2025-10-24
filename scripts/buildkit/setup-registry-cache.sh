@@ -6,10 +6,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 echo "Configurando Registry Local para BuildKit Cache..."
 
 # Garantir diretório de configuração
-mkdir -p "${ROOT_DIR}/infrastructure/registry"
+mkdir -p "${ROOT_DIR}/tools/registry"
 
 # Configurar registry com suporte a cache
-cat > "${ROOT_DIR}/infrastructure/registry/config.yml" << 'EOF'
+cat > "${ROOT_DIR}/tools/registry/config.yml" << 'EOF'
 version: 0.1
 log:
   fields:
@@ -49,7 +49,7 @@ docker run -d \
   --name "${CONTAINER_NAME}" \
   --restart always \
   -p 5000:5000 \
-  -v "${ROOT_DIR}/infrastructure/registry/config.yml:/etc/docker/registry/config.yml:ro" \
+  -v "${ROOT_DIR}/tools/registry/config.yml:/etc/docker/registry/config.yml:ro" \
   -v "${VOLUME_NAME}:/var/lib/registry" \
   registry:2
 

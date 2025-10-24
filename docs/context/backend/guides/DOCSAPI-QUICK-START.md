@@ -6,7 +6,7 @@ domain: backend
 type: guide
 summary: Quick start guide for Documentation API setup, configuration, and basic usage
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # 🚀 DocsAPI - Quick Start Guide
@@ -38,13 +38,13 @@ This will:
 ### Step 1: Start TimescaleDB
 
 ```bash
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d timescaledb
+docker compose -f tools/compose/docker-compose.timescale.yml up -d timescaledb
 ```
 
 ### Step 2: Start DocsAPI
 
 ```bash
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d docs-api
+docker compose -f tools/compose/docker-compose.docs.yml up -d docs-api
 ```
 
 ### Step 3: Verify
@@ -97,11 +97,11 @@ bash scripts/docker/check-docs-services.sh
 
 ```bash
 # Check logs
-docker compose -f infrastructure/compose/docker-compose.docs.yml logs docs-api
+docker compose -f tools/compose/docker-compose.docs.yml logs docs-api
 
 # Rebuild
-docker compose -f infrastructure/compose/docker-compose.docs.yml build --no-cache docs-api
-docker compose -f infrastructure/compose/docker-compose.docs.yml up -d docs-api
+docker compose -f tools/compose/docker-compose.docs.yml build --no-cache docs-api
+docker compose -f tools/compose/docker-compose.docs.yml up -d docs-api
 ```
 
 ### TimescaleDB connection error
@@ -111,7 +111,7 @@ docker compose -f infrastructure/compose/docker-compose.docs.yml up -d docs-api
 docker ps | grep data-timescaledb
 
 # If not, start it
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d timescaledb
+docker compose -f tools/compose/docker-compose.timescale.yml up -d timescaledb
 ```
 
 ### Port 3400 already in use

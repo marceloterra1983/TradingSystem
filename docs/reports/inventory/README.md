@@ -25,4 +25,4 @@ Use these files to review historical infrastructure snapshots collected during m
 Excel workbooks (`.xlsx`) are preferred for easier filtering and visualization. CSV exports are acceptable when spreadsheets are unavailable.
 
 ## Related Documentation
-Refer to `docs/context/ops/infrastructure/container-naming.md` for naming conventions and broader infrastructure context.
+Refer to `docs/context/ops/tools/container-naming.md` for naming conventions and broader infrastructure context.

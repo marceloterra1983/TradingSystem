@@ -20,7 +20,7 @@ const __dirname = path.dirname(__filename);
 
 const DEFAULT_EXPORT_DIR =
   process.env.WEBSCRAPER_EXPORT_DIR || path.join(process.cwd(), 'tmp', 'webscraper-exports');
-const EXPORT_TTL_HOURS = Number(process.env.WEBSCRAPER_EXPORT_TTL_HOURS ?? 24);
+const _EXPORT_TTL_HOURS = Number(process.env.WEBSCRAPER_EXPORT_TTL_HOURS ?? 24);
 const CLEANUP_INTERVAL_HOURS = Number(process.env.WEBSCRAPER_EXPORT_CLEANUP_INTERVAL_HOURS ?? 6);
 const MAX_ROWS = Number(process.env.WEBSCRAPER_EXPORT_MAX_ROWS ?? 100_000);
 const MAX_FILE_SIZE_MB = Number(process.env.WEBSCRAPER_EXPORT_MAX_FILE_SIZE_MB ?? 500);
@@ -794,7 +794,7 @@ export async function generateExportFiles(exportJob) {
   const filesGenerated = new Set(); // Keep track of all generated files
 
   // Estimate size before proceeding
-  const { estimatedBytes, estimatedRows } = await estimateExportSize(
+  const { estimatedBytes, estimatedRows: _estimatedRows } = await estimateExportSize(
     exportJob.exportType,
     exportJob.formats,
     exportJob.filters || {}

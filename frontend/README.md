@@ -1,6 +1,19 @@
+---
+title: 🎨 Frontend - TradingSystem
+sidebar_position: 1
+tags:
+  - frontend
+domain: frontend
+type: index
+summary: '> TradingSystem Frontend - Sistema completo de dashboard para documentação,
+  monitoramento e gestão d'
+status: active
+last_review: '2025-10-23'
+---
+
 # 🎨 Frontend - TradingSystem
 
-> **TradingSystem Frontend Applications** - Documentation, monitoring and trading dashboard
+> **TradingSystem Frontend** - Sistema completo de dashboard para documentação, monitoramento e gestão de trading
 >
 > **Stack:** React 18 + TypeScript + Vite + Tailwind CSS  
 > **Architecture:** Component-based, Clean Architecture  
@@ -8,827 +21,945 @@
 
 ---
 
-## 📋 Overview
+## 📋 Visão Geral
 
-The TradingSystem frontend is organized in a modular structure with independent applications and shared assets.
+O frontend do TradingSystem é organizado em estrutura modular com aplicação principal e recursos compartilhados.
 
 ```text
 frontend/
-├── apps/              # Frontend applications
-│   └── dashboard/    # Main dashboard (current single app)
-│
-└── shared/            # Shared resources
-    └── assets/       # Brand assets, icons, logos
+├── dashboard/        # Aplicação principal (React + TypeScript)
+├── shared/           # Recursos compartilhados (branding)
+└── tokens/           # Design tokens (cores, espaçamento)
 ```
 
 ---
 
-## 🎯 Applications
+## 🎯 Dashboard - Aplicação Principal
 
-### Dashboard (Port 3103)
+**URL:** http://localhost:3103  
+**Versão:** 1.2.0  
+**Status:** ✅ Totalmente Funcional
 
-**Main TradingSystem application** - Complete system for documentation, monitoring and trading management.
+### Características Principais
 
-**URL:** <http://localhost:3103>  
-**Version:** 1.2.0  
-**Status:** ✅ Production Ready
-
-**Features:**
-
-- 📚 Documentation system with 41 pages
-- 📊 B3 market data visualization
-- 📡 TP Capital signals monitoring
-- 🔌 Connection and service management
-- 📈 Real-time analytics and metrics
-- ⚙️ Settings and administrative tools
-
-**Location:** `apps/dashboard/`  
-**Documentation:** [apps/dashboard/README.md](apps/dashboard/README.md)
+- 📚 **46 páginas** interativas de documentação e gestão
+- 📊 **B3 Market Data** - Visualização de dados do mercado brasileiro
+- 📡 **TP Capital** - Monitoramento de sinais de opções via Telegram
+- 🔌 **Connections** - Gestão de conexões e serviços
+- 📈 **Analytics** - Métricas em tempo real
+- ⚙️ **Settings** - Ferramentas administrativas
 
 ---
 
-## 🏗️ Technology Stack
+## 🏗️ Stack Tecnológico
 
 ### Core Framework
-
-```json
-{
-  "framework": "React 18.2.0",
-  "language": "TypeScript 5.3.3",
-  "buildTool": "Vite 7.1.10",
-  "runtime": "Node.js 22+",
-  "packageManager": "npm"
-}
+```
+React 18.2.0          - Framework UI
+TypeScript 5.3.3      - Tipagem estática
+Vite 7.1.10           - Build tool e dev server
+Node.js 22+           - Runtime
+npm                   - Package manager
 ```
 
 ### UI & Styling
-
-```json
-{
-  "styling": "Tailwind CSS 3.4.1",
-  "components": "shadcn/ui + Radix UI",
-  "typography": "@tailwindcss/typography 0.5.19",
-  "icons": "Lucide React 0.309.0",
-  "animations": "Framer Motion 12.23.22"
-}
+```
+Tailwind CSS 3.4.1             - CSS utility-first
+shadcn/ui + Radix UI           - Componentes acessíveis
+@tailwindcss/typography 0.5.19 - Typography
+Lucide React 0.309.0           - Ícones
+Framer Motion 12.23.22         - Animações
 ```
 
-### State & Data
-
-```json
-{
-  "stateManagement": "Zustand 4.4.7",
-  "serverState": "@tanstack/react-query 5.17.19",
-  "http": "Axios 1.6.5",
-  "markdown": "react-markdown 10.1.0"
-}
+### State & Data Management
+```
+Zustand 4.4.7                  - State management global
+@tanstack/react-query 5.17.19  - Server state & caching
+Axios 1.6.5                    - HTTP client
+react-markdown 10.1.0          - Renderização de markdown
 ```
 
 ### Feature Libraries
-
-```json
-{
-  "dragDrop": "@dnd-kit 6.3.1",
-  "charts": "Recharts 2.10.3",
-  "dates": "date-fns 3.0.6",
-  "routing": "Custom implementation"
-}
+```
+@dnd-kit 6.3.1        - Drag-and-drop
+Recharts 2.10.3       - Gráficos
+date-fns 3.0.6        - Manipulação de datas
 ```
 
-### Testing Stack
-
-```json
-{
-  "unitTests": "Vitest 3.2.4",
-  "testing": "@testing-library/react 14.1.2",
-  "coverage": "@vitest/coverage-v8 3.2.4"
-}
+### Testing
+```
+Vitest 3.2.4                    - Test runner
+@testing-library/react 14.1.2   - Testing utilities
+@vitest/coverage-v8 3.2.4       - Cobertura de testes
 ```
 
 ---
 
-## 📱 Available Pages (41)
+## 🚀 Quick Start
 
-### 📊 Dashboard & Insights
-
-- **DashboardPage** - System overview
-- **OverviewPage** - General overview
-- **MetricsPage** - System metrics
-- **PerformancePage** - Performance and analysis
-
-### 📚 Documentation
-
-- **DocsPage** - Documentation hub
-- **DocsSpecsPage** - Technical specifications
-- **DocumentationPage** - Documentation system
-- **DocumentationStatsPageSimple** - Documentation statistics
-- **DocumentationSystemsPageSimple** - Documented systems
-- **DocusaurusPage** - Docusaurus integration
-- **PRDsPage** - Product Requirements Documents
-- **ADRPage** - Architecture Decision Records
-- **FeaturesPage** - Features and functionalities
-- **RoadmapPage** - Project roadmap
-- **MetadataPage** - Documentation metadata
-
-### 💡 Idea Bank
-
-- **BancoIdeiasPage** - Trading ideas management
-- **BancoIdeiasPageNew** - New version with improvements
-- **EscopoPage** - Scope and planning
-- **EscopoPageNew** - New scope version
-
-### 📡 Connections & Integrations
-
-- **ConnectionsPage** - Connection management (Telegram bots)
-- **ConnectionsPageNew** - New version
-- **TelegramDataPage** - Telegram data
-- **SubscriptionsPage** - Subscriptions and webhooks
-
-### 📈 Trading & Market
-
-- **B3MarketPage** - B3 market data
-- **MarketOverviewPage** - Market overview
-- **SignalsPage** - Trading signals
-- **TPCapitalOpcoesPage** - TP Capital options
-- **LiveFeedPage** - Live feed
-- **OrdersPage** - Order management
-- **PositionsPage** - Open positions
-
-### 🛡️ Risk & Control
-
-- **RiskControlsPage** - Risk controls
-- **RiskLimitsPage** - Risk limits
-
-### 🤖 ML & AI
-
-- **MLModelPage** - Machine Learning models
-- **MCPControlPage** - Agent-MCP control
-- **BacktestingPage** - Strategy backtesting
-
-### 📊 Data & Logs
-
-- **ParquetBrowserPage** - Parquet file browser
-- **LogsColetaPage** - Data collection logs
-- **LogsDashboardPage** - Logs dashboard
-
-### ⚙️ System & Settings
-
-- **SettingsPage** - System settings
-- **AdminToolsPage** - Administrative tools
-- **BackupRestorePage** - Backup and restore
-
----
-
-## 🧩 UI Components
-
-### Layout Components (`components/layout/`)
-
-- `Layout.tsx` - Main layout with sidebar
-- `LayoutHeader.tsx` - Header with navigation
-- `LayoutSidebar.tsx` - Collapsible sidebar
-- `PageContent.tsx` - Content container
-
-### UI Library (`components/ui/`)
-
-Complete component library based on shadcn/ui:
-
-- Buttons (action-buttons, variants)
-- Cards (collapsible, customizable)
-- Forms (inputs, selects, textareas)
-- Data Display (tables, charts, badges)
-- Feedback (toasts, dialogs, tooltips)
-- Navigation (tabs, command palette)
-
-**Documentation:** [apps/dashboard/src/components/ui/README.md](apps/dashboard/src/components/ui/README.md)
-
-### Trading Components (`components/trading/`)
-
-- Specialized trading components
-- Market data visualization
-- Execution controls
-
----
-
-## 🎨 Shared Assets
-
-### Branding (`shared/assets/branding/`)
-
-TradingSystem logos and visual identity:
-
-- **`logo.svg`** - Complete logo (horizontal)
-- **`logo-dark.svg`** - Logo for dark mode
-- **`logo-compact.svg`** - Compact logo (square)
-- **`logo-icon.svg`** - Icon only
-- **`preview.html`** - Logo preview
-- **`README.md`** - Brand usage guide
-
-**Usage:**
-
-```tsx
-import logoUrl from '@/../../shared/assets/branding/logo.svg'
-```
-
----
-
-## 🚀 Development
-
-### Prerequisites
-
-- Node.js 22+ (recommended v22.20.0)
-- npm 10+
-
-### Initial Setup
+### Desenvolvimento
 
 ```bash
-# Clone repository (if not already done)
-cd /home/marce/projetos/TradingSystem
+# 1. Navegar para o dashboard
+cd frontend/dashboard
 
-# Install dashboard dependencies
-cd frontend/apps/dashboard
+# 2. Instalar dependências
 npm install
-```
 
-### Run Development - Option 1 (Recommended)
-
-Native Node.js development server:
-
-```bash
-cd frontend/apps/dashboard
+# 3. Iniciar dev server
 npm run dev
+# Abre em: http://localhost:3103
+
+# 4. Verificar tipos (opcional)
+npm run type-check
+
+# 5. Lint (opcional)
+npm run lint
+npm run lint:fix
 ```
 
-Access: <http://localhost:3103>
-
-### Run Development - Option 2
-
-Docker deployment (optional, not recommended for development):
+### Build de Produção
 
 ```bash
-# Frontend runs locally for better DX (hot reload)
-cd frontend/apps/dashboard
-npm run dev
+cd frontend/dashboard
+
+# Build otimizado
+npm run build
+
+# Preview do build
+npm run preview
+
+# Análise de bundles
+npm run build:analyze
 ```
 
-Access: <http://localhost:3103>
-
----
-
-## 🧪 Testing
-
-### Unit Tests (Vitest)
+### Testes
 
 ```bash
-cd frontend/apps/dashboard
-
-# Run tests
+# Testes unitários
 npm run test
 
-# Watch mode (development)
+# Watch mode
 npm run test:watch
 
-# With coverage
+# Cobertura
 npm run test:coverage
 ```
 
-**Current coverage:** 80% (branches, functions, lines, statements)
-
 ---
 
----
+## 📁 Estrutura de Componentes
 
-> **📝 Note about E2E Testing:**
-> E2E testing with Cypress was removed from this project (October 2025).
-> Unit tests with Vitest remain available and provide comprehensive test coverage.
-> For integration testing, consider using Vitest's browser mode or React Testing Library.
+### Dashboard (`/frontend/dashboard/`)
 
----
-
-## 🔨 Available Scripts
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| **Development** | `npm run dev` | Start dev server with hot reload |
-| **Build** | `npm run build` | Optimized production build |
-| **Preview** | `npm run preview` | Preview production build |
-| **Copy Docs** | `npm run copy:docs` | Copy PRDs to public/ |
-| **Watch Docs** | `npm run watch:docs` | Watch docs/ for auto-copy |
-| **Lint** | `npm run lint` | Run ESLint |
-| **Lint Fix** | `npm run lint:fix` | Fix ESLint issues |
-| **Type Check** | `npm run type-check` | Check TypeScript types |
-| **Test** | `npm run test` | Run unit tests |
-| **Test Watch** | `npm run test:watch` | Tests in watch mode |
-| **Coverage** | `npm run test:coverage` | Tests with coverage |
-
----
-
-## 🏗️ Dashboard Architecture
-
-### Component Structure
-
-```text
-src/
-├── components/
-│   ├── layout/              # Layout components (Header, Sidebar, etc)
-│   ├── pages/               # Page components (41 pages)
-│   ├── trading/             # Trading-specific components
-│   └── ui/                  # UI library (shadcn/ui based)
+```
+dashboard/
+├── src/
+│   ├── components/
+│   │   ├── pages/           - 46 páginas refatoradas
+│   │   │   ├── TPCapitalOpcoesPage.tsx
+│   │   │   ├── B3MarketPage.tsx
+│   │   │   ├── tp-capital/  - Componentes do TP Capital
+│   │   │   ├── b3-market/   - Componentes do B3
+│   │   │   ├── launcher/    - Seção de launcher
+│   │   │   ├── database/    - Páginas de database
+│   │   │   └── workspace/   - Kanban board
+│   │   ├── ui/              - 21 componentes UI (shadcn/ui)
+│   │   ├── layout/          - Layouts customizáveis com drag-and-drop
+│   │   ├── history/         - Histórico e jobs
+│   │   ├── trading/         - Componentes de trading
+│   │   └── scraping/        - Web scraping UI
+│   ├── services/            - 7 clientes de API
+│   │   ├── apiService.ts
+│   │   ├── b3MarketService.ts
+│   │   ├── documentationService.ts
+│   │   ├── firecrawlService.ts
+│   │   ├── libraryService.ts
+│   │   ├── tpCapitalService.ts
+│   │   └── workspaceService.ts
+│   ├── hooks/               - React hooks customizados
+│   ├── contexts/            - React contexts (Theme, Search, Trading)
+│   ├── store/               - Zustand stores
+│   ├── utils/               - Funções utilitárias
+│   ├── config/              - Configurações (api.ts)
+│   ├── data/                - Dados de navegação
+│   ├── lib/                 - Bibliotecas auxiliares
+│   ├── types/               - TypeScript type definitions
+│   └── __tests__/           - Testes unitários
 │
-├── hooks/                   # Custom React hooks
-├── services/                # API clients & integrations
-├── store/                   # Zustand state management
-├── utils/                   # Helper functions
-└── App.tsx                  # App root
+├── public/
+│   ├── assets/branding/     - Logos e identidade visual
+│   └── docs/                - PRDs copiados (build)
+│
+├── scripts/                 - Scripts de build
+│   ├── copy-docs.js         - Copia PRDs para public
+│   └── watch-docs.js        - Watch de mudanças em PRDs
+│
+├── Dockerfile               - Container config
+├── vite.config.ts           - Configuração Vite + Proxies
+├── tailwind.config.js       - Configuração Tailwind
+├── tsconfig.json            - TypeScript config
+├── package.json             - Dependências (31 deps + 26 devDeps)
+└── README.md                - Este arquivo
 ```
 
-### Design Patterns
+---
 
-**Clean Architecture:**
+## 🎨 Sistema de Layout Customizável
 
-- Clear separation between UI, logic and data
-- Reusable and testable components
-- Services for API integration
+### CustomizablePageLayout
 
-**Component Patterns:**
+Sistema completo de layout grid customizável com drag-and-drop para reorganização de componentes.
 
-- Functional components with hooks
-- TypeScript for type safety
-- Well-defined props interfaces
-- Composition over inheritance
+**Funcionalidades**:
+- ✅ **Drag-and-drop** - Reorganize componentes arrastando
+- ✅ **Grid responsivo** - 1, 2, 3 ou 4 colunas
+- ✅ **Collapse/Expand All** - Colapsar/expandir todos cards
+- ✅ **Persistência** - Layout salvo no localStorage
+- ✅ **Reset** - Voltar ao layout padrão
 
-**State Management:**
+**Uso Básico**:
+```tsx
+import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { MinhaSection } from './sections/MinhaSection';
 
-- Zustand for global state
-- React Query for server state
-- Local state with useState/useReducer
+export function MinhaPage() {
+  const sections = [
+    { id: 'section-1', content: <MinhaSection /> },
+    { id: 'section-2', content: <OutraSection /> },
+  ];
+
+  return (
+    <CustomizablePageLayout
+      pageId="minha-pagina"
+      title="Minha Página"
+      sections={sections}
+      defaultColumns={2}
+    />
+  );
+}
+```
+
+**Páginas que Usam CustomizablePageLayout**:
+- ✅ TPCapitalOpcoesPage (refatorada)
+- ✅ B3MarketPage (refatorada)
+- ✅ EscopoPageNew
+- ✅ ConnectionsPageNew
+- ✅ WorkspacePageNew
+
+**Componentes**:
+- `CustomizablePageLayout.tsx` - Wrapper completo
+- `DraggableGridLayout.tsx` - Grid com drag-and-drop
+- `LayoutControls.tsx` - Controles de colunas
+- `useCustomLayout.tsx` - Hook de gerenciamento
+
+---
+
+## 🧩 Componentes UI (shadcn/ui)
+
+### Componentes Disponíveis (21)
+
+```
+Formulários:
+- button.tsx           - Botões (variants: default, ghost, outline)
+- input.tsx            - Campos de entrada
+- textarea.tsx         - Campos de texto longo
+- checkbox.tsx         - Checkboxes
+- select.tsx           - Seletores dropdown
+- label.tsx            - Labels de formulário
+
+Layout:
+- card.tsx             - Cards básicos
+- collapsible-card.tsx - Cards colapsáveis (drag-and-drop)
+- collapsible.tsx      - Collapsible primitivo
+- accordion.tsx        - Acordeão
+- tabs.tsx             - Abas
+- scroll-area.tsx      - Área com scroll customizado
+
+Feedback:
+- dialog.tsx           - Modais/Diálogos
+- toast.tsx            - Notificações
+- tooltip.tsx          - Tooltips
+- badge.tsx            - Badges
+- skeleton.tsx         - Loading skeletons
+
+Actions:
+- action-buttons.tsx   - Botões de ação padronizados
+- button-with-dropdown.tsx - Botões com dropdown
+
+Utilities:
+- command.tsx          - Command palette
+- placeholder-section.tsx - Placeholders
+```
+
+### Padrões de Ação
+
+Todos os botões de ação seguem padrões consistentes:
+
+```tsx
+import { AddButton, EditButton, DeleteButton, ViewButton } from '../ui/action-buttons';
+
+<AddButton onClick={handleCreate} />        // Adicionar
+<ViewButton onClick={handleView} />         // Visualizar
+<EditButton onClick={handleEdit} />         // Editar
+<DeleteButton onClick={handleDelete} />     // Deletar
+```
+
+**Especificações**:
+- Tamanho: `h-10 w-10` (40x40px)
+- Ícone: `h-5 w-5` (20x20px)
+- Padding: `p-0` (centralizado)
+- Estilo: Ghost com hover
+
+---
+
+## 🔌 Configuração de APIs
+
+### Proxies do Vite
+
+```typescript
+// vite.config.ts
+proxy: {
+  '/api/library':     → http://localhost:3200  // Workspace API
+  '/api/tp-capital':  → http://localhost:4005  // TP Capital API
+  '/api/b3':          → http://localhost:3302  // B3 Market API
+  '/api/docs':        → http://localhost:3400  // Documentation API
+  '/api/launcher':    → http://localhost:3500  // Launcher/Status API
+  '/api/firecrawl':   → http://localhost:3600  // Firecrawl Proxy
+  '/mcp':             → http://localhost:3847  // MCP Server
+  '/docs':            → http://localhost:3004  // Docusaurus
+}
+```
+
+### Serviços de API
+
+Cada serviço tem seu cliente dedicado em `src/services/`:
+
+```typescript
+// Exemplo de uso
+import { tpCapitalService } from '../services/tpCapitalService';
+
+const signals = await tpCapitalService.getSignals({ limit: 100 });
+const logs = await tpCapitalService.getLogs({ limit: 50 });
+```
 
 ---
 
 ## 🎨 Design System
 
-### Themes
+### Brand Assets (`/frontend/shared/assets/branding/`)
 
-- ✅ **Light Mode** - Default light theme
-- ✅ **Dark Mode** - Full dark mode support
-- 🎨 **Customizable** - Via Tailwind CSS
+```
+Logos Disponíveis:
+├── logo.svg          - Logo completo (400x80px) - tema claro
+├── logo-dark.svg     - Logo completo (400x80px) - tema escuro
+├── logo-compact.svg  - Logo compacto (280x60px) - sem tagline
+└── logo-icon.svg     - Apenas ícone (60x80px) - favicon
 
-### Standardized Components
-
-- **Buttons** - Action buttons with variants
-- **Cards** - Customizable collapsible cards
-- **Forms** - Inputs, selects, textareas
-- **Toasts** - Notification system
-- **Dialogs** - Modals and confirmations
-
-**Style guides:**
-
-- [Button Standards](apps/dashboard/src/components/ui/BUTTON-STANDARDS.md)
-- [Toast Documentation](apps/dashboard/src/components/ui/TOAST-DOCUMENTATION.md)
-- [Collapsible Cards](apps/dashboard/src/components/ui/collapsible-card-standardization.md)
-
----
-
-## 📡 Backend Integrations
-
-### Consumed APIs
-
-| API | Port | Purpose |
-|-----|------|---------|
-| **Workspace** | 3102 | Idea Bank (QuestDB) |
-| **TP-Capital** | 3200 | Telegram signals |
-| **B3** | 3302 | B3 market data |
-| **DocsAPI** | 3400 | Documentation CRUD |
-| **Laucher** | 3500 | Status and orchestration |
-| **Agent-MCP** | 8080 | Agent coordination |
-
-### Services Layer
-
-**Location:** `apps/dashboard/src/services/`
-
-Implements clients for all backend APIs:
-
-- `libraryService.ts` - Library/Idea Bank
-- `tpCapitalService.ts` - TP Capital signals
-- And others...
-
----
-
-## 🔧 Environment Variables
-
-> **⚠️ CRITICAL RULE - READ FIRST:**  
-> **NEVER create a local `.env` file in `frontend/apps/dashboard/`!**  
-> **ALWAYS use the centralized `.env` file from the project root.**  
-> **Vite automatically loads `.env` from project root - no configuration needed!**
-
-### Configuration Location
-
-```bash
-TradingSystem/
-├── .env  ⭐ SINGLE SOURCE OF TRUTH (Vite loads automatically)
-├── .env.example  ⭐ Template with all variables
-└── frontend/apps/dashboard/
-    ├── vite.config.ts
-    └── src/
+Especificações:
+- Cores primárias: #3b82f6 (blue), #10b981 (green), #f59e0b (amber)
+- Tipografia: Inter, Segoe UI, system-ui
+- Formato: SVG (escalável, ~2-4KB)
 ```
 
-### Frontend Variables (from root `.env`)
+### Design Tokens (`/frontend/tokens/core.json`)
 
-All `VITE_*` prefixed variables are automatically available:
-
-```bash
-# From TradingSystem/.env (NOT local .env!)
-
-# API Endpoints
-VITE_API_URL=http://localhost:4010
-VITE_WS_URL=ws://localhost:4010
-
-# Data Sources
-VITE_QUESTDB_URL=http://localhost:9000
-VITE_PROMETHEUS_URL=http://localhost:9090
-
-# Feature Flags
-VITE_ENABLE_ML_FEATURES=true
-VITE_ENABLE_PROFITDLL=false
-```
-
-### How It Works
-
-**Vite's automatic behavior**:
-1. Searches for `.env` in project root
-2. Loads all `VITE_*` variables
-3. Makes them available via `import.meta.env`
-
-**No configuration needed!** ✨
-
-### Usage in Code
-
-```typescript
-// Access environment variables
-const apiUrl = import.meta.env.VITE_API_URL;
-const wsUrl = import.meta.env.VITE_WS_URL;
-
-// Type-safe with TypeScript
-interface ImportMetaEnv {
-  readonly VITE_API_URL: string;
-  readonly VITE_WS_URL: string;
-  readonly VITE_ENABLE_ML_FEATURES: string;
+```json
+{
+  "color": {
+    "primary": "#9333EA",    // Gemini CLI purple
+    "success": "#10B981"     // Verde sucesso
+  },
+  "spacing": {
+    "sm": "8px",
+    "md": "16px"
+  }
 }
 ```
 
-### Adding New Variables
-
-1. **Add to root `.env.example`**:
-   ```bash
-   VITE_MY_NEW_FEATURE=true
-   ```
-
-2. **Add to root `.env`**:
-   ```bash
-   VITE_MY_NEW_FEATURE=true
-   ```
-
-3. **Use in code**:
-   ```typescript
-   const enabled = import.meta.env.VITE_MY_NEW_FEATURE === 'true';
-   ```
-
-4. **Validate**:
-   ```bash
-   bash scripts/env/validate-env.sh
-   ```
-
-### Migration Note
-
-The old local `.env` file was migrated to:
-- `frontend/apps/dashboard/.env.OLD.backup` (can be deleted)
-
-See `frontend/apps/dashboard/ENV-MIGRATION-NOTE.md` for details.
-
 ---
 
-## 📦 Build and Deploy
+## 📊 Páginas Refatoradas (Padrão de Excelência)
 
-### Production Build
+### TP Capital Opções (785 → 39 linhas)
 
-```bash
-cd frontend/apps/dashboard
+**Redução de 95%** através de componentização modular:
 
-# Optimized build
-npm run build
-
-# Local preview
-npm run preview
+```
+tp-capital/
+├── TPCapitalOpcoesPage.tsx     39 linhas  - Página principal
+├── SignalsTable.tsx           277 linhas  - Tabela de sinais
+├── LogsViewer.tsx             156 linhas  - Logs de ingestão
+├── api.ts                      62 linhas  - Camada de API
+├── utils.ts                   129 linhas  - Utilitários
+├── types.ts                    42 linhas  - Tipos TypeScript
+└── constants.ts                52 linhas  - Constantes
 ```
 
-**Output:** `dist/` - Optimized and minified files
+### B3 Market Data (423 → 37 linhas)
 
----
+**Redução de 91%** através de separação de responsabilidades:
 
-### Deploy Strategy
-
-**Frontend runs locally for development (recommended):**
-
-```bash
-# Dashboard
-cd frontend/apps/dashboard && npm run dev
-
-# Docusaurus
-cd docs/docusaurus && npm run start -- --port 3004
+```
+b3-market/
+├── B3MarketPage.tsx            37 linhas  - Página principal
+├── OverviewSection.tsx        192 linhas  - Snapshots, Indicadores, Gamma
+├── AdjustmentsSection.tsx     172 linhas  - Ajustes com filtros
+├── types.ts                    29 linhas  - Tipos TypeScript
+└── utils.ts                    11 linhas  - Utilitários
 ```
 
-**Docker deployment (production only):**
-
-- Dashboard: Use Dockerfile in `frontend/apps/dashboard/`
-- Docusaurus: Use `docs/docusaurus/Dockerfile.prod`
-- DocsAPI: Use `infrastructure/compose/docker-compose.docs.yml`
-
----
-
-## 📚 Documentation Resources
-
-### Technical Documentation
-
-**Location:** `/docs/context/frontend/`
-
-All frontend documentation has been consolidated in `/docs`:
-
-#### Implementation Guides
-
-- **Dark Mode:** `docs/context/frontend/guides/dark-mode.md`
-- **Dark Mode Quick Reference:** `docs/context/frontend/guides/dark-mode-quick-reference.md`
-- **Documentation Quick Start:** `docs/context/frontend/guides/documentation-quick-start.md`
-
-#### Requirements
-
-- **Collapsible Cards:** `docs/context/frontend/requirements/collapsible-cards.md`
-
-#### Features
-
-- Feature documentation in `docs/context/frontend/features/`
-
-#### API Documentation
-
-- Frontend-Backend API Hub: `docs/context/shared/integrations/frontend-backend-api-hub.md`
+**Benefícios da Refatoração**:
+- ✅ Componentes < 300 linhas cada
+- ✅ Responsabilidades bem definidas
+- ✅ Fácil de testar unitariamente
+- ✅ Reutilização de código
+- ✅ Manutenibilidade muito melhor
 
 ---
 
-### Local Documentation (In Code)
+## 📱 Páginas Disponíveis (46)
 
-**READMEs within code:**
+### 📊 Dashboard & Analytics
+- DashboardPage - Visão geral do sistema
+- OverviewPage - Overview geral
+- PerformancePage - Performance e análises
 
-- `apps/dashboard/README.md` - Complete dashboard documentation
-- `apps/dashboard/src/components/ui/README.md` - UI library
-- `apps/dashboard/src/components/ui/BUTTON-STANDARDS.md` - Button standards
-- `apps/dashboard/src/components/ui/TOAST-DOCUMENTATION.md` - Toast system
-- `apps/dashboard/src/components/layout/README.md` - Layout components
+### 📚 Documentação
+- DocusaurusPage - Hub de documentação Docusaurus
+- DocumentationPage - Sistema de documentação
+- DocumentationStatsPageSimple - Estatísticas
+- DocumentationSystemsPageSimple - Sistemas documentados
+- PRDsPage - Product Requirements Documents
+- ADRPage - Architecture Decision Records
+- FeaturesPage - Funcionalidades
+- RoadmapPage - Roadmap do projeto
+- MetadataPage - Metadados
+
+### 💡 Workspace & Ideas
+- WorkspacePageNew - Kanban board com drag-and-drop
+- EscopoPageNew - Escopo e planejamento
+
+### 📡 Conexões & Integrações
+- ConnectionsPageNew - Gestão de conexões (WebSocket, ProfitDLL, Services)
+- TelegramDataPage - Dados do Telegram
+
+### 📈 Trading & Mercado
+- **TPCapitalOpcoesPage** ⭐ - Sinais TP Capital (refatorada)
+- **B3MarketPage** ⭐ - Dados de mercado B3 (refatorada)
+- MarketOverviewPage - Overview do mercado
+- SignalsPage - Sinais de trading
+- PositionsPage - Posições abertas
+- OrdersPage - Ordens
+- SubscriptionsPage - Assinaturas
+
+### 🤖 Infrastructure & AI
+- LauncherPage - Status e launcher de serviços
+- LangGraphPage - LangGraph orchestrator
+- LlamaIndexPage - LlamaIndex RAG services
+- LangChainVectorPage - Vector store (Qdrant)
+- AgnoAgentsPage - Agno multi-agent framework
+
+### 🗄️ Database & Tools
+- DatabasePage - Ferramentas de database (pgAdmin, pgWeb, QuestDB)
+- ParquetBrowserPage - Navegador de arquivos Parquet
+- MiroPage - Miro board embarcado
+- MCPControlPage - MCP server control
+
+### ⚙️ Settings & Admin
+- SettingsPage - Configurações do sistema
+- AdminToolsPage - Ferramentas administrativas
+- BackupRestorePage - Backup e restore
+- RiskControlsPage - Controles de risco
+- RiskLimitsPage - Limites de risco
+
+### 📊 Logs & Monitoring
+- LogsColetaPage - Logs de coleta
+- LogsDashboardPage - Dashboard de logs
+- LiveFeedPage - Feed ao vivo
+
+### 🎯 Other
+- URLsPage - Gerenciador de URLs
+- DocsApiPage - API de documentação
 
 ---
 
-## 🎨 Brand Assets
-
-### Available Logos
-
-**Location:** `shared/assets/branding/`
-
-| File | Usage |
-|------|-------|
-| `logo.svg` | Complete horizontal logo (preferred) |
-| `logo-dark.svg` | Logo for dark mode |
-| `logo-compact.svg` | Compact/square logo |
-| `logo-icon.svg` | Icon only (favicon, etc) |
-
-**Preview:** `shared/assets/branding/preview.html`
-
-**Usage guide:** [shared/assets/branding/README.md](shared/assets/branding/README.md)
-
----
-
-## 🔄 Development Workflow
-
-### 1. Create New Page
+## 🛠️ Scripts NPM Disponíveis
 
 ```bash
-cd frontend/apps/dashboard/src/components/pages
+# Desenvolvimento
+npm run dev              # Dev server (watch:docs + dev:vite)
+npm run dev:vite         # Apenas Vite (sem watch de docs)
 
-# Create file
-touch MyNewPage.tsx
+# Build
+npm run build            # Build produção (com copy:docs)
+npm run build:dev        # Build desenvolvimento
+npm run build:analyze    # Build com análise de bundles
+npm run preview          # Preview do build
+npm run preview:open     # Preview e abre navegador
+
+# Qualidade de Código
+npm run lint             # ESLint
+npm run lint:fix         # ESLint com auto-fix
+npm run lint:report      # Relatório detalhado
+npm run type-check       # TypeScript type checking
+
+# Testes
+npm run test             # Vitest
+npm run test:watch       # Vitest watch mode
+npm run test:coverage    # Cobertura de testes
+
+# Documentação
+npm run watch:docs       # Observa mudanças em PRDs
+npm run copy:docs        # Copia PRDs para public
+
+# Utilitários
+npm run check:bundle     # Verifica tamanhos de bundles
 ```
+
+---
+
+## 📦 Componentização Modular
+
+### Estrutura de Página Refatorada (Padrão)
+
+Para páginas complexas, siga o padrão de modularização:
+
+```
+pages/
+├── MinhaPage.tsx              # Página principal (< 50 linhas)
+└── minha-page/                # Pasta de componentes
+    ├── types.ts               # Tipos TypeScript
+    ├── constants.ts           # Constantes e dados de exemplo
+    ├── utils.ts               # Utilitários e formatadores
+    ├── api.ts                 # Camada de API
+    ├── ComponentePrincipal.tsx  # Componente UI principal
+    └── ComponenteSecundario.tsx # Outros componentes
+```
+
+**Benefícios**:
+- ✅ Cada arquivo < 300 linhas
+- ✅ Responsabilidades claras
+- ✅ Fácil de testar
+- ✅ Reutilizável
+- ✅ Manutenível
+
+---
+
+## 🔧 Configuração do Vite
+
+### Proxies Configurados
+
+O Vite redireciona requisições `/api/*` para os respectivos backends:
+
+```typescript
+// Exemplo de requisição no frontend
+fetch('/api/tp-capital/signals')
+// É redirecionada para → http://localhost:4005/signals
+
+fetch('/api/b3/overview')
+// É redirecionada para → http://localhost:3302/overview
+```
+
+### Otimizações de Build
+
+- **Code Splitting**: 30 chunks separados
+- **Lazy Loading**: Páginas carregadas sob demanda
+- **Tree Shaking**: Código não usado é removido
+- **Minification**: Terser com drop_console em produção
+- **Source Maps**: Disponíveis em desenvolvimento
+
+**Bundle Sizes**:
+- Total: ~1.1MB (gzipped: ~350KB)
+- Initial load: ~400KB
+- Lazy chunks: 10-50KB cada
+
+---
+
+## 🧪 Testes
+
+### Vitest Configuration
+
+```bash
+# Executar testes
+npm run test
+
+# Watch mode
+npm run test:watch
+
+# Cobertura
+npm run test:coverage
+# Gera relatório em: coverage/index.html
+```
+
+**Testes Implementados**:
+- ✅ `documentation-page.spec.tsx` - Testes de documentação
+- ✅ `connections-page.fetch-service-launcher-status.test.ts` - Testes de API
+- ✅ `setup.ts` - Setup global de testes
+
+**Target de Cobertura**: 80% (branches, functions, lines, statements)
+
+---
+
+## 🎯 Padrões de Desenvolvimento
+
+### Estrutura de Componente
 
 ```tsx
-// MyNewPage.tsx
-import React from 'react';
+// 1. Imports (ordenados)
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '../ui/button';
 
-export default function MyNewPage() {
+// 2. Types
+interface Props {
+  data: DataType;
+  onAction: () => void;
+}
+
+// 3. Component
+export function MeuComponente({ data, onAction }: Props) {
+  // 4. State
+  const [state, setState] = useState();
+  
+  // 5. Queries
+  const { data } = useQuery(...);
+  
+  // 6. Handlers
+  const handleClick = () => { ... };
+  
+  // 7. Render
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">My New Page</h1>
-      {/* Your content here */}
-    </div>
+    <div>...</div>
   );
 }
 ```
 
-### 2. Add Route
+### Nomenclatura
 
-Update navigation in `src/components/layout/LayoutSidebar.tsx` or routing system.
+- **Componentes**: PascalCase (`MinhaPage.tsx`)
+- **Hooks**: camelCase com prefixo `use` (`useMinhaLogica.ts`)
+- **Utils**: camelCase (`formatNumber.ts`)
+- **Types**: PascalCase (`MinhaInterface`)
+- **Constants**: UPPER_SNAKE_CASE (`MAX_LIMIT`)
 
-### 3. Create UI Component
+### Organização de Imports
 
-```bash
-cd frontend/apps/dashboard/src/components/ui
+```tsx
+// 1. React
+import { useState, useEffect } from 'react';
 
-# Create file
-touch my-component.tsx
+// 2. Bibliotecas externas
+import { useQuery } from '@tanstack/react-query';
+
+// 3. Componentes UI
+import { Button } from '../ui/button';
+
+// 4. Componentes locais
+import { MinhaSection } from './sections/MinhaSection';
+
+// 5. Services
+import { apiService } from '../../services/apiService';
+
+// 6. Utils e types
+import { formatNumber } from '../../utils/formatters';
+import type { MinhaInterface } from './types';
 ```
 
-Follow standards from:
-
-- [BUTTON-STANDARDS.md](apps/dashboard/src/components/ui/BUTTON-STANDARDS.md)
-- [UI README](apps/dashboard/src/components/ui/README.md)
-
 ---
 
-## 🧪 Quality Assurance
+## 🚀 Performance & Otimizações
 
-### Linting
+### Lazy Loading
 
-```bash
-# Check code
-npm run lint
+Páginas carregadas sob demanda para reduzir bundle inicial:
 
-# Auto-fix
-npm run lint:fix
-
-# Generate report
-npm run lint:report
+```tsx
+// navigation.tsx
+const TPCapitalOpcoesPage = React.lazy(
+  () => import('../components/pages/TPCapitalOpcoesPage')
+);
 ```
 
-**Configuration:** `.eslintrc.json`  
-**Rules:** React, TypeScript, Hooks
+### React Query
 
----
+Cache inteligente com revalidação:
 
-### Type Checking
-
-```bash
-# Check types
-npm run type-check
+```tsx
+useQuery({
+  queryKey: ['tp-capital-signals'],
+  queryFn: fetchSignals,
+  staleTime: 60_000,        // 1 minuto
+  refetchInterval: 5_000,    // Refetch a cada 5s
+  placeholderData: (prev) => prev,  // Mantém dados anteriores
+});
 ```
 
-**Configuration:** `tsconfig.json`  
-**Strict mode:** Enabled
+### Memoização
 
----
+```tsx
+// Computações pesadas
+const filteredData = useMemo(
+  () => data.filter(condition),
+  [data, condition]
+);
 
-### Coverage Thresholds
-
-**Required minimum:** 80%
-
-- Branches: 80%
-- Functions: 80%
-- Lines: 80%
-- Statements: 80%
-
-**Configuration:** `vitest.config.ts` (in project root)
-
----
-
-## 🔗 Useful Links
-
-### Development URLs
-
-- Dashboard: <http://localhost:3103>
-- Workspace: <http://localhost:3102>
-- TP Capital: <http://localhost:3200>
-- B3 Data: <http://localhost:3302>
-- DocsAPI: <http://localhost:3400>
-- Laucher: <http://localhost:3500>
-
-### Infrastructure URLs
-
-- QuestDB UI: <http://localhost:9000>
-- Prometheus: <http://localhost:9090>
-- Grafana: <http://localhost:3000>
-- Agent-MCP: <http://localhost:8080>
-
----
-
-## 📖 Related Documentation
-
-### Technical References
-
-- **[/docs/context/frontend/](/docs/context/frontend/)** - Complete frontend documentation
-- **[/docs/context/shared/integrations/frontend-backend-api-hub.md](/docs/context/shared/integrations/frontend-backend-api-hub.md)** - API Hub
-
-### Standards and Guidelines
-
-- **[/docs/DOCUMENTATION-STANDARD.md](/docs/DOCUMENTATION-STANDARD.md)** - Documentation standard
-- **[/.cursorrules-linux](/.cursorrules-linux)** - Project rules
-
-### Project References
-
-- **[/SYSTEM-OVERVIEW.md](/SYSTEM-OVERVIEW.md)** - System overview
-- **[/docs/DIRECTORY-STRUCTURE.md](/docs/DIRECTORY-STRUCTURE.md)** - Directory structure
-- **[/backend/manifest.json](/backend/manifest.json)** - Service registry
-
----
-
-## 🔐 Security
-
-### Environment Variables
-
-- ❌ **Never commit** `.env` files
-- ✅ **Use** `.env.example` as template
-- ✅ **Keep** secrets in local `.env`
-
-### CORS
-
-- Configured in each backend API
-- Allowed origins defined via environment variable
-
-### Rate Limiting
-
-- Implemented in backends
-- Protection against API abuse
-
----
-
-## 🎯 Next Steps
-
-### Future Applications
-
-Structure is prepared for multiple applications:
-
-```text
-frontend/apps/
-├── dashboard/        # ✅ Current
-├── trading-terminal/ # 🔮 Future - Trading terminal
-├── analytics/        # 🔮 Legacy placeholder - reserved for future insights modules
-└── mobile/           # 🔮 Future - Mobile app
+// Callbacks estáveis
+const handleClick = useCallback(() => {
+  // ...
+}, [dependencies]);
 ```
 
-### Planned Improvements
-
-- 📱 Full mobile responsiveness
-- 🎨 More customizable themes
-- 🌐 Internationalization (i18n)
-- ♿ Accessibility improvements (a11y)
-- 📊 More data visualization components
-
 ---
 
-## 🆘 Troubleshooting
+## 🐛 Troubleshooting
 
-### Port 3103 in use
-
-```bash
-# Find process
-lsof -i :3103
-
-# Kill process
-kill -9 <PID>
-```
-
-### Corrupted node_modules
+### Dashboard não inicia
 
 ```bash
+# Verificar se porta 3103 está livre
+lsof -ti:3103
+
+# Limpar e reinstalar
 rm -rf node_modules package-lock.json
 npm install
+
+# Tentar novamente
+npm run dev
 ```
 
-### Build fails
+### Erros de Tipo TypeScript
 
 ```bash
-# Clear Vite cache
-rm -rf node_modules/.vite
+# Verificar tipos
+npm run type-check
 
-# Rebuild
-npm run build
+# Se muitos erros, pode ser cache do IDE
+# Recarregar window do VS Code
 ```
 
+### APIs retornam 404/500
+
+```bash
+# Verificar se backends estão rodando
+lsof -ti:4005   # TP Capital
+lsof -ti:3302   # B3 Market
+lsof -ti:3200   # Workspace
+
+# Iniciar backends
+cd apps/tp-capital && npm start
+cd apps/b3-market-data && npm start
+```
+
+### Proxy não funciona
+
+Verifique `vite.config.ts`:
+- Portas corretas no proxy
+- `changeOrigin: true` habilitado
+- Paths de rewrite corretos
 
 ---
 
-## 📞 Support
+## 📝 Scripts de Manutenção
 
-- **Documentation:** `/docs/context/frontend/`
-- **Issues:** GitHub Issues (when available)
-- **Guides:** `/docs/context/ops/onboarding/`
+### Monitorar Arquivos Temporários
+
+```bash
+# Verificar arquivos temporários no projeto
+bash scripts/maintenance/monitor-temp-files.sh
+
+# Limpar arquivos temporários
+bash scripts/maintenance/cleanup-temp-files.sh
+```
+
+### Verificar Componentes Não Usados
+
+```bash
+# Identificar componentes que não são importados
+bash scripts/maintenance/check-unused-components.sh
+```
 
 ---
 
-## 📊 Frontend Statistics
+## 📚 Documentação Técnica
 
-| Metric | Value |
-|--------|-------|
-| Applications | 1 (Dashboard) |
-| Pages | 41 |
-| UI Components | 30+ |
-| TypeScript Lines | ~15,000+ |
-| Coverage | 80%+ |
-| Build Size | ~2 MB (minified) |
+### Guias de Componentes
+
+Documentos dentro do código para referência:
+
+- `src/components/ui/BUTTON-STANDARDS.md` - Padrões de botões
+- `src/components/ui/TOAST-DOCUMENTATION.md` - Sistema de toast
+- `src/components/ui/collapsible-card-standardization.md` - Cards colapsáveis
+
+### PRDs Disponíveis
+
+Product Requirements Documents em `public/docs/context/shared/product/prd/`:
+
+- `en/docusaurus-implementation-prd.md`
+- `en/idea-bank-prd.md`
+- `en/prometheus-monitoring-prd.md`
+- `en/tp-capital-signal-table-prd.md`
+- `en/tp-capital-telegram-connections-prd.md`
+- `pt/agno-integration-prd.md`
+- `pt/documentation-specs-plan.md`
+
+Estes arquivos são copiados automaticamente dos `docs/` principais durante build.
 
 ---
 
-**Last updated:** 2025-10-15  
-**Version:** 1.2.0  
-**Maintained by:** TradingSystem Team
+## 🔐 Variáveis de Ambiente
+
+### Desenvolvimento
+
+Criar `.env` em `frontend/dashboard/` (opcional - tem defaults):
+
+```env
+# Porta do dashboard
+VITE_DASHBOARD_PORT=3103
+
+# Base URL (para domínio unificado)
+VITE_API_BASE_URL=http://tradingsystem.local
+
+# Proxies individuais (sobrescrevem defaults)
+VITE_TP_CAPITAL_PROXY_TARGET=http://localhost:4005
+VITE_B3_PROXY_TARGET=http://localhost:3302
+VITE_WORKSPACE_PROXY_TARGET=http://localhost:3200
+```
+
+### Produção
+
+Ver `.env.example` para todas as opções disponíveis.
+
+---
+
+## 🎓 Como Adicionar Nova Página
+
+### 1. Criar Componente
+
+```bash
+cd frontend/dashboard/src/components/pages
+```
+
+```tsx
+// MinhaNovaPage.tsx
+import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { MinhaSection } from './minha-nova-page/MinhaSection';
+
+export function MinhaNovaPage() {
+  const sections = [
+    { id: 'secao-1', content: <MinhaSection /> },
+  ];
+
+  return (
+    <CustomizablePageLayout
+      pageId="minha-nova-page"
+      title="Minha Nova Página"
+      sections={sections}
+      defaultColumns={1}
+    />
+  );
+}
+```
+
+### 2. Registrar em Navigation
+
+```tsx
+// src/data/navigation.tsx
+import { MinhaNovaPage } from '../components/pages/MinhaNovaPage';
+
+// Adicionar no array de pages da seção apropriada:
+{
+  id: 'minha-nova-page',
+  title: 'Minha Nova Página',
+  header: {
+    title: 'Minha Nova Página',
+    subtitle: 'Descrição opcional',
+  },
+  parts: [],
+  customContent: <MinhaNovaPage />,
+  icon: <IconName className="h-4 w-4" />,
+}
+```
+
+### 3. Testar
+
+```bash
+npm run dev
+# Acessar: http://localhost:3103
+# Navegar para a nova página
+```
+
+---
+
+## 📊 Métricas do Projeto
+
+```
+Total de arquivos:         196
+Arquivos TypeScript/React: 151
+Páginas:                    46
+Componentes UI:             21
+Serviços de API:             7
+Hooks customizados:         ~15
+Tamanho (com node_modules): 352MB
+Tamanho (código fonte):     ~2MB
+```
+
+---
+
+## 🔄 Roadmap de Melhorias
+
+### Concluído ✅
+- ✅ Refatoração TPCapitalOpcoesPage (785 → 39 linhas)
+- ✅ Refatoração B3MarketPage (423 → 37 linhas)
+- ✅ Scripts de monitoramento de temporários
+- ✅ Script de verificação de componentes não usados
+- ✅ Limpeza de arquivos obsoletos
+- ✅ Consolidação de READMEs
+
+### Futuro (Opcional)
+- [ ] Refatorar páginas de Launcher (>400 linhas cada)
+- [ ] Implementar testes E2E com Playwright
+- [ ] Adicionar Storybook para componentes UI
+- [ ] Implementar i18n (internacionalização)
+- [ ] PWA (Progressive Web App)
+- [ ] Server-Side Rendering (SSR)
+
+---
+
+## 🤝 Contribuindo
+
+1. Siga os padrões de componentização
+2. Mantenha arquivos < 300 linhas
+3. Use TypeScript strict mode
+4. Adicione testes para novas funcionalidades
+5. Documente componentes complexos
+6. Execute `npm run lint` e `npm run type-check` antes de commitar
+
+---
+
+## 📞 Suporte
+
+Para questões sobre o frontend:
+
+1. Verifique esta documentação
+2. Consulte `docs/context/frontend/` (documentação técnica)
+3. Veja exemplos nas páginas refatoradas (TP Capital, B3 Market)
+4. Crie uma issue no repositório
+
+---
+
+**Versão**: 2.0.0  
+**Última Atualização**: 2025-10-23  
+**Maintainer**: TradingSystem Team  
+**Status**: ✅ Production Ready & Refatorado
+
+---
+
+## 🎉 Conquistas Recentes
+
+- **Outubro 2025**: Refatoração completa das páginas maiores (TPCapital e B3Market)
+- **Redução total**: 1,208 → 76 linhas nas páginas principais (-94%)
+- **Novos padrões**: Componentização modular estabelecida
+- **Scripts de manutenção**: Monitoramento automático implementado
+- **Limpeza**: 6 arquivos obsoletos removidos
+- **Estrutura**: Pasta frontend 100% organizada e documentada

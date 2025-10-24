@@ -1,3 +1,14 @@
+---
+title: 🚀 TradingSystem - Local Intelligent Trading Platform
+sidebar_position: 1
+tags: [documentation]
+domain: shared
+type: index
+summary: "[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)"
+status: active
+last_review: "2025-10-23"
+---
+
 # 🚀 TradingSystem - Local Intelligent Trading Platform
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
@@ -12,32 +23,35 @@
 
 ## 📋 Table of Contents
 
--   [📋 Table of Contents](#-table-of-contents)
--   [🎯 Overview](#-overview)
-    -   [Key Highlights](#key-highlights)
--   [✨ Features](#-features)
-    -   [Market Data Capture \& Signal Ingestion](#market-data-capture--signal-ingestion)
-    -   [ML-Powered Analysis](#ml-powered-analysis)
-    -   [Order Execution \& Risk](#order-execution--risk)
-    -   [Observability](#observability)
--   [🏗️ Architecture](#️-architecture)
-    -   [High-Level Design](#high-level-design)
-    -   [Principles](#principles)
--   [🛠️ Tech Stack](#️-tech-stack)
--   [⚙️ Environment Configuration](#️-environment-configuration)
-    -   [Quick Setup (3 steps)](#quick-setup-3-steps)
-    -   [What Gets Configured](#what-gets-configured)
-    -   [Manual Setup](#manual-setup)
-    -   [Migrating from Old .env Files](#migrating-from-old-env-files)
--   [🚀 Getting Started](#-getting-started)
-    -   [Quick Start (Linux/WSL)](#quick-start-linuxwsl)
-    -   [Prerequisites](#prerequisites)
-    -   [Installation](#installation)
-    -   [Development Setup](#development-setup)
-        -   [Pre-commit Hooks](#pre-commit-hooks)
-    -   [Environment Options](#environment-options)
-    -   [WebScraper App \& API](#webscraper-app--api)
--   [📁 Project Structure](#-project-structure)
+- [🚀 TradingSystem - Local Intelligent Trading Platform](#-tradingsystem---local-intelligent-trading-platform)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [🎯 Overview](#-overview)
+    - [Key Highlights](#key-highlights)
+  - [✨ Features](#-features)
+    - [Market Data Capture \& Signal Ingestion](#market-data-capture--signal-ingestion)
+    - [ML-Powered Analysis](#ml-powered-analysis)
+    - [Order Execution \& Risk](#order-execution--risk)
+    - [Observability](#observability)
+  - [🏗️ Architecture](#️-architecture)
+    - [High-Level Design](#high-level-design)
+    - [Principles](#principles)
+  - [🛠️ Tech Stack](#️-tech-stack)
+  - [⚙️ Environment Configuration](#️-environment-configuration)
+    - [Quick Setup (3 steps)](#quick-setup-3-steps)
+    - [What Gets Configured](#what-gets-configured)
+    - [Manual Setup](#manual-setup)
+    - [Migrating from Old .env Files](#migrating-from-old-env-files)
+  - [🚀 Getting Started](#-getting-started)
+    - [⚡ Universal Startup (NOVO! - 2025-10-20)](#-universal-startup-novo---2025-10-20)
+      - [Instalação (Uma Vez)](#instalação-uma-vez)
+      - [Uso Diário](#uso-diário)
+    - [Quick Start Manual (Linux/WSL)](#quick-start-manual-linuxwsl)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Development Setup](#development-setup)
+      - [Pre-commit Hooks](#pre-commit-hooks)
+    - [Environment Options](#environment-options)
+  - [📁 Project Structure](#-project-structure)
 
 > **🚨 First Time Here?** Read [Environment Configuration](#️-environment-configuration) BEFORE doing anything else!
 
@@ -298,11 +312,11 @@ health
     In a second terminal:
     ```bash
     # Dashboard (Port 3103)
-    cd frontend/apps/dashboard && npm run dev -- --host 0.0.0.0 --port 3103
+    cd frontend/dashboard && npm run dev -- --host 0.0.0.0 --port 3103
     ```
 6. **(Optional) Bring up supporting services** from WSL using Docker Compose:
     ```bash
-    bash infrastructure/scripts/start-all-stacks.sh
+    bash tools/scripts/start-all-stacks.sh
     ```
 7. **Access the portals from Windows** via your browser:
     - Documentation: http://localhost:3004
@@ -368,8 +382,8 @@ See [Documentation Standard](docs/DOCUMENTATION-STANDARD.md) for frontmatter req
 
 For detailed setup instructions, see:
 
--   [Reverse Proxy Setup](docs/context/ops/infrastructure/reverse-proxy-setup.md)
--   [VPS Migration Guide](docs/context/ops/infrastructure/nginx-proxy-vps-migration.md)
+-   [Reverse Proxy Setup](docs/context/ops/tools/reverse-proxy-setup.md)
+-   [VPS Migration Guide](docs/context/ops/tools/nginx-proxy-vps-migration.md)
 
 ### Environment Options
 
@@ -384,32 +398,12 @@ You can access the system in two ways:
 
 2. **Direct Port Access (Legacy)**
     - Frontend: `http://localhost:3103`
-    - WebScraper App: `http://localhost:3800`
     - Workspace: `http://localhost:3102`
     - TP Capital API: `http://localhost:3200`
     - B3 Market API: `http://localhost:3302`
-    - WebScraper API: `http://localhost:3700`
     - DocsAPI: `http://localhost:3400`
     - Laucher: `http://localhost:3500`
     - Docusaurus: `http://localhost:3004`
-
-### WebScraper App & API
-
--   **Frontend**: `frontend/apps/WebScraper` (Vite + React, port `3800`)
--   **Backend**: `backend/api/webscraper-api` (Express + Prisma, port `3700`)
--   **Features**: Firecrawl integration, template management, job history & analytics
--   **Scripts**:
-    -   `bash scripts/webscraper/start-service.sh` / `stop-service.sh`
-    -   `bash backend/api/webscraper-api/scripts/init-database.sh [--seed]`
-    -   `bash backend/api/webscraper-api/scripts/test-endpoints.sh`
-
-```bash
-# WebScraper API (Port 3700)
-cd backend/api/webscraper-api
-npm install
-npx prisma generate
-npm run dev
-```
 
 ## 📁 Project Structure
 

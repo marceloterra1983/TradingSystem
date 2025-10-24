@@ -219,11 +219,11 @@ else
 fi
 
 compose_files=(
-  "infrastructure/compose/docker-compose.data.yml"
-  "infrastructure/monitoring/docker-compose.yml"
-  "infrastructure/compose/docker-compose.docs.yml"
-  "infrastructure/compose/docker-compose.infra.yml"
-  "infrastructure/firecrawl/firecrawl-source/docker-compose.yaml"
+  "tools/compose/docker-compose.data.yml"
+  "tools/monitoring/docker-compose.yml"
+  "tools/compose/docker-compose.docs.yml"
+  "tools/compose/docker-compose.infra.yml"
+  "tools/firecrawl/firecrawl-source/docker-compose.yaml"
 )
 
 for file in "${compose_files[@]}"; do
@@ -280,7 +280,7 @@ log_section "Test Suite Execution"
 run_test_suite "DocsAPI" "backend/api/documentation-api" npm run test || true
 run_test_suite "Dashboard" "frontend/apps/dashboard" npm run test || true
 run_test_suite "Firecrawl Proxy" "backend/api/firecrawl-proxy" npm run test:integration || true
-run_test_suite "LangGraph validation" "." bash infrastructure/langgraph/validate-deployment.sh || true
+run_test_suite "LangGraph validation" "." bash tools/langgraph/validate-deployment.sh || true
 
 log_section "Integration Validation"
 

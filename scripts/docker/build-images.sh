@@ -63,15 +63,15 @@ main() {
 
   # Custom builds (Node/Python services)
   build_image "docs-api" "backend/api/documentation-api" "Dockerfile.simple"
-  build_image "docs-api-viewer" "infrastructure/docs-api"
-  build_image "infra-langgraph" "infrastructure/langgraph"
-  build_image "infra-llamaindex-ingestion" "infrastructure/llamaindex" "Dockerfile.ingestion"
-  build_image "infra-llamaindex-query" "infrastructure/llamaindex" "Dockerfile.query"
-  build_image "infra-agno-agents" "infrastructure/agno-agents"
-  build_image "mon-alert-router" "infrastructure/monitoring/alert-router"
-  build_image "firecrawl-api" "infrastructure/firecrawl/firecrawl-source/apps/api"
-  build_image "firecrawl-playwright" "infrastructure/firecrawl/firecrawl-source/apps/playwright-service-ts"
-  build_image "firecrawl-postgres" "infrastructure/firecrawl/firecrawl-source/apps/nuq-postgres"
+  build_image "docs-api-viewer" "tools/docs-api"
+  build_image "infra-langgraph" "tools/langgraph"
+  build_image "infra-llamaindex-ingestion" "tools/llamaindex" "Dockerfile.ingestion"
+  build_image "infra-llamaindex-query" "tools/llamaindex" "Dockerfile.query"
+  build_image "infra-agno-agents" "tools/agno-agents"
+  build_image "mon-alert-router" "tools/monitoring/alert-router"
+  build_image "firecrawl-api" "tools/firecrawl/firecrawl-source/apps/api"
+  build_image "firecrawl-playwright" "tools/firecrawl/firecrawl-source/apps/playwright-service-ts"
+  build_image "firecrawl-postgres" "tools/firecrawl/firecrawl-source/apps/nuq-postgres"
 
   log "Image build/retag complete."
 }

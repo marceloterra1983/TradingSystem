@@ -14,14 +14,14 @@ domain: backend
 type: guide
 summary: Comprehensive guide for accessing and using database UI tools (pgAdmin, pgweb, Adminer, Azimutt) with TimescaleDB.
 status: active
-last_review: 2025-10-16
+last_review: "2025-10-16"
 ---
 
 ## Overview
 
 The TradingSystem TimescaleDB stack ships with four complementary database UI tools that help developers, DBAs, and analysts manage, explore, and document the time-series datasets captured by the platform. Each tool targets a specific workflow, from production-grade administration to rapid data exploration and schema visualization. This guide explains how to access, configure, and validate each tool so teams can work efficiently and securely.
 
-All services share the centralized environment configuration defined in the project root `.env` file, ensuring consistent credentials and localhost-only bindings. Review the [Environment Configuration](../../../ops/ENVIRONMENT-CONFIGURATION.md) guide for details on managing secrets and loading environment variables across stacks. Infrastructure-level operational procedures, including backup and restore workflows, são mantidos no [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md).
+All services share the centralized environment configuration defined in the project root `.env` file, ensuring consistent credentials and localhost-only bindings. Review the [Environment Configuration](../../../ops/ENVIRONMENT-CONFIGURATION.md) guide for details on managing secrets and loading environment variables across stacks. Infrastructure-level operational procedures, including backup and restore workflows, são mantidos no [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/backend/data/timescaledb/README.md).
 
 ## Quick Access
 
@@ -47,10 +47,10 @@ All services share the centralized environment configuration defined in the proj
 
 ```bash
 # Start optional Adminer + Azimutt
-docker compose -f infrastructure/compose/docker-compose.timescale.yml --profile optional up -d
+docker compose -f tools/compose/docker-compose.timescale.yml --profile optional up -d
 
 # Stop optional Adminer + Azimutt
-docker compose -f infrastructure/compose/docker-compose.timescale.yml --profile optional down
+docker compose -f tools/compose/docker-compose.timescale.yml --profile optional down
 ```
 
 ## Architecture Diagram
@@ -233,7 +233,7 @@ end legend
 
 1. Start optional services:
    ```bash
-   docker compose -f infrastructure/compose/docker-compose.timescale.yml --profile optional up -d
+   docker compose -f tools/compose/docker-compose.timescale.yml --profile optional up -d
    ```
 2. Open **http://localhost:8082**.
 3. Fill in the login form:
@@ -250,7 +250,7 @@ end legend
 
 1. Start optional services (if not already running):
    ```bash
-   docker compose -f infrastructure/compose/docker-compose.timescale.yml --profile optional up -d
+   docker compose -f tools/compose/docker-compose.timescale.yml --profile optional up -d
    ```
 2. Open **http://localhost:8084**.
 3. If prompted, authenticate using the password defined by `${AZIMUTT_AUTH_PASSWORD}`.
@@ -351,7 +351,7 @@ end legend
   ```bash
   docker cp data-timescaledb-backup:/backups/tradingsystem_2025-10-16.sql.gz ./backup.sql.gz
   ```
-- Detailed restore workflows live in the [TimescaleDB infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md).
+- Detailed restore workflows live in the [TimescaleDB infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/backend/data/timescaledb/README.md).
 
 ### pgAdmin Configuration Backup
 
@@ -365,12 +365,12 @@ docker run --rm \
   alpine tar czf /backup/pgadmin-backup-$(date +%Y%m%d).tar.gz -C /source .
 
 # Restore pgAdmin volume
-docker compose -f infrastructure/compose/docker-compose.timescale.yml stop timescaledb-pgadmin
+docker compose -f tools/compose/docker-compose.timescale.yml stop timescaledb-pgadmin
 docker run --rm \
   -v timescaledb-pgadmin:/target \
   -v "$(pwd)":/backup \
   alpine sh -c "cd /target && tar xzf /backup/pgadmin-backup-20251016.tar.gz"
-docker compose -f infrastructure/compose/docker-compose.timescale.yml start timescaledb-pgadmin
+docker compose -f tools/compose/docker-compose.timescale.yml start timescaledb-pgadmin
 ```
 
 - Export server connections via UI: **File → Backup → Server Groups/Servers**.
@@ -505,9 +505,9 @@ docker compose -f infrastructure/compose/docker-compose.timescale.yml start time
 - [Azimutt Documentation](https://azimutt.app/docs)
 - [TimescaleDB Documentation](https://docs.timescale.com/)
 - [TimescaleDB Operations Guide](timescaledb-operations.md)
-- [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/infrastructure/timescaledb/README.md)
+- [TimescaleDB Infrastructure README](https://github.com/marceloterra/TradingSystem/blob/main/backend/data/timescaledb/README.md)
 - [Environment Configuration Guide](../../../ops/ENVIRONMENT-CONFIGURATION.md)
-- [Docker Compose Stack](../../../../../infrastructure/compose/docker-compose.timescale.yml)
+- [Docker Compose Stack](../../../../../tools/compose/docker-compose.timescale.yml)
 
 ## Conclusion
 

@@ -82,14 +82,14 @@ echo ""
 
 # 7. Infrastructure Services
 echo -e "${YELLOW}📦 Stack 7/7: Stopping Infrastructure services...${NC}"
-compose_cmd -f "${REPO_ROOT}/infrastructure/compose/docker-compose.infra.yml" down
+compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.infra.yml" down
 echo -e "${GREEN}✓ Infrastructure services stopped${NC}"
 echo ""
 
 # 6. Monitoring
 echo -e "${YELLOW}📦 Stack 6/7: Stopping Monitoring...${NC}"
-if [ -f infrastructure/monitoring/docker-compose.yml ]; then
-    compose_cmd -f "${REPO_ROOT}/infrastructure/monitoring/docker-compose.yml" down
+if [ -f tools/monitoring/docker-compose.yml ]; then
+    compose_cmd -f "${REPO_ROOT}/tools/monitoring/docker-compose.yml" down
     echo -e "${GREEN}✓ Monitoring stopped${NC}"
 else
     echo -e "${YELLOW}⚠ Monitoring compose file not found, skipping...${NC}"
@@ -97,7 +97,7 @@ fi
 echo ""
 
 # TimescaleDB stack
-TIMESCALE_COMPOSE="infrastructure/compose/docker-compose.timescale.yml"
+TIMESCALE_COMPOSE="tools/compose/docker-compose.timescale.yml"
 echo -e "${YELLOW}📦 Stack 5/7: Stopping TimescaleDB...${NC}"
 if has_compose_services "$TIMESCALE_COMPOSE"; then
     compose_cmd -f "${REPO_ROOT}/${TIMESCALE_COMPOSE}" down
@@ -108,7 +108,7 @@ fi
 echo ""
 
 # Frontend apps unified database
-FRONTEND_APPS_COMPOSE="infrastructure/compose/docker-compose.frontend-apps.yml"
+FRONTEND_APPS_COMPOSE="tools/compose/docker-compose.frontend-apps.yml"
 echo -e "${YELLOW}📦 Stack 4/7: Stopping Frontend Apps database...${NC}"
 if has_compose_services "$FRONTEND_APPS_COMPOSE"; then
     compose_cmd -f "${REPO_ROOT}/${FRONTEND_APPS_COMPOSE}" down
@@ -120,7 +120,7 @@ echo ""
 
 # 3. Data (manter volumes)
 echo -e "${YELLOW}📦 Stack 3/7: Stopping Data (keeping volumes)...${NC}"
-DATA_COMPOSE="infrastructure/compose/docker-compose.data.yml"
+DATA_COMPOSE="tools/compose/docker-compose.data.yml"
 if has_compose_services "$DATA_COMPOSE"; then
     compose_cmd -f "${REPO_ROOT}/${DATA_COMPOSE}" down
     echo -e "${GREEN}✓ Data layer stopped${NC}"
@@ -130,7 +130,7 @@ fi
 echo ""
 
 # Docs stack
-DOCS_COMPOSE="infrastructure/compose/docker-compose.docs.yml"
+DOCS_COMPOSE="tools/compose/docker-compose.docs.yml"
 echo -e "${YELLOW}📦 Stack 2/7: Stopping Docs stack...${NC}"
 if has_compose_services "$DOCS_COMPOSE"; then
     compose_cmd -f "${REPO_ROOT}/${DOCS_COMPOSE}" down
@@ -140,7 +140,7 @@ else
 fi
 echo ""
 
-INFRA_COMPOSE="infrastructure/compose/docker-compose.infra.yml"
+INFRA_COMPOSE="tools/compose/docker-compose.infra.yml"
 echo -e "${YELLOW}📦 Stack 1/7: Stopping Infrastructure (keeping volumes)...${NC}"
 if has_compose_services "$INFRA_COMPOSE"; then
     compose_cmd -f "${REPO_ROOT}/${INFRA_COMPOSE}" down

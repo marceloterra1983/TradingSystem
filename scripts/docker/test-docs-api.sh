@@ -68,7 +68,7 @@ if ! docker ps | grep -q docs-api; then
     echo -e "${RED}❌ DocsAPI container is not running${NC}"
     echo ""
     echo "Start it with:"
-    echo "  docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml up -d"
+    echo "  docker compose --env-file .env -f tools/compose/docker-compose.docs.yml up -d"
     exit 1
 fi
 echo -e "${GREEN}✅ Container is running${NC}"
@@ -135,6 +135,6 @@ if [[ $TESTS_FAILED -eq 0 ]]; then
     exit 0
 else
     echo -e "${RED}⚠️  Some tests failed. Check logs:${NC}"
-    echo "  docker compose --env-file .env -f infrastructure/compose/docker-compose.docs.yml logs docs-api"
+    echo "  docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs docs-api"
     exit 1
 fi

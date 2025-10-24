@@ -34,7 +34,7 @@ bash scripts/firecrawl/start.sh
 docker ps | grep firecrawl
 
 # Stream logs
-docker compose -f infrastructure/firecrawl/firecrawl-source/docker-compose.yaml logs -f
+docker compose -f tools/firecrawl/firecrawl-source/docker-compose.yaml logs -f
 
 # Stop (preserve data)
 bash scripts/firecrawl/stop.sh
@@ -61,11 +61,11 @@ Key settings (all in root `.env`):
 - `FIRECRAWL_PORT` – external core API port (default 3002)
 - `FIRECRAWL_REDIS_URL` – Redis connection string used by the stack
 - `FIRECRAWL_NUQ_DATABASE_URL` – PostgreSQL connection string
-- See `infrastructure/firecrawl/README.md` and `.env.example` for the full list
+- See `tools/firecrawl/README.md` and `.env.example` for the full list
 
 ## Related Documentation
 
-- `infrastructure/firecrawl/README.md`
+- `tools/firecrawl/README.md`
 - `docs/context/backend/api/firecrawl-proxy.md`
 - `scripts/services/README.md`
 - `backend/api/firecrawl-proxy/README.md`

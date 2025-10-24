@@ -6,7 +6,7 @@ domain: ops
 type: reference
 summary: Tabela rápida com as portas expostas localmente após a remoção do Traefik
 status: active
-last_review: 2025-10-18
+last_review: "2025-10-18"
 ---
 
 Após a remoção do Traefik, cada serviço expõe sua própria porta diretamente no host. Use a tabela abaixo como referência ao subir os stacks com `start-all-services.sh` ou `start-all-stacks.sh`.
@@ -47,7 +47,7 @@ Após a remoção do Traefik, cada serviço expõe sua própria porta diretament
 
 ## Convenção de Nomenclatura
 
-As convenções de prefixo (`data-*`, `infra-*`, `mon-*`, `docs-*`, `firecrawl-*`, `individual-*`) estão documentadas em [Container Naming Convention](infrastructure/container-naming.md). Consulte o guia antes de adicionar novos serviços ou atualizar compose files.
+As convenções de prefixo (`data-*`, `infra-*`, `mon-*`, `docs-*`, `firecrawl-*`, `individual-*`) estão documentadas em [Container Naming Convention](tools/container-naming.md). Consulte o guia antes de adicionar novos serviços ou atualizar compose files.
 
 > Necessita publicar um serviço externamente? Utilize um proxy reverso dedicado (nginx, Caddy, etc.) ou configure um load balancer na borda. O repositório não inclui mais Traefik por padrão.
 

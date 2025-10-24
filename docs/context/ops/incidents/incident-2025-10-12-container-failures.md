@@ -6,7 +6,7 @@ domain: ops
 type: reference
 summary: Four Docker services failed to start after system restart. All issues resolved with documented solutions
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # Incident: Multiple Container Startup Failures
@@ -93,7 +93,7 @@ curl http://localhost:4005/signals?limit=5
 docker rm tradingsystem-b3-market-data
 
 # 2. Rebuilt from correct location
-cd frontend/apps/b3-market-data
+cd apps/b3-market-data
 docker build -t b3-market-data-simple:latest .
 
 # 3. Ran with proper network configuration
@@ -200,7 +200,7 @@ Created comprehensive troubleshooting documentation:
 ## 🔗 Related Documentation
 
 - [Container Startup Troubleshooting Guide](../troubleshooting/container-startup-issues.md)
-- Resumo dos serviços Docker: consulte `infrastructure/DOCKER-SERVICES-SUMMARY.md` no repositório.
+- Resumo dos serviços Docker: consulte `tools/DOCKER-SERVICES-SUMMARY.md` no repositório.
 - [Service Ports Reference](../../frontend/features/feature-ports-page.md)
 - [Monitoramento (Prometheus/Grafana)](../monitoring/prometheus-setup.md)
 

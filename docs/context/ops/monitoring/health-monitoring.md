@@ -506,8 +506,8 @@ sudo systemctl enable --now health-check.timer
 - Pattern-matching engine in `health.sh` maps failures to actionable steps.
 - Output includes commands such as:
   - Service restart: `npm --prefix frontend/apps/dashboard run start`
-  - Container restart: `docker compose -f infrastructure/compose/docker-compose.infra.yml restart grafana`
-  - Database recovery: `docker compose -f infrastructure/compose/docker-compose.data.yml up -d timescaledb`
+  - Container restart: `docker compose -f tools/compose/docker-compose.infra.yml restart grafana`
+  - Database recovery: `docker compose -f tools/compose/docker-compose.data.yml up -d timescaledb`
   - Port collision investigation: `lsof -i :3500`
 - Remediation hints appear in text/JSON outputs and within Dashboard UI to guide incident response teams.
 

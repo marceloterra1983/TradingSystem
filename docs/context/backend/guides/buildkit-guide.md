@@ -6,7 +6,7 @@ domain: ops
 type: guide
 summary: Implementation guide for BuildKit build system with local and distributed caching strategies
 status: active
-last_review: 2025-10-17
+last_review: "2025-10-17"
 ---
 
 # BuildKit Build System Guide
@@ -105,7 +105,7 @@ Unified interface for all build operations in `scripts/buildkit/buildkit-wrapper
 
 ### Registry Configuration
 ```yaml
-# infrastructure/registry/config.yml
+# tools/registry/config.yml
 version: 0.1
 storage:
   cache:

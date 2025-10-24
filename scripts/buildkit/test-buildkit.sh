@@ -4,7 +4,7 @@ set -e
 echo "Testando BuildKit..."
 
 # Criar diretório de teste
-TEST_DIR="infrastructure/tests/buildkit-test"
+TEST_DIR="tools/tests/buildkit-test"
 mkdir -p $TEST_DIR
 
 # Executar build com BuildKit

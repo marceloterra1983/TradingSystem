@@ -41,7 +41,7 @@ No critical broken links. All essential documentation is accessible.
 -   `backend/api/webscraper-api.md` - Missing init script and frontend link (2 links)
 -   `backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md` - Missing PRD reference
 -   `backend/data/webscraper-schema.md` - Missing SQL schema file
--   `ops/infrastructure/reverse-proxy-setup.md` - Missing nginx docs (3 links)
+-   `ops/tools/reverse-proxy-setup.md` - Missing nginx docs (3 links)
 
 ### ✅ Resolved (26 items)
 
@@ -117,7 +117,7 @@ No critical broken links. All essential documentation is accessible.
 
 -   `../src/pages/BancoIdeiasPage.tsx` (source files not in docs)
 -   `src/components/pages/PortsPage.tsx` (incorrect path)
--   `../../../../../infrastructure/agno-agents/README.md` (too many parent directories)
+-   `../../../../../tools/agno-agents/README.md` (too many parent directories)
 
 **Remediation**: Update paths or remove references to source files from documentation.
 
@@ -137,11 +137,11 @@ No critical broken links. All essential documentation is accessible.
 
 1. Create `backend/api/workspace.openapi.yaml` (or update reference to correct spec location)
 2. Create `backend/api/documentation-api.openapi.yaml`
-3. Create `infrastructure/nginx-proxy/README.md` and `VPS-MIGRATION-GUIDE.md`
-4. Create `infrastructure/firecrawl/README.md`
+3. Create `tools/nginx-proxy/README.md` and `VPS-MIGRATION-GUIDE.md`
+4. Create `tools/firecrawl/README.md`
 5. Create `backend/api/firecrawl-proxy/README.md`
 6. Create `shared/product/prd/pt/agno-integration-prd.md`
-7. Create `infrastructure/timescaledb/webscraper-schema.sql`
+7. Create `tools/timescaledb/webscraper-schema.sql`
 
 ### Phase 3: Update References (2-4 hours)
 
@@ -166,7 +166,7 @@ No critical broken links. All essential documentation is accessible.
 **File**: `backend/NEW-SERVICE-TEMPLATE.md`
 
 -   Line 389: `ENV-RULES.md` → **Create** or reference `docs/ENV-RULES.md`
--   Line 390: `backend/ENV-CONFIGURATION-RULES.md` → **Create** or reference `ops/ENVIRONMENT-CONFIGURATION.md`
+-   Line 390: `config/ENV-CONFIGURATION-RULES.md` → **Create** or reference `ops/ENVIRONMENT-CONFIGURATION.md`
 -   Line 392: `CONTRIBUTING.md` → **Fix path** to `../../CONTRIBUTING.md`
 
 **File**: `backend/api/README.md`
@@ -181,7 +181,7 @@ No critical broken links. All essential documentation is accessible.
 
 **File**: `backend/api/firecrawl-proxy.md`
 
--   Line 373: `infrastructure/firecrawl/README.md` → **Create** infrastructure guide
+-   Line 373: `tools/firecrawl/README.md` → **Create** infrastructure guide
 -   Line 374: `backend/api/firecrawl-proxy/README.md` → **Create** implementation README
 
 **File**: `backend/api/webscraper-api.md`
@@ -197,7 +197,7 @@ No critical broken links. All essential documentation is accessible.
 
 **File**: `backend/data/webscraper-schema.md`
 
--   Line 366: `infrastructure/timescaledb/webscraper-schema.sql` → **Create** SQL schema file
+-   Line 366: `tools/timescaledb/webscraper-schema.sql` → **Create** SQL schema file
 
 **File**: `backend/guides/agno-agents-guide.md`
 
@@ -218,7 +218,7 @@ No critical broken links. All essential documentation is accessible.
 
 ### Operations Documentation (14 broken links)
 
-**File**: `ops/infrastructure/reverse-proxy-setup.md`
+**File**: `ops/tools/reverse-proxy-setup.md`
 
 -   Line 260-262: Nginx and architecture docs → **Create** missing infrastructure documentation
 
@@ -291,7 +291,7 @@ No critical broken links. All essential documentation is accessible.
 -   `backend/api/webscraper-api.md` - Missing init script and frontend link (2 links)
 -   `backend/architecture/decisions/2025-10-16-adr-0002-agno-framework.md` - Missing PRD reference
 -   `backend/data/webscraper-schema.md` - Missing SQL schema file
--   `ops/infrastructure/reverse-proxy-setup.md` - Missing nginx docs (3 links)
+-   `ops/tools/reverse-proxy-setup.md` - Missing nginx docs (3 links)
 
 ### Medium Priority (Remaining 12 links)
 

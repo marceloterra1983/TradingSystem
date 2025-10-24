@@ -51,10 +51,10 @@ echo -e "${BLUE}[2/4]${NC} Verifying compose file project names..."
 echo ""
 
 echo -e "${CYAN}Project names in use:${NC}"
-grep -h "^name:" infrastructure/compose/*.yml infrastructure/monitoring/*.yml 2>/dev/null | sort -u | sed 's/name: /  • /'
+grep -h "^name:" tools/compose/*.yml tools/monitoring/*.yml 2>/dev/null | sort -u | sed 's/name: /  • /'
 
 # Check for duplicates
-DUPLICATES=$(grep -h "^name:" infrastructure/compose/*.yml infrastructure/monitoring/*.yml 2>/dev/null | cut -d: -f2 | tr -d ' ' | sort | uniq -d)
+DUPLICATES=$(grep -h "^name:" tools/compose/*.yml tools/monitoring/*.yml 2>/dev/null | cut -d: -f2 | tr -d ' ' | sort | uniq -d)
 
 if [ -n "$DUPLICATES" ]; then
     echo ""
@@ -79,8 +79,8 @@ echo ""
 
 # Stop and remove containers that might be orphans
 COMPOSE_FILES=(
-    "infrastructure/compose/docker-compose.timescale.yml"
-    "infrastructure/compose/docker-compose.frontend-apps.yml"
+    "tools/compose/docker-compose.timescale.yml"
+    "tools/compose/docker-compose.frontend-apps.yml"
 )
 
 for COMPOSE_FILE in "${COMPOSE_FILES[@]}"; do
@@ -104,11 +104,11 @@ echo -e "${BLUE}[4/4]${NC} Restarting services..."
 echo ""
 
 echo -e "${YELLOW}→${NC} Starting TimescaleDB stack..."
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d --remove-orphans
+docker compose -f tools/compose/docker-compose.timescale.yml up -d --remove-orphans
 echo -e "${GREEN}  ✓${NC} Started"
 
 echo -e "${YELLOW}→${NC} Starting Frontend Apps DB..."
-docker compose -f infrastructure/compose/docker-compose.frontend-apps.yml up -d --remove-orphans
+docker compose -f tools/compose/docker-compose.frontend-apps.yml up -d --remove-orphans
 echo -e "${GREEN}  ✓${NC} Started"
 
 echo ""
@@ -129,7 +129,7 @@ echo -e "${GREEN}✓${NC} Cleanup complete!"
 echo ""
 
 # Check for remaining orphans
-REMAINING_ORPHANS=$(docker compose -f infrastructure/compose/docker-compose.timescale.yml ps 2>&1 | grep -c "Found orphan" || true)
+REMAINING_ORPHANS=$(docker compose -f tools/compose/docker-compose.timescale.yml ps 2>&1 | grep -c "Found orphan" || true)
 
 if [ "$REMAINING_ORPHANS" -eq 0 ]; then
     echo -e "${GREEN}✓${NC} No orphan containers detected"

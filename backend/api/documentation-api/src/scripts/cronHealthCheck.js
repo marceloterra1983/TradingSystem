@@ -78,7 +78,7 @@ class HealthCheckCron {
     try {
       const history = await fs.readFile(this.historyFile, 'utf8');
       this.history = JSON.parse(history);
-    } catch (error) {
+    } catch (_error) {
       logger.info('No existing health check history found');
       this.history = [];
     }

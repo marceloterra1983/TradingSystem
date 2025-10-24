@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Utility for interacting with backend/manifest.json.
+ * Utility for interacting with config/services-manifest.json.
  *
  * Usage:
  *   node scripts/service-manifest.js list
@@ -11,7 +11,7 @@
 const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path');
 
-const MANIFEST_PATH = resolve(process.cwd(), 'backend/manifest.json');
+const MANIFEST_PATH = resolve(process.cwd(), 'config/services-manifest.json');
 
 function loadManifest() {
   try {

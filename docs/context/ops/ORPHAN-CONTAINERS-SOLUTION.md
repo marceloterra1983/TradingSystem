@@ -4,8 +4,8 @@ tags: [docker, docker-compose, troubleshooting, infrastructure]
 domain: ops
 type: guide
 summary: "Complete solution for Docker Compose orphan container warnings"
-status: implemented
-last_review: 2025-10-20
+status: active
+last_review: "2025-10-20"
 sidebar_position: 1
 ---
 
@@ -39,10 +39,10 @@ Docker Compose uses the `name:` field (or directory name if not specified) to gr
 **In our case:**
 
 ```yaml
-# infrastructure/compose/docker-compose.timescale.yml
+# tools/compose/docker-compose.timescale.yml
 name: database  # ❌ Conflict!
 
-# infrastructure/compose/docker-compose.frontend-apps.yml  
+# tools/compose/docker-compose.frontend-apps.yml  
 name: database  # ❌ Same name!
 ```
 
@@ -58,7 +58,7 @@ name: database  # ❌ Same name!
 
 **Changed:**
 ```yaml
-# infrastructure/compose/docker-compose.frontend-apps.yml
+# tools/compose/docker-compose.frontend-apps.yml
 name: frontend-apps  # ✅ Unique!
 ```
 
@@ -167,10 +167,10 @@ bash scripts/docker/validate-compose-names.sh
 
 [2/3] Extracting project names...
 ✓ database
-  File: infrastructure/compose/docker-compose.timescale.yml
+  File: tools/compose/docker-compose.timescale.yml
 
 ✓ frontend-apps
-  File: infrastructure/compose/docker-compose.frontend-apps.yml
+  File: tools/compose/docker-compose.frontend-apps.yml
 
 ...
 
@@ -304,14 +304,14 @@ name: {category}-{purpose}
 
 ```bash
 # Start TimescaleDB
-docker compose -f infrastructure/compose/docker-compose.timescale.yml up -d
+docker compose -f tools/compose/docker-compose.timescale.yml up -d
 
 # Start Frontend Apps DB  
-docker compose -f infrastructure/compose/docker-compose.frontend-apps.yml up -d
+docker compose -f tools/compose/docker-compose.frontend-apps.yml up -d
 
 # Check for warnings (should be none)
-docker compose -f infrastructure/compose/docker-compose.timescale.yml ps
-docker compose -f infrastructure/compose/docker-compose.frontend-apps.yml ps
+docker compose -f tools/compose/docker-compose.timescale.yml ps
+docker compose -f tools/compose/docker-compose.frontend-apps.yml ps
 ```
 
 **Expected:** No "Found orphan containers" warnings
@@ -325,12 +325,12 @@ docker compose ls
 **Expected output:**
 ```
 NAME                STATUS              CONFIG FILES
-database            running(8)          infrastructure/compose/docker-compose.timescale.yml
-documentation       running(2)          infrastructure/compose/docker-compose.docs.yml
-frontend-apps       running(1)          infrastructure/compose/docker-compose.frontend-apps.yml
-infrastructure      running(4)          infrastructure/compose/docker-compose.infra.yml
-langgraph-dev       running(3)          infrastructure/compose/docker-compose.langgraph-dev.yml
-monitoring          running(4)          infrastructure/monitoring/docker-compose.yml
+database            running(8)          tools/compose/docker-compose.timescale.yml
+documentation       running(2)          tools/compose/docker-compose.docs.yml
+frontend-apps       running(1)          tools/compose/docker-compose.frontend-apps.yml
+infrastructure      running(4)          tools/compose/docker-compose.infra.yml
+langgraph-dev       running(3)          tools/compose/docker-compose.langgraph-dev.yml
+monitoring          running(4)          tools/monitoring/docker-compose.yml
 ```
 
 All project names should be **unique**.
