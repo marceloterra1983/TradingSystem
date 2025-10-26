@@ -8,7 +8,7 @@ services:
       - "${PROMETHEUS_PORT:-9090}:9090"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   alertmanager:
     image: "${IMG_MON_ALERTMANAGER:-prom/alertmanager}:${IMG_VERSION:-latest}"
@@ -17,7 +17,7 @@ services:
       - "${ALERTMANAGER_PORT:-9093}:9093"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   grafana:
     image: "${IMG_MON_GRAFANA:-grafana/grafana}:${IMG_VERSION:-latest}"
@@ -25,10 +25,10 @@ services:
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   alert-router:
     image: "${IMG_MON_ALERT_ROUTER:-nginx}:${IMG_VERSION:-alpine}"
@@ -37,4 +37,4 @@ services:
       - "${ALERT_ROUTER_PORT:-9094}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
