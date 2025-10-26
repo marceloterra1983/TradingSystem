@@ -2,7 +2,7 @@ name: database
 
 services:
   timescaledb:
-    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb:latest-pg16}"
     container_name: data-timescaledb
     ports:
       - "5433:5432"
@@ -26,7 +26,7 @@ services:
       - tradingsystem_backend
 
   timescaledb-backup:
-    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
+    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb:latest-pg16}"
     container_name: data-timescaledb-backup
     ports:
       - "5434:5432"
@@ -39,7 +39,7 @@ services:
       - ../../.env
 
   timescaledb-exporter:
-    image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter:latest}"
     container_name: data-timescaledb-exporter
     ports:
       - "${TIMESCALEDB_EXPORTER_PORT:-9187}:9187"
@@ -54,7 +54,7 @@ services:
       - timescaledb
 
   timescaledb-pgadmin:
-    image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-dpage/pgadmin4}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-dpage/pgadmin4:latest}"
     container_name: data-timescaledb-pgadmin
     ports:
       - "${PGADMIN_HOST_PORT:-5050}:80"
@@ -71,7 +71,7 @@ services:
       - ../../.env
 
   timescaledb-pgweb:
-    image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb:latest}"
     container_name: data-timescaledb-pgweb
     ports:
       - "${PGWEB_PORT:-8081}:8081"
@@ -87,7 +87,7 @@ services:
       - tradingsystem_backend
 
   timescaledb-adminer:
-    image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer:latest}"
     container_name: data-timescaledb-adminer
     ports:
       - "${ADMINER_PORT:-8080}:8080"
@@ -103,7 +103,7 @@ services:
       - timescaledb
 
   postgress-langgraph:
-    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres}:${IMG_VERSION:-15}"
+    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres:15}"
     container_name: data-postgress-langgraph
     ports:
       - "5435:5432"
@@ -116,7 +116,7 @@ services:
       - ../../.env
 
   qdrant:
-    image: "${IMG_DATA_QDRANT:-qdrant/qdrant}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_QDRANT:-qdrant/qdrant:latest}"
     container_name: data-qdrant
     ports:
       - "${QDRANT_PORT:-6333}:6333"
@@ -130,7 +130,7 @@ services:
       - ../../.env
 
   questdb:
-    image: "${IMG_DATA_QUESTDB:-questdb/questdb}:${IMG_VERSION:-latest}"
+    image: "${IMG_DATA_QUESTDB:-questdb/questdb:latest}"
     container_name: data-questdb
     ports:
       - "${QUESTDB_HTTP_PORT_NEW:-9000}:9000"
@@ -144,7 +144,7 @@ services:
       - ../../.env
 
   frontend-apps:
-    image: "${IMG_DATA_FRONTEND_APPS:-nginx}:${IMG_VERSION:-alpine}"
+    image: "${IMG_DATA_FRONTEND_APPS:-nginx:alpine}"
     container_name: data-frontend-apps
     ports:
       - "${FRONTEND_APPS_PORT:-3001}:80"
