@@ -92,7 +92,7 @@ const unifiedConfig: ApiConfig = {
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8082',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
 };
 
 // Direct port configuration (legacy)
@@ -130,7 +130,7 @@ const directConfig: ApiConfig = {
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8082',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
 };
 
 // Get current configuration based on environment
