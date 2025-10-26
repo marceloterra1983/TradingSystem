@@ -1,0 +1,11 @@
+{
+  "label": "Domain",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Domain Designs",
+    "slug": "/sdd/domain",
+    "description": "Domain models and schemas for TradingSystem."
+  }
+}

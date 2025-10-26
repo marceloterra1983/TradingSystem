@@ -45,9 +45,9 @@ stop --clean-logs
 |---------|-----|-------|
 | Dashboard | http://localhost:3103 | 3103 |
 | Workspace API | http://localhost:3200 | 3200 |
+| Documentation API | http://localhost:3400 | 3400 |
 | Status API | http://localhost:3500 | 3500 |
 | TP-Capital | http://localhost:4005 | 4005 |
-| Documentation API | http://localhost:3400 | 3400 |
 | Firecrawl Proxy | http://localhost:3600 | 3600 |
 
 ## 📊 Health Checks
@@ -179,5 +179,4 @@ WORKSPACE_PORT=3200
 ---
 
 **Pronto!** Agora você tem controle total do TradingSystem com comandos simples. 🎉
-
 

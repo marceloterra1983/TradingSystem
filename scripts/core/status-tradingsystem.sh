@@ -173,12 +173,12 @@ check_services() {
     
     local services=(
         "workspace-api:3200"
+        "documentation-api:3205"
         "b3-market-data:3302"
         "service-launcher:3500"
         "firecrawl-proxy:3600"
-        "webscraper-api:3700"
         "frontend-dashboard:3103"
-        "docusaurus:3004"
+        "docusaurus:3205"
     )
     
     local running=0
@@ -327,7 +327,7 @@ show_summary() {
     # Key URLs
     echo -e "${BOLD}Key URLs:${NC}"
     echo -e "  Dashboard:       ${CYAN}http://localhost:3103${NC}"
-    echo -e "  Documentation:   ${CYAN}http://localhost:3004${NC}"
+    echo -e "  Documentation:   ${CYAN}http://localhost:3205${NC}"
     echo -e "  Prometheus:      ${CYAN}http://localhost:9090${NC}"
     echo -e "  Grafana:         ${CYAN}http://localhost:3000${NC}"
     echo ""

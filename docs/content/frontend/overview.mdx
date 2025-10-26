@@ -1,0 +1,41 @@
+---
+title: Frontend Engineering
+description: Design tokens, UI architecture, and dashboard implementation guidelines.
+tags:
+  - engineering
+  - frontend
+primarySystems:
+  - frontend/dashboard
+  - backend/api
+owner: FrontendGuild
+lastReviewed: '2025-10-26'
+---
+import CodeTabs from '@site/src/components/CodeTabs';
+import AdmonitionWrap from '@site/src/components/AdmonitionWrap';
+
+## Coverage
+
+This section hosts engineering deep dives, architectural diagrams, and onboarding guides for the
+TradingSystem frontend teams. Organize content under subdirectories such as `architecture/`,
+`components/`, `tooling/`, and `observability/`.
+
+Each article should reference the owning squad, list the production contact path, and link to the
+relevant repositories or dashboards.
+
+## Authoring guidance
+
+- Prefer mermaid or PlantUML diagrams stored adjacent to their source docs.
+- Use callout components (coming in Phase 2.3) to highlight operational caveats.
+- Cross-link to `apps` for dashboards or embedded experiences impacted by the work.
+
+<AdmonitionWrap type="info" title="Starter snippet">
+  Use code tabs to compare API responses, CLI commands, or config files across environments.
+</AdmonitionWrap>
+
+<CodeTabs
+  groupId="platform-snippet"
+  items={[
+    {label: 'curl', language: 'bash', code: 'curl https://api.example.com/health'},
+    {label: 'Node.js', language: 'js', code: "await fetch('https://api.example.com/health');"}
+  ]}
+/>

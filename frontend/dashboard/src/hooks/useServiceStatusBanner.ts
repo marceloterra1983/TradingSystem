@@ -7,11 +7,20 @@ export function useServiceStatusBanner() {
   const { data } = useQuery({
     queryKey: ['service-launcher-status'],
     queryFn: async () => {
-      const response = await fetch(`${SERVICE_LAUNCHER_URL}/api/status`);
-      return response.json();
+      try {
+        const response = await fetch(`${SERVICE_LAUNCHER_URL}/api/status`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.warn('[ServiceStatusBanner] Failed to fetch service status:', error);
+        return null;
+      }
     },
     refetchInterval: 15000,
-    staleTime: 10000
+    staleTime: 10000,
+    retry: false
   });
 
   const downCount = data?.downCount ?? 0;

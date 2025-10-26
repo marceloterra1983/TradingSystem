@@ -81,7 +81,7 @@ if (-not $SkipFrontend) {
 if (-not $SkipDocs) {
   Invoke-ServiceStartup -Name 'Docs (Docusaurus)' `
     -WorkingDirectory (Join-Path $repoRoot 'docs') `
-    -StartCommand 'npm run start -- --port 3004 --host 0.0.0.0'
+    -StartCommand 'npm run start -- --port 3205 --host 0.0.0.0'
 }
 
 if ($StartMonitoring) {
@@ -138,7 +138,7 @@ Write-Host ''
 Write-Host 'Services running:' -ForegroundColor Yellow
 if (-not ($SkipIdeaBank -or $SkipWorkspace)) { Write-Host '  - Workspace:          http://localhost:3100' -ForegroundColor White }
 if (-not $SkipFrontend) { Write-Host '  - Dashboard:          http://localhost:5173' -ForegroundColor White }
-if (-not $SkipDocs) { Write-Host '  - Docs (Docusaurus):  http://localhost:3004' -ForegroundColor White }
-if ($StartDocsDocker) { Write-Host '  - Docs (Docker):      http://localhost:3004' -ForegroundColor White }
+if (-not $SkipDocs) { Write-Host '  - Docs (Docusaurus):  http://localhost:3205' -ForegroundColor White }
+if ($StartDocsDocker) { Write-Host '  - Docs (Docker):      http://localhost:3205' -ForegroundColor White }
 Write-Host ''
 Write-Host 'Close this window to exit.' -ForegroundColor Gray

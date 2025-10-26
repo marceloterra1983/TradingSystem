@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiConfig } from '@/config/api';
+import { buildDocsUrl } from '@/lib/docsUrl';
 import documentationService, {
   SearchResult,
   SearchSuggestion,
@@ -105,7 +106,7 @@ export const DocumentationPage: React.FC = () => {
     if (result.path) {
       const href = result.path.startsWith('http')
         ? result.path
-        : `${apiConfig.docsUrl.replace(/\/$/, '')}/${result.path.replace(/^\//, '')}`;
+        : buildDocsUrl(result.path);
       window.open(href, '_blank', 'noopener,noreferrer');
     } else if (result.source) {
       window.open(result.source, '_blank', 'noopener,noreferrer');

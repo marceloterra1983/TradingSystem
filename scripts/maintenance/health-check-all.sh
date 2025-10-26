@@ -25,25 +25,25 @@ fi
 
 declare -A SERVICE_PATHS=(
     ["Dashboard"]="frontend/dashboard"
-    ["Workspace API"]="backend/api/workspace"
-    ["TP Capital"]="apps/tp-capital"
-    ["B3 Market Data"]="apps/b3-market-data"
     ["Documentation API"]="backend/api/documentation-api"
     ["Status API"]="apps/status"
+    ["Telegram Gateway"]="apps/telegram-gateway"
+    ["B3 Market Data"]="apps/b3-market-data"
     ["Firecrawl Proxy"]="backend/api/firecrawl-proxy"
-    ["WebScraper API"]="backend/api/webscraper-api"
     ["Docusaurus"]="docs"
 )
+# Note: TP Capital API and Workspace now run as Docker containers (see docker-compose.apps.yml)
 
 declare -A STACK_COMPOSE_FILES=(
     ["data-timescale"]="tools/compose/docker-compose.timescale.yml"
+    ["apps"]="tools/compose/docker-compose.apps.yml"
     ["monitoring"]="tools/monitoring/docker-compose.yml"
     ["docs"]="tools/compose/docker-compose.docs.yml"
     ["infra"]="tools/compose/docker-compose.infra.yml"
     ["firecrawl"]="tools/firecrawl/firecrawl-source/docker-compose.yaml"
 )
 
-declare -a CRITICAL_SERVICES=("timescaledb" "Service Launcher" "Dashboard")
+declare -a CRITICAL_SERVICES=("timescaledb" "Service Launcher" "Dashboard" "Telegram Gateway" "tp-capital-api" "workspace-service")
 declare -a REMEDIATION_TARGETS=()
 declare -A REMEDIATION_MAP=()
 declare -A LATENCY_PERCENTILES=()

@@ -1,0 +1,241 @@
+---
+title: Risk Limits Configuration
+description: Trading risk limits and controls for TradingSystem.
+tags:
+  - tools
+  - security
+  - risk
+  - trading
+owner: SecurityOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem enforces multi-layer risk controls covering order placement, position management, and
+emergency stop mechanisms. These policies align with the Order Manager service specification and
+ensure safe trading behavior as the platform evolves.
+
+- **Status**: Planned (Order Manager API under development).  
+- **Enforcement Points**: Pre-trade checks, kill switch, position monitoring, account-level limits.
+
+## Risk Limit Types
+
+### Daily Loss Limit
+
+- **Purpose**: Cap daily drawdown.  
+- **Configuration**: `dailyLossLimit` (BRL), tracked alongside `currentDailyLoss`.  
+- **Enforcement**: Reject orders once `currentDailyLoss &gt;= dailyLossLimit`. Reset at 09:00 BRT.  
+- **Endpoint**: `GET /api/risk/limits`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "dailyLossLimit": 5000.00,
+    "currentDailyLoss": 1250.50,
+    "remainingLimit": 3749.50
+  }
+}
+```
+
+### Position Size Limit
+
+- **Purpose**: Restrict exposure per symbol.  
+- **Configuration**: `maxPositionSize` map (e.g., `{"PETR4": 1000}`).  
+- **Enforcement**: `currentPosition + orderQuantity` must not exceed limit (absolute value).  
+- **Endpoint**: `GET /api/risk/limits`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "maxPositionSize": {
+      "PETR4": 1000,
+      "VALE3": 500
+    },
+    "currentPositions": {
+      "PETR4": 750,
+      "VALE3": 200
+    }
+  }
+}
+```
+
+### Trading Hours
+
+- **Purpose**: Prevent orders outside configured session.  
+- **Configuration**: `tradingHours.start`, `tradingHours.end`, `tradingHours.timezone`.  
+- **Enforcement**: Reject orders outside `start`–`end`. Optional pre/post-market toggles.  
+- **Endpoint**: `GET /api/risk/limits`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "tradingHours": {
+      "start": "09:00",
+      "end": "18:00",
+      "timezone": "America/Sao_Paulo"
+    },
+    "currentTime": "10:30",
+    "marketOpen": true
+  }
+}
+```
+
+### Margin Requirement
+
+- **Purpose**: Ensure sufficient margin before orders.  
+- **Configuration**: `marginRequirement` (percentage) and `availableBalance`.  
+- **Enforcement**: Calculate `orderValue * marginRequirement`; reject if balance insufficient.  
+- **Endpoint**: `GET /api/risk/positions`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "availableBalance": 50000.00,
+    "usedMargin": 10000.00,
+    "freeMargin": 40000.00,
+    "marginLevel": 500.00
+  }
+}
+```
+
+## Kill Switch
+
+- **Purpose**: Emergency halt for all trading activity.  
+- **Activation**: `POST /api/risk/kill-switch` (manual or automated triggers).  
+- **Effects**: Cancel open orders, reject new orders, optionally flatten positions, notify operators.
+
+```json
+{
+  "success": true,
+  "data": {
+    "killSwitchActive": true,
+    "ordersCanceled": 15,
+    "activatedAt": "2025-10-24T11:00:00Z",
+    "reason": "Market volatility spike"
+  },
+  "message": "Kill switch activated, all orders canceled"
+}
+```
+
+- **Deactivation**: Manual approval required.  
+- **Audit**: Log every activation with reason, user, timestamp, and outcomes.
+
+## Risk Check Sequence
+
+Order Manager runs deterministic checks to minimize latency while guarding risk.
+
+1. **Trading Hours** – In-memory validation (&lt;1 ms); reject outside defined window.  
+2. **Kill Switch** – In-memory flag (&lt;1 ms); reject if active.  
+3. **Daily Loss** – Database lookup (~10 ms); block orders exceeding limit.  
+4. **Position Size** – Database lookup (~10 ms); block excessive exposure.  
+5. **Margin Requirement** – External broker call (~50 ms); validate available balance.
+
+- **Latency Target**: &lt;100 ms p95.  
+- **Optimization**: Cache read-heavy limits (trading hours, kill switch) while keeping write-through semantics.
+
+## Configuration Management
+
+### Environment Variables (MVP)
+
+```bash
+DAILY_LOSS_LIMIT=5000.00
+MAX_POSITION_SIZE_PETR4=1000
+MAX_POSITION_SIZE_VALE3=500
+TRADING_HOURS_START=09:00
+TRADING_HOURS_END=18:00
+```
+
+- **Limitations**: Requires service restart, lacks audit trail, no per-user granularity.
+
+### Database Table (Planned)
+
+```sql
+CREATE TABLE risk_limits (
+  limit_id UUID PRIMARY KEY,
+  user_id UUID,
+  limit_type TEXT NOT NULL,
+  symbol TEXT,
+  limit_value NUMERIC NOT NULL,
+  effective_from TIMESTAMPTZ NOT NULL,
+  effective_to TIMESTAMPTZ,
+  created_by TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL
+);
+```
+
+- Supports dynamic updates, audit history, per-user limits, and effective dating.  
+- **Endpoint**: `PUT /api/risk/limits` for authorized updates.
+
+```json
+{
+  "limitType": "daily_loss",
+  "limitValue": 10000.00,
+  "effectiveFrom": "2025-11-01T00:00:00Z"
+}
+```
+
+## Monitoring and Alerts
+
+### Prometheus Metrics (Planned)
+
+```
+order_manager_risk_violations_total{type="daily_loss_limit"} 5
+order_manager_risk_violations_total{type="position_size_limit"} 2
+order_manager_kill_switch_activations_total 1
+order_manager_daily_loss_current 1250.50
+order_manager_daily_loss_limit 5000.00
+order_manager_position_size_current{symbol="PETR4"} 750
+order_manager_position_size_limit{symbol="PETR4"} 1000
+```
+
+### Grafana Dashboards
+
+1. Daily loss tracker (gauge).  
+2. Position size heatmap by symbol.  
+3. Risk violation counts by type.  
+4. Kill switch status indicator.  
+5. Trading hours and market status panel.
+
+### Alert Rules
+
+| Alert | Condition | Severity | Action |
+|-------|-----------|----------|--------|
+| Daily Loss Warning | `currentDailyLoss > dailyLossLimit * 0.8` | Warning | Notify traders |
+| Daily Loss Critical | `currentDailyLoss &gt;= dailyLossLimit` | Critical | Activate kill switch |
+| Position Size Warning | `currentPosition > maxPositionSize * 0.9` | Warning | Notify traders |
+| Kill Switch Activated | `killSwitchActive == true` | Critical | Alert all operators |
+| Risk Check Failures | `riskViolations > 10 in 5m` | Warning | Review risk configuration |
+
+- **Channels**: Slack `#trading-alerts`, email `trading-ops@company.com`, SMS for on-call (critical).
+
+## Testing
+
+### Unit Tests
+- Daily loss limit boundary conditions.  
+- Position size enforcement for long/short scenarios.  
+- Trading hour validation pre/post market.  
+- Margin requirement calculations with varying leverage.  
+- Kill switch activation/deactivation behavior.
+
+### Integration Tests
+- Successful order under thresholds.  
+- Rejected order exceeding daily loss, position size, or trading hours.  
+- Kill switch block on new orders.  
+- Risk limit updates applied without restart.
+
+### Load Tests
+- 100 orders/second synthetic load; ensure &lt;100 ms p95 risk check time.  
+- Validate database query performance under contention.
+
+## Related Documentation
+
+- [Security Overview](./overview).  
+- [Environment Variables Reference](./env).  
+- [Security Audit Procedures](./audit).  
+- [Order Manager API](../../api/order-manager).  
+- [Order Manager SDD](../../sdd/api/order-manager/v1/spec).

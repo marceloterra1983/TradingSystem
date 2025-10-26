@@ -540,7 +540,7 @@ Unified reverse proxy routing all TradingSystem services under a single domain, 
 | B3 | `http://tradingsystem.local/api/b3` | `http://localhost:3302` |
 | Documentation API | `http://tradingsystem.local/api/docs` | `http://localhost:3400` |
 | Launcher | `http://tradingsystem.local/api/launcher` | `http://localhost:3500` |
-| Docusaurus | `http://tradingsystem.local/docs` | `http://localhost:3004` |
+| Docusaurus | `http://tradingsystem.local/docs` | `http://localhost:3205` |
 
 **Quick Setup (Linux/WSL2):**
 ```bash

@@ -19,12 +19,13 @@ last_review: "2025-10-23"
 
 > **Local trading system** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for real-time market data capture, ML-based cause-and-effect analysis, and automated order execution. 100% on-premise, no cloud dependencies.
 
-> **🚨 DEVELOPERS:** Before creating ANY new service, read **[ENV-RULES.md](docs/context/ENV-RULES.md)** - Centralized `.env` is MANDATORY!
+> **🚨 DEVELOPERS:** Before creating ANY new service, read **[Environment Configuration Guide](http://localhost:3205/tools/security-config/env)** - Centralized `.env` is MANDATORY! Also see [Documentation Hub](http://localhost:3205) for comprehensive guides.
 
 ## 📋 Table of Contents
 
 - [🚀 TradingSystem - Local Intelligent Trading Platform](#-tradingsystem---local-intelligent-trading-platform)
   - [📋 Table of Contents](#-table-of-contents)
+  - [📚 Documentation](#-documentation)
   - [🎯 Overview](#-overview)
     - [Key Highlights](#key-highlights)
   - [✨ Features](#-features)
@@ -52,6 +53,38 @@ last_review: "2025-10-23"
       - [Pre-commit Hooks](#pre-commit-hooks)
     - [Environment Options](#environment-options)
   - [📁 Project Structure](#-project-structure)
+
+## 📚 Documentation
+
+**TradingSystem has comprehensive documentation powered by Docusaurus v3:**
+
+**Quick Links**:
+- 📖 [Documentation Hub](http://localhost:3205) (local dev)
+- 📖 [Documentation Hub](http://tradingsystem.local/docs) (unified domain)
+- 🗂️ [Content Directory](docs/content/) - Browse all documentation
+- 📋 [Validation Guide](docs/governance/VALIDATION-GUIDE.md) - How to validate docs
+- ✅ [Review Checklist](docs/governance/REVIEW-CHECKLIST.md) - Quality standards
+
+**Content Structure** (135+ pages):
+- **Apps**: Workspace, TP Capital, Order Manager, Data Capture
+- **APIs**: Order Manager, Data Capture, Workspace
+- **Frontend**: Design system, guidelines, engineering practices
+- **Database**: Schemas, migrations, backup/retention
+- **Tools**: Node.js, .NET, Python, Docker, PlantUML, Docusaurus
+- **SDD**: Domain schemas, events, flows, API specifications
+- **PRD**: Product requirements, feature briefs
+- **Reference**: Templates, ADRs, diagrams
+
+**For Contributors**:
+- Run `npm --prefix docs run docs:dev` to start local server
+- Run `npm --prefix docs run docs:check` before committing
+- See [docs/README.md](docs/README.md) for automation and helpers
+
+**Migration Complete** (2025-10-26):
+- ✅ Migrated from legacy Docusaurus v2 to Docusaurus v3
+- ✅ 251 legacy files consolidated into 135 structured pages
+- ✅ Documentation Hub now serves on port 3205 (legacy port retired)
+- 📖 See [CHANGELOG.md](CHANGELOG.md) for migration history
 
 > **🚨 First Time Here?** Read [Environment Configuration](#️-environment-configuration) BEFORE doing anything else!
 
@@ -144,6 +177,41 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
 -   **Unified Domain** - Single domain access through Nginx reverse proxy
 -   **Same-Origin Design** - All services under tradingsystem.local
 
+### Containerized Services (New! 🐳)
+
+**As of October 2025**, TP Capital and Workspace services are fully containerized:
+
+```
+Telegram Gateway (Local)  →  TP Capital API (Container)  →  TimescaleDB
+       ↓                            ↓
+   Port 4006               Port 4005 (Signals)
+                                    ↓
+                         Workspace API (Container)
+                              Port 3200 (Ideas & Docs)
+```
+
+**What's Containerized**:
+- ✅ **TP Capital API** - Trading signals ingestion (Port 4005)
+- ✅ **Workspace API** - Ideas & documentation management (Port 3200)
+- ✅ **Hot-Reload** - Development mode with nodemon + volume mounts
+- ✅ **Health Checks** - Automatic health monitoring for all containers
+
+**What Runs Locally**:
+- 🖥️ **Telegram Gateway** - Shared message ingestion service (Port 4006)
+- 🖥️ **Frontend Dashboard** - React UI (Port 3103)
+- 🖥️ **Other APIs** - Documentation, Status, etc.
+
+**Quick Start with Docker**:
+```bash
+# Start containerized services (3 commands)
+docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
+docker compose -f tools/compose/docker-compose.apps.yml --env-file .env up -d
+curl http://localhost:4005/health  # Verify TP Capital API
+curl http://localhost:3200/health  # Verify Workspace API
+```
+
+**See**: [DOCKER-QUICK-START.md](DOCKER-QUICK-START.md) for comprehensive Docker setup guide
+
 ## 🛠️ Tech Stack
 
 | Layer                | Technology                                                    |
@@ -229,7 +297,7 @@ If you have existing `.env` files scattered across the project:
 bash scripts/env/migrate-env.sh
 ```
 
-📖 **Complete Guide**: [Environment Configuration Documentation](docs/context/ops/ENVIRONMENT-CONFIGURATION.md)
+📖 **Complete Guide**: [Environment Variables Reference](http://localhost:3205/tools/security-config/env) | [Setup Script](scripts/env/setup-env.sh)
 
 ---
 
@@ -272,7 +340,7 @@ health
 -   `start-minimal` - Modo mínimo (essenciais)
 -   `start --force-kill` - Force restart matando processos em portas ocupadas
 
-📖 **Guia Completo**: [QUICK-START.md](QUICK-START.md) | [Startup Scripts](scripts/startup/README.md)
+📖 **Guia Completo**: [QUICK-START.md](QUICK-START.md) | [Startup Scripts](scripts/startup/README.md) | [Docs Hub](http://localhost:3205) (Docusaurus v3)
 
 ---
 
@@ -306,8 +374,8 @@ health
     ```
 5. **Start the documentation + dashboard stack**:
     ```bash
-    # Docusaurus (Port 3004)
-    cd docs/docusaurus && npm run start -- --host 0.0.0.0 --port 3004
+    # Documentation Hub (Port 3205)
+    cd docs && npm run start -- --host 0.0.0.0 --port 3205
     ```
     In a second terminal:
     ```bash
@@ -319,11 +387,11 @@ health
     bash tools/scripts/start-all-stacks.sh
     ```
 7. **Access the portals from Windows** via your browser:
-    - Documentation: http://localhost:3004
+    - Documentation: http://localhost:3205
     - Dashboard: http://localhost:3103
-    - API Hub (via Docusaurus): http://localhost:3004/shared/integrations/frontend-backend-api-hub
+    - API Hub (via Documentation Hub): http://localhost:3205/shared/integrations/frontend-backend-api-hub
 
-Refer back to the [Operations Quick Start Guides](docs/context/ops/onboarding/START-SERVICES.md) for service-specific instructions.
+Refer back to the [Operations Quick Start Guides](http://localhost:3205/tools/onboarding/start-services) for service-specific instructions.
 
 ### Prerequisites
 
@@ -365,6 +433,14 @@ API endpoints: http://tradingsystem.local/api/*
 
 ### Development Setup
 
+To boot the dashboard and documentation together in local mode:
+
+```bash
+npm run dev:dashboard-docs
+```
+
+This starts the dashboard at `http://localhost:3103` and the docs workspace at `http://localhost:3205`.
+
 #### Pre-commit Hooks
 
 Husky pre-commit hooks are automatically installed via `npm install` and run the following validations:
@@ -378,12 +454,12 @@ Hooks run automatically before each commit. To bypass (emergency only):
 git commit --no-verify -m "Emergency fix"
 ```
 
-See [Documentation Standard](docs/DOCUMENTATION-STANDARD.md) for frontmatter requirements.
+See [Documentation Standards](docs/governance/README.md#documentation-standards) for frontmatter requirements.
 
 For detailed setup instructions, see:
 
--   [Reverse Proxy Setup](docs/context/ops/tools/reverse-proxy-setup.md)
--   [VPS Migration Guide](docs/context/ops/tools/nginx-proxy-vps-migration.md)
+-   [Reverse Proxy Setup](http://localhost:3205/tools/infrastructure/reverse-proxy-setup)
+-   [VPS Migration Guide](http://localhost:3205/tools/infrastructure/nginx-proxy-vps-migration)
 
 ### Environment Options
 
@@ -400,10 +476,10 @@ You can access the system in two ways:
     - Frontend: `http://localhost:3103`
     - Workspace: `http://localhost:3102`
     - TP Capital API: `http://localhost:3200`
-    - B3 Market API: `http://localhost:3302`
     - DocsAPI: `http://localhost:3400`
+    - B3 Market API: `http://localhost:3302`
     - Laucher: `http://localhost:3500`
-    - Docusaurus: `http://localhost:3004`
+    - Documentation Hub: `http://localhost:3205`
 
 ## 📁 Project Structure
 

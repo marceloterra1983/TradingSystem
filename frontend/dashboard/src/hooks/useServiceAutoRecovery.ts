@@ -35,11 +35,20 @@ export function useServiceAutoRecovery() {
   const { data: statusData } = useQuery({
     queryKey: ['service-launcher-status'],
     queryFn: async () => {
-      const response = await fetch(`${SERVICE_LAUNCHER_URL}/api/status`);
-      return response.json();
+      try {
+        const response = await fetch(`${SERVICE_LAUNCHER_URL}/api/status`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        console.warn('[Auto-Recovery] Failed to fetch service status:', error);
+        return null;
+      }
     },
     refetchInterval: 15000,
-    staleTime: 10000
+    staleTime: 10000,
+    retry: false
   });
 
   const autoStartMutation = useMutation({
@@ -55,7 +64,15 @@ export function useServiceAutoRecovery() {
   });
 
   useEffect(() => {
-    if (!statusData?.services) return;
+    if (!statusData?.services) {
+      console.log('[Auto-Recovery] No service data available');
+      return;
+    }
+
+    console.log('[Auto-Recovery] Checking services...', {
+      totalServices: statusData.services.length,
+      attemptedStarts: Array.from(attemptedStarts.current)
+    });
 
     const downServices = statusData.services.filter(
       (service: ServiceStatus) => 
@@ -64,8 +81,10 @@ export function useServiceAutoRecovery() {
         !attemptedStarts.current.has(service.id)
     );
 
+    console.log('[Auto-Recovery] Critical services down:', downServices.map((s: ServiceStatus) => s.id));
+
     downServices.forEach((service: ServiceStatus) => {
-      console.warn(`[Auto-Recovery] Detected down service: ${service.name} (${service.id})`);
+      console.warn(`[Auto-Recovery] Attempting to start: ${service.name} (${service.id})`);
       attemptedStarts.current.add(service.id);
       autoStartMutation.mutate(service.id);
     });
@@ -73,7 +92,12 @@ export function useServiceAutoRecovery() {
     // Clear attempted starts for services that are back online
     statusData.services
       .filter((s: ServiceStatus) => s.status === 'ok')
-      .forEach((s: ServiceStatus) => attemptedStarts.current.delete(s.id));
+      .forEach((s: ServiceStatus) => {
+        if (attemptedStarts.current.has(s.id)) {
+          console.log(`[Auto-Recovery] Service ${s.id} is back online, clearing attempt`);
+          attemptedStarts.current.delete(s.id);
+        }
+      });
 
   }, [statusData, autoStartMutation]);
 

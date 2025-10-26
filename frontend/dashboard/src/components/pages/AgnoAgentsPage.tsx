@@ -10,7 +10,7 @@ import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Activity, BrainCircuit, BookOpen, ExternalLink, GaugeCircle, Radar, ShieldCheck, Workflow } from 'lucide-react';
-import { apiConfig } from '../../config/api';
+import { buildDocsUrl } from '../../lib/docsUrl';
 
 const DEFAULT_AGNO_BASE_URL = 'http://localhost:8200';
 
@@ -22,13 +22,6 @@ const sanitizeBaseUrl = (value: string | undefined): string => {
 };
 
 const AGNO_BASE_URL = sanitizeBaseUrl(import.meta.env.VITE_AGNO_AGENTS_URL);
-
-const buildDocsUrl = (relativePath: string) => {
-  const normalizedBase = apiConfig.docsUrl.replace(/\/$/, '');
-  const docsBase = normalizedBase.endsWith('/docs') ? normalizedBase : `${normalizedBase}/docs`;
-  const normalizedPath = relativePath.replace(/^\//, '').replace(/\.md$/, '');
-  return `${docsBase}/${normalizedPath}`;
-};
 
 const QUICK_LINKS = [
   {

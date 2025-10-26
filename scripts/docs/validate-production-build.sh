@@ -4,8 +4,12 @@
 
 set -euo pipefail
 
+# Paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DOCUSAURUS_DIR="${PROJECT_ROOT}/docs"
+
 # Configuration
-DOCUSAURUS_DIR="/home/marce/projetos/TradingSystem/docs/docusaurus"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BUILD_VALIDATION_LOG="${DOCUSAURUS_DIR}/BUILD-VALIDATION-${TIMESTAMP}.md"
 SERVE_PORT=3000

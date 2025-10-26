@@ -41,7 +41,7 @@
       "id": "docs-api",
       "type": "backend",
       "path": "backend/api/docs-api",
-      "start": "npm run dev",
+      "start": "PORT=3400 npm run dev",
       "build": "npm run build",
       "test": "npm test",
       "port": 3400,
@@ -76,11 +76,11 @@
     {
       "id": "docusaurus",
       "type": "docs",
-      "path": "docs/docusaurus",
-      "start": "npm start -- --port 3004",
+      "path": "docs",
+      "start": "npm start -- --port 3205",
       "build": "npm run build",
       "test": "npm test",
-      "port": 3004,
+      "port": 3205,
       "env": null,
       "workspace": true,
       "managed": "internal"

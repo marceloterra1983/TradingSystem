@@ -1,0 +1,11 @@
+{
+  "label": "v1",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Flows v1",
+    "slug": "/sdd/flows/v1",
+    "description": "Version 1 process flows."
+  }
+}

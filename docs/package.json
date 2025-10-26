@@ -1,0 +1,48 @@
+{
+  "name": "trading-system-docs-v2",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "scripts": {
+    "start": "npm run docs:dev",
+    "docs:dev": "docusaurus start --host 0.0.0.0 --port 3205",
+    "docs:build": "docusaurus build",
+    "docs:serve": "docusaurus serve --dir build --host 0.0.0.0 --port 3205",
+    "docs:auto": "node ../scripts/docusaurus/docs-auto.mjs",
+    "docs:lint": "markdownlint \"content/**/*.{md,mdx}\" && remark content --ext mdx",
+    "docs:typecheck": "tsc --noEmit",
+    "docs:check": "npm run docs:auto && npm run docs:validate-generated && npm run docs:lint && npm run docs:typecheck && npm run docs:test && npm run docs:build",
+    "docs:links": "bash ../scripts/docusaurus/check-links.sh",
+    "docs:new": "bash ../scripts/docusaurus/new.sh",
+    "docs:test": "node --test tests/**/*.test.mjs",
+    "docs:validate-generated": "node tests/validate-generated-content.test.mjs",
+    "docs:auto:verify": "npm run docs:auto && npm run docs:validate-generated"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/theme-mermaid": "^3.9.2",
+    "clsx": "^2.1.1",
+    "cytoscape": "^3.30.3",
+    "prism-react-renderer": "^2.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "redocusaurus": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.2",
+    "markdownlint-cli": "^0.44.0",
+    "remark-cli": "^12.0.1",
+    "remark-lint": "^10.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-lint-frontmatter-schema": "^3.15.4",
+    "typescript": "^5.6.3",
+    "linkinator": "^6.0.0"
+  },
+  "overrides": {
+    "@apidevtools/json-schema-ref-parser": "^14.2.1"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "label": "Order Manager",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Order Manager App",
+    "slug": "/apps/order-manager",
+    "description": "Operational documentation for the Order Manager application."
+  }
+}

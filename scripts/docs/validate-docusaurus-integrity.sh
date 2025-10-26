@@ -15,7 +15,7 @@ readonly NC='\033[0m' # No Color
 # Configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-readonly DOCUSAURUS_DIR="${PROJECT_ROOT}/docs/docusaurus"
+readonly DOCUSAURUS_DIR="${PROJECT_ROOT}/docs"
 readonly TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 readonly VALIDATION_REPORT="${DOCUSAURUS_DIR}/VALIDATION-REPORT-${TIMESTAMP}.md"
 readonly VALIDATION_JSON="${DOCUSAURUS_DIR}/VALIDATION-REPORT-${TIMESTAMP}.json"

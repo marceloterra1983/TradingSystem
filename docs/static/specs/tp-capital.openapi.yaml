@@ -1,0 +1,1037 @@
+openapi: 3.1.0
+info:
+  title: TradingSystem TP Capital API
+  version: 1.0.0
+  description: |
+    REST API for TP Capital trading signals ingestion, management, and monitoring.
+
+    The TP Capital service receives trading signals from Telegram channels via a gateway,
+    stores them in TimescaleDB, and provides APIs for signal retrieval, Telegram bot/channel
+    management, and system monitoring.
+
+    **Features:**
+    - Trading signal ingestion and retrieval with advanced filtering
+    - Telegram bot and channel CRUD operations
+    - Forwarded message tracking
+    - Health monitoring and Prometheus metrics
+    - Application logging and debugging
+
+    **Rate Limiting:**
+    - Global rate limit: 120 requests per minute per IP
+    - Rate limit headers included in all responses
+
+    **Authentication:**
+    - Currently no authentication (internal service)
+    - POST /ingest endpoint requires X-Gateway-Secret header (not documented publicly)
+    - Production deployments should add API key or JWT authentication
+servers:
+  - url: http://localhost:3200
+    description: Local development
+  - url: http://tradingsystem.local/api/tp-capital
+    description: Reverse proxy route
+security: []
+tags:
+  - name: Health
+    description: Service health and monitoring
+  - name: Signals
+    description: Trading signals management
+  - name: Bots
+    description: Telegram bot CRUD operations
+  - name: Channels
+    description: Telegram channel CRUD operations
+  - name: Configuration
+    description: System configuration and management
+  - name: Logs
+    description: Application logging
+
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Service information
+      description: Returns basic information about the TP Capital API and available endpoints.
+      responses:
+        '200':
+          description: Service information payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInfo'
+              example:
+                status: "ok"
+                endpoints: ["/health", "/signals", "/logs", "/metrics"]
+                message: "TP Capital ingestion API"
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status and TimescaleDB connectivity.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "ok"
+                timescale: true
+
+  /metrics:
+    get:
+      tags: [Health]
+      summary: Prometheus metrics
+      description: Returns process and application metrics in Prometheus text format.
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                # HELP process_cpu_user_seconds_total Total user CPU time spent in seconds.
+                # TYPE process_cpu_user_seconds_total counter
+                process_cpu_user_seconds_total 1.23
+
+  /logs:
+    get:
+      tags: [Logs]
+      summary: Get application logs
+      description: Returns application logs with optional filtering by level and limit.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+          description: Maximum number of logs to return
+        - in: query
+          name: level
+          schema:
+            type: string
+            enum: [info, warn, error, debug]
+          description: Filter logs by level
+      responses:
+        '200':
+          description: Log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LogEntry'
+
+  /signals:
+    get:
+      tags: [Signals]
+      summary: Fetch trading signals
+      description: Returns trading signals with advanced filtering options including channel, type, search, and time range.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+          description: Maximum number of signals to return
+        - in: query
+          name: channel
+          schema:
+            type: string
+          description: Filter by Telegram channel ID (e.g., "-1001234567890")
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: Filter by signal type
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Full-text search on asset and raw_message (case-insensitive)
+        - in: query
+          name: from
+          schema:
+            oneOf:
+              - type: number
+                description: Unix timestamp in milliseconds
+              - type: string
+                format: date-time
+                description: ISO 8601 datetime
+          description: Start of time range
+        - in: query
+          name: to
+          schema:
+            oneOf:
+              - type: number
+                description: Unix timestamp in milliseconds
+              - type: string
+                format: date-time
+                description: ISO 8601 datetime
+          description: End of time range
+      responses:
+        '200':
+          description: Signals retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Signal'
+              example:
+                data:
+                  - id: "sig-123"
+                    asset: "WINZ25"
+                    signal_type: "buy"
+                    entry_price: 120500
+                    stop_loss: 120300
+                    targets: [120700, 120900, 121100]
+                    channel_id: "-1001234567890"
+                    raw_message: "COMPRA WINZ25 @ 120500 SL 120300 Alvos: 120700, 120900, 121100"
+                    ingested_at: "2025-10-26T12:00:00.000Z"
+                    timestamp: "2025-10-26T11:59:30.000Z"
+                    photos: []
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [Signals]
+      summary: Delete trading signal
+      description: Deletes a signal by its ingestedAt timestamp.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ingestedAt]
+              properties:
+                ingestedAt:
+                  type: string
+                  format: date-time
+                  description: Timestamp when signal was ingested
+            example:
+              ingestedAt: "2025-10-26T12:00:00.000Z"
+      responses:
+        '200':
+          description: Signal deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /forwarded-messages:
+    get:
+      tags: [Signals]
+      summary: Fetch forwarded messages
+      description: Returns messages forwarded by the Telegram forwarder bot with optional filtering.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - in: query
+          name: channelId
+          schema:
+            type: number
+          description: Filter by source channel ID
+        - in: query
+          name: from
+          schema:
+            oneOf:
+              - type: number
+              - type: string
+                format: date-time
+        - in: query
+          name: to
+          schema:
+            oneOf:
+              - type: number
+              - type: string
+                format: date-time
+      responses:
+        '200':
+          description: Forwarded messages retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ForwardedMessage'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /telegram/bots:
+    get:
+      tags: [Bots]
+      summary: List Telegram bots
+      description: Returns all Telegram bots from TimescaleDB including soft-deleted ones.
+      responses:
+        '200':
+          description: Bots retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelegramBot'
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Bots]
+      summary: Create Telegram bot
+      description: Creates a new Telegram bot configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, token]
+              properties:
+                username:
+                  type: string
+                  description: Bot username (without @)
+                  example: "TPCapitalBot"
+                token:
+                  type: string
+                  description: Bot token from @BotFather
+                  example: "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+                bot_type:
+                  type: string
+                  enum: [ingestion, forwarder, monitoring]
+                  default: ingestion
+                  description: Bot purpose
+                description:
+                  type: string
+                  description: Human-readable description
+      responses:
+        '200':
+          description: Bot created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  id:
+                    type: string
+                    example: "bot-1730000000000-abc123"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /telegram/bots/{id}:
+    put:
+      tags: [Bots]
+      summary: Update Telegram bot
+      description: Updates an existing Telegram bot configuration.
+      parameters:
+        - $ref: '#/components/parameters/BotId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                token:
+                  type: string
+                bot_type:
+                  type: string
+                  enum: [ingestion, forwarder, monitoring]
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, inactive, deleted]
+      responses:
+        '200':
+          description: Bot updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [Bots]
+      summary: Delete Telegram bot (soft delete)
+      description: Soft deletes a Telegram bot by setting its status to 'deleted'.
+      parameters:
+        - $ref: '#/components/parameters/BotId'
+      responses:
+        '200':
+          description: Bot deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /telegram/channels:
+    get:
+      tags: [Channels]
+      summary: List Telegram channels
+      description: Returns all Telegram channels from TimescaleDB including soft-deleted ones.
+      responses:
+        '200':
+          description: Channels retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelegramChannel'
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Channels]
+      summary: Create Telegram channel
+      description: Creates a new Telegram channel configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [label, channel_id]
+              properties:
+                label:
+                  type: string
+                  description: Human-readable channel name
+                  example: "TP Capital Sinais Premium"
+                channel_id:
+                  type: string
+                  description: Telegram channel ID (starts with -100)
+                  example: "-1001234567890"
+                channel_type:
+                  type: string
+                  enum: [source, destination]
+                  default: source
+                  description: Channel purpose
+                description:
+                  type: string
+                  description: Optional description
+      responses:
+        '200':
+          description: Channel created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  id:
+                    type: string
+                    example: "channel-1730000000000-abc123"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /telegram/channels/{id}:
+    put:
+      tags: [Channels]
+      summary: Update Telegram channel
+      description: Updates an existing Telegram channel configuration.
+      parameters:
+        - $ref: '#/components/parameters/ChannelId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                channel_id:
+                  type: string
+                channel_type:
+                  type: string
+                  enum: [source, destination]
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, inactive, deleted]
+                signal_count:
+                  type: integer
+                last_signal:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Channel updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      tags: [Channels]
+      summary: Delete Telegram channel (soft delete)
+      description: Soft deletes a Telegram channel by setting its status to 'deleted'.
+      parameters:
+        - $ref: '#/components/parameters/ChannelId'
+      responses:
+        '200':
+          description: Channel deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /telegram-channels:
+    get:
+      deprecated: true
+      tags: [Channels]
+      summary: "[DEPRECATED] List Telegram channels (legacy)"
+      description: |
+        **DEPRECATED:** Use `GET /telegram/channels` instead.
+
+        Legacy endpoint for listing Telegram channels. This endpoint is maintained for
+        backward compatibility but will be removed in a future version.
+
+        **Migration:** Replace all calls to `/telegram-channels` with `/telegram/channels`.
+      responses:
+        '200':
+          description: Channels retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelegramChannel'
+
+    post:
+      deprecated: true
+      tags: [Channels]
+      summary: "[DEPRECATED] Create Telegram channel (legacy)"
+      description: |
+        **DEPRECATED:** Use `POST /telegram/channels` instead.
+
+        **Migration:** Replace all calls to `/telegram-channels` with `/telegram/channels`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [label, channel_id]
+              properties:
+                label:
+                  type: string
+                channel_id:
+                  type: string
+                channel_type:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Channel created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  channel:
+                    $ref: '#/components/schemas/TelegramChannel'
+
+  /telegram-channels/{id}:
+    put:
+      deprecated: true
+      tags: [Channels]
+      summary: "[DEPRECATED] Update Telegram channel (legacy)"
+      description: |
+        **DEPRECATED:** Use `PUT /telegram/channels/{id}` instead.
+
+        **Migration:** Replace all calls to `/telegram-channels/{id}` with `/telegram/channels/{id}`.
+      parameters:
+        - $ref: '#/components/parameters/ChannelId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Channel updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /bots:
+    get:
+      tags: [Configuration]
+      summary: Get bot configuration info
+      description: Returns information about configured Telegram bots from environment variables.
+      responses:
+        '200':
+          description: Bot configuration retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BotConfigInfo'
+              example:
+                data:
+                  configured: true
+                  mode: "polling"
+                  webhook: null
+                  status: "running"
+                  timestamp: "2025-10-26T12:00:00.000Z"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /channels:
+    get:
+      tags: [Configuration]
+      summary: Get channels with stats
+      description: Returns Telegram channels from TimescaleDB with message count statistics.
+      responses:
+        '200':
+          description: Channels with stats retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChannelStats'
+                  source:
+                    type: string
+                    example: "timescale"
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /config/channels:
+    get:
+      tags: [Configuration]
+      summary: Get configured channels
+      description: Returns channels configured in environment variables (source and destination).
+      responses:
+        '200':
+          description: Configured channels retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channelId:
+                          type: number
+                        type:
+                          type: string
+                          enum: [source, destination]
+                  timestamp:
+                    type: string
+                    format: date-time
+              example:
+                data:
+                  - channelId: -1001234567890
+                    type: "source"
+                  - channelId: -1009876543210
+                    type: "destination"
+                timestamp: "2025-10-26T12:00:00.000Z"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /reload-channels:
+    post:
+      tags: [Configuration]
+      summary: Reload channels dynamically
+      description: Reloads active channels from TimescaleDB and updates the forwarder bot configuration without restart.
+      responses:
+        '200':
+          description: Channels reloaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  channels:
+                    type: array
+                    items:
+                      type: number
+              example:
+                success: true
+                channels: [-1001234567890, -1001234567891]
+        '503':
+          description: Forwarder not running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Forwarder not running"
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  parameters:
+    BotId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Telegram bot identifier
+      example: "bot-1730000000000-abc123"
+
+    ChannelId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Telegram channel identifier
+      example: "channel-1730000000000-abc123"
+
+  responses:
+    ValidationError:
+      description: Request validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Validation failed"
+              details:
+                type: array
+                items:
+                  type: string
+                example: ["username is required", "token is required"]
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: "Failed to fetch signals"
+
+  schemas:
+    ServiceInfo:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        endpoints:
+          type: array
+          items:
+            type: string
+          example: ["/health", "/signals", "/logs", "/metrics"]
+        message:
+          type: string
+          example: "TP Capital ingestion API"
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+          example: "ok"
+        timescale:
+          type: boolean
+          description: TimescaleDB connectivity status
+          example: true
+
+    LogEntry:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [info, warn, error, debug]
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        module:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+
+    Signal:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Auto-generated signal ID
+        asset:
+          type: string
+          description: Asset symbol (e.g., WINZ25, PETR4)
+          example: "WINZ25"
+        signal_type:
+          type: string
+          description: Signal type (buy, sell, etc.)
+          example: "buy"
+        entry_price:
+          type: number
+          description: Entry price
+          example: 120500
+        stop_loss:
+          type: number
+          description: Stop loss price
+          example: 120300
+        targets:
+          type: array
+          items:
+            type: number
+          description: Target prices
+          example: [120700, 120900, 121100]
+        channel_id:
+          type: string
+          description: Telegram channel ID
+          example: "-1001234567890"
+        raw_message:
+          type: string
+          description: Original Telegram message text
+        ingested_at:
+          type: string
+          format: date-time
+          description: When signal was ingested by system
+        timestamp:
+          type: string
+          format: date-time
+          description: Original Telegram message timestamp
+        photos:
+          type: array
+          items:
+            type: string
+          description: Photo URLs attached to signal
+      required: [id, asset, channel_id, raw_message, ingested_at, timestamp]
+
+    ForwardedMessage:
+      type: object
+      properties:
+        source_channel_id:
+          type: number
+        destination_channel_id:
+          type: number
+        original_message_id:
+          type: number
+        forwarded_message_id:
+          type: number
+        message_text:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    TelegramBot:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "bot-1730000000000-abc123"
+        username:
+          type: string
+          description: Bot username (without @)
+          example: "TPCapitalBot"
+        token:
+          type: string
+          description: Bot token from @BotFather (sensitive)
+        bot_type:
+          type: string
+          enum: [ingestion, forwarder, monitoring]
+          description: Bot purpose
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, deleted]
+          default: active
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, username, token, bot_type, status, created_at]
+
+    TelegramChannel:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "channel-1730000000000-abc123"
+        label:
+          type: string
+          description: Human-readable channel name
+          example: "TP Capital Sinais Premium"
+        channel_id:
+          type: string
+          description: Telegram channel ID (starts with -100)
+          example: "-1001234567890"
+        channel_type:
+          type: string
+          enum: [source, destination]
+          description: Channel purpose
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, deleted]
+          default: active
+        signal_count:
+          type: integer
+          description: Total signals received from this channel
+        last_signal:
+          type: string
+          format: date-time
+          description: Timestamp of last signal
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, label, channel_id, channel_type, status, created_at]
+
+    BotConfigInfo:
+      type: object
+      properties:
+        configured:
+          type: boolean
+          description: Whether bot token is configured
+        mode:
+          type: string
+          enum: [webhook, polling]
+          description: Bot mode from environment
+        webhook:
+          anyOf:
+            - type: object
+              properties:
+                url:
+                  anyOf:
+                    - type: string
+                    - type: 'null'
+                hasSecretToken:
+                  type: boolean
+            - type: 'null'
+        status:
+          type: string
+          example: "running"
+        timestamp:
+          type: string
+          format: date-time
+
+    ChannelStats:
+      type: object
+      properties:
+        channel_id:
+          type: string
+        label:
+          type: string
+        message_count:
+          type: integer
+          description: Total messages from this channel
+        last_message:
+          type: string
+          format: date-time

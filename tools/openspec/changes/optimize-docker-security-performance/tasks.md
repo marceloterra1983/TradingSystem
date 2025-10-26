@@ -14,14 +14,14 @@
 - [ ] 1.1.3 Se não existir, adicionar ao `.env`:
   ```bash
   # TimescaleDB Connection (if not present)
-  TIMESCALEDB_PASSWORD=axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL
+  TIMESCALEDB_PASSWORD=pass_timescale
   TIMESCALEDB_USER=timescale
   TIMESCALEDB_DB=trading
   ```
 
 ### 1.2 Remove Hardcoded Password
 - [ ] 1.2.1 Editar `tools/compose/docker-compose.database.yml` linha 12
-  - **BEFORE**: `POSTGRES_PASSWORD: axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL`
+  - **BEFORE**: `POSTGRES_PASSWORD: pass_timescale`
   - **AFTER**: `POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}`
 
 - [ ] 1.2.2 Editar backup database password (linha 34, baixa prioridade)

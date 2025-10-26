@@ -3,13 +3,19 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import promClient from 'prom-client';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config, validateConfig } from './config.js';
 import { logger } from './logger.js';
 import { getLogs } from './logStore.js';
 import { timescaleClient } from './timescaleClient.js';
-import { createTelegramIngestion } from './telegramIngestion.js';
-import { createTelegramForwarderManual } from './telegramForwarderManual.js';
+import { createTelegramIngestionManual } from './telegramIngestionManual.js';
+import { createTelegramUserForwarderPolling } from './telegramUserForwarderPolling.js';
 import { formatTimestamp } from './timeUtils.js';
+import ingestionRouter from '../api/src/routes/ingestion.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 validateConfig(logger);
 
@@ -23,7 +29,7 @@ const disableCors = process.env.DISABLE_CORS === 'true';
 if (!disableCors) {
   const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
     ? process.env.CORS_ORIGIN
-    : 'http://localhost:3101,http://localhost:3004';
+    : 'http://localhost:3101,http://localhost:3205';
   const corsOrigins = rawCorsOrigin === '*'
     ? undefined
     : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
@@ -49,6 +55,12 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Mount ingestion route (receives from Telegram Gateway)
+app.use('/', ingestionRouter);
+
+// Servir imagens estáticas do Telegram
+app.use('/telegram-images', express.static(path.join(__dirname, '..', 'public', 'telegram-images')));
 
 const register = new promClient.Registry();
 promClient.collectDefaultMetrics({ register });
@@ -97,6 +109,92 @@ app.get('/signals', async (req, res) => {
   } catch (error) {
     logger.error({ err: error }, 'Failed to fetch signals');
     res.status(500).json({ error: 'Failed to fetch signals' });
+  }
+});
+
+app.get('/forwarded-messages', async (req, res) => {
+  try {
+    const limit = req.query.limit ? Number(req.query.limit) : 100;
+    const sourceChannelId = req.query.channelId ? Number(req.query.channelId) : undefined;
+
+    const rows = await timescaleClient.fetchForwardedMessages({
+      limit,
+      sourceChannelId,
+      fromTs: req.query.from ? Number(req.query.from) || Date.parse(String(req.query.from)) : undefined,
+      toTs: req.query.to ? Number(req.query.to) || Date.parse(String(req.query.to)) : undefined,
+    });
+
+    res.json({ data: rows });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to fetch forwarded messages');
+    res.status(500).json({ error: 'Failed to fetch forwarded messages' });
+  }
+});
+
+// ========== TELEGRAM CHANNELS CRUD ==========
+
+app.get('/telegram-channels', async (req, res) => {
+  try {
+    const channels = await timescaleClient.getTelegramChannels();
+    res.json({ data: channels });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to fetch telegram channels');
+    res.status(500).json({ error: 'Failed to fetch telegram channels' });
+  }
+});
+
+app.post('/telegram-channels', async (req, res) => {
+  try {
+    const { label, channel_id, channel_type, description } = req.body;
+    
+    if (!label || !channel_id) {
+      return res.status(400).json({ error: 'label and channel_id are required' });
+    }
+
+    const channel = {
+      id: `ch_${Date.now()}`,
+      label,
+      channel_id: String(channel_id),
+      channel_type: channel_type || 'source',
+      description: description || '',
+    };
+
+    await timescaleClient.createTelegramChannel(channel);
+    logger.info({ channelId: channel_id }, 'Telegram channel created');
+    
+    res.status(201).json({ success: true, channel });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to create telegram channel');
+    res.status(500).json({ error: 'Failed to create telegram channel' });
+  }
+});
+
+app.put('/telegram-channels/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    await timescaleClient.updateTelegramChannel(id, updates);
+    logger.info({ channelId: id }, 'Telegram channel updated');
+    
+    res.json({ success: true });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to update telegram channel');
+    res.status(500).json({ error: 'Failed to update telegram channel' });
+  }
+});
+
+app.delete('/telegram-channels/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await timescaleClient.deleteTelegramChannel(id);
+    logger.info({ channelId: id }, 'Telegram channel deleted');
+    
+    res.json({ success: true });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to delete telegram channel');
+    res.status(500).json({ error: 'Failed to delete telegram channel' });
   }
 });
 
@@ -337,8 +435,8 @@ const server = app.listen(config.server.port, () => {
   logger.info({ port: config.server.port }, 'TP Capital ingestion service listening');
 });
 
-// Launch ingestion bot (listens to channels and saves to QuestDB)
-const telegramIngestion = createTelegramIngestion();
+// Launch ingestion bot (listens to channels and saves to TimescaleDB)
+const telegramIngestion = createTelegramIngestionManual();
 if (telegramIngestion) {
   telegramIngestion.launch().catch((error) => {
     logger.error({ err: error }, 'Failed to launch Telegram ingestion bot');
@@ -346,26 +444,78 @@ if (telegramIngestion) {
   });
 }
 
-// Launch forwarder bot (forwards messages from source to destination channels)
-const telegramForwarder = createTelegramForwarderManual();
-if (telegramForwarder) {
-  telegramForwarder.launch().catch((error) => {
-    logger.error({ err: error }, 'Failed to launch Telegram forwarder bot');
-    process.exitCode = 1;
-  });
+// Load channels from database and launch forwarder
+async function loadChannelsAndStartForwarder() {
+  try {
+    // Buscar canais ativos do banco
+    const channels = await timescaleClient.getTelegramChannels();
+    const activeChannels = channels
+      .filter(ch => ch.status === 'active' && ch.channel_type === 'source')
+      .map(ch => Number(ch.channel_id));
+
+    logger.info({ count: activeChannels.length, channels: activeChannels }, 'Loaded active channels from database');
+
+    // Se não houver canais no banco, usa do .env como fallback
+    const channelsToUse = activeChannels.length > 0 
+      ? activeChannels 
+      : config.telegram.forwarderSourceChannels;
+
+    if (channelsToUse.length === 0) {
+      logger.warn('No channels configured. Please add channels via API or .env');
+      return null;
+    }
+
+    // Launch forwarder com canais do banco
+    const forwarder = createTelegramUserForwarderPolling(channelsToUse);
+    if (forwarder) {
+      await forwarder.launch();
+    }
+    return forwarder;
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to load channels and start forwarder');
+    return null;
+  }
 }
+
+let telegramUserForwarder = null;
+loadChannelsAndStartForwarder().then(forwarder => {
+  telegramUserForwarder = forwarder;
+}).catch(error => {
+  logger.error({ err: error }, 'Failed to initialize forwarder');
+});
+
+// Endpoint para recarregar canais dinamicamente
+app.post('/reload-channels', async (req, res) => {
+  try {
+    const channels = await timescaleClient.getTelegramChannels();
+    const activeChannels = channels
+      .filter(ch => ch.status === 'active' && ch.channel_type === 'source')
+      .map(ch => Number(ch.channel_id));
+
+    if (telegramUserForwarder && telegramUserForwarder.updateChannels) {
+      telegramUserForwarder.updateChannels(activeChannels);
+      logger.info({ channels: activeChannels }, 'Channels reloaded');
+      res.json({ success: true, channels: activeChannels });
+    } else {
+      res.status(503).json({ error: 'Forwarder not running' });
+    }
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to reload channels');
+    res.status(500).json({ error: 'Failed to reload channels' });
+  }
+});
 
 process.on('SIGINT', async () => {
   logger.info('Shutting down');
   server.close();
 
-  // Stop both bots gracefully
+  // Stop bots/clients gracefully
   const stopPromises = [];
   if (telegramIngestion?.bot) {
     stopPromises.push(telegramIngestion.bot.stop());
   }
-  if (telegramForwarder?.bot) {
-    stopPromises.push(telegramForwarder.bot.stop());
+  if (telegramUserForwarder?.stop) {
+    stopPromises.push(telegramUserForwarder.stop());
   }
 
   await Promise.all(stopPromises);

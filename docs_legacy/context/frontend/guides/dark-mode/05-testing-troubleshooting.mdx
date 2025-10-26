@@ -1,0 +1,418 @@
+---
+title: Dark Mode Testing & Troubleshooting
+sidebar_position: 5
+tags: [frontend, ui, dark-mode, testing, troubleshooting, debugging]
+domain: frontend
+type: guide
+summary: Testing procedures, common issues, and solutions for dark mode implementation
+status: active
+last_review: "2025-10-18"
+---
+
+import BrowserOnly from "@docusaurus/BrowserOnly";
+
+# Dark Mode Testing & Troubleshooting
+
+> Part of the [Dark Mode Implementation Hub](../dark-mode.md)
+
+## Manual Testing Checklist
+
+### Basic Functionality
+
+-   [ ] Toggle button works (moon ↔ sun icon changes)
+-   [ ] Theme persists after page refresh
+-   [ ] System preference detection works
+-   [ ] All text is readable in both themes
+-   [ ] Interactive elements have visible hover states
+-   [ ] Logo switches between light/dark versions
+-   [ ] Borders are visible but not too harsh
+-   [ ] No flickering on page load
+
+### Component Testing
+
+-   [ ] All colored backgrounds have dark variants
+-   [ ] Native form elements (select, textarea) have dark styling
+-   [ ] Category/status cards display with correct colors in dark mode
+-   [ ] Icons are visible in both themes
+-   [ ] Shadows don't create harsh contrasts in dark mode
+
+### Browser Testing
+
+Test in multiple browsers:
+
+-   [ ] Chrome/Edge (Chromium)
+-   [ ] Firefox
+-   [ ] Safari (if available)
+
+### Accessibility Testing
+
+-   [ ] Color contrast meets WCAG AA standards (4.5:1 for text)
+-   [ ] Focus indicators visible in both themes
+-   [ ] Screen reader announces theme changes (if implemented)
+
+---
+
+## Browser DevTools Testing
+
+### Test Theme Persistence
+
+<details>
+<summary>Show testing commands</summary>
+
+```js
+// In browser console
+localStorage.setItem("theme", "dark");
+location.reload();
+
+localStorage.setItem("theme", "light");
+location.reload();
+
+localStorage.setItem("theme", "system");
+location.reload();
+```
+
+</details>
+
+### Test System Preference
+
+```js
+// Check system preference
+if (window.matchMedia) {
+    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    console.log("System prefers dark mode:", darkModeQuery.matches);
+}
+```
+
+### Inspect Theme State
+
+```js
+// Check current theme
+console.log("Stored theme:", localStorage.getItem("theme"));
+console.log("HTML class:", document.documentElement.classList.contains("dark"));
+```
+
+---
+
+## Common Issues & Solutions
+
+### Issue 1: Theme Not Persisting
+
+**Symptoms:**
+
+-   Theme resets to default after page refresh
+-   localStorage shows null or undefined
+
+**Diagnosis:**
+
+```js
+console.log(localStorage.getItem("theme"));
+```
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Check if localStorage is enabled in browser
+2. Verify ThemeProvider is saving to localStorage
+3. Check for localStorage quota errors
+4. Clear and reset:
+    ```js
+    localStorage.removeItem("theme");
+    location.reload();
+    ```
+
+</details>
+
+---
+
+### Issue 2: Flicker on Page Load
+
+**Symptoms:**
+
+-   Brief flash of wrong theme when page loads
+-   Theme "jumps" from light to dark (or vice versa)
+
+**Diagnosis:**
+
+-   Theme is applied after React hydration
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Ensure ThemeProvider wraps App in `src/App.tsx`:
+
+    ```tsx
+    <ThemeProvider defaultTheme="system">
+        <App />
+    </ThemeProvider>
+    ```
+
+2. Add inline script in `index.html` (before React loads):
+    ```html
+    <script>
+        const theme = localStorage.getItem("theme") || "system";
+        if (
+            theme === "dark" ||
+            (theme === "system" &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+            document.documentElement.classList.add("dark");
+        }
+    </script>
+    ```
+
+</details>
+
+---
+
+### Issue 3: Colors Not Changing
+
+**Symptoms:**
+
+-   Some components don't change color when toggling theme
+-   Dark mode classes not applied
+
+**Diagnosis:**
+
+<details>
+<summary>Show diagnostic steps</summary>
+
+1. Check if component has `dark:` classes:
+
+    ```bash
+    grep -n "dark:" src/components/MyComponent.tsx
+    ```
+
+2. Verify Tailwind config:
+    ```js
+    // tailwind.config.js
+    export default {
+        darkMode: "class", // Must be 'class'
+    };
+    ```
+
+</details>
+
+**Solutions:**
+
+1. Add missing `dark:` classes to component
+2. Rebuild Tailwind: `npm run dev` (restart dev server)
+3. Clear Tailwind cache: `rm -rf node_modules/.vite`
+
+---
+
+### Issue 4: System Preference Not Detected
+
+**Symptoms:**
+
+-   'system' theme doesn't follow OS preference
+-   Theme doesn't change when OS theme changes
+
+**Diagnosis:**
+
+```js
+if (window.matchMedia) {
+    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    console.log("System prefers dark mode:", darkModeQuery.matches);
+} else {
+    console.log("matchMedia not supported");
+}
+```
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Verify browser supports `matchMedia` (Chrome 76+, Firefox 67+, Safari 12.1+)
+2. Check ThemeProvider listens to system changes:
+    ```tsx
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = () => {
+            if (theme === "system") {
+                setResolvedTheme(mediaQuery.matches ? "dark" : "light");
+            }
+        };
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, [theme]);
+    ```
+
+</details>
+
+---
+
+### Issue 5: Invisible Elements
+
+**Symptoms:**
+
+-   Text or icons disappear in dark mode
+-   Elements have same color as background
+
+**Diagnosis:**
+
+-   Missing dark mode color variants
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Add dark variants to all colored elements:
+
+    ```tsx
+    // ❌ Wrong
+    <span className="text-gray-900">Text</span>
+
+    // ✅ Correct
+    <span className="text-gray-900 dark:text-gray-100">Text</span>
+    ```
+
+2. Use browser DevTools to inspect element colors in dark mode
+
+</details>
+
+---
+
+### Issue 6: Harsh Borders in Dark Mode
+
+**Symptoms:**
+
+-   Borders too bright/harsh in dark mode
+-   Visual discomfort from high contrast
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Use darker border colors:
+
+    ```tsx
+    // ❌ Too bright
+    border-gray-200 dark:border-gray-200
+
+    // ✅ Correct
+    border-gray-200 dark:border-gray-700
+    ```
+
+2. Reduce border opacity:
+    ```tsx
+    border-gray-200 dark:border-gray-700/50
+    ```
+
+</details>
+
+---
+
+### Issue 7: Images/Logos Not Switching
+
+**Symptoms:**
+
+-   Logo doesn't change between light/dark versions
+-   Images look wrong in dark mode
+
+**Solutions:**
+
+<details>
+<summary>Show solutions</summary>
+
+1. Use theme-aware image selection:
+
+    ```tsx
+    import { useTheme } from "@/contexts/ThemeContext";
+
+    function Logo() {
+        const { resolvedTheme } = useTheme();
+        return (
+            <img
+                src={resolvedTheme === "dark" ? "/logo-dark.svg" : "/logo.svg"}
+                alt="Logo"
+            />
+        );
+    }
+    ```
+
+2. Use CSS filters for simple adjustments:
+    ```tsx
+    <img className="dark:invert" src="/icon.svg" />
+    ```
+
+</details>
+
+---
+
+## Performance Testing
+
+### Measure Theme Switch Performance
+
+```js
+// In browser console
+const start = performance.now();
+localStorage.setItem("theme", "dark");
+location.reload();
+// After reload:
+const end = performance.now();
+console.log(`Theme switch took ${end - start}ms`);
+```
+
+**Expected:** < 100ms for theme application
+
+### Check Tailwind Bundle Size
+
+```bash
+# Build and analyze
+npm run build
+du -sh dist/assets/*.css
+```
+
+**Expected:** Dark mode adds < 10% to CSS bundle size
+
+---
+
+## Debugging Tools
+
+### React DevTools
+
+1. Install React DevTools browser extension
+2. Inspect ThemeProvider component
+3. Check `theme` and `resolvedTheme` state
+4. Verify context is accessible in child components
+
+### Tailwind CSS IntelliSense
+
+1. Install Tailwind CSS IntelliSense VS Code extension
+2. Hover over classes to see generated CSS
+3. Verify `dark:` variants are recognized
+
+### Browser DevTools
+
+1. **Elements tab**: Inspect `<html>` element for `dark` class
+2. **Console tab**: Run diagnostic commands
+3. **Application tab**: Check localStorage for `theme` key
+4. **Network tab**: Verify no extra requests for theme switching
+
+---
+
+## Next Steps
+
+-   **See working examples** → [Real-World Examples](./06-real-world-examples.mdx)
+-   **Learn patterns** → [Component Patterns](./03-component-patterns.mdx)
+-   **Understand architecture** → [Technical Implementation](./02-technical-implementation.md)
+
+## Related Guides
+
+-   [Dark Mode Hub](../dark-mode.md) - Complete navigation
+-   [Implementation Checklist](./04-implementation-checklist.md) - Prevent issues
+-   [Quick Reference Card](../dark-mode-quick-reference.md) - Fast lookup
+
+---
+
+**Part of**: Dark Mode Implementation Hub
+**Version**: 3.0.0
+**Last Updated**: 2025-10-18
+

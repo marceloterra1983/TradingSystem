@@ -82,7 +82,7 @@ The service uses variables with the `B3_API_` prefix for service-specific config
 | `B3_API_PORT` | HTTP server port | `3302` | `config/.env.defaults` |
 | `B3_API_QUESTDB_HTTP_URL` | QuestDB HTTP endpoint | `http://localhost:9002` | `config/.env.defaults` |
 | `B3_API_QUESTDB_TIMEOUT` | QuestDB request timeout (ms) | `10000` | `config/.env.defaults` |
-| `B3_API_CORS_ORIGIN` | Allowed CORS origins (comma-separated) | `http://localhost:3103,http://localhost:3004` | `config/.env.defaults` |
+| `B3_API_CORS_ORIGIN` | Allowed CORS origins (comma-separated) | `http://localhost:3103,http://localhost:3205` | `config/.env.defaults` |
 | `B3_API_RATE_LIMIT_WINDOW_MS` | Rate limit time window (ms) | `60000` | `config/.env.defaults` |
 | `B3_API_RATE_LIMIT_MAX` | Max requests per window | `120` | `config/.env.defaults` |
 | `B3_API_LOG_LEVEL` | Pino log level | `info` | `config/.env.defaults` |
@@ -142,7 +142,7 @@ To allow requests from additional domains:
 
 1. Edit `config/.env.defaults` or root `.env`:
    ```bash
-   B3_API_CORS_ORIGIN=http://localhost:3103,http://localhost:3004,https://trading.example.com
+   B3_API_CORS_ORIGIN=http://localhost:3103,http://localhost:3205,https://trading.example.com
    ```
 
 2. Restart the service for changes to take effect
@@ -208,4 +208,4 @@ Prometheus metrics available at `GET /metrics`:
 | B3 API | 3302 | http://localhost:3302 |
 | QuestDB HTTP | 9000 | http://localhost:9000 |
 | Dashboard | 3101 | http://localhost:3101 |
-| Docusaurus | 3004 | http://localhost:3004 |
+| Docusaurus | 3205 | http://localhost:3205 |

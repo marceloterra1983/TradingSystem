@@ -14,7 +14,7 @@ export const config = {
     timeoutMs: Number(env('B3_API_QUESTDB_TIMEOUT', env('QUESTDB_HTTP_TIMEOUT', 10000))),
   },
   cors: {
-    origin: env('B3_API_CORS_ORIGIN', env('CORS_ORIGIN', 'http://localhost:3103,http://localhost:3004')),
+    origin: env('B3_API_CORS_ORIGIN', env('CORS_ORIGIN', 'http://localhost:3103,http://localhost:3205')),
   },
   rateLimit: {
     windowMs: Number(env('B3_API_RATE_LIMIT_WINDOW_MS', env('RATE_LIMIT_WINDOW_MS', 60000))),

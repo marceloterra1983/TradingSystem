@@ -1,0 +1,176 @@
+---
+title: Incident Runbook
+description: Recovery guide for incidents affecting the TP Capital application.
+tags:
+  - apps
+  - tp-capital
+  - runbook
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Detection
+
+### Common Alerts
+
+| Alert Name | Trigger | Dashboard | Severity |
+|------------|---------|-----------|----------|
+| `TPCapitalHighLatency` | p95 ingestion latency > 1000ms for 5m | Grafana: TP Capital | Warning |
+| `TPCapitalQuestDBDown` | QuestDB connection fails | Grafana: TP Capital | Critical |
+| `TPCapitalHighErrorRate` | Error rate > 5% for 10m | Grafana: TP Capital | Warning |
+| `TPCapitalNoSignals` | No signals received for 30m | Grafana: TP Capital | Warning |
+| `TPCapitalDiskSpaceLow` | QuestDB volume > 80% | Grafana: Infrastructure | Warning |
+
+### Manual Detection
+
+```bash
+curl http://localhost:3200/health
+# Expected: {"status": "ok", "questdb": "connected"}
+
+curl http://localhost:3200/signals?limit=1
+# Timestamp should be < 1 hour old during market hours
+```
+
+- Use `http://<host>:4005/...` when targeting production hosts or Compose-exposed services.
+
+- QuestDB UI: `http://localhost:9002` → `SELECT COUNT(*) FROM tp_capital_signals WHERE ts > now() - 1h;`
+
+## Response
+
+### Incident 1: Service Not Responding
+
+**Symptoms**: `/health` returns 503/timeouts, dashboard shows API unavailable, no recent logs.
+
+**Triage**:
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs --tail=100 tp-capital-signals
+docker stats tp-capital-signals
+```
+
+**Mitigation**:
+
+```bash
+docker compose -f docker-compose.prod.yml restart tp-capital-signals
+curl http://localhost:3200/health
+docker compose -f docker-compose.prod.yml logs -f tp-capital-signals
+```
+
+If restart fails, validate environment file (`infrastructure/tp-capital-signals.env`) and rebuild (`docker compose -f docker-compose.prod.yml up -d --build`).
+
+**Validation**: Health endpoint returns 200, logs show service start, dashboard reconnects.
+
+---
+
+### Incident 2: QuestDB Connection Failure
+
+**Symptoms**: `/health` reports `questdb: "disconnected"`, logs show connection errors, `/signals` empty/503.
+
+**Triage**:
+
+```bash
+docker compose -f docker-compose.prod.yml ps questdb
+curl http://localhost:9002
+nc -zv localhost 9009
+docker compose -f docker-compose.prod.yml logs --tail=100 questdb
+```
+
+**Mitigation**:
+
+```bash
+docker compose -f docker-compose.prod.yml restart questdb
+docker volume inspect questdb-data
+df -h
+docker compose -f docker-compose.prod.yml restart tp-capital-signals
+```
+
+If QuestDB corrupted, restore from backup (stop stack, replace volume, bring services up).
+
+**Validation**: QuestDB UI accessible, `/health` shows connected, signals resume.
+
+---
+
+### Incident 3: High Ingestion Latency
+
+**Symptoms**: Alert fires, dashboard shows delayed signals, latency > 1000ms.
+
+**Triage**:
+
+```sql
+-- QuestDB UI
+SELECT * FROM sys.queries;
+```
+
+```bash
+docker stats tp-capital-signals questdb
+```
+
+```sql
+SELECT date_trunc('minute', ts) AS minute, COUNT(*) AS signal_count
+FROM tp_capital_signals
+WHERE ts > now() - 1h
+GROUP BY minute
+ORDER BY minute DESC
+LIMIT 60;
+```
+
+**Mitigation**:
+
+- Increase QuestDB memory (update compose env, redeploy).
+- Prune old partitions (`ALTER TABLE tp_capital_signals DROP PARTITION WHERE ts < dateadd('d', -90, now());`).
+- Scale horizontally if sustained high volume.
+
+**Validation**: Latency returns &lt;500ms p95, backlog cleared.
+
+---
+
+### Incident 4: No Signals Received
+
+**Symptoms**: Alert for no signals, QuestDB shows no recent entries.
+
+**Triage**:
+
+```bash
+curl http://localhost:3200/telegram/bots
+curl http://localhost:3200/telegram/channels
+docker compose logs tp-capital-signals | grep -i telegram
+```
+
+**Mitigation**:
+
+```bash
+curl https://api.telegram.org/bot<TOKEN>/getMe
+docker compose -f docker-compose.prod.yml restart tp-capital-signals
+```
+
+Verify Telegram channels manually; if inactive during market hours, escalate to content team.
+
+**Validation**: New signals visible within 5 minutes, QuestDB updated, logs show ingestion success.
+
+## Follow-up
+
+### Post-Incident Review
+
+1. Document incident summary in the shared incident tracker (TODO: replace with docs ops handbook link once published).
+2. Update runbook with new learnings.
+3. Notify stakeholders with impact, root cause, mitigation.
+
+### Preventive Actions
+
+- Short-term (1 week): Adjust alert thresholds, add missing metrics, update docs.
+- Long-term (1 month): Automate recovery, add redundancy, improve observability.
+
+### Communication
+
+- During incident: Post updates every 15 minutes, escalate unresolved issues, inform dashboard users if downtime > 5 minutes.
+- After resolution: Send all-clear, schedule post-mortem for critical incidents, update status page if applicable.
+
+### Escalation Path
+
+| Severity | Response Time | Escalation |
+|----------|---------------|------------|
+| Critical | Immediate | On-call engineer → Team lead → CTO |
+| Warning | 15 minutes | On-call engineer → Team lead |
+| Info | Best effort | On-call engineer |
+
+Maintain contact list for on-call engineer, team lead, DevOps, and QuestDB expert.

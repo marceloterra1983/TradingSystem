@@ -16,7 +16,7 @@ export const logger = pino({
   }
 }, pinoPretty({
   colorize: true,
-  translateTime: 'SYS:standard',
+  translateTime: 'SYS:HH:MM:ss', // São Paulo timezone (UTC-3)
   ignore: 'pid,hostname',
   messageFormat: '{service} [{level}] {msg}'
 }));

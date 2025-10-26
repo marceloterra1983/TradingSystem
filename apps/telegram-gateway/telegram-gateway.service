@@ -1,0 +1,35 @@
+[Unit]
+Description=Telegram Gateway (Shared Service)
+Documentation=https://github.com/your-org/TradingSystem/tree/main/apps/telegram-gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=marce
+Group=marce
+WorkingDirectory=/home/marce/Projetos/TradingSystem/apps/telegram-gateway
+ExecStart=/usr/bin/node src/index.js
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telegram-gateway
+
+# Environment
+EnvironmentFile=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/.env
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/data
+ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/.session
+
+# Resource Limits
+MemoryMax=500M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

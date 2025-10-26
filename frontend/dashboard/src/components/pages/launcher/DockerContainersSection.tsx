@@ -160,30 +160,22 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     url: 'http://localhost:6333',
   },
   
-  // Documentation Services
+  // Documentation Services (2-container architecture)
   {
-    name: 'docs-api-viewer',
+    name: 'documentation',
     status: 'running',
     category: 'docs',
-    description: 'OpenAPI & AsyncAPI Specifications Viewer',
-    ports: ['3101'],
-    url: 'http://localhost:3101',
+    description: 'NGINX serving static Docusaurus + OpenAPI/AsyncAPI specs',
+    ports: ['3400'],
+    url: 'http://localhost:3400',
   },
   {
     name: 'docs-api',
     status: 'running',
     category: 'docs',
-    description: 'Documentation management API with QuestDB integration',
-    ports: ['3400'],
-    url: 'http://localhost:3400',
-  },
-  {
-    name: 'docs-docusaurus',
-    status: 'running',
-    category: 'docs',
-    description: 'Documentation Hub (Docusaurus)',
-    ports: ['3004'],
-    url: 'http://localhost:3004',
+    description: 'DocsAPI (Express + FlexSearch) - Search, validation, CRUD',
+    ports: ['3401'],
+    url: 'http://localhost:3401/health',
   },
   
   // Firecrawl Services
@@ -489,7 +481,6 @@ export function DockerContainersSection() {
     </CollapsibleCard>
   );
 }
-
 
 
 

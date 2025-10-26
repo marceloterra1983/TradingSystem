@@ -1,0 +1,27 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Session files (NEVER commit these!)
+.session/
+*.session
+*.session.bak
+*.session.expired-*
+*.session.corrupt-*
+
+# Data files
+data/
+*.jsonl
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

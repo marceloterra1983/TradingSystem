@@ -1,0 +1,130 @@
+---
+title: Redocusaurus Overview
+description: Strategy for rendering OpenAPI specs with Redocusaurus.
+tags:
+  - tools
+  - redocusaurus
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+Redocusaurus integrates Redoc into Docusaurus to render OpenAPI specifications as interactive API documentation. It delivers searchable references, organized navigation, and the ability to host multiple API versions across services.
+
+**Status**: Planned integration — OpenAPI specs for several services are still being authored, and the Redoc build pipeline is not yet live.
+
+## Integration Architecture
+
+- **OpenAPI Specs**: Canonical YAML files stored under `content/reference/specs/openapi/`.
+- **Redoc Pages**: Generated routes that present each spec via the Redocusaurus plugin.
+- **URL Pattern**: `/redoc/<service-name>` (for example, `/redoc/order-manager`).
+
+**Services Targeted**
+
+1. **Order Manager API** — Port 3205 (.NET 8). Spec file `order-manager.openapi.yaml`. Status: TODO.
+2. **Data Capture API** — Port 3100 (.NET 8). Spec file `data-capture.openapi.yaml`. Status: TODO.
+3. **Workspace API** — Port 3200 (Node.js). Spec file `workspace.openapi.yaml`. Status: ready for migration.
+
+## Configuration
+
+```javascript
+// docusaurus.config.js
+module.exports = {
+  plugins: [
+    [
+      'redocusaurus',
+      {
+        specs: [
+          {
+            id: 'order-manager',
+            spec: 'content/reference/specs/openapi/order-manager.openapi.yaml',
+            route: '/redoc/order-manager/',
+          },
+          {
+            id: 'data-capture',
+            spec: 'content/reference/specs/openapi/data-capture.openapi.yaml',
+            route: '/redoc/data-capture/',
+          },
+          {
+            id: 'workspace',
+            spec: 'content/reference/specs/openapi/workspace.openapi.yaml',
+            route: '/redoc/workspace/',
+          },
+        ],
+        theme: {
+          primaryColor: '#9333EA',
+          options: {
+            disableSearch: false,
+            hideDownloadButton: false,
+          },
+        },
+      },
+    ],
+  ],
+};
+```
+
+**OpenAPI Requirements**
+
+- Use OpenAPI 3.0 or 3.1.
+- Provide clear descriptions for every endpoint.
+- Include realistic request/response examples.
+- Document all error codes and authentication flows.
+- Group endpoints with tags for navigation clarity.
+
+## Automation Workflow
+
+**Planned Pipeline**
+
+1. Generate specs from source code (Swashbuckle or equivalent).
+2. Validate with Spectral (`npm run validate:openapi`).
+3. Store specs in `content/reference/specs/openapi/`.
+4. Build Redoc output during the Docusaurus build.
+
+**CI Integration**
+
+```bash
+npm run generate:openapi
+npm run validate:openapi
+npm run build
+```
+
+**Manual Workflow (Current)**
+
+1. Author YAML specs manually.
+2. Validate with Swagger Editor or Redoc CLI.
+3. Commit to repository.
+4. Update Redocusaurus plugin configuration.
+5. Build locally to preview.
+
+## Features
+
+- Interactive navigation with collapsible sections.
+- Automatic code samples in multiple languages.
+- “Try It Out” support when CORS allows.
+- Schema visualization for complex objects.
+- Responsive layout compatible with mobile.
+- Markdown support within descriptions.
+
+**Customization**
+
+- Brand-aligned theme colors (primary `#9333EA`).
+- Toggle search and download buttons.
+- Supply custom logos and favicons.
+- Extend via custom CSS.
+
+## Best Practices
+
+- Maintain parity between code and specs; automate generation where possible.
+- Provide thorough examples and error documentation.
+- Version specs when breaking changes occur and mark deprecated endpoints.
+- Use `$ref` for shared schemas to avoid duplication.
+- Link Redoc pages from supporting SDD documents for context.
+
+## Related Documentation
+
+- API Style Guide (TODO: link once reference API style guide is published)
+- [Order Manager API](../../api/order-manager)
+- [Data Capture API](../../api/data-capture)
+- Workspace API (TODO: link once workspace API docs migrate)
+- OpenAPI Specs (TODO: link after reference specs directory is created)

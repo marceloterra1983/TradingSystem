@@ -1,0 +1,256 @@
+---
+title: API Catalog
+description: OpenAPI specs, endpoint behavior, and integration guidelines for TradingSystem
+  services.
+tags:
+  - api
+  - integration
+owner: BackendGuild
+lastReviewed: '2025-10-26'
+---
+## Available APIs
+
+The TradingSystem platform exposes multiple REST APIs for different functionalities. All APIs are documented using **OpenAPI 3.1** and integrated with **Redocusaurus** for interactive documentation.
+
+### Production APIs
+
+#### 📚 [Documentation API](./documentation-api.mdx)
+**Port:** 3400 (dev), 3205 (prod) | **Status:** ✅ Active
+
+Comprehensive documentation management with ideas, specs, search, and file attachments.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/documentation-api)
+- **Key Features:** Multi-tenancy, FlexSearch, File uploads, Statistics
+- **Repository:** `backend/api/documentation-api/`
+
+#### 💡 [Workspace API (Idea Bank)](./workspace-api.mdx)
+**Port:** 3200 | **Status:** ✅ Active
+
+Simple CRUD operations for workspace items with Kanban-style status management.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/workspace)
+- **Key Features:** QuestDB/LowDB dual-strategy, Kanban integration, Prometheus metrics
+- **Repository:** `backend/api/workspace/`
+
+#### 📈 [TP Capital API](./tp-capital-api.mdx)
+**Port:** 3200 | **Status:** ✅ Active
+
+Trading signals ingestion from Telegram channels with comprehensive bot and channel management.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/tp-capital)
+- **Key Features:** Signal management, Telegram bot/channel CRUD, Real-time ingestion, TimescaleDB storage
+- **Repository:** `apps/tp-capital/`
+
+### Trading APIs (Planned)
+
+#### 📊 [Data Capture API](./data-capture.mdx)
+**Port:** TBD | **Status:** 🚧 Planned
+
+High-performance market data ingestion from ProfitDLL with WebSocket streaming.
+
+- **Key Features:** Real-time data capture, Order book updates, Trade events
+- **Performance:** &lt;50ms p95 latency
+
+#### ⚡ [Order Manager API](./order-manager.mdx)
+**Port:** TBD | **Status:** 🚧 Planned
+
+Order execution with comprehensive risk management and validation.
+
+- **Key Features:** Risk checks, Kill switch, Position tracking
+- **Performance:** &lt;500ms p95 execution latency
+
+## API Standards
+
+All TradingSystem APIs follow these standards:
+
+### Documentation
+- ✅ OpenAPI 3.1 specification
+- ✅ Interactive Redocusaurus documentation
+- ✅ Code examples in multiple languages
+- ✅ Comprehensive error documentation
+
+### Rate Limiting
+- **Default:** 300 requests per 60-second window
+- **Headers:** `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
+- **Response:** `429 Too Many Requests` when exceeded
+
+### Authentication
+- **Current:** API key (development)
+- **Planned:** JWT tokens, OAuth2, mTLS (production)
+
+### Observability
+- ✅ Prometheus metrics at `/metrics`
+- ✅ Health checks at `/health`
+- ✅ Structured logging (JSON)
+- ✅ Request tracing (correlation IDs)
+
+### Versioning
+- **Strategy:** URL-based versioning (`/api/v1/...`)
+- **Deprecation:** 6-month notice period
+- **Support:** N and N-1 versions maintained
+
+## Quick Start
+
+### Health Check All Services
+
+```bash
+# Documentation API
+curl http://localhost:3400/health
+
+# Workspace API
+curl http://localhost:3200/health
+
+# TP Capital API
+curl http://localhost:3200/health
+```
+
+### View Metrics
+
+```bash
+# Documentation API metrics
+curl http://localhost:3400/metrics
+
+# Workspace API metrics
+curl http://localhost:3200/metrics
+
+# TP Capital API metrics
+curl http://localhost:3200/metrics
+```
+
+### Interactive API Testing
+
+Visit the Redocusaurus pages to test APIs interactively:
+- [Documentation API](/api/documentation-api)
+- [Workspace API](/api/workspace)
+- [TP Capital API](/api/tp-capital)
+
+## Development Guide
+
+### Running APIs Locally
+
+```bash
+# Documentation API
+cd backend/api/documentation-api
+npm install && npm run dev
+
+# Workspace API
+cd backend/api/workspace
+npm install && npm run dev
+
+# TP Capital API
+cd apps/tp-capital
+npm install && npm run dev
+```
+
+### Environment Setup
+
+See individual API documentation for required environment variables:
+- [Documentation API Environment](./documentation-api.mdx#environment-variables)
+- [Workspace API Environment](./workspace-api.mdx#environment-variables)
+
+### Testing APIs
+
+```bash
+# Run all API tests
+npm test
+
+# Run specific API tests
+cd backend/api/documentation-api && npm test
+cd backend/api/workspace && npm test
+```
+
+## Integration Examples
+
+### JavaScript/TypeScript
+
+```typescript
+import axios from 'axios';
+
+// Documentation API
+const docsApi = axios.create({
+  baseURL: 'http://localhost:3400',
+});
+
+const systems = await docsApi.get('/api/v1/systems');
+
+// Workspace API
+const workspaceApi = axios.create({
+  baseURL: 'http://localhost:3200',
+});
+
+const items = await workspaceApi.get('/api/items');
+```
+
+### Python
+
+```python
+import requests
+
+# Documentation API
+docs_response = requests.get('http://localhost:3400/api/v1/systems')
+systems = docs_response.json()
+
+# Workspace API
+workspace_response = requests.get('http://localhost:3200/api/items')
+items = workspace_response.json()
+```
+
+## Service Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│           TradingSystem Dashboard               │
+│                (Port 3103)                      │
+└────────────┬────────────────────────┬───────────┘
+             │                        │
+     ┌───────▼────────┐      ┌───────▼────────┐
+     │ Documentation  │      │   Workspace    │
+     │      API       │      │      API       │
+     │  (Port 3400)   │      │  (Port 3200)   │
+     └───────┬────────┘      └───────┬────────┘
+             │                        │
+     ┌───────▼────────┐      ┌───────▼────────┐
+     │   QuestDB +    │      │  QuestDB +     │
+     │  PostgreSQL    │      │    LowDB       │
+     └────────────────┘      └────────────────┘
+```
+
+## API Governance
+
+### Adding New APIs
+
+1. **Create OpenAPI Spec**
+   ```bash
+   # Place spec in canonical location
+   touch docs/static/specs/new-api.openapi.yaml
+   ```
+
+1. **Configure Redocusaurus**
+   Edit `docs/docusaurus.config.js`:
+   ```javascript
+   specs: [
+     // ... existing specs
+     {
+       id: 'new-api',
+       spec: 'static/specs/new-api.openapi.yaml',
+       route: '/api/new-api',
+     },
+   ]
+   ```
+
+1. **Create Documentation**
+   ```bash
+   touch docs/content/api/new-api.mdx
+   ```
+
+1. **Update Navbar**
+   Add link to navbar dropdown in `docusaurus.config.js`
+
+See `docs/static/specs/README.md` for detailed instructions.
+
+## Resources
+
+- [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Redocusaurus Documentation](https://github.com/rohit-gohri/redocusaurus)
+- [API Design Guidelines](../reference/api-guidelines.mdx)
+- [Testing Strategy](../reference/testing-strategy.mdx)

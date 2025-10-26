@@ -46,6 +46,8 @@ jobs:
       contents: write
       issues: write
       pull-requests: read
+    env:
+      DOCS_API_URL: ${{ vars.DOCS_API_URL || secrets.DOCS_API_URL || 'http://localhost:3400' }}
 
     steps:
       - name: Checkout repository
@@ -68,16 +70,17 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Create reports directory
-        run: mkdir -p docs/reports
+        run: mkdir -p docs_v2/reports
 
       - name: Run documentation audit
         id: audit
         continue-on-error: true
         run: |
           REPORT_DATE=$(date +%Y-%m-%d)
-          REPORT_FILE="./docs/reports/${REPORT_DATE}-documentation-audit.md"
+          REPORT_FILE="./docs_v2/reports/${REPORT_DATE}-documentation-audit.md"
           
           bash scripts/docs/audit-documentation.sh \
+            --docs-dir ./docs_v2/content \
             --output "$REPORT_FILE" \
             ${{ github.event.inputs.skip_external_links == 'true' && '--skip-external-links' || '' }} \
             --verbose
@@ -172,7 +175,9 @@ jobs:
           # Call Documentation API to update metrics
           # Note: This requires Documentation API to be accessible
           # In production, use internal network or VPN
-          curl -X POST http://localhost:3400/api/v1/docs/health/update-metrics \
+          # Update metrics for docs_v2 health dashboard
+          DOCS_API_BASE="${DOCS_API_URL%/}"
+          curl -X POST "${DOCS_API_BASE}/api/v1/docs/health/update-metrics" \
             -H "Content-Type: application/json" \
             -d "$COMBINED_JSON" \
             --max-time 10 \
@@ -187,7 +192,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           REPORT_DATE=$(date +%Y-%m-%d)
-          REPORT_FILE="docs/reports/${REPORT_DATE}-documentation-audit.md"
+          REPORT_FILE="docs_v2/reports/${REPORT_DATE}-documentation-audit.md"
           
           if [ -f "$REPORT_FILE" ]; then
             git add "$REPORT_FILE"
@@ -216,15 +221,15 @@ jobs:
       - name: Archive old reports
         run: |
           # Create archive directory
-          mkdir -p docs/reports/archive
+          mkdir -p docs_v2/reports/archive
           
           # Move reports older than 30 days to archive
-          find docs/reports -maxdepth 1 -name "20*-documentation-audit.md" -type f -mtime +30 \
-            -exec mv {} docs/reports/archive/ \;
+          find docs_v2/reports -maxdepth 1 -name "20*-documentation-audit.md" -type f -mtime +30 \
+            -exec mv {} docs_v2/reports/archive/ \;
           
           # Commit archive changes if any
-          if [ -n "$(git status --porcelain docs/reports/archive)" ]; then
-            git add docs/reports/archive
+          if [ -n "$(git status --porcelain docs_v2/reports/archive)" ]; then
+            git add docs_v2/reports/archive
             git commit -m "docs: archive old audit reports [skip ci]"
             git push origin main
           fi
@@ -235,7 +240,7 @@ jobs:
           CURRENT_SCORE=${{ steps.metrics.outputs.health_score }}
           
           # Get previous score from last audit report
-          PREV_REPORT=$(find docs/reports -maxdepth 1 -name "20*-documentation-audit.md" -type f | sort -r | sed -n 2p)
+          PREV_REPORT=$(find docs_v2/reports -maxdepth 1 -name "20*-documentation-audit.md" -type f | sort -r | sed -n 2p)
           
           if [ -f "$PREV_REPORT" ]; then
             PREV_SCORE=$(grep "Health Score:" "$PREV_REPORT" | head -n1 | grep -oP '\d+\.?\d*' || echo "$CURRENT_SCORE")
@@ -286,16 +291,16 @@ jobs:
 
             ### Actions Required
 
-            1. Review the [full audit report](../blob/main/docs/reports/${reportDate}-documentation-audit.md)
+            1. Review the [full audit report](../blob/main/docs_v2/reports/${reportDate}-documentation-audit.md)
             2. Fix critical issues (broken links, missing frontmatter)
             3. Update outdated documentation
             4. Monitor health score in [Grafana Dashboard](http://localhost:3000/d/docs-health)
 
             ### Resources
 
-            - [Documentation Health Dashboard](http://localhost:3004/health)
-            - [Health Dashboard Guide](/docs/context/shared/tools/health-dashboard-guide)
-            - [Automated Code Quality](/docs/context/ops/automated-code-quality)
+            - [Documentation Health Dashboard](http://localhost:3205/health) (docs_v2)
+            - [Health Dashboard Guide](http://localhost:3205/tools/health-dashboard) (docs_v2)
+            - [Automated Code Quality](https://github.com/marceloterra/TradingSystem/blob/main/docs/context/ops/automated-code-quality.md)
 
             ---
             *This issue was created automatically by the Documentation Health Audit workflow*
@@ -315,7 +320,7 @@ jobs:
           name: docs-audit-${{ steps.audit.outputs.report_date }}
           path: |
             /tmp/docs-audit-*/
-            docs/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md
+            docs_v2/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md
           retention-days: 90
 
       - name: Create workflow summary
@@ -345,6 +350,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Resources" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- [View Full Report](../blob/main/docs/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Health Dashboard](http://localhost:3004/health)" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Full Report](../blob/main/docs_v2/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Health Dashboard](http://localhost:3205/health)" >> $GITHUB_STEP_SUMMARY
           echo "- [Grafana Dashboard](http://localhost:3000/d/docs-health)" >> $GITHUB_STEP_SUMMARY

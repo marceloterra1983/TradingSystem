@@ -3,19 +3,21 @@ import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { apiConfig } from '../../config/api';
 import EscopoPageNew from './EscopoPageNew';
+import APIViewerPage from './APIViewerPage';
 
 export function DocusaurusPageNew() {
   const [activeView, setActiveView] = useState<'overview' | 'docs' | 'docsApi'>('docs');
   const isOverview = activeView === 'overview';
   const isDocsView = activeView === 'docs';
-  const iframeSrc =
-    activeView === 'docs' ? apiConfig.docsUrl : activeView === 'docsApi' ? apiConfig.docsApiUrl : undefined;
-  const iframeTitle =
-    activeView === 'docs'
-      ? 'TradingSystem Documentation Portal'
-      : activeView === 'docsApi'
-        ? 'TradingSystem API Documentation'
-        : undefined;
+  const isDocsApiView = activeView === 'docsApi';
+
+  // Use absolute URL for iframe (iframes don't use Vite proxy)
+  // Development: http://localhost:3400
+  // Production: Use the configured docsUrl
+  const iframeSrc = activeView === 'docs'
+    ? (import.meta.env.DEV ? 'http://localhost:3400' : apiConfig.docsUrl)
+    : undefined;
+  const iframeTitle = activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
 
   const handleOpenInNewTab = () => {
     if (typeof window === 'undefined') {
@@ -23,6 +25,8 @@ export function DocusaurusPageNew() {
     }
     if (isOverview) {
       window.open(`${window.location.origin}/#/escopo`, '_blank', 'noopener,noreferrer');
+    } else if (isDocsApiView) {
+      window.open(apiConfig.docsApiUrl, '_blank', 'noopener,noreferrer');
     } else if (iframeSrc) {
       window.open(iframeSrc, '_blank', 'noopener,noreferrer');
     }
@@ -61,7 +65,7 @@ export function DocusaurusPageNew() {
           variant="outline"
           size="sm"
           onClick={handleOpenInNewTab}
-          disabled={isOverview ? false : !iframeSrc}
+          disabled={isOverview ? false : (!iframeSrc && !isDocsApiView)}
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Open in new tab
@@ -73,13 +77,15 @@ export function DocusaurusPageNew() {
             <EscopoPageNew />
           </div>
         </div>
+      ) : isDocsApiView ? (
+        <APIViewerPage />
       ) : (
         <iframe
           src={iframeSrc}
           title={iframeTitle}
           className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
           allow="clipboard-read; clipboard-write"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
         />
       )}
     </div>

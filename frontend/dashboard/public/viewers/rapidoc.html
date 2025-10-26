@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RapiDoc - TradingSystem API</title>
+  <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <rapi-doc
+    id="thedoc"
+    theme="dark"
+    bg-color="#0f172a"
+    text-color="#ffffff"
+    header-color="#1e293b"
+    primary-color="#3b82f6"
+    nav-bg-color="#1e293b"
+    nav-text-color="#e2e8f0"
+    nav-hover-bg-color="#334155"
+    nav-hover-text-color="#ffffff"
+    nav-accent-color="#3b82f6"
+    render-style="read"
+    schema-style="table"
+    schema-expand-level="1"
+    schema-description-expanded="true"
+    default-schema-tab="schema"
+    response-area-height="400px"
+    show-header="true"
+    show-info="true"
+    allow-authentication="true"
+    allow-server-selection="true"
+    allow-api-list-style-selection="true"
+    allow-try="true"
+    allow-spec-url-load="false"
+    allow-spec-file-load="false"
+    show-components="true"
+    api-key-location="header"
+    layout="column"
+    sort-tags="false"
+    sort-endpoints-by="path"
+    heading-text=""
+  >
+  </rapi-doc>
+
+  <script>
+    window.onload = function() {
+      // Get spec URL from query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
+
+      // Set spec URL
+      const rapidoc = document.getElementById('thedoc');
+      rapidoc.setAttribute('spec-url', specUrl);
+    };
+  </script>
+</body>
+</html>

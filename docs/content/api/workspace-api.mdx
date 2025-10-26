@@ -1,0 +1,450 @@
+---
+title: Workspace API (Idea Bank)
+description: CRUD operations for idea items with QuestDB and LowDB persistence, health
+  checks, and Prometheus metrics.
+tags:
+  - api
+  - workspace
+  - idea-bank
+  - crud
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The **Workspace API** (also known as Library API or Idea Bank API) provides a simple and efficient way to manage idea items for the TradingSystem dashboard. It supports CRUD operations with dual-strategy persistence using QuestDB for production and LowDB for development.
+
+### Key Features
+
+- **Simple CRUD**: Create, read, update, and delete idea items
+- **Dual Persistence**: QuestDB (production) with LowDB fallback (development)
+- **Kanban Integration**: Status-based workflow (backlog, in-progress, done)
+- **Health Monitoring**: Comprehensive health checks and metrics
+- **Prometheus Metrics**: Built-in observability
+- **Auto-migration**: Seamless data migration between databases
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 3200 |
+| **Base URL** | http://localhost:3200 |
+| **Reverse Proxy Route** | http://tradingsystem.local/api/workspace |
+| **Repository** | `backend/api/workspace/` |
+| **Database** | QuestDB (primary), LowDB (fallback) |
+| **Status** | ✅ Active |
+
+## Quick Start
+
+### Health Check
+
+```bash
+curl http://localhost:3200/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-10-25T08:00:00Z",
+  "uptime": 12345,
+  "database": {
+    "questdb": "connected",
+    "lowdb": "available"
+  }
+}
+```
+
+### Get All Items
+
+```bash
+curl http://localhost:3200/api/items
+```
+
+### Create New Item
+
+```bash
+curl -X POST http://localhost:3200/api/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Implement WebSocket streaming",
+    "description": "Add real-time market data streaming",
+    "status": "backlog",
+    "priority": "high",
+    "tags": ["feature", "real-time"]
+  }'
+```
+
+### Update Item Status
+
+```bash
+curl -X PUT http://localhost:3200/api/items/123 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "in-progress"
+  }'
+```
+
+### Delete Item
+
+```bash
+curl -X DELETE http://localhost:3200/api/items/123
+```
+
+## API Reference
+
+The complete OpenAPI specification is available at:
+
+<a href="/api/workspace" className="button button--primary">View Full API Documentation</a>
+
+### Main Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Service health status |
+| `/metrics` | GET | Prometheus metrics |
+| `/api/items` | GET | List all items |
+| `/api/items` | POST | Create new item |
+| `/api/items/:id` | GET | Get item by ID |
+| `/api/items/:id` | PUT | Update item |
+| `/api/items/:id` | DELETE | Delete item |
+| `/api/items/status/:status` | GET | Get items by status |
+
+## Data Model
+
+### Item Schema
+
+```typescript
+interface Item {
+  id: string;              // UUID
+  title: string;           // Required
+  description?: string;    // Optional
+  status: Status;          // Required: backlog | in-progress | done
+  priority?: Priority;     // Optional: low | medium | high | critical
+  tags?: string[];         // Optional
+  createdAt: string;       // ISO 8601 timestamp
+  updatedAt: string;       // ISO 8601 timestamp
+}
+
+type Status = 'backlog' | 'in-progress' | 'done';
+type Priority = 'low' | 'medium' | 'high' | 'critical';
+```
+
+### Example Item
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "title": "Add dark mode support",
+  "description": "Implement dark mode theme toggle in dashboard",
+  "status": "in-progress",
+  "priority": "medium",
+  "tags": ["ui", "enhancement"],
+  "createdAt": "2025-10-25T08:00:00Z",
+  "updatedAt": "2025-10-25T09:30:00Z"
+}
+```
+
+## Rate Limiting
+
+Global rate limit: **300 requests per 60-second window** (via express-rate-limit)
+
+Response headers:
+- `RateLimit-Limit`: 300
+- `RateLimit-Remaining`: Number of requests remaining
+- `RateLimit-Reset`: Unix timestamp when limit resets
+
+When rate limit is exceeded, API returns `429 Too Many Requests`.
+
+## Database Strategy
+
+### Dual-Strategy Persistence
+
+The Workspace API uses intelligent database selection:
+
+1. **Production Mode**: QuestDB for high-performance time-series storage
+2. **Development Mode**: LowDB for simple file-based persistence
+3. **Auto-fallback**: If QuestDB is unavailable, falls back to LowDB
+4. **Migration Tools**: Built-in commands to migrate data between databases
+
+### QuestDB (Primary)
+
+```sql
+-- Table: workspace_items
+CREATE TABLE workspace_items (
+  id SYMBOL,
+  title STRING,
+  description STRING,
+  status SYMBOL,
+  priority SYMBOL,
+  tags STRING,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+) TIMESTAMP(created_at) PARTITION BY DAY;
+```
+
+### LowDB (Fallback)
+
+```json
+{
+  "items": [
+    {
+      "id": "...",
+      "title": "...",
+      ...
+    }
+  ]
+}
+```
+
+Stored at: `backend/api/workspace/db/workspace.json`
+
+## Monitoring & Observability
+
+### Prometheus Metrics
+
+Available at `/metrics` endpoint:
+
+```bash
+curl http://localhost:3200/metrics
+```
+
+**Key Metrics:**
+
+```prometheus
+# HTTP metrics
+http_request_duration_seconds{method="GET",route="/api/items",status="200"}
+http_requests_total{method="POST",route="/api/items",status="201"}
+
+# Database metrics
+questdb_query_duration_seconds
+questdb_connection_pool_size
+lowdb_read_duration_seconds
+lowdb_write_duration_seconds
+
+# Business metrics
+workspace_items_total{status="backlog"}
+workspace_items_total{status="in-progress"}
+workspace_items_total{status="done"}
+workspace_items_created_total
+workspace_items_updated_total
+workspace_items_deleted_total
+```
+
+### Health Checks
+
+```bash
+curl http://localhost:3200/health
+```
+
+Health check includes:
+- Service uptime
+- QuestDB connectivity
+- LowDB availability
+- Memory usage
+- Response time
+
+## Development
+
+### Local Setup
+
+```bash
+cd backend/api/workspace
+npm install
+npm run dev
+```
+
+### Environment Variables
+
+```bash
+PORT=3200
+NODE_ENV=development
+QUESTDB_HTTP_URL=http://localhost:9000
+QUESTDB_PG_URL=postgresql://admin:quest@localhost:8812/qdb
+LOWDB_PATH=./db/workspace.json
+ENABLE_METRICS=true
+```
+
+### Testing
+
+```bash
+npm test                 # Run all tests
+npm run test:watch      # Watch mode
+npm run test:coverage   # Coverage report
+npm run test:integration # Integration tests
+```
+
+### Database Migration
+
+```bash
+# Migrate from LowDB to QuestDB
+npm run migrate:to-questdb
+
+# Migrate from QuestDB to LowDB
+npm run migrate:to-lowdb
+
+# Backup current database
+npm run db:backup
+```
+
+## Integration Examples
+
+### JavaScript/TypeScript (React)
+
+```typescript
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3200',
+});
+
+// Fetch all items
+const { data: items } = await api.get('/api/items');
+
+// Create new item
+const newItem = await api.post('/api/items', {
+  title: 'New Feature',
+  description: 'Implement new feature',
+  status: 'backlog',
+  priority: 'high',
+  tags: ['feature', 'backend']
+});
+
+// Update item status
+await api.put(`/api/items/${item.id}`, {
+  status: 'done'
+});
+
+// Delete item
+await api.delete(`/api/items/${item.id}`);
+```
+
+### Python
+
+```python
+import requests
+
+BASE_URL = 'http://localhost:3200'
+
+# Get all items
+items = requests.get(f'{BASE_URL}/api/items').json()
+
+# Create item
+new_item = requests.post(f'{BASE_URL}/api/items', json={
+    'title': 'Optimize query performance',
+    'description': 'Add indexes to improve query speed',
+    'status': 'backlog',
+    'priority': 'medium'
+}).json()
+
+# Update item
+updated = requests.put(f'{BASE_URL}/api/items/{new_item["id"]}', json={
+    'status': 'in-progress'
+}).json()
+```
+
+### cURL Examples
+
+```bash
+# Get items by status
+curl "http://localhost:3200/api/items/status/in-progress"
+
+# Create item with tags
+curl -X POST http://localhost:3200/api/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Refactor API endpoints",
+    "status": "backlog",
+    "tags": ["refactor", "api", "backend"]
+  }'
+
+# Partial update
+curl -X PUT http://localhost:3200/api/items/123 \
+  -H "Content-Type: application/json" \
+  -d '{"priority": "critical"}'
+```
+
+## Dashboard Integration
+
+The Workspace API powers the **Idea Bank** feature in the TradingSystem Dashboard:
+
+- **Kanban Board**: Drag-and-drop items between columns (backlog → in-progress → done)
+- **Real-time Updates**: Dashboard polls API every 30 seconds
+- **Filtering**: Filter by status, priority, tags
+- **Sorting**: Sort by date, priority, status
+- **Search**: Client-side search across title and description
+
+See: [Idea Bank Feature Documentation](../apps/workspace/overview.mdx)
+
+## Related Documentation
+
+- [OpenAPI Specification](/api/workspace) - Complete API reference
+- [Idea Bank PRD](../prd/products/trading-app/feature-idea-bank.mdx) - Product requirements
+- [Database Schema](../database/schema.mdx) - Data models
+- [Frontend Integration](../apps/workspace/overview.mdx) - Dashboard integration
+- [Deployment Guide](../apps/workspace/deployment.mdx) - Production deployment
+
+## Troubleshooting
+
+### Common Issues
+
+**Cannot connect to QuestDB**
+```bash
+# Check QuestDB status
+curl http://localhost:9000/
+
+# Verify QuestDB is running
+docker ps | grep questdb
+
+# API will auto-fallback to LowDB
+```
+
+**Rate limit exceeded**
+```bash
+# Wait for rate limit window to reset (60 seconds)
+# Or implement client-side rate limiting
+
+# Check rate limit headers
+curl -I http://localhost:3200/api/items
+```
+
+**Items not persisting**
+```bash
+# Check database connection
+curl http://localhost:3200/health
+
+# Verify write permissions (LowDB)
+ls -la backend/api/workspace/db/
+
+# Check QuestDB logs
+docker logs questdb
+```
+
+**Slow response times**
+```bash
+# Check metrics
+curl http://localhost:3200/metrics | grep duration
+
+# Enable query logging
+export DEBUG=workspace:*
+npm run dev
+```
+
+## Changelog
+
+### v1.0.0 (2025-10-25)
+- ✅ Initial release with CRUD operations
+- ✅ QuestDB and LowDB dual-strategy
+- ✅ Prometheus metrics integration
+- ✅ Health monitoring
+- ✅ Rate limiting
+- ✅ OpenAPI specification
+
+### Roadmap
+- [ ] GraphQL support
+- [ ] WebSocket for real-time updates
+- [ ] Bulk operations API
+- [ ] Advanced filtering and sorting
+- [ ] Item relationships (parent/child)
+- [ ] File attachments support
+- [ ] User authentication and permissions

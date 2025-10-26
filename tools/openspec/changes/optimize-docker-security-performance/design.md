@@ -95,7 +95,7 @@ Em 2025-10-26, o **docker-health-optimizer agent** executou análise completa da
 ### Decision 1: Use ${VAR} Syntax Instead of Hardcoded Values
 
 **Context:**
-- Current: `POSTGRES_PASSWORD: axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL` (hardcoded)
+- Current: `POSTGRES_PASSWORD: pass_timescale` (hardcoded)
 - Violates CLAUDE.md: "Never commit credentials"
 - Git history contains password (security risk)
 
@@ -121,7 +121,7 @@ Use environment variable reference: `POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}`
 ```yaml
 # BEFORE
 environment:
-  POSTGRES_PASSWORD: axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL
+  POSTGRES_PASSWORD: pass_timescale
 
 # AFTER
 environment:

@@ -1,0 +1,167 @@
+---
+title: Operations
+description: Monitoring, logging, and metrics for the TP Capital application.
+tags:
+  - apps
+  - tp-capital
+  - operations
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Health Monitoring
+
+### Health Endpoints
+
+| Endpoint | Purpose | Expected Response | Check Frequency |
+|----------|---------|-------------------|-----------------|
+| `GET /health` | Service health | `{"status": "ok", "questdb": "connected"}` | Every 30s |
+| `GET /signals?limit=1` | Data freshness | Latest signal timestamp | Every 5m |
+| QuestDB `http://localhost:9002` | Database UI | Web interface loads | Manual |
+
+### Dashboards
+
+- Grafana dashboard: `tools/monitoring/dashboards/tp-capital.json`.
+- Panels: Signal ingestion rate, API latency, QuestDB health, error rate, Telegram bot status, storage usage.
+
+### Prometheus Queries
+
+```promql
+# Ingestion rate
+rate(tp_capital_signals_total[5m])
+
+# API latency p95
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+
+# Error rate
+rate(tp_capital_errors_total[5m]) / rate(tp_capital_signals_total[5m])
+
+# QuestDB connection status
+tp_capital_questdb_connected
+```
+
+### Alert Thresholds
+
+| Alert | Condition | Severity | Action |
+|-------|-----------|----------|--------|
+| High Ingestion Latency | p95 > 1000ms for 5m | Warning | Check QuestDB load |
+| QuestDB Disconnected | Connection fails | Critical | Restart QuestDB, check network |
+| High Error Rate | Errors > 5% for 10m | Warning | Check Telegram bot token, review logs |
+| No Signals Received | No signals for 30m | Warning | Verify Telegram channels active |
+| Disk Space Low | QuestDB volume > 80% | Warning | Prune old partitions |
+
+## Logs and Metrics
+
+### Log Configuration
+
+- Structured JSON logs emitted via shared logger (`logger.js`).
+- Destination: stdout (captured by Docker or systemd).
+- Retention: 7 days (rotated daily).
+
+### Log Levels
+
+- `debug` for detailed ingestion flow (development).
+- `info` for signal ingestion success and API requests.
+- `warn` for validation failures and retries.
+- `error` for QuestDB connection failures and unhandled exceptions.
+
+### Structured Fields
+
+```json
+{
+  "timestamp": "2025-10-24T10:30:45.123Z",
+  "level": "info",
+  "service": "tp-capital",
+  "message": "Signal ingested successfully",
+  "signal_id": "abc123",
+  "asset": "PETR4",
+  "signal_type": "COMPRA",
+  "channel": "TP_Capital",
+  "latency_ms": 245
+}
+```
+
+### Accessing Logs
+
+```bash
+# Follow logs
+docker compose -f docker-compose.prod.yml logs -f tp-capital-signals
+
+# Last 100 lines
+docker compose -f docker-compose.prod.yml logs --tail=100 tp-capital-signals
+
+# Filter by level
+docker compose -f docker-compose.prod.yml logs tp-capital-signals | grep ERROR
+
+# Operational logs via API
+curl http://localhost:3200/logs?limit=50
+# Replace with http://<host>:4005/... in production.
+```
+
+### Key Metrics
+
+| Metric | Type | Description | Labels |
+|--------|------|-------------|--------|
+| `tp_capital_signals_total` | Counter | Total signals ingested | `channel`, `signal_type` |
+| `tp_capital_errors_total` | Counter | Total ingestion errors | `error_type` |
+| `http_request_duration_seconds` | Histogram | API request latency | `method`, `endpoint`, `status` |
+| `tp_capital_questdb_connected` | Gauge | QuestDB connection status (0/1) | - |
+| `tp_capital_telegram_last_message_timestamp` | Gauge | Unix timestamp of last message | `channel` |
+
+## Maintenance Procedures
+
+### Daily Tasks
+
+1. Check Grafana dashboard for ingestion rate and error spikes.
+2. Review latest logs for warnings or errors.
+3. Verify data freshness via `GET /signals?limit=1`.
+
+### Weekly Tasks
+
+1. Prune QuestDB partitions older than 90 days.
+2. Review storage usage (`docker volume inspect questdb-data`).
+3. Rotate log files if persisted outside Docker.
+
+### Monthly Tasks
+
+1. Rotate Telegram bot tokens via BotFather.
+2. Analyze latency trends and optimize queries.
+3. Backup QuestDB data (export to CSV).
+
+### Data Reconciliation
+
+```sql
+-- Count signals by channel (last 7 days)
+SELECT channel, COUNT(*) AS signal_count
+FROM tp_capital_signals
+WHERE ts > now() - 7d
+GROUP BY channel
+ORDER BY signal_count DESC;
+
+-- Find duplicate signals (same asset, timestamp)
+SELECT asset, ts, COUNT(*) AS duplicate_count
+FROM tp_capital_signals
+WHERE ts > now() - 1d
+GROUP BY asset, ts
+HAVING COUNT(*) > 1;
+
+-- Validate required fields
+SELECT COUNT(*) AS invalid_signals
+FROM tp_capital_signals
+WHERE ts > now() - 1d
+  AND (asset IS NULL OR signal_type IS NULL OR channel IS NULL);
+```
+
+### Cleanup Jobs
+
+- Automated pruning (cron):
+
+  ```bash
+  0 2 * * * docker exec questdb psql -c "ALTER TABLE tp_capital_signals DROP PARTITION WHERE ts < dateadd('d', -90, now());"
+  ```
+
+- Manual cleanup:
+
+  ```sql
+  DELETE FROM tp_capital_signals WHERE channel = 'TEST';
+  VACUUM TABLE tp_capital_signals;
+  ```

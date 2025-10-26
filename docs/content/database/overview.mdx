@@ -1,0 +1,114 @@
+---
+title: Data Platform
+description: Schemas, retention policies, and operational guidance for TradingSystem
+  databases.
+tags:
+  - database
+  - observability
+owner: DataOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem currently operates a multi-store data platform that balances MVP agility with
+production-grade time-series throughput. The architecture evolves from lightweight JSON storage to
+PostgreSQL-based services while retaining specialized databases for high-ingest telemetry.
+
+### Current Architecture
+
+- **LowDB**  
+  MVP storage for Idea Bank and Documentation API  
+  Files: `db/ideas.json`, `db/db.json`  
+  Limitations: No concurrency, no transactions, file-based writes  
+  Status: Active (MVP), planned migration to PostgreSQL
+
+- **QuestDB**  
+  Time-series storage for TP Capital signals and Telegram metadata  
+  Tables: `tp_capital_signals`, `tp_capital_signals_deleted`, `telegram_bots`, `telegram_channels`  
+  Features: Append-only ingestion, day partitions, PostgreSQL wire protocol  
+  Status: Active (production)
+
+- **Parquet Files**  
+  Historical market data for analytics and machine learning  
+  Location: `data/parquet/`  
+  Format: Apache Arrow columnar files with 2+ years retention  
+  Status: Active (analytics workloads)
+
+- **TimescaleDB**  
+  Planned relational storage for multi-user features and transactional workloads  
+  Port: 5433 (host) → 5432 (container)  
+  Status: Infrastructure ready, migration pending to replace LowDB
+
+### Migration Roadmap
+
+1. **Planning** – Define relational schema, publish ADR comparing TimescaleDB vs PostgreSQL.
+2. **Infrastructure** – Provision PostgreSQL 14+, secure access, and monitoring stack.
+3. **Data Migration** – Build ETL from LowDB JSON to SQL tables with validation and rollback.
+4. **Applications** – Update APIs to use ORM, introduce migrations, and pool connections.
+5. **QuestDB Alignment** – Automate 30-day retention, document cross-database exports.
+6. **Testing** – Run unit, integration, load, and failover testing across services.
+7. **Deployment** – Roll out with feature flags and staged traffic shifts, maintain fallback.
+
+## Data Stores
+
+### LowDB (MVP)
+- **Purpose**: Lightweight JSON store for Idea Bank and Documentation API.  
+- **Files**: `db/ideas.json`, `db/db.json`.  
+- **Access Pattern**: Entire file load/write, single-user usage.  
+- **Limitations**: No concurrency control, last-write-wins conflicts.  
+- **Backup**: Scheduled scripts copy JSON files to timestamped directories.  
+- **Migration Target**: TimescaleDB/PostgreSQL once multi-user rollout begins.
+
+### QuestDB (Production)
+- **Purpose**: High-throughput time-series storage for TP Capital signals.  
+- **Ports**: 9002 (HTTP UI), 9009 (ILP ingestion).  
+- **PostgreSQL wire protocol**: 8812 disabled/not exposed in local stacks per service port map.  
+- **Tables**:  
+  - `tp_capital_signals`: Normalized Telegram signals, day-partitioned.  
+  - `tp_capital_signals_deleted`: Soft delete archive for audit recovery.  
+  - `telegram_bots`: Bot credential store.  
+  - `telegram_channels`: Monitored channels configuration.  
+- **Features**: Append-only ILP writes, PostgreSQL wire protocol, web UI.  
+- **Retention**: 30-day online window with monthly exports to cold storage.  
+- **Backup**: Stop service, archive `%QUESTDB_ROOT%/db/` directory.
+
+### Parquet Files (Analytics)
+- **Purpose**: Long-horizon market data for backtesting and ML.  
+- **Location**: `data/parquet/` organized by `YYYY/MM/DD`.  
+- **Format**: Apache Arrow columnar with compression for fast scans.  
+- **Retention**: Minimum two years of intraday history.  
+- **Backup**: `robocopy /MIR` (Windows) or `rsync` (Linux) to secondary storage.  
+- **Access**: Python (Polars, Pandas) and Spark pipelines.
+
+### TimescaleDB (Planned)
+- **Purpose**: ACID-compliant storage for Idea Bank, Documentation, and future transactional needs.  
+- **Port**: 5433 (host) connecting to containerized PostgreSQL 14+.  
+- **Features**: Time-series optimizations, concurrent writes, relational modeling.  
+- **Status**: Provisioned via `docker-compose.timescale.yml`, awaiting data migration.  
+- **Admin Tools**: PgAdmin (5050), pgWeb (8081) for maintenance.
+
+## Access Patterns
+
+### Idea Bank & Documentation
+- **Current**: Reads/writes entire LowDB JSON files with synchronous I/O.  
+- **Future**: SQL queries with indexes, transactional writes, and concurrency support.
+
+### TP Capital Signals
+- **Write Path**: Telegram → Parser → Validator → QuestDB ILP → Confirmation.  
+- **Read Path**: Dashboard → REST API → QuestDB SQL → JSON responses.  
+- **Common Queries**:  
+  - Recent signals: `SELECT * FROM tp_capital_signals WHERE ts > now() - 7d ORDER BY ts DESC LIMIT 100`.  
+  - Channel filter: `WHERE channel = 'TP_Capital'`.  
+  - Asset search: `WHERE asset LIKE '%PETR%'`.
+
+### Market Data (Parquet)
+- **Write Path**: Data capture → Serializer → Parquet writer → Disk.  
+- **Read Path**: Python scripts using Polars/Pandas → DataFrame analytics.  
+- **Usage**: Time-range scans, symbol filters, aggregations for strategy research.
+
+## Related Documentation
+
+- [Schema Reference](./schema) – Detailed table definitions across domains.  
+- [Migrations](./migrations) – Strategy, checklists, and execution logs.  
+- [Retention & Backup](./retention-backup) – Retention windows and backup procedures.  
+- Database UI tools and TimescaleDB operations guides migrate separately.

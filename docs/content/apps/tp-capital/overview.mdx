@@ -1,0 +1,50 @@
+---
+title: TP Capital Overview
+description: Purpose, scope, and user journeys for the TP Capital Telegram ingestion
+  application.
+tags:
+  - apps
+  - tp-capital
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Summary
+
+Node-based microservice that ingests TP Capital Telegram messages, normalizes the payload, and writes records into QuestDB. The service (`backend/api/tp-capital`) runs on Node.js 20 with Express, persists data to QuestDB, and exposes normalized trading signals via REST on port 3200. It listens to Telegram channels, enriches payloads, and writes time-series records that power the Dashboard and downstream automations.
+
+## Stakeholders
+
+- **Primary users**: Dashboard UI consumers, Agno Agents (market analysis)
+- **Operators**: DevOps team managing QuestDB and Telegram bot credentials
+- **Downstream systems**: Dashboard (port 3103), Agno Agents framework
+
+## User Journeys
+
+### Journey 1: Signal Ingestion
+
+1. Telegram bot receives message from TP Capital channel.
+2. Service parses message extracting asset, buy range, targets, stop.
+3. Validates payload structure.
+4. Writes to QuestDB via ILP protocol (&lt;500ms p95 latency).
+5. Signal available via REST API for dashboard consumption.
+
+### Journey 2: Dashboard Consumption
+
+1. Dashboard polls `/signals` endpoint every 15 seconds.
+2. Receives paginated list of normalized signals.
+3. Displays in TP Capital table page with filters (channel, signal type).
+4. Auto-refresh keeps data current.
+
+### Journey 3: Agent Integration
+
+1. Agno Agents query `/signals` endpoint.
+2. Combine Telegram signals with Workspace ideas and B3 market data.
+3. Apply risk controls and compliance checks.
+4. Generate trading recommendations.
+
+## SLA Metrics
+
+- **Ingestion latency**: &lt;500ms p95 (Telegram webhook → QuestDB write)
+- **API response time**: &lt;200ms p95 for `/signals` endpoint
+- **Availability**: 99.5% uptime target
+- **Data retention**: 90 days in QuestDB (partitioned by day)

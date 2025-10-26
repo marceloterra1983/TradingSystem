@@ -1,0 +1,114 @@
+---
+title: Configuration
+description: Environment variables, secrets, and runtime configuration for the TP
+  Capital application.
+tags:
+  - apps
+  - tp-capital
+  - configuration
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Environment Variables
+
+The service expects a centralized `.env` at the repository root. Run `scripts/env/validate-env.sh` after updates.
+
+### Required Variables
+
+| Variable | Description | Example | Default |
+|----------|-------------|---------|---------|
+| `TP_CAPITAL_API_PORT` | HTTP port for the service | `3200` | `3200` |
+| `QUESTDB_HTTP_URL` | QuestDB HTTP endpoint for queries | `http://localhost:9002` | - |
+| `QUESTDB_ILP_HOST` | QuestDB ILP host for time-series writes | `localhost` | - |
+| `QUESTDB_ILP_PORT` | QuestDB ILP port | `9009` | - |
+| `TELEGRAM_BOT_TOKEN` | Bot token for pulling channel messages | `123456:ABCDEF` | - |
+
+### Optional Variables
+
+| Variable | Description | Example | Default |
+|----------|-------------|---------|---------|
+| `LOG_LEVEL` | Logging verbosity (debug, info, warn, error) | `info` | `info` |
+| `METRICS_ENABLED` | Enable Prometheus metrics endpoint | `true` | `true` |
+| `CORS_ORIGIN` | Allowed CORS origins | `http://localhost:3103` | `*` |
+
+### Secure Storage
+
+- **Development**: Store in repository root `.env` (gitignored).
+- **Production**: Use `apps/tp-capital/infrastructure/tp-capital-signals.env`.
+- Never hardcode tokens in source code.
+- Use environment-specific env files (dev, staging, prod).
+- Rotate Telegram bot tokens quarterly.
+- Validate all required variables on startup.
+
+## Ports and Networking
+
+### Service Ports
+
+| Port | Protocol | Purpose | Exposed |
+|------|----------|---------|---------|
+| 3200 | HTTP | REST API endpoints (default dev port) | Yes (dev), internal in prod |
+| 4005 | HTTP | Published port for Docker Compose/production | Yes (prod) |
+
+### Dependency Ports
+
+| Service | Port | Protocol | Purpose |
+|---------|------|----------|---------|
+| QuestDB HTTP | 9002 | HTTP | Query interface, Web UI |
+| QuestDB ILP | 9009 | TCP | Influx Line Protocol writes |
+
+### Networking Requirements
+
+- **Development**: Service and QuestDB on same Docker network (auto-configured by Compose). Dashboard proxies `/api/tp-capital` → `http://localhost:3200`.
+- **Production**: Service exposed on port 4005. QuestDB on internal Docker network (not exposed to host). Nginx reverse proxy routes `/api/tp-capital` → service.
+- **Firewall**: Allow inbound 4005 from dashboard and agents hosts. Block external access to QuestDB ports (9002, 9009). Allow outbound HTTPS to Telegram API and DNS resolution.
+
+### Port Conventions
+
+- Development default: `TP_CAPITAL_API_PORT=3200` (used by CLI examples and dashboard proxy).
+- Docker Compose maps container port 3200 to host 4005.
+- Production hosts expose 4005 externally while the service still respects `TP_CAPITAL_API_PORT` internally.
+- QuestDB retains HTTP 9002 and ILP 9009 across all environments.
+
+## Feature Flags
+
+Currently no feature flags implemented.
+
+### Planned Flags
+
+| Flag | Purpose | Default | Rollout Plan |
+|------|---------|---------|--------------|
+| `ENABLE_WEBSOCKET` | Real-time signal push via WebSocket | `false` | Phase 2 (Q2 2025) |
+| `ENABLE_SIGNAL_VALIDATION` | Strict validation rules for signals | `true` | Already active |
+| `ENABLE_RATE_LIMITING` | API rate limiting per client | `false` | Phase 3 (Q3 2025) |
+
+### Fallback Behavior
+
+If QuestDB is unavailable:
+
+1. Service logs error to stdout.
+2. Returns HTTP 503 for `/signals` endpoint.
+3. Continues accepting Telegram messages (queued in memory, max 1000).
+4. Retries QuestDB connection every 30 seconds.
+5. Flushes queued messages on reconnection.
+
+## Configuration Files
+
+### Docker Compose
+
+- **Development**: `apps/tp-capital/infrastructure/docker-compose.yml` (builds service locally, mounts source, exposes ports 3200 and 9002).
+- **Production**: `apps/tp-capital/infrastructure/docker-compose.prod.yml` (pulls GHCR image, uses production env file, exposes port 4005 and 9002, persists `questdb-data` volume).
+
+### Package.json Scripts
+
+```json
+{
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "dev:stable": "node src/server.js",
+    "lint": "eslint ./src --ext .js",
+    "test": "node --test",
+    "seed": "node scripts/seed-sample-data.js"
+  }
+}
+```

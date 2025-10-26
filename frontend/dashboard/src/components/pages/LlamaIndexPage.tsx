@@ -9,9 +9,9 @@ import {
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { apiConfig } from '../../config/api';
 import { Activity, BookOpen, Boxes, ExternalLink, GaugeCircle, ShieldCheck, Workflow } from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
+import { buildDocsUrl } from '../../lib/docsUrl';
 
 const DEFAULT_QUERY_URL = 'http://localhost:3450';
 const DEFAULT_QDRANT_URL = 'http://localhost:6333';
@@ -45,13 +45,6 @@ const resolveQdrantUrl = (): string => {
 
 const QUERY_BASE_URL = resolveQueryUrl();
 const QDRANT_BASE_URL = resolveQdrantUrl();
-
-const buildDocsUrl = (relativePath: string) => {
-  const normalizedBase = apiConfig.docsUrl.replace(/\/$/, '');
-  const docsBase = normalizedBase.endsWith('/docs') ? normalizedBase : `${normalizedBase}/docs`;
-  const normalizedPath = relativePath.replace(/^\//, '').replace(/\.md$/, '');
-  return `${docsBase}/${normalizedPath}`;
-};
 
 interface QuickLink {
   id: string;

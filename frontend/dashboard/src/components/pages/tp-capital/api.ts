@@ -1,6 +1,6 @@
 import { FetchParams, FetchSignalsResult, FetchLogsResult } from './types';
 import { SAMPLE_SIGNALS, SAMPLE_LOGS } from './constants';
-import { buildQuery, buildLogsQuery } from './utils';
+import { buildQuery, buildLogsQuery, buildDeleteUrl } from './utils';
 
 export async function fetchSignals(params: FetchParams): Promise<FetchSignalsResult> {
   try {
@@ -49,14 +49,24 @@ export async function fetchLogs(params: { limit: number; level?: string }): Prom
 }
 
 export async function deleteSignal(ingestedAt: string): Promise<void> {
-  const response = await fetch(`/api/tp-capital/signals`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ingestedAt }),
-  });
+  const url = buildDeleteUrl();
   
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ingestedAt }),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText);
+      throw new Error(`Erro ao deletar sinal (HTTP ${response.status}): ${errorText}`);
+    }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Não foi possível conectar ao serviço TP-Capital. Verifique se o backend está rodando.');
+    }
+    throw error;
   }
 }
 

@@ -254,3 +254,7 @@ frontend/apps/dashboard/cypress/downloads/
 # ============================================
 reiniciar.log
 logs/services/*.log
+
+# Python Virtual Environment (auto-activation)
+.bashrc
+venv/

@@ -15,17 +15,23 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+function AppContent() {
   // Ativa auto-recovery global para serviços críticos
   useServiceAutoRecovery();
 
   return (
+    <TooltipProvider>
+      <Layout defaultPageId="workspace" />
+      <ToastContainer />
+    </TooltipProvider>
+  );
+}
+
+function App() {
+  return (
     <ThemeProvider defaultTheme="system">
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Layout defaultPageId="workspace" />
-          <ToastContainer />
-        </TooltipProvider>
+        <AppContent />
       </QueryClientProvider>
     </ThemeProvider>
   );

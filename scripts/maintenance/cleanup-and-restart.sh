@@ -258,7 +258,7 @@ verify_cleanup() {
     fi
     
     # Check ports
-    local ports=(3103 3004 3200 3302 3400 3500 3600 3700 3800)
+    local ports=(3103 3205 3200 3302 3400 3500 3600 3700 3800)
     local ports_in_use=0
     
     for port in "${ports[@]}"; do

@@ -127,11 +127,21 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 /**
  * Hook to initialize the workspace store and set up event listeners.
  * This should be called once in the main WorkspacePage component.
+ * Includes automatic polling every 15 seconds for real-time updates.
  */
 export function useInitializeWorkspaceEvents() {
   const loadItems = useWorkspaceStore((state) => state.loadItems);
 
   useEffect(() => {
+    // Initial load
     void loadItems().catch(() => undefined);
+
+    // Set up automatic polling every 15 seconds
+    const intervalId = setInterval(() => {
+      void loadItems({ force: true }).catch(() => undefined);
+    }, 15000); // 15 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, [loadItems]);
 }

@@ -327,7 +327,7 @@ proxy: {
   '/api/launcher':    → http://localhost:3500  // Launcher/Status API
   '/api/firecrawl':   → http://localhost:3600  // Firecrawl Proxy
   '/mcp':             → http://localhost:3847  // MCP Server
-  '/docs':            → http://localhost:3004  // Docusaurus
+  '/docs':            → http://localhost:3205  // Docusaurus (v3)
 }
 ```
 

@@ -16,7 +16,7 @@ const disableCors = process.env.DISABLE_CORS === 'true';
 const rawCorsOrigin =
   process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
     ? process.env.CORS_ORIGIN
-    : 'http://localhost:3103,http://localhost:3004';
+    : 'http://localhost:3103,http://localhost:3205';
 
 app.use(helmet());
 
@@ -25,14 +25,14 @@ if (!disableCors) {
     rawCorsOrigin === '*'
       ? undefined
       : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
-  app.use(
-    cors({
-      origin: corsOrigins || undefined,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization']
-    })
-  );
+  const corsOptions = {
+    origin: corsOrigins || undefined,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  };
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 } else {
   logger.info('CORS disabled - unified domain mode active');
 }

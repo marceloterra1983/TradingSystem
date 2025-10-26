@@ -8,7 +8,7 @@ A análise do **docker-health-optimizer** agent revelou problemas críticos na i
 
 1. **SEGURANÇA CRÍTICA**: Senhas hardcoded expostas em compose files
    - Arquivo: `tools/compose/docker-compose.database.yml:12`
-   - Senha PostgreSQL: `axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL` (hardcoded)
+   - Senha PostgreSQL: `pass_timescale` (hardcoded)
    - **Violação**: CLAUDE.md requer "Never commit credentials"
    - **Risco**: Senha exposta no git history, acesso não autorizado ao banco
 
@@ -33,7 +33,7 @@ A análise do **docker-health-optimizer** agent revelou problemas críticos na i
 ### 1. CRÍTICO: Segurança (Prioridade Máxima)
 
 #### 1.1 Remover Senhas Hardcoded
-- **BREAKING**: Substituir `POSTGRES_PASSWORD: axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL`
+- **BREAKING**: Substituir `POSTGRES_PASSWORD: pass_timescale`
 - Por: `POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}`
 - Validar que `.env` possui a variável necessária
 - Testar reconexão de todos serviços dependentes
@@ -117,12 +117,12 @@ tests/
 
 **BREAKING 2**: Hardcoded Password Removed
 
-- **Before**: `POSTGRES_PASSWORD: axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL` (hardcoded)
+- **Before**: `POSTGRES_PASSWORD: pass_timescale` (hardcoded)
 - **After**: `POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}` (from .env)
 - **Migration**:
   ```bash
   # Add to .env if not present
-  echo "TIMESCALEDB_PASSWORD=axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL" >> .env
+  echo "TIMESCALEDB_PASSWORD=pass_timescale" >> .env
 
   # Restart TimescaleDB
   docker compose -f tools/compose/docker-compose.database.yml restart timescaledb

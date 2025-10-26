@@ -34,6 +34,8 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 
 ## TL;DR Quick Checklist
 
+> **Nota:** Ao executar comandos OpenSpec localmente (incluindo sessões Codex), use `npm run openspec -- <comando>` ou `npx openspec <comando>`. As referências abaixo mantêm o formato curto `openspec ...` por brevidade.
+
 - Search existing work: `openspec spec list --long`, `openspec list` (use `rg` only for full-text search)
 - Decide scope: new capability vs modify existing capability
 - Pick a unique `change-id`: kebab-case, verb-led (`add-`, `update-`, `remove-`, `refactor-`)
@@ -120,26 +122,28 @@ After deployment, create separate PR to:
 
 ### CLI Commands
 
+Use `npm run openspec -- <comando>` (ou `npx openspec <comando>`) quando estiver trabalhando localmente com o Codex.
+
 ```bash
 # Essential commands
-openspec list                  # List active changes
-openspec list --specs          # List specifications
-openspec show [item]           # Display change or spec
-openspec diff [change]         # Show spec differences
-openspec validate [item]       # Validate changes or specs
-openspec archive [change] [--yes|-y]      # Archive after deployment (add --yes for non-interactive runs)
+npm run openspec -- list                  # List active changes
+npm run openspec -- list --specs          # List specifications
+npm run openspec -- show [item]           # Display change or spec
+npm run openspec -- diff [change]         # Show spec differences
+npm run openspec -- validate [item]       # Validate changes or specs
+npm run openspec -- archive [change] [--yes|-y]      # Archive after deployment (add --yes for non-interactive runs)
 
 # Project management
-openspec init [path]           # Initialize OpenSpec
-openspec update [path]         # Update instruction files
+npm run openspec -- init [path]           # Initialize OpenSpec
+npm run openspec -- update [path]         # Update instruction files
 
 # Interactive mode
-openspec show                  # Prompts for selection
-openspec validate              # Bulk validation mode
+npm run openspec -- show                  # Prompts for selection
+npm run openspec -- validate              # Bulk validation mode
 
 # Debugging
-openspec show [change] --json --deltas-only
-openspec validate [change] --strict
+npm run openspec -- show [change] --json --deltas-only
+npm run openspec -- validate [change] --strict
 ```
 
 ### Command Flags

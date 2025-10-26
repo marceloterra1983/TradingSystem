@@ -63,7 +63,7 @@ Docker services should be started separately using scripts/docker/start-stacks.s
 Options:
   --skip-frontend       Skip frontend dashboard (port 3103)
   --skip-backend        Skip all backend APIs (ports 3200, 3302, 3500, 3600, 3700)
-  --skip-docs           Skip Docusaurus (port 3004)
+  --skip-docs           Skip Docusaurus (port 3205)
   --force-kill-ports    Kill existing processes on busy ports
   --help                Show this help message
 
@@ -75,13 +75,13 @@ Examples:
 Service Ports:
   Frontend:
     3103 - Dashboard (React + Vite)
-    3004 - Docusaurus (Docusaurus)
+    3205 - Docusaurus (Docusaurus)
 
   Backend:
     3200 - Workspace API (Timescale/Postgres)
     3200 - TP-Capital API
+    3400 - Documentation API
     3302 - B3 Market Data API
-    3400 - Documentation API (Docker only - see docker-compose.docs.yml)
     3500 - Service Launcher
     3600 - Firecrawl Proxy
     3700 - WebScraper API
@@ -131,15 +131,16 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # Service definitions (name:path:port:command)
-# NOTE: documentation-api runs as Docker container (see tools/compose/docker-compose.docs.yml)
+# NOTE: documentation-api runs via npm (default port 3400)
 declare -A SERVICES=(
     ["workspace-api"]="backend/api/workspace:3200:npm run dev"
+    ["documentation-api"]="backend/api/documentation-api:3400:PORT=3400 npm run dev"
     ["tp-capital"]="apps/tp-capital:3200:npm run dev"
     ["b3-market-data"]="apps/b3-market-data:3302:npm run dev"
     ["firecrawl-proxy"]="backend/api/firecrawl-proxy:3600:npm run dev"
     ["status"]="apps/status:3500:npm start"
     ["frontend-dashboard"]="frontend/dashboard:3103:npm run dev"
-    ["docusaurus"]="docs/docusaurus:3004:npm run start -- --port 3004"
+    ["docusaurus"]="docs:3205:npm run start -- --port 3205"
 )
 
 # Start service function
@@ -282,7 +283,7 @@ main() {
         echo ""
         echo "📊 Access URLs:"
         echo "  Dashboard:          http://localhost:3103"
-        echo "  Documentation:      http://localhost:3004"
+        echo "  Documentation:      http://localhost:3205"
         echo "  Workspace API:      http://localhost:3200"
         echo "  TP-Capital:         http://localhost:3200"
         echo "  B3:                 http://localhost:3302"

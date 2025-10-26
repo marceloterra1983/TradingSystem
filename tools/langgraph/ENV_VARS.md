@@ -83,7 +83,7 @@ RETRY_DELAYS=[1,2,4]
 
 ## CORS
 ```bash
-CORS_ORIGINS=http://localhost:3103,http://localhost:3004
+CORS_ORIGINS=http://localhost:3103,http://localhost:3205
 ```
 
 ## Monitoring

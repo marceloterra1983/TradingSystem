@@ -18,7 +18,7 @@ import json
 import logging
 import re
 import sys
-from datetime import datetime, timedelta, date
+from datetime import datetime, date
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Any
 
@@ -32,8 +32,7 @@ class CustomJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-# Required frontmatter fields from DOCUMENTATION-STANDARD.md
-REQUIRED_FIELDS = {
+LEGACY_REQUIRED_FIELDS = {
     'title': str,
     'sidebar_position': int,
     'tags': list,
@@ -44,7 +43,14 @@ REQUIRED_FIELDS = {
     'last_review': str
 }
 
-# Allowed values for domain and type fields
+V2_REQUIRED_FIELDS = {
+    'title': str,
+    'description': str,
+    'tags': list,
+    'owner': str,
+    'lastReviewed': str
+}
+
 ALLOWED_DOMAINS = {'frontend', 'backend', 'ops', 'shared'}
 ALLOWED_TYPES = {
     'guide', 'reference', 'adr', 'prd', 'rfc', 'runbook',
@@ -52,6 +58,20 @@ ALLOWED_TYPES = {
 }
 
 ALLOWED_STATUSES = {'draft', 'active', 'deprecated'}
+ALLOWED_OWNERS = {
+    'DocsOps',
+    'ProductOps',
+    'ArchitectureGuild',
+    'FrontendGuild',
+    'BackendGuild',
+    'ToolingGuild',
+    'DataOps',
+    'SecurityOps',
+    'PromptOps',
+    'MCPGuild',
+    'SupportOps',
+    'ReleaseOps',
+}
 
 # Exclude patterns
 EXCLUDE_PATTERNS = {
@@ -151,12 +171,17 @@ def calculate_days_since_review(last_review: Any) -> int:
     return -1
 
 
-def validate_frontmatter_fields(frontmatter: Dict, file_path: str) -> Dict[str, Any]:
+def validate_frontmatter_fields(frontmatter: Dict, file_path: str, schema: str) -> Dict[str, Any]:
     """Validate frontmatter fields against required specifications."""
     issues = []
 
+    if schema == 'legacy':
+        required_fields = LEGACY_REQUIRED_FIELDS
+    else:
+        required_fields = V2_REQUIRED_FIELDS
+
     # Check for missing required fields
-    for field, expected_type in REQUIRED_FIELDS.items():
+    for field, expected_type in required_fields.items():
         if field not in frontmatter:
             issues.append({
                 'type': 'missing_field',
@@ -191,63 +216,80 @@ def validate_frontmatter_fields(frontmatter: Dict, file_path: str) -> Dict[str, 
                     'message': f"Field {field} should be a list"
                 })
 
-    # Validate domain values
-    if 'domain' in frontmatter:
-        domain = frontmatter['domain']
-        if domain not in ALLOWED_DOMAINS:
-            issues.append({
-                'type': 'invalid_value',
-                'field': 'domain',
-                'value': domain,
-                'allowed': list(ALLOWED_DOMAINS),
-                'message': f"Invalid domain '{domain}'. Allowed: {', '.join(ALLOWED_DOMAINS)}"
-            })
+    if schema == 'legacy':
+        if 'domain' in frontmatter:
+            domain = frontmatter['domain']
+            if domain not in ALLOWED_DOMAINS:
+                issues.append({
+                    'type': 'invalid_value',
+                    'field': 'domain',
+                    'value': domain,
+                    'allowed': list(ALLOWED_DOMAINS),
+                    'message': f"Invalid domain '{domain}'. Allowed: {', '.join(ALLOWED_DOMAINS)}"
+                })
 
-    # Validate type values
-    if 'type' in frontmatter:
-        doc_type = frontmatter['type']
-        if doc_type not in ALLOWED_TYPES:
-            issues.append({
-                'type': 'invalid_value',
-                'field': 'type',
-                'value': doc_type,
-                'allowed': list(ALLOWED_TYPES),
-                'message': f"Invalid type '{doc_type}'. Allowed: {', '.join(ALLOWED_TYPES)}"
-            })
+        if 'type' in frontmatter:
+            doc_type = frontmatter['type']
+            if doc_type not in ALLOWED_TYPES:
+                issues.append({
+                    'type': 'invalid_value',
+                    'field': 'type',
+                    'value': doc_type,
+                    'allowed': list(ALLOWED_TYPES),
+                    'message': f"Invalid type '{doc_type}'. Allowed: {', '.join(ALLOWED_TYPES)}"
+                })
 
-    # Validate status values
-    if 'status' in frontmatter:
-        status = frontmatter['status']
-        if status not in ALLOWED_STATUSES:
-            issues.append({
-                'type': 'invalid_value',
-                'field': 'status',
-                'value': status,
-                'allowed': list(ALLOWED_STATUSES),
-                'message': f"Invalid status '{status}'. Allowed: {', '.join(ALLOWED_STATUSES)}"
-            })
+        if 'status' in frontmatter:
+            status = frontmatter['status']
+            if status not in ALLOWED_STATUSES:
+                issues.append({
+                    'type': 'invalid_value',
+                    'field': 'status',
+                    'value': status,
+                    'allowed': list(ALLOWED_STATUSES),
+                    'message': f"Invalid status '{status}'. Allowed: {', '.join(ALLOWED_STATUSES)}"
+                })
 
-    # Validate date format
-    if 'last_review' in frontmatter:
-        last_review = frontmatter['last_review']
-        if not validate_date_format(last_review):
-            issues.append({
-                'type': 'invalid_date',
-                'field': 'last_review',
-                'value': str(last_review),
-                'message': f"Invalid date format '{last_review}'. Expected: YYYY-MM-DD"
-            })
+        if 'last_review' in frontmatter:
+            last_review = frontmatter['last_review']
+            if not validate_date_format(last_review):
+                issues.append({
+                    'type': 'invalid_date',
+                    'field': 'last_review',
+                    'value': str(last_review),
+                    'message': f"Invalid date format '{last_review}'. Expected: YYYY-MM-DD"
+                })
 
-    # Validate sidebar_position is positive
-    if 'sidebar_position' in frontmatter:
-        position = frontmatter['sidebar_position']
-        if isinstance(position, int) and position < 0:
-            issues.append({
-                'type': 'invalid_value',
-                'field': 'sidebar_position',
-                'value': position,
-                'message': f"sidebar_position should be non-negative, got {position}"
-            })
+        if 'sidebar_position' in frontmatter:
+            position = frontmatter['sidebar_position']
+            if isinstance(position, int) and position < 0:
+                issues.append({
+                    'type': 'invalid_value',
+                    'field': 'sidebar_position',
+                    'value': position,
+                    'message': f"sidebar_position should be non-negative, got {position}"
+                })
+    else:
+        if 'owner' in frontmatter:
+            owner = frontmatter['owner']
+            if owner not in ALLOWED_OWNERS:
+                issues.append({
+                    'type': 'invalid_value',
+                    'field': 'owner',
+                    'value': owner,
+                    'allowed': list(ALLOWED_OWNERS),
+                    'message': f"Invalid owner '{owner}'. Allowed: {', '.join(sorted(ALLOWED_OWNERS))}"
+                })
+
+        if 'lastReviewed' in frontmatter:
+            last_reviewed = frontmatter['lastReviewed']
+            if not validate_date_format(last_reviewed):
+                issues.append({
+                    'type': 'invalid_date',
+                    'field': 'lastReviewed',
+                    'value': str(last_reviewed),
+                    'message': f"Invalid date format '{last_reviewed}'. Expected: YYYY-MM-DD"
+                })
 
     return {
         'file': file_path,
@@ -261,7 +303,10 @@ def scan_markdown_files(docs_dir: Path) -> List[Path]:
     """Scan directory for markdown files, excluding symlinks and patterns."""
     markdown_files = []
 
-    for file_path in docs_dir.rglob('*.md'):
+    for file_path in docs_dir.rglob('*'):
+        if file_path.suffix.lower() not in {'.md', '.mdx'}:
+            continue
+
         # Skip if file matches exclude patterns
         if any(pattern in str(file_path) for pattern in EXCLUDE_PATTERNS):
             continue
@@ -279,17 +324,19 @@ def scan_markdown_files(docs_dir: Path) -> List[Path]:
     return sorted(markdown_files)
 
 
-def analyze_document_freshness(results: List[Dict], threshold_days: int) -> Dict:
+def analyze_document_freshness(results: List[Dict], threshold_days: int, schema: str) -> Dict:
     """Analyze document freshness based on last_review dates."""
     outdated_documents = []
     current_date = datetime.now()
+
+    date_field = 'last_review' if schema == 'legacy' else 'lastReviewed'
 
     for result in results:
         if not result.get('has_frontmatter'):
             continue
 
         frontmatter = result.get('frontmatter', {})
-        last_review = frontmatter.get('last_review')
+        last_review = frontmatter.get(date_field)
 
         if last_review and validate_date_format(last_review):
             days_old = calculate_days_since_review(last_review)
@@ -304,11 +351,12 @@ def analyze_document_freshness(results: List[Dict], threshold_days: int) -> Dict
     return {
         'outdated_documents': sorted(outdated_documents, key=lambda x: x['days_old'], reverse=True),
         'threshold_days': threshold_days,
-        'analysis_date': current_date.strftime('%Y-%m-%d')
+        'analysis_date': current_date.strftime('%Y-%m-%d'),
+        'date_field': date_field
     }
 
 
-def generate_statistics(results: List[Dict]) -> Dict:
+def generate_statistics(results: List[Dict], schema: str) -> Dict:
     """Generate summary statistics from validation results."""
     total_files = len(results)
     files_with_frontmatter = sum(1 for r in results if r['has_frontmatter'])
@@ -321,6 +369,7 @@ def generate_statistics(results: List[Dict]) -> Dict:
     issue_counts = {}
     domain_counts = {}
     type_counts = {}
+    owner_counts = {}
 
     for result in results:
         if result['has_frontmatter']:
@@ -340,22 +389,32 @@ def generate_statistics(results: List[Dict]) -> Dict:
 
             # Count by domain and type
             frontmatter = result.get('frontmatter', {})
-            domain = frontmatter.get('domain', 'unknown')
-            doc_type = frontmatter.get('type', 'unknown')
+            if schema == 'legacy':
+                domain = frontmatter.get('domain', 'unknown')
+                doc_type = frontmatter.get('type', 'unknown')
 
-            domain_counts[domain] = domain_counts.get(domain, 0) + 1
-            type_counts[doc_type] = type_counts.get(doc_type, 0) + 1
+                domain_counts[domain] = domain_counts.get(domain, 0) + 1
+                type_counts[doc_type] = type_counts.get(doc_type, 0) + 1
+            else:
+                owner = frontmatter.get('owner', 'unknown')
+                owner_counts[owner] = owner_counts.get(owner, 0) + 1
 
-    return {
+    statistics = {
         'total_files': total_files,
         'files_with_frontmatter': files_with_frontmatter,
         'files_missing_frontmatter': files_missing_frontmatter,
         'files_with_issues': files_with_issues,
         'files_incomplete_frontmatter': files_incomplete_frontmatter,
-        'issue_counts': issue_counts,
-        'domain_distribution': domain_counts,
-        'type_distribution': type_counts
+        'issue_counts': issue_counts
     }
+
+    if schema == 'legacy':
+        statistics['domain_distribution'] = domain_counts
+        statistics['type_distribution'] = type_counts
+    else:
+        statistics['owner_distribution'] = owner_counts
+
+    return statistics
 
 
 def main():
@@ -365,7 +424,7 @@ def main():
         '--docs-dir',
         type=str,
         nargs='+',
-        default=['./docs/context'],
+        default=None,
         help='One or more documentation directories to scan'
     )
     parser.add_argument(
@@ -386,6 +445,12 @@ def main():
         help='Strict mode: validate all fields including sidebar_position (default: True for backward compatibility)'
     )
     parser.add_argument(
+        '--schema',
+        choices=['v2', 'legacy'],
+        default='v2',
+        help='Select documentation schema to validate'
+    )
+    parser.add_argument(
         '--verbose', '-v',
         action='store_true',
         help='Enable verbose logging'
@@ -395,9 +460,16 @@ def main():
 
     setup_logging(args.verbose)
 
+    schema = args.schema
+
     results = []
     all_markdown_files = []
-    docs_dirs = [Path(d) for d in args.docs_dir]
+
+    if args.docs_dir is None:
+        default_dir = Path('./docs/content') if schema == 'v2' else Path('./docs_legacy/context')
+        docs_dirs = [default_dir]
+    else:
+        docs_dirs = [Path(d) for d in args.docs_dir]
 
     for docs_dir in docs_dirs:
         if not docs_dir.exists() or not docs_dir.is_dir():
@@ -432,14 +504,14 @@ def main():
                 'frontmatter': None
             })
         else:
-            result = validate_frontmatter_fields(frontmatter, relative_path)
+            result = validate_frontmatter_fields(frontmatter, relative_path, schema)
             results.append(result)
 
     # Generate statistics
-    statistics = generate_statistics(results)
+    statistics = generate_statistics(results, schema)
 
     # Analyze document freshness
-    freshness_analysis = analyze_document_freshness(results, args.threshold_days)
+    freshness_analysis = analyze_document_freshness(results, args.threshold_days, schema)
 
     # Prepare final report
     report = {
@@ -447,7 +519,8 @@ def main():
             'scan_date': datetime.now().isoformat(),
             'docs_directory': [str(d) for d in docs_dirs],
             'threshold_days': args.threshold_days,
-            'script_version': '1.0.0'
+            'script_version': '1.0.0',
+            'schema': schema
         },
         'summary': statistics,
         'freshness_analysis': freshness_analysis,
@@ -485,6 +558,7 @@ def main():
 
     # Print summary
     print(f"\n=== Frontmatter Validation Summary ===")
+    print(f"Schema: {schema}")
     print(f"Total files scanned: {statistics['total_files']}")
     print(f"Files with frontmatter: {statistics['files_with_frontmatter']}")
     print(f"Files missing frontmatter: {statistics['files_missing_frontmatter']}")

@@ -1,0 +1,94 @@
+---
+title: Functional Requirements
+description: Functional and non-functional requirements for the TP Capital application.
+tags:
+  - apps
+  - tp-capital
+  - requirements
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Functional Requirements
+
+### FR-1: Telegram Bot Listener
+
+- Support polling or webhook modes for message ingestion.
+- Handle multiple Telegram channels and bots.
+- Store bot metadata in QuestDB (credentials, channel mappings).
+- Endpoint: `GET /telegram/bots` and `GET /telegram/channels`.
+
+### FR-2: Message Parser
+
+- Extract structured data from Telegram messages:
+  - Asset symbol (e.g., PETR4, VALE3)
+  - Signal type (COMPRA, VENDA)
+  - Buy range (min/max prices)
+  - Target prices (array of targets)
+  - Stop loss price
+  - Channel source
+  - Timestamp
+- Validate payload structure before persistence.
+- Handle malformed messages gracefully (log errors, skip invalid).
+
+### FR-3: QuestDB Line Protocol Writer
+
+- Write normalized signals to `tp_capital_signals` table.
+- Use ILP (Influx Line Protocol) for high-throughput ingestion.
+- Partition tables by day for efficient querying and pruning.
+- Provide healthcheck endpoint for QuestDB connectivity.
+
+### FR-4: REST API Endpoints
+
+- `GET /signals` - Paginated list of signals with filters (channel, signal_type, limit, offset).
+- `GET /logs` - Operational logs from ingestion process.
+- `GET /telegram/bots` - Registered bot metadata.
+- `GET /telegram/channels` - Monitored channels and groups.
+- All endpoints return JSON responses.
+
+### FR-5: Prometheus Metrics
+
+- Expose `/metrics` endpoint for Prometheus scraping.
+- Track ingestion rate, error rate, latency percentiles.
+
+### FR-6: Sample Data Seeding
+
+- Provide `npm run seed` command to populate QuestDB with synthetic signals.
+- Support local QA and testing workflows.
+
+## Non-Functional Requirements
+
+### NFR-1: Performance
+
+- **Ingestion latency**: &lt;500ms p95 (Telegram → QuestDB).
+- **API response time**: &lt;200ms p95 for `/signals` queries.
+- **Throughput**: Support 100+ signals/minute during peak hours.
+
+### NFR-2: Reliability
+
+- **Availability**: 99.5% uptime (excluding planned maintenance).
+- **Data durability**: QuestDB persistence via Docker volume (`questdb-data`).
+- **Error handling**: Graceful degradation if QuestDB unavailable (log errors, retry with backoff).
+
+### NFR-3: Auditability
+
+- Structured logs to stdout using shared logger (`logger.js`).
+- QuestDB acts as audit log (all signals timestamped and immutable).
+- Operational logs accessible via `GET /logs` endpoint.
+
+### NFR-4: Security
+
+- Telegram bot tokens stored in centralized `.env` (never hardcoded).
+- Validate environment variables on startup (`scripts/env/validate-env.sh`).
+- No sensitive data in logs or error messages.
+
+### NFR-5: Scalability
+
+- Stateless service design (horizontal scaling possible).
+- QuestDB handles high-volume time-series data efficiently.
+- Day-partitioned tables support pruning and archival.
+
+### NFR-6: Maintainability
+
+- TypeScript interfaces for Signal schema.
+- Shared logger and metrics middleware.
+- Comprehensive integration examples in documentation.

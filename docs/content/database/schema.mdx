@@ -1,0 +1,251 @@
+---
+title: Schema Reference
+description: Entity relationships and schema details for TradingSystem databases.
+tags:
+  - database
+  - schema
+owner: DataOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem spans multiple data domains with a mix of production and planned schemas. QuestDB
+handles live TP Capital telemetry, TimescaleDB/PostgreSQL will support multi-user workflows, and
+LowDB remains the MVP store for legacy APIs until migration completes.
+
+- **QuestDB** – Production time-series data (`tp_capital_signals`, Telegram configuration tables).
+- **TimescaleDB/PostgreSQL** – Planned relational schemas for trading core and logging domains.
+- **LowDB** – Legacy JSON storage for Idea Bank and Documentation (migration pending).
+
+## ER Diagram
+
+**Current State**: No official ER diagram exists yet.
+
+**Planned Relationships** (from schema drafts):
+
+```
+trades (1) ----< (N) positions
+trades (N) >---- (1) strategy_settings
+positions (N) >---- (1) risk_limits
+```
+
+**Next Steps**: Generate diagrams via PlantUML or dbdiagram.io once PostgreSQL schemas reach GA.
+
+## Trading Core Domain
+
+### tp_capital_signals (QuestDB – Production)
+
+- **Purpose**: Normalized TP Capital Telegram signals for dashboard consumption.
+- **Status**: Active (production).
+- **Table Definition**:
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| `ts` | TIMESTAMP | Designated timestamp, partitioned by day | NOT NULL, PRIMARY |
+| `channel` | SYMBOL | Source channel label | |
+| `signal_type` | SYMBOL | Operation type (`Swing Trade`, `Day Trade`) | |
+| `asset` | SYMBOL | Asset ticker | |
+| `buy_min` | DOUBLE | Lower bound for buy zone | |
+| `buy_max` | DOUBLE | Upper bound for buy zone | |
+| `target_1` | DOUBLE | First profit target | |
+| `target_2` | DOUBLE | Second profit target | |
+| `target_final` | DOUBLE | Final profit target | |
+| `stop` | DOUBLE | Stop-loss threshold | |
+| `raw_message` | STRING | Sanitized Telegram payload | |
+| `source` | SYMBOL | Message origin (`forwarder`, `ingestion`) | |
+| `ingested_at` | TIMESTAMP | Server-side ingestion timestamp | NOT NULL |
+
+```sql
+CREATE TABLE tp_capital_signals (
+  ts TIMESTAMP,
+  channel SYMBOL,
+  signal_type SYMBOL,
+  asset SYMBOL,
+  buy_min DOUBLE,
+  buy_max DOUBLE,
+  target_1 DOUBLE,
+  target_2 DOUBLE,
+  target_final DOUBLE,
+  stop DOUBLE,
+  raw_message STRING,
+  source SYMBOL,
+  ingested_at TIMESTAMP
+) TIMESTAMP(ts) PARTITION BY DAY;
+```
+
+- **Indexes**: Designated timestamp index on `ts`.
+- **Access Patterns**: Dashboard filtering by channel, signal type, asset search, 100–1000 row windows.
+- **API Integration**:  
+  - `GET /signals?limit=500&channel=&type=&search=`  
+  - `DELETE /signals` (body uses `ingestedAt`)  
+  - `GET /logs?limit=&level=` for ingestion traces.
+- **Monitoring**: Prometheus `/metrics`, health checks on `/health`.  
+- **Security**: Restrict HTTP/PG ports; bot tokens stored in plaintext require network controls.
+
+---
+
+### tp_capital_signals_deleted (QuestDB – Archive)
+
+- **Purpose**: Soft deletion archive to recover removed signals.
+- **Schema**: Mirrors `tp_capital_signals` plus `deleted_at TIMESTAMP`.
+- **Retention**: 90 days per retention policy.
+- **Workflow**: Dashboard delete → copy rows to archive → rebuild `tp_capital_signals` without removed entries.
+
+---
+
+### telegram_bots (QuestDB – Configuration)
+
+- **Purpose**: Telegram bot metadata for connections management.
+- **Table Definition**:
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| `id` | SYMBOL | Primary key (`bot-${timestamp}-${rand}`) | NOT NULL |
+| `username` | SYMBOL | Bot username | |
+| `token` | STRING | Sensitive bot token | NOT NULL |
+| `bot_type` | SYMBOL | `Forwarder` or `Sender` | |
+| `description` | STRING | Operator notes | |
+| `status` | SYMBOL | `active`, `deleted` | |
+| `created_at` | TIMESTAMP | Creation timestamp | |
+| `updated_at` | TIMESTAMP | Last update timestamp | NOT NULL, PRIMARY |
+
+```sql
+CREATE TABLE IF NOT EXISTS telegram_bots (
+  id SYMBOL,
+  username SYMBOL,
+  token STRING,
+  bot_type SYMBOL,
+  description STRING,
+  status SYMBOL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+) TIMESTAMP(updated_at) PARTITION BY DAY;
+```
+
+- **API Integration**: CRUD endpoints under `/telegram/bots`.
+
+---
+
+### telegram_channels (QuestDB – Configuration)
+
+- **Purpose**: Monitored Telegram channel registry.
+- **Table Definition**:
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| `id` | SYMBOL | Primary key (`channel-${timestamp}-${rand}`) | NOT NULL |
+| `label` | SYMBOL | Friendly display name | |
+| `channel_id` | LONG | Telegram channel identifier | |
+| `channel_type` | SYMBOL | `source` or `destination` | |
+| `description` | STRING | Operational notes | |
+| `status` | SYMBOL | `active`, `deleted` | |
+| `signal_count` | LONG | Aggregate signal counter | |
+| `last_signal` | TIMESTAMP | Last signal timestamp | |
+| `created_at` | TIMESTAMP | Creation timestamp | |
+| `updated_at` | TIMESTAMP | Last update timestamp | NOT NULL, PRIMARY |
+
+```sql
+CREATE TABLE IF NOT EXISTS telegram_channels (
+  id SYMBOL,
+  label SYMBOL,
+  channel_id LONG,
+  channel_type SYMBOL,
+  description STRING,
+  status SYMBOL,
+  signal_count LONG,
+  last_signal TIMESTAMP,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+) TIMESTAMP(updated_at) PARTITION BY DAY;
+```
+
+- **API Integration**: CRUD endpoints under `/telegram/channels`.
+
+---
+
+### trades (PostgreSQL – Planned)
+
+- **Purpose**: Track executed trades for order management.  
+- **Status**: Draft (post-migration schema).  
+- **Table Definition**:
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| `trade_id` | UUID | Unique identifier | PRIMARY KEY, NOT NULL |
+| `symbol` | TEXT | Asset identifier | NOT NULL |
+| `side` | TEXT | `BUY` or `SELL` | NOT NULL, CHECK constraint |
+| `quantity` | NUMERIC | Executed quantity | NOT NULL, > 0 |
+| `price` | NUMERIC | Execution price | NOT NULL, > 0 |
+| `executed_at` | TIMESTAMPTZ | Execution timestamp | NOT NULL |
+| `strategy_id` | UUID | Strategy reference | FOREIGN KEY (planned) |
+
+- **Indexes**: Primary key on `trade_id`, secondary indexes on `(symbol, executed_at)` and `(strategy_id, executed_at)`.
+- **Constraints**: Enforce `side` enum, positive quantity and price.
+
+---
+
+### positions (PostgreSQL – Planned)
+
+- **Purpose**: Monitor open positions for risk management.  
+- **Status**: Draft (post-migration schema).  
+- **Table Definition**:
+
+| Column | Type | Description | Constraints |
+|--------|------|-------------|-------------|
+| `position_id` | UUID | Primary key | NOT NULL |
+| `symbol` | TEXT | Asset identifier | NOT NULL |
+| `quantity` | NUMERIC | Net position | NOT NULL |
+| `avg_price` | NUMERIC | VWAP | NOT NULL |
+| `unrealized_pnl` | NUMERIC | Mark-to-market | |
+| `updated_at` | TIMESTAMPTZ | Last update | NOT NULL |
+
+- **Constraints**: Optional `(symbol, strategy_id)` uniqueness; maintain zero quantity rows for closed positions.
+- **Relations**: Links to `trades`, `strategy_settings`, `risk_limits` (future).
+
+---
+
+### b3_market_data (QuestDB – Planned)
+
+- **Purpose**: Real-time B3 market data ingestion via ProfitDLL.  
+- **Status**: Schema defined, pending implementation.  
+- **Reference**: See B3 market data specification for column set and retention.
+
+## Logging Domain
+
+- **Purpose**: Structured logging repository for audit and debugging.  
+- **Status**: Planned (TimescaleDB or separate logging stack).  
+- **Notes**: Define schema with log level, timestamp, service name, and message payload once platform standardizes logging ingestion.
+
+## Data Quality
+
+Operational checks ensure schema integrity and data correctness.
+
+**Weekly Checks**:
+
+- Validate required fields in LowDB (`title`, `description`, `category`).  
+- Confirm enums remain within allowed values (`priority`, `status`).  
+- Flag empty or malformed tags and metadata.  
+- Run `SELECT count(*) FROM tp_capital_signals WHERE ts > now() - 24h` to verify ingestion.  
+- Spot-check `raw_message` formatting and numeric fields for anomalies.
+
+**Monitoring**:
+
+- Track idea counts and API response times via Prometheus.  
+- Alert when `ideas.json` exceeds 1 MB (migration indicator).  
+- Monitor TP Capital ingestion latency and `/signals?limit=1` availability.  
+- Trigger alerts if zero rows returned for &gt;10 minutes during market hours.
+
+**Incident Response**:
+
+1. Identify corrupted entries via logs or dashboards.  
+2. For QuestDB, move affected rows to `tp_capital_signals_deleted` and reseed from Telegram history.  
+3. Restore from backups for widespread corruption.  
+4. Document findings and raise follow-up tasks.
+
+## Related Documentation
+
+- [Database Overview](./overview) – Platform architecture.  
+- [Migrations](./migrations) – Strategy and logs.  
+- [Retention & Backup](./retention-backup) – Lifecycle policies.  
+- TP Capital Service docs (link will be added after migration completes).  
+- Data quality runbook migrates separately for operational workflows.

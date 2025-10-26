@@ -1,0 +1,135 @@
+@startuml docker-container-architecture
+!theme cerulean-outline
+
+title TradingSystem - Docker Container Architecture (Linux Environment)
+
+' Define styles
+skinparam rectangle {
+    BackgroundColor<<Running>> LightGreen
+    BackgroundColor<<Failing>> Tomato
+    BackgroundColor<<Warning>> Gold
+    BackgroundColor<<Native>> LightBlue
+    BorderColor Black
+    FontSize 11
+}
+
+skinparam cloud {
+    BackgroundColor LightGray
+    BorderColor Black
+}
+
+skinparam database {
+    BackgroundColor LightYellow
+    BorderColor Black
+}
+
+' Native Windows Services (NOT in Docker)
+package "Windows Native Services\n(CRITICAL - DO NOT CONTAINERIZE)" <<Native>> {
+    rectangle "Data Capture\n(C# + ProfitDLL)\nPort: 5050" as DataCapture
+    rectangle "Order Manager\n(C# + Risk Engine)\nPort: 5055" as OrderMgr
+
+    note right of DataCapture
+        Reason: Windows-native DLL
+        Latency: <500ms required
+        Docker overhead: 10-50ms
+    end note
+}
+
+' Docker Containers - TradingSystem Services
+package "TradingSystem Docker Services" {
+    ' Working Services
+    rectangle "Dashboard UI\n(React + Vite)\nPort: 5173" as Dashboard <<Failing>>
+    rectangle "Docs Hub\n(Docusaurus)\nPort: 3004" as Docs <<Failing>>
+
+    ' TP Capital Stack
+    package "TP Capital Stack" <<Running>> {
+        database "QuestDB\nPorts: 9000, 8812, 9009" as QuestDB
+        rectangle "Signal Ingestion\nPort: 4005" as TPCapital
+    }
+
+    ' Monitoring Stack
+    package "Monitoring Stack" {
+        rectangle "Prometheus\nPort: 9090" as Prometheus <<Running>>
+        rectangle "Grafana\nPort: 3000" as Grafana <<Running>>
+        rectangle "Alertmanager\nPort: 9093" as Alertmanager <<Failing>>
+        rectangle "Alert Router" as AlertRouter <<Failing>>
+    }
+
+    ' AI/Automation
+    rectangle "Flowise AI\nPort: 3100" as Flowise <<Running>>
+}
+
+' Supporting Infrastructure
+package "Supporting Infrastructure" <<Running>> {
+    rectangle "n8n\nPort: 5678" as N8N
+
+    ' Evolution API Stack
+    package "Evolution API (WhatsApp)" {
+        rectangle "Evolution API\nPort: 8083" as EvolutionAPI <<Warning>>
+        database "PostgreSQL\nPort: 5432" as EvolutionDB
+        database "Redis" as EvolutionRedis
+    }
+
+    database "n8n PostgreSQL" as N8NDB
+}
+
+' Connections
+Dashboard --> Docs : "Documentation\nlinks"
+Dashboard --> Prometheus : "Metrics"
+Dashboard --> OrderMgr : "API calls"
+
+TPCapital --> QuestDB : "Store\nmarket data"
+Prometheus --> DataCapture : "Scrape\nmetrics"
+Prometheus --> OrderMgr : "Scrape\nmetrics"
+Prometheus --> Alertmanager : "Send alerts"
+Alertmanager --> AlertRouter : "Route alerts"
+
+Grafana --> Prometheus : "Query\nmetrics"
+
+
+N8N --> N8NDB : "Store\nworkflows"
+N8N --> EvolutionAPI : "Automation"
+
+EvolutionAPI --> EvolutionDB : "Store\nmessages"
+EvolutionAPI --> EvolutionRedis : "Cache"
+
+' Data Flow
+DataCapture -[#blue,bold]-> OrderMgr : "WebSocket\nmarket data\nws://9001"
+OrderMgr -[#red,bold]-> DataCapture : "Order\nexecution\nvia ProfitDLL"
+
+' Legend
+legend right
+    |<#LightGreen>| Running OK |
+    |<#Tomato>| Failing/Restarting |
+    |<#Gold>| Warning (unhealthy) |
+    |<#LightBlue>| Native Windows |
+
+    **Issues Found:**
+    1. Dashboard: Invalid --host flag
+    2. Docs: Missing PlantUML dependency
+    3. Alertmanager: Invalid webhook URL
+    4. Alert Router: Depends on Alertmanager
+    5. Evolution API: Unhealthy (not critical)
+
+    **Fix Command:**
+    ./infrastructure/scripts/fix-docker-issues.sh
+end legend
+
+' Notes
+note top of Dashboard
+    ERROR: Invalid Option: --host
+    FIX: Update docker-compose.yml
+end note
+
+note top of Docs
+    ERROR: Cannot find module
+    '@akebifiky/remark-simple-plantuml'
+    FIX: npm install + rebuild
+end note
+
+note top of Alertmanager
+    ERROR: unsupported scheme "" for URL
+    FIX: Update alertmanager.yml
+end note
+
+@enduml

@@ -1,0 +1,205 @@
+---
+title: Risk Rule Schema
+description: Schema for risk rules and enforcement policies.
+tags:
+  - sdd
+  - domain
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The RiskRule schema defines risk limits and enforcement policies for trading operations. Risk rules are validated before every order placement to ensure safe trading within configured parameters.
+
+**Domain**: Risk Management  
+**Version**: v1  
+**Status**: Specification (implementation pending)
+
+## Fields
+
+### Core Fields
+
+| Field | Type | Required | Description | Constraints |
+|-------|------|----------|-------------|-------------|
+| `dailyLossLimit` | number | Yes | Maximum daily loss in BRL | Positive number, min 100, max 1,000,000 |
+| `currentDailyLoss` | number | Yes | Current daily loss (running total) | Non-negative number, updated in real-time |
+| `maxPositionSize` | object | Yes | Max position per symbol | Object with symbol keys, positive integer values |
+| `tradingHours` | object | Yes | Allowed trading hours | See TradingHours object below |
+| `killSwitchActive` | boolean | Yes | Emergency stop status | true = all orders rejected |
+
+### TradingHours Object
+
+| Field | Type | Required | Description | Constraints |
+|-------|------|----------|-------------|-------------|
+| `start` | string | Yes | Market open time | HH:MM format (24-hour), e.g., "09:00" |
+| `end` | string | Yes | Market close time | HH:MM format (24-hour), e.g., "18:00" |
+| `timezone` | string | Yes | Timezone for trading hours | IANA timezone, default "America/Sao_Paulo" |
+
+### TypeScript Interface
+
+```typescript
+interface RiskLimits {
+  dailyLossLimit: number;              // Max daily loss (BRL)
+  currentDailyLoss: number;            // Current daily loss
+  maxPositionSize: Record<string, number>; // Max position per symbol
+  tradingHours: {
+    start: string;                     // HH:MM format
+    end: string;                       // HH:MM format
+    timezone: string;                  // IANA timezone
+  };
+  killSwitchActive: boolean;           // Emergency stop status
+}
+```
+
+## Validation Rules
+
+**Daily Loss Limit**
+- Must be positive number
+- Minimum: R$100 (prevent accidental zero)
+- Maximum: R$1,000,000 (sanity check)
+- Current daily loss calculated from realized P&L today
+- Reset at market open (9:00 BRT)
+
+**Position Size Limit**
+- Object with symbol keys (e.g., `{"PETR4": 1000, "VALE3": 500}`)
+- Values must be positive integers
+- Minimum: 1 (allow at least 1 share)
+- Maximum: 10,000 (per symbol, sanity check)
+- Applied to both long and short positions (absolute value)
+
+**Trading Hours**
+- `start` must be before `end` (e.g., "09:00" < "18:00")
+- Both must be valid HH:MM format (00:00 to 23:59)
+- Timezone must be valid IANA timezone (e.g., "America/Sao_Paulo")
+- Default: 9:00-18:00 BRT (Brazilian market hours)
+
+**Kill Switch**
+- Boolean value (true = active, false = inactive)
+- When active: All order creation requests rejected with 403 Forbidden
+- Deactivation requires manual operator action (not automatic)
+
+## Risk Check Sequence
+
+Risk checks are performed in sequence (fail-fast optimization):
+
+1. **Trading Hours Check** (in-memory, &lt;1ms)
+   - Reject if current time outside configured hours
+   - Fastest check, fail immediately if outside hours
+2. **Kill Switch Check** (in-memory, &lt;1ms)
+   - Reject if kill switch active
+   - Prevents all orders during emergency
+3. **Daily Loss Limit Check** (database query, ~10ms)
+   - Query current daily loss from positions/trades
+   - Reject if `currentDailyLoss &gt;= dailyLossLimit`
+4. **Position Size Limit Check** (database query, ~10ms)
+   - Query current position for symbol
+   - Reject if `currentPosition + orderQuantity > maxPositionSize[symbol]`
+5. **Margin Requirement Check** (external call to broker, ~50ms)
+   - Query broker for available margin
+   - Reject if insufficient margin for order
+
+**Total Latency**: &lt;100ms p95 (target)
+
+## Usage
+
+### Pre-Trade Risk Validation
+
+Before every order placement:
+1. Order Manager queries current risk limits via `GET /api/risk/limits`
+2. Validates order against each rule in sequence
+3. Rejects order if any rule violated (returns 403 Forbidden with reason)
+4. Proceeds to order submission if all checks pass
+
+### Risk Limit Configuration
+
+```bash
+# Update daily loss limit
+curl -X PUT http://localhost:3205/api/risk/limits \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dailyLossLimit": 7500,
+    "maxPositionSize": {
+      "PETR4": 1500,
+      "VALE3": 600
+    }
+  }'
+```
+
+### Kill Switch Activation
+
+```bash
+curl -X POST http://localhost:3205/api/risk/kill-switch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "Market volatility spike",
+    "cancelAll": true
+  }'
+```
+
+**Effects**
+- All pending orders canceled immediately
+- All new order requests rejected with 403 Forbidden
+- Alert sent to operators (Slack, email)
+- Audit log records activation reason and timestamp
+
+### Audit Trail
+
+```json
+{
+  "timestamp": "2025-10-24T10:30:00Z",
+  "orderId": "ORD-20251024-001",
+  "riskChecks": {
+    "tradingHours": "passed",
+    "killSwitch": "passed",
+    "dailyLossLimit": "passed",
+    "positionSizeLimit": "passed",
+    "marginRequirement": "passed"
+  },
+  "result": "approved"
+}
+```
+
+**Rejection Example**
+
+```json
+{
+  "timestamp": "2025-10-24T11:00:00Z",
+  "orderId": "ORD-20251024-002",
+  "riskChecks": {
+    "tradingHours": "passed",
+    "killSwitch": "passed",
+    "dailyLossLimit": "failed"
+  },
+  "result": "rejected",
+  "reason": "Daily loss limit exceeded: R$5,250 / R$5,000"
+}
+```
+
+## Relationships
+
+**Related Schemas**
+- **Order**: Risk rules validate orders before submission
+- **Position**: Current positions used to calculate daily loss and position size
+- **Trade**: Trades contribute to daily loss calculation
+
+**Related Events**
+- `risk.violation`: Emitted when order rejected due to risk check failure
+- `kill-switch.activated`: Emitted when kill switch activated
+- `risk-limits.updated`: Emitted when risk limits changed
+
+**Related Flows**
+- [Place Order Flow](../../../flows/v1/place-order) - Risk checks are step 2 in order placement
+- [Kill Switch FlowKill switch flow (planned) (to be created) - Emergency stop sequence
+
+**Database Mapping**
+- PostgreSQL table: `risk_limits` (planned)
+- Configuration stored in database for dynamic updates
+- Historical limits tracked with `effective_from` and `effective_to` timestamps
+
+## Related Documentation
+
+- [Order Schema](./order)
+- [Order Manager API](../../../../api/order-manager)
+- [Risk Limits Configuration](../../../../tools/security-config/risk-limits)
+- [Place Order Flow](../../../flows/v1/place-order)
+- [Business RequirementsBusiness requirements (migration pending) (when migrated)

@@ -88,10 +88,10 @@ export function LayoutSidebar({
     return undefined;
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
-  // Get logo based on theme
-  const logoSrc = resolvedTheme === 'dark' 
-    ? '/assets/branding/logo-dark.svg' 
-    : '/assets/branding/logo.svg';
+  // Get logo based on theme - using compact version for better sidebar fit
+  const logoSrc = resolvedTheme === 'dark'
+    ? '/assets/branding/logo-compact-dark.svg'
+    : '/assets/branding/logo-compact.svg';
 
   return (
     <motion.aside
@@ -121,7 +121,11 @@ export function LayoutSidebar({
           <img
             src={logoSrc}
             alt="TradingSystem"
-            className="h-12 w-auto"
+            className="h-10 w-auto max-w-full object-contain"
+            onError={(e) => {
+              console.error('Logo failed to load:', logoSrc);
+              e.currentTarget.style.display = 'none';
+            }}
           />
         </motion.div>
         

@@ -114,12 +114,12 @@ class TimescaleClient {
   async insertSignal(signal) {
     try {
       const query = `
-        INSERT INTO "${this.schema}".tp_capital_signals 
+        INSERT INTO "${this.schema}".tp_capital_signals
         (ts, channel, signal_type, asset, buy_min, buy_max, target_1, target_2, target_final, stop, raw_message, source, ingested_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING id
       `;
-      
+
       const values = [
         signal.ts || new Date(),
         signal.channel || null,
@@ -140,6 +140,40 @@ class TimescaleClient {
       return result.rows[0];
     } catch (error) {
       logger.error({ err: error, signal }, 'Failed to insert signal');
+      throw error;
+    }
+  }
+
+  async insertSignalWithIdempotency({ channelId, messageId, text, timestamp, photos }) {
+    try {
+      // Insert with ON CONFLICT DO NOTHING for idempotency
+      // Composite unique constraint on (channel_id, message_id, ts)
+      const query = `
+        INSERT INTO "${this.schema}".forwarded_messages
+        (channel_id, message_id, message_text, original_timestamp, photos, received_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (channel_id, message_id, original_timestamp) DO NOTHING
+        RETURNING id
+      `;
+
+      const values = [
+        channelId,
+        messageId,
+        text,
+        timestamp,
+        JSON.stringify(photos || []),
+      ];
+
+      const result = await this.pool.query(query, values);
+
+      // If rowCount > 0, message was inserted (not duplicate)
+      // If rowCount === 0, conflict detected (duplicate message)
+      return {
+        inserted: result.rowCount > 0,
+        id: result.rows[0]?.id || null,
+      };
+    } catch (error) {
+      logger.error({ err: error, channelId, messageId }, 'Failed to insert signal with idempotency');
       throw error;
     }
   }
@@ -409,6 +443,125 @@ class TimescaleClient {
     } catch (error) {
       logger.error({ err: error }, 'Failed to fetch channels with stats');
       throw error;
+    }
+  }
+
+  // ========== FORWARDED MESSAGES METHODS ==========
+
+  async ensureForwardedMessagesTable() {
+    try {
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS "${this.schema}".forwarded_messages (
+          id SERIAL,
+          ts TIMESTAMPTZ NOT NULL,
+          source_channel_id BIGINT NOT NULL,
+          source_channel_name TEXT,
+          message_id BIGINT NOT NULL,
+          message_text TEXT,
+          image_url TEXT,
+          image_width INTEGER,
+          image_height INTEGER,
+          forwarded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          destination_channel_id BIGINT,
+          forward_method TEXT,
+          PRIMARY KEY (id, ts)
+        )
+      `;
+      
+      await this.pool.query(createTableQuery);
+      
+      // Tenta criar hypertable (ignora se já existe)
+      try {
+        await this.pool.query(`SELECT create_hypertable('"${this.schema}".forwarded_messages', 'ts', if_not_exists => TRUE)`);
+      } catch (hypertableError) {
+        // Ignora erro se hypertable já existe
+        logger.debug({ err: hypertableError }, 'Hypertable may already exist');
+      }
+      
+      logger.info({ schema: this.schema }, 'Forwarded messages table ensured');
+    } catch (error) {
+      logger.error({ err: error, schema: this.schema }, 'Failed to ensure forwarded messages table');
+      throw error;
+    }
+  }
+
+  async insertForwardedMessage(message) {
+    try {
+      await this.ensureForwardedMessagesTable();
+
+      const query = `
+        INSERT INTO "${this.schema}".forwarded_messages 
+        (ts, source_channel_id, source_channel_name, message_id, message_text, image_url, image_width, image_height, forwarded_at, destination_channel_id, forward_method)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING id, ts
+      `;
+      
+      const values = [
+        message.ts || new Date(),
+        message.source_channel_id,
+        message.source_channel_name || null,
+        message.message_id,
+        message.message_text || null,
+        message.image_url || null,
+        message.image_width || null,
+        message.image_height || null,
+        message.forwarded_at || new Date(),
+        message.destination_channel_id || null,
+        message.forward_method || 'copy',
+      ];
+
+      const result = await this.pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      logger.error({ err: error, message }, 'Failed to insert forwarded message');
+      throw error;
+    }
+  }
+
+  async fetchForwardedMessages(options = {}) {
+    try {
+      await this.ensureForwardedMessagesTable();
+
+      const { limit, sourceChannelId, fromTs, toTs } = options;
+      
+      let query = `
+        SELECT 
+          id, ts, source_channel_id, source_channel_name, message_id, 
+          message_text, image_url, image_width, image_height, 
+          forwarded_at, destination_channel_id, forward_method
+        FROM "${this.schema}".forwarded_messages
+        WHERE 1=1
+      `;
+      const values = [];
+      let paramCount = 1;
+
+      if (sourceChannelId) {
+        query += ` AND source_channel_id = $${paramCount++}`;
+        values.push(sourceChannelId);
+      }
+
+      if (fromTs) {
+        query += ` AND ts >= $${paramCount++}`;
+        values.push(new Date(fromTs));
+      }
+
+      if (toTs) {
+        query += ` AND ts <= $${paramCount++}`;
+        values.push(new Date(toTs));
+      }
+
+      query += ` ORDER BY ts DESC`;
+
+      if (limit) {
+        query += ` LIMIT $${paramCount++}`;
+        values.push(limit);
+      }
+
+      const result = await this.pool.query(query, values);
+      return result.rows;
+    } catch (error) {
+      logger.warn({ err: error }, 'Failed to fetch forwarded messages, returning empty array');
+      return [];
     }
   }
 

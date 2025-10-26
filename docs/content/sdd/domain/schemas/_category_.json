@@ -1,0 +1,11 @@
+{
+  "label": "Schemas",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Domain Schemas",
+    "slug": "/sdd/domain/schemas",
+    "description": "Schema definitions and documentation."
+  }
+}

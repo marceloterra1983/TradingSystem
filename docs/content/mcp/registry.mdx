@@ -1,0 +1,298 @@
+---
+title: MCP Registry
+description: Metadata, governance, and automation flows for the Model Context Protocol
+  ecosystem.
+tags:
+  - mcp
+  - automation
+owner: MCPGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The Model Context Protocol (MCP) provides a standardized way for AI assistants to interact with external tools and services. TradingSystem integrates MCP through **Claude Code CLI** with seven configured servers that enable filesystem access, Git operations, web fetching, persistent memory, and more.
+
+**MCP Purpose**:
+- Enable AI assistants to access project context (files, Git history, documentation)
+- Provide tool capabilities (search, fetch, memory, reasoning)
+- Standardize permission models and security boundaries
+- Support both CLI and IDE integrations
+
+**Integration Points**:
+- **Claude Code CLI**: Seven MCP servers configured in `~/.claude.json`
+- **Dashboard**: MCP proxy at `/mcp` → `http://localhost:3847`
+- **Configuration**: `.claude/mcp-servers.json` (project reference)
+- **Permissions**: Defined in `.claude-plugin` and `CLAUDE.md`
+
+## MCP Server Registry
+
+<!-- BEGIN AUTO-GENERATED: MCP Registry Automation Status -->
+
+**Automation Hooks**:
+- `scripts/docusaurus/mcp-registry-sync.ts` - Generate MCP registry from configuration files **(TODO - blocked)**
+- `npm run docs:auto` - Regenerate MCP registry documentation
+- Source: `~/.claude.json`, `.claude/mcp-servers.json`
+- Target: `docs/content/mcp/registry.mdx` (generated section)
+
+**Current State**: ⚠️ **TODO** - Automation blocked (MCP config files external to repository)
+
+MCP server configurations are stored in `~/.claude.json` and `.claude/mcp-servers.json` which are external to the repository (user home directory). Automation cannot access these files without additional setup. Options: (1) Commit sanitized MCP configs to repo under `.claude/` directory, (2) Create MCP config API endpoint, or (3) Keep manual documentation.
+
+**Future Enhancements**:
+- Resolve external config access (commit to repo or create API endpoint)
+- Implement `scripts/docusaurus/mcp-registry-sync.ts` once configs accessible
+
+*Note: This table is manually maintained. Automation pending resolution of external config access.*
+
+<!-- END AUTO-GENERATED: MCP Registry Automation Status -->
+
+### Configured Servers
+
+| Server | Status | Transport | Description | Capabilities |
+|--------|--------|-----------|-------------|---------------|
+| **fs-tradingsystem** | ✅ Connected | stdio | Filesystem access to TradingSystem repository | Read/write files, list directories, search files |
+| **git-tradingsystem** | ⚠️ On-demand | stdio | Git operations on TradingSystem repository | Commit, branch, log, diff, status |
+| **fetch** | ⚠️ On-demand | stdio | HTTP requests to external URLs | GET/POST requests, web scraping |
+| **memory** | ✅ Connected | stdio | Persistent memory across sessions | Store/retrieve context, conversation history |
+| **sequential-thinking** | ✅ Connected | stdio | Extended reasoning capabilities | Multi-step reasoning, planning |
+| **time** | ⚠️ On-demand | stdio | Date/time information | Current time, timezone conversions |
+| **everything** | ✅ Connected | stdio | Universal search across files | Full-text search, code search |
+
+**Status Legend**:
+- ✅ Connected: Server active and ready
+- ⚠️ On-demand: Server connects when needed (lazy initialization)
+
+**Verification**:
+```bash
+cd /home/marce/Projetos/TradingSystem
+claude mcp list
+```
+
+### Server Details
+
+#### fs-tradingsystem (Filesystem)
+
+**Purpose**: Provide read/write access to TradingSystem repository files.
+
+**Capabilities**:
+- `read_file`: Read file contents
+- `write_file`: Write/update file contents
+- `list_directory`: List directory contents
+- `search_files`: Search files by pattern
+- `get_file_info`: Get file metadata (size, modified date)
+
+**Permissions**:
+- Allowed directories: `/home/marce/Projetos/TradingSystem`
+- Read: All files in allowed directories
+- Write: All files in allowed directories (with confirmation)
+- Delete: Requires explicit confirmation
+
+**Security**:
+- Restricted to project directory only
+- No access to system files or parent directories
+- All write operations logged
+
+---
+
+#### git-tradingsystem (Git Operations)
+
+**Purpose**: Enable Git operations on TradingSystem repository.
+
+**Capabilities**:
+- `git_status`: Get repository status
+- `git_log`: View commit history
+- `git_diff`: Show file differences
+- `git_commit`: Create commits (with Conventional Commits validation)
+- `git_branch`: Manage branches
+- `git_checkout`: Switch branches
+
+**Permissions**:
+- Read: All Git operations (status, log, diff)
+- Write: Commit, branch creation (with confirmation)
+- Destructive: Requires explicit confirmation (reset, force push)
+
+**Integration**: Custom command `/git-workflows` provides shortcuts for common Git operations.
+
+---
+
+#### fetch (HTTP Requests)
+
+**Purpose**: Make HTTP requests to external URLs.
+
+**Capabilities**:
+- `fetch_url`: GET/POST requests to any URL
+- `fetch_json`: Parse JSON responses
+- `fetch_html`: Fetch and parse HTML
+
+**Permissions**:
+- Allowed: All HTTP/HTTPS URLs
+- Rate limiting: Respects server rate limits
+- Timeout: 30 seconds default
+
+**Security**:
+- No access to localhost (prevents SSRF)
+- User-Agent header identifies Claude Code
+- Respects `robots.txt`
+
+---
+
+#### memory (Persistent Memory)
+
+**Purpose**: Store and retrieve context across Claude Code sessions.
+
+**Capabilities**:
+- `store_memory`: Save key-value pairs
+- `retrieve_memory`: Get stored values
+- `list_memories`: List all stored keys
+- `delete_memory`: Remove stored values
+
+**Storage**: `~/.claude/memory/` (encrypted)
+
+**Use Cases**:
+- Remember project conventions
+- Store frequently used commands
+- Cache API responses
+- Maintain conversation context
+
+---
+
+#### sequential-thinking (Extended Reasoning)
+
+**Purpose**: Enable multi-step reasoning and planning.
+
+**Capabilities**:
+- `think_step_by_step`: Break down complex problems
+- `plan_approach`: Create implementation plans
+- `evaluate_options`: Compare alternatives
+
+**Use Cases**:
+- Architecture design decisions
+- Complex refactoring planning
+- Multi-step troubleshooting
+
+---
+
+#### time (Date/Time)
+
+**Purpose**: Provide current date/time information.
+
+**Capabilities**:
+- `get_current_time`: Get current timestamp
+- `convert_timezone`: Convert between timezones
+- `format_date`: Format dates in various formats
+
+**Use Cases**:
+- Generate timestamps for logs
+- Calculate trading hours (9:00-18:00 BRT)
+- Date-based file naming
+
+---
+
+#### everything (Universal Search)
+
+**Purpose**: Full-text search across all project files.
+
+**Capabilities**:
+- `search_code`: Search code files
+- `search_docs`: Search documentation
+- `search_all`: Search all files
+
+**Performance**: Indexed search for fast results
+
+**Use Cases**:
+- Find function definitions
+- Locate configuration files
+- Search documentation
+
+## Governance
+
+### Permission Model
+
+**Allowed Operations**:
+- Bash: Execute shell commands
+- Read: Read file contents
+- Write: Write/update files
+- Edit: Modify existing files
+- Glob: Pattern-based file search
+- Grep: Text search in files
+- Task: Create and manage tasks
+- WebFetch: HTTP requests
+- WebSearch: Web search queries
+- BashOutput: Capture command output
+- KillShell: Terminate shell processes
+- NotebookEdit: Edit Jupyter notebooks
+- TodoWrite: Create TODO items
+- SlashCommand: Execute custom commands
+- ExitPlanMode: Exit planning mode
+
+**Restricted Operations**:
+- No system-level access (outside allowed directories)
+- No credential access (API keys, passwords)
+- No destructive operations without confirmation
+
+### Approval Workflows
+
+**Automatic Approval**:
+- Read operations (files, Git status, directory listings)
+- Non-destructive writes (create new files, update existing)
+- Custom commands (pre-approved shortcuts)
+
+**Confirmation Required**:
+- Destructive operations (delete files, force push)
+- System commands (sudo, service management)
+- Credential operations (API key generation)
+
+**Escalation**:
+- Security-sensitive operations escalate to user
+- Multi-file changes require review
+- Production deployments require manual approval
+
+### Audit Requirements
+
+**Logging**:
+- All MCP operations logged to `~/.claude/debug/`
+- Structured logs with timestamp, server, operation, result
+- Retention: 30 days
+
+**Monitoring**:
+- MCP server health tracked via `claude mcp list`
+- Connection failures logged and alerted
+- Performance metrics (operation latency, error rate)
+
+**Review Cadence**:
+- Weekly: Review MCP operation logs for anomalies
+- Monthly: Audit MCP server permissions and access patterns
+- Quarterly: Review and update MCP server configurations
+
+## Automation Hooks
+
+**Planned Automation** _(Blocked - see Current State below)_:
+- `scripts/docusaurus/mcp-registry-sync.ts` - Generate MCP registry from configuration files **(TODO - blocked)**
+- `npm run docs:auto` - Regenerate MCP registry documentation
+- Source: `~/.claude.json`, `.claude/mcp-servers.json`
+- Target: `docs/content/mcp/registry.mdx` (generated section)
+
+**Current State**: ⚠️ **TODO** - Automation blocked (MCP config files external to repository)
+
+MCP server configurations are stored in `~/.claude.json` and `.claude/mcp-servers.json` which are external to the repository (user home directory). Automation cannot access these files without additional setup. Options: (1) Commit sanitized MCP configs to repo under `.claude/` directory, (2) Create MCP config API endpoint, or (3) Keep manual documentation.
+
+**Future Enhancement**:
+- Resolve external config access (commit to repo or create API endpoint)
+- Implement `scripts/docusaurus/mcp-registry-sync.ts` once configs accessible
+- Auto-detect MCP servers from configuration
+- Generate capability tables from server manifests
+- Sync permissions from `.claude-plugin`
+- Validate server health and update status badges
+
+## Related Documentation
+
+- [MCP Transports](./transports) - Transport protocols and deployment modes
+- [MCP Permissions](./permissions) - Permission model and governance
+- Claude Code CLI setup (migration pending)
+- [Agent Catalog](../agents/overview) - Agents using MCP capabilities
+- [Security Configuration](../../tools/security-config/overview) - Security best practices
+
+**External Resources**:
+- [MCP Specification](https://modelcontextprotocol.io/)
+- [Claude Code Documentation](https://docs.anthropic.com/claude-code)
+- [Anthropic Console](https://console.anthropic.com/)

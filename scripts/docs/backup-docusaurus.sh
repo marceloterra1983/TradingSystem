@@ -15,7 +15,7 @@ readonly NC='\033[0m' # No Color
 # Configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-readonly DOCUSAURUS_DIR="${PROJECT_ROOT}/docs/docusaurus"
+readonly DOCUSAURUS_DIR="${PROJECT_ROOT}/docs"
 readonly TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 readonly DEFAULT_BACKUP_DIR="${PROJECT_ROOT}/.backup-docusaurus-${TIMESTAMP}"
 
@@ -134,7 +134,7 @@ validate_source() {
         return 1
     fi
     
-    if [[ ! -f "${DOCUSAURUS_DIR}/docusaurus.config.ts" ]]; then
+    if [[ ! -f "${DOCUSAURUS_DIR}/docusaurus.config.js" ]]; then
         error "docusaurus.config.ts not found. Not a valid Docusaurus installation."
         return 1
     fi
@@ -329,13 +329,13 @@ To restore this backup:
 # 1. Stop any running Docusaurus processes
 # 2. Backup current installation (if needed)
 # 3. Remove current installation
-rm -rf docs/docusaurus
+rm -rf "${DOCUSAURUS_DIR}"
 
 # 4. Restore from backup
-rsync -av ${BACKUP_DIR}/docusaurus/ docs/docusaurus/
+rsync -av ${BACKUP_DIR}/docusaurus/ "${DOCUSAURUS_DIR}/"
 
 # 5. Install dependencies
-cd docs/docusaurus
+cd "${DOCUSAURUS_DIR}"
 npm install
 
 # 6. Verify installation
@@ -388,7 +388,7 @@ Manually verify backup integrity:
 
 \`\`\`bash
 # Compare file counts
-find docs/docusaurus -type f | grep -v node_modules | grep -v .docusaurus | grep -v build | wc -l
+find "${DOCUSAURUS_DIR}" -type f | grep -v node_modules | grep -v .docusaurus | grep -v build | wc -l
 find ${BACKUP_DIR}/docusaurus -type f | wc -l
 
 # Verify checksums (see platform-specific instructions above)
@@ -590,10 +590,17 @@ generate_restoration_guide() {
     
     local guide="${BACKUP_DIR}/metadata/RESTORATION-GUIDE.md"
     
-    cat > "$guide" << 'EOF'
+    cat > "$guide" << EOF
 # Docusaurus Restoration Guide
 
 This guide provides step-by-step instructions for restoring Docusaurus from this backup.
+
+---
+
+## Environment References
+
+- Project Root: ${PROJECT_ROOT}
+- Docusaurus Directory: ${DOCUSAURUS_DIR}
 
 ---
 
@@ -627,8 +634,8 @@ pkill -f "docusaurus start"
 If you want to preserve the current installation:
 
 ```bash
-cd /home/marce/projetos/TradingSystem
-mv docs/docusaurus docs/docusaurus-backup-$(date +%Y%m%d-%H%M%S)
+cd "${PROJECT_ROOT}"
+mv "${DOCUSAURUS_DIR}" "${DOCUSAURUS_DIR}-backup-\$(date +%Y%m%d-%H%M%S)"
 ```
 
 ### 3. Remove Current Installation
@@ -636,11 +643,11 @@ mv docs/docusaurus docs/docusaurus-backup-$(date +%Y%m%d-%H%M%S)
 Remove the current Docusaurus installation:
 
 ```bash
-cd /home/marce/projetos/TradingSystem
-rm -rf docs/docusaurus
+cd "${PROJECT_ROOT}"
+rm -rf "${DOCUSAURUS_DIR}"
 
 # Verify removal
-ls docs/
+ls "$(dirname "${DOCUSAURUS_DIR}")"
 ```
 
 ### 4. Restore from Backup
@@ -649,13 +656,13 @@ Restore files from this backup:
 
 ```bash
 # Navigate to project root
-cd /home/marce/projetos/TradingSystem
+cd "${PROJECT_ROOT}"
 
 # Restore using rsync (preserves timestamps and permissions)
-rsync -av BACKUP_DIR/docusaurus/ docs/docusaurus/
+rsync -av BACKUP_DIR/docusaurus/ "${DOCUSAURUS_DIR}/"
 
 # Verify restoration
-ls -la docs/docusaurus
+ls -la "${DOCUSAURUS_DIR}"
 ```
 
 **Replace `BACKUP_DIR` with the actual backup directory path.**
@@ -665,7 +672,7 @@ ls -la docs/docusaurus
 Install Node.js dependencies:
 
 ```bash
-cd docs/docusaurus
+cd "${DOCUSAURUS_DIR}"
 npm install
 ```
 
@@ -684,7 +691,7 @@ Run the development server to verify:
 npm run dev
 ```
 
-The server should start on `http://localhost:3004`.
+The server should start on `http://localhost:3205`.
 
 **Verification checklist**:
 - [ ] Server starts without errors
@@ -745,19 +752,19 @@ npm install
 ### Issue: Dev server fails to start
 
 **Symptoms**:
-- "Port 3004 already in use"
+- "Port 3205 already in use"
 - "EADDRINUSE"
 
 **Solution**:
 ```bash
-# Find process using port 3004
-lsof -i :3004
+# Find process using port 3205
+lsof -i :3205
 
 # Kill the process
 kill -9 <PID>
 
 # Or use a different port
-npm run dev -- --port 3005
+npm run dev -- --port 3206
 ```
 
 ### Issue: Build fails with memory error
@@ -788,7 +795,7 @@ NODE_OPTIONS="--max-old-space-size=4096" npm run build
 ls -la ../../.env
 
 # Check environment variables are loaded
-cat docusaurus.config.ts | grep dotenv
+grep dotenv docusaurus.config.js
 
 # Verify .env has required variables
 grep -E "DOCS_|SEARCH_|HEALTH_|GRAFANA_|PLANTUML_" ../../.env
@@ -806,7 +813,7 @@ grep -E "DOCS_|SEARCH_|HEALTH_|GRAFANA_|PLANTUML_" ../../.env
 bash scripts/docs/backup-docusaurus.sh
 
 # Or restore specific files from git
-git checkout docs/docusaurus/package.json
+git checkout docs/package.json
 ```
 
 ---
@@ -817,10 +824,10 @@ If restoration fails, rollback to previous state:
 
 ```bash
 # If you created a backup in step 2
-cd /home/marce/projetos/TradingSystem
-rm -rf docs/docusaurus
-mv docs/docusaurus-backup-TIMESTAMP docs/docusaurus
-cd docs/docusaurus
+cd "${PROJECT_ROOT}"
+rm -rf "${DOCUSAURUS_DIR}"
+mv "${DOCUSAURUS_DIR}-backup-TIMESTAMP" "${DOCUSAURUS_DIR}"
+cd "${DOCUSAURUS_DIR}"
 npm install
 ```
 

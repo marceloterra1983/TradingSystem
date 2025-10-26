@@ -99,7 +99,7 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3004',
+    'http://localhost:3400',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
@@ -135,6 +135,15 @@ export default defineConfig(({ mode }) => {
         allow: [repoRoot],
       },
       proxy: {
+        // Docusaurus assets proxy (must come before /docs)
+        '^/assets/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
+        '^/img/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
         '/mcp': {
           target: mcpProxy.target,
           changeOrigin: true,

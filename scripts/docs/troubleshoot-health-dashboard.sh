@@ -3,25 +3,27 @@
 
 set -e
 
-PROJECT_ROOT="/home/marce/projetos/TradingSystem"
-cd "$PROJECT_ROOT"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DOCUSAURUS_DIR="${PROJECT_ROOT}/docs"
+cd "${PROJECT_ROOT}"
 
 echo "============================================"
 echo "Health Dashboard Troubleshooting"
 echo "============================================"
 echo ""
 
-# Step 1: Check if port 3004 is in use
-echo "📋 Step 1: Checking port 3004..."
-PORT_CHECK=$(lsof -ti:3004 2>/dev/null || echo "")
+# Step 1: Check if port 3205 is in use
+echo "📋 Step 1: Checking port 3205..."
+PORT_CHECK=$(lsof -ti:3205 2>/dev/null || echo "")
 if [ -n "$PORT_CHECK" ]; then
-    echo "⚠️  Port 3004 is in use by process: $PORT_CHECK"
+    echo "⚠️  Port 3205 is in use by process: $PORT_CHECK"
     echo "   Killing process..."
     kill -9 $PORT_CHECK 2>/dev/null || true
     sleep 2
-    echo "✅ Port 3004 freed"
+    echo "✅ Port 3205 freed"
 else
-    echo "✅ Port 3004 is available"
+    echo "✅ Port 3205 is available"
 fi
 echo ""
 
@@ -50,7 +52,7 @@ echo ""
 
 # Step 3: Check Docusaurus files
 echo "📋 Step 3: Checking Docusaurus files..."
-cd "$PROJECT_ROOT/docs/docusaurus"
+cd "${DOCUSAURUS_DIR}"
 
 if [ ! -f "src/pages/health/index.tsx" ]; then
     echo "❌ Health page not found: src/pages/health/index.tsx"
@@ -102,12 +104,12 @@ echo "============================================"
 echo ""
 echo "Next steps:"
 echo "1. Start Docusaurus:"
-echo "   cd $PROJECT_ROOT/docs/docusaurus"
-echo "   npm run start -- --port 3004"
+echo "   cd ${DOCUSAURUS_DIR}"
+echo "   npm run start -- --port 3205"
 echo ""
 echo "2. Wait for: [SUCCESS] Docusaurus website is running..."
 echo ""
-echo "3. Open browser: http://localhost:3004/health"
+echo "3. Open browser: http://localhost:3205/health"
 echo ""
 echo "4. If page still doesn't load, check browser console (F12)"
 echo ""

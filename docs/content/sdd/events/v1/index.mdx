@@ -1,0 +1,86 @@
+---
+title: Event Catalogue v1
+description: Overview of events emitted in version 1.
+tags:
+  - sdd
+  - events
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+This catalogue lists all domain events emitted by TradingSystem v1. Events represent significant state changes or actions that downstream consumers can react to.
+
+**Version**: v1  
+**Status**: Specification (implementation pending)  
+**Event Bus**: Kafka, RabbitMQ, or in-memory queue (TBD)
+
+## Available Events
+
+| Event | Description | Trigger | Consumers |
+|-------|-------------|---------|-----------|
+| [order.created](./order-created) | Order created and validated | POST /api/orders (success) | Dashboard, Audit, Analytics |
+| order.submitted | Order sent to broker | Broker acknowledgment | Dashboard, Audit |
+| order.filled | Order fully executed | Broker fill callback | Dashboard, Audit, Position Service |
+| order.partially-filled | Order partially executed | Broker partial fill callback | Dashboard, Audit |
+| [order.canceled](./order-canceled) | Order canceled | DELETE /api/orders (success) | Dashboard, Audit |
+| [order.failed](./order-failed) | Submission retries exhausted | Broker/network failure after retries | Dashboard, Audit, Alerting |
+| order.rejected | Order rejected | Risk check failure or broker rejection | Dashboard, Audit |
+| risk.violation | Risk check failed | Risk validation failure | Dashboard, Audit, Alerting |
+| kill-switch.activated | Kill switch activated | POST /api/risk/kill-switch | Dashboard, Audit, Alerting |
+
+*Note: only `order.created` is fully documented in v1. Additional event specifications are planned.*
+
+## Event Schema Conventions
+
+```typescript
+interface DomainEvent<T> {
+  eventId: string;
+  eventType: string;
+  timestamp: string;
+  version: string;
+  payload: T;
+  metadata: EventMetadata;
+}
+
+interface EventMetadata {
+  traceId: string;
+  userId?: string;
+  source: string;
+  correlationId?: string;
+}
+```
+
+**Naming**
+- Use dot notation `<entity>.<action>` (e.g., `order.created`, `risk.violation`)
+- Use past tense for actions
+- Use lowercase with dots
+
+**Versioning**
+- Include `version` field in event envelope (e.g., `"v1"`)
+- Breaking changes require new version (e.g., `"v2"`)
+- Maintain backward compatibility for 6 months
+
+**Ordering**
+- Events for same entity ordered by timestamp
+- No ordering guarantee across different entities
+- Consumers must handle out-of-order events
+
+**Idempotency**
+- Consumers must handle duplicate events
+- Use `eventId` for deduplication
+- At-least-once delivery semantics
+
+## Event Publication
+
+- Synchronous publication (blocking) for MVP
+- Future: Async publication via outbox pattern for guaranteed delivery
+- On failure, log error and continue (event may be lost)
+- Event retention: 7 days on bus, 1 year in audit service
+
+## Related Documentation
+
+- [Schema Catalogue](../domain/schemas/v1/index)
+- [Flow Catalogue](../flows/v1/) (to be created)
+- [Order Manager API](../../api/order-manager)
+- [Event-Driven Architecture](../../../reference/architecture/event-driven) (when migrated)

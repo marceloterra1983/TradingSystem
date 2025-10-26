@@ -1,0 +1,11 @@
+{
+  "label": "Data Capture",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Data Capture App",
+    "slug": "/apps/data-capture",
+    "description": "Operational documentation for the Data Capture application."
+  }
+}

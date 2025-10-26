@@ -1,0 +1,113 @@
+---
+title: Architecture
+description: Architecture diagrams and component responsibilities for the TP Capital
+  application.
+tags:
+  - apps
+  - tp-capital
+  - architecture
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Diagrams
+
+### Component Architecture
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-component-architecture.puml`
+
+Shows the high-level architecture: Telegram ingestion layer (webhook/polling), QuestDB storage (ILP + HTTP interfaces), REST API layer (Express endpoints), Dashboard consumption (React Query with 15s polling), and Agno Agents integration (parallel signal consumption).
+
+**Key Components**:
+1. **Telegram Bot Listener**: Receives messages via webhook or polling.
+2. **Message Parser**: Extracts structured data (asset, signal type, prices).
+3. **Validator**: Ensures payload integrity before persistence.
+4. **QuestDB Client**: Writes via ILP protocol (port 9009) and queries via HTTP (host port 9002, container port 9000).
+5. **REST API**: Express server exposing `/signals`, `/logs`, `/telegram/*` endpoints.
+6. **Prometheus Exporter**: Metrics endpoint for monitoring.
+
+### Telegram Ingestion Flow
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-ingestion-sequence.puml`
+
+Sequence diagram documenting:
+
+1. Telegram webhook → Parser (extract fields).
+2. Parser → Validator (check required fields).
+3. Validator → QuestDB ILP (write signal).
+4. QuestDB → API (confirm write).
+5. API → Telegram (acknowledge receipt).
+
+**Target SLA**: &lt;500ms p95 end-to-end latency.
+
+### Signal Consumption Flow
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-signal-consumption-sequence.puml`
+
+Shows parallel consumption patterns:
+
+- **Dashboard**: Polls `/signals` every 15 seconds with React Query caching.
+- **Agno Agents**: Query `/signals` on-demand, combine with Workspace and B3 data.
+- Both consumers apply filters (channel, signal_type, date range).
+
+## Components
+
+### Service Layer
+
+- **Technology**: Node.js 20 + Express.
+- **Port**: 3200 (configurable via `TP_CAPITAL_API_PORT`).
+- **Entry point**: Main Express app with routes for `/signals`, `/logs`, `/telegram/*`.
+- **Middleware**: Shared logger, error handler, CORS configuration.
+
+### Data Layer
+
+- **Database**: QuestDB (time-series optimized).
+- **Table**: `tp_capital_signals` (schema in `backend/data/schemas/trading-core/tables/tp-capital-signals.md`).
+- **Partitioning**: By day (supports efficient pruning and archival).
+- **Interfaces**: ILP (port 9009) for writes, HTTP (host port 9002 / container port 9000) for queries.
+- **Persistence**: Docker volume `questdb-data`.
+
+### Integration Layer
+
+- **Telegram SDK**: Bot API for webhook/polling.
+- **QuestDB Client**: Custom client library (reusable across services).
+- **Prometheus Client**: Metrics collection and export.
+
+### External Dependencies
+
+- **Telegram Bot API**: Message ingestion source.
+- **QuestDB**: Time-series storage (must be running before service starts).
+- **Dashboard**: Primary consumer at `http://localhost:3103`.
+- **Agno Agents**: Secondary consumer for trading automation.
+
+## Data Flow
+
+### Write Path (Ingestion)
+
+1. Telegram message arrives via webhook.
+2. Parser extracts fields using regex/pattern matching.
+3. Validator checks required fields (asset, signal_type, timestamp).
+4. QuestDB client writes via ILP protocol.
+5. Confirmation logged to stdout.
+
+### Read Path (Consumption)
+
+1. Client requests `GET /signals?channel=TP_Capital&limit=100`.
+2. Express handler queries QuestDB via HTTP.
+3. Results formatted as JSON array.
+4. Response cached by React Query (dashboard) or consumed directly (agents).
+
+## Deployment Architecture
+
+### Local Development
+
+- Docker Compose stack in `apps/tp-capital/infrastructure/`.
+- Services: tp-capital-signals (Node app) + QuestDB.
+- Networking: Shared Docker network for service communication.
+
+### Production
+
+- GitHub Actions builds Docker image on push to `main`.
+- Image pushed to GHCR: `ghcr.io/<owner>/tp-capital-signals`.
+- Deployed via `docker-compose.prod.yml` with production env file.
+- Health check: `curl http://<host>:4005/health`.
+- QuestDB UI: `http://<host>:9002`.

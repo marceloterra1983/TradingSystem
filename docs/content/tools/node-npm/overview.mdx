@@ -1,0 +1,60 @@
+---
+title: Node & npm Overview
+description: Supported Node.js versions, package management policies, and workspace
+  layout.
+tags:
+  - tools
+  - node
+owner: ToolingGuild
+lastReviewed: '2025-10-26'
+---
+## Support Policy
+
+- **Supported Version**: Node.js 18 or higher with npm.
+- **Current Standard**: Node.js 20 (`curl -fsSL https://deb.nodesource.com/setup_20.x`).
+- **Upgrade Cadence**: Follow Node.js LTS schedule and adopt new LTS within three months of release.
+- **EOL Policy**: Deprecate versions six months before their upstream EOL date.
+
+## Workspace Conventions
+
+### Repository Layout
+
+- **Monorepo Structure**: Workspaces defined in the root `package.json`.
+- **Frontend Apps**: `apps/<app-name>` (for example, `apps/workspace`, `apps/tp-capital`).
+- **Frontend Dashboard**: `frontend/dashboard/` (React 18 + Vite).
+- **Shared Frontend**: `frontend/shared/` (reusable components and utilities).
+- **Backend Services**: `backend/api/<service-name>` (Express microservices).
+- **Documentation**: `docs/` (Docusaurus v3 content).
+
+### Package Boundaries
+
+- Each app or service owns a local `package.json` and declares its direct dependencies.
+- Shared dependencies live at the workspace root.
+- Use the workspace protocol for internal packages: `"@tradingsystem/shared": "workspace:*"`.
+
+### Build Scripts
+
+- `npm install --workspaces` — install all workspace dependencies.
+- `npm run dev:dashboard-docs` — launch the dashboard and docs together.
+- `npm run lint` — run ESLint across all workspaces.
+- `npm run test` — execute Vitest suites.
+- `npm run build` — build production bundles.
+
+### Development Workflow
+
+1. Install dependencies: `npm install` (from repository root).
+2. Start required services via scripts in `scripts/startup/` or `npm run dev` inside each workspace.
+3. Run linting before commits: `npm run lint` (enforced by Husky).
+4. Run tests: `npm run test` (mirrors CI expectations).
+
+### Environment Configuration
+
+- Use the centralized `.env` at the repository root.
+- Never create ad-hoc `.env` files inside workspaces.
+- Bootstrap via `scripts/env/setup-env.sh` and validate with `scripts/env/validate-env.sh`.
+
+## Related Documentation
+
+- Environment Configuration (TODO: link once ops docs are migrated)
+- [Frontend Conventions](../../frontend/engineering/conventions)
+- Startup Scripts (TODO: link once startup tooling docs are published)

@@ -12,7 +12,7 @@ services:
     environment:
       POSTGRES_DB: ${TIMESCALEDB_DB:-tradingsystem}
       POSTGRES_USER: ${TIMESCALEDB_USER:-timescale}
-      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-pass_timescale}
       TIMESCALEDB_TELEMETRY: 'off'
     ports:
       - '${TIMESCALEDB_PORT:-5433}:5432'
@@ -40,7 +40,7 @@ services:
       POSTGRES_HOST: timescaledb
       POSTGRES_DB: ${TIMESCALEDB_DB:-tradingsystem}
       POSTGRES_USER: ${TIMESCALEDB_USER:-timescale}
-      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-pass_timescale}
       SCHEDULE: ${TIMESCALEDB_BACKUP_CRON:-0 2 * * *}
       BACKUP_DIR: /backups
       POSTGRES_EXTRA_OPTS: '--format=custom --verbose'
@@ -64,7 +64,7 @@ services:
     environment:
       DATA_SOURCE_URI: 'timescaledb:5432/${TIMESCALEDB_DB:-tradingsystem}?sslmode=disable'
       DATA_SOURCE_USER: ${TIMESCALEDB_USER:-timescale}
-      DATA_SOURCE_PASS: ${TIMESCALEDB_PASSWORD:-changeme}
+      DATA_SOURCE_PASS: ${TIMESCALEDB_PASSWORD:-pass_timescale}
     ports:
       - '${TIMESCALEDB_EXPORTER_PORT:-9187}:9187'
     depends_on:
@@ -112,7 +112,7 @@ services:
     env_file:
       - ../../.env
     environment:
-      DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-tradingsystem}?sslmode=disable'
+      DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-pass_timescale}@timescaledb:5432/${TIMESCALEDB_DB:-tradingsystem}?sslmode=disable'
       PGWEB_SESSIONS: '1'
     ports:
       - '127.0.0.1:${PGWEB_PORT:-8081}:8081'
@@ -170,7 +170,7 @@ services:
     env_file:
       - ../../.env
     environment:
-      DATABASE_URL: 'ecto://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-tradingsystem}?ssl=false'
+      DATABASE_URL: 'ecto://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-pass_timescale}@timescaledb:5432/${TIMESCALEDB_DB:-tradingsystem}?ssl=false'
       PORT: '4000'
       PHX_HOST: ${AZIMUTT_PHX_HOST:-localhost}
       SECRET_KEY_BASE: ${AZIMUTT_SECRET_KEY_BASE:-change-me-secret}

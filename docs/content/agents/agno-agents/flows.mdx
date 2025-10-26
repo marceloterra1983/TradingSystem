@@ -1,0 +1,318 @@
+---
+title: Agent Execution Flows
+description: Execution flows and state transitions for Order Manager agents.
+tags:
+  - agents
+  - order-manager
+  - flows
+owner: MCPGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+Agno Agents execute in coordinated workflows orchestrated by the SignalOrchestratorAgent. This page documents the execution flows, state transitions, and interaction patterns.
+
+## Sequence Diagrams
+
+### Full Orchestration Flow (ORCHESTRATE Action)
+
+```mermaid
+sequenceDiagram
+    participant Client as Dashboard/API Client
+    participant Orch as SignalOrchestratorAgent
+    participant Market as MarketAnalysisAgent
+    participant Risk as RiskManagementAgent
+    participant B3 as B3 API (3302)
+    participant TP as TP Capital API (3200)
+    participant WS as Workspace API (3100)
+    
+    Client->>Orch: POST /api/v1/agents/signals<br/>{action: "ORCHESTRATE", symbols: ["PETR4"]}
+    activate Orch
+    
+    Orch->>Market: analyze_market(symbols, include_tp=true, include_b3=true)
+    activate Market
+    
+    par Parallel Data Gathering
+        Market->>B3: get_b3_data("PETR4")
+        B3-->>Market: {price, volume, indicators}
+    and
+        Market->>TP: get_tp_capital_signals(limit=100)
+        TP-->>Market: [{asset: "PETR4", signal_type: "COMPRA", ...}]
+    and
+        Market->>WS: get_ideas()
+        WS-->>Market: [{title: "PETR4 analysis", ...}]
+    end
+    
+    Market->>Market: Generate signals (LLM or heuristic)
+    Market-->>Orch: [MarketSignal(symbol="PETR4", signal_type="BUY", confidence=0.85)]
+    deactivate Market
+    
+    loop For each signal
+        Orch->>Risk: validate_signal(signal)
+        activate Risk
+        
+        Risk->>Risk: check_trading_hours()
+        Risk->>Risk: check_daily_loss_limit()
+        Risk->>Risk: check_position_size("PETR4", 100)
+        
+        Risk-->>Orch: RiskAssessment(approved=true, risk_level="LOW")
+        deactivate Risk
+    end
+    
+    Orch-->>Client: {signals: [...], assessments: [...], total_time: 0.78}
+    deactivate Orch
+```
+
+---
+
+### Market Analysis Flow (ANALYZE Action)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Market as MarketAnalysisAgent
+    participant B3 as B3 API
+    participant TP as TP Capital API
+    participant LLM as OpenAI GPT-4o
+    
+    Client->>Market: POST /api/v1/agents/analyze<br/>{symbols: ["PETR4"], include_tp_capital: true}
+    activate Market
+    
+    Market->>B3: get_b3_data("PETR4")
+    B3-->>Market: {last_price: 32.50, volume: 1000000, ...}
+    
+    Market->>TP: get_tp_capital_signals(limit=100)
+    TP-->>Market: [{asset: "PETR4", buy_min: 32.00, targets: [34.00, 35.00]}]
+    
+    alt LLM Enabled
+        Market->>LLM: Analyze market data + TP signals
+        LLM-->>Market: {signals: [{symbol: "PETR4", signal_type: "BUY", confidence: 0.85}]}
+    else LLM Disabled
+        Market->>Market: Apply heuristic rules (confidence threshold)
+    end
+    
+    Market-->>Client: {signals: [...], analysis_time: 0.42}
+    deactivate Market
+```
+
+---
+
+### Risk Validation Flow (VALIDATE Action)
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Risk as RiskManagementAgent
+    participant Engine as Risk Engine (Planned)
+    
+    Client->>Risk: validate_signal(MarketSignal)
+    activate Risk
+    
+    Risk->>Risk: check_trading_hours()
+    Note over Risk: Current time: 10:30 BRT<br/>Trading hours: 9:00-18:00<br/>Result: PASS
+    
+    Risk->>Engine: check_daily_limits()
+    Engine-->>Risk: {current_loss: 1250, limit: 5000, passed: true}
+    
+    Risk->>Engine: check_position_size("PETR4", 100)
+    Engine-->>Risk: {current_position: 750, limit: 1000, passed: true}
+    
+    Risk->>Risk: Aggregate results
+    Note over Risk: All checks passed<br/>approved: true<br/>risk_level: LOW
+    
+    Risk-->>Client: RiskAssessment(approved=true, risk_level="LOW")
+    deactivate Risk
+```
+
+## State Transitions
+
+### Agent Lifecycle States
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initializing: Service starts
+    Initializing --> Ready: Clients initialized
+    Ready --> Processing: Request received
+    Processing --> Ready: Request completed
+    Processing --> Error: Exception thrown
+    Error --> Ready: Error handled
+    Ready --> Shutdown: Service stops
+    Shutdown --> [*]
+    
+    note right of Initializing
+        Initialize HTTP clients:
+        - B3Client
+        - TPCapitalClient
+        - WorkspaceClient
+        - RiskEngineClient
+    end note
+    
+    note right of Processing
+        Execute agent workflow:
+        1. Gather data
+        2. Generate signals
+        3. Validate risks
+        4. Return results
+    end note
+```
+
+### Signal Processing States
+
+```mermaid
+stateDiagram-v2
+    [*] --> DataGathering: Request received
+    DataGathering --> SignalGeneration: Data fetched
+    SignalGeneration --> RiskValidation: Signals generated
+    RiskValidation --> Approved: All checks pass
+    RiskValidation --> Rejected: Any check fails
+    Approved --> [*]: Return approved signals
+    Rejected --> [*]: Return rejection reasons
+    
+    note right of DataGathering
+        Parallel fetch:
+        - B3 market data
+        - TP Capital signals
+        - Workspace ideas
+    end note
+    
+    note right of RiskValidation
+        Sequential checks:
+        1. Trading hours
+        2. Daily loss limit
+        3. Position size limit
+    end note
+```
+
+### Circuit Breaker States
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed: Initial state
+    Closed --> Open: 5 consecutive failures
+    Open --> HalfOpen: 60 seconds timeout
+    HalfOpen --> Closed: Success
+    HalfOpen --> Open: Failure
+    
+    note right of Closed
+        Normal operation
+        All requests allowed
+    end note
+    
+    note right of Open
+        Circuit breaker tripped
+        All requests fail fast
+        No API calls made
+    end note
+    
+    note right of HalfOpen
+        Testing recovery
+        Single request allowed
+        Success → Closed
+        Failure → Open
+    end note
+```
+
+**Configuration**:
+- Failure threshold: 5 consecutive failures
+- Timeout: 60 seconds before HALF_OPEN
+- Metrics: `agent_errors_total{error_type="CircuitBreakerError"}`
+
+## Decision Trees
+
+### Market Analysis Decision Tree
+
+```
+Market Analysis Request
+├─ LLM Enabled?
+│  ├─ Yes → Invoke OpenAI GPT-4o
+│  │  ├─ Success → Parse LLM response
+│  │  └─ Failure → Apply fallback heuristics
+│  └─ No → Apply fallback heuristics
+│
+├─ Fallback Heuristics:
+│  ├─ TP Capital signals available?
+│  │  ├─ Yes → Convert TP signals to MarketSignal format
+│  │  │  └─ Extract: symbol, signal_type, confidence, price, size
+│  │  └─ No → Generate HOLD signals for all symbols
+│  │     └─ Confidence: 0.5 (neutral)
+│
+└─ Return: List[MarketSignal]
+```
+
+### Risk Validation Decision Tree
+
+```
+Risk Validation Request
+├─ Check Trading Hours
+│  ├─ Current time in 9:00-18:00 BRT? → PASS
+│  └─ Outside hours? → FAIL (reject signal)
+│
+├─ Check Daily Loss Limit (if trading hours pass)
+│  ├─ Current loss < daily limit? → PASS
+│  └─ Limit exceeded? → FAIL (reject signal)
+│
+├─ Check Position Size (if daily loss pass)
+│  ├─ Current position + order size &lt;= limit? → PASS
+│  └─ Would exceed limit? → FAIL (reject signal)
+│
+└─ Final Decision:
+   ├─ All checks PASS → approved: true, risk_level: LOW
+   └─ Any check FAIL → approved: false, risk_level: HIGH
+```
+
+## Error Handling Flows
+
+### Retry Flow (Exponential Backoff)
+
+```
+API Request
+├─ Attempt 1 (immediate)
+│  ├─ Success → Return result
+│  └─ Failure → Wait 500ms
+│
+├─ Attempt 2 (after 500ms)
+│  ├─ Success → Return result
+│  └─ Failure → Wait 1500ms
+│
+├─ Attempt 3 (after 1500ms)
+│  ├─ Success → Return result
+│  └─ Failure → Wait 3000ms
+│
+├─ Attempt 4 (after 3000ms)
+│  ├─ Success → Return result
+│  └─ Failure → Raise exception
+│
+└─ Max attempts reached → Log error, track metric, return empty result
+```
+
+**Configuration**:
+- Strategy: Exponential backoff (500ms, 1500ms, 3000ms)
+- Max attempts: 4 (configurable via `RETRY_MAX_ATTEMPTS`)
+- Applied to: All HTTP requests (B3, TP Capital, Workspace, Risk Engine)
+
+### Circuit Breaker Flow
+
+```
+API Request
+├─ Circuit Breaker State?
+│  ├─ CLOSED → Execute request
+│  │  ├─ Success → Return result, reset failure count
+│  │  └─ Failure → Increment failure count
+│  │     ├─ Count < 5 → Return error
+│  │     └─ Count &gt;= 5 → Open circuit, start 60s timer
+│  │
+│  ├─ OPEN → Fail fast (CircuitBreakerError)
+│  │  └─ After 60s → Transition to HALF_OPEN
+│  │
+│  └─ HALF_OPEN → Execute single test request
+│     ├─ Success → Close circuit, resume normal operation
+│     └─ Failure → Reopen circuit, restart 60s timer
+```
+
+## Related Documentation
+
+- [Agent Overview](/agents/agno-agents) - Agent responsibilities and interactions
+- [Agent Prompts](./prompts) - Prompt templates
+- [MCP Integration](./mcp) - MCP capabilities
+- [Agent Tests](./tests) - Test suite
+- Monitoring guidance (migration pending)
