@@ -11,7 +11,7 @@ services:
       - "${LANGGRAPH_PORT:-8111}:8111"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     environment:
       - AGNO_API_URL=http://tools-agno-agents:8200
       - DOCS_API_URL=http://docs-api:80
@@ -27,7 +27,7 @@ services:
       - "${LLAMAINDEX_INGESTION_PORT:-8201}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   llamaindex-query:
     image: "${IMG_TOOLS_LLAMAINDEX_QUERY:-nginx}:${IMG_VERSION:-alpine}"
@@ -36,7 +36,7 @@ services:
       - "${LLAMAINDEX_QUERY_PORT:-8202}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   agno-agents:
     image: "${IMG_TOOLS_AGNO_AGENTS:-img-infra-agno-agents}:${IMG_VERSION:-latest}"
@@ -48,7 +48,7 @@ services:
       - "${AGNO_AGENTS_PORT:-8200}:8200"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - tools_default
       - tradingsystem_backend

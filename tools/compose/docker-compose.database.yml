@@ -5,15 +5,25 @@ services:
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
     container_name: data-timescaledb
     ports:
-      - "${TIMESCALEDB_PORT:-5433}:5432"
+      - "5433:5432"
+    env_file:
+      - ../../.env
     environment:
-      POSTGRES_DB: ${TIMESCALEDB_DB:-trading}
-      POSTGRES_USER: ${TIMESCALEDB_USER:-timescale}
-      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-changeme}
+      POSTGRES_DB: trading
+      POSTGRES_USER: timescale
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}
       TIMESCALEDB_TELEMETRY: 'off'
     restart: unless-stopped
-    env_file:
-      - ../../config/docker.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALEDB_USER:-timescale} -d ${TIMESCALEDB_DB:-trading}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    networks:
+      - tradingsystem_backend
 
   timescaledb-backup:
     image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb}:${IMG_VERSION:-latest-pg16}"
@@ -23,10 +33,10 @@ services:
     environment:
       POSTGRES_DB: backup
       POSTGRES_USER: backup
-      POSTGRES_PASSWORD: backup
+      POSTGRES_PASSWORD: ${TIMESCALEDB_BACKUP_PASSWORD:-backup}
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   timescaledb-exporter:
     image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter}:${IMG_VERSION:-latest}"
@@ -39,7 +49,7 @@ services:
       DATA_SOURCE_PASS: ${TIMESCALEDB_PASSWORD:-changeme}
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     depends_on:
       - timescaledb
 
@@ -58,7 +68,7 @@ services:
       SCRIPT_NAME: ""
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   timescaledb-pgweb:
     image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb}:${IMG_VERSION:-latest}"
@@ -66,12 +76,15 @@ services:
     ports:
       - "${PGWEB_PORT:-8081}:8081"
     environment:
-      DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
+      PGWEB_DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     depends_on:
-      - timescaledb
+      timescaledb:
+        condition: service_healthy
+    networks:
+      - tradingsystem_backend
 
   timescaledb-adminer:
     image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer}:${IMG_VERSION:-latest}"
@@ -85,7 +98,7 @@ services:
       - ./adminer-custom.php:/var/www/html/index.php:ro
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     depends_on:
       - timescaledb
 
@@ -100,7 +113,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   qdrant:
     image: "${IMG_DATA_QDRANT:-qdrant/qdrant}:${IMG_VERSION:-latest}"
@@ -114,7 +127,7 @@ services:
       QDRANT_LOG_LEVEL: INFO
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   questdb:
     image: "${IMG_DATA_QUESTDB:-questdb/questdb}:${IMG_VERSION:-latest}"
@@ -128,7 +141,7 @@ services:
       QDB_LOG_LEVEL: INFO
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
 
   frontend-apps:
     image: "${IMG_DATA_FRONTEND_APPS:-nginx}:${IMG_VERSION:-alpine}"
@@ -137,4 +150,19 @@ services:
       - "${FRONTEND_APPS_PORT:-3001}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  tradingsystem_backend:
+    name: tradingsystem_backend
+    external: true
+
+# ========================================
+# Volumes
+# ========================================
+volumes:
+  timescaledb-data:
+    name: timescaledb-data

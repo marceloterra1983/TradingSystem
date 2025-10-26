@@ -1,78 +1,104 @@
 # ============================================================================
-# TradingSystem - Documentation Services Stack
+# TradingSystem - Documentation Services (2 Containers)
 # ============================================================================
 # Services:
-#   - DocsAPI (Port 3400) - Documentation management API (placeholder with health)
-#   - DocsSpecs (Port 3101) - OpenAPI/AsyncAPI viewer
+#   - Documentation (Port 3400) - NGINX serving Docusaurus + specs (static)
+#   - DocsAPI (Port 3401) - Express + FlexSearch + CRUD (dynamic API)
 #
 # Usage:
 #   docker compose -f tools/compose/docker-compose.docs.yml up -d
 #   docker compose -f tools/compose/docker-compose.docs.yml logs -f
 #   docker compose -f tools/compose/docker-compose.docs.yml down
 #
-# Last Updated: 2025-10-23
+# Last Updated: 2025-10-26
 # ============================================================================
 
 name: documentation
 
 services:
   # ============================================================================
-  # DocsAPI - Documentation Management API (Placeholder with Health)
+  # Documentation - NGINX Static Server
+  # Serves: Docusaurus (HTML/CSS/JS), OpenAPI/AsyncAPI specs (YAML/JSON)
   # ============================================================================
-  documentation-api:
-    container_name: docs-api
-    image: "${IMG_DOCS_API:-img-docs-api}:${IMG_VERSION:-latest}"
+  documentation:
+    container_name: documentation
+    image: "${IMG_DOCS:-documentation}:${IMG_VERSION:-latest}"
     platform: linux/amd64
+    env_file:
+      - ../../.env
     build:
-      context: ../docs-api
+      context: ./documentation
       dockerfile: Dockerfile
     ports:
-      - "${DOCS_API_PORT:-3400}:80"
+      - "${DOCS_PORT:-3400}:80"
+    volumes:
+      # Docusaurus build (static site)
+      - ../../docs/build:/usr/share/nginx/html:ro
+      # OpenAPI/AsyncAPI specifications
+      - ../../frontend/dashboard/public/specs:/usr/share/nginx/html/specs:ro
     restart: unless-stopped
-    env_file:
-      - ../../config/docker.env
     networks:
-      - tradingsystem_backend
+      - tradingsystem_frontend
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       start_period: 10s
       retries: 3
     labels:
       - "com.tradingsystem.stack=documentation"
-      - "com.tradingsystem.service=docs-api"
-      - "com.tradingsystem.type=backend"
+      - "com.tradingsystem.service=docs-static"
+      - "com.tradingsystem.type=frontend"
       - "com.tradingsystem.port=3400"
 
   # ============================================================================
-  # DocsSpecs - OpenAPI & AsyncAPI Specifications Viewer
+  # DocsAPI - Documentation Management API
+  # Provides: FlexSearch, CRUD operations, spec validation
   # ============================================================================
-  docs-api-viewer:
-    container_name: docs-api-viewer
-    image: "${IMG_DOCS_API_VIEWER:-nginx}:${IMG_DOCS_VIEWER_VERSION:-alpine}"
+  docs-api:
+    container_name: docs-api
+    image: "${IMG_DOCS_API:-docs-api}:${IMG_VERSION:-latest}"
     platform: linux/amd64
+    env_file:
+      - ../../.env
+    build:
+      context: ../../backend/api/documentation-api
+      dockerfile: Dockerfile
     ports:
-      - "${DOCSPECS_PORT:-3101}:80"
+      - "${DOCS_API_PORT:-3401}:3000"
     environment:
       - NODE_ENV=production
-      - PORT=80
+      - PORT=3000
+      - DOCS_DIR=/app/docs
+      - DOCUMENTATION_DB_STRATEGY=none
+      - LOG_LEVEL=info
     volumes:
-      - ../../docs/spec:/usr/share/nginx/html:ro
-    networks:
-      - tradingsystem_frontend
+      # Documentation source files
+      - ../../docs:/app/docs:ro
+      # Database (SQLite)
+      - docs-api-data:/app/db
     restart: unless-stopped
+    networks:
+      - tradingsystem_backend
+      - tradingsystem_frontend
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
-      start_period: 20s
+      start_period: 15s
       retries: 3
     labels:
       - "com.tradingsystem.stack=documentation"
-      - "com.tradingsystem.service=docs-api-viewer"
-      - "com.tradingsystem.type=frontend"
-      - "com.tradingsystem.port=3101"
+      - "com.tradingsystem.service=docs-api"
+      - "com.tradingsystem.type=backend"
+      - "com.tradingsystem.port=3401"
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  docs-api-data:
+    driver: local
 
 # ============================================================================
 # Networks

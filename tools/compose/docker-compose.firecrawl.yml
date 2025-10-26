@@ -13,7 +13,7 @@ services:
       - "${FIRECRAWL_PROXY_PORT:-3600}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - firecrawl_network
       - tradingsystem_backend
@@ -35,7 +35,7 @@ services:
       - "${FIRECRAWL_API_PORT:-3002}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - firecrawl_network
 
@@ -47,10 +47,10 @@ services:
     environment:
       POSTGRES_DB: firecrawl
       POSTGRES_USER: firecrawl
-      POSTGRES_PASSWORD: firecrawl
+      POSTGRES_PASSWORD: ${FIRECRAWL_DB_PASSWORD:-firecrawl}
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - firecrawl_network
 
@@ -61,7 +61,7 @@ services:
       - "${FIRECRAWL_REDIS_PORT:-6379}:6379"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - firecrawl_network
 
@@ -72,7 +72,7 @@ services:
       - "${FIRECRAWL_PLAYWRIGHT_PORT:-3003}:80"
     restart: unless-stopped
     env_file:
-      - ../../config/docker.env
+      - ../../.env
     networks:
       - firecrawl_network
 
