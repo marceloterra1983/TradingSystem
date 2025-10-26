@@ -32,6 +32,8 @@ const metrics = require('./src/utils/metrics');
 // Terminal detection and launching
 const terminalDetector = require('./src/utils/terminal-detector');
 const terminalLauncher = require('./src/utils/terminal-launcher');
+const telegramGatewayRouter = require('./src/routes/telegram-gateway');
+const containersRouter = require('./src/routes/containers');
 
 const app = express();
 // Port 3500 is the official default (aligned with project standards)
@@ -81,7 +83,7 @@ function invalidateHealthCheckCache() {
 
 const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
   ? process.env.CORS_ORIGIN
-  : 'http://localhost:3101,http://localhost:3004';
+  : 'http://localhost:3101,http://localhost:3205';
 const corsOrigins = rawCorsOrigin === '*'
   ? undefined
   : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
@@ -94,6 +96,9 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 app.use(express.json());
+
+app.use('/api/telegram-gateway', telegramGatewayRouter);
+app.use('/api/containers', containersRouter);
 
 /**
  * Resolve the numeric port for a service.
@@ -206,9 +211,27 @@ const SERVICE_TARGETS = [
     name: 'DocsAPI',
     description: 'Documentation content service',
     category: 'api',
-    defaultPort: 3400,
+    defaultPort: 3205,
     portEnv: 'SERVICE_LAUNCHER_DOCS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCS_URL',
+  }),
+  createServiceTarget({
+    id: 'telegram-gateway',
+    name: 'Telegram Gateway',
+    description: 'Telegram MTProto ingestion gateway',
+    category: 'messaging',
+    defaultPort: 4006,
+    portEnv: 'SERVICE_LAUNCHER_TELEGRAM_GATEWAY_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_TELEGRAM_GATEWAY_URL',
+  }),
+  createServiceTarget({
+    id: 'telegram-gateway-api',
+    name: 'Telegram Gateway API',
+    description: 'CRUD API for Telegram gateway messages',
+    category: 'api',
+    defaultPort: 4010,
+    portEnv: 'SERVICE_LAUNCHER_TELEGRAM_GATEWAY_API_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_TELEGRAM_GATEWAY_API_URL',
   }),
   createServiceTarget({
     id: 'dashboard-ui',
@@ -225,7 +248,7 @@ const SERVICE_TARGETS = [
     name: 'Docusaurus',
     description: 'Site oficial de documentação técnica',
     category: 'docs',
-    defaultPort: 3004,
+    defaultPort: 3205,
     portEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_URL',
     path: '/',
@@ -736,6 +759,16 @@ const SERVICE_START_CONFIGS = {
     workingDir: path.join(projectRoot, 'backend/api/firecrawl-proxy'),
     command: 'npm run dev',
     displayName: 'Firecrawl Proxy'
+  },
+  'telegram-gateway': {
+    workingDir: path.join(projectRoot, 'apps/telegram-gateway'),
+    command: 'npm run dev',
+    displayName: 'Telegram Gateway'
+  },
+  'telegram-gateway-api': {
+    workingDir: path.join(projectRoot, 'backend/api/telegram-gateway'),
+    command: 'npm run dev',
+    displayName: 'Telegram Gateway API'
   }
 };
 

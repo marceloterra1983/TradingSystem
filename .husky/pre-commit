@@ -1,9 +1,24 @@
-#!/usr/bin/env sh
-# ============================================================================
-# TradingSystem Pre-commit Hooks
-# ============================================================================
-# Simplified validation - Updated 2025-10-23
-# ============================================================================
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source=/dev/null
+. "$(dirname "$0")/_/husky.sh"
+
+if [ "${SKIP_DOCS_HOOKS:-0}" = "1" ]; then
+  echo "⚠️  Skipping docs lint (SKIP_DOCS_HOOKS=1)"
+  exit 0
+fi
+
+if [ "${SKIP_DOCS_AUTO:-0}" = "1" ]; then
+  echo "⚠️  Skipping docs:auto (SKIP_DOCS_AUTO=1)"
+else
+  echo "🔄 docs auto-generate"
+  npm --prefix docs run docs:auto
+fi
+
+echo "🔍 docs lint"
+npm --prefix docs run docs:lint
 
 echo "✅ Pre-commit validation passed"
 echo "ℹ️  Note: Run 'bash scripts/maintenance/validate-md-structure.sh' manually if needed"

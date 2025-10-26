@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Play, Loader2 } from 'lucide-react';
 import { ButtonWithDropdown } from '../ui/button-with-dropdown';
 import { Button } from '../ui/button';
 import { apiConfig } from '../../config/api';
+import { useStartContainer } from '../../hooks/useStartContainer';
 
 type DatabaseViewKey = 'questdbConsole' | 'pgAdmin' | 'pgWeb' | 'adminer';
+type ContainerName = 'questdb' | 'pgadmin' | 'pgweb' | 'adminer';
 
 interface EndpointOption {
   label: string;
@@ -16,9 +18,18 @@ interface DatabaseViewDefinition {
   openLabel: string;
   iframeTitle: string;
   endpoints: EndpointOption[];
+  containerName?: ContainerName;
   sandbox?: string;
   allow?: string;
 }
+
+// Map database view keys to container names
+const viewToContainer: Record<DatabaseViewKey, ContainerName | null> = {
+  questdbConsole: 'questdb',
+  pgAdmin: 'pgadmin',
+  pgWeb: 'pgweb',
+  adminer: 'adminer',
+};
 
 const uniqueByUrl = (options: EndpointOption[]): EndpointOption[] => {
   const seen = new Set<string>();
@@ -97,8 +108,23 @@ export function DatabasePageNew() {
     adminer: databaseViews.adminer.endpoints[0]?.url ?? '',
   });
 
+  // Track iframe load errors (indicates container might not be running)
+  const [iframeErrors, setIframeErrors] = React.useState<
+    Record<DatabaseViewKey, boolean>
+  >({
+    questdbConsole: false,
+    pgAdmin: false,
+    pgWeb: false,
+    adminer: false,
+  });
+
   const viewDefinition = databaseViews[activeView];
   const iframeUrl = endpointUrls[activeView];
+  const containerName = viewToContainer[activeView];
+  const hasIframeError = iframeErrors[activeView];
+
+  // Hook for starting containers
+  const { mutate: startContainer, isPending: isStarting } = useStartContainer();
 
   const handleOpenInNewTab = React.useCallback(() => {
     if (typeof window === 'undefined' || !iframeUrl) {
@@ -106,6 +132,33 @@ export function DatabasePageNew() {
     }
     window.open(iframeUrl, '_blank', 'noopener,noreferrer');
   }, [iframeUrl]);
+
+  // Handle iframe load success - clear error state
+  const handleIframeLoad = React.useCallback(() => {
+    setIframeErrors((prev) => ({ ...prev, [activeView]: false }));
+  }, [activeView]);
+
+  // Handle iframe load error - set error state
+  const handleIframeError = React.useCallback(() => {
+    setIframeErrors((prev) => ({ ...prev, [activeView]: true }));
+  }, [activeView]);
+
+  // Handle Start Container button click
+  const handleStartContainer = React.useCallback(() => {
+    if (!containerName) return;
+
+    startContainer(containerName, {
+      onSuccess: () => {
+        // Clear error state and reload iframe after successful start
+        setIframeErrors((prev) => ({ ...prev, [activeView]: false }));
+        // Give container a moment to initialize before reloading iframe
+        setTimeout(() => {
+          // Force iframe reload by changing key
+          setEndpointUrls((prev) => ({ ...prev }));
+        }, 2000);
+      },
+    });
+  }, [containerName, startContainer, activeView]);
 
   const sandbox = viewDefinition.sandbox ?? defaultSandbox;
   const allow = viewDefinition.allow ?? defaultAllow;
@@ -139,24 +192,49 @@ export function DatabasePageNew() {
               );
             })}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenInNewTab}
-            disabled={!iframeUrl}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            {viewDefinition.openLabel}
-          </Button>
+          <div className="flex gap-2">
+            {hasIframeError && containerName && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleStartContainer}
+                disabled={isStarting}
+              >
+                {isStarting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Iniciando...
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Iniciar Container
+                  </>
+                )}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenInNewTab}
+              disabled={!iframeUrl}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              {viewDefinition.openLabel}
+            </Button>
+          </div>
         </div>
       </div>
       {iframeUrl ? (
         <iframe
+          key={`${activeView}-${endpointUrls[activeView]}`}
           src={iframeUrl}
           title={viewDefinition.iframeTitle}
           className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
           sandbox={sandbox}
           allow={allow}
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
         />
       ) : (
         <div className="flex h-[calc(100%-40px)] w-full items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
