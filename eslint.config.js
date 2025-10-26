@@ -42,6 +42,7 @@ export default [
       // Frontend e docs (eles têm suas próprias configurações)
       'frontend/**',
       'docs/**',
+      'docs_legacy/**',
       
       // Scripts com shebang
       '**/migrate-lowdb-to-timescaledb.js',

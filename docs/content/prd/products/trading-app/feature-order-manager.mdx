@@ -1,0 +1,286 @@
+---
+title: "Feature Brief \u2013 Order Manager"
+description: Product requirements for the Order Manager feature within the Trading
+  App.
+tags:
+  - prd
+  - trading-app
+owner: ProductOps
+lastReviewed: '2025-10-26'
+---
+## 1. Summary
+
+The Order Manager feature enables automated order execution with comprehensive risk safeguards. It enforces daily loss limits, position size controls, trading hours restrictions, and provides a kill switch for emergency stops. The system validates all orders against configured risk parameters before submission to ProfitDLL, ensuring safe automation while maintaining fast execution (&lt;500ms p95 latency).
+
+**Problem Statement**
+- Manual order execution is error-prone and slow
+- Existing dashboards lack visibility into rejected orders and breach reasons
+- Risk controls applied inconsistently without automated enforcement
+- No centralized kill switch for emergency situations
+
+**Proposed Solution**
+- Automated order manager with pre-trade risk validation
+- Structured error payloads with actionable rejection reasons
+- Real-time risk monitoring dashboard
+- Emergency kill switch to cancel all orders instantly
+
+## 2. Goals
+
+**Primary Goals**
+1. Enforce daily loss limits and position sizing before each order
+2. Provide operators with actionable feedback when orders are rejected
+3. Execute market, limit, and stop orders with &lt;500ms p95 latency
+4. Track complete order lifecycle (PENDING → FILLED/CANCELED/REJECTED)
+5. Implement kill switch for emergency trading halt
+
+**Secondary Goals**
+1. Support multiple order types (MARKET, LIMIT, STOP, STOP_LIMIT)
+2. Provide idempotency for order creation (prevent duplicates)
+3. Expose Prometheus metrics for monitoring
+4. Maintain complete audit trail for compliance
+5. Enable dynamic risk limit configuration
+
+## 3. Non-Goals
+
+- Does not redesign the ProfitDLL integration layer (uses existing DLL)
+- Does not implement multi-broker support (single broker MVP)
+- Does not support order modification (must cancel and recreate)
+- Does not include backtesting mode (separate feature)
+- Does not implement advanced order types (OCO, bracket) in MVP
+- Does not provide automated order execution (requires manual approval)
+
+## 4. Background
+
+**Current State**
+- Manual order execution via ProfitDLL API
+- Risk controls applied manually by traders
+- No centralized order tracking or audit trail
+- Dashboard lacks order management interface
+- No automated risk validation before order submission
+
+**Market Context**
+- Trading on B3 (Brazilian stock exchange)
+- Market hours: 9:00-18:00 BRT
+- Currency: BRL (Brazilian Real)
+- Broker: Nelogica via ProfitDLL
+
+**Technical Context**
+- Windows-native deployment (ProfitDLL requirement)
+- .NET 8 / C# implementation
+- Port 3205 (Order Manager API)
+- Integration with Dashboard (port 3103)
+
+## 5. User Stories
+
+### US-1: Order Placement with Risk Validation
+**As a** trader  
+**I want** to place orders with automated risk validation  
+**So that** I can execute trades safely without manual risk checks
+
+**Acceptance Criteria**
+- Order form validates inputs client-side (symbol, quantity, price)
+- API validates order against risk limits before submission
+- Rejected orders display clear reason (e.g., "Daily loss limit exceeded: R$5,250 / R$5,000")
+- Approved orders submitted to broker within 500ms
+- Order status tracked in real-time (PENDING → SUBMITTED → FILLED)
+
+### US-2: Risk Limit Configuration
+**As a** risk analyst  
+**I want** to configure risk limits dynamically  
+**So that** I can adjust controls without restarting services
+
+**Acceptance Criteria**
+- Risk limits configurable via API (daily loss, position size, trading hours)
+- Changes applied immediately (no restart required)
+- Audit log records all limit changes with timestamp and user
+- Dashboard displays current limits and utilization
+
+### US-3: Emergency Kill Switch
+**As a** risk manager  
+**I want** to activate kill switch to stop all trading  
+**So that** I can prevent losses during market anomalies
+
+**Acceptance Criteria**
+- Kill switch activates within 1 second
+- All pending orders canceled immediately
+- New orders rejected while kill switch active
+- Alert sent to operators (Slack, email)
+- Audit log records activation reason and timestamp
+
+### US-4: Order Rejection Visibility
+**As a** risk analyst  
+**I need** clear rejection reasons  
+**So that** I can adjust trading parameters quickly
+
+**Acceptance Criteria**
+- Order manager rejects requests exceeding configured limits with structured error payloads
+- Rejections surfaced in dashboard with actionable messaging
+- Error messages include specific limit violated and current value
+- Rejection history accessible via API for analysis
+
+### US-5: Order Lifecycle Tracking
+**As a** trader  
+**I want** to monitor order status in real-time  
+**So that** I can track execution progress and take action if needed
+
+**Acceptance Criteria**
+- Dashboard displays all orders with current status
+- Status updates in real-time (polling or WebSocket)
+- Order details include fills, average price, timestamps
+- Filter orders by status, symbol, date range
+
+## 6. Acceptance Criteria
+
+**Functional Acceptance**
+- ✅ Order creation endpoint validates all required fields
+- ✅ Risk checks enforce daily loss limit, position size, trading hours
+- ✅ Kill switch cancels all pending orders within 1 second
+- ✅ Order lifecycle tracked through all states (11 states per state machine)
+- ✅ Idempotency key prevents duplicate orders
+- ✅ Order cancellation is idempotent (repeated calls succeed)
+
+**Performance Acceptance**
+- ✅ Order placement latency &lt;500ms p95 (business-requirements.md NFR-1.5)
+- ✅ Risk check latency &lt;100ms p95
+- ✅ API response time &lt;200ms p95
+- ✅ Support 100 concurrent orders per account
+
+**Security Acceptance**
+- ✅ All orders logged to audit trail
+- ✅ Risk violations logged with reason and timestamp
+- ✅ Kill switch activations logged with user and reason
+- ✅ No sensitive data in error messages or logs
+
+**Usability Acceptance**
+- ✅ Error messages are clear and actionable
+- ✅ Dashboard displays order status in real-time
+- ✅ Risk limit violations show current vs limit values
+- ✅ Kill switch has confirmation dialog (prevent accidental activation)
+
+## 7. Dependencies
+
+**SDD**
+- [Order Schema](../../../sdd/domain/schemas/v1/order) - Order entity definition
+- [Risk Rule Schema](../../../sdd/domain/schemas/v1/risk-rule) - Risk limit configuration
+- [Order Created Event](../../../sdd/events/v1/order-created) - Event payload contract
+- [Place Order Flow](../../../sdd/flows/v1/place-order) - Order placement sequence
+- [Cancel Order Flow](../../../sdd/flows/v1/cancel-order) - Order cancellation sequence
+
+**API**
+- [Order Manager API](../../../api/order-manager) - API summary
+- [Order Manager Spec](../../../sdd/api/order-manager/v1/spec) - Detailed API specification
+- [Order Manager Guidelines](../../../sdd/api/order-manager/v1/guidelines) - API conventions
+- Redoc: `/redoc/order-manager` (TODO - automated build pending)
+
+**Frontend**
+- [Frontend Architecture](../../../frontend/engineering/architecture) - React Router, Zustand, React Query
+- [Frontend Conventions](../../../frontend/engineering/conventions) - Component structure, imports
+- [Design System](../../../frontend/design-system/components) - UI components
+
+**External**
+- ProfitDLL (order execution, Windows-native)
+- B3 Market Data (price validation)
+- TimescaleDB (order persistence)
+
+## 8. UX/UI References
+
+**Design System**
+- Colors: Risk Management (Red #EF4444) for order-related UI
+- Typography: Inter font family, 400-700 weights
+- Components: shadcn/ui components (Button, Dialog, Table, Badge)
+
+**Order Form Wireframe**
+```
+┌─────────────────────────────────────┐
+│ Place Order                    [×]  │
+├─────────────────────────────────────┤
+│ Symbol *        Side *              │
+│ [PETR4      ▼] [BUY       ▼]       │
+│                                     │
+│ Type *          Quantity *          │
+│ [LIMIT      ▼] [100            ]   │
+│                                     │
+│ Price *         Stop Price          │
+│ [32.50        ] [            ]     │
+│                                     │
+│ Time in Force                       │
+│ [DAY        ▼]                     │
+│                                     │
+│ ┌─────────────────────────────────┐│
+│ │ Risk Check Summary              ││
+│ │ ✅ Trading hours: OK            ││
+│ │ ✅ Daily loss: R$1,250 / R$5,000││
+│ │ ✅ Position size: 750 / 1,000   ││
+│ │ ✅ Margin: Sufficient           ││
+│ └─────────────────────────────────┘│
+│                                     │
+│ [Cancel]              [Place Order]│
+└─────────────────────────────────────┘
+```
+
+**Order List Wireframe**
+```
+┌─────────────────────────────────────────────────────────┐
+│ Orders                                    [+ New Order] │
+├─────────────────────────────────────────────────────────┤
+│ [All ▼] [Symbol ▼] [Status ▼] [Date Range ▼]          │
+├─────────────────────────────────────────────────────────┤
+│ ORD-001  PETR4  BUY  100  LIMIT  32.50  FILLED  ✅     │
+│ ORD-002  VALE3  SELL 50   MARKET -      PENDING ⏳     │
+│ ORD-003  ITUB4  BUY  200  LIMIT  28.00  REJECTED ❌    │
+│          Reason: Daily loss limit exceeded              │
+├─────────────────────────────────────────────────────────┤
+│ Showing 3 of 150 orders                                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Figma/Design Files**: TBD (link once created)
+
+## 9. Metrics
+
+**Product KPIs**
+- Order Volume: Total orders placed per day
+- Execution Rate: Percentage of orders successfully filled
+- Rejection Rate: Percentage of orders rejected by risk checks
+- Average Latency: p50, p95, p99 order placement latency
+- Risk Violations: Count by type (daily loss, position size, trading hours)
+- Kill Switch Activations: Count and duration
+
+**Performance Metrics**
+- Order Placement Latency: &lt;500ms p95 (histogram `order_manager_execution_latency_seconds`)
+- Risk Check Latency: &lt;100ms p95
+- API Response Time: &lt;200ms p95 (histogram `api_request_duration_seconds`)
+- Dashboard Load Time: &lt;2 seconds
+
+**Quality Metrics**
+- Error Rate: &lt;1% of order placements fail
+- Uptime: 99% availability over 30 days
+- Data Consistency: 100% orders logged to audit trail
+- Idempotency: 0 duplicate orders due to retries
+
+**Tracking Requirements**
+- Track rejection counts per rule (Prometheus counter `order_manager_risk_violations_total{type}`)
+- Log all order lifecycle transitions to audit trail
+- Export metrics to Prometheus for Grafana dashboards
+- Structured logs with trace_id for debugging
+
+## 10. Open Questions
+
+**From Source**
+- Should we persist per-order audit logs or aggregate summaries? **Decision**: Per-order audit logs for compliance (full trail)
+
+**Additional Questions**
+1. **Order Modification**: Should MVP support order modification or require cancel+recreate? **Decision**: Cancel+recreate for MVP (modification in v1.1)
+2. **Async Execution**: Should order placement be asynchronous via message queue? **Decision**: Synchronous for MVP (async in v2.0)
+3. **Multi-Broker**: When should we add multi-broker support? **Decision**: v2.0 (after MVP stabilization)
+4. **WebSocket Events**: Should order status updates push via WebSocket? **Decision**: Polling for MVP, WebSocket in v1.1
+5. **Backtesting Mode**: Should we support simulated orders for testing? **Decision**: v1.2 (separate feature)
+6. **Authentication**: When should we add API authentication? **Decision**: v1.1 (token-based auth)
+
+## Related Documentation
+
+- [Trading App Overview](./prd-overview)
+- [Order Manager API](../../../api/order-manager)
+- [Order Schema](../../../sdd/domain/schemas/v1/order)
+- [Place Order Flow](../../../sdd/flows/v1/place-order)
+- [Risk Limits Configuration](../../../tools/security-config/risk-limits)

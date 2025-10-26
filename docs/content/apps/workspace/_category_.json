@@ -1,0 +1,11 @@
+{
+  "label": "Workspace",
+  "position": 4,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Workspace App",
+    "slug": "/apps/workspace",
+    "description": "Operational documentation for the Workspace idea management application."
+  }
+}

@@ -1,0 +1,586 @@
+---
+title: API Specification
+description: Specification for Order Manager API v1.
+tags:
+  - sdd
+  - order-manager
+  - api
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Links
+
+- ⚠️ **OpenAPI Spec**: `/apis/order-manager/v1/openapi.yaml` (TODO - not yet published)
+- ⚠️ **Redoc**: `/redoc/order-manager` (TODO - automated build pending)
+- **Source Code**: `backend/services/order-manager/` (planned implementation)
+- **Architecture**: `../../../../reference/architecture/technical-specification` (external file - migration pending)
+- **Service Map**: `../../../../reference/architecture/service-map` (when migrated from `docs/context/backend/architecture/service-map.md`)
+
+## Service Overview
+
+- **Service Name**: Order Manager API v1
+- **Technology**: .NET 8 / C#
+- **Port**: 3205
+- **Base URL**: `http://localhost:3205/api`
+- **Status**: MVP (specification-first design)
+- **Purpose**: Execute trading orders with integrated risk management and position tracking.
+
+**Core Responsibilities**:
+1. Receive order requests from API Gateway (port 8000)
+2. Apply risk checks: daily loss limits, position size limits, trading hours validation
+3. Execute orders via ProfitDLL integration
+4. Track order lifecycle: pending → submitted → filled/canceled/rejected
+5. Update position states in real-time
+6. Provide kill switch functionality for emergency stops
+
+## API Contract
+
+### Base URL and Versioning
+
+- Base URL: `http://localhost:3205/api`
+- Version: v1 (implicit, no `/v1` prefix for MVP)
+- Future: Adopt `/api/v1` prefix when breaking changes are introduced
+- Content-Type: `application/json; charset=utf-8`
+
+### Authentication
+
+- Current: No authentication (internal service)
+- Planned: Token-based authentication
+  - Header: `Authorization: Bearer <token>`
+  - Tokens validated via shared auth service
+  - Rate limiting applied per token
+
+### Response Envelope
+
+All responses use the standard envelope:
+
+**Success Response**:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "Order created successfully"
+}
+```
+
+**Error Response**:
+
+```json
+{
+  "success": false,
+  "error": "Validation failed",
+  "errors": [
+    "Symbol INVALID not found",
+    "Quantity must be positive"
+  ]
+}
+```
+
+> Exceptions: `GET /health` returns a health payload without the envelope, and `GET /metrics` emits Prometheus metrics as `text/plain`. Clients must handle these endpoints as out-of-band responses.
+
+### Endpoints
+
+#### POST /api/orders
+
+**Purpose**: Create new order (market, limit, stop, stop-limit)
+
+**Request Body**:
+
+```json
+{
+  "symbol": "PETR4",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 100,
+  "price": 32.5,
+  "stopPrice": null,
+  "timeInForce": "DAY",
+  "idempotencyKey": "uuid-v4"
+}
+```
+
+**Validation Rules**:
+- `symbol`: Required, must exist in market data
+- `side`: Required, enum [BUY, SELL]
+- `type`: Required, enum [MARKET, LIMIT, STOP, STOP_LIMIT]
+- `quantity`: Required, positive integer
+- `price`: Required for LIMIT/STOP_LIMIT, positive number
+- `stopPrice`: Required for STOP/STOP_LIMIT
+- `timeInForce`: Optional, enum [DAY, GTC, IOC, FOK], default DAY
+- `idempotencyKey`: Optional UUID v4
+
+**Risk Checks**:
+1. Trading hours: 09:00-18:00 BRT
+2. Daily loss limit: Reject if exceeded
+3. Position size limit: Validate per symbol
+4. Margin requirement: Ensure sufficient balance
+5. Kill switch: Reject when active
+
+**Response** (201 Created):
+
+```json
+{
+  "success": true,
+  "data": {
+    "orderId": "ORD-20251024-001",
+    "symbol": "PETR4",
+    "side": "BUY",
+    "type": "LIMIT",
+    "quantity": 100,
+    "price": 32.5,
+    "status": "PENDING",
+    "createdAt": "2025-10-24T10:30:00Z"
+  },
+  "message": "Order created successfully"
+}
+```
+
+**Error Responses**:
+- 400 Bad Request: Validation failure
+- 403 Forbidden: Risk check failed
+- 500 Internal Server Error: ProfitDLL connection failure
+
+---
+
+#### GET /api/orders
+
+**Purpose**: List orders with filters
+
+**Query Parameters**:
+- `status`: Optional, enum [PENDING, SUBMITTED, PARTIALLY_FILLED, FILLED, CANCELED, FAILED, EXPIRED, REJECTED]
+- `symbol`: Optional, symbol filter
+- `side`: Optional, enum [BUY, SELL]
+- `startDate`: Optional ISO 8601
+- `endDate`: Optional ISO 8601
+- `limit`: Optional, default 50, max 500
+- `offset`: Optional, default 0
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "orders": [
+      {
+        "orderId": "ORD-20251024-001",
+        "symbol": "PETR4",
+        "side": "BUY",
+        "type": "LIMIT",
+        "quantity": 100,
+        "filledQuantity": 50,
+        "price": 32.5,
+        "avgFillPrice": 32.45,
+        "status": "PARTIALLY_FILLED",
+        "createdAt": "2025-10-24T10:30:00Z",
+        "updatedAt": "2025-10-24T10:35:00Z"
+      }
+    ],
+    "total": 1,
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+---
+
+#### GET `/api/orders/{orderId}`
+
+**Purpose**: Retrieve details for a specific order
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "orderId": "ORD-20251024-001",
+    "symbol": "PETR4",
+    "side": "BUY",
+    "type": "LIMIT",
+    "quantity": 100,
+    "filledQuantity": 100,
+    "price": 32.5,
+    "avgFillPrice": 32.48,
+    "status": "FILLED",
+    "fills": [
+      {
+        "fillId": "FILL-001",
+        "quantity": 50,
+        "price": 32.45,
+        "timestamp": "2025-10-24T10:35:00Z"
+      },
+      {
+        "fillId": "FILL-002",
+        "quantity": 50,
+        "price": 32.5,
+        "timestamp": "2025-10-24T10:36:00Z"
+      }
+    ],
+    "createdAt": "2025-10-24T10:30:00Z",
+    "updatedAt": "2025-10-24T10:36:00Z"
+  }
+}
+```
+
+**Error Responses**:
+- 404 Not Found: Order ID not found
+
+---
+
+#### DELETE `/api/orders/{orderId}`
+
+**Purpose**: Cancel order
+
+**Idempotency**: Canceling an already canceled order returns success.
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "orderId": "ORD-20251024-001",
+    "status": "CANCELED",
+    "canceledAt": "2025-10-24T10:40:00Z"
+  },
+  "message": "Order canceled successfully"
+}
+```
+
+**Error Responses**:
+- 404 Not Found: Order ID not found
+- 400 Bad Request: Order already filled
+
+---
+
+#### GET /api/risk/limits
+
+**Purpose**: Retrieve current risk limits
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "dailyLossLimit": 5000,
+    "currentDailyLoss": 1250.5,
+    "maxPositionSize": {
+      "PETR4": 1000,
+      "VALE3": 500
+    },
+    "tradingHours": {
+      "start": "09:00",
+      "end": "18:00",
+      "timezone": "America/Sao_Paulo"
+    },
+    "killSwitchActive": false
+  }
+}
+```
+
+---
+
+#### PUT /api/risk/limits
+
+**Purpose**: Update risk configuration parameters
+
+**Request Body**:
+
+```json
+{
+  "dailyLossLimit": 7500,
+  "maxPositionSize": {
+    "PETR4": 1500,
+    "VALE3": 600
+  },
+  "tradingHours": {
+    "start": "09:00",
+    "end": "18:00",
+    "timezone": "America/Sao_Paulo"
+  }
+}
+```
+
+**Validation Rules**:
+- `dailyLossLimit`: Required, number between 100 and 1_000_000 (BRL)
+- `maxPositionSize`: Required, object of symbol → positive integer (1–10_000)
+- `tradingHours.start` and `.end`: Required HH:MM (24h), `start` < `end`
+- `timezone`: Optional, defaults to `America/Sao_Paulo`; must be valid IANA TZ
+- Reject request when kill switch is active (403) to prevent mid-incident reconfiguration
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "dailyLossLimit": 7500,
+    "maxPositionSize": {
+      "PETR4": 1500,
+      "VALE3": 600
+    },
+    "tradingHours": {
+      "start": "09:00",
+      "end": "18:00",
+      "timezone": "America/Sao_Paulo"
+    },
+    "updatedAt": "2025-10-24T12:05:00Z",
+    "updatedBy": "risk-ops"
+  },
+  "message": "Risk parameters updated"
+}
+```
+
+**Error Responses**:
+- 400 Bad Request: Validation failure (e.g., invalid symbol, missing trading hours)
+- 403 Forbidden: Kill switch is active or caller lacks permission (future auth)
+- 409 Conflict: Optimistic concurrency failure when a `version` field is provided (future enhancement)
+- 500 Internal Server Error: Persistence or downstream failure
+
+---
+
+#### POST /api/risk/kill-switch
+
+**Purpose**: Activate emergency stop (cancel all orders)
+
+**Request Body**:
+
+```json
+{
+  "reason": "Market volatility spike",
+  "cancelAll": true
+}
+```
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "killSwitchActive": true,
+    "ordersCanceled": 15,
+    "activatedAt": "2025-10-24T11:00:00Z",
+    "reason": "Market volatility spike"
+  },
+  "message": "Kill switch activated, all orders canceled"
+}
+```
+
+---
+
+#### GET /api/risk/positions
+
+**Purpose**: Retrieve aggregated open positions and exposure
+
+**Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "data": {
+    "asOf": "2025-10-24T12:00:00Z",
+    "positions": [
+      {
+        "symbol": "PETR4",
+        "netQuantity": 350,
+        "averagePrice": 32.15,
+        "marketPrice": 33.1,
+        "unrealizedPnl": 332.5,
+        "currency": "BRL"
+      },
+      {
+        "symbol": "VALE3",
+        "netQuantity": -120,
+        "averagePrice": 68.4,
+        "marketPrice": 67.8,
+        "unrealizedPnl": 72,
+        "currency": "BRL"
+      }
+    ],
+    "totalUnrealizedPnl": 404.5,
+    "totalExposure": 48250.0
+  }
+}
+```
+
+**Error Responses**:
+- 500 Internal Server Error: Position service unavailable
+- 503 Service Unavailable: Downstream market data source offline
+
+---
+
+#### GET /health
+
+**Purpose**: Service health check
+
+**Response** (200 OK):
+
+```json
+{
+  "status": "healthy",
+  "service": "order-manager",
+  "profitdll": {
+    "status": "connected",
+    "latencyMs": 15
+  },
+  "database": {
+    "status": "connected"
+  },
+  "timestamp": "2025-10-24T10:30:00Z"
+}
+```
+
+**Error Response** (503 Service Unavailable):
+
+```json
+{
+  "status": "unhealthy",
+  "service": "order-manager",
+  "profitdll": {
+    "status": "disconnected",
+    "error": "Connection timeout"
+  }
+}
+```
+
+---
+
+#### GET /metrics
+
+**Purpose**: Prometheus metrics
+
+**Response** (200 OK, text/plain):
+
+```
+# HELP order_manager_orders_total Total orders created
+# TYPE order_manager_orders_total counter
+order_manager_orders_total{side="BUY",status="FILLED"} 150
+
+# HELP order_manager_execution_latency_seconds Order execution latency
+# TYPE order_manager_execution_latency_seconds histogram
+order_manager_execution_latency_seconds_bucket{le="0.1"} 120
+order_manager_execution_latency_seconds_bucket{le="0.5"} 145
+
+# HELP order_manager_risk_violations_total Risk check violations
+# TYPE order_manager_risk_violations_total counter
+order_manager_risk_violations_total{type="daily_loss_limit"} 5
+```
+
+## Data Models
+
+### Order Schema
+
+```typescript
+interface Order {
+  orderId: string;
+  symbol: string;
+  side: 'BUY' | 'SELL';
+  type: 'MARKET' | 'LIMIT' | 'STOP' | 'STOP_LIMIT';
+  quantity: number;
+  filledQuantity: number;
+  price?: number;
+  stopPrice?: number;
+  avgFillPrice?: number;
+  status: OrderStatus;
+  timeInForce: 'DAY' | 'GTC' | 'IOC' | 'FOK';
+  fills: Fill[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+type OrderStatus =
+  | 'PENDING'
+  | 'SUBMITTED'
+  | 'PARTIALLY_FILLED'
+  | 'FILLED'
+  | 'CANCELED'
+  | 'EXPIRED'
+  | 'FAILED'
+  | 'REJECTED';
+
+interface Fill {
+  fillId: string;
+  quantity: number;
+  price: number;
+  timestamp: string;
+}
+```
+
+### Risk Limits Schema
+
+```typescript
+interface RiskLimits {
+  dailyLossLimit: number;
+  currentDailyLoss: number;
+  maxPositionSize: Record<string, number>;
+  tradingHours: {
+    start: string;
+    end: string;
+    timezone: string;
+  };
+  killSwitchActive: boolean;
+}
+```
+
+## Non-Obvious Behaviors
+
+### Order Lifecycle
+
+1. **PENDING**: Created, risk checks passed, awaiting submission
+2. **SUBMITTED**: Sent to ProfitDLL, awaiting acknowledgment
+3. **FAILED**: Submission attempt failed; service will retry or move to REJECTED
+4. **PARTIALLY_FILLED**: Partially executed, remainder active
+5. **FILLED**: Fully executed
+6. **CANCELED**: Canceled by user or kill switch
+7. **EXPIRED**: Order expired based on time-in-force policy
+8. **REJECTED**: Rejected by broker or risk engine
+
+### Risk Check Sequence
+
+1. Trading hours (in-memory)
+2. Kill switch status (in-memory)
+3. Daily loss limit (database)
+4. Position size limit (database)
+5. Margin requirement (broker)
+
+### Idempotency
+
+- Order creation: `idempotencyKey` prevents duplicates (24-hour retention)
+- Order cancellation: Idempotent responses for repeated requests
+- Kill switch: Idempotent activation returning current state
+
+### Error Recovery
+
+- ProfitDLL disconnect: Pending orders queued until reconnection
+- Broker rejection: Status updated to REJECTED with reason logged
+- Partial fill timeout: Auto-cancel remaining quantity after 5 minutes (configurable)
+
+### Performance Considerations
+
+- Order placement latency: &lt;500 ms p95
+- Risk check latency: &lt;100 ms p95
+- Concurrent orders: Support 100 concurrent orders per account
+- Rate limiting: 300 requests per 60s per client (planned)
+
+## Assumptions
+
+1. Windows-native deployment required (ProfitDLL dependency)
+2. Single broker (Nelogica via ProfitDLL) for MVP
+3. All currency values in BRL
+4. Target market is B3 (Brazilian exchange)
+5. Synchronous execution path for MVP
+6. No direct order modification (cancel and recreate)
+
+## Future Enhancements
+
+- Asynchronous order execution via message queue
+- Multi-broker connectivity
+- Advanced order types (OCO, bracket)
+- Order modification endpoint
+- Backtesting mode for simulation
+- WebSocket events for order lifecycle updates

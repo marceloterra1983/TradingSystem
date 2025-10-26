@@ -42,42 +42,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **IMPORTANT:** Before working on any task, understand the project structure and documentation organization:
 
-### Core Documentation Structure (v2.1)
+### Core Documentation Structure
 
-The project follows a **context-driven documentation architecture** under `/docs/context/`:
+The project uses **Docusaurus v3** for comprehensive documentation under `/docs/`:
 
-1. **[docs/README.md](docs/README.md)** - Main Docusaurus (START HERE)
-2. **[docs/DOCUMENTATION-STANDARD.md](docs/DOCUMENTATION-STANDARD.md)** - Official documentation standard (YAML frontmatter, PlantUML)
-3. **[docs/DIRECTORY-STRUCTURE.md](docs/DIRECTORY-STRUCTURE.md)** - Complete project structure guide (v2.1.2)
-4. **[docs/context/](docs/context/)** - Context-driven documentation organized by domain:
-    - **[backend/](docs/context/backend/)** - Backend services, APIs, data, architecture
-    - **[frontend/](docs/context/frontend/)** - UI apps, components, features
-    - **[shared/](docs/context/shared/)** - Cross-cutting concerns, product specs, tools
-    - **[ops/](docs/context/ops/)** - Infrastructure, deployment, monitoring
+1. **[docs/README.md](docs/README.md)** - Documentation hub overview (START HERE)
+2. **[docs/content/](docs/content/)** - All documentation content organized by domain:
+    - **[apps/](docs/content/apps/)** - Application documentation (Workspace, TP Capital, Order Manager)
+    - **[api/](docs/content/api/)** - API specifications and guides
+    - **[frontend/](docs/content/frontend/)** - UI components, design system, guidelines
+    - **[database/](docs/content/database/)** - Schemas, migrations, data lifecycle
+    - **[tools/](docs/content/tools/)** - Development tools and infrastructure
+    - **[sdd/](docs/content/sdd/)** - Software design documents (schemas, events, flows)
+    - **[prd/](docs/content/prd/)** - Product requirements and feature briefs
+    - **[reference/](docs/content/reference/)** - Templates, ADRs, standards
+    - **[diagrams/](docs/content/diagrams/)** - PlantUML architectural diagrams
+3. **[docs/governance/](docs/governance/)** - Documentation governance and quality standards
+4. **[docs/migration/](docs/migration/)** - Migration artifacts and history
 
 ### Key Documentation Locations
 
--   **Architecture Decisions**: `docs/context/backend/architecture/decisions/` (ADRs)
--   **Product Requirements**: `docs/context/shared/product/prd/` (organized by language: `en/` and `pt/` subdirectories)
--   **Implementation Guides**: `docs/context/frontend/guides/` & `docs/context/backend/guides/`
--   **API Documentation**: `docs/context/backend/api/` (service-specific docs)
--   **API Hub (Frontend ↔ Backend)**: `docs/context/shared/integrations/frontend-backend-api-hub.md` — também disponível como aba `API Hub` no Docusaurus
--   **Feature Documentation**: `docs/context/frontend/features/` (Idea Bank, Escopo Page, etc.)
--   **Data Schemas**: `docs/context/backend/data/schemas/` (QuestDB, analytics, logging)
--   **Health Monitoring**: `docs/context/ops/health-monitoring.md` (entry point that links to the full guide under `monitoring/health-monitoring.md`)
+-   **Architecture Decisions**: `docs/content/reference/adrs/` (ADRs)
+-   **Product Requirements**: `docs/content/prd/products/` (organized by product)
+-   **Implementation Guides**: `docs/content/frontend/guides/` & `docs/content/apps/*/`
+-   **API Documentation**: `docs/content/api/` (service-specific docs with Redocusaurus)
+-   **Feature Documentation**: `docs/content/frontend/features/` & `docs/content/apps/*/features/`
+-   **Data Schemas**: `docs/content/database/schema.mdx` (QuestDB, TimescaleDB, LowDB)
+-   **Health Monitoring**: `docs/content/tools/monitoring/`
 
 ### Active Services & Ports
 
 -   **Dashboard**: http://localhost:3103 (React + Vite)
--   **Docusaurus**: http://localhost:3004 (Docusaurus - local dev only)
--   **Library API**: http://localhost:3200 (Express + LowDB/QuestDB)
--   **TP Capital**: http://localhost:3200 (Express + Telegraf)
+-   **Documentation Hub**: http://localhost:3205 (Docusaurus v3)
+-   **Workspace API**: http://localhost:3200 (Express + LowDB/TimescaleDB)
+-   **TP Capital**: http://localhost:4005 (Express + Telegraf)
 -   **B3**: http://localhost:3302 (Express)
--   **Documentation API**: http://localhost:3400 (Docker container - Express + FlexSearch)
+-   **Documentation API**: http://localhost:3400 (Express + FlexSearch)
 -   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
--   **WebScraper API**: http://localhost:3700 (Express)
--   **WebScraper UI**: http://localhost:3800 (React + Vite)
 
 ## 🖥️ Claude Code CLI
 
@@ -188,8 +190,8 @@ Claude Code has the following permissions in this project:
 TradingSystem/
 ├── backend/                        # 🎯 ALL BACKEND CODE
 │   ├── api/                       # REST APIs (Node.js/Express)
-│   │   ├── workspace/            # Port 3200 - Library API (Ideas & Docs)
-│   │   ├── tp-capital/           # Port 3200 - TP Capital ingestion
+│   │   ├── workspace/            # Port 3200 - Workspace API (Ideas & Docs)
+│   │   ├── tp-capital/           # Port 4005 - TP Capital ingestion
 │   │   ├── b3-market-data/       # Port 3302 - B3 market data service
 │   │   ├── documentation-api/    # Port 3400 - Documentation management
 │   │   ├── service-launcher/     # Port 3500 - Service orchestration
@@ -215,22 +217,21 @@ TradingSystem/
 │       ├── assets/               # Branding, icons, images
 │       └── styles/               # Tailwind configs
 │
-├── docs/                          # 📚 DOCUSAURUS (Docusaurus)
-│   ├── context/                  # Context-driven docs
-│   │   ├── backend/              # Backend architecture, APIs, data
-│   │   │   ├── architecture/     # ADRs, service maps
-│   │   │   ├── api/              # API documentation
-│   │   │   └── data/             # Schemas, migrations
-│   │   ├── frontend/             # UI documentation
-│   │   │   ├── features/         # Feature specs & guides
-│   │   │   └── guides/           # Implementation guides
-│   │   ├── shared/               # Cross-cutting concerns
-│   │   │   ├── product/prd/      # Product requirements (EN/PT)
-│   │   │   ├── diagrams/         # PlantUML diagrams
-│   │   │   └── tools/            # Templates, standards
-│   │   └── ops/                  # Operations, infrastructure
-│   ├── static/                   # Static assets for docs
-│   └── src/                      # Docusaurus source code
+├── docs/                          # 📚 DOCUMENTATION HUB (Docusaurus v3)
+│   ├── content/                  # All documentation content
+│   │   ├── apps/                 # Application docs (Workspace, TP Capital, etc.)
+│   │   ├── api/                  # API specifications (Redocusaurus)
+│   │   ├── frontend/             # UI components, design system
+│   │   ├── database/             # Schemas, migrations
+│   │   ├── tools/                # Development tools
+│   │   ├── sdd/                  # Software design documents
+│   │   ├── prd/                  # Product requirements
+│   │   ├── reference/            # Templates, ADRs
+│   │   └── diagrams/             # PlantUML diagrams
+│   ├── governance/               # Documentation standards
+│   ├── migration/                # Migration artifacts
+│   ├── src/                      # Docusaurus source code
+│   └── static/                   # Static assets (specs, images)
 │
 ├── tools/                # 🔧 DEVOPS & INFRASTRUCTURE
 │   ├── monitoring/               # Prometheus, Grafana configs
@@ -291,9 +292,9 @@ Each service has single responsibility, independent deployment as Windows proces
 ### Critical Requirements
 
 -   **MUST compile in x64 mode** - ProfitDLL is 64-bit only
--   DLL reference: `project-hub/systems/documentacao/ProfitDLL/DLLs/Win64/ProfitDLL.dll`
--   Example code: `project-hub/systems/documentacao/ProfitDLL/examples/`
--   Manual: `project-hub/systems/documentacao/ProfitDLL/Manual - ProfitDLL pt_br.pdf` (também disponível em inglês)
+-   DLL location: `tools/ProfitDLL/`
+-   Example code: `tools/ProfitDLL/Exemplo C#/`, `tools/ProfitDLL/Exemplo Python/`, `tools/ProfitDLL/Exemplo C++/`, `tools/ProfitDLL/Exemplo Delphi/`
+-   Manual: `tools/ProfitDLL/Manual/` (português e inglês)
 
 ### Authentication
 
@@ -347,11 +348,11 @@ if (bMarketConnected && bAtivo) {
 ### HTTP REST (Current Services)
 
 -   **Dashboard**: `http://localhost:3103` (React + Vite)
--   **Docusaurus**: `http://localhost:3004` (Docusaurus - local dev only)
+-   **Documentation Hub**: `http://localhost:3205` (Docusaurus v3)
 -   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB)
--   **TP Capital**: `http://localhost:3200` (Express + Telegraf)
+-   **TP Capital**: `http://localhost:4005` (Express + Telegraf)
 -   **B3**: `http://localhost:3302` (Express)
--   **Documentation API**: `http://localhost:3400` (Docker container - see docker-compose.docs.yml)
+-   **Documentation API**: `http://localhost:3400` (Express + FlexSearch)
 -   **Service Launcher**: `http://localhost:3500` (Express)
 -   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
 
@@ -468,15 +469,15 @@ Se preferir iniciar serviços manualmente:
 cd frontend/dashboard
 npm install && npm run dev
 
-# Docusaurus (Port 3004)
-cd docs/docusaurus
-npm install && npm run start -- --port 3004
+# Documentation Hub (Port 3205)
+cd docs
+npm install && npm run start -- --port 3205
 
 # API Services (Ports 3200-3600)
 # Run each in a separate terminal
 
 cd backend/api/workspace && npm install && npm run dev
-cd apps/tp-capital && npm install && npm run dev
+cd apps/tp-capital/api && npm install && npm run dev
 cd apps/b3-market-data && npm install && npm run dev
 cd apps/service-launcher && npm install && npm run dev
 cd backend/api/firecrawl-proxy && npm install && npm run dev
@@ -616,7 +617,7 @@ dotenv.config({ path: "./.env" }); // ❌ Local file
 bash scripts/env/validate-env.sh
 ```
 
-**Documentation**: See `docs/context/ops/ENVIRONMENT-CONFIGURATION.md` for complete guide.
+**Documentation**: See `docs/content/tools/security-config/env.mdx` for the complete guide.
 
 ---
 
@@ -639,18 +640,18 @@ bash scripts/env/validate-env.sh
 -   **MUST include YAML frontmatter** with all required fields (title, tags, domain, type, summary, status, last_review)
 -   **MUST include PlantUML diagrams** for architecture/design documents (ADR, RFC, Technical Specs)
 -   **MUST provide both** `.puml` source file AND embedded rendering in markdown
--   Follow official standard: `docs/DOCUMENTATION-STANDARD.md`
+-   Follow governance guides: `docs/governance/VALIDATION-GUIDE.md`
 -   Use appropriate diagram types: Component, Sequence, State, Class, Deployment
--   Test rendering in Docusaurus before committing (`cd docs/docusaurus && npm run start -- --port 3004`)
--   See examples: `docs/context/shared/diagrams/plantuml-guide.md`
+-   Test rendering in Docusaurus before committing (`cd docs && npm run start -- --port 3205`)
+-   See examples: `docs/content/diagrams/plantuml-guide.mdx`
 
 ### When working with documentation:
 
--   **ALWAYS edit** files in `docs/context/` (canonical source)
--   **NEVER edit** files in `frontend/dashboard/public/docs/` (generated by build)
--   The dashboard's `copy-docs.js` script copies from canonical source to public folder
--   PRDs are organized by language in `en/` and `pt/` subdirectories
--   Follow the documentation standard: `docs/DOCUMENTATION-STANDARD.md`
+-   **ALWAYS edit** files in `docs/content/` (canonical source for Docusaurus)
+-   **NEVER edit** files in `docs/build/` (generated by Docusaurus build)
+-   **NEVER edit** files in `frontend/dashboard/public/docs/` (copied from `docs/content/` by build scripts)
+-   PRDs are organized by product within `docs/content/prd/`
+-   Follow governance checklists: `docs/governance/REVIEW-CHECKLIST.md`
 
 ### Code Style:
 
@@ -669,58 +670,66 @@ bash scripts/env/validate-env.sh
 
 ## 📚 Documentation
 
-**Centralized in `/docs` with context-driven organization:**
+**Centralized in `/docs` with Docusaurus v3:**
 
 ### Core Documentation Standards
 
--   **[docs/DOCUMENTATION-STANDARD.md](docs/DOCUMENTATION-STANDARD.md)** - Official documentation standard (YAML frontmatter, PlantUML)
--   **[docs/DIRECTORY-STRUCTURE.md](docs/DIRECTORY-STRUCTURE.md)** - Complete project structure guide
+-   **[docs/README.md](docs/README.md)** - Documentation hub overview
+-   **[docs/governance/VALIDATION-GUIDE.md](docs/governance/VALIDATION-GUIDE.md)** - Validation suite and quality standards
+-   **[docs/governance/REVIEW-CHECKLIST.md](docs/governance/REVIEW-CHECKLIST.md)** - Review process and criteria
 
-### Docusaurus (Docusaurus - Port 3004)
+### Documentation Hub (Port 3205)
 
--   **[docs/README.md](docs/README.md)** - Main Docusaurus (START HERE)
--   **[docs/context/](docs/context/)** - Context-driven documentation architecture
+-   **[docs/README.md](docs/README.md)** - Main documentation portal
+-   **[docs/content/](docs/content/)** - All documentation content
 
-### Backend Documentation
+### Apps Documentation
 
--   **[docs/context/backend/architecture/](docs/context/backend/architecture/)** - Service maps, ADRs, architectural decisions
--   **[docs/context/backend/api/](docs/context/backend/api/)** - Service-specific API documentation
--   **[docs/context/backend/data/](docs/context/backend/data/)** - QuestDB schemas, migrations, data warehouse
--   **[docs/context/backend/guides/](docs/context/backend/guides/)** - Implementation guides
+-   **[docs/content/apps/workspace/](docs/content/apps/workspace/)** - Workspace app (Port 3200)
+-   **[docs/content/apps/tp-capital/](docs/content/apps/tp-capital/)** - TP Capital app (Port 4005)
+-   **[docs/content/apps/order-manager/](docs/content/apps/order-manager/)** - Order Manager (planned)
+-   **[docs/content/apps/data-capture/](docs/content/apps/data-capture/)** - Data Capture (planned)
+
+### API Documentation
+
+-   **[docs/content/api/overview.mdx](docs/content/api/overview.mdx)** - API catalogue
+-   **[docs/content/api/order-manager.mdx](docs/content/api/order-manager.mdx)** - Order Manager API
+-   **[docs/content/api/data-capture.mdx](docs/content/api/data-capture.mdx)** - Data Capture API
+-   **Redocusaurus Integration**: http://localhost:3205/api/documentation-api, http://localhost:3205/api/workspace
 
 ### Frontend Documentation
 
--   **[docs/context/frontend/features/](docs/context/frontend/features/)** - Feature specs (Idea Bank, Escopo Page, etc.)
--   **[docs/context/frontend/guides/](docs/context/frontend/guides/)** - UI implementation guides
--   **[docs/context/frontend/architecture/](docs/context/frontend/architecture/)** - Frontend ADRs, component architecture
+-   **[docs/content/frontend/design-system/](docs/content/frontend/design-system/)** - Design tokens, components, theming
+-   **[docs/content/frontend/guidelines/](docs/content/frontend/guidelines/)** - Style guide, accessibility, i18n
+-   **[docs/content/frontend/engineering/](docs/content/frontend/engineering/)** - Architecture, conventions, testing
 
-### Shared Documentation
+### Database Documentation
 
--   **[docs/context/shared/product/prd/](docs/context/shared/product/prd/)** - Product Requirements (organized by language: [en/](docs/context/shared/product/prd/en/) and [pt/](docs/context/shared/product/prd/pt/))
--   **[docs/context/shared/diagrams/](docs/context/shared/diagrams/)** - PlantUML architectural diagrams
--   **[docs/context/shared/tools/](docs/context/shared/tools/)** - Templates, standards, development tools
+-   **[docs/content/database/overview.mdx](docs/content/database/overview.mdx)** - Architecture and data stores
+-   **[docs/content/database/schema.mdx](docs/content/database/schema.mdx)** - Table definitions and ER diagrams
+-   **[docs/content/database/migrations.mdx](docs/content/database/migrations.mdx)** - Migration strategy
+-   **[docs/content/database/retention-backup.mdx](docs/content/database/retention-backup.mdx)** - Data lifecycle policies
 
-### Operations Documentation
+### Tools Documentation
 
--   **[docs/context/ops/universal-commands.md](docs/context/ops/universal-commands.md)** - Complete guide for `start` and `stop` commands
--   **[docs/context/ops/health-monitoring.md](docs/context/ops/health-monitoring.md)** - Entry point to the health monitoring guide (`monitoring/health-monitoring.md`)
--   **[docs/context/ops/service-startup-guide.md](docs/context/ops/service-startup-guide.md)** - Service startup procedures
--   **[docs/context/ops/ENVIRONMENT-CONFIGURATION.md](docs/context/ops/ENVIRONMENT-CONFIGURATION.md)** - Environment variable management
+-   **[docs/content/tools/](docs/content/tools/)** - Development tools (Node.js, .NET, Python, Docker, PlantUML, Docusaurus)
+-   **[docs/content/tools/security-config/](docs/content/tools/security-config/)** - Environment variables, risk limits, audit
+-   **[docs/content/tools/ports-services/](docs/content/tools/ports-services/)** - Service port map (auto-generated)
 
-### API Documentation (Service-Specific)
+### Product & Design Documentation
 
--   **[backend/api/workspace/README.md](backend/api/workspace/README.md)** - Library API (Port 3200)
--   **[apps/tp-capital/README.md](apps/tp-capital/README.md)** - TP Capital (Port 3200)
--   **[apps/b3-market-data/README.md](apps/b3-market-data/README.md)** - B3 (Port 3302)
--   **[backend/api/documentation-api/README.md](backend/api/documentation-api/README.md)** - Documentation API (Port 3400 - Docker container)
--   **[backend/api/firecrawl-proxy/README.md](backend/api/firecrawl-proxy/README.md)** - Firecrawl Proxy (Port 3600)
+-   **[docs/content/prd/](docs/content/prd/)** - Product requirements and feature briefs
+-   **[docs/content/sdd/](docs/content/sdd/)** - Software design documents (schemas, events, flows, API specs)
+-   **[docs/content/reference/](docs/content/reference/)** - Templates, ADRs, standards
+-   **[docs/content/diagrams/](docs/content/diagrams/)** - PlantUML architectural diagrams
 
 ## 🔗 Reference Code
 
--   C# ProfitDLL init: `project-hub/systems/documentacao/ProfitDLL/examples/Exemplo C#/Program.cs:928-961`
--   C# Callbacks: `project-hub/systems/documentacao/ProfitDLL/examples/Exemplo C#/Program.cs:102-122`
--   Python init: `project-hub/systems/documentacao/ProfitDLL/examples/Exemplo Python/main.py:721-758`
--   Python orders: `project-hub/systems/documentacao/ProfitDLL/examples/Exemplo Python/main.py:848-922`
+-   C# ProfitDLL init: `tools/ProfitDLL/Exemplo C#/Program.cs`
+-   C# Callbacks: `tools/ProfitDLL/Exemplo C#/CallbackHandler.cs`
+-   Python init: `tools/ProfitDLL/Exemplo Python/main.py`
+-   Delphi example: `tools/ProfitDLL/Exemplo Delphi/`
+-   C++ example: `tools/ProfitDLL/Exemplo C++/main.cpp`
 
 ## ⚠️ Important Reminders
 

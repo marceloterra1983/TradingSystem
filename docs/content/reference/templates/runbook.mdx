@@ -1,0 +1,199 @@
+---
+title: "Template \u2013 Operational Runbook"
+description: Template for operational runbooks and incident response procedures.
+tags:
+  - reference
+  - template
+  - runbook
+  - ops
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Template
+
+> Use this template for operational runbooks and incident response procedures. Replace placeholder text with service-specific details.
+
+### Metadata
+
+- **Service**: [Service name - e.g., Order Manager API]
+- **Owner**: [Team or person - e.g., Backend Guild]
+- **Severity**: [P0 (Critical) | P1 (High) | P2 (Medium) | P3 (Low)]
+- **Last Reviewed**: [YYYY-MM-DD]
+- **On-Call**: [PagerDuty schedule or contact]
+
+### Purpose
+
+**Scope**: [What incidents this runbook covers]
+
+**When to Use**: [Triggering conditions - e.g., "When Order Manager API returns 503 for &gt;5 minutes"]
+
+### Preconditions
+
+**Required Access**:
+- [ ] [Access 1 - e.g., SSH access to production server]
+- [ ] [Access 2 - e.g., Database admin credentials]
+- [ ] [Access 3 - e.g., PagerDuty access]
+
+**Required Tools**:
+- [ ] [Tool 1 - e.g., kubectl CLI]
+- [ ] [Tool 2 - e.g., Database client]
+
+### Signals & Detection
+
+**Alert Names**:
+- `[AlertName1]` - [Description and threshold]
+- `[AlertName2]` - [Description and threshold]
+
+**Manual Detection**:
+```bash
+# Health check
+curl http://localhost:PORT/health
+
+# Check logs
+docker compose logs --tail=100 service-name
+```
+
+**Symptoms**:
+- [Symptom 1 - e.g., Dashboard shows "API unavailable"]
+- [Symptom 2 - e.g., Logs show connection errors]
+- [Symptom 3 - e.g., Metrics show high error rate]
+
+### Immediate Actions
+
+**Quick Checklist** (execute in order):
+1. [ ] Check service status: `docker compose ps service-name`
+2. [ ] Review recent logs: `docker compose logs --tail=100 service-name`
+3. [ ] Check resource usage: `docker stats service-name`
+4. [ ] Verify dependencies: [Database, external APIs, etc.]
+5. [ ] Attempt restart: `docker compose restart service-name`
+
+### Detailed Procedure
+
+#### Step 1: Triage
+
+**Actions**:
+1. [Action 1]
+2. [Action 2]
+
+**Commands**:
+```bash
+# Triage command 1
+command
+
+# Triage command 2
+command
+```
+
+**Expected Results**: [What you should see]
+
+---
+
+#### Step 2: Mitigation
+
+**Actions**:
+1. [Mitigation action 1]
+2. [Mitigation action 2]
+
+**Commands**:
+```bash
+# Mitigation command
+command
+```
+
+**Validation**: [How to confirm mitigation worked]
+
+---
+
+#### Step 3: Recovery
+
+**Actions**:
+1. [Recovery action 1]
+2. [Recovery action 2]
+
+**Validation**:
+- [ ] [Check 1 - e.g., Service responds on port]
+- [ ] [Check 2 - e.g., Health check returns 200 OK]
+- [ ] [Check 3 - e.g., Dashboard shows data]
+
+### Rollback Steps
+
+**If Mitigation Fails**:
+
+1. **Stop Current Deployment**:
+   ```bash
+   docker compose down service-name
+   ```
+
+2. **Restore Previous Version**:
+   ```bash
+   docker pull image:previous-tag
+   docker compose up -d service-name
+   ```
+
+3. **Verify Rollback**:
+   ```bash
+   curl http://localhost:PORT/health
+   ```
+
+### Post-Incident Validation
+
+**Health Checks**:
+- [ ] Service health endpoint returns 200 OK
+- [ ] Logs show no errors for 5 minutes
+- [ ] Metrics return to normal levels
+- [ ] Dashboard functionality restored
+- [ ] Dependent services operational
+
+**Data Integrity**:
+- [ ] No data loss during incident
+- [ ] Recent transactions completed successfully
+- [ ] Database consistency checks pass
+
+### Post-Incident Tasks
+
+**Within 1 Hour**:
+- [ ] Notify stakeholders (all-clear message)
+- [ ] Update incident ticket with resolution
+- [ ] Document timeline and actions taken
+
+**Within 24 Hours**:
+- [ ] Create incident report
+- [ ] Update this runbook if needed
+- [ ] Schedule post-mortem meeting
+- [ ] Identify preventive measures
+
+**Within 1 Week**:
+- [ ] Implement preventive measures
+- [ ] Update monitoring/alerting
+- [ ] Update documentation
+- [ ] Share lessons learned
+
+### Contacts & Escalation
+
+**Primary Contact**: [Name, Slack, Phone]
+
+**Escalation Path**:
+1. On-call engineer (immediate)
+2. Team lead (if unresolved after 15 minutes)
+3. Director (if critical and unresolved after 1 hour)
+
+**Communication Channels**:
+- Incident channel: #incidents
+- Team channel: #team-name
+- Status page: [URL]
+
+### Related Documentation
+
+- Link to the primary service overview, deployment, and operations guides for quick navigation.
+- Reference companion runbooks that may be executed before or after this one.
+
+### Change Log
+
+| Date | Author | Changes |
+|------|--------|----------|
+| YYYY-MM-DD | [Name] | Initial version |
+| YYYY-MM-DD | [Name] | Added rollback steps |
+
+---
+
+**Example Usage**: Use this template for runbooks like "Order Manager API Down", "Database Connection Failures", "High Latency Incidents".

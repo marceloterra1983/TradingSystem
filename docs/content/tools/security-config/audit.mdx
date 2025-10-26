@@ -1,0 +1,255 @@
+---
+title: Security Audit Procedures
+description: Security audit procedures and compliance checks for TradingSystem.
+tags:
+  - tools
+  - security
+  - audit
+  - compliance
+owner: SecurityOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+Security audits verify access control, configuration integrity, trading activity, data access, and
+security events. TradingSystem establishes repeatable procedures for detecting issues, maintaining
+compliance, and documenting findings.
+
+## Audit Logging
+
+### Application Logs
+
+- **Format**: Structured JSON lines (`logs/YYYY-MM-DD.jsonl`).  
+- **Retention**: 30 days online, 90 days archived.  
+- **Levels**: `DEBUG`, `INFO`, `WARN`, `ERROR`, `AUDIT`.  
+- **Audit Events**: Logins, configuration changes, kill switch activations, order placements, risk violations.
+
+Example:
+
+```json
+{
+  "timestamp": "2025-10-24T10:30:45.123Z",
+  "level": "AUDIT",
+  "service": "order-manager",
+  "event": "order_placed",
+  "user": "trader@company.com",
+  "orderId": "ORD-20251024-001",
+  "symbol": "PETR4",
+  "quantity": 100,
+  "price": 32.50,
+  "riskChecks": {
+    "dailyLossLimit": "passed",
+    "positionSizeLimit": "passed",
+    "tradingHours": "passed"
+  },
+  "ipAddress": "192.168.1.100",
+  "userAgent": "Mozilla/5.0..."
+}
+```
+
+### Database Audit Tables (Planned)
+
+```sql
+CREATE TABLE audit_log (
+  audit_id UUID PRIMARY KEY,
+  timestamp TIMESTAMPTZ NOT NULL,
+  event_type TEXT NOT NULL,
+  user_id UUID,
+  user_email TEXT,
+  entity_type TEXT,
+  entity_id UUID,
+  action TEXT NOT NULL,
+  old_value JSONB,
+  new_value JSONB,
+  ip_address INET,
+  user_agent TEXT,
+  result TEXT NOT NULL,
+  error_message TEXT
+);
+
+CREATE INDEX idx_audit_log_timestamp ON audit_log(timestamp DESC);
+CREATE INDEX idx_audit_log_user ON audit_log(user_id, timestamp DESC);
+CREATE INDEX idx_audit_log_event_type ON audit_log(event_type, timestamp DESC);
+```
+
+- **Retention**: One year minimum.  
+- **Access**: Read-only for auditors; operators require explicit approval.
+
+### Security Events
+
+| Event | Severity | Retention | Alert |
+|-------|----------|-----------|-------|
+| Failed login | WARN | 90 days | After 5 failures |
+| Successful login | INFO | 30 days | No |
+| Password change | AUDIT | 1 year | Yes |
+| Permission denial | WARN | 90 days | After 10 denials |
+| Kill switch activated | AUDIT | 1 year | Critical |
+| Risk limit changed | AUDIT | 1 year | Yes |
+| Order rejected (risk) | WARN | 90 days | Threshold-based |
+| Sensitive DB query | AUDIT | 90 days | No |
+| Configuration change | AUDIT | 1 year | Yes |
+
+## Access Control Audits
+
+### User Access Review (Quarterly)
+
+Checklist:
+- [ ] Inventory users with production access (DB, admin UIs, servers).  
+- [ ] Confirm role-based need for each user.  
+- [ ] Remove access for inactive or departed staff.  
+- [ ] Review API keys tied to users/services.  
+- [ ] Document actions in audit log.
+
+### API Key Audit (Monthly)
+
+Steps:
+1. List all keys from `.env`.  
+2. Check last usage via logs or provider dashboards.  
+3. Rotate keys older than 180 days.  
+4. Revoke unused keys (&gt;90 days inactivity).  
+5. Update documentation and confirm services still operate.  
+6. Log changes in audit record.
+
+## Configuration Audits
+
+### Environment Variable Audit (Monthly)
+
+Checklist:
+- [ ] Run `bash scripts/env/validate-env.sh`.  
+- [ ] Verify permissions (`ls -la .env`).  
+- [ ] Review `.env.example` history (`git log .env.example`).  
+- [ ] Ensure no secrets in Git (`git log -p | grep -i password`).  
+- [ ] Compare production vs staging configs.  
+- [ ] Document discrepancies.
+
+### Risk Limit Audit (Weekly)
+
+- Query `GET /api/risk/limits`.  
+- Verify limits match approved policy.  
+- Review Prometheus risk violation metrics.  
+- Check kill switch status.  
+- Log updates or anomalies.
+
+## Trading Activity Audits
+
+### Order Audit (Daily)
+
+Steps:
+1. Fetch orders placed today (`GET /api/orders?startDate=today`).  
+2. Review large trades and unusual symbols.  
+3. Confirm each order passed risk checks.  
+4. Investigate rejected orders.  
+5. Document anomalies and remediation.
+
+### Position Reconciliation (Daily EOD)
+
+1. Collect internal positions (`GET /api/risk/positions`).  
+2. Compare with broker data.  
+3. Investigate discrepancies above 1%.  
+4. Adjust records or escalate.  
+5. Log reconciliation outcome.
+
+## Data Access Audits
+
+### Database Query Review (Weekly)
+
+- Inspect PostgreSQL logs for sensitive queries.  
+- Confirm legitimate business purpose.  
+- Highlight failed authentication attempts and slow queries.  
+- Document suspicious activity.
+
+### API Access Review (Weekly)
+
+- Analyze API request volumes per client.  
+- Monitor failed auth attempts and rate-limit violations.  
+- Validate API keys against authorization list.  
+- Record anomalies and corrective actions.
+
+## Compliance Audits
+
+### GDPR (Future Applicability) – Quarterly
+
+- Catalog personal data storage locations.  
+- Verify retention rules (e.g., 30 days post-deletion).  
+- Track data subject access requests.  
+- Ensure encryption at rest/in transit.  
+- Summarize compliance posture.
+
+### Financial Regulations (If Required) – Quarterly
+
+- Confirm transaction logs retained 5–7 years.  
+- Verify audit logs without gaps.  
+- Evaluate risk controls (daily loss, position limits, kill switch).  
+- Test kill switch functionality.  
+- Report regulatory status.
+
+## Incident Response
+
+### Security Incident Procedure
+
+1. **Detect** – Identify incident via alerts, logs, or user report.  
+2. **Contain** – Isolate systems (disable accounts, block IPs).  
+3. **Investigate** – Analyze audit logs, determine root cause.  
+4. **Remediate** – Patch vulnerabilities, restore services.  
+5. **Document** – Produce incident report, update runbooks.  
+6. **Review** – Hold post-mortem and assign action items.
+
+Incident report template:
+
+```markdown
+# Security Incident Report
+
+**Incident ID**: INC-20251024-001  
+**Date**: 2025-10-24  
+**Severity**: Critical / High / Medium / Low  
+**Status**: Open / Investigating / Resolved
+
+## Summary
+Provide overview of incident.
+
+## Timeline
+- 10:00 – Incident detected  
+- 10:05 – Containment initiated  
+- 10:30 – Root cause identified  
+- 11:00 – Remediation complete  
+- 11:30 – Systems restored
+
+## Root Cause
+Detail contributing factors.
+
+## Impact
+- Systems affected  
+- Data compromised  
+- Users impacted  
+- Downtime duration
+
+## Remediation Actions
+- Fixes applied  
+- Preventive measures
+
+## Lessons Learned
+- What went well  
+- What needs improvement  
+- Follow-up tasks
+```
+
+## Audit Reports
+
+### Monthly Security Report
+
+- Audience: Security team and leadership.  
+- Sections: Executive summary, access review results, configuration audit outcomes, security events, recommendations.  
+- Delivery: First week of each month.
+
+### Quarterly Compliance Report
+
+- Audience: Compliance stakeholders and auditors.  
+- Sections: Compliance status, audit findings, risk assessments, policy updates, training coverage.  
+- Delivery: Within two weeks after quarter end.
+
+## Related Documentation
+
+- [Security Overview](./overview).  
+- [Environment Variables Reference](./env).  
+- [Risk Limits Configuration](./risk-limits).  
+- Monitoring, incident response, and infrastructure guides live under `docs/content/ops/`.

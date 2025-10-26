@@ -27,17 +27,53 @@ export function createTelegramIngestion() {
 
   bot.on('channel_post', async (ctx) => {
     const { channel_post: post } = ctx.update;
+    const messageText = post.text || post.caption || '';
+    const channel = post.chat?.title || `channel:${post.chat?.id}`;
+    const timestamp = new Date(post.date * 1000);
+
     try {
-      const signal = parseSignal(post.text || post.caption || '', {
-        timestamp: post.date * 1000,
-        channel: post.chat?.title || `channel:${post.chat?.id}`,
-        source: 'forwarder'
-      });
+      let signal;
+      let isParsed = true;
 
+      // Tenta fazer o parse da mensagem
+      try {
+        signal = parseSignal(messageText, {
+          timestamp: post.date * 1000,
+          channel,
+          source: 'telegram'
+        });
+      } catch (parseError) {
+        // Se falhar o parse, cria um registro apenas com a mensagem bruta
+        isParsed = false;
+        signal = {
+          ts: timestamp,
+          channel,
+          signal_type: 'unparsed',
+          asset: 'N/A',
+          buy_min: null,
+          buy_max: null,
+          target_1: null,
+          target_2: null,
+          target_final: null,
+          stop: null,
+          raw_message: messageText,
+          source: 'telegram',
+          ingested_at: new Date()
+        };
+        logger.debug({ channel, parseError: parseError.message }, 'Message does not match signal pattern, saving as raw');
+      }
+
+      // Salva no banco (seja signal parseado ou raw)
       await timescaleClient.insertSignal(signal);
-      logger.info({ asset: signal.asset, channel: signal.channel }, 'Signal ingested');
+      
+      if (isParsed) {
+        logger.info({ asset: signal.asset, channel: signal.channel }, 'Signal parsed and ingested');
+      } else {
+        logger.info({ channel, messageLength: messageText.length }, 'Raw message ingested (not a signal)');
+      }
 
-      if (post.chat?.id) {
+      // Envia confirmação apenas para sinais parseados
+      if (isParsed && post.chat?.id) {
         const assetLabel = signal.asset || 'Sinal';
         const processedAt = new Date().toLocaleTimeString('pt-BR', {
           hour: '2-digit',
@@ -58,7 +94,7 @@ export function createTelegramIngestion() {
         }
       }
     } catch (error) {
-      logger.error({ err: error, channelId: post.chat?.id }, 'Failed to ingest message');
+      logger.error({ err: error, channelId: post.chat?.id, messageText }, 'Failed to ingest message');
     }
   });
 

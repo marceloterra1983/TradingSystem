@@ -1,0 +1,84 @@
+---
+title: Incident Runbook
+description: Recovery guide for incidents affecting the Workspace application.
+tags:
+  - apps
+  - workspace
+  - runbook
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Detection
+
+### Automated Alerts
+
+| Alert | Trigger | Source | Severity |
+|-------|---------|--------|----------|
+| `WorkspaceFrontendDown` | HTTP 5xx/timeout from synthetic check | Uptime robot | Critical |
+| `WorkspaceApiErrors` | 5% error rate on `/api/items` | API metrics | Warning |
+| `WorkspaceLatencyHigh` | p95 latency > 500ms for 10m | API metrics | Warning |
+
+### Manual Checks
+
+```bash
+# Frontend availability
+curl -I https://<workspace-host>
+
+# Backend health
+curl http://<api-host>:3200/health
+
+# Verify data sync
+curl http://<api-host>:3200/api/items?limit=1
+```
+
+## Response
+
+### Scenario 1: Frontend Unavailable
+
+**Symptoms**: Synthetic check fails, users see blank page or 500 error.
+
+1. Verify CDN/hosting status (e.g., Netlify, Vercel).
+2. Inspect latest deployment logs for build errors.
+3. Re-deploy previous working `dist/` artifact if outage persists.
+4. Clear CDN cache to remove corrupted assets.
+
+### Scenario 2: API Errors
+
+**Symptoms**: Toast notifications show failure, `/api/items` returns 5xx.
+
+1. Check backend logs: `cd backend/api/workspace && docker logs workspace-api`.
+2. Confirm database availability (TimescaleDB) via backend health check.
+3. Restart backend service if hung (`docker compose restart workspace-api`).
+4. Validate environment variables (`DATABASE_URL`, `PORT`) in backend `.env`.
+
+### Scenario 3: Drag-and-Drop Not Persisting
+
+**Symptoms**: Items revert after moving columns.
+
+1. Inspect network requests for PUT `/api/items/:id` (should return 200).
+2. Check Zustand store errors in browser console.
+3. Ensure backend accepts status transitions (validate enums).
+4. If backend rejects, patch API and redeploy; otherwise fix client logic.
+
+### Scenario 4: Dashboard Embed Failure
+
+**Symptoms**: Workspace iframe blocked or blank within dashboard.
+
+1. Validate iframe URL reachable directly.
+2. Inspect browser console for CSP violations.
+3. Update hosting CSP to include dashboard origin.
+4. Confirm dashboard proxy still forwards `/workspace` path.
+
+## Validation
+
+- Reload Workspace standalone (`http://localhost:3900`) and dashboard iframe view.
+- Create test idea; ensure it appears in table and Kanban and survives page refresh.
+- Run `npm run test` and `npm run lint` after code changes before redeploying.
+- Confirm synthetic monitor and `/health` endpoint return to green status.
+
+## Follow-up
+
+1. Document incident summary, timeline, root cause, and remediation.
+2. Update backlog with preventive actions (e.g., monitoring gaps).
+3. Review dependency versions if issue caused by upgrade.
+4. Communicate resolution to stakeholders and archive incident report.

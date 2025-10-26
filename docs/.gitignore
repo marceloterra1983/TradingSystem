@@ -1,0 +1,9 @@
+# Build output
+build/
+
+# Cache directories
+.docusaurus/
+.cache-loader/
+
+# Dependency directories
+node_modules/

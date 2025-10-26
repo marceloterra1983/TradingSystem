@@ -12,7 +12,7 @@ import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
 
 export function SignalsTable() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [limit, setLimit] = useState(500);
+  const [limit, setLimit] = useState(10);
   const [channelFilter, setChannelFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,10 +75,16 @@ export function SignalsTable() {
     setDeletingId(ingestedAt);
     try {
       await deleteSignal(ingestedAt);
+      console.log('✅ Signal deleted successfully, refetching...');
+      
+      // Forçar refetch com invalidação da query
       await query.refetch();
+      
+      console.log('✅ Data refetched');
     } catch (error) {
-      console.error('Failed to delete signal:', error);
-      alert('Falha ao deletar sinal');
+      console.error('❌ Failed to delete signal:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao deletar sinal';
+      alert(`Falha ao deletar sinal:\n\n${errorMessage}`);
     } finally {
       setDeletingId(null);
     }

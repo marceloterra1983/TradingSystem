@@ -92,11 +92,11 @@ __health_pg_isready() {
 DEFAULT_LOCAL_SERVICES=(
     "Dashboard|VITE_PORT|3103|"
     "Status|SERVICE_LAUNCHER_PORT|3500|/health"
-    "Docusaurus|DOCUSAURUS_PORT|3004|"
+    "Documentation API|DOCUMENTATION_API_PORT|3400|/health"
+    "Docusaurus|DOCUSAURUS_PORT|3205|"
     "B3|B3_API_PORT|3302|/health"
     "TP Capital|TP_CAPITAL_PORT|4005|/health"
     "Workspace|WORKSPACE_PORT|3200|/health"
-    "WebScraper|WEBSCRAPER_API_PORT|3700|/health"
     "Firecrawl Proxy|FIRECRAWL_PROXY_PORT|3600|/health"
 )
 

@@ -1,0 +1,270 @@
+---
+title: Prompt Patterns
+description: Reusable prompt patterns for TradingSystem automations.
+tags:
+  - prompts
+  - llm
+owner: PromptOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem uses structured prompts to guide LLM behavior in agent-based workflows. This page documents canonical prompt patterns, templates, input/output formats, and best practices for authoring prompts across the platform.
+
+**LLM Providers**: OpenAI (primary), Anthropic (planned), Gemini (experimental)  
+**Frameworks**: Agno Agents, LangGraph, LlamaIndex  
+**Configuration**: Controlled via environment variables (see [Variables](./variables))
+
+## Prompt Patterns
+
+### Pattern 1: Market Analysis
+
+**Use Case**: Analyze market data and generate trading signals  
+**Agent**: MarketAnalysisAgent
+
+**System Instructions**:
+```
+You are a market analysis agent specialized in analyzing B3 market data 
+and TP Capital signals. Your role is to identify trading opportunities by 
+analyzing price movements, volume patterns, and signal correlations. 
+Provide clear BUY/SELL/HOLD recommendations with confidence scores.
+```
+
+**Input Template**:
+```json
+{
+  "task": "analyze_market",
+  "payload": {
+    "symbols": ["PETR4", "VALE3"],
+    "include_tp_capital": true,
+    "include_b3": true,
+    "market_data": {
+      "PETR4": {"last_price": 32.50, "volume": 1000000, "change_pct": 2.5}
+    },
+    "tp_capital_signals": [
+      {"asset": "PETR4", "signal_type": "COMPRA", "buy_min": 32.00, "targets": [34.00, 35.00]}
+    ]
+  }
+}
+```
+
+**Output Template**:
+```json
+{
+  "signals": [
+    {
+      "symbol": "PETR4",
+      "signal_type": "BUY",
+      "confidence": 0.85,
+      "price": 32.50,
+      "source": "AGNO",
+      "metadata": {
+        "reasoning": "Strong buy signal from TP Capital confirmed by B3 volume spike"
+      }
+    }
+  ]
+}
+```
+
+**Context Window**: ~2000 tokens (last 24 hours market data + 100 TP Capital signals)  
+**Performance Target**: &lt;1s p95 analysis time
+
+---
+
+### Pattern 2: Risk Validation
+
+**Use Case**: Validate trading signals against risk policies  
+**Agent**: RiskManagementAgent
+
+**System Instructions**:
+```
+You are a risk management agent responsible for validating trading signals 
+against risk limits. Check daily loss limits, position sizes, trading hours, 
+and overall portfolio risk. Approve or reject signals with clear justification. 
+Safety is your top priority.
+```
+
+**Input Template**:
+```json
+{
+  "task": "validate_signal",
+  "payload": {
+    "symbol": "PETR4",
+    "signal_type": "BUY",
+    "confidence": 0.85,
+    "price": 32.50,
+    "timestamp": "2025-10-24T10:30:00Z"
+  }
+}
+```
+
+**Output Template**:
+```json
+{
+  "approved": true,
+  "risk_level": "LOW",
+  "reasons": [
+    "Trading hours: PASS (10:30 BRT within 9:00-18:00)",
+    "Daily loss limit: PASS (current R$1250 < limit R$5000)",
+    "Position size: PASS (current 750 + order 100 = 850 < limit 1000)"
+  ],
+  "checks": {
+    "daily_loss_check": true,
+    "position_size_check": true,
+    "trading_hours_check": true
+  }
+}
+```
+
+**Context Window**: ~500 tokens (single signal + risk limits)  
+**Performance Target**: &lt;500ms p95 validation time
+
+---
+
+### Pattern 3: Signal Orchestration
+
+**Use Case**: Coordinate multi-agent workflows  
+**Agent**: SignalOrchestratorAgent
+
+**System Instructions**:
+```
+You are a signal orchestrator agent that coordinates decisions between 
+MarketAnalysisAgent and RiskManagementAgent. Your role is to manage the 
+workflow: receive market analysis requests, coordinate signal generation, 
+validate signals through risk management, and aggregate results. Ensure 
+smooth communication between agents and handle errors gracefully.
+```
+
+**Input Template**:
+```json
+{
+  "action": "ORCHESTRATE",
+  "data": {
+    "symbols": ["PETR4"],
+    "include_tp_capital": true,
+    "include_b3": true
+  }
+}
+```
+
+**Context Window**: ~1000 tokens (orchestration request + agent responses)  
+**Performance Target**: &lt;2s total orchestration time
+
+## Prompt Templates
+
+### Market Analysis Template
+
+**Template**:
+```
+System: {system_instructions}
+
+User: {task_json}
+
+Task: analyze_market
+Payload:
+- Symbols: {symbols}
+- Include TP Capital: {include_tp_capital}
+- Include B3: {include_b3}
+- Market Data: {market_data}
+- TP Capital Signals: {tp_capital_signals}
+
+Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
+```
+
+**Variables**:
+- `{system_instructions}`: MarketAnalysisAgent system prompt
+- `{task_json}`: JSON-encoded task and payload
+- `{symbols}`: List of symbols to analyze
+- `{include_tp_capital}`: Boolean flag
+- `{include_b3}`: Boolean flag
+- `{market_data}`: B3 market data dictionary
+- `{tp_capital_signals}`: TP Capital signals array
+
+**Expected Output**:
+```json
+{
+  "signals": [
+    {
+      "symbol": "PETR4",
+      "signal_type": "BUY",
+      "confidence": 0.85,
+      "price": 32.50,
+      "source": "AGNO",
+      "metadata": {
+        "reasoning": "Strong buy signal from TP Capital confirmed by B3 volume spike"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### Risk Validation Template
+
+**Template**:
+```
+System: {system_instructions}
+
+User: {task_json}
+
+Task: validate_signal
+Payload:
+- Symbol: {symbol}
+- Signal Type: {signal_type}
+- Confidence: {confidence}
+- Price: {price}
+- Timestamp: {timestamp}
+
+Validate this signal against risk policies. Check:
+1. Trading hours (9:00-18:00 BRT)
+2. Daily loss limit
+3. Position size limit
+
+Provide approval decision with clear justification.
+```
+
+**Variables**:
+- `{system_instructions}`: RiskManagementAgent system prompt
+- `{task_json}`: JSON-encoded task and payload
+- `{symbol}`, `{signal_type}`, `{confidence}`, `{price}`, `{timestamp}`: Signal fields
+
+**Expected Output**:
+```json
+{
+  "approved": true,
+  "risk_level": "LOW",
+  "reasons": [
+    "Trading hours: PASS (10:30 BRT within 9:00-18:00)",
+    "Daily loss limit: PASS (current R$1250 < limit R$5000)",
+    "Position size: PASS (current 750 + order 100 = 850 < limit 1000)"
+  ]
+}
+```
+
+## Best Practices
+
+1. **Clear Role Definition**: Define agent role explicitly in system instructions
+2. **Structured Input/Output**: Use JSON format with clear schemas
+3. **Fallback Strategies**: Provide deterministic fallback when LLM fails
+4. **Context Management**: Limit context size, prioritize recent data
+5. **Error Handling**: Catch LLM exceptions gracefully, log with context
+
+## Evaluation Criteria
+
+**Market Analysis**:
+- Correctness: Signal type matches market conditions
+- Performance: Analysis time &lt;1s p95
+- Quality: Signal accuracy, confidence calibration, reasoning clarity
+
+**Risk Validation**:
+- Correctness: All risk checks executed, approval matches results
+- Performance: Validation time &lt;500ms p95
+- Safety: False positive/negative rates, violation detection
+
+## Related Documentation
+
+- [Prompt Style Guide](./style-guide) - Tone and formatting guidelines
+- [Prompt Variables](./variables) - Environment variables and configuration
+- [Agno Agents](/agents/agno-agents) - Agent implementation
+- [Agent Flows](../../agents/agno-agents/flows) - Execution sequences

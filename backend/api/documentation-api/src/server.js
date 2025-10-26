@@ -68,7 +68,7 @@ if (!config.cors.disable) {
   const rawCorsOrigin =
     config.cors.origin?.trim() !== ''
       ? config.cors.origin
-      : 'http://localhost:3103,http://localhost:3004';
+      : 'http://localhost:3103,http://localhost:3205';
   const corsOrigins =
     rawCorsOrigin === '*'
       ? undefined
@@ -151,6 +151,20 @@ app.get('/', (req, res) => {
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
+    // No database strategy - FlexSearch only
+    if (!isQuestDbStrategy() && !isPostgresStrategy()) {
+      return res.json({
+        status: 'ok',
+        service: 'documentation-api',
+        timestamp: new Date().toISOString(),
+        search: {
+          engine: 'flexsearch',
+          status: 'ready',
+          indexed_files: markdownSearchService.getIndexedCount?.() || 0,
+        },
+      });
+    }
+
     if (isQuestDbStrategy()) {
       const dbHealthy = await questdbClient.healthCheck();
 
@@ -184,8 +198,8 @@ app.get('/health', async (req, res) => {
       service: 'documentation-api',
       timestamp: new Date().toISOString(),
       database: {
-        engine: 'unknown',
-        status: 'neutral',
+        engine: 'none',
+        status: 'not-configured',
       },
     });
   } catch (error) {
@@ -195,7 +209,7 @@ app.get('/health', async (req, res) => {
       service: 'documentation-api',
       timestamp: new Date().toISOString(),
       database: {
-        engine: isPostgresStrategy() ? 'postgres' : 'questdb',
+        engine: isPostgresStrategy() ? 'postgres' : isQuestDbStrategy() ? 'questdb' : 'none',
         status: 'error',
       },
       error: error.message,
@@ -226,7 +240,7 @@ app.use(errorHandler);
 app.listen(PORT, async () => {
   logger.info({ port: PORT }, 'Documentation API starting');
 
-  // Initialize database schema
+  // Initialize database schema (if configured)
   try {
     if (isQuestDbStrategy()) {
       await questdbClient.initialize();
@@ -234,6 +248,8 @@ app.listen(PORT, async () => {
     } else if (isPostgresStrategy()) {
       await ensurePrismaConnection();
       logger.info('Prisma/PostgreSQL connection initialized');
+    } else {
+      logger.info('No database configured - using FlexSearch only');
     }
   } catch (error) {
     logger.error({ err: error }, 'Failed to initialize database connection');

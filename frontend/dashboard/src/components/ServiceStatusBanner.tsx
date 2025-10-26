@@ -1,6 +1,5 @@
 import { AlertCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useServiceStatusBanner } from '../hooks/useServiceStatusBanner';
-import { Link } from 'react-router-dom';
 
 export function ServiceStatusBanner() {
   const { shouldShowBanner, downCount, degradedCount, downServices } = useServiceStatusBanner();
@@ -44,13 +43,13 @@ export function ServiceStatusBanner() {
             )}
           </p>
         </div>
-        <Link
-          to="/ops/status"
-          className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        <a
+          href="#/status"
+          className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
         >
           Ver detalhes
           <ExternalLink className="h-3 w-3" />
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -4,13 +4,15 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - "docs/**"
+      - "docs_v2/**"  # Primary: docs_v2 validation
+      - "docs/**"     # Legacy: keep during transition
       - "**/*.md"
       - "scripts/docs/check-links.py"
   push:
     branches: [main, develop]
     paths:
-      - "docs/**"
+      - "docs_v2/**"  # Primary: docs_v2 validation
+      - "docs/**"     # Legacy: keep during transition
       - "**/*.md"
       - "scripts/docs/check-links.py"
   schedule:
@@ -68,7 +70,9 @@ jobs:
           pip install requests
 
       - name: Create reports directory
-        run: mkdir -p docs/reports
+        run: |
+          mkdir -p docs_v2/reports
+          mkdir -p docs/reports
 
       - name: Install jq
         run: |
@@ -81,8 +85,8 @@ jobs:
         continue-on-error: true
         run: |
           python scripts/docs/check-links.py \
-            --docs-dir ./docs/context \
-            --output ./docs/reports/link-validation-pr.json \
+            --docs-dir ./docs_v2/content \
+            --output ./docs_v2/reports/link-validation-pr.json \
             --skip-external \
             --verbose
 
@@ -92,8 +96,8 @@ jobs:
         continue-on-error: true
         run: |
           python scripts/docs/check-links.py \
-            --docs-dir ./docs/context ./docs \
-            --output ./docs/reports/link-validation-full.json \
+            --docs-dir ./docs_v2/content ./docs/context ./docs \
+            --output ./docs_v2/reports/link-validation-full.json \
             --timeout 10 \
             --verbose
 
@@ -103,10 +107,10 @@ jobs:
         shell: bash
         run: |
           # Find the report file
-          if [ -f "./docs/reports/link-validation-pr.json" ]; then
-            REPORT_FILE="./docs/reports/link-validation-pr.json"
+          if [ -f "./docs_v2/reports/link-validation-pr.json" ]; then
+            REPORT_FILE="./docs_v2/reports/link-validation-pr.json"
           else
-            REPORT_FILE="./docs/reports/link-validation-full.json"
+            REPORT_FILE="./docs_v2/reports/link-validation-full.json"
           fi
 
           if [ ! -f "$REPORT_FILE" ]; then
@@ -183,7 +187,9 @@ jobs:
 
             // Read JSON report for details
             const fs = require('fs');
-            const reportFile = './docs/reports/link-validation-pr.json';
+            const primaryReport = './docs_v2/reports/link-validation-pr.json';
+            const fallbackReport = './docs/reports/link-validation-pr.json';
+            const reportFile = fs.existsSync(primaryReport) ? primaryReport : fallbackReport;
             if (fs.existsSync(reportFile)) {
               const report = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
 
@@ -254,7 +260,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: link-validation-report-${{ github.run_number }}
-          path: docs/reports/link-validation-*.json
+          path: |
+            docs_v2/reports/link-validation-*.json
+            docs/reports/link-validation-*.json  # Legacy during transition
           retention-days: 30
 
       - name: Create GitHub Step Summary
@@ -262,7 +270,11 @@ jobs:
         shell: bash
         run: |
           REPORT_FILE=""
-          if [ -f "./docs/reports/link-validation-pr.json" ]; then
+          if [ -f "./docs_v2/reports/link-validation-pr.json" ]; then
+            REPORT_FILE="./docs_v2/reports/link-validation-pr.json"
+          elif [ -f "./docs_v2/reports/link-validation-full.json" ]; then
+            REPORT_FILE="./docs_v2/reports/link-validation-full.json"
+          elif [ -f "./docs/reports/link-validation-pr.json" ]; then
             REPORT_FILE="./docs/reports/link-validation-pr.json"
           elif [ -f "./docs/reports/link-validation-full.json" ]; then
             REPORT_FILE="./docs/reports/link-validation-full.json"

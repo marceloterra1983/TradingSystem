@@ -1,0 +1,72 @@
+---
+title: Operations
+description: Monitoring, logging, and maintenance procedures for the Workspace application.
+tags:
+  - apps
+  - workspace
+  - operations
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Monitoring
+
+- **Frontend availability**: Synthetic check hitting public Workspace URL every 5 minutes. Expect 200 OK and bundle checksum match.
+- **Backend health**: Poll `GET http://<api-host>:3200/health` to confirm API connectivity (TimescaleDB + Express).
+- **Dashboard embed**: After each release, verify iframe loads inside dashboard without CSP or proxy regressions.
+- **Performance metrics**: Track LCP &lt;2s and INP &lt;200ms via browser performance monitor (beta).
+
+## Logging
+
+- Frontend emits user-facing toast notifications; console errors reserved for development builds.
+- Backend (`backend/api/workspace`) writes structured JSON logs. Forward to central log aggregation if available.
+- Optional telemetry (Sentry/New Relic) can be toggled alongside `VITE_ENABLE_ANALYTICS` when feature flag becomes available.
+
+## Metrics
+
+| KPI | Source | Target |
+|-----|--------|--------|
+| API availability | Workspace API `/health` | ≥99% |
+| CRUD latency | `/api/items` response time | &lt;200ms p95 |
+| Sync freshness | `lastSyncedAt` indicator | &lt;60s |
+| Error rate | Failed API calls / total | &lt;1% |
+
+## Maintenance Checklist
+
+### Daily
+
+- Confirm `/health` endpoint reports `status: ok`.
+- Review backend logs for 4xx/5xx spikes.
+- Perform quick drag-and-drop smoke test to ensure status persistence.
+
+### Weekly
+
+- Run `npm run lint`, `npm run type-check`, `npm run test` to catch regressions.
+- Rotate stale ideas or archive completed items (&gt;90 days) to keep Kanban lean.
+- Audit proxy configuration (`vite.config.ts`) after dependency upgrades.
+
+### Monthly
+
+- Run `npm outdated` and plan dependency upgrades.
+- Capture bundle size report (`npm run build -- --report`) and compare to budget (&lt;300 KB initial JS).
+- Review taxonomy (categories/priorities/statuses) with product stakeholders.
+
+## Troubleshooting
+
+| Symptom | Checks | Resolution |
+|---------|--------|------------|
+| Blank screen | Browser console errors | Rebuild assets, verify environment variables |
+| API 404/500 | Network tab for `/api/items` | Confirm backend `backend/api/workspace` running on 3200; check proxy |
+| Drag-and-drop stuck | Network request fails | Inspect PUT `/api/items/:id` payload, restart API, retry |
+| Dashboard iframe blocked | Frame-ancestors policy | Allow dashboard origin or host pre-flight check |
+
+## Data Integrity
+
+- Backend persists items to TimescaleDB schema `frontend_apps.workspace`.
+- Coordinate with database team for nightly backups and retention policies.
+- Keep API schema synchronized with frontend enums (status, priority, category).
+
+## Alerting
+
+- Alert when `/health` endpoint fails 3 consecutive times (critical severity).
+- Warn when error rate exceeds 1% over 15 minutes.
+- Notify on CDN/hosting incidents impacting static assets (deploy rollback may be required).

@@ -127,7 +127,7 @@ if [ "$SKIP_FRONTEND" = false ]; then
 fi
 
 if [ "$SKIP_DOCS" = false ]; then
-    start_service "Docs (Docusaurus)" "$REPO_ROOT/docs" "npm run start -- --port 3004 --host 0.0.0.0"
+    start_service "Docs (Docusaurus)" "$REPO_ROOT/docs" "npm run start -- --port 3205 --host 0.0.0.0"
 fi
 
 # Start monitoring stack with Docker
@@ -184,6 +184,6 @@ echo ""
 echo "Services running:"
 [ "$SKIP_WORKSPACE" = false ] && echo "  - Workspace:          http://localhost:3100"
 [ "$SKIP_FRONTEND" = false ] && echo "  - Dashboard:          http://localhost:5173"
-[ "$SKIP_DOCS" = false ] && echo "  - Docs (Docusaurus):  http://localhost:3004"
-[ "$START_DOCS_DOCKER" = true ] && echo "  - Docs (Docker):      http://localhost:3004"
+[ "$SKIP_DOCS" = false ] && echo "  - Docs (Docusaurus):  http://localhost:3205"
+[ "$START_DOCS_DOCKER" = true ] && echo "  - Docs (Docker):      http://localhost:3205"
 echo ""

@@ -43,6 +43,12 @@ const LlamaIndexPage = React.lazy(
 const LangChainVectorPage = React.lazy(
   () => import('../components/pages/LangChainVectorPage')
 );
+const APIViewerPage = React.lazy(
+  () => import('../components/pages/APIViewerPage')
+);
+const TelegramGatewayPage = React.lazy(
+  () => import('../components/pages/TelegramGatewayPage')
+);
 
 /**
  * Page Part - Collapsible section within a page
@@ -173,6 +179,16 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [],
         customContent: <TPCapitalOpcoesPage />,
+      },
+      {
+        id: 'telegram-gateway',
+        title: 'Telegram Gateway',
+        header: {
+          title: 'Telegram Gateway',
+          subtitle: 'Monitoramento do serviço MTProto, filas e mensagens persistidas',
+        },
+        parts: [],
+        customContent: <TelegramGatewayPage />,
       },
       {
         id: 'workspace',

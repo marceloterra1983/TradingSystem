@@ -29,11 +29,11 @@ RUN npm install && \
 COPY . .
 
 # Expose port
-EXPOSE 3400
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3400/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
 # Development command with hot reload
 CMD ["npm", "run", "dev"]
@@ -41,8 +41,8 @@ CMD ["npm", "run", "dev"]
 # Stage 3: Production image (optimized)
 FROM node:22-alpine AS production
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init for proper signal handling and curl for health checks
+RUN apk add --no-cache dumb-init curl
 
 # Create app user (security)
 RUN addgroup -g 1001 -S nodejs && \
@@ -55,6 +55,7 @@ COPY --from=base --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Copy application code
 COPY --chown=nodejs:nodejs package*.json ./
+COPY --chown=nodejs:nodejs prisma ./prisma
 COPY --chown=nodejs:nodejs src ./src
 COPY --chown=nodejs:nodejs db ./db
 
@@ -67,11 +68,11 @@ RUN mkdir -p uploads && \
 USER nodejs
 
 # Expose port
-EXPOSE 3400
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3400/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

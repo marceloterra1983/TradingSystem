@@ -96,11 +96,9 @@ show_help() {
     echo "    • Workspace API (Express)           - http://localhost:3200"
     echo "    • TP Capital API (Express)          - http://localhost:3200"
     echo "    • B3 Market Data (Express)          - http://localhost:3302"
-    echo "    • Documentation (Docusaurus)        - http://localhost:3004"
+    echo "    • Documentation (Docusaurus)        - http://localhost:3205"
     echo "    • Service Launcher (Express)        - http://localhost:3500"
     echo "    • Firecrawl Proxy (Express)         - http://localhost:3600"
-    echo "    • WebScraper API (Express)          - http://localhost:3700"
-    echo "    • WebScraper UI (React + Vite)      - http://localhost:3800"
     echo ""
     echo -e "${BOLD}PRÉ-REQUISITOS:${NC}"
     echo "  • Docker & Docker Compose"
@@ -254,7 +252,7 @@ show_summary() {
 
     echo -e "${BOLD}Interface Principal:${NC}"
     echo -e "  ${GREEN}•${NC} Dashboard:              ${CYAN}http://localhost:3103${NC}"
-    echo -e "  ${GREEN}•${NC} Documentação:           ${CYAN}http://localhost:3004${NC}"
+    echo -e "  ${GREEN}•${NC} Documentação:           ${CYAN}http://localhost:3205${NC}"
     echo ""
 
     echo -e "${BOLD}APIs Backend:${NC}"
@@ -263,7 +261,6 @@ show_summary() {
     echo -e "  ${GREEN}•${NC} Documentation API:      ${CYAN}http://localhost:3400${NC}"
     echo -e "  ${GREEN}•${NC} Service Launcher:       ${CYAN}http://localhost:3500${NC}"
     echo -e "  ${GREEN}•${NC} Firecrawl Proxy:        ${CYAN}http://localhost:3600${NC}"
-    echo -e "  ${GREEN}•${NC} WebScraper API:         ${CYAN}http://localhost:3700${NC}"
     echo ""
 
     echo -e "${BOLD}Infraestrutura:${NC}"

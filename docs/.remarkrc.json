@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    [
+      "remark-frontmatter",
+      ["yaml"]
+    ],
+    [
+      "remark-lint-frontmatter-schema",
+      {
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["title", "description", "tags"]
+      }
+    ]
+  ]
+}

@@ -9,9 +9,9 @@ import {
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { apiConfig } from '../../config/api';
 import { Boxes, Database, ExternalLink, Shield, Activity, Code, Gauge } from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
+import { buildDocsUrl } from '../../lib/docsUrl';
 
 const DEFAULT_QDRANT_HTTP = 'http://localhost:6333';
 const DEFAULT_QDRANT_GRPC = 'http://localhost:6334';
@@ -39,13 +39,6 @@ const resolveGrpcUrl = (): string => {
 
 const QDRANT_HTTP_URL = resolveHttpUrl();
 const QDRANT_GRPC_URL = resolveGrpcUrl();
-
-const buildDocsUrl = (relativePath: string) => {
-  const normalizedBase = apiConfig.docsUrl.replace(/\/$/, '');
-  const docsBase = normalizedBase.endsWith('/docs') ? normalizedBase : `${normalizedBase}/docs`;
-  const normalizedPath = relativePath.replace(/^\//, '').replace(/\.md$/, '');
-  return `${docsBase}/${normalizedPath}`;
-};
 
 const DOCUMENTATION_LINKS = [
   {

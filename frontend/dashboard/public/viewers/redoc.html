@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redoc - TradingSystem API</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="redoc-container"></div>
+
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <script>
+    window.onload = function() {
+      // Get spec URL from query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
+
+      // Initialize Redoc
+      Redoc.init(
+        specUrl,
+        {
+          scrollYOffset: 0,
+          hideHostname: false,
+          expandResponses: '200,201',
+          requiredPropsFirst: true,
+          noAutoAuth: false,
+          pathInMiddlePanel: false,
+          hideDownloadButton: false,
+          downloadFileName: 'openapi.yaml',
+          downloadDefinitionUrl: specUrl,
+          disableSearch: false,
+          onlyRequiredInSamples: false,
+          showExtensions: true,
+          hideSingleRequestSampleTab: true,
+          expandSingleSchemaField: true,
+          jsonSampleExpandLevel: 2,
+          hideSchemaTitles: false,
+          simpleOneOfTypeLabel: false,
+          sortPropsAlphabetically: false,
+          payloadSampleIdx: 0,
+          theme: {
+            colors: {
+              primary: {
+                main: '#3b82f6'
+              }
+            },
+            typography: {
+              fontSize: '14px',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              headings: {
+                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }
+            },
+            sidebar: {
+              backgroundColor: '#1e293b',
+              textColor: '#e2e8f0',
+              activeTextColor: '#ffffff'
+            },
+            rightPanel: {
+              backgroundColor: '#0f172a',
+              textColor: '#e2e8f0'
+            }
+          }
+        },
+        document.getElementById('redoc-container')
+      );
+    };
+  </script>
+</body>
+</html>

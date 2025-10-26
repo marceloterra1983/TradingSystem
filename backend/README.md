@@ -104,7 +104,7 @@ curl http://localhost:3400/health
 DOCUMENTATION_API_PORT=3400
 DOCUMENTATION_DB_STRATEGY=postgres
 DOCUMENTATION_DATABASE_URL=postgresql://app_documentation:password@localhost:5444/frontend_apps?schema=documentation
-CORS_ORIGIN=http://localhost:3103,http://localhost:3004
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # docs (was 3004 for legacy docs)
 ```
 
 **Arquivos:**
@@ -238,7 +238,7 @@ FIRECRAWL_PROXY_BASE_URL=http://localhost:3002
 FIRECRAWL_PROXY_TIMEOUT=30000
 FIRECRAWL_PROXY_RATE_LIMIT_WINDOW_MS=60000
 FIRECRAWL_PROXY_RATE_LIMIT_MAX=100
-CORS_ORIGIN=http://localhost:3103,http://localhost:3004
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # docs (was 3004 for legacy docs)
 ```
 
 **Exemplo de Request:**
@@ -916,21 +916,22 @@ lsof -i :3600  # Firecrawl Proxy
 ### Configuração
 - **Service Manifest:** [`config/services-manifest.json`](../config/services-manifest.json)
 - **Environment Rules:** [`config/ENV-CONFIGURATION-RULES.md`](../config/ENV-CONFIGURATION-RULES.md)
-- **Environment Guide:** [`docs/context/ops/ENVIRONMENT-CONFIGURATION.md`](../docs/context/ops/ENVIRONMENT-CONFIGURATION.md)
+- **Environment Guide:** [Environment Variables Reference](http://localhost:3205/tools/security-config/env) (docs)
 
 ### Data Layer
-- **TimescaleDB Operations:** [`docs/context/backend/data/guides/timescaledb-operations.md`](../docs/context/backend/data/guides/timescaledb-operations.md)
-- **Database UI Tools:** [`docs/context/backend/data/guides/database-ui-tools.md`](../docs/context/backend/data/guides/database-ui-tools.md)
-- **QuestDB Dual Storage:** [`docs/context/backend/data/operations/questdb-timescaledb-dual-storage.md`](../docs/context/backend/data/operations/questdb-timescaledb-dual-storage.md)
+- **Database Overview:** [Database Platform](http://localhost:3205/database/overview) (docs)
+- **Database Schema:** [Schema Reference](http://localhost:3205/database/schema) (docs)
+- **Database Operations:** [Retention & Backup](http://localhost:3205/database/retention-backup) (docs)
+- **Legacy Guides:** See `docs_legacy/context/backend/data/` (archived after docs launch)
 
 ### APIs Específicas
-- **Documentation API:** [`docs/context/backend/api/documentation-api/`](../docs/context/backend/api/documentation-api/)
-- **Firecrawl Proxy:** [`docs/context/backend/api/firecrawl-proxy.md`](../docs/context/backend/api/firecrawl-proxy.md)
+- **Order Manager API:** [Order Manager](http://localhost:3205/api/order-manager) (docs)
+- **Data Capture API:** [Data Capture](http://localhost:3205/api/data-capture) (docs)
+- **Workspace API:** [Workspace App](http://localhost:3205/apps/workspace/overview) (docs)
 
 ### Guias
-- **New Service Template:** [`docs/context/backend/NEW-SERVICE-TEMPLATE.md`](../docs/context/backend/NEW-SERVICE-TEMPLATE.md)
-- **Project Structure:** [`docs/DIRECTORY-STRUCTURE.md`](../docs/DIRECTORY-STRUCTURE.md)
-- **Buildkit Guide:** [`docs/context/backend/guides/buildkit-guide.md`](../docs/context/backend/guides/buildkit-guide.md)
+- **Documentation Hub:** [TradingSystem Documentation](http://localhost:3205) (docs)
+- **Legacy Docs:** See `docs_legacy/README.md` (archived - use docs for new content)
 
 ---
 

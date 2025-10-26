@@ -11,7 +11,7 @@ jobs:
     schedule: "0 */2 * * *"  # Every 2 hours
     steps:
       - name: Extract knowledge from Docusaurus
-        cmd: "python docs/ingest/from_docusaurus.py --root docs/docusaurus --symbols docs/ingest/assets/symbols.yaml --out docs/spec"
+        cmd: "python docs/ingest/from_docusaurus.py --root docs --symbols docs/ingest/assets/symbols.yaml --out docs/spec"
         timeout: 300  # 5 minutes
         retries: 2
         

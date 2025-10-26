@@ -1,0 +1,11 @@
+{
+  "label": "Engineering",
+  "position": 3,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Frontend Engineering",
+    "slug": "/frontend/engineering",
+    "description": "Engineering practices for the frontend stack."
+  }
+}

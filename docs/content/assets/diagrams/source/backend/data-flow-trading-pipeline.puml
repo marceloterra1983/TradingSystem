@@ -1,0 +1,32 @@
+@startuml
+title Trading Pipeline Data Flow
+
+skinparam componentStyle rectangle
+skinparam dpi 150
+skinparam shadowing false
+
+actor Trader as trader
+
+package "Market Inputs" {
+  component "B3 Market Feed" as b3
+  component "TP Capital Signals" as tpSignals
+}
+
+component "Ingestion Service" as ingestion
+component "QuestDB" as questdb
+component "Signal Normalizer" as normalizer
+component "Risk Engine" as riskEngine
+component "Trading Agents" as agents
+component "Dashboard" as dashboard
+
+trader --> dashboard : View signals
+b3 --> ingestion
+tpSignals --> ingestion
+ingestion --> questdb : Write raw events
+questdb --> normalizer : Stream market + signal data
+normalizer --> riskEngine : Validate against limits
+riskEngine --> agents : Approve actionable signals
+agents --> dashboard : Publish trading recommendations
+agents --> trader : Notify opportunities
+
+@enduml

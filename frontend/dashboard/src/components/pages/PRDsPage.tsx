@@ -6,7 +6,16 @@ import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import { apiConfig } from '../../config/api';
+import { buildDocsUrl, normalizeDocsBase } from '../../lib/docsUrl';
 
+/**
+ * PRD Loading Strategy:
+ * - Legacy: Serve static markdown from /public/docs_legacy/context/shared/product/prd/
+ * - docs: Serve rendered markdown pages from the Documentation Hub (port 3205)
+ * - Transition: Feature flag toggles docs first, with automatic fallback to legacy.
+ *   This keeps the dashboard resilient while PRDs migrate to docs.
+ */
 /**
  * PRD Data Structure
  */
@@ -17,8 +26,27 @@ interface PRD {
   status: 'implemented' | 'draft' | 'planned';
   owner: string;
   lastSynced: string;
-  prdUrl: string;
+  docsSlug?: string;
 }
+
+const resolveDocsHubBase = (): string => {
+  const env = import.meta.env as Record<string, string | undefined>;
+  const override = env.VITE_PRD_BASE_URL;
+  const candidate = typeof override === 'string' && override.trim() ? override : apiConfig.docsUrl;
+  return normalizeDocsBase(candidate);
+};
+
+const isDocsHubEnabled = (): boolean => {
+  const env = import.meta.env as Record<string, string | undefined>;
+  return (env.VITE_USE_DOCS_V2_PRD || '').toLowerCase() === 'true';
+};
+
+const getLegacyBaseUrl = (): string => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+  return window.location.origin.replace(/\/+$/, '');
+};
 
 /**
  * PRD Database - Portuguese
@@ -31,7 +59,7 @@ const PRDS_PT: PRD[] = [
     status: 'implemented',
     owner: 'Marcelo Terra',
     lastSynced: '2025-10-09',
-    prdUrl: 'http://localhost:8000/shared/product/prd/pt/banco-ideias-prd/',
+    docsSlug: 'prd/products/trading-app/feature-idea-bank.pt',
   },
   {
     id: 'monitoramento-prometheus',
@@ -40,7 +68,6 @@ const PRDS_PT: PRD[] = [
     status: 'draft',
     owner: 'Marcelo Terra',
     lastSynced: '2025-10-10',
-    prdUrl: 'http://localhost:8000/shared/product/prd/pt/monitoramento-prometheus-prd/',
   },
   {
     id: 'docusaurus-implementation',
@@ -49,7 +76,6 @@ const PRDS_PT: PRD[] = [
     status: 'draft',
     owner: 'Docs / Ops',
     lastSynced: '2025-10-10',
-    prdUrl: 'http://localhost:8000/shared/product/prd/pt/docusaurus-implementation-prd/',
   },
 ];
 
@@ -64,7 +90,7 @@ const PRDS_EN: PRD[] = [
     status: 'implemented',
     owner: 'Marcelo Terra',
     lastSynced: '2025-10-09',
-    prdUrl: 'http://localhost:8000/shared/product/prd/en/banco-ideias-prd/',
+    docsSlug: 'prd/products/trading-app/feature-idea-bank',
   },
   {
     id: 'monitoramento-prometheus-en',
@@ -73,7 +99,6 @@ const PRDS_EN: PRD[] = [
     status: 'draft',
     owner: 'Marcelo Terra',
     lastSynced: '2025-10-10',
-    prdUrl: 'http://localhost:8000/shared/product/prd/en/monitoramento-prometheus-prd/',
   },
   {
     id: 'docusaurus-implementation-en',
@@ -82,7 +107,6 @@ const PRDS_EN: PRD[] = [
     status: 'draft',
     owner: 'Docs / Ops',
     lastSynced: '2025-10-10',
-    prdUrl: 'http://localhost:8000/shared/product/prd/en/docusaurus-implementation-prd/',
   },
 ];
 
@@ -123,38 +147,79 @@ function PRDSection({
   title: string;
   description: string;
 }) {
+  const docsHubBase = resolveDocsHubBase();
+  const docsHubFlagEnabled = isDocsHubEnabled();
   const [selectedPRD, setSelectedPRD] = useState<PRD | null>(null);
   const [prdContent, setPrdContent] = useState<string>('');
   const [loadingContent, setLoadingContent] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [activePrdUrl, setActivePrdUrl] = useState<string>('');
 
   useEffect(() => {
     if (!selectedPRD) {
       setPrdContent('');
       setLoadError(null);
+      setActivePrdUrl('');
       return;
     }
 
     setLoadingContent(true);
     setLoadError(null);
 
-    const prdPath = `/docs/context/shared/product/prd/${language}/${selectedPRD.fileName}`;
+    // Temporary migration strategy:
+    // 1. Try docs hub when flagged on (serves rich documentation)
+    // 2. Fall back to legacy static export so the dashboard stays functional
+    const docsEnabled = docsHubFlagEnabled && Boolean(selectedPRD.docsSlug);
+    const docsUrl =
+      docsEnabled && selectedPRD.docsSlug
+        ? buildDocsUrl(selectedPRD.docsSlug, docsHubBase)
+        : null;
+    const legacyUrl = `${getLegacyBaseUrl()}/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`;
+    const fetchCandidates = [
+      ...(docsUrl ? [{ source: 'docs', url: docsUrl }] : []),
+      { source: 'legacy', url: legacyUrl },
+    ] as const;
 
     const loadPrdContent = async () => {
+      let lastError: string | null = null;
       try {
-        const response = await fetch(prdPath);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        for (const candidate of fetchCandidates) {
+          try {
+            const response = await fetch(candidate.url);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const content = await response.text();
+            const contentWithoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, '');
+            setPrdContent(contentWithoutFrontmatter);
+            setActivePrdUrl(candidate.url);
+            setLoadError(null);
+            return;
+          } catch (candidateError) {
+            const message =
+              candidateError instanceof Error ? candidateError.message : 'Unexpected error';
+            console.warn('[PRD Viewer] attempt failed', candidate.url, message);
+            lastError = message;
+          }
         }
 
-        const content = await response.text();
-        const contentWithoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, '');
-        setPrdContent(contentWithoutFrontmatter);
+        throw new Error(
+          `Failed to load PRD from docs and legacy sources. Last error: ${lastError ?? 'unknown error'}`
+        );
       } catch (error) {
-        console.error('[PRD Viewer] error loading file', selectedPRD?.fileName, error);
         const message = error instanceof Error ? error.message : 'Unexpected error';
+        console.error('[PRD Viewer] error loading file', selectedPRD?.fileName, message);
         setPrdContent('');
-        setLoadError(`PRD not found: ${message}`);
+        setActivePrdUrl('');
+        setLoadError(
+          [
+            'PRD not available.',
+            docsEnabled
+              ? 'Verify docs build or disable VITE_USE_DOCS_V2_PRD until migration completes.'
+              : 'Legacy static fallback also failed. Confirm public/docs export is present.',
+            `Detail: ${message}`,
+          ].join(' ')
+        );
       } finally {
         setLoadingContent(false);
       }
@@ -252,10 +317,20 @@ function PRDSection({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(selectedPRD.prdUrl, '_blank')}
+                  onClick={() => {
+                    const fallbackUrl = `${getLegacyBaseUrl()}/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`;
+                    const preferredUrl =
+                      activePrdUrl ||
+                      (docsHubFlagEnabled && selectedPRD.docsSlug
+                        ? buildDocsUrl(selectedPRD.docsSlug, docsHubBase)
+                        : fallbackUrl);
+                    if (preferredUrl) {
+                      window.open(preferredUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Open in MkDocs
+                  Open PRD
                 </Button>
               </div>
 
@@ -301,7 +376,11 @@ function PRDSection({
                 )}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Content loaded from /public/docs/context/shared/product/prd/{language}/{selectedPRD.fileName}
+                Content source:{' '}
+                {activePrdUrl
+                  ? activePrdUrl
+                  : `/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`} (docs migration mode{' '}
+                {docsHubFlagEnabled ? 'enabled' : 'disabled'})
               </p>
             </div>
           </CardContent>

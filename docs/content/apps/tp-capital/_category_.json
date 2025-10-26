@@ -1,0 +1,11 @@
+{
+  "label": "TP Capital",
+  "position": 3,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "TP Capital App",
+    "slug": "/apps/tp-capital",
+    "description": "Operational documentation for the TP Capital Telegram ingestion application."
+  }
+}

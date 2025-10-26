@@ -113,22 +113,40 @@ export function createTelegramForwarder() {
       logger.warn('Webhook mode not implemented for forwarder bot, falling back to polling');
     }
 
+    // Configure polling options with shorter timeout to avoid ETIMEDOUT
+    const pollingOptions = {
+      allowedUpdates: ['channel_post', 'edited_channel_post', 'my_chat_member'],
+      dropPendingUpdates: true,
+      timeout: Number(process.env.TELEGRAM_POLLING_TIMEOUT || 15), // Reduced from 30s default
+      limit: Number(process.env.TELEGRAM_POLLING_LIMIT || 100)
+    };
+
     try {
-      await bot.launch({
-        allowedUpdates: ['channel_post', 'edited_channel_post', 'my_chat_member'],
-        dropPendingUpdates: true
-      });
+      await bot.launch(pollingOptions);
 
       logger.info(
         {
           sourceChannels: config.telegram.forwarderSourceChannels,
           destinationChannel: config.telegram.destinationChannelId,
           mode: 'polling',
+          pollingTimeout: pollingOptions.timeout,
         },
         'Telegram forwarder bot started'
       );
     } catch (error) {
       logger.error({ err: error }, 'Failed to launch forwarder bot');
+      
+      // Retry after delay if it's a network error
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
+        logger.warn('Network error detected, will retry in 10 seconds...');
+        setTimeout(() => {
+          launch().catch((retryErr) => {
+            logger.error({ err: retryErr }, 'Retry failed');
+          });
+        }, 10000);
+        return; // Don't throw on first timeout, try to recover
+      }
+      
       throw error;
     }
   };

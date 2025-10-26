@@ -9,9 +9,9 @@ import {
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { apiConfig } from '../../config/api';
 import { Activity, BrainCircuit, ExternalLink, Gauge, Network, Server, Workflow } from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
+import { buildDocsUrl } from '../../lib/docsUrl';
 
 const DEFAULT_LANGGRAPH_URL = 'http://localhost:8111';
 
@@ -37,13 +37,6 @@ const resolveLangGraphUrl = (): string => {
 };
 
 const LANGGRAPH_BASE_URL = resolveLangGraphUrl();
-
-const buildDocsUrl = (relativePath: string) => {
-  const normalizedBase = apiConfig.docsUrl.replace(/\/$/, '');
-  const docsBase = normalizedBase.endsWith('/docs') ? normalizedBase : `${normalizedBase}/docs`;
-  const normalizedPath = relativePath.replace(/^\//, '').replace(/\.md$/, '');
-  return `${docsBase}/${normalizedPath}`;
-};
 
 interface QuickLink {
   id: string;

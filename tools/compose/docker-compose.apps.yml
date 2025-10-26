@@ -93,7 +93,7 @@ services:
       - TIMESCALEDB_PORT=5432
       - WORKSPACE_DATABASE=APPS-WORKSPACE
       - TIMESCALEDB_USER=timescale
-      - TIMESCALEDB_PASSWORD=axA7d0kgjBezRw0mRlj9tOnHRBKgmZsL
+      - TIMESCALEDB_PASSWORD=pass_timescale
 
       # Database Strategy (TimescaleDB only)
       - LIBRARY_DB_STRATEGY=timescaledb

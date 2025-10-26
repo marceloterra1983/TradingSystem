@@ -31,10 +31,7 @@ export function createTelegramForwarderManual() {
 
     // Check if this message is from one of our source channels
     if (!config.telegram.forwarderSourceChannels.includes(sourceChannelId)) {
-      logger.debug(
-        { sourceChannelId, configuredChannels: config.telegram.forwarderSourceChannels },
-        'Forwarder: Ignoring message from non-configured channel'
-      );
+      // Silently ignore - no need to log every ignored channel
       return;
     }
 
@@ -75,45 +72,77 @@ export function createTelegramForwarderManual() {
     if (!isPolling) return;
 
     try {
+      const pollingTimeout = Number(process.env.TELEGRAM_POLLING_TIMEOUT || 10); // Reduced to 10s
       const updates = await bot.telegram.getUpdates({
         offset,
-        timeout: 30, // Long polling timeout
+        timeout: pollingTimeout,
         allowed_updates: ['channel_post', 'edited_channel_post']
       });
 
+      // Process updates
       if (updates.length > 0) {
-        logger.debug({ count: updates.length }, 'Forwarder: Received updates');
+        logger.debug({ updateCount: updates.length }, 'Forwarder: Received updates');
       }
-
+      
       for (const update of updates) {
         offset = update.update_id + 1;
 
         if (update.channel_post) {
+          const channelId = update.channel_post.chat?.id;
+          logger.debug(
+            { 
+              channelId, 
+              isConfigured: config.telegram.forwarderSourceChannels.includes(channelId),
+              messageId: update.channel_post.message_id 
+            }, 
+            'Forwarder: Processing channel post'
+          );
           await handleChannelPost(update.channel_post);
         }
-
-        if (update.edited_channel_post) {
-          logger.debug(
-            { messageId: update.edited_channel_post.message_id },
-            'Forwarder: Edited channel post detected (not forwarding edits)'
-          );
-        }
+        // Silently ignore other update types
+      }
+      
+      // If we got here successfully, continue immediately
+      if (isPolling) {
+        setImmediate(() => pollUpdates());
       }
     } catch (error) {
-      logger.error({ err: error }, 'Forwarder: Error during polling');
-      // Wait a bit before retrying on error
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-
-    // Continue polling
-    if (isPolling) {
-      setImmediate(() => pollUpdates());
+      // Only log timeout errors at warn level, others at error
+      if (error.code === 'ETIMEDOUT') {
+        logger.warn({ code: error.code }, 'Forwarder: Polling timeout, retrying...');
+        // Shorter retry for timeouts
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } else {
+        logger.error({ err: error }, 'Forwarder: Error during polling');
+        // Longer wait for other errors
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
+      // Continue polling even after error
+      if (isPolling) {
+        setImmediate(() => pollUpdates());
+      }
     }
   }
 
   const launch = async () => {
     // Clear any existing webhook
     await bot.telegram.deleteWebhook({ drop_pending_updates: false });
+
+    // Verify bot info
+    try {
+      const botInfo = await bot.telegram.getMe();
+      logger.info(
+        {
+          botUsername: botInfo.username,
+          botId: botInfo.id,
+        },
+        'Forwarder bot authenticated successfully'
+      );
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to authenticate forwarder bot');
+      throw error;
+    }
 
     isPolling = true;
     
@@ -122,6 +151,7 @@ export function createTelegramForwarderManual() {
         sourceChannels: config.telegram.forwarderSourceChannels,
         destinationChannel: config.telegram.destinationChannelId,
         mode: 'manual-polling',
+        pollingTimeout: Number(process.env.TELEGRAM_POLLING_TIMEOUT || 10),
       },
       'Telegram forwarder bot started (manual polling)'
     );

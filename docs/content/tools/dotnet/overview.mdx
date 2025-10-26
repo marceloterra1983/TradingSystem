@@ -1,0 +1,82 @@
+---
+title: .NET Overview
+description: Supported .NET SDK versions and usage guidelines within TradingSystem.
+tags:
+  - tools
+  - dotnet
+owner: ToolingGuild
+lastReviewed: '2025-10-26'
+---
+## Support Policy
+
+- **Supported Version**: .NET SDK 8.0 or higher.
+- **Platform**: Windows 11 x64 (native execution for ProfitDLL integrations).
+- **Upgrade Cadence**: Follow .NET LTS releases and move to a new LTS within six months.
+- **EOL Policy**: Deprecate SDKs three months before Microsoft’s published EOL.
+
+## Platform Requirements
+
+- **Data Capture** (Port 3100): .NET 8 service that ingests market data from ProfitDLL.
+- **Order Manager** (Port 3205): .NET 8 service for execution and risk controls.
+- **ProfitDLL Integration**: Requires ProfitChart installed locally; Windows-only.
+- **Why Native?** ProfitDLL is a Windows C++ library without Linux support, so services cannot be containerised.
+- **Dual Platform**: .NET services run natively on Windows; Node.js APIs and tooling run in Linux/WSL environments.
+
+## Project Structure
+
+- **Solution File**: `TradingSystem.sln` at the repository root.
+- **Service Layout**: `backend/services/data-capture/` and `backend/services/order-manager/` (proposed structure).
+- **Architecture Layers**:
+  1. Domain — Aggregates, Value Objects, Domain Events.
+  2. Application — Use cases plus command/query handlers.
+  3. Infrastructure — Repositories and ProfitDLL integrations.
+  4. Presentation — Web API controllers and WebSocket handlers.
+
+## Development Workflow
+
+### Prerequisites
+
+- Windows 11 x64, .NET SDK 8.0, ProfitChart installation, Nelogica Data Solution subscription.
+- IDE: Visual Studio 2022 or JetBrains Rider.
+
+### Commands
+
+```bash
+# Build solution
+dotnet build TradingSystem.sln
+
+# Build specific service
+dotnet build backend/services/data-capture/DataCapture.csproj
+
+# Run service
+dotnet run --project backend/services/data-capture/DataCapture.csproj
+
+# Run tests
+dotnet test
+```
+
+### Configuration & Debugging
+
+- Use the centralized `.env` for secrets and load via configuration providers.
+- Service-specific settings stay in `appsettings.json` and `appsettings.Development.json`.
+- ProfitDLL credentials flow through environment variables.
+- Use Visual Studio debugging and attach to running processes when troubleshooting.
+- Structured logs go to stdout for collection via systemd or external tooling.
+
+## Integration with ProfitDLL
+
+- **Capabilities**: Real-time ticks, order book streaming, historical retrieval, multi-asset orders, automatic reconnection.
+- **Pattern**:
+  1. Initialize ProfitDLL during service startup.
+  2. Register callbacks for state, trade, book, and order events.
+  3. Serialize native structs to JSON for downstream consumers.
+  4. Publish to WebSockets or REST endpoints.
+  5. Handle reconnection with exponential backoff.
+- **Performance Targets**: Callback processing under 50 ms p95; order placement under 500 ms p95.
+
+## Related Documentation
+
+- [Data Capture Service](../../apps/data-capture/overview)
+- [Order Manager Service](../../apps/order-manager/overview)
+- [ProfitDLL Integration](../profitdll/overview)
+- [Architecture Service Map](../../reference/architecture/service-map)

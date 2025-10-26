@@ -1,0 +1,209 @@
+---
+title: Deployment Guide
+description: Deploying the TP Capital application across environments.
+tags:
+  - apps
+  - tp-capital
+  - deployment
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Windows Installation
+
+TP Capital is designed for Linux/WSL deployment. For Windows native deployment:
+
+### Prerequisites
+
+- Node.js 18+ installed.
+- QuestDB running (via Docker Desktop or native Windows build).
+- Git for cloning repository.
+
+### Step-by-Step Installation
+
+1. **Clone Repository**
+
+   ```bash
+   git clone https://github.com/<owner>/TradingSystem.git
+   cd TradingSystem/apps/tp-capital
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment**
+
+   ```bash
+   cp .env.example .env
+   # Edit `.env` and set `TP_CAPITAL_API_PORT=4005`
+   #   (default dev port is 3200; use 4005 only if 3200 conflicts)
+   # - QUESTDB_HTTP_URL=http://localhost:9002
+   # - QUESTDB_ILP_HOST=localhost
+   # - QUESTDB_ILP_PORT=9009
+   # - TELEGRAM_BOT_TOKEN=<your-token>
+   ```
+
+4. **Start QuestDB**
+
+   ```bash
+   # Via Docker Desktop
+   cd infrastructure
+   docker compose up questdb -d
+
+   # Or download QuestDB Windows binary from questdb.io
+   ```
+
+5. **Start Service**
+
+   ```bash
+   npm run dev
+   # Service starts on http://localhost:3200 by default (uses TP_CAPITAL_API_PORT)
+   ```
+
+6. **Verify Installation**
+
+   ```bash
+   # Check health endpoint
+   curl http://localhost:3200/health
+   # If you changed TP_CAPITAL_API_PORT, adjust the port above.
+
+   # Check QuestDB UI
+   # Open browser: http://localhost:9002
+
+   # Seed sample data
+   npm run seed
+
+   # Query signals
+   curl http://localhost:3200/signals
+   # Adjust port if TP_CAPITAL_API_PORT differs.
+   ```
+
+### Post-Install Validation
+
+- ✅ Service responds on port defined by `TP_CAPITAL_API_PORT` (default 3200).
+- ✅ QuestDB UI accessible on port 9002.
+- ✅ `/health` endpoint returns 200 OK.
+- ✅ `/signals` endpoint returns JSON array.
+- ✅ Sample data visible in QuestDB console.
+
+## Linux/WSL Deployment
+
+### Local Development
+
+```bash
+cd apps/tp-capital
+cp .env.example .env
+# Edit .env and set TP_CAPITAL_API_PORT=3200
+npm install
+npm run dev
+```
+
+### Docker Compose (Recommended)
+
+```bash
+cd apps/tp-capital/infrastructure
+docker compose up --build
+```
+
+Starts tp-capital-signals service (port 4005) and QuestDB (HTTP/UI 9002 on host, ILP 9009) on a shared Docker network.
+
+### Seed Sample Data
+
+```bash
+npm run seed
+```
+
+Ensure QuestDB is running before seeding.
+
+## Automation
+
+### CI/CD Pipeline
+
+- Workflow: `.github/workflows/tp-capital.yml`.
+- Triggers: Push to `main`, pull requests targeting `main`.
+- Steps: Checkout code, set up Docker Buildx, authenticate to GHCR, build image (`ghcr.io/<owner>/tp-capital-signals:latest` and commit SHA tag), push image, notify deployment channel.
+
+### Production Deployment
+
+1. **Prepare Environment File**
+
+   ```bash
+   cd apps/tp-capital/infrastructure
+   cp tp-capital-signals.env.example tp-capital-signals.env
+   # Edit with production credentials:
+   # - TELEGRAM_BOT_TOKEN=<prod-token>
+   # - QUESTDB_HTTP_URL=http://questdb:9000 (container port; host UI exposed on 9002)
+   # - QUESTDB_ILP_HOST=questdb
+   # - QUESTDB_ILP_PORT=9009
+   ```
+
+2. **Pull Latest Image**
+
+   ```bash
+   docker compose -f docker-compose.prod.yml pull
+   ```
+
+3. **Start Services**
+
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d
+   ```
+
+4. **Verify Deployment**
+
+   ```bash
+   curl http://<host>:4005/health
+   curl http://<host>:9002
+   docker compose -f docker-compose.prod.yml logs -f tp-capital-signals
+   ```
+
+5. **Verify Data Persistence**
+
+   ```bash
+   docker volume inspect questdb-data
+   # QuestDB UI: http://<host>:9002
+   # Run: SELECT * FROM tp_capital_signals ORDER BY ts DESC LIMIT 10;
+   ```
+
+### Rollback Procedure
+
+1. **Stop Current Deployment**
+
+   ```bash
+   docker compose -f docker-compose.prod.yml down
+   ```
+
+2. **Pull Previous Image**
+
+   ```bash
+   docker pull ghcr.io/<owner>/tp-capital-signals:<previous-commit-sha>
+   docker tag ghcr.io/<owner>/tp-capital-signals:<previous-commit-sha> ghcr.io/<owner>/tp-capital-signals:latest
+   ```
+
+3. **Restart Services**
+
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d
+   ```
+
+4. **Verify Rollback**
+
+   ```bash
+   curl http://<host>:4005/health
+   docker compose -f docker-compose.prod.yml logs -f
+   ```
+
+### Infrastructure as Code
+
+- `docker-compose.yml` for local development.
+- `docker-compose.prod.yml` for production deployment.
+- Environment templates: `.env.example`, `tp-capital-signals.env.example`.
+- Dockerfile: Multi-stage Node.js 20 build, non-root user, health check configured.
+
+### Monitoring Integration
+
+- Prometheus scrapes `http://<host>:4005/metrics` every 15 seconds (metrics: ingestion_rate, error_rate, latency_p95, questdb_connection_status).
+- Grafana dashboard: `tools/monitoring/dashboards/tp-capital.json` (panels for ingestion rate, API latency, QuestDB health, error rate).
+- Alerts: Ingestion latency > 1000ms for 5 minutes, QuestDB connection failure, error rate > 5% for 10 minutes.

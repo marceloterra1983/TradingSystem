@@ -297,7 +297,7 @@ Use estas variáveis para customizar portas dos serviços monitorados:
 | `SERVICE_LAUNCHER_DOCS_PORT` | `3400` | Documentation API |
 | `SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT` | `3600` | Firecrawl Proxy |
 | `SERVICE_LAUNCHER_DASHBOARD_PORT` | `3103` | Dashboard UI |
-| `SERVICE_LAUNCHER_DOCUSAURUS_PORT` | `3004` | Docusaurus |
+| `SERVICE_LAUNCHER_DOCUSAURUS_PORT` | `3205` | Docusaurus |
 | `SERVICE_LAUNCHER_PROMETHEUS_PORT` | `9090` | Prometheus |
 | `SERVICE_LAUNCHER_GRAFANA_PORT` | `3000` | Grafana |
 | `SERVICE_LAUNCHER_QUESTDB_HTTP_PORT` | `9000` | QuestDB Console |
@@ -316,7 +316,7 @@ SERVICE_LAUNCHER_TP_CAPITAL_URL=http://custom-host:3200/health
 
 | Variável | Default | Descrição |
 |----------|---------|-----------|
-| `CORS_ORIGIN` | `http://localhost:3103,http://localhost:3004` | Origins permitidas (Dashboard + Docs) |
+| `CORS_ORIGIN` | `http://localhost:3103,http://localhost:3205` | Origins permitidas (Dashboard + Docs) |
 | `RATE_LIMIT_WINDOW_MS` | `60000` | Janela de rate limit (ms) |
 | `RATE_LIMIT_MAX` | `200` | Máximo de requests por janela |
 
@@ -488,7 +488,7 @@ SERVICE_LAUNCHER_LOG_LEVEL=debug npm start
 | documentation-api | DocsAPI | api | 3400 |
 | firecrawl-proxy | Firecrawl Proxy | api | 3600 |
 | dashboard-ui | Dashboard | ui | 3103 |
-| docusaurus | Docusaurus | docs | 3004 |
+| docusaurus | Docusaurus | docs | 3205 |
 | prometheus | Prometheus | monitoring | 9090 |
 | grafana | Grafana | monitoring | 3000 |
 | questdb-http | QuestDB HTTP | data | 9000 |

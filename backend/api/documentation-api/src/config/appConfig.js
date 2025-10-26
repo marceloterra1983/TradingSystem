@@ -1,6 +1,6 @@
 import './load-env-wrapper.js';
 
-const defaultStrategy = process.env.NODE_ENV === 'test' ? 'questdb' : 'questdb';
+const defaultStrategy = process.env.NODE_ENV === 'test' ? 'none' : 'none';
 const rawStrategy = (process.env.DOCUMENTATION_DB_STRATEGY || defaultStrategy).toLowerCase();
 const normalizedStrategy = rawStrategy === 'postgresql' ? 'postgres' : rawStrategy;
 
@@ -9,7 +9,7 @@ export const config = {
     port: Number(process.env.PORT || 3400)
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3103,http://localhost:3004',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3103,http://localhost:3205',
     disable: process.env.DISABLE_CORS === 'true'
   },
   rateLimit: {

@@ -1,0 +1,219 @@
+---
+title: Migrations
+description: Database migration workflows and tooling for TradingSystem.
+tags:
+  - database
+  - migrations
+owner: DataOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem is transitioning from MVP JSON storage toward resilient, transactional databases.
+QuestDB remains the time-series backbone while TimescaleDB/PostgreSQL replaces LowDB for core
+applications. Migration initiatives follow a phased strategy to minimize downtime and risk.
+
+**Current State**:
+- LowDB backs Idea Bank and Documentation APIs (single-user, file-based).  
+- QuestDB stores TP Capital signals and Telegram metadata (append-only, day-partitioned).  
+- TimescaleDB infrastructure stands ready for relational workloads.
+
+**Target State**:
+- TimescaleDB/PostgreSQL provides ACID transactions, schema governance, and concurrency.  
+- QuestDB continues handling time-series ingestion with automated retention.  
+- Legacy LowDB files are archived post-migration.
+
+## Migration Strategy
+
+### Phase 1: Planning
+
+- Define relational schema (see [Schema Reference](./schema)).  
+- Produce ADR comparing TimescaleDB vs vanilla PostgreSQL.  
+- Draft PRD/RFC capturing scope, risks, and requirements.  
+- Identify compatibility constraints and cutover windows.
+
+**Deliverables**: ADR, DDL scripts, migration PRD.
+
+### Phase 2: Infrastructure
+
+- Provision PostgreSQL 14+ with TimescaleDB extension.  
+- Secure access (SSL, credentials, backups).  
+- Configure monitoring dashboards and alerts.  
+- Deploy PgAdmin and pgWeb for administration.
+
+**Status**: ✅ Completed via `docker-compose.timescale.yml`.
+
+### Phase 3: Data Migration
+
+- Build ETL to transform LowDB JSON into SQL tables.  
+- Capture pre/post backups and integrity reports.  
+- Validate row counts and checksums.  
+- Exercise rollback drill before production cutover.
+
+```bash
+# Backup LowDB JSON
+cp db/ideas.json db/ideas.json.backup.$(date +%Y%m%d)
+cp db/db.json db/db.json.backup.$(date +%Y%m%d)
+
+# Run ETL
+node scripts/migrate-lowdb-to-postgres.js
+
+# Validate
+psql -h localhost -p 5433 -U timescale -d tradingsystem -c "SELECT count(*) FROM ideas;"
+node scripts/validate-migration.js
+```
+
+### Phase 4: Application Updates
+
+- Migrate APIs to ORM (Prisma/Knex) or native drivers.  
+- Introduce versioned migration tooling (Prisma Migrate, Flyway, etc.).  
+- Implement connection pooling, retries, and error handling.  
+- Update integration tests to target PostgreSQL.
+
+**Breaking Changes**: Response latency shifts, concurrent transaction semantics, new failure modes.
+
+### Phase 5: QuestDB Alignment
+
+- Automate 30-day retention for TP Capital tables.  
+- Establish export pipeline to analytics warehouse (QuestDB → Parquet).  
+- Document cross-database flows bridging QuestDB and PostgreSQL.  
+- Optimize dashboard queries for new schemas.
+
+**Retention Targets**: 30 days online for signals, 90 days for deleted archive, 365 days for Telegram configuration.
+
+### Phase 6: Testing and Validation
+
+- Increase unit/integration coverage (&gt;80%).  
+- Execute load tests (100 concurrent users, &lt;100 ms p95 risk checks).  
+- Benchmark performance before/after migration.  
+- Run failover and degradation drills.
+
+**Test Scenarios**: Concurrent writes, large dataset queries, transaction rollbacks, connection pool exhaustion.
+
+### Phase 7: Deployment
+
+- Roll out behind feature flags with staged traffic (10% → 50% → 100%).  
+- Monitor error rates, latency, and data integrity.  
+- Maintain LowDB as read-only fallback for 30 days.  
+- Decommission legacy storage once stability confirmed.
+
+**Rollout Timeline**:
+1. Week 1: Staging deployment, smoke tests.  
+2. Week 2: Enable for 10% of users.  
+3. Week 3: Increase to 50%.  
+4. Week 4: Full cutover.  
+5. Weeks 5–8: Monitor, keep LowDB read-only.  
+6. Week 9: Archive LowDB and close migration.
+
+## Migration Checklist
+
+### Pre-Migration
+- [ ] ADR approved by ArchitectureGuild.  
+- [ ] PRD approved by ProductOps.  
+- [ ] PostgreSQL infrastructure provisioned.  
+- [ ] Backup automation configured.  
+- [ ] ETL script validated on sample data.  
+- [ ] Rollback procedures documented.  
+- [ ] Stakeholders (DocsOps, ProductOps, DevOps) notified.
+
+### During Migration
+- [ ] Backup LowDB files (timestamped).  
+- [ ] Run ETL with logging enabled.  
+- [ ] Verify row counts and checksums.  
+- [ ] Test API endpoints against PostgreSQL.  
+- [ ] Execute integration test suite.  
+- [ ] Monitor error logs and metrics.
+
+### Post-Migration
+- [ ] Validate API functionality end-to-end.  
+- [ ] Compare performance metrics pre/post.  
+- [ ] Monitor error rates for 24 hours.  
+- [ ] Update documentation and runbooks.  
+- [ ] Archive LowDB safely.  
+- [ ] Communicate completion.  
+- [ ] Schedule post-mortem review.
+
+## Specific Migration Plans
+
+### 2025-10-12 – B3 QuestDB Migration
+
+- **Objective**: Move B3 market data from Parquet to QuestDB for real-time access.  
+- **Status**: Completed.  
+- **Artifacts**: Execution log, lessons learned, rollback plan documented in migration file.
+
+### 2025-11-01 – Idea Bank to PostgreSQL
+
+- **Objective**: Replace LowDB with TimescaleDB for Idea Bank.  
+- **Status**: Planned (Q1 2026).  
+- **Artifacts**: Detailed plan covering resource needs, risks, and testing strategy.
+
+## Migration Log
+
+| Date | Change | Rollback | Owner |
+|------|--------|----------|-------|
+| 2025-10-12 | B3 market data to QuestDB | Restore Parquet files | DataOps |
+| TBD | Idea Bank to PostgreSQL | Restore LowDB backups | DataOps |
+| TBD | Documentation API to PostgreSQL | Restore LowDB backups | DataOps |
+
+> Maintain dedicated files (e.g., `2025-11-01-migrate-idea-bank-to-postgres.md`) for each migration.
+
+## Best Practices
+
+**Before Migration**:
+1. Backup data stores (LowDB, QuestDB, configs).  
+2. Test ETL end-to-end with validation.  
+3. Document rollback steps.  
+4. Notify stakeholders 48 hours in advance.  
+5. Schedule during low-traffic windows.
+
+**During Migration**:
+1. Tail logs for errors and warnings.  
+2. Validate incrementally after each batch.  
+3. Keep backups accessible until verification completes.  
+4. Smoke test APIs after each phase.  
+5. Document anomalies.
+
+**After Migration**:
+1. Monitor latency, throughput, and error rates.  
+2. Confirm data integrity with checksums and spot checks.  
+3. Update diagrams, runbooks, and support docs.  
+4. Archive legacy files for 90 days.  
+5. Capture lessons learned in post-mortem.
+
+## Rollback Procedures
+
+**If Migration Fails**:
+
+1. Stop impacted services:
+   ```bash
+   npm --prefix backend/api/workspace run stop
+   npm --prefix backend/api/documentation-api run stop
+   ```
+2. Restore LowDB backups:
+   ```bash
+   cp db/ideas.json.backup.20251024 db/ideas.json
+   cp db/db.json.backup.20251024 db/db.json
+   ```
+3. Revert application changes if deployed:
+   ```bash
+   git revert <migration-commit-sha>
+   npm install
+   ```
+4. Restart services:
+   ```bash
+   npm --prefix backend/api/workspace run start
+   npm --prefix backend/api/documentation-api run start
+   ```
+5. Validate APIs:
+   ```bash
+   curl http://localhost:3200/api/items
+   curl http://localhost:3205/api/search?q=test
+   ```
+6. Notify stakeholders and document follow-up actions.
+
+## Related Documentation
+
+- [Database Overview](./overview) – Architecture and data stores.  
+- [Schema Reference](./schema) – Detailed table definitions.  
+- [Retention & Backup](./retention-backup) – Retention schedules and backup runbooks.  
+- Migration strategy ADR, PostgreSQL operations guides, and related runbooks migrate separately.

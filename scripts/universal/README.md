@@ -28,6 +28,7 @@ start --help          # Mostra ajuda
 **Serviços iniciados:**
 - Dashboard (porta 3103)
 - Workspace API (porta 3200)
+- Documentation API (porta 3400)
 - Status API (porta 3500)
 - TP-Capital (porta 4005)
 
@@ -67,6 +68,7 @@ status
 Node.js Services:
   ✓ Dashboard         (Port: 3103, PID: 8281)
   ✓ Workspace API     (Port: 3200, PID: 10756)
+  ✓ Documentation API (Port: 3400, PID: 11234)
   ✓ Status API        (Port: 3500, PID: 10092)
   ✓ TP-Capital        (Port: 4005, PID: 9683)
 
@@ -103,6 +105,7 @@ TradingSystem/
     └── services/                 # Logs dos serviços
         ├── dashboard.log
         ├── workspace.log
+        ├── documentation-api.log
         ├── status.log
         └── tp-capital.log
 ```
@@ -121,6 +124,7 @@ start --force-kill
 ```bash
 tail -f logs/services/dashboard.log
 tail -f logs/services/workspace.log
+tail -f logs/services/documentation-api.log
 tail -f logs/services/status.log
 tail -f logs/services/tp-capital.log
 ```
@@ -180,5 +184,4 @@ Os serviços são configurados via `.env` e `.env.local` na raiz do projeto.
 Para problemas ou dúvidas, consulte:
 - `docs/context/ops/universal-commands.md`
 - `CLAUDE.md` (seção Development Commands)
-
 

@@ -1,0 +1,215 @@
+---
+title: Change Log
+description: Design changes for Order Manager API v1.
+tags:
+  - sdd
+  - order-manager
+  - changelog
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Updates
+
+Track revisions to the specification, guidelines, and related decisions for Order Manager API v1.
+
+## v1.0.0 - 2025-10-24 (Specification-First Design)
+
+**Status**: Draft specification (implementation pending)
+
+**Initial Design**:
+
+Established specification-first design for the Order Manager service referencing architecture specifications (external files - migration pending).
+
+**Endpoints Defined**:
+- `POST /api/orders` — Create order with risk checks
+- `GET /api/orders` — List orders with filters
+- `GET /api/orders/{orderId}` — Get order details
+- `DELETE /api/orders/{orderId}` — Cancel order
+- `GET /api/risk/limits` — Retrieve risk profile
+- `PUT /api/risk/limits` — Update risk parameters
+- `POST /api/risk/kill-switch` — Emergency stop
+- `GET /api/risk/positions` — Position summary
+- `GET /health` — Health check
+- `GET /metrics` — Prometheus metrics
+
+**Core Features**:
+1. Market, limit, stop, and stop-limit order types
+2. Risk controls: daily loss limit, position size cap, trading hours validation
+3. Kill switch to cancel all open orders instantly
+4. Idempotency key support on order creation
+5. Order lifecycle tracking: PENDING → SUBMITTED → FILLED/CANCELED/REJECTED
+
+**Design Decisions**:
+
+### Decision 1: Response Envelope
+- **Rationale**: Align with shared API styleguide to ensure consistent client handling.
+- **Structure**:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "optional"
+}
+```
+
+- **Alternative Considered**: Flat responses without envelope (rejected for inconsistency).
+
+### Decision 2: Idempotency Key Strategy
+- **Rationale**: Prevent duplicate orders due to retries.
+- **Approach**: Optional `idempotencyKey` field retained for 24 hours.
+- **Alternative**: Mandatory keys for all requests (deemed too restrictive for MVP).
+
+### Decision 3: Order Cancellation Idempotency
+- **Rationale**: Simplify client retry logic.
+- **Approach**: DELETE returns current status even when already canceled.
+- **Alternative**: Return 404 for repeated cancels (rejected as non-idempotent).
+
+### Decision 4: Risk Check Sequence
+- **Rationale**: Fail fast and minimize latency.
+- **Sequence**: Trading hours → Kill switch → Daily loss limit → Position size → Margin.
+- **Alternative**: Parallel checks (rejected due to complexity vs. MVP timeline).
+
+### Decision 5: No Order Modification in MVP
+- **Rationale**: Reduce implementation complexity and regression risk.
+- **Approach**: Require cancel + recreate for modifications.
+- **Future**: Introduce PUT `/api/orders/{orderId}` in v1.1.
+
+### Decision 6: Synchronous Order Execution
+- **Rationale**: Simpler control flow with acceptable p95 latency &lt;500 ms.
+- **Approach**: POST blocks until submitted to broker.
+- **Future**: Transition to async queue in v2.0.
+
+### Decision 7: Deferred Versioning
+- **Rationale**: Follow styleguide recommendation; avoid premature `/v1` prefix.
+- **Approach**: Maintain `/api/orders` and introduce `/api/v1` when breaking changes arise.
+
+**Technology Stack**:
+- .NET 8 / C#
+- ProfitDLL for execution
+- Port 3205
+- Windows-native deployment (no Docker)
+
+**Performance Targets**:
+- Order placement latency &lt;500 ms p95
+- Risk checks &lt;100 ms p95
+- Health check &lt;50 ms response time
+- Support 100 concurrent orders per account
+
+**Security**:
+- MVP: No authentication (internal only)
+- Planned: JWT bearer auth with role-based access
+
+**Rate Limiting**:
+- Planned: 300 requests per 60 seconds global limit
+- Endpoint-specific throttles for order creation and kill switch
+
+**Documentation**:
+- OpenAPI spec flagged as TODO
+- Redoc automation pending
+- SDD spec, guidelines, and changelog populated
+
+**Validation**:
+- ✅ Reviewed with ArchitectureGuild
+- ⏳ Implementation pending
+- ⏳ Integration tests pending
+
+---
+
+## Planned Changes
+
+### v1.1.0 - Q1 2025 (Planned)
+
+**Features**:
+- Add PUT `/api/orders/{orderId}` for order modification
+- Introduce WebSocket feed for real-time order status
+- Implement token-based authentication
+- Enable rate limiting middleware
+
+**Improvements**:
+- Optimize risk checks to &lt;50 ms p95
+- Add optimistic locking via version field
+- Enhance error responses with actionable remediation tips
+
+---
+
+### v2.0.0 - Q2 2025 (Planned)
+
+**Breaking Changes**:
+- Adopt `/api/v1/orders` prefix
+- Adjust order status enum (rename `PENDING` → `CREATED`)
+- Deprecate legacy fields
+
+**Features**:
+- Asynchronous execution pipeline via message queue
+- Multi-broker support (Nelogica, XP, Clear)
+- Advanced order types (OCO, bracket)
+- Backtesting / simulation mode
+
+**Performance Targets**:
+- Order placement latency &lt;200 ms p95
+- Support 500 concurrent orders per account
+
+---
+
+## Design Review History
+
+### 2025-10-24 — Initial Specification Review
+
+- **Attendees**: ArchitectureGuild, Backend Team, Product
+- **Decisions**:
+  1. ✅ Adopt envelope response structure
+  2. ✅ Keep idempotency key optional for MVP
+  3. ✅ Approve risk check sequence
+  4. ✅ Proceed with synchronous execution
+  5. ✅ Ship without explicit version prefix
+  6. ⚠️ Defer order modification to v1.1
+  7. ⚠️ Defer async execution to v2.0
+- **Action Items**:
+  - [ ] Generate OpenAPI spec (`backend/api/order-manager.openapi.yaml`)
+  - [ ] Implement .NET service (`backend/services/order-manager/`)
+  - [ ] Configure Redoc automated build
+  - [ ] Develop integration test suite
+  - [ ] Document ProfitDLL integration patterns
+- **Open Questions**:
+  1. Should idempotency be mandatory? → Decided optional for MVP
+  2. Include order modification in MVP? → Deferred to v1.1
+  3. Idempotency key retention period? → Set to 24 hours
+  4. Apply optimistic locking now? → Deferred to v1.1
+
+---
+
+## Related Documents
+
+- Architecture specification: `../../../../reference/architecture/technical-specification` (external file - migration pending)
+- Service map: `../../../../reference/architecture/service-map` (when migrated)
+- API styleguide: `../../../../reference/api-styleguide` (when migrated from `docs/context/backend/references/api-styleguide.md`)
+- Clean Architecture ADR: `../../../../reference/adrs/adr-001-clean-architecture` (external file - migration pending)
+- Specification: `/sdd/api/order-manager/v1/spec`
+- Guidelines: `/sdd/api/order-manager/v1/guidelines`
+
+---
+
+## Validation Checklist
+
+- ✅ REST endpoints align with naming standards
+- ✅ Response envelopes conform to styleguide
+- ✅ Error codes mapped to HTTP semantics
+- ✅ Idempotency strategy documented
+- ✅ Validation rules and rate limits captured
+- ✅ Performance targets established
+
+**Implementation Readiness**:
+- ⏳ OpenAPI spec outstanding
+- ⏳ Service codebase pending
+- ⏳ ProfitDLL integration pending
+- ⏳ Integration tests pending
+- ⏳ Redoc automation pending
+
+---
+
+## Notes
+
+- Specification-first approach; implementation not yet started
+- OpenAPI and Redoc flagged as TODO until automation lands
+- ArchitectureGuild approved baseline decisions on 2025-10-24

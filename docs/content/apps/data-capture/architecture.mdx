@@ -1,0 +1,25 @@
+---
+title: Architecture
+description: System architecture and component interactions for the Data Capture application.
+tags:
+  - apps
+  - data-capture
+  - architecture
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Diagrams
+
+Embed high-level diagrams (PlantUML or Mermaid) illustrating ingestion pipelines, queues, and
+persistence layers.
+
+```mermaid
+flowchart TD
+  Client -->|Trades| Ingestion
+  Ingestion --> Processing
+  Processing --> Storage
+```
+
+## Components
+
+Describe each component's responsibilities, dependencies, and scaling considerations.

@@ -50,22 +50,22 @@ fi
 echo ""
 
 # Check Docusaurus
-echo -e "${BLUE}📚 Docusaurus (Port 3004):${NC}"
+echo -e "${BLUE}📚 Docusaurus (Port 3205):${NC}"
 
 # Check if running as Docker
 if docker ps --format '{{.Names}}' | grep -q tradingsystem-docusaurus; then
     echo -e "  Status: ${GREEN}✅ Running (Docker)${NC}"
-    echo "  URL:    http://localhost:3004"
+    echo "  URL:    http://localhost:3205"
     echo "  Type:   🐳 Docker Container (Production)"
 # Check if running as local service
-elif lsof -i :3004 &> /dev/null; then
+elif lsof -i :3205 &> /dev/null; then
     echo -e "  Status: ${GREEN}✅ Running (Local)${NC}"
-    echo "  URL:    http://localhost:3004"
+    echo "  URL:    http://localhost:3205"
     echo "  Type:   🖥️  Local Service (Development)"
 else
     echo -e "  Status: ${YELLOW}⚠️  Not Running${NC}"
     echo "  Type:   🖥️  Local Service (Development)"
-    echo "  Hint:   cd docs/docusaurus && npm run start -- --port 3004"
+    echo "  Hint:   cd docs && npm run start -- --port 3205"
 fi
 
 echo ""
@@ -100,7 +100,7 @@ echo "╔═══════════════════════�
 echo "║                     Quick Links                             ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
-echo "  📚 Docusaurus:     http://localhost:3004"
+echo "  📚 Docusaurus:     http://localhost:3205"
 echo "  📡 DocsAPI:        http://localhost:3400"
 echo "  📊 DocsAPI Health: http://localhost:3400/health"
 echo "  📋 OpenAPI Spec:   http://localhost:3400/spec/openapi.yaml"
@@ -122,5 +122,5 @@ echo "  View logs:"
 echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs -f"
 echo ""
 echo "  Start Docusaurus (DEV):"
-echo "    cd docs/docusaurus && npm run start -- --port 3004"
+echo "    cd docs && npm run start -- --port 3205"
 echo ""

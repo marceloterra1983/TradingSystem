@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Testing
+tests/
+coverage/
+*.test.js
+*.spec.js
+
+# Development files
+.env
+.env.local
+.env.*.local
+
+# Data files (exclude package*.json from this rule)
+data/
+data/**/*.json
+*.db
+
+# Documentation
+*.md
+docs/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/

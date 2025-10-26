@@ -20,7 +20,7 @@ class Settings:
     )
     timescaledb_dsn: str = os.getenv(
         'TIMESCALEDB_DSN',
-        'postgresql://timescale:change_me@localhost:5433/tradingsystem',
+        'postgresql://timescale:pass_timescale@localhost:5433/tradingsystem',
     )
     replication_stream_name: str = os.getenv('TIMESCALEDB_STREAM', 'tp_capital_signals')
     batch_size: int = int(os.getenv('TIMESCALEDB_BATCH_SIZE', '5000'))

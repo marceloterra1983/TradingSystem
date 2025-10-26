@@ -87,12 +87,10 @@ show_help() {
     echo "    • Workspace API (Port 3200)"
     echo "    • TP Capital API (Port 3200)"
     echo "    • B3 Market Data (Port 3302)"
-    echo "    • Documentation (Port 3004)"
+    echo "    • Documentation (Port 3205)"
     echo "    • Documentation API (Port 3400)"
     echo "    • Service Launcher (Port 3500)"
     echo "    • Firecrawl Proxy (Port 3600)"
-    echo "    • WebScraper API (Port 3700)"
-    echo "    • WebScraper UI (Port 3800)"
     echo ""
     echo -e "  ${BLUE}Docker Stacks:${NC}"
     echo "    • Infrastructure (Qdrant, Redis, etc.)"
@@ -230,7 +228,7 @@ verify_shutdown() {
     fi
 
     # Check specific ports
-    local ports=(3103 3004 3200 3302 3400 3500 3600 3700)
+    local ports=(3103 3205 3200 3302 3400 3500 3600 3700)
     local ports_in_use=()
 
     for port in "${ports[@]}"; do

@@ -67,7 +67,7 @@ declare -A SERVICES=(
     ["documentation-api"]="backend/api/documentation-api"
     ["status"]="apps/status"
     ["dashboard"]="frontend/dashboard"
-    ["docs"]="docs/docusaurus"
+    ["docs"]="docs"
 )
 
 # Install dependencies for a service
@@ -144,7 +144,7 @@ else
     
     log_info "3. Documentation"
     hr
-    install_deps "docs" "docs/docusaurus"
+    install_deps "docs" "docs"
     echo ""
 fi
 

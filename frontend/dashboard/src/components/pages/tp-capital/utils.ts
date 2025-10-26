@@ -37,6 +37,11 @@ export function buildLogsQuery(limit: number, level?: string) {
   return `${base}/logs?${queryParams.toString()}`;
 }
 
+export function buildDeleteUrl() {
+  const base = resolveTpCapitalBase();
+  return `${base}/signals`;
+}
+
 export function formatNumber(value: number | null) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "?";

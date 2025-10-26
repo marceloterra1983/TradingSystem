@@ -16,7 +16,7 @@
     "**/infrastructure/firecrawl",
     "**/infrastructure/ollama",
     "**/tools",
-    "**/docs_v2",
+    "**/docs_legacy",
     "**/docs",
     "**/ProfitDLL",
     "**/frontend",

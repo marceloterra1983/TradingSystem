@@ -31,7 +31,12 @@ export const config = {
     webhook: {
       url: process.env.TELEGRAM_WEBHOOK_URL || '',
       secretToken: process.env.TELEGRAM_WEBHOOK_SECRET || ''
-    }
+    },
+    // User Account credentials (MTProto)
+    apiId: Number(process.env.TELEGRAM_API_ID || 0),
+    apiHash: process.env.TELEGRAM_API_HASH || '',
+    phoneNumber: process.env.TELEGRAM_PHONE_NUMBER || '',
+    session: process.env.TELEGRAM_SESSION || ''
   },
   timescale: {
     host: process.env.TIMESCALEDB_HOST || 'localhost',
@@ -39,7 +44,7 @@ export const config = {
     database: process.env.TIMESCALEDB_DATABASE || 'APPS-TPCAPITAL',
     schema: process.env.TIMESCALEDB_SCHEMA || 'tp_capital',
     user: process.env.TIMESCALEDB_USER || 'timescale',
-    password: process.env.TIMESCALEDB_PASSWORD || 'change_me_timescale'
+    password: process.env.TIMESCALEDB_PASSWORD || 'pass_timescale'
   },
   server: {
     port: Number(process.env.PORT || 4005)

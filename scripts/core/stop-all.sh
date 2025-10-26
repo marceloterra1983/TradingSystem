@@ -99,7 +99,7 @@ main() {
     fi
 
     # Define known ports for TradingSystem services
-    local ports=(3103 3004 3200 3302 3400 3500 3600 3700 3800)
+    local ports=(3103 3205 3200 3205 3302 3500 3600 3700 3800)
 
     if [[ ${#pidfiles[@]} -eq 0 ]]; then
         log_info "No running services found (no PID files)"
