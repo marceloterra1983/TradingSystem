@@ -30,8 +30,8 @@ const ALLOWED_CONTAINERS = {
   'adminer': {
     composePath: 'tools/compose/docker-compose.database.yml',
     service: 'timescaledb-adminer',
-    port: 8082,
-    healthCheck: 'http://localhost:8082'
+    port: 8080,
+    healthCheck: 'http://localhost:8080'
   },
   'questdb': {
     composePath: 'tools/compose/docker-compose.database.yml',
