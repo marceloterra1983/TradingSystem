@@ -51,3 +51,147 @@
 .related li + li {
   margin-top: 0.5rem;
 }
+
+/* ============================================
+   Redoc Dark Mode Override
+   ============================================ */
+
+[data-theme='dark'] .redocusaurus {
+  /* Main background and text */
+  --redoc-background-color: #0f172a;
+  --redoc-text-color: #e2e8f0;
+
+  /* Primary color for interactive elements */
+  --redoc-primary-color: #38bdf8;
+
+  /* Right panel (examples/responses) */
+  --redoc-right-panel-bg: #1e293b;
+  --redoc-right-panel-text: #cbd5e1;
+
+  /* Code blocks */
+  --redoc-code-bg: #020617;
+  --redoc-code-text: #f1f5f9;
+
+  /* Links */
+  --redoc-link-color: #7dd3fc;
+  --redoc-link-hover: #bae6fd;
+
+  /* Menu/Sidebar */
+  --redoc-menu-bg: #0f172a;
+  --redoc-menu-text: #94a3b8;
+  --redoc-menu-active-text: #38bdf8;
+  --redoc-menu-group-text: #64748b;
+
+  /* Headings */
+  --redoc-headings-color: #f1f5f9;
+
+  /* Borders */
+  --redoc-border-color: #334155;
+
+  /* Success/Warning/Error */
+  --redoc-success-color: #34d399;
+  --redoc-warning-color: #fbbf24;
+  --redoc-error-color: #f87171;
+
+  /* HTTP Methods */
+  --redoc-http-get: #34d399;
+  --redoc-http-post: #60a5fa;
+  --redoc-http-put: #fbbf24;
+  --redoc-http-delete: #f87171;
+  --redoc-http-patch: #a78bfa;
+}
+
+/* Apply dark mode variables to Redoc elements */
+[data-theme='dark'] .redocusaurus .redoc-wrap {
+  background-color: var(--redoc-background-color) !important;
+  color: var(--redoc-text-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus .api-content {
+  background-color: var(--redoc-background-color) !important;
+  color: var(--redoc-text-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus .menu-content {
+  background-color: var(--redoc-menu-bg) !important;
+  color: var(--redoc-menu-text) !important;
+}
+
+[data-theme='dark'] .redocusaurus h1,
+[data-theme='dark'] .redocusaurus h2,
+[data-theme='dark'] .redocusaurus h3,
+[data-theme='dark'] .redocusaurus h4,
+[data-theme='dark'] .redocusaurus h5 {
+  color: var(--redoc-headings-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus a {
+  color: var(--redoc-link-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus a:hover {
+  color: var(--redoc-link-hover) !important;
+}
+
+[data-theme='dark'] .redocusaurus .operation-type {
+  border-color: var(--redoc-border-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus pre,
+[data-theme='dark'] .redocusaurus code {
+  background-color: var(--redoc-code-bg) !important;
+  color: var(--redoc-code-text) !important;
+}
+
+[data-theme='dark'] .redocusaurus .responses-inner {
+  background-color: var(--redoc-right-panel-bg) !important;
+  color: var(--redoc-right-panel-text) !important;
+}
+
+/* HTTP Method badges in dark mode */
+[data-theme='dark'] .redocusaurus .http-verb.get {
+  background-color: var(--redoc-http-get) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='dark'] .redocusaurus .http-verb.post {
+  background-color: var(--redoc-http-post) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='dark'] .redocusaurus .http-verb.put {
+  background-color: var(--redoc-http-put) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='dark'] .redocusaurus .http-verb.delete {
+  background-color: var(--redoc-http-delete) !important;
+  color: #0f172a !important;
+}
+
+[data-theme='dark'] .redocusaurus .http-verb.patch {
+  background-color: var(--redoc-http-patch) !important;
+  color: #0f172a !important;
+}
+
+/* Better contrast for tables in dark mode */
+[data-theme='dark'] .redocusaurus table {
+  border-color: var(--redoc-border-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus th {
+  background-color: var(--redoc-right-panel-bg) !important;
+  color: var(--redoc-headings-color) !important;
+  border-color: var(--redoc-border-color) !important;
+}
+
+[data-theme='dark'] .redocusaurus td {
+  border-color: var(--redoc-border-color) !important;
+}
+
+/* Search box in dark mode */
+[data-theme='dark'] .redocusaurus .search-box {
+  background-color: var(--redoc-right-panel-bg) !important;
+  border-color: var(--redoc-border-color) !important;
+  color: var(--redoc-text-color) !important;
+}

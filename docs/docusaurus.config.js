@@ -65,7 +65,46 @@ const config = {
           },
         ],
         theme: {
-          primaryColor: '#0f172a',
+          // Light Mode Colors
+          primaryColor: '#0ea5e9',           // Sky blue for primary elements
+          textColor: '#1e293b',              // Slate-800 for main text
+          backgroundColor: '#ffffff',        // White background
+
+          // Right panel (examples/responses)
+          rightPanelBackgroundColor: '#f8fafc', // Slate-50
+          rightPanelTextColor: '#334155',    // Slate-700
+
+          // Code blocks
+          codeBlockBackgroundColor: '#0f172a', // Slate-900 for code
+          codeBlockTextColor: '#e2e8f0',     // Slate-200
+
+          // Links and interactive elements
+          linkColor: '#0284c7',              // Sky-600
+          linkHoverColor: '#0369a1',         // Sky-700
+
+          // Menu/Sidebar
+          menuBackgroundColor: '#ffffff',
+          menuTextColor: '#475569',          // Slate-600
+          menuActiveTextColor: '#0ea5e9',    // Sky-500
+          menuGroupTextColor: '#64748b',     // Slate-500
+
+          // Headings
+          headingsColor: '#0f172a',          // Slate-900
+
+          // Borders
+          borderColor: '#e2e8f0',            // Slate-200
+
+          // Success/Warning/Error colors
+          successColor: '#10b981',           // Emerald-500
+          warningColor: '#f59e0b',           // Amber-500
+          errorColor: '#ef4444',             // Red-500
+
+          // HTTP Method colors
+          httpGetColor: '#10b981',           // Green for GET
+          httpPostColor: '#3b82f6',          // Blue for POST
+          httpPutColor: '#f59e0b',           // Orange for PUT
+          httpDeleteColor: '#ef4444',        // Red for DELETE
+          httpPatchColor: '#8b5cf6',         // Purple for PATCH
         },
       },
     ],
