@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eu
 
 # shellcheck source=/dev/null
 . "$(dirname "$0")/_/husky.sh"
