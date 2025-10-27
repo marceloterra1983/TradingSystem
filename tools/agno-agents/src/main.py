@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import settings
-from .infrastructure.adapters import B3WebSocketConsumer
 from .interfaces.agents import market_analysis as market_analysis_module
 from .interfaces.agents import risk_management as risk_management_module
 from .interfaces.agents.market_analysis import (
@@ -32,7 +31,6 @@ configure_structured_logging(settings.agno_log_level)
 
 logger = logging.LoggerAdapter(logging.getLogger("agno-agents"), {"service": "agno-agents"})
 
-b3_consumer: Optional[B3WebSocketConsumer] = None
 _cached_health_snapshot: Dict[str, Any] = {
     "status": "unknown",
     "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -45,31 +43,16 @@ _cached_health_snapshot: Dict[str, Any] = {
 }
 
 
-async def handle_b3_message(message: Dict[str, Any]) -> None:
-    logger.debug(
-        "Received B3 WebSocket message",
-        extra={"symbol": message.get("symbol"), "price": message.get("price")},
-    )
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global b3_consumer
-
     logger.info("Initializing Agno Agents dependencies")
     await initialize_market_clients()
     await initialize_risk_client()
-    if settings.enable_b3_websocket:
-        b3_consumer = B3WebSocketConsumer(callback=handle_b3_message)
-        await b3_consumer.start()
 
     try:
         yield
     finally:
         logger.info("Shutting down Agno Agents dependencies")
-        if settings.enable_b3_websocket and b3_consumer:
-            await b3_consumer.stop()
-            b3_consumer = None
         await shutdown_market_clients()
         await shutdown_risk_client()
 
@@ -151,7 +134,6 @@ async def health(detailed: bool = False) -> Dict[str, Any]:
     if detailed:
         current_workspace_client = getattr(market_analysis_module, "workspace_client", None)
         current_tp_capital_client = getattr(market_analysis_module, "tp_capital_client", None)
-        current_b3_client = getattr(market_analysis_module, "b3_client", None)
         current_risk_engine_client = getattr(risk_management_module, "risk_engine_client", None)
 
         dependency_specs = [
@@ -161,7 +143,6 @@ async def health(detailed: bool = False) -> Dict[str, Any]:
                 current_tp_capital_client,
                 lambda client: client.ping(),
             ),
-            ("b3_api", current_b3_client, lambda client: client.ping()),
         ]
 
         dependency_results = await asyncio.gather(
@@ -201,10 +182,7 @@ async def health(detailed: bool = False) -> Dict[str, Any]:
         }
         agents_snapshot = {
             "market_analysis": "ready"
-            if all(
-                client is not None
-                for client in (current_workspace_client, current_tp_capital_client, current_b3_client)
-            )
+            if all(client is not None for client in (current_workspace_client, current_tp_capital_client))
             else "initializing",
             "risk_management": "ready" if current_risk_engine_client is not None else "initializing",
             "signal_orchestrator": "ready",

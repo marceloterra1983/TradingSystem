@@ -18,6 +18,58 @@ echo -e "${BLUE}Telegram Gateway - Autenticação${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
+# Utilidades -------------------------------------------------
+
+ensure_port_free() {
+    local port="${1:-4006}"
+    local max_attempts=5
+    local attempt=1
+
+    while lsof -ti :"$port" &>/dev/null; do
+        echo -e "${YELLOW}⚠️  Porta $port em uso. Tentativa ${attempt}/${max_attempts}.${NC}"
+
+        # Tenta parar via systemd se o serviço existir
+        if command -v systemctl &>/dev/null && systemctl list-units --full --all | grep -q '^telegram-gateway\.service'; then
+            echo -e "${YELLOW}   → Parando serviço systemd telegram-gateway...${NC}"
+            systemctl stop telegram-gateway.service 2>/dev/null || true
+        fi
+
+        # Mata processos com SIGTERM e depois, se necessário, SIGKILL
+        pids="$(lsof -ti :"$port" | tr '\n' ' ')"
+        if [ -n "$pids" ]; then
+            echo -e "${YELLOW}   → Finalizando processos (SIGTERM):${NC} $pids"
+            echo "$pids" | xargs -r kill -TERM 2>/dev/null || true
+        fi
+
+        sleep 2
+
+        if lsof -ti :"$port" &>/dev/null; then
+            pids="$(lsof -ti :"$port" | tr '\n' ' ')"
+            if [ -n "$pids" ]; then
+                echo -e "${YELLOW}   → Forçando término (SIGKILL):${NC} $pids"
+                echo "$pids" | xargs -r kill -KILL 2>/dev/null || true
+            fi
+        fi
+
+        sleep 2
+
+        if ! lsof -ti :"$port" &>/dev/null; then
+            break
+        fi
+
+        attempt=$((attempt + 1))
+        if [ $attempt -gt $max_attempts ]; then
+            echo -e "${YELLOW}❌ Não foi possível liberar a porta $port após ${max_attempts} tentativas.${NC}"
+            echo -e "${YELLOW}   Verifique manualmente com 'lsof -i :$port' e tente novamente.${NC}"
+            exit 1
+        fi
+    done
+
+    echo -e "${GREEN}✓${NC} Porta $port livre"
+}
+
+# ------------------------------------------------------------
+
 # Verificar se estamos no diretório correto
 if [[ ! -f "src/index.js" ]]; then
     echo -e "${YELLOW}⚠️  Execute este script do diretório:${NC}"
@@ -26,14 +78,7 @@ if [[ ! -f "src/index.js" ]]; then
     exit 1
 fi
 
-# Verificar se a porta 4006 está livre
-if lsof -ti :4006 &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Porta 4006 em uso. Matando processos...${NC}"
-    lsof -ti :4006 | xargs -r kill -9 2>/dev/null
-    sleep 2
-fi
-
-echo -e "${GREEN}✓${NC} Porta 4006 livre"
+ensure_port_free 4006
 echo ""
 
 # Instruções

@@ -11,7 +11,7 @@ lastReviewed: '2025-10-26'
 
 The **Agno Agents** service is a Python 3.12 microservice using the [Agno framework](https://github.com/agno-agi/agno) and FastAPI to execute a multi-agent trading system composed of three specialized agents:
 
-1. **MarketAnalysisAgent** - Analyzes B3 market data, TP Capital signals, and Workspace ideas to generate BUY/SELL/HOLD recommendations
+1. **MarketAnalysisAgent** - Analyzes TP Capital signals and Workspace ideas to generate BUY/SELL/HOLD recommendations
 2. **RiskManagementAgent** - Validates each recommendation against daily limits, maximum position size, and trading hours
 3. **SignalOrchestratorAgent** - Coordinates flow between agents, aggregates responses, and exposes REST endpoints
 
@@ -26,7 +26,7 @@ The **Agno Agents** service is a Python 3.12 microservice using the [Agno framew
 
 **Architecture**: Clean Architecture (domain/application/infrastructure/interfaces)
 
-**Integration**: Consumes Workspace API (port 3100), TP Capital API (port 3200), B3 API (port 3302)
+**Integration**: Consumes Workspace API (port 3100) e TP Capital API (port 3200)
 
 ## Agent Responsibilities
 
@@ -35,14 +35,12 @@ The **Agno Agents** service is a Python 3.12 microservice using the [Agno framew
 **Responsibility**: Consolidate market data and signals to generate trading recommendations.
 
 **Internal Tools**:
-- `analyze_b3_data`: Fetch and analyze B3 market data for symbol
 - `analyze_tp_signals`: Fetch and analyze TP Capital Telegram signals
 - `_extract_size_value`: Extract position size from signal metadata
 
 **Input**:
 - `symbols`: List of asset symbols (e.g., `"PETR4", "VALE3"`)
 - `include_tp_capital`: Boolean flag to include TP Capital signals
-- `include_b3`: Boolean flag to include B3 market data
 
 **Output**: List of `MarketSignal` entities with:
 - `symbol`: Asset identifier
@@ -50,7 +48,7 @@ The **Agno Agents** service is a Python 3.12 microservice using the [Agno framew
 - `confidence`: Float (0.0-1.0)
 - `price`: Recommended entry price
 - `timestamp`: Signal generation time
-- `source`: Signal origin (AGNO, TP_CAPITAL, B3)
+- `source`: Signal origin (AGNO, TP_CAPITAL)
 - `size`: Position size recommendation
 - `metadata`: Additional context (targets, stop loss, etc.)
 
@@ -160,7 +158,6 @@ The **Agno Agents** service is a Python 3.12 microservice using the [Agno framew
 
 **Event-Driven Triggers** (future):
 - New TP Capital signal → Trigger analysis for mentioned symbol
-- B3 price alert → Trigger analysis for affected symbol
 - Workspace idea created → Trigger analysis for idea symbols
 
 ## Interactions with Core Services
@@ -196,45 +193,6 @@ The **Agno Agents** service is a Python 3.12 microservice using the [Agno framew
 - Extracts buy ranges, targets, stop loss levels
 
 **Resilience**: Retry with exponential backoff, circuit breaker
-
----
-
-### B3 Market Data API (Port 3302)
-
-**Client**: `B3Client` (`infrastructure/adapters/b3_client.py`)
-
-**Methods**:
-- `ping()`: Health check
-- `get_b3_data(symbol)`: Fetch market data snapshot for symbol
-- `get_adjustments()`: Get corporate actions (splits, dividends)
-- `get_gamma_levels()`: Get options gamma levels
-- `get_indicators_daily()`: Get daily technical indicators
-
-**Integration**:
-- MarketAnalysisAgent fetches B3 data for requested symbols
-- Filters snapshots by symbol
-- Aggregates auxiliary indicators (volatility, volume, etc.)
-
-**Resilience**: Retry with exponential backoff, circuit breaker
-
----
-
-### B3 WebSocket (Port 3302/ws)
-
-**Consumer**: `B3WebSocketConsumer` (`infrastructure/adapters/b3_websocket_consumer.py`)
-
-**Purpose**: Receive real-time market data updates
-
-**Callback**: `handle_b3_message` (configured callback for incoming messages)
-
-**Features**:
-- Auto-reconnection on disconnect
-- Metrics tracking (events received, connection status)
-- Structured logging
-
-**Status**: Optional (controlled by `AGNO_ENABLE_B3_WEBSOCKET`)
-
----
 
 ### Risk Engine (Planned)
 

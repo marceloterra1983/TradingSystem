@@ -107,7 +107,6 @@ def test_market_signal_creation():
 **Purpose**: Test HTTP client adapters and resilience patterns
 
 **Test Cases**:
-- `B3Client` methods (`ping`, `get_b3_data`, `get_adjustments`)
 - `TPCapitalClient` methods (`ping`, `get_tp_capital_signals`)
 - `WorkspaceClient` methods (`ping`, `get_ideas`)
 - `RiskEngineClient` methods (`check_daily_limits`, `check_position_size`, `check_trading_hours`)
@@ -139,18 +138,6 @@ def test_market_signal_creation():
 
 ---
 
-### `test_websocket_consumer.py`
-
-**Purpose**: Test B3 WebSocket consumer
-
-**Test Cases**:
-- WebSocket connection establishment
-- Message handling (callback invocation)
-- Reconnection logic on disconnect
-- Metrics tracking (events received, connection status)
-
----
-
 ### `test_main.py`
 
 **Purpose**: Test FastAPI application startup and configuration
@@ -169,7 +156,6 @@ def test_market_signal_creation():
 **Purpose**: Shared test fixtures and configuration
 
 **Fixtures**:
-- `mock_market_data`: Sample B3 market data
 - `mock_signals`: Sample MarketSignal entities
 - `mock_openai_client`: Mock OpenAI client (prevents real API calls)
 - `test_client`: FastAPI TestClient instance
@@ -214,9 +200,9 @@ pytest -n auto
 
 ```python
 @pytest.mark.asyncio
-async def test_market_analysis_agent(mock_market_data, mock_openai_client):
-    symbols = [entry["symbol"] for entry in mock_market_data]
-    signals = await analyze_market(symbols, include_tp=True, include_b3=True)
+async def test_market_analysis_agent(mock_signals, mock_openai_client):
+    symbols = [entry["symbol"] for entry in mock_signals]
+    signals = await analyze_market(symbols, include_tp=True)
     assert len(signals) == len(symbols)
     for signal in signals:
         assert isinstance(signal, MarketSignal)
@@ -257,7 +243,7 @@ async def test_agent_error_handling(monkeypatch):
 
     monkeypatch.setattr(market_analysis_agent, "arun", fail)
     with pytest.raises(RuntimeError):
-        await analyze_market(["PETR4"], include_tp=True, include_b3=True)
+        await analyze_market(["PETR4"], include_tp=True)
 ```
 
 ### Example 5: Metrics Tracking Test
@@ -288,7 +274,6 @@ black --check .
 ### Integration Testing
 
 **Prerequisites**:
-- B3 API running (port 3302)
 - TP Capital API running (port 3200)
 - Workspace API running (port 3100)
 
@@ -315,31 +300,6 @@ curl http://localhost:8200/health?detailed=true
 - No memory leaks (stable memory usage)
 
 ## Test Data
-
-### Mock Market Data
-
-```python
-mock_market_data = [
-    {
-        "symbol": "PETR4",
-        "last_price": 32.50,
-        "volume": 1000000,
-        "change_pct": 2.5,
-        "high": 33.00,
-        "low": 32.00,
-        "timestamp": "2025-10-24T10:30:00Z"
-    },
-    {
-        "symbol": "VALE3",
-        "last_price": 65.80,
-        "volume": 500000,
-        "change_pct": -1.2,
-        "high": 66.50,
-        "low": 65.50,
-        "timestamp": "2025-10-24T10:30:00Z"
-    }
-]
-```
 
 ### Mock Signals
 
@@ -436,7 +396,7 @@ jobs:
 
 | Symptom | Possible Cause | Recommended Action |
 |---------|----------------|--------------------|
-| 503 on `/api/v1/agents/analyze` | B3 API unavailable | Check logs, wait for circuit HALF_OPEN, verify `/health?detailed=true` |
+| 503 on `/api/v1/agents/analyze` | TP Capital API indisponível | Check logs, wait for circuit HALF_OPEN, verify `/health?detailed=true` |
 | Metrics zeroed | Prometheus not configured | Ensure scrape job `agno-agents` in Prometheus config |
 | LLM not responding | `OPENAI_API_KEY` invalid | Validate credentials, check quota, review error logs |
 | High latency | External APIs slow | Monitor `dependency_status`, adjust timeout, implement caching |

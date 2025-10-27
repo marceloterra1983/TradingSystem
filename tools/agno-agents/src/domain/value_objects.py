@@ -21,10 +21,7 @@ class Symbol(BaseModel):
     @field_validator("exchange")
     @classmethod
     def validate_exchange(cls, value: str) -> str:
-        allowed = {"B3", "BMF"}
         normalized = value.strip().upper()
-        if normalized not in allowed:
-            raise ValueError(f"Exchange must be one of {allowed}")
         return normalized
 
     def __str__(self) -> str:

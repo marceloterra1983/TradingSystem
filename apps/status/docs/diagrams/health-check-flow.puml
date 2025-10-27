@@ -8,7 +8,6 @@ title Service Launcher - Health Check Flow
 actor Dashboard as dash
 participant "Service Launcher\n:3500" as launcher
 participant "Library API\n:3200" as library
-participant "B3 API\n:3302" as b3
 participant "Docs API\n:3400" as docs
 database Logger as log
 
@@ -29,12 +28,6 @@ par Service probing
     activate library
     library --> launcher: 200 OK\n{"status": "ok"}
     deactivate library
-else
-    launcher -> b3: GET /health\n(timeout: 2.5s)
-    activate b3
-    b3 --> launcher: 200 OK\n{"status": "ok"}
-    deactivate b3
-else
     launcher -> docs: GET /health\n(timeout: 2.5s)
     activate docs
     docs --> launcher: 503 Service Unavailable
@@ -43,8 +36,8 @@ end
 
 == Calculate Metrics ==
 
-launcher -> launcher: Calculate latencies\n(library: 85ms, b3: 120ms, docs: timeout)
-launcher -> launcher: Determine statuses\n(library: ok, b3: ok, docs: down)
+launcher -> launcher: Calculate latencies\n(library: 85ms, docs: timeout)
+launcher -> launcher: Determine statuses\n(library: ok, docs: down)
 launcher -> launcher: Sort by severity\n(down > degraded > ok)
 launcher -> launcher: Aggregate metrics\n(overallStatus, degradedCount, etc)
 

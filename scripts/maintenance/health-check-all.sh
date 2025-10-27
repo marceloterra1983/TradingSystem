@@ -28,7 +28,6 @@ declare -A SERVICE_PATHS=(
     ["Documentation API"]="backend/api/documentation-api"
     ["Status API"]="apps/status"
     ["Telegram Gateway"]="apps/telegram-gateway"
-    ["B3 Market Data"]="apps/b3-market-data"
     ["Firecrawl Proxy"]="backend/api/firecrawl-proxy"
     ["Docusaurus"]="docs"
 )

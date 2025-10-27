@@ -24,7 +24,6 @@ declare -A SERVICE_URLS=(
     ["Documentation"]="http://localhost:3205"
     ["Workspace"]="http://localhost:3100"
     ["TP-Capital"]="http://localhost:3200"
-    ["B3"]="http://localhost:3302"
     ["QuestDB Console"]="http://localhost:9000"
     ["QuestDB UI"]="http://localhost:9009"
     ["Prometheus"]="http://localhost:9090"

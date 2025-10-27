@@ -66,12 +66,7 @@ package "Agno Agents Service :8200" {
     component "HTTP Clients" as Clients {
       component "WorkspaceClient" as WorkspaceClient
       component "TPCapitalClient" as TPCapitalClient
-      component "B3Client" as B3Client
       component "RiskEngineClient" as RiskEngineClient
-    }
-
-    component "WebSocket Consumer" as WSConsumer {
-      [B3WebSocketConsumer]
     }
 
     component "Resilience" as Resilience {
@@ -90,8 +85,6 @@ package "Agno Agents Service :8200" {
 package "External Services" {
   component "Workspace API\n:3100" as WorkspaceAPI
   component "TP Capital API\n:3200" as TPCapitalAPI
-  component "B3 API\n:3302" as B3API
-  component "B3 WebSocket" as B3WS
   database "QuestDB" as QuestDB
 }
 
@@ -117,19 +110,14 @@ OrchestratorAgent ..> Entities : aggregates
 Entities ..> ValueObjects : uses
 
 IMarketData <|.. TPCapitalClient : implements
-IMarketData <|.. B3Client : implements
 IWorkspace <|.. WorkspaceClient : implements
 IRiskEngine <|.. RiskEngineClient : implements
 
 WorkspaceClient --> WorkspaceAPI : HTTP
 TPCapitalClient --> TPCapitalAPI : HTTP
-B3Client --> B3API : HTTP
-WSConsumer --> B3WS : WebSocket
-B3API --> QuestDB : queries
 TPCapitalAPI --> QuestDB : queries
 
 Clients ..> Resilience : uses
-WSConsumer ..> Resilience : uses
 
 Routes --> Monitoring : tracks
 MarketAgent --> Monitoring : tracks
@@ -139,8 +127,8 @@ Monitoring --> Prometheus : exports
 Prometheus --> Grafana : visualizes
 
 note right of MarketAgent
-  Analyzes B3 data and TP Capital signals
-  to produce trading recommendations.
+  Consolida sinais TP Capital e contexto
+  do Workspace para gerar recomendações.
 end note
 
 note right of RiskAgent

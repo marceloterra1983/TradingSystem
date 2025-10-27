@@ -227,7 +227,6 @@ child.unref();         // Allow parent to exit
      │
      ├─▶ [Parallel Health Checks]
      │   ├─▶ Library API:3200
-     │   ├─▶ B3 API:3302
      │   ├─▶ Docs API:3400
      │   └─▶ ... (11 services total)
      │

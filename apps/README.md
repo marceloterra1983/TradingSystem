@@ -10,7 +10,6 @@
 apps/
 ├── README.md                    ✅ Este arquivo - Visão geral das aplicações
 ├── tp-capital/                  📡 TP Capital API (Port 4005)
-├── b3-market-data/              📊 B3 Market Data API (Port 3302)
 ├── workspace/                   💼 Workspace API (Port 3200)
 ├── status/                      📈 Status/Launcher API (Port 3500)
 └── firecrawl/                   🌐 Firecrawl Stack (Port 3002)
@@ -31,18 +30,7 @@ apps/
 - 💾 **QuestDB Storage** - Armazena sinais e logs
 - 🔄 **Real-time Updates** - WebSocket para dashboard
 
-### 2. B3 Market Data API (Port 3302)
-**Localização:** `apps/b3-market-data/`  
-**Status:** ✅ Production Ready  
-**Funcionalidade:** Dados de mercado brasileiro
-
-**Características:**
-- 📈 **Market Data** - Dados de ações, opções, índices
-- 🔄 **Real-time Updates** - Dados em tempo real
-- 📊 **Analytics** - Indicadores e métricas
-- 💾 **Time-series Storage** - QuestDB para dados históricos
-
-### 3. Workspace API (Port 3200)
+### 2. Workspace API (Port 3200)
 **Localização:** `apps/workspace/`  
 **Status:** ✅ Production Ready  
 **Funcionalidade:** Gestão de workspace e items
@@ -53,7 +41,7 @@ apps/
 - 🎯 **Priorização** - 4 níveis de prioridade
 - 📊 **Status Tracking** - 5 estados de progresso
 
-### 4. Status/Launcher API (Port 3500)
+### 3. Status/Launcher API (Port 3500)
 **Localização:** `apps/status/`  
 **Status:** ✅ Production Ready  
 **Funcionalidade:** Monitoramento e launcher de serviços
@@ -64,7 +52,7 @@ apps/
 - 📈 **Metrics Aggregation** - Métricas consolidadas
 - 🔄 **Auto-recovery** - Recuperação automática
 
-### 5. Firecrawl Stack (Port 3002)
+### 4. Firecrawl Stack (Port 3002)
 **Localização:** `apps/firecrawl/`  
 **Status:** ✅ Production Ready  
 **Funcionalidade:** Web scraping e crawling
@@ -86,7 +74,6 @@ bash scripts/startup/start-dashboard-stack.sh
 
 # Ou individualmente
 cd apps/tp-capital && npm start
-cd apps/b3-market-data && npm start
 cd apps/workspace && npm start
 cd apps/status && npm start
 ```
@@ -95,7 +82,6 @@ cd apps/status && npm start
 ```bash
 # Health checks
 curl http://localhost:4005/health  # TP Capital
-curl http://localhost:3302/health  # B3 Market
 curl http://localhost:3200/health  # Workspace
 curl http://localhost:3500/health  # Status/Launcher
 curl http://localhost:3002/health  # Firecrawl
@@ -113,7 +99,6 @@ bash scripts/shutdown/stop-dashboard-stack.sh
 | Aplicação | Porta | Tipo | Database | Status |
 |-----------|-------|------|----------|--------|
 | **TP Capital** | 4005 | API | QuestDB | ✅ Production |
-| **B3 Market Data** | 3302 | API | QuestDB | ✅ Production |
 | **Workspace** | 3200 | API | TimescaleDB | ✅ Production |
 | **Status/Launcher** | 3500 | API | - | ✅ Production |
 | **Firecrawl** | 3002 | Stack | PostgreSQL | ✅ Production |
@@ -129,10 +114,6 @@ Todas as aplicações usam o arquivo `.env` centralizado na raiz do projeto:
 # TP Capital
 TP_CAPITAL_API_PORT=4005
 TP_CAPITAL_TELEGRAM_BOT_TOKEN=your-bot-token
-
-# B3 Market Data
-B3_MARKET_API_PORT=3302
-B3_MARKET_DATA_SOURCE=your-data-source
 
 # Workspace
 WORKSPACE_API_PORT=3200
@@ -174,9 +155,6 @@ Configuração centralizada em `config/services-manifest.json`:
 # TP Capital
 cd apps/tp-capital && npm test
 
-# B3 Market Data
-cd apps/b3-market-data && npm test
-
 # Workspace
 cd apps/workspace && npm test
 
@@ -202,7 +180,6 @@ Todas as aplicações expõem métricas em `/metrics`:
 
 ```bash
 curl http://localhost:4005/metrics  # TP Capital
-curl http://localhost:3302/metrics  # B3 Market
 curl http://localhost:3200/metrics  # Workspace
 curl http://localhost:3500/metrics  # Status/Launcher
 ```
@@ -226,14 +203,13 @@ NODE_ENV=production npm start
 ```typescript
 // Proxies configurados no Vite
 '/api/tp-capital' → http://localhost:4005
-'/api/b3' → http://localhost:3302
 '/api/workspace' → http://localhost:3200
 '/api/launcher' → http://localhost:3500
 '/api/firecrawl' → http://localhost:3002
 ```
 
 ### Databases
-- **QuestDB** - Time-series data (TP Capital, B3 Market)
+- **QuestDB** - Time-series data (TP Capital)
 - **TimescaleDB** - Relational data (Workspace)
 - **PostgreSQL** - Firecrawl metadata
 
@@ -272,7 +248,6 @@ NODE_ENV=production npm start
 
 ### Concluído ✅
 - ✅ TP Capital API com Telegram integration
-- ✅ B3 Market Data API com time-series storage
 - ✅ Workspace API com TimescaleDB
 - ✅ Status/Launcher API com health monitoring
 - ✅ Firecrawl Stack com PostgreSQL
@@ -287,8 +262,6 @@ NODE_ENV=production npm start
 ---
 
 **Última Atualização:** 23 de Outubro de 2025  
-**Total de Aplicações:** 5  
+**Total de Aplicações:** 4  
 **Status Geral:** ✅ Production Ready  
 **Arquitetura:** Microservices + APIs REST
-
-

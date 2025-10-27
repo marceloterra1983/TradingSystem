@@ -1,5 +1,6 @@
 ---
 title: Incident Runbook
+sidebar_position: 8
 description: Recovery guide for incidents affecting the TP Capital application.
 tags:
   - apps
@@ -14,163 +15,86 @@ lastReviewed: '2025-10-26'
 
 | Alert Name | Trigger | Dashboard | Severity |
 |------------|---------|-----------|----------|
-| `TPCapitalHighLatency` | p95 ingestion latency > 1000ms for 5m | Grafana: TP Capital | Warning |
-| `TPCapitalQuestDBDown` | QuestDB connection fails | Grafana: TP Capital | Critical |
-| `TPCapitalHighErrorRate` | Error rate > 5% for 10m | Grafana: TP Capital | Warning |
-| `TPCapitalNoSignals` | No signals received for 30m | Grafana: TP Capital | Warning |
-| `TPCapitalDiskSpaceLow` | QuestDB volume > 80% | Grafana: Infrastructure | Warning |
+| `TPCapitalApiUnhealthy` | `/health.status != healthy` for 2 checks | Grafana: TP Capital | Critical |
+| `TPCapitalTimescaleDown` | Timescale probe fails for 1 minute | Grafana: TP Capital | Critical |
+| `TPCapitalGatewayBacklog` | `messages_waiting > 50` for 5 minutes | Grafana: TP Capital | Warning |
+| `TPCapitalNoSignals` | No new signals in 30 minutes during market hours | Grafana: TP Capital | Warning |
+| `TPCapitalErrorRateHigh` | Error ratio > 5 % for 10 minutes | Grafana: TP Capital | Warning |
 
-### Manual Detection
-
-```bash
-curl http://localhost:3200/health
-# Expected: {"status": "ok", "questdb": "connected"}
-
-curl http://localhost:3200/signals?limit=1
-# Timestamp should be < 1 hour old during market hours
-```
-
-- Use `http://<host>:4005/...` when targeting production hosts or Compose-exposed services.
-
-- QuestDB UI: `http://localhost:9002` → `SELECT COUNT(*) FROM tp_capital_signals WHERE ts > now() - 1h;`
-
-## Response
-
-### Incident 1: Service Not Responding
-
-**Symptoms**: `/health` returns 503/timeouts, dashboard shows API unavailable, no recent logs.
-
-**Triage**:
+### Manual Checks
 
 ```bash
-docker compose -f docker-compose.prod.yml ps
-docker compose -f docker-compose.prod.yml logs --tail=100 tp-capital-signals
-docker stats tp-capital-signals
+# API health
+curl http://localhost:4005/health
+
+# Freshness
+curl http://localhost:4005/signals?limit=1
+
+# Gateway status
+curl http://localhost:4006/health
+
+# Timescale connection
+psql "postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL?options=-csearch_path=tp_capital" -c "SELECT COUNT(*) FROM tp_capital_signals WHERE ts > now() - interval '5 minutes';"
 ```
 
-**Mitigation**:
+## Response Playbooks
 
-```bash
-docker compose -f docker-compose.prod.yml restart tp-capital-signals
-curl http://localhost:3200/health
-docker compose -f docker-compose.prod.yml logs -f tp-capital-signals
-```
+### 1. API Unavailable
 
-If restart fails, validate environment file (`infrastructure/tp-capital-signals.env`) and rebuild (`docker compose -f docker-compose.prod.yml up -d --build`).
+**Symptoms**: `/health` returns 503/timeout, dashboard offline.
 
-**Validation**: Health endpoint returns 200, logs show service start, dashboard reconnects.
+1. `docker compose -f apps/tp-capital/infrastructure/docker-compose.prod.yml ps tp-capital`
+2. Review logs `docker compose -f ... logs --tail=200 tp-capital`.
+3. Restart service if necessary `docker compose -f ... restart tp-capital`.
+4. Validate `curl http://localhost:4005/health`.
 
----
+If restart fails, confirm `.env` values and rerun `docker compose -f ... up -d --build`.
 
-### Incident 2: QuestDB Connection Failure
+### 2. TimescaleDB Connection Failure
 
-**Symptoms**: `/health` reports `questdb: "disconnected"`, logs show connection errors, `/signals` empty/503.
+**Symptoms**: `/health.timescale = false`, errors `ECONNREFUSED`, signals not updating.
 
-**Triage**:
+1. Check DB container `docker compose -f ... ps timescaledb`.
+2. Inspect logs `docker compose -f ... logs --tail=200 timescaledb`.
+3. Restart DB `docker compose -f ... restart timescaledb`.
+4. Run migrations if schema corrupted `apps/tp-capital/scripts/init-database.sh --force` (warn: destructive).
+5. Once DB healthy, restart TP Capital API and verify ingestion resumes.
 
-```bash
-docker compose -f docker-compose.prod.yml ps questdb
-curl http://localhost:9002
-nc -zv localhost 9009
-docker compose -f docker-compose.prod.yml logs --tail=100 questdb
-```
+### 3. Gateway Backlog
 
-**Mitigation**:
+**Symptoms**: Alerts on `messages_waiting`, dashboard lags &gt; 10 minutes.
 
-```bash
-docker compose -f docker-compose.prod.yml restart questdb
-docker volume inspect questdb-data
-df -h
-docker compose -f docker-compose.prod.yml restart tp-capital-signals
-```
+1. Inspect queue count: `curl http://localhost:4005/health | jq '.messagesWaiting'`.
+2. Trigger sync: `curl -X POST http://localhost:4005/sync-messages -H "Content-Type: application/json" -d '{"limit":200}'`.
+3. Verify Gateway still polling: `curl http://localhost:4006/metrics | grep polling`.
+4. If backlog persists, restart Gateway service (`systemctl restart telegram-gateway` or `npm run start`).
 
-If QuestDB corrupted, restore from backup (stop stack, replace volume, bring services up).
+### 4. No Signals Received
 
-**Validation**: QuestDB UI accessible, `/health` shows connected, signals resume.
+**Symptoms**: Empty `/signals`, but Gateway healthy.
 
----
+1. Query `telegram_gateway.messages` for received status:
 
-### Incident 3: High Ingestion Latency
+   ```sql
+   SELECT COUNT(*) FROM telegram_gateway.messages WHERE status = 'received';
+   ```
 
-**Symptoms**: Alert fires, dashboard shows delayed signals, latency > 1000ms.
+2. Review TP Capital logs for parsing errors (`grep parse_failed`).
+3. Confirm `TP_CAPITAL_GATEWAY_FILTER_TEXT_CONTAINS` matches current message format.
+4. Escalate to content team if Telegram channel quiet during trading session.
 
-**Triage**:
+## Post-Incident
 
-```sql
--- QuestDB UI
-SELECT * FROM sys.queries;
-```
+1. Capture timeline, root cause, and fixes in incident tracker.
+2. Update Grafana annotations and this runbook if new failure mode observed.
+3. Schedule postmortem for Severity Critical incidents.
 
-```bash
-docker stats tp-capital-signals questdb
-```
+## Escalation
 
-```sql
-SELECT date_trunc('minute', ts) AS minute, COUNT(*) AS signal_count
-FROM tp_capital_signals
-WHERE ts > now() - 1h
-GROUP BY minute
-ORDER BY minute DESC
-LIMIT 60;
-```
+| Severity | Expectation | Escalation Path |
+|----------|-------------|-----------------|
+| Critical | Response &lt; 5 min | On-call engineer → Platform lead → CTO |
+| Warning | Response &lt; 15 min | On-call engineer → Platform lead |
+| Info | Best effort | Component owner |
 
-**Mitigation**:
-
-- Increase QuestDB memory (update compose env, redeploy).
-- Prune old partitions (`ALTER TABLE tp_capital_signals DROP PARTITION WHERE ts < dateadd('d', -90, now());`).
-- Scale horizontally if sustained high volume.
-
-**Validation**: Latency returns &lt;500ms p95, backlog cleared.
-
----
-
-### Incident 4: No Signals Received
-
-**Symptoms**: Alert for no signals, QuestDB shows no recent entries.
-
-**Triage**:
-
-```bash
-curl http://localhost:3200/telegram/bots
-curl http://localhost:3200/telegram/channels
-docker compose logs tp-capital-signals | grep -i telegram
-```
-
-**Mitigation**:
-
-```bash
-curl https://api.telegram.org/bot<TOKEN>/getMe
-docker compose -f docker-compose.prod.yml restart tp-capital-signals
-```
-
-Verify Telegram channels manually; if inactive during market hours, escalate to content team.
-
-**Validation**: New signals visible within 5 minutes, QuestDB updated, logs show ingestion success.
-
-## Follow-up
-
-### Post-Incident Review
-
-1. Document incident summary in the shared incident tracker (TODO: replace with docs ops handbook link once published).
-2. Update runbook with new learnings.
-3. Notify stakeholders with impact, root cause, mitigation.
-
-### Preventive Actions
-
-- Short-term (1 week): Adjust alert thresholds, add missing metrics, update docs.
-- Long-term (1 month): Automate recovery, add redundancy, improve observability.
-
-### Communication
-
-- During incident: Post updates every 15 minutes, escalate unresolved issues, inform dashboard users if downtime > 5 minutes.
-- After resolution: Send all-clear, schedule post-mortem for critical incidents, update status page if applicable.
-
-### Escalation Path
-
-| Severity | Response Time | Escalation |
-|----------|---------------|------------|
-| Critical | Immediate | On-call engineer → Team lead → CTO |
-| Warning | 15 minutes | On-call engineer → Team lead |
-| Info | Best effort | On-call engineer |
-
-Maintain contact list for on-call engineer, team lead, DevOps, and QuestDB expert.
+Maintain up-to-date contacts for Platform lead, DB administrator, and Telegram credential owners.

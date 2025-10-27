@@ -1,36 +1,244 @@
 ---
-title: Application Playbooks
-description: Runbooks and experience guides for user-facing TradingSystem apps.
-tags:
-  - apps
-  - operations
-lastReviewed: '2025-10-26'
+title: Applications Overview
+sidebar_label: Overview
+sidebar_position: 0
+tags: [apps, overview, catalog]
+description: Complete catalog of TradingSystem applications organized by function and criticality.
+lastReviewed: '2025-10-27'
 owner: DocsOps
 ---
+
 import Related from '@site/src/components/Related';
 
-## What lives here
+# Applications Overview
 
-Use this area to capture playbooks for TradingSystem applications such as Data Capture and Order
-Manager. Every entry should contain:
+The TradingSystem consists of multiple applications organized by function and criticality.
 
-- A concise summary of the scenario handled
-- Required prerequisites or permissions
-- A step-by-step resolution checklist with verification points
-- Follow-up tasks and communication templates
+## 📊 Application Catalog
 
-## Drafting new playbooks
+### Core Trading Infrastructure
 
-1. Create a new MDX file inside the relevant application folder.
-2. Populate the mandatory frontmatter fields (`title`, `description`, `tags`, `owner`, `lastReviewed`).
-3. Keep the directory structure consistent—the sidebar auto-generates entries.
-4. Request an SME review before marking the material production-ready.
+Critical applications for market data capture and order execution.
 
-## Related resources
+#### Data Capture
+
+**Purpose:** Real-time market data capture via ProfitDLL integration
+
+**Status:** 🟡 Planned
+
+**Technology:** C# (.NET 8.0), ProfitDLL (64-bit), WebSocket
+
+**Key Features:**
+- Real-time ticker and order book subscriptions
+- Parquet file storage
+- WebSocket streaming to consumers
+- Sub-millisecond latency requirements
+
+**Quick Links:**
+- [Overview](./data-capture/overview) - Architecture and design
+- [API Documentation](./data-capture/api) - WebSocket protocol
+- [Configuration](./data-capture/config) - Setup and environment
+- [Runbook](./data-capture/runbook) - Operations guide
+
+---
+
+#### Order Manager
+
+**Purpose:** Order execution engine with risk management
+
+**Status:** 🟡 Planned
+
+**Technology:** C# (.NET 8.0), ProfitDLL (64-bit), HTTP REST
+
+**Key Features:**
+- Order execution via ProfitDLL
+- Real-time risk checks
+- Kill switch functionality
+- Position tracking
+- Audit logging
+
+**Quick Links:**
+- [Overview](./order-manager/overview) - Architecture and design
+- [API Documentation](./order-manager/api) - REST endpoints
+- [Risk Controls](./order-manager/risk-controls) - Risk management
+- [Configuration](./order-manager/config) - Setup and environment
+- [Runbook](./order-manager/runbook) - Operations guide
+
+---
+
+### Infrastructure
+
+Supporting infrastructure for communication, data ingestion, and orchestration.
+
+#### Service Launcher
+
+**Purpose:** Service orchestration and comprehensive health monitoring
+
+**Status:** 🟢 Production
+
+**Technology:** Node.js, Express, Bash scripts
+
+**Key Features:**
+- Multi-service health monitoring (11+ services)
+- Comprehensive health checks (services + containers + databases)
+- Terminal service launcher (Windows/Linux)
+- Smart caching (60s TTL)
+- Real-time metrics aggregation
+- Rate limiting and CORS protection
+
+**Quick Links:**
+- [Overview](./service-launcher/overview) - Architecture and design
+- [API Documentation](./service-launcher/api) - REST endpoints
+- [Configuration](./service-launcher/config) - Environment variables
+- [Deployment](./service-launcher/deployment) - Setup procedures
+- [Operations](./service-launcher/operations) - Day-to-day management
+- [Runbook](./service-launcher/runbook) - Troubleshooting
+
+---
+
+#### Telegram Gateway
+
+**Purpose:** Telegram message ingestion via MTProto protocol
+
+**Status:** 🟢 Production
+
+**Technology:** Node.js, GramJS (MTProto), TimescaleDB, Express
+
+**Key Features:**
+- Native MTProto connection (no Bot API)
+- Channel subscription management
+- Message storage and retrieval
+- REST API for consumers
+- Automatic message synchronization
+
+**Quick Links:**
+- [Overview](./telegram-gateway/overview) - Architecture and design
+- [Configuration](./telegram-gateway/config) - Setup and credentials
+- [Operations](./telegram-gateway/operations) - Day-to-day operations
+- [Runbook](./telegram-gateway/runbook) - Troubleshooting
+
+---
+
+### Business Applications
+
+Applications that implement specific business logic.
+
+#### TP Capital
+
+**Purpose:** Ingests and processes trading signals from Telegram
+
+**Status:** 🟢 Production
+
+**Technology:** Node.js, Express, TimescaleDB, Telegraf (InfluxDB)
+
+**Key Features:**
+- Telegram message parsing
+- Signal validation and filtering
+- TimescaleDB storage
+- Real-time ingestion via webhook
+- Integration with Telegram Gateway
+
+**Quick Links:**
+- [Overview](./tp-capital/overview) - Architecture and design
+- [API Documentation](./tp-capital/api) - Webhook endpoints
+- [Configuration](./tp-capital/config) - Setup and filters
+- [Operations](./tp-capital/operations) - Day-to-day operations
+- [Runbook](./tp-capital/runbook) - Troubleshooting
+
+---
+
+### Tools
+
+Productivity and workspace management tools.
+
+#### Workspace
+
+**Purpose:** Idea and task management application
+
+**Status:** 🟢 Production
+
+**Technology:** React (frontend), Express (backend), TimescaleDB
+
+**Key Features:**
+- Kanban-style task board
+- Drag-and-drop interface
+- Status tracking (backlog, active, done, archived)
+- REST API for task management
+- Real-time updates
+
+**Quick Links:**
+- [Overview](./workspace/overview) - Architecture and design
+- [API Documentation](./workspace/api) - REST endpoints
+- [Configuration](./workspace/config) - Setup and environment
+- [Operations](./workspace/operations) - Day-to-day operations
+- [Runbook](./workspace/runbook) - Troubleshooting
+
+---
+
+## 🎯 Application Status Legend
+
+| Status | Description |
+|--------|-------------|
+| 🟢 Production | Running in production, stable |
+| 🟡 Planned | Planned, documentation in progress |
+| 🔴 Deprecated | No longer maintained |
+
+---
+
+## 🏗️ Technology Stack Summary
+
+| App | Language | Database | Infrastructure |
+|-----|----------|----------|----------------|
+| Data Capture | C# (.NET 8.0) | Parquet Files | Native Windows Service |
+| Order Manager | C# (.NET 8.0) | TimescaleDB | Native Windows Service |
+| Service Launcher | Node.js | None (stateless) | Docker Compose |
+| Telegram Gateway | Node.js | TimescaleDB | Docker Compose |
+| TP Capital | Node.js | TimescaleDB, Telegraf | Docker Compose |
+| Workspace | React + Node.js | TimescaleDB | Docker Compose |
+
+---
+
+## 📖 Common Documentation
+
+All applications share similar documentation structure:
+
+- **Overview** - Architecture, purpose, and design decisions
+- **API** - REST/WebSocket API documentation
+- **Architecture** - System design and component diagrams
+- **Configuration** - Environment setup and configuration
+- **Deployment** - Deployment procedures
+- **Operations** - Day-to-day operational procedures
+- **Requirements** - Dependencies and prerequisites
+- **Runbook** - Troubleshooting and common issues
+- **Changelog** - Version history and changes
+
+---
+
+## 🚀 Getting Started
+
+### For Developers
+
+1. Start with the application's **Overview** page to understand its purpose
+2. Review **Architecture** to understand the design
+3. Follow **Configuration** to set up your local environment
+4. Use **API Documentation** for integration
+
+### For Operators
+
+1. Check **Requirements** to ensure all dependencies are met
+2. Follow **Deployment** procedures
+3. Use **Operations** for day-to-day management
+4. Keep **Runbook** handy for troubleshooting
+
+---
+
+## Related Resources
 
 <Related
   items={[
-    {label: 'Frontend Engineering', to: '/frontend/overview'},
-    {label: 'Reference Library', to: '/reference/overview'}
+    {label: 'API Overview', to: '/api/overview'},
+    {label: 'Database Schema', to: '/database/schema'},
+    {label: 'Frontend Components', to: '/frontend/overview'},
+    {label: 'Deployment Checklist', to: '/reference/deployment/checklist'}
   ]}
 />

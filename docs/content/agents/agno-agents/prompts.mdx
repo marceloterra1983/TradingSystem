@@ -24,9 +24,9 @@ Each agent has a system instruction that defines its role and behavior:
 
 **MarketAnalysisAgent**:
 ```
-You are a market analysis agent specialized in analyzing B3 market data 
-and TP Capital signals. Your role is to identify trading opportunities by 
-analyzing price movements, volume patterns, and signal correlations. 
+You are a market analysis agent specialized in consolidating TP Capital signals 
+and Workspace insights. Your role is to identify trading opportunities by 
+analyzing signal quality, historical performance, and idea context. 
 Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 ```
 
@@ -56,13 +56,11 @@ smooth communication between agents and handle errors gracefully.
   "payload": {
     "symbols": ["PETR4", "VALE3"],
     "include_tp_capital": true,
-    "include_b3": true,
-    "market_data": {
-      "PETR4": {"last_price": 32.50, "volume": 1000000, "change_pct": 2.5},
-      "VALE3": {"last_price": 65.80, "volume": 500000, "change_pct": -1.2}
-    },
     "tp_capital_signals": [
       {"asset": "PETR4", "signal_type": "COMPRA", "buy_min": 32.00, "buy_max": 33.00, "targets": [34.00, 35.00], "stop": 31.00}
+    ],
+    "workspace_context": [
+      {"title": "PETR4 análise semanal", "thesis": "Volume comprador crescente", "rating": "high"}
     ]
   }
 }
@@ -88,8 +86,7 @@ smooth communication between agents and handle errors gracefully.
   "action": "ORCHESTRATE",
   "data": {
     "symbols": ["PETR4"],
-    "include_tp_capital": true,
-    "include_b3": true
+    "include_tp_capital": true
   }
 }
 ```
@@ -97,9 +94,9 @@ smooth communication between agents and handle errors gracefully.
 ### Context Windows
 
 **MarketAnalysisAgent**:
-- **Market Data**: Last 24 hours of B3 data (price, volume, indicators)
 - **TP Capital Signals**: Last 100 signals (configurable via `limit` parameter)
 - **Workspace Ideas**: All active ideas (filtered by symbol if applicable)
+- **Workspace Insight Scores**: Optional teses/ratings associadas às ideias
 - **Context Size**: ~2000 tokens (varies by data volume)
 
 **RiskManagementAgent**:
@@ -134,7 +131,7 @@ smooth communication between agents and handle errors gracefully.
       "metadata": {
         "targets": [34.00, 35.00, 36.00],
         "stop": 31.00,
-        "reasoning": "Strong buy signal from TP Capital, confirmed by B3 volume spike"
+        "reasoning": "Strong buy signal from TP Capital reforçado por tese positiva no Workspace"
       }
     }
   ]
@@ -169,8 +166,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "symbols": ["PETR4"],
-    "include_tp_capital": true,
-    "include_b3": true
+    "include_tp_capital": true
   }'
 ```
 
@@ -187,7 +183,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
       "source": "AGNO",
       "size": 100,
       "metadata": {
-        "reasoning": "TP Capital signal shows buy range 32.00-33.00 with targets at 34.00, 35.00. B3 data confirms volume spike (+150%) and positive momentum. Recommend BUY at current price 32.50."
+        "reasoning": "TP Capital sinaliza compra entre 32.00-33.00 com alvos em 34.00 e 35.00. Workspace reforça tese de fluxo comprador; recomendação BUY a 32.50."
       }
     }
   ],
@@ -197,7 +193,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
 ```
 
 **Evaluation Notes**:
-- LLM successfully integrated TP Capital signal with B3 market data
+- LLM integrou sinal do TP Capital com contexto do Workspace
 - Confidence score (0.85) reflects strong signal alignment
 - Reasoning provides clear justification
 - Processing time (0.42s) within target (&lt;1s)
@@ -272,8 +268,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
     "action": "ORCHESTRATE",
     "data": {
       "symbols": ["PETR4"],
-      "include_tp_capital": true,
-      "include_b3": false
+      "include_tp_capital": true
     }
   }'
 ```
@@ -383,12 +378,12 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 **Market Data Context**:
 - Time window: Last 24 hours (hardcoded)
 - Symbol filter: Only requested symbols
-- Data sources: B3 (optional), TP Capital (optional), Workspace (optional)
+- Data sources: TP Capital (optional), Workspace (optional)
 
 **Signal Context**:
 - TP Capital limit: 100 signals (configurable in client call)
 - Workspace ideas: All active ideas (no limit)
-- B3 data: Latest snapshot per symbol
+- Workspace context: Optional metadata (thesis, rating)
 
 ## Prompt Templates
 
@@ -404,8 +399,7 @@ Task: analyze_market
 Payload:
 - Symbols: {symbols}
 - Include TP Capital: {include_tp_capital}
-- Include B3: {include_b3}
-- Market Data: {market_data}
+- Workspace Context: {workspace_context}
 - TP Capital Signals: {tp_capital_signals}
 
 Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
@@ -416,8 +410,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 - `{task_json}`: JSON-encoded task and payload
 - `{symbols}`: List of symbols to analyze
 - `{include_tp_capital}`: Boolean flag
-- `{include_b3}`: Boolean flag
-- `{market_data}`: B3 market data dictionary
+- `{workspace_context}`: Workspace insights array
 - `{tp_capital_signals}`: TP Capital signals array
 
 **Expected Output**:
@@ -431,7 +424,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
       "price": 32.50,
       "source": "AGNO",
       "metadata": {
-        "reasoning": "Strong buy signal from TP Capital confirmed by B3 volume spike"
+        "reasoning": "Strong buy signal from TP Capital reforçado por insight do Workspace"
       }
     }
   ]

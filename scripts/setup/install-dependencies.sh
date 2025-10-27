@@ -37,7 +37,6 @@ Services:
   Backend:
     - workspace
     - tp-capital-signals
-    - b3-market-data
     - documentation-api
     - status
   
@@ -63,7 +62,6 @@ done
 declare -A SERVICES=(
     ["workspace"]="backend/api/workspace"
     ["tp-capital-signals"]="apps/tp-capital"
-    ["b3-market-data"]="apps/b3-market-data"
     ["documentation-api"]="backend/api/documentation-api"
     ["status"]="apps/status"
     ["dashboard"]="frontend/dashboard"
@@ -132,7 +130,6 @@ else
     hr
     install_deps "workspace" "backend/api/workspace"
     install_deps "tp-capital-signals" "apps/tp-capital"
-    install_deps "b3-market-data" "apps/b3-market-data"
     install_deps "documentation-api" "backend/api/documentation-api"
     install_deps "status" "apps/status"
     echo ""

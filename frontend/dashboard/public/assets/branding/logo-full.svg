@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="260" height="56" viewBox="0 0 260 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer container with dark background -->
+  <rect width="260" height="56" rx="12" fill="#1a1a1a"/>
+  
+  <!-- Icon square background (dark blue) -->
+  <rect x="10" y="10" width="36" height="36" rx="7" fill="#0f172a"/>
+  
+  <!-- Trading line icon (cyan) - larger -->
+  <path 
+    d="M 16 38 L 22 20 L 28 32 L 33 16 L 40 28" 
+    stroke="#06b6d4" 
+    stroke-width="3" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+    fill="none"
+  />
+  
+  <!-- Text: TradingSystem -->
+  <text x="58" y="36" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" font-weight="600" fill="#e5e5e5" letter-spacing="0.5">
+    TradingSystem
+  </text>
+</svg>

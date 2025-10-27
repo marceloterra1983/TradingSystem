@@ -51,14 +51,25 @@ FORCE_KILL=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
+METRICS_FILE="$SERVICES_DIR/start-metrics.json"
 mkdir -p "$SERVICES_DIR"
 
-# Service definitions (name:directory:port:command)
+# Metrics tracking
+declare -A SERVICE_START_TIMES
+declare -A SERVICE_RETRY_COUNTS
+START_SCRIPT_TIME=$(date +%s)
+
+# Service definitions (name:directory:port:command:env_file:dependencies:max_retries)
+# Format: name=directory:port:command:optional_env_file:dependencies:max_retries
+# dependencies = comma-separated list of service names (empty if none)
+# max_retries = number of restart attempts (default: 3)
 # NOTE: Workspace and TP Capital now run as Docker containers only
 declare -A SERVICES=(
-    ["dashboard"]="frontend/dashboard:3103:npm run dev"
-    ["docusaurus"]="docs:3205:npm run docs:dev"
-    ["status"]="apps/status:3500:npm start"
+    ["telegram-gateway"]="apps/telegram-gateway:4006:npm run dev:apps/telegram-gateway/.env::3"
+    ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev:backend/api/telegram-gateway/.env:telegram-gateway:3"
+    ["dashboard"]="frontend/dashboard:3103:npm run dev:::2"
+    ["docusaurus"]="docs:3205:npm run docs:dev:::2"
+    ["status"]="apps/status:3500:npm start:::2"
 )
 
 # Parse arguments
@@ -95,6 +106,8 @@ Services:
      - TimescaleDB, QuestDB, and other infrastructure
 
   🖥️  Local Dev Services:
+     - Telegram Gateway (4006) - Telegram MTProto gateway service  
+     - Telegram Gateway API (4010) - REST API for gateway messages
      - Dashboard (3103) - React dashboard
      - Docusaurus (3205) - Documentation site
      - Status API (3500) - Service health & launcher
@@ -116,6 +129,61 @@ EOF
             ;;
     esac
 done
+
+# Function to resolve service dependencies (topological sort)
+resolve_dependencies() {
+    local -n services_map=$1
+    local -a sorted_services=()
+    local -A visited=()
+    local -A temp_mark=()
+    
+    # DFS visit function
+    visit() {
+        local node=$1
+        
+        # Check for circular dependency
+        if [[ -n "${temp_mark[$node]:-}" ]]; then
+            log_error "Circular dependency detected: $node"
+            return 1
+        fi
+        
+        # Skip if already visited
+        if [[ -n "${visited[$node]:-}" ]]; then
+            return 0
+        fi
+        
+        temp_mark[$node]=1
+        
+        # Get dependencies
+        local config="${services_map[$node]}"
+        local deps=$(echo "$config" | cut -d':' -f5)
+        
+        # Visit dependencies first
+        if [ -n "$deps" ]; then
+            IFS=',' read -ra dep_array <<< "$deps"
+            for dep in "${dep_array[@]}"; do
+                dep=$(echo "$dep" | tr -d ' ')  # trim whitespace
+                if [ -n "$dep" ] && [[ -n "${services_map[$dep]:-}" ]]; then
+                    visit "$dep"
+                fi
+            done
+        fi
+        
+        unset temp_mark[$node]
+        visited[$node]=1
+        sorted_services+=("$node")
+    }
+    
+    # Visit all services
+    for service in "${!services_map[@]}"; do
+        if [[ -z "${visited[$service]:-}" ]]; then
+            visit "$service"
+        fi
+    done
+    
+    # Return sorted list
+    echo "${sorted_services[@]}"
+}
 
 # Function to check if port is in use
 check_port() {
@@ -191,22 +259,177 @@ start_containers() {
     echo -e "${BLUE}  - workspace-service:${NC}http://localhost:3200"
 }
 
-# Function to start a service
+# Function to validate service environment
+validate_service_env() {
+    local name=$1
+    local env_file=$2
+    
+    if [ -z "$env_file" ] || [ "$env_file" = "$name" ]; then
+        return 0  # No env file specified, skip validation
+    fi
+    
+    local full_path="$PROJECT_ROOT/$env_file"
+    
+    if [ ! -f "$full_path" ]; then
+        log_warning "$name: Environment file not found: $env_file"
+        log_info "  Create it from .env.example or configure manually"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Function to check service health
+check_service_health() {
+    local name=$1
+    local port=$2
+    local max_attempts=3
+    local attempt=0
+    
+    # Try HTTP health check if available
+    while [ $attempt -lt $max_attempts ]; do
+        if curl -sf "http://localhost:$port/health" >/dev/null 2>&1; then
+            log_success "  ✓ $name health check passed"
+            return 0
+        fi
+        attempt=$((attempt + 1))
+        sleep 2
+    done
+    
+    # Fallback: just check if port is listening
+    if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
+        log_info "  ✓ $name is listening on port $port (health endpoint not available)"
+        return 0
+    fi
+    
+    return 1
+}
+
+# Function to calculate exponential backoff delay
+calculate_backoff() {
+    local attempt=$1
+    local base_delay=${2:-2}
+    local max_delay=${3:-30}
+    
+    # Calculate delay: base_delay * 2^(attempt-1)
+    local delay=$((base_delay * (1 << (attempt - 1))))
+    
+    # Cap at max_delay
+    if [ $delay -gt $max_delay ]; then
+        delay=$max_delay
+    fi
+    
+    echo $delay
+}
+
+# Function to save metrics to JSON file
+save_metrics() {
+    local total_time=$(($(date +%s) - START_SCRIPT_TIME))
+    
+    cat > "$METRICS_FILE" <<EOF
+{
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "totalDurationSeconds": $total_time,
+  "services": [
+EOF
+    
+    local first=true
+    for service in "${!SERVICE_START_TIMES[@]}"; do
+        if [ "$first" = false ]; then
+            echo "," >> "$METRICS_FILE"
+        fi
+        first=false
+        
+        local start_time="${SERVICE_START_TIMES[$service]}"
+        local retry_count="${SERVICE_RETRY_COUNTS[$service]:-0}"
+        local status="success"
+        
+        # Check if service is still running
+        local pid_file="$SERVICES_DIR/${service}.pid"
+        if [ -f "$pid_file" ]; then
+            local pid=$(cat "$pid_file")
+            if ! kill -0 "$pid" 2>/dev/null; then
+                status="failed"
+            fi
+        else
+            status="failed"
+        fi
+        
+        cat >> "$METRICS_FILE" <<EOF
+    {
+      "name": "$service",
+      "startTimeSeconds": $start_time,
+      "retryCount": $retry_count,
+      "status": "$status"
+    }
+EOF
+    done
+    
+    cat >> "$METRICS_FILE" <<EOF
+
+  ],
+  "failedServices": [],
+  "summary": {
+    "totalServices": ${#SERVICES[@]},
+    "successfulServices": $(ls -1 "$SERVICES_DIR"/*.pid 2>/dev/null | wc -l),
+    "failedServices": 0
+  }
+}
+EOF
+    
+    log_info "Metrics saved to: $METRICS_FILE"
+}
+
+# Function to start a service with retry logic
 start_service() {
     local name=$1
     local config="${SERVICES[$name]}"
+    
+    # Parse config (format: dir:port:command:env_file:deps:max_retries)
     local dir=$(echo "$config" | cut -d':' -f1)
     local port=$(echo "$config" | cut -d':' -f2)
-    local command=$(echo "$config" | cut -d':' -f3-)
+    local command=$(echo "$config" | cut -d':' -f3)
+    local env_file=$(echo "$config" | cut -d':' -f4)
+    local dependencies=$(echo "$config" | cut -d':' -f5)
+    local max_retries=$(echo "$config" | cut -d':' -f6)
+    max_retries=${max_retries:-3}
+    
     local log_file="$SERVICES_DIR/${name}.log"
     local pid_file="$SERVICES_DIR/${name}.pid"
+    
+    # Track start time for metrics
+    SERVICE_START_TIMES[$name]=$(date +%s)
+    SERVICE_RETRY_COUNTS[$name]=0
 
     log_info "Starting ${name}..."
+    
+    # Check dependencies
+    if [ -n "$dependencies" ]; then
+        IFS=',' read -ra deps <<< "$dependencies"
+        for dep in "${deps[@]}"; do
+            dep=$(echo "$dep" | tr -d ' ')
+            if [ -n "$dep" ]; then
+                local dep_pid_file="$SERVICES_DIR/${dep}.pid"
+                if [ ! -f "$dep_pid_file" ]; then
+                    log_warning "$name depends on $dep, but $dep is not running"
+                    log_info "  Waiting for $dep to start..."
+                    sleep 3
+                fi
+            fi
+        done
+    fi
 
     # Check if directory exists
     if [ ! -d "$PROJECT_ROOT/$dir" ]; then
         log_error "Directory not found: $PROJECT_ROOT/$dir"
         return 1
+    fi
+    
+    # Validate environment file if specified
+    if [ -n "$env_file" ] && [ "$env_file" != "$command" ]; then
+        if ! validate_service_env "$name" "$env_file"; then
+            log_warning "$name requires configuration - continuing anyway..."
+        fi
     fi
 
     # Check if already running
@@ -249,34 +472,95 @@ start_service() {
     local pid=$!
     echo "$pid" > "$pid_file"
 
-    # Wait for port to become active
-    log_info "Waiting for $name to start..."
-    local max_wait=30
-    local waited=0
+    # Retry logic with exponential backoff
+    local attempt=1
+    local success=false
+    
+    while [ $attempt -le $max_retries ]; do
+        if [ $attempt -gt 1 ]; then
+            local backoff=$(calculate_backoff $attempt)
+            SERVICE_RETRY_COUNTS[$name]=$((attempt - 1))
+            log_warning "$name retry attempt $attempt/$max_retries (waiting ${backoff}s)..."
+            sleep $backoff
+            
+            # Clean up previous attempt
+            if [ -f "$pid_file" ]; then
+                local old_pid=$(cat "$pid_file")
+                kill -9 "$old_pid" 2>/dev/null || true
+                rm -f "$pid_file"
+            fi
+            
+            # Restart service
+            cd "$PROJECT_ROOT/$dir"
+            if [ "$name" = "docusaurus" ]; then
+                nohup npm run docs:dev > "$log_file" 2>&1 &
+            else
+                nohup npm run dev > "$log_file" 2>&1 &
+            fi
+            pid=$!
+            echo "$pid" > "$pid_file"
+        fi
+        
+        # Wait for port to become active
+        log_info "Waiting for $name to start (attempt $attempt/$max_retries)..."
+        local max_wait=30
+        local waited=0
 
-    while [ $waited -lt $max_wait ]; do
-        if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
-            log_success "✓ $name started (PID: $pid, Port: $port)"
-            log_info "  Log: $log_file"
-            cd "$PROJECT_ROOT"
+        while [ $waited -lt $max_wait ]; do
+            if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
+                log_success "✓ $name started (PID: $pid, Port: $port)"
+                log_info "  Log: $log_file"
+                
+                # Perform health check
+                if check_service_health "$name" "$port"; then
+                    success=true
+                    cd "$PROJECT_ROOT"
+                    break 2  # Exit both while loops
+                else
+                    log_warning "  Service started but health check inconclusive"
+                    success=true
+                    cd "$PROJECT_ROOT"
+                    break 2
+                fi
+            fi
+
+            # Check if process is still alive
+            if ! kill -0 "$pid" 2>/dev/null; then
+                log_error "$name failed to start (process died)"
+                if [ $attempt -eq $max_retries ]; then
+                    log_error "Last 20 lines of log:"
+                    tail -n 20 "$log_file" | sed 's/^/    /'
+                fi
+                rm -f "$pid_file"
+                cd "$PROJECT_ROOT"
+                break  # Break inner loop, continue with retry
+            fi
+
+            sleep 1
+            waited=$((waited + 1))
+        done
+        
+        # If we succeeded, return immediately
+        if [ "$success" = true ]; then
             return 0
         fi
-
-        # Check if process is still alive
-        if ! kill -0 "$pid" 2>/dev/null; then
-            log_error "$name failed to start (process died)"
-            log_error "Last 20 lines of log:"
-            tail -n 20 "$log_file" | sed 's/^/    /'
-            rm -f "$pid_file"
-            cd "$PROJECT_ROOT"
-            return 1
+        
+        # If we're here, the service failed this attempt
+        if [ $waited -ge $max_wait ]; then
+            log_error "$name failed to start (timeout on attempt $attempt/$max_retries)"
         fi
-
-        sleep 1
-        waited=$((waited + 1))
+        
+        # Move to next attempt
+        attempt=$((attempt + 1))
+        
+        # If we've exhausted all attempts, exit the function with error
+        if [ $attempt -gt $max_retries ]; then
+            break
+        fi
     done
 
-    log_error "$name failed to start (timeout)"
+    # Only reached if all retries failed
+    log_error "$name failed to start after $max_retries attempts"
     log_error "Check log: $log_file"
     cd "$PROJECT_ROOT"
     return 1
@@ -303,8 +587,16 @@ main() {
     if [ "$SKIP_SERVICES" = false ]; then
         section "Starting Local Development Services"
 
+        # Resolve dependencies and get sorted order
+        log_info "Resolving service dependencies..."
+        local sorted_services
+        sorted_services=$(resolve_dependencies SERVICES)
+        log_info "Start order: $sorted_services"
+        echo ""
+
         local failed_services=()
-        for service in dashboard docusaurus status; do
+        # Start services in dependency order
+        for service in $sorted_services; do
             if ! start_service "$service"; then
                 failed_services+=("$service")
             fi
@@ -321,6 +613,9 @@ main() {
                 log_error "  - $service"
             done
         fi
+        
+        # Save metrics
+        save_metrics
     else
         log_info "Skipping local services (--skip-services)"
     fi
@@ -338,9 +633,11 @@ main() {
     echo -e "  📚 Workspace API:     http://localhost:3200"
     echo ""
     echo -e "${CYAN}🖥️  Local Dev Services:${NC}"
-    echo -e "  🎨 Dashboard:         http://localhost:3103"
-    echo -e "  📖 Docusaurus:        http://localhost:3205"
-    echo -e "  📊 Status API:        http://localhost:3500"
+    echo -e "  📨 Telegram Gateway:      http://localhost:4006  (health: /health)"
+    echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
+    echo -e "  🎨 Dashboard:             http://localhost:3103"
+    echo -e "  📖 Docusaurus:            http://localhost:3205"
+    echo -e "  📊 Status API:            http://localhost:3500"
     echo ""
     echo -e "${CYAN}📝 Management:${NC}"
     echo -e "  Check status:  ${BLUE}bash scripts/universal/status.sh${NC} (or: status)"

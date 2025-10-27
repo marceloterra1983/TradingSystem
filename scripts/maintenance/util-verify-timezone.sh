@@ -15,21 +15,8 @@ echo "   Date: $(date)"
 echo "   Timezone: $(cat /etc/timezone 2>/dev/null || echo 'Not set in /etc/timezone')"
 echo ""
 
-# Check B3 containers
-echo "2. B3 SERVICES:"
-B3_CONTAINER=$(docker ps --filter "name=b3-market-data" --format "{{.Names}}" | head -1)
-if [ -n "$B3_CONTAINER" ]; then
-    echo "   b3-market-data:"
-    echo "     Container: $B3_CONTAINER"
-    echo "     Date: $(docker exec $B3_CONTAINER date 2>/dev/null || echo 'Container not running')"
-    echo "     TZ var: $(docker exec $B3_CONTAINER printenv TZ 2>/dev/null || echo 'Not set')"
-else
-    echo "   b3-market-data container not running"
-fi
-echo ""
-
 # Check TimescaleDB
-echo "3. TIMESCALEDB:"
+echo "2. TIMESCALEDB:"
 TIMESCALE_CONTAINER=$(docker ps --filter "name=data-timescaledb" --format "{{.Names}}" | head -1)
 if [ -n "$TIMESCALE_CONTAINER" ]; then
     echo "   Container: $TIMESCALE_CONTAINER"
@@ -41,7 +28,7 @@ fi
 echo ""
 
 # Check data timestamps (TimescaleDB placeholder)
-echo "4. DATA TIMESTAMPS (TimescaleDB):"
+echo "3. DATA TIMESTAMPS (TimescaleDB):"
 if [ -n "$TIMESCALE_CONTAINER" ]; then
     echo "   Run inside container for detailed checks:"
     echo "     docker exec -it $TIMESCALE_CONTAINER psql -U \${TIMESCALEDB_USER:-timescale} -d \${TIMESCALEDB_DB:-tradingsystem} -c \"SELECT NOW();\""
@@ -51,18 +38,8 @@ fi
 echo ""
 
 # Check Node.js services timezone
-echo "5. NODE.JS SERVICES:"
-if [ -n "$B3_CONTAINER" ]; then
-    echo "   b3-market-data API:"
-    docker exec $B3_CONTAINER node -e "
-const now = new Date();
-console.log('   Date:', now.toISOString());
-console.log('   Locale (pt-BR):', now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-console.log('   TZ env:', process.env.TZ || 'Not set');
-" 2>/dev/null || echo "   Container not running"
-else
-    echo "   b3-market-data container not running"
-fi
+echo "4. NODE.JS SERVICES:"
+echo "   (Verifique apenas serviços de API ativos conforme necessário.)"
 echo ""
 
 echo "=========================================="

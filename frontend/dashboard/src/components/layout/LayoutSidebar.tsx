@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { NAVIGATION_DATA, Section } from '../../data/navigation';
-import { useTheme } from '../../contexts/ThemeContext';
 import { isBrowser } from '../../utils/browser';
+import { Logo } from '../ui/logo';
 
 export interface LayoutSidebarProps {
   isCollapsed: boolean;
@@ -35,7 +35,6 @@ export function LayoutSidebar({
   width = 280,
   onWidthChange,
 }: LayoutSidebarProps) {
-  const { resolvedTheme } = useTheme();
   const [expandedSections, setExpandedSections] = React.useState<Set<string>>(() => {
     // Always expand all sections by default
     return new Set(NAVIGATION_DATA.map(section => section.id));
@@ -88,11 +87,6 @@ export function LayoutSidebar({
     return undefined;
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
-  // Get logo based on theme - using compact version for better sidebar fit
-  const logoSrc = resolvedTheme === 'dark'
-    ? '/assets/branding/logo-compact-dark.svg'
-    : '/assets/branding/logo-compact.svg';
-
   return (
     <motion.aside
       ref={sidebarRef}
@@ -110,24 +104,15 @@ export function LayoutSidebar({
     >
       {/* Logo Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <motion.div
-          initial={false}
-          animate={{
-            opacity: isCollapsed ? 0 : 1,
-            width: isCollapsed ? 0 : 'auto',
-          }}
-          className="overflow-hidden"
-        >
-          <img
-            src={logoSrc}
-            alt="TradingSystem"
-            className="h-10 w-auto max-w-full object-contain"
-            onError={(e) => {
-              console.error('Logo failed to load:', logoSrc);
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </motion.div>
+        {!isCollapsed ? (
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Logo variant="compact" size="md" />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center flex-1">
+            <Logo variant="icon" size="sm" />
+          </div>
+        )}
         
         {/* Collapse Button */}
         <button

@@ -286,15 +286,13 @@ curl -X POST http://localhost:8111/workflows/docs/review \
 Orchestration layer for multi-agent trading workflows using the Agno framework.
 
 **Agents:**
-- **MarketAnalysisAgent:** Evaluates B3 market data and TP Capital signals
-- **RiskManagementAgent:** Applies risk controls and compliance checks
-- **SignalOrchestratorAgent:** Coordinates market analysis and risk validation
+- **MarketAnalysisAgent:** Analisa sinais TP Capital e indicadores internos
+- **RiskManagementAgent:** Aplica controles de risco e compliance
+- **SignalOrchestratorAgent:** Coordena análise e validação de risco
 
 **HTTP Client Adapters:**
 - WorkspaceClient (Port 3100) - Idea bank operations
 - TPCapitalClient (Port 3200) - Telegram-derived signals
-- B3Client (Port 3302) - Market data and indicators
-- B3WebSocketConsumer - Real-time market updates
 - RiskEngineClient - Risk checks and limits
 
 **Resilience Patterns:**
@@ -537,7 +535,6 @@ Unified reverse proxy routing all TradingSystem services under a single domain, 
 | Dashboard | `http://tradingsystem.local/` | `http://localhost:3103` |
 | Workspace | `http://tradingsystem.local/api/library` | `http://localhost:3102` |
 | TP Capital API | `http://tradingsystem.local/api/tp-capital` | `http://localhost:3200` |
-| B3 | `http://tradingsystem.local/api/b3` | `http://localhost:3302` |
 | Documentation API | `http://tradingsystem.local/api/docs` | `http://localhost:3400` |
 | Launcher | `http://tradingsystem.local/api/launcher` | `http://localhost:3500` |
 | Docusaurus | `http://tradingsystem.local/docs` | `http://localhost:3205` |

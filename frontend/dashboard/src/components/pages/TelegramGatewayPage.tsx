@@ -1,14 +1,13 @@
-import { useCallback, useMemo, useState } from 'react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import type { PageSection } from '../layout/CustomizablePageLayout';
+import { useCallback, useState } from 'react';
+import { Button } from '../ui/button';
 import {
   useTelegramGatewayDeleteMessage,
   useTelegramGatewayMessages,
   useTelegramGatewayOverview,
   useTelegramGatewayReload,
   useTelegramGatewayReprocess,
-  TelegramGatewayMessagesFilters,
   TelegramGatewayMessage,
+  TelegramGatewayMessagesFilters,
 } from '../../hooks/useTelegramGateway';
 import { StatusSummary } from './telegram-gateway/StatusSummary';
 import { MetricsOverview } from './telegram-gateway/MetricsOverview';
@@ -17,6 +16,8 @@ import { FailureQueueCard } from './telegram-gateway/FailureQueueCard';
 import { SessionCard } from './telegram-gateway/SessionCard';
 import { ChannelsManagerCard } from './telegram-gateway/ChannelsManagerCard';
 import { AuthenticationCard } from './telegram-gateway/AuthenticationCard';
+import { ConnectionDiagnosticCard } from './telegram-gateway/ConnectionDiagnosticCard';
+import { RefreshCw } from 'lucide-react';
 
 export function TelegramGatewayPage() {
   const [messageFilters, setMessageFilters] = useState<TelegramGatewayMessagesFilters>({
@@ -71,115 +72,78 @@ export function TelegramGatewayPage() {
     [deleteMutation],
   );
 
-  const overviewTimestamp = overview?.timestamp;
-  const metricsSummary = overview?.metrics?.summary;
   const queueStatus = overview?.queue;
   const sessionStatus = overview?.session;
+  const metricsSummary = overview?.metrics?.summary;
 
-  const sections = useMemo<PageSection[]>(
-    () => [
-      {
-        id: 'telegram-gateway-status',
-        content: (
-          <StatusSummary
-            overview={overview}
-            isLoading={overviewLoading}
-            error={overviewError}
-            onRefresh={() => {
+  return (
+    <div className="space-y-6 pb-12">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Telegram Gateway</h1>
+          <p className="mt-1 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+            Monitoramento em tempo real do serviço MTProto, consumo da API local e telemetria persistida no TimescaleDB.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
               void refetchOverview();
+              void refetchMessages();
             }}
-            onReloadCache={handleReloadCache}
-            isReloading={reloadCache.isPending}
-            lastUpdated={overviewTimestamp}
-          />
-        ),
-      },
-      {
-        id: 'telegram-gateway-metrics',
-        content: (
-          <MetricsOverview
-            metrics={metricsSummary}
-            isLoading={overviewLoading && !metricsSummary}
-          />
-        ),
-      },
-      {
-        id: 'telegram-gateway-channels',
-        content: <ChannelsManagerCard />,
-      },
-      {
-        id: 'telegram-gateway-messages',
-        content: (
+            disabled={overviewLoading || messagesLoading}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Sincronizar tudo
+          </Button>
+        </div>
+      </header>
+
+      <StatusSummary
+        overview={overview}
+        isLoading={overviewLoading}
+        error={overviewError}
+        onRefresh={() => void refetchOverview()}
+        onReloadCache={handleReloadCache}
+        isReloading={reloadCache.isPending}
+        lastUpdated={overview?.timestamp}
+      />
+
+      <ConnectionDiagnosticCard 
+        overview={overview}
+        isLoading={overviewLoading}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="space-y-4 xl:col-span-2">
           <MessagesTable
             data={messagesData}
             isLoading={messagesLoading}
             error={messagesError}
             filters={messageFilters}
             onFiltersChange={setMessageFilters}
-            onRefresh={() => {
-              void refetchMessages();
-            }}
+            onRefresh={() => void refetchMessages()}
             onReprocess={handleReprocess}
             onDelete={handleDelete}
             isReprocessing={reprocessMutation.isPending}
             isDeleting={deleteMutation.isPending}
           />
-        ),
-      },
-      {
-        id: 'telegram-gateway-queue',
-        content: (
+          <MetricsOverview metrics={metricsSummary} isLoading={overviewLoading && !metricsSummary} />
+        </div>
+        <div className="space-y-4">
           <FailureQueueCard
             queue={queueStatus}
             isLoading={overviewLoading && !queueStatus}
-            onRefresh={() => {
-              void refetchOverview();
-            }}
+            onRefresh={() => void refetchOverview()}
           />
-        ),
-      },
-      {
-        id: 'telegram-gateway-session',
-        content: (
           <SessionCard session={sessionStatus} isLoading={overviewLoading && !sessionStatus} />
-        ),
-      },
-      {
-        id: 'telegram-gateway-auth',
-        content: <AuthenticationCard />,
-      },
-    ],
-    [
-      metricsSummary,
-      queueStatus,
-      sessionStatus,
-      overviewTimestamp,
-      deleteMutation.isPending,
-      handleDelete,
-      handleReloadCache,
-      handleReprocess,
-      messageFilters,
-      messagesData,
-      messagesError,
-      messagesLoading,
-      overview,
-      overviewError,
-      overviewLoading,
-      refetchMessages,
-      refetchOverview,
-      reloadCache.isPending,
-      reprocessMutation.isPending,
-    ],
-  );
-
-  return (
-    <CustomizablePageLayout
-      pageId='telegram-gateway'
-      title='Telegram Gateway'
-      subtitle='Monitoramento operacional, telemetria, fila de falhas e persistência das mensagens MTProto.'
-      sections={sections}
-      defaultColumns={2}
-    />
+          <ChannelsManagerCard />
+          <AuthenticationCard />
+        </div>
+      </div>
+    </div>
   );
 }
 

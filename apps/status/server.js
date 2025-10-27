@@ -182,20 +182,11 @@ const SERVICE_TARGETS = [
   createServiceTarget({
     id: 'tp-capital-signals-api',
     name: 'TP-Capital',
-    description: 'Telegram ingestion service',
+    description: 'Telegram signal ingestion service (Docker container)',
     category: 'api',
-    defaultPort: 3200,
+    defaultPort: 4007,
     portEnv: 'SERVICE_LAUNCHER_TP_CAPITAL_PORT',
     urlEnv: 'SERVICE_LAUNCHER_TP_CAPITAL_URL',
-  }),
-  createServiceTarget({
-    id: 'b3-market-data-api',
-    name: 'B3',
-    description: 'B3 market data gateway',
-    category: 'api',
-    defaultPort: 3302,
-    portEnv: 'SERVICE_LAUNCHER_B3_PORT',
-    urlEnv: 'SERVICE_LAUNCHER_B3_URL',
   }),
   createServiceTarget({
     id: 'firecrawl-proxy',
@@ -745,16 +736,6 @@ const SERVICE_START_CONFIGS = {
     command: 'npm run dev',
     displayName: 'Documentation API'
   },
-  'tp-capital-signals-api': {
-    workingDir: path.join(projectRoot, 'apps/tp-capital'),
-    command: 'npm run dev',
-    displayName: 'TP Capital API'
-  },
-  'b3-market-data-api': {
-    workingDir: path.join(projectRoot, 'backend/api/b3'),
-    command: 'npm run dev',
-    displayName: 'B3 API'
-  },
   'firecrawl-proxy': {
     workingDir: path.join(projectRoot, 'backend/api/firecrawl-proxy'),
     command: 'npm run dev',
@@ -874,6 +855,35 @@ app.get('/metrics', async (_req, res) => {
   }
 });
 
+// =============================================================================
+// GET /api/start-metrics
+// Returns metrics from last system start (from script)
+// =============================================================================
+app.get('/api/start-metrics', (req, res) => {
+  const fs = require('fs');
+  const metricsPath = path.join('/tmp/tradingsystem-logs/start-metrics.json');
+  
+  try {
+    if (!fs.existsSync(metricsPath)) {
+      return res.status(404).json({
+        error: 'Metrics not found',
+        message: 'No start metrics available. Run scripts/universal/start.sh to generate metrics.',
+      });
+    }
+    
+    const metricsData = fs.readFileSync(metricsPath, 'utf8');
+    const metrics = JSON.parse(metricsData);
+    
+    res.json(metrics);
+  } catch (error) {
+    logger.error('Failed to read start metrics', { error: error.message });
+    res.status(500).json({
+      error: 'Failed to read metrics',
+      message: error.message,
+    });
+  }
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     logger.startup('Launcher API started successfully', {
@@ -882,6 +892,7 @@ if (require.main === module) {
         launch: `POST http://localhost:${PORT}/launch`,
         health: `GET http://localhost:${PORT}/health`,
         status: `GET http://localhost:${PORT}/api/status`,
+        startMetrics: `GET http://localhost:${PORT}/api/start-metrics`,
       },
     });
   });

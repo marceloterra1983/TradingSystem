@@ -195,13 +195,13 @@ services:
   "version": 1,
   "services": [
     {
-      "id": "b3-market-data",
+      "id": "tp-capital-signals",
       "type": "backend",
-      "path": "apps/b3-market-data",
+      "path": "apps/tp-capital",
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
-      "port": 3302,
+      "port": 3200,
       "env": ".env.example",
       "workspace": true,
       "managed": "internal"
@@ -228,10 +228,10 @@ services:
 node scripts/lib/service-manifest.js list
 
 # Obter detalhes de um serviço
-node scripts/lib/service-manifest.js get b3-market-data
+node scripts/lib/service-manifest.js get tp-capital-signals
 
 # Obter porta de um serviço
-node scripts/lib/service-manifest.js get b3-market-data --field port
+node scripts/lib/service-manifest.js get tp-capital-signals --field port
 ```
 
 **Usado por:**
@@ -445,7 +445,6 @@ GitHub Actions valida automaticamente em cada PR:
 - ⚙️ [env-validation.yml](../.github/workflows/env-validation.yml) - Validação CI/CD
 
 ### READMEs dos Serviços
-- 📖 [B3 Market Data](../apps/b3-market-data/README.md) - Exemplo de configuração
 - 📖 [Service Launcher](../apps/status/README.md) - Exemplo de configuração
 
 ---
@@ -607,4 +606,3 @@ R: Sim, mas apenas valores padrão seguros (sem segredos).
 **Mantido por:** Time TradingSystem  
 **Última Atualização:** 2025-10-23  
 **Versão:** 2.0 (Pós-consolidação)
-

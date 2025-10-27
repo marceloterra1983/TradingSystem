@@ -1,3 +1,7 @@
+import { ScrollArea } from '../../ui/scroll-area';
+import { TelegramGatewayQueueStatus } from '../../../hooks/useTelegramGateway';
+import { AlertTriangle, FileWarning, List, RefreshCw } from 'lucide-react';
+import { Button } from '../../ui/button';
 import {
   CollapsibleCard,
   CollapsibleCardContent,
@@ -5,10 +9,6 @@ import {
   CollapsibleCardHeader,
   CollapsibleCardTitle,
 } from '../../ui/collapsible-card';
-import { ScrollArea } from '../../ui/scroll-area';
-import { TelegramGatewayQueueStatus } from '../../../hooks/useTelegramGateway';
-import { AlertTriangle, List, RefreshCw } from 'lucide-react';
-import { Button } from '../../ui/button';
 
 interface FailureQueueCardProps {
   queue?: TelegramGatewayQueueStatus;
@@ -45,18 +45,24 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
 
   return (
     <CollapsibleCard cardId="telegram-gateway-failure-queue">
-      <CollapsibleCardHeader>
-        <div className="flex w-full items-center justify-between">
+      <CollapsibleCardHeader className="flex flex-col gap-1 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <CollapsibleCardTitle>
-              <List className="mr-2 inline-block h-5 w-5 text-amber-500" />
+            <CollapsibleCardTitle className="flex items-center gap-2 text-lg font-semibold">
+              <List className="h-5 w-5 text-amber-500" />
               Fila de falhas (JSONL)
             </CollapsibleCardTitle>
             <CollapsibleCardDescription>
-              Mensagens persistidas após exceder todas as tentativas de publicação.
+              Mensagens persistidas após exceder todos os retries de entrega.
             </CollapsibleCardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => void onRefresh()} disabled={isLoading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void onRefresh()}
+            disabled={isLoading}
+            data-collapsible-ignore="true"
+          >
             {isLoading ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
             ) : (
@@ -68,49 +74,53 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
           </Button>
         </div>
       </CollapsibleCardHeader>
-      <CollapsibleCardContent>
+      <CollapsibleCardContent className="space-y-4 pt-5">
         {queue?.error ? (
           <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
             <AlertTriangle className="h-5 w-5" />
             <span>Não foi possível ler a fila: {queue.error}</span>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-md border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="text-xs text-slate-500 dark:text-slate-400">Total de mensagens</div>
-                <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Total de mensagens
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
                   {queue?.totalMessages ?? 0}
-                </div>
+                </p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="text-xs text-slate-500 dark:text-slate-400">Tamanho do arquivo</div>
-                <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Tamanho do arquivo
+                </p>
+                <p className="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">
                   {formatBytes(queue?.sizeBytes)}
-                </div>
+                </p>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  Atualizado em {formatTimestamp(queue?.updatedAt)}
+                </p>
               </div>
-              <div className="rounded-md border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="text-xs text-slate-500 dark:text-slate-400">Última atualização</div>
-                <div className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {formatTimestamp(queue?.updatedAt)}
+              <div className="md:col-span-2 rounded-md border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
+                <div className="flex items-center gap-2">
+                  <FileWarning className="h-4 w-4 text-amber-500" />
+                  <span className="font-semibold uppercase tracking-wide">Arquivo</span>
                 </div>
-              </div>
-              <div className="rounded-md border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-950">
-                <div className="text-xs text-slate-500 dark:text-slate-400">Arquivo</div>
-                <div className="mt-1 break-all text-sm text-slate-900 dark:text-slate-100">
+                <p className="mt-2 break-all text-sm font-medium text-slate-700 dark:text-slate-200">
                   {queue?.path ?? '—'}
-                </div>
+                </p>
               </div>
             </div>
             {hasPreview ? (
               <div className="rounded-lg border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                  <span>Visualização (mais recentes)</span>
+                  <span>Pré-visualização (mais recentes)</span>
                   <span>
                     Exibindo {queue?.previewCount ?? 0} de {queue?.totalMessages ?? 0}
                   </span>
                 </div>
-                <ScrollArea className="max-h-64">
+                <ScrollArea className="max-h-60">
                   <ul className="divide-y divide-slate-200 text-sm dark:divide-slate-800">
                     {queue?.preview?.map((entry, index) => (
                       <li key={`queue-entry-${index}`} className="px-4 py-3">
@@ -122,7 +132,7 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
                             Mensagem: <strong>{entry.messageId ?? 'N/D'}</strong>
                           </span>
                           <span>Falhou em {formatTimestamp(entry.failedAt)}</span>
-                          {entry.queuedAt && <span>Enfileirada em {formatTimestamp(entry.queuedAt)}</span>}
+                          {entry.queuedAt && <span>Fila: {formatTimestamp(entry.queuedAt)}</span>}
                         </div>
                         <p className="mt-2 line-clamp-3 text-sm text-slate-700 dark:text-slate-200">
                           {entry.textPreview || '(sem mensagem)'}
@@ -142,7 +152,7 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
                 Nenhuma mensagem na fila de falhas no momento.
               </div>
             )}
-          </div>
+          </>
         )}
       </CollapsibleCardContent>
     </CollapsibleCard>

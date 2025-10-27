@@ -9,67 +9,538 @@
       margin: 0;
       padding: 0;
     }
+    
+    /* Light mode styles */
+    body.light-mode {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    
+    /* Dark mode styles */
+    body.dark-mode {
+      background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    }
+    
+    /* Theme toggle button */
+    #theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    body.light-mode #theme-toggle {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+    
+    body.dark-mode #theme-toggle {
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+    
+    #theme-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    #theme-toggle:active {
+      transform: translateY(0);
+    }
+    
+    /* Scrollbar - Light mode */
+    body.light-mode ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    body.light-mode ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+    
+    body.light-mode ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+      border-radius: 6px;
+      border: 2px solid #f1f5f9;
+    }
+    
+    body.light-mode ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #22d3ee 0%, #06b6d4 100%);
+    }
+    
+    /* Scrollbar - Dark mode */
+    body.dark-mode ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+    }
+    
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: #0f172a;
+      border-radius: 6px;
+    }
+    
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #06b6d4 0%, #0891b2 100%);
+      border-radius: 6px;
+      border: 2px solid #0f172a;
+    }
+    
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #22d3ee 0%, #06b6d4 100%);
+    }
+    
+    /* Transições suaves */
+    #redoc-container * {
+      transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+    
+    /* Melhorar a aparência de código */
+    #redoc-container code {
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-weight: 500;
+    }
+    
+    /* Links - Light mode */
+    body.light-mode #redoc-container a:hover {
+      text-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+    }
+    
+    /* Links - Dark mode */
+    body.dark-mode #redoc-container a:hover {
+      text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+    }
+    
+    /* Botões HTTP method */
+    #redoc-container [class*="http-verb"] {
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+    }
+    
+    body.light-mode #redoc-container [class*="http-verb"] {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode #redoc-container [class*="http-verb"] {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    #redoc-container [class*="http-verb"]:hover {
+      transform: translateY(-1px);
+    }
+    
+    body.light-mode #redoc-container [class*="http-verb"]:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    body.dark-mode #redoc-container [class*="http-verb"]:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Cards e seções */
+    #redoc-container [class*="section"] {
+      border-radius: 8px;
+    }
+    
+    /* Headers - Light mode */
+    body.light-mode #redoc-container h1,
+    body.light-mode #redoc-container h2,
+    body.light-mode #redoc-container h3 {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Headers - Dark mode */
+    body.dark-mode #redoc-container h1,
+    body.dark-mode #redoc-container h2,
+    body.dark-mode #redoc-container h3 {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Tabelas */
+    #redoc-container table {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    /* Animação de carregamento */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.6;
+      }
+    }
+    
+    #redoc-container [class*="loading"] {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
   </style>
 </head>
-<body>
+<body class="dark-mode">
+  <button id="theme-toggle" aria-label="Toggle theme">
+    <span id="theme-icon">🌙</span>
+    <span id="theme-text">Dark</span>
+  </button>
+  
   <div id="redoc-container"></div>
 
   <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
   <script>
+    // Função para obter o tema salvo ou detectar preferência do sistema
+    function getInitialTheme() {
+      const savedTheme = localStorage.getItem('redoc-theme');
+      if (savedTheme) {
+        return savedTheme;
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    
+    // Função para aplicar o tema
+    function applyTheme(theme) {
+      const body = document.body;
+      const themeIcon = document.getElementById('theme-icon');
+      const themeText = document.getElementById('theme-text');
+      
+      if (theme === 'dark') {
+        body.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark';
+      } else {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light';
+      }
+      
+      localStorage.setItem('redoc-theme', theme);
+      return theme;
+    }
+    
+    // Configurações de tema para Light Mode
+    const lightTheme = {
+      colors: {
+        primary: {
+          main: '#0891b2',        // Cyan-600 - mais escuro para contraste
+          light: '#06b6d4',       // Cyan-500
+          dark: '#0e7490',        // Cyan-700
+          contrastText: '#ffffff'
+        },
+        success: {
+          main: '#059669',        // Emerald-600
+          light: '#10b981',       // Emerald-500
+          dark: '#047857',        // Emerald-700
+          contrastText: '#ffffff'
+        },
+        warning: {
+          main: '#d97706',        // Amber-600
+          light: '#f59e0b',       // Amber-500
+          dark: '#b45309',        // Amber-700
+          contrastText: '#ffffff'
+        },
+        error: {
+          main: '#dc2626',        // Red-600
+          light: '#ef4444',       // Red-500
+          dark: '#b91c1c',        // Red-700
+          contrastText: '#ffffff'
+        },
+        text: {
+          primary: '#0f172a',     // Slate-900 - texto escuro
+          secondary: '#475569'    // Slate-600 - texto secundário
+        },
+        border: {
+          dark: '#cbd5e1',        // Slate-300
+          light: '#e2e8f0'        // Slate-200
+        },
+        responses: {
+          success: {
+            color: '#059669',     // Verde escuro para 2xx
+            backgroundColor: 'rgba(5, 150, 105, 0.1)'
+          },
+          error: {
+            color: '#dc2626',     // Vermelho escuro para 4xx/5xx
+            backgroundColor: 'rgba(220, 38, 38, 0.1)'
+          },
+          redirect: {
+            color: '#d97706',     // Âmbar escuro para 3xx
+            backgroundColor: 'rgba(217, 119, 6, 0.1)'
+          },
+          info: {
+            color: '#0891b2',     // Cyan escuro para 1xx
+            backgroundColor: 'rgba(8, 145, 178, 0.1)'
+          }
+        },
+        http: {
+          get: '#059669',         // Verde escuro - Emerald-600
+          post: '#2563eb',        // Azul escuro - Blue-600
+          put: '#d97706',         // Âmbar escuro - Amber-600
+          options: '#7c3aed',     // Roxo escuro - Violet-600
+          patch: '#db2777',       // Rosa escuro - Pink-600
+          delete: '#dc2626',      // Vermelho escuro - Red-600
+          basic: '#475569',       // Cinza escuro - Slate-600
+          link: '#0d9488',        // Teal-600
+          head: '#9333ea'         // Púrpura escuro - Purple-600
+        }
+      },
+      typography: {
+        fontSize: '15px',
+        lineHeight: '1.6',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+        headings: {
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+          fontWeight: '600'
+        },
+        code: {
+          fontSize: '14px',
+          fontFamily: '"Fira Code", "JetBrains Mono", "Cascadia Code", "Consolas", monospace',
+          fontWeight: '400',
+          color: '#0891b2',       // Cyan-600 para código inline
+          backgroundColor: 'rgba(8, 145, 178, 0.1)',
+          wrap: false
+        },
+        links: {
+          color: '#0891b2',       // Cyan-600 para links
+          visited: '#0e7490',     // Cyan-700 para links visitados
+          hover: '#06b6d4'        // Cyan-500 para hover
+        }
+      },
+      sidebar: {
+        backgroundColor: '#ffffff',       // Branco puro
+        textColor: '#475569',             // Slate-600
+        activeTextColor: '#0891b2',       // Cyan-600 - destaque
+        groupItems: {
+          textTransform: 'uppercase'
+        },
+        level1Items: {
+          textTransform: 'none'
+        },
+        arrow: {
+          color: '#94a3b8'                // Slate-400
+        }
+      },
+      rightPanel: {
+        backgroundColor: '#f8fafc',       // Slate-50 - muito claro
+        textColor: '#334155',             // Slate-700
+        servers: {
+          overlay: {
+            backgroundColor: '#ffffff',   // Branco
+            textColor: '#475569'          // Slate-600
+          },
+          url: {
+            backgroundColor: 'rgba(8, 145, 178, 0.08)'
+          }
+        }
+      },
+      codeBlock: {
+        backgroundColor: '#1e293b',       // Slate-800 - código continua escuro
+        tokens: {}
+      }
+    };
+    
+    // Configurações de tema para Dark Mode
+    const darkTheme = {
+      colors: {
+        primary: {
+          main: '#06b6d4',        // Cyan-500 - cor vibrante e moderna
+          light: '#22d3ee',       // Cyan-400
+          dark: '#0891b2',        // Cyan-600
+          contrastText: '#ffffff'
+        },
+        success: {
+          main: '#10b981',        // Emerald-500
+          light: '#34d399',       // Emerald-400
+          dark: '#059669',        // Emerald-600
+          contrastText: '#ffffff'
+        },
+        warning: {
+          main: '#f59e0b',        // Amber-500
+          light: '#fbbf24',       // Amber-400
+          dark: '#d97706',        // Amber-600
+          contrastText: '#000000'
+        },
+        error: {
+          main: '#ef4444',        // Red-500
+          light: '#f87171',       // Red-400
+          dark: '#dc2626',        // Red-600
+          contrastText: '#ffffff'
+        },
+        text: {
+          primary: '#f1f5f9',     // Slate-100 - texto principal mais claro
+          secondary: '#cbd5e1'    // Slate-300 - texto secundário
+        },
+        border: {
+          dark: '#334155',        // Slate-700
+          light: '#475569'        // Slate-600
+        },
+        responses: {
+          success: {
+            color: '#10b981',     // Verde para 2xx
+            backgroundColor: 'rgba(16, 185, 129, 0.1)'
+          },
+          error: {
+            color: '#ef4444',     // Vermelho para 4xx/5xx
+            backgroundColor: 'rgba(239, 68, 68, 0.1)'
+          },
+          redirect: {
+            color: '#f59e0b',     // Âmbar para 3xx
+            backgroundColor: 'rgba(245, 158, 11, 0.1)'
+          },
+          info: {
+            color: '#06b6d4',     // Cyan para 1xx
+            backgroundColor: 'rgba(6, 182, 212, 0.1)'
+          }
+        },
+        http: {
+          get: '#10b981',         // Verde - Emerald-500
+          post: '#3b82f6',        // Azul - Blue-500
+          put: '#f59e0b',         // Âmbar - Amber-500
+          options: '#8b5cf6',     // Roxo - Violet-500
+          patch: '#ec4899',       // Rosa - Pink-500
+          delete: '#ef4444',      // Vermelho - Red-500
+          basic: '#64748b',       // Cinza - Slate-500
+          link: '#14b8a6',        // Teal-500
+          head: '#a855f7'         // Púrpura - Purple-500
+        }
+      },
+      typography: {
+        fontSize: '15px',
+        lineHeight: '1.6',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+        headings: {
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif',
+          fontWeight: '600'
+        },
+        code: {
+          fontSize: '14px',
+          fontFamily: '"Fira Code", "JetBrains Mono", "Cascadia Code", "Consolas", monospace',
+          fontWeight: '400',
+          color: '#06b6d4',       // Destaque cyan para código inline
+          backgroundColor: 'rgba(6, 182, 212, 0.1)',
+          wrap: false
+        },
+        links: {
+          color: '#22d3ee',       // Cyan-400 para links
+          visited: '#0891b2',     // Cyan-600 para links visitados
+          hover: '#67e8f9'        // Cyan-300 para hover
+        }
+      },
+      sidebar: {
+        backgroundColor: '#0f172a',       // Slate-900 - mais escuro e profissional
+        textColor: '#cbd5e1',             // Slate-300
+        activeTextColor: '#06b6d4',       // Cyan-500 - destaque vibrante
+        groupItems: {
+          textTransform: 'uppercase'
+        },
+        level1Items: {
+          textTransform: 'none'
+        },
+        arrow: {
+          color: '#64748b'                // Slate-500
+        }
+      },
+      rightPanel: {
+        backgroundColor: '#020617',       // Slate-950 - quase preto para código
+        textColor: '#e2e8f0',             // Slate-200
+        servers: {
+          overlay: {
+            backgroundColor: '#0f172a',   // Slate-900
+            textColor: '#cbd5e1'          // Slate-300
+          },
+          url: {
+            backgroundColor: 'rgba(6, 182, 212, 0.1)'
+          }
+        }
+      },
+      codeBlock: {
+        backgroundColor: '#0c1220',       // Ainda mais escuro para código
+        tokens: {}
+      }
+    };
+    
+    let currentTheme = getInitialTheme();
+    let redocInstance = null;
+    
     window.onload = function() {
+      // Aplicar tema inicial
+      applyTheme(currentTheme);
+      
       // Get spec URL from query parameter
       const urlParams = new URLSearchParams(window.location.search);
       const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
-
-      // Initialize Redoc
-      Redoc.init(
-        specUrl,
-        {
-          scrollYOffset: 0,
-          hideHostname: false,
-          expandResponses: '200,201',
-          requiredPropsFirst: true,
-          noAutoAuth: false,
-          pathInMiddlePanel: false,
-          hideDownloadButton: false,
-          downloadFileName: 'openapi.yaml',
-          downloadDefinitionUrl: specUrl,
-          disableSearch: false,
-          onlyRequiredInSamples: false,
-          showExtensions: true,
-          hideSingleRequestSampleTab: true,
-          expandSingleSchemaField: true,
-          jsonSampleExpandLevel: 2,
-          hideSchemaTitles: false,
-          simpleOneOfTypeLabel: false,
-          sortPropsAlphabetically: false,
-          payloadSampleIdx: 0,
-          theme: {
-            colors: {
-              primary: {
-                main: '#3b82f6'
-              }
-            },
-            typography: {
-              fontSize: '14px',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-              headings: {
-                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }
-            },
-            sidebar: {
-              backgroundColor: '#1e293b',
-              textColor: '#e2e8f0',
-              activeTextColor: '#ffffff'
-            },
-            rightPanel: {
-              backgroundColor: '#0f172a',
-              textColor: '#e2e8f0'
-            }
-          }
-        },
-        document.getElementById('redoc-container')
-      );
+      
+      // Função para inicializar/re-inicializar Redoc
+      function initRedoc(theme) {
+        const themeConfig = theme === 'dark' ? darkTheme : lightTheme;
+        
+        // Limpar container
+        const container = document.getElementById('redoc-container');
+        container.innerHTML = '';
+        
+        // Initialize Redoc
+        Redoc.init(
+          specUrl,
+          {
+            scrollYOffset: 50,
+            hideHostname: false,
+            expandResponses: '200,201',
+            requiredPropsFirst: true,
+            noAutoAuth: false,
+            pathInMiddlePanel: false,
+            hideDownloadButton: false,
+            downloadFileName: 'openapi.yaml',
+            downloadDefinitionUrl: specUrl,
+            disableSearch: false,
+            onlyRequiredInSamples: false,
+            showExtensions: true,
+            hideSingleRequestSampleTab: true,
+            expandSingleSchemaField: true,
+            jsonSampleExpandLevel: 2,
+            hideSchemaTitles: false,
+            simpleOneOfTypeLabel: false,
+            sortPropsAlphabetically: false,
+            payloadSampleIdx: 0,
+            theme: themeConfig
+          },
+          container
+        );
+      }
+      
+      // Inicializar com tema atual
+      initRedoc(currentTheme);
+      
+      // Toggle theme button
+      document.getElementById('theme-toggle').addEventListener('click', function() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(currentTheme);
+        initRedoc(currentTheme);
+      });
+      
+      // Detectar mudanças na preferência do sistema
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('redoc-theme')) {
+          currentTheme = e.matches ? 'dark' : 'light';
+          applyTheme(currentTheme);
+          initRedoc(currentTheme);
+        }
+      });
     };
   </script>
 </body>

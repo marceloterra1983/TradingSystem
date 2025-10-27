@@ -1,0 +1,381 @@
+---
+title: Service Launcher API
+sidebar_position: 2
+description: REST API endpoints for service orchestration and health monitoring.
+tags:
+  - api
+  - service-launcher
+  - health-monitoring
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Base URL
+
+- **Development**: `http://localhost:3500`
+- **Production**: `http://localhost:3500` (local only, not exposed to network)
+- **Dashboard Proxy**: `/api/launcher` (via Vite proxy, rewrites to Service Launcher)
+
+## Authentication
+
+No authentication required. Service is protected by:
+- CORS restrictions (Dashboard + Docs origins only)
+- Rate limiting (200 req/min)
+- Local-only access (not exposed to internet)
+
+---
+
+## Endpoints
+
+### GET /health
+
+Basic health check for Service Launcher itself.
+
+**Response 200 OK**:
+```json
+{
+  "status": "ok",
+  "service": "service-launcher-api"
+}
+```
+
+**Example**:
+```bash
+curl http://localhost:3500/health
+```
+
+---
+
+### GET /api/status
+
+Aggregated status of all monitored services with metrics.
+
+**Query Parameters**: None
+
+**Response 200 OK**:
+```json
+{
+  "overallStatus": "ok",
+  "totalServices": 11,
+  "degradedCount": 0,
+  "downCount": 0,
+  "averageLatencyMs": 124,
+  "lastCheckAt": "2025-10-27T12:00:00.000Z",
+  "services": [
+    {
+      "id": "workspace-api",
+      "name": "Workspace",
+      "description": "Workspace item management",
+      "category": "api",
+      "port": 3200,
+      "status": "ok",
+      "latencyMs": 85,
+      "updatedAt": "2025-10-27T12:00:00.000Z",
+      "details": {
+        "healthUrl": "http://localhost:3200/health",
+        "httpStatus": 200
+      }
+    },
+    {
+      "id": "tp-capital-signals-api",
+      "name": "TP-Capital",
+      "description": "TP Capital signals ingestion",
+      "category": "api",
+      "port": 4005,
+      "status": "ok",
+      "latencyMs": 92,
+      "updatedAt": "2025-10-27T12:00:00.000Z",
+      "details": {
+        "healthUrl": "http://localhost:4005/health",
+        "httpStatus": 200
+      }
+    }
+  ]
+}
+```
+
+**Status Values**:
+- `ok`: Service responding correctly (HTTP 2xx)
+- `degraded`: Service responded with HTTP 4xx/5xx
+- `down`: Timeout or connection error
+
+**Sorting**: Services sorted by severity (down > degraded > ok), then by name
+
+**Example**:
+```bash
+curl http://localhost:3500/api/status | jq '.overallStatus'
+```
+
+**Dashboard Integration**:
+```typescript
+const response = await fetch('http://localhost:3500/api/status');
+const { overallStatus, services } = await response.json();
+// Display traffic light: green (ok), yellow (degraded), red (down)
+```
+
+---
+
+### GET /api/health/full
+
+Comprehensive health status including local services, Docker containers, and databases.
+
+**Query Parameters**: None
+
+**Caching**:
+- Results cached for 60 seconds
+- Headers: `X-Cache-Status` (HIT/MISS), `X-Cache-Age` (seconds)
+
+**Response 200 OK (Healthy)**:
+```json
+{
+  "localServices": [
+    {
+      "name": "Dashboard",
+      "status": "running",
+      "port": 3103,
+      "pid": 12345,
+      "health": "healthy",
+      "latencyMs": 45
+    },
+    {
+      "name": "Service Launcher",
+      "status": "running",
+      "port": 3500,
+      "pid": 12346,
+      "health": "healthy",
+      "latencyMs": 12
+    }
+  ],
+  "dockerContainers": [
+    {
+      "name": "data-timescaledb",
+      "status": "running",
+      "health": "healthy",
+      "group": "data-timescale",
+      "service": "timescaledb"
+    },
+    {
+      "name": "workspace-service",
+      "status": "running",
+      "health": "healthy",
+      "group": "apps",
+      "service": "workspace"
+    }
+  ],
+  "databases": [
+    {
+      "name": "timescaledb",
+      "status": "up",
+      "host": "localhost",
+      "port": "5432"
+    }
+  ],
+  "summary": {
+    "allOk": true,
+    "servicesChecked": 8,
+    "containersChecked": 12,
+    "databasesChecked": 1
+  },
+  "overallHealth": "healthy",
+  "remediation": []
+}
+```
+
+**Response 200 OK (Degraded)**:
+```json
+{
+  "localServices": [],
+  "dockerContainers": [
+    {
+      "name": "data-timescaledb",
+      "status": "exited",
+      "health": "unhealthy"
+    }
+  ],
+  "databases": [],
+  "summary": { "allOk": false },
+  "overallHealth": "degraded",
+  "remediation": [
+    {
+      "target": "Dashboard",
+      "actions": [
+        "Start service: cd /path/to/dashboard && npm run dev",
+        "Check port usage: lsof -i :3103"
+      ]
+    },
+    {
+      "target": "TimescaleDB",
+      "actions": [
+        "Start container: docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb",
+        "Check logs: docker logs data-timescaledb"
+      ]
+    }
+  ]
+}
+```
+
+**Response 500 Internal Server Error**:
+```json
+{
+  "success": false,
+  "error": "Failed to execute health check script",
+  "message": "Health check script timed out after 10s"
+}
+```
+
+**Overall Health Values**:
+- `healthy`: All services and dependencies operational
+- `degraded`: Non-critical dependencies with failures or high latency
+- `critical`: Critical services (TimescaleDB, Dashboard, Service Launcher) unavailable
+
+**Performance**:
+- First request (MISS): ~2-5s (full script execution)
+- Cached (HIT): &lt;10ms (in-memory data)
+- Cache TTL: 60 seconds
+- Script timeout: 10 seconds
+
+**Example**:
+```bash
+# Check cache status
+curl -I http://localhost:3500/api/health/full | grep X-Cache
+
+# Get full health report
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+
+# Show remediation steps if degraded
+curl http://localhost:3500/api/health/full | jq '.remediation'
+```
+
+**Dashboard Integration**:
+```typescript
+const response = await fetch('http://localhost:3500/api/health/full');
+const cacheStatus = response.headers.get('X-Cache-Status');
+const health = await response.json();
+
+// Display detailed breakdown
+console.log(`Services: ${health.summary.servicesChecked}`);
+console.log(`Containers: ${health.summary.containersChecked}`);
+console.log(`Overall: ${health.overallHealth}`);
+
+// Show remediation if needed
+if (health.remediation.length > 0) {
+  health.remediation.forEach(rem => {
+    console.log(`Fix ${rem.target}:`, rem.actions);
+  });
+}
+```
+
+---
+
+### POST /launch
+
+Launch a service in a new terminal window (Windows/Linux).
+
+**⚠️ WARNING**: This endpoint executes arbitrary commands. Use only in trusted development environments.
+
+**Request Body**:
+```json
+{
+  "serviceName": "Dashboard",
+  "workingDir": "/home/marce/projetos/TradingSystem/frontend/dashboard",
+  "command": "npm run dev"
+}
+```
+
+**Fields**:
+- `serviceName` (required): Human-readable service name
+- `workingDir` (required): Absolute path to working directory
+- `command` (required): Command to execute
+
+**Response 200 OK**:
+```json
+{
+  "success": true,
+  "message": "Dashboard launched in Windows Terminal"
+}
+```
+
+**Response 400 Bad Request**:
+```json
+{
+  "success": false,
+  "error": "Missing required fields: serviceName, workingDir, command"
+}
+```
+
+**Response 500 Internal Server Error**:
+```json
+{
+  "success": false,
+  "error": "Failed to launch service: command not found"
+}
+```
+
+**Platform Behavior**:
+- **Windows**: Tries Windows Terminal (`wt.exe`), falls back to PowerShell
+- **Linux**: Tries gnome-terminal, konsole, falls back to xterm
+
+**Example**:
+```bash
+curl -X POST http://localhost:3500/launch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "serviceName": "Dashboard",
+    "workingDir": "/home/marce/projetos/TradingSystem/frontend/dashboard",
+    "command": "npm run dev"
+  }'
+```
+
+**Security Notes**:
+- Protected by rate limiting (200 req/min)
+- CORS restricted to Dashboard + Docs origins
+- Validates required fields
+- **DO NOT expose to network/internet**
+- Use only in trusted development environments
+
+---
+
+## Monitored Services
+
+| ID | Name | Category | Port | Health Endpoint |
+|----|------|----------|------|-----------------|
+| workspace-api | Workspace | api | 3200 | `http://localhost:3200/health` |
+| tp-capital-signals-api | TP-Capital | api | 4005 | `http://localhost:4005/health` |
+| documentation-api | DocsAPI | api | 3400 | `http://localhost:3400/health` |
+| firecrawl-proxy | Firecrawl Proxy | api | 3600 | `http://localhost:3600/health` |
+| dashboard-ui | Dashboard | ui | 3103 | `http://localhost:3103` |
+| docusaurus | Docusaurus | docs | 3205 | `http://localhost:3205` |
+| prometheus | Prometheus | monitoring | 9090 | `http://localhost:9090/-/healthy` |
+| grafana | Grafana | monitoring | 3000 | `http://localhost:3000/api/health` |
+| questdb-http | QuestDB HTTP | data | 9000 | `http://localhost:9000` |
+| service-launcher | Launcher API | internal | 3500 | `http://localhost:3500/health` |
+
+## Error Handling
+
+All endpoints return JSON responses with appropriate HTTP status codes:
+
+- **200 OK**: Successful operation
+- **400 Bad Request**: Invalid request body or missing required fields
+- **500 Internal Server Error**: Server-side error (script execution failed, timeout)
+- **503 Service Unavailable**: Service temporarily unavailable
+
+**Error Response Format**:
+```json
+{
+  "success": false,
+  "error": "Error type",
+  "message": "Detailed error message"
+}
+```
+
+## Rate Limiting
+
+- **Limit**: 200 requests per minute per IP
+- **Window**: 60 seconds (sliding)
+- **Response**: HTTP 429 Too Many Requests when exceeded
+
+**Configuration**:
+```bash
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX=200
+```

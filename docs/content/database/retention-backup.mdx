@@ -5,40 +5,69 @@ tags:
   - database
   - operations
 owner: DataOps
-lastReviewed: '2025-10-26'
+lastReviewed: '2025-10-27'
 ---
 ## Retention Policy
 
-Retention rules balance storage cost, operational needs, and future compliance requirements. All
-automation should follow these windows and archival steps.
+Retention rules balance storage cost, operational needs, and compliance requirements. All databases follow automated retention windows with proper archival procedures.
 
-### LowDB JSON Files
-- **Retention**: 14 rolling daily snapshots.  
-- **Archival**: Monthly exports to cold storage (external drive or cloud).  
-- **Files**: `db/ideas.json`, `db/db.json`.  
-- **Backup Schedule**: Daily at 2 AM via scheduled PowerShell script.  
-- **Storage Location**: `backups/lowdb/YYYY-MM-DD/`.  
-- **Cleanup**: Delete snapshots older than 14 days (automated).  
-- **Cold Storage**: Monthly full backup stored indefinitely.
+### TimescaleDB Databases
 
-### QuestDB Tables
+**APPS-TPCAPITAL** (`tp-capital` schema):
+- **tp_capital_signals**: 90-day online retention with hypertable compression after 7 days
+- **telegram_bots**: Full history retention (configuration data)
+- **telegram_channels**: Full history retention (configuration data)
+- **Backup Schedule**: Daily automated backups via `scripts/database/backup-timescaledb.sh`
+- **Storage Location**: `backups/timescaledb/APPS-TPCAPITAL/YYYY-MM-DD/`
+- **Cleanup**: Automated compression policies, manual partition drops after 90 days
+
+**APPS-WORKSPACE** (`workspace` schema):
+- **workspace_items**: 2-year online retention with monthly hypertable partitions
+- **workspace_audit_log**: 1-year retention with compression after 30 days
+- **schema_version**: Permanent retention
+- **Backup Schedule**: Daily automated backups via `scripts/database/backup-timescaledb.sh`
+- **Storage Location**: `backups/timescaledb/APPS-WORKSPACE/YYYY-MM-DD/`
+- **Cleanup**: Automated compression, manual partition drops after retention period
+
+### PostgreSQL + Prisma Database
+
+**documentation-api**:
+- **documentation_systems**: Full history retention
+- **documentation_ideas**: Full history retention until marked deleted
+- **documentation_files**: Retention tied to filesystem cleanup policies
+- **documentation_audit_log**: 2-year retention
+- **Backup Schedule**: Daily automated backups
+- **Storage Location**: `backups/postgres/documentation-api/YYYY-MM-DD/`
+- **Cleanup**: Manual pruning of old audit logs
+
+### QuestDB Tables (Legacy)
 
 **tp_capital_signals**  
-- 30-day online retention.  
-- Monthly CSV export before deletion.  
-- Export location: `backups/questdb/tp_capital_signals/YYYY-MM/`.  
+- Legacy time-series data retention
+- 30-day online retention for legacy queries
+- Monthly CSV export before deletion
+- Export location: `backups/questdb/tp_capital_signals/YYYY-MM/`
 - Cleanup command:
   ```sql
   ALTER TABLE tp_capital_signals DROP PARTITION WHERE ts < dateadd('d', -30, now());
   ```
 
 **tp_capital_signals_deleted**  
-- 90-day retention to support audit and recovery.  
-- Manual review before purging.
+- 90-day retention for audit recovery
+- Manual review before purging
 
-**telegram_bots / telegram_channels**  
-- Retain full history.  
-- Prune records older than 365 days once PostgreSQL configuration DB launches.
+**telegram_bots / telegram_channels** (Legacy)  
+- Historical data only (migrated to TimescaleDB)
+- Can be archived after migration validation
+
+### LowDB JSON Files (Legacy)
+
+- **Retention**: 14 rolling daily snapshots
+- **Files**: `db/ideas.json` (legacy Idea Bank)
+- **Backup Schedule**: Daily at 2 AM
+- **Storage Location**: `backups/lowdb/YYYY-MM-DD/`
+- **Cleanup**: Delete snapshots older than 14 days
+- **Status**: Active for legacy Idea Bank, migration pending Q1 2026
 
 ### Parquet Files (Market Data)
 - **Retention**: Minimum two years of intraday history.  
@@ -62,59 +91,103 @@ automation should follow these windows and archival steps.
 
 ## Backup Procedures
 
-### LowDB Backup
+### TimescaleDB Backup
 
-- **Method**: Scheduled PowerShell script copying JSON files.  
-- **Schedule**: Daily at 2 AM.  
-- **Script**: Planned automation (`scripts/backup/backup-lowdb.ps1`, pending addition); follow manual steps until committed.
+**Automated Daily Backups**:
 
-```powershell
-$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-Copy-Item db/ideas.json backups/lowdb/$timestamp/ideas.json
-Copy-Item db/db.json backups/lowdb/$timestamp/db.json
+- **Script**: `scripts/database/backup-timescaledb.sh`
+- **Schedule**: Daily at 2 AM via cron or Task Scheduler
+- **Databases**: `APPS-TPCAPITAL`, `APPS-WORKSPACE`
+- **Format**: PostgreSQL dump format (compressed)
+
+```bash
+# Manual backup execution
+cd /home/marce/Projetos/TradingSystem
+./scripts/database/backup-timescaledb.sh
+
+# Creates backups:
+# backups/timescaledb/APPS-TPCAPITAL-YYYYMMDD.dump
+# backups/timescaledb/APPS-WORKSPACE-YYYYMMDD.dump
+```
+
+**Individual Database Backup**:
+
+```bash
+# Backup APPS-TPCAPITAL
+docker exec data-timescaledb pg_dump -U timescale -d "APPS-TPCAPITAL" -F c -f /tmp/tpcapital.dump
+docker cp data-timescaledb:/tmp/tpcapital.dump backups/timescaledb/APPS-TPCAPITAL-$(date +%Y%m%d).dump
+
+# Backup APPS-WORKSPACE
+docker exec data-timescaledb pg_dump -U timescale -d "APPS-WORKSPACE" -F c -f /tmp/workspace.dump
+docker cp data-timescaledb:/tmp/workspace.dump backups/timescaledb/APPS-WORKSPACE-$(date +%Y%m%d).dump
 ```
 
 **Verification**:
 
-```powershell
-$original = Get-FileHash db/ideas.json
-$backup = Get-FileHash backups/lowdb/$timestamp/ideas.json
-if ($original.Hash -eq $backup.Hash) {
-    Write-Host "Backup verified successfully"
-}
+```bash
+# List backup files
+ls -lh backups/timescaledb/
+
+# Verify dump integrity
+docker exec data-timescaledb pg_restore --list /tmp/tpcapital.dump | head -20
 ```
 
-### QuestDB Backup
+---
 
-- **Method**: Stop service and archive QuestDB data directory.  
-- **Schedule**: Weekly (Sunday, 3 AM).  
-- **Script**: Planned automation (`scripts/backup/questdb-export.ps1`, pending addition); use procedure below until the script lands.
+### PostgreSQL + Prisma Backup
 
-Steps:
-1. Stop TP Capital service:
-   ```bash
-   npm --prefix apps/tp-capital run stop
-   ```
-2. Zip QuestDB data directory:
-   ```powershell
-   $timestamp = Get-Date -Format "yyyyMMdd"
-   Compress-Archive -Path $env:QUESTDB_ROOT/db/ -DestinationPath backups/questdb/questdb-$timestamp.zip
-   ```
-3. Verify archive:
-   ```powershell
-   Test-Path backups/questdb/questdb-$timestamp.zip
-   ```
-4. Restart service:
-   ```bash
-   npm --prefix apps/tp-capital run start
-   ```
-
-**Alternative CSV Export**:
+**Automated Backups**:
 
 ```bash
-curl -G http://localhost:9002/exp \
-  --data-urlencode "query=SELECT * FROM tp_capital_signals WHERE ts > dateadd('d', -30, now())" \
-  -o backups/questdb/tp_capital_signals_$(date +%Y%m%d).csv
+# Backup documentation-api database
+docker exec data-documentation-postgres pg_dump -U postgres -d documentation-api -F c -f /tmp/documentation-api.dump
+docker cp data-documentation-postgres:/tmp/documentation-api.dump backups/postgres/documentation-api-$(date +%Y%m%d).dump
+```
+
+**Prisma Schema Backup**:
+
+```bash
+# Backup Prisma schema and migrations
+tar -czf backups/prisma/prisma-schema-$(date +%Y%m%d).tar.gz \
+  backend/api/documentation-api/prisma/
+```
+
+---
+
+### LowDB Backup (Legacy)
+
+- **Method**: Copy JSON files with timestamp
+- **Schedule**: Daily at 2 AM
+- **Script**: Manual or automated via cron
+
+```bash
+# Backup ideas.json
+timestamp=$(date +%Y%m%d-%H%M%S)
+mkdir -p backups/lowdb/$timestamp
+cp db/ideas.json backups/lowdb/$timestamp/ideas.json
+
+# Verify backup
+diff db/ideas.json backups/lowdb/$timestamp/ideas.json
+```
+
+---
+
+### QuestDB Backup (Legacy)
+
+- **Method**: Archive QuestDB data directory (legacy data only)
+- **Schedule**: Monthly or as needed
+- **Script**: `scripts/database/restore-questdb.sh`
+
+```bash
+# Stop QuestDB container
+docker-compose -f tools/compose/docker-compose.questdb.yml down
+
+# Backup data directory
+tar -czf backups/questdb/questdb-$(date +%Y%m%d).tar.gz \
+  $QUESTDB_ROOT/db/
+
+# Restart QuestDB
+docker-compose -f tools/compose/docker-compose.questdb.yml up -d
 ```
 
 ### Parquet Backup
@@ -154,45 +227,136 @@ openssl enc -aes-256-cbc -salt \
 
 ## Restore Procedures
 
-### LowDB Restore
+### TimescaleDB Restore
 
-1. Stop dependent services:
+**Full Database Restore**:
+
+1. **Stop dependent services**:
    ```bash
-   npm --prefix backend/api/workspace run stop
-   npm --prefix backend/api/documentation-api run stop
+   # Stop TP Capital API
+   docker-compose -f apps/tp-capital/api/docker-compose.yml down
+   
+   # Stop Workspace API
+   docker-compose -f backend/api/workspace/docker-compose.yml down
    ```
-2. Restore backups:
+
+2. **Drop existing database** (if needed):
+   ```bash
+   docker exec data-timescaledb psql -U timescale -d postgres -c 'DROP DATABASE IF EXISTS "APPS-TPCAPITAL";'
+   docker exec data-timescaledb psql -U timescale -d postgres -c 'CREATE DATABASE "APPS-TPCAPITAL";'
+   ```
+
+3. **Restore from backup**:
+   ```bash
+   # Copy backup to container
+   docker cp backups/timescaledb/APPS-TPCAPITAL-20251024.dump data-timescaledb:/tmp/restore.dump
+   
+   # Restore database
+   docker exec data-timescaledb pg_restore -U timescale -d "APPS-TPCAPITAL" -c /tmp/restore.dump
+   
+   # Clean up
+   docker exec data-timescaledb rm /tmp/restore.dump
+   ```
+
+4. **Verify restore**:
+   ```bash
+   # Check record counts
+   docker exec data-timescaledb psql -U timescale -d "APPS-TPCAPITAL" -c \
+     'SELECT COUNT(*) FROM "tp-capital".tp_capital_signals;'
+   
+   # Verify hypertables
+   docker exec data-timescaledb psql -U timescale -d "APPS-TPCAPITAL" -c \
+     "SELECT * FROM timescaledb_information.hypertables;"
+   ```
+
+5. **Restart services**:
+   ```bash
+   docker-compose -f apps/tp-capital/api/docker-compose.yml up -d
+   docker-compose -f backend/api/workspace/docker-compose.yml up -d
+   ```
+
+**Same process applies to APPS-WORKSPACE**
+
+---
+
+### PostgreSQL + Prisma Restore
+
+1. **Stop Documentation API**:
+   ```bash
+   docker-compose -f backend/api/documentation-api/docker-compose.yml down
+   ```
+
+2. **Restore database**:
+   ```bash
+   # Copy backup
+   docker cp backups/postgres/documentation-api-20251024.dump data-documentation-postgres:/tmp/restore.dump
+   
+   # Drop and recreate
+   docker exec data-documentation-postgres psql -U postgres -c 'DROP DATABASE IF EXISTS "documentation-api";'
+   docker exec data-documentation-postgres psql -U postgres -c 'CREATE DATABASE "documentation-api";'
+   
+   # Restore
+   docker exec data-documentation-postgres pg_restore -U postgres -d documentation-api -c /tmp/restore.dump
+   ```
+
+3. **Run Prisma migrations**:
+   ```bash
+   cd backend/api/documentation-api
+   npx prisma migrate deploy
+   ```
+
+4. **Restart service**:
+   ```bash
+   docker-compose -f backend/api/documentation-api/docker-compose.yml up -d
+   ```
+
+---
+
+### LowDB Restore (Legacy)
+
+1. **Stop services using LowDB**:
+   ```bash
+   # Stop any service using ideas.json
+   ```
+
+2. **Restore backup**:
    ```bash
    cp backups/lowdb/20251024-020000/ideas.json db/ideas.json
-   cp backups/lowdb/20251024-020000/db.json db/db.json
    ```
-3. Verify JSON:
+
+3. **Verify JSON integrity**:
    ```bash
    node -e "JSON.parse(require('fs').readFileSync('db/ideas.json'))"
-   node -e "JSON.parse(require('fs').readFileSync('db/db.json'))"
    ```
-4. Restart services and validate endpoints.
 
-### QuestDB Restore
+4. **Restart services**
 
-1. Stop TP Capital and QuestDB containers:
+---
+
+### QuestDB Restore (Legacy)
+
+1. **Stop QuestDB**:
    ```bash
-   npm --prefix apps/tp-capital run stop
-   docker compose -f tools/compose/docker-compose.questdb.yml down
+   docker-compose -f tools/compose/docker-compose.questdb.yml down
    ```
-2. Replace corrupted data with backup:
-   ```powershell
-   Remove-Item -Recurse -Force $env:QUESTDB_ROOT/db/
-   Expand-Archive -Path backups/questdb/questdb-20251024.zip -DestinationPath $env:QUESTDB_ROOT/
-   ```
-3. Restart QuestDB and TP Capital service, then validate:
+
+2. **Restore data directory**:
    ```bash
-   docker compose -f tools/compose/docker-compose.questdb.yml up -d
-   npm --prefix apps/tp-capital run start
-   curl http://localhost:4005/health
-   curl http://localhost:4005/signals?limit=5
-   curl http://localhost:4005/telegram/bots
-   curl http://localhost:4005/telegram/channels
+   # Backup current data (if any)
+   mv $QUESTDB_ROOT/db $QUESTDB_ROOT/db.old
+   
+   # Extract backup
+   tar -xzf backups/questdb/questdb-20251024.tar.gz -C $QUESTDB_ROOT/
+   ```
+
+3. **Restart QuestDB**:
+   ```bash
+   docker-compose -f tools/compose/docker-compose.questdb.yml up -d
+   ```
+
+4. **Verify data**:
+   ```bash
+   curl "http://localhost:9002/exp?query=SELECT+COUNT(*)+FROM+tp_capital_signals"
    ```
 
 ### Parquet Restore

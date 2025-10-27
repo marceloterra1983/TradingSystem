@@ -33,7 +33,6 @@ auto-generated from `docs/context/ops/service-port-map.md` (legacy source - migr
 | API Viewer | `docs-api-viewer` | 3101 | http://localhost:3101 | Visualização de OpenAPI/AsyncAPI |
 | Library API | - (npm dev server) | 3100 | http://localhost:3100 | Workspace/ideias |
 | TP Capital | - (npm dev server) | 3200 | http://localhost:3200 | Ingestão de sinais Telegram |
-| B3 Market Data | - (npm dev server) | 3302 | http://localhost:3302 | Dados de mercado B3 |
 | Firecrawl Proxy | - (npm dev server) | 3600 | http://localhost:3600 | Proxy Express para Firecrawl |
 | Firecrawl API | `firecrawl-api` | 3002 | http://localhost:3002 | Upstream Firecrawl auto-hospedado |
 | LangGraph | `infra-langgraph` | 8111 | http://localhost:8111 | Orquestração de agentes LangGraph |
@@ -82,7 +81,6 @@ auto-generated from `docs/context/ops/service-port-map.md` (legacy source - migr
 | 3103 | Dashboard | Frontend UI | Active |
 | 3200 | TP Capital API | Backend API | Active |
 | 3205 | Documentation Hub (docs) | Documentation | Active |
-| 3302 | B3 Market Data API | Backend API | Active |
 | 3400 | Documentation API | Backend API | Active |
 | 3500 | Service Launcher | Orchestration | Active |
 | 3600 | Firecrawl Proxy | Proxy | Active |
@@ -136,7 +134,7 @@ auto-generated from `docs/context/ops/service-port-map.md` (legacy source - migr
 **Startup Order**:
 1. Databases: TimescaleDB, QuestDB, PostgreSQL, Redis.  
 2. Monitoring: Prometheus, Grafana, Alertmanager.  
-3. Backend APIs: Workspace, TP Capital, B3, Documentation.  
+3. Backend APIs: Workspace, TP Capital, Documentation.  
 4. Frontend: Dashboard, Docusaurus.  
 5. AI/ML: LangGraph, Firecrawl.
 
@@ -152,7 +150,6 @@ auto-generated from `docs/context/ops/service-port-map.md` (legacy source - migr
 Dashboard (3103)
   ├─> Workspace API (3100)
   ├─> TP Capital API (3200)
-  ├─> B3 API (3302)
   ├─> Documentation API (3400)
   └─> QuestDB (9002)
 
@@ -160,9 +157,6 @@ Workspace API (3100)
   └─> TimescaleDB (5433)
 
 TP Capital API (3200)
-  └─> QuestDB (9002)
-
-B3 API (3302)
   └─> QuestDB (9002)
 
 Documentation API (3400)
@@ -187,8 +181,7 @@ Grafana (3000)
 |---------|----------|----------|
 | Dashboard | http://localhost:3103 | Page loads |
 | Workspace API | http://localhost:3100/health | `{"status": "ok"}` |
-| TP Capital API | http://localhost:3200/health | `{"status": "ok", "questdb": "connected"}` |
-| B3 API | http://localhost:3302/health | `{"status": "ok"}` |
+| TP Capital API | http://localhost:3200/health | `{"status": "ok"}` |
 | Documentation API | http://localhost:3400/health | `{"status": "ok"}` |
 | Documentation Hub (docs) | http://localhost:3205 | Page loads |
 | Docusaurus v2 (Legacy) | http://localhost:3004 | Page loads (legacy – requires manual override) |
@@ -204,7 +197,7 @@ Health script example:
 curl -f http://localhost:3103 > /dev/null 2>&1 && echo "✅ Dashboard" || echo "❌ Dashboard"
 curl -f http://localhost:3100/health > /dev/null 2>&1 && echo "✅ Workspace API" || echo "❌ Workspace API"
 curl -f http://localhost:3200/health > /dev/null 2>&1 && echo "✅ TP Capital API" || echo "❌ TP Capital API"
-curl -f http://localhost:3302/health > /dev/null 2>&1 && echo "✅ B3 API" || echo "❌ B3 API"
+curl -f http://localhost:3200/health > /dev/null 2>&1 && echo "✅ TP Capital API" || echo "❌ TP Capital API"
 curl -f http://localhost:3400/health > /dev/null 2>&1 && echo "✅ Documentation API" || echo "❌ Documentation API"
 curl -f http://localhost:3205 > /dev/null 2>&1 && echo "✅ Documentation Hub (docs)" || echo "❌ Documentation Hub (docs)"
 curl -f http://localhost:3004 > /dev/null 2>&1 && echo "✅ Docusaurus (legacy override)" || echo "❌ Docusaurus (legacy override)"

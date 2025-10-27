@@ -22,6 +22,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_telegram_gateway_channels_updated_at ON telegram_gateway.channels;
+
 CREATE TRIGGER trigger_telegram_gateway_channels_updated_at
     BEFORE UPDATE ON telegram_gateway.channels
     FOR EACH ROW

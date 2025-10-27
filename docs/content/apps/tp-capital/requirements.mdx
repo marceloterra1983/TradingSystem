@@ -1,5 +1,6 @@
 ---
 title: Functional Requirements
+sidebar_position: 3
 description: Functional and non-functional requirements for the TP Capital application.
 tags:
   - apps
@@ -12,10 +13,10 @@ lastReviewed: '2025-10-26'
 
 ### FR-1: Telegram Bot Listener
 
-- Support polling or webhook modes for message ingestion.
+- Support Telegram Gateway ingestion (database queue) with optional bot polling fallback.
 - Handle multiple Telegram channels and bots.
-- Store bot metadata in QuestDB (credentials, channel mappings).
-- Endpoint: `GET /telegram/bots` and `GET /telegram/channels`.
+- Store bot metadata in TimescaleDB (`tp_capital.telegram_bots`, `tp_capital.telegram_channels`).
+- Endpoints: `GET /telegram/bots`, `GET /telegram/channels`, CRUD operations for maintenance.
 
 ### FR-2: Message Parser
 
@@ -30,12 +31,12 @@ lastReviewed: '2025-10-26'
 - Validate payload structure before persistence.
 - Handle malformed messages gracefully (log errors, skip invalid).
 
-### FR-3: QuestDB Line Protocol Writer
+### FR-3: Timescale Writer
 
-- Write normalized signals to `tp_capital_signals` table.
-- Use ILP (Influx Line Protocol) for high-throughput ingestion.
-- Partition tables by day for efficient querying and pruning.
-- Provide healthcheck endpoint for QuestDB connectivity.
+- Persist normalized signals to `tp_capital.tp_capital_signals`.
+- Enforce idempotency for `(channel_id, message_id)` combinations.
+- Manage hypertable creation and retention policies.
+- Provide healthcheck that reports Timescale connectivity.
 
 ### FR-4: REST API Endpoints
 
@@ -52,27 +53,27 @@ lastReviewed: '2025-10-26'
 
 ### FR-6: Sample Data Seeding
 
-- Provide `npm run seed` command to populate QuestDB with synthetic signals.
+- Provide `npm run seed` command to populate TimescaleDB with synthetic signals.
 - Support local QA and testing workflows.
 
 ## Non-Functional Requirements
 
 ### NFR-1: Performance
 
-- **Ingestion latency**: &lt;500ms p95 (Telegram → QuestDB).
+- **Ingestion latency**: &lt;500ms p95 (Telegram Gateway write → Timescale commit).
 - **API response time**: &lt;200ms p95 for `/signals` queries.
 - **Throughput**: Support 100+ signals/minute during peak hours.
 
 ### NFR-2: Reliability
 
 - **Availability**: 99.5% uptime (excluding planned maintenance).
-- **Data durability**: QuestDB persistence via Docker volume (`questdb-data`).
-- **Error handling**: Graceful degradation if QuestDB unavailable (log errors, retry with backoff).
+- **Data durability**: TimescaleDB persistence via Docker volume (`tp-capital-timescaledb-data`).
+- **Error handling**: Graceful degradation if TimescaleDB unavailable (log errors, retry with backoff, keep Gateway queue intact).
 
 ### NFR-3: Auditability
 
 - Structured logs to stdout using shared logger (`logger.js`).
-- QuestDB acts as audit log (all signals timestamped and immutable).
+- TimescaleDB acts as audit log (all signals timestamped and immutable).
 - Operational logs accessible via `GET /logs` endpoint.
 
 ### NFR-4: Security
@@ -84,8 +85,8 @@ lastReviewed: '2025-10-26'
 ### NFR-5: Scalability
 
 - Stateless service design (horizontal scaling possible).
-- QuestDB handles high-volume time-series data efficiently.
-- Day-partitioned tables support pruning and archival.
+- TimescaleDB handles high-volume time-series data efficiently.
+- Month-partitioned hypertables support pruning and archival.
 
 ### NFR-6: Maintainability
 

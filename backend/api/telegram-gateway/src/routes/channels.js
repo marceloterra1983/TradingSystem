@@ -5,6 +5,7 @@ import {
   updateChannel,
   deleteChannel,
 } from '../db/channelsRepository.js';
+import { invalidateCaches } from '../services/telegramGatewayFacade.js';
 
 export const channelsRouter = Router();
 
@@ -42,6 +43,7 @@ channelsRouter.post('/', async (req, res, next) => {
       success: true,
       data: channel,
     });
+    invalidateCaches();
   } catch (error) {
     if (error.code === 'INVALID_CHANNEL_ID') {
       return res.status(400).json({
@@ -66,6 +68,7 @@ channelsRouter.put('/:id', async (req, res, next) => {
       success: true,
       data: updated,
     });
+    invalidateCaches();
   } catch (error) {
     if (error.code === 'INVALID_CHANNEL_ID') {
       return res.status(400).json({
@@ -95,6 +98,7 @@ channelsRouter.delete('/:id', async (req, res, next) => {
     res.json({
       success: true,
     });
+    invalidateCaches();
   } catch (error) {
     if (error.code === 'NOT_FOUND') {
       return res.status(404).json({

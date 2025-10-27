@@ -59,13 +59,11 @@ async def orchestrate_analysis(
         agents_used.append("MarketAnalysisAgent")
         symbols = data.get("symbols", [])
         include_tp = data.get("include_tp_capital", True)
-        include_b3 = data.get("include_b3", True)
         raw_signals: List[Dict[str, Any]] = await invoke_agent_tool(
             market_analysis_agent,
             "analyze_market",
             symbols=symbols,
             include_tp_capital=include_tp,
-            include_b3=include_b3,
         )
         signals = [_coerce_market_signal(item) for item in raw_signals]
 

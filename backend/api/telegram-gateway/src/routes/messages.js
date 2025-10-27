@@ -5,6 +5,7 @@ import {
   softDeleteMessage,
   markReprocessRequested,
 } from '../db/messagesRepository.js';
+import { invalidateCaches } from '../services/telegramGatewayFacade.js';
 
 export const messagesRouter = Router();
 
@@ -68,6 +69,7 @@ messagesRouter.get('/:id', async (req, res, next) => {
       success: true,
       data: message,
     });
+    invalidateCaches();
   } catch (error) {
     next(error);
   }
@@ -120,6 +122,7 @@ messagesRouter.post('/:id/reprocess', async (req, res, next) => {
       data: message,
       message: 'Reprocess request registered',
     });
+    invalidateCaches();
   } catch (error) {
     next(error);
   }

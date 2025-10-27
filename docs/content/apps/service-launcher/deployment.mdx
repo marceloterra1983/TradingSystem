@@ -1,0 +1,518 @@
+---
+title: Service Launcher Deployment
+sidebar_position: 5
+description: Deployment procedures, startup scripts, and Docker Compose setup.
+tags:
+  - deployment
+  - service-launcher
+  - docker
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Deployment Overview
+
+Service Launcher can be deployed in two modes:
+1. **Standalone** (development): Direct Node.js execution
+2. **Docker Compose** (production): Containerized deployment with other services
+
+## Prerequisites
+
+- Node.js 18+ installed
+- Project root `.env` configured
+- Health check script executable: `chmod +x scripts/maintenance/health-check-all.sh`
+- Docker and Docker Compose (for containerized deployment)
+
+## Standalone Deployment
+
+### Quick Start
+
+```bash
+# 1. Navigate to project root
+cd /home/marce/Projetos/TradingSystem
+
+# 2. Ensure .env is configured
+cat .env | grep SERVICE_LAUNCHER
+
+# 3. Install dependencies (if not already done)
+cd apps/status
+npm install
+
+# 4. Start Service Launcher
+npm start
+```
+
+**Expected Output**:
+```
+[INFO] Service Launcher API listening on port 3500
+[INFO] Configuration loaded from /home/marce/Projetos/TradingSystem/.env
+```
+
+### Verify Deployment
+
+```bash
+# Health check
+curl http://localhost:3500/health
+# Expected: {"status":"ok","service":"service-launcher-api"}
+
+# Service status
+curl http://localhost:3500/api/status | jq '.overallStatus'
+# Expected: "ok", "degraded", or "down"
+
+# Comprehensive health
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+# Expected: "healthy", "degraded", or "critical"
+```
+
+### Development Mode
+
+```bash
+# Run with auto-reload (nodemon)
+cd apps/status
+npm run dev
+```
+
+**Features**:
+- Auto-restart on file changes
+- Pretty-printed logs (colorized)
+- Debug log level
+
+## Docker Compose Deployment
+
+### Compose File
+
+Service Launcher is included in the main Docker Compose stack:
+
+**File**: `tools/compose/docker-compose.apps.yml`
+
+```yaml
+services:
+  service-launcher:
+    build:
+      context: ../../apps/status
+      dockerfile: Dockerfile
+    container_name: service-launcher
+    ports:
+      - "${SERVICE_LAUNCHER_PORT:-3500}:3500"
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../scripts:/app/scripts:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - tradingsystem
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3500/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+```
+
+### Start with Docker Compose
+
+```bash
+# Start Service Launcher only
+docker compose -f tools/compose/docker-compose.apps.yml up -d service-launcher
+
+# Start entire apps stack (includes Service Launcher)
+docker compose -f tools/compose/docker-compose.apps.yml up -d
+
+# View logs
+docker compose -f tools/compose/docker-compose.apps.yml logs -f service-launcher
+```
+
+### Stop with Docker Compose
+
+```bash
+# Stop Service Launcher
+docker compose -f tools/compose/docker-compose.apps.yml stop service-launcher
+
+# Remove container
+docker compose -f tools/compose/docker-compose.apps.yml down service-launcher
+```
+
+## Universal Startup Scripts
+
+### Start Command
+
+```bash
+# Universal startup (uses appropriate method for your environment)
+start
+
+# Or explicitly
+bash scripts/universal/start.sh
+```
+
+This script:
+1. Checks if Service Launcher is already running
+2. Starts Docker containers (if configured)
+3. Starts Node.js services (including Service Launcher)
+4. Verifies health of all services
+5. Reports startup status
+
+### Stop Command
+
+```bash
+# Graceful shutdown
+stop
+
+# Force shutdown (SIGKILL)
+stop --force
+```
+
+### Status Check
+
+```bash
+# Check status of all services
+status
+
+# Or explicitly
+bash scripts/universal/status.sh
+```
+
+## Startup Order
+
+Service Launcher should start **after** dependencies but **before** Dashboard:
+
+```
+1. Databases (TimescaleDB, QuestDB)
+   ↓
+2. Infrastructure (Service Launcher, Prometheus)
+   ↓
+3. APIs (Workspace, TP Capital, Docs API)
+   ↓
+4. UIs (Dashboard, Docusaurus)
+```
+
+**Rationale**: Dashboard depends on Service Launcher for health monitoring.
+
+### Script Example
+
+```bash
+# scripts/startup/start-all-services.sh
+
+# 1. Start databases
+docker compose -f tools/compose/docker-compose.database.yml up -d
+
+# 2. Wait for databases
+sleep 10
+
+# 3. Start Service Launcher
+cd apps/status && npm start &
+sleep 5
+
+# 4. Verify Service Launcher
+curl -f http://localhost:3500/health || exit 1
+
+# 5. Start other services
+cd apps/workspace && npm start &
+cd apps/tp-capital && npm start &
+
+# 6. Start Dashboard
+cd frontend/dashboard && npm run dev &
+```
+
+## Health Checks
+
+### Container Health Check
+
+Docker Compose includes built-in health check:
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3500/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 10s
+```
+
+**Status Check**:
+```bash
+docker inspect service-launcher --format='{{.State.Health.Status}}'
+# Expected: "healthy"
+```
+
+### External Health Monitoring
+
+**Prometheus**:
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: 'service-launcher'
+    static_configs:
+      - targets: ['localhost:3500']
+    metrics_path: '/metrics'  # If metrics endpoint is implemented
+```
+
+**Nagios/Icinga**:
+```bash
+# Check command
+check_http -H localhost -p 3500 -u /health -s '"status":"ok"'
+```
+
+## Firewall Configuration
+
+### Development (Localhost Only)
+
+No firewall changes needed - Service Launcher binds to localhost by default.
+
+### Production (If Exposing to Network)
+
+**⚠️ WARNING**: Only expose if you understand security implications.
+
+```bash
+# Ubuntu/Debian (ufw)
+sudo ufw allow from 192.168.1.0/24 to any port 3500 proto tcp comment 'Service Launcher'
+
+# CentOS/RHEL (firewalld)
+sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" port port="3500" protocol="tcp" accept'
+sudo firewall-cmd --reload
+```
+
+**Security Notes**:
+- Never expose to public internet
+- Use VPN or internal network only
+- Consider authentication if exposing beyond localhost
+
+## Environment-Specific Configuration
+
+### Development
+
+```bash
+# .env.development (or .env.local)
+SERVICE_LAUNCHER_PORT=3500
+SERVICE_LAUNCHER_LOG_LEVEL=debug
+SERVICE_LAUNCHER_TIMEOUT_MS=5000
+NODE_ENV=development
+```
+
+### Staging
+
+```bash
+# .env.staging
+SERVICE_LAUNCHER_PORT=3500
+SERVICE_LAUNCHER_LOG_LEVEL=info
+SERVICE_LAUNCHER_TIMEOUT_MS=2500
+NODE_ENV=production
+```
+
+### Production
+
+```bash
+# .env.production
+SERVICE_LAUNCHER_PORT=3500
+SERVICE_LAUNCHER_LOG_LEVEL=warn
+SERVICE_LAUNCHER_TIMEOUT_MS=2000
+NODE_ENV=production
+RATE_LIMIT_MAX=100
+```
+
+## Rollback Procedures
+
+### Rollback to Previous Version
+
+```bash
+# 1. Stop current version
+stop
+
+# 2. Checkout previous version
+git checkout HEAD~1 apps/status/
+
+# 3. Reinstall dependencies (if needed)
+cd apps/status
+npm install
+
+# 4. Restart
+npm start
+
+# 5. Verify
+curl http://localhost:3500/health
+```
+
+### Rollback Docker Container
+
+```bash
+# 1. Stop current container
+docker compose -f tools/compose/docker-compose.apps.yml stop service-launcher
+
+# 2. Pull previous image tag
+docker pull ghcr.io/tradingsystem/service-launcher:previous-tag
+
+# 3. Update compose file with previous tag
+# Edit docker-compose.apps.yml: image: ghcr.io/tradingsystem/service-launcher:previous-tag
+
+# 4. Restart
+docker compose -f tools/compose/docker-compose.apps.yml up -d service-launcher
+```
+
+## Monitoring Deployment
+
+### Log Aggregation
+
+**Docker Logs**:
+```bash
+docker logs -f service-launcher --tail 100
+```
+
+**File Logs** (if configured):
+```bash
+tail -f logs/service-launcher.log | jq '.'
+```
+
+### Metrics
+
+**Health Check Endpoint**:
+```bash
+watch -n 5 'curl -s http://localhost:3500/api/status | jq ".overallStatus"'
+```
+
+**Cache Performance**:
+```bash
+# Monitor cache hit rate
+while true; do
+  curl -sI http://localhost:3500/api/health/full | grep X-Cache-Status
+  sleep 5
+done
+```
+
+## Troubleshooting Deployment
+
+### Issue: Port 3500 Already in Use
+
+```bash
+# Find process
+lsof -ti:3500
+
+# Kill process
+lsof -ti:3500 | xargs kill -9
+
+# Or change port
+SERVICE_LAUNCHER_PORT=3501 npm start
+```
+
+### Issue: Health Check Script Not Found
+
+```bash
+# Verify script exists
+ls -la scripts/maintenance/health-check-all.sh
+
+# Make executable
+chmod +x scripts/maintenance/health-check-all.sh
+
+# Test execution
+bash scripts/maintenance/health-check-all.sh --format json
+```
+
+### Issue: Permission Denied (Docker Socket)
+
+```bash
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Reload groups (or logout/login)
+newgrp docker
+
+# Verify access
+docker ps
+```
+
+### Issue: Configuration Not Loading
+
+```bash
+# Verify .env location
+ls -la /home/marce/Projetos/TradingSystem/.env
+
+# Check load-env.cjs path
+ls -la backend/shared/config/load-env.cjs
+
+# Test configuration loading
+node -e "require('./backend/shared/config/load-env.cjs'); console.log(process.env.SERVICE_LAUNCHER_PORT)"
+```
+
+## Post-Deployment Verification
+
+### Automated Tests
+
+```bash
+# Run test suite
+cd apps/status
+npm test
+
+# Expected: All 25 tests passing
+```
+
+### Manual Verification Checklist
+
+- [ ] Service responds on port 3500
+- [ ] `/health` returns `{"status":"ok"}`
+- [ ] `/api/status` returns service list
+- [ ] `/api/health/full` executes without errors
+- [ ] Dashboard can fetch health status
+- [ ] Logs are being written (if configured)
+- [ ] No error logs in past 5 minutes
+- [ ] Cache is working (X-Cache-Status: HIT observed)
+- [ ] Rate limiting is active (test with 201+ requests)
+- [ ] CORS is configured correctly (Dashboard can access API)
+
+### Load Testing
+
+```bash
+# Simple load test (requires apache2-utils)
+ab -n 1000 -c 10 http://localhost:3500/health
+
+# Expected: 100% success rate, &lt;50ms average response time
+```
+
+## Maintenance Windows
+
+### Planned Downtime
+
+```bash
+# 1. Notify users (if applicable)
+# 2. Stop Service Launcher
+stop
+
+# 3. Perform maintenance (updates, migrations, etc.)
+# 4. Test in isolation
+npm test
+
+# 5. Restart
+start
+
+# 6. Verify health
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+
+# 7. Monitor for 10 minutes
+watch -n 10 'curl -s http://localhost:3500/api/status | jq ".overallStatus"'
+```
+
+### Zero-Downtime Updates (Docker)
+
+```bash
+# 1. Build new image
+docker build -t service-launcher:new apps/status/
+
+# 2. Start new container on different port
+docker run -d -p 3501:3500 --name service-launcher-new service-launcher:new
+
+# 3. Verify new container
+curl http://localhost:3501/health
+
+# 4. Update reverse proxy / load balancer to point to 3501
+# 5. Monitor for issues
+# 6. Stop old container
+docker stop service-launcher
+
+# 7. Rename new container
+docker rename service-launcher-new service-launcher
+```
+
+## Related Documentation
+
+- [Configuration Guide](./config) - Environment variables and setup
+- [Operations Guide](./operations) - Day-to-day management
+- [Runbook](./runbook) - Troubleshooting procedures
+- [Architecture](./architecture) - System design and components

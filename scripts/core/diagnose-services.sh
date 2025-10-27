@@ -64,7 +64,6 @@ check_port 3205 "Docusaurus" || true
 check_port 3200 "Workspace" || true
 check_port 3200 "TP-Capital" || true
 check_port 3400 "DocsAPI" || true
-check_port 3302 "B3" || true
 check_port 3500 "Laucher" || true
 check_port 9000 "QuestDB HTTP" || true
 check_port 9009 "QuestDB ILP" || true
@@ -76,7 +75,6 @@ check_dependencies "/home/marce/projetos/TradingSystem/frontend/dashboard" "Dash
 check_dependencies "/home/marce/projetos/TradingSystem/docs" "Docusaurus" || true
 check_dependencies "/home/marce/projetos/TradingSystem/backend/api/workspace" "Workspace" || true
 check_dependencies "/home/marce/projetos/TradingSystem/apps/tp-capital" "TP-Capital" || true
-check_dependencies "/home/marce/projetos/TradingSystem/apps/b3-market-data" "B3" || true
 # DocsAPI runs as Docker container (see docker-compose.docs.yml)
 check_dependencies "/home/marce/projetos/TradingSystem/apps/status" "Status" || true
 echo ""
@@ -86,7 +84,6 @@ echo "----------------------------"
 check_env_file "/home/marce/projetos/TradingSystem/frontend/dashboard" "Dashboard" || true
 check_env_file "/home/marce/projetos/TradingSystem/backend/api/workspace" "Workspace" || true
 check_env_file "/home/marce/projetos/TradingSystem/apps/tp-capital" "TP-Capital" || true
-check_env_file "/home/marce/projetos/TradingSystem/apps/b3-market-data" "B3" || true
 # DocsAPI runs as Docker container (see docker-compose.docs.yml)
 check_env_file "/home/marce/projetos/TradingSystem/apps/status" "Status" || true
 echo ""
@@ -104,7 +101,6 @@ echo "  - 3205: Docusaurus (Docusaurus)"
 echo "  - 3200: Workspace"
 echo "  - 3200: TP-Capital"
 echo "  - 3400: DocsAPI"
-echo "  - 3302: B3"
 echo "  - 3500: Laucher"
 echo "  - 9000: QuestDB HTTP"
 echo "  - 9009: QuestDB ILP"
@@ -116,7 +112,6 @@ echo "To install missing dependencies:"
 echo "  cd frontend/dashboard && npm install"
 echo "  cd backend/api/workspace && npm install"
 echo "  cd apps/tp-capital && npm install"
-echo "  cd apps/b3-market-data && npm install"
 echo "  # DocsAPI: docker compose -f tools/compose/docker-compose.docs.yml up -d"
 echo "  cd apps/status && npm install"
 echo ""

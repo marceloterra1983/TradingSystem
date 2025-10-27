@@ -11,13 +11,17 @@ export function DocusaurusPageNew() {
   const isDocsView = activeView === 'docs';
   const isDocsApiView = activeView === 'docsApi';
 
-  // Use absolute URL for iframe (iframes don't use Vite proxy)
-  // Development: http://localhost:3400
+  // Use absolute URL for iframe (iframes require absolute URLs for proper loading)
+  // Development: http://localhost:3205 (Docusaurus dev server)
   // Production: Use the configured docsUrl
   const iframeSrc = activeView === 'docs'
-    ? (import.meta.env.DEV ? 'http://localhost:3400' : apiConfig.docsUrl)
+    ? (import.meta.env.DEV ? 'http://localhost:3205' : apiConfig.docsUrl)
     : undefined;
   const iframeTitle = activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
+
+  console.log('[DocusaurusPage] activeView:', activeView);
+  console.log('[DocusaurusPage] iframeSrc:', iframeSrc);
+  console.log('[DocusaurusPage] DEV mode:', import.meta.env.DEV);
 
   const handleOpenInNewTab = () => {
     if (typeof window === 'undefined') {
@@ -80,13 +84,30 @@ export function DocusaurusPageNew() {
       ) : isDocsApiView ? (
         <APIViewerPage />
       ) : (
-        <iframe
-          src={iframeSrc}
-          title={iframeTitle}
-          className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
-          allow="clipboard-read; clipboard-write"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
-        />
+        <div className="h-[calc(100%-40px)] w-full flex flex-col">
+          <div className="mb-2 p-2 bg-blue-50 dark:bg-slate-800 rounded text-sm">
+            <p className="text-gray-800 dark:text-gray-200">
+              <strong>Status:</strong> {iframeSrc ? `Carregando de: ${iframeSrc}` : 'Sem URL configurada'}
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+              Se o conteúdo não aparecer, verifique se o Docusaurus está rodando em {iframeSrc}
+            </p>
+          </div>
+          {iframeSrc ? (
+            <iframe
+              key={iframeSrc}
+              src={iframeSrc}
+              title={iframeTitle}
+              className="flex-1 w-full rounded-lg border-2 border-blue-500 shadow-sm"
+              onLoad={() => console.log('[DocusaurusPage] Iframe carregado com sucesso')}
+              onError={() => console.error('[DocusaurusPage] Erro ao carregar iframe')}
+            />
+          ) : (
+            <div className="flex flex-1 items-center justify-center text-gray-500">
+              No URL configured
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

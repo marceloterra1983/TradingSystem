@@ -3,7 +3,7 @@ import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import { useItemDragDrop } from '../hooks/useItemDragDrop';
 import { DroppableColumn } from './DroppableColumn';
-import { DraggableItemCard } from './DraggableItemCard';
+import { WorkspaceItemDragPreview } from './DraggableItemCard';
 import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
 import { BarChart3 } from 'lucide-react';
 import { STATUS_CONFIG } from '../constants/workspace.constants';
@@ -79,7 +79,7 @@ export function StatusBoardSection() {
 
       {/* Drag Overlay */}
       <DragOverlay>
-        {activeItem ? <DraggableItemCard item={activeItem} /> : null}
+        {activeItem ? <WorkspaceItemDragPreview item={activeItem} /> : null}
       </DragOverlay>
     </DndContext>
   );

@@ -1,0 +1,629 @@
+---
+title: Status API
+sidebar_label: Status API
+sidebar_position: 3
+description: Service orchestration and health monitoring API with comprehensive health checks, circuit breaker patterns, and service launching capabilities
+tags:
+  - api
+  - infrastructure
+  - monitoring
+  - health-check
+  - orchestration
+owner: BackendGuild
+lastReviewed: '2025-10-27'
+---
+
+## Overview
+
+The **Status API** (also known as **Service Launcher API** or **Launcher API**) is the central orchestration and monitoring service for the TradingSystem platform. It provides comprehensive health checking, service launching, and status aggregation across all backend services, databases, and infrastructure components.
+
+### Key Features
+
+- **Service Health Monitoring**: Aggregate health status from 11+ services
+- **Circuit Breaker Pattern**: Resilient health checks with automatic failure detection
+- **Service Launching**: Launch services in detected terminal emulators
+- **Health Check Caching**: 60-second TTL cache for `/api/health/full` endpoint
+- **Auto-Start Capability**: Auto-start down services via REST API
+- **Prometheus Metrics**: Comprehensive metrics export for monitoring
+- **Structured Logging**: Pino-based JSON logging with multiple event types
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 3500 |
+| **Base URL** | http://localhost:3500 |
+| **Repository** | `apps/status/` |
+| **Status** | ✅ Active |
+| **Technology** | Express.js, Node.js |
+
+## Architecture
+
+The Status API acts as a central hub for service orchestration:
+
+```
+┌─────────────────────────────────────────────────┐
+│            Status API (Port 3500)               │
+│                                                 │
+│  ┌──────────────┐  ┌──────────────────────┐   │
+│  │  Circuit     │  │  Health Check        │   │
+│  │  Breaker     │  │  Cache (60s TTL)     │   │
+│  └──────────────┘  └──────────────────────┘   │
+└─────────────────────────────────────────────────┘
+           ↓                    ↓
+    ┌─────────────┐      ┌─────────────┐
+    │  11 Backend │      │  Database   │
+    │  Services   │      │  Containers │
+    └─────────────┘      └─────────────┘
+```
+
+**Flow:**
+1. Frontend requests `/api/status` or `/api/health/full`
+2. Status API checks cache (for `/health/full`)
+3. Executes health checks against all services
+4. Circuit breaker prevents repeated failed checks
+5. Returns aggregated health status with latencies
+
+## Quick Start
+
+### Health Check (Simple)
+
+```bash
+curl http://localhost:3500/health
+```
+
+Response:
+```json
+{
+  "status": "ok",
+  "service": "service-launcher-api"
+}
+```
+
+### Service Status (All Services)
+
+```bash
+curl http://localhost:3500/api/status
+```
+
+Response:
+```json
+{
+  "overallStatus": "ok",
+  "totalServices": 11,
+  "degradedCount": 0,
+  "downCount": 0,
+  "averageLatencyMs": 45,
+  "lastCheckAt": "2025-10-27T12:00:00.000Z",
+  "services": [
+    {
+      "id": "workspace-api",
+      "name": "Workspace",
+      "description": "Workspace item management",
+      "category": "api",
+      "port": 3200,
+      "status": "ok",
+      "latencyMs": 32,
+      "updatedAt": "2025-10-27T12:00:00.000Z",
+      "details": {
+        "healthUrl": "http://localhost:3200/health",
+        "httpStatus": 200,
+        "timeoutMs": 2500
+      }
+    }
+    // ... more services
+  ]
+}
+```
+
+### Comprehensive Health Check (Cached)
+
+```bash
+curl http://localhost:3500/api/health/full
+```
+
+This endpoint executes `scripts/maintenance/health-check-all.sh` and caches results for 60 seconds. Check cache status via headers:
+
+```bash
+curl -I http://localhost:3500/api/health/full
+# X-Cache-Status: HIT | MISS
+# X-Cache-Age: 23  (seconds)
+```
+
+## API Reference
+
+### Health & Monitoring Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Simple health check (always returns OK) |
+| `/api/status` | GET | Aggregate status of all monitored services |
+| `/api/health/full` | GET | Comprehensive health check (cached, 60s TTL) |
+| `/circuit-breaker` | GET | Circuit breaker status for all services |
+| `/metrics` | GET | Prometheus metrics export |
+
+### Service Launching Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/launch` | POST | Launch service in terminal emulator |
+| `/api/auto-start/:serviceId` | POST | Auto-start service (with cooldown) |
+| `/api/start-metrics` | GET | Metrics from last system start |
+
+### Telegram Gateway Proxy
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/telegram-gateway/*` | ALL | Proxy to Telegram Gateway service |
+| `/api/containers/*` | ALL | Docker container management |
+
+## Main Endpoints Detail
+
+### GET /api/status
+
+Probes all 11+ services and returns aggregated health status.
+
+**Features:**
+- Parallel health checks (Promise.all)
+- Circuit breaker protection
+- Latency measurement
+- Results sorted by severity (down → degraded → ok)
+
+**Response Fields:**
+- `overallStatus`: `ok` | `degraded` | `down`
+- `totalServices`: Number of monitored services
+- `degradedCount`: Services with non-ok status
+- `downCount`: Unreachable services
+- `averageLatencyMs`: Average response time across all services
+
+**Example:**
+```bash
+curl http://localhost:3500/api/status | jq '.services[] | select(.status == "down")'
+```
+
+### GET /api/health/full
+
+Executes comprehensive health check script with:
+- **Caching**: 60-second TTL to prevent script flooding
+- **In-Flight Deduplication**: Multiple simultaneous requests share single execution
+- **Script Timeout**: 10 seconds max execution time
+- **Exit Code Handling**: 0=healthy, 1=degraded, 2=critical
+
+**Cache Headers:**
+```http
+X-Cache-Status: HIT | MISS
+X-Cache-Age: <seconds>
+```
+
+**Example:**
+```bash
+# First request (MISS)
+curl -i http://localhost:3500/api/health/full
+# X-Cache-Status: MISS
+
+# Second request within 60s (HIT)
+curl -i http://localhost:3500/api/health/full
+# X-Cache-Status: HIT
+# X-Cache-Age: 5
+```
+
+### POST /launch
+
+Launch a service in a detected terminal emulator.
+
+**Request Body:**
+```json
+{
+  "serviceName": "Workspace API",
+  "workingDir": "/home/marce/Projetos/TradingSystem/backend/api/workspace",
+  "command": "npm run dev"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Workspace API launched in gnome-terminal",
+  "terminal": "gnome-terminal",
+  "platform": "linux"
+}
+```
+
+**Supported Terminals:**
+- **Linux**: gnome-terminal, konsole, xterm
+- **macOS**: Terminal.app, iTerm2
+- **Windows**: Windows Terminal, cmd, PowerShell
+
+### POST /api/auto-start/:serviceId
+
+Auto-start a service with built-in cooldown (30 seconds between attempts).
+
+**Supported Service IDs:**
+- `workspace-api`
+- `documentation-api`
+- `firecrawl-proxy`
+- `telegram-gateway`
+- `telegram-gateway-api`
+
+**Example:**
+```bash
+curl -X POST http://localhost:3500/api/auto-start/workspace-api
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "message": "Workspace API auto-started",
+  "serviceId": "workspace-api",
+  "terminal": "gnome-terminal"
+}
+```
+
+**Response (Cooldown Active):**
+```json
+{
+  "success": false,
+  "error": "Auto-start cooldown active. Try again in 25s"
+}
+```
+
+### GET /circuit-breaker
+
+Returns circuit breaker state for all monitored services.
+
+**Circuit Breaker Configuration:**
+- **Threshold**: 5 consecutive failures
+- **Timeout**: 60 seconds (open state duration)
+
+**Response:**
+```json
+{
+  "threshold": 5,
+  "timeoutMs": 60000,
+  "activeCircuits": 2,
+  "circuits": [
+    {
+      "serviceId": "workspace-api",
+      "state": "closed",
+      "failureCount": 0,
+      "lastFailureTime": null
+    },
+    {
+      "serviceId": "tp-capital-signals-api",
+      "state": "open",
+      "failureCount": 5,
+      "lastFailureTime": "2025-10-27T11:55:00.000Z"
+    }
+  ]
+}
+```
+
+**Circuit States:**
+- `closed`: Service healthy, requests allowed
+- `open`: Service unhealthy, requests blocked (returns cached error)
+- `half-open`: Testing if service recovered (not implemented yet)
+
+## Monitored Services
+
+The Status API monitors these services by default:
+
+### APIs (category: `api`)
+- Workspace API (3200)
+- TP Capital Signals API (4007)
+- Firecrawl Proxy (3600)
+- Documentation API (3205)
+- Telegram Gateway API (4010)
+
+### Messaging (category: `messaging`)
+- Telegram Gateway (4006)
+
+### UI (category: `ui`)
+- Dashboard (3101)
+
+### Docs (category: `docs`)
+- Docusaurus (3205)
+
+### Monitoring (category: `monitoring`)
+- Prometheus (9090)
+- Grafana (3000)
+
+### Data (category: `data`)
+- QuestDB HTTP (9000)
+
+### Internal (category: `internal`)
+- Service Launcher (3500 - self)
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Server Configuration
+STATUS_PORT=3500                    # API port (default: 3500)
+STATUS_HOST=localhost               # Health check host (default: localhost)
+STATUS_PROTOCOL=http                # Health check protocol (default: http)
+STATUS_TIMEOUT_MS=2500              # Health check timeout (default: 2500ms)
+
+# Terminal Launching
+STATUS_USE_WT=true                  # Prefer Windows Terminal on Windows
+
+# Security
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # Allowed origins
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=60000          # Rate limit window (default: 60s)
+RATE_LIMIT_MAX=200                  # Max requests per window (default: 200)
+
+# Service URLs (Override Detection)
+SERVICE_LAUNCHER_WORKSPACE_URL=http://workspace-api:3200/health
+SERVICE_LAUNCHER_TP_CAPITAL_URL=http://tp-capital:4007/health
+# ... (more service URL overrides)
+```
+
+### Customizing Monitored Services
+
+Edit `apps/status/server.js` and modify `SERVICE_TARGETS` array:
+
+```javascript
+const SERVICE_TARGETS = [
+  createServiceTarget({
+    id: 'my-custom-api',
+    name: 'Custom API',
+    description: 'My custom service',
+    category: 'api',
+    defaultPort: 8000,
+    portEnv: 'MY_API_PORT',
+    urlEnv: 'MY_API_URL',
+  }),
+  // ... more services
+];
+```
+
+## Integration Examples
+
+### TypeScript/JavaScript
+
+```typescript
+// Check overall system health
+async function checkSystemHealth() {
+  const response = await fetch('http://localhost:3500/api/status');
+  const data = await response.json();
+
+  if (data.overallStatus === 'down') {
+    console.error(`${data.downCount} services are down!`);
+  }
+
+  return data;
+}
+
+// Auto-start a service
+async function autoStartService(serviceId: string) {
+  const response = await fetch(`http://localhost:3500/api/auto-start/${serviceId}`, {
+    method: 'POST'
+  });
+
+  const data = await response.json();
+  return data.success;
+}
+
+// Get circuit breaker status
+async function getCircuitBreakerStatus() {
+  const response = await fetch('http://localhost:3500/circuit-breaker');
+  const data = await response.json();
+
+  const openCircuits = data.circuits.filter(c => c.state === 'open');
+  console.log(`${openCircuits.length} circuits are open`);
+
+  return data;
+}
+```
+
+### React Hook
+
+```typescript
+import { useState, useEffect } from 'react';
+
+interface ServiceStatus {
+  id: string;
+  name: string;
+  status: 'ok' | 'degraded' | 'down';
+  latencyMs: number | null;
+}
+
+function useServiceStatus() {
+  const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      const res = await fetch('http://localhost:3500/api/status');
+      const data = await res.json();
+      setServices(data.services);
+      setLoading(false);
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  return { services, loading };
+}
+
+// Usage in component
+function SystemHealthDashboard() {
+  const { services, loading } = useServiceStatus();
+
+  const downServices = services.filter(s => s.status === 'down');
+
+  return (
+    <div>
+      <h2>System Health</h2>
+      {downServices.length > 0 && (
+        <Alert severity="error">
+          {downServices.length} services are down
+        </Alert>
+      )}
+      {/* Render service list */}
+    </div>
+  );
+}
+```
+
+### curl Examples
+
+```bash
+# Check if workspace API is running
+curl -s http://localhost:3500/api/status | jq '.services[] | select(.id == "workspace-api")'
+
+# Get all down services
+curl -s http://localhost:3500/api/status | jq '.services[] | select(.status == "down")'
+
+# Check cache status for comprehensive health check
+curl -I http://localhost:3500/api/health/full | grep X-Cache
+
+# Auto-start workspace API
+curl -X POST http://localhost:3500/api/auto-start/workspace-api | jq '.success'
+
+# Get circuit breaker stats
+curl http://localhost:3500/circuit-breaker | jq '.activeCircuits'
+```
+
+## Error Handling
+
+### HTTP Status Codes
+
+| Code | Meaning | When It Occurs |
+|------|---------|----------------|
+| 200 | OK | Request successful |
+| 400 | Bad Request | Missing required fields in /launch request |
+| 404 | Not Found | Service configuration not found (auto-start) |
+| 429 | Too Many Requests | Rate limit exceeded or auto-start cooldown active |
+| 500 | Internal Server Error | Health check script failed or service error |
+| 503 | Service Unavailable | Health check timeout or database connection failed |
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "error": "Error description",
+  "message": "Additional details"
+}
+```
+
+### Common Errors
+
+**500 - Health Check Script Failed:**
+```json
+{
+  "success": false,
+  "error": "Failed to execute health check script",
+  "message": "Health check script not found at /path/to/script"
+}
+```
+
+**429 - Auto-Start Cooldown:**
+```json
+{
+  "success": false,
+  "error": "Auto-start cooldown active. Try again in 25s"
+}
+```
+
+**500 - No Terminal Detected:**
+```json
+{
+  "success": false,
+  "error": "No supported terminal found on this system"
+}
+```
+
+## Prometheus Metrics
+
+Available at `GET /metrics`:
+
+### Custom Metrics
+
+```prometheus
+# Health check execution duration
+status_health_check_duration_seconds{service="workspace-api",status="ok"}
+
+# Health check full execution (script-based)
+status_health_check_full_duration_seconds{cached="false"}
+
+# Service launch attempts
+status_service_launch_total{service="workspace-api",method="gnome-terminal",success="true"}
+
+# Overall system status
+status_overall_status{status="ok"}
+
+# Circuit breaker metrics
+status_circuit_breaker_state{service="workspace-api",state="closed"}
+status_circuit_breaker_failures_total{service="workspace-api"}
+```
+
+### Node.js Metrics
+
+```prometheus
+# CPU usage
+process_cpu_user_seconds_total
+
+# Memory usage
+process_resident_memory_bytes
+
+# Event loop lag
+nodejs_eventloop_lag_seconds
+```
+
+## Monitoring
+
+### Health Check Strategy
+
+1. **Simple Health Check** (`/health`):
+   - Always returns OK
+   - Use for liveness probe
+
+2. **Service Status** (`/api/status`):
+   - Real-time health checks (no cache)
+   - Use for detailed service monitoring
+   - Suitable for polling every 30-60 seconds
+
+3. **Comprehensive Health** (`/api/health/full`):
+   - Cached (60s TTL)
+   - Runs expensive shell script
+   - Use for periodic deep health checks
+   - Suitable for polling every 60-120 seconds
+
+### Monitoring Best Practices
+
+**For Dashboard UI:**
+- Poll `/api/status` every 30 seconds
+- Show service status badges
+- Alert on `degradedCount > 0` or `downCount > 0`
+
+**For Prometheus/Grafana:**
+- Scrape `/metrics` every 15 seconds
+- Alert on circuit breaker open states
+- Track average latency trends
+
+**For CI/CD Pipelines:**
+- Use `/api/health/full` before deployments
+- Ensure `overallHealth` is "healthy"
+- Check individual service categories
+
+## Related Documentation
+
+- **[Health Check Script](/tools/monitoring/health-check-all)** - Comprehensive health check bash script
+- **[Service Manifest](/reference/architecture/services-manifest)** - Service configuration
+- **[Dashboard Integration](/frontend/features/service-status)** - Frontend integration guide
+- **[Prometheus Setup](/tools/monitoring/prometheus)** - Metrics scraping configuration
+
+## Support
+
+For issues, questions, or feature requests:
+- **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
+- **Source Code**: `apps/status/server.js`
+- **Health Check Script**: `scripts/maintenance/health-check-all.sh`

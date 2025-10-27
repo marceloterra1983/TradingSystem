@@ -1,16 +1,23 @@
 name: firecrawl
 
 services:
-  # Firecrawl Proxy - TradingSystem Gateway (Port 3600) - Placeholder with health
+  # Firecrawl Proxy - TradingSystem Gateway (Port 3600) - Full functionality
   firecrawl-proxy:
     image: "${IMG_FIRECRAWL_PROXY:-img-firecrawl-proxy}:${IMG_VERSION:-latest}"
     container_name: firecrawl-proxy
     platform: linux/amd64
     build:
-      context: ../firecrawl
-      dockerfile: Dockerfile.proxy
+      context: ../../backend/api/firecrawl-proxy
+      dockerfile: Dockerfile
     ports:
-      - "${FIRECRAWL_PROXY_PORT:-3600}:80"
+      - "${FIRECRAWL_PROXY_PORT:-3600}:3600"
+    environment:
+      - PORT=3600
+      - FIRECRAWL_API_URL=${FIRECRAWL_API_URL:-https://api.firecrawl.dev}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - LOG_LEVEL=${FIRECRAWL_LOG_LEVEL:-info}
+    volumes:
+      - ../../backend/api/firecrawl-proxy/src:/app/src:ro
     restart: unless-stopped
     env_file:
       - ../../.env
@@ -18,7 +25,7 @@ services:
       - firecrawl_network
       - tradingsystem_backend
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3600/health"]
       interval: 30s
       timeout: 10s
       start_period: 10s

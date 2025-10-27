@@ -2,8 +2,19 @@ import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiUrl } from '../config/api';
 
-const SERVICE_LAUNCHER_URL = getApiUrl('serviceLauncher');
-const TELEGRAM_GATEWAY_BASE = `${SERVICE_LAUNCHER_URL}/api/telegram-gateway`;
+const TELEGRAM_GATEWAY_API_BASE = getApiUrl('telegramGateway').replace(/\/$/, '');
+const TELEGRAM_GATEWAY_SERVICE_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
+const TELEGRAM_GATEWAY_MESSAGES_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/messages`;
+const TELEGRAM_GATEWAY_CHANNELS_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/channels`;
+const TELEGRAM_GATEWAY_TOKEN =
+  (import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined)?.trim() ||
+  (import.meta.env.VITE_API_SECRET_TOKEN as string | undefined)?.trim() ||
+  '';
+
+if (import.meta.env.DEV && TELEGRAM_GATEWAY_TOKEN.length === 0) {
+  // eslint-disable-next-line no-console
+  console.warn('[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401');
+}
 
 export type GatewayHealthStatus = 'healthy' | 'unhealthy' | 'unknown';
 
@@ -173,6 +184,9 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(TELEGRAM_GATEWAY_TOKEN
+        ? { 'X-Gateway-Token': TELEGRAM_GATEWAY_TOKEN }
+        : {}),
       ...(options?.headers ?? {}),
     },
   });
@@ -208,12 +222,13 @@ export function useTelegramGatewayOverview(pollingMs = 10000) {
     queryKey: ['telegram-gateway', 'overview'],
     queryFn: async () => {
       const payload = await fetchJson<{ success: boolean; data: TelegramGatewayOverview }>(
-        `${TELEGRAM_GATEWAY_BASE}/overview`,
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/overview`,
       );
       return payload.data;
     },
     refetchInterval: pollingMs,
     staleTime: pollingMs / 2,
+    retry: 1,
   });
 }
 
@@ -260,7 +275,7 @@ export function useTelegramGatewayMessages(filters: TelegramGatewayMessagesFilte
     queryKey: ['telegram-gateway', 'messages', filters],
     queryFn: async () => {
       const payload = await fetchJson<TelegramGatewayMessagesResponse>(
-        `${TELEGRAM_GATEWAY_BASE}/messages?${queryParams.toString()}`,
+        `${TELEGRAM_GATEWAY_MESSAGES_BASE}?${queryParams.toString()}`,
       );
       return payload;
     },
@@ -275,7 +290,7 @@ export function useTelegramGatewayReload() {
     mutationKey: ['telegram-gateway', 'reload'],
     mutationFn: async () => {
       await fetchJson<{ success: boolean; timestamp: string }>(
-        `${TELEGRAM_GATEWAY_BASE}/actions/reload`,
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/actions/reload`,
         { method: 'POST' },
       );
     },
@@ -292,7 +307,7 @@ export function useTelegramGatewayReprocess() {
     mutationKey: ['telegram-gateway', 'reprocess'],
     mutationFn: async ({ id, requestedBy }: { id: string; requestedBy?: string }) => {
       const payload = await fetchJson<{ success: boolean; data: TelegramGatewayMessage }>(
-        `${TELEGRAM_GATEWAY_BASE}/messages/${id}/reprocess`,
+        `${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}/reprocess`,
         {
           method: 'POST',
           body: JSON.stringify(
@@ -320,7 +335,7 @@ export function useTelegramGatewayDeleteMessage() {
     mutationKey: ['telegram-gateway', 'delete'],
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
       const payload = await fetchJson<{ success: boolean; data: TelegramGatewayMessage }>(
-        `${TELEGRAM_GATEWAY_BASE}/messages/${id}`,
+        `${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}`,
         {
           method: 'DELETE',
           body: JSON.stringify(reason ? { reason } : {}),
@@ -340,7 +355,7 @@ export function useTelegramGatewayChannels() {
     queryKey: ['telegram-gateway', 'channels'],
     queryFn: async () => {
       const payload = await fetchJson<{ success: boolean; data: TelegramGatewayChannel[] }>(
-        `${TELEGRAM_GATEWAY_BASE}/channels`,
+        `${TELEGRAM_GATEWAY_CHANNELS_BASE}`,
       );
       return payload.data ?? [];
     },
@@ -358,7 +373,7 @@ export function useCreateTelegramGatewayChannel() {
       isActive?: boolean;
     }) => {
       const response = await fetchJson<{ success: boolean; data: TelegramGatewayChannel }>(
-        `${TELEGRAM_GATEWAY_BASE}/channels`,
+        `${TELEGRAM_GATEWAY_CHANNELS_BASE}`,
         {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -388,7 +403,7 @@ export function useUpdateTelegramGatewayChannel() {
       isActive?: boolean;
     }) => {
       const response = await fetchJson<{ success: boolean; data: TelegramGatewayChannel }>(
-        `${TELEGRAM_GATEWAY_BASE}/channels/${id}`,
+        `${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`,
         {
           method: 'PUT',
           body: JSON.stringify(payload),
@@ -408,7 +423,7 @@ export function useDeleteTelegramGatewayChannel() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_BASE}/channels/${id}`, {
+      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`, {
         method: 'DELETE',
       });
     },
@@ -424,7 +439,7 @@ export function useTelegramGatewayAuthStatus(pollingMs = 2000) {
     queryKey: ['telegram-gateway', 'auth', 'status'],
     queryFn: async () => {
       const payload = await fetchJson<{ success: boolean; data: TelegramGatewayAuthStatus }>(
-        `${TELEGRAM_GATEWAY_BASE}/auth/status`,
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/status`,
       );
       return payload.data;
     },
@@ -437,7 +452,7 @@ export function useTelegramGatewayAuthStart() {
 
   return useMutation({
     mutationFn: async () => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_BASE}/auth/start`, {
+      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/start`, {
         method: 'POST',
       });
     },
@@ -452,7 +467,7 @@ export function useTelegramGatewayAuthSubmit() {
 
   return useMutation({
     mutationFn: async (value: string) => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_BASE}/auth/input`, {
+      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/input`, {
         method: 'POST',
         body: JSON.stringify({ value }),
       });
@@ -468,7 +483,7 @@ export function useTelegramGatewayAuthCancel() {
 
   return useMutation({
     mutationFn: async () => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_BASE}/auth/cancel`, {
+      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/cancel`, {
         method: 'POST',
       });
     },

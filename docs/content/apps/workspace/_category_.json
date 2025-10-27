@@ -1,11 +1,11 @@
 {
   "label": "Workspace",
-  "position": 4,
+  "position": 5,
   "collapsed": false,
   "link": {
     "type": "generated-index",
     "title": "Workspace App",
     "slug": "/apps/workspace",
-    "description": "Operational documentation for the Workspace idea management application."
+    "description": "Idea and task management tool. Workspace and productivity."
   }
 }

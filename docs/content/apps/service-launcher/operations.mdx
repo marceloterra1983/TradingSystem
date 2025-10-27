@@ -1,0 +1,521 @@
+---
+title: Service Launcher Operations
+sidebar_position: 6
+description: Day-to-day operational procedures, monitoring, and maintenance tasks.
+tags:
+  - operations
+  - service-launcher
+  - monitoring
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Daily Operations
+
+### Starting Service Launcher
+
+```bash
+# Universal command
+start
+
+# Or directly
+cd apps/status && npm start
+
+# Docker Compose
+docker compose -f tools/compose/docker-compose.apps.yml up -d service-launcher
+```
+
+### Stopping Service Launcher
+
+```bash
+# Graceful shutdown
+stop
+
+# Force stop
+stop --force
+
+# Docker Compose
+docker compose -f tools/compose/docker-compose.apps.yml stop service-launcher
+```
+
+### Restarting Service Launcher
+
+```bash
+# Universal command
+bash scripts/universal/restart.sh
+
+# Docker Compose
+docker compose -f tools/compose/docker-compose.apps.yml restart service-launcher
+```
+
+## Health Monitoring
+
+### Quick Health Check
+
+```bash
+# Service Launcher itself
+curl http://localhost:3500/health
+# Expected: {"status":"ok","service":"service-launcher-api"}
+
+# All monitored services
+curl http://localhost:3500/api/status | jq '.overallStatus'
+# Expected: "ok", "degraded", or "down"
+
+# Comprehensive health
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+# Expected: "healthy", "degraded", or "critical"
+```
+
+### Continuous Monitoring
+
+```bash
+# Watch overall status (refresh every 10s)
+watch -n 10 'curl -s http://localhost:3500/api/status | jq ".overallStatus, .services[] | select(.status != \"ok\") | {name, status}"'
+
+# Monitor cache performance
+watch -n 5 'curl -sI http://localhost:3500/api/health/full | grep -E "X-Cache-Status|X-Cache-Age"'
+```
+
+### Health Check Endpoints
+
+| Endpoint | Purpose | Frequency | Expected Response |
+|----------|---------|-----------|-------------------|
+| `http://localhost:3500/health` | Service Launcher health | 30s | `{"status":"ok"}` |
+| `http://localhost:3500/api/status` | Service status aggregation | 30s | `{"overallStatus":"ok"}` |
+| `http://localhost:3500/api/health/full` | Comprehensive health | 60s | `{"overallHealth":"healthy"}` |
+
+## Log Management
+
+### Viewing Logs
+
+**Standalone**:
+```bash
+# Real-time logs (if using process manager)
+pm2 logs service-launcher
+
+# File logs (if configured)
+tail -f logs/service-launcher.log | jq '.'
+```
+
+**Docker**:
+```bash
+# Real-time logs
+docker logs -f service-launcher --tail 100
+
+# Last 24 hours
+docker logs --since 24h service-launcher | jq '.'
+
+# Filter by level
+docker logs service-launcher | jq 'select(.level >= 40)'  # Warn and error only
+```
+
+### Log Levels
+
+**Production** (JSON format):
+```json
+{"level":30,"time":"2025-10-27T12:00:00.000Z","msg":"Service health check completed"}
+```
+
+**Development** (pretty print):
+```
+[INFO] 12:00:00 - Service health check completed
+```
+
+**Levels**:
+- 10: TRACE (most verbose)
+- 20: DEBUG
+- 30: INFO (default)
+- 40: WARN
+- 50: ERROR
+- 60: FATAL
+
+### Log Rotation
+
+**Setup logrotate** (if using file logs):
+
+```bash
+# /etc/logrotate.d/service-launcher
+/path/to/logs/service-launcher.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    missingok
+    create 0644 user group
+    postrotate
+        pkill -USR2 -f service-launcher
+    endscript
+}
+```
+
+## Performance Monitoring
+
+### Response Time Tracking
+
+```bash
+# Measure /health endpoint
+time curl -s http://localhost:3500/health > /dev/null
+# Expected: &lt;50ms
+
+# Measure /api/status endpoint
+time curl -s http://localhost:3500/api/status > /dev/null
+# Expected: &lt;3s
+
+# Measure /api/health/full (cached)
+time curl -s http://localhost:3500/api/health/full > /dev/null
+# Expected: &lt;10ms (HIT) or &lt;5s (MISS)
+```
+
+### Cache Performance
+
+```bash
+# Check cache hit rate over 1 minute
+for i in {1..12}; do
+  curl -sI http://localhost:3500/api/health/full | grep X-Cache-Status
+  sleep 5
+done
+
+# Expected: First request MISS, subsequent requests HIT for 60s
+```
+
+### Resource Usage
+
+**CPU and Memory**:
+```bash
+# Standalone
+ps aux | grep node | grep service-launcher
+
+# Docker
+docker stats service-launcher --no-stream
+```
+
+**Expected Resource Usage**:
+- CPU: &lt;5% (idle), &lt;20% (under load)
+- Memory: 50-150 MB
+- Network: &lt;1 MB/s
+
+## Service Status Management
+
+### Viewing Service Status
+
+```bash
+# All services
+curl http://localhost:3500/api/status | jq '.services[] | {name, status, port}'
+
+# Only degraded/down services
+curl http://localhost:3500/api/status | jq '.services[] | select(.status != "ok") | {name, status, details}'
+
+# Count by status
+curl http://localhost:3500/api/status | jq '{total: .totalServices, degraded: .degradedCount, down: .downCount}'
+```
+
+### Interpreting Status
+
+**Overall Status**:
+- `ok`: All services responding correctly
+- `degraded`: Some services with 4xx/5xx responses
+- `down`: One or more services not responding
+
+**Individual Service Status**:
+- `ok`: HTTP 200 response, latency normal
+- `degraded`: HTTP 4xx/5xx response
+- `down`: Timeout or connection error
+
+## Maintenance Tasks
+
+### Cache Management
+
+```bash
+# View cache status
+curl -sI http://localhost:3500/api/health/full | grep -E "X-Cache"
+
+# Force cache refresh (wait for TTL expiry or restart)
+docker restart service-launcher
+
+# Or change cache TTL (requires code change)
+# cache.TTL = 30000 in healthCheckService.js
+```
+
+### Configuration Updates
+
+```bash
+# 1. Update .env file
+nano /home/marce/Projetos/TradingSystem/.env
+
+# 2. Restart service to apply changes
+docker restart service-launcher
+
+# Or standalone
+stop && start
+
+# 3. Verify new configuration
+curl http://localhost:3500/api/status | jq '.services[] | {name, port}'
+```
+
+### Dependency Updates
+
+```bash
+# 1. Stop service
+stop
+
+# 2. Update dependencies
+cd apps/status
+npm update
+
+# 3. Run tests
+npm test
+
+# 4. Restart service
+start
+
+# 5. Verify health
+curl http://localhost:3500/health
+```
+
+## Backup and Recovery
+
+### Configuration Backup
+
+```bash
+# Backup configuration
+cp /home/marce/Projetos/TradingSystem/.env ./backups/.env.$(date +%Y%m%d)
+
+# Backup entire service directory
+tar -czf service-launcher-backup-$(date +%Y%m%d).tar.gz apps/status/
+```
+
+### Recovery from Failure
+
+```bash
+# 1. Check status
+curl http://localhost:3500/health || echo "Service down"
+
+# 2. View logs for errors
+docker logs service-launcher --tail 50
+
+# 3. Restart service
+docker restart service-launcher
+
+# 4. If restart fails, check configuration
+docker logs service-launcher
+
+# 5. If configuration issue, restore from backup
+cp ./backups/.env.20251027 /home/marce/Projetos/TradingSystem/.env
+
+# 6. Restart
+docker restart service-launcher
+```
+
+## Security Operations
+
+### Access Control
+
+Service Launcher is protected by:
+- **CORS**: Restricts origins to Dashboard + Docs
+- **Rate Limiting**: 200 req/min by default
+- **Local-only**: Binds to localhost (not exposed to network)
+
+**Verify CORS**:
+```bash
+curl -H "Origin: http://malicious.com" http://localhost:3500/health
+# Should fail or return CORS error
+```
+
+**Verify Rate Limiting**:
+```bash
+# Send 201 requests
+for i in {1..201}; do curl -s http://localhost:3500/health; done
+# Last requests should return HTTP 429 Too Many Requests
+```
+
+### Audit Logging
+
+**Enable audit logs** (if needed):
+
+```javascript
+// Add to server.js
+app.use((req, res, next) => {
+  logger.info({
+    event: 'http_request',
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
+  next();
+});
+```
+
+## Integration with Other Services
+
+### Dashboard Integration
+
+Service Launcher provides health data to Dashboard's ConnectionsPage:
+
+```typescript
+// Dashboard fetches every 30s
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const response = await fetch('http://localhost:3500/api/status');
+    const data = await response.json();
+    setServiceStatus(data);
+  }, 30000);
+
+  return () => clearInterval(interval);
+}, []);
+```
+
+**Verify Integration**:
+```bash
+# Check Dashboard can access Service Launcher
+curl -H "Origin: http://localhost:3103" http://localhost:3500/api/status
+# Should succeed with JSON response
+```
+
+### Prometheus Integration
+
+**Add to Prometheus scrape config**:
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: 'service-launcher'
+    static_configs:
+      - targets: ['localhost:3500']
+    metrics_path: '/metrics'  # If implemented
+```
+
+**Note**: Prometheus metrics endpoint not yet implemented. Track in roadmap.
+
+### Grafana Dashboards
+
+**Create dashboard with panels**:
+- Overall status gauge (ok/degraded/down)
+- Service count by status (bar chart)
+- Average latency over time (line graph)
+- Cache hit rate (percentage)
+- Request rate (requests/min)
+
+**Data source**: Prometheus (when metrics endpoint available)
+
+## Troubleshooting Operations
+
+### Service Won't Start
+
+```bash
+# 1. Check port availability
+lsof -i:3500
+
+# 2. Check configuration
+cat /home/marce/Projetos/TradingSystem/.env | grep SERVICE_LAUNCHER
+
+# 3. Check dependencies
+cd apps/status && npm install
+
+# 4. Check health script
+bash scripts/maintenance/health-check-all.sh --format json
+
+# 5. Try with debug logging
+SERVICE_LAUNCHER_LOG_LEVEL=debug npm start
+```
+
+### High Latency
+
+```bash
+# 1. Check service status
+curl -w "@-" -o /dev/null -s http://localhost:3500/api/status <<'EOF'
+    time_total:  %{time_total}s\n
+EOF
+
+# 2. Identify slow services
+curl http://localhost:3500/api/status | jq '.services[] | select(.latencyMs > 500) | {name, latencyMs}'
+
+# 3. Check target service health
+curl http://localhost:{port}/health  # For slow service
+
+# 4. Increase timeout if needed
+SERVICE_LAUNCHER_TIMEOUT_MS=5000 docker restart service-launcher
+```
+
+### Cache Not Working
+
+```bash
+# 1. Verify cache headers
+curl -I http://localhost:3500/api/health/full | grep X-Cache
+
+# 2. Test cache behavior
+# First request: MISS
+curl -sI http://localhost:3500/api/health/full | grep X-Cache-Status
+# Expected: X-Cache-Status: MISS
+
+# Second request (within 60s): HIT
+curl -sI http://localhost:3500/api/health/full | grep X-Cache-Status
+# Expected: X-Cache-Status: HIT
+
+# 3. Check logs for cache operations
+docker logs service-launcher | grep cache
+```
+
+## Operational Metrics
+
+### Key Performance Indicators (KPIs)
+
+| Metric | Target | Alert Threshold |
+|--------|--------|-----------------|
+| Availability | 99.9% | &lt;99% |
+| /health response time | &lt;50ms | &gt;200ms |
+| /api/status response time | &lt;3s | &gt;5s |
+| Cache hit rate | &gt;80% | &lt;60% |
+| Error rate | &lt;1% | &gt;5% |
+| Service restart frequency | &lt;1/day | &gt;3/day |
+
+### Collecting Metrics
+
+```bash
+# Availability (last 24h)
+uptime=$(docker inspect service-launcher --format='{{.State.StartedAt}}')
+echo "Started: $uptime"
+
+# Error rate (last 1000 requests)
+error_count=$(docker logs service-launcher --tail 1000 | jq -r 'select(.level >= 50)' | wc -l)
+echo "Errors: $error_count/1000"
+
+# Cache hit rate (sample)
+cache_hits=$(docker logs service-launcher --tail 1000 | grep "X-Cache-Status: HIT" | wc -l)
+cache_total=$(docker logs service-launcher --tail 1000 | grep "X-Cache-Status" | wc -l)
+echo "Cache hit rate: $(echo "scale=2; $cache_hits/$cache_total*100" | bc)%"
+```
+
+## Scheduled Maintenance
+
+### Weekly Tasks
+
+- [ ] Review logs for errors/warnings
+- [ ] Check disk usage (logs, cache)
+- [ ] Verify all monitored services are healthy
+- [ ] Update configuration if services added/removed
+- [ ] Run test suite: `npm test`
+
+### Monthly Tasks
+
+- [ ] Update Node.js dependencies: `npm update`
+- [ ] Review and optimize health check timeouts
+- [ ] Analyze cache performance (hit rate, TTL)
+- [ ] Review security logs (CORS violations, rate limit hits)
+- [ ] Backup configuration and service directory
+
+### Quarterly Tasks
+
+- [ ] Upgrade Node.js version (if new LTS available)
+- [ ] Review and update security practices
+- [ ] Audit access logs
+- [ ] Performance testing and optimization
+- [ ] Update documentation with operational changes
+
+## Related Documentation
+
+- [Configuration Guide](./config) - Environment variables and setup
+- [Deployment Guide](./deployment) - Startup and deployment procedures
+- [Runbook](./runbook) - Detailed troubleshooting procedures
+- [Architecture](./architecture) - System design and components

@@ -7,20 +7,33 @@ const { Pool } = pg;
 class TimescaleClient {
   constructor() {
     this.schema = config.timescale.schema || 'tp_capital';
-    
-    this.pool = new Pool({
-      host: config.timescale.host,
-      port: config.timescale.port,
-      database: config.timescale.database,
-      user: config.timescale.user,
-      password: config.timescale.password,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-      // Set search_path at connection level
-      options: `-c search_path=${this.schema},public`,
-    });
-    
+
+    const poolConfig = {
+      max: config.timescale.pool?.max ?? 10,
+      idleTimeoutMillis: config.timescale.pool?.idleTimeoutMs ?? 30000,
+      connectionTimeoutMillis: config.timescale.pool?.connectionTimeoutMs ?? 5000,
+    };
+
+    if (config.timescale.connectionString) {
+      poolConfig.connectionString = config.timescale.connectionString;
+    } else {
+      poolConfig.host = config.timescale.host;
+      poolConfig.port = config.timescale.port;
+      poolConfig.database = config.timescale.database;
+      poolConfig.user = config.timescale.user;
+      poolConfig.password = config.timescale.password;
+    }
+
+    if (config.timescale.ssl) {
+      poolConfig.ssl = config.timescale.ssl;
+    }
+
+    if (this.schema) {
+      poolConfig.options = `-c search_path=${this.schema},public`;
+    }
+
+    this.pool = new Pool(poolConfig);
+
     // Set search path for this connection pool
     this.pool.on('connect', async (client) => {
       try {
@@ -97,6 +110,25 @@ class TimescaleClient {
         ingested_at: '2025-10-06T15:43:52Z',
       },
     ];
+  }
+
+  /**
+   * Execute a query on the TP Capital database
+   * @param {string} sql - SQL query
+   * @param {Array} params - Query parameters
+   * @returns {Promise<pg.QueryResult>}
+   */
+  async query(sql, params = []) {
+    try {
+      return await this.pool.query(sql, params);
+    } catch (error) {
+      logger.error({
+        err: error,
+        sql: sql.substring(0, 100),
+        params
+      }, 'TP Capital DB query error');
+      throw error;
+    }
   }
 
   async healthcheck() {
@@ -571,4 +603,3 @@ class TimescaleClient {
 }
 
 export const timescaleClient = new TimescaleClient();
-

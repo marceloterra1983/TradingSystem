@@ -1,5 +1,6 @@
 ---
 title: Deployment Guide
+sidebar_position: 6
 description: Deploying the TP Capital application across environments.
 tags:
   - apps
@@ -8,106 +9,58 @@ tags:
 owner: DocsOps
 lastReviewed: '2025-10-26'
 ---
-## Windows Installation
+## Local Development (Linux/WSL/macOS)
 
-TP Capital is designed for Linux/WSL deployment. For Windows native deployment:
-
-### Prerequisites
-
-- Node.js 18+ installed.
-- QuestDB running (via Docker Desktop or native Windows build).
-- Git for cloning repository.
-
-### Step-by-Step Installation
-
-1. **Clone Repository**
+1. **Clone & Install**
 
    ```bash
    git clone https://github.com/<owner>/TradingSystem.git
    cd TradingSystem/apps/tp-capital
-   ```
-
-2. **Install Dependencies**
-
-   ```bash
    npm install
    ```
 
-3. **Configure Environment**
+2. **Configure Environment**
 
    ```bash
    cp .env.example .env
-   # Edit `.env` and set `TP_CAPITAL_API_PORT=4005`
-   #   (default dev port is 3200; use 4005 only if 3200 conflicts)
-   # - QUESTDB_HTTP_URL=http://localhost:9002
-   # - QUESTDB_ILP_HOST=localhost
-   # - QUESTDB_ILP_PORT=9009
-   # - TELEGRAM_BOT_TOKEN=<your-token>
+   # Key vars:
+   # PORT=4005
+   # TIMESCALEDB_HOST=localhost
+   # TIMESCALEDB_PORT=5433
+   # TIMESCALEDB_DATABASE=APPS-TPCAPITAL
+   # TIMESCALEDB_SCHEMA=tp_capital
+   # GATEWAY_DATABASE_SCHEMA=telegram_gateway
+   # TP_CAPITAL_SIGNALS_CHANNEL_ID=-1001649127710
    ```
 
-4. **Start QuestDB**
+3. **Start TimescaleDB**
 
    ```bash
-   # Via Docker Desktop
-   cd infrastructure
-   docker compose up questdb -d
-
-   # Or download QuestDB Windows binary from questdb.io
+   docker compose -f infrastructure/docker-compose.yml up timescaledb -d
    ```
 
-5. **Start Service**
+4. **Run API**
 
    ```bash
    npm run dev
-   # Service starts on http://localhost:3200 by default (uses TP_CAPITAL_API_PORT)
+   # API available at http://localhost:4005
    ```
 
-6. **Verify Installation**
+5. **Optional – Start Telegram Gateway Stack**
 
    ```bash
-   # Check health endpoint
-   curl http://localhost:3200/health
-   # If you changed TP_CAPITAL_API_PORT, adjust the port above.
-
-   # Check QuestDB UI
-   # Open browser: http://localhost:9002
-
-   # Seed sample data
-   npm run seed
-
-   # Query signals
-   curl http://localhost:3200/signals
-   # Adjust port if TP_CAPITAL_API_PORT differs.
+   bash tools/scripts/start-local-telegram-gateway.sh
+   # Boots TimescaleDB, Gateway (4006/4010) and TP Capital API
    ```
 
-### Post-Install Validation
+6. **Verify**
 
-- ✅ Service responds on port defined by `TP_CAPITAL_API_PORT` (default 3200).
-- ✅ QuestDB UI accessible on port 9002.
-- ✅ `/health` endpoint returns 200 OK.
-- ✅ `/signals` endpoint returns JSON array.
-- ✅ Sample data visible in QuestDB console.
-
-## Linux/WSL Deployment
-
-### Local Development
-
-```bash
-cd apps/tp-capital
-cp .env.example .env
-# Edit .env and set TP_CAPITAL_API_PORT=3200
-npm install
-npm run dev
-```
-
-### Docker Compose (Recommended)
-
-```bash
-cd apps/tp-capital/infrastructure
-docker compose up --build
-```
-
-Starts tp-capital-signals service (port 4005) and QuestDB (HTTP/UI 9002 on host, ILP 9009) on a shared Docker network.
+   ```bash
+   curl http://localhost:4005/health
+   curl http://localhost:4005/signals?limit=1
+   psql "postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL" -c \
+     "SELECT COUNT(*) FROM tp_capital.tp_capital_signals;"
+   ```
 
 ### Seed Sample Data
 
@@ -115,7 +68,7 @@ Starts tp-capital-signals service (port 4005) and QuestDB (HTTP/UI 9002 on host,
 npm run seed
 ```
 
-Ensure QuestDB is running before seeding.
+> Ensure TimescaleDB is running before seeding (`docker compose ps timescaledb`).
 
 ## Automation
 
@@ -155,16 +108,16 @@ Ensure QuestDB is running before seeding.
 
    ```bash
    curl http://<host>:4005/health
-   curl http://<host>:9002
-   docker compose -f docker-compose.prod.yml logs -f tp-capital-signals
+   curl http://<host>:4006/health    # Telegram Gateway
+   docker compose -f docker-compose.prod.yml logs -f tp-capital
+   psql "postgresql://timescale:***@<host>:5433/APPS-TPCAPITAL" -c "SELECT COUNT(*) FROM tp_capital.tp_capital_signals LIMIT 5;"
    ```
 
 5. **Verify Data Persistence**
 
    ```bash
-   docker volume inspect questdb-data
-   # QuestDB UI: http://<host>:9002
-   # Run: SELECT * FROM tp_capital_signals ORDER BY ts DESC LIMIT 10;
+   docker volume inspect tp-capital-timescaledb-data
+   pg_dump --schema=tp_capital APPS-TPCAPITAL > tp-capital-backup.sql
    ```
 
 ### Rollback Procedure
@@ -204,6 +157,6 @@ Ensure QuestDB is running before seeding.
 
 ### Monitoring Integration
 
-- Prometheus scrapes `http://<host>:4005/metrics` every 15 seconds (metrics: ingestion_rate, error_rate, latency_p95, questdb_connection_status).
-- Grafana dashboard: `tools/monitoring/dashboards/tp-capital.json` (panels for ingestion rate, API latency, QuestDB health, error rate).
-- Alerts: Ingestion latency > 1000ms for 5 minutes, QuestDB connection failure, error rate > 5% for 10 minutes.
+- Prometheus scrapes `http://<host>:4005/metrics` every 15 seconds (metrics: `tpcapital_gateway_messages_processed_total`, `tpcapital_gateway_polling_lag_seconds`, `http_request_duration_seconds`).
+- Grafana dashboard: `tools/monitoring/dashboards/tp-capital.json` (panels for ingestion rate, API latency, gateway backlog, Timescale health).
+- Alerts: Ingestion latency > 1s p95 for 5 minutes, Timescale connectivity failure, queue backlog > 50, error rate > 5% for 10 minutes.

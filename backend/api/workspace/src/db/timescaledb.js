@@ -22,16 +22,21 @@ export class TimescaleDBClient {
 
     try {
       const poolConfig = {
-        host: timescaledbConfig.host,
-        port: timescaledbConfig.port,
-        database: timescaledbConfig.database,
-        user: timescaledbConfig.user,
-        password: timescaledbConfig.password,
         ssl: timescaledbConfig.ssl,
         max: timescaledbConfig.max,
         idleTimeoutMillis: timescaledbConfig.idleTimeoutMillis,
         connectionTimeoutMillis: timescaledbConfig.connectionTimeoutMillis,
       };
+
+      if (timescaledbConfig.connectionString) {
+        poolConfig.connectionString = timescaledbConfig.connectionString;
+      } else {
+        poolConfig.host = timescaledbConfig.host;
+        poolConfig.port = timescaledbConfig.port;
+        poolConfig.database = timescaledbConfig.database;
+        poolConfig.user = timescaledbConfig.user;
+        poolConfig.password = timescaledbConfig.password;
+      }
 
       if (timescaledbConfig.schema) {
         poolConfig.options = `-c search_path=${timescaledbConfig.schema},public`;

@@ -5,7 +5,7 @@ import pytest
 from aiobreaker import CircuitBreakerError
 from unittest.mock import AsyncMock
 
-from src.infrastructure.adapters import B3Client, TPCapitalClient, WorkspaceClient
+from src.infrastructure.adapters import TPCapitalClient, WorkspaceClient
 
 
 def _prepare_response(method: str, url: str, json_payload) -> httpx.Response:
@@ -81,59 +81,6 @@ async def test_tp_capital_get_signals(monkeypatch: pytest.MonkeyPatch):
     assert signals[0]["symbol"] == "PETR4"
     assert signals[0]["size"] == pytest.approx(1.0)
     mock_client.get.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_b3_get_data(monkeypatch: pytest.MonkeyPatch):
-    mock_client = AsyncMock()
-    mock_client.get = AsyncMock()
-    mock_client.aclose = AsyncMock()
-    monkeypatch.setattr("httpx.AsyncClient", lambda *args, **kwargs: mock_client)
-
-    client = B3Client()
-    response = _prepare_response(
-        "GET",
-        "http://localhost/overview",
-        {
-            "data": {
-                "snapshots": [
-                    {"symbol": "PETR4", "price": 37.5},
-                    {"symbol": "VALE3", "price": 62.3},
-                ],
-                "indicators": {"PETR4": {"sma": 35.2}},
-                "gammaLevels": [],
-                "dxy": 105.2,
-            }
-        },
-    )
-    mock_client.get.return_value = response
-
-    data = await client.get_b3_data("PETR4")
-
-    assert data["symbol"] == "PETR4"
-    assert data["snapshots"][0]["price"] == 37.5
-    mock_client.get.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_b3_get_adjustments(monkeypatch: pytest.MonkeyPatch):
-    mock_client = AsyncMock()
-    mock_client.get = AsyncMock()
-    mock_client.aclose = AsyncMock()
-    monkeypatch.setattr("httpx.AsyncClient", lambda *args, **kwargs: mock_client)
-
-    client = B3Client()
-    response = _prepare_response(
-        "GET",
-        "http://localhost/adjustments",
-        {"data": [{"symbol": "PETR4", "adjustment": 1.23}]},
-    )
-    mock_client.get.return_value = response
-
-    adjustments = await client.get_adjustments("PETR4")
-
-    assert adjustments[0]["symbol"] == "PETR4"
-    mock_client.get.assert_awaited_once_with("/adjustments", params={"instrument": "PETR4", "limit": 120})
 
 
 @pytest.mark.asyncio

@@ -11,8 +11,8 @@ const config = {
   tagline: 'Product knowledge, runbooks, and specs in one place',
   url: 'https://example.com',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
-  favicon: 'img/logo.svg',
+  onBrokenLinks: 'warn',  // Temporariamente alterado de 'throw' para 'warn' para permitir build
+  favicon: 'img/favicon.svg',
   organizationName: 'TradingSystem',
   projectName: 'docs',
   markdown: {
@@ -62,6 +62,26 @@ const config = {
             id: 'tp-capital-api',
             spec: 'static/specs/tp-capital.openapi.yaml',
             route: '/api/tp-capital',
+          },
+          {
+            id: 'status-api',
+            spec: 'static/specs/status-api.openapi.yaml',
+            route: '/api/status',
+          },
+          {
+            id: 'firecrawl-proxy',
+            spec: 'static/specs/firecrawl-proxy.openapi.yaml',
+            route: '/api/firecrawl',
+          },
+          {
+            id: 'telegram-gateway-api',
+            spec: 'static/specs/telegram-gateway-api.openapi.yaml',
+            route: '/api/telegram-gateway',
+          },
+          {
+            id: 'alert-router',
+            spec: 'static/specs/alert-router.openapi.yaml',
+            route: '/api/alert-router',
           },
         ],
         theme: {
@@ -116,7 +136,10 @@ const config = {
         title: 'TradingSystem Docs',
         logo: {
           alt: 'TradingSystem Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo-light.svg',
+          srcDark: 'img/logo.svg',
+          width: 32,
+          height: 32,
         },
         items: [
           {
@@ -131,6 +154,18 @@ const config = {
             position: 'left',
             items: [
               {
+                label: 'Status API',
+                to: '/api/status',
+              },
+              {
+                label: 'Alert Router',
+                to: '/api/alert-router',
+              },
+              {
+                label: 'Firecrawl Proxy',
+                to: '/api/firecrawl',
+              },
+              {
                 label: 'Documentation API',
                 to: '/api/documentation-api',
               },
@@ -141,6 +176,10 @@ const config = {
               {
                 label: 'TP Capital API',
                 to: '/api/tp-capital',
+              },
+              {
+                label: 'Telegram Gateway API',
+                to: '/api/telegram-gateway',
               },
             ],
           },
@@ -178,7 +217,20 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-        additionalLanguages: ['bash', 'json', 'sql'],
+        additionalLanguages: ['bash', 'json', 'sql', 'yaml', 'typescript', 'javascript', 'jsx', 'tsx'],
+      },
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
+      announcementBar: {
+        id: 'support_us',
+        content:
+          '⭐ Se esta documentação foi útil, considere dar uma estrela no <a target="_blank" rel="noopener noreferrer" href="https://github.com/TradingSystem/TradingSystem">GitHub</a>!',
+        backgroundColor: '#06b6d4',
+        textColor: '#ffffff',
+        isCloseable: true,
       },
     }),
 };

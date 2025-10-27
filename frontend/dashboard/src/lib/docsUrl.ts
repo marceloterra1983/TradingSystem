@@ -7,7 +7,8 @@ import { apiConfig } from '../config/api';
  * - Falls back to apiConfig.docsUrl when no base is provided
  */
 export function normalizeDocsBase(base?: string): string {
-  const candidate = typeof base === 'string' && base.trim() ? base : apiConfig.docsUrl;
+  const trimmed = typeof base === 'string' ? base.trim() : '';
+  const candidate = trimmed || apiConfig.docsUrl;
   if (!candidate) {
     return '';
   }
@@ -39,4 +40,3 @@ export function buildDocsUrl(path = '', base?: string): string {
 
   return `${normalizedBase}/${sanitizedPath}`;
 }
-

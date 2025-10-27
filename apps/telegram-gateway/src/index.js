@@ -17,6 +17,7 @@ import {
   isChannelAllowed,
   closeMessageStore,
 } from './messageStore.js';
+import apiRoutes from './routes.js';
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +34,9 @@ try {
 }
 
 const app = express();
+
+// Middleware
+app.use(express.json());
 
 // Prometheus metrics
 const register = new promClient.Registry();
@@ -109,10 +113,13 @@ app.get('/', (req, res) => {
   res.json({
     status: 'ok',
     service: 'Telegram Gateway (Shared Service)',
-    endpoints: ['/health', '/metrics'],
+    endpoints: ['/health', '/metrics', '/sync-messages'],
     message: 'Shared Telegram Gateway - handles authentication and message forwarding',
   });
 });
+
+// API routes
+app.use('/', apiRoutes);
 
 // Start HTTP server
 const server = app.listen(config.gateway.port, () => {
@@ -320,6 +327,154 @@ if (config.telegram.phoneNumber) {
       logger.info({ sessionFile }, 'Telegram user client connected successfully');
       logger.info('Session saved to file');
       telegramConnectionGauge.set(1);
+      
+      // Tornar o userClient acessível nas rotas
+      app.set('telegramUserClient', userClient);
+
+      // Important: Enable catching up to receive all updates
+      // This ensures the client receives updates for all channels/chats it's subscribed to
+      try {
+        await userClient.catchUp();
+        logger.info('Telegram user client caught up with updates');
+      } catch (catchUpError) {
+        logger.warn({ err: catchUpError }, 'CatchUp failed, but continuing anyway');
+      }
+
+      // Add event handler for new channel messages (polling mode)
+      userClient.addEventHandler(async (event) => {
+        try {
+          // Handle new channel messages
+          if (event.className === 'UpdateNewChannelMessage') {
+            const message = event.message;
+            
+            // Only process messages from channels (not groups or private chats)
+            if (!message.peerId?.channelId) {
+              return;
+            }
+
+            const channelId = `-100${message.peerId.channelId.toString()}`;
+            const messageId = message.id;
+            const receivedAt = new Date();
+            const telegramDate = new Date(message.date * 1000);
+
+            // Extract message text
+            let text = '';
+            if (message.message) {
+              text = message.message;
+            }
+
+            // Extract media info
+            const mediaRefs = [];
+            let mediaType = 'text';
+
+            if (message.media) {
+              const mediaClass = message.media.className;
+              if (mediaClass === 'MessageMediaPhoto') {
+                mediaType = 'photo';
+                mediaRefs.push({
+                  type: 'photo',
+                  id: message.media.photo?.id?.toString(),
+                });
+              } else if (mediaClass === 'MessageMediaDocument') {
+                mediaType = 'document';
+                const doc = message.media.document;
+                mediaRefs.push({
+                  type: 'document',
+                  id: doc?.id?.toString(),
+                  mimeType: doc?.mimeType,
+                  size: doc?.size,
+                });
+              } else if (mediaClass === 'MessageMediaWebPage') {
+                mediaType = 'text'; // Treat as text
+              }
+            }
+
+            const messageData = {
+              channelId,
+              messageId,
+              text: text || '',
+              caption: null,
+              timestamp: telegramDate.toISOString(),
+              photos: [],
+              mediaRefs,
+              mediaType,
+              receivedAt: receivedAt.toISOString(),
+              telegramDate: telegramDate.toISOString(),
+              threadId: null,
+              source: 'user_client',
+              messageType: 'channel_post',
+              chatId: null,
+              metadata: {
+                telegramDetails: {
+                  peerId: message.peerId?.channelId?.toString(),
+                  out: message.out,
+                  mentioned: message.mentioned,
+                  mediaUnread: message.mediaUnread,
+                  silent: message.silent,
+                  post: message.post,
+                  fromScheduled: message.fromScheduled,
+                },
+              },
+            };
+
+            // Check if channel is allowed
+            const isAllowed = await isChannelAllowed(messageData.channelId, { logger });
+            if (!isAllowed) {
+              logger.debug(
+                {
+                  channelId: messageData.channelId,
+                  messageId: messageData.messageId,
+                },
+                'Ignoring message from channel not registered in channel registry (user client)',
+              );
+              return;
+            }
+
+            messagesReceivedCounter.inc({ channel_id: channelId });
+
+            // Save to database
+            try {
+              await recordMessageReceived(messageData, {
+                metadata: {
+                  contentPreview: text.slice(0, 140) || null,
+                },
+                logger,
+              });
+
+              logger.info({
+                channelId,
+                messageId,
+                text: text.substring(0, 50),
+              }, 'Received channel post via user client');
+
+            } catch (storeError) {
+              logger.error(
+                { err: storeError, channelId, messageId },
+                'Failed to persist Telegram message from user client',
+              );
+            }
+
+            // Publish to API endpoints
+            try {
+              const result = await publishWithRetry(messageData);
+              if (result.success) {
+                messagesPublishedCounter.inc();
+              } else {
+                publishFailuresCounter.inc({ reason: 'max_retries' });
+              }
+            } catch (publishError) {
+              logger.error(
+                { err: publishError, channelId, messageId },
+                'Failed to publish message from user client',
+              );
+            }
+          }
+        } catch (error) {
+          logger.error({ err: error }, 'Error processing user client message event');
+        }
+      });
+
+      logger.info('User client event handler registered for channel messages');
 
     } catch (error) {
       logger.error({ err: error }, 'Failed to connect Telegram user client');

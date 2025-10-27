@@ -49,7 +49,7 @@ SKIP_SERVICES=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 
 # Node.js service ports
-PORTS=(3103 3205 3500)
+PORTS=(4006 4010 3103 3205 3500)
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -84,7 +84,7 @@ Options:
   --help, -h      Show this help message
 
 Stops:
-  🖥️  Node.js services (Dashboard, Docusaurus, Status API)
+  🖥️  Node.js services (Telegram Gateway, Gateway API, Dashboard, Docusaurus, Status)
   🐳 Docker containers (TP Capital API, Workspace)
 
 Features:

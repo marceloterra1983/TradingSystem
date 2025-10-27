@@ -63,7 +63,6 @@ declare -a DEPENDENCY_ISSUES=()
 declare -a LOCAL_DOCKER_DEPENDENCIES=(
   "Workspace:data-timescaledb"
   "TP Capital:data-timescaledb"
-  "B3:data-timescaledb"
   "WebScraper:data-timescaledb"
   "Firecrawl Proxy:firecrawl-api,firecrawl-playwright,firecrawl-redis,firecrawl-postgres"
 )

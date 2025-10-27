@@ -1,6 +1,9 @@
 import pg from 'pg';
 import { config } from '../config.js';
 
+// Configure pg to parse BIGINT as string to avoid precision loss
+pg.types.setTypeParser(20, (val) => String(val)); // BIGINT
+
 let pool;
 
 const quoteIdentifier = (value) => `"${String(value).replace(/"/g, '""')}"`;
@@ -14,8 +17,8 @@ const mapRow = (row) => {
   return {
     id: row.id,
     channelId: row.channel_id,
-    messageId: row.message_id,
-    threadId: row.thread_id,
+    messageId: row.message_id ? String(row.message_id) : null,
+    threadId: row.thread_id ? String(row.thread_id) : null,
     source: row.source,
     messageType: row.message_type,
     text: row.text,

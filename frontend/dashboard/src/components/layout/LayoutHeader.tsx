@@ -1,9 +1,11 @@
 import { MoreVertical, Menu, Sun, Moon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { ConnectionStatus } from '../ConnectionStatus';
+import { Clock } from '../ui/clock';
 import { cn } from '../../lib/utils';
 import { Page, getSectionByPageId } from '../../data/navigation';
 import { useTheme } from '../../contexts/ThemeContext';
+import { Logo } from '../ui/logo';
 
 export interface LayoutHeaderProps {
   currentPage: Page;
@@ -45,11 +47,16 @@ export function LayoutHeader({
         {isMobile && onToggleSidebar && (
           <button
             onClick={onToggleSidebar}
-            className="rounded-lg p-2 transition-colors hover:bg-gray-100 lg:hidden"
+            className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
             aria-label="Toggle sidebar"
           >
-            <Menu className="h-5 w-5 text-gray-600" />
+            <Menu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </button>
+        )}
+
+        {/* Logo (mobile only) */}
+        {isMobile && (
+          <Logo variant="icon" size="sm" className="lg:hidden" />
         )}
 
         {/* Page Title */}
@@ -77,6 +84,11 @@ export function LayoutHeader({
         {/* Connection Status */}
         <div className="hidden lg:flex">
           <ConnectionStatus showDetails />
+        </div>
+
+        {/* Clock */}
+        <div className="hidden md:flex">
+          <Clock showIcon timezone="(SP)" />
         </div>
 
         {/* Theme Toggle */}

@@ -49,41 +49,6 @@ function isGenericSelector(selector: string): boolean {
   return generic.includes(selector.trim().toLowerCase());
 }
 
-function analysePattern(pattern: string): Record<string, string> {
-  const warnings: Record<string, string> = {};
-  try {
-    const regex = new RegExp(pattern);
-
-    if (pattern === '.*' || pattern === '.+' || pattern === '.*?') {
-      warnings.urlPattern = 'Pattern is very broad and may match unintended pages.';
-    }
-
-    const sample = [
-      'https://example.com',
-      'https://docs.example.com/api/v1',
-      'https://blog.example.com/post/slug',
-      'http://example.com/page?q=test',
-    ];
-    const matches = sample.filter((url) => regex.test(url)).length;
-    if (matches === sample.length) {
-      warnings.urlPattern = 'Pattern matches common URLs. Consider making it more specific.';
-    }
-
-    if (pattern.includes('https?') && !pattern.includes('\\?')) {
-      warnings.urlPattern = 'Did you mean to escape the question mark (use `\\?`) when matching http/https?';
-    }
-    if (pattern.includes('[.]')) {
-      warnings.urlPattern = 'Square brackets around dot "[.]" are unnecessary. Use "\\." instead.';
-    }
-    if (pattern.includes('.*.*')) {
-      warnings.urlPattern = 'Repeated wildcards " .*.* " can be simplified to " .* ".';
-    }
-  } catch {
-    // invalid regex handled elsewhere
-  }
-  return warnings;
-}
-
 export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: ScrapeValidationOptions = {}): ValidationResult {
   const errors: Record<string, string> = {};
   const warnings: Record<string, string> = {};

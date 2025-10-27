@@ -10,8 +10,8 @@ if [ "${SKIP_DOCS_HOOKS:-0}" = "1" ]; then
   exit 0
 fi
 
-echo "🛠  docs_v2 check pipeline"
+echo "🛠  docs check pipeline"
 # docs:check pipeline: auto → validate → lint → typecheck → test → build
-npm --prefix docs_v2 run docs:check
+npm --prefix docs run docs:check
 
 echo "✅ Pre-push validation passed"
