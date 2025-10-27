@@ -178,9 +178,9 @@ Total: 1 container
 
 **Funcionalidades:**
 
-- ✅ Docusaurus em <http://localhost:3400/>
-- ✅ Specs em <http://localhost:3400/specs/>
-- ✅ Health endpoint em <http://localhost:3400/health>
+- ✅ Docusaurus em `http://localhost:3400/>
+- ✅ Specs em `http://localhost:3400/specs/>
+- ✅ Health endpoint em `http://localhost:3400/health>
 
 ---
 
@@ -493,8 +493,8 @@ $ curl -s http://localhost:3400/health | jq '.'
 
 **Acessar documentação:**
 
-- 📚 Docusaurus: <http://localhost:3400/>
-- 📖 Specs: <http://localhost:3400/specs/>
+- 📚 Docusaurus: `http://localhost:3400/>
+- 📖 Specs: `http://localhost:3400/specs/>
 
 ---
 

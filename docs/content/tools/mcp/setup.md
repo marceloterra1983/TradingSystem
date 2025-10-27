@@ -27,7 +27,7 @@ Os seguintes MCPs já estão prontos para uso (não precisam de configuração a
 
 **Como configurar:**
 
-1. Acesse: <https://github.com/settings/tokens>
+1. Acesse: `https://github.com/settings/tokens`
 2. Clique em "Generate new token" → "Generate new token (classic)"
 3. Dê um nome: `Cursor MCP Token`
 4. Selecione os seguintes scopes:

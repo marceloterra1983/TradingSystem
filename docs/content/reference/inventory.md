@@ -71,8 +71,8 @@ lastReviewed: '2025-10-27'
 
 **URLs Application Services**:
 
-- TP Capital API: <http://localhost:4005>
-- Workspace API: <http://localhost:3200>
+- TP Capital API: `http://localhost:4005`
+- Workspace API: `http://localhost:3200`
 
 ---
 
@@ -109,10 +109,10 @@ lastReviewed: '2025-10-27'
 
 **URLs Database Tools**:
 
-- Adminer: <http://localhost:8080>
-- PgAdmin: <http://localhost:5050>
-- PgWeb: <http://localhost:8081>
-- TimescaleDB Exporter: <http://localhost:9187/metrics>
+- Adminer: `http://localhost:8080`
+- PgAdmin: `http://localhost:5050`
+- PgWeb: `http://localhost:8081`
+- TimescaleDB Exporter: `http://localhost:9187/metrics>
 
 ---
 
@@ -127,10 +127,10 @@ lastReviewed: '2025-10-27'
 
 **URLs Monitoring**:
 
-- Prometheus: <http://localhost:9090>
-- Grafana: <http://localhost:3000>
-- Alertmanager: <http://localhost:9093>
-- Alert Router: <http://localhost:9094>
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+- Alertmanager: `http://localhost:9093`
+- Alert Router: `http://localhost:9094`
 
 ---
 
@@ -147,12 +147,12 @@ lastReviewed: '2025-10-27'
 
 **URLs AI/ML**:
 
-- Ollama: <http://localhost:11434>
-- LangGraph: <http://localhost:8111>
-- Agno Agents: <http://localhost:8200>
-- LlamaIndex Ingestion: <http://localhost:8201>
-- LlamaIndex Query: <http://localhost:8202>
-- Frontend AI Apps: <http://localhost:3001>
+- Ollama: `http://localhost:11434`
+- LangGraph: `http://localhost:8111`
+- Agno Agents: `http://localhost:8200`
+- LlamaIndex Ingestion: `http://localhost:8201`
+- LlamaIndex Query: `http://localhost:8202`
+- Frontend AI Apps: `http://localhost:3001`
 
 ---
 
@@ -166,9 +166,9 @@ lastReviewed: '2025-10-27'
 
 **URLs Documentation**:
 
-- Documentation API: <http://localhost:3400>
-- API Viewer (OLD): <http://localhost:3101> ⚠️ DEPRECATED
-- Firecrawl Proxy: <http://localhost:3600>
+- Documentation API: `http://localhost:3400`
+- API Viewer (OLD): `http://localhost:3101` ⚠️ DEPRECATED
+- Firecrawl Proxy: `http://localhost:3600`
 
 **IMPORTANTE**: `docs-api-viewer` (3101) está **DEPRECATED**. Usar novo API Viewer no Dashboard (3103/#/docs → DocsAPI) ou Docusaurus (3205/api/*).
 
@@ -184,9 +184,9 @@ lastReviewed: '2025-10-27'
 
 **URLs Firecrawl**:
 
-- Firecrawl API: <http://localhost:3002>
-- Firecrawl Playwright: <http://localhost:3003>
-- Firecrawl Proxy: <http://localhost:3600>
+- Firecrawl API: `http://localhost:3002`
+- Firecrawl Playwright: `http://localhost:3003`
+- Firecrawl Proxy: `http://localhost:3600`
 
 ---
 
@@ -196,7 +196,7 @@ lastReviewed: '2025-10-27'
 |-----------|---------|-------|--------|-----------|
 | **individual-containers-registry** | img-outros-containers-registry | 5000 | ✅ Up 6h | Docker Registry (private images) |
 
-**URL**: <http://localhost:5000>
+**URL**: `http://localhost:5000`
 
 ---
 

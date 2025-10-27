@@ -38,7 +38,7 @@ lastReviewed: '2025-10-27'
 
 ### Passo 1: Configurar GitHub Token (Opcional mas Recomendado)
 
-1. Acesse: <https://github.com/settings/tokens>
+1. Acesse: `https://github.com/settings/tokens`
 2. Gere um novo token com scopes: `repo` e `read:org`
 3. Edite `~/.cursor/mcp.json`
 4. Substitua `GITHUB_PERSONAL_ACCESS_TOKEN` pelo token gerado
