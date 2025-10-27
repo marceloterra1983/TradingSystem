@@ -21,6 +21,7 @@ Track revisions to the specification, guidelines, and related decisions for Orde
 Established specification-first design for the Order Manager service referencing architecture specifications (external files - migration pending).
 
 **Endpoints Defined**:
+
 - `POST /api/orders` — Create order with risk checks
 - `GET /api/orders` — List orders with filters
 - `GET /api/orders/{orderId}` — Get order details
@@ -33,6 +34,7 @@ Established specification-first design for the Order Manager service referencing
 - `GET /metrics` — Prometheus metrics
 
 **Core Features**:
+
 1. Market, limit, stop, and stop-limit order types
 2. Risk controls: daily loss limit, position size cap, trading hours validation
 3. Kill switch to cancel all open orders instantly
@@ -42,6 +44,7 @@ Established specification-first design for the Order Manager service referencing
 **Design Decisions**:
 
 ### Decision 1: Response Envelope
+
 - **Rationale**: Align with shared API styleguide to ensure consistent client handling.
 - **Structure**:
 
@@ -56,60 +59,72 @@ Established specification-first design for the Order Manager service referencing
 - **Alternative Considered**: Flat responses without envelope (rejected for inconsistency).
 
 ### Decision 2: Idempotency Key Strategy
+
 - **Rationale**: Prevent duplicate orders due to retries.
 - **Approach**: Optional `idempotencyKey` field retained for 24 hours.
 - **Alternative**: Mandatory keys for all requests (deemed too restrictive for MVP).
 
 ### Decision 3: Order Cancellation Idempotency
+
 - **Rationale**: Simplify client retry logic.
 - **Approach**: DELETE returns current status even when already canceled.
 - **Alternative**: Return 404 for repeated cancels (rejected as non-idempotent).
 
 ### Decision 4: Risk Check Sequence
+
 - **Rationale**: Fail fast and minimize latency.
 - **Sequence**: Trading hours → Kill switch → Daily loss limit → Position size → Margin.
 - **Alternative**: Parallel checks (rejected due to complexity vs. MVP timeline).
 
 ### Decision 5: No Order Modification in MVP
+
 - **Rationale**: Reduce implementation complexity and regression risk.
 - **Approach**: Require cancel + recreate for modifications.
 - **Future**: Introduce PUT `/api/orders/{orderId}` in v1.1.
 
 ### Decision 6: Synchronous Order Execution
+
 - **Rationale**: Simpler control flow with acceptable p95 latency &lt;500 ms.
 - **Approach**: POST blocks until submitted to broker.
 - **Future**: Transition to async queue in v2.0.
 
 ### Decision 7: Deferred Versioning
+
 - **Rationale**: Follow styleguide recommendation; avoid premature `/v1` prefix.
 - **Approach**: Maintain `/api/orders` and introduce `/api/v1` when breaking changes arise.
 
 **Technology Stack**:
+
 - .NET 8 / C#
 - ProfitDLL for execution
 - Port 3205
 - Windows-native deployment (no Docker)
 
 **Performance Targets**:
+
 - Order placement latency &lt;500 ms p95
 - Risk checks &lt;100 ms p95
 - Health check &lt;50 ms response time
 - Support 100 concurrent orders per account
 
 **Security**:
+
 - MVP: No authentication (internal only)
 - Planned: JWT bearer auth with role-based access
 
 **Rate Limiting**:
+
 - Planned: 300 requests per 60 seconds global limit
 - Endpoint-specific throttles for order creation and kill switch
 
 **Documentation**:
+
 - OpenAPI spec flagged as TODO
 - Redoc automation pending
 - SDD spec, guidelines, and changelog populated
 
 **Validation**:
+
 - ✅ Reviewed with ArchitectureGuild
 - ⏳ Implementation pending
 - ⏳ Integration tests pending
@@ -121,12 +136,14 @@ Established specification-first design for the Order Manager service referencing
 ### v1.1.0 - Q1 2025 (Planned)
 
 **Features**:
+
 - Add PUT `/api/orders/{orderId}` for order modification
 - Introduce WebSocket feed for real-time order status
 - Implement token-based authentication
 - Enable rate limiting middleware
 
 **Improvements**:
+
 - Optimize risk checks to &lt;50 ms p95
 - Add optimistic locking via version field
 - Enhance error responses with actionable remediation tips
@@ -136,17 +153,20 @@ Established specification-first design for the Order Manager service referencing
 ### v2.0.0 - Q2 2025 (Planned)
 
 **Breaking Changes**:
+
 - Adopt `/api/v1/orders` prefix
 - Adjust order status enum (rename `PENDING` → `CREATED`)
 - Deprecate legacy fields
 
 **Features**:
+
 - Asynchronous execution pipeline via message queue
 - Multi-broker support (Nelogica, XP, Clear)
 - Advanced order types (OCO, bracket)
 - Backtesting / simulation mode
 
 **Performance Targets**:
+
 - Order placement latency &lt;200 ms p95
 - Support 500 concurrent orders per account
 
@@ -200,6 +220,7 @@ Established specification-first design for the Order Manager service referencing
 - ✅ Performance targets established
 
 **Implementation Readiness**:
+
 - ⏳ OpenAPI spec outstanding
 - ⏳ Service codebase pending
 - ⏳ ProfitDLL integration pending

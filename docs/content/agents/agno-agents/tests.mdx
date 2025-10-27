@@ -20,21 +20,25 @@ Agno Agents include a comprehensive test suite covering unit tests, integration 
 ## Test Scope
 
 **Unit Tests**:
+
 - Domain entities (MarketSignal, RiskAssessment, AgentDecision)
 - Value objects (Symbol, Price, Confidence)
 - Utility functions (`_extract_size_value`, `calculate_confidence`)
 
 **Integration Tests**:
+
 - HTTP clients with httpx mocking and circuit breaker
 - WebSocket consumer with reconnection logic
 - Resilience patterns (retry, circuit breaker)
 
 **API Tests**:
+
 - FastAPI endpoints with TestClient
 - Request/response validation
 - Error handling
 
 **Agent Tests**:
+
 - MarketAnalysisAgent workflow simulation
 - RiskManagementAgent validation logic
 - SignalOrchestratorAgent coordination
@@ -46,12 +50,14 @@ Agno Agents include a comprehensive test suite covering unit tests, integration 
 **Purpose**: Test domain entities and value objects
 
 **Test Cases**:
+
 - MarketSignal creation and validation
 - RiskAssessment creation and validation
 - AgentDecision creation and validation
 - Pydantic schema validation (required fields, type checking)
 
 **Example**:
+
 ```python
 def test_market_signal_creation():
     signal = MarketSignal(
@@ -76,26 +82,31 @@ def test_market_signal_creation():
 **Test Cases**:
 
 **`test_market_analysis_agent`**:
+
 - Tests MarketAnalysisAgent with mock market data
 - Verifies signal generation for all requested symbols
 - Validates MarketSignal entity structure
 
 **`test_risk_management_agent`**:
+
 - Tests RiskManagementAgent with mock signals
 - Verifies RiskAssessment creation
 - Validates `signal_id` format and reasons list
 
 **`test_signal_orchestrator`**:
+
 - Tests SignalOrchestratorAgent with ORCHESTRATE action
 - Verifies `agents_involved` list populated
 - Validates result structure (signals + assessments)
 
 **`test_agent_error_handling`**:
+
 - Tests error handling when agent fails
 - Monkeypatches `agent.arun` to raise exception
 - Verifies exception propagates correctly
 
 **`test_agent_metrics_tracking`**:
+
 - Tests Prometheus metrics tracking
 - Verifies `AGENT_DECISIONS_TOTAL` counter increments
 - Validates metric labels (`agent_name`, `decision_type`)
@@ -107,6 +118,7 @@ def test_market_signal_creation():
 **Purpose**: Test HTTP client adapters and resilience patterns
 
 **Test Cases**:
+
 - `TPCapitalClient` methods (`ping`, `get_tp_capital_signals`)
 - `WorkspaceClient` methods (`ping`, `get_ideas`)
 - `RiskEngineClient` methods (`check_daily_limits`, `check_position_size`, `check_trading_hours`)
@@ -114,6 +126,7 @@ def test_market_signal_creation():
 - Circuit breaker state transitions (CLOSED → OPEN → HALF_OPEN)
 
 **Mocking Strategy**:
+
 - Use httpx.AsyncClient mocking for HTTP requests
 - Mock responses with realistic data
 - Simulate failures for resilience testing
@@ -125,6 +138,7 @@ def test_market_signal_creation():
 **Purpose**: Test FastAPI endpoints
 
 **Test Cases**:
+
 - `POST /api/v1/agents/analyze` (success, validation errors, 500 errors)
 - `POST /api/v1/agents/signals` (ANALYZE, VALIDATE, ORCHESTRATE actions)
 - `GET /api/v1/agents/status` (agent initialization status)
@@ -132,6 +146,7 @@ def test_market_signal_creation():
 - Request validation (Pydantic schema enforcement)
 
 **Testing Approach**:
+
 - Use FastAPI TestClient for synchronous testing
 - Mock agent functions to control behavior
 - Verify response schemas and status codes
@@ -143,6 +158,7 @@ def test_market_signal_creation():
 **Purpose**: Test FastAPI application startup and configuration
 
 **Test Cases**:
+
 - Application initialization
 - Health endpoint availability
 - Metrics endpoint availability
@@ -156,6 +172,7 @@ def test_market_signal_creation():
 **Purpose**: Shared test fixtures and configuration
 
 **Fixtures**:
+
 - `mock_signals`: Sample MarketSignal entities
 - `mock_openai_client`: Mock OpenAI client (prevents real API calls)
 - `test_client`: FastAPI TestClient instance
@@ -181,6 +198,7 @@ pytest --cov=src --cov-report=term
 ```
 
 **Coverage Targets**:
+
 - Overall: &gt;80%
 - Domain entities: 100%
 - Agents: &gt;90%
@@ -274,10 +292,12 @@ black --check .
 ### Integration Testing
 
 **Prerequisites**:
+
 - TP Capital API running (port 3200)
 - Workspace API running (port 3100)
 
 **Procedure**:
+
 ```bash
 bash scripts/startup/start-apis.sh
 pytest tests/test_adapters.py -v
@@ -289,11 +309,13 @@ curl http://localhost:8200/health?detailed=true
 **Tool**: Locust or k6
 
 **Scenarios**:
+
 - 100 concurrent requests to `/api/v1/agents/analyze`
 - Sustained load (10 req/s for 10 minutes)
 - Spike test (0 → 100 req/s in 10 seconds)
 
 **Metrics**:
+
 - p95 latency &lt;1s for market analysis
 - p95 latency &lt;500ms for risk validation
 - Error rate &lt;1%
@@ -344,6 +366,7 @@ def mock_openai_client(monkeypatch):
 ## Coverage Report
 
 **Current Coverage**:
+
 - Domain entities: 100%
 - Agents: 90%
 - Adapters: 85%
@@ -351,11 +374,13 @@ def mock_openai_client(monkeypatch):
 - Overall: 88%
 
 **Coverage Gaps**:
+
 - WebSocket consumer edge cases (reconnection failures)
 - Circuit breaker HALF_OPEN state transitions
 - Error handling for malformed LLM responses
 
 **Improvement Plan**:
+
 - Add WebSocket reconnection tests
 - Add circuit breaker state transition tests
 - Add LLM response parsing tests (malformed JSON, missing fields)
@@ -388,6 +413,7 @@ jobs:
 ```
 
 **CI Requirements**:
+
 - All tests must pass before merge
 - Coverage must be &gt;80%
 - No linting errors (`ruff`, `black`)

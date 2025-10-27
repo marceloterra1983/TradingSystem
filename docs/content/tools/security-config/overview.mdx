@@ -119,17 +119,20 @@ echo "my_secure_password" | docker secret create db_password -
 ## Troubleshooting
 
 ### Variable Not Found
+
 1. Check `.env` (`grep VARIABLE_NAME .env`).  
 2. Ensure compose file references `../../.env`.  
 3. Restart service (`docker compose restart service_name`).
 
 ### Permission Denied
+
 ```bash
 chmod 600 .env
 sudo chown $USER:$USER .env
 ```
 
 ### Validation Failure
+
 ```bash
 bash scripts/env/setup-env.sh
 # or
@@ -137,6 +140,7 @@ nano .env
 ```
 
 ### Docker Compose Cannot Load `.env`
+
 - Verify relative path in compose file.  
 - Run `docker compose -f <file> config` to check interpolation.
 

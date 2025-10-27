@@ -71,6 +71,7 @@ sequenceDiagram
 **Duration**: &lt;50ms
 
 **Actions**
+
 1. Extract `orderId` from URL
 2. Query database `SELECT * FROM orders WHERE orderId = ?`
 3. If not found, return 404 Not Found
@@ -81,6 +82,7 @@ sequenceDiagram
 **Duration**: &lt;10ms
 
 **Checks**
+
 - Status must be `PENDING`, `SUBMITTED`, or `PARTIALLY_FILLED`
 - `FILLED` orders not cancellable
 - `CANCELED` and `REJECTED` treated as idempotent success
@@ -92,6 +94,7 @@ sequenceDiagram
 **Duration**: &lt;200ms p95
 
 **Actions**
+
 - If status `PENDING`, skip broker call (not yet submitted)
 - If `SUBMITTED` or `PARTIALLY_FILLED`, call ProfitDLL `CancelOrder`
 - Retry up to 3 times on failure (exponential backoff)
@@ -103,6 +106,7 @@ sequenceDiagram
 **Duration**: &lt;50ms
 
 **Actions**
+
 - Update database `status = CANCELED`, set `canceledAt`, `updatedAt`
 - Persist remaining quantity and fills
 - Update positions to reflect released quantity
@@ -114,6 +118,7 @@ sequenceDiagram
 **Duration**: &lt;50ms
 
 **Actions**
+
 - Publish `order.canceled` event with payload `{orderId, status, canceledAt, reason}`
 - Return 200 OK response
 - Dashboard updates list based on event or response
@@ -121,16 +126,19 @@ sequenceDiagram
 ## State Changes
 
 **Valid Transitions**
+
 - PENDING → CANCELED
 - SUBMITTED → CANCELED
 - PARTIALLY_FILLED → CANCELED (remaining quantity)
 - FAILED → CANCELED (after retries exhausted)
 
 **Invalid Transitions**
+
 - FILLED → CANCELED (reject with 400)
 - REJECTED → CANCELED (idempotent success)
 
 **Field Updates**
+
 - `status`: Set to `CANCELED`
 - `canceledAt`: Current timestamp
 - `updatedAt`: Current timestamp
@@ -140,16 +148,19 @@ sequenceDiagram
 ## Notifications
 
 **Dashboard**
+
 - Toast: "Order ORD-XXXX canceled successfully"
 - Remove from active list or mark as canceled
 - Refresh position summaries
 
 **Event Consumers**
+
 - Audit service logs cancellation
 - Analytics updates cancellation metrics
 - Monitoring increments `order_manager_orders_total{status="CANCELED"}`
 
 **Alerts**
+
 - High cancellation rate (&gt;20% in 1 hour) triggers alert
 - Kill switch activation cancels all orders and alerts operators
 

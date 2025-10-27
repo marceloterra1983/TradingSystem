@@ -14,6 +14,7 @@ lastReviewed: '2025-10-26'
 **Product Context**
 
 TradingSystem is a complex platform with 6 independent systems:
+
 1. **Dashboard** (Cyan) - UI/UX, KPIs, visualizations
 2. **Data Collection** (Green) - ProfitDLL, WebSocket, feeds
 3. **Database** (Purple) - Parquet, PostgreSQL, metadata
@@ -22,6 +23,7 @@ TradingSystem is a complex platform with 6 independent systems:
 6. **Documentation** (Blue) - Docs, PRDs, ADRs
 
 The Trading App serves as the primary interface for:
+
 - Brainstorming and tracking feature ideas (Idea Bank)
 - Executing orders with risk controls (Order Manager)
 - Monitoring TP Capital signals (Signal Table)
@@ -40,6 +42,7 @@ The Trading App serves as the primary interface for:
 ## Problem and Opportunity
 
 **Current Challenges**
+
 - Ideas scattered across notes, emails, and messages without systematic tracking
 - Manual order execution prone to errors and lacking automated risk controls
 - Multiple data sources (Workspace, TP Capital) require manual correlation
@@ -47,6 +50,7 @@ The Trading App serves as the primary interface for:
 - Difficulty prioritizing features and tracking implementation status
 
 **Opportunity**
+
 - Centralized idea management with categorization and prioritization
 - Automated order execution with pre-trade risk checks
 - Unified dashboard for signals, positions, and system health
@@ -56,6 +60,7 @@ The Trading App serves as the primary interface for:
 ## Objectives and Success Criteria
 
 **Primary Objectives**
+
 1. Provide centralized idea management (Idea Bank/Workspace)
 2. Enable safe automated order execution (Order Manager)
 3. Visualize TP Capital signals and market data
@@ -65,6 +70,7 @@ The Trading App serves as the primary interface for:
 **Success Criteria**
 
 **Quantitative**
+
 - 100% of ideas registered in centralized system
 - &lt;30 seconds to add new idea
 - &lt;500ms p95 order placement latency
@@ -73,6 +79,7 @@ The Trading App serves as the primary interface for:
 - Support 10,000+ ideas without performance degradation
 
 **Qualitative**
+
 - Intuitive interface (no training required)
 - Seamless integration across features
 - Clear roadmap visibility through status board
@@ -90,6 +97,7 @@ The Trading App serves as the primary interface for:
 | Multi-Agent Analysis *(doc planned)* | Approved | AI-powered market analysis and signal generation | Backend Guild | v1.1 (Q1 2026) |
 
 **Release Timeline**
+
 - **v1.0** (Oct 2025): Idea Bank, TP Capital Signals, Dashboard foundation ✅ Complete
 - **v1.1** (Q1 2026): Order Manager, Agno Agents integration 🔄 In Progress
 - **v1.2** (Q2 2026): Risk Dashboard, Advanced analytics 📋 Planned
@@ -98,11 +106,13 @@ The Trading App serves as the primary interface for:
 ## Dependencies
 
 **Technical Dependencies**
+
 - **Backend APIs**: Workspace (port 3102), TP Capital (port 3200), Order Manager (port 3205)
 - **Databases**: QuestDB (TP Capital signals), TimescaleDB (Idea Bank), PostgreSQL (Order Manager)
 - **External**: ProfitDLL (order execution), Telegram API (signal ingestion)
 
 **Documentation Dependencies**
+
 - **SDD**: `/sdd/domain/schemas/v1/order`, `/sdd/flows/v1/place-order`, `/sdd/events/v1/order-created`
 - **API**: `/api/order-manager`, `/api/data-capture`, `/redoc/order-manager`
 - **Frontend**: `/frontend/engineering/architecture`, `/frontend/design-system/components`

@@ -13,11 +13,13 @@ lastReviewed: '2025-10-26'
 Agno Agents currently do **not directly integrate with MCP servers**. The agents operate as a standalone FastAPI service that consumes REST APIs and WebSocket streams.
 
 **Current Architecture**:
+
 - Agno Agents: Python service (port 8200)
 - MCP Servers: Claude Code CLI integration (stdio transport)
 - No direct communication between Agno Agents and MCP servers
 
 **Future Integration** (planned):
+
 - Agno Agents could expose MCP-compatible tools
 - MCP servers could invoke Agno Agents via HTTP
 - Unified agent orchestration via MCP protocol
@@ -29,6 +31,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 ### Potential MCP Tools
 
 **Market Analysis Tools**:
+
 - `analyze_market`: Generate trading signals for symbols
   - Input: `{ "symbols": ["PETR4"], "include_tp_capital": true }`
   - Output: List of MarketSignal entities
@@ -40,6 +43,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
   - Permission scope: `tp-capital:read`
 
 **Risk Management Tools**:
+
 - `validate_signal`: Validate trading signal against risk policies
   - Input: MarketSignal entity
   - Output: RiskAssessment entity
@@ -56,6 +60,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
   - Permission scope: `risk:read`
 
 **Orchestration Tools**:
+
 - `orchestrate_analysis`: Full workflow (analyze + validate)
   - Input: `{ "action": "ORCHESTRATE", "data": { "symbols": ["PETR4"] } }`
   - Output: OrchestrationResponse with signals and assessments
@@ -64,17 +69,20 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 ### Permission Scopes (Planned)
 
 **Read Permissions**:
+
 - `market-data:read`: Access market data (TP Capital)
 - `workspace:read`: Access workspace ideas
 - `risk:read`: Read risk limits and current positions
 - `agents:status`: Check agent health and status
 
 **Write Permissions**:
+
 - `signals:generate`: Generate trading signals
 - `risk:validate`: Validate signals against risk policies
 - `agents:orchestrate`: Execute full agent workflows
 
 **Admin Permissions**:
+
 - `agents:configure`: Update agent configuration
 - `agents:restart`: Restart agent service
 - `risk:update`: Modify risk limits
@@ -86,6 +94,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 **Base URL**: `http://localhost:8200`
 
 **Endpoints**:
+
 - `POST /api/v1/agents/analyze` - Market analysis
 - `POST /api/v1/agents/signals` - Signal orchestration
 - `GET /api/v1/agents/status` - Agent status
@@ -101,6 +110,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 ### Dashboard Integration
 
 **Proxy Configuration**:
+
 ```javascript
 '/api/agents': {
   target: 'http://localhost:8200',
@@ -110,6 +120,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 ```
 
 **Usage Example**:
+
 ```typescript
 import { useQuery } from '@tanstack/react-query';
 
@@ -140,6 +151,7 @@ function useMarketAnalysis(symbols: string[]) {
 **Approach**: Expose Agno Agents capabilities as MCP tools
 
 **Configuration**:
+
 ```json
 {
   "mcpServers": {
@@ -156,12 +168,14 @@ function useMarketAnalysis(symbols: string[]) {
 ```
 
 **Tools Exposed**:
+
 - `analyze_market`: Generate trading signals
 - `validate_signal`: Risk validation
 - `orchestrate_workflow`: Full agent orchestration
 - `get_agent_status`: Health check
 
 **Benefits**:
+
 - AI assistants can invoke agents directly
 - Unified tool calling interface
 - Standardized permission model
@@ -174,11 +188,13 @@ function useMarketAnalysis(symbols: string[]) {
 **Approach**: Agno Agents invoke MCP tools for enhanced capabilities
 
 **Use Cases**:
+
 - **fetch MCP server**: Fetch external market data (news, social sentiment)
 - **memory MCP server**: Store and retrieve trading patterns
 - **sequential-thinking MCP server**: Multi-step reasoning for complex analysis
 
 **Example Integration**:
+
 ```python
 from mcp_client import MCPClient
 
@@ -192,6 +208,7 @@ news_data = response.json()
 ```
 
 **Benefits**:
+
 - Access external data sources
 - Leverage MCP ecosystem (memory, search, reasoning)
 - Standardized error handling and retries
@@ -203,6 +220,7 @@ news_data = response.json()
 **No Authentication**: Internal service, no permission model
 
 **Network Security**:
+
 - Bind to localhost only (not 0.0.0.0)
 - CORS restricted to Dashboard and Docusaurus
 - Rate limiting (100 req/60s)
@@ -210,32 +228,38 @@ news_data = response.json()
 **Future Permissions** (when MCP integration added):
 
 **Read Permissions**:
+
 - `agno:market-data:read`: Access market data APIs
 - `agno:workspace:read`: Access workspace ideas
 - `agno:risk:read`: Read risk limits
 
 **Execute Permissions**:
+
 - `agno:signals:generate`: Generate trading signals
 - `agno:risk:validate`: Validate signals
 - `agno:orchestrate`: Execute full workflows
 
 **Admin Permissions**:
+
 - `agno:config:update`: Modify agent configuration
 - `agno:service:restart`: Restart agent service
 
 ### Approval Workflows (Planned)
 
 **Automatic Approval**:
+
 - Read operations (market data, workspace ideas)
 - Signal generation (non-destructive)
 - Risk validation (read-only checks)
 
 **Confirmation Required**:
+
 - Risk limit updates (affects trading safety)
 - Agent configuration changes (affects behavior)
 - Service restart (causes downtime)
 
 **Escalation**:
+
 - Production deployments → Team lead approval
 - Risk policy changes → Risk manager approval
 - Architecture changes → ArchitectureGuild review
@@ -245,18 +269,22 @@ news_data = response.json()
 ### Prometheus Metrics
 
 **Agent Metrics**:
+
 - `agent_decisions_total{agent_name, decision_type}`: Total decisions by agent and type
 - `agent_processing_seconds_bucket{agent_name}`: Processing time histogram
 - `agent_errors_total{agent_name, error_type}`: Error counts by agent and type
 
 **API Metrics**:
+
 - `api_requests_total{method, endpoint, status}`: Request counts
 - `api_request_duration_seconds_bucket{method, endpoint}`: Request latency histogram
 
 **Dependency Metrics**:
+
 - `dependency_status{dependency}`: Dependency health (0=down, 1=up)
 
 **Example Queries**:
+
 ```promql
 rate(agent_decisions_total[5m])
 histogram_quantile(0.95, rate(agent_processing_seconds_bucket[5m]))
@@ -267,17 +295,20 @@ dependency_status{dependency="tp_capital_api"}
 ### Health Checks
 
 **GET /health** (simple):
+
 - Uses cached snapshot
 - Fast response (&lt;50ms)
 - Returns: `{ "status": "healthy" }`
 
 **GET /health?detailed=true** (comprehensive):
+
 - Executes `ping()` probes with timeout
 - Checks all dependencies (TP Capital, Workspace, Risk Engine)
 - Updates `dependency_status` gauge
 - Returns: `{ "status": "healthy", "dependencies": { "tp_capital_api": "connected", ... } }`
 
 **Alerting**:
+
 - Alert if any dependency down for &gt;5 minutes
 - Alert if agent error rate &gt;5% for 10 minutes
 - Alert if processing latency &gt;2s p95

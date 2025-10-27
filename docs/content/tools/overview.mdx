@@ -20,9 +20,11 @@ Comprehensive toolkit for development, deployment, monitoring, and automation of
 ### 🏗️ Infrastructure & Orchestration
 
 #### Docker Compose (`tools/compose/`)
+
 Docker Compose orchestration files for all platform services.
 
 **Files:**
+
 - `docker-compose.database.yml` - Database services (TimescaleDB, QuestDB, PostgreSQL, Adminer)
 - `docker-compose.apps.yml` - Application services (Workspace, TP Capital, Documentation API, Firecrawl Proxy)
 - `docker-compose.apps.prod.yml` - Production application configuration
@@ -34,6 +36,7 @@ Docker Compose orchestration files for all platform services.
 - `docker-compose.individual.yml` - Individual service testing
 
 **Usage:**
+
 ```bash
 # Start all databases
 docker compose -f tools/compose/docker-compose.database.yml up -d
@@ -46,17 +49,21 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d
 ```
 
 #### Nginx Reverse Proxy (`tools/nginx-proxy/`)
+
 Nginx reverse proxy configurations for routing requests to backend services.
 
 **Features:**
+
 - Path-based routing
 - Load balancing
 - SSL/TLS termination (when configured)
 
 #### Docker Registry (`tools/registry/`)
+
 Private Docker registry for custom images.
 
 #### Systemd Services (`tools/systemd/`)
+
 Linux systemd service definitions for native services (non-containerized).
 
 ---
@@ -97,24 +104,28 @@ Comprehensive monitoring solution with Prometheus, Grafana, Alertmanager, and Al
    - [OpenAPI Spec](/api/alert-router)
 
 **Start Monitoring:**
+
 ```bash
 docker compose -f tools/monitoring/docker-compose.yml up -d
 ```
 
 **Access:**
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin/admin)
-- Alertmanager: http://localhost:9093
-- Alert Router: http://localhost:8080
+
+- Prometheus: <http://localhost:9090>
+- Grafana: <http://localhost:3000> (admin/admin)
+- Alertmanager: <http://localhost:9093>
+- Alert Router: <http://localhost:8080>
 
 ---
 
 ### 🤖 AI & LLM Tools
 
 #### Agno Agents (`tools/agno-agents/`)
+
 AI agents built with Clean Architecture and Domain-Driven Design principles.
 
 **Structure:**
+
 - `src/application/` - Use cases and orchestration
 - `src/domain/` - Business logic and entities
 - `src/infrastructure/` - External integrations
@@ -124,9 +135,11 @@ AI agents built with Clean Architecture and Domain-Driven Design principles.
 **Purpose:** Automated workflows, intelligent decision-making, task automation.
 
 #### LangGraph (`tools/langgraph/`)
+
 LangGraph integration for building stateful, multi-agent AI applications.
 
 **Structure:**
+
 - `src/application/` - LangGraph workflows
 - `src/domain/` - Business entities
 - `src/infrastructure/` - LLM providers, vector stores
@@ -136,9 +149,11 @@ LangGraph integration for building stateful, multi-agent AI applications.
 **Purpose:** Complex multi-step AI workflows, agent orchestration.
 
 #### LlamaIndex (`tools/llamaindex/`)
+
 RAG (Retrieval-Augmented Generation) implementation using LlamaIndex.
 
 **Services:**
+
 - `ingestion_service/` - Document ingestion and indexing
 - `query_service/` - Query processing and retrieval
 - `k8s/` - Kubernetes deployments (production, staging)
@@ -147,6 +162,7 @@ RAG (Retrieval-Augmented Generation) implementation using LlamaIndex.
 **Purpose:** Document Q&A, semantic search, knowledge retrieval.
 
 #### Ollama (`tools/ollama/`)
+
 Local LLM runtime for running models like Llama 2, Mistral, CodeLlama without cloud dependencies.
 
 **Purpose:** Local model inference, development without API costs, data privacy.
@@ -156,9 +172,11 @@ Local LLM runtime for running models like Llama 2, Mistral, CodeLlama without cl
 ### 📦 Trading & Market Data
 
 #### ProfitDLL (`tools/ProfitDLL/`)
+
 **[Documented](/tools/profitdll/overview)** - Trading DLL for market data and order execution.
 
 **Examples:**
+
 - `Exemplo C#/` - C# integration examples
 - `Exemplo C++/` - C++ integration examples
 - `Exemplo Delphi/` - Delphi integration examples
@@ -166,6 +184,7 @@ Local LLM runtime for running models like Llama 2, Mistral, CodeLlama without cl
 - `Manual/` - Official documentation (PT-BR and EN)
 
 **Key Features:**
+
 - Real-time market data streaming
 - Order execution and management
 - Multi-broker support
@@ -176,9 +195,11 @@ Local LLM runtime for running models like Llama 2, Mistral, CodeLlama without cl
 ### 🛠️ Development Tools
 
 #### OpenSpec (`tools/openspec/`)
+
 Specification management tool for tracking changes, proposals, and system design.
 
 **Structure:**
+
 - `changes/` - Change proposals (11 active proposals)
   - adapt-tp-capital-consume-gateway
   - add-telegram-gateway-dashboard
@@ -196,9 +217,11 @@ Specification management tool for tracking changes, proposals, and system design
 **Purpose:** Structured change management, design documentation, proposal tracking.
 
 #### Scripts (`tools/scripts/`)
+
 Helper scripts for automation, maintenance, and operations.
 
 **Categories:**
+
 - `core/` - Core system operations
 - `maintenance/` - Health checks, cleanup
 - `setup/` - Installation and configuration
@@ -206,6 +229,7 @@ Helper scripts for automation, maintenance, and operations.
 - `docker/` - Docker management
 
 #### Firecrawl Source (`tools/firecrawl/firecrawl-source/`)
+
 Firecrawl open-source web scraping tool (cloned for local development).
 
 **Purpose:** Web scraping, crawling, markdown conversion.
@@ -243,6 +267,7 @@ Documented development tools for documentation system:
 ## 🚀 Quick Start
 
 ### Start All Infrastructure
+
 ```bash
 # 1. Start databases
 docker compose -f tools/compose/docker-compose.database.yml up -d
@@ -258,11 +283,12 @@ bash scripts/maintenance/health-check-all.sh
 ```
 
 ### Access Services
-- **Grafana**: http://localhost:3000
-- **Prometheus**: http://localhost:9090
-- **Adminer** (DB UI): http://localhost:8080
-- **Alert Router**: http://localhost:8080
-- **Documentation**: http://localhost:3205
+
+- **Grafana**: <http://localhost:3000>
+- **Prometheus**: <http://localhost:9090>
+- **Adminer** (DB UI): <http://localhost:8080>
+- **Alert Router**: <http://localhost:8080>
+- **Documentation**: <http://localhost:3205>
 
 ---
 

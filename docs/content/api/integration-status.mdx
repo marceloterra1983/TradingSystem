@@ -27,10 +27,10 @@ lastReviewed: '2025-10-27'
 
 | Service | Port | Type | Status | Access |
 |---------|------|------|--------|--------|
-| **Dashboard** | 3103 | React + Vite | ✅ Running | http://localhost:3103 |
-| **Docusaurus** | 3205 | Docusaurus v3 | ✅ Running | http://localhost:3205 |
-| **Documentation API** | 3400 | Express + FlexSearch | ✅ Running | http://localhost:3400 |
-| **TP Capital** | 4005 | Express + Telegraf | ✅ Running | http://localhost:4005 |
+| **Dashboard** | 3103 | React + Vite | ✅ Running | <http://localhost:3103> |
+| **Docusaurus** | 3205 | Docusaurus v3 | ✅ Running | <http://localhost:3205> |
+| **Documentation API** | 3400 | Express + FlexSearch | ✅ Running | <http://localhost:3400> |
+| **TP Capital** | 4005 | Express + Telegraf | ✅ Running | <http://localhost:4005> |
 
 ### ❌ Services Needing Startup
 
@@ -47,12 +47,14 @@ lastReviewed: '2025-10-27'
 **Location**: Dashboard → Knowledge → Docs → **DocsAPI** tab
 
 **Features**:
+
 - 📊 **4 Viewing Options**: Redoc, Swagger UI, RapiDoc, Raw Spec
 - 🔄 **2 APIs Available**: Documentation API, Workspace API
 - 💾 **Download Specs**: Download OpenAPI YAML files
 - 🆕 **Open in New Tab**: View APIs in separate window
 
 **How It Works**:
+
 ```
 User clicks DocsAPI button
   ↓
@@ -66,6 +68,7 @@ Iframe embeds viewer with spec
 ```
 
 **Implementation Files**:
+
 - `frontend/dashboard/src/components/pages/APIViewerPage.tsx` (280 lines)
 - `frontend/dashboard/public/viewers/swagger.html` (local Swagger UI)
 - `frontend/dashboard/public/viewers/rapidoc.html` (local RapiDoc)
@@ -87,6 +90,7 @@ Iframe embeds viewer with spec
 **Solution**: Created local HTML viewers served from same domain
 
 **Before**:
+
 ```typescript
 // External CDN (CORS issues)
 case 'swagger':
@@ -94,6 +98,7 @@ case 'swagger':
 ```
 
 **After**:
+
 ```typescript
 // Local viewer (no CORS)
 case 'swagger':
@@ -101,6 +106,7 @@ case 'swagger':
 ```
 
 **Created Files**:
+
 - `frontend/dashboard/public/viewers/swagger.html`
 - `frontend/dashboard/public/viewers/rapidoc.html`
 
@@ -113,15 +119,18 @@ case 'swagger':
 **Configuration**: `docs/docusaurus.config.js`
 
 **APIs Available**:
+
 1. **Documentation API** - `/api/documentation-api`
 2. **Workspace API** - `/api/workspace`
 
 **MDX Documentation Created**:
+
 - `docs/content/api/overview.mdx` (240 lines)
 - `docs/content/api/documentation-api.mdx` (300 lines)
 - `docs/content/api/workspace-api.mdx` (400 lines)
 
 **OpenAPI Specs**:
+
 - `docs/static/specs/documentation-api.openapi.yaml` (47KB)
 - `docs/static/specs/workspace.openapi.yaml` (9.6KB)
 
@@ -134,6 +143,7 @@ case 'swagger':
 **Reality**: TP Capital has its own port (4005), no conflict ✅
 
 **Service Details**:
+
 - **Type**: Local Node.js service (NOT Docker container)
 - **Port**: 4005
 - **Status**: ✅ Already running
@@ -141,6 +151,7 @@ case 'swagger':
 - **Purpose**: Telegram signal ingestion from TP Capital channels
 
 **Key Endpoints**:
+
 ```bash
 # Health check
 curl http://localhost:4005/health
@@ -164,6 +175,7 @@ http://localhost:4005/
 **Problem**: Docusaurus v3 compilation errors in MDX files
 
 **Errors Fixed**:
+
 - `<` followed by numbers → `&lt;`
 - `>` followed by numbers → `&gt;`
 - `\{\}` in prose → `\{\}`
@@ -175,6 +187,7 @@ http://localhost:4005/
 **Files Fixed**: 40 files across docs/content/
 
 **Examples**:
+
 ```markdown
 # Before
 Monitor build output size <300 KB
@@ -318,6 +331,7 @@ server: {
 **File**: `apps/tp-capital/.env`
 
 **Key Variables**:
+
 ```bash
 # Service
 PORT=4005
@@ -383,12 +397,14 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3205
 **Cause**: Workspace API on port 3200 not started
 
 **Solution**:
+
 ```bash
 cd backend/api/workspace
 npm run dev
 ```
 
 **Verify**:
+
 ```bash
 curl http://localhost:3200/api/items
 # Should return: {"items": [...]}
@@ -403,6 +419,7 @@ curl http://localhost:3200/api/items
 **Impact**: No port conflict! Both can run simultaneously.
 
 **Verification**:
+
 ```bash
 # TP Capital health
 curl http://localhost:4005/health
@@ -418,6 +435,7 @@ curl http://localhost:3200/api/items
 ## ✅ Completed Work Summary
 
 ### 1. DocsAPI Integration
+
 - ✅ Created APIViewerPage component
 - ✅ Integrated 4 viewer types (Redoc, Swagger, RapiDoc, Raw)
 - ✅ Fixed CORS issues with local HTML viewers
@@ -425,23 +443,27 @@ curl http://localhost:3200/api/items
 - ✅ Updated dashboard routing and navigation
 
 ### 2. Redocusaurus Setup
+
 - ✅ Configured plugin in docusaurus.config.js
 - ✅ Added navbar dropdown for APIs
 - ✅ Copied specs to docs/static/specs/
 - ✅ Created comprehensive MDX documentation
 
 ### 3. MDX Compilation Fixes
+
 - ✅ Fixed 40 files with syntax errors
 - ✅ Created automated Python script
 - ✅ Tested Docusaurus build (no errors)
 
 ### 4. Service Discovery
+
 - ✅ Discovered TP Capital port (4005)
 - ✅ Clarified no port conflict with Workspace API
 - ✅ Created comprehensive TP Capital guide
 - ✅ Updated port mapping documentation
 
 ### 5. API Status Tooling
+
 - ✅ Created check-apis.sh health check script
 - ✅ Created START-APIS.md startup guide
 - ✅ Documented all service ports and commands
@@ -459,6 +481,7 @@ npm run dev
 ```
 
 **Expected Output**:
+
 ```
 [INFO] Workspace API starting...
 [INFO] Database: LowDB (development) + QuestDB (production)
@@ -466,6 +489,7 @@ npm run dev
 ```
 
 **Test**:
+
 ```bash
 curl http://localhost:3200/api/items
 ```

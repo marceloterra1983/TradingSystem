@@ -38,11 +38,13 @@ docker logs --tail 50 workspace-service
 ### 1. Port Already in Use
 
 **Symptoms**:
+
 ```
 Error: failed to bind host port for 0.0.0.0:4005:4005/tcp: address already in use
 ```
 
 **Diagnosis**:
+
 ```bash
 # Find what's using the port
 lsof -ti :4005
@@ -50,6 +52,7 @@ ps aux | grep $(lsof -ti :4005)
 ```
 
 **Solution**:
+
 ```bash
 # Option A: Kill the process
 kill -9 $(lsof -ti :4005)
@@ -66,12 +69,14 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d
 ### 2. Database Connection Failed
 
 **Symptoms**:
+
 ```
 Error: getaddrinfo ENOTFOUND timescaledb
 Error: password authentication failed for user "timescale"
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check if TimescaleDB is running
 docker ps | grep timescaledb
@@ -84,6 +89,7 @@ PGPASSWORD="pass_timescale" psql -h localhost -p 5433 -U timescale -d APPS-TPCAP
 ```
 
 **Solution A - Network Issue**:
+
 ```bash
 # Ensure TimescaleDB is on the correct network
 docker network connect --alias timescaledb tradingsystem_backend data-timescaledb
@@ -93,6 +99,7 @@ docker compose -f tools/compose/docker-compose.apps.yml restart
 ```
 
 **Solution B - Password Mismatch**:
+
 ```bash
 # Update database password
 docker exec data-timescaledb psql -U timescale -d postgres -c "ALTER USER timescale WITH PASSWORD 'pass_timescale';"
@@ -105,6 +112,7 @@ docker compose -f tools/compose/docker-compose.apps.yml restart
 ```
 
 **Solution C - Database Not Running**:
+
 ```bash
 # Start TimescaleDB
 docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
@@ -121,11 +129,13 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d
 ### 3. Container Keeps Restarting
 
 **Symptoms**:
+
 ```
 docker ps shows: Restarting (1) X seconds ago
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check logs for the error
 docker logs workspace-service 2>&1 | tail -50
@@ -143,6 +153,7 @@ docker inspect workspace-service --format='{{.State.ExitCode}}'
 **Common Causes & Solutions**:
 
 #### A. Module Not Found
+
 ```bash
 # Error: Cannot find module '/shared/config/load-env.js'
 # Solution: Comment out the import in src/config.js
@@ -157,6 +168,7 @@ docker restart workspace-service
 ```
 
 #### B. Missing Environment Variables
+
 ```bash
 # Check container environment
 docker exec workspace-service printenv | grep TIMESCALEDB
@@ -166,6 +178,7 @@ docker compose -f tools/compose/docker-compose.apps.yml --env-file .env up -d
 ```
 
 #### C. Package Installation Failed
+
 ```bash
 # Rebuild the image
 docker compose -f tools/compose/docker-compose.apps.yml build workspace
@@ -179,11 +192,13 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
 ### 4. Health Check Failing
 
 **Symptoms**:
+
 ```
 docker ps shows: Up X seconds (unhealthy)
 ```
 
 **Diagnosis**:
+
 ```bash
 # Test health endpoint manually
 curl -v http://localhost:3200/health
@@ -198,6 +213,7 @@ docker inspect workspace-service --format='{{json .State.Health}}' | jq '.'
 **Solutions**:
 
 #### A. Service Not Ready Yet
+
 ```bash
 # Health checks start after 40 seconds (start_period)
 # Wait longer and check again
@@ -206,6 +222,7 @@ docker ps | grep workspace-service
 ```
 
 #### B. Health Endpoint Not Responding
+
 ```bash
 # Check if process is running inside container
 docker exec workspace-service ps aux
@@ -218,6 +235,7 @@ docker logs workspace-service
 ```
 
 #### C. Database Connection in Health Check
+
 ```bash
 # Some health checks test database connection
 # Ensure TimescaleDB is accessible
@@ -233,11 +251,13 @@ docker restart workspace-service
 ### 5. Hot-Reload Not Working
 
 **Symptoms**:
+
 ```
 Code changes not reflected in running container
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check volume mounts
 docker inspect workspace-service --format='{{json .Mounts}}' | jq '.[] | select(.Destination=="/app/src")'
@@ -249,6 +269,7 @@ docker exec workspace-service ps aux | grep nodemon
 **Solutions**:
 
 #### A. Volume Mount Issue
+
 ```bash
 # Verify volume is mounted correctly
 docker compose -f tools/compose/docker-compose.apps.yml config | grep -A 5 volumes
@@ -260,6 +281,7 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d --force-recreate
 ```
 
 #### B. Nodemon Not Watching
+
 ```bash
 # Check nodemon configuration in package.json
 docker exec workspace-service cat /app/package.json | jq '.scripts.dev'
@@ -271,6 +293,7 @@ echo "// trigger change" >> backend/api/workspace/src/config.js
 ```
 
 #### C. File Permissions
+
 ```bash
 # On Linux, check file ownership
 ls -la backend/api/workspace/src/
@@ -284,12 +307,14 @@ sudo chown -R $USER:$USER backend/api/workspace/src/
 ### 6. Docker Build Fails
 
 **Symptoms**:
+
 ```
 Error: npm ci can only install packages when package-lock.json exists
 Error: Cannot find module 'package.json'
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check .dockerignore
 cat apps/tp-capital/api/.dockerignore | grep json
@@ -301,6 +326,7 @@ ls -la apps/tp-capital/api/package*.json
 **Solutions**:
 
 #### A. .dockerignore Blocking Files
+
 ```bash
 # Edit .dockerignore to NOT exclude package*.json
 vim apps/tp-capital/api/.dockerignore
@@ -316,6 +342,7 @@ docker compose -f tools/compose/docker-compose.apps.yml build --no-cache
 ```
 
 #### B. Missing package-lock.json
+
 ```bash
 # Generate it
 cd apps/tp-capital/api
@@ -330,12 +357,14 @@ docker compose -f tools/compose/docker-compose.apps.yml build
 ### 7. Environment Variables Not Loading
 
 **Symptoms**:
+
 ```
 Config uses default values instead of .env values
 Warnings: The "TIMESCALEDB_PASSWORD" variable is not set
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check .env file exists
 ls -la .env
@@ -350,6 +379,7 @@ docker exec workspace-service printenv TIMESCALEDB_PASSWORD
 **Solutions**:
 
 #### A. Missing .env File
+
 ```bash
 # Copy from example
 cp .env.example .env
@@ -359,6 +389,7 @@ vim .env
 ```
 
 #### B. .env Not Being Loaded
+
 ```bash
 # Explicitly pass env file
 docker compose -f tools/compose/docker-compose.apps.yml --env-file .env up -d
@@ -369,6 +400,7 @@ docker compose -f tools/compose/docker-compose.apps.yml --env-file .env up -d
 ```
 
 #### C. Variable Name Mismatch
+
 ```bash
 # Check docker-compose.apps.yml uses correct variable names
 grep TIMESCALEDB_PASSWORD tools/compose/docker-compose.apps.yml
@@ -382,12 +414,14 @@ grep TIMESCALEDB_PASSWORD tools/compose/docker-compose.apps.yml
 ### 8. High Memory/CPU Usage
 
 **Symptoms**:
+
 ```
 Container using 100% CPU or excessive memory
 System becomes slow
 ```
 
 **Diagnosis**:
+
 ```bash
 # Check container stats
 docker stats tp-capital-api workspace-service
@@ -402,6 +436,7 @@ docker exec workspace-service cat /proc/meminfo
 **Solutions**:
 
 #### A. Limit Container Resources
+
 ```bash
 # Edit docker-compose.apps.yml, add resource limits:
 services:
@@ -417,6 +452,7 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d
 ```
 
 #### B. Too Many Logs
+
 ```bash
 # Logs can fill disk
 docker system df
@@ -498,6 +534,7 @@ SELECT COUNT(*) FROM workspace.workspace_items;
 If you're still stuck:
 
 1. **Collect Information**:
+
    ```bash
    # Save logs
    docker logs tp-capital-api > tp-capital.log 2>&1

@@ -13,6 +13,7 @@ lastReviewed: '2025-10-27'
 ## ✅ O que foi feito
 
 ### 1. Backup da Configuração Original
+
 - ✅ Backup criado em: `~/.cursor/mcp.json.backup`
 
 ### 2. MCPs Instalados e Configurados
@@ -37,7 +38,7 @@ lastReviewed: '2025-10-27'
 
 ### Passo 1: Configurar GitHub Token (Opcional mas Recomendado)
 
-1. Acesse: https://github.com/settings/tokens
+1. Acesse: <https://github.com/settings/tokens>
 2. Gere um novo token com scopes: `repo` e `read:org`
 3. Edite `~/.cursor/mcp.json`
 4. Substitua `GITHUB_PERSONAL_ACCESS_TOKEN` pelo token gerado
@@ -55,6 +56,7 @@ cursor /home/marce/Projetos/TradingSystem
 ### Passo 3: Testar os MCPs
 
 Pergunte ao Cursor:
+
 - "Quais containers Docker estão rodando?"
 - "Liste os arquivos TypeScript no frontend/dashboard"
 - "Qual a versão mais recente do React?"
@@ -63,11 +65,13 @@ Pergunte ao Cursor:
 ## 🛠️ Scripts Criados
 
 ### Verificar Status dos MCPs
+
 ```bash
 bash scripts/setup/check-mcp-status.sh
 ```
 
 Este script mostra:
+
 - ✅ MCPs instalados
 - ⚠️ Configurações pendentes
 - 🔧 Status das dependências
@@ -87,31 +91,37 @@ Este script mostra:
 ## 🎁 Benefícios dos MCPs Instalados
 
 ### 1. **Filesystem MCP**
+
 - Busca rápida em todo o projeto
 - Navegação inteligente
 - Entende a estrutura do código
 
 ### 2. **Docker MCP**
+
 - Gerenciar containers sem sair do Cursor
 - Ver logs de containers
 - Iniciar/parar serviços rapidamente
 
 ### 3. **NPM MCP**
+
 - Buscar pacotes instantaneamente
 - Ver documentação de dependências
 - Verificar versões e vulnerabilidades
 
 ### 4. **GitKraken MCP**
+
 - Operações Git avançadas
 - Visualizar histórico
 - Gerenciar branches
 
 ### 5. **GitHub MCP** (após configurar)
+
 - Criar e gerenciar issues
 - Revisar pull requests
 - Integração completa com GitHub
 
 ### 6. **PostgreSQL MCP** (após configurar)
+
 - Consultar dados diretamente
 - Inspecionar schemas
 - Debugging de queries
@@ -120,22 +130,26 @@ Este script mostra:
 
 ### Exemplos de Comandos para o Cursor
 
-#### Com Filesystem:
+#### Com Filesystem
+
 - "Encontre todos os arquivos que importam React"
 - "Liste componentes não utilizados"
 - "Mostre arquivos modificados recentemente"
 
-#### Com Docker:
+#### Com Docker
+
 - "Liste todos os containers"
 - "Mostre logs do container timescaledb"
 - "Qual o status do container tp-capital?"
 
-#### Com NPM:
+#### Com NPM
+
 - "Quais pacotes estão desatualizados?"
 - "Mostre a documentação do Express"
 - "Compare versões do TypeScript"
 
-#### Com PostgreSQL:
+#### Com PostgreSQL
+
 - "Quantos registros tem na tabela signals?"
 - "Mostre o schema da tabela orders"
 - "Liste as últimas 10 operações"
@@ -150,6 +164,7 @@ bash scripts/setup/check-mcp-status.sh
 ```
 
 Saída esperada:
+
 ```
 ✅ Arquivo de configuração encontrado
 ✅ JSON válido
@@ -165,16 +180,19 @@ Saída esperada:
 ## 🆘 Problemas Comuns
 
 ### MCP não está funcionando?
+
 1. Reinicie o Cursor completamente (Ctrl+Q)
 2. Verifique o JSON: `jq empty ~/.cursor/mcp.json`
 3. Veja os logs: Menu > Help > Toggle Developer Tools
 
 ### Erro "npx not found"?
+
 ```bash
 npm install -g npx
 ```
 
 ### PostgreSQL não conecta?
+
 ```bash
 # Verifique se está rodando
 docker ps | grep timescaledb
@@ -204,4 +222,3 @@ Para começar a usar, basta **reiniciar o Cursor** e começar a fazer perguntas!
 
 **Instalado em:** $(date +%Y-%m-%d)
 **Próxima revisão:** Configure o GitHub token quando precisar integração com repositórios
-

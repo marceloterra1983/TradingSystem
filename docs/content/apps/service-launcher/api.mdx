@@ -19,6 +19,7 @@ lastReviewed: '2025-10-27'
 ## Authentication
 
 No authentication required. Service is protected by:
+
 - CORS restrictions (Dashboard + Docs origins only)
 - Rate limiting (200 req/min)
 - Local-only access (not exposed to internet)
@@ -32,6 +33,7 @@ No authentication required. Service is protected by:
 Basic health check for Service Launcher itself.
 
 **Response 200 OK**:
+
 ```json
 {
   "status": "ok",
@@ -40,6 +42,7 @@ Basic health check for Service Launcher itself.
 ```
 
 **Example**:
+
 ```bash
 curl http://localhost:3500/health
 ```
@@ -53,6 +56,7 @@ Aggregated status of all monitored services with metrics.
 **Query Parameters**: None
 
 **Response 200 OK**:
+
 ```json
 {
   "overallStatus": "ok",
@@ -95,6 +99,7 @@ Aggregated status of all monitored services with metrics.
 ```
 
 **Status Values**:
+
 - `ok`: Service responding correctly (HTTP 2xx)
 - `degraded`: Service responded with HTTP 4xx/5xx
 - `down`: Timeout or connection error
@@ -102,11 +107,13 @@ Aggregated status of all monitored services with metrics.
 **Sorting**: Services sorted by severity (down > degraded > ok), then by name
 
 **Example**:
+
 ```bash
 curl http://localhost:3500/api/status | jq '.overallStatus'
 ```
 
 **Dashboard Integration**:
+
 ```typescript
 const response = await fetch('http://localhost:3500/api/status');
 const { overallStatus, services } = await response.json();
@@ -122,10 +129,12 @@ Comprehensive health status including local services, Docker containers, and dat
 **Query Parameters**: None
 
 **Caching**:
+
 - Results cached for 60 seconds
 - Headers: `X-Cache-Status` (HIT/MISS), `X-Cache-Age` (seconds)
 
 **Response 200 OK (Healthy)**:
+
 ```json
 {
   "localServices": [
@@ -182,6 +191,7 @@ Comprehensive health status including local services, Docker containers, and dat
 ```
 
 **Response 200 OK (Degraded)**:
+
 ```json
 {
   "localServices": [],
@@ -215,6 +225,7 @@ Comprehensive health status including local services, Docker containers, and dat
 ```
 
 **Response 500 Internal Server Error**:
+
 ```json
 {
   "success": false,
@@ -224,17 +235,20 @@ Comprehensive health status including local services, Docker containers, and dat
 ```
 
 **Overall Health Values**:
+
 - `healthy`: All services and dependencies operational
 - `degraded`: Non-critical dependencies with failures or high latency
 - `critical`: Critical services (TimescaleDB, Dashboard, Service Launcher) unavailable
 
 **Performance**:
+
 - First request (MISS): ~2-5s (full script execution)
 - Cached (HIT): &lt;10ms (in-memory data)
 - Cache TTL: 60 seconds
 - Script timeout: 10 seconds
 
 **Example**:
+
 ```bash
 # Check cache status
 curl -I http://localhost:3500/api/health/full | grep X-Cache
@@ -247,6 +261,7 @@ curl http://localhost:3500/api/health/full | jq '.remediation'
 ```
 
 **Dashboard Integration**:
+
 ```typescript
 const response = await fetch('http://localhost:3500/api/health/full');
 const cacheStatus = response.headers.get('X-Cache-Status');
@@ -274,6 +289,7 @@ Launch a service in a new terminal window (Windows/Linux).
 **⚠️ WARNING**: This endpoint executes arbitrary commands. Use only in trusted development environments.
 
 **Request Body**:
+
 ```json
 {
   "serviceName": "Dashboard",
@@ -283,11 +299,13 @@ Launch a service in a new terminal window (Windows/Linux).
 ```
 
 **Fields**:
+
 - `serviceName` (required): Human-readable service name
 - `workingDir` (required): Absolute path to working directory
 - `command` (required): Command to execute
 
 **Response 200 OK**:
+
 ```json
 {
   "success": true,
@@ -296,6 +314,7 @@ Launch a service in a new terminal window (Windows/Linux).
 ```
 
 **Response 400 Bad Request**:
+
 ```json
 {
   "success": false,
@@ -304,6 +323,7 @@ Launch a service in a new terminal window (Windows/Linux).
 ```
 
 **Response 500 Internal Server Error**:
+
 ```json
 {
   "success": false,
@@ -312,10 +332,12 @@ Launch a service in a new terminal window (Windows/Linux).
 ```
 
 **Platform Behavior**:
+
 - **Windows**: Tries Windows Terminal (`wt.exe`), falls back to PowerShell
 - **Linux**: Tries gnome-terminal, konsole, falls back to xterm
 
 **Example**:
+
 ```bash
 curl -X POST http://localhost:3500/launch \
   -H "Content-Type: application/json" \
@@ -327,6 +349,7 @@ curl -X POST http://localhost:3500/launch \
 ```
 
 **Security Notes**:
+
 - Protected by rate limiting (200 req/min)
 - CORS restricted to Dashboard + Docs origins
 - Validates required fields
@@ -360,6 +383,7 @@ All endpoints return JSON responses with appropriate HTTP status codes:
 - **503 Service Unavailable**: Service temporarily unavailable
 
 **Error Response Format**:
+
 ```json
 {
   "success": false,
@@ -375,6 +399,7 @@ All endpoints return JSON responses with appropriate HTTP status codes:
 - **Response**: HTTP 429 Too Many Requests when exceeded
 
 **Configuration**:
+
 ```bash
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX=200

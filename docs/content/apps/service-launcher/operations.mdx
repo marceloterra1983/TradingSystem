@@ -89,6 +89,7 @@ watch -n 5 'curl -sI http://localhost:3500/api/health/full | grep -E "X-Cache-St
 ### Viewing Logs
 
 **Standalone**:
+
 ```bash
 # Real-time logs (if using process manager)
 pm2 logs service-launcher
@@ -98,6 +99,7 @@ tail -f logs/service-launcher.log | jq '.'
 ```
 
 **Docker**:
+
 ```bash
 # Real-time logs
 docker logs -f service-launcher --tail 100
@@ -112,16 +114,19 @@ docker logs service-launcher | jq 'select(.level >= 40)'  # Warn and error only
 ### Log Levels
 
 **Production** (JSON format):
+
 ```json
 {"level":30,"time":"2025-10-27T12:00:00.000Z","msg":"Service health check completed"}
 ```
 
 **Development** (pretty print):
+
 ```
 [INFO] 12:00:00 - Service health check completed
 ```
 
 **Levels**:
+
 - 10: TRACE (most verbose)
 - 20: DEBUG
 - 30: INFO (default)
@@ -182,6 +187,7 @@ done
 ### Resource Usage
 
 **CPU and Memory**:
+
 ```bash
 # Standalone
 ps aux | grep node | grep service-launcher
@@ -191,6 +197,7 @@ docker stats service-launcher --no-stream
 ```
 
 **Expected Resource Usage**:
+
 - CPU: &lt;5% (idle), &lt;20% (under load)
 - Memory: 50-150 MB
 - Network: &lt;1 MB/s
@@ -213,11 +220,13 @@ curl http://localhost:3500/api/status | jq '{total: .totalServices, degraded: .d
 ### Interpreting Status
 
 **Overall Status**:
+
 - `ok`: All services responding correctly
 - `degraded`: Some services with 4xx/5xx responses
 - `down`: One or more services not responding
 
 **Individual Service Status**:
+
 - `ok`: HTTP 200 response, latency normal
 - `degraded`: HTTP 4xx/5xx response
 - `down`: Timeout or connection error
@@ -312,17 +321,20 @@ docker restart service-launcher
 ### Access Control
 
 Service Launcher is protected by:
+
 - **CORS**: Restricts origins to Dashboard + Docs
 - **Rate Limiting**: 200 req/min by default
 - **Local-only**: Binds to localhost (not exposed to network)
 
 **Verify CORS**:
+
 ```bash
 curl -H "Origin: http://malicious.com" http://localhost:3500/health
 # Should fail or return CORS error
 ```
 
 **Verify Rate Limiting**:
+
 ```bash
 # Send 201 requests
 for i in {1..201}; do curl -s http://localhost:3500/health; done
@@ -367,6 +379,7 @@ useEffect(() => {
 ```
 
 **Verify Integration**:
+
 ```bash
 # Check Dashboard can access Service Launcher
 curl -H "Origin: http://localhost:3103" http://localhost:3500/api/status
@@ -391,6 +404,7 @@ scrape_configs:
 ### Grafana Dashboards
 
 **Create dashboard with panels**:
+
 - Overall status gauge (ok/degraded/down)
 - Service count by status (bar chart)
 - Average latency over time (line graph)

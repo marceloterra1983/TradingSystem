@@ -18,6 +18,7 @@ lastReviewed: '2025-10-26'
 - **Purpose**: Capture real-time market data from ProfitDLL and publish to consumers
 
 **Scope**:
+
 - ProfitDLL connection management (initialize, reconnect, disconnect)
 - Market data callback handling (state, trade, book, order)
 - Data serialization (native structs → JSON)
@@ -26,15 +27,18 @@ lastReviewed: '2025-10-26'
 - Rate limiting and authentication
 
 **Authentication Model**:
+
 - Current: No authentication (internal service)
 - Planned: Token-based authentication for external consumers
 
 **Payload Formats**:
+
 - Input: ProfitDLL native callbacks (C++ structs)
 - Output: JSON over HTTP REST and WebSocket
 - Serialization: Custom serializer for ProfitDLL types
 
 **Rate Limits**:
+
 - REST API: 300 requests per 60s window (planned)
 - WebSocket: No limit (real-time streaming)
 - ProfitDLL callbacks: Rate handled at source
@@ -51,17 +55,20 @@ lastReviewed: '2025-10-26'
 ```
 
 **Redoc Documentation**:
+
 - ⚠️ **TODO**: OpenAPI spec not yet published
 - Planned location: `/apis/data-capture/v1/openapi.yaml`
 - Redoc URL: `/redoc/data-capture` (once automated build exists)
 - Source code: `backend/services/data-capture/` (planned)
 
 **Prerequisites**:
+
 - ProfitChart installed locally (Windows requirement)
 - ProfitDLL 64-bit library accessible
 - Valid broker credentials configured
 
 **Related Documentation**:
+
 - SDD specification (planned): `/sdd/api/data-capture/v1/spec`
 - Architecture: `../../reference/architecture/technical-specification` (external file - migration pending)
 - Service map: `../../reference/architecture/service-map` (when migrated from `docs/context/backend/architecture/service-map.md`)
@@ -75,35 +82,41 @@ lastReviewed: '2025-10-26'
 ### Critical Endpoints
 
 **Connection Management**:
+
 - `POST /api/connection/start` — Initialize ProfitDLL connection
 - `POST /api/connection/stop` — Gracefully disconnect
 - `GET /api/connection/status` — Inspect connection state
 - `POST /api/connection/reconnect` — Force reconnection attempt
 
 **Market Data Queries**:
+
 - `GET /api/market-data/trades` — Recent trades (symbol, time range)
 - `GET /api/market-data/book` — Order book snapshot (symbol, depth)
 - `GET /api/market-data/quotes` — Latest quotes (bid/ask/last)
 - `GET /api/market-data/candles` — OHLCV candles (symbol, interval, range)
 
 **Subscriptions (WebSocket)**:
+
 - `ws://localhost:3100/ws/trades` — Real-time trade stream
 - `ws://localhost:3100/ws/book` — Real-time order book updates
 - `ws://localhost:3100/ws/quotes` — Real-time quote stream
 - Subscribe message: `{"action": "subscribe", "symbols": ["PETR4", "VALE3"]}`
 
 **Callback Statistics**:
+
 - `GET /api/stats/callbacks` — Callback counts by type
 - `GET /api/stats/latency` — Callback processing latency
 - `GET /api/stats/errors` — Error counts and recent failures
 
 **Health & Observability**:
+
 - `GET /health` — Service health check (includes ProfitDLL connection status)
 - `GET /metrics` — Prometheus metrics (callback rate, serialization latency, WebSocket connections)
 
 ### Usage Guidelines
 
 **Connection Lifecycle**:
+
 1. Service starts → Auto-initialize ProfitDLL connection
 2. Connection established → Receive callbacks
 3. Process callbacks → Serialize to JSON → Publish via WebSocket
@@ -111,18 +124,21 @@ lastReviewed: '2025-10-26'
 5. Service stops → Graceful disconnect
 
 **Callback Types**:
+
 - State callbacks: Connection status changes
 - Trade callbacks: Executed trades (price, volume, timestamp)
 - Book callbacks: Order book updates (bid/ask levels)
 - Order callbacks: Order status changes (filled, canceled, rejected)
 
 **Best Practices**:
+
 - Error handling: Use HTTP 200, 400, 404, 500; return `success: false` on failures; log ProfitDLL error codes
 - Rate limiting: REST 300 req/60s per client (planned); enforce WebSocket connection limits; throttle high-frequency callbacks
 - Data persistence: Persist to Parquet files initially; plan migration to QuestDB; default retention 90 days
 - Integration: Consumed by Dashboard (port 3103), analytics pipeline, and Order Manager (port 3205); JSON WebSocket envelope for events; automatic reconnection with exponential backoff (1s–60s)
 
 **Performance SLA**:
+
 - Callback processing latency: &lt;50 ms p95
 - WebSocket publish latency: &lt;100 ms p95
 - REST API response time: &lt;200 ms p95
@@ -158,6 +174,7 @@ ws.onmessage = (event) => {
 ```
 
 **Validation with ArchitectureGuild**:
+
 - ✅ ProfitDLL integration approach reviewed
 - ✅ WebSocket protocol design validated
 - ✅ Serialization strategy confirmed

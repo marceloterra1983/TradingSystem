@@ -32,7 +32,7 @@ The TradingSystem Dashboard is the primary user interface for interacting with a
 ### Key Metrics
 
 - **Port:** 3103
-- **Base URL:** http://localhost:3103
+- **Base URL:** <http://localhost:3103>
 - **Bundle Size:** ~2.5 MB (optimized with code splitting)
 - **Performance:** Lazy loading reduces initial load by 40-60%
 - **Repository:** `frontend/dashboard/`
@@ -96,6 +96,7 @@ const TPCapitalOpcoesPage = React.lazy(
 ```
 
 **Benefits:**
+
 - Faster initial load time
 - Reduced memory footprint
 - Better user experience on slower connections
@@ -125,6 +126,7 @@ export const useTradingStore = create<TradingStore>((set) => ({
 ```
 
 **Use Cases:**
+
 - Sidebar state
 - Current page/view
 - Trading positions
@@ -150,6 +152,7 @@ const queryClient = new QueryClient({
 ```
 
 **Use Cases:**
+
 - API responses
 - Health checks
 - Service status
@@ -171,6 +174,7 @@ A drag-and-drop, multi-column layout system used by most pages:
 ```
 
 **Features:**
+
 - Drag-and-drop section rearrangement
 - Multi-column grid (1, 2, 3, 4 columns)
 - Collapsible sections with persist state
@@ -178,6 +182,7 @@ A drag-and-drop, multi-column layout system used by most pages:
 - Per-page layout persistence (localStorage)
 
 **Pages Using This Pattern:**
+
 - Launcher Page
 - Workspace Page
 - TP Capital Page
@@ -195,6 +200,7 @@ A drag-and-drop, multi-column layout system used by most pages:
 **File:** `frontend/dashboard/src/components/pages/LauncherPage.tsx`
 
 **Sections:**
+
 1. **Start Metrics** - Last system start statistics
 2. **Local Services** - Node.js/Express APIs status
 3. **Docker Containers** - Container health and management
@@ -202,6 +208,7 @@ A drag-and-drop, multi-column layout system used by most pages:
 5. **Container Endpoints** - Web UIs from Docker containers
 
 **API Integration:**
+
 - Status API (Port 3500) - `/api/status`, `/api/health/full`
 - Docker API - Container status and metrics
 
@@ -214,14 +221,17 @@ A drag-and-drop, multi-column layout system used by most pages:
 **File:** `frontend/dashboard/src/components/pages/WorkspacePageNew.tsx`
 
 **Sections:**
+
 1. **WorkspaceListSection** - CRUD table with "+" button
 2. **StatusBoardSection** - Drag-and-drop Kanban board
 
 **State Management:**
+
 - Custom hook: `useInitializeWorkspaceEvents()`
 - Zustand store: `useWorkspaceStore`
 
 **API Integration:**
+
 - Workspace API (Port 3200) - `/api/items`
 - Real-time updates via polling (15s interval)
 
@@ -234,12 +244,14 @@ A drag-and-drop, multi-column layout system used by most pages:
 **File:** `frontend/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
 
 **Sections:**
+
 - Signal visualization
 - Telegram bot/channel management
 - Real-time ingestion metrics
 - Historical signal analysis
 
 **API Integration:**
+
 - TP Capital API (Port 4005) - `/signals`, `/telegram/bots`, `/telegram/channels`
 - Telegram Gateway API (Port 4010) - `/api/messages`
 
@@ -252,12 +264,14 @@ A drag-and-drop, multi-column layout system used by most pages:
 **File:** `frontend/dashboard/src/components/pages/TelegramGatewayFinal.tsx`
 
 **Sections:**
+
 - MTProto connection status
 - Message queue monitoring
 - Channel management
 - Sync status and metrics
 
 **API Integration:**
+
 - Telegram Gateway API (Port 4010) - `/api/telegram-gateway/overview`, `/api/messages`
 
 ---
@@ -279,6 +293,7 @@ Reusable card component with expand/collapse functionality:
 ```
 
 **Features:**
+
 - Persistent state (localStorage)
 - Smooth animations (Framer Motion)
 - Header actions support
@@ -298,6 +313,7 @@ Global service health indicator:
 ```
 
 **Features:**
+
 - Real-time health monitoring
 - Auto-refresh every 30s
 - Color-coded status (green/yellow/red)
@@ -318,6 +334,7 @@ Individual service connection indicator:
 ```
 
 **Features:**
+
 - Real-time connection testing
 - Retry functionality
 - Auto-recovery triggers
@@ -388,6 +405,7 @@ const virtualizer = useVirtualizer({
 **Purpose:** Automatically detects and recovers failed services
 
 **Flow:**
+
 1. Monitors service health every 30s
 2. Detects degraded/down services
 3. Triggers auto-start via Status API
@@ -395,6 +413,7 @@ const virtualizer = useVirtualizer({
 5. Retries with exponential backoff
 
 **Supported Services:**
+
 - Workspace API (3200)
 - Documentation API (3400)
 - TP Capital API (4005)
@@ -407,6 +426,7 @@ const virtualizer = useVirtualizer({
 **Router:** React Router DOM v6
 
 **Routes:**
+
 ```typescript
 <Routes>
   <Route path="/" element={<Layout />}>
@@ -429,11 +449,13 @@ const virtualizer = useVirtualizer({
 **Provider:** `frontend/dashboard/src/contexts/ThemeContext.tsx`
 
 **Modes:**
+
 - Light
 - Dark
 - System (auto-detect)
 
 **Implementation:**
+
 - Tailwind CSS dark mode classes
 - Persistent preference (localStorage)
 - Smooth transitions
@@ -450,9 +472,10 @@ npm install
 npm run dev
 ```
 
-**Dev Server:** http://localhost:3103
+**Dev Server:** <http://localhost:3103>
 
 **Features:**
+
 - Hot Module Replacement (HMR)
 - Fast Refresh
 - Source maps
@@ -470,6 +493,7 @@ npm run preview
 **Output:** `frontend/dashboard/dist/`
 
 **Optimizations:**
+
 - Minification (Terser)
 - Tree-shaking
 - Code splitting
@@ -522,6 +546,7 @@ VITE_TELEGRAM_API_URL=http://localhost:4010
 ```
 
 **Access in Code:**
+
 ```typescript
 const statusApiUrl = import.meta.env.VITE_STATUS_API_URL;
 ```
@@ -565,4 +590,3 @@ const statusApiUrl = import.meta.env.VITE_STATUS_API_URL;
 - [Component Guidelines](/frontend/guidelines/style-guide)
 - [API Overview](/api/overview)
 - [Status API](/api/status-api)
-

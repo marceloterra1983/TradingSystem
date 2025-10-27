@@ -16,12 +16,14 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Protocol**: Standard input/output streams
 
 **How It Works**:
+
 1. Claude Code CLI spawns MCP server process
 2. Communication via stdin (requests) and stdout (responses)
 3. JSON-RPC 2.0 message format
 4. Server lifecycle managed by CLI
 
 **Advantages**:
+
 - ✅ Simple implementation (no network configuration)
 - ✅ Low latency (local process communication)
 - ✅ Secure (no network exposure)
@@ -29,11 +31,13 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 - ✅ No port conflicts
 
 **Disadvantages**:
+
 - ❌ Single client only (no multi-user)
 - ❌ No remote access
 - ❌ Process overhead (spawn per session)
 
 **Configuration Example**:
+
 ```json
 {
   "mcpServers": {
@@ -47,6 +51,7 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 ```
 
 **Use Cases**:
+
 - Local development with Claude Code CLI
 - Single-user AI assistance
 - Secure file access without network exposure
@@ -58,24 +63,28 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Protocol**: HTTP REST API
 
 **How It Works**:
+
 1. MCP server runs as standalone HTTP service
 2. Clients connect via HTTP requests
 3. JSON-RPC 2.0 over HTTP POST
 4. Server runs independently (systemd, Docker)
 
 **Advantages**:
+
 - ✅ Multi-client support
 - ✅ Remote access (with authentication)
 - ✅ Scalable (load balancing, clustering)
 - ✅ Language-agnostic clients
 
 **Disadvantages**:
+
 - ❌ Network configuration required
 - ❌ Higher latency (network overhead)
 - ❌ Security complexity (TLS, authentication)
 - ❌ Port management
 
 **Planned Configuration**:
+
 ```json
 {
   "mcpServers": {
@@ -92,6 +101,7 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 ```
 
 **Use Cases**:
+
 - Multi-user AI assistance (team collaboration)
 - Remote development (access from different machines)
 - Dashboard integration (MCP proxy at port 3847)
@@ -105,23 +115,27 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Protocol**: WebSocket (bidirectional streaming)
 
 **How It Works**:
+
 1. MCP server exposes WebSocket endpoint
 2. Clients connect via WebSocket
 3. JSON-RPC 2.0 over WebSocket frames
 4. Persistent connection with real-time updates
 
 **Advantages**:
+
 - ✅ Real-time bidirectional communication
 - ✅ Server-initiated messages (push notifications)
 - ✅ Lower latency than HTTP polling
 - ✅ Efficient for streaming data
 
 **Disadvantages**:
+
 - ❌ Connection management complexity
 - ❌ Reconnection logic required
 - ❌ Firewall/proxy challenges
 
 **Use Cases**:
+
 - Real-time agent notifications
 - Streaming market data to AI agents
 - Live collaboration features
@@ -135,6 +149,7 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Transport**: stdio
 
 **Deployment**:
+
 - MCP servers spawned by Claude Code CLI on-demand
 - No separate deployment required
 - Configuration in `~/.claude.json`
@@ -144,11 +159,13 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Scalability**: Single user only
 
 **Resiliency**:
+
 - Auto-restart on crash (CLI manages lifecycle)
 - No network dependencies
 - Isolated per session
 
 **Security**:
+
 - No network exposure
 - File system permissions enforced
 - Allowed directories configured in `.claude-plugin`
@@ -160,6 +177,7 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Transport**: HTTP
 
 **Deployment**:
+
 - MCP server as standalone service (Docker container or systemd)
 - Reverse proxy (Nginx) for TLS termination
 - Load balancer for horizontal scaling
@@ -169,18 +187,21 @@ MCP servers in TradingSystem use **stdio (standard input/output)** as the primar
 **Scalability**: Horizontal scaling with load balancer
 
 **Resiliency**:
+
 - Health checks (GET /health)
 - Auto-restart on failure (Docker restart policy)
 - Circuit breaker for downstream dependencies
 - Rate limiting per client
 
 **Security**:
+
 - TLS encryption (HTTPS)
 - Token-based authentication (Bearer tokens)
 - CORS configuration (allowed origins)
 - API key rotation (90-day cycle)
 
 **Infrastructure**:
+
 ```yaml
 # docker-compose.mcp.yml
 services:
@@ -204,6 +225,7 @@ services:
 **Transport**: HTTP + WebSocket (hybrid)
 
 **Deployment**:
+
 - MCP server cluster (3+ instances)
 - Redis for shared state (memory server)
 - PostgreSQL for audit logs
@@ -214,12 +236,14 @@ services:
 **Scalability**: 100+ concurrent clients
 
 **Resiliency**:
+
 - Multi-instance deployment (no single point of failure)
 - Health checks with automatic failover
 - Circuit breakers for all external dependencies
 - Graceful degradation (fallback to cached data)
 
 **Security**:
+
 - mTLS (mutual TLS) for service-to-service communication
 - OAuth 2.0 for user authentication
 - Role-based access control (RBAC)
@@ -231,15 +255,18 @@ services:
 ### stdio Transport
 
 **Latency**:
+
 - Operation latency: &lt;10ms p95
 - Startup time: &lt;100ms (server spawn)
 - Shutdown time: &lt;50ms (graceful termination)
 
 **Throughput**:
+
 - Operations/second: 100+ (limited by processing, not transport)
 - Concurrent operations: 1 (single client)
 
 **Resource Usage**:
+
 - Memory: 50-100 MB per server
 - CPU: &lt;5% idle, &lt;50% under load
 - Disk I/O: Minimal (read-only operations)
@@ -249,15 +276,18 @@ services:
 ### HTTP Transport (Planned)
 
 **Latency**:
+
 - Operation latency: 50-100ms p95 (network + processing)
 - Connection establishment: &lt;50ms
 - TLS handshake: +20-30ms
 
 **Throughput**:
+
 - Requests/second: 1000+ (with load balancing)
 - Concurrent clients: 100+ (horizontal scaling)
 
 **Resource Usage**:
+
 - Memory: 200-500 MB per instance
 - CPU: &lt;10% idle, &lt;70% under load
 - Network: 1-10 Mbps (depends on payload size)
@@ -267,15 +297,18 @@ services:
 ### WebSocket Transport (Future)
 
 **Latency**:
+
 - Message latency: &lt;50ms p95 (persistent connection)
 - Connection establishment: &lt;100ms
 - Reconnection time: &lt;5s (exponential backoff)
 
 **Throughput**:
+
 - Messages/second: 10,000+ (streaming optimized)
 - Concurrent connections: 1000+ (with clustering)
 
 **Resource Usage**:
+
 - Memory: 1-2 GB per instance (connection state)
 - CPU: &lt;15% idle, &lt;80% under load
 - Network: 10-100 Mbps (real-time streaming)
@@ -311,15 +344,18 @@ services:
 ### stdio Configuration
 
 **Required Fields**:
+
 - `command`: Executable path (e.g., `npx`, `node`, `python`)
 - `args`: Command arguments (e.g., server package, options)
 - `transport`: `"stdio"`
 
 **Optional Fields**:
+
 - `env`: Environment variables for server process
 - `cwd`: Working directory for server
 
 **Example**:
+
 ```json
 {
   "command": "npx",
@@ -336,15 +372,18 @@ services:
 ### HTTP Configuration (Planned)
 
 **Required Fields**:
+
 - `url`: Server base URL (e.g., `http://localhost:3847`)
 - `transport`: `"http"`
 
 **Optional Fields**:
+
 - `auth`: Authentication configuration (bearer token, API key)
 - `timeout`: Request timeout (default: 30s)
 - `headers`: Custom HTTP headers
 
 **Example**:
+
 ```json
 {
   "url": "http://localhost:3847",
@@ -365,11 +404,13 @@ services:
 ### stdio Transport
 
 **File System Security**:
+
 - Restrict allowed directories (`.claude-plugin` configuration)
 - Enforce file permissions (read-only for sensitive files)
 - Validate file paths (prevent directory traversal)
 
 **Process Security**:
+
 - Run servers with user permissions (not root)
 - Isolate server processes (no shared state)
 - Limit resource usage (CPU, memory quotas)
@@ -379,16 +420,19 @@ services:
 ### HTTP Transport (Planned)
 
 **Network Security**:
+
 - TLS 1.3 required (no plain HTTP in production)
 - Certificate validation (no self-signed certs)
 - CORS configuration (allowed origins only)
 
 **Authentication**:
+
 - Bearer token authentication (JWT)
 - API key rotation (90-day cycle)
 - Rate limiting (300 req/60s per client)
 
 **Authorization**:
+
 - Role-based access control (read-only, read-write, admin)
 - Operation-level permissions (file read, file write, Git commit)
 - Audit logging (all operations tracked)

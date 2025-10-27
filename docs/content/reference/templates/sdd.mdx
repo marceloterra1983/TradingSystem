@@ -56,6 +56,7 @@ EventBus --> ServiceA : Trigger async handlers
 ```
 
 **Key Components**:
+
 - [Component 1]: [Responsibility and interactions]
 - [Component 2]: [Responsibility and interactions]
 - [Component 3]: [Responsibility and interactions]
@@ -82,6 +83,7 @@ Frontend --> Client : Render result
 ```
 
 **Notes**:
+
 - [Note about synchronous vs asynchronous steps]
 - [Note about error paths or retries]
 
@@ -102,6 +104,7 @@ Completed --> Archived : Retention policy
 ```
 
 **State Descriptions**:
+
 - **Pending**: [Definition]
 - **Processing**: [Definition]
 - **Completed**: [Definition]
@@ -140,6 +143,7 @@ Signal "1" -- "0..1" Order
 ```
 
 **Entity Definitions**:
+
 - **Order**: [Purpose, key fields, constraints]
 - **Signal**: [Purpose, key fields, constraints]
 - **Execution**: [Purpose, key fields, constraints]
@@ -155,6 +159,7 @@ Signal "1" -- "0..1" Order
 **POST `/api/v1/orders`**
 
 Request:
+
 ```json
 {
   "symbol": "PETR4",
@@ -165,6 +170,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "id": "3c0538b3-0d7f-4ca3-83e4-0d41dddac002",
@@ -174,6 +180,7 @@ Response:
 ```
 
 **Error Codes**:
+
 - `400` – Validation error (`INVALID_PRICE`, `INSUFFICIENT_FUNDS`)
 - `401` – Unauthorized
 - `409` – Conflict (duplicate order)
@@ -198,6 +205,7 @@ Response:
 | Error rate | < 0.5% | SLO dashboard |
 
 **Scalability**:
+
 - Horizontal scaling for API (Kubernetes HPA, min 2 pods, max 10)
 - Database partitioning strategy (per month, per asset)
 - Queue consumers auto-scale based on backlog size
@@ -205,16 +213,19 @@ Response:
 ### Security Considerations
 
 **Authentication & Authorization**:
+
 - [Auth method - e.g., JWT with RS256]
 - [Role model - e.g., Admin, Trader, Viewer]
 - [Session management and expiration]
 
 **Data Protection**:
+
 - Encrypt data in transit (TLS 1.3)
 - Encrypt sensitive fields at rest (KMS-managed keys)
 - Mask PII in logs and analytics
 
 **Security Controls**:
+
 - [ ] Static analysis (npm run lint:security)
 - [ ] Dependency scanning (GitHub Dependabot)
 - [ ] Runtime protection (WAF, rate limiting)
@@ -228,6 +239,7 @@ Response:
 | Invalid payload | Request validation | Return 400 with details | Inform user |
 
 **Retry Strategy**:
+
 - Exponential backoff with jitter (1s, 2s, 4s, max 5 attempts)
 - Idempotency keys for POST requests
 - Dead-letter queue for failed async jobs
@@ -235,39 +247,47 @@ Response:
 ### Monitoring & Observability
 
 **Metrics**:
+
 - Request rate, latency, error rate (Prometheus)
 - Queue depth, consumer lag
 - Business KPIs (orders filled, signals processed)
 
 **Logging**:
+
 - Structured JSON logs (correlation IDs, user IDs)
 - Log levels: INFO for success, WARN for recoverable errors, ERROR for failures
 
 **Alerting**:
+
 - Alert on error rate &gt;1% for 5 minutes
 - Alert on latency p95 &gt;1s for 5 minutes
 - Alert on queue backlog &gt;10k messages
 
 **Dashboards**:
+
 - Grafana dashboard: `TradingSystem / Orders`
 - Kibana dashboard: `trading-system-logs`
 
 ### Testing Strategy
 
 **Unit Tests**:
+
 - Critical utilities, domain logic, validation rules
 - Target coverage: 80% statements for core modules
 
 **Integration Tests**:
+
 - API + database interactions
 - Message bus publish/consume flow
 - External API integrations (mocked environments)
 
 **End-to-End Tests**:
+
 - User journey from signal to executed order
 - Failover scenarios (simulate downstream outage)
 
 **Performance Tests**:
+
 - Load testing (baseline and peak)
 - Soak testing (8-hour run)
 - Stress testing (determine breaking point)
@@ -275,12 +295,14 @@ Response:
 ### Deployment Strategy
 
 **Phases**:
+
 1. Deploy to staging (feature flag off)
 2. Run validation suite (integration + E2E)
 3. Canary release to 10% traffic
 4. Full rollout with monitoring
 
 **Rollback Plan**:
+
 - Maintain previous container image
 - Toggle feature flag off
 - Restore database snapshot if schema migration fails
@@ -288,21 +310,25 @@ Response:
 ### Dependencies
 
 **Internal**:
+
 - [Service A] (version constraint, API contract)
 - [Shared library] (semver requirement)
 
 **External**:
+
 - [Third-party API] (SLAs, rate limits)
 - [Identity provider] (token issuance)
 
 ### Migration Notes
 
 **Data Migration**:
+
 - Migration script path (`scripts/migrations/2025-10-24-add-orders.ts`)
 - Backfill strategy (batch size, scheduling)
 - Verification plan (row counts, checksums)
 
 **Breaking Changes**:
+
 - API contract changes (versioned endpoints)
 - Deprecation timeline for legacy functionality
 

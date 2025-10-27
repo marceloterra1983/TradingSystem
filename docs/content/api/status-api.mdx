@@ -32,7 +32,7 @@ The **Status API** (also known as **Service Launcher API** or **Launcher API**) 
 | Property | Value |
 |----------|-------|
 | **Port** | 3500 |
-| **Base URL** | http://localhost:3500 |
+| **Base URL** | <http://localhost:3500> |
 | **Repository** | `apps/status/` |
 | **Status** | ✅ Active |
 | **Technology** | Express.js, Node.js |
@@ -58,6 +58,7 @@ The Status API acts as a central hub for service orchestration:
 ```
 
 **Flow:**
+
 1. Frontend requests `/api/status` or `/api/health/full`
 2. Status API checks cache (for `/health/full`)
 3. Executes health checks against all services
@@ -73,6 +74,7 @@ curl http://localhost:3500/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",
@@ -87,6 +89,7 @@ curl http://localhost:3500/api/status
 ```
 
 Response:
+
 ```json
 {
   "overallStatus": "ok",
@@ -164,12 +167,14 @@ curl -I http://localhost:3500/api/health/full
 Probes all 11+ services and returns aggregated health status.
 
 **Features:**
+
 - Parallel health checks (Promise.all)
 - Circuit breaker protection
 - Latency measurement
 - Results sorted by severity (down → degraded → ok)
 
 **Response Fields:**
+
 - `overallStatus`: `ok` | `degraded` | `down`
 - `totalServices`: Number of monitored services
 - `degradedCount`: Services with non-ok status
@@ -177,6 +182,7 @@ Probes all 11+ services and returns aggregated health status.
 - `averageLatencyMs`: Average response time across all services
 
 **Example:**
+
 ```bash
 curl http://localhost:3500/api/status | jq '.services[] | select(.status == "down")'
 ```
@@ -184,18 +190,21 @@ curl http://localhost:3500/api/status | jq '.services[] | select(.status == "dow
 ### GET /api/health/full
 
 Executes comprehensive health check script with:
+
 - **Caching**: 60-second TTL to prevent script flooding
 - **In-Flight Deduplication**: Multiple simultaneous requests share single execution
 - **Script Timeout**: 10 seconds max execution time
 - **Exit Code Handling**: 0=healthy, 1=degraded, 2=critical
 
 **Cache Headers:**
+
 ```http
 X-Cache-Status: HIT | MISS
 X-Cache-Age: <seconds>
 ```
 
 **Example:**
+
 ```bash
 # First request (MISS)
 curl -i http://localhost:3500/api/health/full
@@ -212,6 +221,7 @@ curl -i http://localhost:3500/api/health/full
 Launch a service in a detected terminal emulator.
 
 **Request Body:**
+
 ```json
 {
   "serviceName": "Workspace API",
@@ -221,6 +231,7 @@ Launch a service in a detected terminal emulator.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -231,6 +242,7 @@ Launch a service in a detected terminal emulator.
 ```
 
 **Supported Terminals:**
+
 - **Linux**: gnome-terminal, konsole, xterm
 - **macOS**: Terminal.app, iTerm2
 - **Windows**: Windows Terminal, cmd, PowerShell
@@ -240,6 +252,7 @@ Launch a service in a detected terminal emulator.
 Auto-start a service with built-in cooldown (30 seconds between attempts).
 
 **Supported Service IDs:**
+
 - `workspace-api`
 - `documentation-api`
 - `firecrawl-proxy`
@@ -247,11 +260,13 @@ Auto-start a service with built-in cooldown (30 seconds between attempts).
 - `telegram-gateway-api`
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3500/api/auto-start/workspace-api
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -262,6 +277,7 @@ curl -X POST http://localhost:3500/api/auto-start/workspace-api
 ```
 
 **Response (Cooldown Active):**
+
 ```json
 {
   "success": false,
@@ -274,10 +290,12 @@ curl -X POST http://localhost:3500/api/auto-start/workspace-api
 Returns circuit breaker state for all monitored services.
 
 **Circuit Breaker Configuration:**
+
 - **Threshold**: 5 consecutive failures
 - **Timeout**: 60 seconds (open state duration)
 
 **Response:**
+
 ```json
 {
   "threshold": 5,
@@ -301,6 +319,7 @@ Returns circuit breaker state for all monitored services.
 ```
 
 **Circuit States:**
+
 - `closed`: Service healthy, requests allowed
 - `open`: Service unhealthy, requests blocked (returns cached error)
 - `half-open`: Testing if service recovered (not implemented yet)
@@ -310,6 +329,7 @@ Returns circuit breaker state for all monitored services.
 The Status API monitors these services by default:
 
 ### APIs (category: `api`)
+
 - Workspace API (3200)
 - TP Capital Signals API (4007)
 - Firecrawl Proxy (3600)
@@ -317,22 +337,28 @@ The Status API monitors these services by default:
 - Telegram Gateway API (4010)
 
 ### Messaging (category: `messaging`)
+
 - Telegram Gateway (4006)
 
 ### UI (category: `ui`)
+
 - Dashboard (3101)
 
 ### Docs (category: `docs`)
+
 - Docusaurus (3205)
 
 ### Monitoring (category: `monitoring`)
+
 - Prometheus (9090)
 - Grafana (3000)
 
 ### Data (category: `data`)
+
 - QuestDB HTTP (9000)
 
 ### Internal (category: `internal`)
+
 - Service Launcher (3500 - self)
 
 ## Configuration
@@ -517,6 +543,7 @@ curl http://localhost:3500/circuit-breaker | jq '.activeCircuits'
 ### Common Errors
 
 **500 - Health Check Script Failed:**
+
 ```json
 {
   "success": false,
@@ -526,6 +553,7 @@ curl http://localhost:3500/circuit-breaker | jq '.activeCircuits'
 ```
 
 **429 - Auto-Start Cooldown:**
+
 ```json
 {
   "success": false,
@@ -534,6 +562,7 @@ curl http://localhost:3500/circuit-breaker | jq '.activeCircuits'
 ```
 
 **500 - No Terminal Detected:**
+
 ```json
 {
   "success": false,
@@ -600,16 +629,19 @@ nodejs_eventloop_lag_seconds
 ### Monitoring Best Practices
 
 **For Dashboard UI:**
+
 - Poll `/api/status` every 30 seconds
 - Show service status badges
 - Alert on `degradedCount > 0` or `downCount > 0`
 
 **For Prometheus/Grafana:**
+
 - Scrape `/metrics` every 15 seconds
 - Alert on circuit breaker open states
 - Track average latency trends
 
 **For CI/CD Pipelines:**
+
 - Use `/api/health/full` before deployments
 - Ensure `overallHealth` is "healthy"
 - Check individual service categories
@@ -624,6 +656,7 @@ nodejs_eventloop_lag_seconds
 ## Support
 
 For issues, questions, or feature requests:
+
 - **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
 - **Source Code**: `apps/status/server.js`
 - **Health Check Script**: `scripts/maintenance/health-check-all.sh`

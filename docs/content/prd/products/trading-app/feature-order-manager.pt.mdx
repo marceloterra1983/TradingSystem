@@ -18,12 +18,14 @@ translation_source_hash: d53b910baec02fc2676641aa5f068da471af67a6
 A funcionalidade **Order Manager** possibilita execução automatizada de ordens com salvaguardas de risco abrangentes. Ela aplica limites de perda diária, controles de tamanho de posição, restrições de horário de negociação e oferece um kill switch para paradas de emergência. O sistema valida todas as ordens contra parâmetros de risco configurados antes do envio ao ProfitDLL, garantindo automação segura com execução rápida (&lt;500ms p95 de latência).
 
 **Problema**
+
 - Execução manual de ordens é lenta e sujeita a erros
 - Dashboards atuais não mostram claramente rejeições de ordens e motivos
 - Controles de risco aplicados de forma inconsistente e sem automação
 - Ausência de kill switch centralizado para emergências
 
 **Solução Proposta**
+
 - Order Manager automatizado com validação de risco pré-negociação
 - Payloads de erro estruturados com motivos acionáveis
 - Dashboard com monitoramento de risco em tempo real
@@ -32,6 +34,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 2. Objetivos
 
 **Objetivos Primários**
+
 1. Aplicar limites de perda diária e tamanho de posição antes de cada ordem
 2. Fornecer feedback acionável quando ordens forem rejeitadas
 3. Executar ordens market, limit e stop com latência &lt;500ms p95
@@ -39,6 +42,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 5. Implementar kill switch para parada emergencial de negociações
 
 **Objetivos Secundários**
+
 1. Suportar múltiplos tipos de ordem (MARKET, LIMIT, STOP, STOP_LIMIT)
 2. Garantir idempotência na criação de ordens (evitar duplicadas)
 3. Expor métricas Prometheus para monitoramento
@@ -57,6 +61,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 4. Contexto
 
 **Estado Atual**
+
 - Execução manual de ordens via API ProfitDLL
 - Controles de risco aplicados manualmente por traders
 - Sem rastreamento centralizado de ordens ou trilha de auditoria
@@ -64,12 +69,14 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - Sem validação automática de risco antes do envio
 
 **Contexto de Mercado**
+
 - Negociação em ativos brasileiros (feed TP Capital)
 - Horário de mercado: 9:00-18:00 BRT
 - Moeda: BRL (Real)
 - Broker: Nelogica via ProfitDLL
 
 **Contexto Técnico**
+
 - Deploy nativo Windows (requisito do ProfitDLL)
 - Implementação .NET 8 / C#
 - Porta 3205 (API Order Manager)
@@ -78,11 +85,13 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 5. Histórias de Usuário
 
 ### US-1: Colocação de Ordem com Validação de Risco
+
 **Como** trader  
 **Quero** enviar ordens com validação automática de risco  
 **Para** executar trades com segurança sem checagens manuais
 
 **Critérios de Aceitação**
+
 - Formulário valida entradas no cliente (ticker, quantidade, preço)
 - API valida ordem contra limites de risco antes do envio
 - Rejeições exibem motivo claro (ex.: "Limite de perda diária excedido: R$5.250 / R$5.000")
@@ -90,22 +99,26 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - Status atualizado em tempo real (PENDING → SUBMITTED → FILLED)
 
 ### US-2: Configuração de Limites de Risco
+
 **Como** analista de risco  
 **Quero** configurar limites dinamicamente  
 **Para** ajustar controles sem reiniciar serviços
 
 **Critérios de Aceitação**
+
 - Limites configuráveis via API (perda diária, tamanho de posição, horários)
 - Mudanças aplicadas imediatamente (sem restart)
 - Auditoria registra todas as mudanças com horário e usuário
 - Dashboard mostra limites vigentes e utilização
 
 ### US-3: Kill Switch de Emergência
+
 **Como** gestor de risco  
 **Quero** acionar o kill switch para parar trading  
 **Para** evitar perdas durante anomalias de mercado
 
 **Critérios de Aceitação**
+
 - Kill switch ativa em até 1 segundo
 - Todas as ordens pendentes canceladas imediatamente
 - Novas ordens rejeitadas enquanto kill switch ativo
@@ -113,22 +126,26 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - Auditoria registra motivo e timestamp da ativação
 
 ### US-4: Visibilidade de Rejeição de Ordens
+
 **Como** analista de risco  
 **Preciso** de motivos claros de rejeição  
 **Para** ajustar parâmetros de trading rapidamente
 
 **Critérios de Aceitação**
+
 - Order Manager rejeita solicitações que excedem limites com payload estruturado
 - Rejeições aparecem no dashboard com mensagem acionável
 - Mensagens incluem limite violado e valor atual
 - Histórico de rejeições disponível via API
 
 ### US-5: Acompanhamento do Ciclo de Vida da Ordem
+
 **Como** trader  
 **Quero** acompanhar o status da ordem em tempo real  
 **Para** monitorar execuções e agir quando necessário
 
 **Critérios de Aceitação**
+
 - Dashboard lista todas as ordens com status atual
 - Status atualizado em tempo real (polling ou WebSocket)
 - Detalhes incluem fills, preço médio, timestamps
@@ -137,6 +154,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 6. Critérios de Aceitação
 
 **Funcionais**
+
 - ✅ Endpoint de criação valida todos os campos obrigatórios
 - ✅ Checagens de risco aplicam limite diário, tamanho de posição e horário
 - ✅ Kill switch cancela ordens pendentes em até 1 segundo
@@ -145,18 +163,21 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - ✅ Cancelamento de ordens é idempotente
 
 **Performance**
+
 - ✅ Latência de colocação &lt;500ms p95 (NFR-1.5)
 - ✅ Validação de risco &lt;100ms p95
 - ✅ Tempo de resposta da API &lt;200ms p95
 - ✅ Suporta 100 ordens concorrentes por conta
 
 **Segurança**
+
 - ✅ Todas as ordens registradas na trilha de auditoria
 - ✅ Violações de risco logadas com motivo e timestamp
 - ✅ Ativações de kill switch registradas com usuário e motivo
 - ✅ Mensagens de erro sem dados sensíveis
 
 **Usabilidade**
+
 - ✅ Mensagens de erro claras e acionáveis
 - ✅ Dashboard mostra status em tempo real
 - ✅ Violações exibem valor atual vs limite
@@ -165,6 +186,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 7. Dependências
 
 **SDD**
+
 - [Schema de Ordem](../../../sdd/domain/schemas/v1/order)
 - [Schema de Regra de Risco](../../../sdd/domain/schemas/v1/risk-rule)
 - [Evento Order Created](../../../sdd/events/v1/order-created)
@@ -172,17 +194,20 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - [Fluxo Cancel Order](../../../sdd/flows/v1/cancel-order)
 
 **API**
+
 - [API Order Manager](../../../api/order-manager)
 - [Spec Order Manager](../../../sdd/api/order-manager/v1/spec)
 - [Guidelines Order Manager](../../../sdd/api/order-manager/v1/guidelines)
 - Redoc: `/redoc/order-manager` (pendente de automação)
 
 **Frontend**
+
 - [Arquitetura Frontend](../../../frontend/engineering/architecture)
 - [Convenções Frontend](../../../frontend/engineering/conventions)
 - [Design System](../../../frontend/design-system/components)
 
 **Externo**
+
 - ProfitDLL (execução de ordens, ambiente Windows)
 - Feed de sinais TP Capital (validação de preço)
 - TimescaleDB (persistência de ordens)
@@ -190,11 +215,13 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 8. Referências de UX/UI
 
 **Design System**
+
 - Cores: Gestão de Risco (Vermelho #EF4444) para UI de ordens
 - Tipografia: Família Inter, pesos 400-700
 - Componentes: shadcn/ui (Button, Dialog, Table, Badge)
 
 **Wireframe do Formulário**
+
 ```
 ┌─────────────────────────────────────┐
 │ Colocar Ordem                 [×]  │
@@ -224,6 +251,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ```
 
 **Wireframe da Lista de Ordens**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Ordens                                    [+ Nova Ordem]│
@@ -244,6 +272,7 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 9. Métricas
 
 **KPIs de Produto**
+
 - Volume de ordens por dia
 - Taxa de execução (ordens preenchidas)
 - Taxa de rejeição (ordens bloqueadas por risco)
@@ -252,18 +281,21 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 - Ativações do kill switch (contagem e duração)
 
 **Métricas de Performance**
+
 - Latência de execução: &lt;500ms p95 (`order_manager_execution_latency_seconds`)
 - Latência da checagem de risco: &lt;100ms p95
 - Tempo de resposta da API: &lt;200ms p95 (`api_request_duration_seconds`)
 - Carregamento do dashboard: &lt;2 segundos
 
 **Métricas de Qualidade**
+
 - Taxa de erro: &lt;1% das ordens falham
 - Disponibilidade: 99% em 30 dias
 - Consistência de dados: 100% das ordens na auditoria
 - Idempotência: 0 ordens duplicadas por retry
 
 **Requisitos de Tracking**
+
 - Contador de rejeições por regra (`order_manager_risk_violations_total{type}`)
 - Logar todas as transições de ciclo de vida
 - Exportar métricas para Prometheus/Grafana
@@ -272,9 +304,11 @@ A funcionalidade **Order Manager** possibilita execução automatizada de ordens
 ## 10. Questões em Aberto
 
 **Do Contexto Original**
+
 - Devemos manter logs por ordem ou agregados? **Decisão**: logs por ordem (compliance)
 
 **Novas Questões**
+
 1. **Modificação de Ordem**: MVP deve permitir editar ordens ou usar cancelar+recriar? **Decisão**: cancelar+recriar (edição no v1.1)
 2. **Execução Assíncrona**: Devemos usar fila assíncrona para envio? **Decisão**: síncrono no MVP (assíncrono no v2.0)
 3. **Multi-Broker**: Quando incluir suporte multi-broker? **Decisão**: v2.0 (após estabilização do MVP)

@@ -50,10 +50,12 @@ The Order schema defines the structure of trading orders in TradingSystem. Order
 | `REJECTED` | Rejected by broker or risk checks | Yes |
 
 **Internal Workflow Stages (non-exposed)**
+
 - Draft → Validating → Validated → Submitting → Submitted (service orchestration checkpoints)
 - Submitting → Retry Pending (internal) when transient errors occur
 
 **API-Visible Status Transitions**
+
 - PENDING → SUBMITTED → \{PARTIALLY_FILLED, FILLED, CANCELED, EXPIRED\}
 - PENDING → REJECTED (risk checks fail)
 - SUBMITTED → \{PARTIALLY_FILLED, FILLED, CANCELED, FAILED, REJECTED\}
@@ -112,6 +114,7 @@ interface Fill {
 ## Validation Rules
 
 **Field Validation**
+
 - `symbol`: Must exist in market data (query Data Capture service)
 - `side`: Must be `BUY` or `SELL`
 - `type`: Must be `MARKET`, `LIMIT`, `STOP`, or `STOP_LIMIT`
@@ -121,12 +124,14 @@ interface Fill {
 - `timeInForce`: Must be `DAY`, `GTC`, `IOC`, or `FOK`
 
 **Business Rules**
+
 1. For STOP_LIMIT orders: `stopPrice` &gt;= `price` for BUY, `stopPrice` &lt;= `price` for SELL
 2. Price must be within ±10% of last traded price (circuit breaker)
 3. Quantity must be multiple of lot size (typically 1 for stocks)
 4. Order must not exceed max position size for symbol
 
 **Risk Validation**
+
 - Trading hours: 9:00-18:00 BRT
 - Daily loss limit: Check account daily loss
 - Position size limit: Validate against max position per symbol
@@ -136,11 +141,13 @@ interface Fill {
 ## Relationships
 
 **Related Schemas**
+
 - **RiskRule**: Orders validated against risk rules before submission
 - **Position**: Orders update position state when filled
 - **Trade**: Each fill creates a trade record
 
 **Related Events**
+
 - `order.created`: Emitted when order created (status: PENDING)
 - `order.submitted`: Emitted when order sent to broker (status: SUBMITTED)
 - `order.filled`: Emitted when order fully executed (status: FILLED)
@@ -149,10 +156,12 @@ interface Fill {
 - `order.rejected`: Emitted when order rejected (status: REJECTED)
 
 **Related Flows**
+
 - [Place Order Flow](../../../flows/v1/place-order) - Order creation and submission sequence
 - [Cancel Order Flow](../../../flows/v1/cancel-order) - Order cancellation sequence
 
 **Database Mapping**
+
 - PostgreSQL table: `orders` (planned)
 - Columns map directly to schema fields
 - Fills stored in separate `order_fills` table (one-to-many relationship)

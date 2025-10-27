@@ -13,6 +13,7 @@ lastReviewed: '2025-10-27'
 ## Deployment Overview
 
 Service Launcher can be deployed in two modes:
+
 1. **Standalone** (development): Direct Node.js execution
 2. **Docker Compose** (production): Containerized deployment with other services
 
@@ -43,6 +44,7 @@ npm start
 ```
 
 **Expected Output**:
+
 ```
 [INFO] Service Launcher API listening on port 3500
 [INFO] Configuration loaded from /home/marce/Projetos/TradingSystem/.env
@@ -73,6 +75,7 @@ npm run dev
 ```
 
 **Features**:
+
 - Auto-restart on file changes
 - Pretty-printed logs (colorized)
 - Debug log level
@@ -146,6 +149,7 @@ bash scripts/universal/start.sh
 ```
 
 This script:
+
 1. Checks if Service Launcher is already running
 2. Starts Docker containers (if configured)
 3. Starts Node.js services (including Service Launcher)
@@ -230,6 +234,7 @@ healthcheck:
 ```
 
 **Status Check**:
+
 ```bash
 docker inspect service-launcher --format='{{.State.Health.Status}}'
 # Expected: "healthy"
@@ -238,6 +243,7 @@ docker inspect service-launcher --format='{{.State.Health.Status}}'
 ### External Health Monitoring
 
 **Prometheus**:
+
 ```yaml
 # prometheus.yml
 scrape_configs:
@@ -248,6 +254,7 @@ scrape_configs:
 ```
 
 **Nagios/Icinga**:
+
 ```bash
 # Check command
 check_http -H localhost -p 3500 -u /health -s '"status":"ok"'
@@ -273,6 +280,7 @@ sudo firewall-cmd --reload
 ```
 
 **Security Notes**:
+
 - Never expose to public internet
 - Use VPN or internal network only
 - Consider authentication if exposing beyond localhost
@@ -353,11 +361,13 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d service-launcher
 ### Log Aggregation
 
 **Docker Logs**:
+
 ```bash
 docker logs -f service-launcher --tail 100
 ```
 
 **File Logs** (if configured):
+
 ```bash
 tail -f logs/service-launcher.log | jq '.'
 ```
@@ -365,11 +375,13 @@ tail -f logs/service-launcher.log | jq '.'
 ### Metrics
 
 **Health Check Endpoint**:
+
 ```bash
 watch -n 5 'curl -s http://localhost:3500/api/status | jq ".overallStatus"'
 ```
 
 **Cache Performance**:
+
 ```bash
 # Monitor cache hit rate
 while true; do

@@ -27,6 +27,7 @@ Service Launcher uses **centralized environment configuration** from the project
 ```
 
 Configuration is loaded automatically via:
+
 ```javascript
 require(path.join(projectRoot, 'backend/shared/config/load-env.cjs'));
 ```
@@ -191,18 +192,21 @@ SERVICE_LAUNCHER_LOG_LEVEL=error  # Errors only
 ### Log Format
 
 **Development** (pretty print):
+
 ```bash
 NODE_ENV=development npm start
 # Output: Colorized, human-readable logs
 ```
 
 **Production** (JSON):
+
 ```bash
 NODE_ENV=production npm start
 # Output: Structured JSON logs (one per line)
 ```
 
 **Example JSON Log**:
+
 ```json
 {
   "level": "info",
@@ -234,6 +238,7 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3205,http://localhost:8080
 ```
 
 **CORS Headers Applied**:
+
 - `Access-Control-Allow-Origin`: Specified origins
 - `Access-Control-Allow-Methods`: GET, POST, PUT, DELETE, OPTIONS
 - `Access-Control-Allow-Headers`: Content-Type, Authorization
@@ -260,6 +265,7 @@ RATE_LIMIT_MAX=10
 ```
 
 **Rate Limit Response** (HTTP 429):
+
 ```json
 {
   "error": "Too many requests, please try again later."
@@ -294,6 +300,7 @@ HEALTH_CHECK_TIMEOUT_MS=5000
 ### Script Requirements
 
 The health check script must:
+
 1. Be executable: `chmod +x scripts/maintenance/health-check-all.sh`
 2. Accept `--format json` flag
 3. Output valid JSON to stdout
@@ -301,6 +308,7 @@ The health check script must:
 5. Complete within timeout period
 
 **Example Script Validation**:
+
 ```bash
 # Test script execution
 bash scripts/maintenance/health-check-all.sh --format json | jq '.'
@@ -325,11 +333,13 @@ SERVICE_LAUNCHER_USE_WT=false
 ```
 
 **Windows Terminal Command**:
+
 ```bash
 wt.exe -d {workingDir} {command}
 ```
 
 **PowerShell Command**:
+
 ```bash
 powershell -NoExit -Command "cd {workingDir}; {command}"
 ```
@@ -337,6 +347,7 @@ powershell -NoExit -Command "cd {workingDir}; {command}"
 ### Linux Terminal
 
 Service Launcher tries terminals in this order:
+
 1. gnome-terminal (GNOME desktop)
 2. konsole (KDE desktop)
 3. xterm (fallback, always available)
@@ -387,6 +398,7 @@ done
 **Cause**: Port 3500 already in use
 
 **Solution**:
+
 ```bash
 # Find process using port
 lsof -ti:3500
@@ -403,6 +415,7 @@ SERVICE_LAUNCHER_PORT=3501 npm start
 **Cause**: Timeout too short for system
 
 **Solution**:
+
 ```bash
 # Increase timeout to 5 seconds
 SERVICE_LAUNCHER_TIMEOUT_MS=5000
@@ -416,6 +429,7 @@ HEALTH_CHECK_TIMEOUT_MS=15000
 **Cause**: Dashboard origin not in CORS_ORIGIN
 
 **Solution**:
+
 ```bash
 # Add Dashboard origin
 CORS_ORIGIN=http://localhost:3103,http://localhost:3205
@@ -428,6 +442,7 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3205
 **Cause**: .env file not in project root or syntax error
 
 **Solution**:
+
 ```bash
 # Verify .env exists
 ls -la /home/marce/Projetos/TradingSystem/.env

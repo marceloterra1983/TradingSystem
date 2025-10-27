@@ -30,8 +30,8 @@ The **Documentation API** provides comprehensive documentation management capabi
 | Property | Value |
 |----------|-------|
 | **Port** | 3400 (development), 3205 (production) |
-| **Base URL** | http://localhost:3400 |
-| **Reverse Proxy Route** | http://tradingsystem.local/api/documentation |
+| **Base URL** | <http://localhost:3400> |
+| **Reverse Proxy Route** | <http://tradingsystem.local/api/documentation> |
 | **Repository** | `backend/api/documentation-api/` |
 | **Database** | QuestDB/PostgreSQL (dual-strategy) |
 | **Status** | ✅ Active |
@@ -45,6 +45,7 @@ curl http://localhost:3400/health
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -99,6 +100,7 @@ The complete OpenAPI specification is available at:
 Global rate limit: **300 requests per 60-second window**
 
 Rate limit headers:
+
 - `RateLimit-Limit`: Maximum requests allowed
 - `RateLimit-Remaining`: Requests remaining
 - `RateLimit-Reset`: Unix timestamp when limit resets
@@ -106,6 +108,7 @@ Rate limit headers:
 ### Authentication
 
 Currently uses API key authentication. Future versions will support:
+
 - JWT tokens
 - OAuth2
 - Service-to-service mTLS
@@ -129,6 +132,7 @@ curl http://localhost:3400/metrics
 ```
 
 Key metrics:
+
 - `http_request_duration_seconds`: Request latency
 - `documentation_api_requests_total`: Total requests
 - `documentation_api_database_operations`: Database ops
@@ -137,6 +141,7 @@ Key metrics:
 ### Health Monitoring
 
 Comprehensive health checks include:
+
 - Database connectivity
 - Disk space
 - Memory usage
@@ -231,6 +236,7 @@ system = requests.post(f'{BASE_URL}/api/v1/systems', json={
 ### Common Issues
 
 **Connection refused on port 3400**
+
 ```bash
 # Check if service is running
 curl http://localhost:3400/health
@@ -240,11 +246,13 @@ cd backend/api/documentation-api && npm run dev
 ```
 
 **Rate limit exceeded**
+
 - Wait for rate limit window to reset
 - Implement exponential backoff
 - Contact ops team for increased limits
 
 **Search not working**
+
 ```bash
 # Verify search index
 curl http://localhost:3400/api/v1/search/status
@@ -256,6 +264,7 @@ npm run rebuild-search-index
 ## Changelog
 
 ### v1.0.0 (2025-10-25)
+
 - ✅ Initial release
 - ✅ QuestDB/PostgreSQL dual-strategy
 - ✅ FlexSearch integration
@@ -263,6 +272,7 @@ npm run rebuild-search-index
 - ✅ Comprehensive health monitoring
 
 ### Roadmap
+
 - [ ] JWT authentication
 - [ ] GraphQL support
 - [ ] Real-time updates via WebSocket

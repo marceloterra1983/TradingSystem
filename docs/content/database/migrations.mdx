@@ -12,6 +12,7 @@ lastReviewed: '2025-10-27'
 TradingSystem successfully migrated from legacy database organization toward an app-based architecture with dedicated databases and schemas. QuestDB remains the time-series backbone while TimescaleDB/PostgreSQL now powers core applications with ACID transactions and concurrency support.
 
 **Current State**:
+
 - ✅ QuestDB stores TP Capital signals and Telegram metadata (append-only, day-partitioned).  
 - ✅ TimescaleDB powers TP Capital API and Workspace services with relational workloads.  
 - ✅ Database structure organized by application domain (`APPS-TPCAPITAL`, `APPS-WORKSPACE`).  
@@ -19,6 +20,7 @@ TradingSystem successfully migrated from legacy database organization toward an 
 - ⚠️ LowDB still active for legacy Idea Bank (migration to PostgreSQL pending).
 
 **Database Organization**:
+
 - **APPS-TPCAPITAL**: TimescaleDB database with `tp-capital` schema for TP Capital trading signals and metadata.  
 - **APPS-WORKSPACE**: TimescaleDB database with `workspace` schema for workspace items and audit logging.  
 - **documentation-api**: PostgreSQL database managed by Prisma for documentation systems, ideas, and files.  
@@ -33,12 +35,14 @@ TradingSystem successfully migrated from legacy database organization toward an 
 **Date**: October 2025
 
 **Migration Details**:
+
 - Migrated `tradingsystem` database → `APPS-TPCAPITAL` with `tp-capital` schema
 - Migrated `frontend_apps` database → `APPS-WORKSPACE` with `workspace` schema  
 - All data preserved with integrity validation
 - Automatic backups created before migration
 
 **Scripts Used**:
+
 - `scripts/database/migrate-database-structure.sh` - Main migration script
 - `scripts/database/migrate-database-structure.sql` - SQL migration logic
 - Backups stored in `backups/database-migration-YYYYMMDD-HHMMSS/`
@@ -92,12 +96,14 @@ npx prisma migrate status
 **Target**: PostgreSQL/TimescaleDB with proper relational schema
 
 **Prerequisites**:
+
 - Define relational schema for ideas, categories, and metadata
 - Build ETL script for LowDB → PostgreSQL migration
 - Implement backup and validation procedures
 - Schedule maintenance window
 
 **Migration Script**:
+
 ```bash
 # Backup LowDB JSON
 cp db/ideas.json db/ideas.json.backup.$(date +%Y%m%d)
@@ -130,6 +136,7 @@ psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) F
 ## Best Practices
 
 **Before Migration**:
+
 1. Backup data stores (LowDB, QuestDB, configs).  
 2. Test ETL end-to-end with validation.  
 3. Document rollback steps.  
@@ -137,6 +144,7 @@ psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) F
 5. Schedule during low-traffic windows.
 
 **During Migration**:
+
 1. Tail logs for errors and warnings.  
 2. Validate incrementally after each batch.  
 3. Keep backups accessible until verification completes.  
@@ -144,6 +152,7 @@ psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) F
 5. Document anomalies.
 
 **After Migration**:
+
 1. Monitor latency, throughput, and error rates.  
 2. Confirm data integrity with checksums and spot checks.  
 3. Update diagrams, runbooks, and support docs.  
@@ -157,11 +166,13 @@ psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) F
 If a migration to APPS-TPCAPITAL or APPS-WORKSPACE fails:
 
 1. **Stop impacted services**:
+
    ```bash
    docker-compose -f tools/compose/docker-compose.timescale.yml stop
    ```
 
 2. **Restore from backup**:
+
    ```bash
    # Locate backup directory
    cd backups/database-migration-YYYYMMDD-HHMMSS/
@@ -174,11 +185,13 @@ If a migration to APPS-TPCAPITAL or APPS-WORKSPACE fails:
    ```
 
 3. **Restart services**:
+
    ```bash
    docker-compose -f tools/compose/docker-compose.timescale.yml start
    ```
 
 4. **Validate data integrity**:
+
    ```bash
    # Check record counts
    docker exec data-timescaledb psql -U timescale -d tradingsystem -c "SELECT COUNT(*) FROM tp_capital_signals;"
@@ -192,12 +205,14 @@ If a migration to APPS-TPCAPITAL or APPS-WORKSPACE fails:
 If Idea Bank migration fails:
 
 1. **Restore LowDB files**:
+
    ```bash
    cp db/ideas.json.backup.YYYYMMDD db/ideas.json
    cp db/db.json.backup.YYYYMMDD db/db.json
    ```
 
 2. **Revert application changes**:
+
    ```bash
    git revert <migration-commit-sha>
    npm install

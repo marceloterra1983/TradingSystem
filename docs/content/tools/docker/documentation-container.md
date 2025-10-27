@@ -27,12 +27,14 @@ lastReviewed: '2025-10-27'
 **Problem Solved**: Container was crashing due to missing `src/utils/logger.js`
 
 **Fix Applied**:
+
 - Created missing logger utility file
 - Updated health check to support "none" database strategy
 - Configured FlexSearch-only mode (no QuestDB/Postgres)
 - Container now starts successfully and all endpoints work
 
 **Status**:
+
 - ✅ Container: `docs-api` (healthy)
 - ✅ Health: `http://localhost:3401/health` → `status: "ok"`
 - ✅ Search: `http://localhost:3401/api/v1/docs/search` → working
@@ -47,12 +49,14 @@ lastReviewed: '2025-10-27'
 **Problem Solved**: Dashboard couldn't embed Docusaurus in iframe due to browser security restrictions (CORS/X-Frame-Options).
 
 **Fix Applied**:
+
 - Added `X-Frame-Options: ALLOW-FROM http://localhost:3103` header
 - Added `Content-Security-Policy: frame-ancestors 'self' http://localhost:3103 http://localhost:*` header
 - Added CORS headers: `Access-Control-Allow-Origin: http://localhost:3103`
 - Rebuilt and restarted documentation container
 
 **Status**:
+
 - ✅ Container: `documentation` (healthy)
 - ✅ NGINX: Serving Docusaurus at `http://localhost:3400`
 - ✅ Dashboard: Iframe embedding working at `http://localhost:3103/#/docs`
@@ -67,12 +71,14 @@ lastReviewed: '2025-10-27'
 **Problem Solved**: Redoc viewer and Select API buttons in Dashboard's DocsAPI tab were not working due to outdated port references and missing Redoc HTML viewer.
 
 **Fix Applied**:
+
 - Created `frontend/dashboard/public/viewers/redoc.html` - Local Redoc viewer HTML
 - Updated `APIViewerPage.tsx` - Changed Redoc URL from `http://localhost:3205` to `/viewers/redoc.html`
 - Updated Documentation API port from `3400` to `3401` (correct DocsAPI container port)
 - All viewers (Redoc, Swagger, RapiDoc) now load locally from Dashboard (no CORS issues)
 
 **Status**:
+
 - ✅ Redoc viewer: Working with dark theme and local specs
 - ✅ Swagger UI viewer: Working with "Try it out" functionality
 - ✅ RapiDoc viewer: Working with modern customizable interface
@@ -90,18 +96,21 @@ lastReviewed: '2025-10-27'
 **Problem Solved**: Docusaurus was not loading in the Dashboard iframe due to cross-origin issues (port 3103 → port 3400).
 
 **Fix Applied**:
+
 - Updated `vite.config.ts` - Changed docs proxy target from port 3205 to 3400
 - Added asset proxies for `/assets/*` and `/img/*` to proxy Docusaurus assets
 - Updated `api.ts` - Changed docsUrl from `http://localhost:3400` to `/docs` (relative URL)
 - Result: Docusaurus now served from same origin (localhost:3103) via Vite proxy
 
 **Technical Solution**:
+
 - **Before**: Iframe loaded from `http://localhost:3400` (cross-origin, CORS blocked)
 - **After**: Iframe loads from `/docs` → Vite proxies to `http://localhost:3400` (same-origin, no CORS)
 - All Docusaurus assets (CSS, JS, images) also proxied through Vite
 - No browser security restrictions, JavaScript executes properly
 
 **Status**:
+
 - ✅ Docusaurus iframe: Loading correctly with full functionality
 - ✅ Asset loading: All CSS, JS, and images load via proxy
 - ✅ Navigation: All links work correctly
@@ -109,6 +118,7 @@ lastReviewed: '2025-10-27'
 - ✅ Same-origin: No CORS or security errors
 
 **Architecture**:
+
 ```
 Dashboard (localhost:3103)
   ├─ /docs → Vite proxy → NGINX (localhost:3400) → Docusaurus HTML
@@ -123,6 +133,7 @@ Dashboard (localhost:3103)
 ## 🎯 Objetivo
 
 Consolidar múltiplos containers de documentação em **1 único container** separado do Dashboard, servindo:
+
 - Docusaurus (site de documentação)
 - OpenAPI/AsyncAPI specifications
 
@@ -145,6 +156,7 @@ Total: 2 containers
 ```
 
 **Problemas:**
+
 - 2 containers separados para documentação
 - Recursos duplicados
 - `docs-api-viewer` não funcionava (403 error)
@@ -165,9 +177,10 @@ Total: 1 container
 ```
 
 **Funcionalidades:**
-- ✅ Docusaurus em http://localhost:3400/
-- ✅ Specs em http://localhost:3400/specs/
-- ✅ Health endpoint em http://localhost:3400/health
+
+- ✅ Docusaurus em <http://localhost:3400/>
+- ✅ Specs em <http://localhost:3400/specs/>
+- ✅ Health endpoint em <http://localhost:3400/health>
 
 ---
 
@@ -327,6 +340,7 @@ curl http://localhost:3400/health
 ```
 
 **Output esperado:**
+
 ```json
 {
   "status": "healthy",
@@ -389,21 +403,25 @@ bash scripts/universal/start.sh
 ## 🎯 Benefícios
 
 ### 1. **Simplicidade**
+
 - 1 container ao invés de 2
 - 1 configuração NGINX
 - Menos código para manter
 
 ### 2. **Performance**
+
 - Menos recursos consumidos
 - Startup mais rápido
 - Menos overhead de rede
 
 ### 3. **Funcionalidade Completa**
+
 - Docusaurus funcional
 - Specs acessíveis
 - Health check confiável
 
 ### 4. **Separação do Dashboard**
+
 - Dashboard (porta 3103) → UI principal + React
 - Documentation (porta 3400) → Docusaurus + Specs
 - Responsabilidades claras
@@ -474,8 +492,9 @@ $ curl -s http://localhost:3400/health | jq '.'
 ```
 
 **Acessar documentação:**
-- 📚 Docusaurus: http://localhost:3400/
-- 📖 Specs: http://localhost:3400/specs/
+
+- 📚 Docusaurus: <http://localhost:3400/>
+- 📖 Specs: <http://localhost:3400/specs/>
 
 ---
 

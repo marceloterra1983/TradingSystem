@@ -30,6 +30,7 @@ The TradingSystem platform exposes **11 REST APIs** organized into infrastructur
 ## Infrastructure APIs
 
 ### 🔧 [Status API (Service Launcher)](./status-api.mdx)
+
 **Port:** 3500 | **Status:** ✅ Active
 
 Central orchestration and health monitoring service for all TradingSystem components.
@@ -40,6 +41,7 @@ Central orchestration and health monitoring service for all TradingSystem compon
 - **Repository:** `apps/status/`
 
 **Quick Links:**
+
 - [Full Documentation](./status-api.mdx)
 - Health: `http://localhost:3500/health`
 - Status: `http://localhost:3500/api/status`
@@ -47,16 +49,18 @@ Central orchestration and health monitoring service for all TradingSystem compon
 ---
 
 ### 🌐 [Firecrawl Proxy](./firecrawl-proxy.mdx)
+
 **Port:** 3600 | **Status:** ✅ Active
 
 Web scraping proxy service with Firecrawl integration for content extraction.
 
 - **Key Features:** Single URL scraping, Multi-page crawling, Job status tracking, 30s timeout handling
-- **Upstream:** Firecrawl API (https://api.firecrawl.dev)
+- **Upstream:** Firecrawl API (<https://api.firecrawl.dev>)
 - **Security:** Centralized API key management, Helmet protection
 - **Repository:** `backend/api/firecrawl-proxy/`
 
 **Quick Links:**
+
 - [Full Documentation](./firecrawl-proxy.mdx)
 - Health: `http://localhost:3600/health`
 - Scrape: `POST http://localhost:3600/api/scrape`
@@ -64,6 +68,7 @@ Web scraping proxy service with Firecrawl integration for content extraction.
 ---
 
 ### 🚨 [Alert Router](./alert-router.mdx)
+
 **Port:** 8080 | **Status:** ✅ Active
 
 Prometheus alert routing service that creates and manages GitHub issues.
@@ -74,6 +79,7 @@ Prometheus alert routing service that creates and manages GitHub issues.
 - **Repository:** `tools/monitoring/alert-router/`
 
 **Quick Links:**
+
 - [Full Documentation](./alert-router.mdx)
 - Health: `http://localhost:8080/health`
 - Webhook: `POST http://localhost:8080/github`
@@ -83,6 +89,7 @@ Prometheus alert routing service that creates and manages GitHub issues.
 ## Data Management APIs
 
 ### 📚 [Documentation API](./documentation-api.mdx)
+
 **Port:** 3400 | **Status:** ✅ Active
 
 Comprehensive documentation management with ideas, specs, search, and file attachments.
@@ -93,6 +100,7 @@ Comprehensive documentation management with ideas, specs, search, and file attac
 - **Repository:** `backend/api/documentation-api/`
 
 **Quick Links:**
+
 - [Full Documentation](./documentation-api.mdx)
 - Health: `http://localhost:3400/health`
 - Metrics: `http://localhost:3400/metrics`
@@ -100,6 +108,7 @@ Comprehensive documentation management with ideas, specs, search, and file attac
 ---
 
 ### 💡 [Workspace API (Idea Bank)](./workspace-api.mdx)
+
 **Port:** 3200 | **Status:** ✅ Active
 
 Simple CRUD operations for workspace items with Kanban-style status management.
@@ -110,6 +119,7 @@ Simple CRUD operations for workspace items with Kanban-style status management.
 - **Repository:** `backend/api/workspace/`
 
 **Quick Links:**
+
 - [Full Documentation](./workspace-api.mdx)
 - Health: `http://localhost:3200/health`
 - Items: `GET http://localhost:3200/api/items`
@@ -119,6 +129,7 @@ Simple CRUD operations for workspace items with Kanban-style status management.
 ## Business Logic APIs
 
 ### 📈 [TP Capital API](./tp-capital-api.mdx)
+
 **Port:** 4005 | **Status:** ✅ Active
 
 Trading signals ingestion from Telegram channels with comprehensive bot and channel management.
@@ -129,6 +140,7 @@ Trading signals ingestion from Telegram channels with comprehensive bot and chan
 - **Repository:** `apps/tp-capital/`
 
 **Quick Links:**
+
 - [Full Documentation](./tp-capital-api.mdx)
 - Health: `http://localhost:4005/health`
 - Signals: `GET http://localhost:4005/signals`
@@ -136,6 +148,7 @@ Trading signals ingestion from Telegram channels with comprehensive bot and chan
 ---
 
 ### 💬 [Telegram Gateway API](./telegram-gateway-api.mdx)
+
 **Port:** 4010 | **Status:** ✅ Active
 
 REST API for accessing Telegram messages captured by the MTProto Gateway.
@@ -146,6 +159,7 @@ REST API for accessing Telegram messages captured by the MTProto Gateway.
 - **Repository:** `backend/api/telegram-gateway/`
 
 **Quick Links:**
+
 - [Full Documentation](./telegram-gateway-api.mdx)
 - Health: `http://localhost:4010/health`
 - Messages: `GET http://localhost:4010/api/messages`
@@ -155,6 +169,7 @@ REST API for accessing Telegram messages captured by the MTProto Gateway.
 ## Planned Trading APIs
 
 ### 📊 [Data Capture API](./data-capture.mdx)
+
 **Port:** TBD | **Status:** 🚧 Planned
 
 High-performance market data ingestion from ProfitDLL with WebSocket streaming.
@@ -165,11 +180,13 @@ High-performance market data ingestion from ProfitDLL with WebSocket streaming.
 - **Repository:** `backend/services/data-capture/` (planned)
 
 **Quick Links:**
+
 - [Full Documentation](./data-capture.mdx)
 
 ---
 
 ### ⚡ [Order Manager API](./order-manager.mdx)
+
 **Port:** TBD | **Status:** 🚧 Planned
 
 Order execution engine with comprehensive risk management and validation.
@@ -180,6 +197,7 @@ Order execution engine with comprehensive risk management and validation.
 - **Repository:** `backend/services/order-manager/` (planned)
 
 **Quick Links:**
+
 - [Full Documentation](./order-manager.mdx)
 
 ---
@@ -187,9 +205,11 @@ Order execution engine with comprehensive risk management and validation.
 ## Meta Documentation
 
 ### 📋 [Integration Status](./integration-status.mdx)
+
 Current integration status of all APIs with the Dashboard and infrastructure.
 
 ### 📖 API Catalog
+
 This page - Complete catalog of all TradingSystem APIs.
 
 ---
@@ -222,6 +242,7 @@ This page - Complete catalog of all TradingSystem APIs.
 All TradingSystem APIs follow these standards:
 
 ### Documentation
+
 - ✅ OpenAPI 3.1 specification (where applicable)
 - ✅ Interactive Redocusaurus documentation
 - ✅ Comprehensive MDX documentation
@@ -229,23 +250,27 @@ All TradingSystem APIs follow these standards:
 - ✅ Complete error documentation
 
 ### Rate Limiting
+
 - **Default:** 120-300 requests per 60-second window (varies by API)
 - **Headers:** `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
 - **Response:** `429 Too Many Requests` when exceeded
 - **Bypass:** Health checks and metrics endpoints excluded
 
 ### Authentication
+
 - **Current:** Optional API key (development mode)
 - **Production:** Token-based auth (X-API-Token, X-Gateway-Token, Authorization headers)
 - **Planned:** JWT tokens, OAuth2, mTLS for trading APIs
 
 ### Observability
+
 - ✅ Prometheus metrics at `/metrics`
 - ✅ Health checks at `/health`
 - ✅ Structured logging (JSON via Pino)
 - ✅ Request correlation IDs (where applicable)
 
 ### Versioning
+
 - **Strategy:** URL-based versioning (`/api/v1/...`) for stable APIs
 - **Deprecation:** 6-month notice period (planned)
 - **Support:** N and N-1 versions maintained
@@ -289,6 +314,7 @@ curl http://localhost:4010/metrics  # Telegram Gateway API
 ### Interactive API Testing
 
 Visit the Redocusaurus pages to test APIs interactively:
+
 - [Documentation API](/api/documentation-api)
 - [Workspace API](/api/workspace)
 - [TP Capital API](/api/tp-capital)
@@ -473,12 +499,14 @@ curl -s http://localhost:4005/signals?limit=5 | jq '.data[] | {
 ### Adding New APIs
 
 1. **Create OpenAPI Spec** (if applicable):
+
    ```bash
    touch docs/static/specs/new-api.openapi.yaml
    ```
 
 2. **Configure Redocusaurus**:
    Edit `docs/docusaurus.config.js`:
+
    ```javascript
    specs: [
      // ... existing specs
@@ -491,6 +519,7 @@ curl -s http://localhost:4005/signals?limit=5 | jq '.data[] | {
    ```
 
 3. **Create Documentation**:
+
    ```bash
    touch docs/content/api/new-api.mdx
    ```

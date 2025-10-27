@@ -34,12 +34,14 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 **File**: `frontend/dashboard/public/viewers/redoc.html`
 
 **Features**:
+
 - Loads Redoc from CDN (`https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js`)
 - Accepts spec URL via query parameter (`?url=/specs/documentation-api.openapi.yaml`)
 - Dark theme matching Dashboard design
 - Same pattern as existing Swagger/RapiDoc viewers
 
 **Code**:
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -67,7 +69,8 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 
 **Changes**:
 
-#### ✅ Fixed Redoc viewer URL (line 56-58):
+#### ✅ Fixed Redoc viewer URL (line 56-58)
+
 ```typescript
 // BEFORE
 case 'redoc':
@@ -80,7 +83,8 @@ case 'redoc':
   break;
 ```
 
-#### ✅ Updated Documentation API port (line 30):
+#### ✅ Updated Documentation API port (line 30)
+
 ```typescript
 // BEFORE
 {
@@ -103,17 +107,20 @@ case 'redoc':
 
 ## 📁 Files Created/Modified
 
-### Created:
+### Created
+
 - ✅ `frontend/dashboard/public/viewers/redoc.html` - Redoc HTML viewer
 
-### Modified:
+### Modified
+
 - ✅ `frontend/dashboard/src/components/pages/APIViewerPage.tsx` - Fixed viewer URLs and ports
 
 ---
 
 ## 🧪 Verification
 
-### ✅ All viewer HTML files exist:
+### ✅ All viewer HTML files exist
+
 ```bash
 $ ls -lah frontend/dashboard/public/viewers/
 -rw-r--r-- 1 marce marce 1.7K rapidoc.html
@@ -121,21 +128,24 @@ $ ls -lah frontend/dashboard/public/viewers/
 -rw-r--r-- 1 marce marce 1.7K swagger.html
 ```
 
-### ✅ Spec files accessible:
+### ✅ Spec files accessible
+
 ```bash
 $ curl -I http://localhost:3103/specs/documentation-api.openapi.yaml
 HTTP/1.1 200 OK
 Content-Type: text/yaml
 ```
 
-### ✅ Redoc viewer accessible:
+### ✅ Redoc viewer accessible
+
 ```bash
 $ curl -I http://localhost:3103/viewers/redoc.html
 HTTP/1.1 200 OK
 Content-Type: text/html;charset=utf-8
 ```
 
-### ✅ Vite Hot Module Replacement (HMR):
+### ✅ Vite Hot Module Replacement (HMR)
+
 ```
 1:08:40 AM [vite] (client) page reload public/viewers/redoc.html
 1:08:54 AM [vite] (client) hmr update /src/components/pages/APIViewerPage.tsx
@@ -161,16 +171,19 @@ Content-Type: text/html;charset=utf-8
 ### Example URLs
 
 **Redoc viewer for Documentation API**:
+
 ```
 http://localhost:3103/viewers/redoc.html?url=/specs/documentation-api.openapi.yaml
 ```
 
 **Swagger UI for Workspace API**:
+
 ```
 http://localhost:3103/viewers/swagger.html?url=/specs/workspace.openapi.yaml
 ```
 
 **RapiDoc for Documentation API**:
+
 ```
 http://localhost:3103/viewers/rapidoc.html?url=/specs/documentation-api.openapi.yaml
 ```
@@ -210,6 +223,7 @@ http://localhost:3103/viewers/rapidoc.html?url=/specs/documentation-api.openapi.
 ```
 
 **Key Points**:
+
 - ✅ **No CORS issues** - All viewers load from same origin (localhost:3103)
 - ✅ **No backend dependency** - Viewers are static HTML files
 - ✅ **No port conflicts** - All served through Dashboard's Vite dev server

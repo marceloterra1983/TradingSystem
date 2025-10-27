@@ -203,6 +203,7 @@ stateDiagram-v2
 ```
 
 **Configuration**:
+
 - Failure threshold: 5 consecutive failures
 - Timeout: 60 seconds before HALF_OPEN
 - Metrics: `agent_errors_total{error_type="CircuitBreakerError"}`
@@ -276,6 +277,7 @@ API Request
 ```
 
 **Configuration**:
+
 - Strategy: Exponential backoff (500ms, 1500ms, 3000ms)
 - Max attempts: 4 (configurable via `RETRY_MAX_ATTEMPTS`)
 - Applied to: All HTTP requests (TP Capital, Workspace, Risk Engine)

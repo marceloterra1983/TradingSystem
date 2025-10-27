@@ -30,21 +30,25 @@ lastReviewed: '2025-10-26'
 ### Preconditions
 
 **Required Access**:
+
 - [ ] [Access 1 - e.g., SSH access to production server]
 - [ ] [Access 2 - e.g., Database admin credentials]
 - [ ] [Access 3 - e.g., PagerDuty access]
 
 **Required Tools**:
+
 - [ ] [Tool 1 - e.g., kubectl CLI]
 - [ ] [Tool 2 - e.g., Database client]
 
 ### Signals & Detection
 
 **Alert Names**:
+
 - `[AlertName1]` - [Description and threshold]
 - `[AlertName2]` - [Description and threshold]
 
 **Manual Detection**:
+
 ```bash
 # Health check
 curl http://localhost:PORT/health
@@ -54,6 +58,7 @@ docker compose logs --tail=100 service-name
 ```
 
 **Symptoms**:
+
 - [Symptom 1 - e.g., Dashboard shows "API unavailable"]
 - [Symptom 2 - e.g., Logs show connection errors]
 - [Symptom 3 - e.g., Metrics show high error rate]
@@ -61,6 +66,7 @@ docker compose logs --tail=100 service-name
 ### Immediate Actions
 
 **Quick Checklist** (execute in order):
+
 1. [ ] Check service status: `docker compose ps service-name`
 2. [ ] Review recent logs: `docker compose logs --tail=100 service-name`
 3. [ ] Check resource usage: `docker stats service-name`
@@ -72,10 +78,12 @@ docker compose logs --tail=100 service-name
 #### Step 1: Triage
 
 **Actions**:
+
 1. [Action 1]
 2. [Action 2]
 
 **Commands**:
+
 ```bash
 # Triage command 1
 command
@@ -91,10 +99,12 @@ command
 #### Step 2: Mitigation
 
 **Actions**:
+
 1. [Mitigation action 1]
 2. [Mitigation action 2]
 
 **Commands**:
+
 ```bash
 # Mitigation command
 command
@@ -107,10 +117,12 @@ command
 #### Step 3: Recovery
 
 **Actions**:
+
 1. [Recovery action 1]
 2. [Recovery action 2]
 
 **Validation**:
+
 - [ ] [Check 1 - e.g., Service responds on port]
 - [ ] [Check 2 - e.g., Health check returns 200 OK]
 - [ ] [Check 3 - e.g., Dashboard shows data]
@@ -120,17 +132,20 @@ command
 **If Mitigation Fails**:
 
 1. **Stop Current Deployment**:
+
    ```bash
    docker compose down service-name
    ```
 
 2. **Restore Previous Version**:
+
    ```bash
    docker pull image:previous-tag
    docker compose up -d service-name
    ```
 
 3. **Verify Rollback**:
+
    ```bash
    curl http://localhost:PORT/health
    ```
@@ -138,6 +153,7 @@ command
 ### Post-Incident Validation
 
 **Health Checks**:
+
 - [ ] Service health endpoint returns 200 OK
 - [ ] Logs show no errors for 5 minutes
 - [ ] Metrics return to normal levels
@@ -145,6 +161,7 @@ command
 - [ ] Dependent services operational
 
 **Data Integrity**:
+
 - [ ] No data loss during incident
 - [ ] Recent transactions completed successfully
 - [ ] Database consistency checks pass
@@ -152,17 +169,20 @@ command
 ### Post-Incident Tasks
 
 **Within 1 Hour**:
+
 - [ ] Notify stakeholders (all-clear message)
 - [ ] Update incident ticket with resolution
 - [ ] Document timeline and actions taken
 
 **Within 24 Hours**:
+
 - [ ] Create incident report
 - [ ] Update this runbook if needed
 - [ ] Schedule post-mortem meeting
 - [ ] Identify preventive measures
 
 **Within 1 Week**:
+
 - [ ] Implement preventive measures
 - [ ] Update monitoring/alerting
 - [ ] Update documentation
@@ -173,11 +193,13 @@ command
 **Primary Contact**: [Name, Slack, Phone]
 
 **Escalation Path**:
+
 1. On-call engineer (immediate)
 2. Team lead (if unresolved after 15 minutes)
 3. Director (if critical and unresolved after 1 hour)
 
 **Communication Channels**:
+
 - Incident channel: #incidents
 - Team channel: #team-name
 - Status page: [URL]

@@ -25,11 +25,13 @@ This catalogue lists all domain schemas for TradingSystem v1. Schemas define the
 ## Schema Conventions
 
 **Naming**
+
 - Use PascalCase for schema names (Order, RiskRule)
 - Use camelCase for field names (orderId, dailyLossLimit)
 - Use UPPER_SNAKE_CASE for enum values (BUY, SELL, PENDING)
 
 **Types**
+
 - Use TypeScript interfaces for schema definitions
 - Use enums for fixed value sets
 - Use ISO 8601 for timestamps
@@ -37,11 +39,13 @@ This catalogue lists all domain schemas for TradingSystem v1. Schemas define the
 - Use integers for quantities
 
 **Validation**
+
 - Document all validation rules (required, ranges, formats)
 - Include business rules (e.g., price within ±10% of last trade)
 - Specify error messages for validation failures
 
 **Relationships**
+
 - Document foreign key relationships
 - Specify cardinality (one-to-one, one-to-many, many-to-many)
 - Link to related schemas, events, and flows

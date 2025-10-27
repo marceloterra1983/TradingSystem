@@ -56,6 +56,7 @@ lsof -ti:3500 | xargs kill -9
 ### P1: Service Launcher Down
 
 **Symptoms**:
+
 - `curl http://localhost:3500/health` times out or connection refused
 - Dashboard cannot fetch service status
 - No logs being written
@@ -102,6 +103,7 @@ bash scripts/maintenance/health-check-all.sh --format json || echo "SCRIPT FAILE
 ```
 
 **Resolution**:
+
 1. If out of memory: Increase container/system memory
 2. If port conflict: Kill conflicting process or change port
 3. If config error: Fix .env and restart
@@ -114,11 +116,13 @@ bash scripts/maintenance/health-check-all.sh --format json || echo "SCRIPT FAILE
 ### Issue 1: Port Already in Use
 
 **Symptoms**:
+
 ```
 Error: listen EADDRINUSE: address already in use :::3500
 ```
 
 **Diagnosis**:
+
 ```bash
 # Find process using port 3500
 lsof -i:3500
@@ -128,12 +132,14 @@ lsof -i:3500
 ```
 
 **Solution A** (Kill process):
+
 ```bash
 lsof -ti:3500 | xargs kill -9
 npm start
 ```
 
 **Solution B** (Change port):
+
 ```bash
 # Edit .env
 echo "SERVICE_LAUNCHER_PORT=3501" >> .env
@@ -146,6 +152,7 @@ npm start
 ```
 
 **Prevention**:
+
 - Use `stop` command before starting new instance
 - Implement PID file to track running instances
 - Use process manager (PM2) to prevent duplicate starts
@@ -155,10 +162,12 @@ npm start
 ### Issue 2: Health Check Script Fails
 
 **Symptoms**:
+
 - `/api/health/full` returns 500 error
 - Logs show: "Failed to execute health check script"
 
 **Diagnosis**:
+
 ```bash
 # 1. Verify script exists
 ls -la scripts/maintenance/health-check-all.sh
@@ -176,12 +185,14 @@ bash scripts/maintenance/health-check-all.sh --format json | jq '.' || echo "INV
 **Solutions**:
 
 **Problem**: Script not executable
+
 ```bash
 chmod +x scripts/maintenance/health-check-all.sh
 docker restart service-launcher
 ```
 
 **Problem**: Script times out
+
 ```bash
 # Increase timeout in .env
 echo "HEALTH_CHECK_TIMEOUT_MS=15000" >> .env
@@ -189,6 +200,7 @@ docker restart service-launcher
 ```
 
 **Problem**: Script returns invalid JSON
+
 ```bash
 # Test script locally
 bash scripts/maintenance/health-check-all.sh --format json > /tmp/health.json
@@ -199,6 +211,7 @@ jq '.' /tmp/health.json
 ```
 
 **Problem**: Script missing dependencies (docker, psql)
+
 ```bash
 # Install missing tools
 sudo apt install docker.io postgresql-client
@@ -213,10 +226,12 @@ psql --version
 ### Issue 3: All Services Show "Down"
 
 **Symptoms**:
+
 - `/api/status` returns all services with status "down"
 - Services are actually running (verified manually)
 
 **Diagnosis**:
+
 ```bash
 # 1. Test service health endpoints directly
 curl http://localhost:3200/health  # Workspace
@@ -233,6 +248,7 @@ ping -c 3 localhost
 **Solutions**:
 
 **Problem**: Timeout too short
+
 ```bash
 # Increase timeout to 5 seconds
 echo "SERVICE_LAUNCHER_TIMEOUT_MS=5000" >> .env
@@ -240,6 +256,7 @@ docker restart service-launcher
 ```
 
 **Problem**: Wrong ports configured
+
 ```bash
 # Verify port configuration
 curl http://localhost:3500/api/status | jq '.services[] | {name, port}'
@@ -251,6 +268,7 @@ SERVICE_LAUNCHER_TP_CAPITAL_PORT=4005
 ```
 
 **Problem**: Services not actually running
+
 ```bash
 # Start missing services
 cd apps/workspace && npm start &
@@ -265,10 +283,12 @@ start
 ### Issue 4: Cache Not Working
 
 **Symptoms**:
+
 - `/api/health/full` always takes 2-5 seconds
 - `X-Cache-Status` always shows "MISS"
 
 **Diagnosis**:
+
 ```bash
 # 1. Test cache behavior
 for i in {1..5}; do
@@ -282,6 +302,7 @@ done
 **Solutions**:
 
 **Problem**: Cache TTL too short
+
 ```javascript
 // Edit apps/status/src/services/healthCheckService.js
 const cache = {
@@ -290,6 +311,7 @@ const cache = {
 ```
 
 **Problem**: Service restarting frequently
+
 ```bash
 # Check restart count
 docker inspect service-launcher --format='{{.RestartCount}}'
@@ -302,6 +324,7 @@ docker logs service-launcher | grep -i error
 ```
 
 **Problem**: Multiple instances running
+
 ```bash
 # Check for duplicate processes
 ps aux | grep service-launcher | wc -l
@@ -317,10 +340,12 @@ start  # Restart single instance
 ### Issue 5: High Latency
 
 **Symptoms**:
+
 - `/api/status` takes >5 seconds to respond
 - `averageLatencyMs` in response is >1000ms
 
 **Diagnosis**:
+
 ```bash
 # 1. Measure response time
 time curl -s http://localhost:3500/api/status > /dev/null
@@ -335,6 +360,7 @@ curl -w "%{time_total}s\n" -o /dev/null -s http://localhost:{port}/health
 **Solutions**:
 
 **Problem**: Individual service slow
+
 ```bash
 # Investigate slow service (e.g., TP Capital)
 curl -w "@-" -o /dev/null -s http://localhost:4005/health <<'EOF'
@@ -353,6 +379,7 @@ docker restart tp-capital-service
 ```
 
 **Problem**: System resource exhaustion
+
 ```bash
 # Check CPU/memory
 top
@@ -366,6 +393,7 @@ ps aux --sort=-%cpu | head -10  # Top CPU consumers
 ```
 
 **Problem**: Network issues
+
 ```bash
 # Check network latency
 ping -c 10 localhost
@@ -382,10 +410,12 @@ sudo systemctl restart NetworkManager
 ### Issue 6: CORS Errors
 
 **Symptoms**:
+
 - Dashboard shows CORS error in browser console
 - "Access-Control-Allow-Origin" error
 
 **Diagnosis**:
+
 ```bash
 # 1. Check CORS configuration
 cat /home/marce/Projetos/TradingSystem/.env | grep CORS_ORIGIN
@@ -400,6 +430,7 @@ docker logs service-launcher | grep -i cors
 **Solutions**:
 
 **Problem**: Dashboard origin not in CORS_ORIGIN
+
 ```bash
 # Add Dashboard origin
 echo "CORS_ORIGIN=http://localhost:3103,http://localhost:3205" >> .env
@@ -407,6 +438,7 @@ docker restart service-launcher
 ```
 
 **Problem**: Wrong protocol (http vs https)
+
 ```bash
 # Ensure protocol matches exactly
 # If Dashboard uses https, CORS_ORIGIN must use https
@@ -414,6 +446,7 @@ CORS_ORIGIN=https://localhost:3103,https://localhost:3205
 ```
 
 **Problem**: Port mismatch
+
 ```bash
 # Ensure port in CORS_ORIGIN matches Dashboard port
 # If Dashboard on 3104, update CORS_ORIGIN
@@ -425,10 +458,12 @@ CORS_ORIGIN=http://localhost:3104,http://localhost:3205
 ### Issue 7: Rate Limiting Triggered
 
 **Symptoms**:
+
 - HTTP 429 "Too Many Requests" responses
 - Legitimate requests being blocked
 
 **Diagnosis**:
+
 ```bash
 # 1. Check rate limit configuration
 cat /home/marce/Projetos/TradingSystem/.env | grep RATE_LIMIT
@@ -444,6 +479,7 @@ done | sort | uniq -c
 **Solutions**:
 
 **Problem**: Rate limit too strict for legitimate traffic
+
 ```bash
 # Increase limit
 echo "RATE_LIMIT_MAX=500" >> .env
@@ -451,6 +487,7 @@ docker restart service-launcher
 ```
 
 **Problem**: Dashboard polling too frequently
+
 ```javascript
 // Reduce Dashboard polling frequency
 // Edit frontend/dashboard/src/components/pages/ConnectionsPage.tsx
@@ -458,6 +495,7 @@ setInterval(fetchStatus, 60000);  // Change from 30s to 60s
 ```
 
 **Problem**: Multiple clients from same IP
+
 ```bash
 # Implement per-user rate limiting (code change required)
 # Or increase limit to accommodate multiple clients
@@ -471,6 +509,7 @@ RATE_LIMIT_MAX=1000
 ### High Memory Usage
 
 **Diagnosis**:
+
 ```bash
 # Check memory usage
 docker stats service-launcher --no-stream
@@ -482,6 +521,7 @@ ps aux | grep service-launcher | awk '{print $6}'  # Memory in KB
 **Alert**: >250 MB
 
 **Solutions**:
+
 - Check for memory leaks (requires profiling)
 - Reduce cache TTL if cache growing unbounded
 - Restart service to clear memory
@@ -490,6 +530,7 @@ ps aux | grep service-launcher | awk '{print $6}'  # Memory in KB
 ### High CPU Usage
 
 **Diagnosis**:
+
 ```bash
 # Check CPU usage
 docker stats service-launcher --no-stream
@@ -501,6 +542,7 @@ top -p $(pgrep -f service-launcher)
 **Alert**: &gt;50%
 
 **Solutions**:
+
 - Check for infinite loops in code
 - Reduce health check frequency (increase TTL)
 - Check if health script is CPU-intensive

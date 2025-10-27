@@ -12,6 +12,7 @@ lastReviewed: '2025-10-27'
 TradingSystem operates with production-grade schemas across multiple database systems. TimescaleDB powers TP Capital and Workspace services with hypertables, PostgreSQL + Prisma manages Documentation API with type-safe migrations, QuestDB handles time-series telemetry, and LowDB remains for legacy Idea Bank.
 
 **Active Databases**:
+
 - **APPS-TPCAPITAL** (TimescaleDB) – TP Capital trading signals with `tp-capital` schema
 - **APPS-WORKSPACE** (TimescaleDB) – Workspace items with `workspace` schema and audit logging
 - **documentation-api** (PostgreSQL + Prisma) – Documentation systems, ideas, files, and audit log
@@ -23,11 +24,13 @@ TradingSystem operates with production-grade schemas across multiple database sy
 **Current State**: Entity relationships exist within each database domain.
 
 **APPS-WORKSPACE relationships**:
+
 ```
 workspace_items (1) ----< (N) workspace_audit_log
 ```
 
 **documentation-api relationships**:
+
 ```
 documentation_systems (1) ----< (N) documentation_ideas
 documentation_systems (1) ----< (N) documentation_files
@@ -69,6 +72,7 @@ SELECT create_hypertable('tp-capital.tp_capital_signals', 'created_at',
 ```
 
 **Indexes**:
+
 - Primary key on `id`
 - Time-series index on `created_at DESC`
 - Filter indexes on `channel`, `asset`, `signal_type`
@@ -136,6 +140,7 @@ SELECT create_hypertable('workspace.workspace_items', 'created_at',
 ```
 
 **Indexes**:
+
 - Primary key on `(id, created_at)`
 - Single column: `category`, `priority`, `status`, `created_at DESC`, `updated_at DESC`
 - GIN indexes: `tags`, `metadata`
@@ -145,6 +150,7 @@ SELECT create_hypertable('workspace.workspace_items', 'created_at',
 - Composite: `(category, status, created_at DESC)`, `(priority, status, created_at DESC)`
 
 **Triggers**:
+
 - Auto-update `updated_at` on UPDATE
 - Audit logging to `workspace_audit_log` on INSERT/UPDATE/DELETE
 
@@ -171,6 +177,7 @@ SELECT create_hypertable('workspace.workspace_audit_log', 'changed_at',
 ```
 
 **Indexes**:
+
 - Primary key on `(id, changed_at)`
 - Filter indexes on `item_id`, `action`, `changed_by`, `changed_at DESC`
 
@@ -253,6 +260,7 @@ File uploads with metadata.
 
 **Indexes**: `idea_id`, `system_id`, `uploaded_by`  
 **Foreign Keys**:
+
 - `idea_id` → `documentation_ideas(id)`
 - `system_id` → `documentation_systems(id)`
 
@@ -370,6 +378,7 @@ CREATE TABLE tp_capital_signals (
 **Target Database**: New PostgreSQL/TimescaleDB database
 
 **Planned tables**:
+
 - `trades`: Executed trades tracking
 - `positions`: Open positions monitoring
 - `strategy_settings`: Strategy configuration
@@ -384,12 +393,14 @@ Operational checks ensure schema integrity and data correctness across all datab
 ### TimescaleDB Checks
 
 **APPS-TPCAPITAL**:
+
 - Verify signal ingestion: `SELECT count(*) FROM "tp-capital".tp_capital_signals WHERE created_at > now() - INTERVAL '24 hours'`
 - Validate channel and asset fields are not null
 - Check for duplicate signals by timestamp and raw_message
 - Monitor bot and channel configuration consistency
 
 **APPS-WORKSPACE**:
+
 - Validate required fields: `title`, `category`, `status`, `priority`
 - Confirm enums remain within CHECK constraints
 - Verify audit log triggers are firing correctly
@@ -398,6 +409,7 @@ Operational checks ensure schema integrity and data correctness across all datab
 ### PostgreSQL + Prisma Checks
 
 **documentation-api**:
+
 - Verify foreign key integrity between systems, ideas, and files
 - Validate file paths exist on filesystem
 - Check audit log completeness for all operations

@@ -52,21 +52,25 @@ TradingSystem uses PlantUML diagrams to visualize architecture, sequences, compo
 ## Diagram Types
 
 **Sequence Diagrams** (9):
+
 - Show interactions between components over time
 - Use for user flows, API calls, event sequences
 - Examples: Telegram ingestion, idea creation, signal consumption
 
 **Component Diagrams** (11):
+
 - Show system structure and relationships
 - Use for architecture overviews, service dependencies
 - Examples: System architecture, TP Capital pipeline, Agno Agents
 
 **State Machines** (4):
+
 - Show states and transitions
 - Use for lifecycle management, workflow states
 - Examples: Order lifecycle, connection states, Kanban workflow
 
 **Deployment Diagrams** (2):
+
 - Show infrastructure and deployment topology
 - Use for deployment planning, infrastructure documentation
 - Examples: Deployment architecture, Docker containers
@@ -76,11 +80,13 @@ TradingSystem uses PlantUML diagrams to visualize architecture, sequences, compo
 ### Rendering Options
 
 **Automatic Rendering** (Recommended):
+
 - Embed .puml files in MDX pages using code blocks
 - Docusaurus automatically renders via remark-simple-plantuml plugin
 - No manual export needed
 
 **Example**:
+
 ````markdown
 ```plantuml
 @startuml
@@ -92,11 +98,13 @@ User -> System : Action
 ````
 
 **Local PlantUML Server**:
+
 - Set `PLANTUML_BASE_URL` environment variable
 - Docusaurus forwards rendering requests to local server
 - Faster builds, offline support
 
 **Manual Export** (Optional):
+
 - Use PlantUML CLI or VSCode extension
 - Export to SVG/PNG for external sharing
 - Store in `docs/static/media/diagrams/`
@@ -104,6 +112,7 @@ User -> System : Action
 ### Diagram Conventions
 
 **Color Coding**:
+
 - Use consistent colors for system categories (per design system)
 - Documentation: Blue #3B82F6
 - Data Collection: Green #10B981
@@ -113,11 +122,13 @@ User -> System : Action
 - Dashboard: Cyan #06B6D4
 
 **Naming Conventions**:
+
 - Use kebab-case: `order-placement-sequence.puml`
 - Prefix with domain: `backend-service-map.puml`
 - Version when architecture changes: `deployment-v2.puml`
 
 **Notes and Annotations**:
+
 - Add notes for context and rationale
 - Reference related code files
 - Include performance targets
@@ -126,18 +137,21 @@ User -> System : Action
 ### Maintenance
 
 **Update Triggers**:
+
 - Architecture changes (new services, removed components)
 - API contract changes (new endpoints, changed flows)
 - State machine updates (new states, transitions)
 - Deployment topology changes (new infrastructure)
 
 **Review Schedule**:
+
 - Quarterly review of all diagrams
 - Update when referenced code changes
 - Deprecate obsolete diagrams
 - Archive historical versions
 
 **Version Control**:
+
 - Commit .puml sources to Git
 - Use descriptive commit messages
 - Link commits to ADRs/PRDs when applicable
@@ -146,6 +160,7 @@ User -> System : Action
 ## Creating New Diagrams
 
 **Steps**:
+
 1. Choose appropriate diagram type (sequence, component, state, deployment)
 2. Use PlantUML syntax
 3. Follow color coding and naming conventions
@@ -156,6 +171,7 @@ User -> System : Action
 8. Commit with descriptive message
 
 **Best Practices**:
+
 - Keep diagrams simple and focused (one concept per diagram)
 - Use colors sparingly (highlight key components)
 - Add notes for non-obvious relationships

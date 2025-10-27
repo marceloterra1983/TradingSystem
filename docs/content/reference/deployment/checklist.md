@@ -18,6 +18,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ## 📋 Overview
 
 **Services to Deploy**:
+
 - TP Capital API (Container - Port 4005)
 - Workspace API (Container - Port 3200)
 - Telegram Gateway (systemd service - Port 4006)
@@ -38,6 +39,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   - CPU: 2 cores minimum (4 cores recommended)
 
 - [ ] **Docker installed and running**
+
   ```bash
   docker --version  # Should be 20.x or higher
   docker compose version  # Should be v2.x
@@ -45,12 +47,14 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Node.js installed** (for Telegram Gateway)
+
   ```bash
   node --version  # Should be v18+ (v20 recommended)
   npm --version   # Should be v9+
   ```
 
 - [ ] **Required ports available**
+
   ```bash
   # Check ports are not in use
   lsof -ti :4005  # Should be empty (TP Capital API)
@@ -62,6 +66,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 1.2 Code & Configuration
 
 - [ ] **Latest code deployed to server**
+
   ```bash
   cd /path/to/TradingSystem
   git pull origin main
@@ -70,6 +75,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Production environment file configured**
+
   ```bash
   # Copy and configure production .env
   cp .env.example .env.production
@@ -80,9 +86,11 @@ Complete this checklist before deploying to production. Mark each item as comple
   grep GATEWAY_SECRET_TOKEN .env.production
   grep CORS_ORIGIN .env.production
   ```
+
   **See**: `PRODUCTION-ENV-GUIDE.md` for detailed configuration
 
 - [ ] **Secrets generated and stored securely**
+
   ```bash
   # Generate and document in password manager:
   # - TIMESCALEDB_PASSWORD (32+ chars)
@@ -91,6 +99,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Production .env file permissions set**
+
   ```bash
   chmod 600 .env.production
   ls -la .env.production  # Should show -rw-------
@@ -99,6 +108,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 1.3 Docker Images
 
 - [ ] **Build production images**
+
   ```bash
   # Build TP Capital API
   docker build -f apps/tp-capital/api/Dockerfile \
@@ -115,6 +125,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Images scanned for vulnerabilities** (optional but recommended)
+
   ```bash
   docker scan tp-capital-api:production
   docker scan workspace-service:production
@@ -127,6 +138,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 2.1 Docker Networks
 
 - [ ] **Create backend network**
+
   ```bash
   docker network create tradingsystem_backend 2>/dev/null || echo "Network exists"
   docker network inspect tradingsystem_backend
@@ -135,6 +147,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 2.2 TimescaleDB Deployment
 
 - [ ] **Deploy TimescaleDB container**
+
   ```bash
   docker compose -f tools/compose/docker-compose.database.yml \
     --env-file .env.production \
@@ -142,6 +155,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Wait for TimescaleDB to be healthy** (60 seconds)
+
   ```bash
   sleep 60
   docker ps | grep timescaledb
@@ -149,6 +163,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Connect TimescaleDB to backend network**
+
   ```bash
   docker network connect --alias timescaledb \
     tradingsystem_backend \
@@ -159,6 +174,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify database password**
+
   ```bash
   # Get password from .env.production
   PASS=$(grep TIMESCALEDB_PASSWORD .env.production | cut -d'"' -f2)
@@ -169,6 +185,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test database connection**
+
   ```bash
   PGPASSWORD="$PASS" psql \
     -h localhost -p 5433 \
@@ -180,6 +197,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Initialize database schemas** (if first deployment)
+
   ```bash
   # TP Capital schema
   docker exec data-timescaledb psql -U timescale -d APPS-TPCAPITAL \
@@ -201,6 +219,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 3.1 Deploy Application Containers
 
 - [ ] **Start application containers**
+
   ```bash
   docker compose -f tools/compose/docker-compose.apps.prod.yml \
     --env-file .env.production \
@@ -208,6 +227,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify containers are running**
+
   ```bash
   docker ps --filter "name=tp-capital-api|workspace-service"
 
@@ -217,6 +237,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Wait for health checks** (60 seconds)
+
   ```bash
   sleep 60
   docker ps --filter "name=tp-capital-api|workspace-service"
@@ -225,6 +246,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Check container logs for errors**
+
   ```bash
   docker logs tp-capital-api --tail 50
   docker logs workspace-service --tail 50
@@ -235,6 +257,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 3.2 Test API Endpoints
 
 - [ ] **Test TP Capital API health**
+
   ```bash
   curl http://localhost:4005/health
 
@@ -243,6 +266,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test Workspace API health**
+
   ```bash
   curl http://localhost:3200/health
 
@@ -251,6 +275,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test database connectivity**
+
   ```bash
   curl http://localhost:4005/health | jq '.database.connected'
   # Should return: true
@@ -260,6 +285,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test CORS configuration**
+
   ```bash
   # Get production domain from .env.production
   DOMAIN=$(grep CORS_ORIGIN .env.production | cut -d'=' -f2)
@@ -284,6 +310,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 **Only if using Telegram integration**
 
 - [ ] **Install npm dependencies**
+
   ```bash
   cd apps/telegram-gateway
   npm install --production
@@ -291,6 +318,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Configure Telegram credentials in .env.production**
+
   ```bash
   # Add to .env.production:
   # TELEGRAM_API_ID=your_api_id
@@ -299,6 +327,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Install systemd service**
+
   ```bash
   sudo bash tools/systemd/install-telegram-gateway.sh
 
@@ -306,6 +335,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify systemd service is running**
+
   ```bash
   sudo systemctl status telegram-gateway
 
@@ -313,6 +343,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Check Gateway logs**
+
   ```bash
   sudo journalctl -u telegram-gateway -n 50 --no-pager
 
@@ -320,6 +351,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test Gateway health**
+
   ```bash
   curl http://localhost:4006/health
 
@@ -333,6 +365,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 4.1 Functional Tests
 
 - [ ] **Test TP Capital webhook endpoint**
+
   ```bash
   # Get secret token from .env.production
   TOKEN=$(grep GATEWAY_SECRET_TOKEN .env.production | cut -d'"' -f2)
@@ -352,6 +385,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify signal was stored in database**
+
   ```bash
   PGPASSWORD="$PASS" psql \
     -h localhost -p 5433 \
@@ -363,6 +397,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test Workspace CRUD operations**
+
   ```bash
   # Create item
   curl -X POST http://localhost:3200/api/items \
@@ -378,6 +413,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 4.2 Performance Tests
 
 - [ ] **Check container resource usage**
+
   ```bash
   docker stats --no-stream tp-capital-api workspace-service
 
@@ -387,6 +423,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test API response times**
+
   ```bash
   # TP Capital health endpoint
   time curl http://localhost:4005/health
@@ -398,6 +435,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Load test** (optional - requires wrk or ab)
+
   ```bash
   # Install wrk if not available
   # sudo apt install wrk
@@ -411,6 +449,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 4.3 Monitoring & Logging
 
 - [ ] **Configure log rotation**
+
   ```bash
   # Already configured in docker-compose.apps.prod.yml:
   # - max-size: 50MB
@@ -421,6 +460,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Set up log monitoring** (optional)
+
   ```bash
   # Option 1: Follow all logs
   docker compose -f tools/compose/docker-compose.apps.prod.yml logs -f
@@ -430,6 +470,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Enable Prometheus metrics** (optional)
+
   ```bash
   # TP Capital API metrics
   curl http://localhost:4005/metrics
@@ -447,6 +488,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 5.1 Security Checks
 
 - [ ] **Verify containers running as non-root**
+
   ```bash
   docker exec tp-capital-api id
   # Should show: uid=1001(nodejs) gid=1001(nodejs)
@@ -456,6 +498,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify no sensitive data in logs**
+
   ```bash
   docker logs tp-capital-api 2>&1 | grep -iE "password|secret|token"
   docker logs workspace-service 2>&1 | grep -iE "password|secret|token"
@@ -464,6 +507,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify .env.production not accessible**
+
   ```bash
   ls -la .env.production
   # Should show: -rw------- (600)
@@ -474,6 +518,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Verify database not exposed to internet**
+
   ```bash
   # TimescaleDB should only be accessible via Docker network
   # Port 5432 should NOT be exposed to 0.0.0.0
@@ -484,6 +529,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Scan for exposed secrets** (optional)
+
   ```bash
   # Using gitleaks or similar
   docker run --rm -v $(pwd):/path zricethezav/gitleaks:latest \
@@ -499,6 +545,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 6.1 Database Backup
 
 - [ ] **Create initial database backup**
+
   ```bash
   # Backup TimescaleDB
   docker exec data-timescaledb pg_dump \
@@ -512,6 +559,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Schedule automatic backups**
+
   ```bash
   # Create cron job for daily backups
   (crontab -l 2>/dev/null; echo "0 2 * * * /path/to/backup-script.sh") | crontab -
@@ -521,6 +569,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Test backup restoration** (in test environment)
+
   ```bash
   # Restore backup (TEST ONLY - do not run in production!)
   # docker exec data-timescaledb pg_restore \
@@ -538,6 +587,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   - Rollback procedures
 
 - [ ] **Test rollback procedure** (in test environment)
+
   ```bash
   # Simulate rollback:
   # 1. Stop containers
@@ -560,6 +610,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   - Monitoring dashboards
 
 - [ ] **Document production environment**
+
   ```bash
   # Create production inventory
   cat > PRODUCTION-INVENTORY.md <<EOF
@@ -642,6 +693,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 ### 8.2 Production Cutover
 
 - [ ] **Switch DNS/Load Balancer** (if applicable)
+
   ```bash
   # Update DNS to point to new servers
   # OR
@@ -649,6 +701,7 @@ Complete this checklist before deploying to production. Mark each item as comple
   ```
 
 - [ ] **Monitor for first hour**
+
   ```bash
   # Watch logs
   docker compose -f tools/compose/docker-compose.apps.prod.yml logs -f
@@ -685,11 +738,13 @@ Complete this checklist before deploying to production. Mark each item as comple
 **If deployment fails, execute rollback:**
 
 1. **Stop production containers**
+
    ```bash
    docker compose -f tools/compose/docker-compose.apps.prod.yml down
    ```
 
 2. **Restore database backup** (if schema changed)
+
    ```bash
    docker exec data-timescaledb pg_restore \
      -U timescale \
@@ -699,6 +754,7 @@ Complete this checklist before deploying to production. Mark each item as comple
    ```
 
 3. **Deploy previous version**
+
    ```bash
    # Checkout previous version
    git checkout <previous_tag>
@@ -713,6 +769,7 @@ Complete this checklist before deploying to production. Mark each item as comple
    ```
 
 4. **Verify rollback successful**
+
    ```bash
    curl http://localhost:4005/health
    curl http://localhost:3200/health
@@ -735,6 +792,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 **Version**: _______________
 
 **Notes**:
+
 ```
 [Add any deployment notes, issues encountered, or lessons learned]
 ```
@@ -744,6 +802,7 @@ Complete this checklist before deploying to production. Mark each item as comple
 **Last Updated**: 2025-10-25
 **Migration Phase**: Phase 9 - Production Deployment
 **Related Docs**:
+
 - `PRODUCTION-ENV-GUIDE.md`
 - `TROUBLESHOOTING.md`
 - `DOCKER-QUICK-START.md`
