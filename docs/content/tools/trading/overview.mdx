@@ -1,0 +1,240 @@
+---
+title: Trading Tools
+description: ProfitDLL integration for market data capture and order execution
+tags:
+  - trading
+  - profitdll
+  - market-data
+  - order-execution
+owner: TradingGuild
+lastReviewed: '2025-10-27'
+---
+
+Core trading tools for market data capture, order execution, and broker integration.
+
+## 📦 ProfitDLL
+
+**Windows-native DLL for real-time market data and order execution via Nelogica Profit.**
+
+### Overview
+
+- **[Overview](/tools/trading/profitdll/overview)** - ProfitDLL introduction and capabilities
+- **[Callbacks](/tools/trading/profitdll/callbacks)** - Event callbacks (trades, orders, book)
+- **[Asset Format](/tools/trading/profitdll/assets-format)** - Asset naming convention (TICKER:EXCHANGE)
+- **[Changelog](/tools/trading/profitdll/changelog)** - Version history
+
+### Key Features
+
+- **Real-time Market Data:**
+  - Trade ticks (price, volume, aggressor)
+  - Order book updates (bid/ask levels)
+  - Aggregated book (price depth)
+  - Historical data retrieval
+
+- **Order Execution:**
+  - Market orders
+  - Limit orders
+  - Stop orders
+  - Day trade and consolidated positions
+
+- **Multi-Broker Support:**
+  - Direct broker connections
+  - WebSocket streaming
+  - Callback-based events
+
+### Critical Requirements
+
+⚠️ **MUST compile in x64 mode** - ProfitDLL is 64-bit only
+
+**Example (C# .csproj):**
+
+```xml
+<PropertyGroup>
+  <PlatformTarget>x64</PlatformTarget>
+</PropertyGroup>
+```
+
+### Authentication
+
+```csharp
+// Market data only
+int result = DLLInitializeMarketLogin(
+    activationKey,
+    username,
+    password,
+    ref stateCallback
+);
+
+// Market data + order execution
+int result = DLLInitializeLogin(
+    activationKey,
+    username,
+    password,
+    ref stateCallback,
+    ref orderCallback
+);
+```
+
+### Connection States
+
+**TStateCallback** reports connection status:
+
+| State | Description | Values |
+|-------|-------------|--------|
+| 0 | Login | 0=OK, 1=Invalid, 2=Wrong Password |
+| 1 | Broker | 0=Disconnected, 2=Connected, 5=HCS Connected |
+| 2 | Market | 4=Connected, 3=Not Logged |
+| 3 | Activation | 0=Valid, else Invalid |
+
+### Key Callbacks
+
+**Must keep delegates alive** (prevent garbage collection):
+
+```csharp
+// Store as static fields
+private static TStateCallback _stateCallback;
+private static TConnectorTradeCallback _tradeCallback;
+private static TOfferBookCallback _bookCallback;
+private static TConnectorOrderCallback _orderCallback;
+
+// Assign callbacks
+_stateCallback = OnStateChange;
+_tradeCallback = OnTrade;
+_bookCallback = OnBook;
+_orderCallback = OnOrder;
+```
+
+### Subscription Pattern
+
+```csharp
+// Wait for connection
+if (bMarketConnected && bAtivo)
+{
+    // Subscribe: "ASSET:EXCHANGE"
+    SubscribeTicker("WINZ25", "B");      // Mini Index Future
+    SubscribeOfferBook("PETR4", "B");    // Petrobras Stock
+    SubscribePriceDepth("VALE3", "B");   // Vale Stock
+}
+```
+
+### Order Execution
+
+```csharp
+// Market order
+int orderId = SendBuyOrder(
+    asset: "WINZ25:B",
+    quantity: 1,
+    price: -1,              // Market order
+    stopPrice: 0,
+    positionType: 1,        // 1=DayTrade, 2=Consolidated
+    orderType: 1,           // 1=Market, 2=Limit, 3=Stop
+    startType: 1,
+    expirationDate: 0
+);
+
+// Limit order
+int orderId = SendBuyOrder(
+    asset: "PETR4:B",
+    quantity: 100,
+    price: 35.50,           // Limit price
+    stopPrice: 0,
+    positionType: 2,        // Consolidated position
+    orderType: 2,           // Limit order
+    startType: 1,
+    expirationDate: 0
+);
+
+// Stop order
+int orderId = SendSellOrder(
+    asset: "VALE3:B",
+    quantity: 100,
+    price: 65.00,           // Execution price
+    stopPrice: 64.50,       // Trigger price
+    positionType: 2,
+    orderType: 3,           // Stop order
+    startType: 1,
+    expirationDate: 0
+);
+```
+
+### Error Codes
+
+```csharp
+const int NL_OK = 0x00000000;           // Success
+const int NL_ERR_FALHA = 0x80000001;    // Generic failure
+const int NL_ERR_SEMAUTORIZACAO = 0x80000002;  // Unauthorized
+const int NL_ERR_ATIVO_INVALIDO = 0x80000003;  // Invalid asset
+```
+
+### Example Code Locations
+
+**C# Integration:**
+
+- `tools/ProfitDLL/Exemplo C#/Program.cs` - Main initialization
+- `tools/ProfitDLL/Exemplo C#/CallbackHandler.cs` - Callback examples
+
+**Python Integration:**
+
+- `tools/ProfitDLL/Exemplo Python/main.py` - Python ctypes wrapper
+
+**C++ Integration:**
+
+- `tools/ProfitDLL/Exemplo C++/main.cpp` - C++ integration
+
+**Delphi Integration:**
+
+- `tools/ProfitDLL/Exemplo Delphi/` - Delphi examples
+
+**Manual:**
+
+- `tools/ProfitDLL/Manual/` - Official documentation (PT-BR and EN)
+
+---
+
+## 🚀 Integration with TradingSystem
+
+### Data Capture Service (Planned)
+
+```text
+ProfitDLL Callback (C#)
+   ↓
+Data Capture validates & serializes → JSON
+   ↓
+WebSocket Publisher streams to internal consumers
+   ↓
+Parquet Writer (local disk)
+   ↓
+QuestDB Ingestion (time-series database)
+```
+
+### Order Manager Service (Planned)
+
+```text
+Gateway receives trading command (HTTP)
+   ↓
+Order Manager performs risk checks
+   ↓
+Execute via ProfitDLL
+   ↓
+Order Callback updates positions
+   ↓
+Dashboard real-time update (WebSocket)
+```
+
+### Risk Management
+
+- Global kill switch: `/api/v1/risk/kill-switch`
+- Daily loss limit (configured in `.env`)
+- Max position size per asset
+- Trading hours restriction (9:00-18:00 default)
+- Auto-pause on connection errors/high latency
+- All executions audited (timestamp + justification)
+
+---
+
+## 📖 Related Documentation
+
+- **[Data Capture App](/apps/data-capture/overview)** - Market data ingestion (planned)
+- **[Order Manager App](/apps/order-manager/overview)** - Order execution (planned)
+- **[.NET Runtime](/tools/runtime/dotnet/overview)** - C# development setup
+- **[Security & Config](/tools/security-config/overview)** - Risk limits and audit
