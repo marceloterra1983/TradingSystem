@@ -31,7 +31,6 @@ The Model Context Protocol (MCP) provides a standardized way for AI assistants t
 <!-- BEGIN AUTO-GENERATED: MCP Registry Automation Status -->
 
 **Automation Hooks**:
-
 - `scripts/docusaurus/mcp-registry-sync.ts` - Generate MCP registry from configuration files **(TODO - blocked)**
 - `npm run docs:auto` - Regenerate MCP registry documentation
 - Source: `~/.claude.json`, `.claude/mcp-servers.json`
@@ -42,7 +41,6 @@ The Model Context Protocol (MCP) provides a standardized way for AI assistants t
 MCP server configurations are stored in `~/.claude.json` and `.claude/mcp-servers.json` which are external to the repository (user home directory). Automation cannot access these files without additional setup. Options: (1) Commit sanitized MCP configs to repo under `.claude/` directory, (2) Create MCP config API endpoint, or (3) Keep manual documentation.
 
 **Future Enhancements**:
-
 - Resolve external config access (commit to repo or create API endpoint)
 - Implement `scripts/docusaurus/mcp-registry-sync.ts` once configs accessible
 
