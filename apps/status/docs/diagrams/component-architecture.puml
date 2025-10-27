@@ -47,7 +47,6 @@ package "External Systems" {
   component "Dashboard UI\n:3103" as dashboard
   component "Library API\n:3200" as library
   component "TP Capital\n:3200" as tp
-  component "B3 API\n:3302" as b3
   component "Docs API\n:3400" as docs
   component "Terminal\n(wt.exe/cmd/bash)" as terminal
 }
@@ -70,7 +69,6 @@ status --> gather: Request statuses
 gather --> eval: For each service
 eval --> library: GET /health
 eval --> tp: GET /health
-eval --> b3: GET /health
 eval --> docs: GET /health
 eval --> summarize: Collect results
 summarize --> sort: Order by severity

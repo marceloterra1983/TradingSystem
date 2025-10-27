@@ -1,5 +1,6 @@
 ---
 title: TP Capital API
+sidebar_position: 8
 description: Trading signals ingestion, Telegram bot/channel management, and monitoring API with TimescaleDB persistence.
 tags:
   - api
@@ -7,7 +8,7 @@ tags:
   - trading
   - telegram
   - signals
-owner: Backend
+owner: BackendGuild
 lastReviewed: '2025-10-26'
 ---
 
@@ -29,8 +30,8 @@ The **TP Capital API** provides comprehensive endpoints for managing trading sig
 
 | Property | Value |
 |----------|-------|
-| **Port** | 3200 |
-| **Base URL** | http://localhost:3200 |
+| **Port** | 4005 |
+| **Base URL** | http://localhost:4005 |
 | **Reverse Proxy Route** | http://tradingsystem.local/api/tp-capital |
 | **Repository** | `apps/tp-capital/` |
 | **Database** | TimescaleDB (PostgreSQL) |
@@ -56,7 +57,7 @@ Telegram Channels → Telegram Gateway → TP Capital API → TimescaleDB
 ### Health Check
 
 ```bash
-curl http://localhost:3200/health
+curl http://localhost:4005/health
 ```
 
 Response:
@@ -71,22 +72,22 @@ Response:
 
 ```bash
 # Get last 50 signals
-curl "http://localhost:3200/signals?limit=50"
+curl "http://localhost:4005/signals?limit=50"
 
 # Filter by channel
-curl "http://localhost:3200/signals?channel=-1001234567890&limit=20"
+curl "http://localhost:4005/signals?channel=-1001234567890&limit=20"
 
 # Search signals
-curl "http://localhost:3200/signals?search=WINZ25"
+curl "http://localhost:4005/signals?search=WINZ25"
 
 # Time range filter
-curl "http://localhost:3200/signals?from=2025-10-26T00:00:00Z&to=2025-10-26T23:59:59Z"
+curl "http://localhost:4005/signals?from=2025-10-26T00:00:00Z&to=2025-10-26T23:59:59Z"
 ```
 
 ### List Telegram Channels
 
 ```bash
-curl http://localhost:3200/telegram/channels
+curl http://localhost:4005/telegram/channels
 ```
 
 Response:
@@ -110,7 +111,7 @@ Response:
 ### Create New Channel
 
 ```bash
-curl -X POST http://localhost:3200/telegram/channels \
+curl -X POST http://localhost:4005/telegram/channels \
   -H "Content-Type: application/json" \
   -d '{
     "label": "TP Capital Day Trade",
@@ -280,7 +281,7 @@ async function fetchSignals(channelId?: string, limit = 50) {
   if (channelId) params.append('channel', channelId);
 
   const response = await fetch(
-    `http://localhost:3200/signals?${params.toString()}`
+    `http://localhost:4005/signals?${params.toString()}`
   );
 
   if (!response.ok) {
@@ -297,7 +298,7 @@ async function createChannel(
   channelId: string,
   channelType: 'source' | 'destination'
 ) {
-  const response = await fetch('http://localhost:3200/telegram/channels', {
+  const response = await fetch('http://localhost:4005/telegram/channels', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ label, channel_id: channelId, channel_type: channelType })
@@ -327,7 +328,7 @@ function useSignals(channelId?: string) {
     params.append('limit', '100');
     if (channelId) params.append('channel', channelId);
 
-    fetch(`http://localhost:3200/signals?${params.toString()}`)
+    fetch(`http://localhost:4005/signals?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         setSignals(data.data);
@@ -369,16 +370,16 @@ function SignalsTable() {
 # Get signals from last 24 hours
 FROM=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
 TO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-curl "http://localhost:3200/signals?from=$FROM&to=$TO"
+curl "http://localhost:4005/signals?from=$FROM&to=$TO"
 
 # Search for PETR4 signals
-curl "http://localhost:3200/signals?search=PETR4"
+curl "http://localhost:4005/signals?search=PETR4"
 
 # Get channels with stats
-curl http://localhost:3200/channels
+curl http://localhost:4005/channels
 
 # Reload channels after updating database
-curl -X POST http://localhost:3200/reload-channels
+curl -X POST http://localhost:4005/reload-channels
 ```
 
 ## Error Handling
@@ -466,7 +467,7 @@ The following endpoints are **deprecated** and will be removed in a future versi
 Monitor service health with:
 
 ```bash
-curl http://localhost:3200/health
+curl http://localhost:4005/health
 ```
 
 **Healthy Response**:
@@ -486,7 +487,7 @@ Service continues to operate even if TimescaleDB is down, but signals cannot be 
 Available at `GET /metrics`:
 
 ```bash
-curl http://localhost:3200/metrics
+curl http://localhost:4005/metrics
 ```
 
 **Key Metrics**:
@@ -501,13 +502,13 @@ Fetch structured logs with filtering:
 
 ```bash
 # Get last 100 logs
-curl http://localhost:3200/logs?limit=100
+curl http://localhost:4005/logs?limit=100
 
 # Filter by level
-curl http://localhost:3200/logs?level=error
+curl http://localhost:4005/logs?level=error
 
 # Combine filters
-curl "http://localhost:3200/logs?level=warn&limit=50"
+curl "http://localhost:4005/logs?level=warn&limit=50"
 ```
 
 Log levels: `info`, `warn`, `error`, `debug`

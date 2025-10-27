@@ -74,9 +74,8 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 
 -   **Dashboard**: http://localhost:3103 (React + Vite)
 -   **Documentation Hub**: http://localhost:3205 (Docusaurus v3)
--   **Workspace API**: http://localhost:3200 (Express + LowDB/TimescaleDB)
--   **TP Capital**: http://localhost:4005 (Express + Telegraf)
--   **B3**: http://localhost:3302 (Express)
+-   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
+-   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
 -   **Documentation API**: http://localhost:3400 (Express + FlexSearch)
 -   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
@@ -190,12 +189,11 @@ Claude Code has the following permissions in this project:
 TradingSystem/
 ├── backend/                        # 🎯 ALL BACKEND CODE
 │   ├── api/                       # REST APIs (Node.js/Express)
-│   │   ├── workspace/            # Port 3200 - Workspace API (Ideas & Docs)
-│   │   ├── tp-capital/           # Port 4005 - TP Capital ingestion
-│   │   ├── b3-market-data/       # Port 3302 - B3 market data service
-│   │   ├── documentation-api/    # Port 3400 - Documentation management
+│   │   ├── workspace/            # Port 3200 - Workspace API (Docker container only)
+│   │   ├── tp-capital/           # Port 4005 - TP Capital ingestion (Docker container only)
+│   │   ├── documentation-api/    # Port 3400 - Documentation management (container only)
 │   │   ├── service-launcher/     # Port 3500 - Service orchestration
-│   │   └── firecrawl-proxy/      # Port 3600 - Firecrawl proxy service
+│   │   └── telegram-gateway/     # Port 3201 - Telegram Gateway API (reference code)
 │   ├── data/                      # Data layer
 │   │   ├── questdb/              # QuestDB schemas & migrations
 │   │   └── warehouse/            # Data warehouse configs
@@ -238,7 +236,6 @@ TradingSystem/
 │   ├── scripts/                  # Automation scripts
 │   ├── systemd/                  # Linux service definitions
 │   ├── tp-capital/              # TP Capital specific infra
-│   ├── b3/                      # B3 integration configs
 │   └── docker/                   # Docker compositions
 │
 ├── compose.dev.yml               # Main development compose
@@ -349,18 +346,16 @@ if (bMarketConnected && bAtivo) {
 
 -   **Dashboard**: `http://localhost:3103` (React + Vite)
 -   **Documentation Hub**: `http://localhost:3205` (Docusaurus v3)
--   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB)
--   **TP Capital**: `http://localhost:4005` (Express + Telegraf)
--   **B3**: `http://localhost:3302` (Express)
+-   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB - Docker container)
+-   **TP Capital**: `http://localhost:4005` (Express + Telegraf - Docker container)
 -   **Documentation API**: `http://localhost:3400` (Express + FlexSearch)
 -   **Service Launcher**: `http://localhost:3500` (Express)
 -   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
 
 ### Current API Endpoints
 
--   **Workspace**: `GET/POST /api/items` - Manage workspace items (documentation backlog)
+-   **Workspace**: `GET/POST /api/items` - Manage workspace items (runs as Docker container)
 -   **TP Capital**: `POST /webhook/telegram` - Telegram message ingestion
--   **B3**: `GET /api/market-data` - Real-time market data
 -   **Documentation**: `GET/POST /api/docs` - Documentation management
 -   **Service Launcher**: `GET /api/status` - Service health checks, `GET /api/health/full` - Comprehensive health status (services + containers + databases)
 -   **Firecrawl Proxy**: `POST /api/scrape` - Web scraping via Firecrawl
@@ -476,14 +471,12 @@ npm install && npm run start -- --port 3205
 # API Services (Ports 3200-3600)
 # Run each in a separate terminal
 
-cd backend/api/workspace && npm install && npm run dev
-cd apps/tp-capital/api && npm install && npm run dev
-cd apps/b3-market-data && npm install && npm run dev
 cd apps/service-launcher && npm install && npm run dev
-cd backend/api/firecrawl-proxy && npm install && npm run dev
 
-# Documentation API runs as Docker container:
+# Workspace API, TP Capital, Documentation API, and Firecrawl Proxy run as Docker containers:
+docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
 docker compose -f tools/compose/docker-compose.docs.yml up -d documentation-api
+docker compose -f tools/compose/docker-compose.firecrawl.yml up -d firecrawl-proxy
 ```
 
 ### Container Management (Docker Compose)
@@ -524,9 +517,8 @@ sc.exe start TradingSystem-OrderManager
 cd frontend/dashboard
 npm run test
 
-# Backend API Tests
-cd backend/api/workspace
-npm run test
+# Backend API Tests (run inside container)
+docker exec workspace-service npm run test
 
 # Documentation Tests
 cd docs

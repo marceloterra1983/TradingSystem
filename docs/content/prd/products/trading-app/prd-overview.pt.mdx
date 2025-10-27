@@ -46,7 +46,7 @@ O Trading App funciona como a interface principal para:
 **Desafios Atuais**
 - Ideias espalhadas em notas, emails e mensagens sem rastreamento sistemático
 - Execução manual de ordens suscetível a erros e sem controles de risco automatizados
-- Múltiplas fontes de dados (Workspace, TP Capital, B3) exigem correlação manual
+- Múltiplas fontes de dados (Workspace, TP Capital) exigem correlação manual
 - Falta de monitoramento centralizado e trilha de auditoria
 - Dificuldade em priorizar funcionalidades e acompanhar o status de implementação
 
@@ -102,7 +102,7 @@ O Trading App funciona como a interface principal para:
 ## Dependências
 
 **Dependências Técnicas**
-- **APIs Backend**: Workspace (porta 3102), TP Capital (porta 3200), B3 (porta 3302), Order Manager (porta 3205)
+- **APIs Backend**: Workspace (porta 3102), TP Capital (porta 3200), Order Manager (porta 3205)
 - **Bancos de Dados**: QuestDB (sinais TP Capital), TimescaleDB (Banco de Ideias), PostgreSQL (Order Manager)
 - **Externos**: ProfitDLL (execução de ordens), API do Telegram (ingestão de sinais)
 

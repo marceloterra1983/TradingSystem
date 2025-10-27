@@ -32,7 +32,6 @@ SERVICE_LAUNCHER_LOG_LEVEL=info          # Log level (debug|info|warn|error)
 # Use these to override the default ports if services are running on non-standard ports
 SERVICE_LAUNCHER_WORKSPACE_PORT=3200     # Workspace API port
 SERVICE_LAUNCHER_TP_CAPITAL_PORT=3200    # TP Capital signals API port
-SERVICE_LAUNCHER_B3_PORT=3302            # B3 market data API port
 SERVICE_LAUNCHER_DOCS_PORT=3400          # Documentation API port
 SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT=3600  # Firecrawl Proxy API port
 SERVICE_LAUNCHER_DASHBOARD_PORT=3103     # Dashboard UI port (Vite)
@@ -45,7 +44,6 @@ SERVICE_LAUNCHER_QUESTDB_HTTP_PORT=9000  # QuestDB HTTP console port
 # Use these for custom URLs or remote services
 # SERVICE_LAUNCHER_WORKSPACE_URL=http://custom-host:3200
 # SERVICE_LAUNCHER_TP_CAPITAL_URL=http://custom-host:3200
-# SERVICE_LAUNCHER_B3_URL=http://custom-host:3302
 # SERVICE_LAUNCHER_DOCS_URL=http://custom-host:3400
 # SERVICE_LAUNCHER_FIRECRAWL_PROXY_URL=http://custom-host:3600
 # SERVICE_LAUNCHER_SELF_URL=http://custom-host:3500/health

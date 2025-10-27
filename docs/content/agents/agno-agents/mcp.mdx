@@ -30,7 +30,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 
 **Market Analysis Tools**:
 - `analyze_market`: Generate trading signals for symbols
-  - Input: `{ "symbols": ["PETR4"], "include_tp_capital": true, "include_b3": true }`
+  - Input: `{ "symbols": ["PETR4"], "include_tp_capital": true }`
   - Output: List of MarketSignal entities
   - Permission scope: `market-data:read`, `signals:generate`
 
@@ -38,11 +38,6 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
   - Input: `{ "limit": 100, "channel": "TP_Capital" }`
   - Output: List of TP Capital signals
   - Permission scope: `tp-capital:read`
-
-- `get_b3_data`: Fetch B3 market data for symbol
-  - Input: `{ "symbol": "PETR4" }`
-  - Output: Market data snapshot
-  - Permission scope: `b3:read`
 
 **Risk Management Tools**:
 - `validate_signal`: Validate trading signal against risk policies
@@ -69,7 +64,7 @@ While Agno Agents don't currently use MCP, they provide capabilities that **coul
 ### Permission Scopes (Planned)
 
 **Read Permissions**:
-- `market-data:read`: Access market data (B3, TP Capital)
+- `market-data:read`: Access market data (TP Capital)
 - `workspace:read`: Access workspace ideas
 - `risk:read`: Read risk limits and current positions
 - `agents:status`: Check agent health and status
@@ -266,7 +261,7 @@ news_data = response.json()
 rate(agent_decisions_total[5m])
 histogram_quantile(0.95, rate(agent_processing_seconds_bucket[5m]))
 rate(agent_errors_total[5m]) / rate(agent_decisions_total[5m])
-dependency_status{dependency="b3_api"}
+dependency_status{dependency="tp_capital_api"}
 ```
 
 ### Health Checks
@@ -278,9 +273,9 @@ dependency_status{dependency="b3_api"}
 
 **GET /health?detailed=true** (comprehensive):
 - Executes `ping()` probes with timeout
-- Checks all dependencies (B3, TP Capital, Workspace, Risk Engine)
+- Checks all dependencies (TP Capital, Workspace, Risk Engine)
 - Updates `dependency_status` gauge
-- Returns: `{ "status": "healthy", "dependencies": { "b3_api": "connected", ... } }`
+- Returns: `{ "status": "healthy", "dependencies": { "tp_capital_api": "connected", ... } }`
 
 **Alerting**:
 - Alert if any dependency down for &gt;5 minutes

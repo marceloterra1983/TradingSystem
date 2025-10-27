@@ -50,7 +50,6 @@ bash scripts/core/start-trading-system-dev.sh --start-monitoring
 - Launcher (3500)
 - Workspace (3200)
 - TP-Capital (4005)
-- B3 Market Data (3302)
 - DocsAPI (3400)
 - Dashboard Frontend (3103 ou 5173)
 - Documentação (3205)
@@ -128,7 +127,7 @@ bash scripts/core/start-dashboard-stack.sh
 
 **Inicia:**
 - Docker: TimescaleDB, QuestDB, LangGraph Postgres, pgAdmin, Firecrawl stack, Documentation API
-- Node.js: Workspace API, TP Capital, B3 Market Data, Firecrawl Proxy, Service Launcher, Dashboard App
+- Node.js: Workspace API, TP Capital, Firecrawl Proxy, Service Launcher, Dashboard App
 
 **Features:**
 - Instalação automática de dependências

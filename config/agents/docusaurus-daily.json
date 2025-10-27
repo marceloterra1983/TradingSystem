@@ -1,0 +1,24 @@
+{
+  "id": "docusaurus-daily",
+  "name": "Docusaurus Daily Agent",
+  "version": "1.0.0",
+  "role": "Summarize daily code changes and update Docusaurus reports.",
+  "instructions": "At the configured time, analyze repository changes since the specified 'since' timestamp (default: local midnight), generate a concise developer-facing summary, write an MDX report under docs/content/reports/daily, and optionally use the local Ollama model for better summaries. Never call external APIs; only use local resources.",
+  "runtime": "node",
+  "entry": "scripts/agents/docusaurus-daily.mjs",
+  "env": [
+    "OLLAMA_BASE_URL",
+    "DOCS_AGENT_MODEL",
+    "DOCS_AGENT_MAX_CONTEXT"
+  ],
+  "argsSchema": {
+    "since": {"type": "string", "default": "local-midnight", "description": "Start time for change analysis (e.g., '2025-10-27 00:00')."},
+    "dry": {"type": "boolean", "default": false, "description": "Dry run (do not write files)."},
+    "model": {"type": "string", "default": "env:DOCS_AGENT_MODEL", "description": "Ollama model override."},
+    "maxContext": {"type": "number", "default": "env:DOCS_AGENT_MAX_CONTEXT", "description": "Max diff characters to include in prompt."},
+    "noValidate": {"type": "boolean", "default": false, "description": "Skip frontmatter validation."},
+    "outDir": {"type": "string", "default": "docs/content/reports/daily", "description": "Output directory for reports."}
+  },
+  "schedule": {"cron": "0 18 * * *"}
+}
+

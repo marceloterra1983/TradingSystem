@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    agno_port: int = Field(8200, alias="AGNO_PORT")
+    agno_port: int = Field(8201, alias="AGNO_PORT")
     agno_log_level: str = Field("INFO", alias="AGNO_LOG_LEVEL")
     agno_model_provider: str = Field("openai", alias="AGNO_MODEL_PROVIDER")
     agno_model_name: str = Field("gpt-4o", alias="AGNO_MODEL_NAME")
@@ -27,11 +27,8 @@ class Settings(BaseSettings):
     rate_limit_period: int = Field(60, alias="AGNO_RATE_LIMIT_PERIOD")
     enable_tracing: bool = Field(False, alias="AGNO_ENABLE_TRACING")
     agno_enable_llm: bool = Field(False, alias="AGNO_ENABLE_LLM")
-    enable_b3_websocket: bool = Field(False, alias="AGNO_ENABLE_B3_WEBSOCKET")
     workspace_api_url: str = Field("http://localhost:3100", alias="WORKSPACE_API_URL")
     tp_capital_api_url: str = Field("http://localhost:3200", alias="TP_CAPITAL_API_URL")
-    b3_api_url: str = Field("http://localhost:3302", alias="B3_API_URL")
-    b3_websocket_url: str = Field("ws://localhost:3302/ws", alias="B3_WEBSOCKET_URL")
     http_timeout: int = Field(10, alias="HTTP_TIMEOUT")
     health_check_timeout: int = Field(5, alias="AGNO_HEALTH_CHECK_TIMEOUT")
     retry_max_attempts: int = Field(4, alias="RETRY_MAX_ATTEMPTS")
@@ -43,6 +40,11 @@ class Settings(BaseSettings):
         5, alias="CIRCUIT_BREAKER_FAILURE_THRESHOLD"
     )
     circuit_breaker_timeout: int = Field(60, alias="CIRCUIT_BREAKER_TIMEOUT")
+
+    # Local Docs Agent (Ollama)
+    ollama_base_url: str = Field("http://localhost:11434", alias="OLLAMA_BASE_URL")
+    docs_agent_model: str = Field("llama3.1:8b", alias="DOCS_AGENT_MODEL")
+    docs_agent_max_context: int = Field(20000, alias="DOCS_AGENT_MAX_CONTEXT")
 
     @field_validator("cors_origins", mode="before")
     @classmethod

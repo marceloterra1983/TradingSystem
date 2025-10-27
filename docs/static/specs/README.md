@@ -12,8 +12,42 @@ Este diretório contém as especificações OpenAPI das APIs do TradingSystem, i
 
 ## Arquivos Disponíveis
 
+### status-api.openapi.yaml
+Especificação da **Status API (Service Launcher)** (Port 3500)
+
+**Endpoints principais:**
+- `/health` - Health check
+- `/api/status` - Status de todos os serviços
+- `/api/health/full` - Health check completo (cached)
+- `/circuit-breaker` - Estado do circuit breaker
+- `/launch` - Lançar serviço em terminal
+- `/api/auto-start/:serviceId` - Auto-start de serviços
+- `/metrics` - Métricas Prometheus
+
+**Ver documentação completa:** http://localhost:3205/api/status
+
+### alert-router.openapi.yaml
+Especificação do **Alert Router** (Port 8080)
+
+**Endpoints principais:**
+- `/health` - Health check
+- `/github` - Webhook para alertas do Prometheus
+
+**Ver documentação completa:** http://localhost:3205/api/alert-router
+
+### firecrawl-proxy.openapi.yaml
+Especificação do **Firecrawl Proxy** (Port 3600)
+
+**Endpoints principais:**
+- `/health` - Health check
+- `/api/scrape` - Scraping de página única
+- `/api/crawl` - Crawling de múltiplas páginas
+- `/api/crawl/status/:jobId` - Status do crawl job
+
+**Ver documentação completa:** http://localhost:3205/api/firecrawl
+
 ### documentation-api.openapi.yaml
-Especificação da **Documentation API** (API Port 3400 — viewer em docs na porta 3205)
+Especificação da **Documentation API** (Port 3400)
 
 **Endpoints principais:**
 - `/api/v1/systems` - Gerenciamento de sistemas de documentação
@@ -26,7 +60,7 @@ Especificação da **Documentation API** (API Port 3400 — viewer em docs na po
 **Ver documentação completa:** http://localhost:3205/api/documentation-api
 
 ### workspace.openapi.yaml
-Especificação da **Workspace API** (Port 3200) - também conhecida como Library API ou Idea Bank API
+Especificação da **Workspace API** (Port 3200)
 
 **Endpoints principais:**
 - `/api/items` - CRUD de itens do workspace
@@ -35,6 +69,33 @@ Especificação da **Workspace API** (Port 3200) - também conhecida como Librar
 - `/metrics` - Métricas Prometheus
 
 **Ver documentação completa:** http://localhost:3205/api/workspace
+
+### tp-capital.openapi.yaml
+Especificação da **TP Capital API** (Port 4005)
+
+**Endpoints principais:**
+- `/health` - Health check
+- `/signals` - CRUD de sinais de trading
+- `/telegram/bots` - CRUD de bots do Telegram
+- `/telegram/channels` - CRUD de canais do Telegram
+- `/logs` - Application logs
+- `/metrics` - Métricas Prometheus
+
+**Ver documentação completa:** http://localhost:3205/api/tp-capital
+
+### telegram-gateway-api.openapi.yaml
+Especificação da **Telegram Gateway API** (Port 4010)
+
+**Endpoints principais:**
+- `/health` - Health check
+- `/api/messages` - CRUD de mensagens do Telegram
+- `/api/channels` - CRUD de canais
+- `/api/telegram-gateway/auth/status` - Status de autenticação
+- `/api/telegram-gateway/overview` - Visão geral do gateway
+- `/api/telegram-gateway/sync-messages` - Sincronizar mensagens
+- `/metrics` - Métricas Prometheus
+
+**Ver documentação completa:** http://localhost:3205/api/telegram-gateway
 
 ## Integração com Redocusaurus
 

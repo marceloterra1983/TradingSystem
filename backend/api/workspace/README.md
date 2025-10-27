@@ -66,6 +66,9 @@ cd backend/api/workspace
 # Start Workspace + TimescaleDB
 docker compose up -d
 
+# If port 5433 on the host is already in use, override it (example uses 5444)
+# TIMESCALEDB_HOST_PORT=5444 docker compose up -d
+
 # Check logs
 docker compose logs -f workspace
 
@@ -77,24 +80,13 @@ curl http://localhost:3200/health
 
 The `workspace_items` table will be created automatically on first run by the init script. If needed manually:
 
-```sql
-CREATE SCHEMA IF NOT EXISTS workspace;
-
-CREATE TABLE IF NOT EXISTS workspace.workspace_items (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT NOT NULL CHECK (category IN ('feature', 'bug', 'task', 'idea')),
-  priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high')),
-  status TEXT NOT NULL CHECK (status IN ('pending', 'in_progress', 'completed', 'cancelled')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_workspace_items_status ON workspace.workspace_items(status);
-CREATE INDEX IF NOT EXISTS idx_workspace_items_category ON workspace.workspace_items(category);
-CREATE INDEX IF NOT EXISTS idx_workspace_items_priority ON workspace.workspace_items(priority);
+```bash
+WORKSPACE_DATABASE_URL="postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL" \
+WORKSPACE_DATABASE_SCHEMA=workspace \
+./scripts/init-database.sh
 ```
+
+Use `--force` to drop/recreate the schema when needed and `--seed` to load the sample data. The script ensures hypertables and grants are applied correctly.
 
 ### 4. Migrate Data from LowDB (If Applicable)
 

@@ -1,0 +1,10 @@
+{
+  "label": "Reports",
+  "position": 50,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Automation Reports",
+    "slug": "/reports"
+  }
+}

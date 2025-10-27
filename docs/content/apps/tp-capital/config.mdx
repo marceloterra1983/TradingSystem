@@ -1,5 +1,6 @@
 ---
 title: Configuration
+sidebar_position: 5
 description: Environment variables, secrets, and runtime configuration for the TP
   Capital application.
 tags:
@@ -11,34 +12,52 @@ lastReviewed: '2025-10-26'
 ---
 ## Environment Variables
 
-The service expects a centralized `.env` at the repository root. Run `scripts/env/validate-env.sh` after updates.
+The service loads configuration from the repository root `.env`, optional `.env.local`, and `apps/tp-capital/.env` (local overrides). Run `scripts/env/validate-env.sh` after modifying secrets or ports.
 
-### Required Variables
-
-| Variable | Description | Example | Default |
-|----------|-------------|---------|---------|
-| `TP_CAPITAL_API_PORT` | HTTP port for the service | `3200` | `3200` |
-| `QUESTDB_HTTP_URL` | QuestDB HTTP endpoint for queries | `http://localhost:9002` | - |
-| `QUESTDB_ILP_HOST` | QuestDB ILP host for time-series writes | `localhost` | - |
-| `QUESTDB_ILP_PORT` | QuestDB ILP port | `9009` | - |
-| `TELEGRAM_BOT_TOKEN` | Bot token for pulling channel messages | `123456:ABCDEF` | - |
-
-### Optional Variables
+### Core Service
 
 | Variable | Description | Example | Default |
 |----------|-------------|---------|---------|
-| `LOG_LEVEL` | Logging verbosity (debug, info, warn, error) | `info` | `info` |
-| `METRICS_ENABLED` | Enable Prometheus metrics endpoint | `true` | `true` |
-| `CORS_ORIGIN` | Allowed CORS origins | `http://localhost:3103` | `*` |
+| `PORT` | HTTP port exposed by the API container (host mapping 4005) | `4005` | `4005` |
+| `CORS_ORIGIN` | Comma-separated list of allowed origins | `http://localhost:3103,http://localhost:3205` | `http://localhost:3101,http://localhost:3205` |
+| `LOG_LEVEL` | Logging verbosity (`debug`, `info`, `warn`, `error`) | `info` | `info` |
+
+### TimescaleDB (Signals Store)
+
+| Variable | Description | Example | Default |
+|----------|-------------|---------|---------|
+| `TIMESCALEDB_HOST` | Hostname for TimescaleDB | `localhost` (dev) / `timescaledb` (Compose) | `localhost` |
+| `TIMESCALEDB_PORT` | Port for TimescaleDB | `5433` (host) / `5432` (container) | `5433` |
+| `TIMESCALEDB_DATABASE` | Database name | `APPS-TPCAPITAL` | `APPS-TPCAPITAL` |
+| `TIMESCALEDB_USER` | Database user | `timescale` | `timescale` |
+| `TIMESCALEDB_PASSWORD` | Database password | `pass_timescale` | `pass_timescale` |
+| `TIMESCALEDB_SCHEMA` | Schema containing `tp_capital_signals` | `tp_capital` | `tp_capital` |
+| `TIMESCALEDB_POOL_MAX` | Max connections in pool | `10` | `10` |
+
+### Telegram Gateway Integration
+
+| Variable | Description | Example | Default |
+|----------|-------------|---------|---------|
+| `GATEWAY_DATABASE_NAME` | Database used by the Telegram Gateway queue | `APPS-TELEGRAM-GATEWAY` | `APPS-TPCAPITAL` (falls back to TimescaleDB) |
+| `GATEWAY_DATABASE_SCHEMA` | Schema containing `messages` table | `telegram_gateway` | `telegram_gateway` |
+| `GATEWAY_DATABASE_HOST` / `PORT` | Overrides for gateway DB host/port | `localhost` / `5433` | Inherits TimescaleDB host/port |
+| `TP_CAPITAL_SIGNALS_CHANNEL_ID` | Primary Telegram channel ID (used by sync worker) | `-1001649127710` | - |
+| `TP_CAPITAL_GATEWAY_FILTER_TEXT_CONTAINS` | Regex applied before ingesting | `(Ativo:|Compra:|Alvo|Stop:?)` | `(Ativo:|Compra:|Alvo|Stop:?)` |
+| `GATEWAY_SECRET_TOKEN` | Shared secret expected on `/ingest` | `supersecret` | - (must be provided when `/ingest` is enabled) |
+
+### Telegram Credentials (Optional)
+
+- `TELEGRAM_INGESTION_BOT_TOKEN`: legacy polling token (not required when relying solely on Gateway).
+- `TELEGRAM_FORWARDER_BOT_TOKEN`: used when forwarding signals to other channels.
+- `TELEGRAM_SOURCE_CHANNEL_IDS`, `TELEGRAM_DESTINATION_CHANNEL_ID`, `TELEGRAM_MODE`: keep aligned with Gateway configuration for forwarding flows.
 
 ### Secure Storage
 
 - **Development**: Store in repository root `.env` (gitignored).
 - **Production**: Use `apps/tp-capital/infrastructure/tp-capital-signals.env`.
-- Never hardcode tokens in source code.
-- Use environment-specific env files (dev, staging, prod).
-- Rotate Telegram bot tokens quarterly.
-- Validate all required variables on startup.
+- Never hardcode tokens in source; manage secrets via vault or CI/CD secrets.
+- Rotate Telegram tokens and shared Gateway secrets quarterly.
+- Validate configuration with `npm run dev -- --check-config` (TODO automation) and CI env validation script.
 
 ## Ports and Networking
 
@@ -46,28 +65,30 @@ The service expects a centralized `.env` at the repository root. Run `scripts/en
 
 | Port | Protocol | Purpose | Exposed |
 |------|----------|---------|---------|
-| 3200 | HTTP | REST API endpoints (default dev port) | Yes (dev), internal in prod |
-| 4005 | HTTP | Published port for Docker Compose/production | Yes (prod) |
+| 4005 | HTTP | REST API & Prometheus metrics | Yes (dev/prod) |
 
 ### Dependency Ports
 
 | Service | Port | Protocol | Purpose |
 |---------|------|----------|---------|
-| QuestDB HTTP | 9002 | HTTP | Query interface, Web UI |
-| QuestDB ILP | 9009 | TCP | Influx Line Protocol writes |
+| TimescaleDB | 5433 (host) / 5432 (container) | PostgreSQL | Signal storage (`tp_capital_signals`) |
+| Telegram Gateway DB | 5433 | PostgreSQL | Gateway queue (`telegram_gateway.messages`) |
+| Telegram Gateway API | 4010 | HTTP | Sync endpoint used by `/sync-messages` |
+| Telegram Gateway Service | 4006 | HTTP | Local MTProto service (`/health`, `/metrics`) |
 
 ### Networking Requirements
 
-- **Development**: Service and QuestDB on same Docker network (auto-configured by Compose). Dashboard proxies `/api/tp-capital` → `http://localhost:3200`.
-- **Production**: Service exposed on port 4005. QuestDB on internal Docker network (not exposed to host). Nginx reverse proxy routes `/api/tp-capital` → service.
-- **Firewall**: Allow inbound 4005 from dashboard and agents hosts. Block external access to QuestDB ports (9002, 9009). Allow outbound HTTPS to Telegram API and DNS resolution.
+- **Development**: Service and TimescaleDB share Docker network. Dashboard proxies `/api/tp-capital` → `http://localhost:4005`.
+- **Production**: Reverse proxy exposes port 4005; TimescaleDB and Gateway DB remain internal on PostgreSQL ports.
+- **Telegram Gateway**: Runs locally (port 4006) and publishes to the API via HTTP POST or database queue.
+- **Firewall**: Allow inbound 4005 from dashboard/agents hosts; restrict PostgreSQL ports to internal networks; allow outbound HTTPS for Telegram API and telemetry.
 
 ### Port Conventions
 
-- Development default: `TP_CAPITAL_API_PORT=3200` (used by CLI examples and dashboard proxy).
-- Docker Compose maps container port 3200 to host 4005.
-- Production hosts expose 4005 externally while the service still respects `TP_CAPITAL_API_PORT` internally.
-- QuestDB retains HTTP 9002 and ILP 9009 across all environments.
+- Development default: `PORT=4005`.
+- Docker Compose maps container 4005 ↔ host 4005; override via `TP_CAPITAL_HOST_PORT` if necessary.
+- TimescaleDB host port defaults to 5433; inside containers use 5432.
+- Telegram Gateway API uses 4010 when running alongside this service.
 
 ## Feature Flags
 
@@ -83,20 +104,21 @@ Currently no feature flags implemented.
 
 ### Fallback Behavior
 
-If QuestDB is unavailable:
+If TimescaleDB is unavailable:
 
 1. Service logs error to stdout.
-2. Returns HTTP 503 for `/signals` endpoint.
-3. Continues accepting Telegram messages (queued in memory, max 1000).
-4. Retries QuestDB connection every 30 seconds.
-5. Flushes queued messages on reconnection.
+2. `/signals` returns HTTP 503 with `Database connection failed`.
+3. Gateway polling worker keeps queue entries in `received` status (no data loss).
+4. Retries database connection every 30 seconds.
+5. Flushes backlog once connectivity is restored (metrics reflect recovery).
 
 ## Configuration Files
 
 ### Docker Compose
 
-- **Development**: `apps/tp-capital/infrastructure/docker-compose.yml` (builds service locally, mounts source, exposes ports 3200 and 9002).
-- **Production**: `apps/tp-capital/infrastructure/docker-compose.prod.yml` (pulls GHCR image, uses production env file, exposes port 4005 and 9002, persists `questdb-data` volume).
+- **Development**: `apps/tp-capital/infrastructure/docker-compose.yml` (builds service locally, mounts source, exposes ports 4005 and 5433).
+- **Production**: `apps/tp-capital/infrastructure/docker-compose.prod.yml` (pulls GHCR image, uses dedicated env file, exposes port 4005, persists `tp-capital-timescaledb-data` volume).
+- **Gateway Stack**: `tools/scripts/start-local-telegram-gateway.sh` provisions TimescaleDB schema, Gateway service (4006/4010), and TP Capital API.
 
 ### Package.json Scripts
 

@@ -66,7 +66,6 @@ declare -A SERVICES=(
     [3103]="Dashboard"
     [3200]="Workspace API"
     [3201]="TP Capital"
-    [3302]="B3 Market"
     [3400]="Documentation"
     [3500]="Service Launcher"
     [3600]="Firecrawl"

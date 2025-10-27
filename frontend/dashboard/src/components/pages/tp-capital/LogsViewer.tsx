@@ -135,6 +135,13 @@ export function LogsViewer() {
             const isExpanded = expandedLogs.has(idx);
             const hasContext = log.context !== null && log.context !== undefined;
             const LevelIcon = getLevelIcon(log.level);
+            const timestampInfo = formatTimestamp(log.timestamp);
+            const timestampLabel =
+              typeof timestampInfo === 'string'
+                ? timestampInfo
+                : timestampInfo
+                ? `${timestampInfo.date} ${timestampInfo.time}`
+                : undefined;
             
             return (
               <div
@@ -163,7 +170,7 @@ export function LogsViewer() {
                   {/* Timestamp compacto */}
                   <span 
                     className="text-[11px] text-slate-500 dark:text-slate-500 font-mono flex-shrink-0 mt-0.5"
-                    title={formatTimestamp(log.timestamp)}
+                    title={timestampLabel}
                   >
                     {new Date(log.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                   </span>
@@ -212,4 +219,3 @@ export function LogsViewer() {
     </CollapsibleCard>
   );
 }
-

@@ -5,7 +5,7 @@ import { Button } from "../../ui/button";
 import { DeleteButton } from "../../ui/action-buttons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { Input } from "../../ui/input";
-import { AlertCircle, FileDown, FileSpreadsheet, RefreshCcw } from "lucide-react";
+import { AlertCircle, FileDown, FileSpreadsheet, RefreshCcw, RotateCcw } from "lucide-react";
 import { LIMIT_OPTIONS } from './constants';
 import { fetchSignals, deleteSignal } from './api';
 import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
@@ -18,6 +18,14 @@ export function SignalsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [usingFallbackData, setUsingFallbackData] = useState(false);
   const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
+  
+  // Message sync state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{show: boolean; success: boolean; message: string}>({
+    show: false,
+    success: false,
+    message: ''
+  });
 
   const query = useQuery({
     queryKey: ['tp-capital-signals', { limit }],
@@ -100,6 +108,55 @@ export function SignalsTable() {
     downloadFile('tp-capital-signals.json', 'application/json', json);
   };
 
+  const handleSyncMessages = async () => {
+    setIsSyncing(true);
+    setSyncResult({ show: false, success: false, message: '' });
+    
+    try {
+      const response = await fetch('/api/tp-capital/sync-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const messagesSynced = result.data?.messagesSynced || 0;
+        setSyncResult({
+          show: true,
+          success: true,
+          message: result.message || `${messagesSynced} mensagem(ns) sincronizada(s)`
+        });
+        
+        // Recarregar sinais após sincronização
+        if (messagesSynced > 0) {
+          await query.refetch();
+        }
+      } else {
+        setSyncResult({
+          show: true,
+          success: false,
+          message: result.message || 'Erro ao sincronizar mensagens'
+        });
+      }
+    } catch (error) {
+      setSyncResult({
+        show: true,
+        success: false,
+        message: 'Erro ao conectar com o serviço de sincronização'
+      });
+    } finally {
+      setIsSyncing(false);
+      
+      // Auto-hide após 5 segundos
+      setTimeout(() => {
+        setSyncResult({ show: false, success: false, message: '' });
+      }, 5000);
+    }
+  };
+
   return (
     <CollapsibleCard cardId="tp-capital-signals">
       <CollapsibleCardHeader>
@@ -111,6 +168,40 @@ export function SignalsTable() {
         </div>
       </CollapsibleCardHeader>
       <CollapsibleCardContent className="space-y-4">
+        {/* Sync Messages Button */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncMessages}
+            disabled={isSyncing}
+            className="border-cyan-700 hover:bg-cyan-900/30 text-cyan-400"
+            data-collapsible-ignore="true"
+          >
+            {isSyncing ? (
+              <>
+                <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                Verificando...
+              </>
+            ) : (
+              <>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Checar Mensagens
+              </>
+            )}
+          </Button>
+          
+          {syncResult.show && (
+            <div className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+              syncResult.success 
+                ? 'bg-emerald-950/50 border border-emerald-800 text-emerald-300' 
+                : 'bg-red-950/50 border border-red-800 text-red-300'
+            }`}>
+              {syncResult.message}
+            </div>
+          )}
+        </div>
+
         {usingFallbackData && (
           <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
             <div className="flex items-start gap-2">
@@ -227,8 +318,6 @@ export function SignalsTable() {
             <thead className="bg-slate-100 dark:bg-slate-800">
               <tr>
                 <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">DATA</th>
-                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">CANAL</th>
-                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">TIPO</th>
                 <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">ATIVO</th>
                 <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">COMPRA MIN</th>
                 <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">COMPRA MAX</th>
@@ -240,14 +329,20 @@ export function SignalsTable() {
               </tr>
             </thead>
             <tbody>
-              {filteredSignals.map((row, idx) => (
+              {filteredSignals.map((row, idx) => {
+                const formattedDate = formatTimestamp(row.ts);
+                const isDateObject = formattedDate && typeof formattedDate === 'object' && 'time' in formattedDate;
+                return (
                 <tr key={`${row.ingested_at}-${idx}`} className="border-t border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50">
-                  <td className="px-3 py-2 whitespace-nowrap text-slate-900 dark:text-slate-100">{formatTimestamp(row.ts)}</td>
-                  <td className="px-3 py-2 text-slate-900 dark:text-slate-100">{row.channel}</td>
-                  <td className="px-3 py-2">
-                    <span className="inline-block rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                      {row.signal_type}
-                    </span>
+                  <td className="px-3 py-2 whitespace-nowrap text-slate-900 dark:text-slate-100">
+                    {isDateObject ? (
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{formattedDate.time}</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">{formattedDate.date}</span>
+                      </div>
+                    ) : (
+                      <span>{String(formattedDate)}</span>
+                    )}
                   </td>
                   <td className="px-3 py-2 font-mono font-semibold text-slate-900 dark:text-slate-100">{row.asset}</td>
                   <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.buy_min)}</td>
@@ -263,10 +358,11 @@ export function SignalsTable() {
                     />
                   </td>
                 </tr>
-              ))}
+              );
+              })}
               {filteredSignals.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-3 py-8 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500 dark:text-slate-400">
                     Nenhum sinal encontrado
                   </td>
                 </tr>

@@ -1,0 +1,522 @@
+---
+title: API Integration Status
+sidebar_label: Integration Status
+sidebar_position: 2
+description: Current status of all TradingSystem API integrations, service health, and recent improvements
+tags:
+  - api
+  - integration
+  - status
+  - dashboard
+owner: BackendGuild
+lastReviewed: '2025-10-27'
+---
+
+# API Integration Status - TradingSystem Dashboard
+
+**Last Updated**: 2025-10-27
+
+> **🚀 Plano de Containerização em Andamento**
+> Veja **[CONTAINERIZATION-STRATEGY.md](CONTAINERIZATION-STRATEGY.md)** para detalhes sobre a estratégia de migração de serviços locais para containers.
+>
+> **Destaque**: TP Capital será dividido em **Telegram Gateway (local)** + **API (container)** - proposta OpenSpec completa disponível em `tools/openspec/changes/split-tp-capital-into-gateway-api/`
+
+## 📊 Current Service Status
+
+### ✅ Running Services
+
+| Service | Port | Type | Status | Access |
+|---------|------|------|--------|--------|
+| **Dashboard** | 3103 | React + Vite | ✅ Running | http://localhost:3103 |
+| **Docusaurus** | 3205 | Docusaurus v3 | ✅ Running | http://localhost:3205 |
+| **Documentation API** | 3400 | Express + FlexSearch | ✅ Running | http://localhost:3400 |
+| **TP Capital** | 4005 | Express + Telegraf | ✅ Running | http://localhost:4005 |
+
+### ❌ Services Needing Startup
+
+| Service | Port | Type | Status | Start Command |
+|---------|------|------|--------|---------------|
+| **Workspace API** | 3200 | Express + LowDB/QuestDB | ❌ Not Running | `cd backend/api/workspace && npm run dev` |
+
+---
+
+## 🎯 Recent Improvements
+
+### 1. ✅ API Viewer Integration (DocsAPI Button)
+
+**Location**: Dashboard → Knowledge → Docs → **DocsAPI** tab
+
+**Features**:
+- 📊 **4 Viewing Options**: Redoc, Swagger UI, RapiDoc, Raw Spec
+- 🔄 **2 APIs Available**: Documentation API, Workspace API
+- 💾 **Download Specs**: Download OpenAPI YAML files
+- 🆕 **Open in New Tab**: View APIs in separate window
+
+**How It Works**:
+```
+User clicks DocsAPI button
+  ↓
+APIViewerPage renders
+  ↓
+Select API (Documentation/Workspace)
+  ↓
+Choose Viewer (Redoc/Swagger/RapiDoc/Raw)
+  ↓
+Iframe embeds viewer with spec
+```
+
+**Implementation Files**:
+- `frontend/dashboard/src/components/pages/APIViewerPage.tsx` (280 lines)
+- `frontend/dashboard/public/viewers/swagger.html` (local Swagger UI)
+- `frontend/dashboard/public/viewers/rapidoc.html` (local RapiDoc)
+- `frontend/dashboard/public/specs/` (OpenAPI specs)
+
+**Viewer Comparison**:
+
+| Viewer | Best For | Try It Out | Dark Mode | Performance |
+|--------|----------|------------|-----------|-------------|
+| **Redoc** | Reading & exploration | ❌ No | ✅ Yes | ⚡ Fast |
+| **Swagger UI** | Testing & development | ✅ Yes | ✅ Yes | ⚠️ Medium |
+| **RapiDoc** | Presentations & demos | ✅ Yes | ✅ Yes | ⚡ Fast |
+| **Raw Spec** | Technical analysis | ❌ No | N/A | ⚡ Instant |
+
+### 2. ✅ CORS Fix for API Viewers
+
+**Problem**: External CDNs couldn't access localhost specs
+
+**Solution**: Created local HTML viewers served from same domain
+
+**Before**:
+```typescript
+// External CDN (CORS issues)
+case 'swagger':
+  url = `https://petstore.swagger.io/?url=${absoluteSpecUrl}`;
+```
+
+**After**:
+```typescript
+// Local viewer (no CORS)
+case 'swagger':
+  url = `/viewers/swagger.html?url=${specUrl}`;
+```
+
+**Created Files**:
+- `frontend/dashboard/public/viewers/swagger.html`
+- `frontend/dashboard/public/viewers/rapidoc.html`
+
+**Documentation**: See `frontend/dashboard/SWAGGER-RAPIDOC-FIX.md`
+
+### 3. ✅ Redocusaurus Integration
+
+**Location**: Docusaurus → APIs dropdown
+
+**Configuration**: `docs/docusaurus.config.js`
+
+**APIs Available**:
+1. **Documentation API** - `/api/documentation-api`
+2. **Workspace API** - `/api/workspace`
+
+**MDX Documentation Created**:
+- `docs/content/api/overview.mdx` (240 lines)
+- `docs/content/api/documentation-api.mdx` (300 lines)
+- `docs/content/api/workspace-api.mdx` (400 lines)
+
+**OpenAPI Specs**:
+- `docs/static/specs/documentation-api.openapi.yaml` (47KB)
+- `docs/static/specs/workspace.openapi.yaml` (9.6KB)
+
+### 4. ✅ TP Capital Service Discovery
+
+**IMPORTANT FINDING**: TP Capital runs on port **4005**, not 3200!
+
+**Previous Assumption**: TP Capital shared port 3200 with Workspace API ❌
+
+**Reality**: TP Capital has its own port (4005), no conflict ✅
+
+**Service Details**:
+- **Type**: Local Node.js service (NOT Docker container)
+- **Port**: 4005
+- **Status**: ✅ Already running
+- **Technology**: Express + Telegraf + TimescaleDB
+- **Purpose**: Telegram signal ingestion from TP Capital channels
+
+**Key Endpoints**:
+```bash
+# Health check
+curl http://localhost:4005/health
+
+# Metrics
+curl http://localhost:4005/metrics
+
+# Logs
+curl http://localhost:4005/logs
+
+# UI
+http://localhost:4005/
+```
+
+**Database**: TimescaleDB on port 5433 (not PostgreSQL default 5432)
+
+**Documentation**: See `TP-CAPITAL-SERVICE-GUIDE.md`
+
+### 5. ✅ MDX Syntax Fixes (40 Files)
+
+**Problem**: Docusaurus v3 compilation errors in MDX files
+
+**Errors Fixed**:
+- `<` followed by numbers → `&lt;`
+- `>` followed by numbers → `&gt;`
+- `\{\}` in prose → `\{\}`
+
+**Solution**: Created automated Python script
+
+**Script**: `docs/scripts/fix-mdx-syntax.py`
+
+**Files Fixed**: 40 files across docs/content/
+
+**Examples**:
+```markdown
+# Before
+Monitor build output size <300 KB
+
+# After
+Monitor build output size &lt;300 KB
+
+# Before
+State: {SUBMITTED, REJECTED}
+
+# After
+State: \{SUBMITTED, REJECTED\}
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### Start All Services
+
+```bash
+# 1. Start Workspace API (Port 3200)
+cd backend/api/workspace
+npm install
+npm run dev
+
+# 3. Verify all services running
+bash scripts/check-apis.sh
+```
+
+### Expected Output After Startup
+
+```
+TradingSystem - Status das APIs
+================================
+
+Dashboard (3103)         : ✅ Rodando
+Docusaurus (3205)        : ✅ Rodando
+Workspace API (3200)     : ✅ Rodando  ← Should be green now
+Documentation API (3400) : ✅ Rodando
+TP Capital (4005)        : ✅ Rodando
+
+================================
+APIs Funcionando: 6/6
+```
+
+### Access API Viewer
+
+1. Open Dashboard: `http://localhost:3103`
+2. Navigate: **Knowledge → Docs**
+3. Click: **DocsAPI** button
+4. Select API: **Documentation API** or **Workspace API**
+5. Choose Viewer: **Redoc**, **Swagger**, **RapiDoc**, or **Raw**
+
+### Test Workspace API Connection
+
+Once Workspace API is running:
+
+1. Dashboard → **Apps → Workspace**
+2. Should see Idea Bank items
+3. Test CRUD:
+   - Click "New Idea" (should work)
+   - Edit existing item (should work)
+   - Delete item (should work)
+
+---
+
+## 📡 Port Mapping (Corrected)
+
+### Local Services (Node.js)
+
+| Port | Service | Purpose | Status |
+|------|---------|---------|--------|
+| 3103 | Dashboard | React frontend | ✅ Running |
+| 3200 | Workspace API | Idea Bank CRUD | ❌ Needs startup |
+| 3400 | Documentation API | Docs management | ✅ Running |
+| **4005** | **TP Capital** | **Telegram ingestion** | ✅ **Running** |
+
+### Docusaurus (Local Dev)
+
+| Port | Service | Purpose | Status |
+|------|---------|---------|--------|
+| 3205 | Docusaurus v3 | Documentation site | ✅ Running |
+
+### Databases
+
+| Port | Service | Purpose | Container |
+|------|---------|---------|-----------|
+| 5433 | TimescaleDB | TP Capital data | ✅ Running |
+| 6333 | QuestDB | Analytics/metrics | ✅ Running (if docker up) |
+
+---
+
+## 🔧 Configuration Files
+
+### Dashboard API Config
+
+**File**: `frontend/dashboard/src/config/api.ts`
+
+**Recent Fix**: Updated docsApiUrl from deprecated 3101 to 3205
+
+```typescript
+export const API_CONFIG = {
+  // Base URL
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3103',
+
+  // Service URLs
+  workspaceApi: `${baseUrl}/api/workspace`,        // Port 3200
+  tpCapitalApi: `${baseUrl}/api/tp-capital`,       // Port 4005 ✅
+  b3Api: `${baseUrl}/api/b3`,                      // Port 3302
+  docsApiUrl: `${baseUrl}/api/documentation-api`,  // Port 3205 (fixed)
+};
+```
+
+**Vite Proxy**: `frontend/dashboard/vite.config.ts`
+
+```typescript
+server: {
+  proxy: {
+    '/api/workspace': {
+      target: 'http://localhost:3200',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api\/workspace/, ''),
+    },
+    '/api/tp-capital': {
+      target: 'http://localhost:4005',  // ✅ Correct port
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api\/tp-capital/, ''),
+    },
+    '/api/b3': {
+      target: 'http://localhost:3302',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api\/b3/, ''),
+    },
+  },
+}
+```
+
+### TP Capital Config
+
+**File**: `apps/tp-capital/.env`
+
+**Key Variables**:
+```bash
+# Service
+PORT=4005
+
+# TimescaleDB
+TIMESCALEDB_HOST=localhost
+TIMESCALEDB_PORT=5433
+TIMESCALEDB_DATABASE=tp_capital
+TIMESCALEDB_USER=postgres
+TIMESCALEDB_PASSWORD=postgres
+
+# Telegram
+TELEGRAM_BOT_TOKEN=your_token
+TELEGRAM_API_ID=your_id
+TELEGRAM_API_HASH=your_hash
+
+# CORS
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+```
+
+---
+
+## 📚 Documentation Created
+
+### API Viewer Guides
+
+| File | Purpose | Lines |
+|------|---------|-------|
+| `API-VIEWER-GUIDE.md` | Complete user guide | ~500 |
+| `SWAGGER-RAPIDOC-FIX.md` | CORS fix documentation | ~320 |
+| `CHANGELOG-DOCSAPI.md` | Migration notes | ~200 |
+
+### Service Guides
+
+| File | Purpose | Lines |
+|------|---------|-------|
+| `TP-CAPITAL-SERVICE-GUIDE.md` | TP Capital complete guide | ~610 |
+| `START-APIS.md` | API startup guide | ~350 |
+
+### MDX Documentation (Docusaurus)
+
+| File | Purpose | Lines |
+|------|---------|-------|
+| `docs/content/api/overview.mdx` | API catalog | ~240 |
+| `docs/content/api/documentation-api.mdx` | Documentation API guide | ~300 |
+| `docs/content/api/workspace-api.mdx` | Workspace API guide | ~400 |
+
+### Scripts
+
+| File | Purpose | Type |
+|------|---------|------|
+| `scripts/check-apis.sh` | API health check | Bash |
+| `docs/scripts/fix-mdx-syntax.py` | MDX error fixer | Python |
+
+---
+
+## ⚠️ Known Issues
+
+### 1. Workspace API Not Running
+
+**Symptom**: Dashboard → Apps → Workspace shows "Failed to load items"
+
+**Cause**: Workspace API on port 3200 not started
+
+**Solution**:
+```bash
+cd backend/api/workspace
+npm run dev
+```
+
+**Verify**:
+```bash
+curl http://localhost:3200/api/items
+# Should return: {"items": [...]}
+```
+
+### 2. TP Capital Port Confusion
+
+**OLD (Incorrect) Assumption**: TP Capital shared port 3200 with Workspace API
+
+**NEW (Correct) Reality**: TP Capital has its own port **4005**
+
+**Impact**: No port conflict! Both can run simultaneously.
+
+**Verification**:
+```bash
+# TP Capital health
+curl http://localhost:4005/health
+# Response: {"status":"ok","service":"tp-capital"}
+
+# Workspace API health (when running)
+curl http://localhost:3200/api/items
+# Response: {"items":[...]}
+```
+
+---
+
+## ✅ Completed Work Summary
+
+### 1. DocsAPI Integration
+- ✅ Created APIViewerPage component
+- ✅ Integrated 4 viewer types (Redoc, Swagger, RapiDoc, Raw)
+- ✅ Fixed CORS issues with local HTML viewers
+- ✅ Copied OpenAPI specs to dashboard public folder
+- ✅ Updated dashboard routing and navigation
+
+### 2. Redocusaurus Setup
+- ✅ Configured plugin in docusaurus.config.js
+- ✅ Added navbar dropdown for APIs
+- ✅ Copied specs to docs/static/specs/
+- ✅ Created comprehensive MDX documentation
+
+### 3. MDX Compilation Fixes
+- ✅ Fixed 40 files with syntax errors
+- ✅ Created automated Python script
+- ✅ Tested Docusaurus build (no errors)
+
+### 4. Service Discovery
+- ✅ Discovered TP Capital port (4005)
+- ✅ Clarified no port conflict with Workspace API
+- ✅ Created comprehensive TP Capital guide
+- ✅ Updated port mapping documentation
+
+### 5. API Status Tooling
+- ✅ Created check-apis.sh health check script
+- ✅ Created START-APIS.md startup guide
+- ✅ Documented all service ports and commands
+
+---
+
+## 🎯 Next Steps for User
+
+### Priority 1: Start Workspace API
+
+```bash
+cd backend/api/workspace
+npm install
+npm run dev
+```
+
+**Expected Output**:
+```
+[INFO] Workspace API starting...
+[INFO] Database: LowDB (development) + QuestDB (production)
+[INFO] Server listening on http://localhost:3200
+```
+
+**Test**:
+```bash
+curl http://localhost:3200/api/items
+```
+
+### Priority 2: Verify Dashboard Connection
+
+1. Open: `http://localhost:3103`
+2. Navigate: **Apps → Workspace**
+3. Verify: Items load successfully
+4. Test: Create new idea (should work)
+
+### Priority 3: Test API Viewer
+
+1. Navigate: **Knowledge → Docs → DocsAPI**
+2. Select: **Workspace API**
+3. Choose: **Swagger UI**
+4. Verify: Swagger loads with all endpoints
+5. Test: Try "Try it out" on GET /api/items
+
+## 📊 Service Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Dashboard                         │
+│                  Port 3103                          │
+│         (React + Vite + Zustand)                    │
+└─────────────────────────────────────────────────────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │
+        ▼              ▼
+┌──────────────┐ ┌──────────────┐
+│  Workspace   │ │  TP Capital  │
+│  API (3200)  │ │  API (4005)  │
+│              │ │              │
+│ Express +    │ │ Express +    │
+│ LowDB/       │ │ Telegraf +   │
+│ QuestDB      │ │ TimescaleDB  │
+└──────────────┘ └──────────────┘
+        │              │
+        ▼              ▼
+┌──────────────────────────────────────────┐
+│          Documentation API               │
+│              Port 3400                   │
+│     (Express + FlexSearch)              │
+└──────────────────────────────────────────┘
+```
+
+---
+
+**Created**: 2025-10-25
+**Last Updated**: 2025-10-27
+**Status**: ✅ Documentation Complete
+**Next Action**: User needs to start Workspace API (port 3200)

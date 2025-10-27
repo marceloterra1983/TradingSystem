@@ -8,7 +8,6 @@ skinparam shadowing false
 actor Trader as trader
 
 package "Market Inputs" {
-  component "B3 Market Feed" as b3
   component "TP Capital Signals" as tpSignals
 }
 
@@ -20,7 +19,6 @@ component "Trading Agents" as agents
 component "Dashboard" as dashboard
 
 trader --> dashboard : View signals
-b3 --> ingestion
 tpSignals --> ingestion
 ingestion --> questdb : Write raw events
 questdb --> normalizer : Stream market + signal data

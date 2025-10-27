@@ -50,7 +50,7 @@ export function parseSignal(messageText, overrides = {}) {
   const stop = overrides.stop || (stopMatch ? Number(stopMatch[1]) : null);
 
   return {
-    ts: new Date(timestamp),
+    ts: timestamp,  // Numeric timestamp in milliseconds (for BIGINT)
     timestamp,
     channel,
     signal_type: signalType,

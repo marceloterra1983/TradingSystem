@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import '../../../shared/config/load-env.js';
+await import('../../../shared/config/load-env.js').catch((error) => {
+  if (error?.code !== 'ERR_MODULE_NOT_FOUND') {
+    throw error;
+  }
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,10 +20,74 @@ const toInt = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const parseDbUrl = (url) => {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname || undefined,
+      port: parsed.port ? Number(parsed.port) : undefined,
+      database: parsed.pathname ? parsed.pathname.replace(/^\//, '') : undefined,
+      user: parsed.username || undefined,
+      password: parsed.password || undefined,
+      schema: parsed.searchParams.get('schema') || undefined,
+      ssl: parsed.searchParams.get('ssl') || undefined,
+    };
+  } catch {
+    return null;
+  }
+};
+
 const defaultDbUrl =
   process.env.TELEGRAM_GATEWAY_DB_URL ||
+  process.env.TELEGRAM_GATEWAY_DATABASE_URL ||
+  process.env.TIMESCALEDB_DATABASE_URL ||
   process.env.TIMESCALEDB_URL ||
-  'postgresql://timescale:changeme@localhost:5433/APPS-TELEGRAM-GATEWAY';
+  null;
+
+const parsedUrl = parseDbUrl(defaultDbUrl);
+
+const dbHost =
+  process.env.TELEGRAM_GATEWAY_DB_HOST ||
+  process.env.TIMESCALEDB_HOST ||
+  parsedUrl?.host ||
+  'localhost';
+
+const dbPort = toInt(
+  process.env.TELEGRAM_GATEWAY_DB_PORT ||
+    process.env.TIMESCALEDB_PORT ||
+    parsedUrl?.port,
+  5433,
+);
+
+const dbName =
+  process.env.TELEGRAM_GATEWAY_DB_NAME ||
+  process.env.TIMESCALEDB_DATABASE ||
+  parsedUrl?.database ||
+  'apps_telegram_gateway';
+
+const dbUser =
+  process.env.TELEGRAM_GATEWAY_DB_USER ||
+  process.env.TIMESCALEDB_USER ||
+  parsedUrl?.user ||
+  'timescale';
+
+const dbPassword =
+  process.env.TELEGRAM_GATEWAY_DB_PASSWORD ||
+  process.env.TIMESCALEDB_PASSWORD ||
+  parsedUrl?.password ||
+  'pass_timescale';
+
+const dbSchema =
+  process.env.TELEGRAM_GATEWAY_DB_SCHEMA ||
+  parsedUrl?.schema ||
+  'telegram_gateway';
+
+const fallbackDbUrl =
+  defaultDbUrl ||
+  `postgresql://${encodeURIComponent(dbUser)}:${encodeURIComponent(
+    dbPassword,
+  )}@${dbHost}:${dbPort}/${dbName}?schema=${dbSchema}`;
 
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
@@ -31,10 +99,15 @@ export const config = {
     process.env.GATEWAY_API_TOKEN ||
     '',
   database: {
-    url: defaultDbUrl,
-    schema: process.env.TELEGRAM_GATEWAY_DB_SCHEMA || 'telegram_gateway',
+    url: fallbackDbUrl,
+    host: dbHost,
+    port: dbPort,
+    database: dbName,
+    user: dbUser,
+    password: dbPassword,
+    schema: dbSchema,
     table: process.env.TELEGRAM_GATEWAY_DB_TABLE || 'messages',
-    ssl: parseBoolean(process.env.TELEGRAM_GATEWAY_DB_SSL),
+    ssl: parseBoolean(process.env.TELEGRAM_GATEWAY_DB_SSL ?? parsedUrl?.ssl),
     pool: {
       max: toInt(process.env.TELEGRAM_GATEWAY_DB_POOL_MAX, 10),
       idleTimeoutMs: toInt(process.env.TELEGRAM_GATEWAY_DB_IDLE_TIMEOUT_MS, 30000),
@@ -73,6 +146,9 @@ export const validateConfig = (logger) => {
     {
       port: config.port,
       dbSchema: config.database.schema,
+      dbName: config.database.database,
+      dbHost: config.database.host,
+      dbPort: config.database.port,
       dbPoolMax: config.database.pool.max,
       pagination: config.pagination,
     },

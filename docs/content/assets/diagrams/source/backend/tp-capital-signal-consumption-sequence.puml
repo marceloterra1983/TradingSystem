@@ -55,9 +55,8 @@ else Agno Agents consume signals
   API --> AgnoAgents : 200 OK {data: [...]}
   deactivate API
   
-  AgnoAgents -> AgnoAgents : Fetch B3 market data (parallel)
   AgnoAgents -> AgnoAgents : Fetch Workspace ideas (parallel)
-  AgnoAgents -> AgnoAgents : Correlate datasets:\n- TP Capital signal strength\n- B3 price trends\n- Workspace idea alignment
+  AgnoAgents -> AgnoAgents : Correlate datasets:\n- TP Capital signal strength\n- Workspace idea alignment
   AgnoAgents -> AgnoAgents : Generate trading recommendations
   deactivate AgnoAgents
 end
@@ -173,7 +172,6 @@ note over AgnoAgents
   **Agent Integration**
   - Polls every 30 seconds
   - Combines TP Capital signals with:
-    * B3 real-time market data
     * Workspace idea backlog
   - Uses LLM/heuristics to correlate
   - Generates actionable recommendations

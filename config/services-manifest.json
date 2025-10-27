@@ -8,7 +8,7 @@
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
-      "port": 3200,
+      "port": 4005,
       "env": ".env.example",
       "workspace": true,
       "managed": "internal"
@@ -26,21 +26,9 @@
       "managed": "internal"
     },
     {
-      "id": "b3-market-data",
-      "type": "backend",
-      "path": "apps/b3-market-data",
-      "start": "npm run dev",
-      "build": "npm run build",
-      "test": "npm test",
-      "port": 3302,
-      "env": ".env.example",
-      "workspace": true,
-      "managed": "internal"
-    },
-    {
       "id": "docs-api",
       "type": "backend",
-      "path": "backend/api/docs-api",
+      "path": "backend/api/documentation-api",
       "start": "PORT=3400 npm run dev",
       "build": "npm run build",
       "test": "npm test",
@@ -98,12 +86,12 @@
       "managed": "internal"
     },
     {
-      "id": "agent-mcp",
+      "id": "agno-agents",
       "type": "external",
-      "path": "tools/Agent-MCP",
-      "start": "poetry run python agent_mcp/app/main_app.py",
+      "path": "tools/agno-agents",
+      "start": "python -m src.main",
       "build": null,
-      "test": null,
+      "test": "pytest",
       "port": 8080,
       "env": ".env.example",
       "workspace": false,
@@ -130,6 +118,30 @@
       "test": "npm test",
       "port": 3600,
       "env": ".env.example",
+      "workspace": true,
+      "managed": "internal"
+    },
+    {
+      "id": "telegram-gateway-api",
+      "type": "backend",
+      "path": "backend/api/telegram-gateway",
+      "start": "npm run dev",
+      "build": "npm run build",
+      "test": "npm test",
+      "port": 4010,
+      "env": ".env.example",
+      "workspace": true,
+      "managed": "internal"
+    },
+    {
+      "id": "workspace-app",
+      "type": "frontend",
+      "path": "apps/workspace",
+      "start": "npm run dev",
+      "build": "npm run build",
+      "test": "npm test",
+      "port": 3900,
+      "env": null,
       "workspace": true,
       "managed": "internal"
     }

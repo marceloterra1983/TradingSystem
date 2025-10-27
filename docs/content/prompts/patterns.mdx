@@ -24,9 +24,9 @@ TradingSystem uses structured prompts to guide LLM behavior in agent-based workf
 
 **System Instructions**:
 ```
-You are a market analysis agent specialized in analyzing B3 market data 
-and TP Capital signals. Your role is to identify trading opportunities by 
-analyzing price movements, volume patterns, and signal correlations. 
+You are a market analysis agent specialized in consolidating TP Capital signals 
+and Workspace insights. Your role is to identify trading opportunities by 
+examining signal quality, thesis alignment, and historical performance. 
 Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 ```
 
@@ -37,12 +37,11 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
   "payload": {
     "symbols": ["PETR4", "VALE3"],
     "include_tp_capital": true,
-    "include_b3": true,
-    "market_data": {
-      "PETR4": {"last_price": 32.50, "volume": 1000000, "change_pct": 2.5}
-    },
     "tp_capital_signals": [
       {"asset": "PETR4", "signal_type": "COMPRA", "buy_min": 32.00, "targets": [34.00, 35.00]}
+    ],
+    "workspace_context": [
+      {"title": "PETR4 tese semanal", "thesis": "Fluxo comprador consistente", "rating": "alta"}
     ]
   }
 }
@@ -59,14 +58,14 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
       "price": 32.50,
       "source": "AGNO",
       "metadata": {
-        "reasoning": "Strong buy signal from TP Capital confirmed by B3 volume spike"
+        "reasoning": "TP Capital sinaliza compra com tese de fluxo comprador alinhada no Workspace"
       }
     }
   ]
 }
 ```
 
-**Context Window**: ~2000 tokens (last 24 hours market data + 100 TP Capital signals)  
+**Context Window**: ~2000 tokens (100 TP Capital signals + workspace insights)  
 **Performance Target**: &lt;1s p95 analysis time
 
 ---
@@ -141,8 +140,7 @@ smooth communication between agents and handle errors gracefully.
   "action": "ORCHESTRATE",
   "data": {
     "symbols": ["PETR4"],
-    "include_tp_capital": true,
-    "include_b3": true
+    "include_tp_capital": true
   }
 }
 ```
@@ -164,8 +162,7 @@ Task: analyze_market
 Payload:
 - Symbols: {symbols}
 - Include TP Capital: {include_tp_capital}
-- Include B3: {include_b3}
-- Market Data: {market_data}
+- Workspace Context: {workspace_context}
 - TP Capital Signals: {tp_capital_signals}
 
 Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
@@ -176,8 +173,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 - `{task_json}`: JSON-encoded task and payload
 - `{symbols}`: List of symbols to analyze
 - `{include_tp_capital}`: Boolean flag
-- `{include_b3}`: Boolean flag
-- `{market_data}`: B3 market data dictionary
+- `{workspace_context}`: Workspace insights array
 - `{tp_capital_signals}`: TP Capital signals array
 
 **Expected Output**:
@@ -191,7 +187,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
       "price": 32.50,
       "source": "AGNO",
       "metadata": {
-        "reasoning": "Strong buy signal from TP Capital confirmed by B3 volume spike"
+        "reasoning": "TP Capital sinaliza compra alinhada à tese vigente no Workspace"
       }
     }
   ]

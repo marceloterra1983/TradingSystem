@@ -8,19 +8,36 @@ primarySystems:
   - frontend/dashboard
   - backend/api
 owner: FrontendGuild
-lastReviewed: '2025-10-26'
+lastReviewed: '2025-10-27'
 ---
 import CodeTabs from '@site/src/components/CodeTabs';
 import AdmonitionWrap from '@site/src/components/AdmonitionWrap';
 
 ## Coverage
 
-This section hosts engineering deep dives, architectural diagrams, and onboarding guides for the
-TradingSystem frontend teams. Organize content under subdirectories such as `architecture/`,
-`components/`, `tooling/`, and `observability/`.
+This section documents the TradingSystem frontend architecture, components, and engineering practices.
 
-Each article should reference the owning squad, list the production contact path, and link to the
-relevant repositories or dashboards.
+### Key Applications
+
+- **Dashboard** (Port 3103): Main UI built with React 18 + Vite + TypeScript
+  - 6 navigation sections (Apps, Knowledge, Infrastructure, Connections, Escopo, Conexões)
+  - Lazy-loaded pages for optimal performance
+  - Zustand (global state) + TanStack Query (server state)
+  - [Architecture Documentation](/frontend/architecture/dashboard)
+  - [Component Guide](/frontend/engineering/components)
+
+- **Workspace App** (Port 3900): Standalone Kanban application
+  - Embeddable in Dashboard via iframe
+  - Drag-and-drop task management
+  - TimescaleDB backend integration
+
+### Architecture
+
+- **State Management**: Zustand + TanStack Query
+- **Styling**: Tailwind CSS + Radix UI components
+- **Performance**: Code splitting, lazy loading, virtual scrolling
+- **Type Safety**: TypeScript with strict mode
+- **Build Tool**: Vite 7.x with optimized chunking
 
 ## Authoring guidance
 

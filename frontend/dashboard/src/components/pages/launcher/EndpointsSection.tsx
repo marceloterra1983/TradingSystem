@@ -76,37 +76,19 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
   // TP Capital API
   {
     name: 'TP Capital API',
-    baseUrl: 'http://localhost:3201',
+    baseUrl: 'http://localhost:4007',
     icon: Server,
     color: 'text-orange-600 dark:text-orange-400',
     endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check with QuestDB status' },
-      { method: 'GET', path: '/signals', description: 'Get trading signals from QuestDB' },
+      { method: 'GET', path: '/health', description: 'Health check with TimescaleDB status' },
+      { method: 'GET', path: '/signals', description: 'Get trading signals from TimescaleDB' },
+      { method: 'GET', path: '/signals/recent', description: 'Get recent signals (last 24h)' },
       { method: 'DELETE', path: '/signals', description: 'Delete all signals (maintenance)' },
-      { method: 'GET', path: '/logs', description: 'Get ingestion logs (limit via query)' },
-      { method: 'GET', path: '/bots', description: 'List configured Telegram bots' },
+      { method: 'GET', path: '/logs', description: 'Get ingestion logs' },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
-  
-  // B3 Market Data API
-  {
-    name: 'B3 Market Data API',
-    baseUrl: 'http://localhost:3302',
-    icon: Server,
-    color: 'text-green-600 dark:text-green-400',
-    endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check endpoint' },
-      { method: 'GET', path: '/overview', description: 'Market overview and summary' },
-      { method: 'GET', path: '/adjustments', description: 'Daily adjustments data' },
-      { method: 'GET', path: '/vol-surface', description: 'Volatility surface data' },
-      { method: 'GET', path: '/indicators/daily', description: 'Daily indicators' },
-      { method: 'GET', path: '/gamma-levels', description: 'Gamma exposure levels' },
-      { method: 'GET', path: '/dxy', description: 'Dollar Index (DXY) data' },
-      { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
-    ],
-  },
-  
+
   // Documentation API
   {
     name: 'Documentation API',

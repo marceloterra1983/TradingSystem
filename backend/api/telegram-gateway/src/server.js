@@ -12,6 +12,7 @@ import {
 } from './db/messagesRepository.js';
 import { messagesRouter } from './routes/messages.js';
 import { channelsRouter } from './routes/channels.js';
+import { telegramGatewayRouter } from './routes/telegramGateway.js';
 
 const logger = pino({ level: config.logLevel });
 
@@ -80,7 +81,21 @@ app.use((req, res, next) => {
   next();
 });
 
-const isPublicRoute = (path) => ['/health', '/metrics'].includes(path);
+const shouldRequireToken =
+  (process.env.TELEGRAM_GATEWAY_REQUIRE_TOKEN ||= 'false').toLowerCase() === 'true';
+
+const isPublicRoute = (path) => {
+  if (!shouldRequireToken) {
+    // No token required in development/local environments unless explicitly enabled
+    return true;
+  }
+
+  if (path === '/health' || path === '/metrics') {
+    return true;
+  }
+
+  return false;
+};
 
 app.use((req, res, next) => {
   if (isPublicRoute(req.path)) {
@@ -129,11 +144,12 @@ app.get('/', (_req, res) => {
   res.json({
     success: true,
     service: 'telegram-gateway-api',
-    endpoints: ['/health', '/metrics', '/api/messages', '/api/channels'],
+    endpoints: ['/health', '/metrics', '/api/messages', '/api/channels', '/api/telegram-gateway/sync-messages'],
   });
 });
 
 app.use('/api/channels', channelsRouter);
+app.use('/api/telegram-gateway', telegramGatewayRouter);
 app.use('/api/messages', messagesRouter);
 
 app.use((err, req, res, _next) => {
@@ -145,7 +161,8 @@ app.use((err, req, res, _next) => {
 });
 
 const server = app.listen(config.port, () => {
-  logger.info({ port: config.port }, 'Telegram Gateway API started');
+logger.info({ port: config.port }, 'Telegram Gateway API started');
+logger.info({ platform: process.platform, nodeVersion: process.version }, 'Runtime environment');
 });
 
 const gracefulShutdown = async () => {

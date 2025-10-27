@@ -1,157 +1,189 @@
 import express from 'express';
-import helmet from 'helmet';
 import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import '../../../../backend/shared/config/load-env.js';
+import helmet from 'helmet';
+import axios from 'axios';
+import pino from 'pino';
 
-import { metricsMiddleware, metricsHandler } from './metrics.js';
-import scrapeRoutes from './routes/scrape.js';
-import { errorHandler, notFoundHandler, rateLimitHandler } from './middleware/errorHandler.js';
-import { logger } from './config/logger.js';
-import { getFirecrawlUrl, testFirecrawlConnection } from './config/firecrawl.js';
-
-const app = express();
-
-const disableCors = process.env.DISABLE_CORS === 'true';
-const rawCorsOrigin =
-  process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
-    ? process.env.CORS_ORIGIN
-    : 'http://localhost:3103,http://localhost:3205';
-
-app.use(helmet());
-
-if (!disableCors) {
-  const corsOrigins =
-    rawCorsOrigin === '*'
-      ? undefined
-      : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
-  const corsOptions = {
-    origin: corsOrigins || undefined,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  };
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
-} else {
-  logger.info('CORS disabled - unified domain mode active');
-}
-
-const rateLimitWindowMs = parseInt(process.env.FIRECRAWL_PROXY_RATE_LIMIT_WINDOW_MS || '60000', 10);
-const rateLimitMax = parseInt(process.env.FIRECRAWL_PROXY_RATE_LIMIT_MAX || '100', 10);
-
-const limiter = rateLimit({
-  windowMs: rateLimitWindowMs,
-  max: rateLimitMax,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  handler: rateLimitHandler,
-  skip: (req) => req.path === '/metrics' || req.path === '/health'
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info'
 });
 
-app.use(limiter);
-app.use(express.json({ limit: '2mb' }));
-app.use(metricsMiddleware);
+const app = express();
+const PORT = process.env.PORT || 3600;
+const FIRECRAWL_API_URL = process.env.FIRECRAWL_API_URL || 'https://api.firecrawl.dev';
+const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 
+// Middleware
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+
+// Request logging
 app.use((req, res, next) => {
-  const start = process.hrtime.bigint();
-  res.on('finish', () => {
-    const durationNs = process.hrtime.bigint() - start;
-    const durationMs = Number(durationNs) / 1e6;
-    logger.info(
-      {
-        method: req.method,
-        url: req.originalUrl,
-        statusCode: res.statusCode,
-        durationMs: Number(durationMs.toFixed(3)),
-        ip: req.ip
-      },
-      'request completed'
-    );
-  });
+  logger.info({ method: req.method, url: req.url }, 'Incoming request');
   next();
 });
 
-app.get('/', (req, res) => {
+// Health check
+app.get('/health', (req, res) => {
   res.json({
-    success: true,
-    data: {
-      service: 'firecrawl-proxy',
-      version: '1.0.0',
-      endpoints: {
-        scrape: '/api/v1/scrape',
-        crawl: '/api/v1/crawl',
-        crawlStatus: '/api/v1/crawl/:id',
-        health: '/health',
-        metrics: '/metrics'
-      }
-    }
+    status: 'healthy',
+    service: 'firecrawl-proxy',
+    version: '1.0.0',
+    firecrawlApiUrl: FIRECRAWL_API_URL,
+    hasApiKey: !!FIRECRAWL_API_KEY
   });
 });
 
-app.get('/health', async (req, res, next) => {
+// Scrape endpoint
+app.post('/api/scrape', async (req, res) => {
   try {
-    const reachable = await testFirecrawlConnection();
-    res.json({
-      success: true,
-      data: {
-        service: 'firecrawl-proxy',
-        status: 'ok',
-        firecrawl: {
-          reachable,
-          baseUrl: getFirecrawlUrl('')
+    const { url, ...options } = req.body;
+
+    if (!url) {
+      logger.warn('Scrape request missing URL');
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    if (!FIRECRAWL_API_KEY) {
+      logger.error('FIRECRAWL_API_KEY not configured');
+      return res.status(500).json({
+        error: 'Firecrawl API key not configured',
+        message: 'Please set FIRECRAWL_API_KEY environment variable'
+      });
+    }
+
+    logger.info({ url }, 'Scraping URL');
+
+    const response = await axios.post(
+      `${FIRECRAWL_API_URL}/v0/scrape`,
+      { url, ...options },
+      {
+        headers: {
+          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+          'Content-Type': 'application/json'
         },
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString()
+        timeout: 30000 // 30 seconds
       }
-    });
+    );
+
+    logger.info({ url, status: response.status }, 'Scrape successful');
+    res.json(response.data);
   } catch (error) {
-    next(error);
+    logger.error({ error: error.message, url: req.body.url }, 'Scrape failed');
+
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ error: 'Request timeout' });
+    }
+
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data,
+      firecrawlApiUrl: FIRECRAWL_API_URL
+    });
   }
 });
 
-app.get('/metrics', metricsHandler);
-app.use('/api/v1', scrapeRoutes);
-
-app.use(notFoundHandler);
-app.use(errorHandler);
-
-const port = parseInt(process.env.FIRECRAWL_PROXY_PORT || '3600', 10);
-
-const startServer = async () => {
-  app.listen(port, async () => {
-    logger.info({ port, environment: process.env.NODE_ENV || 'development' }, 'firecrawl-proxy service started');
-
-    try {
-      const reachable = await testFirecrawlConnection();
-      if (reachable) {
-        logger.info({ firecrawlBaseUrl: getFirecrawlUrl('') }, 'firecrawl service reachable');
-      } else {
-        logger.warn({ firecrawlBaseUrl: getFirecrawlUrl('') }, 'firecrawl service unreachable');
-      }
-    } catch (error) {
-      logger.error(
-        { err: error, firecrawlBaseUrl: getFirecrawlUrl('') },
-        'failed to verify firecrawl connectivity on startup'
-      );
-    }
-  });
-};
-
-startServer();
-
-export default app;
-
-export const resetRateLimiter = (key = '::ffff:127.0.0.1') => {
+// Crawl endpoint (for multiple pages)
+app.post('/api/crawl', async (req, res) => {
   try {
-    if (typeof limiter.resetKey === 'function') {
-      limiter.resetKey(key);
-      limiter.resetKey('127.0.0.1');
+    const { url, ...options } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
     }
-    if (limiter.store && typeof limiter.store.resetAll === 'function') {
-      limiter.store.resetAll();
+
+    if (!FIRECRAWL_API_KEY) {
+      return res.status(500).json({
+        error: 'Firecrawl API key not configured'
+      });
     }
+
+    logger.info({ url }, 'Starting crawl');
+
+    const response = await axios.post(
+      `${FIRECRAWL_API_URL}/v0/crawl`,
+      { url, ...options },
+      {
+        headers: {
+          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    logger.info({ url, jobId: response.data?.jobId }, 'Crawl started');
+    res.json(response.data);
   } catch (error) {
-    logger.warn({ err: error }, 'failed to reset rate limiter');
+    logger.error({ error: error.message, url: req.body.url }, 'Crawl failed');
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data
+    });
   }
-};
+});
+
+// Check crawl status
+app.get('/api/crawl/status/:jobId', async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    if (!FIRECRAWL_API_KEY) {
+      return res.status(500).json({
+        error: 'Firecrawl API key not configured'
+      });
+    }
+
+    const response = await axios.get(
+      `${FIRECRAWL_API_URL}/v0/crawl/status/${jobId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    logger.error({ error: error.message, jobId: req.params.jobId }, 'Status check failed');
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data
+    });
+  }
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    path: req.url,
+    availableEndpoints: [
+      'GET /health',
+      'POST /api/scrape',
+      'POST /api/crawl',
+      'GET /api/crawl/status/:jobId'
+    ]
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  logger.error({ err }, 'Unhandled error');
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message
+  });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info({
+    port: PORT,
+    firecrawlApiUrl: FIRECRAWL_API_URL,
+    hasApiKey: !!FIRECRAWL_API_KEY
+  }, 'Firecrawl Proxy server started');
+
+  if (!FIRECRAWL_API_KEY) {
+    logger.warn('⚠️  FIRECRAWL_API_KEY not set - API calls will fail');
+  }
+});

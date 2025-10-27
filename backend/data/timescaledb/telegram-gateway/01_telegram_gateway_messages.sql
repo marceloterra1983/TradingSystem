@@ -2,6 +2,7 @@
 -- Stores all Telegram messages ingested by the gateway with operational metadata
 
 CREATE SCHEMA IF NOT EXISTS telegram_gateway;
+SET search_path TO telegram_gateway, public;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -43,6 +44,9 @@ CREATE TABLE IF NOT EXISTS telegram_gateway.messages (
 
 ALTER TABLE telegram_gateway.messages
     DROP CONSTRAINT IF EXISTS messages_pkey;
+
+ALTER TABLE telegram_gateway.messages
+    DROP CONSTRAINT IF EXISTS telegram_gateway_messages_pkey;
 
 ALTER TABLE telegram_gateway.messages
     ADD CONSTRAINT telegram_gateway_messages_pkey PRIMARY KEY (id, created_at);
@@ -96,6 +100,8 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_telegram_gateway_messages_updated_at ON telegram_gateway.messages;
 
 CREATE TRIGGER trigger_telegram_gateway_messages_updated_at
     BEFORE UPDATE ON telegram_gateway.messages

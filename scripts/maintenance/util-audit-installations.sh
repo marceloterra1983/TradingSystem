@@ -10,7 +10,6 @@ NODE_PROJECTS=(
   "."
   "frontend/dashboard"
   "backend/api/workspace"
-  "apps/b3-market-data"
   "backend/api/documentation-api"
   "apps/status"
   "apps/tp-capital"

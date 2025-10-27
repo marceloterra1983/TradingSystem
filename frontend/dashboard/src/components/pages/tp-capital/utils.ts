@@ -52,21 +52,37 @@ export function formatNumber(value: number | null) {
   });
 }
 
-export function formatTimestamp(ts: string) {
+export function formatTimestamp(ts: string | number) {
   if (!ts) return "?";
-  const date = new Date(ts);
+  
+  // Converter para número se for string
+  const timestamp = typeof ts === 'string' ? Number(ts) : ts;
+  
+  // Se for NaN, retornar "?"
+  if (Number.isNaN(timestamp)) return "?";
+  
+  // Criar data a partir do timestamp em milissegundos
+  const date = new Date(timestamp);
+  
   if (Number.isNaN(date.getTime())) {
-    return ts;
+    return "?";
   }
-  return date.toLocaleString("pt-BR", {
+  
+  const time = date.toLocaleTimeString("pt-BR", {
     timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
   });
+  
+  const dateStr = date.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  
+  return { time, date: dateStr };
 }
 
 export function formatRelativeTime(ts: string): string {
@@ -155,11 +171,29 @@ export function downloadFile(filename: string, mimeType: string, content: string
   URL.revokeObjectURL(url);
 }
 
+function formatTimestampForCsv(ts: string | number) {
+  if (!ts) return "?";
+  
+  const timestamp = typeof ts === 'string' ? Number(ts) : ts;
+  if (Number.isNaN(timestamp)) return "?";
+  
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "?";
+  
+  return date.toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
 export function toCsv(rows: SignalRow[]) {
   const headers = [
     "DATA",
-    "CANAL",
-    "TIPO",
     "ATIVO",
     "COMPRA_MIN",
     "COMPRA_MAX",
@@ -169,9 +203,7 @@ export function toCsv(rows: SignalRow[]) {
     "STOP",
   ];
   const csvRows = rows.map((row) => [
-    formatTimestamp(row.ts),
-    row.channel,
-    row.signal_type,
+    formatTimestampForCsv(row.ts),
     row.asset,
     formatNumber(row.buy_min),
     formatNumber(row.buy_max),

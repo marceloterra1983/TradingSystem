@@ -18,9 +18,6 @@ const LauncherPage = React.lazy(
 const WorkspacePageNew = React.lazy(
   () => import('../components/pages/WorkspacePageNew')
 );
-const B3MarketPage = React.lazy(
-  () => import('../components/pages/B3MarketPage')
-);
 const TPCapitalOpcoesPage = React.lazy(
   () => import('../components/pages/TPCapitalOpcoesPage')
 );
@@ -43,11 +40,8 @@ const LlamaIndexPage = React.lazy(
 const LangChainVectorPage = React.lazy(
   () => import('../components/pages/LangChainVectorPage')
 );
-const APIViewerPage = React.lazy(
-  () => import('../components/pages/APIViewerPage')
-);
-const TelegramGatewayPage = React.lazy(
-  () => import('../components/pages/TelegramGatewayPage')
+const TelegramGatewayFinal = React.lazy(
+  () => import('../components/pages/TelegramGatewayFinal')
 );
 
 /**
@@ -98,7 +92,7 @@ export interface Section {
  * Trading System Navigation Structure
  *
  * Navigation Sections (current):
- * 0. Apps (Cyan) - B3, TP Capital, Banco de Ideias
+ * 0. Apps (Cyan) - TP Capital, Telegram Gateway, Workspace
  * 1. Knowledge (Indigo) - Docusaurus knowledge hub + documentation
  * 2. Infrastructure (Gray) - LangGraph, LlamaIndex, Launchers
  *
@@ -161,16 +155,6 @@ export const NAVIGATION_DATA: Section[] = [
     label: 'Apps',
     pages: [
       {
-        id: 'b3-market-data',
-        title: 'B3',
-        header: {
-          title: 'B3',
-          subtitle: 'Ajustes, indicadores e Gamma consolidados via QuestDB',
-        },
-        parts: [],
-        customContent: <B3MarketPage />,
-      },
-      {
         id: 'tp-capital',
         title: 'TP CAPITAL',
         header: {
@@ -188,7 +172,7 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Monitoramento do serviço MTProto, filas e mensagens persistidas',
         },
         parts: [],
-        customContent: <TelegramGatewayPage />,
+        customContent: <TelegramGatewayFinal />,
       },
       {
         id: 'workspace',

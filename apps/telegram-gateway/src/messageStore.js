@@ -255,6 +255,20 @@ export async function recordMessageReceived(
     JSON.stringify(buildMetadata(message, extraMetadata)),
   ];
 
+  // Check if message already exists (simple duplicate prevention)
+  const checkQuery = `
+    SELECT id FROM ${tableIdentifier} 
+    WHERE channel_id = $1 AND message_id = $2 
+    AND created_at >= NOW() - INTERVAL '1 hour'
+    LIMIT 1
+  `;
+  const existingCheck = await db.query(checkQuery, [String(message.channelId), normalizeMessageId(message.messageId)]);
+  
+  if (existingCheck.rows.length > 0) {
+    logger?.debug?.({ channelId: message.channelId, messageId: message.messageId }, 'Message already exists, skipping');
+    return mapRow(existingCheck.rows[0]);
+  }
+
   const query = `
     INSERT INTO ${tableIdentifier} (
       channel_id,
@@ -274,19 +288,6 @@ export async function recordMessageReceived(
     VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13::jsonb
     )
-    ON CONFLICT (channel_id, message_id)
-    DO UPDATE SET
-      text = EXCLUDED.text,
-      caption = EXCLUDED.caption,
-      media_type = EXCLUDED.media_type,
-      media_refs = EXCLUDED.media_refs,
-      status = EXCLUDED.status,
-      received_at = EXCLUDED.received_at,
-      telegram_date = EXCLUDED.telegram_date,
-      source = EXCLUDED.source,
-      message_type = EXCLUDED.message_type,
-      metadata = COALESCE(${tableIdentifier}.metadata, '{}'::jsonb) || EXCLUDED.metadata,
-      deleted_at = NULL
     RETURNING *;
   `;
 
@@ -468,3 +469,40 @@ export async function markMessageDeleted(message, { logger, reason } = {}) {
     logger,
   });
 }
+
+export async function getLastMessagesForChannel(channelId, limit = 10, { logger } = {}) {
+  const db = await getPool(logger);
+  const query = `
+    SELECT message_id, received_at, telegram_date
+    FROM ${tableIdentifier}
+    WHERE channel_id = $1
+    ORDER BY message_id DESC
+    LIMIT $2
+  `;
+  
+  const result = await db.query(query, [String(channelId), limit]);
+  return result.rows.map(row => ({
+    messageId: row.message_id,
+    receivedAt: row.received_at,
+    telegramDate: row.telegram_date,
+  }));
+}
+
+export async function getActiveChannels({ logger } = {}) {
+  const db = await getPool(logger);
+  const query = `
+    SELECT channel_id, label, description, is_active
+    FROM ${channelsTableIdentifier}
+    WHERE is_active = TRUE
+  `;
+  
+  const result = await db.query(query);
+  return result.rows.map(row => ({
+    channelId: row.channel_id,
+    label: row.label,
+    description: row.description,
+    isActive: row.is_active,
+  }));
+}
+
+export { getPool };

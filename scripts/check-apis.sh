@@ -47,8 +47,6 @@ if check_api "Documentation API " "http://localhost:3400/health" "3400"; then
     ((running++))
 fi
 
-# B3 Market API (3302)
-if check_api "B3 Market API     " "http://localhost:3302/health" "3302"; then
     ((running++))
 fi
 
@@ -97,9 +95,6 @@ else
         echo ""
     fi
 
-    if ! curl -s -f "http://localhost:3302/health" > /dev/null 2>&1; then
-        echo "   B3 Market API:"
-        echo "   cd backend/api/b3-market-data && npm run dev"
         echo ""
     fi
 

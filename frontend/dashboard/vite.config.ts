@@ -72,7 +72,23 @@ const createRewrite = (pattern: RegExp, basePath: string) => {
 };
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, repoRoot, '');
+  const rootEnv = loadEnv(mode, repoRoot, '');
+  const appEnv = loadEnv(mode, __dirname, '');
+  const processEnv = Object.entries(process.env).reduce<Record<string, string>>(
+    (acc, [key, value]) => {
+      if (typeof value === 'string' && value.length > 0) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {},
+  );
+  const env = { ...rootEnv, ...appEnv, ...processEnv };
+  if (mode === 'development') {
+    console.log('[vite] TELEGRAM_GATEWAY_API_URL=', env.VITE_TELEGRAM_GATEWAY_API_URL);
+    console.log('[vite] TELEGRAM_GATEWAY_API_TOKEN=', env.VITE_TELEGRAM_GATEWAY_API_TOKEN);
+    console.log('[vite] API_SECRET_TOKEN=', env.API_SECRET_TOKEN);
+  }
   const isProd = mode === 'production';
   const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
 
@@ -85,10 +101,6 @@ export default defineConfig(({ mode }) => {
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4005',
   );
-  const b3Proxy = resolveProxy(
-    env.VITE_B3_PROXY_TARGET || env.VITE_B3_API_URL,
-    'http://localhost:3302',
-  );
   const documentationProxy = resolveProxy(
     env.VITE_DOCUMENTATION_PROXY_TARGET || env.VITE_DOCUMENTATION_API_URL,
     'http://localhost:3400',
@@ -99,11 +111,15 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3400',
+    'http://localhost:3205',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
     'http://localhost:3600',
+  );
+  const telegramGatewayProxy = resolveProxy(
+    env.VITE_TELEGRAM_GATEWAY_PROXY_TARGET || env.VITE_TELEGRAM_GATEWAY_API_URL,
+    'http://localhost:4010',
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
 
@@ -159,11 +175,6 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/tp-capital/, tpCapitalProxy.basePath),
         },
-        '/api/b3': {
-          target: b3Proxy.target,
-          changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/b3/, b3Proxy.basePath),
-        },
         '/api/docs': {
           target: documentationProxy.target,
           changeOrigin: true,
@@ -179,8 +190,36 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/firecrawl/, firecrawlProxy.basePath),
         },
+        '/api/telegram-gateway': {
+          target: telegramGatewayProxy.target,
+          changeOrigin: true,
+        },
+        '/api/messages': {
+          target: telegramGatewayProxy.target,
+          changeOrigin: true,
+        },
+        '/api/channels': {
+          target: telegramGatewayProxy.target,
+          changeOrigin: true,
+        },
+        '/api/telegram-photo': {
+          target: 'http://localhost:4006',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
+        },
         '/docs': docsProxyConfig,
       },
+    },
+    define: {
+      'import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN': JSON.stringify(
+        env.VITE_TELEGRAM_GATEWAY_API_TOKEN || env.API_SECRET_TOKEN || '',
+      ),
+      'import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL': JSON.stringify(
+        env.VITE_TELEGRAM_GATEWAY_API_URL || env.VITE_API_BASE_URL || '',
+      ),
+      'import.meta.env.VITE_API_SECRET_TOKEN': JSON.stringify(
+        env.VITE_API_SECRET_TOKEN || env.API_SECRET_TOKEN || '',
+      ),
     },
     build: {
       outDir: 'dist',

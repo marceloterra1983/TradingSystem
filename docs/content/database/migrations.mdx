@@ -5,157 +5,127 @@ tags:
   - database
   - migrations
 owner: DataOps
-lastReviewed: '2025-10-26'
+lastReviewed: '2025-10-27'
 ---
 ## Overview
 
-TradingSystem is transitioning from MVP JSON storage toward resilient, transactional databases.
-QuestDB remains the time-series backbone while TimescaleDB/PostgreSQL replaces LowDB for core
-applications. Migration initiatives follow a phased strategy to minimize downtime and risk.
+TradingSystem successfully migrated from legacy database organization toward an app-based architecture with dedicated databases and schemas. QuestDB remains the time-series backbone while TimescaleDB/PostgreSQL now powers core applications with ACID transactions and concurrency support.
 
 **Current State**:
-- LowDB backs Idea Bank and Documentation APIs (single-user, file-based).  
-- QuestDB stores TP Capital signals and Telegram metadata (append-only, day-partitioned).  
-- TimescaleDB infrastructure stands ready for relational workloads.
+- ✅ QuestDB stores TP Capital signals and Telegram metadata (append-only, day-partitioned).  
+- ✅ TimescaleDB powers TP Capital API and Workspace services with relational workloads.  
+- ✅ Database structure organized by application domain (`APPS-TPCAPITAL`, `APPS-WORKSPACE`).  
+- ✅ Prisma migrations for Documentation API with automated schema management.  
+- ⚠️ LowDB still active for legacy Idea Bank (migration to PostgreSQL pending).
 
-**Target State**:
-- TimescaleDB/PostgreSQL provides ACID transactions, schema governance, and concurrency.  
-- QuestDB continues handling time-series ingestion with automated retention.  
-- Legacy LowDB files are archived post-migration.
+**Database Organization**:
+- **APPS-TPCAPITAL**: TimescaleDB database with `tp-capital` schema for TP Capital trading signals and metadata.  
+- **APPS-WORKSPACE**: TimescaleDB database with `workspace` schema for workspace items and audit logging.  
+- **documentation-api**: PostgreSQL database managed by Prisma for documentation systems, ideas, and files.  
+- **QuestDB**: Time-series data for TP Capital signals, Telegram metadata, and LangGraph events.
 
-## Migration Strategy
+## Completed Migrations
 
-### Phase 1: Planning
+### Database Structure Migration (Oct 2025)
 
-- Define relational schema (see [Schema Reference](./schema)).  
-- Produce ADR comparing TimescaleDB vs vanilla PostgreSQL.  
-- Draft PRD/RFC capturing scope, risks, and requirements.  
-- Identify compatibility constraints and cutover windows.
+**Objective**: Migrate from monolithic database structure to app-based organization.  
+**Status**: ✅ **Completed**  
+**Date**: October 2025
 
-**Deliverables**: ADR, DDL scripts, migration PRD.
+**Migration Details**:
+- Migrated `tradingsystem` database → `APPS-TPCAPITAL` with `tp-capital` schema
+- Migrated `frontend_apps` database → `APPS-WORKSPACE` with `workspace` schema  
+- All data preserved with integrity validation
+- Automatic backups created before migration
 
-### Phase 2: Infrastructure
+**Scripts Used**:
+- `scripts/database/migrate-database-structure.sh` - Main migration script
+- `scripts/database/migrate-database-structure.sql` - SQL migration logic
+- Backups stored in `backups/database-migration-YYYYMMDD-HHMMSS/`
 
-- Provision PostgreSQL 14+ with TimescaleDB extension.  
-- Secure access (SSL, credentials, backups).  
-- Configure monitoring dashboards and alerts.  
-- Deploy PgAdmin and pgWeb for administration.
+### Documentation API Prisma Migration (Oct 2025)
 
-**Status**: ✅ Completed via `docker-compose.timescale.yml`.
+**Objective**: Migrate Documentation API to Prisma ORM with PostgreSQL.  
+**Status**: ✅ **Completed**  
+**Location**: `backend/api/documentation-api/prisma/`
 
-### Phase 3: Data Migration
+**Schema**: Documentation systems, ideas, files, and audit logging tables with proper foreign keys and indexes.
 
-- Build ETL to transform LowDB JSON into SQL tables.  
-- Capture pre/post backups and integrity reports.  
-- Validate row counts and checksums.  
-- Exercise rollback drill before production cutover.
+## Migration Tooling
 
+### Current Migration Scripts
+
+**Location**: `scripts/database/`
+
+| Script | Purpose | Status |
+|--------|---------|--------|
+| `migrate-database-structure.sh` | Main migration script for APPS reorganization | ✅ Active |
+| `migrate-database-structure.sql` | SQL logic for database migration | ✅ Active |
+| `backup-timescaledb.sh` | Automated TimescaleDB backups | ✅ Active |
+| `restore-questdb.sh` | QuestDB table restoration | ✅ Active |
+| `setup-timescaledb-stack.sh` | TimescaleDB infrastructure setup | ✅ Active |
+
+### Prisma Migrations
+
+**Documentation API** uses Prisma for schema management:
+
+```bash
+cd backend/api/documentation-api
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Create new migration
+npx prisma migrate dev --name migration_name
+
+# Check migration status
+npx prisma migrate status
+```
+
+## Pending Migrations
+
+### Idea Bank to PostgreSQL (Q1 2026)
+
+**Objective**: Replace LowDB JSON storage with TimescaleDB for Idea Bank feature.  
+**Status**: ⏳ **Planned**  
+**Current State**: Using LowDB file storage  
+**Target**: PostgreSQL/TimescaleDB with proper relational schema
+
+**Prerequisites**:
+- Define relational schema for ideas, categories, and metadata
+- Build ETL script for LowDB → PostgreSQL migration
+- Implement backup and validation procedures
+- Schedule maintenance window
+
+**Migration Script**:
 ```bash
 # Backup LowDB JSON
 cp db/ideas.json db/ideas.json.backup.$(date +%Y%m%d)
-cp db/db.json db/db.json.backup.$(date +%Y%m%d)
 
-# Run ETL
-node scripts/migrate-lowdb-to-postgres.js
+# Run ETL migration
+node scripts/migrate-ideas-to-postgres.js
 
-# Validate
-psql -h localhost -p 5433 -U timescale -d tradingsystem -c "SELECT count(*) FROM ideas;"
-node scripts/validate-migration.js
+# Validate migration
+psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) FROM ideas;"
 ```
 
-### Phase 4: Application Updates
+## Migration History
 
-- Migrate APIs to ORM (Prisma/Knex) or native drivers.  
-- Introduce versioned migration tooling (Prisma Migrate, Flyway, etc.).  
-- Implement connection pooling, retries, and error handling.  
-- Update integration tests to target PostgreSQL.
-
-**Breaking Changes**: Response latency shifts, concurrent transaction semantics, new failure modes.
-
-### Phase 5: QuestDB Alignment
-
-- Automate 30-day retention for TP Capital tables.  
-- Establish export pipeline to analytics warehouse (QuestDB → Parquet).  
-- Document cross-database flows bridging QuestDB and PostgreSQL.  
-- Optimize dashboard queries for new schemas.
-
-**Retention Targets**: 30 days online for signals, 90 days for deleted archive, 365 days for Telegram configuration.
-
-### Phase 6: Testing and Validation
-
-- Increase unit/integration coverage (&gt;80%).  
-- Execute load tests (100 concurrent users, &lt;100 ms p95 risk checks).  
-- Benchmark performance before/after migration.  
-- Run failover and degradation drills.
-
-**Test Scenarios**: Concurrent writes, large dataset queries, transaction rollbacks, connection pool exhaustion.
-
-### Phase 7: Deployment
-
-- Roll out behind feature flags with staged traffic (10% → 50% → 100%).  
-- Monitor error rates, latency, and data integrity.  
-- Maintain LowDB as read-only fallback for 30 days.  
-- Decommission legacy storage once stability confirmed.
-
-**Rollout Timeline**:
-1. Week 1: Staging deployment, smoke tests.  
-2. Week 2: Enable for 10% of users.  
-3. Week 3: Increase to 50%.  
-4. Week 4: Full cutover.  
-5. Weeks 5–8: Monitor, keep LowDB read-only.  
-6. Week 9: Archive LowDB and close migration.
-
-## Migration Checklist
-
-### Pre-Migration
-- [ ] ADR approved by ArchitectureGuild.  
-- [ ] PRD approved by ProductOps.  
-- [ ] PostgreSQL infrastructure provisioned.  
-- [ ] Backup automation configured.  
-- [ ] ETL script validated on sample data.  
-- [ ] Rollback procedures documented.  
-- [ ] Stakeholders (DocsOps, ProductOps, DevOps) notified.
-
-### During Migration
-- [ ] Backup LowDB files (timestamped).  
-- [ ] Run ETL with logging enabled.  
-- [ ] Verify row counts and checksums.  
-- [ ] Test API endpoints against PostgreSQL.  
-- [ ] Execute integration test suite.  
-- [ ] Monitor error logs and metrics.
-
-### Post-Migration
-- [ ] Validate API functionality end-to-end.  
-- [ ] Compare performance metrics pre/post.  
-- [ ] Monitor error rates for 24 hours.  
-- [ ] Update documentation and runbooks.  
-- [ ] Archive LowDB safely.  
-- [ ] Communicate completion.  
-- [ ] Schedule post-mortem review.
+| Date | Migration | Status | Details |
+|------|-----------|--------|---------|
+| Oct 2025 | Database Structure Reorganization | ✅ Completed | Migrated tradingsystem → APPS-TPCAPITAL, frontend_apps → APPS-WORKSPACE |
+| Oct 2025 | Documentation API Prisma Migration | ✅ Completed | Migrated to Prisma ORM with PostgreSQL |
+| Q1 2026 | Idea Bank to PostgreSQL | ⏳ Planned | Replace LowDB with TimescaleDB |
 
 ## Specific Migration Plans
 
-### 2025-10-12 – B3 QuestDB Migration
-
-- **Objective**: Move B3 market data from Parquet to QuestDB for real-time access.  
-- **Status**: Completed.  
-- **Artifacts**: Execution log, lessons learned, rollback plan documented in migration file.
-
-### 2025-11-01 – Idea Bank to PostgreSQL
+### Idea Bank to PostgreSQL
 
 - **Objective**: Replace LowDB with TimescaleDB for Idea Bank.  
-- **Status**: Planned (Q1 2026).  
-- **Artifacts**: Detailed plan covering resource needs, risks, and testing strategy.
-
-## Migration Log
-
-| Date | Change | Rollback | Owner |
-|------|--------|----------|-------|
-| 2025-10-12 | B3 market data to QuestDB | Restore Parquet files | DataOps |
-| TBD | Idea Bank to PostgreSQL | Restore LowDB backups | DataOps |
-| TBD | Documentation API to PostgreSQL | Restore LowDB backups | DataOps |
-
-> Maintain dedicated files (e.g., `2025-11-01-migrate-idea-bank-to-postgres.md`) for each migration.
+- **Status**: ⏳ Planned (Q1 2026).  
+- **Target Database**: `APPS-WORKSPACE`  
+- **Target Schema**: New `ideas` schema with proper relationships
+- **Prerequisites**: Complete schema design, ETL scripts, backup automation
 
 ## Best Practices
 
@@ -182,34 +152,58 @@ node scripts/validate-migration.js
 
 ## Rollback Procedures
 
-**If Migration Fails**:
+### For Database Structure Migrations
 
-1. Stop impacted services:
+If a migration to APPS-TPCAPITAL or APPS-WORKSPACE fails:
+
+1. **Stop impacted services**:
    ```bash
-   npm --prefix backend/api/workspace run stop
-   npm --prefix backend/api/documentation-api run stop
+   docker-compose -f tools/compose/docker-compose.timescale.yml stop
    ```
-2. Restore LowDB backups:
+
+2. **Restore from backup**:
    ```bash
-   cp db/ideas.json.backup.20251024 db/ideas.json
-   cp db/db.json.backup.20251024 db/db.json
+   # Locate backup directory
+   cd backups/database-migration-YYYYMMDD-HHMMSS/
+   
+   # Restore tradingsystem database
+   docker exec -i data-timescaledb pg_restore -U timescale -d tradingsystem -c tradingsystem_backup.dump
+   
+   # Restore frontend_apps database
+   docker exec -i data-timescaledb pg_restore -U timescale -d frontend_apps -c frontend_apps_backup.dump
    ```
-3. Revert application changes if deployed:
+
+3. **Restart services**:
+   ```bash
+   docker-compose -f tools/compose/docker-compose.timescale.yml start
+   ```
+
+4. **Validate data integrity**:
+   ```bash
+   # Check record counts
+   docker exec data-timescaledb psql -U timescale -d tradingsystem -c "SELECT COUNT(*) FROM tp_capital_signals;"
+   docker exec data-timescaledb psql -U timescale -d frontend_apps -c "SELECT COUNT(*) FROM workspace_items;"
+   ```
+
+5. **Review logs** and notify stakeholders
+
+### For LowDB to PostgreSQL Migrations
+
+If Idea Bank migration fails:
+
+1. **Restore LowDB files**:
+   ```bash
+   cp db/ideas.json.backup.YYYYMMDD db/ideas.json
+   cp db/db.json.backup.YYYYMMDD db/db.json
+   ```
+
+2. **Revert application changes**:
    ```bash
    git revert <migration-commit-sha>
    npm install
    ```
-4. Restart services:
-   ```bash
-   npm --prefix backend/api/workspace run start
-   npm --prefix backend/api/documentation-api run start
-   ```
-5. Validate APIs:
-   ```bash
-   curl http://localhost:3200/api/items
-   curl http://localhost:3205/api/search?q=test
-   ```
-6. Notify stakeholders and document follow-up actions.
+
+3. **Restart services** and validate functionality
 
 ## Related Documentation
 

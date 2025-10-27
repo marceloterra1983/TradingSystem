@@ -49,6 +49,7 @@ const envFiles = [
   path.join(projectRoot, 'config', '.env.defaults'),
   path.join(projectRoot, '.env'),
   path.join(projectRoot, '.env.local'),
+  path.join(process.cwd(), '.env'), // Load service-specific .env
 ];
 
 export function loadEnvironment() {
@@ -57,7 +58,7 @@ export function loadEnvironment() {
       return;
     }
 
-    const override = index >= 2; // allow .env and .env.local to override previous values
+    const override = index >= 2; // allow .env, .env.local, and service-specific .env to override previous values
     const result = dotenv.config({ path: file, override });
 
     if (result.error) {

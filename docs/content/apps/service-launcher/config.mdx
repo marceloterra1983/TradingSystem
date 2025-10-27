@@ -1,0 +1,447 @@
+---
+title: Service Launcher Configuration
+sidebar_position: 4
+description: Environment variables, configuration options, and setup instructions.
+tags:
+  - configuration
+  - service-launcher
+  - environment
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Configuration Overview
+
+Service Launcher uses **centralized environment configuration** from the project root `.env` file. All configuration is optional with sensible defaults.
+
+## Configuration Hierarchy
+
+```
+1. config/.env.defaults     (Versioned defaults)
+         ↓
+2. .env (root)               (Environment configuration)
+         ↓
+3. .env.local (root)         (Local overrides, gitignored)
+         ↓
+4. Environment Variables     (Runtime, highest priority)
+```
+
+Configuration is loaded automatically via:
+```javascript
+require(path.join(projectRoot, 'backend/shared/config/load-env.cjs'));
+```
+
+## Environment Variables
+
+### Main Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SERVICE_LAUNCHER_PORT` | `3500` | HTTP port for Service Launcher API |
+| `PORT` | `3500` | Fallback for backward compatibility |
+| `SERVICE_LAUNCHER_PROTOCOL` | `http` | Protocol for health check URLs |
+| `SERVICE_LAUNCHER_HOST` | `localhost` | Host for health check URLs |
+| `SERVICE_LAUNCHER_TIMEOUT_MS` | `2500` | Timeout for service health checks (milliseconds) |
+| `SERVICE_LAUNCHER_USE_WT` | `false` | Use Windows Terminal for service launch |
+| `SERVICE_LAUNCHER_LOG_LEVEL` | `info` | Logging level (debug\|info\|warn\|error) |
+
+### Service Port Overrides
+
+Override default ports for monitored services:
+
+| Variable | Default | Service |
+|----------|---------|---------|
+| `SERVICE_LAUNCHER_WORKSPACE_PORT` | `3200` | Workspace API |
+| `SERVICE_LAUNCHER_TP_CAPITAL_PORT` | `4005` | TP Capital Signals |
+| `SERVICE_LAUNCHER_DOCS_PORT` | `3400` | Documentation API |
+| `SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT` | `3600` | Firecrawl Proxy |
+| `SERVICE_LAUNCHER_DASHBOARD_PORT` | `3103` | Dashboard UI |
+| `SERVICE_LAUNCHER_DOCUSAURUS_PORT` | `3205` | Docusaurus |
+| `SERVICE_LAUNCHER_PROMETHEUS_PORT` | `9090` | Prometheus |
+| `SERVICE_LAUNCHER_GRAFANA_PORT` | `3000` | Grafana |
+| `SERVICE_LAUNCHER_QUESTDB_HTTP_PORT` | `9000` | QuestDB Console |
+
+**Legacy Support**: `SERVICE_LAUNCHER_LIBRARY_PORT` is read as fallback for `SERVICE_LAUNCHER_WORKSPACE_PORT`.
+
+### Service URL Overrides
+
+For custom URLs or remote services:
+
+```bash
+SERVICE_LAUNCHER_WORKSPACE_URL=http://custom-host:3200/health
+SERVICE_LAUNCHER_TP_CAPITAL_URL=http://custom-host:4005/health
+SERVICE_LAUNCHER_DASHBOARD_URL=http://custom-host:3103
+# ... etc
+```
+
+**Priority**: URL overrides take precedence over port-based URLs.
+
+### Security Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CORS_ORIGIN` | `http://localhost:3103,http://localhost:3205` | Allowed CORS origins (Dashboard + Docs) |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate limit window (milliseconds) |
+| `RATE_LIMIT_MAX` | `200` | Maximum requests per window |
+
+### Health Check Script
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HEALTH_CHECK_SCRIPT_PATH` | `scripts/maintenance/health-check-all.sh` | Path to health check script (relative to project root) |
+| `HEALTH_CHECK_TIMEOUT_MS` | `10000` | Script execution timeout (milliseconds) |
+
+## Configuration Examples
+
+### Development Setup
+
+```bash
+# .env (project root)
+
+# Service Launcher
+SERVICE_LAUNCHER_PORT=3500
+SERVICE_LAUNCHER_LOG_LEVEL=debug
+SERVICE_LAUNCHER_TIMEOUT_MS=5000
+
+# CORS (allow Dashboard + Docs)
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+
+# Rate limiting (permissive for dev)
+RATE_LIMIT_MAX=500
+```
+
+### Production Setup
+
+```bash
+# .env (project root)
+
+# Service Launcher
+SERVICE_LAUNCHER_PORT=3500
+SERVICE_LAUNCHER_LOG_LEVEL=info
+SERVICE_LAUNCHER_TIMEOUT_MS=2500
+
+# CORS (strict origins)
+CORS_ORIGIN=https://dashboard.tradingsystem.local,https://docs.tradingsystem.local
+
+# Rate limiting (stricter for prod)
+RATE_LIMIT_MAX=100
+```
+
+### Custom Service Ports
+
+```bash
+# Override specific service ports
+SERVICE_LAUNCHER_WORKSPACE_PORT=3201
+SERVICE_LAUNCHER_TP_CAPITAL_PORT=4006
+SERVICE_LAUNCHER_DASHBOARD_PORT=3104
+```
+
+### Remote Services
+
+```bash
+# Monitor services on different hosts
+SERVICE_LAUNCHER_WORKSPACE_URL=http://workspace.internal:3200/health
+SERVICE_LAUNCHER_TP_CAPITAL_URL=http://trading.internal:4005/health
+SERVICE_LAUNCHER_PROMETHEUS_URL=http://monitoring.internal:9090/-/healthy
+```
+
+## Port Configuration
+
+### Default Ports
+
+| Service | Port | Configurable Via |
+|---------|------|------------------|
+| Service Launcher | 3500 | `SERVICE_LAUNCHER_PORT` |
+| Workspace | 3200 | `SERVICE_LAUNCHER_WORKSPACE_PORT` |
+| TP Capital | 4005 | `SERVICE_LAUNCHER_TP_CAPITAL_PORT` |
+| Documentation API | 3400 | `SERVICE_LAUNCHER_DOCS_PORT` |
+| Firecrawl Proxy | 3600 | `SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT` |
+| Dashboard | 3103 | `SERVICE_LAUNCHER_DASHBOARD_PORT` |
+| Docusaurus | 3205 | `SERVICE_LAUNCHER_DOCUSAURUS_PORT` |
+| Prometheus | 9090 | `SERVICE_LAUNCHER_PROMETHEUS_PORT` |
+| Grafana | 3000 | `SERVICE_LAUNCHER_GRAFANA_PORT` |
+| QuestDB | 9000 | `SERVICE_LAUNCHER_QUESTDB_HTTP_PORT` |
+
+### Port Conflict Resolution
+
+If port 3500 is already in use:
+
+```bash
+# Option 1: Change Service Launcher port
+SERVICE_LAUNCHER_PORT=3501
+
+# Option 2: Kill process on port 3500
+lsof -ti:3500 | xargs kill -9
+
+# Option 3: Use force-restart script
+bash scripts/startup/start-service-launcher.sh --force-restart
+```
+
+## Logging Configuration
+
+### Log Levels
+
+```bash
+SERVICE_LAUNCHER_LOG_LEVEL=debug  # Most verbose
+SERVICE_LAUNCHER_LOG_LEVEL=info   # Default (recommended)
+SERVICE_LAUNCHER_LOG_LEVEL=warn   # Warnings and errors only
+SERVICE_LAUNCHER_LOG_LEVEL=error  # Errors only
+```
+
+### Log Format
+
+**Development** (pretty print):
+```bash
+NODE_ENV=development npm start
+# Output: Colorized, human-readable logs
+```
+
+**Production** (JSON):
+```bash
+NODE_ENV=production npm start
+# Output: Structured JSON logs (one per line)
+```
+
+**Example JSON Log**:
+```json
+{
+  "level": "info",
+  "time": "2025-10-27T12:00:00.000Z",
+  "service": "service-launcher-api",
+  "event": "service_health_check",
+  "serviceName": "Workspace",
+  "status": "ok",
+  "latencyMs": 85,
+  "msg": "Service health check completed"
+}
+```
+
+## Network Configuration
+
+### CORS Setup
+
+Service Launcher uses CORS to restrict access to specific origins:
+
+```bash
+# Allow Dashboard and Docs (default)
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+
+# Allow additional origins (comma-separated)
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205,http://localhost:8080
+
+# Disable CORS (not recommended)
+# Remove or comment out CORS_ORIGIN variable
+```
+
+**CORS Headers Applied**:
+- `Access-Control-Allow-Origin`: Specified origins
+- `Access-Control-Allow-Methods`: GET, POST, PUT, DELETE, OPTIONS
+- `Access-Control-Allow-Headers`: Content-Type, Authorization
+- `Access-Control-Allow-Credentials`: true
+
+### Rate Limiting
+
+Protect against abuse with rate limiting:
+
+```bash
+# Default: 200 requests per minute
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX=200
+
+# Stricter: 100 requests per minute
+RATE_LIMIT_MAX=100
+
+# More permissive (development): 500 per minute
+RATE_LIMIT_MAX=500
+
+# Very short window (testing): 10 per 10 seconds
+RATE_LIMIT_WINDOW_MS=10000
+RATE_LIMIT_MAX=10
+```
+
+**Rate Limit Response** (HTTP 429):
+```json
+{
+  "error": "Too many requests, please try again later."
+}
+```
+
+## Health Check Configuration
+
+### Script Path
+
+```bash
+# Default (relative to project root)
+HEALTH_CHECK_SCRIPT_PATH=scripts/maintenance/health-check-all.sh
+
+# Custom path
+HEALTH_CHECK_SCRIPT_PATH=/opt/tradingsystem/scripts/custom-health-check.sh
+```
+
+### Script Timeout
+
+```bash
+# Default: 10 seconds
+HEALTH_CHECK_TIMEOUT_MS=10000
+
+# Increase for slow systems
+HEALTH_CHECK_TIMEOUT_MS=15000
+
+# Decrease for fast systems
+HEALTH_CHECK_TIMEOUT_MS=5000
+```
+
+### Script Requirements
+
+The health check script must:
+1. Be executable: `chmod +x scripts/maintenance/health-check-all.sh`
+2. Accept `--format json` flag
+3. Output valid JSON to stdout
+4. Exit with code 0 on success
+5. Complete within timeout period
+
+**Example Script Validation**:
+```bash
+# Test script execution
+bash scripts/maintenance/health-check-all.sh --format json | jq '.'
+
+# Check exit code
+echo $?  # Should be 0
+
+# Verify JSON output
+bash scripts/maintenance/health-check-all.sh --format json | jq '.overallHealth'
+```
+
+## Terminal Launch Configuration
+
+### Windows Terminal
+
+```bash
+# Use Windows Terminal (wt.exe) for service launch
+SERVICE_LAUNCHER_USE_WT=true
+
+# Use PowerShell (default)
+SERVICE_LAUNCHER_USE_WT=false
+```
+
+**Windows Terminal Command**:
+```bash
+wt.exe -d {workingDir} {command}
+```
+
+**PowerShell Command**:
+```bash
+powershell -NoExit -Command "cd {workingDir}; {command}"
+```
+
+### Linux Terminal
+
+Service Launcher tries terminals in this order:
+1. gnome-terminal (GNOME desktop)
+2. konsole (KDE desktop)
+3. xterm (fallback, always available)
+
+**No configuration needed** - automatically detects available terminal.
+
+## Validation
+
+### Configuration Validation Script
+
+```bash
+# Validate all environment variables
+node -e "
+const config = require('./apps/status/src/config.js');
+console.log('Configuration loaded successfully');
+console.log('Port:', config.server?.port || 'NOT SET');
+console.log('Log Level:', process.env.SERVICE_LAUNCHER_LOG_LEVEL || 'NOT SET');
+"
+```
+
+### Health Check Validation
+
+```bash
+# Verify health check script works
+bash scripts/maintenance/health-check-all.sh --format json
+
+# Verify Service Launcher can execute script
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+```
+
+### Port Availability Check
+
+```bash
+# Check if port 3500 is available
+lsof -i:3500
+
+# Check all service ports
+for port in 3103 3200 3205 3400 3500 3600 4005 9000 9090; do
+  echo -n "Port $port: "
+  lsof -i:$port &>/dev/null && echo "IN USE" || echo "AVAILABLE"
+done
+```
+
+## Troubleshooting Configuration
+
+### Issue: Service Launcher won't start (EADDRINUSE)
+
+**Cause**: Port 3500 already in use
+
+**Solution**:
+```bash
+# Find process using port
+lsof -ti:3500
+
+# Kill process
+lsof -ti:3500 | xargs kill -9
+
+# Or change port
+SERVICE_LAUNCHER_PORT=3501 npm start
+```
+
+### Issue: Health checks always timeout
+
+**Cause**: Timeout too short for system
+
+**Solution**:
+```bash
+# Increase timeout to 5 seconds
+SERVICE_LAUNCHER_TIMEOUT_MS=5000
+
+# Or increase script timeout
+HEALTH_CHECK_TIMEOUT_MS=15000
+```
+
+### Issue: CORS errors in Dashboard
+
+**Cause**: Dashboard origin not in CORS_ORIGIN
+
+**Solution**:
+```bash
+# Add Dashboard origin
+CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+
+# Verify Dashboard URL matches exactly (including protocol and port)
+```
+
+### Issue: Configuration not loading
+
+**Cause**: .env file not in project root or syntax error
+
+**Solution**:
+```bash
+# Verify .env exists
+ls -la /home/marce/Projetos/TradingSystem/.env
+
+# Check for syntax errors (no spaces around =)
+cat .env | grep -E '^\w+\s*=\s*.+'
+
+# Restart service to reload configuration
+npm start
+```
+
+## Related Documentation
+
+- [Deployment Guide](./deployment) - Setup and startup procedures
+- [Operations Guide](./operations) - Day-to-day management
+- [Runbook](./runbook) - Troubleshooting common issues
+- [Environment Configuration Rules](/docs/context/ops/ENV-CONFIGURATION-RULES.md) - Project-wide env conventions

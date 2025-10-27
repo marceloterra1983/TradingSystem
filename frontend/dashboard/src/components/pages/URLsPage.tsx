@@ -57,7 +57,6 @@ export function URLsPage() {
         { name: 'Dashboard (Vite UI)', url: 'http://localhost:3103' },
         { name: 'Workspace API', url: 'http://localhost:3200/api/items' },
         { name: 'TP Capital Signals API', url: 'http://localhost:3201' },
-        { name: 'B3 Market Data API', url: 'http://localhost:3302' },
         { name: 'Documentation API', url: 'http://localhost:3400' },
         { name: 'Documentation Hub (docs)', url: 'http://localhost:3205' },
         { name: 'Service Launcher', url: 'http://localhost:3500' },

@@ -9,7 +9,9 @@ import { config, validateConfig } from './config.js';
 import { logger } from './logger.js';
 import { getLogs } from './logStore.js';
 import { timescaleClient } from './timescaleClient.js';
-import { createTelegramIngestionManual } from './telegramIngestionManual.js';
+import { getGatewayDatabaseClient, closeGatewayDatabaseClient } from './gatewayDatabaseClient.js';
+import { GatewayPollingWorker } from './gatewayPollingWorker.js';
+import { gatewayMetrics } from './gatewayMetrics.js';
 import { createTelegramUserForwarderPolling } from './telegramUserForwarderPolling.js';
 import { formatTimestamp } from './timeUtils.js';
 import ingestionRouter from '../api/src/routes/ingestion.js';
@@ -67,7 +69,35 @@ promClient.collectDefaultMetrics({ register });
 
 app.get('/health', async (_req, res) => {
   const timescaleHealthy = await timescaleClient.healthcheck();
-  res.json({ status: 'ok', timescale: timescaleHealthy });
+
+  // Check Gateway database connectivity
+  let gatewayDbStatus = 'unknown';
+  let pollingWorkerStatus = null;
+  let messagesWaiting = 0;
+
+  try {
+    const gatewayDb = getGatewayDatabaseClient();
+    const isConnected = await gatewayDb.testConnection();
+    gatewayDbStatus = isConnected ? 'connected' : 'disconnected';
+
+    if (globalPollingWorker) {
+      pollingWorkerStatus = globalPollingWorker.getStatus();
+      messagesWaiting = await globalPollingWorker.getMessagesWaiting();
+    }
+  } catch (error) {
+    logger.error({ err: error }, 'Health check error for Gateway DB');
+    gatewayDbStatus = 'error';
+  }
+
+  const overallStatus = (timescaleHealthy && gatewayDbStatus === 'connected') ? 'healthy' : 'degraded';
+
+  res.json({
+    status: overallStatus,
+    timescale: timescaleHealthy,
+    gatewayDb: gatewayDbStatus,
+    pollingWorker: pollingWorkerStatus,
+    messagesWaiting
+  });
 });
 
 app.get('/', (_req, res) => {
@@ -81,6 +111,90 @@ app.get('/', (_req, res) => {
 app.get('/metrics', async (_req, res) => {
   res.set('Content-Type', register.contentType);
   res.send(await register.metrics());
+});
+
+app.post('/sync-messages', async (req, res) => {
+  try {
+    logger.info('[SyncMessages] Sincronização solicitada via dashboard');
+    
+    // Chamar o endpoint de sincronização do Telegram Gateway com limite de 100 mensagens
+    const gatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4006);
+    const gatewayUrl = process.env.TELEGRAM_GATEWAY_URL || `http://localhost:${gatewayPort}`;
+    
+    try {
+      const response = await fetch(`${gatewayUrl}/sync-messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ limit: 100 })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        const channelId = config.gateway.signalsChannelId;
+        const channelData = result.data.channelsSynced.find(c => c.channelId === channelId);
+        const messagesSynced = channelData?.messagesSynced || 0;
+        
+        logger.info(
+          { channelId, messagesSynced },
+          '[SyncMessages] Mensagens sincronizadas do Telegram para Gateway'
+        );
+        
+        // Converter mensagens 'queued' para 'received' para que o worker as processe
+        const gatewayDb = await getGatewayDatabaseClient();
+        const updateQuery = `
+          UPDATE telegram_gateway.messages
+          SET status = 'received'
+          WHERE channel_id = $1
+          AND status = 'queued'
+        `;
+        const updateResult = await gatewayDb.query(updateQuery, [channelId]);
+        
+        logger.info(
+          { queuedConverted: updateResult.rowCount },
+          '[SyncMessages] Mensagens queued convertidas para received'
+        );
+        
+        return res.json({
+          success: true,
+          message: messagesSynced > 0 
+            ? `${messagesSynced} mensagem(ns) sincronizada(s). Processamento iniciado.`
+            : 'Todas as mensagens estão sincronizadas',
+          data: {
+            messagesSynced,
+            queuedConverted: updateResult.rowCount,
+            channelId,
+            channelLabel: channelData?.label || 'TP Capital',
+            filters: config.gateway.filters,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else {
+        logger.warn({ result }, '[SyncMessages] Gateway retornou erro');
+        return res.status(response.status).json(result);
+      }
+    } catch (fetchError) {
+      logger.error(
+        { err: fetchError, gatewayUrl },
+        '[SyncMessages] Erro ao conectar com Telegram Gateway'
+      );
+      
+      return res.status(503).json({
+        success: false,
+        message: 'Telegram Gateway não está acessível. Verifique se o serviço está rodando na porta 4006.',
+        error: fetchError.message
+      });
+    }
+  } catch (error) {
+    logger.error({ err: error }, '[SyncMessages] Erro ao sincronizar mensagens');
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao sincronizar mensagens',
+      error: error.message
+    });
+  }
 });
 
 app.get('/signals', async (req, res) => {
@@ -435,14 +549,41 @@ const server = app.listen(config.server.port, () => {
   logger.info({ port: config.server.port }, 'TP Capital ingestion service listening');
 });
 
-// Launch ingestion bot (listens to channels and saves to TimescaleDB)
-const telegramIngestion = createTelegramIngestionManual();
-if (telegramIngestion) {
-  telegramIngestion.launch().catch((error) => {
-    logger.error({ err: error }, 'Failed to launch Telegram ingestion bot');
+// Initialize Gateway Polling Worker
+let globalPollingWorker = null;
+
+async function startGatewayPollingWorker() {
+  try {
+    // Initialize Gateway database client
+    const gatewayDb = getGatewayDatabaseClient();
+
+    // Test connectivity
+    const isConnected = await gatewayDb.testConnection();
+    if (!isConnected) {
+      logger.error('Failed to connect to Gateway database');
+      return;
+    }
+
+    logger.info('Gateway database connected successfully');
+
+    // Create and start polling worker
+    globalPollingWorker = new GatewayPollingWorker({
+      gatewayDb,
+      tpCapitalDb: timescaleClient,
+      metrics: gatewayMetrics
+    });
+
+    await globalPollingWorker.start();
+    logger.info('Gateway polling worker started successfully');
+
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to start Gateway polling worker');
     process.exitCode = 1;
-  });
+  }
 }
+
+// Start polling worker
+startGatewayPollingWorker();
 
 // Load channels from database and launch forwarder
 async function loadChannelsAndStartForwarder() {
@@ -505,19 +646,39 @@ app.post('/reload-channels', async (req, res) => {
   }
 });
 
-process.on('SIGINT', async () => {
-  logger.info('Shutting down');
+// Graceful shutdown handler
+async function gracefulShutdown(signal) {
+  logger.info({ signal }, 'Shutdown signal received');
+
+  // Close HTTP server
   server.close();
 
-  // Stop bots/clients gracefully
+  // Stop components gracefully
   const stopPromises = [];
-  if (telegramIngestion?.bot) {
-    stopPromises.push(telegramIngestion.bot.stop());
+
+  // Stop polling worker
+  if (globalPollingWorker) {
+    logger.info('Stopping Gateway polling worker...');
+    stopPromises.push(globalPollingWorker.stop());
   }
+
+  // Stop Telegram forwarder (if running)
   if (telegramUserForwarder?.stop) {
+    logger.info('Stopping Telegram forwarder...');
     stopPromises.push(telegramUserForwarder.stop());
   }
 
   await Promise.all(stopPromises);
+
+  // Close database connections
+  await Promise.all([
+    timescaleClient.close().catch(err => logger.error({ err }, 'Error closing TimescaleDB')),
+    closeGatewayDatabaseClient().catch(err => logger.error({ err }, 'Error closing Gateway DB'))
+  ]);
+
+  logger.info('Shutdown complete');
   process.exit(0);
-});
+}
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);

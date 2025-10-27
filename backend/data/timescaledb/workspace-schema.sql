@@ -18,7 +18,7 @@ SET search_path TO workspace, public;
 -- ==============================================================================
 -- Stores workspace items with time-series capabilities
 CREATE TABLE IF NOT EXISTS workspace.workspace_items (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     category VARCHAR(50) NOT NULL CHECK (category IN (
@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS workspace.workspace_items (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by VARCHAR(100),
     updated_by VARCHAR(100),
-    metadata JSONB DEFAULT '{}' -- Flexible metadata storage
+    metadata JSONB DEFAULT '{}', -- Flexible metadata storage
+    PRIMARY KEY (id, created_at)
 );
 
 -- Convert to TimescaleDB hypertable for time-series optimization
@@ -111,7 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_workspace_items_priority_status
 -- ==============================================================================
 -- Audit log for tracking changes to workspace items
 CREATE TABLE IF NOT EXISTS workspace.workspace_audit_log (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() NOT NULL,
     item_id UUID NOT NULL,
     action VARCHAR(20) NOT NULL CHECK (action IN ('CREATE', 'UPDATE', 'DELETE')),
     changed_by VARCHAR(100),
@@ -119,7 +120,8 @@ CREATE TABLE IF NOT EXISTS workspace.workspace_audit_log (
     old_data JSONB,
     new_data JSONB,
     changes JSONB,
-    metadata JSONB DEFAULT '{}'
+    metadata JSONB DEFAULT '{}',
+    PRIMARY KEY (id, changed_at)
 );
 
 -- Convert audit log to hypertable
@@ -229,6 +231,15 @@ CREATE TRIGGER trigger_workspace_item_audit
 -- Grants and Permissions
 -- ==============================================================================
 
+-- Ensure application role exists for local/dev usage
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_workspace') THEN
+        CREATE ROLE app_workspace;
+    END IF;
+END;
+$$;
+
 -- Grant usage on schema
 GRANT USAGE ON SCHEMA workspace TO app_workspace;
 
@@ -276,4 +287,3 @@ BEGIN
     RAISE NOTICE '   - Indexes: Created for optimal query performance';
     RAISE NOTICE '   - Triggers: Auto-update timestamps and audit logging';
 END $$;
-

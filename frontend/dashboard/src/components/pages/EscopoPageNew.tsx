@@ -52,7 +52,7 @@ function EscopoObjectives() {
         </li>
         <li className="flex items-start gap-2">
           <span className="text-green-600 dark:text-green-400 mt-1">✓</span>
-          <span>Integração com provedores externos (Telegram, B3, brokers)</span>
+          <span>Integração com provedores externos (Telegram, brokers)</span>
         </li>
       </ul>
     </div>
@@ -151,7 +151,6 @@ function EscopoSystems() {
           { name: 'Dashboard', port: '3103', desc: 'Interface principal React + Vite' },
           { name: 'Workspace API', port: '3200', desc: 'Gestão de workspace e documentação' },
           { name: 'Documentation API', port: '3400', desc: 'API de busca e gerenciamento de docs' },
-          { name: 'B3 Market Data', port: '3302', desc: 'Dados de mercado B3' },
           { name: 'Status API', port: '3500', desc: 'Monitoramento e orquestração' },
           { name: 'TP-Capital', port: '4005', desc: 'Ingestão de sinais Telegram' },
         ].map((system) => (
@@ -219,7 +218,7 @@ function EscopoConstraints() {
             <li>• Ambiente: Linux (WSL2), Docker Desktop</li>
             <li>• Node.js 20+, TypeScript 5+</li>
             <li>• Desenvolvimento local, sem cloud por enquanto</li>
-            <li>• Limites de rate da API B3 (60 req/min)</li>
+            <li>• Limites de rate da API TP Capital (60 req/min)</li>
           </ul>
         </div>
         <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">

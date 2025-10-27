@@ -174,7 +174,6 @@ check_services() {
     local services=(
         "workspace-api:3200"
         "documentation-api:3205"
-        "b3-market-data:3302"
         "service-launcher:3500"
         "firecrawl-proxy:3600"
         "frontend-dashboard:3103"

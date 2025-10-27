@@ -27,7 +27,7 @@ The documentation MUST disponibilizar a página `/docs/api-overview` com resumo 
 
 #### Scenario: API overview visit
 - WHEN alguém acessa `/docs/api-overview`
-- THEN a página lista os serviços Idea Bank, TP Capital, B3, Documentation API e Laucher com propósito, porta e link para detalhes
+- THEN a página lista os serviços Idea Bank, TP Capital, Documentation API e Laucher com propósito, porta e link para detalhes
 
 ### Requirement: Highlight OpenSpec Workflow
 The documentation MUST destacar o fluxo OpenSpec na rota `/openspec` incluindo comandos rápidos e links para specs.
@@ -35,4 +35,3 @@ The documentation MUST destacar o fluxo OpenSpec na rota `/openspec` incluindo c
 #### Scenario: Spec landing visit
 - WHEN um usuário acessa `/openspec`
 - THEN a página exibe uma seção de acesso rápido com os principais comandos (`list`, `list --specs`, `validate`, `archive`) e orientações de colaboração.
-

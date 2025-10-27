@@ -9,7 +9,6 @@ from ..domain.entities import MarketSignal, RiskAssessment
 class AnalyzeMarketRequest(BaseModel):
     symbols: List[str]
     include_tp_capital: bool = True
-    include_b3: bool = True
 
 
 class AnalyzeMarketResponse(BaseModel):

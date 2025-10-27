@@ -41,8 +41,8 @@ def test_risk_assessment_creation():
 
 
 def test_symbol_value_object():
-    symbol = Symbol(ticker="petr4", exchange="b3")
-    assert str(symbol) == "PETR4:B3"
+    symbol = Symbol(ticker="petr4", exchange="bmf")
+    assert str(symbol) == "PETR4:BMF"
 
 
 def test_price_value_object():
@@ -62,7 +62,7 @@ def test_confidence_value_object():
 
 def test_invalid_values():
     with pytest.raises(ValueError):
-        Symbol(ticker="", exchange="B3")
+        Symbol(ticker="", exchange="BMF")
     with pytest.raises(ValueError):
         Price(value=Decimal("-1"))
     with pytest.raises(ValueError):

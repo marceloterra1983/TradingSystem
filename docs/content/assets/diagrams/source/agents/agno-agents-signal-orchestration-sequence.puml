@@ -8,15 +8,7 @@ participant "MarketAnalysis\nAgent" as MarketAgent
 participant "RiskManagement\nAgent" as RiskAgent
 participant "WorkspaceClient" as Workspace
 participant "TPCapitalClient" as TPCapital
-participant "B3Client" as B3
-participant "B3WebSocket" as B3WS
 participant "Prometheus" as Metrics
-
-== Real-time Data Stream ==
-B3WS -> MarketAgent : Real-time price updates
-activate MarketAgent
-MarketAgent -> MarketAgent : Buffer incoming messages
-deactivate MarketAgent
 
 == Analysis Request ==
 Trader -> API : POST /api/v1/agents/analyze\n{symbols: ["PETR4", "VALE3"]}
@@ -30,13 +22,7 @@ Orchestrator -> MarketAgent : analyze_market(symbols)
 activate MarketAgent
 
 == Parallel Data Fetching ==
-par Fetch B3 Data
-  MarketAgent -> B3 : get_b3_data("PETR4")
-  activate B3
-  B3 -> B3 : Query QuestDB
-  B3 --> MarketAgent : {snapshots, indicators, gamma}
-  deactivate B3
-else Fetch TP Capital Signals
+par Fetch TP Capital Signals
   MarketAgent -> TPCapital : get_tp_capital_signals()
   activate TPCapital
   TPCapital -> TPCapital : Query QuestDB
@@ -89,15 +75,15 @@ deactivate API
 
 == Error Handling (Alternative Flow) ==
 alt External API failure
-  B3 --> MarketAgent : HTTPError(503)
+  TPCapital --> MarketAgent : HTTPError(503)
   MarketAgent -> MarketAgent : Retry with exponential backoff
   alt Retry succeeds
-    B3 --> MarketAgent : 200 OK
+    TPCapital --> MarketAgent : 200 OK
   else Circuit breaker opens
     MarketAgent -> Metrics : track_error("MarketAnalysisAgent", "CircuitBreakerError")
-    MarketAgent --> Orchestrator : Error("B3 API unavailable")
+    MarketAgent --> Orchestrator : Error("TP Capital API unavailable")
     Orchestrator --> API : 503 Service Unavailable
-    API --> Trader : 503 {error:"B3 API unavailable"}
+    API --> Trader : 503 {error:"TP Capital API unavailable"}
   end
 end
 

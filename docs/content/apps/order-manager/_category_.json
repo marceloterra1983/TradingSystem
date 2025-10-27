@@ -6,6 +6,6 @@
     "type": "generated-index",
     "title": "Order Manager App",
     "slug": "/apps/order-manager",
-    "description": "Operational documentation for the Order Manager application."
+    "description": "Order execution engine with risk management. Core trading infrastructure."
   }
 }

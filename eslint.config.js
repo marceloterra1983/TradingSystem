@@ -39,8 +39,10 @@ export default [
       '.husky/**',
       '.git/**',
       
-      // Frontend e docs (eles têm suas próprias configurações)
-      'frontend/**',
+      // Assets gerados e outras áreas não monitoradas do frontend
+      'frontend/**/dist/**',
+      'frontend/**/build/**',
+      'frontend/**/coverage/**',
       'docs/**',
       'docs_legacy/**',
       

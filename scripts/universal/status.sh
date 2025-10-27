@@ -73,7 +73,7 @@ Options:
   --help, -h    Show this help message
 
 Shows:
-  📊 Local Services (Dashboard, Docusaurus, Status)
+  📊 Local Services (Telegram Gateway, Gateway API, Dashboard, Docusaurus, Status)
   🐳 Docker Containers (all stacks with grouping)
   🗄️  Databases (TimescaleDB connectivity)
   💻 System Resources (CPU, Memory, Disk)
@@ -125,6 +125,8 @@ check_local_services() {
     fi
 
     local services=(
+        "telegram-gateway:4006"
+        "telegram-gateway-api:4010"
         "dashboard:3103"
         "docusaurus:3205"
         "status:3500"
@@ -249,11 +251,13 @@ show_summary() {
 
     echo -e "${BLUE}━━━ Quick Access ━━━${NC}"
     echo ""
-    echo -e "  Dashboard:       ${CYAN}http://localhost:3103${NC}"
-    echo -e "  Documentation:   ${CYAN}http://localhost:3205${NC}"
-    echo -e "  Status API:      ${CYAN}http://localhost:3500${NC}"
-    echo -e "  TP Capital API:  ${CYAN}http://localhost:4005${NC}"
-    echo -e "  Workspace API:   ${CYAN}http://localhost:3200${NC}"
+    echo -e "  Telegram Gateway:    ${CYAN}http://localhost:4006${NC}"
+    echo -e "  Gateway API:         ${CYAN}http://localhost:4010${NC}"
+    echo -e "  Dashboard:           ${CYAN}http://localhost:3103${NC}"
+    echo -e "  Documentation:       ${CYAN}http://localhost:3205${NC}"
+    echo -e "  Status API:          ${CYAN}http://localhost:3500${NC}"
+    echo -e "  TP Capital API:      ${CYAN}http://localhost:4005${NC}"
+    echo -e "  Workspace API:       ${CYAN}http://localhost:3200${NC}"
     echo ""
 }
 

@@ -25,21 +25,6 @@ execute_sql "CREATE TABLE IF NOT EXISTS telegram_bots (id SYMBOL, username SYMBO
 
 execute_sql "CREATE TABLE IF NOT EXISTS telegram_channels (id SYMBOL, label SYMBOL, channel_id LONG, channel_type SYMBOL, description STRING, status SYMBOL, signal_count LONG, last_signal TIMESTAMP, created_at TIMESTAMP, updated_at TIMESTAMP) TIMESTAMP(updated_at) PARTITION BY DAY;" "telegram_channels"
 
-# B3
-execute_sql "CREATE TABLE IF NOT EXISTS b3_snapshots (ts TIMESTAMP, coleta_data DATE, coleta_hora STRING, instrument SYMBOL, contract_month SYMBOL, price_settlement DOUBLE, price_settlement_prev DOUBLE, status SYMBOL, source SYMBOL, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY DAY;" "b3_snapshots"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_indicators (ts TIMESTAMP, name SYMBOL, value DOUBLE, display_value STRING, updated_at DATE, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY DAY;" "b3_indicators"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_vol_surface (ts TIMESTAMP, contract_month SYMBOL, delta_bucket SYMBOL, volatility DOUBLE, updated_at DATE, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY MONTH;" "b3_vol_surface"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_gamma_levels (ts TIMESTAMP, instrument SYMBOL, call_wall DOUBLE, put_wall DOUBLE, gamma_flip DOUBLE, raw_payload STRING, status SYMBOL, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY DAY;" "b3_gamma_levels"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_adjustments (ts TIMESTAMP, instrument SYMBOL, contract_month SYMBOL, price_settlement DOUBLE, price_prev DOUBLE, status SYMBOL, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY MONTH;" "b3_adjustments"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_indicators_daily (ts TIMESTAMP, indicator SYMBOL, value DOUBLE, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY MONTH;" "b3_indicators_daily"
-
-execute_sql "CREATE TABLE IF NOT EXISTS b3_dxy_ticks (ts TIMESTAMP, bucket SYMBOL, value DOUBLE, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY MONTH;" "b3_dxy_ticks"
-
 # Trading Core
 execute_sql "CREATE TABLE IF NOT EXISTS trades (ts TIMESTAMP, trade_id SYMBOL, symbol SYMBOL, side SYMBOL, quantity DOUBLE, price DOUBLE, strategy_id SYMBOL, ingested_at TIMESTAMP) TIMESTAMP(ts) PARTITION BY DAY;" "trades"
 

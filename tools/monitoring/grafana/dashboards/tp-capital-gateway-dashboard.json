@@ -1,0 +1,332 @@
+{
+  "dashboard": {
+    "title": "TP Capital Gateway Integration",
+    "tags": ["tp-capital", "telegram", "gateway", "signals"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Messages Processed (Total)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(tpcapital_gateway_messages_processed_total)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Polling Lag (seconds)",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "tpcapital_gateway_polling_lag_seconds",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 3, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            },
+            "max": 10,
+            "min": 0
+          }
+        },
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Messages Waiting",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "tpcapital_gateway_messages_waiting",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 10, "color": "yellow" },
+                { "value": 50, "color": "red" }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+      },
+      {
+        "id": 4,
+        "title": "Worker Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"tp-capital\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "value": "1", "text": "Running", "color": "green" },
+              { "value": "0", "text": "Down", "color": "red" }
+            ]
+          }
+        },
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
+      },
+      {
+        "id": 5,
+        "title": "Messages Processed by Status",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"published\"}[5m])",
+            "legendFormat": "Published",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"duplicate\"}[5m])",
+            "legendFormat": "Duplicate",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"failed\"}[5m])",
+            "legendFormat": "Failed",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"parse_failed\"}[5m])",
+            "legendFormat": "Parse Failed",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          { "format": "short", "label": "Messages/sec" },
+          { "format": "short" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 }
+      },
+      {
+        "id": 6,
+        "title": "Processing Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(tpcapital_gateway_processing_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(tpcapital_gateway_processing_duration_seconds_bucket[5m]))",
+            "legendFormat": "99th percentile",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          { "format": "s", "label": "Duration" },
+          { "format": "short" }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 }
+      },
+      {
+        "id": 7,
+        "title": "Polling Lag Over Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "tpcapital_gateway_polling_lag_seconds",
+            "legendFormat": "Polling Lag",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "s", "label": "Lag (seconds)" },
+          { "format": "short" }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [5],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "High Polling Lag Alert",
+          "message": "TP Capital Gateway polling lag is above 5 seconds"
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 }
+      },
+      {
+        "id": 8,
+        "title": "Messages Waiting Queue",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "tpcapital_gateway_messages_waiting",
+            "legendFormat": "Messages in Queue",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          { "format": "short", "label": "Messages" },
+          { "format": "short" }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [100],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "High Queue Alert",
+          "message": "TP Capital Gateway has over 100 messages waiting"
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 }
+      },
+      {
+        "id": 9,
+        "title": "Success Rate (5m)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"published\"}[5m]) / rate(tpcapital_gateway_messages_processed_total[5m]) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 98, "color": "green" }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 20 }
+      },
+      {
+        "id": 10,
+        "title": "Duplicate Rate (5m)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=\"duplicate\"}[5m]) / rate(tpcapital_gateway_messages_processed_total[5m]) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 5, "color": "yellow" },
+                { "value": 10, "color": "red" }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 20 }
+      },
+      {
+        "id": 11,
+        "title": "Error Rate (5m)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(tpcapital_gateway_messages_processed_total{status=~\"failed|parse_failed\"}[5m]) / rate(tpcapital_gateway_messages_processed_total[5m]) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 20 }
+      }
+    ]
+  },
+  "overwrite": true
+}

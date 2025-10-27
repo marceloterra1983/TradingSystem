@@ -9,8 +9,6 @@ component "Agno Agents\n:8200" as Agno {
 }
 component "Workspace API\n:3100" as Workspace
 component "TP Capital API\n:3200" as TPCapital
-component "B3 API\n:3302" as B3
-component "B3 WebSocket" as B3WS
 database "QuestDB" as QuestDB
 component "Prometheus\n:9090" as Prometheus
 component "Grafana\n:3000" as Grafana
@@ -20,9 +18,6 @@ Orchestrator --> Market : Request analysis
 Orchestrator --> Risk : Validate signal
 Market --> Workspace : Fetch ideas
 Market --> TPCapital : Get signals
-Market --> B3 : Get market data
-B3WS --> Market : Real-time updates
-B3 --> QuestDB : Query snapshots
 TPCapital --> QuestDB : Query signals
 Agno --> Prometheus : Export metrics
 Prometheus --> Grafana : Visualize dashboards

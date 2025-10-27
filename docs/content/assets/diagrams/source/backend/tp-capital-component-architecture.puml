@@ -98,7 +98,6 @@ package "Consumers" <<Consumer>> {
   component "Dashboard UI\n:3103" as Dashboard
   component "Agno Agents\n:8200" as AgnoAgents {
     [MarketAnalysisAgent]
-    [Correlates with B3 data]
     [Correlates with Workspace ideas]
   }
 }
@@ -180,10 +179,9 @@ end note
 note right of AgnoAgents
   **Agent Workflow**
   1. Fetch TP Capital signals
-  2. Fetch B3 market data
-  3. Fetch Workspace ideas
-  4. Correlate datasets (LLM/heuristics)
-  5. Generate trading recommendations
+  2. Fetch Workspace ideas
+  3. Correlate datasets (LLM/heuristics)
+  4. Generate trading recommendations
 end note
 
 note as N1

@@ -22,20 +22,16 @@ sequenceDiagram
     participant Orch as SignalOrchestratorAgent
     participant Market as MarketAnalysisAgent
     participant Risk as RiskManagementAgent
-    participant B3 as B3 API (3302)
     participant TP as TP Capital API (3200)
     participant WS as Workspace API (3100)
     
     Client->>Orch: POST /api/v1/agents/signals<br/>{action: "ORCHESTRATE", symbols: ["PETR4"]}
     activate Orch
     
-    Orch->>Market: analyze_market(symbols, include_tp=true, include_b3=true)
+    Orch->>Market: analyze_market(symbols, include_tp=true)
     activate Market
     
     par Parallel Data Gathering
-        Market->>B3: get_b3_data("PETR4")
-        B3-->>Market: {price, volume, indicators}
-    and
         Market->>TP: get_tp_capital_signals(limit=100)
         TP-->>Market: [{asset: "PETR4", signal_type: "COMPRA", ...}]
     and
@@ -71,15 +67,11 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant Market as MarketAnalysisAgent
-    participant B3 as B3 API
     participant TP as TP Capital API
     participant LLM as OpenAI GPT-4o
     
     Client->>Market: POST /api/v1/agents/analyze<br/>{symbols: ["PETR4"], include_tp_capital: true}
     activate Market
-    
-    Market->>B3: get_b3_data("PETR4")
-    B3-->>Market: {last_price: 32.50, volume: 1000000, ...}
     
     Market->>TP: get_tp_capital_signals(limit=100)
     TP-->>Market: [{asset: "PETR4", buy_min: 32.00, targets: [34.00, 35.00]}]
@@ -141,7 +133,6 @@ stateDiagram-v2
     
     note right of Initializing
         Initialize HTTP clients:
-        - B3Client
         - TPCapitalClient
         - WorkspaceClient
         - RiskEngineClient
@@ -170,7 +161,6 @@ stateDiagram-v2
     
     note right of DataGathering
         Parallel fetch:
-        - B3 market data
         - TP Capital signals
         - Workspace ideas
     end note
@@ -288,7 +278,7 @@ API Request
 **Configuration**:
 - Strategy: Exponential backoff (500ms, 1500ms, 3000ms)
 - Max attempts: 4 (configurable via `RETRY_MAX_ATTEMPTS`)
-- Applied to: All HTTP requests (B3, TP Capital, Workspace, Risk Engine)
+- Applied to: All HTTP requests (TP Capital, Workspace, Risk Engine)
 
 ### Circuit Breaker Flow
 

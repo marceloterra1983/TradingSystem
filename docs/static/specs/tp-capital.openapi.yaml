@@ -2,6 +2,9 @@ openapi: 3.1.0
 info:
   title: TradingSystem TP Capital API
   version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
   description: |
     REST API for TP Capital trading signals ingestion, management, and monitoring.
 
@@ -25,7 +28,7 @@ info:
     - POST /ingest endpoint requires X-Gateway-Secret header (not documented publicly)
     - Production deployments should add API key or JWT authentication
 servers:
-  - url: http://localhost:3200
+  - url: http://localhost:4005
     description: Local development
   - url: http://tradingsystem.local/api/tp-capital
     description: Reverse proxy route

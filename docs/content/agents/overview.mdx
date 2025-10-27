@@ -34,9 +34,9 @@ TradingSystem uses autonomous agents to automate market analysis, risk managemen
 
 **Agents**:
 1. **MarketAnalysisAgent**
-   - Responsibility: Analyze B3 market data, TP Capital signals, and Workspace ideas
+   - Responsibility: Analyze TP Capital signals and Workspace ideas
    - Output: BUY/SELL/HOLD recommendations with confidence scores
-   - Integration: B3 API (3302), TP Capital API (3200), Workspace API (3100)
+   - Integration: TP Capital API (3200), Workspace API (3100)
 
 2. **RiskManagementAgent**
    - Responsibility: Validate signals against risk limits
@@ -76,22 +76,18 @@ version: 1.0.0
 framework: Agno
 model: OpenAI GPT-4o (optional)
 responsibilities:
-  - Analyze B3 market data
   - Analyze TP Capital signals
   - Analyze Workspace ideas
   - Generate BUY/SELL/HOLD recommendations
 tools:
-  - analyze_b3_data
   - analyze_tp_signals
   - _extract_size_value
 inputs:
   - symbols: List[str]
   - include_tp_capital: bool
-  - include_b3: bool
 outputs:
   - signals: List[MarketSignal]
 dependencies:
-  - B3 API (port 3302)
   - TP Capital API (port 3200)
   - Workspace API (port 3100)
 performance:
@@ -162,7 +158,6 @@ performance:
 ```
 SignalOrchestratorAgent
 ├─> MarketAnalysisAgent
-│   ├─> B3Client (B3 API)
 │   ├─> TPCapitalClient (TP Capital API)
 │   └─> WorkspaceClient (Workspace API)
 └─> RiskManagementAgent
@@ -187,8 +182,7 @@ const response = await fetch('/api/agents/analyze', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     symbols: ['PETR4', 'VALE3'],
-    include_tp_capital: true,
-    include_b3: true
+    include_tp_capital: true
   })
 });
 const data = await response.json();
@@ -201,7 +195,7 @@ const data = await response.json();
 ```bash
 curl -X POST http://localhost:8200/api/v1/agents/analyze \
   -H "Content-Type: application/json" \
-  -d '{"symbols": ["$1"], "include_tp_capital": true, "include_b3": true}' \
+  -d '{"symbols": ["$1"], "include_tp_capital": true}' \
   | jq '.signals'
 ```
 
@@ -209,7 +203,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
 
 | Symptom | Possible Cause | Recommended Action |
 |---------|----------------|--------------------|
-| 503 on `/api/v1/agents/analyze` | B3 API unavailable | Check logs, wait for circuit HALF_OPEN, verify `/health?detailed=true` |
+| 503 on `/api/v1/agents/analyze` | TP Capital API indisponível | Check logs, wait for circuit HALF_OPEN, verify `/health?detailed=true` |
 | Metrics zeroed | Prometheus not configured | Ensure scrape job `agno-agents` in Prometheus config |
 | LLM not responding | `OPENAI_API_KEY` invalid | Validate credentials, check quota, review error logs |
 | High latency | External APIs slow | Monitor `dependency_status`, adjust timeout, implement caching |

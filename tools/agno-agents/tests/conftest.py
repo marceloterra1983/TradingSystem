@@ -14,7 +14,6 @@ os.environ.setdefault("OPENAI_API_KEY", "test-key")
 os.environ.setdefault("AGNO_ENABLE_METRICS", "true")
 os.environ.setdefault("AGNO_ENABLE_TRACING", "false")
 os.environ.setdefault("AGNO_ENABLE_LLM", "true")
-os.environ.setdefault("AGNO_ENABLE_B3_WEBSOCKET", "false")
 os.environ.setdefault("AGNO_RATE_LIMIT_REQUESTS", "100")
 os.environ.setdefault("AGNO_RATE_LIMIT_PERIOD", "60")
 

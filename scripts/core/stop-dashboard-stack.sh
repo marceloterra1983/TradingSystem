@@ -49,7 +49,6 @@ echo "[stop-dashboard-stack] Ensuring Node service processes are terminated..."
 patterns=(
   "backend/api/workspace"
   "apps/tp-capital"
-  "apps/b3-market-data"
   "backend/api/webscraper-api"
   "backend/api/firecrawl-proxy"
   "apps/status"

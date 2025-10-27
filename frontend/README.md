@@ -43,7 +43,6 @@ frontend/
 ### Características Principais
 
 - 📚 **46 páginas** interativas de documentação e gestão
-- 📊 **B3 Market Data** - Visualização de dados do mercado brasileiro
 - 📡 **TP Capital** - Monitoramento de sinais de opções via Telegram
 - 🔌 **Connections** - Gestão de conexões e serviços
 - 📈 **Analytics** - Métricas em tempo real
@@ -158,9 +157,7 @@ dashboard/
 │   ├── components/
 │   │   ├── pages/           - 46 páginas refatoradas
 │   │   │   ├── TPCapitalOpcoesPage.tsx
-│   │   │   ├── B3MarketPage.tsx
 │   │   │   ├── tp-capital/  - Componentes do TP Capital
-│   │   │   ├── b3-market/   - Componentes do B3
 │   │   │   ├── launcher/    - Seção de launcher
 │   │   │   ├── database/    - Páginas de database
 │   │   │   └── workspace/   - Kanban board
@@ -171,7 +168,6 @@ dashboard/
 │   │   └── scraping/        - Web scraping UI
 │   ├── services/            - 7 clientes de API
 │   │   ├── apiService.ts
-│   │   ├── b3MarketService.ts
 │   │   ├── documentationService.ts
 │   │   ├── firecrawlService.ts
 │   │   ├── libraryService.ts
@@ -242,7 +238,6 @@ export function MinhaPage() {
 
 **Páginas que Usam CustomizablePageLayout**:
 - ✅ TPCapitalOpcoesPage (refatorada)
-- ✅ B3MarketPage (refatorada)
 - ✅ EscopoPageNew
 - ✅ ConnectionsPageNew
 - ✅ WorkspacePageNew
@@ -322,7 +317,6 @@ import { AddButton, EditButton, DeleteButton, ViewButton } from '../ui/action-bu
 proxy: {
   '/api/library':     → http://localhost:3200  // Workspace API
   '/api/tp-capital':  → http://localhost:4005  // TP Capital API
-  '/api/b3':          → http://localhost:3302  // B3 Market API
   '/api/docs':        → http://localhost:3400  // Documentation API
   '/api/launcher':    → http://localhost:3500  // Launcher/Status API
   '/api/firecrawl':   → http://localhost:3600  // Firecrawl Proxy
@@ -396,28 +390,6 @@ tp-capital/
 └── constants.ts                52 linhas  - Constantes
 ```
 
-### B3 Market Data (423 → 37 linhas)
-
-**Redução de 91%** através de separação de responsabilidades:
-
-```
-b3-market/
-├── B3MarketPage.tsx            37 linhas  - Página principal
-├── OverviewSection.tsx        192 linhas  - Snapshots, Indicadores, Gamma
-├── AdjustmentsSection.tsx     172 linhas  - Ajustes com filtros
-├── types.ts                    29 linhas  - Tipos TypeScript
-└── utils.ts                    11 linhas  - Utilitários
-```
-
-**Benefícios da Refatoração**:
-- ✅ Componentes < 300 linhas cada
-- ✅ Responsabilidades bem definidas
-- ✅ Fácil de testar unitariamente
-- ✅ Reutilização de código
-- ✅ Manutenibilidade muito melhor
-
----
-
 ## 📱 Páginas Disponíveis (46)
 
 ### 📊 Dashboard & Analytics
@@ -446,7 +418,6 @@ b3-market/
 
 ### 📈 Trading & Mercado
 - **TPCapitalOpcoesPage** ⭐ - Sinais TP Capital (refatorada)
-- **B3MarketPage** ⭐ - Dados de mercado B3 (refatorada)
 - MarketOverviewPage - Overview do mercado
 - SignalsPage - Sinais de trading
 - PositionsPage - Posições abertas
@@ -743,12 +714,10 @@ npm run type-check
 ```bash
 # Verificar se backends estão rodando
 lsof -ti:4005   # TP Capital
-lsof -ti:3302   # B3 Market
 lsof -ti:3200   # Workspace
 
 # Iniciar backends
 cd apps/tp-capital && npm start
-cd apps/b3-market-data && npm start
 ```
 
 ### Proxy não funciona
@@ -822,7 +791,6 @@ VITE_API_BASE_URL=http://tradingsystem.local
 
 # Proxies individuais (sobrescrevem defaults)
 VITE_TP_CAPITAL_PROXY_TARGET=http://localhost:4005
-VITE_B3_PROXY_TARGET=http://localhost:3302
 VITE_WORKSPACE_PROXY_TARGET=http://localhost:3200
 ```
 
@@ -910,7 +878,6 @@ Tamanho (código fonte):     ~2MB
 
 ### Concluído ✅
 - ✅ Refatoração TPCapitalOpcoesPage (785 → 39 linhas)
-- ✅ Refatoração B3MarketPage (423 → 37 linhas)
 - ✅ Scripts de monitoramento de temporários
 - ✅ Script de verificação de componentes não usados
 - ✅ Limpeza de arquivos obsoletos
@@ -943,7 +910,7 @@ Para questões sobre o frontend:
 
 1. Verifique esta documentação
 2. Consulte `docs/context/frontend/` (documentação técnica)
-3. Veja exemplos nas páginas refatoradas (TP Capital, B3 Market)
+3. Veja exemplos nas páginas refatoradas (TP Capital)
 4. Crie uma issue no repositório
 
 ---
@@ -957,7 +924,7 @@ Para questões sobre o frontend:
 
 ## 🎉 Conquistas Recentes
 
-- **Outubro 2025**: Refatoração completa das páginas maiores (TPCapital e B3Market)
+- **Outubro 2025**: Refatoração completa das páginas maiores (TPCapital)
 - **Redução total**: 1,208 → 76 linhas nas páginas principais (-94%)
 - **Novos padrões**: Componentização modular estabelecida
 - **Scripts de manutenção**: Monitoramento automático implementado

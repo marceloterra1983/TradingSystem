@@ -51,16 +51,6 @@ INSERT INTO workspace.workspace_items (
 
 -- Coleta de Dados
 (
-    'Integrar dados de opções da B3',
-    'Implementar coleta automatizada de dados de opções da B3, incluindo Greeks, volatilidade implícita e cadeia de opções completa.',
-    'coleta-dados',
-    'critical',
-    'review',
-    ARRAY['b3', 'options', 'market-data'],
-    'system',
-    '{"estimated_hours": 40, "external_api": true, "requires_approval": true}'::JSONB
-),
-(
     'Adicionar validação de dados em tempo real',
     'Implementar sistema de validação e sanitização de dados coletados antes de persistir no banco de dados.',
     'coleta-dados',
@@ -236,4 +226,3 @@ END $$;
 -- FROM workspace.workspace_items
 -- GROUP BY category
 -- ORDER BY total DESC;
-

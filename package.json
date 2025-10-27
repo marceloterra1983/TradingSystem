@@ -18,6 +18,11 @@
     "lint:fix": "eslint . --fix",
     "type-check": "cd frontend/dashboard && npm run type-check",
     "validate-docs": "python3 scripts/docs/validate-frontmatter.py --docs-dir ./docs/content",
+    "agent:docs:daily": "node scripts/agents/docusaurus-daily.mjs",
+    "agent:list": "node scripts/agents/runner.mjs list",
+    "agent:describe": "node scripts/agents/runner.mjs describe",
+    "agent:run": "node scripts/agents/runner.mjs run",
+    "agent:new": "node scripts/agents/new-agent.mjs",
     "dev:dashboard-docs": "bash scripts/start-dashboard-with-docs.sh"
   }
 }

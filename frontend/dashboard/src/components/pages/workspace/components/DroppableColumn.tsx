@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { cn } from '../../../../lib/utils';
 import { STATUS_CONFIG } from '../constants/workspace.constants';
 import type { Item, ItemStatus } from '../types/workspace.types';
@@ -15,6 +16,10 @@ export function DroppableColumn({ status, items }: DroppableColumnProps) {
 
   const { setNodeRef, isOver } = useDroppable({
     id: status,
+    data: {
+      type: 'column',
+      status,
+    },
   });
 
   return (
@@ -38,9 +43,15 @@ export function DroppableColumn({ status, items }: DroppableColumnProps) {
           isOver ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950' : 'border-gray-200 dark:border-gray-700'
         )}
       >
-        {items.map((item) => (
-          <DraggableItemCard key={item.id} item={item} />
-        ))}
+        <SortableContext
+          id={status}
+          items={items.map((item) => item.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {items.map((item) => (
+            <DraggableItemCard key={item.id} item={item} />
+          ))}
+        </SortableContext>
 
         {items.length === 0 && (
           <div className="text-center text-sm text-gray-400 dark:text-gray-500 py-8">

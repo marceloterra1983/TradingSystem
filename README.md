@@ -477,7 +477,6 @@ You can access the system in two ways:
     - Workspace: `http://localhost:3102`
     - TP Capital API: `http://localhost:3200`
     - DocsAPI: `http://localhost:3400`
-    - B3 Market API: `http://localhost:3302`
     - Laucher: `http://localhost:3500`
     - Documentation Hub: `http://localhost:3205`
 

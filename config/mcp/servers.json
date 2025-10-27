@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "imports": ["../../.claude/mcp-servers.json"],
+  "servers": [
+    {
+      "ref": "fs-tradingsystem",
+      "enabled": true
+    },
+    {
+      "ref": "github",
+      "enabled": true
+    },
+    {
+      "ref": "openapi-docs",
+      "enabled": true
+    },
+    {
+      "ref": "docker-compose",
+      "enabled": true
+    },
+    {
+      "ref": "postgres-frontend-apps",
+      "enabled": true
+    }
+  ]
+}
+

@@ -5,14 +5,11 @@ actor Trader
 component "Manual Analysis" as Manual
 component "Workspace API\n:3100" as Workspace
 component "TP Capital API\n:3200" as TPCapital
-component "B3 API\n:3302" as B3
 database "QuestDB" as QuestDB
 
 Trader --> Manual : Analyze data manually
 Manual --> Workspace : Fetch ideas
 Manual --> TPCapital : Check signals
-Manual --> B3 : Get market data
-B3 --> QuestDB : Query snapshots
 TPCapital --> QuestDB : Query signals
 
 note right of Manual
@@ -27,11 +24,10 @@ end note
 
 note bottom of Trader
   Workflow:
-  1. Consult B3 quotes & indicators
-  2. Review TP Capital telegram signals
-  3. Ler ideias no Workspace
-  4. Avaliar risco manualmente
-  5. Tomar decisão de trading
+  1. Review TP Capital telegram signals
+  2. Ler ideias no Workspace
+  3. Avaliar risco manualmente
+  4. Tomar decisão de trading
 
   Tempo médio: 5-10 minutos por decisão
 end note
