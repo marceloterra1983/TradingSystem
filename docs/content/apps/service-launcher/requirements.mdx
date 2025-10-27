@@ -15,27 +15,32 @@ lastReviewed: '2025-10-27'
 ### Operating System
 
 **Supported**:
+
 - Linux (Ubuntu 20.04+, Debian 11+, CentOS 8+, RHEL 8+)
 - Windows 10/11 (with WSL2 recommended)
 - macOS 11+ (BigSur or later)
 
 **Tested**:
+
 - Ubuntu 22.04 LTS (primary development environment)
 - Windows 11 + WSL2 (Ubuntu 22.04)
 
 ### Hardware Requirements
 
 **Minimum**:
+
 - CPU: 1 core
 - RAM: 256 MB
 - Disk: 50 MB (for service code and logs)
 
 **Recommended**:
+
 - CPU: 2 cores
 - RAM: 512 MB
 - Disk: 500 MB (includes logs, cache, and dependencies)
 
 **Notes**:
+
 - Service Launcher is lightweight and has minimal resource requirements
 - Actual resource usage depends on number of monitored services
 - Health check script may require additional CPU/memory
@@ -100,6 +105,7 @@ brew install node bash curl docker docker-compose
 ```
 
 **Install**:
+
 ```bash
 cd apps/status
 npm install
@@ -144,9 +150,11 @@ Service Launcher monitors these services (if configured):
 ### Environment Variables
 
 **Required**:
+
 - None (all have defaults)
 
 **Recommended**:
+
 ```bash
 SERVICE_LAUNCHER_PORT=3500
 SERVICE_LAUNCHER_LOG_LEVEL=info
@@ -158,6 +166,7 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3205
 ### File System Requirements
 
 **Project Structure**:
+
 ```
 /home/marce/Projetos/TradingSystem/
 ├── .env                              # Root environment file
@@ -172,6 +181,7 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3205
 ```
 
 **Permissions**:
+
 ```bash
 # Health check script must be executable
 chmod +x scripts/maintenance/health-check-all.sh
@@ -185,9 +195,11 @@ chmod 755 apps/status/
 ### Ports
 
 **Inbound** (Service Launcher listens):
+
 - TCP 3500 (default, configurable via `SERVICE_LAUNCHER_PORT`)
 
 **Outbound** (Service Launcher connects to):
+
 - TCP 3103 (Dashboard)
 - TCP 3200 (Workspace API)
 - TCP 3205 (Docusaurus)
@@ -231,6 +243,7 @@ sudo ufw allow out 3000/tcp
 ### Authentication
 
 **None**. Service Launcher protected by:
+
 - CORS restrictions (Dashboard + Docs origins only)
 - Rate limiting (200 req/min)
 - Local-only binding (not exposed to network)
@@ -244,6 +257,7 @@ sudo ufw allow out 3000/tcp
 **None**. All communication over HTTP (localhost only).
 
 **For production** (if exposing to network):
+
 - Use HTTPS reverse proxy (nginx, Caddy)
 - Implement authentication middleware
 - Use mTLS for service-to-service communication
@@ -407,6 +421,7 @@ npm install pino-elasticsearch
 **No data migration needed** - Service Launcher is stateless.
 
 **Steps**:
+
 1. Stop service
 2. Pull latest code: `git pull`
 3. Update dependencies: `npm install`
@@ -425,6 +440,7 @@ npm install pino-elasticsearch
 ### Common Issues
 
 **Node.js version too old**:
+
 ```bash
 # Check version
 node --version
@@ -436,6 +452,7 @@ sudo n stable
 ```
 
 **Health check script not executable**:
+
 ```bash
 # Make executable
 chmod +x scripts/maintenance/health-check-all.sh
@@ -445,6 +462,7 @@ ls -la scripts/maintenance/health-check-all.sh
 ```
 
 **Docker socket permission denied**:
+
 ```bash
 # Add user to docker group
 sudo usermod -aG docker $USER
@@ -454,6 +472,7 @@ newgrp docker
 ```
 
 **Port 3500 already in use**:
+
 ```bash
 # Find process
 lsof -ti:3500

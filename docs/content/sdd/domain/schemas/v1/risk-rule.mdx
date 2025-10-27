@@ -54,6 +54,7 @@ interface RiskLimits {
 ## Validation Rules
 
 **Daily Loss Limit**
+
 - Must be positive number
 - Minimum: R$100 (prevent accidental zero)
 - Maximum: R$1,000,000 (sanity check)
@@ -61,6 +62,7 @@ interface RiskLimits {
 - Reset at market open (9:00 BRT)
 
 **Position Size Limit**
+
 - Object with symbol keys (e.g., `{"PETR4": 1000, "VALE3": 500}`)
 - Values must be positive integers
 - Minimum: 1 (allow at least 1 share)
@@ -68,12 +70,14 @@ interface RiskLimits {
 - Applied to both long and short positions (absolute value)
 
 **Trading Hours**
+
 - `start` must be before `end` (e.g., "09:00" < "18:00")
 - Both must be valid HH:MM format (00:00 to 23:59)
 - Timezone must be valid IANA timezone (e.g., "America/Sao_Paulo")
 - Default: 9:00-18:00 BRT (Brazilian market hours)
 
 **Kill Switch**
+
 - Boolean value (true = active, false = inactive)
 - When active: All order creation requests rejected with 403 Forbidden
 - Deactivation requires manual operator action (not automatic)
@@ -105,6 +109,7 @@ Risk checks are performed in sequence (fail-fast optimization):
 ### Pre-Trade Risk Validation
 
 Before every order placement:
+
 1. Order Manager queries current risk limits via `GET /api/risk/limits`
 2. Validates order against each rule in sequence
 3. Rejects order if any rule violated (returns 403 Forbidden with reason)
@@ -137,6 +142,7 @@ curl -X POST http://localhost:3205/api/risk/kill-switch \
 ```
 
 **Effects**
+
 - All pending orders canceled immediately
 - All new order requests rejected with 403 Forbidden
 - Alert sent to operators (Slack, email)
@@ -178,20 +184,24 @@ curl -X POST http://localhost:3205/api/risk/kill-switch \
 ## Relationships
 
 **Related Schemas**
+
 - **Order**: Risk rules validate orders before submission
 - **Position**: Current positions used to calculate daily loss and position size
 - **Trade**: Trades contribute to daily loss calculation
 
 **Related Events**
+
 - `risk.violation`: Emitted when order rejected due to risk check failure
 - `kill-switch.activated`: Emitted when kill switch activated
 - `risk-limits.updated`: Emitted when risk limits changed
 
 **Related Flows**
+
 - [Place Order Flow](../../../flows/v1/place-order) - Risk checks are step 2 in order placement
 - [Kill Switch FlowKill switch flow (planned) (to be created) - Emergency stop sequence
 
 **Database Mapping**
+
 - PostgreSQL table: `risk_limits` (planned)
 - Configuration stored in database for dynamic updates
 - Historical limits tracked with `effective_from` and `effective_to` timestamps

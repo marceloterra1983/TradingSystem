@@ -70,6 +70,7 @@ Service Launcher follows a simple yet effective architecture for service orchest
 ### 1. Express HTTP Server
 
 **Responsibilities**:
+
 - Handle HTTP requests for health checks, status monitoring, service launch
 - Apply middleware (CORS, rate limiting, helmet security)
 - Route requests to appropriate handlers
@@ -78,6 +79,7 @@ Service Launcher follows a simple yet effective architecture for service orchest
 **Technology**: Express 4.x, Node.js 18+
 
 **Middleware Stack**:
+
 1. **Helmet**: Security headers (X-Frame-Options, CSP, etc.)
 2. **CORS**: Restrict to Dashboard + Docs origins
 3. **Rate Limiter**: 200 req/min per IP
@@ -87,12 +89,14 @@ Service Launcher follows a simple yet effective architecture for service orchest
 ### 2. Service Health Checker
 
 **Responsibilities**:
+
 - Query health endpoints of all configured services
 - Measure response latency
 - Aggregate status (ok/degraded/down)
 - Calculate metrics (total, degraded count, average latency)
 
 **Logic**:
+
 ```javascript
 for (const service of services) {
   const start = Date.now();
@@ -112,6 +116,7 @@ for (const service of services) {
 ```
 
 **Configuration**:
+
 - Services defined in `statusService.js`
 - URLs constructed from environment variables or defaults
 - Timeout: 2.5s per service (configurable via `SERVICE_LAUNCHER_TIMEOUT_MS`)
@@ -119,6 +124,7 @@ for (const service of services) {
 ### 3. Script Executor + Cache
 
 **Responsibilities**:
+
 - Execute `scripts/maintenance/health-check-all.sh --format json`
 - Parse JSON output
 - Cache results in memory for 60 seconds
@@ -126,6 +132,7 @@ for (const service of services) {
 - Add cache headers (`X-Cache-Status`, `X-Cache-Age`)
 
 **Cache Strategy**:
+
 ```javascript
 const cache = {
   data: null,
@@ -151,6 +158,7 @@ function getCachedHealth() {
 ```
 
 **Script Requirements**:
+
 - Must be executable (`chmod +x`)
 - Must accept `--format json` flag
 - Must output valid JSON to stdout
@@ -159,6 +167,7 @@ function getCachedHealth() {
 ### 4. Terminal Launcher
 
 **Responsibilities**:
+
 - Detect operating system (Windows/Linux/macOS)
 - Launch service command in new terminal window
 - Support multiple terminal emulators
@@ -174,6 +183,7 @@ function getCachedHealth() {
 | Linux | xterm (fallback) | `xterm -e 'cd {workingDir} && {command}; bash'` |
 
 **Error Handling**:
+
 - Try primary terminal, fall back to alternatives
 - Return success/error message
 - Log all launch attempts
@@ -232,6 +242,7 @@ function getCachedHealth() {
 **Decision**: Implement 60-second in-memory cache for `/api/health/full` endpoint.
 
 **Consequences**:
+
 - ✅ Reduces load on system (no excessive script executions)
 - ✅ Improves response time from 2-5s to &lt;10ms (cached)
 - ✅ Acceptable staleness (60s is reasonable for health monitoring)
@@ -239,6 +250,7 @@ function getCachedHealth() {
 - ❌ Cache resets on service restart
 
 **Alternatives Considered**:
+
 - Redis cache: Overkill for single-server deployment
 - No cache: Too slow for real-time dashboard updates
 - File-based cache: Added complexity, I/O overhead
@@ -250,6 +262,7 @@ function getCachedHealth() {
 **Decision**: Use existing bash script (`health-check-all.sh`) instead of implementing in Node.js.
 
 **Consequences**:
+
 - ✅ Reuses existing, battle-tested script
 - ✅ Bash better suited for shell operations (ps, docker, psql)
 - ✅ Easier to maintain health logic in one place
@@ -258,6 +271,7 @@ function getCachedHealth() {
 - ❌ Parsing stdout for JSON (could fail if script has bugs)
 
 **Alternatives Considered**:
+
 - Pure Node.js implementation: Requires child_process for docker/ps anyway
 - Multiple specialized scripts: Increases complexity
 - HTTP-only checks: Misses Docker and database status
@@ -269,12 +283,14 @@ function getCachedHealth() {
 **Decision**: Use `Promise.all()` to query all services in parallel.
 
 **Consequences**:
+
 - ✅ Total time = max(individual times) ≈ 2.5s instead of 27.5s
 - ✅ Responsive API even with many services
 - ❌ Higher instantaneous load on network/system
 - ❌ All services timeout simultaneously (no graceful degradation)
 
 **Implementation**:
+
 ```javascript
 const healthChecks = services.map(service =>
   checkServiceHealth(service).catch(error => ({
@@ -294,6 +310,7 @@ const results = await Promise.all(healthChecks);
 **Decision**: Run Service Launcher locally only (localhost), never expose to network/internet.
 
 **Consequences**:
+
 - ✅ Security: Command execution not accessible remotely
 - ✅ Simplified auth: No need for authentication middleware
 - ✅ Performance: Local health checks are fast
@@ -301,6 +318,7 @@ const results = await Promise.all(healthChecks);
 - ❌ Manual deployment: Each developer/server needs own instance
 
 **Security Measures**:
+
 - CORS restricted to localhost origins
 - Rate limiting (200 req/min)
 - Input validation on `/launch` endpoint
@@ -311,12 +329,14 @@ const results = await Promise.all(healthChecks);
 Service Launcher is highly configurable via environment variables:
 
 **Port Configuration**:
+
 ```bash
 SERVICE_LAUNCHER_PORT=3500
 SERVICE_LAUNCHER_TIMEOUT_MS=2500
 ```
 
 **Service Overrides** (11 services):
+
 ```bash
 SERVICE_LAUNCHER_WORKSPACE_PORT=3200
 SERVICE_LAUNCHER_TP_CAPITAL_PORT=4005
@@ -325,6 +345,7 @@ SERVICE_LAUNCHER_DASHBOARD_PORT=3103
 ```
 
 **Security**:
+
 ```bash
 CORS_ORIGIN=http://localhost:3103,http://localhost:3205
 RATE_LIMIT_WINDOW_MS=60000
@@ -332,6 +353,7 @@ RATE_LIMIT_MAX=200
 ```
 
 **Logging**:
+
 ```bash
 SERVICE_LAUNCHER_LOG_LEVEL=info  # debug|info|warn|error
 NODE_ENV=production              # Affects Pino output format
@@ -340,11 +362,13 @@ NODE_ENV=production              # Affects Pino output format
 ## Scalability Considerations
 
 **Current Limitations**:
+
 - Single-server deployment (no horizontal scaling)
 - In-memory cache (no distributed cache)
 - Local health checks only (cannot monitor remote services)
 
 **Future Enhancements** (if needed):
+
 1. **Redis Cache**: Shared cache for multiple Service Launcher instances
 2. **WebSocket Updates**: Real-time health updates instead of polling
 3. **Remote Service Support**: Query services on different hosts
@@ -356,10 +380,12 @@ NODE_ENV=production              # Affects Pino output format
 ## Dependencies
 
 **Runtime**:
+
 - Node.js 18+
 - `scripts/maintenance/health-check-all.sh` (executable)
 
 **NPM Packages**:
+
 - express: HTTP server
 - helmet: Security headers
 - cors: CORS middleware
@@ -369,6 +395,7 @@ NODE_ENV=production              # Affects Pino output format
 - dotenv: Environment variable loading
 
 **System**:
+
 - bash: For executing health check script
 - docker: For container health checks (optional)
 - psql: For database health checks (optional)
@@ -381,6 +408,7 @@ Service Launcher itself should be monitored:
 **Expected Response**: `{"status":"ok","service":"service-launcher-api"}`
 
 **Metrics to Track**:
+
 - Availability: % time `/health` returns 200 OK
 - Response Time: p50, p95, p99 for `/api/status` and `/api/health/full`
 - Cache Hit Rate: % of `/api/health/full` requests served from cache
@@ -388,6 +416,7 @@ Service Launcher itself should be monitored:
 - Launch Success Rate: % of successful `/launch` operations
 
 **Alerting**:
+
 - Service Launcher down: Critical (other services cannot be monitored)
 - High error rate (>5%): Warning
 - Low cache hit rate (&lt;60%): Investigate (may indicate cache TTL too short)

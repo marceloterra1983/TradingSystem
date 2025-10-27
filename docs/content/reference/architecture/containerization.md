@@ -20,6 +20,7 @@ lastReviewed: '2025-10-27'
 ## 📊 Status Atual (Inventário Completo)
 
 ### Containers Docker: **27 rodando** (100%)
+
 - ✅ Databases: 7 containers
 - ✅ Database Tools: 4 containers
 - ✅ Monitoring: 4 containers
@@ -28,6 +29,7 @@ lastReviewed: '2025-10-27'
 - ✅ Web Scraping: 3 containers
 
 ### Serviços Locais Node.js: **3 de 6 rodando** (50%)
+
 - ✅ **Workspace API** (Port 3200) - CRUD Idea Bank
 - ✅ **TP Capital** (Port 4005) - Telegram signal ingestion
 - ✅ **Status Monitor** - Service health monitoring
@@ -43,7 +45,9 @@ lastReviewed: '2025-10-27'
 ### ✅ **RECOMENDAR CONTAINERIZAR** (5 serviços)
 
 #### 1. **Workspace API** (Port 3200) - **ALTA PRIORIDADE**
+
 **Justificativa**:
+
 - ✅ Stateless API (CRUD simples)
 - ✅ Dual persistence já usa QuestDB containerizado
 - ✅ Não depende de hardware específico
@@ -81,6 +85,7 @@ lastReviewed: '2025-10-27'
 ```
 
 **Benefícios**:
+
 - ✅ Session files permanecem locais (seguro)
 - ✅ API containerizada (escalável, versionada)
 - ✅ Deploy independente (API restart ≠ Telegram disconnect)
@@ -89,6 +94,7 @@ lastReviewed: '2025-10-27'
 **Proposta OpenSpec**: `tools/openspec/changes/split-tp-capital-into-gateway-api/`
 
 **Documentação Completa**:
+
 - [Proposal](tools/openspec/changes/split-tp-capital-into-gateway-api/proposal.md) - Why, What, Impact
 - [Design Document](tools/openspec/changes/split-tp-capital-into-gateway-api/design.md) - Decisões técnicas
 - [Implementation Tasks](tools/openspec/changes/split-tp-capital-into-gateway-api/tasks.md) - Checklist (150+ tasks)
@@ -100,7 +106,9 @@ lastReviewed: '2025-10-27'
 **Prioridade**: **ALTA** - Maior impacto arquitetural, habilita escalabilidade futura
 
 #### 4. **Status Monitor** - **MÉDIA PRIORIDADE**
+
 **Justificativa**:
+
 - ✅ Serviço de infraestrutura/observabilidade
 - ✅ Lightweight
 - ✅ Deve estar sempre disponível
@@ -113,7 +121,9 @@ lastReviewed: '2025-10-27'
 ---
 
 #### 5. **Docusaurus** (Port 3205) - **MÉDIA PRIORIDADE**
+
 **Justificativa**:
+
 - ✅ Site estático após build
 - ✅ Pode usar nginx otimizado
 - ✅ Deploy previsível
@@ -131,18 +141,21 @@ lastReviewed: '2025-10-27'
 #### Dashboard (Port 3103) - **Containerizar APENAS em PRODUÇÃO**
 
 **Desenvolvimento (LOCAL)**:
+
 - ❌ HMR (Hot Module Replacement) precisa de acesso direto ao filesystem
 - ❌ Vite Fast Refresh funciona melhor localmente
 - ❌ Source maps mais fáceis sem camada de container
 - ❌ Watch mode (Chokidar) tem melhor performance local
 
 **Produção (CONTAINER)**:
+
 - ✅ Build otimizado (Vite production build)
 - ✅ Nginx para servir assets estáticos
 - ✅ Cache headers otimizados
 - ✅ Gzip/Brotli compression
 
 **Solução**: Dual-mode
+
 ```dockerfile
 # Development: npm run dev (local)
 # Production: Multi-stage (Vite build → nginx)
@@ -155,6 +168,7 @@ lastReviewed: '2025-10-27'
 ## 🔄 Comparação: Antes vs Depois
 
 ### ANTES (Estado Atual)
+
 ```
 Containers: 27
 Serviços Locais: 6 (3 rodando, 3 parados)
@@ -163,6 +177,7 @@ Deploy: Inconsistente
 ```
 
 ### DEPOIS (Após Containerização Proposta)
+
 ```
 Containers: 32 (+5)
   - Workspace API (novo)
@@ -252,18 +267,21 @@ Deploy: Consistente e versionado
 ## 🎯 Critérios de Sucesso
 
 ### Implementação
+
 - [ ] Todos os serviços iniciam via `docker compose up -d`
 - [ ] Universal `start` command gerencia containers + serviços locais
 - [ ] Health checks passando (Docker + Prometheus)
 - [ ] Zero regressões em funcionalidades existentes
 
 ### Performance
+
 - [ ] Containers usam < 200MB RAM cada (dev mode)
 - [ ] Response time < 100ms (p95) para APIs
 - [ ] Container restart count < 1/dia
 - [ ] Dashboard hot-reload < 2s (dev mode)
 
 ### Operacional
+
 - [ ] Rollback trivial (docker tag anterior)
 - [ ] Logs centralizados (`docker logs -f`)
 - [ ] Deploy consistente dev/staging/prod
@@ -316,6 +334,7 @@ TradingSystem/
 ### 1. **TP Capital - Abordagem Única**
 
 **NÃO** tentar containerizar TP Capital como serviço único. A proposta OpenSpec já documentou por que isso não funciona:
+
 - Session files Telegram não podem estar em volumes Docker (security risk)
 - Reautenticação manual (phone + 2FA) a cada deploy é inaceitável
 - MTProto connections devem ser single-instance (não podem escalar)
@@ -325,11 +344,13 @@ TradingSystem/
 ### 2. **Dashboard - Dev vs Prod**
 
 **Desenvolvimento**: SEMPRE rodar localmente (`npm run dev`)
+
 - Hot-reload essencial para produtividade
 - Source maps funcionam melhor
 - Debugging mais fácil
 
 **Produção**: Containerizar com nginx
+
 - Build otimizado
 - Cache agressivo
 - Compression
@@ -337,6 +358,7 @@ TradingSystem/
 ### 3. **Workspace API - LowDB Removal**
 
 Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) que:
+
 - Remove suporte a LowDB (dual-strategy)
 - Usa apenas TimescaleDB
 - Requer migração de dados se LowDB tiver dados
@@ -348,15 +370,18 @@ Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) q
 ## 🔗 Referências
 
 ### Propostas OpenSpec
+
 - **[split-tp-capital-into-gateway-api](tools/openspec/changes/split-tp-capital-into-gateway-api/README.md)** - **RECOMENDADA** (TP Capital split)
 - **[containerize-tp-capital-workspace](tools/openspec/changes/containerize-tp-capital-workspace/proposal.md)** - Alternativa (full containerization)
 
 ### Documentação
+
 - [INVENTARIO-SERVICOS.md](INVENTARIO-SERVICOS.md) - Status atual completo
 - [CLAUDE.md](CLAUDE.md) - Arquitetura geral do projeto
 - [API-INTEGRATION-STATUS.md](API-INTEGRATION-STATUS.md) - Status das APIs
 
 ### Docker Compose Files Existentes
+
 - `tools/compose/docker-compose.timescale.yml` - Databases
 - `tools/compose/docker-compose.monitoring.yml` - Prometheus/Grafana
 - `tools/compose/docker-compose.firecrawl.yml` - Web scraping
@@ -376,11 +401,13 @@ Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) q
 | **Dashboard** | ⚠️ Prod only | 🟢 BAIXA | 🟡 Média | 2-3h | Dev needs hot-reload |
 
 **Legenda Prioridade**:
+
 - 🔴 ALTA - Começar imediatamente
 - 🟡 MÉDIA - Após ALTA completa
 - 🟢 BAIXA - Nice to have
 
 **Legenda Complexidade**:
+
 - 🟢 Baixa - Containerização direta
 - 🟡 Média - Requer multi-stage build ou configs especiais
 - 🔴 Alta - Mudança arquitetural significativa
@@ -390,6 +417,7 @@ Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) q
 ## 🚀 Quick Start (Após Implementação)
 
 ### Desenvolvimento Local
+
 ```bash
 # Iniciar TUDO (containers + serviços locais)
 start
@@ -407,6 +435,7 @@ cd apps/tp-capital/telegram-gateway && node src/index.js
 ```
 
 ### Produção
+
 ```bash
 # Iniciar todos os containers (incluindo Dashboard e Docusaurus produção)
 docker compose \

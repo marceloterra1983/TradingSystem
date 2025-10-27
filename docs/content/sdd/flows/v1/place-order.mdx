@@ -95,6 +95,7 @@ sequenceDiagram
 **Duration**: &lt;10ms
 
 **Validations**
+
 1. Validate required fields present: `symbol`, `side`, `type`, `quantity`
 2. Validate field types: `quantity` is integer, `price` is decimal
 3. Validate enums: `side` in [BUY, SELL], `type` in [MARKET, LIMIT, STOP, STOP_LIMIT]
@@ -110,6 +111,7 @@ sequenceDiagram
 **Duration**: &lt;100ms p95
 
 **Risk Checks (in sequence)**
+
 1. **Trading Hours**: Reject if current time outside configured hours
 2. **Kill Switch**: Reject if kill switch active
 3. **Daily Loss Limit**: Reject if `currentDailyLoss &gt;= dailyLossLimit`
@@ -125,6 +127,7 @@ sequenceDiagram
 **Duration**: &lt;50ms
 
 **Actions**
+
 1. Generate `orderId` (format `ORD-YYYYMMDD-NNN`)
 2. Set status to `PENDING`
 3. Apply timestamps `createdAt` and `updatedAt`
@@ -142,6 +145,7 @@ sequenceDiagram
 **Duration**: &lt;500ms p95
 
 **Actions**
+
 1. Call ProfitDLL `SendOrder`
 2. Await broker acknowledgment (timeout 5 seconds)
 3. Receive broker order ID
@@ -158,6 +162,7 @@ sequenceDiagram
 **Duration**: Variable (market driven)
 
 **Actions**
+
 1. Broker places order in book
 2. ProfitDLL emits status callbacks
 3. Update order status to `PARTIALLY_FILLED` or `FILLED`
@@ -171,6 +176,7 @@ sequenceDiagram
 ## Validations
 
 **Pre-Conditions**
+
 - User authenticated (future)
 - Order Manager service healthy
 - ProfitDLL connection active
@@ -178,12 +184,14 @@ sequenceDiagram
 - Event bus available (degrades gracefully)
 
 **Post-Conditions**
+
 - Order persisted with status `PENDING` or `SUBMITTED`
 - `order.created` event published
 - Client receives confirmation
 - Risk checks logged to audit trail
 
 **Invariants**
+
 - Order ID unique
 - Status transitions follow state machine
 - Risk checks recorded (pass or fail)
@@ -192,30 +200,35 @@ sequenceDiagram
 ## Error Scenarios
 
 ### Scenario 1: Risk Check Failure
+
 - Input validation passes
 - Risk validation fails (e.g., daily loss limit)
 - Order not persisted
 - API returns 403 Forbidden with reason
 
 ### Scenario 2: Database Failure
+
 - Risk checks pass
 - Database insert fails
 - Order not created
 - API returns 500 Internal Server Error
 
 ### Scenario 3: Event Bus Failure
+
 - Order created successfully
 - Event publication fails
 - Error logged, API returns 201 Created
 - Event lost (acceptable for MVP)
 
 ### Scenario 4: ProfitDLL Disconnected
+
 - Order created (status `PENDING`)
 - Broker submission fails
 - Status updated to `FAILED` then retried
 - After retries, publish `order.failed`, set status `REJECTED`, and surface reason to client
 
 ### Scenario 5: Time-in-Force Expiration
+
 - Order remains `SUBMITTED` without fills past `timeInForce`
 - Broker or scheduler triggers expiration
 - Status transitions to `EXPIRED`

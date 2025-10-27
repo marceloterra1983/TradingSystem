@@ -12,12 +12,14 @@ lastReviewed: '2025-10-26'
 TradingSystem uses autonomous agents to automate market analysis, risk management, and signal orchestration. The current implementation is the **Agno Agents system**, a Python 3.12 microservice using the Agno framework.
 
 **Agent Systems**:
+
 1. **Agno Agents** (Active) - Multi-agent trading system with 3 specialized agents
    - MarketAnalysisAgent: Generate trading signals from market data
    - RiskManagementAgent: Validate signals against risk policies
    - SignalOrchestratorAgent: Coordinate agent workflows
 
 **Future Agent Systems** (Planned):
+
 - Order Execution Agents: Automate order placement and management
 - Portfolio Optimization Agents: Multi-asset portfolio balancing
 - Backtesting Agents: Historical strategy validation
@@ -33,6 +35,7 @@ TradingSystem uses autonomous agents to automate market analysis, risk managemen
 **Status**: Active (MVP)
 
 **Agents**:
+
 1. **MarketAnalysisAgent**
    - Responsibility: Analyze TP Capital signals and Workspace ideas
    - Output: BUY/SELL/HOLD recommendations with confidence scores
@@ -49,6 +52,7 @@ TradingSystem uses autonomous agents to automate market analysis, risk managemen
    - Output: Aggregated signals and assessments
 
 **Documentation**:
+
 - [Agno Agents Overview](/agents/agno-agents) - Detailed agent descriptions
 - [Agent Flows](./agno-agents/flows) - Execution flows and state transitions
 - [Agent Prompts](./agno-agents/prompts) - Prompt templates and patterns
@@ -56,6 +60,7 @@ TradingSystem uses autonomous agents to automate market analysis, risk managemen
 - [Agent Tests](./agno-agents/tests) - Test suite and coverage
 
 **API Reference**:
+
 - `POST /api/v1/agents/analyze` - Market analysis
 - `POST /api/v1/agents/signals` - Signal orchestration
 - `GET /api/v1/agents/status` - Agent status
@@ -165,6 +170,7 @@ SignalOrchestratorAgent
 ```
 
 **Permission Requirements**:
+
 - SignalOrchestratorAgent: `agents:orchestrate`
 - MarketAnalysisAgent: `market-data:read`, `signals:generate`
 - RiskManagementAgent: `risk:read`, `risk:validate`
@@ -176,6 +182,7 @@ SignalOrchestratorAgent
 **Proxy Configuration**: Dashboard proxies `/api/agents` to `http://localhost:8200`
 
 **Usage Example**:
+
 ```typescript
 const response = await fetch('/api/agents/analyze', {
   method: 'POST',

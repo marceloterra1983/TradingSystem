@@ -50,6 +50,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 ### Architecture Evolution
 
 **Completed Migrations**:
+
 1. ✅ **Infrastructure** – PostgreSQL 14+ with TimescaleDB extension provisioned
 2. ✅ **Database Structure** – Migrated to app-based organization (APPS-TPCAPITAL, APPS-WORKSPACE)
 3. ✅ **Documentation API** – Migrated to Prisma ORM with PostgreSQL
@@ -57,6 +58,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 5. ✅ **Workspace API** – Containerized with TimescaleDB hypertables
 
 **Pending Migrations**:
+
 - ⏳ **Idea Bank** – Migrate from LowDB to PostgreSQL (Q1 2026)
 
 ## Data Stores
@@ -64,6 +66,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 ### TimescaleDB (Production)
 
 **APPS-TPCAPITAL Database**
+
 - **Purpose**: TP Capital trading signals and Telegram configuration  
 - **Schema**: `tp-capital`  
 - **Port**: 5433 (host) → 5432 (container)  
@@ -77,6 +80,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Backup**: Automated via `scripts/database/backup-timescaledb.sh`
 
 **APPS-WORKSPACE Database**
+
 - **Purpose**: Workspace items and audit logging  
 - **Schema**: `workspace`  
 - **Port**: 5433 (host) → 5432 (container)  
@@ -92,6 +96,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 ### PostgreSQL + Prisma (Production)
 
 **documentation-api Database**
+
 - **Purpose**: Documentation systems, ideas, and file management  
 - **Port**: 5434 (host) → 5432 (container)  
 - **Connection**: `postgresql://postgres@localhost:5434/documentation-api`  
@@ -103,6 +108,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Features**: Prisma migrations, type-safe queries, foreign keys, indexes  
 - **Migrations**: `backend/api/documentation-api/prisma/migrations/`  
 - **Commands**:
+
   ```bash
   cd backend/api/documentation-api
   npx prisma migrate deploy    # Apply migrations
@@ -111,6 +117,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
   ```
 
 ### QuestDB (Production)
+
 - **Purpose**: High-throughput time-series storage for TP Capital signals  
 - **Ports**: 9002 (HTTP UI), 9009 (ILP ingestion), 8812 (PostgreSQL wire)  
 - **Tables**:  
@@ -121,9 +128,10 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Features**: Append-only ILP writes, PostgreSQL wire protocol, web UI  
 - **Retention**: 30-day online window with monthly exports to cold storage  
 - **Backup**: `scripts/database/restore-questdb.sh`  
-- **Web UI**: http://localhost:9002
+- **Web UI**: <http://localhost:9002>
 
 ### LowDB (Legacy)
+
 - **Purpose**: Legacy JSON store for Idea Bank (migration pending)  
 - **Files**: `db/ideas.json`  
 - **Access Pattern**: Entire file load/write, single-user usage  
@@ -132,6 +140,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Migration**: Planned Q1 2026 to PostgreSQL
 
 ### Parquet Files (Analytics)
+
 - **Purpose**: Long-horizon market data for backtesting and ML  
 - **Location**: `data/parquet/` organized by `YYYY/MM/DD`  
 - **Format**: Apache Arrow columnar with compression for fast scans  
@@ -142,6 +151,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 ## Access Patterns
 
 ### TP Capital API (TimescaleDB)
+
 - **Write Path**: Telegram Gateway → HTTP POST → Validation → TimescaleDB INSERT → Confirmation  
 - **Read Path**: Dashboard → REST API → SQL queries → JSON responses  
 - **Database**: `APPS-TPCAPITAL` on port 5433  
@@ -152,6 +162,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Connection Pool**: 10 max connections, 2 min idle
 
 ### Workspace API (TimescaleDB)
+
 - **Write Path**: REST API → Validation → TimescaleDB INSERT/UPDATE → Audit trigger → Response  
 - **Read Path**: Dashboard → REST API → SQL queries with indexes → JSON responses  
 - **Database**: `APPS-WORKSPACE` on port 5433  
@@ -162,6 +173,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Features**: Automatic audit logging via triggers, JSONB metadata queries
 
 ### Documentation API (PostgreSQL + Prisma)
+
 - **Write Path**: REST API → Prisma Client → PostgreSQL → Response  
 - **Read Path**: REST API → Prisma queries → Type-safe results → JSON responses  
 - **Database**: `documentation-api` on port 5434  
@@ -172,6 +184,7 @@ TradingSystem operates a multi-store data platform with production-grade databas
 - **Features**: Automated migrations, type-safe queries, relation loading
 
 ### QuestDB Signals (Time-Series)
+
 - **Write Path**: Telegram → Parser → Validator → QuestDB ILP → Confirmation  
 - **Read Path**: Dashboard → REST API → QuestDB SQL → JSON responses  
 - **Ports**: 9009 (ILP), 8812 (PostgreSQL wire)  
@@ -181,11 +194,13 @@ TradingSystem operates a multi-store data platform with production-grade databas
   - Asset search: `WHERE asset LIKE '%PETR%'`  
 
 ### Market Data (Parquet)
+
 - **Write Path**: Data capture → Serializer → Parquet writer → Disk  
 - **Read Path**: Python scripts using Polars/Pandas → DataFrame analytics  
 - **Usage**: Time-range scans, symbol filters, aggregations for strategy research
 
 ### Legacy Idea Bank (LowDB)
+
 - **Current**: Reads/writes entire JSON file with synchronous I/O  
 - **Migration**: Planned Q1 2026 to PostgreSQL with proper schema and indexes
 

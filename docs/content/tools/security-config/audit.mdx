@@ -94,6 +94,7 @@ CREATE INDEX idx_audit_log_event_type ON audit_log(event_type, timestamp DESC);
 ### User Access Review (Quarterly)
 
 Checklist:
+
 - [ ] Inventory users with production access (DB, admin UIs, servers).  
 - [ ] Confirm role-based need for each user.  
 - [ ] Remove access for inactive or departed staff.  
@@ -103,6 +104,7 @@ Checklist:
 ### API Key Audit (Monthly)
 
 Steps:
+
 1. List all keys from `.env`.  
 2. Check last usage via logs or provider dashboards.  
 3. Rotate keys older than 180 days.  
@@ -115,6 +117,7 @@ Steps:
 ### Environment Variable Audit (Monthly)
 
 Checklist:
+
 - [ ] Run `bash scripts/env/validate-env.sh`.  
 - [ ] Verify permissions (`ls -la .env`).  
 - [ ] Review `.env.example` history (`git log .env.example`).  
@@ -135,6 +138,7 @@ Checklist:
 ### Order Audit (Daily)
 
 Steps:
+
 1. Fetch orders placed today (`GET /api/orders?startDate=today`).  
 2. Review large trades and unusual symbols.  
 3. Confirm each order passed risk checks.  

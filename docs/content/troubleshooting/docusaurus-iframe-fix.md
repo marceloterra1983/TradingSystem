@@ -22,6 +22,7 @@ lastReviewed: '2025-10-27'
 When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the "Docusaurus" tab, the Docusaurus documentation was not loading in the iframe. The iframe remained blank or showed errors.
 
 **Root Cause**:
+
 1. **Cross-Origin Issues**: Docusaurus was loading from `http://localhost:3400` (different port) into Dashboard iframe at `localhost:3103`
 2. **Browser Security**: Modern browsers block cross-origin iframes due to security policies
 3. **Asset Loading**: Even with CORS headers, Docusaurus assets (JS/CSS) failed to load due to same-origin policy
@@ -35,6 +36,7 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 Instead of loading Docusaurus from a different port (cross-origin), proxy it through the Dashboard's Vite dev server so it's served from the same origin (localhost:3103).
 
 **Benefits**:
+
 - ✅ No CORS issues (same origin)
 - ✅ No iframe security restrictions
 - ✅ JavaScript executes properly
@@ -50,6 +52,7 @@ Instead of loading Docusaurus from a different port (cross-origin), proxy it thr
 **File**: `frontend/dashboard/vite.config.ts`
 
 **Change 1 - Updated docs proxy target** (line 102):
+
 ```typescript
 // BEFORE
 const docsProxy = resolveProxy(
@@ -65,6 +68,7 @@ const docsProxy = resolveProxy(
 ```
 
 **Change 2 - Added Docusaurus asset proxies** (lines 138-146):
+
 ```typescript
 proxy: {
   // Docusaurus assets proxy (must come before /docs)
@@ -82,6 +86,7 @@ proxy: {
 ```
 
 **Why this works**:
+
 - `/docs/` → proxied to `http://localhost:3400/` (Docusaurus HTML)
 - `/assets/.*` → proxied to `http://localhost:3400/assets/.*` (CSS/JS)
 - `/img/.*` → proxied to `http://localhost:3400/img/.*` (Images)
@@ -94,6 +99,7 @@ proxy: {
 **File**: `frontend/dashboard/src/config/api.ts`
 
 **Change** (line 111):
+
 ```typescript
 // BEFORE
 docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || 'http://localhost:3400',
@@ -103,6 +109,7 @@ docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs',
 ```
 
 **Explanation**:
+
 - Dashboard iframe now loads from `/docs` (relative URL)
 - Vite proxies `/docs` → `http://localhost:3400`
 - Result: Same-origin request, no CORS issues
@@ -111,7 +118,7 @@ docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs',
 
 ## 🧪 Verification
 
-### ✅ All endpoints accessible:
+### ✅ All endpoints accessible
 
 ```bash
 # Dashboard main page
@@ -133,7 +140,7 @@ HTTP/1.1 200 OK
 Content-Type: image/svg+xml
 ```
 
-### ✅ Container status:
+### ✅ Container status
 
 ```bash
 $ docker ps --filter "name=documentation"
@@ -199,16 +206,19 @@ documentation   Up X minutes (healthy)   0.0.0.0:3400->80/tcp
 ### URL Structure
 
 **Through Dashboard (Proxied)**:
+
 - Main page: `http://localhost:3103/docs/`
 - Assets: `http://localhost:3103/assets/...`
 - Images: `http://localhost:3103/img/...`
 
 **Direct Access (NGINX)**:
+
 - Main page: `http://localhost:3400/`
 - Assets: `http://localhost:3400/assets/...`
 - Images: `http://localhost:3400/img/...`
 
 Both approaches work! You can access Docusaurus:
+
 1. **In Dashboard iframe** (proxied, same-origin)
 2. **Directly at port 3400** (NGINX, for standalone access)
 

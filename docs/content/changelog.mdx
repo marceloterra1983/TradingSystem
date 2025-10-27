@@ -17,6 +17,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 ## How to Update
 
 **Guidelines**:
+
 - Keep entries concise and focused
 - Group related changes together
 - Use present tense ("Add feature" not "Added feature")
@@ -26,6 +27,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 - Create new version sections when releasing
 
 **Categories**:
+
 - **Added**: New features
 - **Changed**: Changes in existing functionality
 - **Deprecated**: Soon-to-be removed features
@@ -34,6 +36,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 - **Security**: Security updates
 
 **Where to Document**:
+
 - **Project-level changes**: This file (affects multiple apps or platform)
 - **App-specific changes**: Per-app changelog (e.g., `apps/order-manager/changelog.mdx`)
 - **Tool-specific changes**: Per-tool changelog (e.g., `tools/docusaurus/changelog.mdx`)
@@ -44,6 +47,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 ### [Unreleased]
 
 **Added**:
+
 - Documentation migration to Docusaurus v3 (docs/)
 - Comprehensive prompt library for Agno Agents
 - PlantUML diagram consolidation (26 diagrams)
@@ -51,10 +55,12 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 - Central FAQ with 15+ common questions
 
 **Changed**:
+
 - Centralized environment configuration (config/.env.defaults)
 - Service port mappings (removed Traefik, direct port exposure)
 
 **Deprecated**:
+
 - Legacy docs/ (Docusaurus v2) - archived as docs_legacy/ after docs launch
 
 ---
@@ -64,6 +70,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 **Status**: Production
 
 **Highlights**:
+
 - Initial production release
 - Idea Bank/Workspace feature complete
 - TP Capital signal ingestion operational
@@ -72,6 +79,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 - Comprehensive documentation system
 
 **Added**:
+
 - ✅ Idea Bank/Workspace app (port 3102)
 - ✅ TP Capital signal ingestion (port 3200)
 - ✅ Dashboard with React 18 + Vite (port 3103)
@@ -82,15 +90,18 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 - ✅ Documentation system (Docusaurus v2)
 
 **Changed**:
+
 - Migrated from scattered .env files to centralized config/
 - Updated service port mappings (removed Traefik)
 
 **Fixed**:
+
 - Container startup issues with environment variables
 - CORS configuration for dashboard-API communication
 - QuestDB connection retry logic
 
 **Documentation**:
+
 - Release notes (migration pending)
 - Migration guide (migration pending)
 
@@ -126,6 +137,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
 ## Migration History
 
 **Documentation Migrations**:
+
 - **2025-10-24**: Migrated to Docusaurus v3 (docs/)
   - Phase 0: Catalog and mapping complete
   - Phase 1: Apps documentation migrated
@@ -134,6 +146,7 @@ This page serves as the central changelog index for TradingSystem, tracking proj
   - Phases 4-6: Pending (automation, review, cut-over)
 
 **Database Migrations**:
+
 - **Planned Q1 2026**: Idea Bank from LowDB to PostgreSQL
 
 **See**: [Migration History](./database/migrations)

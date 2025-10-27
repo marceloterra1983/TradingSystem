@@ -52,21 +52,25 @@ interface EventMetadata {
 ```
 
 **Naming**
+
 - Use dot notation `<entity>.<action>` (e.g., `order.created`, `risk.violation`)
 - Use past tense for actions
 - Use lowercase with dots
 
 **Versioning**
+
 - Include `version` field in event envelope (e.g., `"v1"`)
 - Breaking changes require new version (e.g., `"v2"`)
 - Maintain backward compatibility for 6 months
 
 **Ordering**
+
 - Events for same entity ordered by timestamp
 - No ordering guarantee across different entities
 - Consumers must handle out-of-order events
 
 **Idempotency**
+
 - Consumers must handle duplicate events
 - Use `eventId` for deduplication
 - At-least-once delivery semantics

@@ -30,12 +30,14 @@ This guide covers environment configuration for production deployment of contain
 ## Overview
 
 **Production services** require specific environment configuration for:
+
 - ✅ **Security** - Strong passwords, secret tokens, restricted CORS
 - ✅ **Performance** - Optimized connection pools, resource limits
 - ✅ **Reliability** - Proper logging, health checks, restart policies
 - ✅ **Monitoring** - Prometheus metrics, structured logging
 
 **Containerized services in production**:
+
 1. **TP Capital API** (Port 4005) - Trading signals ingestion
 2. **Workspace API** (Port 3200) - Ideas & documentation management
 3. **Telegram Gateway** (Port 4006) - Shared Telegram service (systemd)
@@ -58,6 +60,7 @@ TIMESCALEDB_PASSWORD="CHANGE_ME_STRONG_PASSWORD_32_CHARS"  # ⚠️ CHANGE THIS!
 ```
 
 **Generate strong password**:
+
 ```bash
 # Option 1: Using openssl
 openssl rand -base64 32
@@ -78,6 +81,7 @@ GATEWAY_SECRET_TOKEN="CHANGE_ME_STRONG_SECRET_TOKEN"  # ⚠️ CHANGE THIS!
 ```
 
 **Generate secret token**:
+
 ```bash
 # Format: gw_secret_{random_40_chars}
 echo "gw_secret_$(openssl rand -base64 30 | tr -d /=+ | head -c 40)"
@@ -163,6 +167,7 @@ deploy:
 ### 1. Secrets Management
 
 **✅ DO:**
+
 - Generate unique, strong passwords (32+ characters)
 - Use different passwords for each environment
 - Rotate secrets every 90 days
@@ -170,6 +175,7 @@ deploy:
 - Use `.env.production` separate from `.env.development`
 
 **❌ DON'T:**
+
 - Commit `.env` to Git (already in `.gitignore`)
 - Use default/example passwords in production
 - Share passwords via email/Slack
@@ -201,6 +207,7 @@ ports:
 ### 4. Container Security
 
 **Already configured in production Dockerfiles:**
+
 - ✅ Non-root user (`nodejs:1001`)
 - ✅ Multi-stage builds (smaller images)
 - ✅ Production-only dependencies
@@ -356,6 +363,7 @@ curl -H "Origin: https://evil.com" \
 **Cause:** Password mismatch between `.env.production` and database.
 
 **Solution:**
+
 ```bash
 # Check password in .env.production
 grep TIMESCALEDB_PASSWORD .env.production
@@ -373,6 +381,7 @@ docker compose -f tools/compose/docker-compose.apps.prod.yml restart
 **Cause:** CORS_ORIGIN not set to production domain.
 
 **Solution:**
+
 ```bash
 # Update .env.production
 CORS_ORIGIN=https://yourdomain.com
@@ -386,6 +395,7 @@ docker compose -f tools/compose/docker-compose.apps.prod.yml restart
 **Cause:** Service not ready or database connection failed.
 
 **Solution:**
+
 ```bash
 # Check container logs
 docker logs tp-capital-api --tail 100
@@ -402,6 +412,7 @@ docker logs workspace-service --tail 100
 **Cause:** Wrong env file path or permissions.
 
 **Solution:**
+
 ```bash
 # Verify file exists
 ls -la .env.production
@@ -432,6 +443,7 @@ After configuring production environment:
 **Last Updated**: 2025-10-25
 **Migration Status**: Phase 9 - Production Deployment
 **Related Docs**:
+
 - `PRODUCTION-DEPLOYMENT-CHECKLIST.md`
 - `DOCKER-QUICK-START.md` (development)
 - `docs/context/ops/ENVIRONMENT-CONFIGURATION.md`

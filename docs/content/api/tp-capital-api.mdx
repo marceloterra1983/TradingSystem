@@ -31,8 +31,8 @@ The **TP Capital API** provides comprehensive endpoints for managing trading sig
 | Property | Value |
 |----------|-------|
 | **Port** | 4005 |
-| **Base URL** | http://localhost:4005 |
-| **Reverse Proxy Route** | http://tradingsystem.local/api/tp-capital |
+| **Base URL** | <http://localhost:4005> |
+| **Reverse Proxy Route** | <http://tradingsystem.local/api/tp-capital> |
 | **Repository** | `apps/tp-capital/` |
 | **Database** | TimescaleDB (PostgreSQL) |
 | **Status** | ✅ Active |
@@ -46,6 +46,7 @@ Telegram Channels → Telegram Gateway → TP Capital API → TimescaleDB
 ```
 
 **Flow:**
+
 1. Telegram bots listen to configured channels
 2. Messages are forwarded to Telegram Gateway
 3. Gateway sends validated payloads to TP Capital via POST /ingest
@@ -61,6 +62,7 @@ curl http://localhost:4005/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",
@@ -91,6 +93,7 @@ curl http://localhost:4005/telegram/channels
 ```
 
 Response:
+
 ```json
 {
   "data": [
@@ -248,6 +251,7 @@ interface TelegramBot {
 Global rate limit: **120 requests per 60-second window** (via express-rate-limit)
 
 Rate limit headers included in all responses:
+
 - `RateLimit-Limit`: Maximum requests per window
 - `RateLimit-Remaining`: Remaining requests
 - `RateLimit-Reset`: Window reset time (Unix timestamp)
@@ -265,6 +269,7 @@ When rate limit is exceeded, the API returns **429 Too Many Requests**:
 **Current State**: No authentication required (internal service)
 
 **Security Recommendations**:
+
 - Production deployments should add API key or JWT authentication
 - The POST /ingest endpoint (Telegram Gateway → TP Capital) uses X-Gateway-Secret header
 - Public-facing deployments should implement rate limiting per user/API key
@@ -408,6 +413,7 @@ curl -X POST http://localhost:4005/reload-channels
 ### Common Errors
 
 **400 Bad Request - Missing Required Fields**:
+
 ```json
 {
   "error": "Validation failed",
@@ -416,6 +422,7 @@ curl -X POST http://localhost:4005/reload-channels
 ```
 
 **500 Internal Server Error - Database Failure**:
+
 ```json
 {
   "error": "Failed to fetch signals"
@@ -423,6 +430,7 @@ curl -X POST http://localhost:4005/reload-channels
 ```
 
 **503 Service Unavailable - Forwarder Not Running**:
+
 ```json
 {
   "error": "Forwarder not running"
@@ -432,11 +440,13 @@ curl -X POST http://localhost:4005/reload-channels
 ### Retry Strategy
 
 For **503 errors** (database connection failures):
+
 - Implement exponential backoff: 1s, 2s, 4s, 8s
 - Max retries: 3
 - Check `/health` endpoint to verify service recovery
 
 For **429 errors** (rate limiting):
+
 - Use `RateLimit-Reset` header to determine when to retry
 - Implement client-side rate limiting
 
@@ -453,6 +463,7 @@ The following endpoints are **deprecated** and will be removed in a future versi
 | `PUT /telegram-channels/:id` | `PUT /telegram/channels/:id` | ⚠️ Deprecated |
 
 **Migration Steps:**
+
 1. Update all API calls to use `/telegram/channels` instead of `/telegram-channels`
 2. No request/response format changes - endpoints are functionally identical
 3. Test updated integrations in development
@@ -471,11 +482,13 @@ curl http://localhost:4005/health
 ```
 
 **Healthy Response**:
+
 ```json
 { "status": "ok", "timescale": true }
 ```
 
 **Degraded Response** (TimescaleDB down):
+
 ```json
 { "status": "ok", "timescale": false }
 ```
@@ -491,6 +504,7 @@ curl http://localhost:4005/metrics
 ```
 
 **Key Metrics**:
+
 - `process_cpu_user_seconds_total` - CPU usage
 - `process_resident_memory_bytes` - Memory usage
 - `http_request_duration_ms` - Request latency
@@ -523,6 +537,7 @@ Log levels: `info`, `warn`, `error`, `debug`
 ## Support
 
 For issues, questions, or feature requests:
+
 - **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
 - **Documentation**: This page + OpenAPI spec at `/api/tp-capital`
 - **Source Code**: `apps/tp-capital/src/server.js`

@@ -23,6 +23,7 @@ TradingSystem uses structured prompts to guide LLM behavior in agent-based workf
 **Agent**: MarketAnalysisAgent
 
 **System Instructions**:
+
 ```
 You are a market analysis agent specialized in consolidating TP Capital signals 
 and Workspace insights. Your role is to identify trading opportunities by 
@@ -31,6 +32,7 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 ```
 
 **Input Template**:
+
 ```json
 {
   "task": "analyze_market",
@@ -48,6 +50,7 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 ```
 
 **Output Template**:
+
 ```json
 {
   "signals": [
@@ -76,6 +79,7 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 **Agent**: RiskManagementAgent
 
 **System Instructions**:
+
 ```
 You are a risk management agent responsible for validating trading signals 
 against risk limits. Check daily loss limits, position sizes, trading hours, 
@@ -84,6 +88,7 @@ Safety is your top priority.
 ```
 
 **Input Template**:
+
 ```json
 {
   "task": "validate_signal",
@@ -98,6 +103,7 @@ Safety is your top priority.
 ```
 
 **Output Template**:
+
 ```json
 {
   "approved": true,
@@ -126,6 +132,7 @@ Safety is your top priority.
 **Agent**: SignalOrchestratorAgent
 
 **System Instructions**:
+
 ```
 You are a signal orchestrator agent that coordinates decisions between 
 MarketAnalysisAgent and RiskManagementAgent. Your role is to manage the 
@@ -135,6 +142,7 @@ smooth communication between agents and handle errors gracefully.
 ```
 
 **Input Template**:
+
 ```json
 {
   "action": "ORCHESTRATE",
@@ -153,6 +161,7 @@ smooth communication between agents and handle errors gracefully.
 ### Market Analysis Template
 
 **Template**:
+
 ```
 System: {system_instructions}
 
@@ -169,6 +178,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 ```
 
 **Variables**:
+
 - `{system_instructions}`: MarketAnalysisAgent system prompt
 - `{task_json}`: JSON-encoded task and payload
 - `{symbols}`: List of symbols to analyze
@@ -177,6 +187,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 - `{tp_capital_signals}`: TP Capital signals array
 
 **Expected Output**:
+
 ```json
 {
   "signals": [
@@ -199,6 +210,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 ### Risk Validation Template
 
 **Template**:
+
 ```
 System: {system_instructions}
 
@@ -221,11 +233,13 @@ Provide approval decision with clear justification.
 ```
 
 **Variables**:
+
 - `{system_instructions}`: RiskManagementAgent system prompt
 - `{task_json}`: JSON-encoded task and payload
 - `{symbol}`, `{signal_type}`, `{confidence}`, `{price}`, `{timestamp}`: Signal fields
 
 **Expected Output**:
+
 ```json
 {
   "approved": true,
@@ -249,11 +263,13 @@ Provide approval decision with clear justification.
 ## Evaluation Criteria
 
 **Market Analysis**:
+
 - Correctness: Signal type matches market conditions
 - Performance: Analysis time &lt;1s p95
 - Quality: Signal accuracy, confidence calibration, reasoning clarity
 
 **Risk Validation**:
+
 - Correctness: All risk checks executed, approval matches results
 - Performance: Validation time &lt;500ms p95
 - Safety: False positive/negative rates, violation detection

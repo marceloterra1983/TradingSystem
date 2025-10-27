@@ -16,6 +16,7 @@ lastReviewed: '2025-10-27'
 This guide lists high‑value MCP servers for the TradingSystem stack and how to wire them with your environment. These servers expose core project context (files, GitHub), API contracts (OpenAPI), infra controls (Docker Compose), and data access (PostgreSQL).
 
 Config sources:
+
 - `.claude/mcp-servers.json` – template server definitions (project‑scoped)
 - `config/mcp/servers.json` – enables the recommended set for this repo
 - `.env` / `config/.env.defaults` – environment variables consumed by servers
@@ -74,11 +75,13 @@ MCP_OPENAPI_SPECS=docs/static/specs/workspace.openapi.yaml,docs/static/specs/doc
 Claude Code CLI (example):
 
 1) Install servers (adjust names to your chosen packages):
+
 ```
 npm i -g mcp-server-filesystem mcp-server-github mcp-server-openapi mcp-server-docker mcp-server-postgres
 ```
 
 2) Merge project template into `~/.claude.json`:
+
 ```
 bash scripts/setup/mcp-config.sh > /tmp/tradingsystem.mcp.json
 # open ~/.claude.json and paste servers from the output block

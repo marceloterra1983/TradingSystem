@@ -15,6 +15,7 @@ lastReviewed: '2025-10-27'
 ### v1.1.0 (2025-10-27) - Documentation & Standardization
 
 **Added**:
+
 - ✨ Complete documentation structure in `docs/content/apps/service-launcher/`
 - 📖 Comprehensive API documentation with examples
 - 🏗️ Architecture diagrams and design decisions
@@ -26,11 +27,13 @@ lastReviewed: '2025-10-27'
 - 📝 This changelog
 
 **Changed**:
+
 - 📚 Migrated documentation from `apps/status/README.md` to standardized structure
 - 🎯 Updated categorization: Infrastructure (was Tools)
 - 📖 Aligned documentation with other apps (Workspace, TP Capital, Telegram Gateway)
 
 **Fixed**:
+
 - 📝 TP Capital port corrected from 4007 to 4005 in CLAUDE.md
 - 📝 Consistent port references across all documentation
 
@@ -39,6 +42,7 @@ lastReviewed: '2025-10-27'
 ### v1.0.0 (2025-10-18) - Initial Stable Release
 
 **Added**:
+
 - ✅ Core service health monitoring (`/api/status`)
 - ✅ Comprehensive health checks (`/api/health/full`)
 - ✅ Terminal service launcher (`/launch`)
@@ -52,6 +56,7 @@ lastReviewed: '2025-10-27'
 - ✅ Centralized environment configuration
 
 **Monitored Services** (11 total):
+
 - Workspace API (3200)
 - TP Capital (4005)
 - Documentation API (3400)
@@ -64,6 +69,7 @@ lastReviewed: '2025-10-27'
 - Service Launcher itself (3500)
 
 **Dependencies**:
+
 - express: 4.18.2
 - helmet: 7.0.0
 - cors: 2.8.5
@@ -76,6 +82,7 @@ lastReviewed: '2025-10-27'
 ### v0.2.0 (2025-10-12) - Comprehensive Health Checks
 
 **Added**:
+
 - ✨ `/api/health/full` endpoint integrating bash script
 - ✨ Local services health check (via `ps aux`)
 - ✨ Docker containers health check (via `docker ps`)
@@ -85,10 +92,12 @@ lastReviewed: '2025-10-27'
 - ✨ Cache headers (`X-Cache-Status`, `X-Cache-Age`)
 
 **Changed**:
+
 - ⚡ Improved performance: &lt;10ms response time (cached)
 - 📊 Enhanced health status: healthy/degraded/critical
 
 **Dependencies**:
+
 - Requires: `scripts/maintenance/health-check-all.sh` (executable)
 - Requires: bash 4.x+, docker (optional), psql (optional)
 
@@ -97,6 +106,7 @@ lastReviewed: '2025-10-27'
 ### v0.1.0 (2025-09-15) - MVP Release
 
 **Added**:
+
 - ✨ Basic service health monitoring (`/api/status`)
 - ✨ Self health check (`/health`)
 - ✨ Configurable service ports via environment variables
@@ -106,6 +116,7 @@ lastReviewed: '2025-10-27'
 - ✨ Structured logging (Pino)
 
 **Initial Monitored Services** (9):
+
 - Workspace API
 - TP Capital
 - Documentation API
@@ -123,6 +134,7 @@ lastReviewed: '2025-10-27'
 ### v1.2.0 (Planned) - Metrics & Observability
 
 **Planned Features**:
+
 - [ ] Prometheus metrics endpoint (`/metrics`)
   - Service health gauge (ok/degraded/down)
   - Request rate counter
@@ -135,6 +147,7 @@ lastReviewed: '2025-10-27'
 ### v1.3.0 (Planned) - Enhanced Reliability
 
 **Planned Features**:
+
 - [ ] Circuit breaker for consistently failing services
 - [ ] Retry logic with exponential backoff
 - [ ] Health check plugins (extensible architecture)
@@ -144,12 +157,14 @@ lastReviewed: '2025-10-27'
 ### v2.0.0 (Future) - Remote Monitoring
 
 **Breaking Changes**:
+
 - Remote service monitoring (query services on different hosts)
 - Authentication middleware (JWT-based)
 - HTTPS support
 - Multi-datacenter support
 
 **Planned Features**:
+
 - [ ] Remote service monitoring
 - [ ] Authentication/authorization
 - [ ] HTTPS/TLS support
@@ -166,10 +181,12 @@ lastReviewed: '2025-10-27'
 **Breaking Changes**: None
 
 **New Features**:
+
 - Service launch endpoint (`/launch`)
 - Additional monitored services
 
 **Steps**:
+
 1. Stop service: `docker stop service-launcher`
 2. Pull latest code: `git pull`
 3. Update dependencies: `cd apps/status && npm install`
@@ -177,6 +194,7 @@ lastReviewed: '2025-10-27'
 5. Verify: `curl http://localhost:3500/health`
 
 **Configuration Changes**:
+
 - Optional: Add `SERVICE_LAUNCHER_USE_WT=true` for Windows Terminal support
 
 ---
@@ -186,10 +204,12 @@ lastReviewed: '2025-10-27'
 **Breaking Changes**: None
 
 **New Features**:
+
 - Comprehensive health checks (`/api/health/full`)
 - Caching
 
 **Steps**:
+
 1. Stop service
 2. Update code
 3. **Ensure health check script is executable**: `chmod +x scripts/maintenance/health-check-all.sh`
@@ -197,6 +217,7 @@ lastReviewed: '2025-10-27'
 5. Test new endpoint: `curl http://localhost:3500/api/health/full`
 
 **Configuration Changes**:
+
 - Optional: `HEALTH_CHECK_TIMEOUT_MS=10000`
 - Optional: `HEALTH_CHECK_SCRIPT_PATH=scripts/maintenance/health-check-all.sh`
 
@@ -211,12 +232,14 @@ lastReviewed: '2025-10-27'
 ### v1.0.0
 
 **Minor Issues**:
+
 - Cache not distributed (single-server only)
 - No metrics endpoint (Prometheus integration not implemented)
 - Terminal launcher limited support on Linux (gnome-terminal, konsole, xterm only)
 - Health check script requires bash (not pure Node.js)
 
 **Workarounds**:
+
 - Cache: Acceptable for local development (primary use case)
 - Metrics: Use logs for monitoring (until v1.2.0)
 - Terminal: Most common terminals supported
@@ -235,6 +258,7 @@ lastReviewed: '2025-10-27'
 **None** - No security vulnerabilities reported.
 
 **Security Best Practices**:
+
 - ✅ Never expose Service Launcher to public internet
 - ✅ Use CORS to restrict origins
 - ✅ Enable rate limiting
@@ -246,9 +270,11 @@ lastReviewed: '2025-10-27'
 ## Contributors
 
 **Maintainers**:
+
 - TradingSystem Team
 
 **Special Thanks**:
+
 - Claude Code (documentation generation)
 - Node.js community (dependencies)
 - Express.js team (web framework)
@@ -285,6 +311,7 @@ Service Launcher follows [Semantic Versioning 2.0.0](https://semver.org/):
 ## Support
 
 **Documentation**:
+
 - [Overview](./overview) - Purpose and architecture
 - [API Documentation](./api) - REST endpoints
 - [Configuration](./config) - Environment setup
@@ -293,9 +320,11 @@ Service Launcher follows [Semantic Versioning 2.0.0](https://semver.org/):
 - [Runbook](./runbook) - Troubleshooting guide
 
 **Issues**:
+
 - Report bugs: GitHub Issues (internal repository)
 - Feature requests: GitHub Discussions
 
 **Community**:
+
 - Slack: #tradingsystem-platform channel
-- Email: platform-team@tradingsystem.local
+- Email: <platform-team@tradingsystem.local>

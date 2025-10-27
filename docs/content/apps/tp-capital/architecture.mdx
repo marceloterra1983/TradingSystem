@@ -19,6 +19,7 @@ lastReviewed: '2025-10-26'
 Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints), Dashboard consumption (React Query with 15s polling), and Agno Agents integration (parallel signal consumption).
 
 **Key Components**:
+
 1. **Telegram Gateway**: Local service (port 4006/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
 2. **Gateway Polling Worker**: TP Capital component that fetches queued messages, validates content, and applies parsing rules.
 3. **Timescale Writer**: Persists normalized signals into `tp_capital.tp_capital_signals` with idempotency checks.

@@ -14,6 +14,7 @@ MCP servers in TradingSystem operate with granular permissions defined in the `.
 ### Available Scopes
 
 **File Operations**:
+
 - `Read`: Read file contents from allowed directories
 - `Write`: Create new files in allowed directories
 - `Edit`: Modify existing files
@@ -21,21 +22,25 @@ MCP servers in TradingSystem operate with granular permissions defined in the `.
 - `Grep`: Text search within files
 
 **Shell Operations**:
+
 - `Bash`: Execute shell commands (with confirmation for destructive operations)
 - `BashOutput`: Capture command output
 - `KillShell`: Terminate shell processes
 
 **Development Operations**:
+
 - `Task`: Create and manage tasks
 - `TodoWrite`: Create TODO items
 - `NotebookEdit`: Edit Jupyter notebooks
 - `SlashCommand`: Execute custom commands (e.g., `/health-check`, `/git-workflows`)
 
 **External Access**:
+
 - `WebFetch`: Make HTTP requests to external URLs
 - `WebSearch`: Perform web searches
 
 **Workflow Control**:
+
 - `ExitPlanMode`: Exit planning mode and execute actions
 
 ### Permission Matrix
@@ -53,14 +58,17 @@ MCP servers in TradingSystem operate with granular permissions defined in the `.
 ### Allowed Directories
 
 **Permitted Paths**:
+
 - `/home/marce/Projetos/TradingSystem` (full repository access)
 
 **Restricted Paths**:
+
 - System directories (e.g., `/etc`, `/usr`, `/var`)
 - Parent directories (e.g., `/home/marce/Projetos/`)
 - Hidden files outside project (e.g., `~/.ssh`, `~/.aws`)
 
 **Adding Directories**:
+
 ```bash
 claude --add-dir /path/to/directory
 cat ~/.claude.json | jq '.projects[].allowedDirectories'
@@ -71,6 +79,7 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ### Automatic Approval
 
 **Read Operations** (no confirmation required):
+
 - Read file contents
 - List directory contents
 - Search files (Glob, Grep)
@@ -79,6 +88,7 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 - Retrieve memory values
 
 **Non-Destructive Writes** (no confirmation required):
+
 - Create new files
 - Update existing files (with backup)
 - Store memory values
@@ -87,23 +97,27 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ### Confirmation Required
 
 **Destructive Operations**:
+
 - Delete files
 - Force push to Git
 - Overwrite files without backup
 - Execute system commands (sudo)
 
 **Security-Sensitive Operations**:
+
 - Modify `.env` file
 - Update Git configuration
 - Change file permissions
 - Access credential files
 
 **Multi-File Operations**:
+
 - Batch file updates (&gt;10 files)
 - Recursive directory operations
 - Mass deletions
 
 **Confirmation Flow**:
+
 1. MCP server requests operation
 2. Claude Code CLI prompts user for confirmation
 3. User approves or denies
@@ -113,21 +127,25 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ### Escalation Paths
 
 **Level 1: User Confirmation**
+
 - Destructive operations
 - Security-sensitive changes
 - Multi-file operations
 
 **Level 2: Team Lead Approval**
+
 - Production deployments
 - Database migrations
 - Architecture changes
 
 **Level 3: Security Review**
+
 - New MCP server integration
 - Permission scope expansion
 - External API access
 
 **Escalation Contacts**:
+
 - User: Immediate confirmation via CLI prompt
 - Team Lead: Slack notification + approval workflow
 - Security: Email + formal review process
@@ -137,12 +155,14 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ### Review Cadences
 
 **Weekly Reviews**:
+
 - Review MCP operation logs (`~/.claude/debug/`)
 - Check for failed operations or errors
 - Identify unusual access patterns
 - Validate server health (`claude mcp list`)
 
 **Monthly Reviews**:
+
 - Audit MCP server permissions
 - Review allowed directories
 - Check for unused servers (remove if inactive)
@@ -150,6 +170,7 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 - Rotate API tokens (if HTTP transport used)
 
 **Quarterly Reviews**:
+
 - Comprehensive security audit
 - Review and update permission scopes
 - Evaluate new MCP server integrations
@@ -159,12 +180,14 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ### Logging Expectations
 
 **Required Logging**:
+
 - All MCP operations (read, write, execute)
 - Operation timestamp, server, user, result
 - Error details (stack traces for failures)
 - Performance metrics (latency, throughput)
 
 **Log Format**:
+
 ```json
 {
   "timestamp": "2025-10-24T10:30:45.123Z",
@@ -179,12 +202,14 @@ cat ~/.claude.json | jq '.projects[].allowedDirectories'
 ```
 
 **Log Storage**:
+
 - Location: `~/.claude/debug/`
 - Retention: 30 days
 - Rotation: Daily
 - Format: JSONL (one JSON object per line)
 
 **Log Analysis**:
+
 ```bash
 tail -f ~/.claude/debug/mcp-operations.jsonl
 cat ~/.claude/debug/mcp-operations.jsonl | jq -r '.server' | sort | uniq -c
@@ -194,17 +219,20 @@ cat ~/.claude/debug/mcp-operations.jsonl | jq 'select(.result == "error")'
 ### Audit Requirements
 
 **Audit Trail**:
+
 - All write operations logged
 - All destructive operations logged
 - All permission denials logged
 - All authentication failures logged
 
 **Audit Reports**:
+
 - Weekly: MCP operation summary (counts by server, errors)
 - Monthly: Permission usage analysis (identify unused permissions)
 - Quarterly: Security audit (review all operations, identify anomalies)
 
 **Compliance**:
+
 - Retain audit logs for 1 year
 - Provide audit reports on request
 - Support forensic analysis (incident investigation)
@@ -212,6 +240,7 @@ cat ~/.claude/debug/mcp-operations.jsonl | jq 'select(.result == "error")'
 ### Permission Changes
 
 **Adding New Permissions**:
+
 1. Document justification (why needed)
 2. Submit PR with `.claude-plugin` changes
 3. Security review (assess risk)
@@ -220,6 +249,7 @@ cat ~/.claude/debug/mcp-operations.jsonl | jq 'select(.result == "error")'
 6. Deploy and monitor
 
 **Removing Permissions**:
+
 1. Identify unused permissions (audit logs)
 2. Verify no active usage (30-day lookback)
 3. Submit PR with removal
@@ -227,6 +257,7 @@ cat ~/.claude/debug/mcp-operations.jsonl | jq 'select(.result == "error")'
 5. Monitor for issues (7-day window)
 
 **Emergency Revocation**:
+
 1. Detect security incident (unauthorized access)
 2. Immediately revoke permissions (update `.claude-plugin`)
 3. Restart Claude Code CLI

@@ -87,10 +87,12 @@ poetry run black --check .
 6. **Monitoring**: Track accuracy, precision, recall, and drift indicators.
 
 **Incremental Learning**:
+
 - Use `SGDClassifier.partial_fit()` to update models with daily market data.
 - Rebuild from scratch monthly to mitigate drift.
 
 **Backtesting**:
+
 - Replay historical data with time-travel simulation.
 - Measure Sharpe ratio, max drawdown, and win rate.
 - Produce reports with visual summaries.

@@ -216,6 +216,7 @@ order_manager_position_size_limit{symbol="PETR4"} 1000
 ## Testing
 
 ### Unit Tests
+
 - Daily loss limit boundary conditions.  
 - Position size enforcement for long/short scenarios.  
 - Trading hour validation pre/post market.  
@@ -223,12 +224,14 @@ order_manager_position_size_limit{symbol="PETR4"} 1000
 - Kill switch activation/deactivation behavior.
 
 ### Integration Tests
+
 - Successful order under thresholds.  
 - Rejected order exceeding daily loss, position size, or trading hours.  
 - Kill switch block on new orders.  
 - Risk limit updates applied without restart.
 
 ### Load Tests
+
 - 100 orders/second synthetic load; ensure &lt;100 ms p95 risk check time.  
 - Validate database query performance under contention.
 

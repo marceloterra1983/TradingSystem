@@ -23,6 +23,7 @@ Agno Agents use structured prompts to guide LLM behavior when `AGNO_ENABLE_LLM=t
 Each agent has a system instruction that defines its role and behavior:
 
 **MarketAnalysisAgent**:
+
 ```
 You are a market analysis agent specialized in consolidating TP Capital signals 
 and Workspace insights. Your role is to identify trading opportunities by 
@@ -31,6 +32,7 @@ Provide clear BUY/SELL/HOLD recommendations with confidence scores.
 ```
 
 **RiskManagementAgent**:
+
 ```
 You are a risk management agent responsible for validating trading signals 
 against risk limits. Check daily loss limits, position sizes, trading hours, 
@@ -39,6 +41,7 @@ Safety is your top priority.
 ```
 
 **SignalOrchestratorAgent**:
+
 ```
 You are a signal orchestrator agent that coordinates decisions between 
 MarketAnalysisAgent and RiskManagementAgent. Your role is to manage the 
@@ -50,6 +53,7 @@ smooth communication between agents and handle errors gracefully.
 ### Input Variables
 
 **MarketAnalysisAgent Input**:
+
 ```json
 {
   "task": "analyze_market",
@@ -67,6 +71,7 @@ smooth communication between agents and handle errors gracefully.
 ```
 
 **RiskManagementAgent Input**:
+
 ```json
 {
   "task": "validate_signal",
@@ -81,6 +86,7 @@ smooth communication between agents and handle errors gracefully.
 ```
 
 **SignalOrchestratorAgent Input**:
+
 ```json
 {
   "action": "ORCHESTRATE",
@@ -94,18 +100,21 @@ smooth communication between agents and handle errors gracefully.
 ### Context Windows
 
 **MarketAnalysisAgent**:
+
 - **TP Capital Signals**: Last 100 signals (configurable via `limit` parameter)
 - **Workspace Ideas**: All active ideas (filtered by symbol if applicable)
 - **Workspace Insight Scores**: Optional teses/ratings associadas às ideias
 - **Context Size**: ~2000 tokens (varies by data volume)
 
 **RiskManagementAgent**:
+
 - **Signal Context**: Single MarketSignal entity
 - **Risk Limits**: Current daily loss, position sizes, trading hours
 - **Historical Context**: Not used (stateless validation)
 - **Context Size**: ~500 tokens
 
 **SignalOrchestratorAgent**:
+
 - **Workflow Context**: Orchestration request + agent responses
 - **Agent Metadata**: Agents involved, processing times
 - **Context Size**: ~1000 tokens
@@ -117,6 +126,7 @@ smooth communication between agents and handle errors gracefully.
 **Output Format**: JSON (structured responses)
 
 **MarketAnalysisAgent Output**:
+
 ```json
 {
   "signals": [
@@ -139,6 +149,7 @@ smooth communication between agents and handle errors gracefully.
 ```
 
 **RiskManagementAgent Output**:
+
 ```json
 {
   "approved": true,
@@ -161,6 +172,7 @@ smooth communication between agents and handle errors gracefully.
 ### Example 1: Market Analysis with LLM
 
 **Request**:
+
 ```bash
 curl -X POST http://localhost:8200/api/v1/agents/analyze \
   -H "Content-Type: application/json" \
@@ -171,6 +183,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
 ```
 
 **Expected Response**:
+
 ```json
 {
   "signals": [
@@ -193,6 +206,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
 ```
 
 **Evaluation Notes**:
+
 - LLM integrou sinal do TP Capital com contexto do Workspace
 - Confidence score (0.85) reflects strong signal alignment
 - Reasoning provides clear justification
@@ -203,6 +217,7 @@ curl -X POST http://localhost:8200/api/v1/agents/analyze \
 ### Example 2: Risk Validation (Rejection)
 
 **Request**:
+
 ```bash
 curl -X POST http://localhost:8200/api/v1/agents/signals \
   -H "Content-Type: application/json" \
@@ -225,6 +240,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ```
 
 **Expected Response**:
+
 ```json
 {
   "result": {
@@ -250,6 +266,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ```
 
 **Evaluation Notes**:
+
 - Risk check correctly identified trading hours violation
 - Signal rejected with clear reason
 - Fast processing time (0.15s) due to early failure (trading hours check first)
@@ -261,6 +278,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 **Configuration**: `AGNO_ENABLE_LLM=false`
 
 **Request**:
+
 ```bash
 curl -X POST http://localhost:8200/api/v1/agents/signals \
   -H "Content-Type: application/json" \
@@ -274,6 +292,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ```
 
 **Expected Response**:
+
 ```json
 {
   "result": {
@@ -313,6 +332,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ```
 
 **Evaluation Notes**:
+
 - LLM disabled, fallback heuristics used
 - TP Capital signal converted to MarketSignal format
 - Risk validation passed (all checks true)
@@ -376,11 +396,13 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ### Context Control
 
 **Market Data Context**:
+
 - Time window: Last 24 hours (hardcoded)
 - Symbol filter: Only requested symbols
 - Data sources: TP Capital (optional), Workspace (optional)
 
 **Signal Context**:
+
 - TP Capital limit: 100 signals (configurable in client call)
 - Workspace ideas: All active ideas (no limit)
 - Workspace context: Optional metadata (thesis, rating)
@@ -390,6 +412,7 @@ curl -X POST http://localhost:8200/api/v1/agents/signals \
 ### Market Analysis Prompt Template
 
 **Template**:
+
 ```
 System: {system_instructions}
 
@@ -406,6 +429,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 ```
 
 **Variables**:
+
 - `{system_instructions}`: MarketAnalysisAgent system prompt
 - `{task_json}`: JSON-encoded task and payload
 - `{symbols}`: List of symbols to analyze
@@ -414,6 +438,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 - `{tp_capital_signals}`: TP Capital signals array
 
 **Expected Output**:
+
 ```json
 {
   "signals": [
@@ -436,6 +461,7 @@ Generate BUY/SELL/HOLD signals with confidence scores for each symbol.
 ### Risk Validation Prompt Template
 
 **Template**:
+
 ```
 System: {system_instructions}
 
@@ -458,11 +484,13 @@ Provide approval decision with clear justification.
 ```
 
 **Variables**:
+
 - `{system_instructions}`: RiskManagementAgent system prompt
 - `{task_json}`: JSON-encoded task and payload
 - `{symbol}`, `{signal_type}`, `{confidence}`, `{price}`, `{timestamp}`: Signal fields
 
 **Expected Output**:
+
 ```json
 {
   "approved": true,
@@ -480,16 +508,19 @@ Provide approval decision with clear justification.
 ### Market Analysis Evaluation
 
 **Correctness**:
+
 - Signal type matches market conditions (BUY on uptrend, SELL on downtrend)
 - Confidence score correlates with signal strength
 - Price recommendation is actionable (within current market range)
 
 **Performance**:
+
 - Analysis time &lt;1s p95
 - No LLM timeout errors
 - Fallback heuristics work when LLM unavailable
 
 **Quality Metrics**:
+
 - Signal accuracy (backtesting)
 - Confidence calibration (high confidence → high win rate)
 - Reasoning clarity (human-readable explanations)
@@ -499,16 +530,19 @@ Provide approval decision with clear justification.
 ### Risk Validation Evaluation
 
 **Correctness**:
+
 - All risk checks executed (trading hours, daily loss, position size)
 - Approval decision matches check results (all pass → approve)
 - Rejection reasons are clear and actionable
 
 **Performance**:
+
 - Validation time &lt;500ms p95
 - No risk engine timeout errors
 - Graceful degradation when risk engine unavailable
 
 **Safety Metrics**:
+
 - False positive rate (approved signals that should be rejected)
 - False negative rate (rejected signals that should be approved)
 - Risk violation detection rate

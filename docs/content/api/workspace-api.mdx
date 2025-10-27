@@ -29,8 +29,8 @@ The **Workspace API** (also known as Library API or Idea Bank API) provides a si
 | Property | Value |
 |----------|-------|
 | **Port** | 3200 |
-| **Base URL** | http://localhost:3200 |
-| **Reverse Proxy Route** | http://tradingsystem.local/api/workspace |
+| **Base URL** | <http://localhost:3200> |
+| **Reverse Proxy Route** | <http://tradingsystem.local/api/workspace> |
 | **Repository** | `backend/api/workspace/` |
 | **Database** | QuestDB (primary), LowDB (fallback) |
 | **Status** | ✅ Active |
@@ -44,6 +44,7 @@ curl http://localhost:3200/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",
@@ -151,6 +152,7 @@ type Priority = 'low' | 'medium' | 'high' | 'critical';
 Global rate limit: **300 requests per 60-second window** (via express-rate-limit)
 
 Response headers:
+
 - `RateLimit-Limit`: 300
 - `RateLimit-Remaining`: Number of requests remaining
 - `RateLimit-Reset`: Unix timestamp when limit resets
@@ -239,6 +241,7 @@ curl http://localhost:3200/health
 ```
 
 Health check includes:
+
 - Service uptime
 - QuestDB connectivity
 - LowDB availability
@@ -390,6 +393,7 @@ See: [Idea Bank Feature Documentation](../apps/workspace/overview.mdx)
 ### Common Issues
 
 **Cannot connect to QuestDB**
+
 ```bash
 # Check QuestDB status
 curl http://localhost:9000/
@@ -401,6 +405,7 @@ docker ps | grep questdb
 ```
 
 **Rate limit exceeded**
+
 ```bash
 # Wait for rate limit window to reset (60 seconds)
 # Or implement client-side rate limiting
@@ -410,6 +415,7 @@ curl -I http://localhost:3200/api/items
 ```
 
 **Items not persisting**
+
 ```bash
 # Check database connection
 curl http://localhost:3200/health
@@ -422,6 +428,7 @@ docker logs questdb
 ```
 
 **Slow response times**
+
 ```bash
 # Check metrics
 curl http://localhost:3200/metrics | grep duration
@@ -434,6 +441,7 @@ npm run dev
 ## Changelog
 
 ### v1.0.0 (2025-10-25)
+
 - ✅ Initial release with CRUD operations
 - ✅ QuestDB and LowDB dual-strategy
 - ✅ Prometheus metrics integration
@@ -442,6 +450,7 @@ npm run dev
 - ✅ OpenAPI specification
 
 ### Roadmap
+
 - [ ] GraphQL support
 - [ ] WebSocket for real-time updates
 - [ ] Bulk operations API

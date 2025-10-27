@@ -26,6 +26,7 @@ lastReviewed: '2025-10-26'
 - **Purpose**: Execute trading orders with integrated risk management and position tracking.
 
 **Core Responsibilities**:
+
 1. Receive order requests from API Gateway (port 8000)
 2. Apply risk checks: daily loss limits, position size limits, trading hours validation
 3. Execute orders via ProfitDLL integration
@@ -101,6 +102,7 @@ All responses use the standard envelope:
 ```
 
 **Validation Rules**:
+
 - `symbol`: Required, must exist in market data
 - `side`: Required, enum [BUY, SELL]
 - `type`: Required, enum [MARKET, LIMIT, STOP, STOP_LIMIT]
@@ -111,6 +113,7 @@ All responses use the standard envelope:
 - `idempotencyKey`: Optional UUID v4
 
 **Risk Checks**:
+
 1. Trading hours: 09:00-18:00 BRT
 2. Daily loss limit: Reject if exceeded
 3. Position size limit: Validate per symbol
@@ -137,6 +140,7 @@ All responses use the standard envelope:
 ```
 
 **Error Responses**:
+
 - 400 Bad Request: Validation failure
 - 403 Forbidden: Risk check failed
 - 500 Internal Server Error: ProfitDLL connection failure
@@ -148,6 +152,7 @@ All responses use the standard envelope:
 **Purpose**: List orders with filters
 
 **Query Parameters**:
+
 - `status`: Optional, enum [PENDING, SUBMITTED, PARTIALLY_FILLED, FILLED, CANCELED, FAILED, EXPIRED, REJECTED]
 - `symbol`: Optional, symbol filter
 - `side`: Optional, enum [BUY, SELL]
@@ -226,6 +231,7 @@ All responses use the standard envelope:
 ```
 
 **Error Responses**:
+
 - 404 Not Found: Order ID not found
 
 ---
@@ -251,6 +257,7 @@ All responses use the standard envelope:
 ```
 
 **Error Responses**:
+
 - 404 Not Found: Order ID not found
 - 400 Bad Request: Order already filled
 
@@ -306,6 +313,7 @@ All responses use the standard envelope:
 ```
 
 **Validation Rules**:
+
 - `dailyLossLimit`: Required, number between 100 and 1_000_000 (BRL)
 - `maxPositionSize`: Required, object of symbol → positive integer (1–10_000)
 - `tradingHours.start` and `.end`: Required HH:MM (24h), `start` < `end`
@@ -336,6 +344,7 @@ All responses use the standard envelope:
 ```
 
 **Error Responses**:
+
 - 400 Bad Request: Validation failure (e.g., invalid symbol, missing trading hours)
 - 403 Forbidden: Kill switch is active or caller lacks permission (future auth)
 - 409 Conflict: Optimistic concurrency failure when a `version` field is provided (future enhancement)
@@ -409,6 +418,7 @@ All responses use the standard envelope:
 ```
 
 **Error Responses**:
+
 - 500 Internal Server Error: Position service unavailable
 - 503 Service Unavailable: Downstream market data source offline
 

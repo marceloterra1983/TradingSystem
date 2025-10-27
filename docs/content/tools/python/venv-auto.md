@@ -1,4 +1,4 @@
-# 🎯 Venv Automático por Projeto - CONFIGURADO!
+# 🎯 Venv Automático por Projeto - CONFIGURADO
 
 ## ✅ Como Funciona Agora
 
@@ -9,11 +9,13 @@ O terminal **detecta automaticamente** qual projeto você está e **ativa o venv
 ## 🚀 Uso Simples
 
 ### **Clique no "+"**
+
 ```
 Abre bash → Detecta projeto → Ativa venv automaticamente! 🎉
 ```
 
 ### **Resultado:**
+
 ```bash
 ✅ Ambiente virtual ativado automaticamente!
 📍 Python: Python 3.12.3
@@ -29,18 +31,21 @@ Abre bash → Detecta projeto → Ativa venv automaticamente! 🎉
 Agora você tem **3 perfis** disponíveis:
 
 ### **1. bash (Padrão)** ⭐
+
 - **Ativação:** Clique no "+"
 - **Comportamento:** Ativa venv automaticamente conforme o projeto
 - **Ícone:** 💻 Terminal
 - **Uso:** Desenvolvimento normal (venv sempre ativo)
 
 ### **2. bash-clean**
+
 - **Ativação:** Clique na ▼ → Selecione "bash-clean"
 - **Comportamento:** Bash puro, SEM venv
 - **Ícone:** 🔧 Terminal bash
 - **Uso:** Quando NÃO quer venv (raro)
 
 ### **3. venv** (legado)
+
 - **Ativação:** Clique na ▼ → Selecione "venv"
 - **Comportamento:** Igual ao bash (ativa venv)
 - **Ícone:** 🐍 Cobra verde
@@ -65,6 +70,7 @@ Clique na **▼** ao lado do "+" para ver:
 ## 💡 Como Funciona "Por Projeto"
 
 ### **Projeto CursoLangChain:**
+
 ```bash
 cd ~/Projetos/CursoLangChain
 cursor .
@@ -75,6 +81,7 @@ cursor .
 ```
 
 ### **Projeto TradingSystem:**
+
 ```bash
 cd ~/Projetos/TradingSystem
 cursor .
@@ -85,6 +92,7 @@ cursor .
 ```
 
 ### **Qualquer Outro Projeto:**
+
 ```bash
 cd ~/Projetos/OutroProjeto
 # Se tiver venv/ → Ativa automaticamente
@@ -116,6 +124,7 @@ fi
 ## 🧪 Teste Agora
 
 ### **Teste 1: CursoLangChain**
+
 ```
 1. Abrir CursoLangChain no Cursor
 2. Ctrl+Shift+P → Reload Window
@@ -125,6 +134,7 @@ fi
 ```
 
 ### **Teste 2: TradingSystem**
+
 ```
 1. Abrir TradingSystem no Cursor
 2. Ctrl+Shift+P → Reload Window
@@ -134,6 +144,7 @@ fi
 ```
 
 ### **Teste 3: Bash Limpo (quando NÃO quer venv)**
+
 ```
 1. Clique na ▼ ao lado do "+"
 2. Selecione "bash-clean"
@@ -157,6 +168,7 @@ fi
 ## 🎯 Casos de Uso
 
 ### **Caso 1: Desenvolvimento Python Normal**
+
 ```bash
 # Abrir projeto
 cursor ~/Projetos/CursoLangChain
@@ -167,6 +179,7 @@ pip install package       # Instala no venv ✅
 ```
 
 ### **Caso 2: Múltiplos Projetos**
+
 ```bash
 # Projeto 1
 cursor ~/Projetos/CursoLangChain
@@ -180,6 +193,7 @@ cursor ~/Projetos/TradingSystem
 ```
 
 ### **Caso 3: Comandos Git/Sistema (com venv ativo)**
+
 ```bash
 # Venv ativo, mas comandos gerais funcionam normalmente:
 git status        ✅
@@ -191,6 +205,7 @@ npm install       ✅
 ```
 
 ### **Caso 4: Precisa de Bash Puro**
+
 ```bash
 # Clique ▼ → "bash-clean"
 # Bash sem venv para tarefas específicas
@@ -201,6 +216,7 @@ npm install       ✅
 ## 🔧 Configuração Técnica
 
 ### **Profile "bash" (Padrão):**
+
 ```json
 {
   "bash": {
@@ -212,11 +228,13 @@ npm install       ✅
 ```
 
 **Explicação:**
+
 - `--init-file`: Usa o `.bashrc` do projeto
 - `.bashrc`: Contém lógica de detecção e ativação do venv
 - Cada projeto tem seu próprio `.bashrc`
 
 ### **Fluxo de Ativação:**
+
 ```
 1. Clique "+" no projeto
    ↓
@@ -251,6 +269,7 @@ npm install       ✅
 ## 🔄 Comparação com Antes
 
 ### **Workflow Antes:**
+
 ```
 1. Abrir projeto
 2. Abrir terminal
@@ -262,6 +281,7 @@ npm install       ✅
 ```
 
 ### **Workflow Agora:**
+
 ```
 1. Abrir projeto
 2. Clique "+"
@@ -278,6 +298,7 @@ npm install       ✅
 ## 📝 Arquivos Envolvidos
 
 ### **Por Projeto:**
+
 ```
 Projeto/
 ├── .vscode/
@@ -287,6 +308,7 @@ Projeto/
 ```
 
 ### **Global:**
+
 ```
 ~/
 └── .bashrc                ← Configurações pessoais (preservadas)
@@ -299,34 +321,40 @@ Projeto/
 ### **Venv não ativa automaticamente:**
 
 1. **Verificar se venv existe:**
+
    ```bash
    ls -la venv/
    # Deve mostrar diretórios bin, lib, etc
    ```
 
 2. **Verificar .bashrc do projeto:**
+
    ```bash
    ls -la .bashrc
    # Deve existir na raiz do projeto
    ```
 
 3. **Testar manualmente:**
+
    ```bash
    bash --init-file .bashrc
    # Deve ativar venv e mostrar mensagem
    ```
 
 4. **Recarregar Cursor:**
+
    ```
    Ctrl+Shift+P → Reload Window
    ```
 
 ### **Quer bash sem venv:**
+
 ```
 Clique ▼ → Selecione "bash-clean"
 ```
 
 ### **Venv ativo mas Python errado:**
+
 ```bash
 which python
 # Deve mostrar: /home/marce/Projetos/[Projeto]/venv/bin/python
@@ -343,6 +371,7 @@ source venv/bin/activate
 ### **Por que funciona "por projeto"?**
 
 Cada projeto tem seu próprio `.bashrc` que:
+
 1. Detecta o diretório do projeto (`$PROJECT_DIR`)
 2. Verifica se existe `venv/` naquele diretório
 3. Ativa o venv específico daquele projeto
@@ -363,16 +392,19 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ## ✅ Resumo Final
 
 **Configuração:**
+
 - Terminal padrão: bash (com venv automático)
 - Bash limpo disponível via menu
 - Detecção automática por projeto
 
 **Aplicado em:**
+
 - ✅ CursoLangChain
 - ✅ TradingSystem
 - ✅ Qualquer projeto futuro com .bashrc configurado
 
 **Resultado:**
+
 - 🚀 Produtividade aumentada
 - 🎯 Venv sempre correto
 - ⚡ Ativação instantânea
@@ -384,4 +416,3 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 **Documentação:** `VENV_AUTOMATICO_POR_PROJETO.md`  
 **Última atualização:** $(date)
-

@@ -100,6 +100,7 @@ interface EventMetadata {
 ### When Emitted
 
 The event is emitted when:
+
 1. Client sends `POST /api/orders` request
 2. Request passes input validation (required fields, types, formats)
 3. Order passes all risk checks (trading hours, kill switch, daily loss, position size, margin)
@@ -113,27 +114,32 @@ The event is emitted when:
 ### Downstream Consumers
 
 **Dashboard** (port 3103)
+
 - Listens for `order.created` events via WebSocket (planned)
 - Updates order list in real-time
 - Displays notification: "Order ORD-20251024-001 created"
 
 **Audit Service** (planned)
+
 - Persists all events to audit log database
 - Enables compliance reporting and debugging
 - Retention: 1 year
 
 **Analytics Pipeline** (planned)
+
 - Aggregates order creation metrics
 - Tracks order volume by symbol, side, type
 - Feeds Grafana dashboards
 
 **Monitoring**
+
 - Increment counter `order_manager_orders_total{side="BUY",status="PENDING"}`
 - Record latency `order_manager_execution_latency_seconds`
 
 ### Event Ordering
 
 Events for the same order are emitted in sequence:
+
 1. `order.created` (status: PENDING)
 2. `order.submitted` (status: SUBMITTED)
 3. `order.filled` or `order.canceled` or `order.rejected` (terminal state)
@@ -144,10 +150,12 @@ Events for the same order are emitted in sequence:
 ### Error Handling
 
 **Event Publication Failure**
+
 - If event bus unavailable: Log error, continue with order creation (event lost)
 - Future: Implement outbox pattern for guaranteed delivery
 
 **Consumer Failure**
+
 - Consumers must handle duplicate events (idempotent processing)
 - Consumers must handle out-of-order events (use timestamp for ordering)
 - Consumers should implement dead-letter queue for failed processing

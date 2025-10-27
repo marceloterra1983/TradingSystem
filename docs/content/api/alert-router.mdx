@@ -32,7 +32,7 @@ The **Alert Router** is a Prometheus Alertmanager webhook receiver that automati
 | Property | Value |
 |----------|-------|
 | **Port** | 8080 |
-| **Base URL** | http://localhost:8080 |
+| **Base URL** | <http://localhost:8080> |
 | **Repository** | `tools/monitoring/alert-router/` |
 | **Status** | ✅ Active (optional GitHub integration) |
 | **Technology** | Express.js, Octokit (GitHub API), Pino |
@@ -67,6 +67,7 @@ The **Alert Router** is a Prometheus Alertmanager webhook receiver that automati
 ```
 
 **Flow:**
+
 1. Prometheus evaluates alert rules
 2. Alertmanager sends webhook to Alert Router
 3. Alert Router checks if issue exists (by fingerprint)
@@ -82,6 +83,7 @@ curl http://localhost:8080/health
 ```
 
 Response:
+
 ```json
 {
   "status": "ok",
@@ -90,6 +92,7 @@ Response:
 ```
 
 **Response Fields:**
+
 - `status`: Always "ok" if service is running
 - `github`: Boolean indicating if GitHub integration is enabled
 
@@ -121,6 +124,7 @@ curl -X POST http://localhost:8080/github \
 ```
 
 Response:
+
 ```json
 {
   "processed": 1,
@@ -150,6 +154,7 @@ Response:
 Simple health check that reports service status and GitHub integration.
 
 **Response (GitHub Enabled):**
+
 ```json
 {
   "status": "ok",
@@ -158,6 +163,7 @@ Simple health check that reports service status and GitHub integration.
 ```
 
 **Response (GitHub Disabled):**
+
 ```json
 {
   "status": "ok",
@@ -172,6 +178,7 @@ Simple health check that reports service status and GitHub integration.
 Receive alerts from Prometheus Alertmanager and manage GitHub issues.
 
 **Request Body (Alertmanager Format):**
+
 ```json
 {
   "receiver": "github",
@@ -204,6 +211,7 @@ Receive alerts from Prometheus Alertmanager and manage GitHub issues.
 ```
 
 **Required Alert Fields:**
+
 - `status`: `firing` | `resolved`
 - `labels`: Map of label key-value pairs
   - `alertname`: Name of the alert (required)
@@ -215,6 +223,7 @@ Receive alerts from Prometheus Alertmanager and manage GitHub issues.
   - `generatorURL`: Link to Prometheus expression (optional)
 
 **Response:**
+
 ```json
 {
   "processed": 1,
@@ -229,6 +238,7 @@ Receive alerts from Prometheus Alertmanager and manage GitHub issues.
 ```
 
 **Response Fields:**
+
 - `processed`: Number of alerts processed
 - `results`: Array of processing results
   - `fingerprint`: Alert fingerprint (deduplication key)
@@ -237,6 +247,7 @@ Receive alerts from Prometheus Alertmanager and manage GitHub issues.
   - `error`: Error message (if action is "error")
 
 **Possible Actions:**
+
 - **created**: New GitHub issue created for firing alert
 - **commented**: Added comment to existing issue (alert still firing)
 - **closed**: Closed existing issue (alert resolved)
@@ -247,10 +258,12 @@ Receive alerts from Prometheus Alertmanager and manage GitHub issues.
 ### Alert Fingerprinting
 
 Alerts are deduplicated using fingerprints generated from:
+
 1. Alert's `fingerprint` field (if provided)
 2. `{service/job}-{alertname}` (if no fingerprint)
 
 **Example:**
+
 ```javascript
 // Alert with explicit fingerprint
 { labels: { alertname: "HighCPU" }, fingerprint: "custom-fp-123" }
@@ -267,6 +280,7 @@ Alerts are deduplicated using fingerprints generated from:
 ### GitHub Issue Format
 
 **Issue Title:**
+
 ```
 [CRITICAL] Disk space is critically low
 [WARNING] High memory usage detected
@@ -274,6 +288,7 @@ Alerts are deduplicated using fingerprints generated from:
 ```
 
 **Issue Body:**
+
 ```markdown
 ### Alert Details
 - Status: firing
@@ -297,6 +312,7 @@ Alerts are deduplicated using fingerprints generated from:
   }
 }
 ```
+
 ```
 
 **Issue Labels:**
@@ -305,12 +321,16 @@ Alerts are deduplicated using fingerprints generated from:
 
 **Issue Comments (when alert re-fires):**
 ```
+
 🚨 Alert still firing. Prometheus sent an updated notification.
+
 ```
 
 **Issue Close Comment (when resolved):**
 ```
+
 ✅ Alert resolved by Prometheus. Closing issue.
+
 ```
 
 ## Configuration
@@ -341,6 +361,7 @@ LOG_LEVEL=info                      # Log level: debug, info, warn, error
    - Generate and copy token
 
 2. **Set Environment Variable**:
+
    ```bash
    export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
    export GITHUB_OWNER=yourusername
@@ -348,6 +369,7 @@ LOG_LEVEL=info                      # Log level: debug, info, warn, error
    ```
 
 3. **Verify Token**:
+
    ```bash
    curl -H "Authorization: token $GITHUB_TOKEN" \
      https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO
@@ -356,6 +378,7 @@ LOG_LEVEL=info                      # Log level: debug, info, warn, error
 ### Prometheus Alertmanager Configuration
 
 **alertmanager.yml:**
+
 ```yaml
 route:
   receiver: 'default'
@@ -378,6 +401,7 @@ receivers:
 ```
 
 **Key Settings:**
+
 - `send_resolved: true`: Automatically close GitHub issues when alerts resolve
 - Match rules: Route specific severities to GitHub receiver
 
@@ -516,6 +540,7 @@ Errors are returned in the results array, not as HTTP errors:
 ### Common Errors
 
 **GitHub Disabled (Missing Token):**
+
 ```json
 {
   "processed": 1,
@@ -530,6 +555,7 @@ Errors are returned in the results array, not as HTTP errors:
 ```
 
 **GitHub API Error:**
+
 ```json
 {
   "processed": 1,
@@ -553,6 +579,7 @@ PORT=8080 npm start
 ```
 
 **Behavior:**
+
 - Alerts are logged to console
 - Health check returns `github: false`
 - All alerts return `action: "skipped"`
@@ -568,6 +595,7 @@ PORT=8080 npm start
 ## Support
 
 For issues, questions, or feature requests:
+
 - **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
 - **Source Code**: `tools/monitoring/alert-router/src/index.js`
 - **Prometheus Docs**: [Alertmanager Webhook](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)

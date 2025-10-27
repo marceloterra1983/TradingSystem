@@ -32,7 +32,7 @@ The **Telegram Gateway API** provides RESTful access to Telegram messages captur
 | Property | Value |
 |----------|-------|
 | **Port** | 4010 |
-| **Base URL** | http://localhost:4010 |
+| **Base URL** | <http://localhost:4010> |
 | **Repository** | `backend/api/telegram-gateway/` |
 | **Database** | TimescaleDB (PostgreSQL) |
 | **Status** | ✅ Active |
@@ -68,6 +68,7 @@ The **Telegram Gateway API** provides RESTful access to Telegram messages captur
 ```
 
 **Flow:**
+
 1. MTProto Gateway captures messages from Telegram channels
 2. Messages stored in TimescaleDB (`telegram_gateway.messages`)
 3. API exposes messages via REST endpoints
@@ -83,6 +84,7 @@ curl http://localhost:4010/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -114,6 +116,7 @@ curl http://localhost:4010/api/channels
 ```
 
 Response:
+
 ```json
 {
   "channels": [
@@ -159,6 +162,7 @@ curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
 Query messages with optional filters.
 
 **Query Parameters:**
+
 - `limit` (number): Max messages to return (default: 50, max: 1000)
 - `offset` (number): Skip N messages (pagination)
 - `channel_id` (string): Filter by Telegram channel ID
@@ -167,6 +171,7 @@ Query messages with optional filters.
 - `synced` (boolean): Filter by sync status (true/false)
 
 **Response:**
+
 ```json
 {
   "messages": [
@@ -188,6 +193,7 @@ Query messages with optional filters.
 ```
 
 **Example:**
+
 ```bash
 # Pagination
 curl "http://localhost:4010/api/messages?limit=100&offset=100"
@@ -205,6 +211,7 @@ curl "http://localhost:4010/api/messages?from=$FROM"
 List all channels with message statistics.
 
 **Response:**
+
 ```json
 {
   "channels": [
@@ -227,6 +234,7 @@ List all channels with message statistics.
 Mark messages as synchronized (processed by downstream services).
 
 **Request Body:**
+
 ```json
 {
   "last_message_id": 12345,
@@ -235,6 +243,7 @@ Mark messages as synchronized (processed by downstream services).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -272,6 +281,7 @@ LOG_LEVEL=info                      # Log level: debug, info, warn, error
 ### Database Schema
 
 **Messages Table** (`telegram_gateway.messages`):
+
 ```sql
 CREATE TABLE telegram_gateway.messages (
   message_id BIGINT NOT NULL,
@@ -290,6 +300,7 @@ SELECT create_hypertable('telegram_gateway.messages', 'date');
 ```
 
 **Channels Table** (`telegram_gateway.channels`):
+
 ```sql
 CREATE TABLE telegram_gateway.channels (
   id TEXT PRIMARY KEY,
@@ -456,6 +467,7 @@ curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
 ### Common Errors
 
 **503 - Database Unavailable:**
+
 ```json
 {
   "status": "unhealthy",
@@ -465,6 +477,7 @@ curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
 ```
 
 **401 - Unauthorized (when auth enabled):**
+
 ```json
 {
   "success": false,
@@ -483,12 +496,14 @@ TELEGRAM_GATEWAY_API_TOKEN=your_secret_token_here
 ```
 
 **Request with token:**
+
 ```bash
 curl -H "X-Gateway-Token: your_secret_token_here" \
   http://localhost:4010/api/messages
 ```
 
 **Alternative headers:**
+
 - `X-API-Token`
 - `Authorization: Bearer your_secret_token_here`
 
@@ -516,6 +531,7 @@ telegram_gateway_api_nodejs_eventloop_lag_seconds
 ## Support
 
 For issues, questions, or feature requests:
+
 - **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
 - **Source Code**: `backend/api/telegram-gateway/src/server.js`
 - **Database Migrations**: `backend/data/timescaledb/telegram-gateway/`

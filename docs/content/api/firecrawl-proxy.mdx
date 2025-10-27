@@ -32,9 +32,9 @@ The **Firecrawl Proxy API** is a lightweight proxy service that provides secure,
 | Property | Value |
 |----------|-------|
 | **Port** | 3600 |
-| **Base URL** | http://localhost:3600 |
+| **Base URL** | <http://localhost:3600> |
 | **Repository** | `backend/api/firecrawl-proxy/` |
-| **Upstream API** | https://api.firecrawl.dev |
+| **Upstream API** | <https://api.firecrawl.dev> |
 | **Status** | ✅ Active |
 | **Technology** | Express.js, Axios, Node.js |
 
@@ -66,6 +66,7 @@ The **Firecrawl Proxy API** is a lightweight proxy service that provides secure,
 ```
 
 **Flow:**
+
 1. Client sends scrape/crawl request to proxy (Port 3600)
 2. Proxy validates request (URL required)
 3. Proxy injects Firecrawl API key
@@ -82,6 +83,7 @@ curl http://localhost:3600/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -103,6 +105,7 @@ curl -X POST http://localhost:3600/api/scrape \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -135,6 +138,7 @@ curl -X POST http://localhost:3600/api/crawl \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -150,6 +154,7 @@ curl http://localhost:3600/api/crawl/status/abc-123-def-456
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -184,6 +189,7 @@ Response:
 Health check endpoint that verifies proxy status and API key configuration.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -195,6 +201,7 @@ Health check endpoint that verifies proxy status and API key configuration.
 ```
 
 **Response Fields:**
+
 - `status`: Always "healthy" if service is running
 - `service`: Service identifier
 - `version`: API version
@@ -208,6 +215,7 @@ Health check endpoint that verifies proxy status and API key configuration.
 Scrape content from a single URL with optional configuration.
 
 **Request Body:**
+
 ```json
 {
   "url": "https://example.com",
@@ -221,6 +229,7 @@ Scrape content from a single URL with optional configuration.
 ```
 
 **Request Fields:**
+
 - `url` (required): Target URL to scrape
 - `pageOptions` (optional): Scraping configuration
   - `onlyMainContent`: Extract only main content (default: false)
@@ -229,6 +238,7 @@ Scrape content from a single URL with optional configuration.
 - `timeout`: Request timeout in milliseconds (default: 30000)
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -252,6 +262,7 @@ Scrape content from a single URL with optional configuration.
 ```
 
 **Response (Error):**
+
 ```json
 {
   "error": "Request timeout",
@@ -262,6 +273,7 @@ Scrape content from a single URL with optional configuration.
 **Timeout**: 30 seconds (configurable)
 
 **Example:**
+
 ```bash
 # Scrape with options
 curl -X POST http://localhost:3600/api/scrape \
@@ -280,6 +292,7 @@ curl -X POST http://localhost:3600/api/scrape \
 Start a multi-page crawl job that processes multiple URLs from a starting point.
 
 **Request Body:**
+
 ```json
 {
   "url": "https://docs.example.com",
@@ -296,6 +309,7 @@ Start a multi-page crawl job that processes multiple URLs from a starting point.
 ```
 
 **Request Fields:**
+
 - `url` (required): Starting URL for crawl
 - `crawlerOptions` (optional):
   - `includes`: URL patterns to include (glob format)
@@ -305,6 +319,7 @@ Start a multi-page crawl job that processes multiple URLs from a starting point.
 - `pageOptions` (optional): Same as scrape endpoint
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -314,6 +329,7 @@ Start a multi-page crawl job that processes multiple URLs from a starting point.
 ```
 
 **Response Fields:**
+
 - `success`: Boolean indicating job creation success
 - `jobId`: Unique job identifier for status checks
 - `url`: Starting URL for the crawl
@@ -321,6 +337,7 @@ Start a multi-page crawl job that processes multiple URLs from a starting point.
 **Next Steps**: Use `jobId` to poll `/api/crawl/status/:jobId`
 
 **Example:**
+
 ```bash
 # Crawl documentation site
 curl -X POST http://localhost:3600/api/crawl \
@@ -339,9 +356,11 @@ curl -X POST http://localhost:3600/api/crawl \
 Check the status of a crawl job and retrieve results when complete.
 
 **URL Parameters:**
+
 - `jobId` (required): Job ID returned from `/api/crawl`
 
 **Response (In Progress):**
+
 ```json
 {
   "success": true,
@@ -353,6 +372,7 @@ Check the status of a crawl job and retrieve results when complete.
 ```
 
 **Response (Completed):**
+
 ```json
 {
   "success": true,
@@ -378,6 +398,7 @@ Check the status of a crawl job and retrieve results when complete.
 ```
 
 **Response Fields:**
+
 - `success`: Boolean indicating API call success
 - `status`: `scraping` | `completed` | `failed`
 - `current`: Number of pages processed
@@ -387,6 +408,7 @@ Check the status of a crawl job and retrieve results when complete.
 **Polling Strategy**: Poll every 2-5 seconds until status is "completed" or "failed"
 
 **Example:**
+
 ```bash
 # Check status
 curl http://localhost:3600/api/crawl/status/abc-123-def-456
@@ -625,6 +647,7 @@ curl http://localhost:3600/api/crawl/status/$JOBID | jq '.data'
 ### Common Errors
 
 **400 - Missing URL:**
+
 ```json
 {
   "error": "URL is required"
@@ -632,6 +655,7 @@ curl http://localhost:3600/api/crawl/status/$JOBID | jq '.data'
 ```
 
 **500 - API Key Not Configured:**
+
 ```json
 {
   "error": "Firecrawl API key not configured",
@@ -640,6 +664,7 @@ curl http://localhost:3600/api/crawl/status/$JOBID | jq '.data'
 ```
 
 **504 - Request Timeout:**
+
 ```json
 {
   "error": "Request timeout"
@@ -647,6 +672,7 @@ curl http://localhost:3600/api/crawl/status/$JOBID | jq '.data'
 ```
 
 **500 - Firecrawl API Error:**
+
 ```json
 {
   "error": "Request failed with status code 402",
@@ -660,15 +686,18 @@ curl http://localhost:3600/api/crawl/status/$JOBID | jq '.data'
 ### Retry Strategy
 
 For **504 timeout errors**:
+
 - Retry with longer timeout (if supported by Firecrawl)
 - Split large pages into smaller scraping tasks
 
 For **500 errors from Firecrawl**:
+
 - Check Firecrawl API status
 - Verify API key is valid
 - Check credit balance
 
 For **crawl jobs**:
+
 - Poll status endpoint every 2-5 seconds
 - Implement max polling duration (e.g., 5 minutes)
 - Handle "failed" status gracefully
@@ -686,6 +715,7 @@ For **crawl jobs**:
 For production deployments:
 
 1. **Add Authentication**:
+
    ```javascript
    // Add API key middleware
    app.use((req, res, next) => {
@@ -698,6 +728,7 @@ For production deployments:
    ```
 
 2. **Rate Limiting** (per user):
+
    ```javascript
    import rateLimit from 'express-rate-limit';
 
@@ -711,6 +742,7 @@ For production deployments:
    ```
 
 3. **URL Whitelist** (restrict scraping to known domains):
+
    ```javascript
    const allowedDomains = ['example.com', 'docs.example.com'];
 
@@ -729,6 +761,7 @@ For production deployments:
 ## Support
 
 For issues, questions, or feature requests:
+
 - **Firecrawl Issues**: [Firecrawl GitHub](https://github.com/mendableai/firecrawl/issues)
 - **Proxy Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
 - **Source Code**: `backend/api/firecrawl-proxy/src/server.js`
