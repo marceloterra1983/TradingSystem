@@ -161,7 +161,10 @@ class MarkdownSearchService {
         if (entry.isDirectory()) {
           const subFiles = await this.scanDirectory(fullPath);
           files.push(...subFiles);
-        } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        } else if (
+          entry.isFile() &&
+          (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))
+        ) {
           files.push(fullPath);
         }
       }
@@ -220,14 +223,23 @@ class MarkdownSearchService {
 
           const { frontmatter, content: bodyContent } = parsed;
 
-          // Validate required fields
-          if (!frontmatter.title || !frontmatter.domain || !frontmatter.type) {
-            errors.push({
-              file: filePath,
-              error: 'Missing required frontmatter fields',
-            });
+          // Basic required field
+          if (!frontmatter.title) {
+            errors.push({ file: filePath, error: 'Missing title in frontmatter' });
             continue;
           }
+
+          // Derive missing fields from v2 schema or path
+          const relativeFromDocs = path
+            .relative(this.docsDir, filePath)
+            .replace(/\\/g, '/');
+          const segments = relativeFromDocs.split('/');
+
+          const derivedDomain = frontmatter.domain || (segments[0] || 'shared');
+          const derivedType =
+            frontmatter.type || (segments[1] && segments[1] !== '_category_.json' ? segments[1] : 'guide');
+          const summary = frontmatter.summary || frontmatter.description || '';
+          const lastReview = frontmatter.last_review || frontmatter.lastReviewed || '';
 
           // Generate document ID
           const id = this.generateId(path.relative(this.docsDir, filePath));
@@ -237,6 +249,7 @@ class MarkdownSearchService {
             .relative(this.docsDir, filePath)
             .replace(/\\/g, '/')
             .replace(/\.md$/, '');
+          const cleanPath = relativePath.replace(/\.mdx$/, '');
 
           // Extract content for full-text search
           const searchContent = this.extractContent(bodyContent);
@@ -245,14 +258,14 @@ class MarkdownSearchService {
           const doc = {
             id,
             title: frontmatter.title,
-            domain: frontmatter.domain,
-            type: frontmatter.type,
+            domain: derivedDomain,
+            type: derivedType,
             tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
             status: frontmatter.status || 'active',
-            path: `/docs/${relativePath}`,
-            summary: frontmatter.summary || '',
+            path: `/docs/${cleanPath}`,
+            summary,
             content: searchContent,
-            last_review: frontmatter.last_review || '',
+            last_review: lastReview,
           };
 
           // Add to index
@@ -563,6 +576,13 @@ class MarkdownSearchService {
       cacheValid:
         this.facetCache.data !== null && this.facetCache.timestamp !== null,
     };
+  }
+
+  /**
+   * Backwards-compatible count accessor used by health endpoint
+   */
+  getIndexedCount() {
+    return this.stats?.totalFiles || 0;
   }
 }
 

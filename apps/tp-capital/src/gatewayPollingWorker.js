@@ -117,7 +117,7 @@ export class GatewayPollingWorker {
     const messages = await this.fetchUnprocessedMessages();
 
     if (messages.length === 0) {
-      logger.debug('No new messages to process');
+      // Silently skip - no need to log every empty poll
       return;
     }
 
@@ -304,11 +304,12 @@ export class GatewayPollingWorker {
    */
   async insertSignal(signal, msg) {
     const query = `
-      INSERT INTO ${this.tpCapitalSchema}.tp_capital_signals (
+      INSERT INTO ${this.tpCapitalSchema}.signals_v2 (
         channel, signal_type, asset, buy_min, buy_max,
         target_1, target_2, target_final, stop,
-        raw_message, source, ingested_at, ts
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        raw_message, source, ingested_at, ts,
+        status, priority, tags, metadata, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     `;
 
     const values = [
@@ -324,7 +325,12 @@ export class GatewayPollingWorker {
       signal.raw_message,
       signal.source,
       signal.ingested_at,
-      signal.ts
+      signal.ts,
+      'active', // status
+      'medium', // priority
+      [], // tags (vazio inicialmente)
+      JSON.stringify({}), // metadata
+      'gateway-worker' // created_by
     ];
 
     await this.tpCapitalDb.query(query, values);

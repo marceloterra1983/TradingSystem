@@ -253,3 +253,5 @@ A tabela TP Capital agora contém **exclusivamente sinais operacionais** prontos
 
 **Dados limpos = Decisões melhores!** 📊✨
 
+
+

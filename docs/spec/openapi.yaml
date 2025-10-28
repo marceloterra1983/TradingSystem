@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: TradingSystem Documentation API (Compat Spec)
+  version: 1.0.0
+  description: |
+    Minimal OpenAPI document served at /spec/openapi.yaml for compatibility with
+    DocsAPI tests and versioning utilities. The canonical, full specification is
+    published at docs/static/specs/documentation-api.openapi.yaml and via Docusaurus/Redocusaurus.
+servers:
+  - url: http://localhost:3400
+    description: Local development
+  - url: http://tradingsystem.local/api/documentation
+    description: Reverse proxy route
+components:
+  schemas: {}
+  responses: {}
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns service availability and subsystem status.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /api/v1/systems:
+    get:
+      summary: List documentation systems
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: Create documentation system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created

@@ -429,3 +429,5 @@ curl -s "http://localhost:4005/sync-messages" -X POST -H "Content-Type: applicat
 - ✅ Sincronização de 100 mensagens em ~2 segundos
 - ✅ Worker processa mensagens em lote
 
+
+

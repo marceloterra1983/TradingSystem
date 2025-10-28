@@ -64,16 +64,16 @@ function useDocumentationSearch() {
 }
 
 // Example 4: Getting Document Details
-async function getDocument(path: string) {
-  const response = await fetch(`/api/v1/documents/${encodeURIComponent(path)}`);
+// Example 4: Get documentation facets (domain/type/tags/status)
+async function getDocsFacets(query = '') {
+  const url = query ? `/api/v1/docs/facets?q=${encodeURIComponent(query)}` : '/api/v1/docs/facets';
+  const response = await fetch(url);
   return response.json();
 }
 
 // Example 5: Getting Search Suggestions
 async function getSearchSuggestions(query: string) {
-  const response = await fetch(
-    `/api/v1/suggestions?q=${encodeURIComponent(query)}`
-  );
+  const response = await fetch(`/api/v1/suggest?q=${encodeURIComponent(query)}`);
   return response.json();
 }
 
@@ -91,8 +91,8 @@ function DocumentationSearch() {
       updated: '2024',
     });
 
-    // Get document details
-    const document = await getDocument('/docs/architecture/overview.md');
+    // Get documentation facets
+    const facets = await getDocsFacets('architecture');
 
     // Get search suggestions
     const suggestions = await getSearchSuggestions('clean arch');
@@ -129,34 +129,21 @@ function useDebounceSearch(delay = 300) {
   };
 }
 
-// Example 7: Searching with Context
-interface SearchContext {
-  path?: string;
-  relatedTo?: string[];
-  excludePaths?: string[];
-}
-
-async function contextualSearch(
-  query: string,
-  context: SearchContext
-): Promise<SearchResult[]> {
-  const response = await fetch('/api/v1/search/context', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query, context }),
-  });
+// Example 7: Search documentation content (Markdown index)
+async function docsSearch(query: string, opts?: { domain?: string; type?: string; tags?: string[]; status?: string; limit?: number; }) {
+  const params = new URLSearchParams();
+  if (query) params.set('q', query);
+  if (opts?.domain) params.set('domain', opts.domain);
+  if (opts?.type) params.set('type', opts.type);
+  if (opts?.tags?.length) params.set('tags', opts.tags.join(','));
+  if (opts?.status) params.set('status', opts.status);
+  if (opts?.limit) params.set('limit', String(opts.limit));
+  const response = await fetch(`/api/v1/docs/search?${params.toString()}`);
   return response.json();
 }
 
-// Example 8: Getting Related Documents
-async function getRelatedDocuments(path: string): Promise<SearchResult[]> {
-  const response = await fetch(
-    `/api/v1/documents/${encodeURIComponent(path)}/related`
-  );
-  return response.json();
-}
+// Example 8: Get suggestions from documentation titles
+// See getSearchSuggestions above
 
 export {
   basicSearch,
@@ -165,6 +152,6 @@ export {
   getDocument,
   getSearchSuggestions,
   useDebounceSearch,
-  contextualSearch,
-  getRelatedDocuments,
+  docsSearch,
+  getDocsFacets,
 };

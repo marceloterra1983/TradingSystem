@@ -17,7 +17,10 @@ interface ApiSpec {
   name: string;
   description: string;
   port: string;
-  specUrl: string;
+  // Absolute or relative path to spec when using non-Redoc viewers
+  specFile: string; // e.g. documentation-api.openapi.yaml
+  // Docusaurus Redocusaurus route for this API
+  docusaurusRoute: string; // e.g. /api/documentation-api
 }
 
 type ViewerType = 'redoc' | 'swagger' | 'rapidoc' | 'raw';
@@ -28,21 +31,56 @@ const API_SPECS: ApiSpec[] = [
     name: 'Documentation',
     description: 'Documentation management, ideas, specs, search, and files',
     port: '3401',
-    specUrl: '/specs/documentation-api.openapi.yaml',
+    specFile: 'documentation-api.openapi.yaml',
+    docusaurusRoute: '/api/documentation-api',
   },
   {
     id: 'workspace-api',
     name: 'Workspace',
     description: 'CRUD operations for workspace items with Kanban workflow',
     port: '3200',
-    specUrl: '/specs/workspace.openapi.yaml',
+    specFile: 'workspace.openapi.yaml',
+    docusaurusRoute: '/api/workspace',
   },
   {
     id: 'tp-capital-api',
     name: 'TP Capital',
     description: 'Trading signals ingestion, Telegram bot/channel management',
     port: '3200',
-    specUrl: '/specs/tp-capital.openapi.yaml',
+    specFile: 'tp-capital.openapi.yaml',
+    docusaurusRoute: '/api/tp-capital',
+  },
+  {
+    id: 'status-api',
+    name: 'Status API',
+    description: 'Service launcher and aggregated health/status endpoints',
+    port: '3500',
+    specFile: 'status-api.openapi.yaml',
+    docusaurusRoute: '/api/status',
+  },
+  {
+    id: 'firecrawl-proxy',
+    name: 'Firecrawl Proxy',
+    description: 'Web scraping proxy with Firecrawl integration',
+    port: '3600',
+    specFile: 'firecrawl-proxy.openapi.yaml',
+    docusaurusRoute: '/api/firecrawl',
+  },
+  {
+    id: 'telegram-gateway-api',
+    name: 'Telegram Gateway',
+    description: 'REST API for Telegram messages and channels (TimescaleDB)',
+    port: '4010',
+    specFile: 'telegram-gateway-api.openapi.yaml',
+    docusaurusRoute: '/api/telegram-gateway',
+  },
+  {
+    id: 'alert-router',
+    name: 'Alert Router',
+    description: 'Alertmanager webhook → GitHub Issues automation',
+    port: '8080',
+    specFile: 'alert-router.openapi.yaml',
+    docusaurusRoute: '/api/alert-router',
   },
 ];
 
@@ -78,25 +116,24 @@ export function APIViewerPage() {
   const updateViewerUrl = () => {
     let url = '';
 
+    const docsSpecUrl = `/specs/${selectedApi.specFile}`;
+
     switch (viewerType) {
       case 'redoc':
-        // Use local Redoc HTML viewer (no CORS issues)
-        url = `/viewers/redoc.html?url=${encodeURIComponent(selectedApi.specUrl)}`;
+        // Use local Redoc HTML to avoid SPA/route issues; spec served via /specs proxy
+        url = `/viewers/redoc.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-
       case 'swagger':
-        // Use local Swagger UI HTML (no CORS issues)
-        url = `/viewers/swagger.html?url=${encodeURIComponent(selectedApi.specUrl)}`;
+        // Local Swagger UI embedding Docusaurus spec file
+        url = `/viewers/swagger.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-
       case 'rapidoc':
-        // Use local RapiDoc HTML (no CORS issues)
-        url = `/viewers/rapidoc.html?url=${encodeURIComponent(selectedApi.specUrl)}`;
+        // Local RapiDoc embedding Docusaurus spec file
+        url = `/viewers/rapidoc.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-
       case 'raw':
-        // Raw spec URL
-        url = selectedApi.specUrl;
+        // Link directly to the spec served by Docusaurus static assets
+        url = docsSpecUrl;
         break;
     }
 
@@ -111,7 +148,7 @@ export function APIViewerPage() {
 
   const handleDownloadSpec = () => {
     const link = document.createElement('a');
-    link.href = selectedApi.specUrl;
+    link.href = `/specs/${selectedApi.specFile}`;
     link.download = `${selectedApi.id}.openapi.yaml`;
     document.body.appendChild(link);
     link.click();
@@ -283,14 +320,14 @@ export function APIViewerPage() {
                   Spec URL:
                 </p>
                 <code className="text-xs text-blue-600 dark:text-blue-400 break-all">
-                  {selectedApi.specUrl}
+                  {`/specs/${selectedApi.specFile}`}
                 </code>
               </div>
               <div className="flex gap-2">
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => window.open(selectedApi.specUrl, '_blank')}
+                  onClick={() => window.open(`/specs/${selectedApi.specFile}`, '_blank')}
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
                   View Raw Spec

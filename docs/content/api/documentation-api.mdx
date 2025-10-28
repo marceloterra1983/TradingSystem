@@ -88,10 +88,15 @@ The complete OpenAPI specification is available at:
 | `/api/v1/systems` | GET, POST | Manage documentation systems |
 | `/api/v1/systems/:id` | GET, PUT, DELETE | Individual system operations |
 | `/api/v1/ideas` | GET, POST | Idea management |
-| `/api/v1/specs` | GET, POST | Specification management |
-| `/api/v1/search` | GET | Full-text search |
-| `/api/v1/files` | POST | File upload |
-| `/api/v1/stats` | GET | Usage statistics |
+| `/api/v1/search` | GET | Full-text search over OpenAPI/AsyncAPI |
+| `/api/v1/suggest` | GET | Suggestions from OpenAPI/AsyncAPI |
+| `/api/v1/docs/search` | GET | Markdown search (faceted) |
+| `/api/v1/docs/facets` | GET | Facets for Markdown content |
+| `/api/v1/docs/suggest` | GET | Suggestions from Markdown titles |
+| `/api/v1/docs/status` | GET | Documentation health (OpenAPI/AsyncAPI presence) |
+| `/api/v1/docs/download` | GET | Download ZIP with specs/schemas |
+| `/spec/openapi.yaml` | GET | Serve OpenAPI spec (YAML) |
+| `/spec/asyncapi.yaml` | GET | Serve AsyncAPI spec (YAML) |
 
 ## Authentication & Rate Limiting
 
@@ -254,11 +259,16 @@ cd backend/api/documentation-api && npm run dev
 **Search not working**
 
 ```bash
-# Verify search index
-curl http://localhost:3400/api/v1/search/status
+# Verify documentation health (specs availability)
+curl http://localhost:3400/api/v1/docs/status
 
-# Rebuild index
-npm run rebuild-search-index
+# Verify Markdown search endpoints
+curl "http://localhost:3400/api/v1/docs/facets?q=architecture"
+curl "http://localhost:3400/api/v1/docs/suggest?q=arch"
+curl "http://localhost:3400/api/v1/docs/search?q=docs&domain=backend&type=guide"
+
+# Rebuild Markdown index (1/min rate limit)
+curl -X POST http://localhost:3400/api/v1/docs/reindex
 ```
 
 ## Changelog

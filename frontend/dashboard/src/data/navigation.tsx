@@ -229,6 +229,21 @@ export const NAVIGATION_DATA: Section[] = [
         parts: [],
         customContent: <MiroPage />,
       },
+      {
+        id: 'docs-hybrid-search',
+        title: 'Docs Search (Hybrid)',
+        header: {
+          title: 'Docs Hybrid Search',
+          subtitle: 'Busca híbrida (lexical + vetorial) com reranking e âncoras',
+        },
+        parts: [],
+        customContent: (
+          <React.Suspense fallback={<div className="p-4 text-sm">Carregando…</div>}>
+            {/** Lazy import to keep initial bundle small */}
+            {React.createElement(React.lazy(() => import('../components/pages/DocsHybridSearchPage')))}
+          </React.Suspense>
+        ),
+      },
     ],
   },
 
@@ -330,4 +345,3 @@ export function getSectionByPageId(pageId: string): Section | undefined {
 export function getDefaultPage(): Page {
   return NAVIGATION_DATA[0].pages[0];
 }
-

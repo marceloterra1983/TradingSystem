@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "scan_date": "2025-10-27T17:48:16.442425",
+    "scan_date": "2025-10-27T20:41:20.154255",
     "docs_directory": [
       "docs/content"
     ],
@@ -9,24 +9,24 @@
     "schema": "v2"
   },
   "summary": {
-    "total_files": 202,
-    "files_with_frontmatter": 202,
+    "total_files": 209,
+    "files_with_frontmatter": 209,
     "files_missing_frontmatter": 0,
     "files_with_issues": 0,
     "files_incomplete_frontmatter": 0,
     "issue_counts": {},
     "owner_distribution": {
       "MCPGuild": 12,
-      "BackendGuild": 10,
-      "DocsOps": 84,
+      "BackendGuild": 11,
+      "DocsOps": 85,
       "ReleaseOps": 1,
       "DataOps": 4,
       "SupportOps": 4,
       "FrontendGuild": 15,
       "ProductOps": 12,
       "PromptOps": 4,
-      "ArchitectureGuild": 20,
-      "ToolingGuild": 32,
+      "ArchitectureGuild": 21,
+      "ToolingGuild": 36,
       "SecurityOps": 4
     }
   },
@@ -148,7 +148,8 @@
           "github"
         ],
         "owner": "BackendGuild",
-        "lastReviewed": "2025-10-27"
+        "lastReviewed": "2025-10-27",
+        "slug": "/api/alert-router/guide"
       }
     },
     {
@@ -2468,6 +2469,26 @@
       }
     },
     {
+      "file": "docs/content/tools/ai/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "AI & LLM Tools",
+        "description": "AI agents, LangGraph workflows, LlamaIndex RAG, and local LLM runtime (Ollama)",
+        "tags": [
+          "ai",
+          "llm",
+          "agents",
+          "langgraph",
+          "llamaindex",
+          "ollama",
+          "rag"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
       "file": "docs/content/tools/automation/docusaurus-daily-agent.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -2480,6 +2501,25 @@
           "agent"
         ],
         "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/development/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Development Tools",
+        "description": "OpenSpec, automation scripts, Firecrawl, and development utilities",
+        "tags": [
+          "development",
+          "tooling",
+          "openspec",
+          "scripts",
+          "automation",
+          "firecrawl"
+        ],
+        "owner": "ToolingGuild",
         "lastReviewed": "2025-10-27"
       }
     },
@@ -2500,72 +2540,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docker-wsl/changelog.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Change Log",
-        "description": "Updates to Docker and WSL tooling configuration.",
-        "tags": [
-          "tools",
-          "docker",
-          "wsl",
-          "changelog"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/docker-wsl/overview.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Docker & WSL Overview",
-        "description": "Overview of Docker Desktop and WSL usage for TradingSystem development.",
-        "tags": [
-          "tools",
-          "docker",
-          "wsl"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/docker-wsl/setup.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Setup Guide",
-        "description": "Setting up Docker Desktop and WSL for TradingSystem.",
-        "tags": [
-          "tools",
-          "docker",
-          "wsl"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/docker-wsl/troubleshooting.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Troubleshooting",
-        "description": "Resolving common Docker and WSL issues.",
-        "tags": [
-          "tools",
-          "docker",
-          "wsl"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/docusaurus/changelog.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2581,7 +2556,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docusaurus/commands.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/commands.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2596,7 +2571,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docusaurus/config.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/config.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2611,7 +2586,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docusaurus/install.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/install.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2626,7 +2601,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docusaurus/overview.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2641,7 +2616,7 @@
       }
     },
     {
-      "file": "docs/content/tools/docusaurus/troubleshooting.mdx",
+      "file": "docs/content/tools/documentation/docusaurus/troubleshooting.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -2656,81 +2631,179 @@
       }
     },
     {
-      "file": "docs/content/tools/dotnet/changelog.mdx",
+      "file": "docs/content/tools/documentation/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation Tooling",
+        "description": "Docusaurus, PlantUML, Redocusaurus for comprehensive documentation",
+        "tags": [
+          "documentation",
+          "docusaurus",
+          "plantuml",
+          "redocusaurus",
+          "openapi"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/plantuml/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
         "title": "Change Log",
-        "description": "Changes to .NET tooling, SDK versions, and build configurations.",
+        "description": "Updates to PlantUML tooling and conventions.",
         "tags": [
           "tools",
-          "dotnet",
+          "plantuml",
           "changelog"
         ],
-        "owner": "ToolingGuild",
+        "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
       }
     },
     {
-      "file": "docs/content/tools/dotnet/install.mdx",
+      "file": "docs/content/tools/documentation/plantuml/install.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
         "title": "Installation",
-        "description": "Installing the .NET SDK and runtime for TradingSystem development.",
+        "description": "Installing PlantUML tooling locally.",
         "tags": [
           "tools",
-          "dotnet"
+          "plantuml"
         ],
-        "owner": "ToolingGuild",
+        "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
       }
     },
     {
-      "file": "docs/content/tools/dotnet/overview.mdx",
+      "file": "docs/content/tools/documentation/plantuml/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
-        "title": ".NET Overview",
-        "description": "Supported .NET SDK versions and usage guidelines within TradingSystem.",
+        "title": "PlantUML Overview",
+        "description": "Usage guidelines and diagram standards for PlantUML.",
         "tags": [
           "tools",
-          "dotnet"
+          "plantuml",
+          "diagrams",
+          "visualization",
+          "shared"
         ],
-        "owner": "ToolingGuild",
+        "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
       }
     },
     {
-      "file": "docs/content/tools/dotnet/testing.mdx",
+      "file": "docs/content/tools/documentation/plantuml/usage.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
-        "title": "Testing",
-        "description": "Testing strategy and tooling for .NET components.",
+        "title": "Usage Guide",
+        "description": "Workflow for authoring and embedding PlantUML diagrams.",
         "tags": [
           "tools",
-          "dotnet",
-          "testing"
+          "plantuml"
         ],
-        "owner": "ToolingGuild",
+        "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
       }
     },
     {
-      "file": "docs/content/tools/dotnet/windows-x64.mdx",
+      "file": "docs/content/tools/documentation/redocusaurus/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
-        "title": "Windows x64 Deployment",
-        "description": "Guidance for running .NET services on Windows x64 environments.",
+        "title": "Change Log",
+        "description": "Updates to Redocusaurus integration and specs.",
         "tags": [
           "tools",
-          "dotnet",
-          "deployment"
+          "redocusaurus",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/commands.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Commands",
+        "description": "Scripts for building and validating Redoc integrations.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "description": "Configuring Redocusaurus specs and theme options.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing and updating Redocusaurus within the docs workspace.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Redocusaurus Overview",
+        "description": "Strategy for rendering OpenAPI specs with Redocusaurus.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/infrastructure/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Infrastructure & Orchestration",
+        "description": "Docker Compose orchestration, Nginx proxy, service registry, and systemd services",
+        "tags": [
+          "infrastructure",
+          "docker",
+          "nginx",
+          "systemd",
+          "orchestration"
         ],
         "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
+        "lastReviewed": "2025-10-27"
       }
     },
     {
@@ -2812,94 +2885,21 @@
       }
     },
     {
-      "file": "docs/content/tools/node-npm/changelog.mdx",
+      "file": "docs/content/tools/monitoring/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
-        "title": "Change Log",
-        "description": "Node.js and npm tooling changes and upgrade history.",
+        "title": "Monitoring & Observability",
+        "description": "Prometheus, Grafana, Alertmanager, and Alert Router for comprehensive system monitoring",
         "tags": [
-          "tools",
-          "node",
-          "changelog"
+          "monitoring",
+          "observability",
+          "prometheus",
+          "grafana",
+          "alerting"
         ],
         "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/node-npm/commands.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Common Commands",
-        "description": "Frequently used npm and Node.js commands.",
-        "tags": [
-          "tools",
-          "node"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/node-npm/config.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Configuration",
-        "description": "Node.js and npm configuration standards for TradingSystem.",
-        "tags": [
-          "tools",
-          "node"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/node-npm/install.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Installation",
-        "description": "Installing Node.js and npm for TradingSystem development.",
-        "tags": [
-          "tools",
-          "node"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/node-npm/overview.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Node & npm Overview",
-        "description": "Supported Node.js versions, package management policies, and workspace layout.",
-        "tags": [
-          "tools",
-          "node"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/node-npm/troubleshooting.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Troubleshooting",
-        "description": "Common issues and resolutions for Node.js and npm tooling.",
-        "tags": [
-          "tools",
-          "node"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
+        "lastReviewed": "2025-10-27"
       }
     },
     {
@@ -2921,70 +2921,6 @@
       }
     },
     {
-      "file": "docs/content/tools/plantuml/changelog.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Change Log",
-        "description": "Updates to PlantUML tooling and conventions.",
-        "tags": [
-          "tools",
-          "plantuml",
-          "changelog"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/plantuml/install.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Installation",
-        "description": "Installing PlantUML tooling locally.",
-        "tags": [
-          "tools",
-          "plantuml"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/plantuml/overview.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "PlantUML Overview",
-        "description": "Usage guidelines and diagram standards for PlantUML.",
-        "tags": [
-          "tools",
-          "plantuml",
-          "diagrams",
-          "visualization",
-          "shared"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/plantuml/usage.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Usage Guide",
-        "description": "Workflow for authoring and embedding PlantUML diagrams.",
-        "tags": [
-          "tools",
-          "plantuml"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
       "file": "docs/content/tools/ports-services/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -3000,45 +2936,16 @@
       }
     },
     {
-      "file": "docs/content/tools/profitdll/assets-format.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Assets Format",
-        "description": "Instrument formatting and conventions for ProfitDLL data.",
-        "tags": [
-          "tools",
-          "profitdll"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/profitdll/callbacks.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Callbacks",
-        "description": "Callback signatures and lifecycle events for ProfitDLL.",
-        "tags": [
-          "tools",
-          "profitdll"
-        ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/profitdll/changelog.mdx",
+      "file": "docs/content/tools/runtime/docker-wsl/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
         "title": "Change Log",
-        "description": "Updates to ProfitDLL bindings and tooling.",
+        "description": "Updates to Docker and WSL tooling configuration.",
         "tags": [
           "tools",
-          "profitdll",
+          "docker",
+          "wsl",
           "changelog"
         ],
         "owner": "ToolingGuild",
@@ -3046,22 +2953,242 @@
       }
     },
     {
-      "file": "docs/content/tools/profitdll/overview.mdx",
+      "file": "docs/content/tools/runtime/docker-wsl/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
-        "title": "ProfitDLL Overview",
-        "description": "Architecture and calling conventions for the ProfitDLL integration.",
+        "title": "Docker & WSL Overview",
+        "description": "Overview of Docker Desktop and WSL usage for TradingSystem development.",
         "tags": [
           "tools",
-          "profitdll"
+          "docker",
+          "wsl"
         ],
         "owner": "ToolingGuild",
         "lastReviewed": "2025-10-26"
       }
     },
     {
-      "file": "docs/content/tools/python/changelog.mdx",
+      "file": "docs/content/tools/runtime/docker-wsl/setup.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Setup Guide",
+        "description": "Setting up Docker Desktop and WSL for TradingSystem.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/docker-wsl/troubleshooting.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting",
+        "description": "Resolving common Docker and WSL issues.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Changes to .NET tooling, SDK versions, and build configurations.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing the .NET SDK and runtime for TradingSystem development.",
+        "tags": [
+          "tools",
+          "dotnet"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": ".NET Overview",
+        "description": "Supported .NET SDK versions and usage guidelines within TradingSystem.",
+        "tags": [
+          "tools",
+          "dotnet"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/testing.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Testing",
+        "description": "Testing strategy and tooling for .NET components.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "testing"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/windows-x64.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Windows x64 Deployment",
+        "description": "Guidance for running .NET services on Windows x64 environments.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "deployment"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Node.js and npm tooling changes and upgrade history.",
+        "tags": [
+          "tools",
+          "node",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/commands.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Common Commands",
+        "description": "Frequently used npm and Node.js commands.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "description": "Node.js and npm configuration standards for TradingSystem.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing Node.js and npm for TradingSystem development.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Node & npm Overview",
+        "description": "Supported Node.js versions, package management policies, and workspace layout.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/troubleshooting.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting",
+        "description": "Common issues and resolutions for Node.js and npm tooling.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Runtime Environments",
+        "description": "Node.js, Python, .NET SDK, and Docker runtime environments",
+        "tags": [
+          "runtime",
+          "nodejs",
+          "python",
+          "dotnet",
+          "docker"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/python/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -3077,7 +3204,7 @@
       }
     },
     {
-      "file": "docs/content/tools/python/install.mdx",
+      "file": "docs/content/tools/runtime/python/install.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -3092,7 +3219,7 @@
       }
     },
     {
-      "file": "docs/content/tools/python/overview.mdx",
+      "file": "docs/content/tools/runtime/python/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -3107,7 +3234,7 @@
       }
     },
     {
-      "file": "docs/content/tools/python/testing.mdx",
+      "file": "docs/content/tools/runtime/python/testing.mdx",
       "has_frontmatter": true,
       "issues": [],
       "frontmatter": {
@@ -3119,82 +3246,6 @@
           "testing"
         ],
         "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/redocusaurus/changelog.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Change Log",
-        "description": "Updates to Redocusaurus integration and specs.",
-        "tags": [
-          "tools",
-          "redocusaurus",
-          "changelog"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/redocusaurus/commands.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Commands",
-        "description": "Scripts for building and validating Redoc integrations.",
-        "tags": [
-          "tools",
-          "redocusaurus"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/redocusaurus/config.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Configuration",
-        "description": "Configuring Redocusaurus specs and theme options.",
-        "tags": [
-          "tools",
-          "redocusaurus"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/redocusaurus/install.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Installation",
-        "description": "Installing and updating Redocusaurus within the docs workspace.",
-        "tags": [
-          "tools",
-          "redocusaurus"
-        ],
-        "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
-      }
-    },
-    {
-      "file": "docs/content/tools/redocusaurus/overview.mdx",
-      "has_frontmatter": true,
-      "issues": [],
-      "frontmatter": {
-        "title": "Redocusaurus Overview",
-        "description": "Strategy for rendering OpenAPI specs with Redocusaurus.",
-        "tags": [
-          "tools",
-          "redocusaurus"
-        ],
-        "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
       }
     },
@@ -3261,6 +3312,84 @@
           "trading"
         ],
         "owner": "SecurityOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Trading Tools",
+        "description": "ProfitDLL integration for market data capture and order execution",
+        "tags": [
+          "trading",
+          "profitdll",
+          "market-data",
+          "order-execution"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/assets-format.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Assets Format",
+        "description": "Instrument formatting and conventions for ProfitDLL data.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/callbacks.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Callbacks",
+        "description": "Callback signatures and lifecycle events for ProfitDLL.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Updates to ProfitDLL bindings and tooling.",
+        "tags": [
+          "tools",
+          "profitdll",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ProfitDLL Overview",
+        "description": "Architecture and calling conventions for the ProfitDLL integration.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
         "lastReviewed": "2025-10-26"
       }
     },

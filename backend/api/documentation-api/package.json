@@ -16,7 +16,10 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev --name init",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "semantic:index": "node src/scripts/index-docs-to-qdrant.js",
+    "semantic:index:llama": "node src/scripts/index-docs-to-qdrant-llamaindex.js",
+    "semantic:index:auto": "node -e \"(process.env.SEMANTIC_INDEXER==='llamaindex'?await import('./src/scripts/index-docs-to-qdrant-llamaindex.js'):await import('./src/scripts/index-docs-to-qdrant.js'))\""
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
@@ -41,7 +44,9 @@
     "node-fetch": "^3.3.2",
     "pino": "^9.4.0",
     "pino-pretty": "^13.1.2",
-    "prom-client": "^15.1.0"
+    "prom-client": "^15.1.0",
+    "@qdrant/js-client-rest": "^1.9.0",
+    "llamaindex": "^0.3.11"
   },
   "license": "MIT",
   "devDependencies": {

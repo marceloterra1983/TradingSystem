@@ -12,9 +12,9 @@ import statsRoutes from './routes/stats.js';
 import searchRoutes from './routes/search.js';
 import specsRoutes from './routes/specs.js';
 import docsHealthRoutes from './routes/docs-health.js';
-import markdownSearchRoutes, {
-  initializeRoute,
-} from './routes/markdown-search.js';
+import semanticRoutes from './routes/semantic.js';
+import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
+import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
 import MarkdownSearchService from './services/markdownSearchService.js';
 import searchMetrics from './services/searchMetrics.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -35,12 +35,12 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../../../../');
 
 // Initialize Markdown Search Service
-const markdownSearchService = new MarkdownSearchService(
-  path.join(projectRoot, 'docs/context')
-);
+const markdownDocsDir = path.join(projectRoot, 'docs/content');
+const markdownSearchService = new MarkdownSearchService(markdownDocsDir);
 
 // Initialize markdown search routes with dependencies
 initializeRoute({ markdownSearchService, searchMetrics });
+initializeHybridRoute({ markdownSearchService });
 
 const app = express();
 const PORT = config.server.port;
@@ -99,12 +99,10 @@ app.use(express.json());
 app.use(metricsMiddleware);
 
 // Serve static files from docs directory
-app.use('/spec', express.static(path.join(__dirname, '../../../docs/spec')));
-app.use('/docs', express.static(path.join(__dirname, '../../../docs/public')));
-app.use(
-  '/_static',
-  express.static(path.join(__dirname, '../../../docs/public'))
-);
+app.use('/spec', express.static(path.join(projectRoot, 'docs/spec')));
+// Legacy mounts kept for backward compatibility; point to docs/build if available
+app.use('/docs', express.static(path.join(projectRoot, 'docs/build')));
+app.use('/_static', express.static(path.join(projectRoot, 'docs/build')));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -123,7 +121,7 @@ app.use((req, res, next) => {
 
 // Documentation endpoints
 app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../../docs/public/redoc.html'));
+  res.sendFile(path.join(projectRoot, 'docs/build/index.html'));
 });
 
 app.get('/', (req, res) => {
@@ -225,7 +223,9 @@ app.use('/api/v1', statsRoutes);
 app.use('/api/v1', searchRoutes);
 app.use('/api/v1/docs', specsRoutes);
 app.use('/api/v1/docs', markdownSearchRoutes);
+app.use('/api/v1/docs', hybridRoutes);
 app.use('/api/v1/docs/health', docsHealthRoutes);
+app.use('/api/v1/semantic', semanticRoutes);
 
 // Prometheus metrics endpoint
 app.get('/metrics', metricsHandler);

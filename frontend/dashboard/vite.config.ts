@@ -123,17 +123,12 @@ export default defineConfig(({ mode }) => {
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
 
-  const docsProxyConfig =
-    docsProxy.basePath !== ''
-      ? {
-          target: docsProxy.target,
-          changeOrigin: true,
-          rewrite: createRewrite(/^\/docs/, docsProxy.basePath),
-        }
-      : {
-          target: docsProxy.target,
-          changeOrigin: true,
-        };
+  const docsProxyConfig = {
+    target: docsProxy.target,
+    changeOrigin: true,
+    // Always strip the "/docs" prefix and apply optional basePath
+    rewrite: createRewrite(/^\/docs/, docsProxy.basePath),
+  };
 
   return {
     resolve: {
@@ -208,6 +203,11 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
         },
         '/docs': docsProxyConfig,
+        // Proxy OpenAPI specs to Docs server to avoid CORS in viewers
+        '^/specs/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
       },
     },
     define: {

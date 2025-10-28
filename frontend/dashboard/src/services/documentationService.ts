@@ -114,6 +114,36 @@ export interface SearchSuggestion {
   version?: string;
 }
 
+// ====================
+// Docs Hybrid Search (lexical + vector)
+// ====================
+
+export interface DocsHybridItem {
+  title: string;
+  url: string;
+  path: string;
+  snippet?: string;
+  score: number;
+  source: 'hybrid';
+  components: { semantic: boolean; lexical: boolean };
+  tags?: string[];
+  domain?: string;
+  type?: string;
+}
+
+export interface DocsHybridResponse {
+  total: number;
+  results: DocsHybridItem[];
+  alpha: number;
+}
+
+// ====================
+// Docs Facets (domains/types/tags/statuses)
+// ====================
+
+export interface DocFacetItem { value: string; count: number }
+export interface DocsFacets { domains: DocFacetItem[]; types: DocFacetItem[]; tags: DocFacetItem[]; statuses: DocFacetItem[] }
+
 class DocumentationService {
   private client: AxiosInstance;
 
@@ -208,6 +238,33 @@ class DocumentationService {
       params: { q: query, limit },
     });
     return response.data?.suggestions ?? [];
+  }
+
+  // ====================
+  // DOCS (Markdown) HYBRID SEARCH
+  // ====================
+
+  async docsHybridSearch(
+    query: string,
+    opts?: { limit?: number; alpha?: number; domain?: string; type?: string; status?: string; tags?: string[] }
+  ): Promise<DocsHybridResponse> {
+    const params: Record<string, string | number> = { q: query };
+    if (opts?.limit) params.limit = opts.limit;
+    if (typeof opts?.alpha === 'number') params.alpha = opts.alpha;
+    if (opts?.domain) params.domain = opts.domain;
+    if (opts?.type) params.type = opts.type;
+    if (opts?.status) params.status = opts.status;
+    if (opts?.tags?.length) params.tags = opts.tags.join(',');
+
+    const response = await this.client.get('/api/v1/docs/search-hybrid', { params });
+    return response.data as DocsHybridResponse;
+  }
+
+  async getDocsFacets(query = ''): Promise<DocsFacets> {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    const response = await this.client.get('/api/v1/docs/facets', { params });
+    return response.data?.facets as DocsFacets;
   }
 
   // ====================

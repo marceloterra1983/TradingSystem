@@ -146,14 +146,15 @@ class TimescaleClient {
   async insertSignal(signal) {
     try {
       const query = `
-        INSERT INTO "${this.schema}".tp_capital_signals
-        (ts, channel, signal_type, asset, buy_min, buy_max, target_1, target_2, target_final, stop, raw_message, source, ingested_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        INSERT INTO "${this.schema}".signals_v2
+        (ts, channel, signal_type, asset, buy_min, buy_max, target_1, target_2, target_final, stop, 
+         raw_message, source, ingested_at, status, priority, tags, metadata, created_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
         RETURNING id
       `;
 
       const values = [
-        signal.ts || new Date(),
+        signal.ts || Date.now(),
         signal.channel || null,
         signal.signal_type || null,
         signal.asset,
@@ -166,6 +167,11 @@ class TimescaleClient {
         signal.raw_message || null,
         signal.source || 'telegram',
         signal.ingested_at || new Date(),
+        signal.status || 'active',
+        signal.priority || 'medium',
+        signal.tags || [],
+        JSON.stringify(signal.metadata || {}),
+        signal.created_by || 'system',
       ];
 
       const result = await this.pool.query(query, values);
@@ -210,16 +216,58 @@ class TimescaleClient {
     }
   }
 
+  async updateSignalStatus(signalId, status, updatedBy = 'system', metadata = {}) {
+    try {
+      const query = `
+        UPDATE "${this.schema}".signals_v2
+        SET status = $1, 
+            updated_by = $2,
+            updated_at = now(),
+            metadata = metadata || $3::jsonb
+        WHERE id = $4
+        RETURNING id, status, updated_at
+      `;
+      
+      const values = [status, updatedBy, JSON.stringify(metadata), signalId];
+      const result = await this.pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      logger.error({ err: error, signalId, status }, 'Failed to update signal status');
+      throw error;
+    }
+  }
+
+  async addSignalTags(signalId, tags, updatedBy = 'system') {
+    try {
+      const query = `
+        UPDATE "${this.schema}".signals_v2
+        SET tags = array_cat(tags, $1::text[]),
+            updated_by = $2,
+            updated_at = now()
+        WHERE id = $3
+        RETURNING id, tags
+      `;
+      
+      const values = [tags, updatedBy, signalId];
+      const result = await this.pool.query(query, values);
+      return result.rows[0];
+    } catch (error) {
+      logger.error({ err: error, signalId, tags }, 'Failed to add signal tags');
+      throw error;
+    }
+  }
+
   async fetchSignals(options = {}) {
     try {
-      const { limit, channel, signalType, fromTs, toTs } = options;
+      const { limit, channel, signalType, fromTs, toTs, status } = options;
       
       let query = `
         SELECT 
-          ts, channel, signal_type, asset, buy_min, buy_max, 
+          id, ts, channel, signal_type, asset, buy_min, buy_max, 
           target_1, target_2, target_final, stop, raw_message, 
-          source, ingested_at
-        FROM "${this.schema}".tp_capital_signals
+          source, created_at as ingested_at, created_at, updated_at,
+          status, priority, tags, metadata, created_by, updated_by
+        FROM "${this.schema}".signals_v2
         WHERE 1=1
       `;
       const values = [];
@@ -245,6 +293,11 @@ class TimescaleClient {
         values.push(new Date(toTs));
       }
 
+      if (status) {
+        query += ` AND status = $${paramCount++}`;
+        values.push(status);
+      }
+
       query += ` ORDER BY ts DESC`;
 
       if (limit) {
@@ -262,7 +315,8 @@ class TimescaleClient {
 
   async deleteSignalByIngestedAt(ingestedAt) {
     try {
-      const query = `DELETE FROM "${this.schema}".tp_capital_signals WHERE ingested_at = $1`;
+      // Use signals_v2 directly (view doesn't support DELETE)
+      const query = `DELETE FROM "${this.schema}".signals_v2 WHERE created_at = $1`;
       await this.pool.query(query, [new Date(ingestedAt)]);
     } catch (error) {
       logger.error({ err: error, ingestedAt }, 'Failed to delete signal');
