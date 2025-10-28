@@ -1,0 +1,600 @@
+---
+title: Alert Router
+sidebar_label: Alert Router
+sidebar_position: 4
+description: Prometheus alert routing service that creates and manages GitHub issues based on alert status
+tags:
+  - api
+  - infrastructure
+  - monitoring
+  - prometheus
+  - alerting
+  - github
+owner: BackendGuild
+lastReviewed: '2025-10-27'
+slug: /api/alert-router/guide
+---
+
+## Overview
+
+The **Alert Router** is a Prometheus Alertmanager webhook receiver that automatically creates, updates, and closes GitHub issues based on alert events. It provides an automated issue tracking system for production alerts, ensuring visibility and traceability of system incidents.
+
+### Key Features
+
+- **Automated Issue Creation**: Creates GitHub issues for firing alerts
+- **Issue Lifecycle Management**: Updates issues when alerts re-fire, closes when resolved
+- **Fingerprint Deduplication**: Prevents duplicate issues for the same alert
+- **Severity Labeling**: Automatic GitHub labels based on alert severity
+- **Status Tracking**: Tracks alert status changes via issue comments
+- **Conditional Activation**: Can run without GitHub integration (logs only)
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 8080 |
+| **Base URL** | `http://localhost:8080` |
+| **Repository** | `tools/monitoring/alert-router/` |
+| **Status** | ✅ Active (optional GitHub integration) |
+| **Technology** | Express.js, Octokit (GitHub API), Pino |
+
+## Architecture
+
+```
+┌──────────────────────────────────────────┐
+│      Prometheus Alertmanager             │
+│      (Port 9093)                         │
+└──────────────────┬───────────────────────┘
+                   │ Webhook POST /github
+                   ▼
+┌──────────────────────────────────────────┐
+│      Alert Router (Port 8080)           │
+│                                          │
+│  • Parse Alertmanager payload           │
+│  • Generate fingerprint                 │
+│  • Check for existing GitHub issue      │
+│  • Create/Update/Close issue            │
+└──────────────────┬───────────────────────┘
+                   │ GitHub API
+                   ▼
+┌──────────────────────────────────────────┐
+│      GitHub Issues                       │
+│      (yourorg/yourrepo)                  │
+│                                          │
+│  • Alert issues with labels             │
+│  • Severity tags                        │
+│  • Status comments                      │
+└──────────────────────────────────────────┘
+```
+
+**Flow:**
+
+1. Prometheus evaluates alert rules
+2. Alertmanager sends webhook to Alert Router
+3. Alert Router checks if issue exists (by fingerprint)
+4. Creates new issue or updates existing issue
+5. Closes issue when alert resolves
+
+## Quick Start
+
+### Health Check
+
+```bash
+curl http://localhost:8080/health
+```
+
+Response:
+
+```json
+{
+  "status": "ok",
+  "github": true
+}
+```
+
+**Response Fields:**
+
+- `status`: Always "ok" if service is running
+- `github`: Boolean indicating if GitHub integration is enabled
+
+### Receive Alert (Prometheus Webhook)
+
+This endpoint is typically called by Prometheus Alertmanager, but can be tested manually:
+
+```bash
+curl -X POST http://localhost:8080/github \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alerts": [
+      {
+        "status": "firing",
+        "labels": {
+          "alertname": "HighMemoryUsage",
+          "severity": "warning",
+          "service": "workspace-api"
+        },
+        "annotations": {
+          "summary": "High memory usage detected",
+          "description": "Memory usage is above 80%",
+          "generatorURL": "http://prometheus:9090/graph?..."
+        },
+        "fingerprint": "abc123"
+      }
+    ]
+  }'
+```
+
+Response:
+
+```json
+{
+  "processed": 1,
+  "results": [
+    {
+      "fingerprint": "abc123",
+      "action": "created",
+      "issue": 42
+    }
+  ]
+}
+```
+
+## API Reference
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check with GitHub integration status |
+| `/github` | POST | Receive alerts from Prometheus Alertmanager |
+
+## Endpoint Details
+
+### GET /health
+
+Simple health check that reports service status and GitHub integration.
+
+**Response (GitHub Enabled):**
+
+```json
+{
+  "status": "ok",
+  "github": true
+}
+```
+
+**Response (GitHub Disabled):**
+
+```json
+{
+  "status": "ok",
+  "github": false
+}
+```
+
+**Use Case**: Service monitoring, pre-deployment checks
+
+### POST /github
+
+Receive alerts from Prometheus Alertmanager and manage GitHub issues.
+
+**Request Body (Alertmanager Format):**
+
+```json
+{
+  "receiver": "github",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "DiskSpaceLow",
+        "severity": "critical",
+        "service": "questdb",
+        "job": "questdb-exporter"
+      },
+      "annotations": {
+        "summary": "Disk space is critically low",
+        "description": "Disk usage is above 90%",
+        "generatorURL": "http://prometheus:9090/graph?g0.expr=disk_usage_percent%20%3E%2090"
+      },
+      "startsAt": "2025-10-27T12:00:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus:9090/graph",
+      "fingerprint": "workspace-api-diskspacelow"
+    }
+  ],
+  "groupLabels": {},
+  "commonLabels": {},
+  "commonAnnotations": {},
+  "externalURL": "http://alertmanager:9093"
+}
+```
+
+**Required Alert Fields:**
+
+- `status`: `firing` | `resolved`
+- `labels`: Map of label key-value pairs
+  - `alertname`: Name of the alert (required)
+  - `severity`: `critical` | `warning` | `info` (recommended)
+  - `service` or `job`: Service identifier (recommended)
+- `annotations`: Map of annotation key-value pairs
+  - `summary`: Short description (recommended)
+  - `description`: Detailed description (optional)
+  - `generatorURL`: Link to Prometheus expression (optional)
+
+**Response:**
+
+```json
+{
+  "processed": 1,
+  "results": [
+    {
+      "fingerprint": "workspace-api-diskspacelow",
+      "action": "created",
+      "issue": 123
+    }
+  ]
+}
+```
+
+**Response Fields:**
+
+- `processed`: Number of alerts processed
+- `results`: Array of processing results
+  - `fingerprint`: Alert fingerprint (deduplication key)
+  - `action`: `created` | `commented` | `closed` | `resolved-no-issue` | `skipped` | `error`
+  - `issue`: GitHub issue number (if applicable)
+  - `error`: Error message (if action is "error")
+
+**Possible Actions:**
+
+- **created**: New GitHub issue created for firing alert
+- **commented**: Added comment to existing issue (alert still firing)
+- **closed**: Closed existing issue (alert resolved)
+- **resolved-no-issue**: Alert resolved but no matching issue found
+- **skipped**: GitHub integration disabled
+- **error**: Failed to process alert
+
+### Alert Fingerprinting
+
+Alerts are deduplicated using fingerprints generated from:
+
+1. Alert's `fingerprint` field (if provided)
+2. `{service/job}-{alertname}` (if no fingerprint)
+
+**Example:**
+
+```javascript
+// Alert with explicit fingerprint
+{ labels: { alertname: "HighCPU" }, fingerprint: "custom-fp-123" }
+// → Fingerprint: "custom-fp-123"
+
+// Alert without fingerprint
+{ labels: { alertname: "HighMemory", service: "workspace-api" } }
+// → Fingerprint: "workspace-api-highmemory"
+
+{ labels: { alertname: "DiskFull", job: "questdb" } }
+// → Fingerprint: "questdb-diskfull"
+```
+
+### GitHub Issue Format
+
+**Issue Title:**
+
+```
+[CRITICAL] Disk space is critically low
+[WARNING] High memory usage detected
+[INFO] Certificate expiring soon
+```
+
+**Issue Body:**
+
+```markdown
+### Alert Details
+- Status: firing
+- Severity: critical
+- Service: questdb
+- Fingerprint: workspace-api-diskspacelow
+- Description: Disk usage is above 90%
+- Generator: http://prometheus:9090/graph?...
+
+```json
+{
+  "status": "firing",
+  "labels": {
+    "alertname": "DiskSpaceLow",
+    "severity": "critical",
+    "service": "questdb"
+  },
+  "annotations": {
+    "summary": "Disk space is critically low",
+    "description": "Disk usage is above 90%"
+  }
+}
+```
+
+```
+
+**Issue Labels:**
+- `alert` (always applied)
+- `severity:critical` | `severity:warning` | `severity:info`
+
+**Issue Comments (when alert re-fires):**
+```
+
+🚨 Alert still firing. Prometheus sent an updated notification.
+
+```
+
+**Issue Close Comment (when resolved):**
+```
+
+✅ Alert resolved by Prometheus. Closing issue.
+
+```
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Server
+PORT=8080                           # API port (default: 8080)
+
+# GitHub Integration (Required for issue creation)
+GITHUB_TOKEN=ghp_xxxxxxxxxxxx      # GitHub personal access token
+GITHUB_OWNER=yourusername           # GitHub repository owner
+GITHUB_REPO=tradingsystem          # GitHub repository name
+
+# Logging
+LOG_LEVEL=info                      # Log level: debug, info, warn, error
+```
+
+### GitHub Token Setup
+
+1. **Generate Personal Access Token**:
+   - Navigate to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Select scopes:
+     - `repo` (full control of private repositories)
+     - `public_repo` (access to public repositories)
+   - Generate and copy token
+
+2. **Set Environment Variable**:
+
+   ```bash
+   export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   export GITHUB_OWNER=yourusername
+   export GITHUB_REPO=tradingsystem
+   ```
+
+3. **Verify Token**:
+
+   ```bash
+   curl -H "Authorization: token $GITHUB_TOKEN" \
+     https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO
+   ```
+
+### Prometheus Alertmanager Configuration
+
+**alertmanager.yml:**
+
+```yaml
+route:
+  receiver: 'default'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'github'
+    - match:
+        severity: warning
+      receiver: 'github'
+
+receivers:
+  - name: 'default'
+    # Other receivers (email, slack, etc.)
+
+  - name: 'github'
+    webhook_configs:
+      - url: 'http://alert-router:8080/github'
+        send_resolved: true
+```
+
+**Key Settings:**
+
+- `send_resolved: true`: Automatically close GitHub issues when alerts resolve
+- Match rules: Route specific severities to GitHub receiver
+
+## Integration Examples
+
+### TypeScript (Alert Sender)
+
+```typescript
+interface PrometheusAlert {
+  status: 'firing' | 'resolved';
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  fingerprint?: string;
+}
+
+async function sendAlertToRouter(alert: PrometheusAlert) {
+  const response = await fetch('http://localhost:8080/github', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alerts: [alert] })
+  });
+
+  const data = await response.json();
+  console.log(`Processed ${data.processed} alerts`);
+
+  for (const result of data.results) {
+    if (result.action === 'created') {
+      console.log(`Created GitHub issue #${result.issue}`);
+    } else if (result.action === 'error') {
+      console.error(`Error: ${result.error}`);
+    }
+  }
+}
+
+// Usage
+await sendAlertToRouter({
+  status: 'firing',
+  labels: {
+    alertname: 'HighCPU',
+    severity: 'warning',
+    service: 'workspace-api'
+  },
+  annotations: {
+    summary: 'CPU usage is high',
+    description: 'CPU usage is above 80%'
+  }
+});
+```
+
+### curl Examples
+
+```bash
+# Send firing alert
+curl -X POST http://localhost:8080/github \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alerts": [{
+      "status": "firing",
+      "labels": {
+        "alertname": "ServiceDown",
+        "severity": "critical",
+        "service": "workspace-api"
+      },
+      "annotations": {
+        "summary": "Workspace API is down",
+        "description": "Health check failed for 5 minutes"
+      }
+    }]
+  }'
+
+# Send resolved alert
+curl -X POST http://localhost:8080/github \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alerts": [{
+      "status": "resolved",
+      "labels": {
+        "alertname": "ServiceDown",
+        "service": "workspace-api"
+      },
+      "fingerprint": "workspace-api-servicedown"
+    }]
+  }'
+
+# Multiple alerts in one request
+curl -X POST http://localhost:8080/github \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alerts": [
+      { "status": "firing", "labels": {...}, "annotations": {...} },
+      { "status": "firing", "labels": {...}, "annotations": {...} }
+    ]
+  }'
+```
+
+## Error Handling
+
+### HTTP Status Codes
+
+| Code | Meaning | When It Occurs |
+|------|---------|----------------|
+| 200 | OK | Health check successful |
+| 202 | Accepted | Alerts received and processing started |
+| 400 | Bad Request | No alerts in payload |
+
+### Error Response Format
+
+```json
+{
+  "error": "No alerts found in payload"
+}
+```
+
+### Alert Processing Errors
+
+Errors are returned in the results array, not as HTTP errors:
+
+```json
+{
+  "processed": 2,
+  "results": [
+    {
+      "fingerprint": "workspace-api-servicedown",
+      "action": "created",
+      "issue": 123
+    },
+    {
+      "fingerprint": "invalid-alert",
+      "action": "error",
+      "error": "API rate limit exceeded"
+    }
+  ]
+}
+```
+
+### Common Errors
+
+**GitHub Disabled (Missing Token):**
+
+```json
+{
+  "processed": 1,
+  "results": [
+    {
+      "fingerprint": "workspace-api-alert",
+      "action": "skipped",
+      "reason": "github-disabled"
+    }
+  ]
+}
+```
+
+**GitHub API Error:**
+
+```json
+{
+  "processed": 1,
+  "results": [
+    {
+      "fingerprint": "workspace-api-alert",
+      "action": "error",
+      "error": "API rate limit exceeded"
+    }
+  ]
+}
+```
+
+## Running Without GitHub
+
+The Alert Router can run without GitHub integration for testing/development:
+
+```bash
+# Start without GitHub credentials
+PORT=8080 npm start
+```
+
+**Behavior:**
+
+- Alerts are logged to console
+- Health check returns `github: false`
+- All alerts return `action: "skipped"`
+
+**Use Case**: Local development, testing Prometheus integration
+
+## Related Documentation
+
+- **[Monitoring Overview](/tools/monitoring/overview)** - Prometheus, Alertmanager, Grafana
+
+## Support
+
+For issues, questions, or feature requests:
+
+- **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
+- **Source Code**: `tools/monitoring/alert-router/src/index.js`
+- **Prometheus Docs**: [Alertmanager Webhook](https://prometheus.io/docs/alerting/latest/configuration/#webhook_config)

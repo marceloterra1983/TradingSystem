@@ -1,0 +1,11 @@
+{
+  "label": "Ports & Services",
+  "position": 11,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Ports & Services",
+    "slug": "/tools/ports-services",
+    "description": "Networking and port assignments across services."
+  }
+}

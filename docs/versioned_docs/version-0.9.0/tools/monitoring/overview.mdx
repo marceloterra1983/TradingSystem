@@ -1,0 +1,284 @@
+---
+title: Monitoring & Observability
+description: Prometheus, Grafana, Alertmanager, and Alert Router for comprehensive system monitoring
+tags:
+  - monitoring
+  - observability
+  - prometheus
+  - grafana
+  - alerting
+owner: ToolingGuild
+lastReviewed: '2025-10-27'
+---
+
+# Monitoring & Observability
+
+Comprehensive monitoring solution with metrics collection, visualization, alerting, and automated incident management.
+
+## 📊 Architecture
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Services    │────▶│  Prometheus  │────▶│   Grafana    │
+│  (Metrics)   │     │  (Collector) │     │  (Visualize) │
+└──────────────┘     └──────┬───────┘     └──────────────┘
+                            │
+                            ▼
+                     ┌──────────────┐     ┌──────────────┐
+                     │ Alertmanager │────▶│ Alert Router │
+                     │  (Routing)   │     │(GitHub Issue)│
+                     └──────────────┘     └──────────────┘
+```
+
+---
+
+## 🛠️ Components
+
+### 1. Prometheus (Port 9090)
+
+**Time-series metrics collection and storage.**
+
+**Features:**
+- Multi-target scraping (services, containers, databases)
+- PromQL query language
+- Alert rule evaluation
+- Local time-series database
+
+**Configuration:**
+- **Config:** `tools/monitoring/prometheus/prometheus.yml`
+- **Rules:** `tools/monitoring/prometheus/rules/*.yml`
+- **Scrape Targets:**
+  - Node Exporter (system metrics)
+  - Service Launcher API (`/api/metrics`)
+  - Dashboard API (`/api/metrics`)
+  - Container cAdvisor metrics
+
+**Access:** [http://localhost:9090](http://localhost:9090)
+
+**Common Queries:**
+
+```promql
+# CPU usage by service
+rate(process_cpu_seconds_total[5m])
+
+# Memory usage
+process_resident_memory_bytes
+
+# HTTP request rate
+rate(http_requests_total[5m])
+
+# Error rate
+rate(http_requests_total{status=~"5.."}[5m])
+```
+
+### 2. Grafana (Port 3000)
+
+**Metrics visualization and dashboarding.**
+
+**Features:**
+- Pre-configured dashboards
+- Dashboard provisioning (auto-import on startup)
+- Multi-datasource support (Prometheus, QuestDB)
+- Alert visualization
+
+**Configuration:**
+- **Dashboards:** `tools/monitoring/grafana/dashboards/*.json`
+- **Provisioning:** `tools/monitoring/grafana/provisioning/`
+- **Datasources:** `tools/monitoring/grafana/provisioning/datasources/`
+
+**Pre-configured Dashboards:**
+- **TradingSystem Overview** - System-wide metrics
+- **Service Health** - Service-specific metrics
+- **Database Performance** - QuestDB, TimescaleDB, PostgreSQL
+- **Container Resources** - CPU, memory, network, disk
+
+**Access:** [http://localhost:3000](http://localhost:3000)
+**Default Credentials:** `admin / admin` (change on first login)
+
+### 3. Alertmanager (Port 9093)
+
+**Alert deduplication, grouping, and routing.**
+
+**Features:**
+- Alert deduplication (same alert, multiple sources)
+- Alert grouping (related alerts)
+- Notification routing (route to different channels)
+- Silencing and inhibition
+
+**Configuration:**
+- **Config:** `tools/monitoring/alertmanager/alertmanager.yml`
+
+**Routing:**
+```yaml
+route:
+  receiver: 'alert-router'
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+```
+
+**Access:** [http://localhost:9093](http://localhost:9093)
+
+### 4. Alert Router (Port 8080)
+
+**Automated GitHub Issues integration for alerts.**
+
+**Features:**
+- Prometheus alerts → GitHub Issues
+- Automatic issue creation on alert firing
+- Auto-close issue on alert resolved
+- Alert fingerprinting and deduplication
+- Issue labeling by severity
+
+**Configuration:**
+- **Source:** `tools/monitoring/alert-router/src/`
+- **OpenAPI Spec:** [/api/alert-router](/api/alert-router)
+
+**Workflow:**
+1. Prometheus evaluates alert rules
+2. Alert fires → Sent to Alertmanager
+3. Alertmanager routes to Alert Router webhook
+4. Alert Router creates GitHub Issue with:
+   - Alert name and description
+   - Severity label (`critical`, `warning`, `info`)
+   - Alert fingerprint (for deduplication)
+   - Start time and current status
+5. Alert resolves → Alert Router closes GitHub Issue
+
+**Access:** [http://localhost:8080](http://localhost:8080)
+
+---
+
+## 🚀 Quick Start
+
+### Start Monitoring Stack
+
+```bash
+# Start all monitoring services
+docker compose -f tools/monitoring/docker-compose.yml up -d
+
+# Check status
+docker compose -f tools/monitoring/docker-compose.yml ps
+
+# View logs
+docker compose -f tools/monitoring/docker-compose.yml logs -f
+```
+
+### Access Services
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Prometheus | http://localhost:9090 | None |
+| Grafana | http://localhost:3000 | `admin / admin` |
+| Alertmanager | http://localhost:9093 | None |
+| Alert Router | http://localhost:8080 | None |
+
+### Stop Monitoring Stack
+
+```bash
+docker compose -f tools/monitoring/docker-compose.yml down
+```
+
+---
+
+## 📈 Usage Examples
+
+### Add New Scrape Target
+
+Edit `tools/monitoring/prometheus/prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: 'my-new-service'
+    static_configs:
+      - targets: ['localhost:3600']
+    metrics_path: '/api/metrics'
+    scrape_interval: 15s
+```
+
+Restart Prometheus:
+
+```bash
+docker compose -f tools/monitoring/docker-compose.yml restart prometheus
+```
+
+### Create Alert Rule
+
+Create `tools/monitoring/prometheus/rules/my-alerts.yml`:
+
+```yaml
+groups:
+  - name: my-service-alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} (>5%)"
+```
+
+Reload Prometheus:
+
+```bash
+curl -X POST http://localhost:9090/-/reload
+```
+
+### Import Grafana Dashboard
+
+1. Place JSON dashboard in `tools/monitoring/grafana/dashboards/`
+2. Restart Grafana (dashboard auto-imported on startup)
+
+```bash
+docker compose -f tools/monitoring/docker-compose.yml restart grafana
+```
+
+---
+
+## 🔍 Troubleshooting
+
+### Prometheus Not Scraping
+
+```bash
+# Check Prometheus targets
+curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.health != "up")'
+
+# Check service metrics endpoint
+curl http://localhost:3500/api/metrics
+```
+
+### Grafana Dashboard Not Loading
+
+```bash
+# Check Grafana logs
+docker compose -f tools/monitoring/docker-compose.yml logs grafana
+
+# Verify datasource connection
+curl -u admin:admin http://localhost:3000/api/datasources
+```
+
+### Alerts Not Firing
+
+```bash
+# Check Prometheus alert rules
+curl http://localhost:9090/api/v1/rules
+
+# Check Alertmanager status
+curl http://localhost:9093/api/v2/status
+
+# Check Alert Router logs
+docker compose -f tools/monitoring/docker-compose.yml logs alert-router
+```
+
+---
+
+## 📖 Related Documentation
+
+- **[API Documentation - Alert Router](/api/alert-router)** - OpenAPI specification
+- **[Service Launcher](/apps/service-launcher/overview)** - Service health monitoring
+- **[Infrastructure Overview](/tools/infrastructure/overview)** - Infrastructure components
+- **[Ports & Services](/tools/ports-services/overview)** - Service port mapping

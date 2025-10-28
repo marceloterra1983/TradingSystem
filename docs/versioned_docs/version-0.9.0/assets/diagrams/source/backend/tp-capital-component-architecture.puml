@@ -1,0 +1,195 @@
+@startuml
+title TP Capital - Component Architecture
+
+!define RECTANGLE class
+
+skinparam component {
+  BackgroundColor<<Interface>> LightBlue
+  BackgroundColor<<Application>> LightGreen
+  BackgroundColor<<Infrastructure>> LightGray
+  BackgroundColor<<External>> LightYellow
+  BackgroundColor<<Consumer>> LightPink
+}
+
+package "TP Capital API :3200" {
+  package "Interfaces Layer" <<Interface>> {
+    component "Express Routes" as Routes {
+      [GET /signals]
+      [GET /logs]
+      [GET /telegram/bots]
+      [GET /telegram/channels]
+      [POST /webhook/telegram]
+    }
+  }
+
+  package "Application Layer" <<Application>> {
+    component "Query Builders" as QueryBuilders {
+      [Filter by channel]
+      [Filter by signal_type]
+      [Filter by date range]
+      [Pagination (limit/offset)]
+    }
+
+    component "DTOs" as DTOs {
+      [SignalResponseDTO]
+      [LogResponseDTO]
+      [BotMetadataDTO]
+      [ChannelMetadataDTO]
+    }
+
+    component "Validation" as Validation {
+      [Telegram message format]
+      [Signal field validation]
+      [Date range validation]
+    }
+  }
+
+  package "Infrastructure Layer" <<Infrastructure>> {
+    component "QuestDB HTTP Client\n:9000" as QuestDBHTTP {
+      [SQL queries]
+      [SELECT from tp_capital_signals]
+      [JOIN with telegram_channels]
+    }
+
+    component "QuestDB ILP Client\n:9009" as QuestDBILP {
+      [Time-series writes]
+      [INSERT signals]
+      [High throughput]
+    }
+
+    component "Telegram Bot API Client" as TelegramClient {
+      [Webhook receiver]
+      [Message polling (future)]
+      [Bot authentication]
+    }
+
+    component "Message Parser" as Parser {
+      [Regex extraction]
+      [Asset identification]
+      [Target parsing]
+      [Stop-loss parsing]
+    }
+
+    component "Pino Logger" as Logger {
+      [Structured logging]
+      [Ingestion events]
+      [Parse errors]
+    }
+
+    component "Telegraf Metrics" as Metrics {
+      [tp_capital_signals_ingested_total]
+      [tp_capital_parse_errors_total]
+      [tp_capital_query_duration]
+    }
+  }
+}
+
+package "External Services" <<External>> {
+  component "Telegram Bot API" as TelegramBotAPI
+  component "Telegram Channels/Groups" as TelegramChannels
+  database "QuestDB\n:9000, :9009" as QuestDB {
+    [tp_capital_signals]
+    [telegram_bots]
+    [telegram_channels]
+  }
+}
+
+package "Consumers" <<Consumer>> {
+  component "Dashboard UI\n:3103" as Dashboard
+  component "Agno Agents\n:8200" as AgnoAgents {
+    [MarketAnalysisAgent]
+    [Correlates with Workspace ideas]
+  }
+}
+
+package "Observability Stack" {
+  component "Prometheus\n:9090" as Prometheus
+  component "Grafana\n:3000" as Grafana
+}
+
+' Data Flow: Ingestion
+TelegramChannels --> TelegramBotAPI : Post signal message
+TelegramBotAPI --> Routes : Webhook POST /webhook/telegram
+Routes --> Parser : parse_signal(message_text)
+Parser --> Validation : Validate extracted fields
+Validation --> QuestDBILP : Write signal (ILP protocol)
+QuestDBILP --> QuestDB : Append to tp_capital_signals
+
+' Data Flow: Consumption
+Dashboard --> Routes : GET /signals (with filters)
+AgnoAgents --> Routes : GET /signals (periodic polling)
+Routes --> QueryBuilders : Build SQL query
+QueryBuilders --> QuestDBHTTP : Execute query
+QuestDBHTTP --> QuestDB : SELECT * FROM tp_capital_signals
+QuestDB --> QuestDBHTTP : Return rows
+QuestDBHTTP --> Routes : Signal data
+Routes ..> DTOs : Format response
+Routes --> Dashboard : 200 OK {data: [...]}
+Routes --> AgnoAgents : 200 OK {data: [...]}
+
+' Observability
+Routes --> Logger : Log ingestion/queries
+Routes --> Metrics : Track operations
+Metrics --> Prometheus : Export metrics
+Prometheus --> Grafana : Visualize
+
+' Metadata queries
+Routes --> QuestDBHTTP : Query telegram_bots/telegram_channels
+
+note right of TelegramBotAPI
+  **Ingestion Sources**
+  - Telegram channels (public/private)
+  - Telegram groups
+  - Multiple bot tokens supported
+end note
+
+note right of QuestDB
+  **Schema Tables**
+  - tp_capital_signals (main)
+  - telegram_bots (config)
+  - telegram_channels (config)
+  Partitioned by day for performance
+end note
+
+note bottom of Parser
+  **Signal Format Examples**
+  "PETR4 COMPRA entre 28.50-28.80"
+  "VALE3 VENDA parcial alvo 65.00"
+  Regex extracts: asset, signal_type,
+  buy_min, buy_max, targets[], stop
+end note
+
+note bottom of QuestDBILP
+  **ILP Protocol Advantages**
+  - High throughput (>100k msgs/sec)
+  - Low latency (<10ms write)
+  - TCP connection pooling
+  - Binary protocol efficiency
+end note
+
+note right of Dashboard
+  **Dashboard Features**
+  - Signal table with filters
+  - Channel filter dropdown
+  - Signal type filter (COMPRA/VENDA)
+  - Date range picker
+  - Auto-refresh every 15 seconds
+end note
+
+note right of AgnoAgents
+  **Agent Workflow**
+  1. Fetch TP Capital signals
+  2. Fetch Workspace ideas
+  3. Correlate datasets (LLM/heuristics)
+  4. Generate trading recommendations
+end note
+
+note as N1
+  **Performance Targets**
+  - Ingestion latency: <500ms p95
+  - Query latency: <100ms p95 (100 rows)
+  - Parse success rate: >95%
+  - QuestDB uptime: >99.9%
+end note
+
+@enduml

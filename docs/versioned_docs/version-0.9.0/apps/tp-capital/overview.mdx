@@ -1,0 +1,50 @@
+---
+title: TP Capital Overview
+sidebar_position: 1
+description: Purpose, scope, and user journeys for the TP Capital Telegram ingestion
+  application.
+tags:
+  - apps
+  - tp-capital
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Summary
+
+Node.js 20 service that ingests TP Capital Telegram messages received by the **Telegram Gateway** and stores normalized signals in **TimescaleDB** (`APPS-TPCAPITAL.tp_capital_signals`). The API (`apps/tp-capital`, exposed on port **4005**) validates payloads, enriches metadata, exports Prometheus metrics, and serves the dashboard plus downstream automations via REST.
+
+## Stakeholders
+
+- **Primary users**: Dashboard UI consumers, Agno Agents (market analysis)
+- **Operators**: Platform/DevOps team managing TimescaleDB, Telegram credentials, and Gateway configuration
+- **Downstream systems**: Dashboard (port 3103), Agno Agents framework, data export jobs
+
+## User Journeys
+
+### Journey 1: Signal Ingestion
+
+1. Telegram Gateway (port 4006) authenticates with MTProto and stores messages in `telegram_gateway.messages`.
+2. TP Capital API polling worker fetches new rows, validates structure, and applies parsing rules (asset, buy range, targets, stop).
+3. Service writes normalized payload to TimescaleDB (`tp_capital_signals`) and tracks processing metrics.
+4. Gateway queue is marked as processed; API metrics reflect ingestion.
+
+### Journey 2: Dashboard Consumption
+
+1. Dashboard polls `/signals` endpoint every 15 seconds.
+2. API queries TimescaleDB and returns paginated, filtered signals.
+3. Dashboard renders tables/cards with sorting, filters, and freshness indicators.
+4. Operators can trigger `/sync-messages` to backfill from Gateway if necessary.
+
+### Journey 3: Agent Integration
+
+1. Agno Agents query `/signals` (or `/forwarded-messages`) for latest events.
+2. Combine signals with Workspace initiatives for enriched context.
+3. Apply risk controls, alerting thresholds, and compliance checks.
+4. Generate trading recommendations or trigger automation flows.
+
+## SLA Metrics
+
+- **Ingestion latency**: &lt;500ms p95 (Gateway write → TimescaleDB commit)
+- **API response time**: &lt;200ms p95 for `/signals`
+- **Availability**: 99.5% uptime target
+- **Data retention**: 90 days in TimescaleDB (monthly chunks, autovacuum enabled)

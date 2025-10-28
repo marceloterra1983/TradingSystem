@@ -1,0 +1,59 @@
+---
+title: Change Log
+sidebar_position: 9
+description: Release history for the Workspace application.
+tags:
+  - apps
+  - workspace
+  - changelog
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Releases
+
+### v1.0.0 - 2025-10-23
+
+- Initial standalone release on port 3900.
+- CRUD workflow with validation and toast feedback.
+- Kanban board with drag-and-drop.
+- Category, priority, and status taxonomy aligned to TradingSystem domains.
+- Dashboard iframe integration.
+- Dark mode and responsive layout.
+
+### v0.9.0 - 2025-10-18 (Beta)
+
+- Added CollapsibleCard layout and multi-section page.
+- Introduced quick add form and statistics by category.
+- Integrated Zustand store and TanStack Query caching.
+- Established Vite proxy for `/api/workspace`.
+
+### v0.5.0 - 2025-10-10 (Alpha)
+
+- Basic idea list with table view.
+- Manual status updates (no drag-and-drop).
+- Initial Express API contract (`/api/items`).
+
+## Upcoming
+
+### v1.1.0 - Planned Q1 2025
+
+- Export functionality (CSV/JSON).
+- Advanced filter panel with saved views.
+- Analytics integration (usage dashboards).
+
+### v1.2.0 - Planned Q2 2025
+
+- Comments and collaboration features.
+- Timeline/history view per idea.
+- Automation hooks for Agno Agents ingestion.
+
+## Upgrade Notes
+
+- `v0.9.0 → v1.0.0`: No breaking changes; rebuild frontend assets and ensure backend API on v1 schema.
+- `v0.5.0 → v0.9.0`: Requires enabling CollapsibleCard layout and migrating status enums to five-column set.
+
+## Support
+
+- Issues: `https://github.com/<owner>/TradingSystem/issues`
+- Product requirements: see `docs/content/apps/workspace/requirements.mdx`
+- Architecture reference: `docs/content/apps/workspace/architecture.mdx`

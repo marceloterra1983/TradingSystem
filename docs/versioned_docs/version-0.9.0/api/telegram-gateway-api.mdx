@@ -1,0 +1,537 @@
+---
+title: Telegram Gateway API
+sidebar_label: Telegram Gateway API
+sidebar_position: 9
+description: REST API for accessing Telegram messages, channels, and gateway status with TimescaleDB persistence
+tags:
+  - api
+  - telegram
+  - messaging
+  - crud
+  - timescaledb
+owner: BackendGuild
+lastReviewed: '2025-10-27'
+---
+
+## Overview
+
+The **Telegram Gateway API** provides RESTful access to Telegram messages captured by the MTProto Gateway. It serves as the query interface for messages stored in TimescaleDB, enabling downstream services (like TP Capital) to retrieve, filter, and synchronize Telegram channel data.
+
+### Key Features
+
+- **Message Retrieval**: Query messages with filtering by channel, date range, and sync status
+- **Channel Management**: CRUD operations for Telegram channels
+- **Sync Status Tracking**: Track message synchronization state
+- **Prometheus Metrics**: HTTP request metrics and database health
+- **Rate Limiting**: 300 requests per minute
+- **Optional Authentication**: Token-based auth for production environments
+- **TimescaleDB Backend**: Efficient time-series message storage
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 4010 |
+| **Base URL** | `http://localhost:4010` |
+| **Repository** | `backend/api/telegram-gateway/` |
+| **Database** | TimescaleDB (PostgreSQL) |
+| **Status** | ✅ Active |
+| **Technology** | Express.js, Pino, Prometheus Client |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│   MTProto Gateway (apps/telegram-gateway)      │
+│   Port 4006 - Message Ingestion                │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│        TimescaleDB (telegram_gateway schema)    │
+│        • messages table (hypertable)            │
+│        • channels table                         │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│   Telegram Gateway API (Port 4010)             │
+│   • GET /api/messages (query)                  │
+│   • GET /api/channels (list)                   │
+│   • POST /api/telegram-gateway/sync-messages   │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│   Consumers (TP Capital, Analytics, etc.)      │
+└─────────────────────────────────────────────────┘
+```
+
+**Flow:**
+
+1. MTProto Gateway captures messages from Telegram channels
+2. Messages stored in TimescaleDB (`telegram_gateway.messages`)
+3. API exposes messages via REST endpoints
+4. Consumers poll `/api/messages` for new messages
+5. Consumers mark messages as synced
+
+## Quick Start
+
+### Health Check
+
+```bash
+curl http://localhost:4010/health
+```
+
+Response:
+
+```json
+{
+  "status": "healthy",
+  "service": "telegram-gateway-api",
+  "timestamp": "2025-10-27T12:00:00.000Z"
+}
+```
+
+### Get Recent Messages
+
+```bash
+# Get last 50 messages
+curl "http://localhost:4010/api/messages?limit=50"
+
+# Filter by channel
+curl "http://localhost:4010/api/messages?channel_id=-1001234567890&limit=20"
+
+# Filter by date range
+curl "http://localhost:4010/api/messages?from=2025-10-27T00:00:00Z&to=2025-10-27T23:59:59Z"
+
+# Get only unsynced messages
+curl "http://localhost:4010/api/messages?synced=false&limit=100"
+```
+
+### Get Channels
+
+```bash
+curl http://localhost:4010/api/channels
+```
+
+Response:
+
+```json
+{
+  "channels": [
+    {
+      "id": "-1001234567890",
+      "username": "tpcapital_signals",
+      "title": "TP Capital Sinais Premium",
+      "description": "Canal oficial de sinais",
+      "message_count": 1250,
+      "last_message_at": "2025-10-27T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Sync Messages (Mark as Processed)
+
+```bash
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "last_message_id": 12345,
+    "channel_id": "-1001234567890"
+  }'
+```
+
+## API Reference
+
+### Main Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check with database ping |
+| `/metrics` | GET | Prometheus metrics |
+| `/api/messages` | GET | Query messages with filters |
+| `/api/channels` | GET | List all channels with stats |
+| `/api/telegram-gateway/sync-messages` | POST | Mark messages as synced |
+
+## Endpoint Details
+
+### GET /api/messages
+
+Query messages with optional filters.
+
+**Query Parameters:**
+
+- `limit` (number): Max messages to return (default: 50, max: 1000)
+- `offset` (number): Skip N messages (pagination)
+- `channel_id` (string): Filter by Telegram channel ID
+- `from` (ISO 8601): Start date filter
+- `to` (ISO 8601): End date filter
+- `synced` (boolean): Filter by sync status (true/false)
+
+**Response:**
+
+```json
+{
+  "messages": [
+    {
+      "message_id": 12345,
+      "channel_id": "-1001234567890",
+      "date": "2025-10-27T12:00:00.000Z",
+      "text": "COMPRA WINZ25 @ 120500",
+      "from_id": "user123",
+      "photos": [],
+      "synced": false,
+      "created_at": "2025-10-27T12:00:05.000Z"
+    }
+  ],
+  "total": 1250,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+**Example:**
+
+```bash
+# Pagination
+curl "http://localhost:4010/api/messages?limit=100&offset=100"
+
+# Unsynced messages for specific channel
+curl "http://localhost:4010/api/messages?channel_id=-1001234567890&synced=false"
+
+# Messages from last hour
+FROM=$(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ)
+curl "http://localhost:4010/api/messages?from=$FROM"
+```
+
+### GET /api/channels
+
+List all channels with message statistics.
+
+**Response:**
+
+```json
+{
+  "channels": [
+    {
+      "id": "-1001234567890",
+      "username": "tpcapital_signals",
+      "title": "TP Capital Sinais Premium",
+      "description": "Canal oficial de sinais de trading",
+      "message_count": 1250,
+      "last_message_at": "2025-10-27T12:00:00.000Z",
+      "first_message_at": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "total": 3
+}
+```
+
+### POST /api/telegram-gateway/sync-messages
+
+Mark messages as synchronized (processed by downstream services).
+
+**Request Body:**
+
+```json
+{
+  "last_message_id": 12345,
+  "channel_id": "-1001234567890"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "updated": 42,
+  "channel_id": "-1001234567890",
+  "last_message_id": 12345
+}
+```
+
+**Use Case**: TP Capital polling worker calls this after processing messages
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Server
+PORT=4010                           # API port (default: 4010)
+
+# Database (TimescaleDB)
+PGHOST=localhost                    # Database host
+PGPORT=5433                         # Database port (default: 5433)
+PGDATABASE=telegram_gateway         # Database name
+PGUSER=postgres                     # Database user
+PGPASSWORD=postgres                 # Database password
+
+# Authentication (Optional)
+TELEGRAM_GATEWAY_REQUIRE_TOKEN=false  # Enable token auth (default: false)
+TELEGRAM_GATEWAY_API_TOKEN=your_token # API token for auth
+
+# Logging
+LOG_LEVEL=info                      # Log level: debug, info, warn, error
+```
+
+### Database Schema
+
+**Messages Table** (`telegram_gateway.messages`):
+
+```sql
+CREATE TABLE telegram_gateway.messages (
+  message_id BIGINT NOT NULL,
+  channel_id TEXT NOT NULL,
+  date TIMESTAMPTZ NOT NULL,
+  text TEXT,
+  from_id TEXT,
+  photos TEXT[],
+  synced BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (channel_id, message_id)
+);
+
+-- Convert to hypertable for time-series optimization
+SELECT create_hypertable('telegram_gateway.messages', 'date');
+```
+
+**Channels Table** (`telegram_gateway.channels`):
+
+```sql
+CREATE TABLE telegram_gateway.channels (
+  id TEXT PRIMARY KEY,
+  username TEXT,
+  title TEXT,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+## Integration Examples
+
+### TypeScript (TP Capital Polling Worker)
+
+```typescript
+import fetch from 'node-fetch';
+
+interface TelegramMessage {
+  message_id: number;
+  channel_id: string;
+  date: string;
+  text: string;
+  synced: boolean;
+}
+
+class TelegramGatewayClient {
+  private baseUrl = 'http://localhost:4010';
+
+  async getUnsyncedMessages(channelId?: string, limit = 100): Promise<TelegramMessage[]> {
+    const params = new URLSearchParams();
+    params.append('synced', 'false');
+    params.append('limit', limit.toString());
+    if (channelId) params.append('channel_id', channelId);
+
+    const response = await fetch(`${this.baseUrl}/api/messages?${params}`);
+    const data = await response.json();
+    return data.messages;
+  }
+
+  async markAsSynced(channelId: string, lastMessageId: number): Promise<void> {
+    await fetch(`${this.baseUrl}/api/telegram-gateway/sync-messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel_id: channelId, last_message_id: lastMessageId })
+    });
+  }
+}
+
+// Usage in polling worker
+const client = new TelegramGatewayClient();
+
+async function processMessages() {
+  const messages = await client.getUnsyncedMessages('-1001234567890');
+
+  for (const msg of messages) {
+    // Process message (parse signal, store in database)
+    await processSignal(msg.text);
+  }
+
+  if (messages.length > 0) {
+    const lastId = messages[messages.length - 1].message_id;
+    await client.markAsSynced('-1001234567890', lastId);
+  }
+}
+
+// Poll every 5 seconds
+setInterval(processMessages, 5000);
+```
+
+### React Hook (Dashboard Integration)
+
+```typescript
+import { useState, useEffect } from 'react';
+
+function useTelegramMessages(channelId?: string, autoRefresh = true) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const params = new URLSearchParams({ limit: '100' });
+      if (channelId) params.append('channel_id', channelId);
+
+      const res = await fetch(`http://localhost:4010/api/messages?${params}`);
+      const data = await res.json();
+      setMessages(data.messages);
+      setLoading(false);
+    };
+
+    fetchMessages();
+
+    if (autoRefresh) {
+      const interval = setInterval(fetchMessages, 10000); // Poll every 10s
+      return () => clearInterval(interval);
+    }
+  }, [channelId, autoRefresh]);
+
+  return { messages, loading };
+}
+
+// Usage
+function TelegramMessagesViewer({ channelId }) {
+  const { messages, loading } = useTelegramMessages(channelId);
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <ul>
+      {messages.map(msg => (
+        <li key={msg.message_id}>
+          <strong>{msg.date}</strong>: {msg.text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### curl Examples
+
+```bash
+# Get last 100 messages
+curl "http://localhost:4010/api/messages?limit=100"
+
+# Get unsynced messages only
+curl "http://localhost:4010/api/messages?synced=false"
+
+# Get messages from specific channel
+curl "http://localhost:4010/api/messages?channel_id=-1001234567890"
+
+# Pagination (get messages 100-200)
+curl "http://localhost:4010/api/messages?limit=100&offset=100"
+
+# Mark messages as synced
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channel_id": "-1001234567890",
+    "last_message_id": 12345
+  }'
+```
+
+## Error Handling
+
+### HTTP Status Codes
+
+| Code | Meaning | When It Occurs |
+|------|---------|----------------|
+| 200 | OK | Request successful |
+| 400 | Bad Request | Invalid parameters |
+| 401 | Unauthorized | Missing or invalid API token (if auth enabled) |
+| 500 | Internal Server Error | Database error |
+| 503 | Service Unavailable | Database connection failed |
+
+### Error Response Format
+
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
+```
+
+### Common Errors
+
+**503 - Database Unavailable:**
+
+```json
+{
+  "status": "unhealthy",
+  "service": "telegram-gateway-api",
+  "message": "Database connection failed"
+}
+```
+
+**401 - Unauthorized (when auth enabled):**
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized"
+}
+```
+
+## Authentication (Optional)
+
+To enable token-based authentication:
+
+```bash
+# .env
+TELEGRAM_GATEWAY_REQUIRE_TOKEN=true
+TELEGRAM_GATEWAY_API_TOKEN=your_secret_token_here
+```
+
+**Request with token:**
+
+```bash
+curl -H "X-Gateway-Token: your_secret_token_here" \
+  http://localhost:4010/api/messages
+```
+
+**Alternative headers:**
+
+- `X-API-Token`
+- `Authorization: Bearer your_secret_token_here`
+
+## Prometheus Metrics
+
+Available at `GET /metrics`:
+
+```prometheus
+# HTTP request metrics
+telegram_gateway_api_http_requests_total{method="GET",route="/api/messages",status="200"}
+telegram_gateway_api_http_request_duration_seconds{method="GET",route="/api/messages"}
+
+# Node.js metrics
+telegram_gateway_api_process_cpu_user_seconds_total
+telegram_gateway_api_process_resident_memory_bytes
+telegram_gateway_api_nodejs_eventloop_lag_seconds
+```
+
+## Related Documentation
+
+- **[Telegram Gateway (MTProto)](/apps/telegram-gateway/overview)** - Message ingestion service
+- **[TP Capital API](/api/tp-capital-api)** - Signal processing consumer
+- **[TimescaleDB Schema](/database/schema)** - Database table definitions
+
+## Support
+
+For issues, questions, or feature requests:
+
+- **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
+- **Source Code**: `backend/api/telegram-gateway/src/server.js`
+- **Database Migrations**: `backend/data/timescaledb/telegram-gateway/`

@@ -1,0 +1,11 @@
+{
+  "label": "Guidelines",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Frontend Guidelines",
+    "slug": "/frontend/guidelines",
+    "description": "Guidelines covering style, accessibility, and performance."
+  }
+}

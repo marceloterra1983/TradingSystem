@@ -1,0 +1,11 @@
+{
+  "label": "PlantUML",
+  "position": 6,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "PlantUML",
+    "slug": "/tools/plantuml",
+    "description": "Guidelines for authoring PlantUML diagrams."
+  }
+}

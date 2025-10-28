@@ -1,0 +1,183 @@
+---
+title: Docker & WSL Overview
+description: Overview of Docker Desktop and WSL usage for TradingSystem development.
+tags:
+  - tools
+  - docker
+  - wsl
+owner: ToolingGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem combines Docker for containerised services with Windows Subsystem for Linux (WSL) to provide a seamless cross-platform development experience.
+
+- **Windows-Native Services**: .NET/ProfitDLL workloads run directly on Windows.
+- **Containers**: Node.js APIs, databases, monitoring, and auxiliary tooling run inside Docker.
+- **Development Environment**: WSL 2 hosts the Linux workspace for Node.js, Python, and documentation tooling.
+
+## Docker Usage
+
+### Docker Compose Stacks (`tools/compose/`)
+
+1. **Infrastructure Core** — TimescaleDB, PgAdmin, Grafana, Prometheus.
+2. **Documentation** — Docusaurus site.
+3. **AI/ML Tools** — LangGraph, Agno Agents, LlamaIndex, Ollama.
+4. **Monitoring** — Prometheus, Grafana, Alertmanager.
+5. **Web Scraping** — Firecrawl service.
+6. **Reverse Proxy** — Nginx unified domain.
+
+### Common Commands
+
+```bash
+# Start all stacks
+bash tools/scripts/start-all-stacks.sh
+
+# Start a specific stack
+cd tools/compose/<stack-name>
+docker compose up -d
+
+# Stop all stacks
+bash tools/scripts/stop-all-stacks.sh
+
+# Tail logs
+docker compose logs -f <service-name>
+
+# Health check
+docker compose ps
+```
+
+### Network Architecture
+
+- External networks expose services to the host (e.g., `tradingsystem-network`).
+- Internal networks isolate databases and monitoring (e.g., `timescaledb-network`, `monitoring-network`).
+- Docker DNS provides automatic service discovery.
+
+### Key Ports
+
+- Dashboard: 3103
+- Workspace: 3100
+- Idea Bank API: 3200
+- TP Capital API: 4005
+- documentation-api: 3400
+- Launcher: 3500
+- Docusaurus: 3205
+- TimescaleDB: 5432
+- PgAdmin: 5050
+- Grafana: 3000
+- Prometheus: 9090
+
+## WSL 2 Setup
+
+### Prerequisites
+
+- Windows 11 (recommended) or Windows 10 2004+.
+- WSL 2 enabled with Ubuntu 20.04 or later.
+- Docker Desktop installed with WSL integration.
+
+### Installation Steps
+
+```bash
+wsl --update
+wsl --install -d Ubuntu-22.04
+wsl --set-default-version 2
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git build-essential python3 python3-venv python3-pip
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+### Docker Desktop Configuration
+
+1. Enable “Use the WSL 2 based engine”.
+2. Enable integration with the Ubuntu distribution.
+3. Apply changes and restart Docker Desktop.
+
+### Verification
+
+```bash
+wsl --list --verbose
+docker --version
+docker compose version
+docker run hello-world
+```
+
+## Development Workflow
+
+### Clone in WSL
+
+```bash
+cd ~
+mkdir -p projects
+cd projects
+git clone https://github.com/marceloterra/TradingSystem.git
+cd TradingSystem
+```
+
+### Environment Setup
+
+```bash
+bash scripts/env/setup-env.sh
+bash scripts/env/validate-env.sh
+npm install --workspaces
+```
+
+### Start Services
+
+- `start` — universal startup shortcut.
+- `bash scripts/startup/start-all.sh` — manual start sequence.
+- `bash tools/scripts/start-all-stacks.sh` — Docker-only stack startup.
+
+### Access from Windows
+
+- Services exposed in WSL are reachable via `localhost`.
+- Docs: `http://localhost:3205`
+- Dashboard: `http://localhost:3103`
+- Unified domain: `http://tradingsystem.local` (requires Nginx setup).
+
+## Best Practices
+
+- Minimise exposed ports; prefer internal Docker networks.
+- Use Docker secrets instead of environment variables for sensitive data.
+- Configure health checks and restart policies.
+- Store source code inside WSL filesystem for performance.
+- Allocate sufficient resources in `.wslconfig`.
+- Always use WSL 2 backend for Docker Desktop.
+
+### Troubleshooting
+
+```bash
+# Restart WSL
+wsl --shutdown
+wsl
+
+# Start Docker daemon (if needed)
+sudo service docker start
+
+# Reset networks
+docker network prune
+docker compose down
+docker compose up -d
+
+# Resolve port conflicts
+lsof -i :<port>
+kill -9 <pid>
+```
+
+## Multi-Clone Isolation
+
+- Set a unique `COMPOSE_PROJECT_NAME` per clone to avoid shared networks.
+
+```bash
+export COMPOSE_PROJECT_NAME=$(basename "$(pwd)")
+docker compose up -d
+```
+
+- Benefits: isolated networks, no port conflicts, independent lifecycles, and easier parallel feature work.
+
+## Related Documentation
+
+- Docker Compose Stacks (TODO: link once ops docker stacks doc migrates)
+- Network Architecture (TODO: link after reference networking doc exists)
+- [Service Port Map](/tools/ports-services/overview)
+- Environment Configuration (TODO: link once ops environment configuration doc is created)

@@ -1,0 +1,11 @@
+{
+  "label": "Node & npm",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Node & npm Tooling",
+    "slug": "/tools/node-npm",
+    "description": "Guides for Node.js and npm usage within TradingSystem."
+  }
+}

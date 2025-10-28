@@ -1,0 +1,77 @@
+---
+title: Docusaurus Daily Agent
+description: Agent local que resume mudanças diárias no código e atualiza relatórios do Docusaurus.
+tags: [automation, docs, agent]
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Visão Geral
+
+O Docusaurus Daily Agent roda localmente (sem chamadas externas) e gera um relatório diário em MDX com base nas mudanças de código desde 00:00 do dia atual. Quando disponível, usa um modelo local via Ollama para sintetizar um changelog. Caso contrário, faz fallback para um resumo básico.
+
+Saída gerada em:
+
+- `docs/content/reports/daily/YYYY-MM-DD.mdx`
+
+## Requisitos
+
+- Git com histórico válido no repositório
+- Node.js 18+
+- Opcional (para IA local):
+  - Ollama rodando em `http://localhost:11434`
+  - Variáveis: `OLLAMA_BASE_URL`, `DOCS_AGENT_MODEL` (ex.: `llama3.1:8b`)
+
+## Execução
+
+```
+npm run agent:docs:daily
+```
+
+Logs indicam o caminho do arquivo gerado. Se o ambiente Python tiver PyYAML instalado, a validação de frontmatter também é executada.
+
+Via Agno Agents API (rodando localmente):
+
+```
+POST http://localhost:8201/api/v1/agents/docs/daily/run
+{
+  "since": "2025-10-27 00:00", // opcional
+  "dry": false,
+  "model": "llama3.1:8b",     // opcional (override)
+  "maxContext": 20000,         // opcional (override)
+  "noValidate": false,
+  "outDir": "docs/content/reports/daily"
+}
+```
+
+Listar manifestos de agentes (carregados de `config/agents/*.json`):
+
+```
+GET http://localhost:8201/api/v1/agents/registry
+GET http://localhost:8201/api/v1/agents/docs/daily/manifest
+GET http://localhost:8201/api/v1/agents/docusaurus-daily/args
+```
+
+O endpoint `/{agentId}/args` retorna o schema de argumentos com defaults resolvidos (incluindo valores vindos de variáveis de ambiente como `DOCS_AGENT_MODEL`, `DOCS_AGENT_MAX_CONTEXT` e `OLLAMA_BASE_URL`).
+
+## Variáveis de Ambiente
+
+```
+OLLAMA_BASE_URL=http://localhost:11434
+DOCS_AGENT_MODEL=llama3.1:8b
+DOCS_AGENT_MAX_CONTEXT=20000
+```
+
+## Agendamento (cron)
+
+Exemplo para executar às 18h diariamente:
+
+```
+0 18 * * * cd /caminho/para/TradingSystem && /usr/bin/env -S bash -lc 'npm run agent:docs:daily >> logs/daily-agent.log 2>&1'
+```
+
+## Notas
+
+- O agente determina o baseRef com `git rev-list -1 --before="YYYY-MM-DD 00:00" HEAD` e difere para `HEAD`.
+- Sem Ollama disponível, gera um resumo com lista de arquivos e commits do dia.
+- A validação de frontmatter é melhor quando PyYAML está instalado (veja `scripts/docs/install-dependencies.sh`).
