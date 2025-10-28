@@ -1,0 +1,290 @@
+---
+title: Documentation API
+sidebar_position: 6
+description: REST API for managing documentation systems, ideas, specifications, search,
+  and file attachments.
+tags:
+  - api
+  - documentation
+  - search
+  - crud
+owner: DocsOps
+lastReviewed: '2025-10-26'
+slug: /api/documentation-api/guide
+---
+## Overview
+
+The **Documentation API** provides comprehensive documentation management capabilities for the TradingSystem platform. It supports CRUD operations for documentation systems, ideas, specifications, file management, and full-text search powered by FlexSearch.
+
+### Key Features
+
+- **Multi-tenancy**: Manage multiple documentation systems with isolated namespaces
+- **Idea Management**: Track ideas, proposals, and feature requests with rich metadata
+- **Specifications**: Store and version technical specs, ADRs, and PRDs
+- **Full-text Search**: Fast search across all documentation using FlexSearch
+- **File Attachments**: Upload and manage files with automatic metadata extraction
+- **Statistics & Analytics**: Comprehensive usage stats and health monitoring
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 3400 (development), 3205 (production) |
+| **Base URL** | `http://localhost:3400` |
+| **Reverse Proxy Route** | `http://tradingsystem.local/api/documentation` |
+| **Repository** | `backend/api/documentation-api/` |
+| **Database** | QuestDB/PostgreSQL (dual-strategy) |
+| **Status** | ✅ Active |
+
+## Quick Start
+
+### Health Check
+
+```bash
+curl http://localhost:3400/health
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "status": "healthy",
+  "timestamp": "2025-10-25T08:00:00Z",
+  "uptime": 12345,
+  "database": "connected"
+}
+```
+
+### Create a Documentation System
+
+```bash
+curl -X POST http://localhost:3400/api/v1/systems \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "trading-platform",
+    "description": "Main trading platform documentation",
+    "owner": "trading-team"
+  }'
+```
+
+### Search Documentation
+
+```bash
+curl http://localhost:3400/api/v1/search?q=risk+management
+```
+
+## API Reference
+
+The complete OpenAPI specification is available at:
+
+<a href="/api/documentation-api" className="button button--primary">View Full API Documentation</a>
+
+### Main Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Service health status |
+| `/api/v1/systems` | GET, POST | Manage documentation systems |
+| `/api/v1/systems/:id` | GET, PUT, DELETE | Individual system operations |
+| `/api/v1/ideas` | GET, POST | Idea management |
+| `/api/v1/search` | GET | Full-text search over OpenAPI/AsyncAPI |
+| `/api/v1/suggest` | GET | Suggestions from OpenAPI/AsyncAPI |
+| `/api/v1/docs/search` | GET | Markdown search (faceted) |
+| `/api/v1/docs/facets` | GET | Facets for Markdown content |
+| `/api/v1/docs/suggest` | GET | Suggestions from Markdown titles |
+| `/api/v1/docs/status` | GET | Documentation health (OpenAPI/AsyncAPI presence) |
+| `/api/v1/docs/download` | GET | Download ZIP with specs/schemas |
+| `/spec/openapi.yaml` | GET | Serve OpenAPI spec (YAML) |
+| `/spec/asyncapi.yaml` | GET | Serve AsyncAPI spec (YAML) |
+
+## Authentication & Rate Limiting
+
+### Rate Limiting
+
+Global rate limit: **300 requests per 60-second window**
+
+Rate limit headers:
+
+- `RateLimit-Limit`: Maximum requests allowed
+- `RateLimit-Remaining`: Requests remaining
+- `RateLimit-Reset`: Unix timestamp when limit resets
+
+### Authentication
+
+Currently uses API key authentication. Future versions will support:
+
+- JWT tokens
+- OAuth2
+- Service-to-service mTLS
+
+## Database Strategy
+
+The Documentation API uses a **dual-persistence strategy**:
+
+1. **Primary**: QuestDB for high-performance time-series data
+2. **Fallback**: PostgreSQL for ACID compliance and complex queries
+3. **Auto-migration**: Seamless migration between databases
+
+## Monitoring & Observability
+
+### Metrics
+
+Prometheus metrics available at `/metrics`:
+
+```bash
+curl http://localhost:3400/metrics
+```
+
+Key metrics:
+
+- `http_request_duration_seconds`: Request latency
+- `documentation_api_requests_total`: Total requests
+- `documentation_api_database_operations`: Database ops
+- `documentation_api_search_duration`: Search performance
+
+### Health Monitoring
+
+Comprehensive health checks include:
+
+- Database connectivity
+- Disk space
+- Memory usage
+- Search index status
+
+## Development
+
+### Local Setup
+
+```bash
+cd backend/api/documentation-api
+npm install
+npm run dev
+```
+
+### Environment Variables
+
+```bash
+PORT=3400
+DATABASE_URL=postgresql://user:pass@localhost:5432/docs
+QUESTDB_HTTP_URL=http://localhost:9000
+ENABLE_SEARCH=true
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=10485760  # 10MB
+```
+
+### Testing
+
+```bash
+npm test                 # Run all tests
+npm run test:watch      # Watch mode
+npm run test:coverage   # Coverage report
+```
+
+## Integration Examples
+
+### JavaScript/TypeScript
+
+```typescript
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:3400',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Create a new idea
+const idea = await api.post('/api/v1/ideas', {
+  title: 'Implement WebSocket streaming',
+  description: 'Add real-time updates via WebSockets',
+  status: 'proposed',
+  priority: 'high',
+  tags: ['enhancement', 'real-time']
+});
+
+// Search
+const results = await api.get('/api/v1/search', {
+  params: { q: 'websocket', limit: 10 }
+});
+```
+
+### Python
+
+```python
+import requests
+
+BASE_URL = 'http://localhost:3400'
+
+# Health check
+health = requests.get(f'{BASE_URL}/health').json()
+print(f"Status: {health['status']}")
+
+# Create system
+system = requests.post(f'{BASE_URL}/api/v1/systems', json={
+    'name': 'analytics-platform',
+    'description': 'Analytics and reporting system',
+    'owner': 'analytics-team'
+}).json()
+```
+
+## Related Documentation
+
+- [OpenAPI Specification](/api/documentation-api) - Complete API reference
+- [Workspace API](./workspace-api.mdx) - Idea Bank and workspace management
+- [Database Schema](../database/schema.mdx) - Data models and relationships
+- Deployment guide (migration pending) - Production deployment
+
+## Support & Troubleshooting
+
+### Common Issues
+
+**Connection refused on port 3400**
+
+```bash
+# Check if service is running
+curl http://localhost:3400/health
+
+# Start the service
+cd backend/api/documentation-api && npm run dev
+```
+
+**Rate limit exceeded**
+
+- Wait for rate limit window to reset
+- Implement exponential backoff
+- Contact ops team for increased limits
+
+**Search not working**
+
+```bash
+# Verify documentation health (specs availability)
+curl http://localhost:3400/api/v1/docs/status
+
+# Verify Markdown search endpoints
+curl "http://localhost:3400/api/v1/docs/facets?q=architecture"
+curl "http://localhost:3400/api/v1/docs/suggest?q=arch"
+curl "http://localhost:3400/api/v1/docs/search?q=docs&domain=backend&type=guide"
+
+# Rebuild Markdown index (1/min rate limit)
+curl -X POST http://localhost:3400/api/v1/docs/reindex
+```
+
+## Changelog
+
+### v1.0.0 (2025-10-25)
+
+- ✅ Initial release
+- ✅ QuestDB/PostgreSQL dual-strategy
+- ✅ FlexSearch integration
+- ✅ File upload support
+- ✅ Comprehensive health monitoring
+
+### Roadmap
+
+- [ ] JWT authentication
+- [ ] GraphQL support
+- [ ] Real-time updates via WebSocket
+- [ ] Multi-language search
+- [ ] Advanced analytics dashboard

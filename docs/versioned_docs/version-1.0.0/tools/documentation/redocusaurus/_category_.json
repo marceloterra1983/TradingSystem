@@ -1,0 +1,11 @@
+{
+  "label": "Redocusaurus",
+  "position": 5,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Redocusaurus Integration",
+    "slug": "/tools/redocusaurus",
+    "description": "Guides for embedding Redoc within Docusaurus."
+  }
+}

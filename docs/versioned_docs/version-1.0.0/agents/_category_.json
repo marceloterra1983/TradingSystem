@@ -1,0 +1,9 @@
+{
+  "label": "Agents",
+  "position": 5,
+  "collapsed": false,
+  "link": {
+    "type": "doc",
+    "id": "agents/overview"
+  }
+}

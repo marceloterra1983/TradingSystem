@@ -1,0 +1,11 @@
+{
+  "label": ".NET",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": ".NET Tooling",
+    "slug": "/tools/dotnet",
+    "description": "Guides for .NET development and runtime tooling."
+  }
+}

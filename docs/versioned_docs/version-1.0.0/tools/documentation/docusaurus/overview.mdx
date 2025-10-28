@@ -1,0 +1,91 @@
+---
+title: Docusaurus Overview
+description: Structure and governance of the Docusaurus documentation workspace.
+tags:
+  - tools
+  - docusaurus
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Workspace Layout
+
+- **Legacy Docs**: `docs/` (Docusaurus v2, being retired).
+- **New Docs**: `docs/` (Docusaurus v3, production).
+- **Content Directory**: `docs/content/` with domain-specific MDX.
+- **Configuration**: `docs/docusaurus.config.js`.
+- **Static Assets**: `docs/static/`.
+- **Scripts**: `scripts/docusaurus/` for automation.
+- **Tests**: `docs/tests/` for validation suites.
+
+**Content Organisation**
+
+- `content/apps/` — Application docs (tp-capital, workspace, order-manager, data-capture).
+- `content/api/` — API summaries and references.
+- `content/frontend/` — Frontend design system, guidelines, engineering.
+- `content/tools/` — Tooling overviews (node-npm, dotnet, python, etc.).
+- `content/sdd/` — Software design documents.
+- `content/prd/` — Product requirements.
+- `content/reference/` — Architecture, templates, specifications.
+- `content/diagrams/` — PlantUML diagrams and guides.
+- `content/mcp/` — Model Context Protocol documentation.
+- `content/agents/` — AI agent references.
+
+**Key Config Files**
+
+- `docusaurus.config.js` — Site configuration, theme, plugins.
+- `sidebars.js` — Sidebar navigation definitions.
+- `_category_.json` — Directory-level metadata.
+- `package.json` — Project scripts and dependencies.
+
+## Governance
+
+- **Frontmatter Validation**: Husky pre-commit hooks enforce required fields (`title`, `description`, `tags`, `owner`, `lastReviewed`).
+- **Link Validation**: GitHub Actions workflow checks all internal links.
+- **Content Review**: DocsOps signs off on every documentation change.
+- **Versioning**: Single active version; plan to version docs when breaking API changes ship using `npm run docusaurus docs:version <version>`.
+- **Deployment**:
+  - Local preview: `npm run start` (port 3205).
+  - Production build: `npm run build` (outputs `build/`).
+  - Hosting: Nginx reverse proxy at `http://tradingsystem.local/docs`.
+  - CI/CD: GitHub Actions builds and deploys on pushes to `main`.
+- **Automation**:
+  - `npm run docs:auto` — Generate reference content (ports, tokens, MCP registry).
+  - `npm run docs:check` — Full validation suite (lint, type-check, build).
+  - `npm run docs:links` — Link validation.
+  - `npm run docs:test` — Documentation tests.
+- **Content Standards**:
+  - MDX for all docs; support React components inline.
+  - Follow the documentation frontmatter schema.
+  - Use kebab-case for filenames and slugs.
+  - Prefer relative links for internal references.
+  - Provide syntax-highlighted code samples.
+  - Leverage PlantUML or Mermaid for diagrams.
+- **Maintenance**:
+  - Quarterly review cadence for accuracy.
+  - Mark stale docs with `status: deprecated`.
+  - Fix broken links immediately (CI failure).
+  - Keep frontmatter fields complete and validated.
+
+## Migration Status
+
+- **Phase 0**: Catalog and mapping — complete.
+- **Phase 1**: Apps documentation — complete.
+- **Phase 2**: Frontend and tools migration — in progress.
+- **Phase 3**: PRD, SDD, templates, diagrams — queued.
+- **Phase 4**: Automation enhancements — planned.
+- **Phase 5**: Review and governance updates — planned.
+- **Phase 6**: Reference updates and cut-over — planned.
+
+**Migration Artifacts**
+
+- `docs/migration/README-CATALOG.md`
+- `docs/migration/CONTENT-INVENTORY.md`
+- `docs/migration/MIGRATION-MAPPING.md`
+- `docs/migration/INVENTORY-REPORT.md`
+
+## Related Documentation
+
+- Documentation Standard (TODO: link once meta documentation standard migrates)
+- Migration Guide (TODO: link once migration guide is published)
+- [PlantUML Guide](../plantuml/overview)
+- [Redocusaurus Integration](../redocusaurus/overview)

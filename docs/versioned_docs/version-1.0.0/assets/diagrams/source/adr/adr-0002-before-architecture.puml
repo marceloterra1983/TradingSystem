@@ -1,0 +1,35 @@
+@startuml
+title Architecture - Before Agno Integration
+
+actor Trader
+component "Manual Analysis" as Manual
+component "Workspace API\n:3100" as Workspace
+component "TP Capital API\n:3200" as TPCapital
+database "QuestDB" as QuestDB
+
+Trader --> Manual : Analyze data manually
+Manual --> Workspace : Fetch ideas
+Manual --> TPCapital : Check signals
+TPCapital --> QuestDB : Query signals
+
+note right of Manual
+  Issues:
+  - Manual decision-making
+  - No automated risk checks
+  - Fragmented analysis across APIs
+  - Slow response time (minutes)
+  - No coordination between data sources
+  - High chance of human error
+end note
+
+note bottom of Trader
+  Workflow:
+  1. Review TP Capital telegram signals
+  2. Ler ideias no Workspace
+  3. Avaliar risco manualmente
+  4. Tomar decisão de trading
+
+  Tempo médio: 5-10 minutos por decisão
+end note
+
+@enduml

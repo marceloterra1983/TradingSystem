@@ -1,0 +1,87 @@
+---
+title: Operations
+sidebar_position: 7
+description: Monitoring, logging, and maintenance for the Telegram Gateway stack.
+tags:
+  - apps
+  - telegram-gateway
+  - operations
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Health Checks
+
+| Endpoint | Component | Expected Response | Cadence |
+|----------|-----------|-------------------|---------|
+| `http://localhost:4006/health` | Gateway service | `{"status":"healthy","telegram":"connected"}` | 30s |
+| `http://localhost:4010/health` | REST API | `{"status":"healthy","database":true}` | 30s |
+| `psql ... -c "SELECT COUNT(*) FROM telegram_gateway.messages"` | TimescaleDB queue | `<row count>` | 5m |
+
+## Dashboards & Metrics
+
+- Grafana dashboard: `tools/monitoring/dashboards/telegram-gateway.json`.
+- Key PromQL:
+
+```promql
+# Messages captured per minute
+rate(telegram_messages_received_total[5m])
+
+# Publish failures by reason
+rate(telegram_publish_failures_total[5m])
+
+# REST API latency
+histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="telegram-gateway-api"}[5m]))
+
+# Failure queue size
+telegram_failure_queue_size
+```
+
+## Logs
+
+### Gateway Service
+
+```bash
+# systemd deployments
+sudo journalctl -u telegram-gateway -f
+
+# Local (npm start)
+npm run start -- --log-level=debug
+```
+
+Logs include event type (`ingest`, `forward`, `retry`), channel id, and status.
+
+### REST API
+
+```bash
+docker compose -f docker-compose.prod.yml logs -f telegram-gateway-api
+curl -H "X-Gateway-Token: $TELEGRAM_GATEWAY_API_TOKEN" http://localhost:4010/
+```
+
+## Maintenance Tasks
+
+### Daily
+
+1. Verify Gateway health endpoint shows `connected`.
+2. Check queue depth (`SELECT COUNT(*) FROM telegram_gateway.messages WHERE status IN ('received','processing');`).
+3. Clear failure queue if needed (`rm data/failure-queue.jsonl` after backup).
+
+### Weekly
+
+1. Backup `.session/` directory (`tar -czf telegram-session-$(date +%F).tar.gz .session/`).
+2. Rotate REST API logs.
+3. Inspect failure queue JSONL for recurring issues.
+
+### Monthly
+
+1. Rotate `API_SECRET_TOKEN` and `TELEGRAM_GATEWAY_API_TOKEN`.
+2. Review Telegram channel list and update environment variables.
+3. Perform load test by reprocessing sample messages (`node scripts/replay-sample.js` if available).
+
+## Operational Tips
+
+- Set up systemd unit (`telegram-gateway.service`) for automatic restarts on crash.
+- Configure Prometheus alerts:
+  - Gateway disconnected (`telegram_connection_status == 0` for 1 minute).
+  - REST API auth errors (`increase(telegram_gateway_api_auth_failures_total[5m]) > 0`).
+  - Queue backlog (`telegram_failure_queue_size > 0` or DB queue count > threshold).
+- Keep Telegram credentials secure; losing `.session/` forces re-authentication with SMS/2FA.

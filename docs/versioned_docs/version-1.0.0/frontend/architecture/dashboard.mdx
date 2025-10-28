@@ -1,0 +1,592 @@
+---
+title: Dashboard Architecture
+sidebar_position: 1
+description: React dashboard architecture, navigation structure, and component patterns
+tags:
+  - frontend
+  - architecture
+  - dashboard
+  - react
+owner: FrontendGuild
+lastReviewed: '2025-10-27'
+---
+
+## Overview
+
+The TradingSystem Dashboard is the primary user interface for interacting with all system components. Built with **React 18**, **TypeScript**, and **Vite**, it provides a unified view of services, APIs, trading signals, and operational tools.
+
+### Technology Stack
+
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| **React** | UI framework | 18.3.1 |
+| **TypeScript** | Type safety | 5.3.3 |
+| **Vite** | Build tool & dev server | 7.1.10 |
+| **Zustand** | Global state management | 4.4.7 |
+| **TanStack Query** | Server state management | 5.17.19 |
+| **Tailwind CSS** | Styling framework | 3.4.1 |
+| **Radix UI** | Accessible components | Latest |
+| **Lucide React** | Icon library | 0.309.0 |
+| **Framer Motion** | Animation library | 12.23.22 |
+
+### Key Metrics
+
+- **Port:** 3103
+- **Base URL:** `http://localhost:3103`
+- **Bundle Size:** ~2.5 MB (optimized with code splitting)
+- **Performance:** Lazy loading reduces initial load by 40-60%
+- **Repository:** `frontend/dashboard/`
+
+---
+
+## Application Structure
+
+### Navigation Architecture
+
+The dashboard is organized into **6 primary sections**, each containing specialized pages:
+
+```
+Dashboard (Port 3103)
+├── 1. Apps (Cyan)
+│   ├── TP Capital → TPCapitalOpcoesPage
+│   ├── Telegram Gateway → TelegramGatewayFinal
+│   └── Workspace → WorkspacePageNew
+│
+├── 2. Knowledge (Indigo)
+│   ├── Docusaurus Hub → DocusaurusPageNew
+│   └── Database → DatabasePageNew
+│
+├── 3. Infrastructure (Gray)
+│   ├── Launcher → LauncherPage
+│   ├── LangGraph → LangGraphPage
+│   ├── LlamaIndex → LlamaIndexPage
+│   └── Agno Agents → AgnoAgentsPage
+│
+├── 4. Connections
+│   └── Miro Integration → MiroPage
+│
+├── 5. Escopo (Deprecated)
+│   └── Legacy scope management
+│
+└── 6. Conexões (Dashboard)
+    └── Connection management
+```
+
+**Navigation Definition:** `frontend/dashboard/src/data/navigation.tsx`
+
+---
+
+## Core Architectural Patterns
+
+### 1. Lazy Loading
+
+All pages are loaded on-demand using React's `lazy()` API, reducing initial bundle size by **40-60%**:
+
+```typescript
+// frontend/dashboard/src/data/navigation.tsx
+const LauncherPage = React.lazy(
+  () => import('../components/pages/LauncherPage')
+);
+const WorkspacePageNew = React.lazy(
+  () => import('../components/pages/WorkspacePageNew')
+);
+const TPCapitalOpcoesPage = React.lazy(
+  () => import('../components/pages/TPCapitalOpcoesPage')
+);
+```
+
+**Benefits:**
+
+- Faster initial load time
+- Reduced memory footprint
+- Better user experience on slower connections
+
+---
+
+### 2. State Management Strategy
+
+#### Global State (Zustand)
+
+Used for UI state and cross-cutting concerns:
+
+```typescript
+// frontend/dashboard/src/store/appStore.ts
+interface TradingStore {
+  positions: Position[];
+  orders: Order[];
+  signals: Signal[];
+  // UI state
+  sidebarOpen: boolean;
+  currentView: string;
+}
+
+export const useTradingStore = create<TradingStore>((set) => ({
+  // ... state and actions
+}));
+```
+
+**Use Cases:**
+
+- Sidebar state
+- Current page/view
+- Trading positions
+- Orders and signals
+
+#### Server State (TanStack Query)
+
+Used for API data fetching and caching:
+
+```typescript
+// frontend/dashboard/src/services/api.ts
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 30000, // 30s cache
+    },
+  },
+});
+```
+
+**Use Cases:**
+
+- API responses
+- Health checks
+- Service status
+- Workspace items
+
+---
+
+### 3. CustomizablePageLayout Pattern
+
+A drag-and-drop, multi-column layout system used by most pages:
+
+```typescript
+<CustomizablePageLayout
+  pageId="launcher"
+  title="Service Launcher"
+  sections={sections}
+  defaultColumns={2}
+/>
+```
+
+**Features:**
+
+- Drag-and-drop section rearrangement
+- Multi-column grid (1, 2, 3, 4 columns)
+- Collapsible sections with persist state
+- Collapse/Expand all functionality
+- Per-page layout persistence (localStorage)
+
+**Pages Using This Pattern:**
+
+- Launcher Page
+- Workspace Page
+- TP Capital Page
+- Telegram Gateway Page
+- Database Page
+
+---
+
+## Page Architectures
+
+### Launcher Page
+
+**Purpose:** Service orchestration and health monitoring
+
+**File:** `frontend/dashboard/src/components/pages/LauncherPage.tsx`
+
+**Sections:**
+
+1. **Start Metrics** - Last system start statistics
+2. **Local Services** - Node.js/Express APIs status
+3. **Docker Containers** - Container health and management
+4. **API Endpoints** - REST endpoints from local services
+5. **Container Endpoints** - Web UIs from Docker containers
+
+**API Integration:**
+
+- Status API (Port 3500) - `/api/status`, `/api/health/full`
+- Docker API - Container status and metrics
+
+---
+
+### Workspace Page
+
+**Purpose:** Idea and task management with Kanban visualization
+
+**File:** `frontend/dashboard/src/components/pages/WorkspacePageNew.tsx`
+
+**Sections:**
+
+1. **WorkspaceListSection** - CRUD table with "+" button
+2. **StatusBoardSection** - Drag-and-drop Kanban board
+
+**State Management:**
+
+- Custom hook: `useInitializeWorkspaceEvents()`
+- Zustand store: `useWorkspaceStore`
+
+**API Integration:**
+
+- Workspace API (Port 3200) - `/api/items`
+- Real-time updates via polling (15s interval)
+
+---
+
+### TP Capital Page
+
+**Purpose:** Trading signal monitoring from Telegram
+
+**File:** `frontend/dashboard/src/components/pages/TPCapitalOpcoesPage.tsx`
+
+**Sections:**
+
+- Signal visualization
+- Telegram bot/channel management
+- Real-time ingestion metrics
+- Historical signal analysis
+
+**API Integration:**
+
+- TP Capital API (Port 4005) - `/signals`, `/telegram/bots`, `/telegram/channels`
+- Telegram Gateway API (Port 4010) - `/api/messages`
+
+---
+
+### Telegram Gateway Page
+
+**Purpose:** Telegram message ingestion monitoring
+
+**File:** `frontend/dashboard/src/components/pages/TelegramGatewayFinal.tsx`
+
+**Sections:**
+
+- MTProto connection status
+- Message queue monitoring
+- Channel management
+- Sync status and metrics
+
+**API Integration:**
+
+- Telegram Gateway API (Port 4010) - `/api/telegram-gateway/overview`, `/api/messages`
+
+---
+
+## Component Patterns
+
+### 1. CollapsibleCard
+
+Reusable card component with expand/collapse functionality:
+
+```typescript
+<CollapsibleCard
+  id="section-id"
+  title="Section Title"
+  defaultCollapsed={false}
+>
+  {/* Section content */}
+</CollapsibleCard>
+```
+
+**Features:**
+
+- Persistent state (localStorage)
+- Smooth animations (Framer Motion)
+- Header actions support
+- Custom icons
+
+---
+
+### 2. ServiceStatusBanner
+
+Global service health indicator:
+
+```typescript
+<ServiceStatusBanner
+  services={healthData.services}
+  overallStatus={healthData.overallStatus}
+/>
+```
+
+**Features:**
+
+- Real-time health monitoring
+- Auto-refresh every 30s
+- Color-coded status (green/yellow/red)
+- Click to expand details
+
+---
+
+### 3. ConnectionStatus
+
+Individual service connection indicator:
+
+```typescript
+<ConnectionStatus
+  service="workspace-api"
+  port={3200}
+  onRetry={handleRetry}
+/>
+```
+
+**Features:**
+
+- Real-time connection testing
+- Retry functionality
+- Auto-recovery triggers
+- Visual feedback
+
+---
+
+## Performance Optimizations
+
+### 1. Code Splitting
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui', 'lucide-react', 'framer-motion'],
+          'query-vendor': ['@tanstack/react-query', 'zustand'],
+        },
+      },
+    },
+  },
+});
+```
+
+**Result:** 3 vendor chunks + per-page chunks
+
+---
+
+### 2. React Query Caching
+
+```typescript
+{
+  staleTime: 30000, // 30s - Data stays fresh
+  cacheTime: 300000, // 5min - Cached data retained
+  refetchOnWindowFocus: false, // Avoid unnecessary refetches
+  retry: 1, // Minimize retry overhead
+}
+```
+
+---
+
+### 3. Virtual Scrolling
+
+For large lists (e.g., signals, messages):
+
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+const virtualizer = useVirtualizer({
+  count: items.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 50,
+});
+```
+
+**Result:** Renders only visible items, ~90% performance improvement for 1000+ items
+
+---
+
+## Auto-Recovery System
+
+**File:** `frontend/dashboard/src/hooks/useServiceAutoRecovery.ts`
+
+**Purpose:** Automatically detects and recovers failed services
+
+**Flow:**
+
+1. Monitors service health every 30s
+2. Detects degraded/down services
+3. Triggers auto-start via Status API
+4. Shows user notification
+5. Retries with exponential backoff
+
+**Supported Services:**
+
+- Workspace API (3200)
+- Documentation API (3400)
+- TP Capital API (4005)
+- Telegram Gateway API (4010)
+
+---
+
+## Routing
+
+**Router:** React Router DOM v6
+
+**Routes:**
+
+```typescript
+<Routes>
+  <Route path="/" element={<Layout />}>
+    <Route index element={<Navigate to="/workspace" />} />
+    <Route path="/workspace" element={<WorkspacePageNew />} />
+    <Route path="/tp-capital" element={<TPCapitalOpcoesPage />} />
+    <Route path="/launcher" element={<LauncherPage />} />
+    <Route path="/telegram-gateway" element={<TelegramGatewayFinal />} />
+    {/* ... more routes */}
+  </Route>
+</Routes>
+```
+
+**Default Page:** Workspace (`/workspace`)
+
+---
+
+## Theme System
+
+**Provider:** `frontend/dashboard/src/contexts/ThemeContext.tsx`
+
+**Modes:**
+
+- Light
+- Dark
+- System (auto-detect)
+
+**Implementation:**
+
+- Tailwind CSS dark mode classes
+- Persistent preference (localStorage)
+- Smooth transitions
+
+---
+
+## Build & Development
+
+### Development
+
+```bash
+cd frontend/dashboard
+npm install
+npm run dev
+```
+
+**Dev Server:** `http://localhost:3103`
+
+**Features:**
+
+- Hot Module Replacement (HMR)
+- Fast Refresh
+- Source maps
+- Watch mode for docs
+
+---
+
+### Production Build
+
+```bash
+npm run build
+npm run preview
+```
+
+**Output:** `frontend/dashboard/dist/`
+
+**Optimizations:**
+
+- Minification (Terser)
+- Tree-shaking
+- Code splitting
+- Asset optimization
+
+---
+
+## Testing
+
+### Unit Tests
+
+**Framework:** Vitest
+
+```bash
+npm run test        # Run once
+npm run test:watch  # Watch mode
+npm run test:coverage # Coverage report
+```
+
+**Test Location:** `frontend/dashboard/src/__tests__/`
+
+---
+
+### Component Tests
+
+**Framework:** Testing Library
+
+```typescript
+import { render, screen } from '@testing-library/react';
+
+test('renders service launcher', () => {
+  render(<LauncherPage />);
+  expect(screen.getByText('Service Launcher')).toBeInTheDocument();
+});
+```
+
+---
+
+## Environment Variables
+
+**File:** `frontend/dashboard/.env.example`
+
+```env
+# API Endpoints
+VITE_STATUS_API_URL=http://localhost:3500
+VITE_WORKSPACE_API_URL=http://localhost:3200
+VITE_DOCS_API_URL=http://localhost:3400
+VITE_TP_CAPITAL_API_URL=http://localhost:4005
+VITE_TELEGRAM_API_URL=http://localhost:4010
+```
+
+**Access in Code:**
+
+```typescript
+const statusApiUrl = import.meta.env.VITE_STATUS_API_URL;
+```
+
+---
+
+## Troubleshooting
+
+### Issue: Pages not loading
+
+**Solution:** Check lazy load imports and Suspense boundaries
+
+### Issue: API requests failing
+
+**Solution:** Verify CORS configuration in backend APIs
+
+### Issue: Slow initial load
+
+**Solution:** Check bundle size with `npm run build:analyze`
+
+### Issue: State not persisting
+
+**Solution:** Verify localStorage is accessible and not blocked
+
+---
+
+## Future Improvements
+
+- [ ] Implement WebSocket for real-time updates
+- [ ] Add offline support with Service Workers
+- [ ] Implement push notifications
+- [ ] Add advanced filtering and search
+- [ ] Implement data export (CSV, JSON)
+- [ ] Add comprehensive E2E tests
+
+---
+
+## Related Documentation
+
+- [Design System](/frontend/design-system/tokens)
+- [Component Guidelines](/frontend/guidelines/style-guide)
+- [API Overview](/api/overview)
+- [Status API](/api/status-api)

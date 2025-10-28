@@ -1,0 +1,11 @@
+{
+  "label": "v1",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Domain Schemas v1",
+    "slug": "/sdd/domain/schemas/v1",
+    "description": "Version 1 schema definitions."
+  }
+}

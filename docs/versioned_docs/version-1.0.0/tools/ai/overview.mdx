@@ -1,0 +1,341 @@
+---
+title: AI & LLM Tools
+description: AI agents, LangGraph workflows, LlamaIndex RAG, and local LLM runtime (Ollama)
+tags:
+  - ai
+  - llm
+  - agents
+  - langgraph
+  - llamaindex
+  - ollama
+  - rag
+owner: ArchitectureGuild
+lastReviewed: '2025-10-27'
+---
+
+# AI & LLM Tools
+
+AI/ML infrastructure for building intelligent agents, multi-step workflows, RAG systems, and local LLM inference.
+
+## 🤖 Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Agno Agents    │     │   LangGraph     │     │  LlamaIndex     │
+│  (Clean Arch)   │     │  (Workflows)    │     │     (RAG)       │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 ▼
+                         ┌─────────────────┐
+                         │     Ollama      │
+                         │  (Local LLMs)   │
+                         └─────────────────┘
+```
+
+---
+
+## 🛠️ Components
+
+### 1. Agno Agents (`tools/agno-agents/`)
+
+**AI agents built with Clean Architecture and Domain-Driven Design principles.**
+
+**Architecture:**
+
+```
+agno-agents/
+├── src/
+│   ├── application/       # Use cases and orchestration
+│   ├── domain/            # Business logic and entities
+│   ├── infrastructure/    # External integrations (LLMs, APIs)
+│   └── interfaces/        # API endpoints and CLI
+├── tests/                 # Unit and integration tests
+└── Dockerfile             # Containerized deployment
+```
+
+**Purpose:**
+- Automated workflows and task automation
+- Intelligent decision-making agents
+- Multi-agent collaboration
+- Clean separation of concerns (business logic isolated from infrastructure)
+
+**Key Features:**
+- Domain-Driven Design (Entities, Value Objects, Aggregates)
+- Clean Architecture (dependencies point inward)
+- Testable business logic (domain layer has no external dependencies)
+- Pluggable infrastructure (swap LLM providers without changing domain code)
+
+**Example Use Cases:**
+- Data ingestion automation
+- Alert triage and routing
+- Report generation
+- Trading signal validation
+
+---
+
+### 2. LangGraph (`tools/langgraph/`)
+
+**Stateful, multi-agent AI applications with graph-based workflows.**
+
+**Architecture:**
+
+```
+langgraph/
+├── src/
+│   ├── application/       # LangGraph workflow definitions
+│   ├── domain/            # Business entities and rules
+│   ├── infrastructure/    # LLM providers, vector stores
+│   ├── interfaces/        # API and CLI
+│   └── monitoring/        # Observability for LangGraph
+├── langgraph.json         # LangGraph Studio config
+└── Dockerfile             # Containerized deployment
+```
+
+**Purpose:**
+- Complex multi-step AI workflows
+- Agent orchestration with state management
+- Conditional workflow branching
+- Human-in-the-loop workflows
+
+**Key Features:**
+- Graph-based workflow definition (nodes = agents, edges = transitions)
+- State persistence (checkpointing)
+- Cycle detection and loop prevention
+- Parallel agent execution
+- LangGraph Studio integration (visual workflow debugging)
+
+**Example Use Cases:**
+- Market analysis pipeline (data → analysis → validation → decision)
+- Customer support automation (intake → triage → resolution → follow-up)
+- Document processing workflows (extract → validate → enrich → store)
+
+**Documentation:**
+- `QUICK_START.md` - Getting started guide
+- `DEVELOPMENT.md` - Development workflow
+- `ENV_VARS.md` - Environment variables
+
+---
+
+### 3. LlamaIndex (`tools/llamaindex/`)
+
+**RAG (Retrieval-Augmented Generation) implementation for document Q&A and semantic search.**
+
+**Architecture:**
+
+```
+llamaindex/
+├── ingestion_service/     # Document ingestion and indexing
+│   ├── src/
+│   │   ├── ingestion/    # Document loaders and transformers
+│   │   ├── indexing/     # Vector index builders
+│   │   └── storage/      # Persistence layer
+│   └── Dockerfile.ingestion
+├── query_service/         # Query processing and retrieval
+│   ├── src/
+│   │   ├── retrieval/    # Semantic search and ranking
+│   │   ├── generation/   # LLM-based response generation
+│   │   └── api/          # REST API endpoints
+│   └── Dockerfile.query
+├── k8s/                   # Kubernetes deployments
+│   ├── production/
+│   └── staging/
+└── tests/                 # Service tests
+```
+
+**Purpose:**
+- Document Q&A (ask questions about uploaded documents)
+- Semantic search (find relevant documents by meaning, not keywords)
+- Knowledge retrieval (extract information from large document corpora)
+
+**Key Features:**
+- Multi-format support (PDF, DOCX, Markdown, HTML, etc.)
+- Vector embeddings for semantic similarity
+- Hybrid search (semantic + keyword)
+- Query rewriting and expansion
+- Source citation (responses include document references)
+
+**Example Use Cases:**
+- Trading documentation Q&A ("How do I configure ProfitDLL?")
+- Regulatory compliance search ("Find all documents mentioning risk limits")
+- Market research assistant ("Summarize recent reports on energy sector")
+
+**Deployment:**
+- **Ingestion Service** - Background job for document processing
+- **Query Service** - REST API for search and Q&A
+
+**Documentation:**
+- `DEPLOYMENT.md` - Deployment guide (Docker, Kubernetes)
+
+---
+
+### 4. Ollama (`tools/ollama/`)
+
+**Local LLM runtime for running open-source models without cloud dependencies.**
+
+**Supported Models:**
+- **Llama 2** (7B, 13B, 70B) - General-purpose chat
+- **Mistral** (7B) - Fast, high-quality responses
+- **CodeLlama** (7B, 13B, 34B) - Code generation and completion
+- **Gemma** (2B, 7B) - Google's lightweight models
+- **Phi-2** (2.7B) - Microsoft's small model
+
+**Purpose:**
+- Local model inference (no API costs, data stays local)
+- Development without cloud dependencies
+- Data privacy and compliance
+- Experimentation with open-source models
+
+**Key Features:**
+- GPU acceleration (CUDA, ROCm)
+- Model quantization (smaller models, faster inference)
+- Multi-model support (run multiple models concurrently)
+- OpenAI-compatible API (drop-in replacement for OpenAI SDK)
+
+**Setup:**
+
+```bash
+# Install Ollama (Docker + GPU)
+bash tools/ollama/setup-ollama-docker-gpu.sh
+
+# Pull models
+docker exec ollama ollama pull llama2
+docker exec ollama ollama pull mistral
+docker exec ollama ollama pull codellama
+
+# Test all models
+bash tools/ollama/test-all-models.sh
+```
+
+**Usage (OpenAI-compatible API):**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"  # not used but required
+)
+
+response = client.chat.completions.create(
+    model="llama2",
+    messages=[{"role": "user", "content": "Explain Clean Architecture"}]
+)
+print(response.choices[0].message.content)
+```
+
+**Documentation:**
+- `USAGE-GUIDE.md` - Ollama usage guide
+- `setup-ollama-docker-gpu.sh` - GPU setup script
+- `test-all-models.sh` - Model testing script
+
+---
+
+## 🚀 Quick Start
+
+### Start AI Services
+
+```bash
+# Start Ollama (local LLM runtime)
+docker compose -f tools/ollama/docker-compose.yml up -d
+
+# Start LangGraph (workflows)
+docker compose -f tools/langgraph/docker-compose.yml up -d
+
+# Start LlamaIndex (RAG)
+docker compose -f tools/llamaindex/docker-compose.yml up -d
+
+# Start Agno Agents
+docker compose -f tools/agno-agents/docker-compose.yml up -d
+```
+
+### Test Ollama
+
+```bash
+# Pull and test Llama 2
+docker exec ollama ollama pull llama2
+docker exec ollama ollama run llama2 "Hello, what can you do?"
+
+# Test all models
+bash tools/ollama/test-all-models.sh
+```
+
+### Access Services
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Ollama API | http://localhost:11434 | Local LLM inference |
+| LangGraph API | http://localhost:8000 | Workflow execution |
+| LlamaIndex Query | http://localhost:8001 | Document Q&A |
+| LlamaIndex Ingestion | http://localhost:8002 | Document upload |
+
+---
+
+## 📖 Integration Examples
+
+### Use Ollama with Agno Agents
+
+```python
+# agno-agents/src/infrastructure/llm/ollama_provider.py
+from openai import OpenAI
+
+class OllamaProvider:
+    def __init__(self):
+        self.client = OpenAI(
+            base_url="http://localhost:11434/v1",
+            api_key="ollama"
+        )
+
+    def generate(self, prompt: str, model: str = "llama2") -> str:
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+```
+
+### Use LlamaIndex for RAG
+
+```python
+# query_service/src/retrieval/search.py
+from llama_index import VectorStoreIndex, SimpleDirectoryReader
+
+# Load documents
+documents = SimpleDirectoryReader("docs/").load_data()
+
+# Create index
+index = VectorStoreIndex.from_documents(documents)
+
+# Query
+query_engine = index.as_query_engine()
+response = query_engine.query("How do I configure ProfitDLL?")
+print(response.response)
+print(response.source_nodes)  # Source citations
+```
+
+### Build LangGraph Workflow
+
+```python
+# langgraph/src/application/workflows/analysis_pipeline.py
+from langgraph.graph import StateGraph
+
+# Define workflow
+workflow = StateGraph()
+workflow.add_node("extract", extract_data)
+workflow.add_node("analyze", analyze_data)
+workflow.add_node("validate", validate_results)
+workflow.add_edge("extract", "analyze")
+workflow.add_edge("analyze", "validate")
+
+# Run workflow
+result = workflow.invoke({"input": "market_data.csv"})
+```
+
+---
+
+## 📖 Related Documentation
+
+- **[Agents Overview](/agents/overview)** - Agent architecture and patterns
+- **[MCP Platform](/mcp)** - Model Context Protocol integration
+- **[Prompts Library](/prompts/overview)** - Reusable prompt templates
+- **[Python Runtime](/tools/runtime/python/overview)** - Python setup for AI tools

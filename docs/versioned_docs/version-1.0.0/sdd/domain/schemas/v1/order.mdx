@@ -1,0 +1,237 @@
+---
+title: Order Schema
+description: Schema definition for order entities.
+tags:
+  - sdd
+  - domain
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The Order schema defines the structure of trading orders in TradingSystem. Orders represent requests to buy or sell assets with specific parameters (price, quantity, type) and track the complete lifecycle from creation to execution or cancellation.
+
+**Domain**: Trading Core  
+**Version**: v1  
+**Status**: Specification (implementation pending)
+
+## Fields
+
+### Core Fields
+
+| Field | Type | Required | Description | Constraints |
+|-------|------|----------|-------------|-------------|
+| `orderId` | string | Yes | Unique order identifier | Format: `ORD-YYYYMMDD-NNN` |
+| `symbol` | string | Yes | Asset identifier | 4-6 uppercase characters (e.g., PETR4, VALE3) |
+| `side` | enum | Yes | Order side | Values: `BUY`, `SELL` |
+| `type` | enum | Yes | Order type | Values: `MARKET`, `LIMIT`, `STOP`, `STOP_LIMIT` |
+| `quantity` | number | Yes | Total quantity | Positive integer, min 1, max 999999 |
+| `filledQuantity` | number | Yes | Filled quantity | Non-negative integer, &lt;= quantity |
+| `price` | number | Conditional | Limit price | Required for LIMIT/STOP_LIMIT, positive decimal |
+| `stopPrice` | number | Conditional | Stop trigger price | Required for STOP/STOP_LIMIT, positive decimal |
+| `avgFillPrice` | number | No | Average fill price | Calculated from fills, positive decimal |
+| `status` | enum | Yes | Current order status | See OrderStatus enum below |
+| `timeInForce` | enum | Yes | Time in force | Values: `DAY`, `GTC`, `IOC`, `FOK` (default `DAY`) |
+| `fills` | array | Yes | Fill history | Array of Fill objects (see below) |
+| `createdAt` | string | Yes | Creation timestamp | ISO 8601 format with timezone |
+| `updatedAt` | string | Yes | Last update timestamp | ISO 8601 format with timezone |
+
+### OrderStatus Enum
+
+| Value | Description | Terminal |
+|-------|-------------|----------|
+| `PENDING` | Created, risk checks passed, awaiting submission | No |
+| `SUBMITTED` | Sent to broker, awaiting acknowledgment | No |
+| `PARTIALLY_FILLED` | Partially executed, remainder active | No |
+| `FILLED` | Fully executed | Yes |
+| `CANCELED` | Canceled by user or kill switch | Yes |
+| `EXPIRED` | Order expired based on time-in-force | Yes |
+| `FAILED` | Temporary submission failure (auto retry) | No |
+| `REJECTED` | Rejected by broker or risk checks | Yes |
+
+**Internal Workflow Stages (non-exposed)**
+
+- Draft → Validating → Validated → Submitting → Submitted (service orchestration checkpoints)
+- Submitting → Retry Pending (internal) when transient errors occur
+
+**API-Visible Status Transitions**
+
+- PENDING → SUBMITTED → \{PARTIALLY_FILLED, FILLED, CANCELED, EXPIRED\}
+- PENDING → REJECTED (risk checks fail)
+- SUBMITTED → \{PARTIALLY_FILLED, FILLED, CANCELED, FAILED, REJECTED\}
+- FAILED → \{SUBMITTED (retry), REJECTED (max retries exceeded)\}
+- SUBMITTED → EXPIRED (time-in-force elapsed)
+
+> **Note**: Internal workflow steps such as Draft, Validating, and Submitting reflect service orchestration and should not be confused with API-visible `OrderStatus` values. Clients observe only the statuses listed in the `OrderStatus` enum.
+
+### Fill Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fillId` | string | Yes | Unique fill identifier |
+| `quantity` | number | Yes | Filled quantity for this execution |
+| `price` | number | Yes | Execution price |
+| `timestamp` | string | Yes | Execution timestamp (ISO 8601) |
+
+### TypeScript Interface
+
+```typescript
+interface Order {
+  orderId: string;
+  symbol: string;
+  side: 'BUY' | 'SELL';
+  type: 'MARKET' | 'LIMIT' | 'STOP' | 'STOP_LIMIT';
+  quantity: number;
+  filledQuantity: number;
+  price?: number;
+  stopPrice?: number;
+  avgFillPrice?: number;
+  status: OrderStatus;
+  timeInForce: 'DAY' | 'GTC' | 'IOC' | 'FOK';
+  fills: Fill[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+type OrderStatus =
+  | 'PENDING'
+  | 'SUBMITTED'
+  | 'PARTIALLY_FILLED'
+  | 'FILLED'
+  | 'CANCELED'
+  | 'EXPIRED'
+  | 'FAILED'
+  | 'REJECTED';
+
+interface Fill {
+  fillId: string;
+  quantity: number;
+  price: number;
+  timestamp: string;
+}
+```
+
+## Validation Rules
+
+**Field Validation**
+
+- `symbol`: Must exist in market data (query Data Capture service)
+- `side`: Must be `BUY` or `SELL`
+- `type`: Must be `MARKET`, `LIMIT`, `STOP`, or `STOP_LIMIT`
+- `quantity`: Positive integer, min 1, max 999999
+- `price`: Required for LIMIT/STOP_LIMIT, positive decimal with max 2 decimal places
+- `stopPrice`: Required for STOP/STOP_LIMIT, positive decimal
+- `timeInForce`: Must be `DAY`, `GTC`, `IOC`, or `FOK`
+
+**Business Rules**
+
+1. For STOP_LIMIT orders: `stopPrice` &gt;= `price` for BUY, `stopPrice` &lt;= `price` for SELL
+2. Price must be within ±10% of last traded price (circuit breaker)
+3. Quantity must be multiple of lot size (typically 1 for stocks)
+4. Order must not exceed max position size for symbol
+
+**Risk Validation**
+
+- Trading hours: 9:00-18:00 BRT
+- Daily loss limit: Check account daily loss
+- Position size limit: Validate against max position per symbol
+- Margin requirement: Verify sufficient balance
+- Kill switch: Reject if active
+
+## Relationships
+
+**Related Schemas**
+
+- **RiskRule**: Orders validated against risk rules before submission
+- **Position**: Orders update position state when filled
+- **Trade**: Each fill creates a trade record
+
+**Related Events**
+
+- `order.created`: Emitted when order created (status: PENDING)
+- `order.submitted`: Emitted when order sent to broker (status: SUBMITTED)
+- `order.filled`: Emitted when order fully executed (status: FILLED)
+- `order.canceled`: Emitted when order canceled (status: CANCELED)
+- `order.failed`: Emitted when submission retries are exhausted (status: FAILED)
+- `order.rejected`: Emitted when order rejected (status: REJECTED)
+
+**Related Flows**
+
+- [Place Order Flow](../../../flows/v1/place-order) - Order creation and submission sequence
+- [Cancel Order Flow](../../../flows/v1/cancel-order) - Order cancellation sequence
+
+**Database Mapping**
+
+- PostgreSQL table: `orders` (planned)
+- Columns map directly to schema fields
+- Fills stored in separate `order_fills` table (one-to-many relationship)
+
+## Usage Examples
+
+**Create Order Request**
+
+```json
+{
+  "symbol": "PETR4",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 100,
+  "price": 32.50,
+  "timeInForce": "DAY",
+  "idempotencyKey": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Order Response**
+
+```json
+{
+  "orderId": "ORD-20251024-001",
+  "symbol": "PETR4",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 100,
+  "filledQuantity": 0,
+  "price": 32.50,
+  "status": "PENDING",
+  "timeInForce": "DAY",
+  "fills": [],
+  "createdAt": "2025-10-24T10:30:00Z",
+  "updatedAt": "2025-10-24T10:30:00Z"
+}
+```
+
+**Partially Filled Order**
+
+```json
+{
+  "orderId": "ORD-20251024-001",
+  "symbol": "PETR4",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 100,
+  "filledQuantity": 50,
+  "price": 32.50,
+  "avgFillPrice": 32.45,
+  "status": "PARTIALLY_FILLED",
+  "fills": [
+    {
+      "fillId": "FILL-001",
+      "quantity": 50,
+      "price": 32.45,
+      "timestamp": "2025-10-24T10:35:00Z"
+    }
+  ],
+  "createdAt": "2025-10-24T10:30:00Z",
+  "updatedAt": "2025-10-24T10:35:00Z"
+}
+```
+
+## Related Documentation
+
+- [Order Manager API](../../../../api/order-manager)
+- [Order Manager Spec](../../../api/order-manager/v1/spec)
+- [Risk Rule Schema](./risk-rule)
+- [Order Created Event](../../../events/v1/order-created)
+- [Place Order Flow](../../../flows/v1/place-order)
+- [Database Schema](../../../../database/schema)
