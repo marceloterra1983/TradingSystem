@@ -1,0 +1,13 @@
+conventions:
+  symbol_format: "<TICKER>:<EXCHANGE>"
+  description: "Canonical symbol format for TradingSystem ingest pipelines."
+
+markets:
+  equities:
+    - symbol: PETR4:BVMF
+      desc: Petrobras PN
+    - symbol: VALE3:BVMF
+      desc: Vale ON
+  futures:
+    - symbol: WINQ24:BVMF
+      desc: Ibovespa mini index

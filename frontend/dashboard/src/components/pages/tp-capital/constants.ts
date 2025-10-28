@@ -1,6 +1,6 @@
 import { SignalRow, LogEntry } from './types';
 
-export const LIMIT_OPTIONS = [10, 100, 250, 500, 1000];
+export const LIMIT_OPTIONS = [10, 25, 50, 100, 250, 500, 1000];
 export const LOG_LIMIT_OPTIONS = [50, 100, 200];
 
 export const SAMPLE_SIGNALS: SignalRow[] = [

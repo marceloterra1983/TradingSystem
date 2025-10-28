@@ -311,7 +311,7 @@ npm run sync-specs
 2. Verificar console do browser para erros
 3. Testar URL da spec diretamente:
    ```
-   http://localhost:3103/specs/documentation-api.openapi.yaml
+   http://localhost:3205/specs/documentation-api.openapi.yaml
    ```
 
 4. Limpar cache do browser (Ctrl+Shift+R)

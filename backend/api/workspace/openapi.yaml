@@ -1,6 +1,6 @@
-# Stub file - canonical spec is at docs/context/backend/api/specs/workspace.openapi.yaml
+# Stub file - canonical spec is at docs/static/specs/workspace.openapi.yaml
 # This file is deprecated and will be removed in a future version.
 # Please use the canonical spec for all OpenAPI documentation needs.
 #
 # To include this spec in your tooling, use:
-# $ref: 'docs/context/backend/api/specs/workspace.openapi.yaml'
+# $ref: 'docs/static/specs/workspace.openapi.yaml'

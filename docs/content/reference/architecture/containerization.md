@@ -95,11 +95,11 @@ lastReviewed: '2025-10-27'
 
 **Documentação Completa**:
 
-- [Proposal](tools/openspec/changes/split-tp-capital-into-gateway-api/proposal.md) - Why, What, Impact
-- [Design Document](tools/openspec/changes/split-tp-capital-into-gateway-api/design.md) - Decisões técnicas
-- [Implementation Tasks](tools/openspec/changes/split-tp-capital-into-gateway-api/tasks.md) - Checklist (150+ tasks)
-- [Gateway Spec](tools/openspec/changes/split-tp-capital-into-gateway-api/specs/tp-capital-telegram-gateway/spec.md) - Requirements
-- [API Spec](tools/openspec/changes/split-tp-capital-into-gateway-api/specs/tp-capital-api/spec.md) - Requirements modificados
+- Proposal: `tools/openspec/changes/split-tp-capital-into-gateway-api/proposal.md` (Why, What, Impact)
+- Design Document: `tools/openspec/changes/split-tp-capital-into-gateway-api/design.md` (Decisões técnicas)
+- Implementation Tasks: `tools/openspec/changes/split-tp-capital-into-gateway-api/tasks.md` (Checklist)
+- Gateway Spec: `tools/openspec/changes/split-tp-capital-into-gateway-api/specs/tp-capital-telegram-gateway/spec.md` (Requirements)
+- API Spec: `tools/openspec/changes/split-tp-capital-into-gateway-api/specs/tp-capital-api/spec.md` (Requirements modificados)
 
 **Complexidade**: 🟡 Média-Alta (12-16 horas total)
 
@@ -371,14 +371,14 @@ Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) q
 
 ### Propostas OpenSpec
 
-- **[split-tp-capital-into-gateway-api](tools/openspec/changes/split-tp-capital-into-gateway-api/README.md)** - **RECOMENDADA** (TP Capital split)
-- **[containerize-tp-capital-workspace](tools/openspec/changes/containerize-tp-capital-workspace/proposal.md)** - Alternativa (full containerization)
+- split-tp-capital-into-gateway-api: `tools/openspec/changes/split-tp-capital-into-gateway-api/README.md` (**RECOMENDADA**)
+- containerize-tp-capital-workspace: `tools/openspec/changes/containerize-tp-capital-workspace/proposal.md` (Alternativa)
 
 ### Documentação
 
-- [INVENTARIO-SERVICOS.md](INVENTARIO-SERVICOS.md) - Status atual completo
-- [CLAUDE.md](CLAUDE.md) - Arquitetura geral do projeto
-- [API-INTEGRATION-STATUS.md](API-INTEGRATION-STATUS.md) - Status das APIs
+- INVENTARIO-SERVICOS.md — Status atual completo (raiz do repositório)
+- CLAUDE.md — Arquitetura geral do projeto (raiz do repositório)
+- API-INTEGRATION-STATUS.md — Status das APIs (raiz do repositório)
 
 ### Docker Compose Files Existentes
 

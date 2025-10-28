@@ -52,7 +52,8 @@
     window.onload = function() {
       // Get spec URL from query parameter
       const urlParams = new URLSearchParams(window.location.search);
-      const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
+      const defaultSpecUrl = '/specs/documentation-api.openapi.yaml';
+      const specUrl = urlParams.get('url') || defaultSpecUrl;
 
       // Set spec URL
       const rapidoc = document.getElementById('thedoc');

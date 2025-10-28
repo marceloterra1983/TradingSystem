@@ -10,15 +10,9 @@
       padding: 0;
     }
     
-    /* Light mode styles */
-    body.light-mode {
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    }
-    
-    /* Dark mode styles */
-    body.dark-mode {
-      background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-    }
+    /* Light/Dark backgrounds (solid for readability) */
+    body.light-mode { background: #ffffff; }
+    body.dark-mode { background: #0b1220; }
     
     /* Theme toggle button */
     #theme-toggle {
@@ -115,15 +109,9 @@
       font-weight: 500;
     }
     
-    /* Links - Light mode */
-    body.light-mode #redoc-container a:hover {
-      text-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
-    }
-    
-    /* Links - Dark mode */
-    body.dark-mode #redoc-container a:hover {
-      text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
-    }
+    /* Links: underline on hover, no glow */
+    body.light-mode #redoc-container a:hover,
+    body.dark-mode #redoc-container a:hover { text-decoration: underline; text-shadow: none; }
     
     /* Botões HTTP method */
     #redoc-container [class*="http-verb"] {
@@ -484,7 +472,8 @@
       
       // Get spec URL from query parameter
       const urlParams = new URLSearchParams(window.location.search);
-      const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
+      const defaultSpecUrl = '/specs/documentation-api.openapi.yaml';
+      const specUrl = urlParams.get('url') || defaultSpecUrl;
       
       // Função para inicializar/re-inicializar Redoc
       function initRedoc(theme) {

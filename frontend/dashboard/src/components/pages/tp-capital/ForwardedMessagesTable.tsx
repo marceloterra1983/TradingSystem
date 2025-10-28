@@ -43,8 +43,8 @@ export function ForwardedMessagesTable() {
   const { data: messages = [], isLoading, error, refetch } = useQuery({
     queryKey: ['forwarded-messages', limit],
     queryFn: () => fetchForwardedMessages(limit),
-    refetchInterval: 15000, // Auto-refresh a cada 15s
-    staleTime: 10000,
+    refetchInterval: 60000, // Auto-refresh a cada 60s (antes: 15s - causa rate limit)
+    staleTime: 30000,
   });
 
   // Obter lista de canais únicos

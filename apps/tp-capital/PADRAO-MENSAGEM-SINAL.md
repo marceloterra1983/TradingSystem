@@ -300,3 +300,5 @@ tp_capital_messages_processed_total{status="duplicate"} = duplicatas
 
 Se `parse_failed` continuar alto, ajuste os filtros para ser mais restritivo!
 
+
+

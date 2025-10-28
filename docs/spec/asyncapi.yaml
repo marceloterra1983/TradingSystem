@@ -1,0 +1,41 @@
+asyncapi: 2.6.0
+info:
+  title: TradingSystem Documentation AsyncAPI (Compat Spec)
+  version: 1.0.0
+  description: |
+    Minimal AsyncAPI document served at /spec/asyncapi.yaml for compatibility with
+    DocsAPI tests and versioning utilities. This is a placeholder; the platform
+    does not currently expose message-based channels in this service.
+  contact:
+    name: DocsOps
+    url: https://example.com
+    email: docs@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+defaultContentType: application/json
+id: urn:tradingsystem:docsapi
+servers:
+  default:
+    url: http://localhost:3400
+    protocol: http
+    description: Local development
+tags:
+  - name: docs
+    description: Documentation events
+channels:
+  docs/events:
+    publish:
+      operationId: docsIndexRebuilt
+      message:
+        messageId: docsIndexRebuiltV1
+        name: DocsIndexRebuilt
+        title: Documentation Index Rebuilt
+        payload:
+          type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+            filesIndexed:
+              type: integer

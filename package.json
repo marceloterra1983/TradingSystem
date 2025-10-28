@@ -23,6 +23,10 @@
     "agent:describe": "node scripts/agents/runner.mjs describe",
     "agent:run": "node scripts/agents/runner.mjs run",
     "agent:new": "node scripts/agents/new-agent.mjs",
-    "dev:dashboard-docs": "bash scripts/start-dashboard-with-docs.sh"
+    "dev:dashboard-docs": "bash scripts/start-dashboard-with-docs.sh",
+    "smoke:docsapi": "bash scripts/maintenance/smoke-docsapi.sh",
+    "docs:restart": "bash scripts/maintenance/restart-docusaurus.sh",
+    "dashboard:restart": "bash scripts/maintenance/restart-dashboard.sh",
+    "dev:stack": "bash -c 'bash scripts/maintenance/restart-docusaurus.sh && bash scripts/maintenance/restart-dashboard.sh'"
   }
 }

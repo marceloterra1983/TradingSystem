@@ -33,7 +33,7 @@ export function LogsViewer() {
     refetchInterval: (data) => {
       // @ts-expect-error React Query v5 type inference issue with custom result properties
       if (!data || data.usingFallback) return false;
-      return 3000;
+      return 30000; // 30 segundos (antes: 3s - causa rate limit)
     },
   });
 

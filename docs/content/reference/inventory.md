@@ -14,7 +14,7 @@ lastReviewed: '2025-10-27'
 **Status**: Documentação completa de containers e serviços locais
 
 > **📋 Nova Estratégia de Containerização**
-> Uma análise completa de quais serviços devem ser containerizados está disponível em **[CONTAINERIZATION-STRATEGY.md](CONTAINERIZATION-STRATEGY.md)**.
+> Veja também **[Containerization](/reference/architecture/containerization)** para estratégia de containerização.
 > Destaque: **TP Capital será dividido em 2 camadas** (Gateway local + API containerizada) - veja proposta OpenSpec completa.
 
 ---

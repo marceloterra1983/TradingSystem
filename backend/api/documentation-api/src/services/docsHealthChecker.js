@@ -79,7 +79,15 @@ class DocsHealthChecker {
 
       const issues = [];
       if (parseResult.diagnostics.length > 0) {
-        issues.push(...parseResult.diagnostics.map((diagnostic) => diagnostic.message));
+        const allowlist = [
+          'The latest version of AsyncAPi is not used',
+        ];
+        for (const d of parseResult.diagnostics) {
+          const msg = String(d.message || '');
+          if (!allowlist.some((s) => msg.includes(s))) {
+            issues.push(msg);
+          }
+        }
       }
 
       return {

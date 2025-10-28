@@ -515,12 +515,12 @@ start_service() {
                 if check_service_health "$name" "$port"; then
                     success=true
                     cd "$PROJECT_ROOT"
-                    break 2  # Exit both while loops
+                    return 0  # Return immediately on success
                 else
                     log_warning "  Service started but health check inconclusive"
                     success=true
                     cd "$PROJECT_ROOT"
-                    break 2
+                    return 0  # Return immediately even if health check is inconclusive
                 fi
             fi
 
@@ -540,7 +540,7 @@ start_service() {
             waited=$((waited + 1))
         done
         
-        # If we succeeded, return immediately
+        # If we succeeded (shouldn't reach here due to early return, but just in case)
         if [ "$success" = true ]; then
             return 0
         fi

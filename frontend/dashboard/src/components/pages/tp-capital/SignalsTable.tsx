@@ -33,7 +33,7 @@ export function SignalsTable() {
     refetchInterval: (data) => {
       // @ts-expect-error React Query v5 type inference issue with custom result properties
       if (!data || data.usingFallback) return false;
-      return 5000;
+      return 30000; // 30 segundos (antes: 5s - causa rate limit)
     },
     retry: false,
   });
@@ -222,6 +222,9 @@ export function SignalsTable() {
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/30">
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 items-end">
             <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                Quantidade
+              </label>
               <Select value={String(limit)} onValueChange={(value) => setLimit(Number(value))}>
                 <SelectTrigger className="h-8 w-full text-sm">
                   <SelectValue placeholder="Limite" />
@@ -236,6 +239,9 @@ export function SignalsTable() {
               </Select>
             </div>
             <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                Canal
+              </label>
               <Select value={channelFilter} onValueChange={setChannelFilter}>
                 <SelectTrigger className="h-8 w-full text-sm">
                   <SelectValue placeholder="Canal" />
@@ -251,6 +257,9 @@ export function SignalsTable() {
               </Select>
             </div>
             <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                Tipo
+              </label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="h-8 w-full text-sm">
                   <SelectValue placeholder="Tipo" />
@@ -266,9 +275,12 @@ export function SignalsTable() {
               </Select>
             </div>
             <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                Buscar
+              </label>
               <Input
                 type="text"
-                placeholder="Buscar..."
+                placeholder="Ativo, mensagem..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-8 text-sm"
@@ -309,8 +321,21 @@ export function SignalsTable() {
           </div>
         </div>
 
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          Exibindo {filteredSignals.length} de {signals.length} registros
+        <div className="flex items-center justify-between px-1 py-2">
+          <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Exibindo <span className="font-bold text-cyan-600 dark:text-cyan-400">{filteredSignals.length}</span> de <span className="font-bold">{signals.length}</span> registros
+            {filteredSignals.length !== signals.length && (
+              <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                (filtrados)
+              </span>
+            )}
+          </div>
+          {query.isFetching && (
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <RefreshCcw className="h-3 w-3 animate-spin" />
+              Atualizando...
+            </div>
+          )}
         </div>
 
         <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700">

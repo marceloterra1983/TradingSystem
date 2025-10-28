@@ -36,7 +36,7 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 **Features**:
 
 - Loads Redoc from CDN (`https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js`)
-- Accepts spec URL via query parameter (`?url=/specs/documentation-api.openapi.yaml`)
+- Accepts spec URL via query parameter (`?url=http://localhost:3205/specs/documentation-api.openapi.yaml`)
 - Dark theme matching Dashboard design
 - Same pattern as existing Swagger/RapiDoc viewers
 
@@ -54,7 +54,7 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
   <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const specUrl = urlParams.get('url') || '/specs/documentation-api.openapi.yaml';
+    const specUrl = urlParams.get('url') || 'http://localhost:3205/specs/documentation-api.openapi.yaml';
     Redoc.init(specUrl, { theme: { ... } }, document.getElementById('redoc-container'));
   </script>
 </body>
@@ -79,7 +79,7 @@ case 'redoc':
 
 // AFTER
 case 'redoc':
-  url = `/viewers/redoc.html?url=${encodeURIComponent(selectedApi.specUrl)}`;
+  url = `/viewers/redoc.html?url=${encodeURIComponent('http://localhost:3205/specs/' + selectedApi.id + '.openapi.yaml')}`;
   break;
 ```
 
@@ -91,7 +91,7 @@ case 'redoc':
   id: 'documentation-api',
   name: 'Documentation API',
   port: '3400',  // ❌ Wrong - this is NGINX port
-  specUrl: '/specs/documentation-api.openapi.yaml',
+  specUrl: 'http://localhost:3205/specs/documentation-api.openapi.yaml',
 }
 
 // AFTER
@@ -99,7 +99,7 @@ case 'redoc':
   id: 'documentation-api',
   name: 'Documentation API',
   port: '3401',  // ✅ Correct - DocsAPI container port
-  specUrl: '/specs/documentation-api.openapi.yaml',
+  specUrl: 'http://localhost:3205/specs/documentation-api.openapi.yaml',
 }
 ```
 
@@ -131,7 +131,7 @@ $ ls -lah frontend/dashboard/public/viewers/
 ### ✅ Spec files accessible
 
 ```bash
-$ curl -I http://localhost:3103/specs/documentation-api.openapi.yaml
+$ curl -I http://localhost:3205/specs/documentation-api.openapi.yaml
 HTTP/1.1 200 OK
 Content-Type: text/yaml
 ```
@@ -173,19 +173,19 @@ Content-Type: text/html;charset=utf-8
 **Redoc viewer for Documentation API**:
 
 ```
-http://localhost:3103/viewers/redoc.html?url=/specs/documentation-api.openapi.yaml
+http://localhost:3103/viewers/redoc.html?url=http://localhost:3205/specs/documentation-api.openapi.yaml
 ```
 
 **Swagger UI for Workspace API**:
 
 ```
-http://localhost:3103/viewers/swagger.html?url=/specs/workspace.openapi.yaml
+http://localhost:3103/viewers/swagger.html?url=http://localhost:3205/specs/workspace.openapi.yaml
 ```
 
 **RapiDoc for Documentation API**:
 
 ```
-http://localhost:3103/viewers/rapidoc.html?url=/specs/documentation-api.openapi.yaml
+http://localhost:3103/viewers/rapidoc.html?url=http://localhost:3205/specs/documentation-api.openapi.yaml
 ```
 
 ---
@@ -208,7 +208,7 @@ http://localhost:3103/viewers/rapidoc.html?url=/specs/documentation-api.openapi.
 │  │  │  Iframe Container                          │  │  │
 │  │  │  ┌──────────────────────────────────────┐  │  │  │
 │  │  │  │  /viewers/redoc.html?url=...         │  │  │  │
-│  │  │  │  (loads spec from /specs/*.yaml)     │  │  │  │
+│  │  │  │  (loads spec from http://localhost:3205/specs/*.yaml) │  │  │  │
 │  │  │  └──────────────────────────────────────┘  │  │  │
 │  │  └────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────┘  │
@@ -217,17 +217,16 @@ http://localhost:3103/viewers/rapidoc.html?url=/specs/documentation-api.openapi.
 │  - /viewers/redoc.html                                 │
 │  - /viewers/swagger.html                               │
 │  - /viewers/rapidoc.html                               │
-│  - /specs/documentation-api.openapi.yaml               │
-│  - /specs/workspace.openapi.yaml                       │
+│  - Specs via Docusaurus (http://localhost:3205/specs/*.yaml)   │
 └────────────────────────────────────────────────────────┘
 ```
 
 **Key Points**:
 
-- ✅ **No CORS issues** - All viewers load from same origin (localhost:3103)
-- ✅ **No backend dependency** - Viewers are static HTML files
-- ✅ **No port conflicts** - All served through Dashboard's Vite dev server
-- ✅ **Fast loading** - Specs are local files, viewers load from CDN
+- ✅ **No CORS issues** - Viewers usam URLs absolutas do Docs (3205)
+- ✅ **Separation of concerns** - Viewers (3103) e specs (3205) independentes
+- ✅ **Sem conflito de portas** - Dashboard (3103), Docs (3205)
+- ✅ **Carregamento estável** - Specs são servidas pelo Docusaurus (build estático)
 
 ---
 
