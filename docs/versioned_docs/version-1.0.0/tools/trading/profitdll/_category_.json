@@ -1,0 +1,11 @@
+{
+  "label": "ProfitDLL",
+  "position": 9,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "ProfitDLL",
+    "slug": "/tools/profitdll",
+    "description": "Guides for integrating with the ProfitDLL library."
+  }
+}

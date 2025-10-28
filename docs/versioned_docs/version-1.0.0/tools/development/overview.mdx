@@ -1,0 +1,339 @@
+---
+title: Development Tools
+description: OpenSpec, automation scripts, Firecrawl, and development utilities
+tags:
+  - development
+  - tooling
+  - openspec
+  - scripts
+  - automation
+  - firecrawl
+owner: ToolingGuild
+lastReviewed: '2025-10-27'
+---
+
+# Development Tools
+
+Essential development tools for change management, automation, web scraping, and system maintenance.
+
+## 🛠️ Components
+
+### 1. OpenSpec (`tools/openspec/`)
+
+**Specification management tool for tracking changes, proposals, and system design.**
+
+**Structure:**
+
+```
+openspec/
+├── changes/               # Change proposals (11 active)
+│   ├── adapt-tp-capital-consume-gateway/
+│   ├── add-telegram-gateway-dashboard/
+│   ├── add-tp-capital-api-docs/
+│   ├── containerize-tp-capital-workspace/
+│   ├── database-tools-start-on-demand/
+│   ├── implement-docs-api/
+│   ├── migrate-docs-to-docusaurus-v2/
+│   ├── optimize-docker-security-performance/
+│   ├── split-tp-capital-into-gateway-api/
+│   ├── unified-tp-capital-split-workspace-containerize/
+│   └── update-docs-apps/
+├── specs/                 # System specifications
+│   ├── dashboard/
+│   ├── docs-navigation/
+│   ├── documentation-hosting/
+│   └── status/
+├── AGENTS.md              # AI agent instructions
+├── CLAUDE.md              # Claude-specific instructions
+├── openspec_jobs.yaml     # CI/CD integration
+└── project.md             # Project metadata
+```
+
+**Purpose:**
+- Structured change management (proposals before implementation)
+- Design documentation (specs for major components)
+- Proposal tracking (status, dependencies, blockers)
+- AI-assisted development (agent instructions)
+
+**Workflow:**
+
+1. **Create Change Proposal:**
+   ```bash
+   mkdir tools/openspec/changes/my-new-feature
+   cd tools/openspec/changes/my-new-feature
+   # Create spec.md with proposal details
+   ```
+
+2. **Document Specification:**
+   ```bash
+   mkdir tools/openspec/specs/my-component
+   cd tools/openspec/specs/my-component
+   # Create component.md with design
+   ```
+
+3. **Track Progress:**
+   - Update `status` field in spec.md (draft → in-progress → completed)
+   - Reference spec in commits and PRs
+   - Link specs to related ADRs
+
+**Example Proposal Structure:**
+
+```markdown
+# Feature: Add Real-Time Alerts
+
+## Status
+- **State:** in-progress
+- **Owner:** DevGuild
+- **Priority:** high
+
+## Problem
+No real-time alerting for critical system events.
+
+## Solution
+Implement WebSocket-based alert system with:
+- Alert rules engine
+- WebSocket pub/sub
+- Dashboard integration
+
+## Implementation Plan
+1. Create alert rules schema
+2. Build alert evaluation engine
+3. Implement WebSocket server
+4. Add dashboard widgets
+
+## Dependencies
+- WebSocket server (Port 9002)
+- AlertManager integration
+
+## Risks
+- WebSocket connection stability
+- Alert flooding
+```
+
+---
+
+### 2. Scripts (`tools/scripts/`)
+
+**Helper scripts for automation, maintenance, and operations.**
+
+**Structure:**
+
+```
+scripts/
+├── core/                  # Core system operations
+├── maintenance/           # Health checks, cleanup
+│   ├── health-check-all.sh
+│   ├── cleanup-logs.sh
+│   └── validate-env.sh
+├── setup/                 # Installation and configuration
+│   ├── install-dependencies.sh
+│   └── configure-services.sh
+├── database/              # Database operations
+│   ├── backup-questdb.sh
+│   ├── migrate-timescale.sh
+│   └── reset-databases.sh
+└── docker/                # Docker management
+    ├── start-stacks.sh
+    ├── stop-stacks.sh
+    └── prune-images.sh
+```
+
+**Key Scripts:**
+
+#### Health Check (Comprehensive)
+
+```bash
+# Check all services, containers, and databases
+bash scripts/maintenance/health-check-all.sh
+
+# JSON output (for automation)
+bash scripts/maintenance/health-check-all.sh --format json
+
+# Prometheus metrics export
+bash scripts/maintenance/health-check-all.sh --format prometheus
+
+# Services only (no containers)
+bash scripts/maintenance/health-check-all.sh --services-only
+
+# Containers only
+bash scripts/maintenance/health-check-all.sh --containers-only
+```
+
+#### Docker Stack Management
+
+```bash
+# Start all Docker stacks
+bash scripts/docker/start-stacks.sh
+
+# Stop all Docker stacks
+bash scripts/docker/stop-stacks.sh
+
+# Prune unused images
+bash scripts/docker/prune-images.sh
+```
+
+#### Environment Validation
+
+```bash
+# Validate .env file
+bash scripts/maintenance/validate-env.sh
+
+# Check for missing variables
+bash scripts/maintenance/validate-env.sh --strict
+
+# Export validated env to JSON
+bash scripts/maintenance/validate-env.sh --format json
+```
+
+#### Database Operations
+
+```bash
+# Backup QuestDB
+bash scripts/database/backup-questdb.sh
+
+# Migrate TimescaleDB
+bash scripts/database/migrate-timescale.sh
+
+# Reset all databases (DESTRUCTIVE)
+bash scripts/database/reset-databases.sh --confirm
+```
+
+---
+
+### 3. Firecrawl (`tools/firecrawl/`)
+
+**Open-source web scraping tool for converting websites to markdown.**
+
+**Structure:**
+
+```
+firecrawl/
+├── firecrawl-source/      # Firecrawl open-source codebase (git clone)
+├── Dockerfile.proxy       # Proxy service for local Firecrawl
+└── firecrawl.env.example  # Environment variables template
+```
+
+**Purpose:**
+- Web scraping (extract content from websites)
+- Markdown conversion (HTML → clean Markdown)
+- Document ingestion (feed scraped content to LlamaIndex RAG)
+- Content archival (snapshot websites as Markdown)
+
+**Usage:**
+
+```bash
+# Start Firecrawl Proxy (Port 3600)
+docker compose -f tools/compose/docker-compose.firecrawl.yml up -d
+
+# Scrape URL
+curl -X POST http://localhost:3600/api/scrape \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}'
+
+# Response (Markdown)
+{
+  "markdown": "# Example Domain\n\nThis domain is for use in...",
+  "metadata": {
+    "title": "Example Domain",
+    "url": "https://example.com",
+    "timestamp": "2025-10-27T12:00:00Z"
+  }
+}
+```
+
+**Integration with LlamaIndex:**
+
+```python
+# Scrape and ingest into RAG
+import requests
+from llama_index import Document
+
+# Scrape URL
+response = requests.post(
+    "http://localhost:3600/api/scrape",
+    json={"url": "https://docs.example.com"}
+)
+markdown = response.json()["markdown"]
+
+# Create document
+doc = Document(text=markdown, metadata={"source": "https://docs.example.com"})
+
+# Ingest into LlamaIndex
+index.insert(doc)
+```
+
+**Features:**
+- JavaScript rendering (Playwright-based)
+- Anti-bot bypass (stealth mode)
+- Rate limiting and retry logic
+- Proxy support
+
+---
+
+## 🚀 Quick Operations
+
+### Create New Change Proposal
+
+```bash
+# 1. Create proposal directory
+mkdir tools/openspec/changes/my-new-feature
+
+# 2. Create spec.md
+cat > tools/openspec/changes/my-new-feature/spec.md << 'EOF'
+# Feature: My New Feature
+
+## Status
+- **State:** draft
+- **Owner:** YourName
+- **Priority:** medium
+
+## Problem
+Describe the problem this feature solves.
+
+## Solution
+Describe the proposed solution.
+
+## Implementation Plan
+1. Step 1
+2. Step 2
+3. Step 3
+EOF
+
+# 3. Reference in commits
+git commit -m "feat: implement my-new-feature (openspec/my-new-feature)"
+```
+
+### Run Health Checks
+
+```bash
+# Full health check
+bash scripts/maintenance/health-check-all.sh
+
+# Check specific service
+curl http://localhost:3500/api/status/dashboard
+
+# Check all via Service Launcher API
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+```
+
+### Scrape Documentation
+
+```bash
+# Start Firecrawl Proxy
+docker compose -f tools/compose/docker-compose.firecrawl.yml up -d
+
+# Scrape URL
+curl -X POST http://localhost:3600/api/scrape \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://docs.profitchart.com"}' | jq '.markdown'
+```
+
+---
+
+## 📖 Related Documentation
+
+- **Scripts** - See `tools/scripts/` directory for automation scripts
+- **OpenSpec** - See `tools/openspec/` directory for change proposals
+- **Firecrawl** - See `tools/firecrawl/` directory for web scraping tools
+- **[Service Launcher](/apps/service-launcher/overview)** - Service orchestration
+- **[AI Tools](/tools/ai/overview)** - LlamaIndex RAG integration

@@ -42,6 +42,11 @@ const config = {
               path: 'next',
               banner: 'unreleased',
             },
+            '1.0.0': {
+              label: '1.0.0 (Stable) ✅',
+              path: '1.0.0',
+              banner: 'none',
+            },
           },
           // Only build current version in development for fast iteration
           onlyIncludeVersions: process.env.NODE_ENV === 'development' ? ['current'] : undefined,

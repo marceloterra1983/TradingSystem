@@ -1,0 +1,170 @@
+@startuml Order Lifecycle State Machine
+!theme plain
+title Order Lifecycle - State Transitions
+
+!define STATE_COLOR #E5F5FF
+!define ERROR_COLOR #FFE5E5
+!define SUCCESS_COLOR #E5FFE5
+!define WARN_COLOR #FFF5E5
+
+[*] --> Draft : User creates order
+
+state Draft STATE_COLOR {
+  Draft : Entry: Initialize order object
+  Draft : Validate: Basic field checks
+  Draft : Exit: Prepare for risk validation
+}
+
+Draft --> Validating : Submit order
+Draft --> Canceled : User cancels
+Draft --> [*] : Discard draft
+
+state Validating STATE_COLOR {
+  Validating : Entry: Lock order for validation
+  Validating : Do: Risk engine checks
+  Validating : - Daily loss limit
+  Validating : - Position size limit
+  Validating : - Trading hours
+  Validating : - Signal confidence
+  Validating : - Connection health
+  Validating : Exit: Validation result
+}
+
+Validating --> Validated : All checks pass
+Validating --> Rejected : Validation fails
+
+state Validated SUCCESS_COLOR {
+  Validated : Entry: Mark as validated
+  Validated : Order ready for execution
+  Validated : Exit: Send to ProfitDLL
+}
+
+Validated --> Submitting : Execute order
+Validated --> Canceled : User cancels\n(before submission)
+
+state Submitting WARN_COLOR {
+  Submitting : Entry: Call ProfitDLL
+  Submitting : Do: SendOrder()
+  Submitting : Await: Broker confirmation
+  Submitting : Exit: Order ID assigned
+}
+
+Submitting --> Submitted : Broker accepts
+Submitting --> Rejected : Broker rejects\n(invalid params)
+Submitting --> Failed : Network error\n(retry possible)
+
+state Submitted WARN_COLOR {
+  Submitted : Entry: Order in book
+  Submitted : Order ID: XXX-YYY-ZZZ
+  Submitted : Status: Working
+  Submitted : Exit: Execution callback
+}
+
+Submitted --> PartiallyFilled : Partial execution
+Submitted --> Filled : Complete execution
+Submitted --> Canceled : User cancels\n(via CancelOrder)
+Submitted --> Expired : Time-in-force expires
+
+state PartiallyFilled WARN_COLOR {
+  PartiallyFilled : Entry: Log partial fill
+  PartiallyFilled : Filled Qty: X of Y
+  PartiallyFilled : Avg Price: Z
+  PartiallyFilled : Exit: Update position
+}
+
+PartiallyFilled --> Filled : Remaining filled
+PartiallyFilled --> Canceled : User cancels remaining
+PartiallyFilled --> Expired : Time-in-force expires
+
+state Filled SUCCESS_COLOR {
+  Filled : Entry: Order complete
+  Filled : Total Qty: Fully executed
+  Filled : Avg Price: Final price
+  Filled : Commission: Calculated
+  Filled : Exit: Update position & P&L
+}
+
+state Rejected ERROR_COLOR {
+  Rejected : Entry: Log rejection reason
+  Rejected : Reason: Risk/Broker/Network
+  Rejected : Code: Error code
+  Rejected : Exit: Notify user
+}
+
+state Canceled WARN_COLOR {
+  Canceled : Entry: Log cancellation
+  Canceled : Reason: User/System/Expired
+  Canceled : Timestamp: When canceled
+  Canceled : Exit: Release resources
+}
+
+state Failed ERROR_COLOR {
+  Failed : Entry: Log failure
+  Failed : Reason: Network/System error
+  Failed : Retry Count: N attempts
+  Failed : Exit: Retry or abort
+}
+
+Failed --> Submitting : Retry (max 3x)
+Failed --> Rejected : Max retries exceeded
+
+Filled --> [*] : Complete
+Rejected --> [*] : Complete
+Canceled --> [*] : Complete
+
+note right of Draft
+  **Initial State**
+  Order created but not submitted.
+  User can modify all fields.
+end note
+
+note right of Validating
+  **Risk Engine Validation**
+  - Global kill switch check
+  - Daily loss limit
+  - Max position size
+  - Trading hours (9:00-18:00)
+  - Signal confidence (>60%)
+  - ProfitDLL connection active
+end note
+
+note right of Submitting
+  **ProfitDLL Integration**
+  Calls: SendOrder(asset, side, qty, price)
+  Returns: orderID or error code
+  Timeout: 5 seconds
+end note
+
+note right of Submitted
+  **Working Order**
+  Order is in the broker's book.
+  User can cancel or modify.
+  Callbacks: OnOrderStatus()
+end note
+
+note left of Filled
+  **Terminal State - Success**
+  Position updated:
+  - Long/Short balance
+  - Average cost
+  - Realized P&L
+  - Audit log entry
+end note
+
+note left of Rejected
+  **Terminal State - Failure**
+  Common reasons:
+  - Risk limit exceeded
+  - Invalid symbol
+  - Insufficient margin
+  - Market closed
+end note
+
+note left of Canceled
+  **Terminal State - User Action**
+  Order removed from book.
+  No execution occurred.
+  Resources released.
+end note
+
+@enduml

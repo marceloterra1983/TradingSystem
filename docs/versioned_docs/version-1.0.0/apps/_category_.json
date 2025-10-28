@@ -1,0 +1,11 @@
+{
+  "label": "Apps",
+  "position": 10,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Applications",
+    "slug": "/apps",
+    "description": "Playbooks and documentation for user-facing TradingSystem applications."
+  }
+}

@@ -1,0 +1,49 @@
+---
+title: "Event \u2013 Order Canceled"
+description: Placeholder contract for the `order.canceled` event.
+tags:
+  - sdd
+  - events
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The `order.canceled` event notifies consumers that an order was successfully canceled through the Order Manager API or a kill-switch automation. Detailed payload attributes will be finalized alongside the cancellation workflow implementation.
+
+**Event Name**: `order.canceled`  
+**Version**: v1 (draft)  
+**Status**: Stub (schema pending)  
+**Trigger**: Order cancellation via `DELETE /api/orders/{orderId}` or automated kill switch
+
+## Payload
+
+```typescript
+interface OrderCanceledEvent {
+  eventId: string;
+  eventType: 'order.canceled';
+  timestamp: string;
+  version: 'v1';
+  payload: {
+    orderId: string;
+    status: 'CANCELED';
+    canceledAt: string;
+    reason?: string;
+  };
+  metadata: EventMetadata;
+}
+
+interface EventMetadata {
+  traceId: string;
+  userId?: string;
+  source: string;
+  correlationId?: string;
+}
+```
+
+> **TODO**: Align `reason` enumerations with API error codes and include broker cancellation context once integration is complete.
+
+## Related Documentation
+
+- [Cancel Order Flow](../../flows/v1/cancel-order)
+- [Order Schema](../../domain/schemas/v1/order)

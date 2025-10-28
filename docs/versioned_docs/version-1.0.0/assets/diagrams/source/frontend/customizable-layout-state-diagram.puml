@@ -1,0 +1,141 @@
+@startuml
+title Customizable Layout - State Management Flow
+
+[*] --> Initializing : Page component mounts
+
+state Initializing {
+  Initializing : useCustomLayout hook initializes
+  Initializing : Check for saved layout in localStorage
+}
+
+Initializing --> LoadingFromStorage : getItem('tradingSystem_layout_{pageId}')
+
+state LoadingFromStorage {
+  LoadingFromStorage : Read localStorage
+  LoadingFromStorage : Parse JSON if exists
+}
+
+LoadingFromStorage --> LayoutRestored : [Saved layout exists]
+LoadingFromStorage --> DefaultLayout : [No saved layout or parse error]
+
+state LayoutRestored {
+  LayoutRestored : Apply saved columns
+  LayoutRestored : Apply saved componentLayout
+  LayoutRestored : Validate structure
+}
+
+state DefaultLayout {
+  DefaultLayout : Use defaultColumns prop
+  DefaultLayout : Distribute components sequentially
+  DefaultLayout : section1 → column 0
+  DefaultLayout : section2 → column 1
+  DefaultLayout : section3 → column 0 (wrap)
+}
+
+LayoutRestored --> Idle
+DefaultLayout --> Idle
+
+state Idle {
+  Idle : Layout rendered
+  Idle : User can interact
+}
+
+Idle --> Dragging : [Mouse down on drag handle + 8px movement]
+
+state Dragging {
+  Dragging : Active drag in progress
+  Dragging : Show visual feedback
+  Dragging : Highlight drop zones
+  Dragging : Track cursor position
+}
+
+Dragging --> Idle : [Mouse up / onDragEnd]
+
+note right of Dragging
+  **Actions on Drag End:**
+  1. moveComponent(id, newColumnIndex)
+  2. Update componentLayout state
+  3. Save to localStorage
+  4. Trigger re-render
+end note
+
+Idle --> UpdatingColumns : [User clicks column button (1/2/3/4)]
+
+state UpdatingColumns {
+  UpdatingColumns : Set new column count
+  UpdatingColumns : Redistribute components
+  UpdatingColumns : Save to localStorage
+}
+
+UpdatingColumns --> Idle
+
+note right of UpdatingColumns
+  **Redistribution Logic:**
+  - Preserve relative order
+  - Balance across columns
+  - Round-robin distribution
+  Example: 5 sections, 3 columns
+  → col0: [0,3], col1: [1,4], col2: [2]
+end note
+
+Idle --> Resetting : [User clicks Reset button]
+
+state Resetting {
+  Resetting : Clear localStorage entry
+  Resetting : Reset to defaultColumns
+  Resetting : Reset to default positions
+}
+
+Resetting --> DefaultLayout
+
+note right of Resetting
+  **Reset Actions:**
+  1. removeItem('tradingSystem_layout_{pageId}')
+  2. Apply defaultColumns
+  3. Sequential distribution
+  4. Trigger re-render
+end note
+
+Idle --> TogglingCard : [User clicks card header]
+
+state TogglingCard {
+  TogglingCard : Toggle collapsed state
+  TogglingCard : Save collapse state
+  TogglingCard : (Separate from layout state)
+}
+
+TogglingCard --> Idle
+
+note right of TogglingCard
+  **Collapse State:**
+  - Managed by CollapsibleCard
+  - Stored in separate localStorage key
+  - Key: tradingSystem_card_{cardId}
+  - Independent of layout changes
+end note
+
+note as N1
+  **State Persistence:**
+  - Every state change → localStorage write
+  - Debounced to avoid excessive writes
+  - Format: {columns: number, componentLayout: Record<id, columnIndex>}
+  - Per-page isolation via pageId
+end note
+
+note as N2
+  **Error Recovery:**
+  - Invalid localStorage data → Reset to default
+  - Missing componentLayout → Rebuild from componentIds
+  - Parse errors → Log warning and use defaults
+  - Graceful degradation
+end note
+
+note as N3
+  **Validation Rules:**
+  - columns must be 1, 2, 3, or 4
+  - componentLayout keys must match componentIds
+  - columnIndex must be < columns
+  - All sections must have a column assignment
+end note
+
+@enduml

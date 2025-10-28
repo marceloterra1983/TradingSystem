@@ -1,0 +1,100 @@
+---
+title: Incident Runbook
+sidebar_position: 8
+description: Recovery guide for incidents affecting the TP Capital application.
+tags:
+  - apps
+  - tp-capital
+  - runbook
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Detection
+
+### Common Alerts
+
+| Alert Name | Trigger | Dashboard | Severity |
+|------------|---------|-----------|----------|
+| `TPCapitalApiUnhealthy` | `/health.status != healthy` for 2 checks | Grafana: TP Capital | Critical |
+| `TPCapitalTimescaleDown` | Timescale probe fails for 1 minute | Grafana: TP Capital | Critical |
+| `TPCapitalGatewayBacklog` | `messages_waiting > 50` for 5 minutes | Grafana: TP Capital | Warning |
+| `TPCapitalNoSignals` | No new signals in 30 minutes during market hours | Grafana: TP Capital | Warning |
+| `TPCapitalErrorRateHigh` | Error ratio > 5 % for 10 minutes | Grafana: TP Capital | Warning |
+
+### Manual Checks
+
+```bash
+# API health
+curl http://localhost:4005/health
+
+# Freshness
+curl http://localhost:4005/signals?limit=1
+
+# Gateway status
+curl http://localhost:4006/health
+
+# Timescale connection
+psql "postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL?options=-csearch_path=tp_capital" -c "SELECT COUNT(*) FROM tp_capital_signals WHERE ts > now() - interval '5 minutes';"
+```
+
+## Response Playbooks
+
+### 1. API Unavailable
+
+**Symptoms**: `/health` returns 503/timeout, dashboard offline.
+
+1. `docker compose -f apps/tp-capital/infrastructure/docker-compose.prod.yml ps tp-capital`
+2. Review logs `docker compose -f ... logs --tail=200 tp-capital`.
+3. Restart service if necessary `docker compose -f ... restart tp-capital`.
+4. Validate `curl http://localhost:4005/health`.
+
+If restart fails, confirm `.env` values and rerun `docker compose -f ... up -d --build`.
+
+### 2. TimescaleDB Connection Failure
+
+**Symptoms**: `/health.timescale = false`, errors `ECONNREFUSED`, signals not updating.
+
+1. Check DB container `docker compose -f ... ps timescaledb`.
+2. Inspect logs `docker compose -f ... logs --tail=200 timescaledb`.
+3. Restart DB `docker compose -f ... restart timescaledb`.
+4. Run migrations if schema corrupted `apps/tp-capital/scripts/init-database.sh --force` (warn: destructive).
+5. Once DB healthy, restart TP Capital API and verify ingestion resumes.
+
+### 3. Gateway Backlog
+
+**Symptoms**: Alerts on `messages_waiting`, dashboard lags &gt; 10 minutes.
+
+1. Inspect queue count: `curl http://localhost:4005/health | jq '.messagesWaiting'`.
+2. Trigger sync: `curl -X POST http://localhost:4005/sync-messages -H "Content-Type: application/json" -d '{"limit":200}'`.
+3. Verify Gateway still polling: `curl http://localhost:4006/metrics | grep polling`.
+4. If backlog persists, restart Gateway service (`systemctl restart telegram-gateway` or `npm run start`).
+
+### 4. No Signals Received
+
+**Symptoms**: Empty `/signals`, but Gateway healthy.
+
+1. Query `telegram_gateway.messages` for received status:
+
+   ```sql
+   SELECT COUNT(*) FROM telegram_gateway.messages WHERE status = 'received';
+   ```
+
+2. Review TP Capital logs for parsing errors (`grep parse_failed`).
+3. Confirm `TP_CAPITAL_GATEWAY_FILTER_TEXT_CONTAINS` matches current message format.
+4. Escalate to content team if Telegram channel quiet during trading session.
+
+## Post-Incident
+
+1. Capture timeline, root cause, and fixes in incident tracker.
+2. Update Grafana annotations and this runbook if new failure mode observed.
+3. Schedule postmortem for Severity Critical incidents.
+
+## Escalation
+
+| Severity | Expectation | Escalation Path |
+|----------|-------------|-----------------|
+| Critical | Response &lt; 5 min | On-call engineer → Platform lead → CTO |
+| Warning | Response &lt; 15 min | On-call engineer → Platform lead |
+| Info | Best effort | Component owner |
+
+Maintain up-to-date contacts for Platform lead, DB administrator, and Telegram credential owners.

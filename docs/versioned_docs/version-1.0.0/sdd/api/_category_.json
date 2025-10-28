@@ -1,0 +1,11 @@
+{
+  "label": "APIs",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "API Designs",
+    "slug": "/sdd/api",
+    "description": "Solution design documents for APIs."
+  }
+}
