@@ -8,7 +8,7 @@
 
 ## Validation Suite Overview
 
-**The complete validation suite consists of 5 validation layers:**
+**The complete validation suite consists of 10 validation layers:**
 
 1. **Content Generation** (`docs:auto`) - Generate reference content from source files
 2. **Generated Content Validation** (`docs:validate-generated`) - Verify generation succeeded
@@ -19,8 +19,9 @@
 7. **Link Validation** (`docs:links`) - Check all internal and external links
 8. **Technical References Validation** (`docs/scripts/validate-technical-references.sh`) - Ensure legacy references removed and docs adoption verified
 9. **Frontmatter Validation** (`validate-frontmatter.py`) - Validate YAML frontmatter
+10. **Version Validation** (manual/script) - Validate versioned documentation snapshots
 
-**Total Execution Time**: ~10-15 minutes
+**Total Execution Time**: ~10-20 minutes (depending on version count)
 
 ---
 
@@ -431,6 +432,182 @@ Outdated documents (> 90 days): 0
 
 ---
 
+### Step 10: Version Validation
+
+**Purpose**: Validate versioned documentation snapshots to ensure integrity and correctness.
+
+**When to Run**:
+- After creating a new version snapshot
+- Before deploying versioned docs to production
+- Quarterly as part of maintenance (check all active versions)
+
+**Command**:
+```bash
+cd docs
+
+# Validate version snapshot creation
+bash ../scripts/validation/validate-version-snapshot.sh <VERSION>
+
+# Example: Validate version 1.0.0
+bash ../scripts/validation/validate-version-snapshot.sh 1.0.0
+```
+
+**Manual Validation Steps**:
+
+#### 10.1: Version File Structure
+
+```bash
+# Check versions.json exists and contains version
+cat versions.json | grep "<VERSION>"
+
+# Expected: Version appears in array (e.g., "1.0.0")
+
+# Verify versioned docs directory exists
+ls -la versioned_docs/version-<VERSION>/
+
+# Expected: Directory exists with all content subdirectories
+
+# Count versioned MDX files
+find versioned_docs/version-<VERSION>/ -name "*.mdx" | wc -l
+
+# Expected: ~135-200 files (matches current content count)
+
+# Verify sidebar snapshot exists
+ls -lh versioned_sidebars/version-<VERSION>-sidebars.json
+
+# Expected: File exists and is non-empty (> 1KB)
+```
+
+#### 10.2: Version Content Integrity
+
+```bash
+# Compare file counts between versions
+CURRENT_COUNT=$(find content/ -name "*.mdx" | wc -l)
+VERSION_COUNT=$(find versioned_docs/version-<VERSION>/ -name "*.mdx" | wc -l)
+
+echo "Current: $CURRENT_COUNT, Version <VERSION>: $VERSION_COUNT"
+
+# Expected: Counts should match (or version count slightly higher if files were added)
+
+# Spot check key files exist in version
+test -f versioned_docs/version-<VERSION>/index.mdx && echo "✅ index.mdx present"
+test -d versioned_docs/version-<VERSION>/apps/ && echo "✅ apps/ directory present"
+test -d versioned_docs/version-<VERSION>/api/ && echo "✅ api/ directory present"
+```
+
+#### 10.3: Version Build Test
+
+```bash
+# Test build with new version
+npm run docs:build
+
+# Expected: Build completes successfully
+# Expected: Build time < 120s (with up to 3 versions)
+
+# Verify version directories in build output
+ls -la build/
+
+# Expected for version 1.0.0:
+#   - build/next/     (current unreleased)
+#   - build/          (latest stable, e.g., 1.0.0 at root)
+#   OR
+#   - build/1.0.0/    (if not latest)
+#   - build/next/
+
+# Check sitemap includes version URLs
+grep "version-<VERSION>" build/sitemap.xml || grep "<VERSION>" build/sitemap.xml
+
+# Expected: Version URLs present in sitemap
+```
+
+#### 10.4: Version Navigation Test
+
+```bash
+# Start dev server
+npm run docs:dev
+
+# Manual checks (browser):
+# 1. Navigate to http://localhost:3205
+# 2. Version dropdown visible in navbar (top right)
+# 3. Dropdown shows new version with correct label
+# 4. Click version selector → Select new version
+# 5. Verify navigation to correct path (/ or /vX.X.X/)
+# 6. Verify content loads correctly
+# 7. Test internal links work within version
+# 8. Check banner displays correctly per version type
+
+# Stop server: Ctrl+C
+```
+
+#### 10.5: Version Link Validation
+
+```bash
+# Run link validation on all versions
+npm run docs:links 2>&1 | tee version-links-report.txt
+
+# Check for version-specific broken links
+grep "version-<VERSION>" version-links-report.txt | grep "Broken"
+
+# Expected: < 5 broken links per version
+# Expected: All internal links valid within version
+```
+
+**Validation Checklist**:
+
+- [ ] versions.json contains new version entry
+- [ ] versioned_docs/version-X.X.X/ directory exists
+- [ ] File count matches current content (~135-200 files)
+- [ ] versioned_sidebars/version-X.X.X-sidebars.json exists
+- [ ] Build completes successfully with new version
+- [ ] Build time < 120s (with up to 3 versions)
+- [ ] Version dropdown shows new version with correct label
+- [ ] Navigation to version works (correct path)
+- [ ] Internal links work within version
+- [ ] Banner displays correctly (unreleased/stable/deprecated)
+- [ ] Sitemap includes version URLs
+- [ ] Link validation passes (< 5 broken per version)
+
+**If Fails**:
+- **Missing version files**: Re-run `npx docusaurus docs:version X.X.X`
+- **File count mismatch**: Check for uncommitted files in content/
+- **Build fails**: Run `npm run docs:check` to validate current content first
+- **Links broken**: Document in KNOWN-ISSUES.md (acceptable for versioned snapshots)
+- **Dropdown missing**: Clear cache (`rm -rf .docusaurus`) and rebuild
+
+**Quick Validation Script**:
+
+```bash
+#!/bin/bash
+# Quick version validation script
+
+VERSION=$1
+if [ -z "$VERSION" ]; then
+  echo "Usage: ./validate-version.sh <VERSION>"
+  exit 1
+fi
+
+echo "=== Validating Version $VERSION ==="
+
+# Check files exist
+[ -f versions.json ] && echo "✅ versions.json exists" || echo "❌ versions.json missing"
+grep -q "$VERSION" versions.json && echo "✅ $VERSION in versions.json" || echo "❌ $VERSION not in versions.json"
+[ -d "versioned_docs/version-$VERSION" ] && echo "✅ versioned_docs/version-$VERSION exists" || echo "❌ Directory missing"
+[ -f "versioned_sidebars/version-$VERSION-sidebars.json" ] && echo "✅ Sidebar snapshot exists" || echo "❌ Sidebar missing"
+
+# Count files
+FILE_COUNT=$(find "versioned_docs/version-$VERSION" -name "*.mdx" 2>/dev/null | wc -l)
+echo "📊 Files versioned: $FILE_COUNT"
+[ "$FILE_COUNT" -gt 100 ] && echo "✅ File count acceptable" || echo "⚠️  File count low"
+
+echo ""
+echo "Next steps:"
+echo "  1. Run: npm run docs:build"
+echo "  2. Run: npm run docs:links"
+echo "  3. Test version dropdown in browser"
+```
+
+---
+
 ## Full Validation Pipeline
 
 **Run All Validations in Sequence**:
@@ -474,6 +651,10 @@ python scripts/docs/validate-frontmatter.py \
 ## Pre-Launch Validation Checklist
 
 - [ ] Technical references validation passed (no legacy `docs/docusaurus` or port `3004` references)
+- [ ] Version 1.0.0 created and validated (if launching versioned docs)
+- [ ] Version dropdown functional in navbar
+- [ ] All active versions build successfully (< 120s total)
+- [ ] Link validation passed for all versions (< 5 broken per version)
 
 ---
 

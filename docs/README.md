@@ -26,6 +26,55 @@ Refer to the tasks file for the full rollout plan and outstanding items; see `pa
 - Shell wrappers under `scripts/docusaurus/` mirror these commands for CI pipelines, including `check-links.sh`.
 - Husky hooks run `npm --prefix docs run docs:auto` then `docs:lint` on commit and `docs:check` on push; export `SKIP_DOCS_AUTO=1` to skip only the auto-generation step or `SKIP_DOCS_HOOKS=1` to bypass the hook entirely in emergencies.
 
+## Versioning
+
+**The documentation uses Docusaurus versioning to maintain snapshots aligned with system releases.**
+
+### Creating a New Version
+
+```bash
+# After Phase 6 launch or major release
+cd docs
+npx docusaurus docs:version 1.0.0
+
+# Verify snapshot created
+npm run docs:version:list
+```
+
+### Version Management Commands
+
+```bash
+# List all versions
+npm run docs:version:list
+
+# Build only current version (fast dev builds)
+npm run docs:build:fast
+
+# Build all versions (production)
+npm run docs:build
+```
+
+### Version Strategy
+
+- **current** (Next): Unreleased development version at `/next/`
+- **Latest Stable**: Most recent release at `/` (root path)
+- **Retention Policy**: Keep current + 2 latest stable versions
+- **Naming**: Semantic versioning (1.0.0, 2.0.0, etc.)
+
+### Build Performance
+
+- **Dev builds**: ~45s (current version only)
+- **Production builds**: ~75-105s (all active versions)
+- **Target**: < 120s with 3 versions
+
+### Version Labels
+
+- **Next (Unreleased) 🚧** - Development version with unreleased banner
+- **X.X.X (Stable) ✅** - Latest stable version (no banner)
+- **X.X.X** - Older versions with "outdated" banner
+
+**For detailed versioning procedures, see `governance/VERSIONING-GUIDE.md`**
+
 ## Generated Content
 
 **Overview**:
