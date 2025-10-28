@@ -189,11 +189,64 @@ grep -r "TODO\|TBD\|FIXME" docs/content/ | wc -l
 
 ---
 
-### Week 4: Automation & Tooling Review
+### Week 4: Automation, Versioning & Tooling Review
 
-**Objective**: Ensure automation scripts work correctly and efficiently.
+**Objective**: Ensure automation scripts work correctly, manage documentation versions, and maintain build performance.
 
-#### Step 1: Test Automation Scripts
+#### Step 1: Version Health Check
+
+**Purpose**: Monitor active versions, build performance, and storage usage.
+
+**Actions**:
+- [ ] List all active versions:
+  ```bash
+  cd docs
+  npm run docs:version:list
+  ```
+
+- [ ] Check version count (target: current + 2 stable = 3 max):
+  ```bash
+  cat versions.json | jq length
+  ```
+
+- [ ] Measure build performance:
+  ```bash
+  time npm run docs:build
+  # Target: < 120s with 3 versions
+  ```
+
+- [ ] Check storage usage per version:
+  ```bash
+  du -sh versioned_docs/version-*/
+  # Target: < 10MB per version
+  ```
+
+- [ ] Review version deprecation candidates (> 2 releases old):
+  - If `2.0.0` is stable and `1.0.0` exists → Consider deprecating `1.0.0`
+  - Add deprecation notice (12 months before removal)
+  - See `VERSIONING-GUIDE.md` for deprecation procedures
+
+#### Step 2: Version Link Validation
+
+**Actions**:
+- [ ] Run link validation on all versions:
+  ```bash
+  npm run docs:links 2>&1 | tee version-links-report.txt
+  ```
+
+- [ ] Check broken links per version:
+  ```bash
+  for VERSION in $(cat versions.json | jq -r '.[]'); do
+    echo "=== Version $VERSION ==="
+    grep "version-$VERSION" version-links-report.txt | grep "Broken" | wc -l
+  done
+  ```
+
+- [ ] Document known issues (external links broken in old versions):
+  - Create `docs/governance/KNOWN-ISSUES.md` if not exists
+  - List acceptable broken links per version
+
+#### Step 3: Test Automation Scripts
 
 **Scripts to Test**:
 
@@ -216,7 +269,7 @@ npm run docs:check
 ```
 - [ ] Verify all steps complete successfully (auto, validate, lint, typecheck, test, build)
 - [ ] Check build output for warnings/errors
-- [ ] Validate build time is acceptable (<5 minutes)
+- [ ] Validate build time is acceptable (< 120s with versions)
 
 **docs:links** (link validation):
 ```bash
@@ -224,7 +277,7 @@ cd docs
 npm run docs:links
 ```
 - [ ] Verify linkinator runs successfully
-- [ ] Check for broken links
+- [ ] Check for broken links (< 5 per version)
 - [ ] Validate external links (if any)
 
 **validate-frontmatter.py** (frontmatter validation):
@@ -309,8 +362,17 @@ python scripts/docs/validate-frontmatter.py \
 |--------|--------|---------|---------|---------|----------|
 | docs:auto success rate | 100% | - | - | - | - |
 | docs:check pass rate | 100% | - | - | - | - |
-| Build time (minutes) | <5 | - | - | - | - |
+| Build time (seconds) | <120 | - | - | - | - |
 | Test coverage | >80% | - | - | - | - |
+
+### Version Health
+
+| Metric | Target | Q4 2025 | Q1 2026 | Q2 2026 | Q3 2026 |
+|--------|--------|---------|---------|---------|----------|
+| Active versions count | ≤3 | - | - | - | - |
+| Storage per version (MB) | <10 | - | - | - | - |
+| Build time with versions (s) | <120 | - | - | - | - |
+| Broken links per version | <5 | - | - | - | - |
 
 ### Usage Metrics (if analytics available)
 
@@ -353,12 +415,13 @@ python scripts/docs/validate-frontmatter.py \
 |---------|------|---------|--------|
 | 1.0.0 | 2025-10-24 | Initial version | DocsOps |
 | 1.1.0 | TBD | Updated for docs schema | DocsOps |
+| 1.2.0 | 2025-10-28 | Added versioning health checks | DocsOps |
 
 ---
 
 ## Related Documentation
 
 - [Review Checklist](./REVIEW-CHECKLIST.md) - Chapter-by-chapter review
-- [Documentation Standard](../content/meta/documentation-standard) (when migrated)
-- [Validation Guide](./VALIDATION-GUIDE.md) - How to run validation suite
+- [Versioning Guide](./VERSIONING-GUIDE.md) - Version management procedures
+- [Validation Guide](./VALIDATION-GUIDE.md) - How to run validation suite (includes version validation)
 - [Communication Plan](./COMMUNICATION-PLAN.md) - Internal announcements
