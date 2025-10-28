@@ -1,0 +1,89 @@
+@startuml
+!theme plain
+skinparam componentStyle rectangle
+skinparam wrapWidth 200
+skinparam defaultFontName Courier
+skinparam defaultFontSize 12
+
+title Firecrawl Proxy - Component Architecture
+
+rectangle "Dashboard (React)\nPort 3103" as Dashboard #E5FFE5 {
+  component "CrawlHistoryPanel" as CrawlHistoryPanel
+  component "firecrawlService.ts" as FirecrawlServiceTS
+  component "useFirecrawl Hooks" as FirecrawlHooks
+}
+
+rectangle "Firecrawl Proxy API (Express)\nPort 3600" as Proxy #E5F5FF {
+  component "Routes\n/api/v1/scrape\n/api/v1/crawl\n/api/v1/crawl/:id" as ProxyRoutes
+  component "Validation Middleware\n(express-validator)" as Validation
+  component "Rate Limiter\n100 req/min" as RateLimiter
+  component "Error Handler" as ErrorHandler
+  component "FirecrawlService" as ProxyService
+  component "Metrics\n(prom-client)" as Metrics
+  component "Logger\n(Pino)" as Logger
+}
+
+rectangle "Firecrawl Core (Docker Compose)\nPort 3002" as Firecrawl #FFE5E5 {
+  component "API Service" as FirecrawlAPI
+  component "Worker Processes" as Workers
+  component "Playwright Service" as Playwright
+  database "Redis Queue" as Redis
+  database "PostgreSQL (nuq-postgres)" as Postgres
+}
+
+rectangle "Monitoring" as Monitoring #FFF5E5 {
+  component "Prometheus" as Prometheus
+  component "Grafana" as Grafana
+}
+
+Dashboard --> Proxy : HTTP POST/GET\n/api/v1/*
+FirecrawlHooks --> Proxy : React Query polling\n(every 5s while scraping)
+ProxyRoutes --> Validation : request data
+Validation --> RateLimiter : normalized request
+RateLimiter --> ProxyService : allowed requests
+ProxyService --> FirecrawlAPI : HTTP POST/GET\n/v1/scrape, /v1/crawl
+Workers --> Playwright : render JS content
+Workers --> Redis : enqueue crawl jobs
+FirecrawlAPI --> Workers : dispatch jobs
+FirecrawlAPI --> Postgres : persist metadata
+ProxyService --> Metrics : record operations
+ProxyService --> Logger : structured logs (JSON)
+Prometheus --> Grafana : query metrics
+Metrics --> Prometheus : scrape /metrics
+
+note right of Validation
+  Validates URL format, formats array,
+  numeric limits (1-1000 pages, 1-10 depth),
+  timeout ranges (1000-60000 ms).
+end note
+
+note right of RateLimiter
+  Enforces 100 requests/minute per IP.
+  Returns HTTP 429 with Retry-After header
+  when threshold is exceeded.
+end note
+
+note right of ErrorHandler
+  Normalizes Firecrawl errors:
+  - ECONNREFUSED -> 503 Service Unavailable
+  - ETIMEDOUT -> 504 Gateway Timeout
+  - API errors -> forwarded status & message
+end note
+
+note right of Metrics
+  Prometheus metrics:
+  - tradingsystem_http_requests_total
+  - tradingsystem_http_request_duration_seconds
+  - tradingsystem_firecrawl_scrape_total
+  - tradingsystem_firecrawl_scrape_duration_seconds
+  - tradingsystem_firecrawl_crawl_jobs_total
+  - tradingsystem_firecrawl_crawl_status_checks_total
+end note
+
+note right of Firecrawl
+  Self-hosted Firecrawl stack with Playwright
+  browser automation, Redis job queue, and
+  PostgreSQL metadata storage running in Docker.
+end note
+
+@enduml

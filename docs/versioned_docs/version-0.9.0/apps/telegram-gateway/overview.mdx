@@ -1,0 +1,53 @@
+---
+title: Telegram Gateway Overview
+sidebar_position: 1
+description: Purpose, scope, and user journeys for the Telegram Gateway ingestion stack.
+tags:
+  - apps
+  - telegram-gateway
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Summary
+
+Telegram Gateway is a two-part service that bridges Telegram channels and TradingSystem APIs:
+
+- **MTProto Gateway (apps/telegram-gateway, port 4006)** authenticates with Telegram, captures channel messages, and writes them to TimescaleDB queue tables (`telegram_gateway.messages`).
+- **REST API (backend/api/telegram-gateway, port 4010)** exposes captured messages, health checks, and analytics for downstream consumers.
+
+It underpins TP Capital signal ingestion and any future Telegram-driven automations, providing a reliable, auditable pipeline with retry and failure queue support.
+
+## Stakeholders
+
+- **Primary users**: TP Capital API, analytics jobs, Ops teams monitoring trading signals.
+- **Operators**: Platform/DevOps team managing Telegram credentials, TimescaleDB and queue integrity.
+- **Downstream systems**: TP Capital API (port 4005), future ingestion services, observability stack.
+
+## User Journeys
+
+### Journey 1: Session Provisioning
+
+1. Operator sets Telegram API credentials in `.env`.
+2. Starts Gateway (`npm start` or systemd unit) and completes login (SMS + 2FA).
+3. Gateway stores `.session/` file locally with strict permissions.
+4. Health endpoint reports `telegram: connected`.
+
+### Journey 2: Signal Capture & Queueing
+
+1. Gateway listens to configured channels (`TELEGRAM_SOURCE_CHANNEL_IDS`).
+2. Incoming messages normalized and persisted into `telegram_gateway.messages` (`status = 'received'`).
+3. Retries applied on transient errors; failures appended to JSONL queue.
+4. Metrics (`tgateway_messages_received_total`) incremented.
+
+### Journey 3: Downstream Consumption
+
+1. TP Capital polling worker fetches new rows, parses signals, and writes to `tp_capital_signals`.
+2. Gateway REST API exposes `/api/messages` for manual inspection and analytics.
+3. Operators trigger `/sync-messages` when manual backfill required.
+
+## SLA Targets
+
+- **Gateway uptime**: 99.5% (single instance, auto-restart via systemd).
+- **Capture latency**: &lt; 5 seconds between Telegram delivery and queue insert.
+- **API availability**: 99.5% (containerized service with health probe).
+- **Data retention**: Queue history retained for 7 days (configurable) plus JSONL failure queue backups.

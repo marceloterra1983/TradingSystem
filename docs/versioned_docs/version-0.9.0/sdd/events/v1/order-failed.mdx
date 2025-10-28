@@ -1,0 +1,59 @@
+---
+title: "Event \u2013 Order Failed"
+description: Contract for the `order.failed` event emitted after submission retries
+  exhaust.
+tags:
+  - sdd
+  - events
+owner: ArchitectureGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The `order.failed` event is emitted when the Order Manager exhausts all broker submission retries. It signals that the order entered the `FAILED` status and the service will no longer attempt additional submissions, allowing downstream systems to surface actionable alerts.
+
+**Event Name**: `order.failed`  
+**Version**: v1  
+**Status**: Specification (implementation pending)  
+**Trigger**: Submission retries exhausted after transient failures
+
+## Payload
+
+```typescript
+interface OrderFailedEvent {
+  eventId: string;
+  eventType: 'order.failed';
+  timestamp: string;
+  version: 'v1';
+  payload: OrderFailedPayload;
+  metadata: EventMetadata;
+}
+
+interface OrderFailedPayload {
+  orderId: string;
+  status: 'FAILED';
+  failedAt: string;
+  retryCount: number;
+  lastError: string;
+  brokerOrderId?: string;
+}
+
+interface EventMetadata {
+  traceId: string;
+  userId?: string;
+  source: 'api' | 'scheduler';
+  correlationId?: string;
+}
+```
+
+## Semantics
+
+- Emitted after the final retry attempt fails (default 3 attempts).
+- Clients should prompt operators to intervene or resubmit a new order.
+- The order transitions to `REJECTED` after the event if human acknowledgement is required; otherwise it remains `FAILED` for auditing.
+
+## Related Documentation
+
+- [Order Schema](../../domain/schemas/v1/order)
+- [Place Order Flow](../../flows/v1/place-order)
+- [Event Catalogue](/sdd/events/v1)

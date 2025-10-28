@@ -69,12 +69,33 @@ def test_documents():
 
 @pytest.fixture
 def mock_openai_embeddings(monkeypatch):
-    """Mock OpenAI embeddings generation."""
+    """Mock embeddings generation for providers used in tests (OpenAI/Ollama)."""
     def mock_get_embedding(*args, **kwargs):
         # Return fixed-size mock embedding
         return [0.1] * 1536
-    
-    monkeypatch.setattr(
-        "llama_index.embeddings.openai.OpenAIEmbedding.get_text_embedding",
-        mock_get_embedding
-    )
+
+    # Try to patch OpenAI provider (legacy path used by some tests)
+    try:
+        monkeypatch.setattr(
+            "llama_index.embeddings.openai.OpenAIEmbedding.get_text_embedding",
+            mock_get_embedding
+        )
+        monkeypatch.setattr(
+            "llama_index.embeddings.openai.OpenAIEmbedding.get_query_embedding",
+            mock_get_embedding
+        )
+    except Exception:
+        pass
+
+    # Patch Ollama provider used by the services now
+    try:
+        monkeypatch.setattr(
+            "llama_index.embeddings.ollama.OllamaEmbedding.get_text_embedding",
+            mock_get_embedding
+        )
+        monkeypatch.setattr(
+            "llama_index.embeddings.ollama.OllamaEmbedding.get_query_embedding",
+            mock_get_embedding
+        )
+    except Exception:
+        pass

@@ -1,0 +1,688 @@
+---
+title: Service Launcher Runbook
+sidebar_position: 8
+description: Troubleshooting guide, incident response procedures, and common solutions.
+tags:
+  - runbook
+  - troubleshooting
+  - service-launcher
+owner: DocsOps
+lastReviewed: '2025-10-27'
+---
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Health check
+curl http://localhost:3500/health
+
+# Service status
+curl http://localhost:3500/api/status | jq '.overallStatus'
+
+# Comprehensive health
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+
+# View logs (Docker)
+docker logs service-launcher --tail 100
+
+# Restart service
+docker restart service-launcher
+
+# Kill process on port 3500
+lsof -ti:3500 | xargs kill -9
+```
+
+### Emergency Contacts
+
+- **Primary Oncall**: Platform/DevOps team
+- **Escalation**: TradingSystem project lead
+- **Documentation**: This runbook + [Operations Guide](./operations)
+
+---
+
+## Incident Response Procedures
+
+### Severity Levels
+
+| Severity | Description | Response Time | Example |
+|----------|-------------|---------------|---------|
+| **P1 - Critical** | Service completely down | 15 minutes | Service Launcher not responding |
+| **P2 - High** | Major functionality impaired | 1 hour | All monitored services showing "down" |
+| **P3 - Medium** | Degraded performance | 4 hours | High latency, cache not working |
+| **P4 - Low** | Minor issue, no impact | Next business day | Single service incorrectly reported as down |
+
+### P1: Service Launcher Down
+
+**Symptoms**:
+
+- `curl http://localhost:3500/health` times out or connection refused
+- Dashboard cannot fetch service status
+- No logs being written
+
+**Immediate Actions**:
+
+```bash
+# 1. Verify service is actually down
+curl -m 5 http://localhost:3500/health || echo "DOWN"
+
+# 2. Check if process is running
+ps aux | grep service-launcher || docker ps | grep service-launcher
+
+# 3. Check logs for crash reason
+docker logs service-launcher --tail 50
+# Or for standalone:
+tail -50 logs/service-launcher.log
+
+# 4. Attempt restart
+docker restart service-launcher
+# Or for standalone:
+cd apps/status && npm start
+
+# 5. Verify recovery
+curl http://localhost:3500/health
+```
+
+**Root Cause Investigation**:
+
+```bash
+# Check system resources
+free -h  # Memory
+df -h    # Disk space
+top      # CPU usage
+
+# Check port conflicts
+lsof -i:3500
+
+# Check configuration
+cat /home/marce/Projetos/TradingSystem/.env | grep SERVICE_LAUNCHER
+
+# Check health script
+bash scripts/maintenance/health-check-all.sh --format json || echo "SCRIPT FAILED"
+```
+
+**Resolution**:
+
+1. If out of memory: Increase container/system memory
+2. If port conflict: Kill conflicting process or change port
+3. If config error: Fix .env and restart
+4. If script error: Fix script permissions or logic
+
+---
+
+## Common Issues
+
+### Issue 1: Port Already in Use
+
+**Symptoms**:
+
+```
+Error: listen EADDRINUSE: address already in use :::3500
+```
+
+**Diagnosis**:
+
+```bash
+# Find process using port 3500
+lsof -i:3500
+
+# Example output:
+# node    12345 user   TCP *:3500 (LISTEN)
+```
+
+**Solution A** (Kill process):
+
+```bash
+lsof -ti:3500 | xargs kill -9
+npm start
+```
+
+**Solution B** (Change port):
+
+```bash
+# Edit .env
+echo "SERVICE_LAUNCHER_PORT=3501" >> .env
+
+# Restart with new port
+npm start
+
+# Update Dashboard configuration
+# Edit frontend/dashboard/vite.config.ts proxy target
+```
+
+**Prevention**:
+
+- Use `stop` command before starting new instance
+- Implement PID file to track running instances
+- Use process manager (PM2) to prevent duplicate starts
+
+---
+
+### Issue 2: Health Check Script Fails
+
+**Symptoms**:
+
+- `/api/health/full` returns 500 error
+- Logs show: "Failed to execute health check script"
+
+**Diagnosis**:
+
+```bash
+# 1. Verify script exists
+ls -la scripts/maintenance/health-check-all.sh
+
+# 2. Check permissions
+stat scripts/maintenance/health-check-all.sh | grep Access
+
+# 3. Test script execution
+bash scripts/maintenance/health-check-all.sh --format json
+
+# 4. Check script output
+bash scripts/maintenance/health-check-all.sh --format json | jq '.' || echo "INVALID JSON"
+```
+
+**Solutions**:
+
+**Problem**: Script not executable
+
+```bash
+chmod +x scripts/maintenance/health-check-all.sh
+docker restart service-launcher
+```
+
+**Problem**: Script times out
+
+```bash
+# Increase timeout in .env
+echo "HEALTH_CHECK_TIMEOUT_MS=15000" >> .env
+docker restart service-launcher
+```
+
+**Problem**: Script returns invalid JSON
+
+```bash
+# Test script locally
+bash scripts/maintenance/health-check-all.sh --format json > /tmp/health.json
+jq '.' /tmp/health.json
+
+# If invalid, fix script syntax
+# Check for trailing commas, unescaped quotes, etc.
+```
+
+**Problem**: Script missing dependencies (docker, psql)
+
+```bash
+# Install missing tools
+sudo apt install docker.io postgresql-client
+
+# Verify installation
+docker --version
+psql --version
+```
+
+---
+
+### Issue 3: All Services Show "Down"
+
+**Symptoms**:
+
+- `/api/status` returns all services with status "down"
+- Services are actually running (verified manually)
+
+**Diagnosis**:
+
+```bash
+# 1. Test service health endpoints directly
+curl http://localhost:3200/health  # Workspace
+curl http://localhost:4005/health  # TP Capital
+curl http://localhost:3103         # Dashboard
+
+# 2. Check Service Launcher timeout
+echo $SERVICE_LAUNCHER_TIMEOUT_MS
+
+# 3. Check network connectivity
+ping -c 3 localhost
+```
+
+**Solutions**:
+
+**Problem**: Timeout too short
+
+```bash
+# Increase timeout to 5 seconds
+echo "SERVICE_LAUNCHER_TIMEOUT_MS=5000" >> .env
+docker restart service-launcher
+```
+
+**Problem**: Wrong ports configured
+
+```bash
+# Verify port configuration
+curl http://localhost:3500/api/status | jq '.services[] | {name, port}'
+
+# Update ports in .env if incorrect
+SERVICE_LAUNCHER_WORKSPACE_PORT=3200
+SERVICE_LAUNCHER_TP_CAPITAL_PORT=4005
+# ... etc
+```
+
+**Problem**: Services not actually running
+
+```bash
+# Start missing services
+cd apps/workspace && npm start &
+cd apps/tp-capital && npm start &
+
+# Or use universal start
+start
+```
+
+---
+
+### Issue 4: Cache Not Working
+
+**Symptoms**:
+
+- `/api/health/full` always takes 2-5 seconds
+- `X-Cache-Status` always shows "MISS"
+
+**Diagnosis**:
+
+```bash
+# 1. Test cache behavior
+for i in {1..5}; do
+  curl -sI http://localhost:3500/api/health/full | grep X-Cache-Status
+  sleep 10
+done
+
+# Expected: First MISS, then 6 HITs (within 60s TTL)
+```
+
+**Solutions**:
+
+**Problem**: Cache TTL too short
+
+```javascript
+// Edit apps/status/src/services/healthCheckService.js
+const cache = {
+  TTL: 60000  // Increase to 120000 (2 minutes)
+};
+```
+
+**Problem**: Service restarting frequently
+
+```bash
+# Check restart count
+docker inspect service-launcher --format='{{.RestartCount}}'
+
+# Check uptime
+docker inspect service-launcher --format='{{.State.StartedAt}}'
+
+# If restarting frequently, investigate logs
+docker logs service-launcher | grep -i error
+```
+
+**Problem**: Multiple instances running
+
+```bash
+# Check for duplicate processes
+ps aux | grep service-launcher | wc -l
+
+# Should be 1 (or 2 with grep itself)
+# If more, kill duplicates
+pkill -f service-launcher
+start  # Restart single instance
+```
+
+---
+
+### Issue 5: High Latency
+
+**Symptoms**:
+
+- `/api/status` takes >5 seconds to respond
+- `averageLatencyMs` in response is >1000ms
+
+**Diagnosis**:
+
+```bash
+# 1. Measure response time
+time curl -s http://localhost:3500/api/status > /dev/null
+
+# 2. Identify slow services
+curl http://localhost:3500/api/status | jq '.services[] | select(.latencyMs > 500) | {name, latencyMs}'
+
+# 3. Test slow service directly
+curl -w "%{time_total}s\n" -o /dev/null -s http://localhost:{port}/health
+```
+
+**Solutions**:
+
+**Problem**: Individual service slow
+
+```bash
+# Investigate slow service (e.g., TP Capital)
+curl -w "@-" -o /dev/null -s http://localhost:4005/health <<'EOF'
+    time_namelookup:  %{time_namelookup}s\n
+       time_connect:  %{time_connect}s\n
+    time_appconnect:  %{time_appconnect}s\n
+   time_pretransfer:  %{time_pretransfer}s\n
+      time_redirect:  %{time_redirect}s\n
+ time_starttransfer:  %{time_starttransfer}s\n
+                    ----------\n
+         time_total:  %{time_total}s\n
+EOF
+
+# Restart slow service
+docker restart tp-capital-service
+```
+
+**Problem**: System resource exhaustion
+
+```bash
+# Check CPU/memory
+top
+docker stats
+
+# If high usage, identify culprit
+ps aux --sort=-%mem | head -10  # Top memory consumers
+ps aux --sort=-%cpu | head -10  # Top CPU consumers
+
+# Kill resource hog or increase system resources
+```
+
+**Problem**: Network issues
+
+```bash
+# Check network latency
+ping -c 10 localhost
+
+# Check for packet loss
+netstat -s | grep -i "packet"
+
+# Restart network (if necessary)
+sudo systemctl restart NetworkManager
+```
+
+---
+
+### Issue 6: CORS Errors
+
+**Symptoms**:
+
+- Dashboard shows CORS error in browser console
+- "Access-Control-Allow-Origin" error
+
+**Diagnosis**:
+
+```bash
+# 1. Check CORS configuration
+cat /home/marce/Projetos/TradingSystem/.env | grep CORS_ORIGIN
+
+# 2. Test CORS from Dashboard origin
+curl -H "Origin: http://localhost:3103" http://localhost:3500/health
+
+# 3. Check logs for CORS errors
+docker logs service-launcher | grep -i cors
+```
+
+**Solutions**:
+
+**Problem**: Dashboard origin not in CORS_ORIGIN
+
+```bash
+# Add Dashboard origin
+echo "CORS_ORIGIN=http://localhost:3103,http://localhost:3205" >> .env
+docker restart service-launcher
+```
+
+**Problem**: Wrong protocol (http vs https)
+
+```bash
+# Ensure protocol matches exactly
+# If Dashboard uses https, CORS_ORIGIN must use https
+CORS_ORIGIN=https://localhost:3103,https://localhost:3205
+```
+
+**Problem**: Port mismatch
+
+```bash
+# Ensure port in CORS_ORIGIN matches Dashboard port
+# If Dashboard on 3104, update CORS_ORIGIN
+CORS_ORIGIN=http://localhost:3104,http://localhost:3205
+```
+
+---
+
+### Issue 7: Rate Limiting Triggered
+
+**Symptoms**:
+
+- HTTP 429 "Too Many Requests" responses
+- Legitimate requests being blocked
+
+**Diagnosis**:
+
+```bash
+# 1. Check rate limit configuration
+cat /home/marce/Projetos/TradingSystem/.env | grep RATE_LIMIT
+
+# 2. Test rate limit
+for i in {1..201}; do
+  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3500/health
+done | sort | uniq -c
+
+# Expected: 200 successful, 1 with 429
+```
+
+**Solutions**:
+
+**Problem**: Rate limit too strict for legitimate traffic
+
+```bash
+# Increase limit
+echo "RATE_LIMIT_MAX=500" >> .env
+docker restart service-launcher
+```
+
+**Problem**: Dashboard polling too frequently
+
+```javascript
+// Reduce Dashboard polling frequency
+// Edit frontend/dashboard/src/components/pages/ConnectionsPage.tsx
+setInterval(fetchStatus, 60000);  // Change from 30s to 60s
+```
+
+**Problem**: Multiple clients from same IP
+
+```bash
+# Implement per-user rate limiting (code change required)
+# Or increase limit to accommodate multiple clients
+RATE_LIMIT_MAX=1000
+```
+
+---
+
+## Performance Troubleshooting
+
+### High Memory Usage
+
+**Diagnosis**:
+
+```bash
+# Check memory usage
+docker stats service-launcher --no-stream
+# Or standalone:
+ps aux | grep service-launcher | awk '{print $6}'  # Memory in KB
+```
+
+**Expected**: 50-150 MB
+**Alert**: >250 MB
+
+**Solutions**:
+
+- Check for memory leaks (requires profiling)
+- Reduce cache TTL if cache growing unbounded
+- Restart service to clear memory
+- Increase container memory limit if legitimate usage
+
+### High CPU Usage
+
+**Diagnosis**:
+
+```bash
+# Check CPU usage
+docker stats service-launcher --no-stream
+# Or standalone:
+top -p $(pgrep -f service-launcher)
+```
+
+**Expected**: &lt;5% (idle), &lt;20% (under load)
+**Alert**: &gt;50%
+
+**Solutions**:
+
+- Check for infinite loops in code
+- Reduce health check frequency (increase TTL)
+- Check if health script is CPU-intensive
+- Profile code to identify hot paths
+
+---
+
+## Recovery Procedures
+
+### Complete Service Restart
+
+```bash
+# 1. Stop service
+docker stop service-launcher
+
+# 2. Clear any stale state (if applicable)
+rm -f /tmp/service-launcher-*
+
+# 3. Verify port is free
+lsof -i:3500 || echo "Port free"
+
+# 4. Start service
+docker start service-launcher
+
+# 5. Wait for startup (10s)
+sleep 10
+
+# 6. Verify health
+curl http://localhost:3500/health
+curl http://localhost:3500/api/status | jq '.overallStatus'
+```
+
+### Rollback to Previous Version
+
+```bash
+# 1. Stop current version
+docker stop service-launcher
+
+# 2. Checkout previous version
+cd /home/marce/Projetos/TradingSystem
+git log --oneline apps/status/ | head -5  # Find commit
+git checkout <previous-commit-hash> apps/status/
+
+# 3. Reinstall dependencies
+cd apps/status
+npm install
+
+# 4. Restart
+docker restart service-launcher
+
+# 5. Verify
+curl http://localhost:3500/health
+```
+
+### Emergency Shutdown
+
+```bash
+# Graceful shutdown
+docker stop -t 30 service-launcher
+
+# Force shutdown (if graceful fails)
+docker kill service-launcher
+
+# Or standalone
+pkill -SIGTERM -f service-launcher  # Graceful
+# Wait 30s
+pkill -SIGKILL -f service-launcher  # Force
+```
+
+---
+
+## Monitoring and Alerts
+
+### Alert Rules
+
+**Prometheus AlertManager**:
+
+```yaml
+groups:
+  - name: service-launcher
+    rules:
+      - alert: ServiceLauncherDown
+        expr: up{job="service-launcher"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service Launcher is down"
+
+      - alert: ServiceLauncherHighLatency
+        expr: http_request_duration_seconds{endpoint="/api/status"} > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Service Launcher high latency"
+
+      - alert: ServiceLauncherLowCacheHitRate
+        expr: cache_hit_rate < 0.6
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Service Launcher cache hit rate below 60%"
+```
+
+### Health Check Monitoring
+
+```bash
+# Continuous monitoring script
+while true; do
+  status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3500/health)
+  if [ "$status" != "200" ]; then
+    echo "$(date): Service Launcher unhealthy (HTTP $status)" | tee -a /var/log/service-launcher-monitor.log
+    # Trigger alert (e.g., send email, Slack notification)
+  fi
+  sleep 60
+done
+```
+
+---
+
+## Post-Incident Review
+
+After resolving an incident, conduct a post-incident review:
+
+1. **Timeline**: Document when issue started, detected, and resolved
+2. **Root Cause**: Identify underlying cause (not just symptoms)
+3. **Impact**: Services affected, downtime duration
+4. **Resolution**: Steps taken to resolve
+5. **Prevention**: How to prevent recurrence
+6. **Action Items**: Tasks to improve reliability
+
+**Template**: See `docs/incidents/template-incident-report.md`
+
+---
+
+## Related Documentation
+
+- [Operations Guide](./operations) - Day-to-day management
+- [Configuration Guide](./config) - Environment setup
+- [Architecture](./architecture) - System design
+- [Deployment Guide](./deployment) - Installation procedures

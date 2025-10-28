@@ -1,0 +1,11 @@
+{
+  "label": "Workspace",
+  "position": 5,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Workspace App",
+    "slug": "/apps/workspace",
+    "description": "Idea and task management tool. Workspace and productivity."
+  }
+}

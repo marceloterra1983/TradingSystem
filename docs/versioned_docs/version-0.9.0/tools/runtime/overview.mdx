@@ -1,0 +1,155 @@
+---
+title: Runtime Environments
+description: Node.js, Python, .NET SDK, and Docker runtime environments
+tags:
+  - runtime
+  - nodejs
+  - python
+  - dotnet
+  - docker
+owner: ToolingGuild
+lastReviewed: '2025-10-27'
+---
+
+# Runtime Environments
+
+Development runtime environments for JavaScript/TypeScript (Node.js), Python, C# (.NET), and containerization (Docker).
+
+## 🛠️ Runtimes
+
+### Node.js & npm
+
+**JavaScript runtime and package manager for frontend and backend services.**
+
+- **[Overview](/tools/runtime/node-npm/overview)** - Installation, configuration, and usage
+- **[Commands](/tools/runtime/node-npm/commands)** - Common npm commands and scripts
+- **[Configuration](/tools/runtime/node-npm/config)** - package.json and npm config
+- **[Troubleshooting](/tools/runtime/node-npm/troubleshooting)** - Common issues and solutions
+- **[Changelog](/tools/runtime/node-npm/changelog)** - Version history
+
+**Used By:**
+- Dashboard (React + Vite)
+- Documentation Hub (Docusaurus)
+- APIs (Express: Workspace, TP Capital, Documentation, Service Launcher, Firecrawl Proxy)
+
+---
+
+### Python
+
+**Python runtime for data processing, ML, and automation.**
+
+- **[Overview](/tools/runtime/python/overview)** - Installation, venv, and configuration
+- **[Installation](/tools/runtime/python/install)** - Python setup and package management
+- **[Testing](/tools/runtime/python/testing)** - pytest and testing workflow
+- **[Changelog](/tools/runtime/python/changelog)** - Version history
+
+**Virtual Environments:**
+- **[venv Activation](/tools/runtime/python/venv-activation)** - Manual activation guide
+- **[Auto-activation](/tools/runtime/python/venv-auto)** - Automatic venv activation
+- **[Visual Bell](/tools/runtime/python/venv-visual-bell)** - Terminal venv indicator
+- **[Bash vs venv](/tools/runtime/python/bash-vs-venv)** - Shell vs venv commands
+
+**Used By:**
+- Data Capture (C# + Python ML pipeline - planned)
+- Analytics Pipeline (Python + ML - planned)
+- LangGraph (AI workflows)
+- LlamaIndex (RAG)
+- Agno Agents (AI agents)
+
+---
+
+### .NET SDK
+
+**C# development kit for core trading services.**
+
+- **[Overview](/tools/runtime/dotnet/overview)** - .NET SDK introduction
+- **[Installation](/tools/runtime/dotnet/install)** - .NET setup
+- **[Testing](/tools/runtime/dotnet/testing)** - xUnit and testing workflow
+- **[Windows x64 Mode](/tools/runtime/dotnet/windows-x64)** - 64-bit compilation (ProfitDLL requirement)
+- **[Changelog](/tools/runtime/dotnet/changelog)** - Version history
+
+**Used By:**
+- Data Capture (C# + ProfitDLL - planned)
+- Order Manager (C# + Risk Engine - planned)
+
+**Critical:** All trading services MUST compile in x64 mode due to ProfitDLL being 64-bit only.
+
+---
+
+### Docker & WSL
+
+**Container runtime for auxiliary services.**
+
+- **[Overview](/tools/runtime/docker-wsl/overview)** - Docker on WSL2
+- **[Setup](/tools/runtime/docker-wsl/setup)** - Installation and configuration
+- **[Troubleshooting](/tools/runtime/docker-wsl/troubleshooting)** - Common issues
+- **[Changelog](/tools/runtime/docker-wsl/changelog)** - Version history
+
+**Used By:**
+- All containerized services (databases, APIs, monitoring, documentation, AI tools)
+
+**Docker Compose Stacks:**
+- `tools/compose/docker-compose.database.yml` - Databases (TimescaleDB, QuestDB, PostgreSQL)
+- `tools/compose/docker-compose.apps.yml` - Applications (Workspace, TP Capital, etc.)
+- `tools/monitoring/docker-compose.yml` - Monitoring (Prometheus, Grafana, Alertmanager)
+
+---
+
+## 🚀 Quick Start
+
+### Check Installed Versions
+
+```bash
+# Node.js
+node --version  # v20.x or later
+npm --version   # v10.x or later
+
+# Python
+python3 --version  # 3.11 or later
+pip3 --version
+
+# .NET
+dotnet --version  # 8.0 or later
+
+# Docker
+docker --version
+docker compose version
+```
+
+### Install Dependencies
+
+```bash
+# Node.js dependencies (frontend/backend)
+npm install
+
+# Python dependencies (AI tools)
+pip3 install -r requirements.txt
+
+# .NET dependencies (trading services - planned)
+dotnet restore
+```
+
+### Run Services
+
+```bash
+# Node.js service
+npm run dev
+
+# Python service (with venv)
+source venv/bin/activate
+python main.py
+
+# .NET service
+dotnet run
+
+# Docker service
+docker compose up -d
+```
+
+---
+
+## 📖 Related Documentation
+
+- **[Infrastructure Overview](/tools/infrastructure/overview)** - Docker Compose orchestration
+- **[Development Tools](/tools/development/overview)** - Scripts and automation
+- **[AI Tools](/tools/ai/overview)** - Python-based AI services

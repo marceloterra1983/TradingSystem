@@ -1,0 +1,11 @@
+{
+  "label": "Events",
+  "position": 3,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Event Designs",
+    "slug": "/sdd/events",
+    "description": "Event definitions and documentation."
+  }
+}

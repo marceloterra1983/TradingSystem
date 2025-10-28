@@ -21,22 +21,45 @@ services:
       - tradingsystem_backend
 
   llamaindex-ingestion:
-    image: "${IMG_TOOLS_LLAMAINDEX_INGESTION:-nginx}:${IMG_VERSION:-alpine}"
+    image: "${IMG_TOOLS_LLAMAINDEX_INGESTION:-img-tools-llamaindex-ingestion}:${IMG_VERSION:-latest}"
     container_name: tools-llamaindex-ingestion
+    build:
+      context: ../llamaindex
+      dockerfile: Dockerfile.ingestion
     ports:
-      - "${LLAMAINDEX_INGESTION_PORT:-8201}:80"
+      - "${LLAMAINDEX_INGESTION_PORT:-8201}:8000"
     restart: unless-stopped
     env_file:
       - ../../.env
+    environment:
+      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+    networks:
+      - tools_default
+      - tradingsystem_backend
 
   llamaindex-query:
-    image: "${IMG_TOOLS_LLAMAINDEX_QUERY:-nginx}:${IMG_VERSION:-alpine}"
+    image: "${IMG_TOOLS_LLAMAINDEX_QUERY:-img-tools-llamaindex-query}:${IMG_VERSION:-latest}"
     container_name: tools-llamaindex-query
+    build:
+      context: ../llamaindex
+      dockerfile: Dockerfile.query
     ports:
-      - "${LLAMAINDEX_QUERY_PORT:-8202}:80"
+      - "${LLAMAINDEX_QUERY_PORT:-8202}:8000"
     restart: unless-stopped
     env_file:
       - ../../.env
+    environment:
+      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-}
+    networks:
+      - tools_default
+      - tradingsystem_backend
 
   agno-agents:
     image: "${IMG_TOOLS_AGNO_AGENTS:-img-infra-agno-agents}:${IMG_VERSION:-latest}"

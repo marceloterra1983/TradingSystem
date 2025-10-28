@@ -15,8 +15,8 @@ from qdrant_client import QdrantClient
 
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama
 
 # Query type enum for request handling
 QUERY_TYPE_SEMANTIC = "semantic"
@@ -59,19 +59,22 @@ vector_store = QdrantVectorStore(
     client=qdrant_client,
     collection_name="documentation"
 )
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-LLM_ENABLED = bool(OPENAI_API_KEY)
+# Configure embeddings with Ollama (local)
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# Support both OLLAMA_EMBED_MODEL (service-local) and OLLAMA_EMBEDDING_MODEL (repo-wide)
+OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL") or os.getenv("OLLAMA_EMBEDDING_MODEL") or "nomic-embed-text"
+Settings.embed_model = OllamaEmbedding(model_name=OLLAMA_EMBED_MODEL, base_url=OLLAMA_BASE_URL)
 
-if LLM_ENABLED:
-    # Configure defaults for LLM and embeddings
-    Settings.embed_model = OpenAIEmbedding()
-    Settings.llm = OpenAI(temperature=0)
-    index = VectorStoreIndex.from_vector_store(vector_store)
+# Optionally configure LLM with Ollama (local) when model is provided
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
+if OLLAMA_MODEL:
+    Settings.llm = Ollama(model=OLLAMA_MODEL, base_url=OLLAMA_BASE_URL)
+    LLM_ENABLED = True
 else:
-    index = None
-    logger.warning(
-        "OPENAI_API_KEY not set. Query endpoints will return 503 until the key is configured."
-    )
+    LLM_ENABLED = False
+
+# Build index from existing vector store
+index = VectorStoreIndex.from_vector_store(vector_store)
 
 class QueryRequest(BaseModel):
     """Query request model."""
@@ -104,7 +107,7 @@ async def query_documents(
     if not LLM_ENABLED or index is None:
         raise HTTPException(
             status_code=503,
-            detail="OpenAI integration is disabled. Set OPENAI_API_KEY to enable query endpoints."
+            detail="LLM não configurado. Defina OLLAMA_MODEL para habilitar respostas geradas."
         )
     try:
         # Check cache
@@ -171,11 +174,7 @@ async def semantic_search(
     """
     Perform semantic search over the document collection.
     """
-    if not LLM_ENABLED or index is None:
-        raise HTTPException(
-            status_code=503,
-            detail="OpenAI integration is disabled. Set OPENAI_API_KEY to enable query endpoints."
-        )
+    # Allow search without LLM; requires only embeddings
     try:
         # Check cache
         cache_key = f"search:{query}:{max_results}"
@@ -184,9 +183,10 @@ async def semantic_search(
         if cached_response:
             return cached_response
 
-        # Create query engine for similarity search
+        # Create query engine for similarity search only (no LLM)
         query_engine = index.as_query_engine(
             similarity_top_k=max_results,
+            response_mode="no_text",
         )
 
         # Execute search with metrics tracking

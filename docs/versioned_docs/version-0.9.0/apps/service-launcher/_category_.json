@@ -1,0 +1,9 @@
+{
+  "label": "Service Launcher",
+  "position": 5,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "description": "Service orchestration and health monitoring API for TradingSystem infrastructure."
+  }
+}

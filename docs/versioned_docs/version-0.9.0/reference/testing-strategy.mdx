@@ -1,0 +1,62 @@
+---
+title: Testing Strategy
+description: Unified testing strategy covering APIs, frontend, and infrastructure.
+tags:
+  - reference
+  - testing
+owner: ProductOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+The TradingSystem testing strategy combines automated checks, contract verification, and operational drills to ensure reliability across services. This page aggregates expectations for contributors regardless of language or subsystem.
+
+## Test Pyramid
+
+1. **Unit Tests**  
+   - Mandatory for business logic and utility modules.  
+   - Keep fast (&lt;100 ms per test) with in-memory dependencies.
+
+2. **Integration Tests**  
+   - Exercise real adapters (databases, message queues, HTTP clients).  
+   - Run in CI via Docker Compose targets (`npm run test:integration` or `poetry run pytest integration`).
+
+3. **End-to-End / Smoke**  
+   - Validate critical user journeys (dashboard + APIs).  
+   - Triggered nightly through GitHub Actions workflow `smoke-tests.yml`.
+
+## Tooling by Layer
+
+| Layer | Tooling | Commands |
+|-------|---------|----------|
+| Frontend | Vitest + Playwright | `npm run test`, `npm run test:e2e` |
+| Node.js APIs | Jest + Supertest | `npm --prefix backend/api/<service> run test` |
+| Python Services | Pytest + Ruff + Black | `poetry run pytest`, `poetry run ruff check` |
+| .NET Services | xUnit | `dotnet test` |
+| Documentation | Frontmatter + Link validation | `npm run validate-docs`, `npm --prefix docs run docs:links` |
+
+## Quality Gates
+
+- **CI Requirements**: lint, unit tests, integration tests, and documentation validation must pass before merge.
+- **Coverage Target**: 80 % branch coverage for core modules (document deviations in PR description).
+- **Contract Tests**: Redocusaurus specs must include examples used by API test suites.
+- **Snapshots**: Avoid brittle snapshots; prefer explicit assertions with domain values.
+
+## Test Data Guidelines
+
+- Use factories or fixtures with realistic but anonymised data.
+- Store canonical datasets in `tests/fixtures/` per service.
+- Reset state between tests (database truncation, in-memory resets).
+- Document any long-running integration test prerequisites in the service README.
+
+## Observability Hooks
+
+- Emit structured logs for pass/fail conditions (`{ traceId, testName, durationMs }`).
+- Publish metrics for long-running regression suites (`tests_duration_seconds` Prometheus metric).
+- Capture artifacts (screenshots, HTML reports) for flaky investigations.
+
+## Related Documentation
+
+- [API Design Guidelines](./api-guidelines)
+- [Frontend Testing Guide](../frontend/engineering/testing)
+- [Workspace API Operations](../apps/workspace/operations)

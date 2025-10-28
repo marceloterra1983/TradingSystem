@@ -1,0 +1,11 @@
+{
+  "label": "Docusaurus",
+  "position": 4,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Docusaurus Tooling",
+    "slug": "/tools/docusaurus",
+    "description": "Guides for maintaining the Docusaurus documentation site."
+  }
+}

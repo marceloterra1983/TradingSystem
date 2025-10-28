@@ -34,6 +34,17 @@ const config = {
           editUrl: 'https://github.com/TradingSystem/TradingSystem/tree/main/docs/',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
+          // Versioning configuration
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: 'Next (Unreleased) 🚧',
+              path: 'next',
+              banner: 'unreleased',
+            },
+          },
+          // Only build current version in development for fast iteration
+          onlyIncludeVersions: process.env.NODE_ENV === 'development' ? ['current'] : undefined,
         },
         blog: false,
         pages: {
@@ -180,6 +191,21 @@ const config = {
               {
                 label: 'Telegram Gateway API',
                 to: '/api/telegram-gateway',
+              },
+            ],
+          },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+            dropdownActiveClassDisabled: true,
+            dropdownItemsAfter: [
+              {
+                type: 'html',
+                value: '<hr style="margin: 0.3rem 0;">',
+              },
+              {
+                href: 'https://github.com/TradingSystem/TradingSystem/releases',
+                label: 'All Releases',
               },
             ],
           },

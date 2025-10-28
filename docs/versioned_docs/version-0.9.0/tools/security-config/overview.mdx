@@ -1,0 +1,152 @@
+---
+title: Security Configuration Overview
+description: Policies and controls for securing TradingSystem environments.
+tags:
+  - tools
+  - security
+owner: SecurityOps
+lastReviewed: '2025-10-26'
+---
+## Objectives
+
+TradingSystem centralizes security configuration to streamline secrets handling, enforce consistent
+access control, and maintain auditability across services.
+
+1. **Secrets Management** – Root `.env` file acts as single source of truth for all credentials.  
+2. **Access Control** – Restrict secrets via file permissions (`chmod 600`) and limited user access.  
+3. **Auditability** – Track configuration changes through Git (minus secrets) and dedicated audit logs.  
+4. **Compliance** – Follow strong password policies, regular rotation, and secure distribution.  
+5. **Automation** – Provide setup, validation, and migration scripts to minimize manual error.
+
+## Security Architecture
+
+### Centralized Configuration
+
+- `.env` at repository root holds environment variables for every service.  
+- `.env.example` supplies safe defaults without secrets and remains committed to Git.  
+- Docker Compose files reference root `.env` via relative paths, avoiding duplication.  
+- `scripts/env/validate-env.sh` enforces presence of required variables and secure permissions.
+
+### Defense Layers
+
+1. **File System** – `.env` restricted to owner read/write (`chmod 600`).  
+2. **Version Control** – `.env` listed in `.gitignore` to prevent accidental commits.  
+3. **Runtime** – Docker and services load secrets from environment, never hardcode them.  
+4. **Application** – Sensitive values never logged; admin endpoints require authentication.  
+5. **Monitoring** – Access to PgAdmin, Grafana, and other UIs audited through logs.
+
+### Threat Model
+
+- **Insider Threat**: Limit `.env` access to authorized operators.  
+- **Credential Leakage**: Enforce strong secrets, avoid default passwords, rotate frequently.  
+- **Unauthorized Access**: Bind admin UIs to localhost, enable reverse proxies with auth for external exposure.  
+- **Man-in-the-Middle**: Plan TLS termination for production deployments and secret transport.
+
+## Configuration Categories
+
+### Database Credentials
+
+- `TIMESCALEDB_DB`, `TIMESCALEDB_USER`, `TIMESCALEDB_PASSWORD`, `TIMESCALEDB_PORT`.  
+- Backup/metrics variables: `TIMESCALEDB_BACKUP_CRON`, `TIMESCALEDB_EXPORTER_PORT`.  
+- Passwords generated with `openssl rand -base64 32`, rotated every 90 days.
+
+### Admin UI Credentials
+
+- **PgAdmin** (`PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD`, `PGADMIN_LISTEN_PORT`, `PGADMIN_HOST_PORT`).  
+- **Grafana** (`GRAFANA_ADMIN_USER`, `GRAFANA_ADMIN_PASSWORD`).  
+- UIs run on localhost (5050, 3000) to limit exposure and should sit behind authenticated proxies in production.
+
+### API Keys & Secrets
+
+- `OPENAI_API_KEY`, `JWT_SECRET_KEY`, `QDRANT_API_KEY`, Telegram tokens, optional GitHub/Slack credentials.  
+- Rotate API keys every 180 days, use least-privilege scopes, monitor usage anomalies, and revoke compromised keys immediately.
+
+### Application Configuration
+
+- Backend ports for Workspace, TP Capital, Documentation, Service Launcher.  
+- Frontend variables for Vite dev server and proxy rewrites.  
+- Rate limiting, CORS origins, logging verbosity, and security toggles.
+
+## Setup Procedures
+
+### Option 1 – Interactive Setup (Recommended)
+
+```bash
+bash scripts/env/setup-env.sh
+```
+
+- Generates `.env` from template, creates strong secrets, prompts for required values, and locks permissions.
+
+### Option 2 – Manual Setup
+
+```bash
+cp .env.example .env
+nano .env
+bash scripts/env/validate-env.sh
+```
+
+### Option 3 – Migrate Legacy `.env` Files
+
+```bash
+bash scripts/env/migrate-env.sh
+```
+
+- Consolidates multiple environment files into root configuration.
+
+## Validation
+
+- `bash scripts/env/validate-env.sh` confirms required variables, rejects placeholders, and checks permissions.  
+- Docker Compose validation:
+
+```bash
+docker compose -f tools/compose/docker-compose.timescale.yml config
+docker compose -f tools/compose/docker-compose.infra.yml config
+docker compose -f tools/monitoring/docker-compose.yml config
+```
+
+## Best Practices
+
+1. Keep `.env` limited to owner access (`chmod 600`).  
+2. Never commit `.env`; ensure `.gitignore` includes it (`grep -E "^\.env$" .gitignore`).  
+3. Generate secrets with `openssl rand` (base64 for passwords, hex for JWT).  
+4. Rotate secrets on defined cadence (passwords 90 days, API keys 180 days, JWT 365 days).  
+5. Use Docker Secrets in production for encrypted at-rest handling:
+
+```bash
+echo "my_secure_password" | docker secret create db_password -
+```
+
+## Troubleshooting
+
+### Variable Not Found
+
+1. Check `.env` (`grep VARIABLE_NAME .env`).  
+2. Ensure compose file references `../../.env`.  
+3. Restart service (`docker compose restart service_name`).
+
+### Permission Denied
+
+```bash
+chmod 600 .env
+sudo chown $USER:$USER .env
+```
+
+### Validation Failure
+
+```bash
+bash scripts/env/setup-env.sh
+# or
+nano .env
+```
+
+### Docker Compose Cannot Load `.env`
+
+- Verify relative path in compose file.  
+- Run `docker compose -f <file> config` to check interpolation.
+
+## Related Documentation
+
+- [Environment Variables Reference](./env).  
+- [Risk Limits](./risk-limits).  
+- [Security Audit Procedures](./audit).  
+- Operations guides under `docs/content/ops/` link back to this overview.
