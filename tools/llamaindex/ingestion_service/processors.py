@@ -11,9 +11,7 @@ from pathlib import Path
 import magic
 import frontmatter
 from PyPDF2 import PdfReader
-from llama_index.readers import SimpleDirectoryReader
-from llama_index.node_parser import SimpleNodeParser
-from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
+from llama_index.core.node_parser import SentenceSplitter
 
 from .monitoring import record_document_ingested, track_time, INGEST_TIME
 
@@ -25,7 +23,7 @@ class DocumentProcessor:
     def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.text_splitter = TokenTextSplitter(
+        self.text_splitter = SentenceSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap
         )

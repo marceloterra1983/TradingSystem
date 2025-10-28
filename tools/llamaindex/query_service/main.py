@@ -13,10 +13,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 
-from llama_index import ServiceContext, VectorStoreIndex
-from enum import Enum
-from llama_index.schema import QueryType
+from llama_index.core import VectorStoreIndex, Settings
 from llama_index.vector_stores.qdrant import QdrantVectorStore
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.llms.openai import OpenAI
 
 # Query type enum for request handling
 QUERY_TYPE_SEMANTIC = "semantic"
@@ -63,13 +63,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LLM_ENABLED = bool(OPENAI_API_KEY)
 
 if LLM_ENABLED:
-    service_context = ServiceContext.from_defaults(chunk_size=512)
-    index = VectorStoreIndex.from_vector_store(
-        vector_store,
-        service_context=service_context
-    )
+    # Configure defaults for LLM and embeddings
+    Settings.embed_model = OpenAIEmbedding()
+    Settings.llm = OpenAI(temperature=0)
+    index = VectorStoreIndex.from_vector_store(vector_store)
 else:
-    service_context = None
     index = None
     logger.warning(
         "OPENAI_API_KEY not set. Query endpoints will return 503 until the key is configured."
@@ -119,24 +117,26 @@ async def query_documents(
         # Create query engine
         query_engine = index.as_query_engine(
             similarity_top_k=request.max_results,
-            filters=request.filters
+            filters=request.filters,
         )
 
         # Execute query with metrics tracking
         with track_query_metrics():
-            response = await query_engine.aquery(
-                request.query,
-                mode=QUERY_TYPE_SEMANTIC
-            )
+            response = await query_engine.aquery(request.query)
 
         # Format response
         sources = []
         for node in response.source_nodes:
-            sources.append(SearchResult(
-                content=node.node.text,
-                relevance=float(node.score) if node.score else 0.0,
-                metadata=node.node.metadata
-            ))
+            # Support both NodeWithScore.node.text and NodeWithScore.text
+            text = getattr(node, "text", None) or getattr(getattr(node, "node", None), "text", "")
+            meta = getattr(node, "metadata", None) or getattr(getattr(node, "node", None), "metadata", {})
+            sources.append(
+                SearchResult(
+                    content=text,
+                    relevance=float(getattr(node, "score", 0.0) or 0.0),
+                    metadata=meta,
+                )
+            )
 
         query_response = QueryResponse(
             answer=str(response),
@@ -187,24 +187,24 @@ async def semantic_search(
         # Create query engine for similarity search
         query_engine = index.as_query_engine(
             similarity_top_k=max_results,
-            response_mode="no_text"
         )
 
         # Execute search with metrics tracking
         with track_query_metrics():
-            response = await query_engine.aquery(
-                query,
-                mode=QUERY_TYPE_SIMILARITY
-            )
+            response = await query_engine.aquery(query)
 
         # Format results
         results = []
         for node in response.source_nodes:
-            results.append(SearchResult(
-                content=node.node.text,
-                relevance=float(node.score) if node.score else 0.0,
-                metadata=node.node.metadata
-            ))
+            text = getattr(node, "text", None) or getattr(getattr(node, "node", None), "text", "")
+            meta = getattr(node, "metadata", None) or getattr(getattr(node, "node", None), "metadata", {})
+            results.append(
+                SearchResult(
+                    content=text,
+                    relevance=float(getattr(node, "score", 0.0) or 0.0),
+                    metadata=meta,
+                )
+            )
 
         # Cache results
         await cache_client.set(cache_key, results, expire=3600)

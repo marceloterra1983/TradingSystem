@@ -10,14 +10,14 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
-from llama_index import (
-    SimpleDirectoryReader,
+from llama_index.core import (
     VectorStoreIndex,
     StorageContext,
-    ServiceContext,
-    VectorStoreIndex
+    Settings,
 )
+from llama_index.core.readers import SimpleDirectoryReader
 from llama_index.vector_stores.qdrant import QdrantVectorStore
+from llama_index.embeddings.ollama import OllamaEmbedding
 
 # Configure logging
 logging.basicConfig(
@@ -43,6 +43,12 @@ vector_store = QdrantVectorStore(
 # Create storage context
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+# Configure embeddings with Ollama (local)
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+# Set default embed model for index operations
+Settings.embed_model = OllamaEmbedding(model_name=OLLAMA_EMBED_MODEL, base_url=OLLAMA_BASE_URL)
+
 class ProcessingResult(BaseModel):
     """Response model for document processing results."""
     success: bool
@@ -60,7 +66,7 @@ async def ingest_directory(directory_path: str):
         documents = SimpleDirectoryReader(directory_path).load_data()
         
         # Create index from documents
-        index = VectorStoreIndex.from_documents(
+        VectorStoreIndex.from_documents(
             documents,
             storage_context=storage_context
         )
@@ -88,7 +94,7 @@ async def ingest_document(file_path: str):
         documents = SimpleDirectoryReader(input_files=[file_path]).load_data()
         
         # Create index from document
-        index = VectorStoreIndex.from_documents(
+        VectorStoreIndex.from_documents(
             documents,
             storage_context=storage_context
         )
