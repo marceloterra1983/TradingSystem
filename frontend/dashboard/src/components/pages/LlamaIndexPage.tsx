@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import { Activity, BookOpen, Boxes, ExternalLink, GaugeCircle, ShieldCheck, Workflow } from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
 import { buildDocsUrl } from '../../lib/docsUrl';
+import LlamaIndexQueryTool from './LlamaIndexQueryTool';
 
 const DEFAULT_QUERY_URL = 'http://localhost:3450';
 const DEFAULT_QDRANT_URL = 'http://localhost:6333';
@@ -211,6 +212,25 @@ export function LlamaIndexPage(): JSX.Element {
                   </div>
                 ))}
               </div>
+            </CollapsibleCardContent>
+          </CollapsibleCard>
+        ),
+      },
+      {
+        id: 'llamaindex-interactive',
+        content: (
+          <CollapsibleCard cardId="llamaindex-interactive" defaultCollapsed={false}>
+            <CollapsibleCardHeader>
+              <CollapsibleCardTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-sky-600" />
+                Interactive Query Tool
+              </CollapsibleCardTitle>
+              <CollapsibleCardDescription>
+                Execute semantic search (/search) ou respostas com LLM (/query) diretamente do dashboard.
+              </CollapsibleCardDescription>
+            </CollapsibleCardHeader>
+            <CollapsibleCardContent>
+              <LlamaIndexQueryTool />
             </CollapsibleCardContent>
           </CollapsibleCard>
         ),
