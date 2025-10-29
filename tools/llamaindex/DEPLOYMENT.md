@@ -42,6 +42,54 @@ Optional configurations:
 - `RATE_LIMIT_PERIOD`: Period in seconds (default: 60)
 - `CACHE_TYPE`: Cache backend (memory/redis)
 
+### Unified Domain + Proxy (Recommended)
+
+When serving the dashboard and APIs under a single domain (e.g., `http://tradingsystem.local`), route app traffic via the Documentation API proxy. This avoids exposing tokens to the browser and simplifies CORS.
+
+Frontend `.env` (dashboard):
+
+```
+VITE_USE_UNIFIED_DOMAIN=true
+VITE_API_BASE_URL=http://tradingsystem.local
+# Query service direct URL still used in non-unified mode
+VITE_LLAMAINDEX_QUERY_URL=http://localhost:8202
+```
+
+Backend `.env` (documentation-api):
+
+```
+# Where the LlamaIndex Query service is listening
+LLAMAINDEX_QUERY_URL=http://localhost:8202
+# JWT config (must match query service)
+JWT_SECRET_KEY=dev-secret
+JWT_ALGORITHM=HS256
+```
+
+Nginx snippet:
+
+```
+server {
+  listen 80;
+  server_name tradingsystem.local;
+
+  # Proxy for Documentation API (includes RAG proxy)
+  location /api/ {
+    proxy_pass http://localhost:3400/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  # Dashboard (Vite / SPA)
+  location / {
+    proxy_pass http://localhost:3103/;
+    proxy_set_header Host $host;
+  }
+}
+```
+
+The UI automatically prefers the proxy (`/api/v1/rag`) when `VITE_USE_UNIFIED_DOMAIN=true` and `VITE_API_BASE_URL` are set; otherwise it calls the LlamaIndex Query service directly on `VITE_LLAMAINDEX_QUERY_URL`.
+
 ### Security Configuration
 
 1. Generate secure keys:
