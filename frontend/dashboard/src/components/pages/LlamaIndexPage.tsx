@@ -14,7 +14,7 @@ import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
 import { buildDocsUrl } from '../../lib/docsUrl';
 import LlamaIndexQueryTool from './LlamaIndexQueryTool';
 
-const DEFAULT_QUERY_URL = 'http://localhost:3450';
+const DEFAULT_QUERY_URL = 'http://localhost:8202';
 const DEFAULT_QDRANT_URL = 'http://localhost:6333';
 
 const sanitize = (value: string | undefined, fallback: string): string => {
@@ -141,7 +141,7 @@ export function LlamaIndexPage(): JSX.Element {
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="outline">Query: porta 3450</Badge>
+                <Badge variant="outline">Query: porta 8202</Badge>
                 <Badge variant="outline">Ingestion: porta interna 8000</Badge>
                 <Badge variant="outline">Qdrant: portas 6333/6334</Badge>
                 <Badge variant="outline">OpenAI (LLM opcional)</Badge>

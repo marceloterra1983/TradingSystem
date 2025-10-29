@@ -12,9 +12,15 @@ export interface QueryResponse {
 }
 
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
+const DEFAULT_PROXY_PATH = '/api/v1/rag';
 
 function baseUrl(): string {
   const env = import.meta.env as Record<string, string | undefined>;
+  const useUnified = `${env.VITE_USE_UNIFIED_DOMAIN}`.toLowerCase() === 'true';
+  const apiBase = env.VITE_API_BASE_URL;
+  if (useUnified && apiBase) {
+    return `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`;
+  }
   const raw = env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL;
   return (raw || DEFAULT_QUERY_URL).replace(/\/+$/, '');
 }
@@ -50,4 +56,3 @@ export async function queryDocs(queryText: string, maxResults = 5): Promise<Quer
 }
 
 export const llamaIndexService = { search, queryDocs };
-
