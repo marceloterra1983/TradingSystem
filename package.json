@@ -1,6 +1,7 @@
 {
   "type": "module",
   "devDependencies": {
+    "@modelcontextprotocol/server-filesystem": "^2025.8.21",
     "@types/react": "^18.3.26",
     "@types/react-dom": "^18.3.7",
     "eslint": "^9.37.0",
@@ -13,6 +14,13 @@
     "react-dom": "^18.3.1"
   },
   "scripts": {
+    "start": "bash scripts/universal/start.sh --force-kill",
+    "start:all": "bash scripts/universal/start.sh --force-kill --with-vectors",
+    "start:soft": "bash scripts/universal/start.sh --with-vectors",
+    "env:validate": "bash scripts/env/validate-env.sh",
+    "env:validade": "npm run env:validate",
+    "stop": "bash scripts/universal/stop.sh",
+    "stop:all": "bash scripts/universal/stop.sh --with-db --with-vectors --prune-networks",
     "prepare": "husky install",
     "lint": "cd frontend/dashboard && npm run lint",
     "lint:fix": "eslint . --fix",
