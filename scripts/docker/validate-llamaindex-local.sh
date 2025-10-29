@@ -70,14 +70,18 @@ else
   ok "Ollama detected at $OLLAMA_HTTP"
 fi
 
-# 3) Check embedding model presence
+# 3) Check embedding model presence (skip if using container-only)
 EMBED_MODEL="${OLLAMA_EMBED_MODEL:-${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}}"
-if [ -n "$OLLAMA_HTTP" ]; then
-  TAGS_JSON="$(curl -s "$OLLAMA_HTTP/api/tags" || echo '{"models":[]}')"
-  if echo "$TAGS_JSON" | grep -iq "\"$EMBED_MODEL\""; then
-    ok "Embedding model present: $EMBED_MODEL"
-  else
-    warn "Embedding model not found at $OLLAMA_HTTP: $EMBED_MODEL"
+if [ "${FORCE_OLLAMA_CONTAINER:-0}" = "1" ]; then
+  echo "[info] Skipping host embedding model check (FORCE_OLLAMA_CONTAINER=1)"
+else
+  if [ -n "$OLLAMA_HTTP" ]; then
+    TAGS_JSON="$(curl -s "$OLLAMA_HTTP/api/tags" || echo '{"models":[]}')"
+    if echo "$TAGS_JSON" | grep -iq "\"$EMBED_MODEL\""; then
+      ok "Embedding model present: $EMBED_MODEL"
+    else
+      warn "Embedding model not found at $OLLAMA_HTTP: $EMBED_MODEL"
+    fi
   fi
 fi
 
