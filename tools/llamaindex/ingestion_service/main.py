@@ -15,7 +15,7 @@ from llama_index.core import (
     StorageContext,
     Settings,
 )
-from llama_index.core.readers import SimpleDirectoryReader
+from llama_index.core import SimpleDirectoryReader
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.embeddings.ollama import OllamaEmbedding
 
@@ -26,6 +26,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Ensure NLTK resources available (stopwords, punkt)
+try:
+    import nltk  # type: ignore
+    nltk_data_dir = os.getenv("NLTK_DATA", "/usr/local/nltk_data")
+    if nltk_data_dir not in nltk.data.path:
+        nltk.data.path.append(nltk_data_dir)
+    for pkg, res in [("stopwords", "corpora/stopwords"), ("punkt", "tokenizers/punkt")]:
+        try:
+            nltk.data.find(res)
+        except LookupError:
+            try:
+                nltk.download(pkg, download_dir=nltk_data_dir, quiet=True)
+            except Exception as de:
+                logger.warning(f"NLTK download failed for {pkg}: {de}")
+except Exception as e:
+    logger.warning(f"NLTK setup error: {e}")
+
 app = FastAPI(title="LlamaIndex Ingestion Service")
 
 # Initialize Qdrant client
@@ -35,9 +52,10 @@ qdrant_client = QdrantClient(
 )
 
 # Initialize vector store
+QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "documentation")
 vector_store = QdrantVectorStore(
     client=qdrant_client,
-    collection_name="documentation"
+    collection_name=QDRANT_COLLECTION,
 )
 
 # Create storage context
@@ -57,14 +75,28 @@ class ProcessingResult(BaseModel):
     documents_processed: Optional[int] = None
     errors: Optional[List[str]] = None
 
+class DirectoryIngestRequest(BaseModel):
+    directory_path: str
+
+class DocumentIngestRequest(BaseModel):
+    file_path: str
+
 @app.post("/ingest/directory", response_model=ProcessingResult)
-async def ingest_directory(directory_path: str):
+async def ingest_directory(request: DirectoryIngestRequest):
     """
     Ingest all documents from a specified directory.
     """
+    # Validate directory path
+    if not os.path.isdir(request.directory_path):
+        raise HTTPException(status_code=400, detail=f"Directory not found: {request.directory_path}")
     try:
-        # Load documents
-        documents = SimpleDirectoryReader(directory_path).load_data()
+        # Load documents recursively from directory
+        documents = SimpleDirectoryReader(
+            input_dir=request.directory_path,
+            recursive=True,
+        ).load_data()
+        if not documents:
+            raise HTTPException(status_code=400, detail=f"No supported documents found in {request.directory_path}")
         
         # Create index from documents
         VectorStoreIndex.from_documents(
@@ -74,25 +106,30 @@ async def ingest_directory(directory_path: str):
         
         return ProcessingResult(
             success=True,
-            message=f"Successfully processed {len(documents)} documents",
+            message=f"Successfully processed {len(documents)} documents from {request.directory_path}",
             documents_processed=len(documents)
         )
     
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error processing directory {directory_path}: {str(e)}")
+        logger.error(f"Error processing directory {request.directory_path}: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Error processing directory: {str(e)}"
         )
 
 @app.post("/ingest/document", response_model=ProcessingResult)
-async def ingest_document(file_path: str):
+async def ingest_document(request: DocumentIngestRequest):
     """
     Ingest a single document.
     """
+    # Validate file path
+    if not os.path.isfile(request.file_path):
+        raise HTTPException(status_code=400, detail=f"File not found: {request.file_path}")
     try:
         # Load single document
-        documents = SimpleDirectoryReader(input_files=[file_path]).load_data()
+        documents = SimpleDirectoryReader(input_files=[request.file_path]).load_data()
         
         # Create index from document
         VectorStoreIndex.from_documents(
@@ -102,12 +139,14 @@ async def ingest_document(file_path: str):
         
         return ProcessingResult(
             success=True,
-            message="Successfully processed document",
+            message=f"Successfully processed document {request.file_path}",
             documents_processed=1
         )
     
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error processing file {file_path}: {str(e)}")
+        logger.error(f"Error processing file {request.file_path}: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Error processing file: {str(e)}"
