@@ -13,6 +13,7 @@ import searchRoutes from './routes/search.js';
 import specsRoutes from './routes/specs.js';
 import docsHealthRoutes from './routes/docs-health.js';
 import semanticRoutes from './routes/semantic.js';
+import ragProxyRoutes from './routes/rag-proxy.js';
 import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
 import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
 import MarkdownSearchService from './services/markdownSearchService.js';
@@ -226,6 +227,7 @@ app.use('/api/v1/docs', markdownSearchRoutes);
 app.use('/api/v1/docs', hybridRoutes);
 app.use('/api/v1/docs/health', docsHealthRoutes);
 app.use('/api/v1/semantic', semanticRoutes);
+app.use('/api/v1/rag', ragProxyRoutes);
 
 // Prometheus metrics endpoint
 app.get('/metrics', metricsHandler);

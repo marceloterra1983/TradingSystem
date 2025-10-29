@@ -14,6 +14,15 @@ export function LlamaIndexQueryTool(): JSX.Element {
   const [error, setError] = React.useState<string | null>(null);
   const [results, setResults] = React.useState<SearchResultItem[] | null>(null);
   const [answer, setAnswer] = React.useState<QueryResponse | null>(null);
+  const [copied, setCopied] = React.useState<string | null>(null);
+
+  const handleCopy = async (label: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1200);
+    } catch {}
+  };
 
   const handleRun = async () => {
     setLoading(true);
@@ -37,7 +46,7 @@ export function LlamaIndexQueryTool(): JSX.Element {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3">
         <div className="md:col-span-2">
           <Label htmlFor="li-query">Query</Label>
           <Input id="li-query" value={text} onChange={(e) => setText(e.target.value)} placeholder="Pergunta ou termos de busca" />
@@ -78,6 +87,14 @@ export function LlamaIndexQueryTool(): JSX.Element {
               <li key={idx} className="rounded border border-slate-200 dark:border-slate-800 p-3">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline">Score {r.relevance.toFixed(3)}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleCopy(`res-${idx}`, r.content)}>
+                      Copiar
+                    </Button>
+                    {copied === `res-${idx}` && (
+                      <span className="text-xs text-emerald-600">Copiado</span>
+                    )}
+                  </div>
                 </div>
                 <p className="mt-2 text-sm whitespace-pre-wrap">
                   {r.content}
@@ -93,6 +110,12 @@ export function LlamaIndexQueryTool(): JSX.Element {
           <div className="flex items-center gap-2">
             <Badge variant="outline">Conf {answer.confidence.toFixed(3)}</Badge>
             <Badge variant="outline">Fontes {answer.sources.length}</Badge>
+            <Button variant="outline" size="sm" onClick={() => handleCopy('answer', answer.answer)}>
+              Copiar resposta
+            </Button>
+            {copied === 'answer' && (
+              <span className="text-xs text-emerald-600">Copiado</span>
+            )}
           </div>
           <div className="rounded border border-slate-200 dark:border-slate-800 p-3">
             <p className="text-sm whitespace-pre-wrap">{answer.answer}</p>
@@ -102,6 +125,14 @@ export function LlamaIndexQueryTool(): JSX.Element {
               <div key={idx} className="rounded border border-slate-200 dark:border-slate-800 p-3">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline">Score {s.relevance.toFixed(3)}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleCopy(`src-${idx}`, s.content)}>
+                      Copiar fonte
+                    </Button>
+                    {copied === `src-${idx}` && (
+                      <span className="text-xs text-emerald-600">Copiado</span>
+                    )}
+                  </div>
                 </div>
                 <p className="mt-2 text-sm whitespace-pre-wrap">{s.content}</p>
               </div>
