@@ -14,15 +14,31 @@ export interface QueryResponse {
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
 const DEFAULT_PROXY_PATH = '/api/v1/rag';
 
+export type ServiceMode = 'auto' | 'proxy' | 'direct';
+let overrideMode: ServiceMode = 'auto';
+
+export function setMode(mode: ServiceMode) {
+  overrideMode = mode;
+}
+
+export function getMode(): ServiceMode {
+  return overrideMode;
+}
+
 function baseUrl(): string {
   const env = import.meta.env as Record<string, string | undefined>;
   const useUnified = `${env.VITE_USE_UNIFIED_DOMAIN}`.toLowerCase() === 'true';
   const apiBase = env.VITE_API_BASE_URL;
-  if (useUnified && apiBase) {
-    return `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`;
-  }
-  const raw = env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL;
-  return (raw || DEFAULT_QUERY_URL).replace(/\/+$/, '');
+  const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(/\/+$/, '');
+  const proxy = apiBase ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}` : '';
+
+  // Apply override first
+  if (overrideMode === 'proxy' && proxy) return proxy;
+  if (overrideMode === 'direct') return direct;
+
+  // Auto mode: prefer proxy in unified-domain setups; otherwise direct
+  if (useUnified && apiBase && proxy) return proxy;
+  return direct;
 }
 
 function authHeader(): HeadersInit {
@@ -53,6 +69,15 @@ export async function queryDocs(queryText: string, maxResults = 5): Promise<Quer
     throw new Error(`Query failed (${resp.status}): ${msg}`);
   }
   return (await resp.json()) as QueryResponse;
+}
+
+export function endpointInfo(): { url: string; mode: ServiceMode; resolved: 'proxy' | 'direct' } {
+  const env = import.meta.env as Record<string, string | undefined>;
+  const apiBase = env.VITE_API_BASE_URL;
+  const proxy = apiBase ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}` : '';
+  const url = baseUrl();
+  const resolved: 'proxy' | 'direct' = proxy && url.startsWith(proxy) ? 'proxy' : 'direct';
+  return { url, mode: overrideMode, resolved };
 }
 
 export const llamaIndexService = { search, queryDocs };
