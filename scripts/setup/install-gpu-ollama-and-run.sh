@@ -70,7 +70,7 @@ persist_env() {
   }
   set_kv FORCE_OLLAMA_CONTAINER 1
   set_kv OLLAMA_PORT 11435
-  set_kv OLLAMA_EMBEDDING_MODEL nomic-embed-text
+  set_kv OLLAMA_EMBEDDING_MODEL mxbai-embed-large
   set_kv OLLAMA_MODEL llama3
   set_kv JWT_SECRET_KEY dev-secret
   set_kv JWT_ALGORITHM HS256
