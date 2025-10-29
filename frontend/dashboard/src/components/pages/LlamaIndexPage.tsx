@@ -354,12 +354,46 @@ function LlamaIndexEndpointBanner(): JSX.Element {
     return getMode();
   });
   const [copied, setCopied] = useState(false);
+  const [health, setHealth] = useState<'unknown' | 'ok' | 'error'>('unknown');
+  const [healthMsg, setHealthMsg] = useState<string>('');
 
   useEffect(() => {
     try { window.localStorage.setItem(lsKey, mode); } catch {}
   }, [mode]);
 
   const info = endpointInfo();
+
+  async function doHealthCheck() {
+    try {
+      setHealth('unknown');
+      setHealthMsg('');
+      const env = import.meta.env as Record<string, string | undefined>;
+      const apiBase = (env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+      const direct = (env.VITE_LLAMAINDEX_QUERY_URL || 'http://localhost:8202').replace(/\/+$/, '');
+      let url = '';
+      if (info.resolved === 'proxy' && apiBase) {
+        url = `${apiBase}/health`;
+      } else {
+        url = `${direct}/health`;
+      }
+      const res = await fetch(url, { method: 'GET' });
+      if (res.ok) {
+        setHealth('ok');
+        setHealthMsg('OK');
+      } else {
+        setHealth('error');
+        setHealthMsg(`HTTP ${res.status}`);
+      }
+    } catch (e: any) {
+      setHealth('error');
+      setHealthMsg(e?.message || 'Network error');
+    }
+  }
+
+  useEffect(() => {
+    doHealthCheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   return (
     <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 mb-4">
@@ -370,6 +404,21 @@ function LlamaIndexEndpointBanner(): JSX.Element {
             <Badge variant="outline">{info.resolved.toUpperCase()}</Badge>
           </div>
           <div className="mt-1 font-mono text-xs break-all text-slate-700 dark:text-slate-300">{info.url}</div>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-sm text-slate-600 dark:text-slate-400">Saúde:</span>
+            {health === 'ok' && <Badge variant="outline" className="text-emerald-700 border-emerald-400">OK</Badge>}
+            {health === 'error' && (
+              <Badge variant="outline" className="text-red-700 border-red-400">
+                {healthMsg || 'Erro'}{info.resolved === 'direct' ? ' (Possível CORS/porta)' : ''}
+              </Badge>
+            )}
+            {health === 'unknown' && <Badge variant="outline">Testando…</Badge>}
+          </div>
+          {health === 'error' && info.resolved === 'direct' && (
+            <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Dica: use modo <code className="font-mono">proxy</code> com domínio unificado para evitar CORS.
+            </div>
+          )}
           <div className="mt-2">
             <Button
               variant="outline"
@@ -383,6 +432,14 @@ function LlamaIndexEndpointBanner(): JSX.Element {
               }}
             >
               {copied ? 'Copiado' : 'Copiar URL'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={doHealthCheck}
+            >
+              Testar
             </Button>
           </div>
         </div>
