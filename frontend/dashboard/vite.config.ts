@@ -101,9 +101,10 @@ export default defineConfig(({ mode }) => {
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4005',
   );
+  // DocsAPI (dynamic) runs on 3401 by default; 3400 is static docs (NGINX)
   const documentationProxy = resolveProxy(
     env.VITE_DOCUMENTATION_PROXY_TARGET || env.VITE_DOCUMENTATION_API_URL,
-    'http://localhost:3400',
+    'http://localhost:3401',
   );
   const serviceLauncherProxy = resolveProxy(
     env.VITE_SERVICE_LAUNCHER_PROXY_TARGET || env.VITE_SERVICE_LAUNCHER_API_URL,
@@ -146,8 +147,8 @@ export default defineConfig(({ mode }) => {
         allow: [repoRoot],
       },
       proxy: {
-        // Docusaurus assets proxy (must come before /docs)
-        '^/assets/.*': {
+        // Docusaurus assets proxy (specific paths only - avoid dashboard assets)
+        '^/assets/images/.*': {
           target: docsProxy.target,
           changeOrigin: true,
         },
@@ -179,6 +180,21 @@ export default defineConfig(({ mode }) => {
           target: serviceLauncherProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/launcher/, serviceLauncherProxy.basePath),
+        },
+        '/api/v1/rag': {
+          target: documentationProxy.target,
+          changeOrigin: true,
+          rewrite: (incomingPath) => {
+            const stripped = incomingPath.replace(/^\/api\/v1\/rag/, '');
+            const remainder = stripped.startsWith('/') ? stripped : `/${stripped}`;
+            if (!documentationProxy.basePath) {
+              return `/api/v1/rag${remainder}`.replace(/\/+/g, '/') || '/api/v1/rag';
+            }
+            const base = documentationProxy.basePath.startsWith('/')
+              ? documentationProxy.basePath
+              : `/${documentationProxy.basePath}`;
+            return `${base}/api/v1/rag${remainder}`.replace(/\/+/g, '/') || `${base}/api/v1/rag`;
+          },
         },
         '/api/firecrawl': {
           target: firecrawlProxy.target,

@@ -11,8 +11,17 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Copy backend/shared package files for dependency installation
+COPY ../../shared/logger/package.json /shared/logger/package.json
+COPY ../../shared/middleware/package.json /shared/middleware/package.json
+
 # Install dependencies (production only)
 RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Install shared modules dependencies
+RUN cd /shared/logger && npm ci --only=production && \
+    cd /shared/middleware && npm ci --only=production && \
     npm cache clean --force
 
 # ============================================
@@ -28,6 +37,10 @@ WORKDIR /app
 
 # Copy dependencies from builder
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Copy backend/shared modules (required for shared logger/middleware)
+COPY --from=builder --chown=nodejs:nodejs /shared /shared
+COPY --chown=nodejs:nodejs ../../shared /shared
 
 # Copy application code
 COPY --chown=nodejs:nodejs . .

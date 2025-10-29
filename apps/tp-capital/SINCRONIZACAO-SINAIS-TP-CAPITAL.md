@@ -60,15 +60,15 @@ if (!signal.buy_min || !signal.buy_max) {
 ### 2. Sincronização Manual (Botão "Checar Mensagens")
 
 **Acionada por:** Usuário clicando no botão no dashboard  
-**Limite:** 100 últimas mensagens do Telegram
+**Limite:** 500 últimas mensagens do Telegram
 
 **Fluxo:**
 ```
 1. Frontend → POST /api/tp-capital/sync-messages
-2. TP Capital → POST http://localhost:4006/sync-messages { limit: 100 }
-3. Telegram Gateway → Busca últimas 100 mensagens do Telegram
+2. TP Capital → POST http://localhost:4006/sync-messages { limit: 500 }
+3. Telegram Gateway → Busca últimas 500 mensagens do Telegram
 4. Telegram Gateway → Identifica mensagens faltantes
-5. Telegram Gateway → Insere até 100 mensagens no banco
+5. Telegram Gateway → Insere até 500 mensagens no banco
 6. TP Capital → Converte mensagens 'queued' → 'received'
 7. Worker → Processa mensagens com validação
 8. Worker → Salva APENAS sinais completos na tabela
@@ -115,7 +115,7 @@ if (!signal.buy_min || !signal.buy_max) {
 **Endpoint:** `POST /sync-messages`
 
 **Funcionalidades:**
-1. Chama Telegram Gateway com `limit: 100`
+1. Chama Telegram Gateway com `limit: 500`
 2. Converte mensagens `queued` → `received`
 3. Retorna estatísticas de sincronização
 
@@ -212,7 +212,7 @@ O ativo veio tocar a região do 144...
 ### 2. Via API
 
 ```bash
-# Sincronizar últimas 100 mensagens
+# Sincronizar últimas 500 mensagens
 curl -X POST http://localhost:4005/sync-messages \
   -H "Content-Type: application/json"
 
@@ -416,7 +416,7 @@ curl -s "http://localhost:4005/sync-messages" -X POST -H "Content-Type: applicat
 - ✅ Tabela limpa com apenas sinais operacionais
 - ✅ Data formatada (horário em cima, data embaixo)
 - ✅ Valores sempre preenchidos
-- ✅ Sincronização manual de 100 mensagens com um clique
+- ✅ Sincronização manual de 500 mensagens com um clique
 - ✅ Feedback visual em tempo real
 
 **Dados:**
@@ -426,7 +426,7 @@ curl -s "http://localhost:4005/sync-messages" -X POST -H "Content-Type: applicat
 
 **Performance:**
 - ✅ Polling a cada 5 segundos
-- ✅ Sincronização de 100 mensagens em ~2 segundos
+- ✅ Sincronização de 500 mensagens em ~5 segundos
 - ✅ Worker processa mensagens em lote
 
 

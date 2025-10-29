@@ -46,6 +46,9 @@ FORCE=false
 CLEAN_LOGS=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
+WITH_DB=false
+WITH_VECTORS=false
+PRUNE_NETWORKS=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 
 # Node.js service ports
@@ -70,6 +73,18 @@ while [[ $# -gt 0 ]]; do
             SKIP_SERVICES=true
             shift
             ;;
+        --with-db)
+            WITH_DB=true
+            shift
+            ;;
+        --with-vectors)
+            WITH_VECTORS=true
+            shift
+            ;;
+        --prune-networks|--remove-networks)
+            PRUNE_NETWORKS=true
+            shift
+            ;;
         --help|-h)
             cat << EOF
 TradingSystem Universal Stop v2.0
@@ -81,11 +96,16 @@ Options:
   --clean-logs    Remove service logs after stopping
   --skip-docker   Skip stopping Docker containers
   --skip-services Skip stopping local services
+  --with-db       Also stop database stack (TimescaleDB, UI tools)
+  --with-vectors  Also stop vectors stack (LlamaIndex, Ollama, Qdrant)
+  --prune-networks Remove shared Docker networks if unused
   --help, -h      Show this help message
 
 Stops:
   🖥️  Node.js services (Telegram Gateway, Gateway API, Dashboard, Docusaurus, Status)
   🐳 Docker containers (TP Capital API, Workspace)
+  🐳 Database stack (when --with-db)
+  🧠 Vectors stack (when --with-vectors)
 
 Features:
   ✓ Graceful shutdown with SIGTERM (default)
@@ -151,13 +171,55 @@ stop_containers() {
     fi
 
     # Check if containers are running
-    if docker ps | grep -qE "tp-capital-api|workspace-service"; then
-        log_info "Stopping tp-capital-api and workspace-service..."
-        docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" down
+    if docker ps --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
+        log_info "Stopping apps stack (apps-tp-capital, apps-workspace)..."
+        docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" down --remove-orphans
         log_success "✓ Containers stopped"
     else
         log_info "No application containers running"
     fi
+}
+
+# Function to stop database stack (TimescaleDB + tools)
+stop_db_stack() {
+    section "Stopping Database Stack (TimescaleDB)"
+    local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.timescale.yml"
+    if [ ! -f "$DB_COMPOSE_FILE" ]; then
+        log_info "Timescale compose file not found (skipping)"
+        return 0
+    fi
+    # Stop primary DB service; down is safe to ensure removal of orphans
+    docker compose -f "$DB_COMPOSE_FILE" down --remove-orphans || true
+    log_success "✓ Database stack stopped"
+}
+
+# Function to stop vectors stack (LlamaIndex + Ollama + Qdrant)
+stop_vectors_stack() {
+    section "Stopping Vectors Stack (LlamaIndex, Ollama, Qdrant)"
+    local INFRA_COMPOSE="$PROJECT_ROOT/tools/compose/docker-compose.infrastructure.yml"
+    local INDIV_COMPOSE="$PROJECT_ROOT/tools/compose/docker-compose.individual.yml"
+    local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.timescale.yml"
+
+    # Stop LlamaIndex services if compose exists
+    if [ -f "$INFRA_COMPOSE" ]; then
+        docker compose -f "$INFRA_COMPOSE" down --remove-orphans || true
+    fi
+
+    # Stop Ollama container if compose exists or container is present
+    if [ -f "$INDIV_COMPOSE" ]; then
+        docker compose -f "$INDIV_COMPOSE" down --remove-orphans || true
+    else
+        if docker ps -a --format '{{.Names}}' | grep -qx "ollama"; then
+            docker rm -f ollama >/dev/null 2>&1 || true
+        fi
+    fi
+
+    # Stop Qdrant if present (part of timescale compose stack)
+    if docker ps -a --format '{{.Names}}' | grep -qx "data-qdrant"; then
+        docker rm -f data-qdrant >/dev/null 2>&1 || true
+    fi
+
+    log_success "✓ Vectors stack stopped"
 }
 
 # Function to stop services by PID files
@@ -242,6 +304,22 @@ main() {
         else
             log_success "✓ Stopped $stopped_count service(s)"
         fi
+
+        # Stop docs-watcher (file watcher without port)
+        if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
+            log_info "Stopping docs-watcher..."
+            if [ "$FORCE" = true ]; then
+                pkill -9 -f "watch-docs.js" || true
+            else
+                pkill -15 -f "watch-docs.js" || true
+                sleep 1
+                # Force kill if still alive
+                if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
+                    pkill -9 -f "watch-docs.js" || true
+                fi
+            fi
+            log_success "✓ Stopped docs-watcher"
+        fi
     else
         log_info "Skipping local services (--skip-services)"
     fi
@@ -251,6 +329,21 @@ main() {
     # Step 2: Stop Docker containers
     if [ "$SKIP_DOCKER" = false ]; then
         stop_containers
+        if [ "$WITH_VECTORS" = true ]; then
+            stop_vectors_stack
+        fi
+        if [ "$WITH_DB" = true ]; then
+            stop_db_stack
+        fi
+        if [ "$PRUNE_NETWORKS" = true ]; then
+            section "Pruning shared Docker networks"
+            for net in tradingsystem_backend tradingsystem_infra tradingsystem_data; do
+                if docker network ls --format '{{.Name}}' | grep -qx "$net"; then
+                    docker network rm "$net" >/dev/null 2>&1 || true
+                fi
+            done
+            log_success "✓ Network prune attempted (ignored if in use)"
+        fi
     else
         log_info "Skipping Docker containers (--skip-docker)"
     fi

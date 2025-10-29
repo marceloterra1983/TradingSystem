@@ -303,37 +303,15 @@ export class GatewayPollingWorker {
    * Insert signal into TP Capital database
    */
   async insertSignal(signal, msg) {
-    const query = `
-      INSERT INTO ${this.tpCapitalSchema}.signals_v2 (
-        channel, signal_type, asset, buy_min, buy_max,
-        target_1, target_2, target_final, stop,
-        raw_message, source, ingested_at, ts,
-        status, priority, tags, metadata, created_by
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
-    `;
-
-    const values = [
-      signal.channel || msg.channel_id,
-      signal.signal_type,
-      signal.asset,
-      signal.buy_min,
-      signal.buy_max,
-      signal.target_1,
-      signal.target_2,
-      signal.target_final,
-      signal.stop,
-      signal.raw_message,
-      signal.source,
-      signal.ingested_at,
-      signal.ts,
-      'active', // status
-      'medium', // priority
-      [], // tags (vazio inicialmente)
-      JSON.stringify({}), // metadata
-      'gateway-worker' // created_by
-    ];
-
-    await this.tpCapitalDb.query(query, values);
+    const now = new Date();
+    await this.tpCapitalDb.insertSignal({
+      ...signal,
+      channel: signal.channel || msg.channel_id,
+      source: signal.source || 'telegram-gateway',
+      ingested_at: signal.ingested_at || now,
+      created_at: signal.created_at || now,
+      updated_at: signal.updated_at || now,
+    });
   }
 
   /**

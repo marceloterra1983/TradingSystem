@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
@@ -9,12 +9,13 @@ import {
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Activity, BookOpen, Boxes, ExternalLink, GaugeCircle, ShieldCheck, Workflow } from 'lucide-react';
-import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
-import { buildDocsUrl } from '../../lib/docsUrl';
-import { endpointInfo, getMode, setMode, type ServiceMode } from '../../services/llamaIndexService';
+import { Activity, Boxes, ShieldCheck, Workflow } from 'lucide-react';
+import { checkHealth, endpointInfo, getMode, setMode, type ServiceMode } from '../../services/llamaIndexService';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import LlamaIndexQueryTool from './LlamaIndexQueryTool';
+import LlamaIndexIngestionStatusCard, { type LlamaIndexStatusResponse } from './LlamaIndexIngestionStatusCard';
+import LlamaIndexCollectionsCard from './LlamaIndexCollectionsCard';
 
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
 const DEFAULT_QDRANT_URL = 'http://localhost:6333';
@@ -49,83 +50,136 @@ const resolveQdrantUrl = (): string => {
 const QUERY_BASE_URL = resolveQueryUrl();
 const QDRANT_BASE_URL = resolveQdrantUrl();
 
-interface QuickLink {
-  id: string;
-  label: string;
-  helper: string;
-  href: string;
-  icon: JSX.Element;
-}
-
-const QUICK_LINKS: QuickLink[] = [
-  {
-    id: 'query-root',
-    label: 'Query Service API',
-    helper: 'Endpoint principal para consultas RAG (FastAPI)',
-    href: QUERY_BASE_URL,
-    icon: <Workflow className="w-4 h-4 text-sky-600" />,
-  },
-  {
-    id: 'query-swagger',
-    label: 'Swagger /docs',
-    helper: 'Explore endpoints REST do serviço de consultas',
-    href: `${QUERY_BASE_URL}/docs`,
-    icon: <ExternalLink className="w-4 h-4 text-indigo-600" />,
-  },
-  {
-    id: 'query-health',
-    label: 'Health Check (Query)',
-    helper: 'Status do serviço de consultas e dependências',
-    href: `${QUERY_BASE_URL}/health`,
-    icon: <ShieldCheck className="w-4 h-4 text-emerald-600" />,
-  },
-  {
-    id: 'qdrant-dashboard',
-    label: 'Qdrant API',
-    helper: 'Vector store utilizado pelo LangChain / LlamaIndex',
-    href: QDRANT_BASE_URL,
-    icon: <Boxes className="w-4 h-4 text-amber-600" />,
-  },
-];
-
-const DOCUMENTATION_LINKS = [
-  {
-    id: 'implementation-plan',
-    label: 'LlamaIndex Implementation Plan',
-    description: 'Roadmap completo, integrações e arquitetura RAG.',
-    href: buildDocsUrl('context/shared/product/plans/llamaindex-implementation-plan'),
-  },
-  {
-    id: 'infra-deployment',
-    label: 'Infrastructure LlamaIndex DEPLOYMENT',
-    description: 'Guia operacional para serviços de ingestion e query.',
-    href: buildDocsUrl('infrastructure/llamaindex/DEPLOYMENT'),
-  },
-];
-
-const CLI_SNIPPETS = [
-  {
-    id: 'query-health',
-    title: 'Verificar saúde do Query Service',
-    command: `curl -s ${QUERY_BASE_URL}/health | jq`,
-  },
-  {
-    id: 'ingestion-health',
-    title: 'Checar saúde do Ingestion Service (docker exec)',
-    command: `docker exec infra-llamaindex_ingestion curl -s http://localhost:8000/health | jq`,
-  },
-  {
-    id: 'list-collections',
-    title: 'Listar collections no Qdrant',
-    command: `curl -s ${QDRANT_BASE_URL}/collections | jq`,
-  },
-];
-
 function handleOpen(url: string) {
   return () => window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function LlamaIndexPage(): JSX.Element {
+  const [statusData, setStatusData] = useState<LlamaIndexStatusResponse | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [ingesting, setIngesting] = useState(false);
+  const [ingestionMessage, setIngestionMessage] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async (preserveMessage = false) => {
+    setStatusLoading(true);
+    setStatusError(null);
+    if (!preserveMessage) {
+      setIngestionMessage(null);
+    }
+    try {
+      const resp = await fetch('/api/v1/rag/status');
+      const raw = await resp.text();
+      if (!resp.ok) {
+        throw new Error(raw || `Request failed (${resp.status})`);
+      }
+      const json = raw ? (JSON.parse(raw) as LlamaIndexStatusResponse) : null;
+      setStatusData(json);
+    } catch (err: any) {
+      const rawMessage = err?.message || 'Falha ao carregar status do LlamaIndex';
+      const friendly =
+        rawMessage.includes('401') || rawMessage.toLowerCase().includes('credenciais')
+          ? 'A requisição foi rejeitada (401). Certifique-se de que o Documentation API (porta 3401) esteja em execução ou configure um VITE_LLAMAINDEX_JWT para acesso direto.'
+          : rawMessage;
+      setStatusError(friendly);
+    } finally {
+      setStatusLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  const handleRefresh = useCallback(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  const handleIngest = useCallback(async () => {
+    setIngesting(true);
+    setIngestionMessage(null);
+    try {
+      const resp = await fetch('/api/v1/rag/status/ingest', { method: 'POST' });
+      const raw = await resp.text();
+      if (!resp.ok) {
+        throw new Error(raw || `Request failed (${resp.status})`);
+      }
+      let payload: any = null;
+      try {
+        payload = raw ? JSON.parse(raw) : null;
+      } catch {
+        payload = { message: raw };
+      }
+      setIngestionMessage(payload?.message || 'Ingestão acionada.');
+      await fetchStatus(true);
+    } catch (err: any) {
+      setIngestionMessage(err?.message || 'Falha ao acionar ingestão.');
+    } finally {
+      setIngesting(false);
+    }
+  }, [fetchStatus]);
+
+  const docsTotal = statusData?.documentation?.totalDocuments ?? null;
+  const docsIndexed = statusData?.documentation?.indexedDocuments ?? null;
+  const docsMissing = statusData?.documentation?.missingDocuments ?? null;
+  const chunkCount = statusData?.qdrant?.count ?? null;
+  const primaryCollection = statusData?.qdrant?.collection;
+  const collections = statusData?.collections ?? [];
+
+  const formatNumber = (value: number | null | undefined) =>
+    typeof value === 'number' ? value.toLocaleString() : '–';
+
+  const envVars = import.meta.env as Record<string, string | undefined>;
+  const apiBaseUrl = (envVars.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+  const directQueryBase = QUERY_BASE_URL;
+  const proxyQueryBase = apiBaseUrl ? `${apiBaseUrl}/api/v1/rag` : undefined;
+  const qdrantBase = QDRANT_BASE_URL;
+
+  const quickLinks = useMemo(() => [
+    {
+      id: 'query-api',
+      label: 'Query Service API',
+      helper: proxyQueryBase ? 'via docs-api (/api/v1/rag)' : 'Endpoint direto para o serviço',
+      href: proxyQueryBase ?? directQueryBase,
+      icon: <Workflow className="w-4 h-4 text-sky-600" />,
+    },
+    {
+      id: 'query-swagger',
+      label: 'Swagger /docs',
+      helper: 'Documentação interativa do Query service',
+      href: `${directQueryBase.replace(/\/+$/, '')}/docs`,
+      icon: <ShieldCheck className="w-4 h-4 text-emerald-600" />,
+    },
+    {
+      id: 'qdrant',
+      label: 'Qdrant API',
+      helper: 'Vector store utilizado pelo LangChain / LlamaIndex',
+      href: qdrantBase,
+      icon: <Boxes className="w-4 h-4 text-amber-600" />,
+    },
+  ], [directQueryBase, proxyQueryBase, qdrantBase]);
+
+  const stats = [
+    {
+      id: 'docs-indexed',
+      label: 'Documentos indexados',
+      value: formatNumber(docsIndexed),
+      helper: docsTotal != null ? `${formatNumber(docsIndexed)} / ${formatNumber(docsTotal)}` : '—',
+    },
+    {
+      id: 'docs-pending',
+      label: 'Pendentes',
+      value: formatNumber(docsMissing),
+      helper: docsTotal != null ? `${formatNumber(docsMissing)} restantes` : '—',
+    },
+    {
+      id: 'chunks',
+      label: 'Chunks no Qdrant',
+      value: formatNumber(chunkCount),
+      helper: primaryCollection ? `Coleção ${primaryCollection}` : undefined,
+    },
+  ];
+
   const sections = useMemo(
     () => [
       {
@@ -135,46 +189,41 @@ export function LlamaIndexPage(): JSX.Element {
             <CollapsibleCardHeader>
               <CollapsibleCardTitle className="flex items-center gap-2">
                 <Workflow className="w-5 h-5 text-sky-600" />
-                LlamaIndex RAG Services
+                LlamaIndex
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Infraestrutura de Retrieval-Augmented Generation integrada ao LangChain, com ingestão assíncrona e exposição REST.
+                Status resumido dos serviços e links úteis.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
-          <CollapsibleCardContent>
-            <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="outline">Query: porta 8202</Badge>
-                <Badge variant="outline">Ingestion: porta interna 8000</Badge>
-                <Badge variant="outline">Qdrant: portas 6333/6334</Badge>
-                <Badge variant="outline">OpenAI (LLM opcional)</Badge>
-            </div>
+            <CollapsibleCardContent>
+              <div className="space-y-4">
+                <LlamaIndexEndpointBanner />
 
-            {/* Endpoint banner and mode toggle */}
-            <LlamaIndexEndpointBanner />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-2">
-                  <h4 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-indigo-500" />
-                    Fluxo de consultas
-                  </h4>
-                  <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                    <li>Endpoint REST (`/query`) retorna contexto enriquecido + resposta.</li>
-                    <li>Integração direta com LangGraph e Agno Agents para decisões.</li>
-                    <li>Suporte a cache, rate limiting e logging estruturado.</li>
-                  </ul>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {stats.map((stat) => (
+                    <div
+                      key={stat.id}
+                      className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 p-4"
+                    >
+                      <p className="text-xs uppercase text-slate-500 dark:text-slate-400">{stat.label}</p>
+                      <p className="mt-1 text-lg font-semibold text-slate-800 dark:text-slate-100">{stat.value}</p>
+                      {stat.helper && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{stat.helper}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
-                <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-2">
-                  <h4 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <GaugeCircle className="w-4 h-4 text-emerald-500" />
-                    Observabilidade e segurança
-                  </h4>
-                  <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                    <li>Métricas Prometheus na porta 8000 (ingestion) e 8000/metrics.</li>
-                    <li>JWT opcional para proteger endpoints externos.</li>
-                    <li>APIs com logs enriquecidos e suporte a tracing futuro.</li>
-                  </ul>
+                <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 p-3">
+                  <p className="text-xs uppercase text-slate-500 dark:text-slate-400 mb-2">Atalhos</p>
+                  <div className="flex flex-wrap gap-2">
+                    {quickLinks.map((link) => (
+                      <Button key={link.id} variant="outline" size="sm" onClick={handleOpen(link.href)} className="gap-2">
+                        {link.icon}
+                        {link.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </CollapsibleCardContent>
@@ -182,41 +231,46 @@ export function LlamaIndexPage(): JSX.Element {
         ),
       },
       {
-        id: 'llamaindex-actions',
+        id: 'llamaindex-status',
         content: (
-          <CollapsibleCard cardId="llamaindex-actions">
+          <CollapsibleCard cardId="llamaindex-status" defaultCollapsed={false}>
             <CollapsibleCardHeader>
               <CollapsibleCardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-amber-600" />
-                Acesso rápido
+                <Activity className="w-5 h-5 text-emerald-600" />
+                Ingestão e saúde
               </CollapsibleCardTitle>
-              <CollapsibleCardDescription>
-                Interfaces expostas para consulta, documentação e health-check do stack LangChain/LlamaIndex.
-              </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {QUICK_LINKS.map((link) => (
-                  <div
-                    key={link.id}
-                    className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 flex flex-col gap-3"
-                  >
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-                        {link.icon}
-                      </span>
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">{link.label}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{link.helper}</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" onClick={handleOpen(link.href)} className="justify-start gap-2">
-                      <ExternalLink className="w-4 h-4" />
-                      Abrir em nova aba
-                    </Button>
-                  </div>
-                ))}
-              </div>
+              <LlamaIndexIngestionStatusCard
+                data={statusData}
+                loading={statusLoading}
+                error={statusError}
+                ingesting={ingesting}
+                ingestionMessage={ingestionMessage}
+                onRefresh={handleRefresh}
+                onIngest={handleIngest}
+              />
+            </CollapsibleCardContent>
+          </CollapsibleCard>
+        ),
+      },
+      {
+        id: 'llamaindex-collections',
+        content: (
+          <CollapsibleCard cardId="llamaindex-collections">
+            <CollapsibleCardHeader>
+              <CollapsibleCardTitle className="flex items-center gap-2">
+                <Boxes className="w-5 h-5 text-amber-600" />
+                Coleções vetoriais
+              </CollapsibleCardTitle>
+            </CollapsibleCardHeader>
+            <CollapsibleCardContent>
+              <LlamaIndexCollectionsCard
+                collections={collections}
+                primaryCollection={primaryCollection}
+                chunkCount={chunkCount}
+                loading={statusLoading}
+              />
             </CollapsibleCardContent>
           </CollapsibleCard>
         ),
@@ -240,93 +294,8 @@ export function LlamaIndexPage(): JSX.Element {
           </CollapsibleCard>
         ),
       },
-      {
-        id: 'llamaindex-docs',
-        content: (
-          <CollapsibleCard cardId="llamaindex-docs">
-            <CollapsibleCardHeader>
-              <CollapsibleCardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-indigo-600" />
-                Documentação e suporte
-              </CollapsibleCardTitle>
-              <CollapsibleCardDescription>
-                Consulte guias de implementação, roadmap e detalhes operacionais.
-              </CollapsibleCardDescription>
-            </CollapsibleCardHeader>
-            <CollapsibleCardContent>
-              <div className="space-y-3">
-                {DOCUMENTATION_LINKS.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4"
-                  >
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">{item.label}</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.description}</p>
-                    <Button variant="outline" onClick={handleOpen(item.href)} className="gap-2">
-                      <ExternalLink className="w-4 h-4" />
-                      Abrir documentação
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CollapsibleCardContent>
-          </CollapsibleCard>
-        ),
-      },
-      {
-        id: 'llamaindex-cli',
-        content: (
-          <CollapsibleCard cardId="llamaindex-cli">
-            <CollapsibleCardHeader>
-              <CollapsibleCardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-emerald-600" />
-                Snippets CLI
-              </CollapsibleCardTitle>
-              <CollapsibleCardDescription>
-                Comandos para troubleshooting, health checks e inspeção do vector store.
-              </CollapsibleCardDescription>
-            </CollapsibleCardHeader>
-            <CollapsibleCardContent>
-              <div className="space-y-4">
-                {CLI_SNIPPETS.map((snippet) => (
-                  <div key={snippet.id} className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{snippet.title}</p>
-                    <pre className="bg-slate-900/90 text-slate-50 text-xs p-3 rounded-lg overflow-x-auto">
-                      <code>{snippet.command}</code>
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            </CollapsibleCardContent>
-          </CollapsibleCard>
-        ),
-      },
-      {
-        id: 'llamaindex-swagger',
-        content: (
-          <CollapsibleCard cardId="llamaindex-swagger" defaultCollapsed={false}>
-            <CollapsibleCardHeader>
-              <CollapsibleCardTitle className="flex items-center gap-2">
-                <Boxes className="w-5 h-5 text-indigo-600" />
-                Query API (Swagger UI)
-              </CollapsibleCardTitle>
-              <CollapsibleCardDescription>
-                Teste requisições do serviço de consultas LlamaIndex sem sair do dashboard.
-              </CollapsibleCardDescription>
-            </CollapsibleCardHeader>
-            <CollapsibleCardContent>
-              <DatabaseEmbedFrame
-                url={`${QUERY_BASE_URL}/docs`}
-                title="LlamaIndex Swagger UI"
-                openLabel="Abrir em aba separada"
-                iframeTitle="LlamaIndex Swagger UI"
-              />
-            </CollapsibleCardContent>
-          </CollapsibleCard>
-        ),
-      },
     ],
-    []
+    [collections, chunkCount, handleIngest, handleRefresh, ingestionMessage, ingesting, primaryCollection, quickLinks, statusData, statusError, statusLoading]
   );
 
   return (
@@ -357,6 +326,7 @@ function LlamaIndexEndpointBanner(): JSX.Element {
   const [copied, setCopied] = useState(false);
   const [health, setHealth] = useState<'unknown' | 'ok' | 'error'>('unknown');
   const [healthMsg, setHealthMsg] = useState<string>('');
+  const [healthUrl, setHealthUrl] = useState<string>('');
   const [, setFailCount] = useState(0);
   const [showSuggest, setShowSuggest] = useState(false);
   const suppressKey = 'llamaindex.suppressProxySuggest';
@@ -371,24 +341,16 @@ function LlamaIndexEndpointBanner(): JSX.Element {
     try {
       setHealth('unknown');
       setHealthMsg('');
-      const env = import.meta.env as Record<string, string | undefined>;
-      const apiBase = (env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-      const direct = (env.VITE_LLAMAINDEX_QUERY_URL || 'http://localhost:8202').replace(/\/+$/, '');
-      let url = '';
-      if (info.resolved === 'proxy' && apiBase) {
-        url = `${apiBase}/health`;
-      } else {
-        url = `${direct}/health`;
-      }
-      const res = await fetch(url, { method: 'GET' });
-      if (res.ok) {
+      const latest = await checkHealth();
+      setHealthUrl(latest.url);
+      if (latest.status === 'ok') {
         setHealth('ok');
         setHealthMsg('OK');
         setFailCount(0);
       } else {
         setHealth('error');
-        setHealthMsg(`HTTP ${res.status}`);
-        if (info.resolved === 'direct') {
+        setHealthMsg(latest.message || 'Erro');
+        if (latest.resolved === 'direct') {
           setFailCount((c) => {
             const n = c + 1;
             try {
@@ -402,7 +364,8 @@ function LlamaIndexEndpointBanner(): JSX.Element {
     } catch (e: any) {
       setHealth('error');
       setHealthMsg(e?.message || 'Network error');
-      if (info.resolved === 'direct') {
+      const latestInfo = endpointInfo();
+      if (latestInfo.resolved === 'direct') {
         setFailCount((c) => {
           const n = c + 1;
           try {
@@ -439,13 +402,22 @@ function LlamaIndexEndpointBanner(): JSX.Element {
           <div className="mt-1 font-mono text-xs break-all text-slate-700 dark:text-slate-300">{info.url}</div>
           <div className="mt-2 flex items-center gap-2">
             <span className="text-sm text-slate-600 dark:text-slate-400">Saúde:</span>
-            {health === 'ok' && <Badge variant="outline" className="text-emerald-700 border-emerald-400">OK</Badge>}
-            {health === 'error' && (
-              <Badge variant="outline" className="text-red-700 border-red-400">
-                {healthMsg || 'Erro'}{info.resolved === 'direct' ? ' (Possível CORS/porta)' : ''}
-              </Badge>
-            )}
-            {health === 'unknown' && <Badge variant="outline">Testando…</Badge>}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {health === 'ok' ? (
+                  <Badge variant="outline" className="text-emerald-700 border-emerald-400 cursor-help">OK</Badge>
+                ) : health === 'error' ? (
+                  <Badge variant="outline" className="text-red-700 border-red-400 cursor-help">
+                    {healthMsg || 'Erro'}{info.resolved === 'direct' ? ' (Possível CORS/porta)' : ''}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="cursor-help">Testando…</Badge>
+                )}
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="max-w-xs break-all">{healthUrl || endpointInfo().url}</div>
+              </TooltipContent>
+            </Tooltip>
           </div>
           {health === 'error' && info.resolved === 'direct' && (
             <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -491,6 +463,19 @@ function LlamaIndexEndpointBanner(): JSX.Element {
             <option value="proxy">proxy</option>
             <option value="direct">direct</option>
           </select>
+          {/* Open Swagger link adjusted by mode */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const env = import.meta.env as Record<string, string | undefined>;
+              const direct = (env.VITE_LLAMAINDEX_QUERY_URL || 'http://localhost:8202').replace(/\/+$/, '');
+              window.open(`${direct}/docs`, '_blank', 'noopener,noreferrer');
+            }}
+            title={endpointInfo().resolved === 'proxy' ? 'Abrir Swagger do Query (direct)' : 'Abrir Swagger do Query'}
+          >
+            Abrir Swagger{endpointInfo().resolved === 'proxy' ? ' (direct)' : ''}
+          </Button>
         </div>
       </div>
     </div>

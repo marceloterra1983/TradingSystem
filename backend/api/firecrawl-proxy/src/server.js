@@ -1,37 +1,94 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import axios from 'axios';
-import pino from 'pino';
 
-const logger = pino({
-  level: process.env.LOG_LEVEL || 'info'
-});
+// Shared modules
+import { createLogger } from '../../../shared/logger/index.js';
+import {
+  configureCors,
+  configureRateLimit,
+  configureHelmet,
+  createErrorHandler,
+  createNotFoundHandler,
+  createCorrelationIdMiddleware,
+} from '../../../shared/middleware/index.js';
+import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
 
 const app = express();
 const PORT = process.env.PORT || 3600;
 const FIRECRAWL_API_URL = process.env.FIRECRAWL_API_URL || 'https://api.firecrawl.dev';
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-
-// Request logging
-app.use((req, res, next) => {
-  logger.info({ method: req.method, url: req.url }, 'Incoming request');
-  next();
+// Initialize logger
+const logger = createLogger('firecrawl-proxy', {
+  version: '1.0.0',
+  base: {
+    firecrawlApiUrl: FIRECRAWL_API_URL,
+    hasApiKey: !!FIRECRAWL_API_KEY,
+  },
 });
 
-// Health check
-app.get('/health', (req, res) => {
+// Middleware stack
+app.use(createCorrelationIdMiddleware());
+app.use(configureHelmet({ logger }));
+app.use(configureCors({ logger }));
+app.use(configureRateLimit({ logger }));
+app.use(express.json());
+
+// Health check endpoint - comprehensive check
+app.get(
+  '/health',
+  createHealthCheckHandler({
+    serviceName: 'firecrawl-proxy',
+    version: '1.0.0',
+    logger,
+    checks: {
+      firecrawlApi: async () => {
+        if (!FIRECRAWL_API_KEY) {
+          throw new Error('API key not configured');
+        }
+        // Simple connectivity check to Firecrawl API
+        try {
+          await axios.get(`${FIRECRAWL_API_URL}/health`, {
+            timeout: 5000,
+            validateStatus: () => true, // Accept any status
+          });
+          return 'connected';
+        } catch (error) {
+          if (error.code === 'ECONNABORTED') {
+            throw new Error('timeout');
+          }
+          // Even if endpoint doesn't exist, connection is OK
+          return 'reachable';
+        }
+      },
+    },
+  })
+);
+
+// Readiness probe
+app.get(
+  '/ready',
+  createHealthCheckHandler({
+    serviceName: 'firecrawl-proxy',
+    version: '1.0.0',
+    logger,
+    checks: {
+      apiKey: async () => {
+        if (!FIRECRAWL_API_KEY) {
+          throw new Error('API key not configured');
+        }
+        return 'configured';
+      },
+    },
+  })
+);
+
+// Liveness probe
+app.get('/healthz', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'firecrawl-proxy',
-    version: '1.0.0',
-    firecrawlApiUrl: FIRECRAWL_API_URL,
-    hasApiKey: !!FIRECRAWL_API_KEY
+    uptime: process.uptime(),
   });
 });
 
@@ -153,37 +210,63 @@ app.get('/api/crawl/status/:jobId', async (req, res) => {
   }
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    path: req.url,
-    availableEndpoints: [
-      'GET /health',
-      'POST /api/scrape',
-      'POST /api/crawl',
-      'GET /api/crawl/status/:jobId'
-    ]
-  });
-});
+// Error handling middleware
+app.use(createNotFoundHandler({ logger }));
+app.use(
+  createErrorHandler({
+    logger,
+    includeStack: process.env.NODE_ENV !== 'production',
+  })
+);
 
-// Error handler
-app.use((err, req, res, next) => {
-  logger.error({ err }, 'Unhandled error');
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: err.message
-  });
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  logger.info({
+// Start server
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.startup('Firecrawl Proxy server started', {
     port: PORT,
     firecrawlApiUrl: FIRECRAWL_API_URL,
-    hasApiKey: !!FIRECRAWL_API_KEY
-  }, 'Firecrawl Proxy server started');
+    hasApiKey: !!FIRECRAWL_API_KEY,
+  });
 
   if (!FIRECRAWL_API_KEY) {
     logger.warn('⚠️  FIRECRAWL_API_KEY not set - API calls will fail');
   }
+});
+
+// Graceful shutdown
+const shutdown = async (signal) => {
+  logger.info({ signal }, 'Shutdown signal received');
+
+  const timeout = setTimeout(() => {
+    logger.error('Shutdown timeout - forcing exit');
+    process.exit(1);
+  }, 10000);
+
+  try {
+    // Close server
+    await new Promise((resolve) => {
+      server.close(resolve);
+      logger.info('HTTP server closed');
+    });
+
+    clearTimeout(timeout);
+    logger.info('Graceful shutdown completed');
+    process.exit(0);
+  } catch (error) {
+    logger.error({ err: error }, 'Error during shutdown');
+    clearTimeout(timeout);
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  logger.fatal({ err: error }, 'Uncaught exception');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, 'Unhandled promise rejection');
 });

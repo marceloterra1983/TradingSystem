@@ -1,5 +1,5 @@
 export interface SignalRow {
-  ts: string;
+  ts: string | number;
   channel: string;
   signal_type: string;
   asset: string;

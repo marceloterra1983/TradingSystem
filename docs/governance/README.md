@@ -11,6 +11,37 @@ Governance documents ensure:
 - **Sustainability**: Repeatable processes for ongoing maintenance
 - **Communication**: Stakeholders informed of changes and launches
 
+## Directory Structure
+
+```
+governance/
+├── README.md                       # This file
+├── DOCUMENTATION-INDEX.md          # Complete documentation index (NEW)
+├── REVIEW-CHECKLIST.md             # Review checklist
+├── VALIDATION-GUIDE.md             # Validation guide
+├── MAINTENANCE-CHECKLIST.md        # Maintenance procedures
+├── COMMUNICATION-PLAN.md           # Launch communication plan
+├── ENV-AUDIT-REPORT.md            # Environment variables audit
+│
+├── audits/                         # Quality audits (NEW)
+│   ├── APPS-DOCS-AUDIT-2025-10-27.md
+│   ├── AUDIT-SUMMARY-2025-10-27.md
+│   └── CORRECTIONS-APPLIED-2025-10-27.md
+│
+├── organization/                   # Organization reports (NEW)
+│   ├── APPS-DOCS-ORGANIZATION-2025-10-27.md
+│   ├── DOCS-ORGANIZATION-2025-10-27.md
+│   └── SCRIPTS-REORGANIZATION-2025-10-27.md
+│
+├── reviews/                        # Major reviews (NEW)
+│   └── DOCUSAURUS-REVIEW-FINAL-REPORT.md
+│
+└── planning/                       # Planning documents (NEW)
+    └── PLANO-REVISAO-API-DOCS.md
+```
+
+**Recent Organization (2025-10-29)**: Moved audit, organization, review, and planning documents from project root to organized subdirectories. See [DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md) for complete file locations.
+
 ## Documents
 
 ### 1. [REVIEW-CHECKLIST.md](REVIEW-CHECKLIST.md)

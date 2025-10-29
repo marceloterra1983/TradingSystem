@@ -2,7 +2,7 @@
 -- Stores the list of Telegram channels allowed for ingestion
 
 CREATE TABLE IF NOT EXISTS telegram_gateway.channels (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
     channel_id BIGINT NOT NULL UNIQUE,
     label TEXT,
     description TEXT,

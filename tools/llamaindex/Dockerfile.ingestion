@@ -216,11 +216,15 @@ eles
 elas
 SW_PT
 
-# Copy application code
-COPY ingestion_service/ .
+# Copy application code and shared helpers
+COPY shared/ ./shared/
+COPY ingestion_service/ ./ingestion_service/
 
 # Create directory for logs
 RUN mkdir -p /app/logs
+
+# Switch to service directory
+WORKDIR /app/ingestion_service
 
 # Run the ingestion service
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

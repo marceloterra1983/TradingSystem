@@ -1,0 +1,16 @@
+{
+  "name": "@trading-system/llamaindex-tools",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "LlamaIndex RAG monitoring and automation tools",
+  "scripts": {
+    "watch": "node watch-docs.js",
+    "watch:dry": "DRY_RUN=true node watch-docs.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

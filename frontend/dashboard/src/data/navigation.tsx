@@ -43,6 +43,9 @@ const LangChainVectorPage = React.lazy(
 const TelegramGatewayFinal = React.lazy(
   () => import('../components/pages/TelegramGatewayFinal')
 );
+const DocsHybridSearchPage = React.lazy(
+  () => import('../components/pages/DocsHybridSearchPage')
+);
 
 /**
  * Page Part - Collapsible section within a page
@@ -237,12 +240,8 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Busca híbrida (lexical + vetorial) com reranking e âncoras',
         },
         parts: [],
-        customContent: (
-          <React.Suspense fallback={<div className="p-4 text-sm">Carregando…</div>}>
-            {/** Lazy import to keep initial bundle small */}
-            {React.createElement(React.lazy(() => import('../components/pages/DocsHybridSearchPage')))}
-          </React.Suspense>
-        ),
+        // Use the same lazy loading pattern as other pages; PageContent wraps with Suspense
+        customContent: <DocsHybridSearchPage />,
       },
     ],
   },

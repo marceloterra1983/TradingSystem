@@ -331,13 +331,16 @@ if (config.telegram.phoneNumber) {
       // Tornar o userClient acessível nas rotas
       app.set('telegramUserClient', userClient);
 
-      // Important: Enable catching up to receive all updates
-      // This ensures the client receives updates for all channels/chats it's subscribed to
-      try {
-        await userClient.catchUp();
-        logger.info('Telegram user client caught up with updates');
-      } catch (catchUpError) {
-        logger.warn({ err: catchUpError }, 'CatchUp failed, but continuing anyway');
+      // Important: Enable catching up to receive all updates (if supported by gramJS)
+      if (typeof userClient.catchUp === 'function') {
+        try {
+          await userClient.catchUp();
+          logger.info('Telegram user client caught up with updates');
+        } catch (catchUpError) {
+          logger.warn({ err: catchUpError }, 'CatchUp failed, but continuing anyway');
+        }
+      } else {
+        logger.info('catchUp() not available in this gramJS version; continuing without it');
       }
 
       // Add event handler for new channel messages (polling mode)

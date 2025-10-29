@@ -45,7 +45,7 @@ const mapRow = (row) => {
   };
 };
 
-const buildArrayCondition = (field, values, paramIndex) => {
+const buildArrayCondition = (field, values, paramIndex, type = 'text') => {
   if (!values || values.length === 0) return null;
   if (values.length === 1) {
     return {
@@ -55,7 +55,7 @@ const buildArrayCondition = (field, values, paramIndex) => {
     };
   }
   return {
-    clause: `${field} = ANY($${paramIndex}::text[])`,
+    clause: `${field} = ANY($${paramIndex}::${type}[])`,
     params: [values],
     next: paramIndex + 1,
   };
@@ -77,10 +77,12 @@ const getPool = async (logger) => {
 
   pool = new pg.Pool(poolConfig);
 
-  const searchPathSql = `SET search_path TO ${quoteIdentifier(
-    config.database.schema,
-  )}, public`;
+  const schemaIdent = quoteIdentifier(config.database.schema);
+  const tableNameIdent = quoteIdentifier(config.database.table);
+  const searchPathSql = `SET search_path TO ${schemaIdent}, public`;
 
+  // On each new client connection, set the search_path to ensure unqualified
+  // queries hit the right schema.
   pool.on('connect', (client) => {
     client.query(searchPathSql).catch((error) => {
       logger?.error?.({ err: error }, 'Failed to set search_path for Telegram Gateway DB');
@@ -89,14 +91,62 @@ const getPool = async (logger) => {
 
   const client = await pool.connect();
   try {
+    // Basic connectivity
     await client.query('SELECT 1');
+
+    // Ensure schema exists and set search_path for this session
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schemaIdent}`);
     await client.query(searchPathSql);
+
+    // Self-heal minimal tables for local/dev usage so the API can run even
+    // before migrations are applied. This mirrors the gateway service DDL.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${schemaIdent}."channels" (
+        id BIGSERIAL PRIMARY KEY,
+        channel_id BIGINT UNIQUE NOT NULL,
+        label TEXT,
+        description TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${schemaIdent}.${tableNameIdent} (
+        id BIGSERIAL PRIMARY KEY,
+        channel_id BIGINT NOT NULL,
+        message_id TEXT NOT NULL,
+        thread_id BIGINT,
+        source TEXT NOT NULL DEFAULT 'unknown',
+        message_type TEXT NOT NULL DEFAULT 'channel_post',
+        text TEXT,
+        caption TEXT,
+        media_type TEXT,
+        media_refs JSONB NOT NULL DEFAULT '[]'::jsonb,
+        status TEXT NOT NULL DEFAULT 'received',
+        received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        telegram_date TIMESTAMPTZ,
+        published_at TIMESTAMPTZ,
+        failed_at TIMESTAMPTZ,
+        queued_at TIMESTAMPTZ,
+        reprocess_requested_at TIMESTAMPTZ,
+        reprocessed_at TIMESTAMPTZ,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        deleted_at TIMESTAMPTZ
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_${config.database.table}_channel_date
+      ON ${schemaIdent}.${tableNameIdent} (channel_id, telegram_date);
+    `);
+
     logger?.info?.(
-      {
-        schema: config.database.schema,
-        table: config.database.table,
-      },
-      'Connected to Telegram Gateway TimescaleDB',
+      { schema: config.database.schema, table: config.database.table },
+      'Telegram Gateway API: ensured schema/tables exist',
     );
   } finally {
     client.release();
@@ -116,9 +166,17 @@ export const listMessages = async (filters = {}, logger) => {
   let paramIndex = 1;
 
   if (filters.channelId) {
-    conditions.push(`channel_id = $${paramIndex}`);
-    params.push(filters.channelId);
-    paramIndex += 1;
+    // Support both single channelId and array of channelIds
+    const channelIds = Array.isArray(filters.channelId)
+      ? filters.channelId
+      : [filters.channelId];
+
+    const condition = buildArrayCondition('channel_id', channelIds, paramIndex, 'bigint');
+    if (condition) {
+      conditions.push(condition.clause);
+      params.push(...condition.params);
+      paramIndex = condition.next;
+    }
   }
 
   if (filters.messageId) {

@@ -18,6 +18,16 @@ def test_health_check(test_client_query):
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
+
+def test_gpu_policy(test_client_query):
+    """GPU policy endpoint should expose coordination settings."""
+    response = test_client_query.get("/gpu/policy")
+    assert response.status_code == 200
+    data = response.json()
+    assert "policy" in data
+    assert "options" in data
+    assert "maxConcurrency" in data
+
 @pytest.fixture
 def test_token():
     """Create a test JWT token."""

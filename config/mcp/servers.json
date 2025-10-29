@@ -21,7 +21,10 @@
     {
       "ref": "postgres-frontend-apps",
       "enabled": true
+    },
+    {
+      "ref": "sentry",
+      "enabled": true
     }
   ]
 }
-

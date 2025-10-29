@@ -6,8 +6,9 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
+    "dev": "npm run kill-port && node --watch src/server.js",
     "dev:stable": "node src/server.js",
+    "kill-port": "lsof -ti:4005 | xargs kill -9 2>/dev/null || true",
     "lint": "eslint ./src --ext .js",
     "test": "node --test",
     "seed": "node scripts/seed-sample-data.js"

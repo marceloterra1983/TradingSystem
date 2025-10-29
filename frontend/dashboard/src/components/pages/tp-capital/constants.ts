@@ -5,7 +5,7 @@ export const LOG_LIMIT_OPTIONS = [50, 100, 200];
 
 export const SAMPLE_SIGNALS: SignalRow[] = [
   {
-    ts: '2025-01-10T13:45:00.000Z',
+    ts: new Date('2025-01-10T13:45:00.000Z').getTime(),
     channel: 'tp-capital-premium',
     signal_type: 'Swing Trade',
     asset: 'PETR4',
@@ -20,7 +20,7 @@ export const SAMPLE_SIGNALS: SignalRow[] = [
     ingested_at: '2025-01-10T13:45:03.000Z',
   },
   {
-    ts: '2025-01-10T14:05:00.000Z',
+    ts: new Date('2025-01-10T14:05:00.000Z').getTime(),
     channel: 'tp-capital-premium',
     signal_type: 'Day Trade',
     asset: 'WINJ25',

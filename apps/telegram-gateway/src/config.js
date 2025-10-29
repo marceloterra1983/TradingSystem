@@ -22,7 +22,8 @@ const toInteger = (value, fallback) => {
 const defaultDbUrl =
   process.env.TELEGRAM_GATEWAY_DB_URL ||
   process.env.TIMESCALEDB_URL ||
-  'postgresql://timescale:changeme@localhost:5433/APPS-TELEGRAM-GATEWAY';
+  // Fallback aligned with local Timescale defaults (single DB 'tradingsystem' + schema 'telegram_gateway')
+  'postgresql://timescale:pass_timescale@localhost:5433/tradingsystem';
 
 export const config = {
   gateway: {

@@ -6,6 +6,9 @@ import { cn } from '../../lib/utils';
 import { Page, getSectionByPageId } from '../../data/navigation';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Logo } from '../ui/logo';
+import { useEffect, useState } from 'react';
+import { endpointInfo, checkHealth, setMode, getMode, type ServiceMode } from '../../services/llamaIndexService';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export interface LayoutHeaderProps {
   currentPage: Page;
@@ -32,6 +35,23 @@ export function LayoutHeader({
 }: LayoutHeaderProps) {
   const currentSection = getSectionByPageId(currentPage.id);
   const { resolvedTheme, toggleTheme } = useTheme();
+  const [ragHealth, setRagHealth] = useState<'unknown' | 'ok' | 'error'>('unknown');
+  const [ragResolved, setRagResolved] = useState<'proxy' | 'direct'>(endpointInfo().resolved);
+  const [ragHealthUrl, setRagHealthUrl] = useState<string>('');
+  const [headerMode, setHeaderMode] = useState<ServiceMode>(getMode());
+
+  async function refreshRagHealth() {
+    const h = await checkHealth();
+    setRagResolved(h.resolved);
+    setRagHealth(h.status);
+    setRagHealthUrl(h.url);
+  }
+
+  useEffect(() => {
+    refreshRagHealth();
+    const id = setInterval(() => { refreshRagHealth(); }, 60000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <header
@@ -84,6 +104,72 @@ export function LayoutHeader({
         {/* Connection Status */}
         <div className="hidden lg:flex">
           <ConnectionStatus showDetails />
+        </div>
+
+        {/* RAG Endpoint Health + Controls */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Compact status dot */}
+          <span
+            className={
+              'inline-block h-2.5 w-2.5 rounded-full ' +
+              (ragHealth === 'ok'
+                ? 'bg-emerald-500'
+                : ragHealth === 'error'
+                ? 'bg-red-500'
+                : 'bg-gray-400')
+            }
+            title={`RAG ${ragResolved.toUpperCase()} - ${ragHealth}`}
+          />
+          <button
+            className="text-xs text-gray-600 dark:text-gray-300 hover:underline"
+            title="Abrir LlamaIndex"
+            onClick={() => { window.location.hash = '#/llamaindex-services'; }}
+          >
+            RAG
+          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {ragHealth === 'ok' ? (
+                <span className="rounded px-2 py-0.5 text-xs border border-emerald-400 text-emerald-700 cursor-help">{ragResolved.toUpperCase()}</span>
+              ) : ragHealth === 'unknown' ? (
+                <span className="rounded px-2 py-0.5 text-xs border border-gray-400 text-gray-700 cursor-help">...</span>
+              ) : (
+                <button
+                  className="rounded px-2 py-0.5 text-xs border border-red-400 text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  title="Falha ao acessar endpoint RAG. Clique para alternar para proxy."
+                  onClick={() => { setMode('proxy'); setHeaderMode('proxy'); refreshRagHealth(); }}
+                >
+                  {ragResolved.toUpperCase()} !
+                </button>
+              )}
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="max-w-xs break-all">{ragHealthUrl || endpointInfo().url}</div>
+            </TooltipContent>
+          </Tooltip>
+          {/* Mode selector */}
+          <select
+            className="text-xs rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-1.5 py-0.5"
+            value={headerMode}
+            onChange={(e) => { const m = e.target.value as ServiceMode; setMode(m); setHeaderMode(m); refreshRagHealth(); }}
+            title="Modo do endpoint RAG"
+          >
+            <option value="auto">auto</option>
+            <option value="proxy">proxy</option>
+            <option value="direct">direct</option>
+          </select>
+          {/* Open Swagger (direct) */}
+          <button
+            className="text-xs rounded px-2 py-0.5 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+            title="Abrir Swagger do Query (direct)"
+            onClick={() => {
+              const env = import.meta.env as Record<string, string | undefined>;
+              const direct = (env.VITE_LLAMAINDEX_QUERY_URL || 'http://localhost:8202').replace(/\/+$/, '');
+              window.open(`${direct}/docs`, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            Swagger
+          </button>
         </div>
 
         {/* Clock */}

@@ -13,7 +13,7 @@ This service now supports local semantic search using Ollama embeddings and Qdra
 Set in the repo `.env` (see `.env.example`):
 
 - `QDRANT_URL` (default `http://localhost:6333`)
-- `QDRANT_COLLECTION` (default `docs_index`)
+- `QDRANT_COLLECTION` (default `documentation`)
 - `OLLAMA_BASE_URL` (default `http://localhost:11434`)
 - `OLLAMA_EMBEDDING_MODEL` (default `nomic-embed-text`)
 - Optional chunking: `DOCS_CHUNK_SIZE=800`, `DOCS_CHUNK_OVERLAP=120`

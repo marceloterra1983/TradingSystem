@@ -146,32 +146,75 @@ class TimescaleClient {
   async insertSignal(signal) {
     try {
       const query = `
-        INSERT INTO "${this.schema}".signals_v2
-        (ts, channel, signal_type, asset, buy_min, buy_max, target_1, target_2, target_final, stop, 
-         raw_message, source, ingested_at, status, priority, tags, metadata, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
-        RETURNING id
+        INSERT INTO "${this.schema}".tp_capital_signals
+        (
+          ts,
+          channel,
+          signal_type,
+          asset,
+          buy_min,
+          buy_max,
+          target_1,
+          target_2,
+          target_final,
+          stop,
+          raw_message,
+          source,
+          ingested_at,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+          $11, $12, $13, $14, $15
+        )
+        RETURNING id, ts
       `;
 
+      const now = new Date();
+      const tsValue =
+        signal.ts instanceof Date
+          ? signal.ts
+          : typeof signal.ts === 'number'
+            ? new Date(signal.ts)
+            : signal.ts
+              ? new Date(signal.ts)
+              : now;
+      const ingestedAtValue =
+        signal.ingested_at instanceof Date
+          ? signal.ingested_at
+          : signal.ingested_at
+            ? new Date(signal.ingested_at)
+            : now;
+      const createdAtValue =
+        signal.created_at instanceof Date
+          ? signal.created_at
+          : signal.created_at
+            ? new Date(signal.created_at)
+            : ingestedAtValue;
+      const updatedAtValue =
+        signal.updated_at instanceof Date
+          ? signal.updated_at
+          : signal.updated_at
+            ? new Date(signal.updated_at)
+            : ingestedAtValue;
+
       const values = [
-        signal.ts || Date.now(),
+        tsValue,
         signal.channel || null,
         signal.signal_type || null,
         signal.asset,
-        signal.buy_min || null,
-        signal.buy_max || null,
-        signal.target_1 || null,
-        signal.target_2 || null,
-        signal.target_final || null,
-        signal.stop || null,
+        signal.buy_min ?? null,
+        signal.buy_max ?? null,
+        signal.target_1 ?? null,
+        signal.target_2 ?? null,
+        signal.target_final ?? null,
+        signal.stop ?? null,
         signal.raw_message || null,
         signal.source || 'telegram',
-        signal.ingested_at || new Date(),
-        signal.status || 'active',
-        signal.priority || 'medium',
-        signal.tags || [],
-        JSON.stringify(signal.metadata || {}),
-        signal.created_by || 'system',
+        ingestedAtValue,
+        createdAtValue,
+        updatedAtValue,
       ];
 
       const result = await this.pool.query(query, values);
@@ -219,20 +262,17 @@ class TimescaleClient {
   async updateSignalStatus(signalId, status, updatedBy = 'system', metadata = {}) {
     try {
       const query = `
-        UPDATE "${this.schema}".signals_v2
-        SET status = $1, 
-            updated_by = $2,
-            updated_at = now(),
-            metadata = metadata || $3::jsonb
-        WHERE id = $4
-        RETURNING id, status, updated_at
+        UPDATE "${this.schema}".tp_capital_signals
+        SET updated_at = now()
+        WHERE id = $1
+        RETURNING id, updated_at
       `;
       
-      const values = [status, updatedBy, JSON.stringify(metadata), signalId];
+      const values = [signalId];
       const result = await this.pool.query(query, values);
       return result.rows[0];
     } catch (error) {
-      logger.error({ err: error, signalId, status }, 'Failed to update signal status');
+      logger.error({ err: error, signalId, status }, 'Failed to update signal status (table does not support status column)');
       throw error;
     }
   }
@@ -240,34 +280,31 @@ class TimescaleClient {
   async addSignalTags(signalId, tags, updatedBy = 'system') {
     try {
       const query = `
-        UPDATE "${this.schema}".signals_v2
-        SET tags = array_cat(tags, $1::text[]),
-            updated_by = $2,
-            updated_at = now()
-        WHERE id = $3
-        RETURNING id, tags
+        UPDATE "${this.schema}".tp_capital_signals
+        SET updated_at = now()
+        WHERE id = $1
+        RETURNING id, updated_at
       `;
       
-      const values = [tags, updatedBy, signalId];
+      const values = [signalId];
       const result = await this.pool.query(query, values);
       return result.rows[0];
     } catch (error) {
-      logger.error({ err: error, signalId, tags }, 'Failed to add signal tags');
+      logger.error({ err: error, signalId, tags }, 'Failed to add signal tags (table does not support tags column)');
       throw error;
     }
   }
 
   async fetchSignals(options = {}) {
     try {
-      const { limit, channel, signalType, fromTs, toTs, status } = options;
+      const { limit, channel, signalType, fromTs, toTs } = options;
       
       let query = `
         SELECT 
           id, ts, channel, signal_type, asset, buy_min, buy_max, 
           target_1, target_2, target_final, stop, raw_message, 
-          source, created_at as ingested_at, created_at, updated_at,
-          status, priority, tags, metadata, created_by, updated_by
-        FROM "${this.schema}".signals_v2
+          source, created_at as ingested_at, created_at, updated_at
+        FROM "${this.schema}".tp_capital_signals
         WHERE 1=1
       `;
       const values = [];
@@ -293,11 +330,6 @@ class TimescaleClient {
         values.push(new Date(toTs));
       }
 
-      if (status) {
-        query += ` AND status = $${paramCount++}`;
-        values.push(status);
-      }
-
       query += ` ORDER BY ts DESC`;
 
       if (limit) {
@@ -315,8 +347,8 @@ class TimescaleClient {
 
   async deleteSignalByIngestedAt(ingestedAt) {
     try {
-      // Use signals_v2 directly (view doesn't support DELETE)
-      const query = `DELETE FROM "${this.schema}".signals_v2 WHERE created_at = $1`;
+      // Delete from tp_capital_signals table using created_at timestamp
+      const query = `DELETE FROM "${this.schema}".tp_capital_signals WHERE created_at = $1`;
       await this.pool.query(query, [new Date(ingestedAt)]);
     } catch (error) {
       logger.error({ err: error, ingestedAt }, 'Failed to delete signal');
@@ -533,110 +565,38 @@ class TimescaleClient {
   }
 
   // ========== FORWARDED MESSAGES METHODS ==========
-
-  async ensureForwardedMessagesTable() {
-    try {
-      const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS "${this.schema}".forwarded_messages (
-          id SERIAL,
-          ts TIMESTAMPTZ NOT NULL,
-          source_channel_id BIGINT NOT NULL,
-          source_channel_name TEXT,
-          message_id BIGINT NOT NULL,
-          message_text TEXT,
-          image_url TEXT,
-          image_width INTEGER,
-          image_height INTEGER,
-          forwarded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-          destination_channel_id BIGINT,
-          forward_method TEXT,
-          PRIMARY KEY (id, ts)
-        )
-      `;
-      
-      await this.pool.query(createTableQuery);
-      
-      // Tenta criar hypertable (ignora se já existe)
-      try {
-        await this.pool.query(`SELECT create_hypertable('"${this.schema}".forwarded_messages', 'ts', if_not_exists => TRUE)`);
-      } catch (hypertableError) {
-        // Ignora erro se hypertable já existe
-        logger.debug({ err: hypertableError }, 'Hypertable may already exist');
-      }
-      
-      logger.info({ schema: this.schema }, 'Forwarded messages table ensured');
-    } catch (error) {
-      logger.error({ err: error, schema: this.schema }, 'Failed to ensure forwarded messages table');
-      throw error;
-    }
-  }
-
-  async insertForwardedMessage(message) {
-    try {
-      await this.ensureForwardedMessagesTable();
-
-      const query = `
-        INSERT INTO "${this.schema}".forwarded_messages 
-        (ts, source_channel_id, source_channel_name, message_id, message_text, image_url, image_width, image_height, forwarded_at, destination_channel_id, forward_method)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING id, ts
-      `;
-      
-      const values = [
-        message.ts || new Date(),
-        message.source_channel_id,
-        message.source_channel_name || null,
-        message.message_id,
-        message.message_text || null,
-        message.image_url || null,
-        message.image_width || null,
-        message.image_height || null,
-        message.forwarded_at || new Date(),
-        message.destination_channel_id || null,
-        message.forward_method || 'copy',
-      ];
-
-      const result = await this.pool.query(query, values);
-      return result.rows[0];
-    } catch (error) {
-      logger.error({ err: error, message }, 'Failed to insert forwarded message');
-      throw error;
-    }
-  }
+  // Table created by migration: backend/data/timescaledb/tp-capital/01_create_forwarded_messages_table.sql
 
   async fetchForwardedMessages(options = {}) {
     try {
-      await this.ensureForwardedMessagesTable();
+      const { limit, channelId, fromTs, toTs } = options;
 
-      const { limit, sourceChannelId, fromTs, toTs } = options;
-      
       let query = `
-        SELECT 
-          id, ts, source_channel_id, source_channel_name, message_id, 
-          message_text, image_url, image_width, image_height, 
-          forwarded_at, destination_channel_id, forward_method
+        SELECT
+          id, channel_id, message_id, message_text,
+          original_timestamp, photos, received_at
         FROM "${this.schema}".forwarded_messages
         WHERE 1=1
       `;
       const values = [];
       let paramCount = 1;
 
-      if (sourceChannelId) {
-        query += ` AND source_channel_id = $${paramCount++}`;
-        values.push(sourceChannelId);
+      if (channelId) {
+        query += ` AND channel_id = $${paramCount++}`;
+        values.push(channelId);
       }
 
       if (fromTs) {
-        query += ` AND ts >= $${paramCount++}`;
+        query += ` AND original_timestamp >= $${paramCount++}`;
         values.push(new Date(fromTs));
       }
 
       if (toTs) {
-        query += ` AND ts <= $${paramCount++}`;
+        query += ` AND original_timestamp <= $${paramCount++}`;
         values.push(new Date(toTs));
       }
 
-      query += ` ORDER BY ts DESC`;
+      query += ` ORDER BY original_timestamp DESC`;
 
       if (limit) {
         query += ` LIMIT $${paramCount++}`;

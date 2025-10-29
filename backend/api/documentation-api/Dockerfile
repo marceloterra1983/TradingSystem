@@ -19,14 +19,22 @@ FROM node:22-alpine AS development
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY api/documentation-api/package*.json ./
+
+# Copy shared modules
+COPY shared /shared
 
 # Install ALL dependencies (including dev)
 RUN npm install && \
     npm cache clean --force
 
+# Install shared modules dependencies
+RUN cd /shared/logger && npm ci && \
+    cd /shared/middleware && npm ci && \
+    cd /shared/config && npm ci
+
 # Copy source code
-COPY . .
+COPY api/documentation-api .
 
 # Expose port
 EXPOSE 3000
@@ -35,8 +43,8 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
-# Development command with hot reload
-CMD ["npm", "run", "dev"]
+# Development command
+CMD ["npm", "start"]
 
 # Stage 3: Production image (optimized)
 FROM node:22-alpine AS production
@@ -57,7 +65,6 @@ COPY --from=base --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --chown=nodejs:nodejs package*.json ./
 COPY --chown=nodejs:nodejs prisma ./prisma
 COPY --chown=nodejs:nodejs src ./src
-COPY --chown=nodejs:nodejs db ./db
 
 # Create uploads directory with proper permissions
 RUN mkdir -p uploads && \

@@ -58,9 +58,9 @@ router.post('/ingest', authGateway, async (req, res) => {
       });
 
       if (result.inserted) {
-        // Track metrics
+        // Track metrics (use 'status' label to match gateway metrics)
         if (metrics?.messagesIngestedTotal) {
-          metrics.messagesIngestedTotal.inc({ channel_id: channelId, result: 'inserted' });
+          metrics.messagesIngestedTotal.inc({ status: 'inserted' });
         }
 
         logger.info({
@@ -77,7 +77,7 @@ router.post('/ingest', authGateway, async (req, res) => {
       } else {
         // Duplicate - idempotency check prevented insertion
         if (metrics?.messagesIngestedTotal) {
-          metrics.messagesIngestedTotal.inc({ channel_id: channelId, result: 'duplicate' });
+          metrics.messagesIngestedTotal.inc({ status: 'duplicate' });
         }
 
         logger.info({

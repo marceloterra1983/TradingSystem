@@ -1,5 +1,6 @@
 import express from 'express';
 import fetch from 'node-fetch';
+import { createHmac } from 'crypto';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ function base64url(input) {
 }
 
 function signHmacSha256(message, secret) {
-  return base64url(require('crypto').createHmac('sha256', secret).update(message).digest());
+  return base64url(createHmac('sha256', secret).update(message).digest());
 }
 
 function createJwt(payload) {
@@ -76,5 +77,16 @@ router.post('/query', async (req, res) => {
   }
 });
 
-export default router;
+// GET /api/v1/rag/gpu/policy
+router.get('/gpu/policy', async (_req, res) => {
+  try {
+    const url = `${QUERY_BASE_URL}/gpu/policy`;
+    const upstream = await fetch(url, { headers: { Authorization: bearer() } });
+    const text = await upstream.text();
+    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
 
+export default router;

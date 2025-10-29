@@ -51,12 +51,22 @@ channelsRouter.post('/', async (req, res, next) => {
         message: error.message,
       });
     }
+    // Unique violation
     if (error.code === '23505') {
       return res.status(409).json({
         success: false,
         message: 'Já existe um canal cadastrado com este ID',
       });
     }
+    // Invalid text representation (e.g., invalid bigint)
+    if (error.code === '22P02') {
+      return res.status(400).json({
+        success: false,
+        message: 'Canal inválido: formato do channelId incorreto',
+      });
+    }
+    // Log unexpected error for troubleshooting
+    req.log?.error?.({ err: error }, 'Failed to create channel');
     next(error);
   }
 });
@@ -88,6 +98,13 @@ channelsRouter.put('/:id', async (req, res, next) => {
         message: error.message,
       });
     }
+    if (error.code === '22P02') {
+      return res.status(400).json({
+        success: false,
+        message: 'Canal inválido: formato do channelId incorreto',
+      });
+    }
+    req.log?.error?.({ err: error }, 'Failed to update channel');
     next(error);
   }
 });
@@ -106,6 +123,7 @@ channelsRouter.delete('/:id', async (req, res, next) => {
         message: 'Canal não encontrado',
       });
     }
+    req.log?.error?.({ err: error }, 'Failed to delete channel');
     next(error);
   }
 });

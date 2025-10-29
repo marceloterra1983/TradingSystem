@@ -22,24 +22,10 @@ export function initializeRoute(deps) {
  */
 const validateSearch = [
   query('q').optional().isString().isLength({ min: 2, max: 200 }).trim(),
-  query('domain').optional().isIn(['frontend', 'backend', 'ops', 'shared']),
-  query('type')
-    .optional()
-    .isIn([
-      'guide',
-      'reference',
-      'adr',
-      'prd',
-      'rfc',
-      'runbook',
-      'overview',
-      'index',
-      'glossary',
-      'template',
-      'feature',
-    ]),
+  query('domain').optional().isString().trim().isLength({ min: 1, max: 100 }),
+  query('type').optional().isString().trim().isLength({ min: 1, max: 100 }),
   query('tags').optional().isString(),
-  query('status').optional().isIn(['active', 'draft', 'deprecated']),
+  query('status').optional().isString().trim().isLength({ min: 1, max: 50 }),
   query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
 ];
 

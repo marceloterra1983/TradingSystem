@@ -4,11 +4,12 @@ services:
   # ========================================
   # TP Capital API (Trading Signals)
   # ========================================
-  tp-capital-api:
+  tp-capital:
+    image: "${IMG_APPS_TP_CAPITAL:-img-apps-tp-capital}:${IMG_VERSION:-latest}"
     build:
-      context: ../../apps/tp-capital
-      dockerfile: Dockerfile.dev
-    container_name: tp-capital-api
+      context: ../..
+      dockerfile: apps/tp-capital/Dockerfile.dev
+    container_name: apps-tp-capital
 
     # Load environment from centralized root .env
     env_file:
@@ -22,20 +23,20 @@ services:
       - NODE_ENV=development
       - LOG_LEVEL=info
 
-      # TimescaleDB Connection (TP Capital schema)
-      - TIMESCALEDB_HOST=${TIMESCALEDB_HOST:-timescaledb}
-      - TIMESCALEDB_PORT=${TIMESCALEDB_PORT:-5432}
-      - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}
+      # TimescaleDB Connection (Central Database)
+      - TIMESCALEDB_HOST=data-timescaledb
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-tradingsystem}
       - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}
       - TIMESCALEDB_PASSWORD=${TIMESCALEDB_PASSWORD:-pass_timescale}
       - TIMESCALEDB_SCHEMA=tp_capital
 
       # Gateway Database Connection (for polling messages)
-      # Note: Override DB_URL from .env to use Docker network hostname
-      - TELEGRAM_GATEWAY_DB_URL=postgresql://timescale:pass_timescale@timescaledb:5432/APPS-TELEGRAM-GATEWAY
-      - GATEWAY_DATABASE_HOST=timescaledb
+      # Note: Using centralized data-timescaledb with schema telegram_gateway
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://timescale:pass_timescale@data-timescaledb:5432/tradingsystem?schema=telegram_gateway
+      - GATEWAY_DATABASE_HOST=data-timescaledb
       - GATEWAY_DATABASE_PORT=5432
-      - GATEWAY_DATABASE_NAME=APPS-TELEGRAM-GATEWAY
+      - GATEWAY_DATABASE_NAME=tradingsystem
       - GATEWAY_DATABASE_SCHEMA=telegram_gateway
       - GATEWAY_DATABASE_USER=timescale
       - GATEWAY_DATABASE_PASSWORD=pass_timescale
@@ -68,6 +69,7 @@ services:
     volumes:
       # Hot-reload: mount source code
       - ../../apps/tp-capital/src:/app/src:ro
+      - ../../apps/tp-capital/api:/app/api:ro
       - ../../apps/tp-capital/public:/app/public:ro
 
       # Anonymous volume prevents overwrite
@@ -102,10 +104,11 @@ services:
   # Workspace Service (Ideas & Documentation)
   # ========================================
   workspace:
+    image: "${IMG_APPS_WORKSPACE:-img-apps-workspace}:${IMG_VERSION:-latest}"
     build:
-      context: ../../backend/api/workspace
-      dockerfile: Dockerfile.dev
-    container_name: workspace-service
+      context: ../../backend
+      dockerfile: api/workspace/Dockerfile.dev
+    container_name: apps-workspace
 
     env_file:
       - ../../.env
@@ -118,9 +121,10 @@ services:
       - NODE_ENV=development
       - LOG_LEVEL=info
 
-      # TimescaleDB Connection
-      - TIMESCALEDB_HOST=timescaledb
+      # TimescaleDB Connection (Central Database)
+      - TIMESCALEDB_HOST=data-timescaledb
       - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_DATABASE=APPS-WORKSPACE
       - WORKSPACE_DATABASE=APPS-WORKSPACE
       - TIMESCALEDB_USER=timescale
       - TIMESCALEDB_PASSWORD=pass_timescale

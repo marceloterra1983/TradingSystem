@@ -60,11 +60,12 @@ const dbPort = toInt(
   5433,
 );
 
+// Default to shared TimescaleDB database used across local dev
 const dbName =
   process.env.TELEGRAM_GATEWAY_DB_NAME ||
   process.env.TIMESCALEDB_DATABASE ||
   parsedUrl?.database ||
-  'apps_telegram_gateway';
+  'tradingsystem';
 
 const dbUser =
   process.env.TELEGRAM_GATEWAY_DB_USER ||
@@ -91,7 +92,9 @@ const fallbackDbUrl =
 
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
-  port: toInt(process.env.TELEGRAM_GATEWAY_API_PORT ?? process.env.PORT, 4010),
+  // Do NOT fall back to generic PORT to avoid collisions with other services.
+  // Use explicit TELEGRAM_GATEWAY_API_PORT only.
+  port: toInt(process.env.TELEGRAM_GATEWAY_API_PORT, 4010),
   logLevel: process.env.LOG_LEVEL ?? 'info',
   apiToken:
     process.env.TELEGRAM_GATEWAY_API_TOKEN ||

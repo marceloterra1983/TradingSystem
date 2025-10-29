@@ -6,10 +6,18 @@
 // - Validates docs frontmatter
 
 import {execSync} from 'node:child_process';
-import {existsSync, mkdirSync, writeFileSync} from 'node:fs';
+import {existsSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 
 const ROOT = process.cwd();
+const FALSE_VALUES = new Set(['0', 'false', 'off', 'no', 'n', '']);
+
+const GPU_FORCE = readBool('LLAMAINDEX_FORCE_GPU', true);
+const GPU_NUM = Number(process.env.LLAMAINDEX_GPU_NUM || process.env.OLLAMA_NUM_GPU || '1');
+const GPU_MAX_CONCURRENCY = Number(process.env.LLAMAINDEX_GPU_MAX_CONCURRENCY || process.env.OLLAMA_GPU_MAX_CONCURRENCY || '1');
+const GPU_LOCK_PATH = process.env.LLAMAINDEX_GPU_LOCK_PATH || '/tmp/llamaindex-gpu.lock';
+const GPU_LOCK_ENABLED = readBool('LLAMAINDEX_GPU_USE_FILE_LOCK', true) && GPU_MAX_CONCURRENCY === 1;
+const GPU_LOCK_POLL_MS = Number(process.env.LLAMAINDEX_GPU_LOCK_POLL_SECONDS || '0.25') * 1000;
 
 function parseArgs(argv) {
   const args = { since: null, dry: false, model: null, maxContext: null, noValidate: false, outDir: null };
@@ -60,6 +68,69 @@ function listChanges(baseRef) {
   return {files, diff, log};
 }
 
+function readBool(name, defaultValue) {
+  const raw = process.env[name];
+  if (raw === undefined) return defaultValue;
+  return !FALSE_VALUES.has(String(raw).trim().toLowerCase());
+}
+
+function readOptionalBool(name, fallback) {
+  const raw = process.env[name] ?? (fallback ? process.env[fallback] : undefined);
+  if (raw === undefined) return undefined;
+  return !FALSE_VALUES.has(String(raw).trim().toLowerCase());
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withGpuLock(operation, fn) {
+  if (!GPU_LOCK_ENABLED) {
+    return fn();
+  }
+  const ownerId = `${process.pid}-${Date.now()}-${operation}`;
+  const ownerFile = join(GPU_LOCK_PATH, 'owner');
+  while (true) {
+    try {
+      mkdirSync(GPU_LOCK_PATH);
+      writeFileSync(ownerFile, ownerId, 'utf8');
+      break;
+    } catch (err) {
+      if (err && err.code === 'EEXIST') {
+        await sleep(GPU_LOCK_POLL_MS);
+        continue;
+      }
+      throw err;
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    try { rmSync(ownerFile, {force: true}); } catch {}
+    try { rmSync(GPU_LOCK_PATH, {recursive: true, force: true}); } catch {}
+  }
+}
+
+function buildOllamaOptions() {
+  if (!GPU_FORCE) return {};
+  const options = { num_gpu: GPU_NUM };
+  const gpuLayers = process.env.LLAMAINDEX_GPU_LAYERS || process.env.OLLAMA_GPU_LAYERS;
+  if (gpuLayers) {
+    const parsed = Number(gpuLayers);
+    options.gpu_layers = Number.isNaN(parsed) ? gpuLayers : parsed;
+  }
+  const gpuSplit = process.env.LLAMAINDEX_GPU_SPLIT || process.env.OLLAMA_GPU_SPLIT;
+  if (gpuSplit) options.gpu_split = gpuSplit;
+  const mainGpu = process.env.LLAMAINDEX_GPU_MAIN || process.env.OLLAMA_MAIN_GPU;
+  if (mainGpu) {
+    const parsed = Number(mainGpu);
+    options.main_gpu = Number.isNaN(parsed) ? mainGpu : parsed;
+  }
+  const lowVram = readOptionalBool('LLAMAINDEX_GPU_LOW_VRAM', 'OLLAMA_LOW_VRAM');
+  if (lowVram !== undefined) options.low_vram = lowVram;
+  return options;
+}
+
 async function summarizeWithOllama({diff, files, log, modelOverride, maxContextOverride}) {
   const baseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
   const model = modelOverride || process.env.DOCS_AGENT_MODEL || 'llama3.1:8b';
@@ -73,15 +144,23 @@ async function summarizeWithOllama({diff, files, log, modelOverride, maxContextO
   const prompt = `You are a technical writer agent. Summarize today's code changes into a concise developer-facing changelog in Markdown.\n\nGuidelines:\n- Organize by domain: Frontend, Backend, Docs, Tools/Infra\n- For each domain, list 3-7 key changes with short bullets\n- Highlight breaking changes, new env vars, new scripts, and docs-impact\n- Keep it factual. Use file paths for precision.\n- Output ONLY Markdown content (no extra commentary).\n\nContext:\n${context}`;
 
   try {
-    const res = await fetch(`${baseUrl}/api/generate`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({model, prompt, stream: false})
+    const payload = {model, prompt, stream: false};
+    const ollamaOptions = buildOllamaOptions();
+    if (Object.keys(ollamaOptions).length) payload.options = ollamaOptions;
+
+    const text = await withGpuLock('docusaurus-daily', async () => {
+      const res = await fetch(`${baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`ollama http ${res.status}`);
+      const data = await res.json();
+      const content = data.response || data.text || '';
+      if (!content) throw new Error('empty ollama response');
+      return content;
     });
-    if (!res.ok) throw new Error(`ollama http ${res.status}`);
-    const data = await res.json();
-    const text = data.response || data.text || '';
-    if (!text) throw new Error('empty ollama response');
+
     return text;
   } catch (err) {
     // Fallback summary

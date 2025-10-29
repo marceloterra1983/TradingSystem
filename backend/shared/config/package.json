@@ -1,0 +1,15 @@
+{
+  "name": "@backend/shared/config",
+  "version": "1.0.0",
+  "description": "Centralized environment loading and validation for TradingSystem services",
+  "type": "module",
+  "main": "load-env.js",
+  "exports": {
+    ".": "./load-env.js",
+    "./validator": "./validator.js",
+    "./load-env": "./load-env.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

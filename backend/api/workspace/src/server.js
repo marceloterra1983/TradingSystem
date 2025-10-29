@@ -1,113 +1,224 @@
+/**
+ * Workspace API - Migrated to use shared modules
+ *
+ * CHANGES FROM PREVIOUS VERSION:
+ * - Using shared logger (backend/shared/logger)
+ * - Using shared middleware (backend/shared/middleware)
+ * - Standardized health check endpoint
+ * - Correlation ID support
+ */
+
 import express from 'express';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import pino from 'pino';
-import pinoHttp from 'pino-http';
 import promClient from 'prom-client';
-import { config } from './config.js';
+
+// Shared modules
+import { createLogger } from '../../../shared/logger/index.js';
+import {
+  configureCors,
+  configureRateLimit,
+  configureHelmet,
+  createErrorHandler,
+  createNotFoundHandler,
+  createCorrelationIdMiddleware,
+} from '../../../shared/middleware/index.js';
+import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
+
+// Service-specific modules
+import { config, timescaledbConfig } from './config.js';
 import { getDbClient } from './db/index.js';
 import { itemsRouter } from './routes/items.js';
 
-const logger = pino({ level: config.logLevel });
+// Create logger
+const logger = createLogger('workspace-api', {
+  version: '1.0.0',
+  base: {
+    dbStrategy: config.dbStrategy,
+  },
+});
+
 const app = express();
 
+// Prometheus metrics
 const requestCounter = new promClient.Counter({
-  name: 'tradingsystem_http_requests_total',
-  help: 'Total HTTP requests',
+  name: 'workspace_api_requests_total',
+  help: 'Total HTTP requests to Workspace API',
   labelNames: ['method', 'route', 'status'],
 });
 
 const requestDuration = new promClient.Histogram({
-  name: 'tradingsystem_http_request_duration_seconds',
-  help: 'HTTP request duration in seconds',
+  name: 'workspace_api_request_duration_seconds',
+  help: 'HTTP request duration in seconds for Workspace API',
   labelNames: ['method', 'route', 'status'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10],
 });
 
-promClient.collectDefaultMetrics();
+promClient.collectDefaultMetrics({ prefix: 'workspace_api_' });
 
-app.use(cors());
-app.use(express.json({ limit: '1mb' }));
-app.use(
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 300,
-    standardHeaders: true,
-    legacyHeaders: false,
-  }),
-);
-app.use(
-  pinoHttp({
-    logger,
-    customLogLevel(req, res, err) {
-      if (res.statusCode >= 500 || err) return 'error';
-      if (res.statusCode >= 400) return 'warn';
-      return 'info';
-    },
-  }),
-);
+// ============================================================================
+// MIDDLEWARE STACK (using shared modules)
+// ============================================================================
 
+// 1. Correlation ID (must be first for tracing)
+app.use(createCorrelationIdMiddleware());
+
+// 2. Security headers (Helmet)
+app.use(configureHelmet({ logger }));
+
+// 3. CORS configuration
+app.use(configureCors({ logger }));
+
+// 4. Body parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 5. Rate limiting (environment-based)
+app.use(configureRateLimit({ logger }));
+
+// 6. Request metrics (Prometheus)
 app.use((req, res, next) => {
-  const end = requestDuration.startTimer({
-    method: req.method,
-    route: req.path,
-  });
+  const start = Date.now();
+
   res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+
     requestCounter.inc({
       method: req.method,
-      route: req.path,
+      route: req.route?.path || req.path,
       status: res.statusCode,
     });
-    end({ status: res.statusCode });
+
+    requestDuration.observe(
+      {
+        method: req.method,
+        route: req.route?.path || req.path,
+        status: res.statusCode,
+      },
+      duration
+    );
+
+    // Log request with shared logger pattern
+    logger.request(req, res, Date.now() - start);
   });
+
   next();
 });
 
-app.get('/health', async (req, res) => {
-  const db = getDbClient();
-  try {
-    await db.getItems();
-    res.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      service: 'workspace-api',
-      dbStrategy: config.dbStrategy,
-    });
-  } catch (error) {
-    req.log.error({ err: error }, 'Health check failed');
-    res.status(500).json({
-      success: false,
-      message: 'Health check failed',
-      errors: [error.message],
-    });
-  }
+// ============================================================================
+// ROUTES
+// ============================================================================
+
+// Health check endpoint (standardized)
+app.get('/health', createHealthCheckHandler({
+  serviceName: 'workspace-api',
+  version: '1.0.0',
+  logger,
+  checks: {
+    database: async () => {
+      const db = getDbClient();
+      await db.getItems();
+      return `${config.dbStrategy} connected`;
+    },
+  },
+}));
+
+// Readiness probe (Kubernetes-compatible)
+app.get('/ready', createHealthCheckHandler({
+  serviceName: 'workspace-api',
+  version: '1.0.0',
+  logger,
+  checks: {
+    database: async () => {
+      const db = getDbClient();
+      const items = await db.getItems();
+      return `${config.dbStrategy} ready (${items.length} items)`;
+    },
+  },
+}));
+
+// Liveness probe (always returns 200 if process is alive)
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'workspace-api',
+    uptime: process.uptime(),
+  });
 });
 
-app.get('/metrics', async (req, res) => {
+// Prometheus metrics endpoint
+app.get('/metrics', async (_req, res) => {
   res.setHeader('Content-Type', promClient.register.contentType);
   res.end(await promClient.register.metrics());
 });
 
+// API routes
 app.use('/api/items', itemsRouter);
 
-app.use((err, req, res, _next) => {
-  req.log.error({ err }, 'Unhandled error');
-  res.status(500).json({
-    success: false,
-    message: 'Internal server error',
-  });
-});
+// ============================================================================
+// ERROR HANDLING (using shared modules)
+// ============================================================================
+
+// 404 handler (must be before error handler)
+app.use(createNotFoundHandler({ logger }));
+
+// Global error handler (must be last)
+app.use(createErrorHandler({ logger, includeStack: config.env !== 'production' }));
+
+// ============================================================================
+// SERVER STARTUP & GRACEFUL SHUTDOWN
+// ============================================================================
 
 const server = app.listen(config.port, () => {
-  logger.info({ port: config.port }, 'Workspace API started');
+  logger.startup('Workspace API started successfully', {
+    port: config.port,
+    dbStrategy: config.dbStrategy,
+    environment: config.env,
+    timescaleConfig: config.dbStrategy === 'timescaledb' ? {
+      host: timescaledbConfig.host,
+      port: timescaledbConfig.port,
+      database: timescaledbConfig.database,
+      schema: timescaledbConfig.schema,
+    } : null,
+  });
 });
 
-const gracefulShutdown = () => {
-  logger.info('Shutting down workspace API...');
-  server.close(() => {
-    logger.info('Workspace API stopped');
+const gracefulShutdown = (signal) => {
+  logger.info({ signal }, 'Received shutdown signal, closing server...');
+
+  server.close(async () => {
+    logger.info('HTTP server closed');
+
+    // Close database connections
+    try {
+      const db = getDbClient();
+      if (db.close) {
+        await db.close();
+        logger.info('Database connections closed');
+      }
+    } catch (error) {
+      logger.error({ err: error }, 'Error closing database connections');
+    }
+
+    logger.info('Workspace API stopped gracefully');
     process.exit(0);
   });
+
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    logger.error('Graceful shutdown timeout, forcing exit');
+    process.exit(1);
+  }, 10000);
 };
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.fatal({ err: error }, 'Uncaught exception');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.fatal({ reason, promise }, 'Unhandled promise rejection');
+  process.exit(1);
+});

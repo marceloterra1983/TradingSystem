@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import {
   CollapsibleCard,
@@ -46,6 +46,7 @@ import {
   Image,
   RotateCcw
 } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface GatewayData {
   health?: {
@@ -105,6 +106,51 @@ export function TelegramGatewayFinal() {
     message: ''
   });
   
+  // Message highlighting
+  const [highlightedMessages, setHighlightedMessages] = useState<Set<string>>(new Set());
+  const previousMessageIdsRef = useRef<Set<string>>(new Set());
+  
+  // Detectar novas mensagens e destacá-las
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
+
+    const currentMessageIds = new Set(messages.map((msg: any) => msg.id));
+    
+    // Se é o primeiro carregamento (previousMessageIdsRef está vazio), 
+    // apenas inicializar sem destacar nada
+    if (previousMessageIdsRef.current.size === 0) {
+      previousMessageIdsRef.current = currentMessageIds;
+      return;
+    }
+
+    const newMessageIds = new Set<string>();
+
+    // Identificar mensagens que não estavam na lista anterior
+    currentMessageIds.forEach((id) => {
+      if (!previousMessageIdsRef.current.has(id)) {
+        newMessageIds.add(id);
+      }
+    });
+
+    // Atualizar as mensagens destacadas apenas se houver novas mensagens
+    if (newMessageIds.size > 0) {
+      setHighlightedMessages(newMessageIds);
+
+      // Remover destaque após 1 minuto
+      const timer = setTimeout(() => {
+        setHighlightedMessages(new Set());
+      }, 60000);
+
+      // Atualizar referência dos IDs anteriores
+      previousMessageIdsRef.current = currentMessageIds;
+
+      return () => clearTimeout(timer);
+    } else {
+      // Atualizar referência dos IDs anteriores mesmo sem novas mensagens
+      previousMessageIdsRef.current = currentMessageIds;
+    }
+  }, [messages]);
+  
   const handleViewMessage = (msg: any) => {
     setSelectedMessage(msg);
     setIsDialogOpen(true);
@@ -115,11 +161,16 @@ export function TelegramGatewayFinal() {
     setSyncResult({ show: false, success: false, message: '' });
     
     try {
+      const token =
+        (import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined)?.trim() ||
+        (import.meta.env.VITE_API_SECRET_TOKEN as string | undefined)?.trim() ||
+        '';
+
       const response = await fetch('/api/telegram-gateway/sync-messages', {
         method: 'POST',
         headers: {
-          'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
           'Content-Type': 'application/json',
+          ...(token ? { 'X-Gateway-Token': token } : {}),
         },
       });
 
@@ -345,7 +396,7 @@ export function TelegramGatewayFinal() {
   const handleToggleChannel = async (id: string, isActive: boolean) => {
     try {
       const response = await fetch(`/api/channels/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
@@ -354,8 +405,21 @@ export function TelegramGatewayFinal() {
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        alert(`Erro ao alterar status: ${result.message || response.statusText}`);
+        const raw = await response.text();
+        let message = response.statusText;
+        try {
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (parsed && typeof parsed === 'object') {
+            message = parsed.message || JSON.stringify(parsed);
+          } else if (raw) {
+            message = raw;
+          }
+        } catch {
+          if (raw) {
+            message = raw;
+          }
+        }
+        alert(`Erro ao alterar status: ${message}`);
         return;
       }
 
@@ -401,7 +465,7 @@ export function TelegramGatewayFinal() {
 
     try {
       const response = await fetch(`/api/channels/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
@@ -413,8 +477,21 @@ export function TelegramGatewayFinal() {
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        alert(`Erro ao editar: ${result.message || response.statusText}`);
+        const raw = await response.text();
+        let message = response.statusText;
+        try {
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (parsed && typeof parsed === 'object') {
+            message = parsed.message || JSON.stringify(parsed);
+          } else if (raw) {
+            message = raw;
+          }
+        } catch {
+          if (raw) {
+            message = raw;
+          }
+        }
+        alert(`Erro ao editar: ${message}`);
         return;
       }
 
@@ -763,8 +840,18 @@ export function TelegramGatewayFinal() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
-                    {filteredMessages.map((msg: any) => (
-                      <tr key={msg.id} className="hover:bg-slate-800/50 transition-colors">
+                    {filteredMessages.map((msg: any) => {
+                      const isHighlighted = highlightedMessages.has(msg.id);
+                      return (
+                        <tr 
+                          key={msg.id} 
+                          className={cn(
+                            'transition-colors duration-300',
+                            isHighlighted 
+                              ? 'bg-yellow-100/80 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'
+                              : 'hover:bg-slate-800/50'
+                          )}
+                        >
                         <td className="py-3 px-4 text-sm text-slate-300 whitespace-nowrap">
                           <div className="flex flex-col gap-0.5">
                             <span className="font-semibold">{formatTime(msg.receivedAt)}</span>
@@ -800,7 +887,8 @@ export function TelegramGatewayFinal() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
