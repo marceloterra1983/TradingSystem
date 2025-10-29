@@ -73,10 +73,10 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 ### Active Services & Ports
 
 -   **Dashboard**: http://localhost:3103 (React + Vite)
--   **Documentation Hub**: http://localhost:3205 (Docusaurus v3)
+-   **Documentation Hub**: http://localhost:3400 (Docusaurus v3 via NGINX)
 -   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
 -   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
--   **Documentation API**: http://localhost:3400 (Express + FlexSearch)
+-   **Documentation API**: http://localhost:3401 (Express + FlexSearch)
 -   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
 
@@ -345,10 +345,10 @@ if (bMarketConnected && bAtivo) {
 ### HTTP REST (Current Services)
 
 -   **Dashboard**: `http://localhost:3103` (React + Vite)
--   **Documentation Hub**: `http://localhost:3205` (Docusaurus v3)
+-   **Documentation Hub**: `http://localhost:3400` (Docusaurus v3 via NGINX)
 -   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB - Docker container)
 -   **TP Capital**: `http://localhost:4005` (Express + Telegraf - Docker container)
--   **Documentation API**: `http://localhost:3400` (Express + FlexSearch)
+-   **Documentation API**: `http://localhost:3401` (Express + FlexSearch)
 -   **Service Launcher**: `http://localhost:3500` (Express)
 -   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
 
@@ -464,9 +464,9 @@ Se preferir iniciar serviços manualmente:
 cd frontend/dashboard
 npm install && npm run dev
 
-# Documentation Hub (Port 3205)
+# Documentation Hub (Port 3400)
 cd docs
-npm install && npm run start -- --port 3205
+npm install && npm run start -- --port 3400
 
 # API Services (Ports 3200-3600)
 # Run each in a separate terminal
@@ -634,7 +634,7 @@ bash scripts/env/validate-env.sh
 -   **MUST provide both** `.puml` source file AND embedded rendering in markdown
 -   Follow governance guides: `docs/governance/VALIDATION-GUIDE.md`
 -   Use appropriate diagram types: Component, Sequence, State, Class, Deployment
--   Test rendering in Docusaurus before committing (`cd docs && npm run start -- --port 3205`)
+-   Test rendering in Docusaurus before committing (`cd docs && npm run start -- --port 3400`)
 -   See examples: `docs/content/diagrams/plantuml-guide.mdx`
 
 ### When working with documentation:
@@ -670,7 +670,7 @@ bash scripts/env/validate-env.sh
 -   **[docs/governance/VALIDATION-GUIDE.md](docs/governance/VALIDATION-GUIDE.md)** - Validation suite and quality standards
 -   **[docs/governance/REVIEW-CHECKLIST.md](docs/governance/REVIEW-CHECKLIST.md)** - Review process and criteria
 
-### Documentation Hub (Port 3205)
+### Documentation Hub (Port 3400)
 
 -   **[docs/README.md](docs/README.md)** - Main documentation portal
 -   **[docs/content/](docs/content/)** - All documentation content
@@ -687,7 +687,7 @@ bash scripts/env/validate-env.sh
 -   **[docs/content/api/overview.mdx](docs/content/api/overview.mdx)** - API catalogue
 -   **[docs/content/api/order-manager.mdx](docs/content/api/order-manager.mdx)** - Order Manager API
 -   **[docs/content/api/data-capture.mdx](docs/content/api/data-capture.mdx)** - Data Capture API
--   **Redocusaurus Integration**: http://localhost:3205/api/documentation-api, http://localhost:3205/api/workspace
+-   **Redocusaurus Integration**: http://localhost:3400/api/documentation-api, http://localhost:3400/api/workspace
 
 ### Frontend Documentation
 

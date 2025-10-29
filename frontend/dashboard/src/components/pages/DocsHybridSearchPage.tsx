@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ExternalLink, Copy, Eye } from 'lucide-react';
 import documentationService, { DocsHybridItem } from '../../services/documentationService';
+import { DocPreviewModal } from './DocPreviewModal';
 import {
   Select,
   SelectTrigger,
@@ -62,18 +63,26 @@ export default function DocsHybridSearchPage(): JSX.Element {
   });
   const [facets, setFacets] = useState<{ domains: { value: string; count: number }[]; types: { value: string; count: number }[]; statuses: { value: string; count: number }[]; tags: { value: string; count: number }[] }>({ domains: [], types: [], statuses: [], tags: [] });
 
-  // Popup window handler
-  const openPreview = (url: string, title: string) => {
-    const width = Math.min(1200, window.innerWidth * 0.8);
-    const height = Math.min(900, window.innerHeight * 0.9);
-    const left = (window.innerWidth - width) / 2;
-    const top = (window.innerHeight - height) / 2;
+  // Modal state for preview
+  const [previewModal, setPreviewModal] = useState<{ isOpen: boolean; title: string; url: string }>({
+    isOpen: false,
+    title: '',
+    url: '',
+  });
 
-    window.open(
-      url,
-      'docPreview',
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no`
-    );
+  // Modal preview handler - opens in-page modal overlay
+  const openPreview = (url: string, title: string) => {
+    // API returns URLs with "/docs/" but Docusaurus uses "/next/"
+    const fixedUrl = url.replace(/^\/docs\//, '/next/');
+    const docusaurusUrl = `http://localhost:3205${fixedUrl}`;
+
+    console.log('[DocsSearch] Opening preview modal:', { url, fixedUrl, docusaurusUrl });
+
+    setPreviewModal({
+      isOpen: true,
+      title,
+      url: docusaurusUrl,
+    });
   };
 
   // Persist results to localStorage
@@ -446,18 +455,17 @@ export default function DocsHybridSearchPage(): JSX.Element {
           <CollapsibleCardContent>
             <ul className="space-y-3">
               {results.map((r) => {
-                // Use proxied docs URL for same-origin access in iframe
-                const docUrl = r.url.startsWith('/docs') ? r.url : `/docs${r.url}`;
-                // For external link, use direct Docusaurus URL
-                const fullDocUrl = `http://localhost:3205${r.url}`;
+                // API returns "/docs/..." but Docusaurus uses "/next/..."
+                const fixedUrl = r.url.replace(/^\/docs\//, '/next/');
+                const fullDocUrl = `http://localhost:3205${fixedUrl}`;
 
                 return (
                 <li key={`${r.url}-${r.score}`} className="rounded-md border border-slate-200 dark:border-slate-800 p-3 bg-white dark:bg-slate-900/60">
                   <div className="flex items-center justify-between gap-2">
                     <button
-                      onClick={() => openPreview(fullDocUrl, r.title)}
+                      onClick={() => openPreview(r.url, r.title)}
                       className="font-medium text-sky-700 dark:text-sky-400 hover:underline flex items-center gap-1 text-left"
-                      title="Clique para abrir preview em popup"
+                      title="Clique para abrir documento no Docusaurus (popup)"
                     >
                       {r.title}
                       <Eye className="w-4 h-4" />
@@ -506,12 +514,22 @@ export default function DocsHybridSearchPage(): JSX.Element {
   }, [query, alphaPct, alpha, limit, error, loading, results, lastSearchedQuery]);
 
   return (
-    <CustomizablePageLayout
-      pageId="docs-hybrid-search"
-      title="Docs Hybrid Search"
-      subtitle="Busca híbrida (lexical + vetorial) com reranking leve e âncoras."
-      sections={sections}
-      defaultColumns={1}
-    />
+    <>
+      <CustomizablePageLayout
+        pageId="docs-hybrid-search"
+        title="Docs Hybrid Search"
+        subtitle="Busca híbrida (lexical + vetorial) com reranking leve e âncoras."
+        sections={sections}
+        defaultColumns={1}
+      />
+
+      {/* Preview Modal */}
+      <DocPreviewModal
+        isOpen={previewModal.isOpen}
+        onClose={() => setPreviewModal({ isOpen: false, title: '', url: '' })}
+        title={previewModal.title}
+        url={previewModal.url}
+      />
+    </>
   );
 }

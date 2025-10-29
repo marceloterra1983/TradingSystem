@@ -59,7 +59,7 @@ fi
 FORCE_KILL=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
-WITH_VECTORS=false
+WITH_VECTORS=true
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 METRICS_FILE="$SERVICES_DIR/start-metrics.json"
 mkdir -p "$SERVICES_DIR"
@@ -75,11 +75,11 @@ START_SCRIPT_TIME=$(date +%s)
 # max_retries = number of restart attempts (default: 3)
 # NOTE: Workspace and TP Capital now run as Docker containers only
 declare -A SERVICES=(
-    ["telegram-gateway"]="apps/telegram-gateway:4006:npm run dev:apps/telegram-gateway/.env::3"
-    ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev:backend/api/telegram-gateway/.env:telegram-gateway:3"
+    ["telegram-gateway"]="apps/telegram-gateway:4006:npm run dev:::3"
+    ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev::telegram-gateway:3"
     ["docs-api"]="backend/api/documentation-api:3401:PORT=3401 npm start:::3"
     # Use npm run start (docs package maps start -> docs:dev) to avoid ':' in command string
-    ["docusaurus"]="docs:3205:npm run start:::2"
+    ["docusaurus"]="docs:3400:PORT=3400 npm run start:::2"
     ["dashboard"]="frontend/dashboard:3103:npm run dev::docs-api,docusaurus:2"
     ["status"]="apps/status:3500:npm start:::2"
     ["docs-watcher"]="tools/llamaindex::npm run watch::docs-api:1"
@@ -104,6 +104,10 @@ while [[ $# -gt 0 ]]; do
             WITH_VECTORS=true
             shift
             ;;
+        --skip-vectors|--no-vectors)
+            WITH_VECTORS=false
+            shift
+            ;;
         --help|-h)
             cat << EOF
 TradingSystem Universal Start v2.0
@@ -114,7 +118,8 @@ Options:
   --force-kill       Kill processes on occupied ports before starting
   --skip-docker      Skip Docker containers startup
   --skip-services    Skip local dev services startup
-  --with-vectors     Start Qdrant + Ollama + LlamaIndex (for hybrid search)
+  --with-vectors     Start Qdrant + Ollama + LlamaIndex (default behaviour)
+  --skip-vectors     Skip starting Qdrant/Ollama/LlamaIndex
   --help, -h         Show this help message
 
 Services:
@@ -127,7 +132,7 @@ Services:
      - Telegram Gateway (4006) - Telegram MTProto gateway service
      - Telegram Gateway API (4010) - REST API for gateway messages
      - DocsAPI (3401) - Documentation API (hybrid search)
-     - Docusaurus (3205) - Documentation site
+     - Docusaurus (3400) - Documentation site
      - Dashboard (3103) - React dashboard
      - Status API (3500) - Service health & launcher
 
@@ -820,9 +825,17 @@ main() {
     echo -e "  📨 Telegram Gateway:      http://localhost:4006  (health: /health)"
     echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
     echo -e "  📚 DocsAPI:               http://localhost:3401  (health: /health)"
-    echo -e "  📖 Docusaurus:            http://localhost:3205"
+    echo -e "  📖 Docusaurus:            http://localhost:3400"
     echo -e "  🎨 Dashboard:             http://localhost:3103"
     echo -e "  📊 Status API:            http://localhost:3500"
+    if [ "$WITH_VECTORS" = true ]; then
+      echo -e "  🔍 LlamaIndex Query:      http://localhost:8202  (health: /health)"
+      echo -e "  📥 LlamaIndex Ingestion:  http://localhost:8201  (health: /health)"
+      echo -e "  🧠 Qdrant Vector DB:      http://localhost:6333"
+    else
+      echo ""
+      echo -e "  ⚠️  Vetores desativados (--skip-vectors). Sem Qdrant/Ollama/LlamaIndex os recursos RAG ficarão indisponíveis."
+    fi
     echo ""
     echo -e "${CYAN}📝 Management:${NC}"
     echo -e "  Check status:  ${BLUE}bash scripts/universal/status.sh${NC} (or: status)"

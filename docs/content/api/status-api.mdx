@@ -333,7 +333,7 @@ The Status API monitors these services by default:
 - Workspace API (3200)
 - TP Capital Signals API (4007)
 - Firecrawl Proxy (3600)
-- Documentation API (3205)
+- Documentation API (3401)
 - Telegram Gateway API (4010)
 
 ### Messaging (category: `messaging`)
@@ -346,7 +346,7 @@ The Status API monitors these services by default:
 
 ### Docs (category: `docs`)
 
-- Docusaurus (3205)
+- Docusaurus (3400)
 
 ### Monitoring (category: `monitoring`)
 
@@ -376,7 +376,7 @@ STATUS_TIMEOUT_MS=2500              # Health check timeout (default: 2500ms)
 STATUS_USE_WT=true                  # Prefer Windows Terminal on Windows
 
 # Security
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # Allowed origins
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401  # Allowed origins
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=60000          # Rate limit window (default: 60s)

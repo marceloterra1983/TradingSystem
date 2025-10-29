@@ -121,10 +121,32 @@ async def ingest_directory(request: DirectoryIngestRequest):
         raise HTTPException(status_code=400, detail=f"Directory not found: {request.directory_path}")
     try:
         # Load documents recursively from directory
-        documents = SimpleDirectoryReader(
-            input_dir=request.directory_path,
-            recursive=True,
-        ).load_data()
+        allowed_exts = {".md", ".mdx", ".txt", ".pdf"}
+        excluded_names = {
+            "_category_.json",
+            "_category_.yml",
+            "_category_.yaml",
+            "category.json",
+            "category.yml",
+            "category.yaml",
+        }
+        files_to_ingest = []
+        for root, _, files in os.walk(request.directory_path):
+            for name in files:
+                if name in excluded_names:
+                    continue
+                ext = os.path.splitext(name)[1].lower()
+                if allowed_exts and ext not in allowed_exts:
+                    continue
+                files_to_ingest.append(os.path.join(root, name))
+
+        if not files_to_ingest:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No supported documents found in {request.directory_path}"
+            )
+
+        documents = SimpleDirectoryReader(input_files=files_to_ingest).load_data()
         if not documents:
             raise HTTPException(status_code=400, detail=f"No supported documents found in {request.directory_path}")
         
@@ -164,6 +186,13 @@ async def ingest_document(request: DocumentIngestRequest):
     if not os.path.isfile(request.file_path):
         raise HTTPException(status_code=400, detail=f"File not found: {request.file_path}")
     try:
+        allowed_exts = {".md", ".mdx", ".txt", ".pdf"}
+        ext = os.path.splitext(request.file_path)[1].lower()
+        if allowed_exts and ext not in allowed_exts:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file extension '{ext}'. Allowed extensions: {', '.join(sorted(allowed_exts))}"
+            )
         # Load single document
         documents = SimpleDirectoryReader(input_files=[request.file_path]).load_data()
         

@@ -47,7 +47,7 @@ CLEAN_LOGS=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
 WITH_DB=false
-WITH_VECTORS=false
+WITH_VECTORS=true
 PRUNE_NETWORKS=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 
@@ -81,6 +81,10 @@ while [[ $# -gt 0 ]]; do
             WITH_VECTORS=true
             shift
             ;;
+        --skip-vectors|--no-vectors)
+            WITH_VECTORS=false
+            shift
+            ;;
         --prune-networks|--remove-networks)
             PRUNE_NETWORKS=true
             shift
@@ -97,7 +101,8 @@ Options:
   --skip-docker   Skip stopping Docker containers
   --skip-services Skip stopping local services
   --with-db       Also stop database stack (TimescaleDB, UI tools)
-  --with-vectors  Also stop vectors stack (LlamaIndex, Ollama, Qdrant)
+  --with-vectors  Also stop vectors stack (default behaviour)
+  --skip-vectors  Leave LlamaIndex/Ollama/Qdrant running
   --prune-networks Remove shared Docker networks if unused
   --help, -h      Show this help message
 
@@ -105,7 +110,7 @@ Stops:
   🖥️  Node.js services (Telegram Gateway, Gateway API, Dashboard, Docusaurus, Status)
   🐳 Docker containers (TP Capital API, Workspace)
   🐳 Database stack (when --with-db)
-  🧠 Vectors stack (when --with-vectors)
+  🧠 Vectors stack (omit with --skip-vectors)
 
 Features:
   ✓ Graceful shutdown with SIGTERM (default)

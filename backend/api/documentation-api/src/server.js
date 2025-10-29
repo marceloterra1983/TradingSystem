@@ -27,6 +27,7 @@ import ragProxyRoutes from './routes/rag-proxy.js';
 import ragStatusRoutes from './routes/rag-status.js';
 import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
 import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
+import markdownContentRoutes from './routes/markdown-content.js';
 
 // Application services
 import MarkdownSearchService from './services/markdownSearchService.js';
@@ -54,6 +55,9 @@ const projectRoot = isContainer
 // Initialize Markdown Search Service
 const markdownDocsDir = path.join(projectRoot, 'docs/content');
 const markdownSearchService = new MarkdownSearchService(markdownDocsDir);
+
+// Make markdownDocsDir available globally for markdown-content route
+global.markdownDocsDir = markdownDocsDir;
 
 // Initialize markdown search routes with dependencies
 initializeRoute({ markdownSearchService, searchMetrics });
@@ -193,6 +197,7 @@ app.use('/api/v1', searchRoutes);
 app.use('/api/v1/docs', specsRoutes);
 app.use('/api/v1/docs', markdownSearchRoutes);
 app.use('/api/v1/docs', hybridRoutes);
+app.use('/api/v1/docs', markdownContentRoutes);
 app.use('/api/v1/docs/health', docsHealthRoutes);
 app.use('/api/v1/semantic', semanticRoutes);
 app.use('/api/v1/rag', ragProxyRoutes);

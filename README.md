@@ -19,7 +19,7 @@ last_review: "2025-10-23"
 
 > **Local trading system** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for real-time market data capture, ML-based cause-and-effect analysis, and automated order execution. 100% on-premise, no cloud dependencies.
 
-> **🚨 DEVELOPERS:** Before creating ANY new service, read **[Environment Configuration Guide](http://localhost:3205/tools/security-config/env)** - Centralized `.env` is MANDATORY! Also see [Documentation Hub](http://localhost:3205) for comprehensive guides.
+> **🚨 DEVELOPERS:** Before creating ANY new service, read **[Environment Configuration Guide](http://localhost:3400/tools/security-config/env)** - Centralized `.env` is MANDATORY! Also see [Documentation Hub](http://localhost:3400) for comprehensive guides.
 
 ## 📋 Table of Contents
 
@@ -59,7 +59,7 @@ last_review: "2025-10-23"
 **TradingSystem has comprehensive documentation powered by Docusaurus v3:**
 
 **Quick Links**:
-- 📖 [Documentation Hub](http://localhost:3205) (local dev)
+- 📖 [Documentation Hub](http://localhost:3400) (local runtime)
 - 📖 [Documentation Hub](http://tradingsystem.local/docs) (unified domain)
 - 🗂️ [Content Directory](docs/content/) - Browse all documentation
 - 📋 [Validation Guide](docs/governance/VALIDATION-GUIDE.md) - How to validate docs
@@ -83,7 +83,7 @@ last_review: "2025-10-23"
 **Migration Complete** (2025-10-26):
 - ✅ Migrated from legacy Docusaurus v2 to Docusaurus v3
 - ✅ 251 legacy files consolidated into 135 structured pages
-- ✅ Documentation Hub now serves on port 3205 (legacy port retired)
+- ✅ Documentation Hub now serves on port 3400 (DocsAPI on 3401)
 - 📖 See [CHANGELOG.md](CHANGELOG.md) for migration history
 
 > **🚨 First Time Here?** Read [Environment Configuration](#️-environment-configuration) BEFORE doing anything else!
@@ -297,7 +297,7 @@ If you have existing `.env` files scattered across the project:
 bash scripts/env/migrate-env.sh
 ```
 
-📖 **Complete Guide**: [Environment Variables Reference](http://localhost:3205/tools/security-config/env) | [Setup Script](scripts/env/setup-env.sh)
+📖 **Complete Guide**: [Environment Variables Reference](http://localhost:3400/tools/security-config/env) | [Setup Script](scripts/env/setup-env.sh)
 
 ---
 
@@ -339,8 +339,9 @@ health
 -   `start-services` - Apenas serviços Node.js
 -   `start-minimal` - Modo mínimo (essenciais)
 -   `start --force-kill` - Force restart matando processos em portas ocupadas
+-   `start --skip-vectors` - Não iniciar Qdrant/Ollama/LlamaIndex (RAG) quando não for necessário
 
-📖 **Guia Completo**: [QUICK-START.md](QUICK-START.md) | [Startup Scripts](scripts/startup/README.md) | [Docs Hub](http://localhost:3205) (Docusaurus v3)
+📖 **Guia Completo**: [QUICK-START.md](QUICK-START.md) | [Startup Scripts](scripts/startup/README.md) | [Docs Hub](http://localhost:3400) (Docusaurus v3)
 
 ---
 
@@ -374,8 +375,8 @@ health
     ```
 5. **Start the documentation + dashboard stack**:
     ```bash
-    # Documentation Hub (Port 3205)
-    cd docs && npm run start -- --host 0.0.0.0 --port 3205
+    # Documentation Hub (Port 3400)
+    cd docs && npm run start -- --host 0.0.0.0 --port 3400
     ```
     In a second terminal:
     ```bash
@@ -387,11 +388,11 @@ health
     bash tools/scripts/start-all-stacks.sh
     ```
 7. **Access the portals from Windows** via your browser:
-    - Documentation: http://localhost:3205
+    - Documentation: http://localhost:3400
     - Dashboard: http://localhost:3103
-    - API Hub (via Documentation Hub): http://localhost:3205/shared/integrations/frontend-backend-api-hub
+    - API Hub (via Documentation Hub): http://localhost:3400/shared/integrations/frontend-backend-api-hub
 
-Refer back to the [Operations Quick Start Guides](http://localhost:3205/tools/onboarding/start-services) for service-specific instructions.
+Refer back to the [Operations Quick Start Guides](http://localhost:3400/tools/onboarding/start-services) for service-specific instructions.
 
 ### Prerequisites
 
@@ -439,7 +440,7 @@ To boot the dashboard and documentation together in local mode:
 npm run dev:dashboard-docs
 ```
 
-This starts the dashboard at `http://localhost:3103` and the docs workspace at `http://localhost:3205`.
+This starts the dashboard at `http://localhost:3103` and the docs workspace at `http://localhost:3400`.
 
 #### Pre-commit Hooks
 
@@ -458,8 +459,8 @@ See [Documentation Standards](docs/governance/README.md#documentation-standards)
 
 For detailed setup instructions, see:
 
--   [Reverse Proxy Setup](http://localhost:3205/tools/infrastructure/reverse-proxy-setup)
--   [VPS Migration Guide](http://localhost:3205/tools/infrastructure/nginx-proxy-vps-migration)
+-   [Reverse Proxy Setup](http://localhost:3400/tools/infrastructure/reverse-proxy-setup)
+-   [VPS Migration Guide](http://localhost:3400/tools/infrastructure/nginx-proxy-vps-migration)
 
 ### Environment Options
 
@@ -478,7 +479,7 @@ You can access the system in two ways:
     - TP Capital API: `http://localhost:3200`
     - DocsAPI: `http://localhost:3400`
     - Laucher: `http://localhost:3500`
-    - Documentation Hub: `http://localhost:3205`
+    - Documentation Hub: `http://localhost:3400`
 
 ## 📁 Project Structure
 
