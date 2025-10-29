@@ -7,11 +7,214 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     curl \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-fetch NLTK data needed by readers
+ENV NLTK_DATA=/usr/local/nltk_data \
+    PYTHONUNBUFFERED=1
+RUN python -m nltk.downloader -d /usr/local/nltk_data punkt || true
+# Provide a minimal stopwords corpus to avoid runtime downloads
+RUN mkdir -p /usr/local/nltk_data/corpora/stopwords
+RUN cat > /usr/local/nltk_data/corpora/stopwords/english <<'SW_EN'
+a
+an
+and
+are
+as
+at
+be
+but
+by
+for
+if
+in
+into
+is
+it
+no
+not
+of
+on
+or
+such
+that
+the
+their
+then
+there
+these
+they
+this
+to
+was
+will
+with
+you
+your
+from
+have
+has
+had
+were
+which
+who
+whom
+what
+when
+where
+why
+how
+about
+above
+below
+again
+further
+once
+doing
+do
+does
+did
+own
+same
+too
+very
+can
+could
+should
+would
+might
+must
+up
+down
+over
+under
+more
+most
+less
+least
+other
+some
+any
+both
+each
+few
+many
+so
+than
+now
+only
+also
+because
+until
+while
+during
+out
+off
+again
+against
+between
+through
+SW_EN
+RUN cat > /usr/local/nltk_data/corpora/stopwords/portuguese <<'SW_PT'
+de
+do
+da
+dos
+das
+o
+a
+os
+as
+um
+uma
+uns
+umas
+e
+é
+em
+no
+na
+nos
+nas
+por
+para
+com
+sem
+sob
+sobre
+entre
+como
+que
+quem
+qual
+quais
+quando
+onde
+porque
+porquê
+não
+sim
+se
+ser
+ter
+tem
+têm
+foi
+era
+são
+está
+estão
+estavam
+estive
+estivemos
+estiveram
+estiver
+já
+mais
+menos
+muito
+muitos
+muita
+muitas
+pouco
+poucos
+pouca
+poucas
+também
+mesmo
+mesma
+mesmos
+mesmas
+outro
+outra
+outros
+outras
+seu
+sua
+seus
+suas
+meu
+minha
+meus
+minhas
+teu
+tua
+teus
+tuas
+dele
+dela
+deles
+delas
+nós
+vós
+eles
+elas
+SW_PT
 
 # Copy application code
 COPY ingestion_service/ .

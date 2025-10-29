@@ -8,10 +8,10 @@ import logging
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, AsyncQdrantClient
 
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -48,16 +48,18 @@ app.add_middleware(
 # Initialize metrics
 init_metrics(app)
 
-# Initialize Qdrant client
-qdrant_client = QdrantClient(
-    host=os.getenv("QDRANT_HOST", "localhost"),
-    port=int(os.getenv("QDRANT_PORT", 6333))
-)
+# Initialize Qdrant clients (sync + async)
+QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
+qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+async_qdrant_client = AsyncQdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 # Initialize vector store
+QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "documentation")
 vector_store = QdrantVectorStore(
     client=qdrant_client,
-    collection_name="documentation"
+    aclient=async_qdrant_client,
+    collection_name=QDRANT_COLLECTION,
 )
 # Configure embeddings with Ollama (local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -98,7 +100,8 @@ class QueryResponse(BaseModel):
 @app.post("/query", response_model=QueryResponse)
 @rate_limiter
 async def query_documents(
-    request: QueryRequest,
+    payload: QueryRequest,
+    request: Request,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -111,7 +114,7 @@ async def query_documents(
         )
     try:
         # Check cache
-        cache_key = f"query:{request.query}"
+        cache_key = f"query:{payload.query}"
         cache_client = get_cache_client()
         cached_response = await cache_client.get(cache_key)
         if cached_response:
@@ -119,13 +122,13 @@ async def query_documents(
 
         # Create query engine
         query_engine = index.as_query_engine(
-            similarity_top_k=request.max_results,
-            filters=request.filters,
+            similarity_top_k=payload.max_results,
+            filters=payload.filters,
         )
 
         # Execute query with metrics tracking
         with track_query_metrics():
-            response = await query_engine.aquery(request.query)
+            response = await query_engine.aquery(payload.query)
 
         # Format response
         sources = []
@@ -168,6 +171,7 @@ async def query_documents(
 @rate_limiter
 async def semantic_search(
     query: str,
+    request: Request,
     max_results: int = 5,
     current_user: dict = Depends(get_current_user)
 ):
