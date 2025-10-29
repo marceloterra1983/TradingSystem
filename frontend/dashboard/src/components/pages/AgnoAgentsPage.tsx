@@ -95,39 +95,12 @@ function useAgentsRegistry(baseUrl: string) {
     };
   }, [baseUrl, reloadTick]);
 
-  return { loading, error, agents };
+  const refresh = () => setReloadTick((v) => v + 1);
+
+  return { loading, error, agents, refresh };
 }
 
-const QUICK_LINKS = [
-  {
-    id: 'open-service',
-    label: 'Abrir Agno Agents',
-    helper: 'Interface FastAPI raiz do serviço',
-    href: AGNO_BASE_URL,
-    icon: <Activity className="w-4 h-4" />,
-  },
-  {
-    id: 'swagger',
-    label: 'Swagger UI',
-    helper: 'Explorar endpoints REST',
-    href: `${AGNO_BASE_URL}/docs`,
-    icon: <ExternalLink className="w-4 h-4" />,
-  },
-  {
-    id: 'metrics',
-    label: 'Prometheus /metrics',
-    helper: 'Sinais operacionais e alertas',
-    href: `${AGNO_BASE_URL}/metrics`,
-    icon: <GaugeCircle className="w-4 h-4" />,
-  },
-  {
-    id: 'health',
-    label: 'Health Check detalhado',
-    helper: 'Status das dependências externas',
-    href: `${AGNO_BASE_URL}/health?detailed=true`,
-    icon: <ShieldCheck className="w-4 h-4" />,
-  },
-];
+// Removed unused static QUICK_LINKS that referenced AGNO_BASE_URL.
 
 const DOCUMENTATION_LINKS = [
   {
@@ -156,32 +129,7 @@ const DOCUMENTATION_LINKS = [
   },
 ];
 
-const HEALTH_SNIPPETS = [
-  {
-    id: 'curl-health',
-    title: 'Health check completo',
-    command: `curl -s ${AGNO_BASE_URL}/health?detailed=true | jq`,
-  },
-  {
-    id: 'curl-metrics',
-    title: 'Exportar métricas Prometheus',
-    command: `curl -s ${AGNO_BASE_URL}/metrics | head`,
-  },
-  {
-    id: 'curl-signals',
-    title: 'Executar orquestração de sinais',
-    command: `curl -X POST ${AGNO_BASE_URL}/api/v1/agents/signals \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "action": "ORCHESTRATE",
-    "data": {
-      "symbols": ["PETR4", "WINZ25"],
-      "include_tp_capital": true,
-      "include_b3": true
-    }
-  }' | jq`,
-  },
-];
+// Removed unused static HEALTH_SNIPPETS.
 
 function handleOpen(url: string) {
   return () => window.open(url, '_blank', 'noopener,noreferrer');
@@ -481,7 +429,7 @@ export function AgnoAgentsPage(): JSX.Element {
 export default AgnoAgentsPage;
 
 function AgentsRegistrySection({ baseUrl }: { baseUrl: string }) {
-  const { loading, error, agents } = useAgentsRegistry(baseUrl);
+  const { loading, error, agents, refresh } = useAgentsRegistry(baseUrl);
   const [openId, setOpenId] = useState<string | null>(null);
   const [form, setForm] = useState({
     since: '',
@@ -566,7 +514,7 @@ function AgentsRegistrySection({ baseUrl }: { baseUrl: string }) {
               Verifique se o serviço está acessível em <code className="font-mono">{baseUrl}</code> e a CORS permite <code className="font-mono">http://localhost:3103</code>.
             </div>
             <div>
-              <Button size="sm" variant="outline" onClick={() => setReloadTick((v) => v + 1)}>Tentar novamente</Button>
+              <Button size="sm" variant="outline" onClick={refresh}>Tentar novamente</Button>
             </div>
           </div>
         )}

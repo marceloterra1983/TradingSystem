@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import { Activity, BookOpen, Boxes, ExternalLink, GaugeCircle, ShieldCheck, Workflow } from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
 import { buildDocsUrl } from '../../lib/docsUrl';
+import { endpointInfo, getMode, setMode, type ServiceMode } from '../../services/llamaIndexService';
 import LlamaIndexQueryTool from './LlamaIndexQueryTool';
 
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
@@ -139,13 +140,38 @@ export function LlamaIndexPage(): JSX.Element {
                 Infraestrutura de Retrieval-Augmented Generation integrada ao LangChain, com ingestão assíncrona e exposição REST.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
-            <CollapsibleCardContent>
-              <div className="flex flex-wrap gap-2 mb-4">
+          <CollapsibleCardContent>
+            <div className="flex flex-wrap gap-2 mb-4">
                 <Badge variant="outline">Query: porta 8202</Badge>
                 <Badge variant="outline">Ingestion: porta interna 8000</Badge>
                 <Badge variant="outline">Qdrant: portas 6333/6334</Badge>
                 <Badge variant="outline">OpenAI (LLM opcional)</Badge>
+            </div>
+
+            {/* Endpoint banner and mode toggle */}
+            <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 mb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-600 dark:text-slate-400">Endpoint em uso:</span>
+                    <Badge variant="outline">{endpointInfo().resolved.toUpperCase()}</Badge>
+                  </div>
+                  <div className="mt-1 font-mono text-xs break-all text-slate-700 dark:text-slate-300">{endpointInfo().url}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-slate-600 dark:text-slate-400">Modo</label>
+                  <select
+                    className="text-sm rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1"
+                    value={getMode()}
+                    onChange={(e) => { setMode(e.target.value as ServiceMode); /* force re-render */ window.dispatchEvent(new Event('hashchange')); }}
+                  >
+                    <option value="auto">auto</option>
+                    <option value="proxy">proxy</option>
+                    <option value="direct">direct</option>
+                  </select>
+                </div>
               </div>
+            </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-2">
