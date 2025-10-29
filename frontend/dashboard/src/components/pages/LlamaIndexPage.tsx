@@ -13,6 +13,7 @@ import { Activity, BookOpen, Boxes, ExternalLink, GaugeCircle, ShieldCheck, Work
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
 import { buildDocsUrl } from '../../lib/docsUrl';
 import { endpointInfo, getMode, setMode, type ServiceMode } from '../../services/llamaIndexService';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import LlamaIndexQueryTool from './LlamaIndexQueryTool';
 
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
@@ -356,6 +357,9 @@ function LlamaIndexEndpointBanner(): JSX.Element {
   const [copied, setCopied] = useState(false);
   const [health, setHealth] = useState<'unknown' | 'ok' | 'error'>('unknown');
   const [healthMsg, setHealthMsg] = useState<string>('');
+  const [, setFailCount] = useState(0);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const suppressKey = 'llamaindex.suppressProxySuggest';
 
   useEffect(() => {
     try { window.localStorage.setItem(lsKey, mode); } catch {}
@@ -380,13 +384,34 @@ function LlamaIndexEndpointBanner(): JSX.Element {
       if (res.ok) {
         setHealth('ok');
         setHealthMsg('OK');
+        setFailCount(0);
       } else {
         setHealth('error');
         setHealthMsg(`HTTP ${res.status}`);
+        if (info.resolved === 'direct') {
+          setFailCount((c) => {
+            const n = c + 1;
+            try {
+              const sup = typeof window !== 'undefined' ? window.localStorage.getItem(suppressKey) : null;
+              if (n >= 2 && sup !== '1') setShowSuggest(true);
+            } catch {}
+            return n;
+          });
+        }
       }
     } catch (e: any) {
       setHealth('error');
       setHealthMsg(e?.message || 'Network error');
+      if (info.resolved === 'direct') {
+        setFailCount((c) => {
+          const n = c + 1;
+          try {
+            const sup = typeof window !== 'undefined' ? window.localStorage.getItem(suppressKey) : null;
+            if (n >= 2 && sup !== '1') setShowSuggest(true);
+          } catch {}
+          return n;
+        });
+      }
     }
   }
 
@@ -395,7 +420,15 @@ function LlamaIndexEndpointBanner(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
+  // Auto health every 30s
+  useEffect(() => {
+    const id = setInterval(() => { doHealthCheck(); }, 30000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
   return (
+    <>
     <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 mb-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="text-sm">
@@ -461,5 +494,44 @@ function LlamaIndexEndpointBanner(): JSX.Element {
         </div>
       </div>
     </div>
+    <Dialog open={showSuggest} onOpenChange={setShowSuggest}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Recomendar uso de Proxy</DialogTitle>
+          <DialogDescription>
+            Detectamos falhas consecutivas ao acessar o endpoint em modo <code className="font-mono">direct</code>. Recomendamos alternar para <code className="font-mono">proxy</code> usando domínio unificado para evitar CORS e problemas de porta.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              try { window.localStorage.setItem(suppressKey, '1'); } catch {}
+              setShowSuggest(false);
+            }}
+          >
+            Não mostrar novamente
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => { setShowSuggest(false); doHealthCheck(); }}
+          >
+            Tentar novamente
+          </Button>
+          <Button
+            onClick={() => {
+              setMode('proxy');
+              setModeState('proxy');
+              setShowSuggest(false);
+              // Quick recheck
+              setTimeout(() => doHealthCheck(), 500);
+            }}
+          >
+            Alternar para Proxy
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
