@@ -32,6 +32,9 @@ status
 # Forçar reinício (mata processos existentes)
 start --force-kill
 
+# Iniciar sem stack RAG (Qdrant/Ollama/LlamaIndex)
+start --skip-vectors
+
 # Parar com força
 stop --force
 
@@ -45,14 +48,25 @@ stop --clean-logs
 |---------|-----|-------|
 | Dashboard | http://localhost:3103 | 3103 |
 | Workspace API | http://localhost:3200 | 3200 |
-| Documentation API | http://localhost:3400 | 3400 |
+| Documentation Hub | http://localhost:3400 | 3400 |
+| Documentation API | http://localhost:3401 | 3401 |
 | Status API | http://localhost:3500 | 3500 |
 | TP-Capital | http://localhost:4005 | 4005 |
 | Firecrawl Proxy | http://localhost:3600 | 3600 |
+| LlamaIndex Query | http://localhost:8202 | 8202 |
+| LlamaIndex Ingestion | http://localhost:8201 | 8201 |
+| Qdrant Vector DB | http://localhost:6333 | 6333 |
+| Ollama API | http://localhost:11434 | 11434 |
 
 ## 📊 Health Checks
 
 ```bash
+# Documentation Hub (NGINX container)
+curl -I http://localhost:3400
+
+# Documentation API
+curl http://localhost:3401/health
+
 # Workspace API
 curl http://localhost:3200/health
 
@@ -84,7 +98,7 @@ tail -f logs/services/*.log
 
 ## 🐳 Docker Containers
 
-Os containers Docker são gerenciados separadamente:
+Os containers Docker principais (Workspace, TP Capital, Qdrant, Ollama, LlamaIndex) são iniciados automaticamente pelo `start`. Use os comandos abaixo apenas para troubleshooting manual:
 
 ```bash
 # Ver containers rodando
@@ -179,4 +193,3 @@ WORKSPACE_PORT=3200
 ---
 
 **Pronto!** Agora você tem controle total do TradingSystem com comandos simples. 🎉
-

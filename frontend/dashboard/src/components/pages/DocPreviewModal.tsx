@@ -1,144 +1,95 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog';
-import { ExternalLink, X, Loader2 } from 'lucide-react';
-import { Button } from '../ui/button';
+import { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 interface DocPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   url: string;
-  fullUrl: string;
 }
 
-export function DocPreviewModal({
-  isOpen,
-  onClose,
-  title,
-  url,
-  fullUrl,
-}: DocPreviewModalProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
+/**
+ * Modal overlay for previewing Docusaurus documents in-page
+ * Opens as overlay on current page instead of new window
+ */
+export function DocPreviewModal({ isOpen, onClose, title, url }: DocPreviewModalProps) {
+  // Close on ESC key
   useEffect(() => {
-    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
 
-    setIsLoading(true);
-    setHasError(false);
-
-    // Reset iframe scroll position when opening
-    if (iframeRef.current) {
-      iframeRef.current.src = fullUrl;
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
     }
 
-    // Timeout to detect if iframe failed to load
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('[DocPreview] Iframe taking too long to load, may be blocked');
-      }
-    }, 10000);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
-    return () => clearTimeout(timeout);
-  }, [isOpen, fullUrl, isLoading]);
-
-  const handleIframeLoad = () => {
-    console.log('[DocPreview] Iframe loaded successfully');
-    setIsLoading(false);
-    setHasError(false);
-  };
-
-  const handleIframeError = () => {
-    console.error('[DocPreview] Iframe failed to load');
-    setIsLoading(false);
-    setHasError(true);
-  };
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-4 pb-3 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-lg font-semibold truncate">
-                {title}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-slate-600 dark:text-slate-400 truncate mt-1">
-                {url}
-              </DialogDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(fullUrl, '_blank')}
-                className="whitespace-nowrap"
-              >
-                <ExternalLink className="w-4 h-4 mr-1" />
-                Abrir em nova aba
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+      {/* Modal Container */}
+      <div
+        className="relative z-10 w-[95vw] h-[95vh] max-w-7xl bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-sky-500 to-sky-600 dark:from-sky-600 dark:to-sky-700 text-white">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-semibold truncate">{title}</h2>
+            <p className="text-sm opacity-90 truncate mt-1">
+              {url}
+            </p>
           </div>
-        </DialogHeader>
-        <div className="flex-1 overflow-hidden relative">
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900/50 z-10">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-sky-600 dark:text-sky-400" />
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Carregando documento...
-                </p>
-              </div>
-            </div>
-          )}
-          {hasError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-900/50 z-10">
-              <div className="flex flex-col items-center gap-3 max-w-md text-center p-6">
-                <div className="text-red-600 dark:text-red-400 text-4xl">⚠️</div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  Erro ao carregar preview
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  O documento não pôde ser carregado no preview. Isso pode acontecer devido a
-                  restrições de segurança do navegador.
-                </p>
-                <Button
-                  onClick={() => window.open(fullUrl, '_blank')}
-                  variant="default"
-                  className="mt-2"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Abrir em nova aba
-                </Button>
-              </div>
-            </div>
-          )}
+          <button
+            onClick={onClose}
+            className="ml-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+            title="Fechar (ESC)"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Content - Iframe */}
+        <div className="flex-1 bg-slate-50 dark:bg-slate-800 overflow-hidden">
           <iframe
-            ref={iframeRef}
-            src={fullUrl}
+            src={url}
             className="w-full h-full border-0"
-            title={`Preview: ${title}`}
+            title={title}
             sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
           />
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Footer */}
+        <div className="px-6 py-3 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-sm">
+          <div className="text-slate-600 dark:text-slate-400">
+            Pressione <kbd className="px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 font-mono text-xs">ESC</kbd> ou clique fora para fechar
+          </div>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-md transition-colors"
+          >
+            Abrir em Nova Aba
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }

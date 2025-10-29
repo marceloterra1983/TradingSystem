@@ -24,7 +24,7 @@ Especificação da **Status API (Service Launcher)** (Port 3500)
 - `/api/auto-start/:serviceId` - Auto-start de serviços
 - `/metrics` - Métricas Prometheus
 
-**Ver documentação completa:** http://localhost:3205/api/status
+**Ver documentação completa:** http://localhost:3400/api/status
 
 ### alert-router.openapi.yaml
 Especificação do **Alert Router** (Port 8080)
@@ -33,7 +33,7 @@ Especificação do **Alert Router** (Port 8080)
 - `/health` - Health check
 - `/github` - Webhook para alertas do Prometheus
 
-**Ver documentação completa:** http://localhost:3205/api/alert-router
+**Ver documentação completa:** http://localhost:3400/api/alert-router
 
 ### firecrawl-proxy.openapi.yaml
 Especificação do **Firecrawl Proxy** (Port 3600)
@@ -44,7 +44,7 @@ Especificação do **Firecrawl Proxy** (Port 3600)
 - `/api/crawl` - Crawling de múltiplas páginas
 - `/api/crawl/status/:jobId` - Status do crawl job
 
-**Ver documentação completa:** http://localhost:3205/api/firecrawl
+**Ver documentação completa:** http://localhost:3400/api/firecrawl
 
 ### documentation-api.openapi.yaml
 Especificação da **Documentation API** (Port 3400)
@@ -57,7 +57,7 @@ Especificação da **Documentation API** (Port 3400)
 - `/api/v1/files` - Upload e gerenciamento de arquivos
 - `/api/v1/stats` - Estatísticas de uso
 
-**Ver documentação completa:** http://localhost:3205/api/documentation-api
+**Ver documentação completa:** http://localhost:3400/api/documentation-api
 
 ### workspace.openapi.yaml
 Especificação da **Workspace API** (Port 3200)
@@ -68,7 +68,7 @@ Especificação da **Workspace API** (Port 3200)
 - `/health` - Health check
 - `/metrics` - Métricas Prometheus
 
-**Ver documentação completa:** http://localhost:3205/api/workspace
+**Ver documentação completa:** http://localhost:3400/api/workspace
 
 ### tp-capital.openapi.yaml
 Especificação da **TP Capital API** (Port 4005)
@@ -81,7 +81,7 @@ Especificação da **TP Capital API** (Port 4005)
 - `/logs` - Application logs
 - `/metrics` - Métricas Prometheus
 
-**Ver documentação completa:** http://localhost:3205/api/tp-capital
+**Ver documentação completa:** http://localhost:3400/api/tp-capital
 
 ### telegram-gateway-api.openapi.yaml
 Especificação da **Telegram Gateway API** (Port 4010)
@@ -95,7 +95,7 @@ Especificação da **Telegram Gateway API** (Port 4010)
 - `/api/telegram-gateway/sync-messages` - Sincronizar mensagens
 - `/metrics` - Métricas Prometheus
 
-**Ver documentação completa:** http://localhost:3205/api/telegram-gateway
+**Ver documentação completa:** http://localhost:3400/api/telegram-gateway
 
 ## Integração com Redocusaurus
 
