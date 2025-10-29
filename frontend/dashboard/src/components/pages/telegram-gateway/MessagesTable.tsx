@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -99,9 +99,52 @@ export function MessagesTable({
   isDeleting,
 }: MessagesTableProps) {
   const [search, setSearch] = useState(filters.search ?? '');
+  const [highlightedMessages, setHighlightedMessages] = useState<Set<string>>(new Set());
+  const previousMessageIdsRef = useRef<Set<string>>(new Set());
 
   const messages = data?.data ?? [];
   const pagination = data?.pagination;
+
+  // Detectar novas mensagens e destacá-las
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
+
+    const currentMessageIds = new Set(messages.map((msg) => msg.id));
+    
+    // Se é o primeiro carregamento (previousMessageIdsRef está vazio), 
+    // apenas inicializar sem destacar nada
+    if (previousMessageIdsRef.current.size === 0) {
+      previousMessageIdsRef.current = currentMessageIds;
+      return;
+    }
+
+    const newMessageIds = new Set<string>();
+
+    // Identificar mensagens que não estavam na lista anterior
+    currentMessageIds.forEach((id) => {
+      if (!previousMessageIdsRef.current.has(id)) {
+        newMessageIds.add(id);
+      }
+    });
+
+    // Atualizar as mensagens destacadas apenas se houver novas mensagens
+    if (newMessageIds.size > 0) {
+      setHighlightedMessages(newMessageIds);
+
+      // Remover destaque após 1 minuto
+      const timer = setTimeout(() => {
+        setHighlightedMessages(new Set());
+      }, 60000);
+
+      // Atualizar referência dos IDs anteriores
+      previousMessageIdsRef.current = currentMessageIds;
+
+      return () => clearTimeout(timer);
+    } else {
+      // Atualizar referência dos IDs anteriores mesmo sem novas mensagens
+      previousMessageIdsRef.current = currentMessageIds;
+    }
+  }, [messages]);
 
   const uniqueChannels = useMemo(() => {
     const set = new Set(messages.map((message) => message.channelId));
@@ -109,7 +152,9 @@ export function MessagesTable({
   }, [messages]);
 
   const currentStatus = filters.status?.[0] ?? 'all';
-  const currentChannel = filters.channelId ?? 'all';
+  const currentChannel = Array.isArray(filters.channelId) 
+    ? filters.channelId[0] ?? 'all' 
+    : filters.channelId ?? 'all';
   const limit = filters.limit ?? 25;
   const offset = filters.offset ?? 0;
 
@@ -295,9 +340,19 @@ export function MessagesTable({
                     </td>
                   </tr>
                 ) : (
-                  messages.map((message) => (
-                    <tr key={message.id} className="bg-white dark:bg-slate-950/60">
-                      <td className="px-3 py-3 align-top font-mono text-xs text-slate-500 dark:text-slate-400">
+                  messages.map((message) => {
+                    const isHighlighted = highlightedMessages.has(message.id);
+                    return (
+                      <tr
+                        key={message.id}
+                        className={cn(
+                          'transition-colors duration-300',
+                          isHighlighted
+                            ? 'bg-yellow-100/80 dark:bg-yellow-900/20'
+                            : 'bg-white dark:bg-slate-950/60'
+                        )}
+                      >
+                        <td className="px-3 py-3 align-top font-mono text-xs text-slate-500 dark:text-slate-400">
                         {message.channelId}
                         {message.threadId && (
                           <span className="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">
@@ -367,7 +422,8 @@ export function MessagesTable({
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>

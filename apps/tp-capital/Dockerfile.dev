@@ -6,14 +6,26 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy TP Capital package files
+COPY apps/tp-capital/package*.json ./
+
+# Copy backend/shared modules (for logger, middleware, config)
+COPY backend/shared /backend/shared
+
+# Install TP Capital dependencies
 RUN npm ci
 
-COPY . .
+# Install shared modules dependencies
+RUN cd /backend/shared/logger && npm ci && \
+    cd /backend/shared/middleware && npm ci && \
+    cd /backend/shared/config && npm install dotenv
+
+# Copy source code
+COPY apps/tp-capital .
 
 EXPOSE 4005
 
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=40s \
   CMD node -e "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

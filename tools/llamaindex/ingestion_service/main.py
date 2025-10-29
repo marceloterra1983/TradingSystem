@@ -5,7 +5,9 @@ Handles document ingestion, processing, and vector storage management.
 
 import logging
 import os
+import sys
 from typing import List, Optional
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -25,6 +27,21 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# Ensure shared helpers are importable when running as a script
+CURRENT_DIR = Path(__file__).resolve().parent
+SHARED_DIR = CURRENT_DIR.parent / "shared"
+if SHARED_DIR.exists() and str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+from gpu import (  # type: ignore # pylint: disable=wrong-import-position
+    acquire_gpu_slot,
+    build_gpu_metadata,
+    get_ollama_gpu_options,
+    GPU_COOLDOWN_SECONDS,
+    GPU_FORCE_ENABLED,
+    GPU_MAX_CONCURRENCY,
+)
 
 # Ensure NLTK resources available (stopwords, punkt)
 try:
@@ -66,7 +83,19 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Support both OLLAMA_EMBED_MODEL (service-local) and OLLAMA_EMBEDDING_MODEL (repo-wide)
 OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL") or os.getenv("OLLAMA_EMBEDDING_MODEL") or "nomic-embed-text"
 # Set default embed model for index operations
-Settings.embed_model = OllamaEmbedding(model_name=OLLAMA_EMBED_MODEL, base_url=OLLAMA_BASE_URL)
+Settings.embed_model = OllamaEmbedding(
+    model_name=OLLAMA_EMBED_MODEL,
+    base_url=OLLAMA_BASE_URL,
+    ollama_additional_kwargs=get_ollama_gpu_options(),
+)
+
+logger.info(
+    "GPU policy: forced=%s, options=%s, max_concurrency=%s, cooldown=%s",
+    GPU_FORCE_ENABLED,
+    get_ollama_gpu_options(),
+    GPU_MAX_CONCURRENCY,
+    GPU_COOLDOWN_SECONDS,
+)
 
 class ProcessingResult(BaseModel):
     """Response model for document processing results."""
@@ -74,6 +103,7 @@ class ProcessingResult(BaseModel):
     message: str
     documents_processed: Optional[int] = None
     errors: Optional[List[str]] = None
+    gpu: Optional[dict] = None
 
 class DirectoryIngestRequest(BaseModel):
     directory_path: str
@@ -98,16 +128,22 @@ async def ingest_directory(request: DirectoryIngestRequest):
         if not documents:
             raise HTTPException(status_code=400, detail=f"No supported documents found in {request.directory_path}")
         
-        # Create index from documents
-        VectorStoreIndex.from_documents(
-            documents,
-            storage_context=storage_context
+        async with acquire_gpu_slot("ingest_directory") as gpu_usage:
+            VectorStoreIndex.from_documents(
+                documents,
+                storage_context=storage_context
+            )
+        gpu_meta = build_gpu_metadata(
+            gpu_usage["wait_time_seconds"],
+            operation=gpu_usage.get("operation"),
+            lock_owner=gpu_usage.get("lock_owner"),
         )
-        
+
         return ProcessingResult(
             success=True,
             message=f"Successfully processed {len(documents)} documents from {request.directory_path}",
-            documents_processed=len(documents)
+            documents_processed=len(documents),
+            gpu=gpu_meta
         )
     
     except HTTPException:
@@ -131,16 +167,22 @@ async def ingest_document(request: DocumentIngestRequest):
         # Load single document
         documents = SimpleDirectoryReader(input_files=[request.file_path]).load_data()
         
-        # Create index from document
-        VectorStoreIndex.from_documents(
-            documents,
-            storage_context=storage_context
+        async with acquire_gpu_slot("ingest_document") as gpu_usage:
+            VectorStoreIndex.from_documents(
+                documents,
+                storage_context=storage_context
+            )
+        gpu_meta = build_gpu_metadata(
+            gpu_usage["wait_time_seconds"],
+            operation=gpu_usage.get("operation"),
+            lock_owner=gpu_usage.get("lock_owner"),
         )
-        
+
         return ProcessingResult(
             success=True,
             message=f"Successfully processed document {request.file_path}",
-            documents_processed=1
+            documents_processed=1,
+            gpu=gpu_meta
         )
     
     except HTTPException:

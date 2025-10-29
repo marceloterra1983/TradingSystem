@@ -62,16 +62,23 @@ services:
     env_file:
       - ../../.env
     build:
-      context: ../../backend/api/documentation-api
-      dockerfile: Dockerfile
+      context: ../../backend
+      dockerfile: api/documentation-api/Dockerfile
+      target: development
     ports:
       - "${DOCS_API_PORT:-3401}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - DOCS_DIR=/app/docs
+      - LLAMAINDEX_DOCS_DIR=/app/docs/content
+      - LLAMAINDEX_INGESTION_DOCS_DIR=/data/docs
       - DOCUMENTATION_DB_STRATEGY=none
       - LOG_LEVEL=info
+      - QDRANT_URL=http://data-qdrant:6333
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - LLAMAINDEX_QUERY_URL=http://tools-llamaindex-query:8000
+      - LLAMAINDEX_INGESTION_URL=http://tools-llamaindex-ingestion:8000
     volumes:
       # Documentation source files
       - ../../docs:/app/docs:ro
@@ -82,7 +89,7 @@ services:
       - tradingsystem_backend
       - tradingsystem_frontend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
       interval: 30s
       timeout: 10s
       start_period: 15s

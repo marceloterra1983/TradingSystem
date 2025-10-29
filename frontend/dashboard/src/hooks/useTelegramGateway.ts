@@ -229,13 +229,14 @@ export function useTelegramGatewayOverview(pollingMs = 10000) {
     refetchInterval: pollingMs,
     staleTime: pollingMs / 2,
     retry: 1,
+    placeholderData: (previousData) => previousData, // Keep previous data during refetch to avoid flicker
   });
 }
 
 export interface TelegramGatewayMessagesFilters {
   status?: string[];
   source?: string[];
-  channelId?: string;
+  channelId?: string | string[]; // Support both single and multiple channelIds
   messageId?: string | number;
   search?: string;
   from?: string;
@@ -250,7 +251,15 @@ export function useTelegramGatewayMessages(filters: TelegramGatewayMessagesFilte
   const queryParams = useMemo(() => {
     const params = new URLSearchParams();
 
-    if (filters.channelId) params.set('channelId', filters.channelId);
+    // Handle channelId - support both single string and array
+    if (filters.channelId) {
+      if (Array.isArray(filters.channelId)) {
+        filters.channelId.forEach((channelId) => params.append('channelId', channelId));
+      } else {
+        params.set('channelId', filters.channelId);
+      }
+    }
+
     if (filters.messageId) params.set('messageId', String(filters.messageId));
     if (filters.search) params.set('search', filters.search);
     if (filters.from) params.set('from', filters.from);
@@ -383,7 +392,7 @@ export function useCreateTelegramGatewayChannel() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway'] });
+      // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
 }
@@ -413,7 +422,7 @@ export function useUpdateTelegramGatewayChannel() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway'] });
+      // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
 }
@@ -429,7 +438,7 @@ export function useDeleteTelegramGatewayChannel() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway'] });
+      // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
 }

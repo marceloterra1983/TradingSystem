@@ -42,6 +42,9 @@ Optional configurations:
 - `RATE_LIMIT_PERIOD`: Period in seconds (default: 60)
 - `CACHE_TYPE`: Cache backend (memory/redis)
 
+> ℹ️ **Coleção padrão (`QDRANT_COLLECTION`)**  
+> O valor padrão agora é `documentation`. O serviço de query detecta automaticamente coleções legadas (`docs_index`) e faz fallback caso a coleção configurada esteja vazia, garantindo que buscas nunca retornem vazias por causa de um nome incorreto.
+
 ### Unified Domain + Proxy (Recommended)
 
 When serving the dashboard and APIs under a single domain (e.g., `http://tradingsystem.local`), route app traffic via the Documentation API proxy. This avoids exposing tokens to the browser and simplifies CORS.
@@ -88,7 +91,10 @@ server {
 }
 ```
 
-The UI automatically prefers the proxy (`/api/v1/rag`) when `VITE_USE_UNIFIED_DOMAIN=true` and `VITE_API_BASE_URL` are set; otherwise it calls the LlamaIndex Query service directly on `VITE_LLAMAINDEX_QUERY_URL`.
+> ℹ️ **Dashboard behaviour (2025-10)**  
+> A atualização do dashboard passa a preferir sempre o proxy `/api/v1/rag` quando ele estiver disponível. Mesmo em desenvolvimento local (sem `VITE_API_BASE_URL`), as requisições são encaminhadas pelo Documentation API via Vite proxy, eliminando a necessidade de expor `VITE_LLAMAINDEX_JWT` no navegador. Basta manter o serviço **documentation-api** rodando na porta `3401`. Se o proxy estiver indisponível, o frontend faz fallback automático para o endpoint direto.
+
+The UI automatically prefers the proxy (`/api/v1/rag`) and only falls back to the direct service defined em `VITE_LLAMAINDEX_QUERY_URL` se o proxy estiver indisponível.
 
 ### Security Configuration
 

@@ -1,10 +1,20 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import pino from 'pino';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Shared modules
+import { createLogger } from '../../../shared/logger/index.js';
+import {
+  configureCors,
+  configureRateLimit,
+  configureHelmet,
+  createErrorHandler,
+  createNotFoundHandler,
+  createCorrelationIdMiddleware,
+} from '../../../shared/middleware/index.js';
+import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
+
+// Application routes
 import systemsRoutes from './routes/systems.js';
 import ideasRoutes from './routes/ideas.js';
 import filesRoutes from './routes/files.js';
@@ -14,11 +24,13 @@ import specsRoutes from './routes/specs.js';
 import docsHealthRoutes from './routes/docs-health.js';
 import semanticRoutes from './routes/semantic.js';
 import ragProxyRoutes from './routes/rag-proxy.js';
+import ragStatusRoutes from './routes/rag-status.js';
 import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
 import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
+
+// Application services
 import MarkdownSearchService from './services/markdownSearchService.js';
 import searchMetrics from './services/searchMetrics.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { metricsMiddleware, metricsHandler } from './metrics.js';
 import questdbClient from './utils/questDBClient.js';
 import {
@@ -32,8 +44,12 @@ import { ensurePrismaConnection } from './utils/prismaClient.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Get project root (4 levels up from src/)
-const projectRoot = path.resolve(__dirname, '../../../../');
+// Get project root - in container: /app, in dev: 4 levels up
+// Check if running in container (has /app dir) or dev (nested in repo)
+const isContainer = __dirname.startsWith('/app');
+const projectRoot = isContainer
+  ? '/app'
+  : path.resolve(__dirname, '../../../../');
 
 // Initialize Markdown Search Service
 const markdownDocsDir = path.join(projectRoot, 'docs/content');
@@ -46,56 +62,19 @@ initializeHybridRoute({ markdownSearchService });
 const app = express();
 const PORT = config.server.port;
 
-// Logger configuration
-const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard',
-      ignore: 'pid,hostname',
-    },
+// Initialize logger
+const logger = createLogger('documentation-api', {
+  version: '1.0.0',
+  base: {
+    dbStrategy: isQuestDbStrategy() ? 'questdb' : isPostgresStrategy() ? 'postgres' : 'flexsearch',
   },
 });
 
-// Middleware
-app.use(helmet());
-
-// CORS configuration
-// When using unified domain (tradingsystem.local), CORS is not needed
-// Only enable CORS when accessing APIs directly via different ports
-if (!config.cors.disable) {
-  const rawCorsOrigin =
-    config.cors.origin?.trim() !== ''
-      ? config.cors.origin
-      : 'http://localhost:3103,http://localhost:3205';
-  const corsOrigins =
-    rawCorsOrigin === '*'
-      ? undefined
-      : rawCorsOrigin
-          .split(',')
-          .map((origin) => origin.trim())
-          .filter(Boolean);
-  app.use(
-    cors({
-      origin: corsOrigins || undefined,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    })
-  );
-} else {
-  logger.info('CORS disabled - Using unified domain mode');
-}
-
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.max,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
+// Middleware stack
+app.use(createCorrelationIdMiddleware());
+app.use(configureHelmet({ logger }));
+app.use(configureCors({ logger, disableCors: config.cors.disable }));
+app.use(configureRateLimit({ logger }));
 app.use(express.json());
 app.use(metricsMiddleware);
 
@@ -147,73 +126,62 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
-app.get('/health', async (req, res) => {
-  try {
-    // No database strategy - FlexSearch only
-    if (!isQuestDbStrategy() && !isPostgresStrategy()) {
-      return res.json({
-        status: 'ok',
-        service: 'documentation-api',
-        timestamp: new Date().toISOString(),
-        search: {
-          engine: 'flexsearch',
-          status: 'ready',
-          indexed_files: markdownSearchService.getIndexedCount?.() || 0,
-        },
-      });
-    }
-
-    if (isQuestDbStrategy()) {
-      const dbHealthy = await questdbClient.healthCheck();
-
-      return res.json({
-        status: dbHealthy.status === 'healthy' ? 'ok' : 'degraded',
-        service: 'documentation-api',
-        timestamp: new Date().toISOString(),
-        database: {
-          engine: 'questdb',
-          status: dbHealthy.status,
-          connections: dbHealthy.connections,
-        },
-      });
-    }
-
-    if (isPostgresStrategy()) {
-      await ensurePrismaConnection();
-      return res.json({
-        status: 'ok',
-        service: 'documentation-api',
-        timestamp: new Date().toISOString(),
-        database: {
-          engine: 'postgres',
-          status: 'healthy',
-        },
-      });
-    }
-
-    return res.json({
-      status: 'ok',
-      service: 'documentation-api',
-      timestamp: new Date().toISOString(),
-      database: {
-        engine: 'none',
-        status: 'not-configured',
+// Health check endpoint - comprehensive check with all dependencies
+app.get(
+  '/health',
+  createHealthCheckHandler({
+    serviceName: 'documentation-api',
+    version: '1.0.0',
+    logger,
+    checks: {
+      database: async () => {
+        if (isQuestDbStrategy()) {
+          const dbHealthy = await questdbClient.healthCheck();
+          if (dbHealthy.status !== 'healthy') {
+            throw new Error(`QuestDB ${dbHealthy.status}`);
+          }
+          return `questdb connected (${dbHealthy.connections} conns)`;
+        }
+        if (isPostgresStrategy()) {
+          await ensurePrismaConnection();
+          return 'postgres connected';
+        }
+        return 'no database configured';
       },
-    });
-  } catch (error) {
-    logger.error({ err: error }, 'Health check failed');
-    res.status(503).json({
-      status: 'error',
-      service: 'documentation-api',
-      timestamp: new Date().toISOString(),
-      database: {
-        engine: isPostgresStrategy() ? 'postgres' : isQuestDbStrategy() ? 'questdb' : 'none',
-        status: 'error',
+      searchIndex: async () => {
+        const count = markdownSearchService.getIndexedCount?.() || 0;
+        if (count === 0) {
+          throw new Error('No documents indexed');
+        }
+        return `${count} documents indexed`;
       },
-      error: error.message,
-    });
-  }
+    },
+  })
+);
+
+// Readiness probe - check if ready to serve traffic
+app.get(
+  '/ready',
+  createHealthCheckHandler({
+    serviceName: 'documentation-api',
+    version: '1.0.0',
+    logger,
+    checks: {
+      searchIndex: async () => {
+        const count = markdownSearchService.getIndexedCount?.() || 0;
+        return `${count} documents ready`;
+      },
+    },
+  })
+);
+
+// Liveness probe - minimal check
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'healthy',
+    service: 'documentation-api',
+    uptime: process.uptime(),
+  });
 });
 
 // API Routes
@@ -228,19 +196,26 @@ app.use('/api/v1/docs', hybridRoutes);
 app.use('/api/v1/docs/health', docsHealthRoutes);
 app.use('/api/v1/semantic', semanticRoutes);
 app.use('/api/v1/rag', ragProxyRoutes);
+app.use('/api/v1/rag/status', ragStatusRoutes);
 
 // Prometheus metrics endpoint
 app.get('/metrics', metricsHandler);
 
-// 404 handler
-app.use(notFoundHandler);
-
-// Global error handler
-app.use(errorHandler);
+// Error handling middleware
+app.use(createNotFoundHandler({ logger }));
+app.use(
+  createErrorHandler({
+    logger,
+    includeStack: config.server.env !== 'production',
+  })
+);
 
 // Start server
-app.listen(PORT, async () => {
-  logger.info({ port: PORT }, 'Documentation API starting');
+const server = app.listen(PORT, async () => {
+  logger.startup('Documentation API started', {
+    port: PORT,
+    env: config.server.env,
+  });
 
   // Initialize database schema (if configured)
   try {
@@ -277,5 +252,50 @@ app.listen(PORT, async () => {
   console.log(`   Stats:        http://localhost:${PORT}/api/v1/stats`);
   console.log(`   Docs Search:  http://localhost:${PORT}/api/v1/docs/search`);
   console.log(`   Docs Facets:  http://localhost:${PORT}/api/v1/docs/facets\n`);
+});
+
+// Graceful shutdown
+const shutdown = async (signal) => {
+  logger.info({ signal }, 'Shutdown signal received');
+
+  const timeout = setTimeout(() => {
+    logger.error('Shutdown timeout - forcing exit');
+    process.exit(1);
+  }, 10000);
+
+  try {
+    // Close server first
+    await new Promise((resolve) => {
+      server.close(resolve);
+      logger.info('HTTP server closed');
+    });
+
+    // Close database connections
+    if (isQuestDbStrategy()) {
+      await questdbClient.close?.();
+      logger.info('QuestDB connection closed');
+    }
+
+    clearTimeout(timeout);
+    logger.info('Graceful shutdown completed');
+    process.exit(0);
+  } catch (error) {
+    logger.error({ err: error }, 'Error during shutdown');
+    clearTimeout(timeout);
+    process.exit(1);
+  }
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  logger.fatal({ err: error }, 'Uncaught exception');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, 'Unhandled promise rejection');
 });
 

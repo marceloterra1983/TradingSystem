@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { 
   useTelegramGatewayOverview,
   useTelegramGatewayMessages,
@@ -16,13 +16,26 @@ import { Button } from '../ui/button';
 export function TelegramGatewayPageNew() {
   const [messageLimit] = useState(10);
   const [messageOffset, setMessageOffset] = useState(0);
+  const [messageStatusFilter, setMessageStatusFilter] = useState<string>('all');
 
   // Fetch data
-  const { 
-    data: overview, 
-    isLoading: overviewLoading, 
-    refetch: refetchOverview 
-  } = useTelegramGatewayOverview();
+  const {
+    data: overview,
+    isLoading: overviewLoading,
+    refetch: refetchOverview
+  } = useTelegramGatewayOverview(30000); // Poll every 30s instead of 10s to reduce flicker
+
+  const {
+    data: channels = [],
+    isLoading: channelsLoading,
+  } = useTelegramGatewayChannels();
+
+  // Extract active channel IDs for filtering messages
+  const activeChannelIds = useMemo(() => {
+    return channels
+      .filter(channel => channel.isActive)
+      .map(channel => channel.channelId);
+  }, [channels]);
 
   const {
     data: messagesData,
@@ -32,12 +45,10 @@ export function TelegramGatewayPageNew() {
     limit: messageLimit,
     offset: messageOffset,
     sort: 'desc',
+    // Only show messages from active monitored channels
+    // If no channels configured, don't filter (permissive mode)
+    channelId: activeChannelIds.length > 0 ? activeChannelIds : undefined,
   });
-
-  const {
-    data: channels = [],
-    isLoading: channelsLoading,
-  } = useTelegramGatewayChannels();
 
   // Mutations
   const createChannel = useCreateTelegramGatewayChannel();
@@ -110,6 +121,8 @@ export function TelegramGatewayPageNew() {
             onRefresh={refetchMessages}
             onLoadMore={hasMore ? handleLoadMore : undefined}
             hasMore={hasMore}
+            selectedStatus={messageStatusFilter}
+            onStatusChange={setMessageStatusFilter}
           />
         </div>
 

@@ -1,12 +1,32 @@
+/**
+ * TP Capital API - Migrated to use shared modules
+ *
+ * CHANGES FROM PREVIOUS VERSION:
+ * - Using shared logger (backend/shared/logger)
+ * - Using shared middleware (backend/shared/middleware)
+ * - Standardized health check endpoint
+ * - Correlation ID support
+ */
+
 import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
 import promClient from 'prom-client';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Shared modules
+import { createLogger } from '../../backend/shared/logger/index.js';
+import {
+  configureCors,
+  configureRateLimit,
+  configureHelmet,
+  createErrorHandler,
+  createNotFoundHandler,
+  createCorrelationIdMiddleware,
+} from '../../backend/shared/middleware/index.js';
+import { createHealthCheckHandler } from '../../backend/shared/middleware/health.js';
+
+// Service-specific modules
 import { config, validateConfig } from './config.js';
-import { logger } from './logger.js';
 import { getLogs } from './logStore.js';
 import { timescaleClient } from './timescaleClient.js';
 import { getGatewayDatabaseClient, closeGatewayDatabaseClient } from './gatewayDatabaseClient.js';
@@ -19,44 +39,54 @@ import ingestionRouter from '../api/src/routes/ingestion.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Create logger
+const logger = createLogger('tp-capital', {
+  version: '1.0.0',
+  base: {
+    channelId: config.gateway?.signalsChannelId,
+  },
+});
+
 validateConfig(logger);
 
 const app = express();
 
-// CORS configuration
-// When using unified domain (tradingsystem.local), CORS is not needed
-// Only enable CORS when accessing APIs directly via different ports
-const disableCors = process.env.DISABLE_CORS === 'true';
+// Expose shared resources to nested routers
+app.set('logger', logger);
+app.locals.metrics = {
+  ...gatewayMetrics,
+  // Maintain compatibility with ingestion router expectations
+  messagesIngestedTotal: gatewayMetrics.messagesProcessed,
+};
+app.locals.timescaleClient = timescaleClient;
 
-if (!disableCors) {
-  const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
-    ? process.env.CORS_ORIGIN
-    : 'http://localhost:3101,http://localhost:3205';
-  const corsOrigins = rawCorsOrigin === '*'
-    ? undefined
-    : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
-  const corsOptions = corsOrigins ? { origin: corsOrigins, credentials: true } : undefined;
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
-} else {
-  logger.info('CORS disabled - Using unified domain mode');
-}
+// Prometheus metrics
+const register = new promClient.Registry();
+promClient.collectDefaultMetrics({ register, prefix: 'tp_capital_' });
 
-const limiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
-  max: Number(process.env.RATE_LIMIT_MAX || 120),
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// ============================================================================
+// MIDDLEWARE STACK (using shared modules)
+// ============================================================================
 
-app.use(limiter);
-app.use(
-  helmet({
-    crossOriginResourcePolicy: false,
-    crossOriginEmbedderPolicy: false
-  })
-);
-app.use(express.json());
+// 1. Correlation ID (must be first for tracing)
+app.use(createCorrelationIdMiddleware());
+
+// 2. Security headers (Helmet)
+app.use(configureHelmet({ logger }));
+
+// 3. CORS configuration
+app.use(configureCors({ logger }));
+
+// 4. Body parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 5. Rate limiting (environment-based)
+app.use(configureRateLimit({ logger }));
+
+// ============================================================================
+// ROUTES
+// ============================================================================
 
 // Mount ingestion route (receives from Telegram Gateway)
 app.use('/', ingestionRouter);
@@ -64,39 +94,52 @@ app.use('/', ingestionRouter);
 // Servir imagens estáticas do Telegram
 app.use('/telegram-images', express.static(path.join(__dirname, '..', 'public', 'telegram-images')));
 
-const register = new promClient.Registry();
-promClient.collectDefaultMetrics({ register });
+// Health check endpoint (standardized with dependency checks)
+app.get('/health', createHealthCheckHandler({
+  serviceName: 'tp-capital',
+  version: '1.0.0',
+  logger,
+  checks: {
+    timescaledb: async () => {
+      const healthy = await timescaleClient.healthcheck();
+      if (!healthy) throw new Error('TimescaleDB unhealthy');
+      return 'connected';
+    },
+    gatewayDatabase: async () => {
+      const gatewayDb = getGatewayDatabaseClient();
+      const isConnected = await gatewayDb.testConnection();
+      if (!isConnected) throw new Error('Gateway DB disconnected');
+      return 'connected';
+    },
+    pollingWorker: async () => {
+      if (!globalPollingWorker) return 'not initialized';
+      const status = globalPollingWorker.getStatus();
+      const waiting = await globalPollingWorker.getMessagesWaiting();
+      return `${status} (${waiting} messages waiting)`;
+    },
+  },
+}));
 
-app.get('/health', async (_req, res) => {
-  const timescaleHealthy = await timescaleClient.healthcheck();
+// Readiness probe
+app.get('/ready', createHealthCheckHandler({
+  serviceName: 'tp-capital',
+  version: '1.0.0',
+  logger,
+  checks: {
+    timescaledb: async () => {
+      const healthy = await timescaleClient.healthcheck();
+      if (!healthy) throw new Error('TimescaleDB not ready');
+      return 'ready';
+    },
+  },
+}));
 
-  // Check Gateway database connectivity
-  let gatewayDbStatus = 'unknown';
-  let pollingWorkerStatus = null;
-  let messagesWaiting = 0;
-
-  try {
-    const gatewayDb = getGatewayDatabaseClient();
-    const isConnected = await gatewayDb.testConnection();
-    gatewayDbStatus = isConnected ? 'connected' : 'disconnected';
-
-    if (globalPollingWorker) {
-      pollingWorkerStatus = globalPollingWorker.getStatus();
-      messagesWaiting = await globalPollingWorker.getMessagesWaiting();
-    }
-  } catch (error) {
-    logger.error({ err: error }, 'Health check error for Gateway DB');
-    gatewayDbStatus = 'error';
-  }
-
-  const overallStatus = (timescaleHealthy && gatewayDbStatus === 'connected') ? 'healthy' : 'degraded';
-
-  res.json({
-    status: overallStatus,
-    timescale: timescaleHealthy,
-    gatewayDb: gatewayDbStatus,
-    pollingWorker: pollingWorkerStatus,
-    messagesWaiting
+// Liveness probe
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'tp-capital',
+    uptime: process.uptime(),
   });
 });
 
@@ -117,7 +160,7 @@ app.post('/sync-messages', async (req, res) => {
   try {
     logger.info('[SyncMessages] Sincronização solicitada via dashboard');
     
-    // Chamar o endpoint de sincronização do Telegram Gateway com limite de 100 mensagens
+    // Chamar o endpoint de sincronização do Telegram Gateway com limite de 500 mensagens
     const gatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4006);
     const gatewayUrl = process.env.TELEGRAM_GATEWAY_URL || `http://localhost:${gatewayPort}`;
     
@@ -127,7 +170,7 @@ app.post('/sync-messages', async (req, res) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ limit: 100 })
+        body: JSON.stringify({ limit: 500 })
       });
       
       const result = await response.json();
@@ -219,7 +262,16 @@ app.get('/signals', async (req, res) => {
         )
       : rows;
 
-    res.json({ data: filtered });
+    // Convert ts from Date object to timestamp in milliseconds for frontend
+    const normalized = filtered.map(row => ({
+      ...row,
+      ts: row.ts ? new Date(row.ts).getTime() : null,
+      ingested_at: row.ingested_at ? new Date(row.ingested_at).toISOString() : null,
+      created_at: row.created_at ? new Date(row.created_at).toISOString() : null,
+      updated_at: row.updated_at ? new Date(row.updated_at).toISOString() : null,
+    }));
+
+    res.json({ data: normalized });
   } catch (error) {
     logger.error({ err: error }, 'Failed to fetch signals');
     res.status(500).json({ error: 'Failed to fetch signals' });
@@ -229,11 +281,11 @@ app.get('/signals', async (req, res) => {
 app.get('/forwarded-messages', async (req, res) => {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : 100;
-    const sourceChannelId = req.query.channelId ? Number(req.query.channelId) : undefined;
+    const channelId = req.query.channelId ? String(req.query.channelId) : undefined;
 
     const rows = await timescaleClient.fetchForwardedMessages({
       limit,
-      sourceChannelId,
+      channelId,
       fromTs: req.query.from ? Number(req.query.from) || Date.parse(String(req.query.from)) : undefined,
       toTs: req.query.to ? Number(req.query.to) || Date.parse(String(req.query.to)) : undefined,
     });
@@ -545,8 +597,27 @@ app.delete('/telegram/channels/:id', async (req, res) => {
   }
 });
 
+// ============================================================================
+// ERROR HANDLING (using shared modules)
+// ============================================================================
+
+// 404 handler (must be before error handler)
+app.use(createNotFoundHandler({ logger }));
+
+// Global error handler (must be last)
+app.use(createErrorHandler({ logger, includeStack: config.server.env !== 'production' }));
+
+// ============================================================================
+// SERVER STARTUP & GRACEFUL SHUTDOWN
+// ============================================================================
+
 const server = app.listen(config.server.port, () => {
-  logger.info({ port: config.server.port }, 'TP Capital ingestion service listening');
+  logger.startup('TP Capital API started successfully', {
+    port: config.server.port,
+    environment: config.server.env,
+    gatewayPolling: config.gateway?.enabled,
+    signalsChannel: config.gateway?.signalsChannelId,
+  });
 });
 
 // Initialize Gateway Polling Worker
@@ -648,37 +719,56 @@ app.post('/reload-channels', async (req, res) => {
 
 // Graceful shutdown handler
 async function gracefulShutdown(signal) {
-  logger.info({ signal }, 'Shutdown signal received');
+  logger.info({ signal }, 'Received shutdown signal, closing server...');
 
   // Close HTTP server
-  server.close();
+  server.close(async () => {
+    logger.info('HTTP server closed');
 
-  // Stop components gracefully
-  const stopPromises = [];
+    // Stop components gracefully
+    const stopPromises = [];
 
-  // Stop polling worker
-  if (globalPollingWorker) {
-    logger.info('Stopping Gateway polling worker...');
-    stopPromises.push(globalPollingWorker.stop());
-  }
+    // Stop polling worker
+    if (globalPollingWorker) {
+      logger.info('Stopping Gateway polling worker...');
+      stopPromises.push(globalPollingWorker.stop());
+    }
 
-  // Stop Telegram forwarder (if running)
-  if (telegramUserForwarder?.stop) {
-    logger.info('Stopping Telegram forwarder...');
-    stopPromises.push(telegramUserForwarder.stop());
-  }
+    // Stop Telegram forwarder (if running)
+    if (telegramUserForwarder?.stop) {
+      logger.info('Stopping Telegram forwarder...');
+      stopPromises.push(telegramUserForwarder.stop());
+    }
 
-  await Promise.all(stopPromises);
+    await Promise.all(stopPromises);
 
-  // Close database connections
-  await Promise.all([
-    timescaleClient.close().catch(err => logger.error({ err }, 'Error closing TimescaleDB')),
-    closeGatewayDatabaseClient().catch(err => logger.error({ err }, 'Error closing Gateway DB'))
-  ]);
+    // Close database connections
+    await Promise.all([
+      timescaleClient.close().catch(err => logger.error({ err }, 'Error closing TimescaleDB')),
+      closeGatewayDatabaseClient().catch(err => logger.error({ err }, 'Error closing Gateway DB'))
+    ]);
 
-  logger.info('Shutdown complete');
-  process.exit(0);
+    logger.info('TP Capital API stopped gracefully');
+    process.exit(0);
+  });
+
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    logger.error('Graceful shutdown timeout, forcing exit');
+    process.exit(1);
+  }, 10000);
 }
 
-process.on('SIGINT', gracefulShutdown);
-process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.fatal({ err: error }, 'Uncaught exception');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.fatal({ reason, promise }, 'Unhandled promise rejection');
+  process.exit(1);
+});

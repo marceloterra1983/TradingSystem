@@ -144,15 +144,6 @@ services:
     env_file:
       - ../../.env
 
-  frontend-apps:
-    image: "${IMG_DATA_FRONTEND_APPS:-nginx:alpine}"
-    container_name: data-frontend-apps
-    ports:
-      - "${FRONTEND_APPS_PORT:-3001}:80"
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-
 # ========================================
 # Networks
 # ========================================

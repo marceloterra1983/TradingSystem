@@ -46,10 +46,20 @@ fi
 
 cd "$PROJECT_ROOT"
 
-# Configuration
+# Configuration: load only versioned defaults to avoid sourcing user secrets
+# and potentially invalid shell syntax in .env/.env.local. Per-service compose
+# files read env files themselves via env_file. We still export image defaults
+# to satisfy Compose variable substitution when launching stacks from here.
+if [ -f "$PROJECT_ROOT/config/.env.defaults" ]; then
+    set -a
+    . "$PROJECT_ROOT/config/.env.defaults"
+    set +a
+fi
+
 FORCE_KILL=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
+WITH_VECTORS=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 METRICS_FILE="$SERVICES_DIR/start-metrics.json"
 mkdir -p "$SERVICES_DIR"
@@ -67,9 +77,12 @@ START_SCRIPT_TIME=$(date +%s)
 declare -A SERVICES=(
     ["telegram-gateway"]="apps/telegram-gateway:4006:npm run dev:apps/telegram-gateway/.env::3"
     ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev:backend/api/telegram-gateway/.env:telegram-gateway:3"
-    ["dashboard"]="frontend/dashboard:3103:npm run dev:::2"
-    ["docusaurus"]="docs:3205:npm run docs:dev:::2"
+    ["docs-api"]="backend/api/documentation-api:3401:PORT=3401 npm start:::3"
+    # Use npm run start (docs package maps start -> docs:dev) to avoid ':' in command string
+    ["docusaurus"]="docs:3205:npm run start:::2"
+    ["dashboard"]="frontend/dashboard:3103:npm run dev::docs-api,docusaurus:2"
     ["status"]="apps/status:3500:npm start:::2"
+    ["docs-watcher"]="tools/llamaindex::npm run watch::docs-api:1"
 )
 
 # Parse arguments
@@ -87,6 +100,10 @@ while [[ $# -gt 0 ]]; do
             SKIP_SERVICES=true
             shift
             ;;
+        --with-vectors)
+            WITH_VECTORS=true
+            shift
+            ;;
         --help|-h)
             cat << EOF
 TradingSystem Universal Start v2.0
@@ -97,6 +114,7 @@ Options:
   --force-kill       Kill processes on occupied ports before starting
   --skip-docker      Skip Docker containers startup
   --skip-services    Skip local dev services startup
+  --with-vectors     Start Qdrant + Ollama + LlamaIndex (for hybrid search)
   --help, -h         Show this help message
 
 Services:
@@ -106,10 +124,11 @@ Services:
      - TimescaleDB, QuestDB, and other infrastructure
 
   🖥️  Local Dev Services:
-     - Telegram Gateway (4006) - Telegram MTProto gateway service  
+     - Telegram Gateway (4006) - Telegram MTProto gateway service
      - Telegram Gateway API (4010) - REST API for gateway messages
-     - Dashboard (3103) - React dashboard
+     - DocsAPI (3401) - Documentation API (hybrid search)
      - Docusaurus (3205) - Documentation site
+     - Dashboard (3103) - React dashboard
      - Status API (3500) - Service health & launcher
 
 Features:
@@ -185,20 +204,38 @@ resolve_dependencies() {
     echo "${sorted_services[@]}"
 }
 
-# Function to check if port is in use
-check_port() {
+# Function to check if port is in use (portable)
+port_in_use() {
     local port=$1
-    lsof -ti :"$port" 2>/dev/null
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1
+        return $?
+    elif command -v ss >/dev/null 2>&1; then
+        ss -ltn "sport = :$port" | awk 'NR>1 && /LISTEN/ {found=1} END{exit (found?0:1)}'
+        return $?
+    else
+        timeout 1 bash -lc ">/dev/tcp/127.0.0.1/$port" >/dev/null 2>&1
+        return $?
+    fi
 }
 
 # Function to kill process on port
 kill_port() {
     local port=$1
-    local pid=$(check_port "$port")
-    if [ -n "$pid" ]; then
-        log_warning "Killing process on port $port (PID: $pid)"
-        kill -9 "$pid" 2>/dev/null || true
+    if command -v lsof >/dev/null 2>&1; then
+        local pids
+        pids=$(lsof -ti :"$port" 2>/dev/null | tr '\n' ' ')
+        if [ -n "$pids" ]; then
+            log_warning "Killing process(es) on port $port (PID(s): $pids)"
+            kill -9 $pids 2>/dev/null || true
+            sleep 1
+        fi
+    elif command -v fuser >/dev/null 2>&1; then
+        log_warning "Killing process(es) on port $port via fuser"
+        fuser -k -n tcp "$port" 2>/dev/null || true
         sleep 1
+    else
+        log_warning "No lsof/fuser available to kill processes on port $port"
     fi
 }
 
@@ -207,26 +244,126 @@ start_containers() {
     section "Starting Docker Containers"
 
     # Check if docker-compose.apps.yml exists
-    if [ ! -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" ]; then
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.apps.yml"
+    if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "No docker-compose.apps.yml found - skipping containers"
         return 0
     fi
 
-    # Check if containers are already running
-    if docker ps | grep -qE "tp-capital-api|workspace-service"; then
+    # Ensure external networks exist (some stacks expect them)
+    for net in tradingsystem_backend tradingsystem_infra tradingsystem_data Database_default; do
+        if ! docker network ls --format '{{.Name}}' | grep -qx "$net"; then
+            log_info "Creating docker network: $net"
+            docker network create "$net" >/dev/null || true
+        fi
+    done
+
+    # Start database stack (TimescaleDB) first if compose file exists
+    local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.timescale.yml"
+    if [ -f "$DB_COMPOSE_FILE" ]; then
+        # Provide sane defaults for image variables when not set in .env
+        export IMG_DATA_TIMESCALEDB="${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}"
+        export IMG_DATA_QDRANT="${IMG_DATA_QDRANT:-qdrant/qdrant}"
+        export IMG_VERSION="${IMG_VERSION:-latest}"
+        log_info "Starting TimescaleDB stack..."
+        if [ "$FORCE_KILL" = true ]; then
+            # Free host DB ports
+            for p in 5433 8081 5050; do
+                if port_in_use "$p"; then
+                    log_warning "Killing host process on port $p (--force-kill)"
+                    kill_port "$p"
+                fi
+            done
+            # Only remove DB container if unhealthy or not running
+            if docker ps -a --format '{{.Names}}' | grep -qx "data-timescaledb"; then
+                db_state=$(docker inspect --format='{{.State.Status}}' data-timescaledb 2>/dev/null || echo unknown)
+                db_health=$(docker inspect --format='{{.State.Health.Status}}' data-timescaledb 2>/dev/null || echo none)
+                if [ "$db_state" != "running" ] || { [ "$db_health" != "healthy" ] && [ "$db_health" != "none" ]; }; then
+                    log_warning "Removing 'data-timescaledb' (state=$db_state, health=$db_health)"
+                    docker rm -f data-timescaledb >/dev/null 2>&1 || true
+                fi
+            fi
+        fi
+
+        if docker ps -a --format '{{.Names}}' | grep -qx "data-timescaledb"; then
+            db_state=$(docker inspect --format='{{.State.Status}}' data-timescaledb 2>/dev/null || echo unknown)
+            if [ "$db_state" = "running" ]; then
+                log_info "TimescaleDB already running (data-timescaledb)"
+            else
+                log_info "Starting existing TimescaleDB container (data-timescaledb)"
+                docker start data-timescaledb >/dev/null || true
+            fi
+        else
+            docker compose -p database -f "$DB_COMPOSE_FILE" up -d timescaledb >/dev/null
+        fi
+
+        # Wait health for TimescaleDB (container name: data-timescaledb)
+        log_info "Waiting for TimescaleDB health..."
+        local max_db_wait=60
+        local waited_db=0
+        while [ $waited_db -lt $max_db_wait ]; do
+            local db_health
+            db_health=$(docker inspect --format='{{.State.Health.Status}}' data-timescaledb 2>/dev/null || echo starting)
+            if [ "$db_health" = "healthy" ]; then
+                log_success "✓ TimescaleDB healthy"
+                break
+            fi
+            sleep 2
+            waited_db=$((waited_db + 2))
+        done
+        if [ $waited_db -ge $max_db_wait ]; then
+            log_warning "⚠ TimescaleDB health check timed out; continuing"
+        fi
+    else
+        log_warning "Timescale compose not found; assuming DB is already available"
+    fi
+
+    # If ports are busy by host processes and --force-kill, free them
+    if [ "$FORCE_KILL" = true ]; then
+        for p in 4005 3200; do
+            if port_in_use "$p"; then
+                log_warning "Killing host process on port $p (--force-kill)"
+                kill_port "$p"
+            fi
+        done
+    fi
+
+    # Remove conflicting containers by name when --force-kill (handles exited containers too)
+    if [ "$FORCE_KILL" = true ]; then
+        for cname in apps-workspace apps-tp-capital; do
+            if docker ps -a --format '{{.Names}}' | grep -qx "$cname"; then
+                state=$(docker inspect --format='{{.State.Status}}' "$cname" 2>/dev/null || echo unknown)
+                health=$(docker inspect --format='{{.State.Health.Status}}' "$cname" 2>/dev/null || echo none)
+                if [ "$state" != "running" ] || { [ "$health" != "healthy" ] && [ "$health" != "none" ]; }; then
+                    log_warning "Removing '$cname' (state=$state, health=$health)"
+                    docker rm -f "$cname" >/dev/null 2>&1 || true
+                fi
+            fi
+        done
+    fi
+
+    # If already running and not forcing, skip
+    if docker ps --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
         log_info "Application containers already running"
         if [ "$FORCE_KILL" = true ]; then
-            log_info "Restarting containers (--force-kill)..."
-            docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" down
-            sleep 2
+            ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo none)
+            tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tp-capital 2>/dev/null || echo none)
+            if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
+                log_info "Containers healthy; skipping restart (ignoring --force-kill)"
+                return 0
+            else
+                log_info "Restarting containers (--force-kill)..."
+                docker compose -p apps -f "$COMPOSE_FILE" down || true
+                sleep 2
+            fi
         else
             return 0
         fi
     fi
 
     # Start containers
-    log_info "Starting tp-capital-api and workspace-service..."
-    docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" up -d
+    log_info "Starting apps stack (tp-capital, workspace)..."
+    docker compose -p apps -f "$COMPOSE_FILE" up -d --force-recreate
 
     # Wait for containers to be healthy
     log_info "Waiting for containers to be healthy..."
@@ -234,16 +371,18 @@ start_containers() {
     local waited=0
 
     while [ $waited -lt $max_wait ]; do
-        local workspace_health=$(docker inspect --format='{{.State.Health.Status}}' workspace-service 2>/dev/null || echo "starting")
+        local ws_health tp_health
+        ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo starting)
+        tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tp-capital 2>/dev/null || echo starting)
 
-        if [ "$workspace_health" = "healthy" ]; then
-            log_success "✓ Containers are healthy"
+        if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
+            log_success "✓ App containers are healthy"
             break
         fi
 
         sleep 2
         waited=$((waited + 2))
-
+ 
         if [ $((waited % 10)) -eq 0 ]; then
             log_info "Still waiting... (${waited}s/${max_wait}s)"
         fi
@@ -255,8 +394,8 @@ start_containers() {
     fi
 
     log_success "✓ Containers started"
-    echo -e "${BLUE}  - tp-capital-api:   ${NC}http://localhost:4005"
-    echo -e "${BLUE}  - workspace-service:${NC}http://localhost:3200"
+    log_info "  - tp-capital-api:    http://localhost:4005"
+    log_info "  - workspace-service: http://localhost:3200"
 }
 
 # Function to validate service environment
@@ -425,11 +564,24 @@ start_service() {
         return 1
     fi
     
-    # Validate environment file if specified
+    # Validate environment file if specified; for telegram-gateway fall back to root .env,
+    # for outros serviços sem env_file, pular com aviso
+    local env_ok=0
+    local use_root_env_fallback=0
     if [ -n "$env_file" ] && [ "$env_file" != "$command" ]; then
         if ! validate_service_env "$name" "$env_file"; then
-            log_warning "$name requires configuration - continuing anyway..."
+            if [ "$name" = "telegram-gateway" ]; then
+                log_warning "$name: Environment file not found: $env_file"
+                log_info "  Falling back to project .env/.env.local"
+                use_root_env_fallback=1
+            else
+                log_warning "$name: required environment file missing; skipping start"
+                env_ok=1
+            fi
         fi
+    fi
+    if [ $env_ok -eq 1 ]; then
+        return 0
     fi
 
     # Check if already running
@@ -443,13 +595,31 @@ start_service() {
         fi
     fi
 
-    # Check port
-    if check_port "$port" > /dev/null; then
-        if [ "$FORCE_KILL" = true ]; then
-            kill_port "$port"
-        else
-            log_warning "Port $port already in use. Use --force-kill to restart"
-            return 0
+    # Check port; if healthy service already listening, skip start
+    if [ -n "$port" ]; then
+        if curl -sf "http://localhost:$port/health" >/dev/null 2>&1; then
+            log_info "$name already running on port $port (health OK); skipping start"
+            echo $$ > "$pid_file"; return 0
+        fi
+        # Special-case: docs-api — skip local start if docker container is exposing 3401
+        if [ "$name" = "docs-api" ]; then
+            if docker ps --format '{{.Names}}' | grep -qx docs-api; then
+                log_info "docs-api container detected; skipping local docs-api"
+                echo $$ > "$pid_file"; return 0
+            fi
+        fi
+        if port_in_use "$port"; then
+            if [ "$FORCE_KILL" = true ]; then
+                # Avoid killing docker-proxy for containerized docs-api; skip instead
+                if [ "$name" = "docs-api" ] && docker ps --format '{{.Names}}' | grep -qx docs-api; then
+                    log_info "docs-api port in use by container; skipping local start"
+                    echo $$ > "$pid_file"; return 0
+                fi
+                kill_port "$port"
+            else
+                log_warning "Port $port already in use. Use --force-kill to restart"
+                return 0
+            fi
         fi
     fi
 
@@ -462,11 +632,14 @@ start_service() {
     # Start service in background
     cd "$PROJECT_ROOT/$dir"
 
-    # Use appropriate start command
-    if [ "$name" = "docusaurus" ]; then
-        nohup npm run docs:dev > "$log_file" 2>&1 &
+    # Use command from service config (supports inline env like "PORT=3401 npm start")
+    if [ -z "$command" ]; then
+        command="npm run dev"
+    fi
+    if [ $use_root_env_fallback -eq 1 ]; then
+        nohup bash -lc "set -a; [ -f '$PROJECT_ROOT/.env' ] && . '$PROJECT_ROOT/.env'; [ -f '$PROJECT_ROOT/.env.local' ] && . '$PROJECT_ROOT/.env.local'; set +a; $command" > "$log_file" 2>&1 &
     else
-        nohup npm run dev > "$log_file" 2>&1 &
+        nohup bash -lc "$command" > "$log_file" 2>&1 &
     fi
 
     local pid=$!
@@ -492,11 +665,7 @@ start_service() {
             
             # Restart service
             cd "$PROJECT_ROOT/$dir"
-            if [ "$name" = "docusaurus" ]; then
-                nohup npm run docs:dev > "$log_file" 2>&1 &
-            else
-                nohup npm run dev > "$log_file" 2>&1 &
-            fi
+            nohup bash -lc "$command" > "$log_file" 2>&1 &
             pid=$!
             echo "$pid" > "$pid_file"
         fi
@@ -583,6 +752,18 @@ main() {
         echo ""
     fi
 
+    # Optional: Start vectors stack (Qdrant + Ollama + LlamaIndex)
+    if [ "$WITH_VECTORS" = true ]; then
+        section "Starting Vectors Stack (Qdrant + Ollama + LlamaIndex)"
+        local vec_script="$PROJECT_ROOT/scripts/docker/start-llamaindex-local.sh"
+        if [ -f "$vec_script" ]; then
+            bash "$vec_script"
+        else
+            log_warning "Vectors start script not found. Skipping."
+        fi
+        echo ""
+    fi
+
     # Step 2: Start local development services
     if [ "$SKIP_SERVICES" = false ]; then
         section "Starting Local Development Services"
@@ -631,12 +812,16 @@ main() {
     echo -e "${CYAN}🐳 Docker Containers:${NC}"
     echo -e "  💹 TP Capital API:    http://localhost:4005"
     echo -e "  📚 Workspace API:     http://localhost:3200"
+    echo -e "  💾 TimescaleDB:       postgresql://timescale:pass_timescale@localhost:5433/${TIMESCALEDB_DB:-tradingsystem}"
+    echo -e "     ├─ pgAdmin:        http://localhost:${PGADMIN_HOST_PORT:-5050}"
+    echo -e "     └─ pgWeb:          http://localhost:${PGWEB_PORT:-8081}"
     echo ""
     echo -e "${CYAN}🖥️  Local Dev Services:${NC}"
     echo -e "  📨 Telegram Gateway:      http://localhost:4006  (health: /health)"
     echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
-    echo -e "  🎨 Dashboard:             http://localhost:3103"
+    echo -e "  📚 DocsAPI:               http://localhost:3401  (health: /health)"
     echo -e "  📖 Docusaurus:            http://localhost:3205"
+    echo -e "  🎨 Dashboard:             http://localhost:3103"
     echo -e "  📊 Status API:            http://localhost:3500"
     echo ""
     echo -e "${CYAN}📝 Management:${NC}"

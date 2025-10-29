@@ -19,13 +19,18 @@ logger = logging.getLogger(__name__)
 
 class DocumentProcessor:
     """Base class for document processors."""
-    
-    def __init__(self, chunk_size: int = 512, chunk_overlap: int = 50):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+
+    def __init__(self, chunk_size: int = None, chunk_overlap: int = None):
+        # Support environment variable configuration for optimal chunking
+        # Recommended: 768-1024 tokens with 100-150 overlap for better context
+        self.chunk_size = chunk_size or int(os.getenv('LLAMAINDEX_CHUNK_SIZE', '768'))
+        self.chunk_overlap = chunk_overlap or int(os.getenv('LLAMAINDEX_CHUNK_OVERLAP', '128'))
+
+        logger.info(f"DocumentProcessor initialized: chunk_size={self.chunk_size}, chunk_overlap={self.chunk_overlap}")
+
         self.text_splitter = SentenceSplitter(
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap
         )
     
     @track_time(INGEST_TIME)

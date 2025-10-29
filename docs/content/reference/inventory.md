@@ -19,19 +19,19 @@ lastReviewed: '2025-10-27'
 
 ---
 
-## 📦 CONTAINERS DOCKER (29 rodando)
+## 📦 CONTAINERS DOCKER (28 rodando)
 
 > **🎉 NOVO**: Workspace API e TP Capital API agora containerizados!
 >
-> - ✅ `workspace-service` (Port 3200) - Healthy
-> - ✅ `tp-capital-api` (Port 4005) - Healthy
+> - ✅ `apps-workspace` (Port 3200) - Healthy
+> - ✅ `apps-tp-capital` (Port 4005) - Healthy
 
 ### 📋 Lista Completa de Containers
 
 | # | Container | Imagem | Porta(s) | Status | Categoria |
 |---|-----------|--------|----------|--------|-----------|
-| 1 | **tp-capital-api** | apps-tp-capital-api | 4005 | ✅ Healthy | Application Services |
-| 2 | **workspace-service** | apps-workspace | 3200 | ✅ Healthy | Application Services |
+| 1 | **apps-tp-capital** | img-apps-tp-capital | 4005 | ✅ Healthy | Application Services |
+| 2 | **apps-workspace** | img-apps-workspace | 3200 | ✅ Healthy | Application Services |
 | 3 | **data-timescaledb** | timescale/timescaledb:latest-pg16 | 5433 | ✅ Up 17h | Databases |
 | 4 | **data-timescaledb-backup** | img-data-timescaledb-backup | 5434 | ✅ Up 17h | Databases |
 | 5 | **data-postgress-langgraph** | img-data-postgress-langgraph | 5435 | ✅ Up 17h | Databases |
@@ -52,13 +52,12 @@ lastReviewed: '2025-10-27'
 | 20 | **tools-agno-agents** | img-infra-agno-agents | 8200 | ✅ Healthy | AI/ML |
 | 21 | **infra-llamaindex-ingestion** | img-infra-llamaindex-ingestion | 8201 | ✅ Up 17h | AI/ML |
 | 22 | **infra-llamaindex-query** | img-infra-llamaindex-query | 8202 | ✅ Up 17h | AI/ML |
-| 23 | **data-frontend-apps** | img-data-frontend-apps | 3001 | ✅ Up 17h | AI/ML |
-| 24 | **docs-api** | nginx:latest | 3400 | ✅ Healthy | Documentation |
-| 25 | **docs-api-viewer** | nginx:alpine | 3101 | ⚠️ Unhealthy | Documentation |
-| 26 | **firecrawl-api** | nginx:alpine | 3002 | ✅ Up 17h | Web Scraping |
-| 27 | **firecrawl-playwright** | img-firecrawl-playwright | 3003 | ✅ Up 17h | Web Scraping |
-| 28 | **firecrawl-proxy** | img-firecrawl-proxy | 3600 | ✅ Healthy | Web Scraping |
-| 29 | **individual-containers-registry** | img-outros-containers-registry | 5000 | ✅ Up 17h | Infrastructure |
+| 23 | **docs-api** | nginx:latest | 3400 | ✅ Healthy | Documentation |
+| 24 | **docs-api-viewer** | nginx:alpine | 3101 | ⚠️ Unhealthy | Documentation |
+| 25 | **firecrawl-api** | nginx:alpine | 3002 | ✅ Up 17h | Web Scraping |
+| 26 | **firecrawl-playwright** | img-firecrawl-playwright | 3003 | ✅ Up 17h | Web Scraping |
+| 27 | **firecrawl-proxy** | img-firecrawl-proxy | 3600 | ✅ Healthy | Web Scraping |
+| 28 | **individual-containers-registry** | img-outros-containers-registry | 5000 | ✅ Up 17h | Infrastructure |
 
 ---
 
@@ -66,8 +65,8 @@ lastReviewed: '2025-10-27'
 
 | Container | Imagem | Porta | Status | Propósito |
 |-----------|---------|-------|--------|-----------|
-| **tp-capital-api** | apps-tp-capital-api | 4005 | ✅ Up (healthy) | TP Capital REST API + Business Logic |
-| **workspace-service** | apps-workspace | 3200 | ✅ Up (healthy) | Workspace API (Idea Bank CRUD) |
+| **apps-tp-capital** | img-apps-tp-capital | 4005 | ✅ Up (healthy) | TP Capital REST API + Business Logic |
+| **apps-workspace** | img-apps-workspace | 3200 | ✅ Up (healthy) | Workspace API (Idea Bank CRUD) |
 
 **URLs Application Services**:
 
@@ -134,7 +133,7 @@ lastReviewed: '2025-10-27'
 
 ---
 
-### 🤖 AI/ML Stack (6 containers)
+### 🤖 AI/ML Stack (5 containers)
 
 | Container | Imagem | Porta | Status | Propósito |
 |-----------|---------|-------|--------|-----------|
@@ -143,7 +142,6 @@ lastReviewed: '2025-10-27'
 | **tools-agno-agents** | img-infra-agno-agents | 8200 | ✅ Up 6h (healthy) | Agno AI agents |
 | **infra-llamaindex-ingestion** | img-infra-llamaindex-ingestion | 8201 | ✅ Up 6h | LlamaIndex ingestion |
 | **infra-llamaindex-query** | img-infra-llamaindex-query | 8202 | ✅ Up 6h | LlamaIndex query |
-| **data-frontend-apps** | img-data-frontend-apps | 3001 | ✅ Up 6h | Frontend AI apps |
 
 **URLs AI/ML**:
 
@@ -152,7 +150,6 @@ lastReviewed: '2025-10-27'
 - Agno Agents: `http://localhost:8200`
 - LlamaIndex Ingestion: `http://localhost:8201`
 - LlamaIndex Query: `http://localhost:8202`
-- Frontend AI Apps: `http://localhost:3001`
 
 ---
 
@@ -246,12 +243,12 @@ Os serviços Workspace API e TP Capital API agora rodam como containers Docker (
 | **Databases** | 7 | 0 | 7 |
 | **Database Tools** | 4 | 0 | 4 |
 | **Monitoring** | 4 | 0 | 4 |
-| **AI/ML** | 6 | 0 | 6 |
+| **AI/ML** | 5 | 0 | 5 |
 | **Documentation** | 2 | 1 (Docusaurus - parado) | 3 |
 | **Web Scraping** | 3 | 0 | 3 |
-| **Frontend** | 1 (Frontend Apps) | 1 (Dashboard - parado) | 2 |
+| **Frontend** | 0 | 1 (Dashboard - parado) | 1 |
 | **Infrastructure** | 1 (Registry) | 0 | 1 |
-| **TOTAL** | **29** | **2** | **31** |
+| **TOTAL** | **28** | **2** | **30** |
 
 ---
 
@@ -259,7 +256,7 @@ Os serviços Workspace API e TP Capital API agora rodam como containers Docker (
 
 | Status | Containers | Serviços Locais |
 |--------|-----------|-----------------|
-| ✅ **Rodando** | 29/29 (100%) | 0/2 (0%) |
+| ✅ **Rodando** | 28/28 (100%) | 0/2 (0%) |
 | ⚠️ **Unhealthy** | 1 (docs-api-viewer) | 0 |
 | ❌ **Parado** | 0 | 2 (Dashboard, Docusaurus) |
 
@@ -272,7 +269,6 @@ Os serviços Workspace API e TP Capital API agora rodam como containers Docker (
 | Porta | Serviço | Tipo | Status |
 |-------|---------|------|--------|
 | 3000 | Grafana | Container | ✅ Running |
-| 3001 | Frontend AI Apps | Container | ✅ Running |
 | 3002 | Firecrawl API | Container | ✅ Running |
 | 3003 | Firecrawl Playwright | Container | ✅ Running |
 | 3101 | API Viewer (OLD) | Container | ⚠️ DEPRECATED |
@@ -489,7 +485,8 @@ curl -s http://localhost:3600/api/health       # Firecrawl Proxy
 
 ---
 
-**Última Atualização**: 2025-10-25
-**Containers Rodando**: 29/29 (100%)
+**Última Atualização**: 2025-10-28
+**Containers Rodando**: 28/28 (100%)
 **Serviços Locais Rodando**: 0/2 (0%) - Dashboard e Docusaurus em dev apenas
 **Status Geral**: ✅ Todos os serviços principais containerizados! Dashboard + Docusaurus rodando localmente em dev
+**Nota**: Container `data-frontend-apps` (Port 3001) removido - era placeholder sem conteúdo

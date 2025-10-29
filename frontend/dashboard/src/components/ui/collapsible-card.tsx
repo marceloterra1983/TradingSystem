@@ -189,7 +189,7 @@ export const CollapsibleCardDescription = React.forwardRef<HTMLParagraphElement,
     return (
       <p
         ref={ref}
-        className={cn('text-sm text-gray-600 mt-1 dark:text-gray-400', className)}
+        className={cn('text-sm text-gray-600 mt-1 dark:text-gray-300', className)}
         {...props}
       >
         {children}

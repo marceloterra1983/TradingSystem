@@ -60,7 +60,16 @@ else
 fi
 
 echo "[step] Start Qdrant"
-dc -f tools/compose/docker-compose.database.yml up -d qdrant
+if docker ps -a --format '{{.Names}}' | grep -qx data-qdrant; then
+  if ! docker ps --format '{{.Names}}' | grep -qx data-qdrant; then
+    echo "[step] Starting existing Qdrant container (data-qdrant)"
+    docker start data-qdrant >/dev/null
+  else
+    echo "[ok] Qdrant already running"
+  fi
+else
+  dc -f tools/compose/docker-compose.database.yml up -d qdrant
+fi
 # Ensure Qdrant container is on shared network
 docker network connect tradingsystem_backend data-qdrant 2>/dev/null || true
 wait_http "http://localhost:6333/collections" "Qdrant"
@@ -93,7 +102,16 @@ if [ "$OLLAMA_PORT_IN_USE" -eq 1 ]; then
   if ! echo "$HOST_TAGS_JSON" | grep -iq "\"$EMBED_MODEL\""; then
     echo "[info] Host Ollama does not have '$EMBED_MODEL'. Starting dedicated container on 11435..."
     export OLLAMA_PORT=11435
-    dc -f tools/compose/docker-compose.individual.yml up -d ollama
+    if docker ps -a --format '{{.Names}}' | grep -qx ollama; then
+      if docker ps --format '{{.Names}}' | grep -qx ollama; then
+        echo "[ok] Ollama container already running"
+      else
+        echo "[step] Starting existing Ollama container (ollama)"
+        docker start ollama >/dev/null || true
+      fi
+    else
+      dc -f tools/compose/docker-compose.individual.yml up -d ollama
+    fi
     docker network connect tradingsystem_backend ollama 2>/dev/null || true
     wait_http "http://localhost:11435/api/tags" "Ollama (container@11435)"
 
@@ -169,7 +187,29 @@ echo "[step] Build LlamaIndex images"
 dc -f tools/compose/docker-compose.infrastructure.yml build llamaindex-ingestion llamaindex-query
 
 echo "[step] Start LlamaIndex services"
-dc -f tools/compose/docker-compose.infrastructure.yml up -d --force-recreate llamaindex-ingestion llamaindex-query
+# Ingestion
+if docker ps -a --format '{{.Names}}' | grep -qx tools-llamaindex-ingestion; then
+  if docker ps --format '{{.Names}}' | grep -qx tools-llamaindex-ingestion; then
+    echo "[ok] tools-llamaindex-ingestion already running"
+  else
+    echo "[step] Starting existing tools-llamaindex-ingestion"
+    docker start tools-llamaindex-ingestion >/dev/null || true
+  fi
+else
+  dc -f tools/compose/docker-compose.infrastructure.yml up -d llamaindex-ingestion
+fi
+
+# Query
+if docker ps -a --format '{{.Names}}' | grep -qx tools-llamaindex-query; then
+  if docker ps --format '{{.Names}}' | grep -qx tools-llamaindex-query; then
+    echo "[ok] tools-llamaindex-query already running"
+  else
+    echo "[step] Starting existing tools-llamaindex-query"
+    docker start tools-llamaindex-query >/dev/null || true
+  fi
+else
+  dc -f tools/compose/docker-compose.infrastructure.yml up -d llamaindex-query
+fi
 
 wait_http "http://localhost:8201/health" "Ingestion service"
 wait_http "http://localhost:8202/health" "Query service"

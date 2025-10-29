@@ -216,11 +216,15 @@ eles
 elas
 SW_PT
 
-# Copy application code
-COPY query_service/ .
+# Copy application code and shared helpers
+COPY shared/ ./shared/
+COPY query_service/ ./query_service/
 
 # Create directory for logs and cache
 RUN mkdir -p /app/logs /app/cache
+
+# Switch to service directory
+WORKDIR /app/query_service
 
 # Run the query service
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

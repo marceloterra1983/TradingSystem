@@ -3,14 +3,22 @@ Shared test fixtures and configuration.
 """
 
 import os
+import sys
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 
+TEST_ROOT = Path(__file__).resolve().parent
+SERVICES_ROOT = TEST_ROOT.parent
+if str(SERVICES_ROOT) not in sys.path:
+    sys.path.insert(0, str(SERVICES_ROOT))
+
 # Import both services
-from ingestion_service.main import app as ingestion_app
-from query_service.main import app as query_app
+from ingestion_service.main import app as ingestion_app  # type: ignore  # noqa: E402
+from query_service.main import app as query_app  # type: ignore  # noqa: E402
 
 @pytest.fixture
 def test_client_ingestion():

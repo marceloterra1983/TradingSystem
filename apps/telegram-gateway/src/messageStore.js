@@ -100,26 +100,61 @@ const getPool = async (logger) => {
 
   pool = new pg.Pool(poolConfig);
 
-  const searchPathSql = `SET search_path TO ${quoteIdentifier(
-    config.database.schema,
-  )}, public`;
-  pool.on('connect', (client) => {
-    client.query(searchPathSql).catch((error) => {
-      logger?.error?.({ err: error }, 'Failed to set TimescaleDB search_path');
-    });
-  });
-
   const client = await pool.connect();
   try {
-    await client.query('SELECT 1');
-    await client.query(searchPathSql);
-    logger?.info?.(
-      {
-        schema: config.database.schema,
-        table: config.database.table,
-      },
-      'Connected to TimescaleDB',
-    );
+    // Ensure schema exists and set search_path for this session
+    const schemaName = config.database.schema;
+    const schemaIdent = quoteIdentifier(schemaName);
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${schemaIdent}`);
+    await client.query(`SET search_path TO ${schemaIdent}, public`);
+
+    // Ensure tables exist (self-healing for local/dev environments)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${schemaIdent}."channels" (
+        id BIGSERIAL PRIMARY KEY,
+        channel_id BIGINT UNIQUE NOT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        title TEXT,
+        last_sync_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    const tableNameIdent = quoteIdentifier(config.database.table);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${schemaIdent}.${tableNameIdent} (
+        id BIGSERIAL PRIMARY KEY,
+        channel_id BIGINT NOT NULL,
+        message_id TEXT NOT NULL,
+        thread_id BIGINT,
+        source TEXT NOT NULL DEFAULT 'unknown',
+        message_type TEXT NOT NULL DEFAULT 'channel_post',
+        text TEXT,
+        caption TEXT,
+        media_type TEXT,
+        media_refs JSONB NOT NULL DEFAULT '[]'::jsonb,
+        status TEXT NOT NULL DEFAULT 'received',
+        received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        telegram_date TIMESTAMPTZ,
+        published_at TIMESTAMPTZ,
+        failed_at TIMESTAMPTZ,
+        queued_at TIMESTAMPTZ,
+        reprocess_requested_at TIMESTAMPTZ,
+        reprocessed_at TIMESTAMPTZ,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        deleted_at TIMESTAMPTZ
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_${config.database.table}_channel_date
+      ON ${schemaIdent}.${tableNameIdent} (channel_id, telegram_date);
+    `);
+
+    logger?.info?.({ schema: schemaName, table: config.database.table }, 'Ensured telegram gateway schema/tables');
   } finally {
     client.release();
   }

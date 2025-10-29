@@ -7,18 +7,18 @@ services:
     ports:
       - "${TP_CAPITAL_HOST_PORT:-4005}:4005"
     env_file:
-      - ./.env
+      - ../../.env
     environment:
       - NODE_ENV=development
       - PORT=4005
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - TIMESCALEDB_HOST=timescaledb
+      - TIMESCALEDB_HOST=data-timescaledb
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}
       - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}
       - TIMESCALEDB_PASSWORD=${TIMESCALEDB_PASSWORD:-pass_timescale}
       - TIMESCALEDB_SCHEMA=${TIMESCALEDB_SCHEMA:-tp_capital}
-      - GATEWAY_DATABASE_HOST=${GATEWAY_DATABASE_HOST:-timescaledb}
+      - GATEWAY_DATABASE_HOST=${GATEWAY_DATABASE_HOST:-data-timescaledb}
       - GATEWAY_DATABASE_PORT=${GATEWAY_DATABASE_PORT:-5432}
       - GATEWAY_DATABASE_NAME=${GATEWAY_DATABASE_NAME:-${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}}
       - GATEWAY_DATABASE_SCHEMA=${GATEWAY_DATABASE_SCHEMA:-telegram_gateway}
@@ -29,10 +29,11 @@ services:
       - ./scripts:/app/scripts:ro
       - /app/node_modules
     networks:
-      - tradingsystem-network
-    depends_on:
-      timescaledb:
-        condition: service_healthy
+      - tradingsystem_backend
+    # depends_on:
+    #   timescaledb:
+    #     condition: service_healthy
+    # NOTE: Now using external data-timescaledb container
     restart: unless-stopped
     healthcheck:
       test:
@@ -47,29 +48,30 @@ services:
       retries: 5
       start_period: 40s
 
-  timescaledb:
-    image: timescale/timescaledb:latest-pg15
-    container_name: tp-capital-timescaledb
-    ports:
-      - "${TIMESCALEDB_HOST_PORT:-5445}:5432"
-    environment:
-      - POSTGRES_USER=${TIMESCALEDB_USER:-timescale}
-      - POSTGRES_PASSWORD=${TIMESCALEDB_PASSWORD:-pass_timescale}
-      - POSTGRES_DB=${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}
-    volumes:
-      - tp-capital-timescaledb-data:/var/lib/postgresql/data
-    networks:
-      - tradingsystem-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALEDB_USER:-timescale}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # timescaledb:
+  #   image: timescale/timescaledb:latest-pg15
+  #   container_name: tp-capital-timescaledb
+  #   ports:
+  #     - "${TIMESCALEDB_HOST_PORT:-5445}:5432"
+  #   environment:
+  #     - POSTGRES_USER=${TIMESCALEDB_USER:-timescale}
+  #     - POSTGRES_PASSWORD=${TIMESCALEDB_PASSWORD:-pass_timescale}
+  #     - POSTGRES_DB=${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}
+  #   volumes:
+  #     - tp-capital-timescaledb-data:/var/lib/postgresql/data
+  #   networks:
+  #     - tradingsystem-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${TIMESCALEDB_USER:-timescale}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  # NOTE: Using external data-timescaledb container instead
 
 networks:
-  tradingsystem-network:
-    name: tradingsystem-network
+  tradingsystem_backend:
+    name: tradingsystem_backend
     external: true
 
 volumes:

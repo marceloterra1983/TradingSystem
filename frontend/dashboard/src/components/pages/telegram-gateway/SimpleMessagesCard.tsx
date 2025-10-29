@@ -30,17 +30,24 @@ interface SimpleMessagesCardProps {
   onRefresh: () => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
+  selectedStatus?: string;
+  onStatusChange?: (status: string) => void;
 }
 
-export function SimpleMessagesCard({ 
-  messages, 
-  total, 
-  isLoading, 
+export function SimpleMessagesCard({
+  messages,
+  total,
+  isLoading,
   onRefresh,
   onLoadMore,
-  hasMore 
+  hasMore,
+  selectedStatus: controlledStatus,
+  onStatusChange
 }: SimpleMessagesCardProps) {
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  // Use controlled state if provided, otherwise use internal state
+  const [internalStatus, setInternalStatus] = useState<string>('all');
+  const selectedStatus = controlledStatus ?? internalStatus;
+  const setSelectedStatus = onStatusChange ?? setInternalStatus;
 
   const filteredMessages = selectedStatus === 'all' 
     ? messages 

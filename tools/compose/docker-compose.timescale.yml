@@ -3,7 +3,7 @@ name: database
 services:
   timescaledb:
     container_name: data-timescaledb
-    image: "${IMG_DATA_TIMESCALEDB:-img-data-timescaledb}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -30,7 +30,7 @@ services:
 
   timescaledb-backup:
     container_name: data-timescaledb-backup
-    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-img-data-timescaledb-backup}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -55,7 +55,7 @@ services:
 
   timescaledb-exporter:
     container_name: data-timescaledb-exporter
-    image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-img-data-timescaledb-exporter}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -76,7 +76,7 @@ services:
 
   timescaledb-pgadmin:
     container_name: data-timescaledb-pgadmin
-    image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-img-data-timescaledb-pgadmin}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -105,7 +105,7 @@ services:
   # Lightweight PostgreSQL web client for quick TimescaleDB queries during local development
   timescaledb-pgweb:
     container_name: data-timescaledb-pgweb
-    image: "${IMG_DATA_TIMESCALEDB_PGWEB:-img-data-timescaledb-pgweb}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -134,7 +134,7 @@ services:
   # Optional Adminer UI for full CRUD management when pgAdmin is not required
   timescaledb-adminer:
     container_name: data-timescaledb-adminer
-    image: "${IMG_DATA_TIMESCALEDB_ADMINER:-img-data-timescaledb-adminer}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
     env_file:
@@ -163,7 +163,7 @@ services:
   # Optional Azimutt schema explorer for collaborative ERD visualization when mapping data models
   timescaledb-azimutt:
     container_name: data-timescaledb-azimutt
-    image: "${IMG_DATA_TIMESCALEDB_AZIMUTT:-img-data-timescaledb-azimutt}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     restart: unless-stopped
     platform: linux/amd64
     # CENTRALIZED ENV: References root .env file
@@ -194,7 +194,7 @@ services:
       - 'com.tradingsystem.description=ERD visualization and schema exploration (optional)'
 
   data-postgress-langgraph:
-    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-img-data-postgress-langgraph}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres}:${IMG_POSTGRES_TAG:-15}"
     container_name: data-postgress-langgraph
     restart: unless-stopped
     platform: linux/amd64
@@ -222,7 +222,7 @@ services:
       - "com.tradingsystem.description=PostgreSQL for LangGraph checkpoints"
 
   data-qdrant:
-    image: "${IMG_DATA_QDRANT:-img-data-qdrant}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_QDRANT:-qdrant/qdrant}:${IMG_QDRANT_TAG:-latest}"
     container_name: data-qdrant
     restart: unless-stopped
     platform: linux/amd64
@@ -244,7 +244,7 @@ services:
       - "com.tradingsystem.description=Vector database"
 
   data-questdb:
-    image: "${IMG_DATA_QUESTDB:-img-data-questdb}:${IMG_VERSION:-2025.10.19}"
+    image: "${IMG_DATA_QUESTDB:-questdb/questdb}:${IMG_QUESTDB_TAG:-latest}"
     container_name: data-questdb
     restart: unless-stopped
     platform: linux/amd64
@@ -275,6 +275,7 @@ networks:
   default:
     name: Database_default
     driver: bridge
+    external: true
   tradingsystem_data:
     external: true
   tradingsystem_backend:

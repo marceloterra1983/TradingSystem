@@ -2,16 +2,16 @@ import { getDatabasePool } from './messagesRepository.js';
 
 const parseChannelId = (value) => {
   try {
-    if (typeof value === 'bigint') return value;
-    if (typeof value === 'number') return BigInt(value);
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      if (!trimmed) {
-        throw new Error('channelId vazio');
-      }
-      return BigInt(trimmed);
+    if (typeof value === 'undefined' || value === null) {
+      throw new Error('channelId vazio');
     }
-    throw new Error('Formato inválido para channelId');
+    const asString = String(value).trim();
+    if (!asString) {
+      throw new Error('channelId vazio');
+    }
+    // Validate using BigInt but return normalized string to avoid pg BigInt param issues
+    const normalized = BigInt(asString).toString();
+    return normalized;
   } catch (error) {
     const err = new Error(`Canal inválido: ${error.message}`);
     err.code = 'INVALID_CHANNEL_ID';
@@ -31,9 +31,11 @@ const mapChannelRow = (row) => ({
 
 export const listChannels = async ({ logger }) => {
   const db = await getDatabasePool(logger);
+  // search_path is set by messagesRepository to the configured schema,
+  // so we can reference unqualified table names safely here.
   const result = await db.query(
     `SELECT id, channel_id, label, description, is_active, created_at, updated_at
-     FROM telegram_gateway.channels
+     FROM channels
      ORDER BY created_at DESC`,
   );
   return result.rows.map(mapChannelRow);
@@ -44,7 +46,7 @@ export const createChannel = async ({ channelId, label, description, isActive = 
   const numericChannelId = parseChannelId(channelId);
 
   const result = await db.query(
-    `INSERT INTO telegram_gateway.channels (channel_id, label, description, is_active)
+    `INSERT INTO channels (channel_id, label, description, is_active)
      VALUES ($1, $2, $3, $4)
      RETURNING id, channel_id, label, description, is_active, created_at, updated_at`,
     [numericChannelId, label || null, description || null, Boolean(isActive)],
@@ -97,7 +99,7 @@ export const updateChannel = async (
   values.push(id);
 
   const result = await db.query(
-    `UPDATE telegram_gateway.channels
+    `UPDATE channels
      SET ${updates.join(', ')}
      WHERE id = $${index}
      RETURNING id, channel_id, label, description, is_active, created_at, updated_at`,
@@ -116,7 +118,7 @@ export const updateChannel = async (
 export const deleteChannel = async (id, { logger }) => {
   const db = await getDatabasePool(logger);
   const result = await db.query(
-    `DELETE FROM telegram_gateway.channels WHERE id = $1 RETURNING id`,
+    `DELETE FROM channels WHERE id = $1 RETURNING id`,
     [id],
   );
 

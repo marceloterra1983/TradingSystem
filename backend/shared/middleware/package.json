@@ -1,0 +1,38 @@
+{
+  "name": "@backend/shared/middleware",
+  "version": "1.0.0",
+  "description": "Centralized Express middleware for TradingSystem services",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    },
+    "./health": {
+      "import": "./health.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Tests will be added in Phase 2\" && exit 0"
+  },
+  "keywords": [
+    "middleware",
+    "express",
+    "cors",
+    "rate-limit",
+    "helmet",
+    "health-check",
+    "tradingsystem"
+  ],
+  "author": "TradingSystem Team",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

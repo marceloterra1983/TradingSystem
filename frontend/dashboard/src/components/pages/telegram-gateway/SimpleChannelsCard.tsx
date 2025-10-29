@@ -17,24 +17,25 @@ interface SimpleChannelsCardProps {
   channels: Channel[];
   isLoading: boolean;
   onCreate: (data: { channelId: string; label?: string; description?: string }) => Promise<void>;
-  onToggle: (id: string, isActive: boolean) => Promise<void>;
+  onToggle: (id: string, currentIsActive: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
-export function SimpleChannelsCard({ 
-  channels, 
-  isLoading, 
-  onCreate, 
-  onToggle, 
-  onDelete 
+export function SimpleChannelsCard({
+  channels,
+  isLoading,
+  onCreate,
+  onToggle,
+  onDelete
 }: SimpleChannelsCardProps) {
   const [channelId, setChannelId] = useState('');
   const [label, setLabel] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!channelId.trim()) return;
-    
+
     setIsSaving(true);
     try {
       await onCreate({
@@ -45,6 +46,18 @@ export function SimpleChannelsCard({
       setLabel('');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleToggle = async (id: string, currentIsActive: boolean) => {
+    setTogglingId(id);
+    try {
+      await onToggle(id, currentIsActive);
+    } catch (error) {
+      console.error('Failed to toggle channel:', error);
+      alert(`Erro ao ${currentIsActive ? 'desativar' : 'ativar'} canal`);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -125,9 +138,15 @@ export function SimpleChannelsCard({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onToggle(channel.id, channel.isActive)}
+                    onClick={() => handleToggle(channel.id, channel.isActive)}
+                    disabled={togglingId === channel.id}
                   >
-                    {channel.isActive ? (
+                    {togglingId === channel.id ? (
+                      <>
+                        <div className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        {channel.isActive ? 'Desativando...' : 'Ativando...'}
+                      </>
+                    ) : channel.isActive ? (
                       <>
                         <ToggleRight className="h-4 w-4 mr-1" />
                         Desativar

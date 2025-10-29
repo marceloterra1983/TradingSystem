@@ -269,6 +269,15 @@ bash tools/ollama/test-all-models.sh
 | LlamaIndex Query | http://localhost:8001 | Document Q&A |
 | LlamaIndex Ingestion | http://localhost:8002 | Document upload |
 
+### GPU Coordination Defaults
+
+LlamaIndex services serialize GPU workloads via a shared semaphore and a filesystem lock (`/tmp/llamaindex-gpu.lock`). Tweak behaviour with the following environment variables:
+
+- `LLAMAINDEX_FORCE_GPU` / `LLAMAINDEX_GPU_NUM` – force GPU execution and set GPU count per request.
+- `LLAMAINDEX_GPU_MAX_CONCURRENCY` – cap concurrent GPU jobs (defaults to `1`).
+- `LLAMAINDEX_GPU_COOLDOWN_SECONDS` – optional pause between jobs.
+- `LLAMAINDEX_GPU_USE_FILE_LOCK` / `LLAMAINDEX_GPU_LOCK_PATH` – cross-process lock consumed by Python services and Node scripts.
+
 ---
 
 ## 📖 Integration Examples

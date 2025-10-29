@@ -2,12 +2,14 @@
 set -euo pipefail
 
 # Verify that the Nginx proxy for documentation-api is reachable and that the RAG proxy works.
-# Usage: scripts/tools/verify-nginx-proxy.sh [base_url] [query]
+# Usage: scripts/tools/verify-nginx-proxy.sh [base_url] [query] [direct_query_url]
 #   base_url: http://tradingsystem.local or https://mysite:8443 (default: http://tradingsystem.local)
 #   query: test (default)
+#   direct_query_url: http://localhost:8202 (optional) — tests direct /health too
 
 RAW_BASE="${1:-http://tradingsystem.local}"
 Q="${2:-test}"
+DIRECT_QUERY_URL="${3:-}"
 
 # Normalize base to include scheme
 if ! printf %s "$RAW_BASE" | grep -qE '^[a-z]+://'; then
@@ -66,3 +68,13 @@ else
 fi
 
 echo "[done] Verification complete"
+
+if [ -n "$DIRECT_QUERY_URL" ]; then
+  echo
+  echo "[step] Direct query service health (no proxy)"
+  RESP=$(req GET "${DIRECT_QUERY_URL%/}/health")
+  BODY=$(printf "%s" "$RESP" | sed '$d')
+  CODE=$(printf "%s" "$RESP" | tail -n1)
+  echo "HTTP $CODE"
+  [ "$CODE" != "200" ] && echo "[body] ${BODY:0:500}"
+fi

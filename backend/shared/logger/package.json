@@ -1,0 +1,31 @@
+{
+  "name": "@backend/shared/logger",
+  "version": "1.0.0",
+  "description": "Centralized Pino logger factory for TradingSystem services",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Tests will be added in Phase 2\" && exit 0"
+  },
+  "keywords": [
+    "logger",
+    "pino",
+    "tradingsystem",
+    "shared"
+  ],
+  "author": "TradingSystem Team",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "pino": "^9.0.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

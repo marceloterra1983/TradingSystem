@@ -124,7 +124,7 @@ export interface DocsHybridItem {
   path: string;
   snippet?: string;
   score: number;
-  source: 'hybrid';
+  source: 'hybrid' | 'lexical';
   components: { semantic: boolean; lexical: boolean };
   tags?: string[];
   domain?: string;
@@ -148,9 +148,12 @@ class DocumentationService {
   private client: AxiosInstance;
 
   constructor() {
+    // getApiUrl('documentation') returns '/api/docs' which is proxied to http://localhost:3401
+    // Routes like '/api/v1/docs/facets' will be combined with baseURL to form '/api/docs/api/v1/docs/facets'
+    // The Vite proxy strips '/api/docs' and forwards to the backend at http://localhost:3401
     this.client = axios.create({
-      baseURL: getApiUrl('documentation'),
-      timeout: 10000,
+      baseURL: getApiUrl('documentation'), // '/api/docs'
+      timeout: 30000, // Increased to 30s for slow searches
       headers: {
         'Content-Type': 'application/json',
       },
@@ -265,6 +268,28 @@ class DocumentationService {
     if (query) params.q = query;
     const response = await this.client.get('/api/v1/docs/facets', { params });
     return response.data?.facets as DocsFacets;
+  }
+
+  // ====================
+  // DOCS (Markdown) LEXICAL SEARCH - fallback when hybrid fails
+  // ====================
+
+  async docsLexicalSearch(
+    query: string,
+    opts?: { limit?: number; domain?: string; type?: string; status?: string; tags?: string[] }
+  ): Promise<{ total: number; results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; score?: number }> }> {
+    const params: Record<string, string | number> = { q: query };
+    if (opts?.limit) params.limit = opts.limit;
+    if (opts?.domain) params.domain = opts.domain;
+    if (opts?.type) params.type = opts.type;
+    if (opts?.status) params.status = opts.status;
+    if (opts?.tags?.length) params.tags = opts.tags.join(',');
+
+    const response = await this.client.get('/api/v1/docs/search', { params });
+    return response.data as {
+      total: number;
+      results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; score?: number }>;
+    };
   }
 
   // ====================

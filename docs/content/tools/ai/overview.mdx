@@ -269,6 +269,15 @@ bash tools/ollama/test-all-models.sh
 | LlamaIndex Query | http://localhost:8001 | Document Q&A |
 | LlamaIndex Ingestion | http://localhost:8002 | Document upload |
 
+### GPU Coordination Defaults
+
+To avoid GPU contention, LlamaIndex services enqueue work with a shared semaphore and a filesystem lock (`/tmp/llamaindex-gpu.lock`). Adjust the behaviour via environment variables:
+
+- `LLAMAINDEX_FORCE_GPU` / `LLAMAINDEX_GPU_NUM` – always request GPU execution and control the number of GPUs per job.
+- `LLAMAINDEX_GPU_MAX_CONCURRENCY` – maximum in-flight GPU tasks (defaults to `1`; additional requests wait).
+- `LLAMAINDEX_GPU_COOLDOWN_SECONDS` – optional cooldown after each job if your hardware needs a breather.
+- `LLAMAINDEX_GPU_USE_FILE_LOCK` / `LLAMAINDEX_GPU_LOCK_PATH` – cross-process lock shared by Node scripts and Python services.
+
 ---
 
 ## 📖 Integration Examples

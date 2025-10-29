@@ -17,7 +17,14 @@ const parseBoolean = (value, fallback = false) => {
 messagesRouter.get('/', async (req, res, next) => {
   try {
     const filters = {
-      channelId: req.query.channelId ? String(req.query.channelId).trim() : undefined,
+      channelId: req.query.channelId
+        ? Array.isArray(req.query.channelId)
+          ? req.query.channelId
+          : String(req.query.channelId)
+              .split(',')
+              .map((value) => value.trim())
+              .filter(Boolean)
+        : undefined,
       messageId: req.query.messageId ? String(req.query.messageId).trim() : undefined,
       status: req.query.status,
       source: req.query.source
