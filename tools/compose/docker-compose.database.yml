@@ -2,8 +2,8 @@ name: database
 
 services:
   timescaledb:
-    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb:latest-pg16}"
-    container_name: data-timescaledb
+    image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
+    container_name: data-timescale
     ports:
       - "5433:5432"
     env_file:
@@ -27,8 +27,8 @@ services:
       - tradingsystem_backend
 
   timescaledb-backup:
-    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb:latest-pg16}"
-    container_name: data-timescaledb-backup
+    image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
+    container_name: data-timescale-backup
     ports:
       - "5434:5432"
     environment:
@@ -41,7 +41,7 @@ services:
 
   timescaledb-exporter:
     image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter:latest}"
-    container_name: data-timescaledb-exporter
+    container_name: data-timescale-exporter
     ports:
       - "${TIMESCALEDB_EXPORTER_PORT:-9187}:9187"
     environment:
@@ -56,7 +56,7 @@ services:
 
   timescaledb-pgadmin:
     image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-dpage/pgadmin4:latest}"
-    container_name: data-timescaledb-pgadmin
+    container_name: data-timescale-pgadmin
     ports:
       - "${PGADMIN_HOST_PORT:-5050}:80"
     environment:
@@ -73,7 +73,7 @@ services:
 
   timescaledb-pgweb:
     image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb:latest}"
-    container_name: data-timescaledb-pgweb
+    container_name: data-timescale-pgweb
     ports:
       - "${PGWEB_PORT:-8081}:8081"
     environment:
@@ -89,7 +89,7 @@ services:
 
   timescaledb-adminer:
     image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer:latest}"
-    container_name: data-timescaledb-adminer
+    container_name: data-timescale-admin
     ports:
       - "${ADMINER_PORT:-8080}:8080"
     environment:
@@ -105,7 +105,7 @@ services:
 
   postgress-langgraph:
     image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres:15}"
-    container_name: data-postgress-langgraph
+    container_name: data-postgres-langgraph
     ports:
       - "5435:5432"
     environment:

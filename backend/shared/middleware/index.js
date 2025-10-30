@@ -54,7 +54,7 @@ export function configureCors(options = {}) {
     // Read from environment
     const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
       ? process.env.CORS_ORIGIN
-      : 'http://localhost:3103,http://localhost:3205'; // Default: dashboard + docs
+      : 'http://localhost:3103,http://localhost:3400,http://localhost:3401'; // Default: dashboard + docs
 
     if (rawCorsOrigin === '*') {
       allowedOrigins = undefined; // Allow all origins

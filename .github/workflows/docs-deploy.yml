@@ -5,14 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'docs_v2/**'
       - 'docs/**'
       - '.github/workflows/docs-deploy.yml'
   pull_request:
     branches:
       - main
     paths:
-      - 'docs_v2/**'
       - 'docs/**'
   workflow_dispatch:  # Manual trigger
 
@@ -50,52 +48,14 @@ jobs:
             echo "No active freeze detected."
           fi
 
-  build-docs-v2:
-    name: Build docs_v2 (Docusaurus v3)
+  build-docs:
+    name: Build documentation site
     runs-on: ubuntu-latest
     needs: freeze_guard
     if: ${{ needs.freeze_guard.outputs.active != 'true' }}
     defaults:
       run:
-        working-directory: docs_v2
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'  # docs_v2 uses Node 20
-          cache: 'npm'
-          cache-dependency-path: docs_v2/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run docs:auto (generate content)
-        run: npm run docs:auto
-
-      - name: Build Docusaurus v3 site
-        run: npm run docs:build
-        env:
-          NODE_ENV: production
-
-      - name: Upload docs_v2 build artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: docs-v2-build
-          path: docs_v2/build
-
-# Legacy docs build - will be removed after docs_v2 cut-over (2025-11-15)
-  build-legacy:
-    name: Build Legacy Docs (Docusaurus v2)
-    runs-on: ubuntu-latest
-    needs: freeze_guard
-    if: ${{ needs.freeze_guard.outputs.active != 'true' }}
-    defaults:
-      run:
-        working-directory: docs/docusaurus
+        working-directory: docs
 
     steps:
       - name: Checkout repository
@@ -106,24 +66,28 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: docs/docusaurus/package-lock.json
+          cache-dependency-path: docs/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Run docs:auto (generate content)
+        run: npm run docs:auto
+
       - name: Build Docusaurus site
-        run: npm run build
+        run: npm run docs:build
         env:
           NODE_ENV: production
 
-      - name: Upload build artifact
+      - name: Upload docs build artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/docusaurus/build
+          name: docs-build
+          path: docs/build
 
-  deploy-docs-v2:
-    name: Deploy docs_v2 to GitHub Pages
-    needs: [freeze_guard, build-docs-v2]
+  deploy-docs:
+    name: Deploy documentation to GitHub Pages
+    needs: [freeze_guard, build-docs]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.freeze_guard.outputs.active != 'true'
     runs-on: ubuntu-latest
 
@@ -132,17 +96,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy docs_v2 to GitHub Pages
+      - name: Deploy documentation to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: docs-v2-build
-
-# Legacy deployment - disabled (docs_v2 is primary)
-# deploy-legacy:
-#   name: Deploy Legacy Docs
-#   needs: [freeze_guard, build-legacy]
-#   # Disabled - docs_v2 is now primary deployment
+          artifact_name: docs-build
 
   link-check:
     name: Check for Broken Links
@@ -151,7 +109,7 @@ jobs:
     if: github.event_name == 'pull_request' && needs.freeze_guard.outputs.active != 'true'
     defaults:
       run:
-        working-directory: docs_v2
+        working-directory: docs
 
     steps:
       - name: Checkout repository
@@ -160,20 +118,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
-          cache-dependency-path: docs_v2/package-lock.json
+          cache-dependency-path: docs/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build docs_v2 site
+      - name: Build documentation site
         run: npm run docs:build
 
       - name: Check for broken links
         uses: lycheeverse/lychee-action@v1
         with:
-          args: --verbose --no-progress './docs_v2/build/**/*.html'
+          args: --verbose --no-progress './docs/build/**/*.html'
           fail: true
 
   validate-frontmatter:
@@ -195,8 +153,8 @@ jobs:
         run: |
           echo "Checking for required front matter fields..."
 
-          # Find all markdown files in docs_v2/content
-          FILES=$(find docs_v2/content -type f \( -name "*.mdx" -o -name "*.md" \))
+          # Find all markdown files in docs/content
+          FILES=$(find docs/content -type f \( -name "*.mdx" -o -name "*.md" \))
 
           ERRORS=0
           for file in $FILES; do

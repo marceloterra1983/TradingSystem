@@ -42,8 +42,8 @@ if check_api "Workspace API     " "http://localhost:3200/health" "3200"; then
     ((running++))
 fi
 
-# Documentation API (3400)
-if check_api "Documentation API " "http://localhost:3400/health" "3400"; then
+# Documentation API (3401)
+if check_api "Documentation API " "http://localhost:3401/health" "3401"; then
     ((running++))
 fi
 
@@ -59,8 +59,8 @@ if check_api "Dashboard         " "http://localhost:3103" "3103"; then
     ((running++))
 fi
 
-# Docusaurus (3205)
-if check_api "Docusaurus        " "http://localhost:3205" "3205"; then
+# Docusaurus (3400)
+if check_api "Docusaurus        " "http://localhost:3400" "3400"; then
     ((running++))
 fi
 
@@ -89,7 +89,7 @@ else
         echo ""
     fi
 
-    if ! curl -s -f "http://localhost:3400/health" > /dev/null 2>&1; then
+    if ! curl -s -f "http://localhost:3401/health" > /dev/null 2>&1; then
         echo "   Documentation API:"
         echo "   cd backend/api/documentation-api && npm run dev"
         echo ""
@@ -104,9 +104,9 @@ else
         echo ""
     fi
 
-    if ! curl -s -f "http://localhost:3205" > /dev/null 2>&1; then
+    if ! curl -s -f "http://localhost:3400" > /dev/null 2>&1; then
         echo "   Docusaurus:"
-        echo "   cd docs && npm run start -- --port 3205"
+        echo "   cd docs && npm run start -- --port 3400"
         echo ""
     fi
 fi

@@ -10,7 +10,7 @@ command.
 Available helpers:
 
 - `build.sh` – run the production build (`npm --prefix docs run docs:build`)
-- `serve.sh` – serve the built site locally on port 3205 by default
+- `serve.sh` – serve the built site locally on port 3400 by default
 - `lint.sh` – execute Markdown/remark linting
 - `check-links.sh` – rebuild and run Linkinator; set `EXTRA_SKIP="pattern1 pattern2"` to ignore additional URLs
 - `docs-auto.mjs` – placeholder automation entry point for generated content

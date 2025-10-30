@@ -3,7 +3,7 @@ name: monitoring
 services:
   prometheus:
     image: "${IMG_MON_PROMETHEUS:-prom/prometheus}:${IMG_VERSION:-latest}"
-    container_name: mon-prometheus
+    container_name: monitor-prometheus
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
     restart: unless-stopped
@@ -12,7 +12,7 @@ services:
 
   alertmanager:
     image: "${IMG_MON_ALERTMANAGER:-prom/alertmanager}:${IMG_VERSION:-latest}"
-    container_name: mon-alertmanager
+    container_name: monitor-alertmanager
     ports:
       - "${ALERTMANAGER_PORT:-9093}:9093"
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
 
   grafana:
     image: "${IMG_MON_GRAFANA:-grafana/grafana}:${IMG_VERSION:-latest}"
-    container_name: mon-grafana
+    container_name: monitor-grafana
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     environment:
@@ -32,7 +32,7 @@ services:
 
   alert-router:
     image: "${IMG_MON_ALERT_ROUTER:-nginx}:${IMG_VERSION:-alpine}"
-    container_name: mon-alert-router
+    container_name: monitor-alert-router
     ports:
       - "${ALERT_ROUTER_PORT:-9094}:80"
     restart: unless-stopped

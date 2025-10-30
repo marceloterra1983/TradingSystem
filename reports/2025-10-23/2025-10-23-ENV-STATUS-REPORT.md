@@ -171,7 +171,7 @@ WEBSCRAPER_EXPORT_MAX_FILE_SIZE_MB=500 ✅
 WEBSCRAPER_LOG_LEVEL=info ✅
 WEBSCRAPER_RATE_LIMIT_WINDOW_MS=60000 ✅
 WEBSCRAPER_RATE_LIMIT_MAX=200 ✅
-WEBSCRAPER_CORS_ORIGIN=http://localhost:3103,http://localhost:3205 ✅
+WEBSCRAPER_CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401 ✅
 ```
 
 ---
@@ -333,4 +333,3 @@ bash scripts/startup/start-dashboard-stack.sh
 **Relatório gerado em:** 23 de Outubro de 2025  
 **Próxima revisão:** 23 de Novembro de 2025  
 **Próxima rotação de senhas:** 20 de Janeiro de 2026
-

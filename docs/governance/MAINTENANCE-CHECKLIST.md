@@ -5,6 +5,7 @@
 **Frequency**: Quarterly (every 90 days)
 **Owner**: DocsOps
 **Next Review**: 2026-01-24 (Q1 2026)
+**Last Maintenance Run**: 2025-10-29 — Docs hub cutover to ports `3400/3401` and validation thresholds recalibrated.
 
 ## Quarterly Review Checklist
 

@@ -285,7 +285,7 @@ app.get('/health', createHealthCheckHandler({
 
 ```bash
 # CORS
-CORS_ORIGIN="http://localhost:3103,http://localhost:3205"  # Comma-separated
+CORS_ORIGIN="http://localhost:3103,http://localhost:3400,http://localhost:3401"  # Comma-separated
 DISABLE_CORS=false  # Set to 'true' for unified domain mode
 
 # Rate Limiting

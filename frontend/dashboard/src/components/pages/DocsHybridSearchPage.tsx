@@ -13,6 +13,7 @@ import { Badge } from '../ui/badge';
 import { ExternalLink, Copy, Eye } from 'lucide-react';
 import documentationService, { DocsHybridItem } from '../../services/documentationService';
 import { DocPreviewModal } from './DocPreviewModal';
+import { normalizeDocsApiPath, resolveDocsPreviewUrl } from '../../utils/docusaurus';
 import {
   Select,
   SelectTrigger,
@@ -72,16 +73,19 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
   // Modal preview handler - opens in-page modal overlay
   const openPreview = (url: string, title: string) => {
-    // API returns URLs with "/docs/" but Docusaurus uses "/next/"
-    const fixedUrl = url.replace(/^\/docs\//, '/next/');
-    const docusaurusUrl = `http://localhost:3205${fixedUrl}`;
+    const normalizedPath = normalizeDocsApiPath(url, 'next');
+    const previewUrl = resolveDocsPreviewUrl(url, 'next', { absolute: true });
 
-    console.log('[DocsSearch] Opening preview modal:', { url, fixedUrl, docusaurusUrl });
+    console.log('[DocsSearch] Opening preview modal:', {
+      originalUrl: url,
+      normalizedPath,
+      previewUrl,
+    });
 
     setPreviewModal({
       isOpen: true,
       title,
-      url: docusaurusUrl,
+      url: previewUrl,
     });
   };
 
@@ -185,7 +189,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
             if (mounted.current) {
               // Convert lexical results to hybrid format
               const convertedResults: DocsHybridItem[] = lexicalData.results.map((r) => {
-                // Ensure URL points to Docusaurus (port 3205)
+                // Ensure URL uses proxy prefix for same-origin Docusaurus access
                 let docUrl = r.path;
                 if (!docUrl.startsWith('/docs/')) {
                   docUrl = `/docs/${docUrl.replace(/^\/+/, '')}`;
@@ -455,9 +459,8 @@ export default function DocsHybridSearchPage(): JSX.Element {
           <CollapsibleCardContent>
             <ul className="space-y-3">
               {results.map((r) => {
-                // API returns "/docs/..." but Docusaurus uses "/next/..."
-                const fixedUrl = r.url.replace(/^\/docs\//, '/next/');
-                const fullDocUrl = `http://localhost:3205${fixedUrl}`;
+                const normalizedPath = normalizeDocsApiPath(r.url, 'next');
+                const fullDocUrl = resolveDocsPreviewUrl(r.url, 'next', { absolute: true });
 
                 return (
                 <li key={`${r.url}-${r.score}`} className="rounded-md border border-slate-200 dark:border-slate-800 p-3 bg-white dark:bg-slate-900/60">
@@ -478,7 +481,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                     variant="outline"
                     onClick={() => void navigator.clipboard?.writeText(fullDocUrl)}
                     className="h-8 px-2"
-                    title="Copiar link completo"
+                    title={`Copiar link (${normalizedPath})`}
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
@@ -486,7 +489,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                     variant="ghost"
                     onClick={() => window.open(fullDocUrl, '_blank')}
                     className="h-8 px-2"
-                    title="Abrir em nova aba"
+                    title={`Abrir em nova aba (${normalizedPath})`}
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>

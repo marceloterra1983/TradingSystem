@@ -1,0 +1,438 @@
+openapi: 3.1.0
+info:
+  title: TradingSystem Firecrawl Proxy API
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  description: |
+    Proxy service for Firecrawl web scraping and crawling capabilities.
+
+    The Firecrawl Proxy provides RESTful access to Firecrawl's web scraping service,
+    enabling single-page scraping and multi-page crawling with markdown conversion,
+    structured data extraction, and screenshot capture.
+
+    **Key Features:**
+    - Single-page scraping with markdown conversion
+    - Multi-page crawling with configurable depth
+    - Screenshot capture support
+    - Structured data extraction
+    - Job status tracking for crawl operations
+    - Prometheus metrics export
+
+    **Firecrawl Integration:**
+    - Uses official Firecrawl API
+    - Requires FIRECRAWL_API_KEY environment variable
+    - Rate limits enforced by Firecrawl service
+
+    **Use Cases:**
+    - Documentation scraping for knowledge base
+    - Competitive analysis data collection
+    - News and market data aggregation
+    - Content monitoring and archival
+
+    **Authentication:**
+    - No authentication required for proxy endpoints
+    - Firecrawl API key configured server-side
+servers:
+  - url: http://localhost:3600
+    description: Local development
+security: []
+tags:
+  - name: Health
+    description: Service health monitoring
+  - name: Scraping
+    description: Single-page web scraping
+  - name: Crawling
+    description: Multi-page web crawling
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  service:
+                    type: string
+                    example: "firecrawl-proxy"
+
+  /api/scrape:
+    post:
+      tags: [Scraping]
+      summary: Scrape single webpage
+      description: |
+        Scrapes a single webpage and returns its content in markdown format.
+
+        **Features:**
+        - Converts HTML to clean markdown
+        - Extracts metadata (title, description, keywords)
+        - Optional screenshot capture
+        - Removes ads and navigation elements
+        - Preserves links and images
+
+        **Timeout:** 30 seconds default
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapeRequest'
+            examples:
+              basic:
+                value:
+                  url: "https://example.com/article"
+              with-screenshot:
+                value:
+                  url: "https://example.com/article"
+                  formats: ["markdown", "html"]
+                  includeTags: ["article", "main"]
+                  excludeTags: ["nav", "footer"]
+                  onlyMainContent: true
+      responses:
+        '200':
+          description: Scrape successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeResponse'
+              example:
+                success: true
+                data:
+                  markdown: "# Article Title\n\nArticle content..."
+                  html: "<article>...</article>"
+                  metadata:
+                    title: "Article Title"
+                    description: "Article description"
+                    language: "en"
+                    ogImage: "https://example.com/image.png"
+                  links:
+                    - "https://example.com/related"
+        '400':
+          description: Invalid request (missing URL or invalid format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Scraping failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/crawl:
+    post:
+      tags: [Crawling]
+      summary: Crawl multiple webpages
+      description: |
+        Initiates a crawl job for multiple webpages starting from a seed URL.
+
+        **Features:**
+        - Follows links up to specified depth
+        - Respects robots.txt
+        - Deduplicates URLs
+        - Returns job ID for status tracking
+        - Async execution (results via /api/crawl/status/:jobId)
+
+        **Limits:**
+        - Max depth: 5
+        - Max pages per crawl: 100
+        - Timeout per page: 30 seconds
+
+        **Note:** This is an async operation. Use the returned jobId to check status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrawlRequest'
+            example:
+              url: "https://example.com/docs"
+              maxDepth: 2
+              limit: 50
+              includePaths: ["/docs/*"]
+              excludePaths: ["/docs/archive/*"]
+      responses:
+        '202':
+          description: Crawl job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  jobId:
+                    type: string
+                    example: "crawl-1730000000-abc123"
+                  message:
+                    type: string
+                    example: "Crawl job started"
+                  statusUrl:
+                    type: string
+                    example: "/api/crawl/status/crawl-1730000000-abc123"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/crawl/status/{jobId}:
+    get:
+      tags: [Crawling]
+      summary: Get crawl job status
+      description: |
+        Returns the status of a crawl job initiated via POST /api/crawl.
+
+        **Job States:**
+        - `pending`: Job queued but not started
+        - `running`: Job in progress
+        - `completed`: Job finished successfully
+        - `failed`: Job failed with errors
+
+        **Polling:** Poll this endpoint every 5-10 seconds until status is completed or failed.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job identifier returned from POST /api/crawl
+          example: "crawl-1730000000-abc123"
+      responses:
+        '200':
+          description: Job status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrawlStatusResponse'
+              examples:
+                running:
+                  value:
+                    success: true
+                    jobId: "crawl-1730000000-abc123"
+                    status: "running"
+                    progress:
+                      total: 50
+                      completed: 15
+                      failed: 0
+                    startedAt: "2025-10-27T12:00:00.000Z"
+                completed:
+                  value:
+                    success: true
+                    jobId: "crawl-1730000000-abc123"
+                    status: "completed"
+                    progress:
+                      total: 50
+                      completed: 48
+                      failed: 2
+                    startedAt: "2025-10-27T12:00:00.000Z"
+                    completedAt: "2025-10-27T12:05:30.000Z"
+                    data:
+                      - url: "https://example.com/docs/intro"
+                        markdown: "# Introduction\n\n..."
+                        metadata:
+                          title: "Introduction"
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ScrapeRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to scrape
+          example: "https://example.com/article"
+        formats:
+          type: array
+          items:
+            type: string
+            enum: [markdown, html, links, screenshot]
+          description: Output formats to return
+          default: ["markdown"]
+        includeTags:
+          type: array
+          items:
+            type: string
+          description: HTML tags to include (whitelist)
+          example: ["article", "main", "section"]
+        excludeTags:
+          type: array
+          items:
+            type: string
+          description: HTML tags to exclude (blacklist)
+          example: ["nav", "footer", "aside"]
+        onlyMainContent:
+          type: boolean
+          description: Extract only main content (remove navigation, ads, etc.)
+          default: true
+        waitFor:
+          type: integer
+          description: Milliseconds to wait for page load
+          default: 0
+          example: 2000
+
+    ScrapeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            markdown:
+              type: string
+              description: Page content in markdown format
+            html:
+              type: string
+              description: Raw HTML content (if requested)
+            metadata:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                language:
+                  type: string
+                keywords:
+                  type: array
+                  items:
+                    type: string
+                ogImage:
+                  type: string
+                  format: uri
+            links:
+              type: array
+              items:
+                type: string
+                format: uri
+              description: Links found on page
+            screenshot:
+              type: string
+              description: Base64-encoded screenshot (if requested)
+
+    CrawlRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Starting URL for crawl
+          example: "https://example.com/docs"
+        maxDepth:
+          type: integer
+          description: Maximum link depth to follow
+          default: 2
+          minimum: 1
+          maximum: 5
+        limit:
+          type: integer
+          description: Maximum pages to crawl
+          default: 100
+          minimum: 1
+          maximum: 100
+        includePaths:
+          type: array
+          items:
+            type: string
+          description: URL path patterns to include (glob patterns)
+          example: ["/docs/*", "/api/*"]
+        excludePaths:
+          type: array
+          items:
+            type: string
+          description: URL path patterns to exclude (glob patterns)
+          example: ["/docs/archive/*"]
+        allowBackwardLinks:
+          type: boolean
+          description: Follow links to parent directories
+          default: false
+        allowExternalLinks:
+          type: boolean
+          description: Follow links to external domains
+          default: false
+
+    CrawlStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+        progress:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total pages to crawl
+            completed:
+              type: integer
+              description: Pages successfully crawled
+            failed:
+              type: integer
+              description: Pages that failed to crawl
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        data:
+          type: array
+          description: Crawled pages (only present when status is completed)
+          items:
+            type: object
+            properties:
+              url:
+                type: string
+                format: uri
+              markdown:
+                type: string
+              metadata:
+                type: object
+        error:
+          anyOf:
+            - type: string
+            - type: "null"
+          description: Error message (only present when status is failed)
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        message:
+          type: string

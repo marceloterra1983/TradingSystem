@@ -37,11 +37,11 @@ else
     CYAN='\033[0;36m'
     NC='\033[0m'
 
-    log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; }
-    log_success() { echo -e "${GREEN}[SUCCESS]${NC} $*" >&2; }
+    log_info() { [ "$QUIET_MODE" = true ] && return; echo -e "${BLUE}[INFO]${NC} $*" >&2; }
+    log_success() { [ "$QUIET_MODE" = true ] && return; echo -e "${GREEN}[SUCCESS]${NC} $*" >&2; }
     log_warning() { echo -e "${YELLOW}[WARNING]${NC} $*" >&2; }
     log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-    section() { echo ""; echo "========================================"; echo -e "${BLUE}  $1${NC}"; echo "========================================"; echo ""; }
+    section() { [ "$QUIET_MODE" = true ] && return; echo ""; echo "========================================"; echo -e "${BLUE}  $1${NC}"; echo "========================================"; echo ""; }
 fi
 
 cd "$PROJECT_ROOT"
@@ -60,6 +60,8 @@ FORCE_KILL=false
 SKIP_DOCKER=false
 SKIP_SERVICES=false
 WITH_VECTORS=true
+SKIP_HEALTH_CHECKS=false
+QUIET_MODE=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 METRICS_FILE="$SERVICES_DIR/start-metrics.json"
 mkdir -p "$SERVICES_DIR"
@@ -108,6 +110,14 @@ while [[ $# -gt 0 ]]; do
             WITH_VECTORS=false
             shift
             ;;
+        --skip-health-checks)
+            SKIP_HEALTH_CHECKS=true
+            shift
+            ;;
+        --quiet|-q)
+            QUIET_MODE=true
+            shift
+            ;;
         --help|-h)
             cat << EOF
 TradingSystem Universal Start v2.0
@@ -115,12 +125,14 @@ TradingSystem Universal Start v2.0
 Usage: $0 [OPTIONS]
 
 Options:
-  --force-kill       Kill processes on occupied ports before starting
-  --skip-docker      Skip Docker containers startup
-  --skip-services    Skip local dev services startup
-  --with-vectors     Start Qdrant + Ollama + LlamaIndex (default behaviour)
-  --skip-vectors     Skip starting Qdrant/Ollama/LlamaIndex
-  --help, -h         Show this help message
+  --force-kill          Kill processes on occupied ports before starting
+  --skip-docker         Skip Docker containers startup
+  --skip-services       Skip local dev services startup
+  --with-vectors        Start Qdrant + Ollama + LlamaIndex (default behaviour)
+  --skip-vectors        Skip starting Qdrant/Ollama/LlamaIndex
+  --skip-health-checks  Skip health checks (faster startup for experienced users)
+  --quiet, -q           Quiet mode (only show errors and final summary)
+  --help, -h            Show this help message
 
 Services:
   🐳 Docker Containers:
@@ -153,6 +165,25 @@ EOF
             ;;
     esac
 done
+
+# ==============================================================================
+# Signal Handlers
+# ==============================================================================
+
+cleanup_on_exit() {
+    log_warning "Interrupt detected. Cleaning up..."
+    # Kill background processes started by this script
+    jobs -p | xargs -r kill 2>/dev/null || true
+    log_info "Cleanup complete. Exiting."
+    exit 1
+}
+
+# Register signal handlers
+trap cleanup_on_exit SIGINT SIGTERM
+
+# ==============================================================================
+# Dependency Resolution
+# ==============================================================================
 
 # Function to resolve service dependencies (topological sort)
 resolve_dependencies() {
@@ -333,36 +364,25 @@ start_containers() {
         done
     fi
 
-    # Remove conflicting containers by name when --force-kill (handles exited containers too)
+    # If --force-kill is set, always restart containers (consistent behavior)
     if [ "$FORCE_KILL" = true ]; then
-        for cname in apps-workspace apps-tp-capital; do
-            if docker ps -a --format '{{.Names}}' | grep -qx "$cname"; then
-                state=$(docker inspect --format='{{.State.Status}}' "$cname" 2>/dev/null || echo unknown)
-                health=$(docker inspect --format='{{.State.Health.Status}}' "$cname" 2>/dev/null || echo none)
-                if [ "$state" != "running" ] || { [ "$health" != "healthy" ] && [ "$health" != "none" ]; }; then
-                    log_warning "Removing '$cname' (state=$state, health=$health)"
-                    docker rm -f "$cname" >/dev/null 2>&1 || true
-                fi
-            fi
-        done
-    fi
+        if docker ps -a --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
+            log_warning "--force-kill: Forcing restart of all application containers (healthy or not)"
+            docker compose -p apps -f "$COMPOSE_FILE" down || true
+            sleep 2
+        fi
+    # If not forcing and containers already running, check health and skip if healthy
+    elif docker ps --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
+        ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo none)
+        tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tp-capital 2>/dev/null || echo none)
 
-    # If already running and not forcing, skip
-    if docker ps --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
-        log_info "Application containers already running"
-        if [ "$FORCE_KILL" = true ]; then
-            ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo none)
-            tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tp-capital 2>/dev/null || echo none)
-            if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
-                log_info "Containers healthy; skipping restart (ignoring --force-kill)"
-                return 0
-            else
-                log_info "Restarting containers (--force-kill)..."
-                docker compose -p apps -f "$COMPOSE_FILE" down || true
-                sleep 2
-            fi
-        else
+        if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
+            log_info "Application containers already healthy; skipping restart"
             return 0
+        else
+            log_warning "Containers exist but not healthy (ws=$ws_health, tp=$tp_health); restarting..."
+            docker compose -p apps -f "$COMPOSE_FILE" down || true
+            sleep 2
         fi
     fi
 
@@ -429,23 +449,29 @@ check_service_health() {
     local port=$2
     local max_attempts=3
     local attempt=0
-    
+
+    # Skip health checks if flag is set
+    if [ "$SKIP_HEALTH_CHECKS" = true ]; then
+        log_info "  ⊘ $name health check skipped (--skip-health-checks)"
+        return 0
+    fi
+
     # Try HTTP health check if available
     while [ $attempt -lt $max_attempts ]; do
-        if curl -sf "http://localhost:$port/health" >/dev/null 2>&1; then
+        if curl -sf --max-time 5 "http://localhost:$port/health" >/dev/null 2>&1; then
             log_success "  ✓ $name health check passed"
             return 0
         fi
         attempt=$((attempt + 1))
         sleep 2
     done
-    
+
     # Fallback: just check if port is listening
     if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
         log_info "  ✓ $name is listening on port $port (health endpoint not available)"
         return 0
     fi
-    
+
     return 1
 }
 
@@ -538,7 +564,7 @@ start_service() {
     local max_retries=$(echo "$config" | cut -d':' -f6)
     max_retries=${max_retries:-3}
     
-    local log_file="$SERVICES_DIR/${name}.log"
+    local log_file="$SERVICES_DIR/${name}-$(date +%Y%m%d).log"
     local pid_file="$SERVICES_DIR/${name}.pid"
     
     # Track start time for metrics
@@ -589,6 +615,17 @@ start_service() {
         return 0
     fi
 
+    # Special handling for PM2-managed watcher
+    if [ "$name" = "docs-watcher" ] && command -v pm2 >/dev/null 2>&1; then
+        if pm2 show docs-watcher >/dev/null 2>&1; then
+            if pm2 show docs-watcher 2>/dev/null | grep -qi "status\s*: online"; then
+                log_info "docs-watcher managed by PM2 (online); skipping local start"
+                echo $$ > "$pid_file"
+                return 0
+            fi
+        fi
+    fi
+
     # Check if already running
     if [ -f "$pid_file" ]; then
         local old_pid=$(cat "$pid_file")
@@ -602,7 +639,7 @@ start_service() {
 
     # Check port; if healthy service already listening, skip start
     if [ -n "$port" ]; then
-        if curl -sf "http://localhost:$port/health" >/dev/null 2>&1; then
+        if curl -sf --max-time 5 "http://localhost:$port/health" >/dev/null 2>&1; then
             log_info "$name already running on port $port (health OK); skipping start"
             echo $$ > "$pid_file"; return 0
         fi
@@ -675,26 +712,39 @@ start_service() {
             echo "$pid" > "$pid_file"
         fi
         
-        # Wait for port to become active
+        # Wait for port to become active (or ensure process stays alive when no port is published)
         log_info "Waiting for $name to start (attempt $attempt/$max_retries)..."
         local max_wait=30
+        if [ -z "$port" ]; then
+            max_wait=5
+        fi
         local waited=0
 
         while [ $waited -lt $max_wait ]; do
-            if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
-                log_success "✓ $name started (PID: $pid, Port: $port)"
-                log_info "  Log: $log_file"
-                
-                # Perform health check
-                if check_service_health "$name" "$port"; then
+            if [ -z "$port" ]; then
+                if kill -0 "$pid" 2>/dev/null; then
+                    log_success "✓ $name started (PID: $pid)"
+                    log_info "  Log: $log_file"
                     success=true
                     cd "$PROJECT_ROOT"
-                    return 0  # Return immediately on success
-                else
-                    log_warning "  Service started but health check inconclusive"
-                    success=true
-                    cd "$PROJECT_ROOT"
-                    return 0  # Return immediately even if health check is inconclusive
+                    return 0
+                fi
+            else
+                if lsof -i :"$port" -sTCP:LISTEN -t >/dev/null 2>&1; then
+                    log_success "✓ $name started (PID: $pid, Port: $port)"
+                    log_info "  Log: $log_file"
+                    
+                    # Perform health check
+                    if check_service_health "$name" "$port"; then
+                        success=true
+                        cd "$PROJECT_ROOT"
+                        return 0  # Return immediately on success
+                    else
+                        log_warning "  Service started but health check inconclusive"
+                        success=true
+                        cd "$PROJECT_ROOT"
+                        return 0  # Return immediately even if health check is inconclusive
+                    fi
                 fi
             fi
 
@@ -807,12 +857,24 @@ main() {
     fi
 
     # Final summary
-    section "Summary"
+    local total_services=${#SERVICES[@]}
+    local stopped_count=0
+    for service in "${!SERVICES[@]}"; do
+        local pid_file="$SERVICES_DIR/${service}.pid"
+        if [ ! -f "$pid_file" ]; then
+            ((stopped_count++))
+        fi
+    done
+
+    section "Summary ($total_services services, $stopped_count stopped)"
 
     # Ensure colors are defined for this section
     local CYAN='\033[0;36m'
     local NC='\033[0m'
     local BLUE='\033[0;34m'
+    local GREEN='\033[0;32m'
+    local YELLOW='\033[1;33m'
+    local RED='\033[0;31m'
 
     echo -e "${CYAN}🐳 Docker Containers:${NC}"
     echo -e "  💹 TP Capital API:    http://localhost:4005"
@@ -840,7 +902,13 @@ main() {
     echo -e "${CYAN}📝 Management:${NC}"
     echo -e "  Check status:  ${BLUE}bash scripts/universal/status.sh${NC} (or: status)"
     echo -e "  Stop services: ${BLUE}bash scripts/universal/stop.sh${NC}   (or: stop)"
-    echo -e "  View logs:     ${BLUE}tail -f $SERVICES_DIR/<service>.log${NC}"
+    echo -e "  View logs:     ${BLUE}tail -f $SERVICES_DIR/<service>-$(date +%Y%m%d).log${NC}"
+    echo ""
+    echo -e "${CYAN}Legend:${NC}"
+    echo -e "  ${GREEN}✓${NC} - Service running and healthy"
+    echo -e "  ${YELLOW}⚠${NC} - Service running but health check failed"
+    echo -e "  ${RED}✗${NC} - Service not running"
+    echo -e "  ${BLUE}⊘${NC} - Health check skipped (--skip-health-checks)"
     echo ""
 }
 

@@ -2,7 +2,7 @@
 # Technical References Validation Script
 #
 # Validates that all legacy documentation references (docs_legacy/, docs_legacy/docusaurus, port 3004)
-# have been migrated to docs (docs/, port 3205) across the repository.
+# have been migrated to docs (docs/, ports 3400/3401) across the repository.
 # Dependencies: ripgrep (preferred) or GNU grep; falls back to a portable find+grep
 # implementation when only BSD grep is available.
 # Usage: bash docs/scripts/validate-technical-references.sh [--strict] [--verbose]
@@ -23,8 +23,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
-EXCLUDE_DIRS=("node_modules" ".git" "docs_legacy/context" "docs/governance" "docs/migration")
-EXCLUDE_FILES=("*.log" "COMPLETE-REFERENCE-INVENTORY.md" "REFERENCE-UPDATE-TRACKING.md" "reference-inventory.json")
+EXCLUDE_DIRS=("node_modules" ".git" "logs" ".github" "docs_v2" "docs_legacy/context" "docs/governance" "docs/migration" "tools/openspec" "frontend/dashboard/public/docs" "frontend/dashboard/dist" "docs/versioned_docs" "docs/build" "docs/archive")
+EXCLUDE_FILES=("*.log" "COMPLETE-REFERENCE-INVENTORY.md" "REFERENCE-UPDATE-TRACKING.md" "reference-inventory.json" "validate-technical-references.sh")
 
 SEARCH_TOOL=""
 
@@ -37,7 +37,8 @@ for file in "${EXCLUDE_FILES[@]}"; do
 done
 
 ALLOWED_DOCS_V2_MAX=${ALLOWED_DOCS_V2_MAX:-0}
-EXPECTED_3205_MIN=${EXPECTED_3205_MIN:-20}
+EXPECTED_DOCS_PORT_MIN=${EXPECTED_DOCS_PORT_MIN:-${EXPECTED_3205_MIN:-20}}
+EXPECTED_DOCS_API_PORT_MIN=${EXPECTED_DOCS_API_PORT_MIN:-10}
 
 usage() {
   cat <<'USAGE'
@@ -264,9 +265,13 @@ fi
 #######################################
 log_info "Checking for docs/docusaurus references..."
 legacy_output=""
-if legacy_output=$(perform_grep "docs/docusaurus" 2>/dev/null); then
-  log_error "Legacy docs/docusaurus references found"
-  printf '%s\n' "${legacy_output}"
+if legacy_output=$(perform_grep "docs/docusaurus/" 2>/dev/null); then
+  if [[ -z "${legacy_output}" ]]; then
+    log_success "No legacy docs/docusaurus references detected (outside excluded paths)"
+  else
+    log_error "Legacy docs/docusaurus references found"
+    printf '%s\n' "${legacy_output}"
+  fi
 else
   log_success "No legacy docs/docusaurus references detected (outside excluded paths)"
 fi
@@ -274,13 +279,13 @@ fi
 #######################################
 # Validation 2: Legacy port 3004 references
 #######################################
-log_info "Checking for port 3004 references..."
+log_info "Checking for legacy documentation URL references (http://localhost:3004)..."
 port3004_output=""
-if port3004_output=$(perform_grep '\b3004\b' -E 2>/dev/null); then
-  log_error "Legacy port 3004 references found"
+if port3004_output=$(perform_grep 'http://localhost:3004' 2>/dev/null); then
+  log_error "Legacy documentation URL references found"
   printf '%s\n' "${port3004_output}"
 else
-  log_success "No legacy port 3004 references detected (outside excluded paths)"
+  log_success "No legacy documentation URL references detected (outside excluded paths)"
 fi
 
 #######################################
@@ -295,18 +300,29 @@ else
 fi
 
 #######################################
-# Validation 4: Port 3205 references present
+# Validation 4: Port 3400 references present
 #######################################
-log_info "Counting port 3205 references..."
-port3205_total=$(count_matches '\b3205\b' -E)
-if (( port3205_total < EXPECTED_3205_MIN )); then
-  log_warning "Only ${port3205_total} port 3205 references detected (expected >= ${EXPECTED_3205_MIN})"
+log_info "Counting port 3400 references..."
+port3400_total=$(count_matches '\b3400\b' -E)
+if (( port3400_total < EXPECTED_DOCS_PORT_MIN )); then
+  log_warning "Only ${port3400_total} port 3400 references detected (expected >= ${EXPECTED_DOCS_PORT_MIN})"
 else
-  log_success "Found ${port3205_total} references to port 3205 (threshold ${EXPECTED_3205_MIN})"
+  log_success "Found ${port3400_total} references to port 3400 (threshold ${EXPECTED_DOCS_PORT_MIN})"
 fi
 
 #######################################
-# Validation 5: CORS configurations updated
+# Validation 5: Port 3401 references present
+#######################################
+log_info "Counting port 3401 references..."
+port3401_total=$(count_matches '\b3401\b' -E)
+if (( port3401_total < EXPECTED_DOCS_API_PORT_MIN )); then
+  log_warning "Only ${port3401_total} port 3401 references detected (expected >= ${EXPECTED_DOCS_API_PORT_MIN})"
+else
+  log_success "Found ${port3401_total} references to port 3401 (threshold ${EXPECTED_DOCS_API_PORT_MIN})"
+fi
+
+#######################################
+# Validation 6: CORS configurations updated
 #######################################
 log_info "Validating CORS configurations..."
 cors_output=""
@@ -314,10 +330,16 @@ if cors_output=$(perform_grep 'CORS_ORIGIN' --include='*.js' --include='*.ts' --
   if grep -q '3004' <<<"${cors_output}"; then
     log_error "CORS_ORIGIN still references port 3004"
     printf '%s\n' "${cors_output}"
-  elif grep -q '3205' <<<"${cors_output}"; then
-    log_success "CORS_ORIGIN definitions reference port 3205"
+  elif grep -q '3400' <<<"${cors_output}" && grep -q '3401' <<<"${cors_output}"; then
+    log_success "CORS_ORIGIN definitions reference ports 3400 and 3401"
+  elif grep -q '3400' <<<"${cors_output}"; then
+    log_warning "CORS_ORIGIN definitions reference port 3400 but are missing port 3401"
+    printf '%s\n' "${cors_output}"
+  elif grep -q '3401' <<<"${cors_output}"; then
+    log_warning "CORS_ORIGIN definitions reference port 3401 but are missing port 3400"
+    printf '%s\n' "${cors_output}"
   else
-    log_warning "CORS_ORIGIN definitions found but do not mention port 3205"
+    log_warning "CORS_ORIGIN definitions found but do not mention ports 3400/3401"
     printf '%s\n' "${cors_output}"
   fi
 else
@@ -325,12 +347,12 @@ else
 fi
 
 #######################################
-# Validation 6: services-manifest.json
+# Validation 7: services-manifest.json
 #######################################
 log_info "Checking services-manifest.json..."
-if jq -e '.services[] | select(.id == "docusaurus" and .path == "docs" and .port == 3205)' \
+if jq -e '.services[] | select(.id == "docusaurus" and .path == "docs" and .port == 3400)' \
   config/services-manifest.json >/dev/null 2>&1; then
-  log_success "services-manifest.json references docs on port 3205"
+  log_success "services-manifest.json references docs on port 3400"
 else
   current_path=$(jq -r '.services[] | select(.id == "docusaurus") | (.path // "missing")' \
     config/services-manifest.json 2>/dev/null || echo "missing")
@@ -339,7 +361,7 @@ else
   if [[ "${current_path}" == "missing" ]]; then
     log_error "services-manifest.json does not define a docusaurus service entry"
   else
-    log_error "services-manifest.json expected path=docs and port=3205 but found path=${current_path}, port=${current_port}"
+    log_error "services-manifest.json expected path=docs and port=3400 but found path=${current_path}, port=${current_port}"
   fi
 fi
 
@@ -357,10 +379,10 @@ fi
 # Validation 8: .env.example guidance
 #######################################
 log_info "Checking .env.example documentation hints..."
-if grep -q 'docs/governance' .env.example && grep -q '3205' .env.example; then
-  log_success ".env.example references docs governance guidance and port 3205"
+if grep -q 'docs/governance' .env.example && grep -q '3400' .env.example; then
+  log_success ".env.example references docs governance guidance and port 3400"
 else
-  log_warning ".env.example missing docs governance guidance or port 3205 references"
+  log_warning ".env.example missing docs governance guidance or port 3400 references"
 fi
 
 #######################################

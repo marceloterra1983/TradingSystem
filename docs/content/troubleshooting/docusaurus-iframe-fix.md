@@ -11,9 +11,11 @@ lastReviewed: '2025-10-27'
 
 # Docusaurus Iframe Loading Fix
 
-**Date**: 2025-10-26 01:25 UTC-03
+**Date**: 2025-10-29 (Updated)
 **Status**: ✅ **COMPLETE**
 **Issue**: Docusaurus not loading in Dashboard iframe at `http://localhost:3103/#/docs`
+
+**Port Strategy**: Docusaurus always uses port **3400** (dev server or NGINX container). See `DOCUSAURUS-PORTS-STRATEGY.md` for details.
 
 ---
 

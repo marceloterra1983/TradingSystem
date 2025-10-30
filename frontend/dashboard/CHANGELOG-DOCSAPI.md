@@ -17,7 +17,7 @@ docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3101',
 
 **After:**
 ```typescript
-docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3205/api/documentation-api',
+docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3401/api/documentation-api',
 ```
 
 **Unified Domain:**
@@ -28,17 +28,17 @@ docsApiUrl: `${import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
 #### 2. **Button Behavior**
 - **Location:** Dashboard → Knowledge → Docs → "DocAPI" button
 - **Old URL:** `http://localhost:3101` (deprecated service)
-- **New URL:** `http://localhost:3205/api/documentation-api` (Redocusaurus)
+- **New URL:** `http://localhost:3401/api/documentation-api` (Redocusaurus)
 
 #### 3. **Available API Documentation**
 The DocAPI button now provides access to multiple API specs via Redocusaurus:
 
-1. **Documentation API** - `http://localhost:3205/api/documentation-api`
-   - Service port: 3400 (Node.js runtime)
-   - Viewer: docs (Redocusaurus) served at 3205
+1. **Documentation API** - `http://localhost:3401/api/documentation-api`
+   - Service port: 3401 (Node.js runtime)
+   - Viewer: docs (Redocusaurus) served at 3400
    - Features: Systems, Ideas, Specs, Search, Files, Stats
 
-2. **Workspace API** - `http://localhost:3205/api/workspace`
+2. **Workspace API** - `http://localhost:3401/api/workspace`
    - Port: 3200
    - Features: Idea Bank, Kanban, CRUD operations
 
@@ -50,7 +50,7 @@ The DocAPI button now provides access to multiple API specs via Redocusaurus:
 - Users saw connection errors
 
 #### After
-- Clicking "DocAPI" button opens `http://localhost:3205/api/documentation-api`
+- Clicking "DocAPI" button opens `http://localhost:3401/api/documentation-api`
 - Full interactive API documentation via Redocusaurus
 - Access to multiple API specs through navbar dropdown
 - Try-it-out functionality for testing endpoints
@@ -63,8 +63,8 @@ Dashboard (Port 3103)
   └─> Knowledge Section
       └─> Docs Page
           ├─> Overview Tab (Escopo page)
-          ├─> Docusaurus Tab → http://localhost:3205
-          └─> DocAPI Tab → http://localhost:3205/api/documentation-api ✅ NEW
+          ├─> Docusaurus Tab → http://localhost:3400
+          └─> DocAPI Tab → http://localhost:3401/api/documentation-api ✅ NEW
 ```
 
 ### Testing
@@ -90,7 +90,7 @@ Dashboard (Port 3103)
 **Local Development (default):**
 ```bash
 # No configuration needed - uses defaults
-# DocAPI viewer: http://localhost:3205/api/documentation-api
+# DocAPI viewer: http://localhost:3401/api/documentation-api
 ```
 
 **Custom Port:**
@@ -128,7 +128,7 @@ VITE_API_BASE_URL=http://tradingsystem.local
 - **Status:** ⚠️ Deprecated - no longer used
 
 #### New Service (Active)
-- **Port:** 3205
+- **Port:** 3401
 - **Purpose:** Docusaurus v3 with Redocusaurus plugin
 - **Status:** ✅ Active and recommended
 - **Features:**
@@ -144,13 +144,13 @@ VITE_API_BASE_URL=http://tradingsystem.local
 
 **Check if docs is running:**
 ```bash
-curl http://localhost:3205
+curl http://localhost:3401
 ```
 
 **Start docs:**
 ```bash
 cd docs
-npm run start -- --port 3205
+npm run start -- --port 3401
 ```
 
 #### Wrong URL in DocAPI button
@@ -160,7 +160,7 @@ npm run start -- --port 3205
 # Check frontend config
 cat frontend/dashboard/src/config/api.ts | grep docsApiUrl
 
-# Should show: http://localhost:3205/api/documentation-api
+# Should show: http://localhost:3401/api/documentation-api
 ```
 
 **Clear browser cache:**
@@ -185,7 +185,7 @@ ls -la docs/static/specs/
 cd docs
 npm run clear
 npm run build
-npm run start -- --port 3205
+npm run start -- --port 3401
 ```
 
 ### Rollback Instructions
@@ -197,7 +197,7 @@ If needed, revert to old configuration:
 docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3101',
 ```
 
-**Note:** Old service at port 3101 is deprecated. Consider using standalone Redocusaurus at port 3205 instead.
+**Note:** Old service at port 3101 is deprecated. Consider using standalone Redocusaurus served via docs (`http://localhost:3400`) instead.
 
 ### Future Improvements
 

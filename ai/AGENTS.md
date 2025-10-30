@@ -38,7 +38,7 @@
 - **Localização**: `~/.claude.json`
 - **Comando**: `claude` (no terminal WSL2)
 - **Features**:
-  - Custom commands (`.claude/commands/`)
+  - Custom commands (`claude/commands/`)
   - MCP servers integration
   - Project-aware context
   - Terminal-based workflow
@@ -48,7 +48,7 @@
 - **Config**: `config/mcp/servers.json`
 - **Features**:
   - GUI-based interaction
-  - MCP servers (importa de `.claude/mcp-servers.json`)
+  - MCP servers (importa de `claude/mcp-servers.json`)
   - File tree navigation
   - Inline code suggestions
 
@@ -66,7 +66,7 @@
 
 ```
 ~/.claude.json                          # Global config (API key, settings)
-.claude/
+claude/
 ├── README.md                           # Overview of Claude configuration
 ├── MCP-FILESYSTEM-SETUP.md            # Filesystem server setup guide
 ├── mcp-servers.json                   # MCP servers definitions
@@ -97,7 +97,7 @@ claude
 ### Features
 
 - ✅ **7 MCP Servers** integrated (filesystem, git, docker, postgres, etc.)
-- ✅ **Custom Commands** in `.claude/commands/`
+- ✅ **Custom Commands** in `claude/commands/`
 - ✅ **Terminal Integration** (works seamlessly in Cursor's terminal)
 - ✅ **Project Configuration** (auto-loads rules and settings)
 
@@ -196,7 +196,7 @@ claude
 // config/mcp/servers.json - Enabled servers list
 {
   "version": 1,
-  "imports": ["../../.claude/mcp-servers.json"],
+  "imports": ["../../claude/mcp-servers.json"],
   "servers": [
     { "ref": "fs-tradingsystem", "enabled": true },
     { "ref": "github", "enabled": true },
@@ -209,7 +209,7 @@ claude
 
 ```bash
 # Test filesystem server
-bash .claude/test-mcp-fs.sh
+bash claude/test-mcp-fs.sh
 
 # Check installation
 npm list @modelcontextprotocol/server-filesystem
@@ -291,7 +291,7 @@ node scripts/agents/runner.mjs <agent-name>
 
 **Purpose**: Docker health monitoring and optimization
 
-**File**: `.claude/agents/docker-health-optimizer.md`
+**File**: `claude/agents/docker-health-optimizer.md`
 
 **Capabilities**:
 - Verify Docker installation health
@@ -310,7 +310,7 @@ node scripts/agents/runner.mjs <agent-name>
 
 **Purpose**: Retrieval-Augmented Generation analysis
 
-**File**: `.claude/agents/rag-analyzer.md`
+**File**: `claude/agents/rag-analyzer.md`
 
 **Capabilities**:
 - Analyze RAG pipeline performance
@@ -389,7 +389,7 @@ TradingSystem/
 │   └── openspec/                  # OpenSpec framework
 ├── scripts/                       # Automation scripts
 │   └── agents/                    # AI agents
-└── .claude/                       # Claude Code configuration
+└── claude/                        # Claude Code configuration
 ```
 
 ### Coding Style
@@ -497,7 +497,7 @@ bash scripts/env/validate-env.sh
 ### For AI Agents
 
 1. **[CLAUDE.md](../CLAUDE.md)** - Main instructions for Claude Code
-2. **[.ai/AGENTS.md](.ai/AGENTS.md)** - This file (AI tools overview)
+2. **[ai/AGENTS.md](ai/AGENTS.md)** - This file (AI tools overview)
 3. **[tools/openspec/AGENTS.md](tools/openspec/AGENTS.md)** - OpenSpec framework guide
 
 ### For Development
@@ -508,8 +508,8 @@ bash scripts/env/validate-env.sh
 
 ### For Operations
 
-1. **[.claude/README.md](.claude/README.md)** - Claude configuration
-2. **[.claude/MCP-FILESYSTEM-SETUP.md](.claude/MCP-FILESYSTEM-SETUP.md)** - MCP setup guide
+1. **[.claude/README.md](claude/README.md)** - Claude configuration
+2. **[.claude/MCP-FILESYSTEM-SETUP.md](claude/MCP-FILESYSTEM-SETUP.md)** - MCP setup guide
 3. **[tools/compose/](tools/compose/)** - Docker Compose stacks
 
 ---
@@ -594,7 +594,7 @@ cat ~/.claude.json
 **MCP Servers not loading**:
 ```bash
 # Test filesystem server
-bash .claude/test-mcp-fs.sh
+bash claude/test-mcp-fs.sh
 
 # Reload VSCode
 # Ctrl+Shift+P → "Reload Window"
@@ -639,7 +639,7 @@ bash scripts/maintenance/health-check-all.sh
 - ✅ Added troubleshooting section
 
 ### 2025-10-25: Initial AI Configuration
-- ✅ Created `.ai/` directory structure
+- ✅ Created `ai/` directory structure
 - ✅ Basic guidelines for AI agents
 - ✅ Repository structure overview
 

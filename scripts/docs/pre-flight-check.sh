@@ -219,7 +219,7 @@ check_ports() {
     fi
     
     local ports_to_check=(
-        "${DOCUSAURUS_PORT:-3205}"
+        "${DOCUSAURUS_PORT:-3400}"
         "${DOCS_API_PORT:-3400}"
     )
     

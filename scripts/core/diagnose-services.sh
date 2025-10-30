@@ -60,10 +60,10 @@ check_env_file() {
 echo "1. Checking Port Status..."
 echo "----------------------------"
 check_port 3101 "Dashboard" || true
-check_port 3205 "Docusaurus" || true
+check_port 3400 "Docusaurus" || true
 check_port 3200 "Workspace" || true
 check_port 3200 "TP-Capital" || true
-check_port 3400 "DocsAPI" || true
+check_port 3401 "DocsAPI" || true
 check_port 3500 "Laucher" || true
 check_port 9000 "QuestDB HTTP" || true
 check_port 9009 "QuestDB ILP" || true
@@ -97,10 +97,10 @@ echo "5. Port Configuration Summary..."
 echo "----------------------------"
 echo "Expected ports:"
 echo "  - 3101: Dashboard (React + Vite)"
-echo "  - 3205: Docusaurus (Docusaurus)"
+echo "  - 3400: Docusaurus (Docusaurus)"
 echo "  - 3200: Workspace"
 echo "  - 3200: TP-Capital"
-echo "  - 3400: DocsAPI"
+echo "  - 3401: DocsAPI"
 echo "  - 3500: Laucher"
 echo "  - 9000: QuestDB HTTP"
 echo "  - 9009: QuestDB ILP"

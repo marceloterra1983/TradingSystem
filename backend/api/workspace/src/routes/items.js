@@ -89,7 +89,6 @@ router.post('/', baseValidators, async (req, res, next) => {
 
     const { title, description, category, priority, tags = [] } = req.body;
     const item = {
-      id: nanoid(),
       title,
       description,
       category,
@@ -101,12 +100,12 @@ router.post('/', baseValidators, async (req, res, next) => {
     };
 
     const db = getDbClient();
-    await db.createItem(item);
+    const createdItem = await db.createItem(item);
 
     res.status(201).json({
       success: true,
       message: 'Item created successfully',
-      data: item,
+      data: createdItem,
     });
   } catch (error) {
     next(error);

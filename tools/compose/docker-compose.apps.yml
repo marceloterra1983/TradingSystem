@@ -5,11 +5,11 @@ services:
   # TP Capital API (Trading Signals)
   # ========================================
   tp-capital:
-    image: "${IMG_APPS_TP_CAPITAL:-img-apps-tp-capital}:${IMG_VERSION:-latest}"
+    image: "${IMG_APPS_TPCAPITAL:-img-apps-tpcapital}:${IMG_VERSION:-latest}"
     build:
       context: ../..
       dockerfile: apps/tp-capital/Dockerfile.dev
-    container_name: apps-tp-capital
+    container_name: apps-tpcapital
 
     # Load environment from centralized root .env
     env_file:
@@ -24,7 +24,7 @@ services:
       - LOG_LEVEL=info
 
       # TimescaleDB Connection (Central Database)
-      - TIMESCALEDB_HOST=data-timescaledb
+      - TIMESCALEDB_HOST=data-timescale
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-tradingsystem}
       - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}
@@ -32,9 +32,9 @@ services:
       - TIMESCALEDB_SCHEMA=tp_capital
 
       # Gateway Database Connection (for polling messages)
-      # Note: Using centralized data-timescaledb with schema telegram_gateway
-      - TELEGRAM_GATEWAY_DB_URL=postgresql://timescale:pass_timescale@data-timescaledb:5432/tradingsystem?schema=telegram_gateway
-      - GATEWAY_DATABASE_HOST=data-timescaledb
+      # Note: Using centralized data-timescale with schema telegram_gateway
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://timescale:pass_timescale@data-timescale:5432/tradingsystem?schema=telegram_gateway
+      - GATEWAY_DATABASE_HOST=data-timescale
       - GATEWAY_DATABASE_PORT=5432
       - GATEWAY_DATABASE_NAME=tradingsystem
       - GATEWAY_DATABASE_SCHEMA=telegram_gateway
@@ -122,7 +122,7 @@ services:
       - LOG_LEVEL=info
 
       # TimescaleDB Connection (Central Database)
-      - TIMESCALEDB_HOST=data-timescaledb
+      - TIMESCALEDB_HOST=data-timescale
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DATABASE=APPS-WORKSPACE
       - WORKSPACE_DATABASE=APPS-WORKSPACE

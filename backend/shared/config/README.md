@@ -137,7 +137,7 @@ TIMESCALE_POSTGRES_PASSWORD=your_password_here
 TIMESCALE_POSTGRES_DATABASE=tradingsystem
 
 # === CORS ===
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401
 DISABLE_CORS=false
 
 # === Rate Limiting ===

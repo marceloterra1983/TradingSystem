@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { buildDocsUrl } from '@/lib/docsUrl';
 
 /**
  * Simple Markdown Viewer - Displays markdown content without Docusaurus shell
@@ -11,7 +12,7 @@ export default function MarkdownViewer(): JSX.Element {
   const path = searchParams.get('path') || '';
   const title = searchParams.get('title') || 'Document';
 
-  const [content, setContent] = useState<string>('');
+  const [, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,9 +28,8 @@ export default function MarkdownViewer(): JSX.Element {
         setLoading(true);
         setError(null);
 
-        // Try to fetch raw markdown from Docusaurus static files
-        // The path comes from docs/content/, so we construct the full URL
-        const docsUrl = `http://localhost:3205/docs/${path}`;
+        // Try to fetch rendered markdown from Docusaurus through the dashboard proxy
+        const docsUrl = buildDocsUrl(path);
 
         console.log('[MarkdownViewer] Fetching:', docsUrl);
 
@@ -92,7 +92,7 @@ export default function MarkdownViewer(): JSX.Element {
           <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">{title}</h1>
           <div className="flex gap-2">
             <a
-              href={`http://localhost:3205/docs/${path}`}
+              href={buildDocsUrl(path)}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-1.5 text-sm bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 rounded hover:bg-sky-200 dark:hover:bg-sky-800"
@@ -113,7 +113,7 @@ export default function MarkdownViewer(): JSX.Element {
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
           <iframe
-            src={`http://localhost:3205/docs/${path}`}
+            src={buildDocsUrl(path)}
             className="w-full border-0"
             style={{ height: 'calc(100vh - 120px)', minHeight: '600px' }}
             title={title}

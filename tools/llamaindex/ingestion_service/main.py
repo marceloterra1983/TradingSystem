@@ -62,21 +62,51 @@ except Exception as e:
 
 app = FastAPI(title="LlamaIndex Ingestion Service")
 
-# Initialize Qdrant client
-qdrant_client = QdrantClient(
-    host=os.getenv("QDRANT_HOST", "localhost"),
-    port=int(os.getenv("QDRANT_PORT", 6333))
-)
+# Initialize Qdrant client with error handling
+QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
+try:
+    qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    # Try a simple operation to verify connectivity
+    qdrant_client.get_collections()
+    logger.info("Qdrant client initialized successfully at %s:%s", QDRANT_HOST, QDRANT_PORT)
+except Exception as e:
+    logger.error(
+        "Failed to initialize Qdrant clients. Qdrant may be unavailable at %s:%s. Error: %s",
+        QDRANT_HOST,
+        QDRANT_PORT,
+        str(e),
+    )
+    logger.warning("Service will start but ingestion operations will fail until Qdrant is available.")
+    qdrant_client = None
 
-# Initialize vector store
+# Initialize vector store with error handling
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "documentation")
-vector_store = QdrantVectorStore(
-    client=qdrant_client,
-    collection_name=QDRANT_COLLECTION,
-)
-
-# Create storage context
-storage_context = StorageContext.from_defaults(vector_store=vector_store)
+if qdrant_client is not None:
+    try:
+        vector_store = QdrantVectorStore(
+            client=qdrant_client,
+            collection_name=QDRANT_COLLECTION,
+        )
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+        logger.info("Vector store and storage context initialized for collection: %s", QDRANT_COLLECTION)
+    except Exception as e:
+        logger.error(
+            "Failed to initialize vector store. Qdrant may be unavailable. Error: %s",
+            str(e),
+        )
+        logger.warning(
+            "Service will start but ingestion operations will fail until Qdrant is available. "
+            "Check QDRANT_HOST=%s, QDRANT_PORT=%s",
+            QDRANT_HOST,
+            QDRANT_PORT,
+        )
+        vector_store = None
+        storage_context = None
+else:
+    logger.warning("Qdrant client not initialized. Vector store will not be available.")
+    vector_store = None
+    storage_context = None
 
 # Configure embeddings with Ollama (local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -116,6 +146,11 @@ async def ingest_directory(request: DirectoryIngestRequest):
     """
     Ingest all documents from a specified directory.
     """
+    if vector_store is None or storage_context is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
+        )
     # Validate directory path
     if not os.path.isdir(request.directory_path):
         raise HTTPException(status_code=400, detail=f"Directory not found: {request.directory_path}")
@@ -182,6 +217,11 @@ async def ingest_document(request: DocumentIngestRequest):
     """
     Ingest a single document.
     """
+    if vector_store is None or storage_context is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
+        )
     # Validate file path
     if not os.path.isfile(request.file_path):
         raise HTTPException(status_code=400, detail=f"File not found: {request.file_path}")
@@ -228,6 +268,11 @@ async def delete_collection(collection_name: str):
     """
     Delete a collection and all its documents.
     """
+    if qdrant_client is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Qdrant client is not available. Service is still initializing or Qdrant is unreachable."
+        )
     try:
         qdrant_client.delete_collection(collection_name)
         return ProcessingResult(
@@ -247,15 +292,25 @@ async def health_check():
     Health check endpoint.
     """
     try:
+        if qdrant_client is None or vector_store is None:
+            return {
+                "status": "degraded",
+                "message": "Qdrant client or vector store not initialized",
+                "collection": QDRANT_COLLECTION,
+            }
         # Check Qdrant connection
         qdrant_client.get_collections()
-        return {"status": "healthy"}
+        return {
+            "status": "healthy",
+            "collection": QDRANT_COLLECTION,
+        }
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        raise HTTPException(
-            status_code=503,
-            detail="Service unhealthy"
-        )
+        return {
+            "status": "degraded",
+            "error": str(e),
+            "collection": QDRANT_COLLECTION,
+        }
 
 if __name__ == "__main__":
     import uvicorn

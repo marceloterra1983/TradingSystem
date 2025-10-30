@@ -52,7 +52,7 @@ PRUNE_NETWORKS=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 
 # Node.js service ports
-PORTS=(4006 4010 3103 3205 3500)
+PORTS=(4006 4010 3103 3400 3401 3500)
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do

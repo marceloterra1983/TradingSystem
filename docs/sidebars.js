@@ -141,7 +141,7 @@ const sidebars = {
         // Infrastructure & Orchestration
         {
           type: 'category',
-          label: 'Infrastructure',
+          label: 'Tools',
           link: {
             type: 'doc',
             id: 'tools/infrastructure/overview',

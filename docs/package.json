@@ -7,10 +7,10 @@
   },
   "scripts": {
     "start": "npm run docs:dev",
-    "docs:dev": "docusaurus start --host 0.0.0.0 --port 3205",
+    "docs:dev": "docusaurus start --host 0.0.0.0 --port 3400",
     "docs:build": "docusaurus build",
     "docs:build:fast": "NODE_ENV=development npm run docs:build",
-    "docs:serve": "docusaurus serve --dir build --host 0.0.0.0 --port 3205",
+    "docs:serve": "docusaurus serve --dir build --host 0.0.0.0 --port 3400",
     "docs:auto": "node ../scripts/docusaurus/docs-auto.mjs",
     "docs:lint": "markdownlint \"content/**/*.{md,mdx}\" && remark content --ext mdx",
     "docs:typecheck": "tsc --noEmit",

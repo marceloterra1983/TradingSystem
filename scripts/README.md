@@ -50,9 +50,9 @@ bash scripts/core/start-trading-system-dev.sh --start-monitoring
 - Launcher (3500)
 - Workspace (3200)
 - TP-Capital (4005)
-- DocsAPI (3400)
+- DocsAPI (3401)
 - Dashboard Frontend (3103 ou 5173)
-- Documentação (3205)
+- Documentação (3400)
 - Prometheus (9090)
 - Grafana (3000)
 
@@ -304,8 +304,8 @@ bash scripts/docker/check-docs-services.sh
 ```
 
 **Verifica:**
-- DocsAPI (porta 3400)
-- Docusaurus (porta 3205)
+- DocsAPI (porta 3401)
+- Docusaurus (porta 3400)
 - TimescaleDB (porta 5433)
 
 ### Scripts BuildKit
@@ -1326,7 +1326,7 @@ pkill node
 ```bash
 lsof -i :3200  # Workspace
 lsof -i :3103  # Dashboard
-lsof -i :3205  # Docs
+lsof -i :3400  # Docs
 lsof -i :3500  # Launcher
 ```
 
@@ -1361,7 +1361,7 @@ Stop-Process -Name node -Force
 ```powershell
 netstat -ano | findstr "3200"  # Workspace
 netstat -ano | findstr "3103"  # Dashboard
-netstat -ano | findstr "3205"  # Docs
+netstat -ano | findstr "3400"  # Docs
 netstat -ano | findstr "3500"  # Launcher
 ```
 

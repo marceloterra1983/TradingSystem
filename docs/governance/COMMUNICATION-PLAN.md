@@ -35,7 +35,7 @@ We're excited to announce that the new TradingSystem documentation (docs) will l
 ✅ 26 PlantUML diagrams for architecture visualization
 
 **How to Access:**
-- Local dev (docs): http://localhost:3205
+- Local dev (docs): http://localhost:3400
 - Unified domain: http://tradingsystem.local/docs
 - Legacy docs (Docusaurus v2): http://localhost:3004
 - Browse content: `docs/content/`
@@ -48,7 +48,7 @@ We're excited to announce that the new TradingSystem documentation (docs) will l
 - Quarterly maintenance and updates
 
 **Action Items:**
-- 📖 Preview docs at http://localhost:3205
+- 📖 Preview docs at http://localhost:3400
 - 💬 Share feedback in #docs-feedback channel
 - 🐛 Report issues in GitHub (label: documentation)
 - 📅 Attend launch demo (Nov 14, 2 PM)
@@ -111,7 +111,7 @@ Join us for a 30-minute walkthrough of the new documentation system!
 🚀 **docs Launches Tomorrow!** 🚀
 
 **Launch Date:** November 15, 2025
-**Access:** http://tradingsystem.local/docs (unified domain) or http://localhost:3205 (local dev)
+**Access:** http://tradingsystem.local/docs (unified domain) or http://localhost:3400 (local dev)
 
 **What Changes:**
 ✅ New documentation URL: tradingsystem.local/docs (was: localhost:3004)
@@ -130,7 +130,7 @@ Join us for a 30-minute walkthrough of the new documentation system!
 3. Try the search feature
 4. Share feedback in #docs-feedback
 
-**Need Help?** See FAQ: http://localhost:3205/faq or ask in #docs-migration
+**Need Help?** See FAQ: http://localhost:3400/faq or ask in #docs-migration
 
 **Demo Recording:** Available in #docs-migration channel
 ```
@@ -182,7 +182,7 @@ Join us for a 30-minute walkthrough of the new documentation system!
 - 💬 Questions: #docs-migration channel
 - 🐛 Issues: GitHub (label: documentation)
 - 📧 Email: docs-ops@company.com
-- 📖 FAQ: http://localhost:3205/faq
+- 📖 FAQ: http://localhost:3400/faq
 
 **Thank You:**
 Thanks to DocsOps, ProductOps, ArchitectureGuild, FrontendGuild, BackendGuild, and all contributors for making this launch possible! 🙌
@@ -269,8 +269,8 @@ Thanks for your patience during the transition! The new documentation is here to
 
 **Location**: Top of dashboard
 **Type**: Info banner (blue)
-**Message**: "📚 New documentation launching Nov 15! Preview at http://localhost:3205"
-**Action**: "Preview Now" button → http://localhost:3205
+**Message**: "📚 New documentation launching Nov 15! Preview at http://localhost:3400"
+**Action**: "Preview Now" button → http://localhost:3400
 **Dismissible**: Yes
 
 ### Launch Day Banner (Launch to T+7)
@@ -441,7 +441,7 @@ The new documentation system launches Nov 15. We need your help reviewing [X] fi
    
    **What This Means:**
    - Legacy docs remain active at http://localhost:3004
-   - docs preview still available at http://localhost:3205
+   - docs preview still available at http://localhost:3400
    - No action required from you
    
    **Next Steps:**

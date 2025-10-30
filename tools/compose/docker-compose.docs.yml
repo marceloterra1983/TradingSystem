@@ -21,8 +21,8 @@ services:
   # Serves: Docusaurus (HTML/CSS/JS), OpenAPI/AsyncAPI specs (YAML/JSON)
   # ============================================================================
   documentation:
-    container_name: documentation
-    image: "${IMG_DOCS:-documentation}:${IMG_VERSION:-latest}"
+    container_name: docs-hub
+    image: "${IMG_DOCS_HUB:-img-docs-hub}:${IMG_VERSION:-latest}"
     platform: linux/amd64
     env_file:
       - ../../.env
@@ -57,7 +57,7 @@ services:
   # ============================================================================
   docs-api:
     container_name: docs-api
-    image: "${IMG_DOCS_API:-docs-api}:${IMG_VERSION:-latest}"
+    image: "${IMG_DOCS_API:-img-docs-api}:${IMG_VERSION:-latest}"
     platform: linux/amd64
     env_file:
       - ../../.env

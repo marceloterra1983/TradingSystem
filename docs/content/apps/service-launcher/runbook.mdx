@@ -433,7 +433,7 @@ docker logs service-launcher | grep -i cors
 
 ```bash
 # Add Dashboard origin
-echo "CORS_ORIGIN=http://localhost:3103,http://localhost:3205" >> .env
+echo "CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401" >> .env
 docker restart service-launcher
 ```
 
@@ -442,7 +442,7 @@ docker restart service-launcher
 ```bash
 # Ensure protocol matches exactly
 # If Dashboard uses https, CORS_ORIGIN must use https
-CORS_ORIGIN=https://localhost:3103,https://localhost:3205
+CORS_ORIGIN=https://localhost:3103,https://localhost:3400,https://localhost:3401
 ```
 
 **Problem**: Port mismatch
@@ -450,7 +450,7 @@ CORS_ORIGIN=https://localhost:3103,https://localhost:3205
 ```bash
 # Ensure port in CORS_ORIGIN matches Dashboard port
 # If Dashboard on 3104, update CORS_ORIGIN
-CORS_ORIGIN=http://localhost:3104,http://localhost:3205
+CORS_ORIGIN=http://localhost:3104,http://localhost:3400,http://localhost:3401
 ```
 
 ---

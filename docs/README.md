@@ -11,7 +11,7 @@ npm install
 npm run docs:dev
 ```
 
-The dev server listens on `http://localhost:3205` by default; pass `--port` to override (for CI smoke tests we use `npm run docs:dev -- --host 127.0.0.1 --port 3205`).
+The dev server listens on `http://localhost:3400` by default; pass `--port` to override (for CI smoke tests we use `npm run docs:dev -- --host 127.0.0.1 --port 3400`).
 
 Refer to the tasks file for the full rollout plan and outstanding items; see `package.json` for the exact dependency versions.
 
@@ -87,7 +87,7 @@ npm run docs:build
 |------|--------|-----------|--------|
 | `content/tools/ports-services/overview.mdx` | `docs/context/ops/service-port-map.md` | Ports table parser | ✅ Active |
 | `content/frontend/design-system/tokens.mdx` | `frontend/dashboard/tailwind.config.js` | Tailwind token extractor | ✅ Active |
-| `content/mcp/registry.mdx` | `~/.claude.json`, `.claude/mcp-servers.json` | MCP registry sync | ⚠️ TODO (blocked) |
+| `content/mcp/registry.mdx` | `~/.claude.json`, `claude/mcp-servers.json` | MCP registry sync | ⚠️ TODO (blocked) |
 
 **How to Regenerate**:
 

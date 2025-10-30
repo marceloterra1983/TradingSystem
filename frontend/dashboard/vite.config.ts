@@ -112,7 +112,7 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3205',
+    'http://localhost:3400',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
@@ -165,6 +165,11 @@ export default defineConfig(({ mode }) => {
           target: libraryProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/library/, libraryProxy.basePath),
+        },
+        '/api/workspace': {
+          target: libraryProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/workspace/, libraryProxy.basePath),
         },
         '/api/tp-capital': {
           target: tpCapitalProxy.target,
@@ -219,11 +224,9 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
         },
         '/docs': docsProxyConfig,
-        // Proxy OpenAPI specs to Docs server to avoid CORS in viewers
-        '^/specs/.*': {
-          target: docsProxy.target,
-          changeOrigin: true,
-        },
+        // Note: /specs/ files are served directly from public/specs/ by Vite
+        // No proxy needed - files are static assets served from same origin
+        // This avoids CORS issues in API viewers (redoc, swagger, rapidoc)
       },
     },
     define: {

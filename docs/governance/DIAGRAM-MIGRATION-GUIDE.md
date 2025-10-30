@@ -95,7 +95,7 @@ Update `docs/content/diagrams/diagrams.mdx` table to reflect new paths:
 ```bash
 cd docs
 npm run docs:dev
-# Open http://localhost:3205/diagrams
+# Open http://localhost:3400/diagrams
 # Verify all diagrams render correctly
 ```
 

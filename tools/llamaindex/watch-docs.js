@@ -17,7 +17,18 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 
 // State
 let debounceTimer = null;
-let pendingChanges = new Set();
+const pendingChanges = new Set();
+
+const parseMessage = async (response, fallback = '') => {
+  try {
+    const text = await response.text();
+    if (!text) return fallback;
+    const data = JSON.parse(text);
+    return data?.message || data?.error || text;
+  } catch {
+    return fallback;
+  }
+};
 
 console.log('📚 Documentation File Watcher');
 console.log(`   Watching: ${DOCS_DIR}`);
@@ -50,8 +61,12 @@ async function triggerReingestion() {
     if (flexResp.ok) {
       const flexData = await flexResp.json();
       console.log(`   ✅ FlexSearch: ${flexData.indexed?.files || 0} files indexed`);
+    } else if (flexResp.status === 429) {
+      const message = await parseMessage(flexResp, 'rate limit reached');
+      console.warn(`   ⚠️ FlexSearch reindex rate-limited: ${message}`);
     } else {
-      console.error(`   ❌ FlexSearch failed: ${flexResp.status}`);
+      const message = await parseMessage(flexResp, flexResp.statusText);
+      console.error(`   ❌ FlexSearch failed (${flexResp.status}): ${message}`);
     }
 
     // 2. Re-ingest Qdrant
@@ -65,8 +80,12 @@ async function triggerReingestion() {
       const qdrantData = await qdrantResp.json();
       const docsProcessed = qdrantData.ingestion?.documents_processed || 0;
       console.log(`   ✅ Qdrant: ${docsProcessed} documents processed`);
+    } else if (qdrantResp.status === 429) {
+      const message = await parseMessage(qdrantResp, 'rate limit reached');
+      console.warn(`   ⚠️ Qdrant ingest rate-limited: ${message}`);
     } else {
-      console.error(`   ❌ Qdrant failed: ${qdrantResp.status}`);
+      const message = await parseMessage(qdrantResp, qdrantResp.statusText);
+      console.error(`   ❌ Qdrant failed (${qdrantResp.status}): ${message}`);
     }
 
     console.log(`\n✨ Re-ingestion completed successfully`);

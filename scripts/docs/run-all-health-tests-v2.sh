@@ -289,9 +289,9 @@ start_docusaurus() {
     echo ""
     echo "Or run directly:"
     echo "  cd docs"
-    echo "  npm run start -- --port 3205"
+    echo "  npm run start -- --port 3400"
     echo ""
-    echo "Then access: http://localhost:3205/health"
+    echo "Then access: http://localhost:3400/health"
     echo ""
     
     log_success "Skipped Docusaurus startup (manual step)"

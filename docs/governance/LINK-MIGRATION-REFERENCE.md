@@ -10,8 +10,8 @@
 
 | Legacy Path | docs Path | Notes |
 |-------------|--------------|-------|
-| `http://localhost:3004` | `http://localhost:3205` | Port change (legacy Docusaurus v2 → docs) |
-| `http://localhost:3004/docs` | `http://localhost:3205` | docs served at root |
+| `http://localhost:3004` | `http://localhost:3400` | Port change (legacy Docusaurus v2 → docs container) |
+| `http://localhost:3004/docs` | `http://localhost:3400` | docs served at root |
 | `http://tradingsystem.local/docs` | `http://tradingsystem.local/docs` | Unified domain (nginx routes to docs) |
 
 ### File Paths (Legacy → docs)
@@ -114,14 +114,14 @@ Use relative paths from the current document:
 
 Use for external references or when linking from code:
 
-- Backend README → `http://localhost:3205/database/overview`
+- Backend README → `http://localhost:3400/database/overview`
 - Dashboard components → `apiConfig.docsUrl`
 - CI workflows → `http://localhost:3400/health`
 
 ### Markdown Conventions
 
 - Internal: `[Architecture](./architecture)`
-- Absolute: `[Docs Hub](http://localhost:3205)`
+- Absolute: `[Docs Hub](http://localhost:3400)`
 - Legacy (temporary): `[Legacy Guide](../../docs/context/backend/data/guides/database-ui-tools.md) (archived)`
 
 ## Validation

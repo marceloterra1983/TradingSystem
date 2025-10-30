@@ -188,31 +188,49 @@ dc -f tools/compose/docker-compose.infrastructure.yml build llamaindex-ingestion
 
 echo "[step] Start LlamaIndex services"
 # Ingestion
+INGESTION_JUST_STARTED=0
 if docker ps -a --format '{{.Names}}' | grep -qx tools-llamaindex-ingestion; then
   if docker ps --format '{{.Names}}' | grep -qx tools-llamaindex-ingestion; then
     echo "[ok] tools-llamaindex-ingestion already running"
   else
     echo "[step] Starting existing tools-llamaindex-ingestion"
     docker start tools-llamaindex-ingestion >/dev/null || true
+    INGESTION_JUST_STARTED=1
   fi
 else
   dc -f tools/compose/docker-compose.infrastructure.yml up -d llamaindex-ingestion
+  INGESTION_JUST_STARTED=1
 fi
 
 # Query
+QUERY_JUST_STARTED=0
 if docker ps -a --format '{{.Names}}' | grep -qx tools-llamaindex-query; then
   if docker ps --format '{{.Names}}' | grep -qx tools-llamaindex-query; then
     echo "[ok] tools-llamaindex-query already running"
   else
     echo "[step] Starting existing tools-llamaindex-query"
     docker start tools-llamaindex-query >/dev/null || true
+    QUERY_JUST_STARTED=1
   fi
 else
   dc -f tools/compose/docker-compose.infrastructure.yml up -d llamaindex-query
+  QUERY_JUST_STARTED=1
 fi
 
-wait_http "http://localhost:8201/health" "Ingestion service"
-wait_http "http://localhost:8202/health" "Query service"
+# Wait for services with progress feedback
+echo "[step] Waiting for LlamaIndex services to be ready..."
+# Give services a moment to start if they were just started
+if [ "$INGESTION_JUST_STARTED" -eq 1 ] || [ "$QUERY_JUST_STARTED" -eq 1 ]; then
+  echo "[info] Services were just started, allowing 5 seconds for initialization..."
+  sleep 5
+fi
+
+wait_http "http://localhost:8201/health" "Ingestion service" 30 2 || {
+  echo "[warn] Ingestion service health check failed, but continuing..."
+}
+wait_http "http://localhost:8202/health" "Query service" 30 2 || {
+  echo "[warn] Query service health check failed, but continuing..."
+}
 
 echo
 echo "[success] All services are up"

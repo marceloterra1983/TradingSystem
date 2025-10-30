@@ -17,7 +17,7 @@ echo "╚═══════════════════════�
 echo ""
 
 # Check DocsAPI (Docker)
-echo -e "${BLUE}📡 DocsAPI (Port 3400):${NC}"
+echo -e "${BLUE}📡 DocsAPI (Port 3401):${NC}"
 
 if docker ps --format '{{.Names}}' | grep -q docs-api; then
     health=$(docker inspect --format='{{.State.Health.Status}}' docs-api 2>/dev/null || echo "no-health-check")
@@ -33,13 +33,13 @@ if docker ps --format '{{.Names}}' | grep -q docs-api; then
     fi
     
     # Test HTTP
-    if curl -s -o /dev/null -w "%{http_code}" http://localhost:3400/health | grep -q 200; then
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost:3401/health | grep -q 200; then
         echo -e "  HTTP:   ${GREEN}✅ Responding${NC}"
     else
         echo -e "  HTTP:   ${RED}❌ Not responding${NC}"
     fi
     
-    echo "  URL:    http://localhost:3400"
+    echo "  URL:    http://localhost:3401"
     echo "  Type:   🐳 Docker Container"
 else
     echo -e "  Status: ${RED}❌ Not Running${NC}"
@@ -50,22 +50,22 @@ fi
 echo ""
 
 # Check Docusaurus
-echo -e "${BLUE}📚 Docusaurus (Port 3205):${NC}"
+echo -e "${BLUE}📚 Docusaurus (Port 3400):${NC}"
 
 # Check if running as Docker
 if docker ps --format '{{.Names}}' | grep -q tradingsystem-docusaurus; then
     echo -e "  Status: ${GREEN}✅ Running (Docker)${NC}"
-    echo "  URL:    http://localhost:3205"
+    echo "  URL:    http://localhost:3400"
     echo "  Type:   🐳 Docker Container (Production)"
 # Check if running as local service
-elif lsof -i :3205 &> /dev/null; then
+elif lsof -i :3400 &> /dev/null; then
     echo -e "  Status: ${GREEN}✅ Running (Local)${NC}"
-    echo "  URL:    http://localhost:3205"
+    echo "  URL:    http://localhost:3400"
     echo "  Type:   🖥️  Local Service (Development)"
 else
     echo -e "  Status: ${YELLOW}⚠️  Not Running${NC}"
     echo "  Type:   🖥️  Local Service (Development)"
-    echo "  Hint:   cd docs && npm run start -- --port 3205"
+    echo "  Hint:   cd docs && npm run start -- --port 3400"
 fi
 
 echo ""
@@ -100,10 +100,10 @@ echo "╔═══════════════════════�
 echo "║                     Quick Links                             ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
-echo "  📚 Docusaurus:     http://localhost:3205"
-echo "  📡 DocsAPI:        http://localhost:3400"
-echo "  📊 DocsAPI Health: http://localhost:3400/health"
-echo "  📋 OpenAPI Spec:   http://localhost:3400/spec/openapi.yaml"
+echo "  📚 Docusaurus:     http://localhost:3400"
+echo "  📡 DocsAPI:        http://localhost:3401"
+echo "  📊 DocsAPI Health: http://localhost:3401/health"
+echo "  📋 OpenAPI Spec:   http://localhost:3401/spec/openapi.yaml"
 echo "  💾 PgAdmin:        http://localhost:5050 (login required)"
 echo ""
 
@@ -122,5 +122,5 @@ echo "  View logs:"
 echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs -f"
 echo ""
 echo "  Start Docusaurus (DEV):"
-echo "    cd docs && npm run start -- --port 3205"
+echo "    cd docs && npm run start -- --port 3400"
 echo ""

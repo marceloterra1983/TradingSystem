@@ -28,8 +28,8 @@ lastReviewed: '2025-10-27'
 | Service | Port | Type | Status | Access |
 |---------|------|------|--------|--------|
 | **Dashboard** | 3103 | React + Vite | ✅ Running | `http://localhost:3103` |
-| **Docusaurus** | 3205 | Docusaurus v3 | ✅ Running | `http://localhost:3205` |
-| **Documentation API** | 3400 | Express + FlexSearch | ✅ Running | `http://localhost:3400` |
+| **Docusaurus** | 3400 | Docusaurus v3 | ✅ Running | `http://localhost:3400` |
+| **Documentation API** | 3401 | Express + FlexSearch | ✅ Running | `http://localhost:3401` |
 | **TP Capital** | 4005 | Express + Telegraf | ✅ Running | `http://localhost:4005` |
 
 ### ❌ Services Needing Startup
@@ -225,7 +225,7 @@ TradingSystem - Status das APIs
 ================================
 
 Dashboard (3103)         : ✅ Rodando
-Docusaurus (3205)        : ✅ Rodando
+Docusaurus (3400)        : ✅ Rodando
 Workspace API (3200)     : ✅ Rodando  ← Should be green now
 Documentation API (3400) : ✅ Rodando
 TP Capital (4005)        : ✅ Rodando
@@ -270,7 +270,7 @@ Once Workspace API is running:
 
 | Port | Service | Purpose | Status |
 |------|---------|---------|--------|
-| 3205 | Docusaurus v3 | Documentation site | ✅ Running |
+| 3400 | Docusaurus v3 | Documentation site | ✅ Running |
 
 ### Databases
 
@@ -287,7 +287,7 @@ Once Workspace API is running:
 
 **File**: `frontend/dashboard/src/config/api.ts`
 
-**Recent Fix**: Updated docsApiUrl from deprecated 3101 to 3205
+**Recent Fix**: Updated docsApiUrl from deprecated 3101 to 3401
 
 ```typescript
 export const API_CONFIG = {
@@ -298,7 +298,7 @@ export const API_CONFIG = {
   workspaceApi: `${baseUrl}/api/workspace`,        // Port 3200
   tpCapitalApi: `${baseUrl}/api/tp-capital`,       // Port 4005 ✅
   b3Api: `${baseUrl}/api/b3`,                      // Port 3302
-  docsApiUrl: `${baseUrl}/api/documentation-api`,  // Port 3205 (fixed)
+  docsApiUrl: `${baseUrl}/api/documentation-api`,  // Port 3401 (fixed)
 };
 ```
 
@@ -349,7 +349,7 @@ TELEGRAM_API_ID=your_id
 TELEGRAM_API_HASH=your_hash
 
 # CORS
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401
 ```
 
 ---

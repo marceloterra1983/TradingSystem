@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "imports": ["../../.claude/mcp-servers.json"],
+  "imports": ["../../claude/mcp-servers.json"],
   "servers": [
     {
       "ref": "fs-tradingsystem",

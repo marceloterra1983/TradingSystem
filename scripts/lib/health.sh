@@ -93,7 +93,7 @@ DEFAULT_LOCAL_SERVICES=(
     "Dashboard|VITE_PORT|3103|"
     "Status|SERVICE_LAUNCHER_PORT|3500|/health"
     "Documentation API|DOCUMENTATION_API_PORT|3400|/health"
-    "Docusaurus|DOCUSAURUS_PORT|3205|"
+    "Docusaurus|DOCUSAURUS_PORT|3400|"
     "TP Capital|TP_CAPITAL_PORT|4005|/health"
     "Workspace|WORKSPACE_PORT|3200|/health"
     "Firecrawl Proxy|FIRECRAWL_PROXY_PORT|3600|/health"

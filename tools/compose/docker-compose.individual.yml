@@ -3,7 +3,7 @@ name: individual
 services:
   ollama:
     image: "${IMG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
-    container_name: ollama
+    container_name: rag-ollama
     # Enable GPU acceleration (requires NVIDIA Container Toolkit installed)
     gpus: all
     ports:

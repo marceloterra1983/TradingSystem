@@ -11,6 +11,7 @@ export class TimescaleDBClient {
     if (!row) return null;
     return {
       ...row,
+      id: String(row.id), // Convert integer ID to string for frontend compatibility
       tags: Array.isArray(row.tags) ? row.tags : [],
       metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : {},
       updatedAt: row.updatedAt ?? row.createdAt,
@@ -122,8 +123,8 @@ export class TimescaleDBClient {
     try {
       const query = `
         INSERT INTO ${timescaledbConfig.table}
-        (id, title, description, category, priority, status, tags, created_at, updated_at, created_by, updated_by, metadata)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        (title, description, category, priority, status, tags, created_at, updated_at, created_by, updated_by, metadata)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING
           id,
           title,
@@ -140,7 +141,6 @@ export class TimescaleDBClient {
       `;
 
       const values = [
-        item.id,
         item.title,
         item.description,
         item.category,

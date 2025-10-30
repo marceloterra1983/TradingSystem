@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
-import { apiConfig } from '../../config/api';
 import EscopoPageNew from './EscopoPageNew';
 import APIViewerPage from './APIViewerPage';
+import { apiConfig } from '../../config/api';
+import { resolveDocsVersionRoot } from '../../utils/docusaurus';
 
 export function DocusaurusPageNew() {
   const [activeView, setActiveView] = useState<'overview' | 'docs' | 'docsApi'>('docs');
@@ -11,19 +12,20 @@ export function DocusaurusPageNew() {
   const isDocsView = activeView === 'docs';
   const isDocsApiView = activeView === 'docsApi';
 
-  // Use absolute URL for iframe (iframes require absolute URLs for proper loading)
-  // Development: http://localhost:3205 (Docusaurus dev server)
-  // Production: Use the configured docsUrl
-  const iframeSrc = activeView === 'docs'
-    ? (import.meta.env.DEV ? 'http://localhost:3205' : apiConfig.docsUrl)
-    : undefined;
+  const docsVersionRoot = resolveDocsVersionRoot('next', {
+    absolute: true,
+    trailingSlash: true,
+  });
+  const iframeSrc = isDocsView ? docsVersionRoot : undefined;
   const iframeTitle = activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
 
   console.log('[DocusaurusPage] activeView:', activeView);
   console.log('[DocusaurusPage] iframeSrc:', iframeSrc);
   console.log('[DocusaurusPage] DEV mode:', import.meta.env.DEV);
 
-  const handleOpenInNewTab = () => {
+  const handleOpenInNewTab = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (typeof window === 'undefined') {
       return;
     }
@@ -36,14 +38,23 @@ export function DocusaurusPageNew() {
     }
   };
 
+  const handleViewChange = (view: 'overview' | 'docs' | 'docsApi') => {
+    console.log('[DocusaurusPage] Changing view to:', view);
+    setActiveView(view);
+  };
+
   return (
     <div className="h-[calc(100vh-160px)] w-full">
-      <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={isOverview ? 'primary' : 'outline'}
             size="sm"
-            onClick={() => setActiveView('overview')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleViewChange('overview');
+            }}
             disabled={isOverview}
           >
             Overview
@@ -51,7 +62,11 @@ export function DocusaurusPageNew() {
           <Button
             variant={isDocsView ? 'primary' : 'outline'}
             size="sm"
-            onClick={() => setActiveView('docs')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleViewChange('docs');
+            }}
             disabled={isDocsView}
           >
             Docusaurus
@@ -59,7 +74,11 @@ export function DocusaurusPageNew() {
           <Button
             variant={activeView === 'docsApi' ? 'primary' : 'outline'}
             size="sm"
-            onClick={() => setActiveView('docsApi')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleViewChange('docsApi');
+            }}
             disabled={activeView === 'docsApi'}
           >
             DocsAPI

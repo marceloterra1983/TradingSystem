@@ -19,7 +19,7 @@ desktop.ini
 .idea/
 *.iml
 .agent/
-.claude/
+# claude/ - Now visible and tracked (renamed from .claude/)
 .cursor/
 .obsidian/
 .specify/

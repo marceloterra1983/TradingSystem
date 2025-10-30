@@ -83,7 +83,7 @@ function invalidateHealthCheckCache() {
 
 const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
   ? process.env.CORS_ORIGIN
-  : 'http://localhost:3101,http://localhost:3205';
+  : 'http://localhost:3101,http://localhost:3400,http://localhost:3401';
 const corsOrigins = rawCorsOrigin === '*'
   ? undefined
   : rawCorsOrigin.split(',').map((origin) => origin.trim()).filter(Boolean);
@@ -202,7 +202,7 @@ const SERVICE_TARGETS = [
     name: 'DocsAPI',
     description: 'Documentation content service',
     category: 'api',
-    defaultPort: 3205,
+    defaultPort: 3400,
     portEnv: 'SERVICE_LAUNCHER_DOCS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCS_URL',
   }),
@@ -239,10 +239,10 @@ const SERVICE_TARGETS = [
     name: 'Docusaurus',
     description: 'Site oficial de documentação técnica',
     category: 'docs',
-    defaultPort: 3205,
+    defaultPort: 3400,
     portEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_URL',
-    path: '/',
+    path: '/health', // Use health endpoint (returns 200 OK, no redirect)
   }),
   createServiceTarget({
     id: 'prometheus',

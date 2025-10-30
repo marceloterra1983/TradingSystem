@@ -3,13 +3,13 @@ import { buildDocsUrl, normalizeDocsBase } from '../../lib/docsUrl';
 
 describe('docsUrl helpers', () => {
   it('normalizes base urls by trimming whitespace and trailing slashes', () => {
-    expect(normalizeDocsBase(' http://localhost:3205/ ')).toBe('http://localhost:3205');
+    expect(normalizeDocsBase(' http://localhost:3400/ ')).toBe('http://localhost:3400');
     expect(normalizeDocsBase('http://tradingsystem.local/docs///')).toBe('http://tradingsystem.local/docs');
   });
 
   it('builds urls for direct port mode without duplicating segments', () => {
-    expect(buildDocsUrl('tools/ports-services/overview', 'http://localhost:3205')).toBe(
-      'http://localhost:3205/tools/ports-services/overview'
+    expect(buildDocsUrl('tools/ports-services/overview', 'http://localhost:3400')).toBe(
+      'http://localhost:3400/tools/ports-services/overview'
     );
   });
 
@@ -26,9 +26,8 @@ describe('docsUrl helpers', () => {
   });
 
   it('strips markdown extensions before concatenation', () => {
-    expect(buildDocsUrl('/context/backend/guide.md', 'http://localhost:3205')).toBe(
-      'http://localhost:3205/context/backend/guide'
+    expect(buildDocsUrl('/context/backend/guide.md', 'http://localhost:3400')).toBe(
+      'http://localhost:3400/context/backend/guide'
     );
   });
 });
-

@@ -25,14 +25,14 @@ Essential files that should always remain in the project root:
 | **CHANGELOG.md** | 7.8K | Version history and release notes | `/CHANGELOG.md` |
 | **QUICK-START.md** | 3.4K | Quick start guide for developers | `/QUICK-START.md` |
 
-## AI Agent Instructions (/.ai/)
+## AI Agent Instructions (/ai/)
 
 Instructions and guidelines for AI assistants working with this codebase:
 
 | File | Size | Description | Location |
 |------|------|-------------|----------|
-| **AGENTS.md** | 3.1K | Repository guidelines for AI agents | `/.ai/AGENTS.md` |
-| **GEMINI.md** | 4.4K | Gemini-specific instructions | `/.ai/GEMINI.md` |
+| **AGENTS.md** | 3.1K | Repository guidelines for AI agents | `/ai/AGENTS.md` |
+| **GEMINI.md** | 4.4K | Gemini-specific instructions | `/ai/GEMINI.md` |
 
 **Note**: CLAUDE.md in the root is the canonical source - it's kept in root for easy access.
 
@@ -114,7 +114,7 @@ For detailed content structure, see [docs/README.md](../README.md).
 **Objective**: Clean up and organize 19 .md files scattered in project root.
 
 **Actions Taken**:
-1. ✅ Created `.ai/` directory for AI agent instructions (2 files)
+1. ✅ Created `ai/` directory for AI agent instructions (2 files)
 2. ✅ Created `docs/governance/` subdirectories (audits, organization, reviews, planning)
 3. ✅ Moved 10 files to appropriate governance directories
 4. ✅ Deleted 5 redundant Docusaurus review files (info consolidated in final report)
@@ -145,8 +145,8 @@ The following files were deleted because their content was consolidated into `DO
 
 ### For AI Assistants
 - Main instructions: [`/CLAUDE.md`](/CLAUDE.md)
-- Repository guidelines: [`/.ai/AGENTS.md`](/.ai/AGENTS.md)
-- Gemini-specific: [`/.ai/GEMINI.md`](/.ai/GEMINI.md)
+- Repository guidelines: [`/ai/AGENTS.md`](/ai/AGENTS.md)
+- Gemini-specific: [`/ai/GEMINI.md`](/ai/GEMINI.md)
 
 ### For Project Managers
 - Audits: [`/docs/governance/audits/`](/docs/governance/audits/)

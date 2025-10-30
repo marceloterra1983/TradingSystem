@@ -1,0 +1,275 @@
+openapi: 3.1.0
+info:
+  title: TradingSystem Alert Router
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  description: |
+    Webhook service for routing Prometheus alerts to GitHub Issues.
+
+    The Alert Router receives Prometheus Alertmanager webhooks and automatically creates,
+    updates, or closes GitHub Issues based on alert status. It implements intelligent
+    deduplication using alert fingerprints to prevent duplicate issues.
+
+    **Key Features:**
+    - Automatic GitHub Issue creation for firing alerts
+    - Issue closure when alerts are resolved
+    - Alert fingerprinting for deduplication
+    - Severity-based labeling
+    - Alert status tracking via GitHub comments
+    - Lifecycle management (create → update → close)
+
+    **Alert Lifecycle:**
+    1. **Firing:** Alert triggers → Create GitHub Issue with alert details
+    2. **Still Firing:** Same alert fires again → Add comment to existing issue
+    3. **Resolved:** Alert resolves → Comment "Resolved" and close issue
+
+    **Authentication:**
+    - No authentication required for webhook endpoint
+    - GitHub API token configured server-side via `GITHUB_TOKEN`
+    - Repository configured via `GITHUB_OWNER` and `GITHUB_REPO`
+
+    **Configuration:**
+    - Set `GITHUB_TOKEN` to enable GitHub integration
+    - If not configured, alerts are logged but not routed to GitHub
+servers:
+  - url: http://localhost:8080
+    description: Local development
+security: []
+tags:
+  - name: Health
+    description: Service health monitoring
+  - name: Webhooks
+    description: Prometheus alert webhooks
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: |
+        Returns service health status and GitHub integration status.
+
+        **GitHub Status:**
+        - `true`: GitHub integration enabled (token configured)
+        - `false`: GitHub integration disabled (alerts will be logged only)
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  github:
+                    type: boolean
+                    description: GitHub integration enabled
+              examples:
+                enabled:
+                  value:
+                    status: "ok"
+                    github: true
+                disabled:
+                  value:
+                    status: "ok"
+                    github: false
+
+  /github:
+    post:
+      tags: [Webhooks]
+      summary: Prometheus alert webhook
+      description: |
+        Receives Prometheus Alertmanager webhook payloads and routes them to GitHub Issues.
+
+        **Behavior by Alert Status:**
+
+        **Firing Alert:**
+        - New alert → Create GitHub Issue
+        - Existing alert → Add comment "Alert still firing"
+
+        **Resolved Alert:**
+        - Existing issue → Add comment "Resolved" and close issue
+        - No existing issue → Log as resolved (no action)
+
+        **GitHub Issue Format:**
+        - **Title:** `[SEVERITY] Alert summary`
+        - **Labels:** `alert`, `severity:{level}`
+        - **Body:** Alert details in markdown (status, severity, service, fingerprint, description, JSON dump)
+
+        **Fingerprinting:**
+        - Uses `alert.fingerprint` if present
+        - Otherwise: `{service}-{alertname}` (lowercased)
+        - Prevents duplicate issues for same alert
+      requestBody:
+        required: true
+        description: Prometheus Alertmanager webhook payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertmanagerWebhook'
+            example:
+              alerts:
+                - status: "firing"
+                  labels:
+                    alertname: "HighMemoryUsage"
+                    service: "workspace-api"
+                    severity: "warning"
+                  annotations:
+                    summary: "Workspace API memory usage above 80%"
+                    description: "Memory usage is 85% on workspace-api container"
+                    generatorURL: "http://prometheus:9090/graph?g0.expr=..."
+                  fingerprint: "abc123def456"
+                - status: "resolved"
+                  labels:
+                    alertname: "DatabaseDown"
+                    service: "timescaledb"
+                    severity: "critical"
+                  annotations:
+                    summary: "TimescaleDB is down"
+                    description: "Cannot connect to TimescaleDB container"
+                  fingerprint: "def456abc789"
+      responses:
+        '202':
+          description: Alerts accepted and processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: integer
+                    description: Number of alerts processed
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AlertResult'
+              examples:
+                created_and_closed:
+                  value:
+                    processed: 2
+                    results:
+                      - fingerprint: "workspace-api-highmemoryusage"
+                        action: "created"
+                        issue: 42
+                      - fingerprint: "timescaledb-databasedown"
+                        action: "closed"
+                        issue: 38
+                commented:
+                  value:
+                    processed: 1
+                    results:
+                      - fingerprint: "workspace-api-highmemoryusage"
+                        action: "commented"
+                        issue: 42
+                github_disabled:
+                  value:
+                    processed: 1
+                    results:
+                      - fingerprint: "workspace-api-highmemoryusage"
+                        action: "skipped"
+                        reason: "github-disabled"
+        '400':
+          description: Invalid payload (no alerts found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No alerts found in payload"
+
+components:
+  schemas:
+    AlertmanagerWebhook:
+      type: object
+      required:
+        - alerts
+      properties:
+        alerts:
+          type: array
+          description: Array of Prometheus alerts
+          items:
+            $ref: '#/components/schemas/Alert'
+          minItems: 1
+
+    Alert:
+      type: object
+      required:
+        - status
+        - labels
+      properties:
+        status:
+          type: string
+          enum: [firing, resolved]
+          description: Alert status
+        labels:
+          type: object
+          description: Alert labels (alertname, service, severity, etc.)
+          properties:
+            alertname:
+              type: string
+              description: Alert rule name
+            service:
+              type: string
+              description: Service identifier
+            job:
+              type: string
+              description: Job identifier (fallback if service not present)
+            severity:
+              type: string
+              enum: [info, warning, critical]
+              description: Alert severity level
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Alert annotations (summary, description, etc.)
+          properties:
+            summary:
+              type: string
+              description: Short alert summary
+            description:
+              type: string
+              description: Detailed alert description
+            generatorURL:
+              type: string
+              format: uri
+              description: Prometheus expression URL
+          additionalProperties:
+            type: string
+        fingerprint:
+          type: string
+          description: Unique alert identifier (optional, auto-generated if missing)
+        startsAt:
+          type: string
+          format: date-time
+          description: Alert start time
+        endsAt:
+          type: string
+          format: date-time
+          description: Alert end time (for resolved alerts)
+
+    AlertResult:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+          description: Alert fingerprint
+        action:
+          type: string
+          enum: [created, commented, closed, resolved-no-issue, skipped, error]
+          description: Action taken for this alert
+        issue:
+          type: integer
+          description: GitHub issue number (if created/updated/closed)
+        reason:
+          type: string
+          description: Reason for action (e.g., "github-disabled")
+        error:
+          type: string
+          description: Error message (if action is "error")

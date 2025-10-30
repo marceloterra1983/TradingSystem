@@ -12,7 +12,7 @@ import { buildDocsUrl, normalizeDocsBase } from '../../lib/docsUrl';
 /**
  * PRD Loading Strategy:
  * - Legacy: Serve static markdown from /public/docs_legacy/context/shared/product/prd/
- * - docs: Serve rendered markdown pages from the Documentation Hub (port 3205)
+ * - docs: Serve rendered markdown pages from the Documentation Hub (port 3400)
  * - Transition: Feature flag toggles docs first, with automatic fallback to legacy.
  *   This keeps the dashboard resilient while PRDs migrate to docs.
  */

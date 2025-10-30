@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Print a ready-to-paste MCP servers block for user-level config (e.g., ~/.claude.json)
-# It reads .claude/mcp-servers.json from repo root and performs optional env substitution.
+# It reads claude/mcp-servers.json from repo root and performs optional env substitution.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
-TEMPLATE_FILE="$ROOT_DIR/.claude/mcp-servers.json"
+TEMPLATE_FILE="$ROOT_DIR/claude/mcp-servers.json"
 
 if [[ ! -f "$TEMPLATE_FILE" ]]; then
   echo "Template not found: $TEMPLATE_FILE" 1>&2
