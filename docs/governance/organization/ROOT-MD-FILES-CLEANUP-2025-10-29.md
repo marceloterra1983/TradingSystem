@@ -24,8 +24,8 @@ Successfully reorganized 19 .md files scattered in the project root directory, r
 - ✅ Root directory cleaned: 19 → 4 files (79% reduction)
 - ✅ Files organized: 12 files moved to appropriate directories
 - ✅ Redundant files removed: 5 files (26K saved)
-- ✅ New directories created: 5 (.ai/, audits/, organization/, reviews/, planning/)
-- ✅ Index files created: 2 (DOCUMENTATION-INDEX.md, .ai/README.md)
+- ✅ New directories created: 5 (ai/, audits/, organization/, reviews/, planning/)
+- ✅ Index files created: 2 (DOCUMENTATION-INDEX.md, ai/README.md)
 - ✅ Documentation structure: 100% improved
 
 ## Problem Statement
@@ -52,7 +52,7 @@ This created:
 Files were categorized into 7 groups:
 
 1. **Essential Root Files** (4) - Keep in root
-2. **AI Instructions** (2) - Move to .ai/
+2. **AI Instructions** (2) - Move to ai/
 3. **Quality Audits** (3) - Move to docs/governance/audits/
 4. **Organization Reports** (3) - Move to docs/governance/organization/
 5. **Major Reviews** (1) - Move to docs/governance/reviews/
@@ -63,7 +63,7 @@ Files were categorized into 7 groups:
 
 ```
 TradingSystem/
-├── .ai/                           (NEW)
+├── ai/                           (NEW)
 │   ├── README.md
 │   ├── AGENTS.md
 │   └── GEMINI.md
@@ -90,7 +90,7 @@ mkdir -p docs/governance/planning
 #### Moved Files
 ```bash
 # AI Instructions
-mv AGENTS.md GEMINI.md .ai/
+mv AGENTS.md GEMINI.md ai/
 
 # Audits
 mv APPS-DOCS-AUDIT-2025-10-27.md docs/governance/audits/
@@ -126,7 +126,7 @@ Reason: Content was consolidated in `DOCUSAURUS-REVIEW-FINAL-REPORT.md`.
 touch docs/governance/DOCUMENTATION-INDEX.md
 
 # AI directory overview
-touch .ai/README.md
+touch ai/README.md
 
 # Updated governance README with new structure
 # Updated docs/governance/README.md
@@ -168,7 +168,7 @@ ROOT (4 essential files):
 ├── CHANGELOG.md (7.8K)
 └── QUICK-START.md (3.4K)
 
-.ai/ (3 files):
+ai/ (3 files):
 ├── README.md
 ├── AGENTS.md (3.1K)
 └── GEMINI.md (4.4K)
@@ -258,7 +258,7 @@ DELETED (5 redundant files):
 
 **Contents**:
 - Root documentation (README, CLAUDE, CHANGELOG, QUICK-START)
-- AI agent instructions (/.ai/)
+- AI agent instructions (/ai/)
 - Governance documentation (/docs/governance/)
 - Content documentation (/docs/content/)
 - Migration and cleanup history
@@ -266,9 +266,9 @@ DELETED (5 redundant files):
 
 **Size**: ~300 lines
 
-### 2. .ai/README.md
+### 2. ai/README.md
 
-**Purpose**: Explain the .ai/ directory and its files.
+**Purpose**: Explain the ai/ directory and its files.
 
 **Contents**:
 - Directory purpose
@@ -299,7 +299,7 @@ All changes verified:
   - All other files moved or deleted
 
 ✅ AI instructions organized
-  - .ai/ directory created
+  - ai/ directory created
   - AGENTS.md and GEMINI.md moved
   - README.md added for context
 
@@ -316,7 +316,7 @@ All changes verified:
 
 ✅ Index files created
   - DOCUMENTATION-INDEX.md complete
-  - .ai/README.md complete
+  - ai/README.md complete
   - docs/governance/README.md updated
 
 ✅ File permissions preserved

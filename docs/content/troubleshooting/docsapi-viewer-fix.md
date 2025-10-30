@@ -21,7 +21,7 @@ lastReviewed: '2025-10-27'
 
 When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the "DocsAPI" button, the API viewers (Redoc, Swagger, RapiDoc) were not working:
 
-1. **Redoc viewer** - Pointed to wrong port (3205 instead of local viewer)
+1. **Redoc viewer** - Pointed to wrong port (3400 instead of local viewer)
 2. **Select API button** - Port references were outdated
 3. **Missing Redoc HTML** - Only Swagger and RapiDoc viewers existed
 
@@ -36,7 +36,7 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 **Features**:
 
 - Loads Redoc from CDN (`https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js`)
-- Accepts spec URL via query parameter (`?url=http://localhost:3205/specs/documentation-api.openapi.yaml`)
+- Accepts spec URL via query parameter (`?url=http://localhost:3400/specs/documentation-api.openapi.yaml`)
 - Dark theme matching Dashboard design
 - Same pattern as existing Swagger/RapiDoc viewers
 
@@ -54,7 +54,7 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
   <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const specUrl = urlParams.get('url') || 'http://localhost:3205/specs/documentation-api.openapi.yaml';
+    const specUrl = urlParams.get('url') || 'http://localhost:3400/specs/documentation-api.openapi.yaml';
     Redoc.init(specUrl, { theme: { ... } }, document.getElementById('redoc-container'));
   </script>
 </body>
@@ -74,12 +74,12 @@ When accessing the Dashboard at `http://localhost:3103/#/docs` and clicking the 
 ```typescript
 // BEFORE
 case 'redoc':
-  url = `http://localhost:3205/api/${selectedApi.id}`;
+  url = `http://localhost:3401/api/${selectedApi.id}`;
   break;
 
 // AFTER
 case 'redoc':
-  url = `/viewers/redoc.html?url=${encodeURIComponent('http://localhost:3205/specs/' + selectedApi.id + '.openapi.yaml')}`;
+  url = `/viewers/redoc.html?url=${encodeURIComponent('http://localhost:3400/specs/' + selectedApi.id + '.openapi.yaml')}`;
   break;
 ```
 
@@ -91,7 +91,7 @@ case 'redoc':
   id: 'documentation-api',
   name: 'Documentation API',
   port: '3400',  // ❌ Wrong - this is NGINX port
-  specUrl: 'http://localhost:3205/specs/documentation-api.openapi.yaml',
+  specUrl: 'http://localhost:3400/specs/documentation-api.openapi.yaml',
 }
 
 // AFTER
@@ -99,7 +99,7 @@ case 'redoc':
   id: 'documentation-api',
   name: 'Documentation API',
   port: '3401',  // ✅ Correct - DocsAPI container port
-  specUrl: 'http://localhost:3205/specs/documentation-api.openapi.yaml',
+  specUrl: 'http://localhost:3400/specs/documentation-api.openapi.yaml',
 }
 ```
 
@@ -131,7 +131,7 @@ $ ls -lah frontend/dashboard/public/viewers/
 ### ✅ Spec files accessible
 
 ```bash
-$ curl -I http://localhost:3205/specs/documentation-api.openapi.yaml
+$ curl -I http://localhost:3400/specs/documentation-api.openapi.yaml
 HTTP/1.1 200 OK
 Content-Type: text/yaml
 ```
@@ -173,19 +173,19 @@ Content-Type: text/html;charset=utf-8
 **Redoc viewer for Documentation API**:
 
 ```
-http://localhost:3103/viewers/redoc.html?url=http://localhost:3205/specs/documentation-api.openapi.yaml
+http://localhost:3103/viewers/redoc.html?url=http://localhost:3400/specs/documentation-api.openapi.yaml
 ```
 
 **Swagger UI for Workspace API**:
 
 ```
-http://localhost:3103/viewers/swagger.html?url=http://localhost:3205/specs/workspace.openapi.yaml
+http://localhost:3103/viewers/swagger.html?url=http://localhost:3400/specs/workspace.openapi.yaml
 ```
 
 **RapiDoc for Documentation API**:
 
 ```
-http://localhost:3103/viewers/rapidoc.html?url=http://localhost:3205/specs/documentation-api.openapi.yaml
+http://localhost:3103/viewers/rapidoc.html?url=http://localhost:3400/specs/documentation-api.openapi.yaml
 ```
 
 ---
@@ -208,7 +208,7 @@ http://localhost:3103/viewers/rapidoc.html?url=http://localhost:3205/specs/docum
 │  │  │  Iframe Container                          │  │  │
 │  │  │  ┌──────────────────────────────────────┐  │  │  │
 │  │  │  │  /viewers/redoc.html?url=...         │  │  │  │
-│  │  │  │  (loads spec from http://localhost:3205/specs/*.yaml) │  │  │  │
+│  │  │  │  (loads spec from http://localhost:3400/specs/*.yaml) │  │  │  │
 │  │  │  └──────────────────────────────────────┘  │  │  │
 │  │  └────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────┘  │
@@ -217,15 +217,15 @@ http://localhost:3103/viewers/rapidoc.html?url=http://localhost:3205/specs/docum
 │  - /viewers/redoc.html                                 │
 │  - /viewers/swagger.html                               │
 │  - /viewers/rapidoc.html                               │
-│  - Specs via Docusaurus (http://localhost:3205/specs/*.yaml)   │
+│  - Specs via Docusaurus (http://localhost:3400/specs/*.yaml)   │
 └────────────────────────────────────────────────────────┘
 ```
 
 **Key Points**:
 
-- ✅ **No CORS issues** - Viewers usam URLs absolutas do Docs (3205)
-- ✅ **Separation of concerns** - Viewers (3103) e specs (3205) independentes
-- ✅ **Sem conflito de portas** - Dashboard (3103), Docs (3205)
+- ✅ **No CORS issues** - Viewers usam URLs absolutas do Docs (3400)
+- ✅ **Separation of concerns** - Viewers (3103) e specs (3400) independentes
+- ✅ **Sem conflito de portas** - Dashboard (3103), Docs (3400)
 - ✅ **Carregamento estável** - Specs são servidas pelo Docusaurus (build estático)
 
 ---

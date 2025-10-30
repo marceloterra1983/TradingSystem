@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG_DIR="$ROOT_DIR/logs"
 PID_FILE="$LOG_DIR/docusaurus-serve.pid"
 LOG_FILE="$LOG_DIR/docusaurus-serve.log"
-PORT="${PORT:-3205}"
+PORT="${PORT:-3400}"
 
 mkdir -p "$LOG_DIR"
 
@@ -58,4 +58,3 @@ done
 
 echo "[docs:restart] Timed out waiting for Docusaurus at $URL" >&2
 exit 1
-

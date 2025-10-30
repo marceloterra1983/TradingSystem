@@ -114,24 +114,31 @@ router.get('/search-hybrid', validate, async (req, res) => {
       if (s > prev) baseLex.set(base, s);
     }
 
-    // 2) Semantic via Qdrant
-    const semRaw = await semanticService.search(q, Number(limit) * 4);
-    const semanticItems = [];
-    for (const item of semRaw) {
-      const p = item.payload || {};
-      // Apply filters on semantic payload, best-effort
-      if (!applyFilters(p, filters)) continue;
-      semanticItems.push({
-        id: item.id,
-        score: typeof item.score === 'number' ? item.score : 0,
-        path: p.path,
-        url: p.url || (p.path ? `/docs/${String(p.path).replace(/\.mdx?$/, '')}` : undefined),
-        title: p.title || p.path,
-        tags: p.tags || [],
-        domain: p.domain || undefined,
-        type: p.type || undefined,
-        snippet: p.content || '',
-      });
+    // 2) Semantic via Qdrant (with fallback to lexical-only if Qdrant/Ollama unavailable)
+    let semRaw = [];
+    let semanticItems = [];
+    try {
+      semRaw = await semanticService.search(q, Number(limit) * 4);
+      for (const item of semRaw) {
+        const p = item.payload || {};
+        // Apply filters on semantic payload, best-effort
+        if (!applyFilters(p, filters)) continue;
+        semanticItems.push({
+          id: item.id,
+          score: typeof item.score === 'number' ? item.score : 0,
+          path: p.path,
+          url: p.url || (p.path ? `/docs/${String(p.path).replace(/\.mdx?$/, '')}` : undefined),
+          title: p.title || p.path,
+          tags: p.tags || [],
+          domain: p.domain || undefined,
+          type: p.type || undefined,
+          snippet: p.content || '',
+        });
+      }
+    } catch (semError) {
+      // If semantic search fails (Qdrant/Ollama unavailable), continue with lexical-only results
+      console.warn('[HybridSearch] Semantic search failed, falling back to lexical-only:', semError.message);
+      semanticItems = [];
     }
 
     // 3) Merge + rerank

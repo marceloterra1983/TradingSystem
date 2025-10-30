@@ -18,8 +18,8 @@
 
 **Infrastructure Readiness**:
 - [ ] `npm run docs:build` succeeds for docs
-- [ ] docs serves on port 3205 (`npm run docs:dev`)
-- [ ] Nginx reverse proxy configured (`tradingsystem.local/docs → localhost:3205`)
+- [ ] docs serves on port 3400 (`npm run docs:dev`)
+- [ ] Nginx reverse proxy configured (`tradingsystem.local/docs → localhost:3400`)
 - [ ] Health endpoints responding (`http://localhost:3400/health`)
 - [ ] Monitoring dashboards updated (Grafana, Prometheus)
 
@@ -31,10 +31,10 @@
 - [ ] Source code references updated (CORS, URLs, configs)
 - [ ] Docker configurations updated (compose files, volumes)
 - [ ] Reference validation commands executed successfully
-- [ ] Frontend components updated (`apiConfig.docsUrl → port 3205`)
+- [ ] Frontend components updated (`apiConfig.docsUrl → port 3400`)
 - [ ] Backend README references docs
 - [ ] CI/CD workflows updated (validate docs)
-- [ ] CORS configurations updated (allow port 3205)
+- [ ] CORS configurations updated (allow ports 3400/3401)
 - [ ] Environment variables updated (`.env`, `.env.example`)
 - [ ] Cutover execution checklist reviewed (see `docs/migration/CUTOVER-EXECUTION-CHECKLIST.md`)
 - [ ] Rollback procedure validated (see `docs/migration/ROLLBACK-PROCEDURE.md`)
@@ -122,7 +122,8 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
    # Validate docs references are correct
    grep -r "docs" --exclude-dir=node_modules | grep -v "#"
-   grep -r "\b3205\b" --exclude-dir=node_modules | grep -v "#"
+   grep -r "\b3400\b" --exclude-dir=node_modules | grep -v "#"
+   grep -r "\b3401\b" --exclude-dir=node_modules | grep -v "#"
    ```
 
 **Success Criteria**:
@@ -188,27 +189,27 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
    lsof -ti:3004 | xargs kill -9
    ```
 
-2. **Start docs** (port 3205)
+2. **Start docs** (port 3400)
 
    ```bash
    cd docs
    npm run docs:build
-   npm run docs:serve -- --port 3205 --host 0.0.0.0
+   npm run docs:serve -- --port 3400 --host 0.0.0.0
    ```
 
 3. **Verify docs Health**
 
    ```bash
-   curl http://localhost:3205
-   curl http://localhost:3205/apps/workspace/overview
-   curl http://localhost:3205/api/order-manager
+   curl http://localhost:3400
+   curl http://localhost:3400/apps/workspace/overview
+   curl http://localhost:3400/api/order-manager
    ```
 
 4. **Update Nginx Configuration**
 
    ```nginx
    location /docs {
-       proxy_pass http://localhost:3205;  # Changed from 3004
+       proxy_pass http://localhost:3400;  # Changed from 3004
        proxy_set_header Host $host;
        proxy_set_header X-Real-IP $remote_addr;
    }
@@ -244,7 +245,7 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
    ```bash
    # Update .env
-   # CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+   # CORS_ORIGIN=http://localhost:3103,http://localhost:3400
    bash scripts/startup/start-all.sh
    ```
 
@@ -292,15 +293,15 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
    export default function LegacyRedirect() {
      useEffect(() => {
-       window.location.href = 'http://localhost:3205';
+       window.location.href = 'http://localhost:3400';
      }, []);
 
      return (
        <div style={{ padding: '2rem', textAlign: 'center' }}>
          <h1>⚠️ Documentation Moved</h1>
          <p>This documentation system is deprecated.</p>
-         <p>Redirecting to <a href="http://localhost:3205">docs</a>...</p>
-         <p>If not redirected, <a href="http://localhost:3205">click here</a>.</p>
+         <p>Redirecting to <a href="http://localhost:3400">docs</a>...</p>
+         <p>If not redirected, <a href="http://localhost:3400">click here</a>.</p>
        </div>
      );
    }
@@ -326,17 +327,17 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 1. **Smoke Tests**
 
    ```bash
-   curl http://localhost:3205
-   curl http://localhost:3205/apps/workspace/overview
-   curl http://localhost:3205/api/order-manager
-   curl http://localhost:3205/frontend/design-system/tokens
-   curl http://localhost:3205/database/schema
-   curl http://localhost:3205/tools/ports-services/overview
-   curl http://localhost:3205/prd/products/trading-app/prd-overview
-   curl http://localhost:3205/sdd/api/order-manager/v1/spec
-   curl http://localhost:3205/diagrams/diagrams
-   curl http://localhost:3205/faq
-   curl http://localhost:3205/changelog
+   curl http://localhost:3400
+   curl http://localhost:3400/apps/workspace/overview
+   curl http://localhost:3400/api/order-manager
+   curl http://localhost:3400/frontend/design-system/tokens
+   curl http://localhost:3400/database/schema
+   curl http://localhost:3400/tools/ports-services/overview
+   curl http://localhost:3400/prd/products/trading-app/prd-overview
+   curl http://localhost:3400/sdd/api/order-manager/v1/spec
+   curl http://localhost:3400/diagrams/diagrams
+   curl http://localhost:3400/faq
+   curl http://localhost:3400/changelog
    ```
 
 2. **Link Validation**
@@ -357,7 +358,7 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 5. **Monitor Metrics**
 
    ```bash
-   curl http://localhost:3205/metrics
+   curl http://localhost:3400/metrics
    ```
 
 ## Post-Cut-over Actions
@@ -376,7 +377,7 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
 **Week 4** (Dec 15):
 - [ ] Archive legacy `docs/` directory
-- [ ] Remove legacy Docusaurus build (`docs/docusaurus/`)
+- [ ] Remove legacy Docusaurus build directory from obsolete installations
 - [ ] Update remaining legacy references
 - [ ] Send “Transition Complete” announcement
 
@@ -389,13 +390,13 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 1. **Stop docs**
 
    ```bash
-   pkill -f "docusaurus.*3205"
+   pkill -f "docusaurus.*3400"
    ```
 
 2. **Restart Legacy Docusaurus**
 
    ```bash
-   cd docs/docusaurus
+   cd docs
    npm run start -- --port 3004 --host 0.0.0.0
    ```
 
@@ -427,7 +428,7 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
    Critical issues detected. Rolled back to legacy docs.
    - Legacy docs: http://localhost:3004 (active)
-   - docs: http://localhost:3205 (preview only)
+   - docs: http://localhost:3400 (preview only)
 
    New cut-over date will be announced after issues resolved.
    ```
@@ -456,7 +457,7 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 ## Success Criteria
 
 **Cut-over Successful When**:
-- [ ] docs accessible at `http://localhost:3205` and `http://tradingsystem.local/docs`
+- [ ] docs accessible at `http://localhost:3400` and `http://tradingsystem.local/docs`
 - [ ] All pages load without errors
 - [ ] Search functionality works
 - [ ] Navigation and breadcrumbs functional

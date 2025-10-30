@@ -537,7 +537,7 @@ Unified reverse proxy routing all TradingSystem services under a single domain, 
 | TP Capital API | `http://tradingsystem.local/api/tp-capital` | `http://localhost:3200` |
 | Documentation API | `http://tradingsystem.local/api/docs` | `http://localhost:3400` |
 | Launcher | `http://tradingsystem.local/api/launcher` | `http://localhost:3500` |
-| Docusaurus | `http://tradingsystem.local/docs` | `http://localhost:3205` |
+| Docusaurus | `http://tradingsystem.local/docs` | `http://localhost:3400` |
 
 **Quick Setup (Linux/WSL2):**
 ```bash

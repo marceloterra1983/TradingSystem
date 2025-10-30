@@ -104,7 +104,7 @@ curl http://localhost:3400/health
 DOCUMENTATION_API_PORT=3400
 DOCUMENTATION_DB_STRATEGY=postgres
 DOCUMENTATION_DATABASE_URL=postgresql://app_documentation:password@localhost:5444/frontend_apps?schema=documentation
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # docs (was 3004 for legacy docs)
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401  # docs (was 3004 for legacy docs)
 ```
 
 **Arquivos:**
@@ -238,7 +238,7 @@ FIRECRAWL_PROXY_BASE_URL=http://localhost:3002
 FIRECRAWL_PROXY_TIMEOUT=30000
 FIRECRAWL_PROXY_RATE_LIMIT_WINDOW_MS=60000
 FIRECRAWL_PROXY_RATE_LIMIT_MAX=100
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205  # docs (was 3004 for legacy docs)
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401  # docs (was 3004 for legacy docs)
 ```
 
 **Exemplo de Request:**
@@ -916,21 +916,21 @@ lsof -i :3600  # Firecrawl Proxy
 ### Configuração
 - **Service Manifest:** [`config/services-manifest.json`](../config/services-manifest.json)
 - **Environment Rules:** [`config/ENV-CONFIGURATION-RULES.md`](../config/ENV-CONFIGURATION-RULES.md)
-- **Environment Guide:** [Environment Variables Reference](http://localhost:3205/tools/security-config/env) (docs)
+- **Environment Guide:** [Environment Variables Reference](http://localhost:3400/tools/security-config/env) (docs)
 
 ### Data Layer
-- **Database Overview:** [Database Platform](http://localhost:3205/database/overview) (docs)
-- **Database Schema:** [Schema Reference](http://localhost:3205/database/schema) (docs)
-- **Database Operations:** [Retention & Backup](http://localhost:3205/database/retention-backup) (docs)
+- **Database Overview:** [Database Platform](http://localhost:3400/database/overview) (docs)
+- **Database Schema:** [Schema Reference](http://localhost:3400/database/schema) (docs)
+- **Database Operations:** [Retention & Backup](http://localhost:3400/database/retention-backup) (docs)
 - **Legacy Guides:** See `docs_legacy/context/backend/data/` (archived after docs launch)
 
 ### APIs Específicas
-- **Order Manager API:** [Order Manager](http://localhost:3205/api/order-manager) (docs)
-- **Data Capture API:** [Data Capture](http://localhost:3205/api/data-capture) (docs)
-- **Workspace API:** [Workspace App](http://localhost:3205/apps/workspace/overview) (docs)
+- **Order Manager API:** [Order Manager](http://localhost:3400/api/order-manager) (docs)
+- **Data Capture API:** [Data Capture](http://localhost:3400/api/data-capture) (docs)
+- **Workspace API:** [Workspace App](http://localhost:3400/apps/workspace/overview) (docs)
 
 ### Guias
-- **Documentation Hub:** [TradingSystem Documentation](http://localhost:3205) (docs)
+- **Documentation Hub:** [TradingSystem Documentation](http://localhost:3400) (docs)
 - **Legacy Docs:** See `docs_legacy/README.md` (archived - use docs for new content)
 
 ---

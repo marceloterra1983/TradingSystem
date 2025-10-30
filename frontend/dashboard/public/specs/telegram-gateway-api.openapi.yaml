@@ -1,0 +1,954 @@
+openapi: 3.1.0
+info:
+  title: TradingSystem Telegram Gateway API
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  description: |
+    REST API for accessing Telegram messages, channels, and gateway status with TimescaleDB persistence.
+
+    The Telegram Gateway API serves as the query interface for messages captured by the MTProto Gateway (Port 4006).
+    It provides comprehensive CRUD operations for messages and channels, authentication management,
+    and monitoring capabilities.
+
+    **Key Features:**
+    - Message retrieval with advanced filtering (channel, date range, status, search)
+    - Channel CRUD operations
+    - Telegram authentication management (interactive phone/code flow)
+    - Gateway metrics and health monitoring
+    - Failure queue management
+    - Message reprocessing capabilities
+    - Prometheus metrics export
+
+    **Architecture:**
+    - MTProto Gateway (Port 4006) → Captures messages from Telegram
+    - TimescaleDB → Stores messages and channels
+    - This API (Port 4010) → Query interface for downstream services
+
+    **Rate Limiting:**
+    - Global rate limit: 300 requests per minute per IP
+    - Rate limit headers included in all responses
+
+    **Authentication:**
+    - Optional token-based authentication (disabled by default in development)
+    - Set `TELEGRAM_GATEWAY_REQUIRE_TOKEN=true` to enable
+    - Provide token via `X-Gateway-Token`, `X-API-Token`, or `Authorization: Bearer` headers
+servers:
+  - url: http://localhost:4010
+    description: Local development
+security: []
+tags:
+  - name: Health
+    description: Service health and monitoring
+  - name: Messages
+    description: Message retrieval and management
+  - name: Channels
+    description: Channel CRUD operations
+  - name: Authentication
+    description: Telegram authentication flow
+  - name: Gateway
+    description: Gateway monitoring and management
+  - name: Sync
+    description: Message synchronization
+
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Service information
+      description: Returns basic service information and available endpoints.
+      responses:
+        '200':
+          description: Service info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  service:
+                    type: string
+                  endpoints:
+                    type: array
+                    items:
+                      type: string
+              example:
+                success: true
+                service: "telegram-gateway-api"
+                endpoints: ["/health", "/metrics", "/api/messages", "/api/channels", "/api/telegram-gateway/sync-messages"]
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status and TimescaleDB connectivity.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, unhealthy]
+                  service:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+              example:
+                status: "healthy"
+                service: "telegram-gateway-api"
+                timestamp: "2025-10-27T12:00:00.000Z"
+        '503':
+          description: Database connection failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /metrics:
+    get:
+      tags: [Health]
+      summary: Prometheus metrics
+      description: |
+        Returns process and application metrics in Prometheus text format.
+
+        **Metrics:**
+        - `telegram_gateway_api_http_requests_total` - HTTP request count
+        - `telegram_gateway_api_http_request_duration_seconds` - Request duration
+        - Node.js default metrics (CPU, memory, event loop)
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api/messages:
+    get:
+      tags: [Messages]
+      summary: List messages
+      description: |
+        Query messages with optional filters.
+
+        **Filters:**
+        - Channel ID, message ID
+        - Date range (from/to)
+        - Status (pending, processed, failed, deleted)
+        - Source (telegram, forward)
+        - Text search (case-insensitive)
+        - Include deleted messages
+
+        **Pagination:**
+        - Default limit: 50
+        - Max limit: 1000
+        - Use offset for pagination
+      parameters:
+        - name: channelId
+          in: query
+          schema:
+            type: string
+          description: Filter by Telegram channel ID
+          example: "-1001234567890"
+        - name: messageId
+          in: query
+          schema:
+            type: string
+          description: Filter by message ID
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processed, failed, deleted]
+          description: Filter by processing status
+        - name: source
+          in: query
+          schema:
+            type: string
+          description: Filter by source (comma-separated for multiple)
+          example: "telegram,forward"
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start date filter (ISO 8601)
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End date filter (ISO 8601)
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Text search in message content
+        - name: includeDeleted
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Include soft-deleted messages
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, oldest]
+            default: newest
+          description: Sort order
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 50
+          description: Max messages to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Skip N messages (pagination)
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /api/messages/{id}:
+    get:
+      tags: [Messages]
+      summary: Get message by ID
+      description: Retrieve a single message by its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Message unique identifier (UUID)
+      responses:
+        '200':
+          description: Message found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Message'
+        '404':
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Messages]
+      summary: Soft delete message
+      description: |
+        Marks a message as deleted (soft delete).
+
+        **Note:** This does not remove the message from the database, only marks it as deleted.
+        Use `includeDeleted=true` query parameter to retrieve deleted messages.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Message unique identifier (UUID)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for deletion
+              example:
+                reason: "Spam message"
+      responses:
+        '200':
+          description: Message deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Message'
+        '404':
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/messages/{id}/reprocess:
+    post:
+      tags: [Messages]
+      summary: Request message reprocessing
+      description: |
+        Marks a message for reprocessing by downstream services.
+
+        **Use Case:** Failed parsing, incorrect data extraction, manual review needed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Message unique identifier (UUID)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestedBy:
+                  type: string
+                  description: User or system requesting reprocessing
+                  default: "dashboard"
+              example:
+                requestedBy: "admin-user"
+      responses:
+        '200':
+          description: Reprocess request registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Message'
+                  message:
+                    type: string
+        '404':
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/channels:
+    get:
+      tags: [Channels]
+      summary: List channels
+      description: Returns all configured Telegram channels with message statistics.
+      responses:
+        '200':
+          description: Channels retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Channel'
+
+    post:
+      tags: [Channels]
+      summary: Create channel
+      description: |
+        Create a new Telegram channel configuration.
+
+        **Channel ID Format:** Must start with `-100` (Telegram supergroup/channel format).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - channelId
+              properties:
+                channelId:
+                  type: string
+                  description: Telegram channel ID (must start with -100)
+                  example: "-1001234567890"
+                label:
+                  type: string
+                  description: Human-readable channel name
+                  example: "TP Capital Sinais Premium"
+                description:
+                  type: string
+                  description: Channel description
+                isActive:
+                  type: boolean
+                  description: Whether channel is active
+                  default: true
+      responses:
+        '201':
+          description: Channel created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Channel'
+        '400':
+          description: Invalid channel ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Channel already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/channels/{id}:
+    put:
+      tags: [Channels]
+      summary: Update channel
+      description: Update channel configuration (label, description, active status).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Channel unique identifier (UUID)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                description:
+                  type: string
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Channel updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Channel'
+        '404':
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Channels]
+      summary: Delete channel
+      description: |
+        Delete channel configuration.
+
+        **Note:** This does not delete messages from this channel, only removes the channel config.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Channel unique identifier (UUID)
+      responses:
+        '200':
+          description: Channel deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '404':
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/telegram-gateway/auth/status:
+    get:
+      tags: [Authentication]
+      summary: Get authentication status
+      description: |
+        Returns the current authentication status of the Telegram Gateway.
+
+        **States:**
+        - `idle`: No authentication in progress
+        - `waitingForPhone`: Waiting for phone number
+        - `waitingForCode`: Waiting for verification code
+        - `waitingForPassword`: Waiting for 2FA password
+        - `authenticated`: Successfully authenticated
+        - `failed`: Authentication failed
+      responses:
+        '200':
+          description: Authentication status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/AuthStatus'
+
+  /api/telegram-gateway/auth/start:
+    post:
+      tags: [Authentication]
+      summary: Start authentication
+      description: |
+        Initiates Telegram authentication flow.
+
+        **Flow:**
+        1. Call this endpoint to start
+        2. Poll `/auth/status` to check state
+        3. Submit phone number via `/auth/input` when state is `waitingForPhone`
+        4. Submit verification code via `/auth/input` when state is `waitingForCode`
+        5. Submit 2FA password via `/auth/input` when state is `waitingForPassword` (if required)
+      responses:
+        '200':
+          description: Authentication started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/AuthStatus'
+        '409':
+          description: Authentication already in progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/telegram-gateway/auth/input:
+    post:
+      tags: [Authentication]
+      summary: Submit authentication input
+      description: |
+        Submit phone number, verification code, or 2FA password during authentication flow.
+
+        **Value Format:**
+        - Phone: International format with + (e.g., +5511987654321)
+        - Code: 5-digit code from Telegram
+        - Password: Your 2FA password (if enabled)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+              properties:
+                value:
+                  type: string
+                  description: Phone number, code, or password
+              example:
+                value: "+5511987654321"
+      responses:
+        '200':
+          description: Input submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/AuthStatus'
+        '400':
+          description: Missing value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: No authentication process running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/telegram-gateway/auth/cancel:
+    post:
+      tags: [Authentication]
+      summary: Cancel authentication
+      description: Cancels ongoing authentication process.
+      responses:
+        '200':
+          description: Authentication cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/AuthStatus'
+        '409':
+          description: No authentication process running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/telegram-gateway/overview:
+    get:
+      tags: [Gateway]
+      summary: Gateway overview
+      description: |
+        Returns comprehensive gateway status including:
+        - Total messages count
+        - Messages by status (pending, processed, failed)
+        - Active channels count
+        - Recent messages
+      responses:
+        '200':
+          description: Gateway overview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GatewayOverview'
+
+  /api/telegram-gateway/metrics:
+    get:
+      tags: [Gateway]
+      summary: Gateway metrics
+      description: |
+        Returns gateway performance metrics:
+        - Message ingestion rate
+        - Processing success/failure rates
+        - Average processing time
+      responses:
+        '200':
+          description: Gateway metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/telegram-gateway/session:
+    get:
+      tags: [Gateway]
+      summary: Gateway session info
+      description: Returns Telegram session information (phone number, username, connection status).
+      responses:
+        '200':
+          description: Session info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/telegram-gateway/queue:
+    get:
+      tags: [Gateway]
+      summary: Get failure queue
+      description: |
+        Returns messages in the failure queue (messages that failed processing).
+
+        **Use Case:** Monitor and manually review failed messages.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+          description: Max messages to return
+      responses:
+        '200':
+          description: Failure queue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/telegram-gateway/messages/summary:
+    get:
+      tags: [Gateway]
+      summary: Messages summary
+      description: |
+        Returns aggregated message statistics:
+        - Total messages
+        - Messages by status
+        - Messages by channel
+        - Messages by day (last 30 days)
+      responses:
+        '200':
+          description: Messages summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/telegram-gateway/actions/reload:
+    post:
+      tags: [Gateway]
+      summary: Reload caches
+      description: |
+        Invalidates all in-memory caches.
+
+        **Use Case:** Force refresh after database changes made directly in DB.
+      responses:
+        '200':
+          description: Caches invalidated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/telegram-gateway/sync-messages:
+    post:
+      tags: [Sync]
+      summary: Sync messages from Telegram
+      description: |
+        Triggers message synchronization from Telegram channels.
+
+        **Note:** This proxies the request to the MTProto Gateway (Port 4006).
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      totalMessagesSynced:
+                        type: integer
+        '503':
+          description: MTProto Gateway unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique message identifier
+        channelId:
+          type: string
+          description: Telegram channel ID
+        messageId:
+          type: string
+          description: Telegram message ID
+        date:
+          type: string
+          format: date-time
+          description: Message date from Telegram
+        text:
+          type: string
+          description: Message text content
+        fromId:
+          type: string
+          description: Sender user ID
+        photos:
+          type: array
+          items:
+            type: string
+          description: Photo URLs
+        status:
+          type: string
+          enum: [pending, processed, failed, deleted]
+          description: Processing status
+        source:
+          type: string
+          enum: [telegram, forward]
+          description: Message source
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+
+    Channel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        channelId:
+          type: string
+          description: Telegram channel ID
+        label:
+          type: string
+          description: Human-readable name
+        description:
+          type: string
+        isActive:
+          type: boolean
+        messageCount:
+          type: integer
+          description: Total messages from this channel
+        lastMessageAt:
+          anyOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AuthStatus:
+      type: object
+      properties:
+        state:
+          type: string
+          enum: [idle, waitingForPhone, waitingForCode, waitingForPassword, authenticated, failed]
+        message:
+          type: string
+        error:
+          anyOf:
+            - type: string
+            - type: "null"
+
+    GatewayOverview:
+      type: object
+      properties:
+        totalMessages:
+          type: integer
+        messagesByStatus:
+          type: object
+          properties:
+            pending:
+              type: integer
+            processed:
+              type: integer
+            failed:
+              type: integer
+        activeChannels:
+          type: integer
+        recentMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        hasMore:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string

@@ -83,7 +83,7 @@ RETRY_DELAYS=[1,2,4]
 
 ## CORS
 ```bash
-CORS_ORIGINS=http://localhost:3103,http://localhost:3205
+CORS_ORIGINS=http://localhost:3103,http://localhost:3400,http://localhost:3401
 ```
 
 ## Monitoring
@@ -98,4 +98,3 @@ HEALTH_CHECK_TIMEOUT=5
 2. Update passwords and API keys
 3. Ensure PostgreSQL and QuestDB services are running
 4. Restart LangGraph container: `docker compose -f infrastructure/compose/docker-compose.infra.yml restart langgraph`
-

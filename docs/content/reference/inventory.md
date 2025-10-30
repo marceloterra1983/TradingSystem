@@ -158,7 +158,7 @@ lastReviewed: '2025-10-27'
 | Container | Imagem | Porta | Status | Propósito |
 |-----------|---------|-------|--------|-----------|
 | **docs-api** | nginx:latest | 3400 | ✅ Up 6h (healthy) | Documentation API (FlexSearch) |
-| **docs-api-viewer** | nginx:alpine | 3101 | ⚠️ Up 6h (unhealthy) | API viewer (DEPRECATED - use 3205) |
+| **docs-api-viewer** | nginx:alpine | 3101 | ⚠️ Up 6h (unhealthy) | API viewer (DEPRECATED - use 3400) |
 | **firecrawl-proxy** | img-firecrawl-proxy | 3600 | ✅ Up 6h (healthy) | Firecrawl proxy service |
 
 **URLs Documentation**:
@@ -167,7 +167,7 @@ lastReviewed: '2025-10-27'
 - API Viewer (OLD): `http://localhost:3101` ⚠️ DEPRECATED
 - Firecrawl Proxy: `http://localhost:3600`
 
-**IMPORTANTE**: `docs-api-viewer` (3101) está **DEPRECATED**. Usar novo API Viewer no Dashboard (3103/#/docs → DocsAPI) ou Docusaurus (3205/api/*).
+**IMPORTANTE**: `docs-api-viewer` (3101) está **DEPRECATED**. Usar novo API Viewer no Dashboard (3103/#/docs → DocsAPI) ou Docusaurus (3400/api/*).
 
 ---
 
@@ -227,7 +227,7 @@ Os serviços Workspace API e TP Capital API agora rodam como containers Docker (
 | Serviço | Porta | Tecnologia | Propósito | Como Iniciar |
 |---------|-------|------------|-----------|--------------|
 | **Dashboard** | 3103 | React + Vite | Frontend principal (dev) | `cd frontend/dashboard && npm run dev` |
-| **Docusaurus** | 3205 | Docusaurus v3 | Documentation site (dev) | `cd docs/docusaurus && npm run start -- --port 3205` |
+| **Docusaurus** | 3400 | Docusaurus v3 | Documentation site (dev) | `cd docs && npm run start -- --port 3400` |
 
 **Nota**: Dashboard e Docusaurus são mantidos locais em **desenvolvimento** para hot-reload. Em produção, serão containerizados.
 
@@ -274,7 +274,7 @@ Os serviços Workspace API e TP Capital API agora rodam como containers Docker (
 | 3101 | API Viewer (OLD) | Container | ⚠️ DEPRECATED |
 | **3103** | **Dashboard** | **Local Node.js (dev)** | ❌ **Not Running** |
 | **3200** | **Workspace API** | **Container** | ✅ **Running (Healthy)** |
-| **3205** | **Docusaurus** | **Local Node.js (dev)** | ❌ **Not Running** |
+| **3400** | **Docusaurus** | **Local Node.js (dev)** | ❌ **Not Running** |
 | 3400 | Documentation API | Container | ✅ Running |
 | 3600 | Firecrawl Proxy | Container | ✅ Running |
 
@@ -378,10 +378,10 @@ cd frontend/dashboard
 npm install
 npm run dev
 
-# 3. Iniciar Docusaurus (Port 3205) - Dev apenas
+# 3. Iniciar Docusaurus (Port 3400) - Dev apenas
 cd docs/docusaurus
 npm install
-npm run start -- --port 3205
+npm run start -- --port 3400
 
 # 4. Verificar tudo rodando
 bash scripts/check-apis.sh
@@ -403,8 +403,8 @@ docker ps --format "{{.Names}}" | wc -l
 # Deve retornar: 29
 
 # Serviços locais (dev apenas)
-lsof -i -P -n | grep LISTEN | grep -E ":(3103|3205)"
-# Deve mostrar: 3103 (Dashboard), 3205 (Docusaurus) - apenas em dev
+lsof -i -P -n | grep LISTEN | grep -E ":(3103|3400)"
+# Deve mostrar: 3103 (Dashboard), 3400 (Docusaurus) - apenas em dev
 ```
 
 ---
@@ -472,7 +472,7 @@ curl http://localhost:3500/api/health/full | jq
 docker ps --format "table {{.Names}}\t{{.Status}}"
 
 # Serviços locais (dev apenas)
-lsof -i -P -n | grep LISTEN | grep -E ":(3103|3205)"
+lsof -i -P -n | grep LISTEN | grep -E ":(3103|3400)"
 
 # Teste de conectividade - Application Services (containerizados)
 curl -s http://localhost:3200/api/items        # Workspace API (container)

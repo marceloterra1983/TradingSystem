@@ -38,7 +38,7 @@
 
 **Docusaurus Build**:
 ```
-[SUCCESS] Docusaurus website is running at: http://localhost:3205/
+[SUCCESS] Docusaurus website is running at: http://localhost:3400/
 [webpackbar] ✔ Client: Compiled successfully in 4.19s
 ```
 

@@ -128,7 +128,7 @@ check_local_services() {
         "telegram-gateway:4006"
         "telegram-gateway-api:4010"
         "dashboard:3103"
-        "docusaurus:3205"
+        "docusaurus:3400"
         "status:3500"
     )
 
@@ -137,10 +137,10 @@ check_local_services() {
 
     for service_def in "${services[@]}"; do
         IFS=':' read -r name port <<< "$service_def"
-        local pid=$(lsof -ti :"$port" 2>/dev/null || echo "")
+        local pid=$(lsof -ti :"$port" 2>/dev/null | head -n1 || echo "")
 
         if [ -n "$pid" ]; then
-            ((running++))
+            ((++running))
             if [ "$JSON_OUTPUT" = false ]; then
                 echo -e "  ${GREEN}✓${NC} $(printf '%-20s' "$name") ${GREEN}RUNNING${NC}  PID: $pid  Port: $port"
 
@@ -183,8 +183,8 @@ check_docker_containers() {
 
     if [ "$USE_LIBS" = true ]; then
         # Use advanced health checking from health.sh
-        check_all_docker_stacks
-        generate_health_summary --format text
+        check_all_docker_stacks || true
+        generate_health_summary --format text || true
     else
         # Fallback: simple check
         local container_count=$(docker ps -q 2>/dev/null | wc -l || echo "0")
@@ -254,7 +254,7 @@ show_summary() {
     echo -e "  Telegram Gateway:    ${CYAN}http://localhost:4006${NC}"
     echo -e "  Gateway API:         ${CYAN}http://localhost:4010${NC}"
     echo -e "  Dashboard:           ${CYAN}http://localhost:3103${NC}"
-    echo -e "  Documentation:       ${CYAN}http://localhost:3205${NC}"
+    echo -e "  Documentation:       ${CYAN}http://localhost:3400${NC}"
     echo -e "  Status API:          ${CYAN}http://localhost:3500${NC}"
     echo -e "  TP Capital API:      ${CYAN}http://localhost:4005${NC}"
     echo -e "  Workspace API:       ${CYAN}http://localhost:3200${NC}"

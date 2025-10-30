@@ -10,7 +10,7 @@ export const config = {
   },
   vectors: {
     qdrantUrl: process.env.QDRANT_URL || 'http://localhost:6333',
-    qdrantCollection: process.env.QDRANT_COLLECTION || 'docs_index',
+    qdrantCollection: process.env.QDRANT_COLLECTION || 'documentation',
     ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
     ollamaEmbeddingModel: process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
     // Max chunk size (approx tokens), overlap; used by indexer script
@@ -18,7 +18,7 @@ export const config = {
     chunkOverlap: Number(process.env.DOCS_CHUNK_OVERLAP || 120)
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3103,http://localhost:3205',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3103,http://localhost:3400,http://localhost:3401',
     disable: process.env.DISABLE_CORS === 'true'
   },
   rateLimit: {

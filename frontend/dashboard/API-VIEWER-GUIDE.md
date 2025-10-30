@@ -11,7 +11,7 @@ O botão **DocsAPI** no TradingSystem Dashboard agora abre um **visualizador ded
 
 ### 1. **Seleção de API**
 Escolha entre as APIs disponíveis:
-- **Documentation API** (Port 3400) - Gerenciamento de documentação, ideias, specs, busca e arquivos
+- **Documentation API** (Port 3401) - Gerenciamento de documentação, ideias, specs, busca e arquivos
 - **Workspace API** (Port 3200) - CRUD de workspace com Kanban workflow
 
 ### 2. **Múltiplos Visualizadores**
@@ -192,7 +192,7 @@ https://mrin9.github.io/RapiDoc/examples/example1.html?spec-url=http://localhost
 ```
 ┌─────────────────────────────────────────────┐
 │ [Documentation API] [Workspace API]         │
-│  Port 3400          Port 3200               │
+│  Port 3401          Port 3200               │
 └─────────────────────────────────────────────┘
 ```
 
@@ -246,7 +246,7 @@ Dashboard (3103)
   └─> Knowledge Section
       └─> Docs Page
           ├─> Overview Tab (Escopo)
-          ├─> Docusaurus Tab (Port 3205)
+          ├─> Docusaurus Tab (Port 3400)
           └─> DocsAPI Tab ✅ API VIEWER
               ├─> Select API
               │   ├─> Documentation API
@@ -311,7 +311,7 @@ npm run sync-specs
 2. Verificar console do browser para erros
 3. Testar URL da spec diretamente:
    ```
-   http://localhost:3205/specs/documentation-api.openapi.yaml
+   http://localhost:3400/specs/documentation-api.openapi.yaml
    ```
 
 4. Limpar cache do browser (Ctrl+Shift+R)

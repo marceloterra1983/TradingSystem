@@ -72,11 +72,24 @@ app.add_middleware(
 # Initialize metrics
 init_metrics(app)
 
-# Initialize Qdrant clients (sync + async)
+# Initialize Qdrant clients (sync + async) with error handling
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
-qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-async_qdrant_client = AsyncQdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+try:
+    qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    async_qdrant_client = AsyncQdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    # Try a simple operation to verify connectivity
+    qdrant_client.get_collections()
+except Exception as e:
+    logger.error(
+        "Failed to initialize Qdrant clients. Qdrant may be unavailable at %s:%s. Error: %s",
+        QDRANT_HOST,
+        QDRANT_PORT,
+        str(e),
+    )
+    logger.warning("Service will start but queries will fail until Qdrant is available.")
+    qdrant_client = None
+    async_qdrant_client = None
  
 LEGACY_COLLECTION_PREFERENCE = ["documentation", "docs_index"]
 
@@ -85,6 +98,8 @@ def _get_collection_info(name: str) -> Tuple[bool, int]:
     """
     Inspect a Qdrant collection and return (exists, count).
     """
+    if qdrant_client is None:
+        return False, 0
     try:
         qdrant_client.get_collection(name)
     except Exception as exc:  # pragma: no cover - diagnostics only
@@ -92,11 +107,12 @@ def _get_collection_info(name: str) -> Tuple[bool, int]:
         return False, 0
 
     count_value = 0
-    try:
-        count_response = qdrant_client.count(collection_name=name, exact=True)
-        count_value = getattr(count_response, "count", None) or 0
-    except Exception as exc:  # pragma: no cover - diagnostics only
-        logger.debug("Failed to count collection %s: %s", name, exc)
+    if qdrant_client is not None:
+        try:
+            count_response = qdrant_client.count(collection_name=name, exact=True)
+            count_value = getattr(count_response, "count", None) or 0
+        except Exception as exc:  # pragma: no cover - diagnostics only
+            logger.debug("Failed to count collection %s: %s", name, exc)
     return True, int(count_value)
 
 
@@ -137,22 +153,49 @@ def _select_active_collection(configured: str) -> Tuple[str, Tuple[bool, int]]:
 
 # Initialize vector store (with alias fallback detection)
 CONFIGURED_QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "documentation")
-ACTIVE_QDRANT_COLLECTION, ACTIVE_COLLECTION_INFO = _select_active_collection(CONFIGURED_QDRANT_COLLECTION)
-if ACTIVE_QDRANT_COLLECTION != CONFIGURED_QDRANT_COLLECTION:
-    os.environ["QDRANT_COLLECTION"] = ACTIVE_QDRANT_COLLECTION
+# Only try to select collection if Qdrant client is available
+if qdrant_client is not None:
+    ACTIVE_QDRANT_COLLECTION, ACTIVE_COLLECTION_INFO = _select_active_collection(CONFIGURED_QDRANT_COLLECTION)
+    if ACTIVE_QDRANT_COLLECTION != CONFIGURED_QDRANT_COLLECTION:
+        os.environ["QDRANT_COLLECTION"] = ACTIVE_QDRANT_COLLECTION
+else:
+    # Use configured collection as fallback when Qdrant is unavailable
+    ACTIVE_QDRANT_COLLECTION = CONFIGURED_QDRANT_COLLECTION
+    ACTIVE_COLLECTION_INFO = (False, 0)
+    logger.warning("Qdrant unavailable - using configured collection name without verification: %s", ACTIVE_QDRANT_COLLECTION)
 
-vector_store = QdrantVectorStore(
-    client=qdrant_client,
-    aclient=async_qdrant_client,
-    collection_name=ACTIVE_QDRANT_COLLECTION,
-)
-app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
-logger.info(
-    "Vector store initialised. active_collection=%s (configured=%s, vectors=%s)",
-    ACTIVE_QDRANT_COLLECTION,
-    CONFIGURED_QDRANT_COLLECTION,
-    ACTIVE_COLLECTION_INFO[1],
-)
+# Initialize vector store with error handling for connection issues
+if qdrant_client is not None and async_qdrant_client is not None:
+    try:
+        vector_store = QdrantVectorStore(
+            client=qdrant_client,
+            aclient=async_qdrant_client,
+            collection_name=ACTIVE_QDRANT_COLLECTION,
+        )
+        app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
+        logger.info(
+            "Vector store initialised. active_collection=%s (configured=%s, vectors=%s)",
+            ACTIVE_QDRANT_COLLECTION,
+            CONFIGURED_QDRANT_COLLECTION,
+            ACTIVE_COLLECTION_INFO[1],
+        )
+    except Exception as e:
+        logger.error(
+            "Failed to initialize vector store. Qdrant may be unavailable. Error: %s",
+            str(e),
+        )
+        logger.warning(
+            "Service will start but queries may fail until Qdrant is available. "
+            "Check QDRANT_HOST=%s, QDRANT_PORT=%s",
+            QDRANT_HOST,
+            QDRANT_PORT,
+        )
+        vector_store = None
+        app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
+else:
+    logger.warning("Qdrant clients not initialized. Vector store will not be available.")
+    vector_store = None
+    app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
 # Configure embeddings with Ollama (local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Support both OLLAMA_EMBED_MODEL (service-local) and OLLAMA_EMBEDDING_MODEL (repo-wide)
@@ -177,7 +220,11 @@ else:
     LLM_ENABLED = False
 
 # Build index from existing vector store
-index = VectorStoreIndex.from_vector_store(vector_store)
+if vector_store is not None:
+    index = VectorStoreIndex.from_vector_store(vector_store)
+else:
+    logger.warning("Index not initialized - vector_store is None. Queries will fail until Qdrant is available.")
+    index = None
 
 logger.info(
     "GPU policy: forced=%s, options=%s, max_concurrency=%s, cooldown=%s",
@@ -225,7 +272,12 @@ async def query_documents(
     """
     Execute a natural language query against the document collection.
     """
-    if not LLM_ENABLED or index is None:
+    if index is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
+        )
+    if not LLM_ENABLED:
         raise HTTPException(
             status_code=503,
             detail="LLM não configurado. Defina OLLAMA_MODEL para habilitar respostas geradas."
@@ -330,6 +382,12 @@ async def semantic_search(
             response.headers["X-GPU-Max-Concurrency"] = str(GPU_MAX_CONCURRENCY)
             return cached_response
 
+        if index is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
+            )
+
         async with acquire_gpu_slot("search") as gpu_usage:
             query_engine = index.as_query_engine(
                 similarity_top_k=max_results,
@@ -374,6 +432,13 @@ async def health_check():
     Health check endpoint.
     """
     try:
+        if qdrant_client is None:
+            return {
+                "status": "degraded",
+                "message": "Qdrant client not initialized",
+                "collection": ACTIVE_QDRANT_COLLECTION,
+                "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
+            }
         # Check Qdrant connection
         qdrant_client.get_collections()
         exists, current_count = _get_collection_info(ACTIVE_QDRANT_COLLECTION)
@@ -387,10 +452,12 @@ async def health_check():
         }
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        raise HTTPException(
-            status_code=503,
-            detail="Service unhealthy"
-        )
+        return {
+            "status": "degraded",
+            "error": str(e),
+            "collection": ACTIVE_QDRANT_COLLECTION,
+            "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
+        }
 
 if __name__ == "__main__":
     import uvicorn

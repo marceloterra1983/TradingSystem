@@ -83,7 +83,7 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: List[str] = [
         "http://localhost:3103",  # Dashboard
-        "http://localhost:3205",  # Docusaurus
+        "http://localhost:3400",  # Docusaurus
         "https://smith.langchain.com",  # LangSmith Studio
         "http://localhost:8112",  # Self (dev environment)
     ]

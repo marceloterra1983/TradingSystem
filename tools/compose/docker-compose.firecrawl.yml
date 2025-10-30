@@ -3,8 +3,8 @@ name: firecrawl
 services:
   # Firecrawl Proxy - TradingSystem Gateway (Port 3600) - Full functionality
   firecrawl-proxy:
-    image: "${IMG_FIRECRAWL_PROXY:-img-firecrawl-proxy}:${IMG_VERSION:-latest}"
-    container_name: firecrawl-proxy
+    image: "${IMG_TOOLS_FIRECRAWL_PROXY:-img-firecrawl-proxy}:${IMG_VERSION:-latest}"
+    container_name: tools-firecrawl-proxy
     platform: linux/amd64
     build:
       context: ../../backend/api/firecrawl-proxy
@@ -37,7 +37,7 @@ services:
   # Firecrawl Core API (Port 3002) - Internal only
   firecrawl-api:
     image: "${IMG_FIRECRAWL_API:-nginx}:${IMG_VERSION:-alpine}"
-    container_name: firecrawl-api
+    container_name: tools-firecrawl-api
     ports:
       - "${FIRECRAWL_API_PORT:-3002}:80"
     restart: unless-stopped
@@ -48,7 +48,7 @@ services:
 
   firecrawl-postgres:
     image: "${IMG_FIRECRAWL_POSTGRES:-postgres}:${IMG_VERSION:-15}"
-    container_name: firecrawl-postgres
+    container_name: tools-firecrawl-postgres
     ports:
       - "${FIRECRAWL_POSTGRES_PORT:-5436}:5432"
     environment:
@@ -63,7 +63,7 @@ services:
 
   firecrawl-redis:
     image: "${IMG_FIRECRAWL_REDIS:-redis}:${IMG_VERSION:-latest}"
-    container_name: firecrawl-redis
+    container_name: tools-firecrawl-redis
     ports:
       - "${FIRECRAWL_REDIS_PORT:-6379}:6379"
     restart: unless-stopped
@@ -74,7 +74,7 @@ services:
 
   firecrawl-playwright:
     image: "${IMG_FIRECRAWL_PLAYWRIGHT:-nginx}:${IMG_VERSION:-alpine}"
-    container_name: firecrawl-playwright
+    container_name: tools-firecrawl-playwright
     ports:
       - "${FIRECRAWL_PLAYWRIGHT_PORT:-3003}:80"
     restart: unless-stopped

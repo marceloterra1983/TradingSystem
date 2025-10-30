@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     agno_model_name: str = Field("gpt-4o", alias="AGNO_MODEL_NAME")
     openai_api_key: str | None = Field(None, alias="OPENAI_API_KEY")
     cors_origins: List[str] | str = Field(
-        default_factory=lambda: ["http://localhost:3103", "http://localhost:3205"],
+        default_factory=lambda: ["http://localhost:3103", "http://localhost:3400", "http://localhost:3401"],
         alias="AGNO_CORS_ORIGINS",
     )
     enable_metrics: bool = Field(True, alias="AGNO_ENABLE_METRICS")

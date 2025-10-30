@@ -56,9 +56,9 @@ Service Launcher follows a simple yet effective architecture for service orchest
         │                            │
         │  Workspace      (3200)     │
         │  TP Capital     (4005)     │
-        │  Docs API       (3400)     │
+        │  Docs API       (3401)     │
         │  Dashboard      (3103)     │
-        │  Docusaurus     (3205)     │
+        │  Docusaurus     (3400)     │
         │  Prometheus     (9090)     │
         │  Grafana        (3000)     │
         │  QuestDB        (9000)     │
@@ -347,7 +347,7 @@ SERVICE_LAUNCHER_DASHBOARD_PORT=3103
 **Security**:
 
 ```bash
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX=200
 ```

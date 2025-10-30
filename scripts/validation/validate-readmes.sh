@@ -214,7 +214,8 @@ check_claude_consistency() {
     # Check if CLAUDE.md has updated port information
     if grep -q "3103" "$claude_md" && \
        grep -q "3200" "$claude_md" && \
-       grep -q "3205" "$claude_md"; then
+       grep -q "3400" "$claude_md" && \
+       grep -q "3401" "$claude_md"; then
         log_success "CLAUDE.md contains current port information"
     else
         log_warning "CLAUDE.md may have outdated port information"

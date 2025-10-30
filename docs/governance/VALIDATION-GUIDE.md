@@ -330,7 +330,7 @@ bash docs/scripts/validate-technical-references.sh
 - Run with `--strict` to fail on warnings
 - Override adoption thresholds when needed (e.g. staging hardening):
   ```bash
-  EXPECTED_DOCS_V2_MIN=75 EXPECTED_3205_MIN=30 bash docs/scripts/validate-technical-references.sh --strict
+  EXPECTED_DOCS_V2_MIN=75 EXPECTED_DOCS_PORT_MIN=30 EXPECTED_DOCS_API_PORT_MIN=20 bash docs/scripts/validate-technical-references.sh --strict
   ```
 
 **Expected Output**:
@@ -338,9 +338,10 @@ bash docs/scripts/validate-technical-references.sh
 [SUCCESS] No legacy docs/docusaurus references detected (outside excluded paths)
 [SUCCESS] No legacy port 3004 references detected (outside excluded paths)
 [SUCCESS] Found 82 docs references (threshold 50)
-[SUCCESS] Found 45 references to port 3205 (threshold 20)
-[SUCCESS] CORS_ORIGIN definitions reference port 3205
-[SUCCESS] services-manifest.json references docs on port 3205
+[SUCCESS] Found 58 references to port 3400 (threshold 20)
+[SUCCESS] Found 41 references to port 3401 (threshold 20)
+[SUCCESS] CORS_ORIGIN definitions reference ports 3400 and 3401
+[SUCCESS] services-manifest.json references docs on port 3400
 [SUCCESS] package.json validate-docs script references docs/content
 [WARNING] .env.example still references legacy documentation or port
 
@@ -353,11 +354,12 @@ Result: PASSED with warnings
 - [ ] No matches for `docs/docusaurus` (outside archived directories)
 - [ ] No matches for port `3004` (outside archived directories)
 - [ ] `docs` references meet the configured minimum (`EXPECTED_DOCS_V2_MIN`, default 50)
-- [ ] Port `3205` references meet the configured minimum (`EXPECTED_3205_MIN`, default 20)
-- [ ] `CORS_ORIGIN` values updated to 3205 (no residual 3004)
-- [ ] `config/services-manifest.json` `docusaurus` entry resolves to `docs` / `3205` via jq check
+- [ ] Port `3400` references meet the configured minimum (`EXPECTED_DOCS_PORT_MIN`, default 20)
+- [ ] Port `3401` references meet the configured minimum (`EXPECTED_DOCS_API_PORT_MIN`, default 10)
+- [ ] `CORS_ORIGIN` values updated to 3400/3401 (no residual 3004)
+- [ ] `config/services-manifest.json` `docusaurus` entry resolves to `docs` / `3400` via jq check
 - [ ] `package.json` `validate-docs` script updated to `docs/content`
-- [ ] `.env.example` guidance updated to docs and port 3205
+- [ ] `.env.example` guidance updated to docs and port 3400
 - [ ] `docs/governance/**` and `docs/migration/**` contain only approved migration narratives
 
 **If Fails**:
@@ -370,14 +372,14 @@ Result: PASSED with warnings
 **Troubleshooting**:
 - Legacy references found: update files directly and rerun script
 - CORS not updated: verify backend configs (`apps/status/server.js`, `backend/api/documentation-api/src/config/appConfig.js`)
-- services-manifest.json failing: ensure `path` is `docs` and `port` is `3205`; the script now reports the actual values returned by jq
+- services-manifest.json failing: ensure `path` is `docs` and `port` is `3400`; the script now reports the actual values returned by jq
 - package.json failing: update `validate-docs` script target to `docs/content`
 - Missing tooling: install `jq` and either ripgrep (`rg`) or GNU grep; the script falls back to a portable find+grep path when only BSD grep is available (macOS default)
 
 **CI/CD Integration**:
 ```yaml
 - name: Validate Technical References
-  run: EXPECTED_DOCS_V2_MIN=75 EXPECTED_3205_MIN=30 bash docs/scripts/validate-technical-references.sh --strict
+  run: EXPECTED_DOCS_V2_MIN=75 EXPECTED_DOCS_PORT_MIN=30 EXPECTED_DOCS_API_PORT_MIN=20 bash docs/scripts/validate-technical-references.sh --strict
 ```
 
 **Expected Duration**: <1 minute
@@ -527,7 +529,7 @@ grep "version-<VERSION>" build/sitemap.xml || grep "<VERSION>" build/sitemap.xml
 npm run docs:dev
 
 # Manual checks (browser):
-# 1. Navigate to http://localhost:3205
+# 1. Navigate to http://localhost:3400
 # 2. Version dropdown visible in navbar (top right)
 # 3. Dropdown shows new version with correct label
 # 4. Click version selector → Select new version
@@ -736,7 +738,7 @@ python scripts/docs/validate-frontmatter.py \
 ### Technical References Validation
 - Legacy references detected: 0 (`docs/docusaurus`, port `3004`)
 - docs references detected: 87
-- Port 3205 references detected: 34
+- Port 3400 references detected: 58
 - CORS configurations updated: Yes
 - services-manifest.json updated: Yes
 - package.json validate-docs script updated: Yes

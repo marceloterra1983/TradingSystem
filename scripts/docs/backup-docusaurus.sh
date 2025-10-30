@@ -691,7 +691,7 @@ Run the development server to verify:
 npm run dev
 ```
 
-The server should start on `http://localhost:3205`.
+The server should start on `http://localhost:3400`.
 
 **Verification checklist**:
 - [ ] Server starts without errors
@@ -752,13 +752,13 @@ npm install
 ### Issue: Dev server fails to start
 
 **Symptoms**:
-- "Port 3205 already in use"
+- "Port 3400 already in use"
 - "EADDRINUSE"
 
 **Solution**:
 ```bash
-# Find process using port 3205
-lsof -i :3205
+# Find process using port 3400
+lsof -i :3400
 
 # Kill the process
 kill -9 <PID>

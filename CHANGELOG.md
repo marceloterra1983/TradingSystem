@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   Changes to existing functionality go here
+-   Documentation Hub now serves via port `3400` (NGINX container) and DocsAPI via port `3401`, replacing the interim 3205/3400 mapping
 
 ### Deprecated
 
@@ -87,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   ✅ Updated `README.md` to reflect single documentation system (Docusaurus v3)
 -   ✅ Updated `AGENTS.md` to clarify `docs/` structure
 -   ✅ Updated `CLAUDE.md` to remove all legacy references (`docs/context/`, `docs/docusaurus`, port 3004)
--   ✅ Removed legacy `docs_v2` references (system renamed to `docs/`)
+-   ✅ Removed legacy documentation references (system renamed to `docs/`)
 -   ✅ Updated all links to point to new structure (`docs/content/`)
 
 **Technical Changes**:
@@ -122,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 
 ⚠️ **Port Change**: Documentation Hub moved from port 3004 to 3205
--   Update bookmarks: `http://localhost:3004` → `http://localhost:3205`
+-   Update bookmarks from the legacy docs port to the new documentation container address
 -   Update CORS configs if using custom `.env` (add port 3205)
 
 ⚠️ **Path Change**: Documentation content moved from `docs/context/` to `docs/content/`

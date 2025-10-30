@@ -133,3 +133,4 @@ echo ""
 echo "Para reverter:"
 echo "  find . -name 'package.json.backup' -exec sh -c 'mv \"\$1\" \"\${1%.backup}\"' _ {} \\;"
 
+

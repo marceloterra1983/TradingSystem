@@ -99,14 +99,14 @@ claude
 
 ### Features
 
--   ✅ **Custom Commands** - Project-specific shortcuts (`.claude/commands/`)
+-   ✅ **Custom Commands** - Project-specific shortcuts (`claude/commands/`)
 -   ✅ **MCP Servers** - 7 integrated servers (filesystem, git, fetch, memory, etc.)
 -   ✅ **Terminal Integration** - Works seamlessly in Cursor's terminal (WSL2)
 -   ✅ **Project Configuration** - Automatic loading of rules and settings
 
 ### Documentation
 
-**Complete CLI guide**: [`.claude/CLAUDE-CLI.md`](.claude/CLAUDE-CLI.md)
+**Complete CLI guide**: [`claude/CLAUDE-CLI.md`](claude/CLAUDE-CLI.md)
 
 **Custom commands**:
 
@@ -120,8 +120,8 @@ claude
 
 -   `~/.claude.json` - Global config (API key, MCP servers)
 -   `.claude-plugin` - Project settings
--   `.claude/commands/` - Custom commands
--   `.claude/mcp-servers.json` - MCP configuration
+-   `claude/commands/` - Custom commands
+-   `claude/mcp-servers.json` - MCP configuration
 
 ## Permissions
 
@@ -557,6 +557,43 @@ curl -I http://localhost:3500/api/health/full | grep X-Cache-Status
 ```
 
 ## 📝 Development Guidelines
+
+### ⚠️ Execução de Comandos Privilegiados (sudo)
+
+**REGRA: Quando necessário executar um comando `sudo` que requer senha do usuário:**
+
+1. **NUNCA execute diretamente** comandos que solicitam senha interativa no terminal
+2. **SEMPRE crie um script** contendo os comandos necessários
+3. **Informe claramente ao usuário**:
+   - Qual script foi criado e sua localização
+   - Por que o comando precisa de privilégios elevados
+   - Quais comandos serão executados (mostrar conteúdo do script)
+   - Instruções para executar: `sudo bash caminho/do/script.sh`
+4. **AGUARDE confirmação do usuário** antes de continuar com próximas etapas
+5. **Marque como concluído** após confirmação do usuário
+
+**Exemplo de comunicação:**
+
+```
+Criei o script /home/marce/Projetos/TradingSystem/scripts/setup-permissions.sh
+que precisa ser executado com privilégios de administrador.
+
+O script irá:
+- Modificar permissões do diretório /var/log/trading
+- Adicionar seu usuário ao grupo 'docker'
+
+Por favor, execute:
+sudo bash /home/marce/Projetos/TradingSystem/scripts/setup-permissions.sh
+
+Aguardando sua confirmação após a execução...
+```
+
+**Scripts de manutenção/setup devem ser salvos em**:
+- `scripts/setup/` - Scripts de configuração inicial
+- `scripts/maintenance/` - Scripts de manutenção do sistema
+- `scripts/docker/` - Scripts relacionados ao Docker
+
+---
 
 ### ⚠️ CRITICAL: Environment Variables Configuration
 

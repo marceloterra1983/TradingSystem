@@ -4,6 +4,7 @@ import { ButtonWithDropdown } from '../ui/button-with-dropdown';
 import { Button } from '../ui/button';
 import { apiConfig } from '../../config/api';
 import { useStartContainer } from '../../hooks/useStartContainer';
+import { useContainerStatus } from '../../hooks/useContainerStatus';
 
 type DatabaseViewKey = 'questdbConsole' | 'pgAdmin' | 'pgWeb' | 'adminer';
 type ContainerName = 'questdb' | 'pgadmin' | 'pgweb' | 'adminer';
@@ -123,6 +124,12 @@ export function DatabasePageNew() {
   const containerName = viewToContainer[activeView];
   const hasIframeError = iframeErrors[activeView];
 
+  // Hook for checking container status
+  const { isRunning: isContainerRunning, isLoading: isStatusLoading, checkStatus } = useContainerStatus(
+    containerName,
+    iframeUrl
+  );
+
   // Hook for starting containers
   const { mutate: startContainer, isPending: isStarting } = useStartContainer();
 
@@ -151,14 +158,15 @@ export function DatabasePageNew() {
       onSuccess: () => {
         // Clear error state and reload iframe after successful start
         setIframeErrors((prev) => ({ ...prev, [activeView]: false }));
-        // Give container a moment to initialize before reloading iframe
+        // Recheck status after a delay
         setTimeout(() => {
+          checkStatus();
           // Force iframe reload by changing key
           setEndpointUrls((prev) => ({ ...prev }));
-        }, 2000);
+        }, 3000);
       },
     });
-  }, [containerName, startContainer, activeView]);
+  }, [containerName, startContainer, activeView, checkStatus]);
 
   const sandbox = viewDefinition.sandbox ?? defaultSandbox;
   const allow = viewDefinition.allow ?? defaultAllow;
@@ -193,7 +201,7 @@ export function DatabasePageNew() {
             })}
           </div>
           <div className="flex gap-2">
-            {hasIframeError && containerName && (
+            {containerName && !isStatusLoading && !isContainerRunning && (
               <Button
                 variant="default"
                 size="sm"
@@ -213,6 +221,19 @@ export function DatabasePageNew() {
                 )}
               </Button>
             )}
+            {hasIframeError && containerName && isContainerRunning && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  setIframeErrors((prev) => ({ ...prev, [activeView]: false }));
+                  // Force iframe reload
+                  setEndpointUrls((prev) => ({ ...prev }));
+                }}
+              >
+                Recarregar
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -225,7 +246,35 @@ export function DatabasePageNew() {
           </div>
         </div>
       </div>
-      {iframeUrl ? (
+      {!iframeUrl ? (
+        <div className="flex h-[calc(100%-40px)] w-full items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          Nenhum endpoint configurado para esta ferramenta.
+        </div>
+      ) : containerName && !isStatusLoading && !isContainerRunning ? (
+        <div className="flex h-[calc(100%-40px)] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            O container {viewDefinition.label} não está rodando.
+          </p>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleStartContainer}
+            disabled={isStarting}
+          >
+            {isStarting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Iniciando...
+              </>
+            ) : (
+              <>
+                <Play className="mr-2 h-4 w-4" />
+                Iniciar Container
+              </>
+            )}
+          </Button>
+        </div>
+      ) : (
         <iframe
           key={`${activeView}-${endpointUrls[activeView]}`}
           src={iframeUrl}
@@ -236,10 +285,6 @@ export function DatabasePageNew() {
           onLoad={handleIframeLoad}
           onError={handleIframeError}
         />
-      ) : (
-        <div className="flex h-[calc(100%-40px)] w-full items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-          Nenhum endpoint configurado para esta ferramenta.
-        </div>
       )}
     </div>
   );

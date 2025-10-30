@@ -317,7 +317,7 @@ TradingSystem/
 │   ├── Dockerfile.prod                # Para produção
 │   ├── nginx.conf
 │   └── .dockerignore
-├── docs/docusaurus/
+├── docs/
 │   ├── Dockerfile.prod
 │   ├── nginx.conf
 │   └── .dockerignore

@@ -7,9 +7,9 @@ Este arquivo é a fonte de dados para geração automática das tabelas de porta
 | Serviço | Container | URL/Porta | Descrição |
 |---------|-----------|-----------|-----------|
 | Dashboard | - (npm dev server) | http://localhost:3103 | Interface principal do TradingSystem |
-| Documentation API | - (npm dev server) | http://localhost:3400 | API de documentação (Express + FlexSearch) |
-| Documentation Hub (docs) | - (npm dev server) | http://localhost:3205 | Hub de documentação (Docusaurus v3 — primário) |
-| Documentação (Docusaurus v2 - Legacy) | docs-docusaurus | http://localhost:3004 | Hub de documentação legado (desativação em andamento) |
+| Documentation API | - (npm dev server) | http://localhost:3401 | API de documentação (Express + FlexSearch) |
+| Documentation Hub (docs) | - (npm dev server) | http://localhost:3400 | Hub de documentação (Docusaurus v3 — primário) |
+| Documentação (Docusaurus v2 - Legacy) | docs-docusaurus | (retired) | Hub de documentação legado (desativação em andamento) |
 | API Viewer | docs-api-viewer | http://localhost:3101 | Visualização de OpenAPI/AsyncAPI |
 | Library API | - (npm dev server) | http://localhost:3100 | Workspace/ideias |
 | TP Capital | - (npm dev server) | http://localhost:3200 | Ingestão de sinais Telegram |

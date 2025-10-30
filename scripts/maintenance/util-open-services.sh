@@ -21,7 +21,7 @@ section "TradingSystem - Opening Services"
 # Service URLs
 declare -A SERVICE_URLS=(
     ["Dashboard"]="http://localhost:3103"
-    ["Documentation"]="http://localhost:3205"
+    ["Documentation"]="http://localhost:3400"
     ["Workspace"]="http://localhost:3100"
     ["TP-Capital"]="http://localhost:3200"
     ["QuestDB Console"]="http://localhost:9000"
@@ -68,4 +68,3 @@ echo ""
 log_info "💡 DICA: Se algum serviço não abrir automaticamente,"
 log_info "copie as URLs acima e acesse diretamente no browser."
 echo ""
-
