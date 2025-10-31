@@ -162,24 +162,25 @@ The containerized TP Capital SHALL provide structured logging and metrics for mo
 
 The containerized TP Capital SHALL correctly manage TimescaleDB dependency during startup and runtime.
 
-#### Scenario: Docker Compose depends_on configuration
+#### Scenario: Stack database iniciado separadamente
 
-- **GIVEN** Docker Compose file includes `depends_on: timescaledb: condition: service_healthy`
-- **WHEN** developer runs `docker compose up -d tp-capital`
-- **THEN** Docker Compose waits for TimescaleDB container to be healthy before starting TP Capital
-- **AND** if TimescaleDB health check fails, TP Capital container does not start
-- **AND** Docker Compose logs show "Waiting for timescaledb to be healthy..."
+- **GIVEN** TimescaleDB está rodando (`docker compose -f tools/compose/docker-compose.database.yml ps timescaledb` mostra `healthy`)
+- **AND** rede externa `tradingsystem_backend` está disponível
+- **WHEN** o desenvolvedor executa `docker compose -f tools/compose/docker-compose.apps.yml up -d tp-capital`
+- **THEN** o container `apps-tpcapital` sobe imediatamente e monta volumes de código
+- **AND** healthcheck monitora `http://localhost:4005/health`
+- **AND** Service Launcher exibe status `starting` até o healthcheck retornar 200.
 
 #### Scenario: Application-level connection retry
 
-- **GIVEN** TimescaleDB is starting and not yet accepting connections
-- **AND** TP Capital container has already started (past depends_on check)
-- **WHEN** service attempts initial database connection
-- **THEN** connection fails with "connection refused" error
-- **AND** service retries connection after 2 second delay
-- **AND** service logs "TimescaleDB connection retry 1/5"
-- **AND** when TimescaleDB becomes available, subsequent retry succeeds
-- **AND** service continues normal operation
+- **GIVEN** TimescaleDB está inicializando e ainda não aceita conexões
+- **AND** TP Capital container está rodando
+- **WHEN** o serviço tenta a conexão inicial
+- **THEN** a conexão falha com "connection refused"
+- **AND** `timescaleClient` registra `TimescaleDB connection failed - retrying` (tentativa 1/5)
+- **AND** após 2 segundos o serviço tenta novamente
+- **AND** quando TimescaleDB fica disponível, a próxima tentativa é bem-sucedida
+- **AND** o serviço retoma processamento normal.
 
 #### Scenario: Database connection lost during runtime
 

@@ -1,0 +1,60 @@
+name: tools
+
+services:
+  langgraph:
+    image: "${IMG_TOOLS_LANGGRAPH:-img-tools-langgraph}:${IMG_VERSION:-latest}"
+    container_name: tools-langgraph
+    build:
+      context: ../langgraph
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+    ports:
+      - "${LANGGRAPH_PORT:-8111}:8111"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - AGNO_API_URL=http://tools-agno-agents:8200
+      - DOCS_API_URL=http://docs-api:80
+      - FIRECRAWL_PROXY_URL=http://firecrawl-proxy:80
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  agno-agents:
+    image: "${IMG_TOOLS_AGNO_AGENTS:-img-tools-agno-agents}:${IMG_VERSION:-latest}"
+    container_name: tools-agno-agents
+    build:
+      context: ../agno-agents
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+    ports:
+      - "${AGNO_AGENTS_PORT:-8200}:8200"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tradingsystem_backend:
+    external: true

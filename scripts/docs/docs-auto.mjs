@@ -433,7 +433,7 @@ export async function runDocsAuto({repoRoot = resolve(__dirname, '..', '..'), lo
         const markerEnd = `<!-- END AUTO-GENERATED: ${marker} -->`;
         const automationBlock = [
           '**Automation Hooks**:',
-          '- `scripts/docusaurus/mcp-registry-sync.ts` - Generate MCP registry from configuration files **(TODO - blocked)**',
+          '- `scripts/docs/mcp-registry-sync.ts` - Generate MCP registry from configuration files **(TODO - blocked)**',
           '- `npm run docs:auto` - Regenerate MCP registry documentation',
           '- Source: `~/.claude.json`, `.claude/mcp-servers.json`',
           '- Target: `docs/content/mcp/registry.mdx` (generated section)',
@@ -444,7 +444,7 @@ export async function runDocsAuto({repoRoot = resolve(__dirname, '..', '..'), lo
           '',
           '**Future Enhancements**:',
           '- Resolve external config access (commit to repo or create API endpoint)',
-          '- Implement `scripts/docusaurus/mcp-registry-sync.ts` once configs accessible',
+          '- Implement `scripts/docs/mcp-registry-sync.ts` once configs accessible',
           '',
           '*Note: This table is manually maintained. Automation pending resolution of external config access.*',
         ].join('\n');

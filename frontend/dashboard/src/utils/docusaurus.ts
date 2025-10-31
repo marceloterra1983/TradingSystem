@@ -55,9 +55,17 @@ export function resolveDocsBase(options: DocsUrlOptions = {}): string {
 export function buildDocsUrl(path = '/', options: DocsUrlOptions = {}): string {
   const base = resolveDocsBase({ absolute: options.absolute });
   const normalizedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+  const isVersionedPath = /^\/(next|current|version-[^/]+|\d+\.\d+\.\d+)(\/|$)/.test(normalizedPath);
 
   let result: string;
-  if (HTTP_REGEX.test(base)) {
+  if (isVersionedPath) {
+    if (options.absolute && typeof window !== 'undefined') {
+      const origin = window.location.origin.replace(/\/+$/, '');
+      result = `${origin}${normalizedPath}`;
+    } else {
+      result = normalizedPath;
+    }
+  } else if (HTTP_REGEX.test(base)) {
     result = `${trimTrailingSlash(base)}${normalizedPath}`;
   } else if (options.absolute && typeof window !== 'undefined') {
     const origin = window.location.origin.replace(/\/+$/, '');
@@ -108,5 +116,8 @@ export function resolveDocsPreviewUrl(
   const pathWithSlash = normalizedPath !== `/${version}` && !normalizedPath.endsWith('/')
     ? `${normalizedPath}/`
     : normalizedPath;
+  if (options.absolute && typeof window !== 'undefined') {
+    return `${window.location.origin.replace(/\/+$/, '')}${pathWithSlash}`;
+  }
   return buildDocsUrl(pathWithSlash, { ...options, trailingSlash: options.trailingSlash ?? true });
 }

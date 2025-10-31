@@ -12,6 +12,7 @@ import { formatTimestampShort } from '../../../../utils/dateUtils';
 
 export function WorkspaceListSection() {
   const loading = useWorkspaceStore((state) => state.loading);
+  const syncing = useWorkspaceStore((state) => state.syncing);
   const error = useWorkspaceStore((state) => state.error);
   const lastSyncedAt = useWorkspaceStore((state) => state.lastSyncedAt);
   const { filteredItems } = useItemFilters(); // searchTerm and setters are not used here, but in a filter component
@@ -24,6 +25,8 @@ export function WorkspaceListSection() {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }, [filteredItems]);
+
+  const showLoadingState = loading && sortedItems.length === 0;
 
   return (
     <CollapsibleCard cardId="workspace-list">
@@ -42,19 +45,21 @@ export function WorkspaceListSection() {
             <div
               className={cn(
                 'flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border',
-                loading
+                loading || syncing
                   ? 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200'
                   : 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300'
               )}
             >
-              {loading ? (
+              {loading || syncing ? (
                 <RefreshCw className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Clock className="h-3.5 w-3.5" />
               )}
               <span>
-                {loading
-                  ? 'Sincronizando...'
+                {loading && sortedItems.length === 0
+                  ? 'Carregando...'
+                  : syncing
+                    ? 'Sincronizando...'
                   : lastSyncedAt
                     ? `Atualizado em ${formatTimestampShort(lastSyncedAt)}`
                     : 'Aguardando sincronização'}
@@ -100,7 +105,7 @@ export function WorkspaceListSection() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {loading ? (
+                {showLoadingState ? (
                   <tr>
                     <td className="px-4 py-8 text-center text-sm text-gray-500" colSpan={7}>
                       Carregando...

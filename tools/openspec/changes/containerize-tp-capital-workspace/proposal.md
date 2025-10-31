@@ -125,8 +125,8 @@ A containerização resolve esses problemas fundamentais mantendo a flexibilidad
 
 **Phases**:
 1. **Preparação** (1h): Backup dados, validar .env, testar TimescaleDB
-2. **Containerização** (3-4h): Criar Dockerfiles, .dockerignore, retry logic
-3. **Docker Compose** (2h): Integrar com stack existente, configurar networks/volumes
+2. **Containerização** (3-4h): Revisar Dockerfiles existentes, criar/ajustar .dockerignore, aplicar retry logic
+3. **Docker Compose** (2h): Integrar com stack existente, configurar networks/volumes (rede externa)
 4. **Scripts** (1-2h): Atualizar start/stop/health scripts
 5. **Migração Dados** (1h): Script LowDB → TimescaleDB (se necessário)
 6. **Testing** (2-3h): Testes end-to-end, validação hot-reload, health checks
@@ -162,9 +162,11 @@ A containerização resolve esses problemas fundamentais mantendo a flexibilidad
   - `specs/workspace-service/spec.md` (NEW)
 - **Affected Documentation**:
   - `CLAUDE.md` (remove local services references)
-  - `docs/context/ops/service-startup-guide.md`
-  - `docs/context/backend/guides/guide-tp-capital.md`
-  - `docs/context/backend/api/workspace/README.md`
+- `docs/context/ops/service-startup-guide.md`
+- `docs/context/backend/guides/guide-tp-capital.md`
+- `docs/context/backend/api/workspace/README.md`
+- `docs/governance/CONTAINER-NAMING-CONVENTION.md`
+- `docs/governance/CONTAINER-INVENTORY-CURRENT.md`
 - **Related ADRs**:
   - Future: ADR-00X - Containerization strategy for auxiliary services
 

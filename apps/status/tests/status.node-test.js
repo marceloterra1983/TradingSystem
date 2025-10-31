@@ -172,7 +172,7 @@ test('sortResultsBySeverity orders results by status then name', () => {
 
 test('SERVICE_TARGETS inclui serviços estendidos', () => {
   const ids = new Set(SERVICE_TARGETS.map((service) => service.id));
-  ['dashboard-ui', 'docusaurus', 'prometheus', 'grafana', 'questdb-http'].forEach((expected) => {
+  ['dashboard-ui', 'docs-hub', 'prometheus', 'grafana', 'questdb-http'].forEach((expected) => {
     assert.ok(ids.has(expected), `Service target ${expected} deve estar cadastrado`);
   });
 });

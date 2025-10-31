@@ -44,12 +44,12 @@ The documentation build process SHALL create all build artifacts within the resp
 ## ADDED Requirements
 
 ### Requirement: Documentation Automation Hub
-The documentation platform SHALL centralize automation scripts for the upgraded site under `scripts/docusaurus/` to keep content synchronized.
+The documentation platform SHALL centralize automation scripts for the upgraded site under `scripts/docs/` to keep content synchronized.
 
 #### Scenario: Automation Script Location
 - **GIVEN** a developer needs to regenerate documentation assets (Redoc pages, ports table, MCP registry, tokens, PRD index)
 - **WHEN** they inspect repository tooling
-- **THEN** all automation entrypoints SHALL exist under `scripts/docusaurus/` (or subdirectories) and reference the `/docs/` workspace via relative paths
+- **THEN** all automation entrypoints SHALL exist under `scripts/docs/` (or subdirectories) and reference the `/docs/` workspace via relative paths
 - **AND** executing `npm --prefix docs run docs:auto` SHALL orchestrate those scripts successfully
 
 #### Scenario: CI Enforcement

@@ -329,11 +329,72 @@ export class SystemsRepository {
   }
 }
 
+/**
+ * Null Object Pattern for when database is disabled
+ */
+class NullSystemsRepository {
+  async create() {
+    throw new Error('Systems management is disabled (database strategy is "none")');
+  }
+
+  async findById() {
+    return null;
+  }
+
+  async findAll() {
+    return [];
+  }
+
+  async getAllSystems() {
+    return [];
+  }
+
+  async update() {
+    throw new Error('Systems management is disabled (database strategy is "none")');
+  }
+
+  async delete() {
+    throw new Error('Systems management is disabled (database strategy is "none")');
+  }
+
+  async findByStatus() {
+    return [];
+  }
+
+  async findByType() {
+    return [];
+  }
+
+  async findByOwner() {
+    return [];
+  }
+
+  async search() {
+    return [];
+  }
+
+  async getStatistics() {
+    return {
+      total: 0,
+      by_status: {},
+      by_type: {},
+      avg_response_time: 0
+    };
+  }
+
+  transformRow(row) {
+    return row;
+  }
+}
+
 let systemsRepositoryInstance = null;
 
 export function getSystemsRepository() {
   if (!systemsRepositoryInstance) {
-    if (config.database.strategy === 'postgres') {
+    if (config.database.strategy === 'none') {
+      logger.info('Using NullSystemsRepository (database disabled)');
+      systemsRepositoryInstance = new NullSystemsRepository();
+    } else if (config.database.strategy === 'postgres') {
       systemsRepositoryInstance = createPostgresSystemsRepository();
     } else {
       systemsRepositoryInstance = new SystemsRepository();

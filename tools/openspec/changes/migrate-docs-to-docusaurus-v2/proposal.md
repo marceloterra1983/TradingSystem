@@ -8,13 +8,13 @@
 
 ### What Changes
 - Introduce a dedicated `docs/` Docusaurus workspace with strict content taxonomy and automation hooks.
-- Centralize documentation scripts under `scripts/docusaurus/**`, adding generators for Redoc summaries, design tokens, MCP registry, PRD index, stale report, and link checking.
+- Centralize documentation scripts under `scripts/docs/**`, adding generators for Redoc summaries, design tokens, MCP registry, PRD index, stale report, and link checking.
 - Scaffold comprehensive content structure (Apps, API, Agents, MCP, Prompts, Database, Tools, Frontend, PRD, SDD, Reference, Changelog, FAQ) with mandatory frontmatter and shared components.
 - Update operations workflows (Laucher, dashboards, scripts) to reference the new workspace without disrupting the legacy `docs/` site during transition.
 - Extend OpenSpec specs to cover the new workspace layout and navigation taxonomy.
 
 ### Impact
-- **Code/Repo**: Adds `docs/`, new scripts under `scripts/docusaurus/`, Husky hooks, CI pipeline updates, content scaffolding, and diagrams/static assets directories. Legacy `docs/` remains unchanged for parity.
+- **Code/Repo**: Adds `docs/`, new scripts under `scripts/docs/`, Husky hooks, CI pipeline updates, content scaffolding, and diagrams/static assets directories. Legacy `docs/` remains unchanged for parity.
 - **Tooling**: Requires Node 18+, Docusaurus plugins (`@redocly/redocusaurus`, `@easyops-cn/docusaurus-search-local`, `@docusaurus/theme-mermaid`, `@docusaurus/plugin-client-redirects`), markdown linting dependencies, and Husky integration.
 - **Operations**: Laucher and automation scripts need new working directory paths; adds nightly jobs for stale/broken link reports.
 - **Risks**: Content drift if automation not enforced, dual-site complexity during migration, plugin incompatibilities, potential CI runtime increase.

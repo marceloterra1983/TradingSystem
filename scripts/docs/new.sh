@@ -6,10 +6,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 usage() {
   cat <<'EOF'
-Usage: scripts/docusaurus/new.sh <section/path> [--title "My Title"] [--description "Summary"] [--tag tag1,tag2]
+Usage: scripts/docs/new.sh <section/path> [--title "My Title"] [--description "Summary"] [--tag tag1,tag2]
 
 Examples:
-  scripts/docusaurus/new.sh playbooks/fix-service --title "Fix Service" --description "Runbook placeholder" --tag operations,playbooks
+  scripts/docs/new.sh playbooks/fix-service --title "Fix Service" --description "Runbook placeholder" --tag operations,playbooks
 EOF
 }
 

@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPTS_DIR="$PROJECT_ROOT/scripts/universal"
+SCRIPTS_DIR="$PROJECT_ROOT/scripts"
 
 # Detect shell
 SHELL_RC=""
@@ -39,41 +39,60 @@ chmod +x "$SCRIPTS_DIR"/*.sh
 echo -e "${GREEN}  ✓ Scripts are now executable${NC}"
 echo ""
 
-# Add aliases to shell config
-echo -e "${CYAN}Installing aliases to ${BLUE}${SHELL_RC}${NC}"
+# Create wrapper scripts in .bin directory
+BIN_DIR="$PROJECT_ROOT/.bin"
+mkdir -p "$BIN_DIR"
 
-# Remove old aliases if they exist
+echo -e "${CYAN}Creating wrapper scripts...${NC}"
+
+# Create start wrapper
+cat > "$BIN_DIR/start" << 'EOF'
+#!/bin/bash
+exec bash "$HOME/Projetos/TradingSystem/scripts/start.sh" "$@"
+EOF
+
+# Create stop wrapper
+cat > "$BIN_DIR/stop" << 'EOF'
+#!/bin/bash
+exec bash "$HOME/Projetos/TradingSystem/scripts/stop.sh" "$@"
+EOF
+
+# Create status wrapper
+cat > "$BIN_DIR/status" << 'EOF'
+#!/bin/bash
+exec bash "$HOME/Projetos/TradingSystem/scripts/status.sh" "$@"
+EOF
+
+chmod +x "$BIN_DIR"/*
+
+echo -e "${GREEN}  ✓ Wrapper scripts created${NC}"
+echo ""
+
+# Add .bin to PATH in shell config
+echo -e "${CYAN}Adding .bin directory to PATH in ${BLUE}${SHELL_RC}${NC}"
+
+# Remove old PATH entry if it exists
 sed -i '/# TradingSystem Universal Commands/,/# End TradingSystem Universal Commands/d' "$SHELL_RC" 2>/dev/null || true
 
-# Add new aliases
-cat >> "$SHELL_RC" << EOF
+# Add new PATH entry
+cat >> "$SHELL_RC" << 'EOF'
 
 # TradingSystem Universal Commands
-alias start='bash $SCRIPTS_DIR/start.sh'
-alias stop='bash $SCRIPTS_DIR/stop.sh'
-alias status='bash $SCRIPTS_DIR/status.sh'
-alias ts-start='bash $SCRIPTS_DIR/start.sh'
-alias ts-stop='bash $SCRIPTS_DIR/stop.sh'
-alias ts-status='bash $SCRIPTS_DIR/status.sh'
+export PATH="$HOME/Projetos/TradingSystem/.bin:$PATH"
 # End TradingSystem Universal Commands
 EOF
 
-echo -e "${GREEN}  ✓ Aliases installed${NC}"
+echo -e "${GREEN}  ✓ PATH updated${NC}"
 echo ""
 
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║${NC}  ✅ ${CYAN}Installation Complete!${NC}                              ${GREEN}║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${CYAN}Available commands:${NC}"
+echo -e "${CYAN}Available commands (from any directory):${NC}"
 echo -e "  ${BLUE}start${NC}      - Start all services"
 echo -e "  ${BLUE}stop${NC}       - Stop all services"
 echo -e "  ${BLUE}status${NC}     - Show service status"
-echo ""
-echo -e "${CYAN}Prefixed commands (avoid conflicts):${NC}"
-echo -e "  ${BLUE}ts-start${NC}   - Start all services"
-echo -e "  ${BLUE}ts-stop${NC}    - Stop all services"
-echo -e "  ${BLUE}ts-status${NC}  - Show service status"
 echo ""
 echo -e "${YELLOW}⚠️  Reload your shell to use the commands:${NC}"
 echo -e "  ${BLUE}source ${SHELL_RC}${NC}"

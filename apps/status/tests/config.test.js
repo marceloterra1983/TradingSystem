@@ -77,8 +77,8 @@ describe('Service Launcher Configuration', () => {
       
       expect(serviceIds).toContain('workspace-api');
       expect(serviceIds).toContain('tp-capital-signals-api');
-      expect(serviceIds).toContain('b3-market-data-api');
       expect(serviceIds).toContain('documentation-api');
+      expect(serviceIds).toContain('docs-hub');
       expect(serviceIds).toContain('dashboard-ui');
       expect(serviceIds).toContain('service-launcher');
     });

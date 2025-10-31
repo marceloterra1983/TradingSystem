@@ -9,7 +9,7 @@ import {
   generatePortsTable,
   extractTailwindTokens,
   generateTokensTable,
-} from '../../scripts/docusaurus/docs-auto.mjs';
+} from '../../scripts/docs/docs-auto.mjs';
 
 const silentLogger = {
   start() {},
@@ -318,7 +318,7 @@ test('runDocsAuto generates content for ports and tokens', async (t) => {
     '<!-- BEGIN AUTO-GENERATED: MCP Registry Automation Status -->',
     '',
     '**Automation Hooks**:',
-    '- `scripts/docusaurus/mcp-registry-sync.ts` - Generate MCP registry from configuration files',
+    '- `scripts/docs/mcp-registry-sync.ts` - Generate MCP registry from configuration files',
     '- `npm run docs:auto` - Regenerate MCP registry documentation',
     '- Source: `~/.claude.json`, `.claude/mcp-servers.json`',
     '- Target: `docs/content/mcp/registry.mdx` (generated section)',

@@ -56,16 +56,21 @@ def track_time(metric, labels=None):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             start_time = time.time()
+            label_kwargs = dict(labels or {})
+            if not label_kwargs:
+                label_names = getattr(metric, "_labelnames", ())
+                if label_names:
+                    label_kwargs = {name: "default" for name in label_names}
             try:
                 result = await func(*args, **kwargs)
-                if labels:
-                    metric.labels(**labels).observe(time.time() - start_time)
+                if label_kwargs:
+                    metric.labels(**label_kwargs).observe(time.time() - start_time)
                 else:
                     metric.observe(time.time() - start_time)
                 return result
             except Exception as e:
-                if labels:
-                    metric.labels(**labels).observe(time.time() - start_time)
+                if label_kwargs:
+                    metric.labels(**label_kwargs).observe(time.time() - start_time)
                 else:
                     metric.observe(time.time() - start_time)
                 raise e

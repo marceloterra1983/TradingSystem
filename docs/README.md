@@ -22,8 +22,8 @@ Refer to the tasks file for the full rollout plan and outstanding items; see `pa
 - `npm run docs:check` runs docs:auto → docs:validate-generated → lint → type-check → tests → build.
 - `npm run docs:links` rebuilds the site and runs `linkinator` over the static output (requires internet for external URLs if any).
 - `npm run docs:test` runs Node-based unit tests for the automation helpers.
-- Run `bash ../scripts/docusaurus/new.sh <section/slug> --title "Title"` to scaffold a new MDX page with the required frontmatter.
-- Shell wrappers under `scripts/docusaurus/` mirror these commands for CI pipelines, including `check-links.sh`.
+- Run `bash ../scripts/docs/new.sh <section/slug> --title "Title"` to scaffold a new MDX page with the required frontmatter.
+- Shell wrappers under `scripts/docs/` mirror these commands for CI pipelines, including `check-links.sh`.
 - Husky hooks run `npm --prefix docs run docs:auto` then `docs:lint` on commit and `docs:check` on push; export `SKIP_DOCS_AUTO=1` to skip only the auto-generation step or `SKIP_DOCS_HOOKS=1` to bypass the hook entirely in emergencies.
 
 ## Versioning

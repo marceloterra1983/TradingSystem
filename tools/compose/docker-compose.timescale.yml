@@ -2,7 +2,7 @@ name: database
 
 services:
   timescaledb:
-    container_name: data-timescaledb
+    container_name: data-timescale
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
@@ -29,7 +29,7 @@ services:
       - 'com.tradingsystem.description=PostgreSQL 15 + TimescaleDB cluster'
 
   timescaledb-backup:
-    container_name: data-timescaledb-backup
+    container_name: data-timescale-backup
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
@@ -54,7 +54,7 @@ services:
       - 'com.tradingsystem.description=Nightly dumps for TimescaleDB'
 
   timescaledb-exporter:
-    container_name: data-timescaledb-exporter
+    container_name: data-timescale-exporter
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
@@ -75,7 +75,7 @@ services:
       - 'com.tradingsystem.description=Prometheus exporter for TimescaleDB'
 
   timescaledb-pgadmin:
-    container_name: data-timescaledb-pgadmin
+    container_name: data-timescale-pgadmin
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
@@ -104,7 +104,7 @@ services:
 
   # Lightweight PostgreSQL web client for quick TimescaleDB queries during local development
   timescaledb-pgweb:
-    container_name: data-timescaledb-pgweb
+    container_name: data-timescale-pgweb
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     platform: linux/amd64
     restart: unless-stopped
@@ -133,7 +133,7 @@ services:
 
   # Optional Adminer UI for full CRUD management when pgAdmin is not required
   timescaledb-adminer:
-    container_name: data-timescaledb-adminer
+    container_name: data-timescale-adminer
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     restart: unless-stopped
     # CENTRALIZED ENV: References root .env file
@@ -162,7 +162,7 @@ services:
 
   # Optional Azimutt schema explorer for collaborative ERD visualization when mapping data models
   timescaledb-azimutt:
-    container_name: data-timescaledb-azimutt
+    container_name: data-timescale-azimutt
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     restart: unless-stopped
     platform: linux/amd64
@@ -193,9 +193,9 @@ services:
       - 'com.tradingsystem.service=timescaledb-azimutt'
       - 'com.tradingsystem.description=ERD visualization and schema exploration (optional)'
 
-  data-postgress-langgraph:
+  data-postgres-langgraph:
     image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres}:${IMG_POSTGRES_TAG:-15}"
-    container_name: data-postgress-langgraph
+    container_name: data-postgres-langgraph
     restart: unless-stopped
     platform: linux/amd64
     ports:
@@ -218,7 +218,7 @@ services:
       retries: 5
     labels:
       - "com.tradingsystem.stack=database"
-      - "com.tradingsystem.service=data-postgress-langgraph"
+      - "com.tradingsystem.service=data-postgres-langgraph"
       - "com.tradingsystem.description=PostgreSQL for LangGraph checkpoints"
 
   data-qdrant:

@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from qdrant_client import QdrantClient, AsyncQdrantClient
 
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, PromptTemplate
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
@@ -204,6 +204,7 @@ Settings.embed_model = OllamaEmbedding(
     model_name=OLLAMA_EMBED_MODEL,
     base_url=OLLAMA_BASE_URL,
     ollama_additional_kwargs=get_ollama_gpu_options(),
+    request_timeout=float(os.getenv("OLLAMA_REQUEST_TIMEOUT", "120.0")),  # 2 minutes timeout
 )
 
 # Optionally configure LLM with Ollama (local) when model is provided
@@ -214,10 +215,29 @@ if OLLAMA_MODEL:
         base_url=OLLAMA_BASE_URL,
         additional_kwargs=get_ollama_gpu_options(),
         keep_alive=os.getenv("OLLAMA_KEEP_ALIVE", os.getenv("LLAMAINDEX_KEEP_ALIVE", "5m")),
+        request_timeout=float(os.getenv("OLLAMA_REQUEST_TIMEOUT", "120.0")),  # 2 minutes timeout
     )
     LLM_ENABLED = True
 else:
     LLM_ENABLED = False
+
+# Custom QA prompt template - more flexible than default
+# Allows model to synthesize information and use context intelligently
+CUSTOM_QA_PROMPT = PromptTemplate(
+    template=(
+        "You are a helpful AI assistant answering questions about the TradingSystem project documentation.\n\n"
+        "Context information from the documentation:\n"
+        "---------------------\n"
+        "{context_str}\n"
+        "---------------------\n\n"
+        "Using the context above and your understanding of software development concepts, "
+        "provide a clear and accurate answer to the following question. "
+        "If the context doesn't contain enough information, you may use general knowledge "
+        "but clearly indicate when you're doing so.\n\n"
+        "Question: {query_str}\n\n"
+        "Answer:"
+    )
+)
 
 # Build index from existing vector store
 if vector_store is not None:
@@ -296,6 +316,7 @@ async def query_documents(
             query_engine = index.as_query_engine(
                 similarity_top_k=payload.max_results,
                 filters=payload.filters,
+                text_qa_template=CUSTOM_QA_PROMPT,
             )
 
             with track_query_metrics():
@@ -342,10 +363,11 @@ async def query_documents(
         return response_payload
 
     except Exception as e:
-        logger.error(f"Error processing query: {str(e)}")
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: (no message)"
+        logger.error(f"Error processing query: {error_msg}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Error processing query: {str(e)}"
+            detail=f"Error processing query: {error_msg}"
         )
 
 

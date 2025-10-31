@@ -129,6 +129,7 @@ export interface DocsHybridItem {
   tags?: string[];
   domain?: string;
   type?: string;
+  status?: string;
 }
 
 export interface DocsHybridResponse {
@@ -277,7 +278,7 @@ class DocumentationService {
   async docsLexicalSearch(
     query: string,
     opts?: { limit?: number; domain?: string; type?: string; status?: string; tags?: string[] }
-  ): Promise<{ total: number; results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; score?: number }> }> {
+  ): Promise<{ total: number; results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; status?: string; score?: number }> }> {
     const params: Record<string, string | number> = { q: query };
     if (opts?.limit) params.limit = opts.limit;
     if (opts?.domain) params.domain = opts.domain;
@@ -288,8 +289,67 @@ class DocumentationService {
     const response = await this.client.get('/api/v1/docs/search', { params });
     return response.data as {
       total: number;
-      results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; score?: number }>;
+      results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; status?: string; score?: number }>;
     };
+  }
+
+  async getDocContent(docPath: string): Promise<string> {
+    if (!docPath) {
+      throw new Error('Caminho do documento não informado');
+    }
+
+    const stripPrefix = (value: string) => {
+      const withoutLeading = value.replace(/^\/+/, '').replace(/^docs\//, '');
+      try {
+        return decodeURIComponent(withoutLeading);
+      } catch {
+        return withoutLeading;
+      }
+    };
+
+    const base = stripPrefix(docPath);
+    const segments = base.split('/').filter(Boolean);
+    const baseCandidates = new Set<string>();
+    if (base) baseCandidates.add(base);
+    if (segments.length > 1) {
+      baseCandidates.add(segments.slice(1).join('/'));
+    }
+    baseCandidates.add(`versioned_docs/${base}`);
+
+    const pathCandidates = new Set<string>();
+    baseCandidates.forEach((candidate) => {
+      if (!candidate) {
+        return;
+      }
+      if (candidate.endsWith('.md') || candidate.endsWith('.mdx')) {
+        pathCandidates.add(candidate);
+      } else {
+        pathCandidates.add(`${candidate}.mdx`);
+        pathCandidates.add(`${candidate}.md`);
+      }
+    });
+
+    let lastError: unknown;
+    for (const candidate of pathCandidates) {
+      try {
+        const response = await this.client.get('/api/v1/docs/content', {
+          params: { path: candidate },
+        });
+        const content = (response.data as { content?: string })?.content;
+        if (typeof content === 'string') {
+          return content;
+        }
+        lastError = new Error('Documento retornado sem conteúdo');
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (lastError instanceof Error) {
+      throw new Error(`Não foi possível carregar conteúdo para ${docPath}: ${lastError.message}`);
+    }
+
+    throw new Error(`Não foi possível carregar conteúdo para ${docPath}`);
   }
 
   // ====================

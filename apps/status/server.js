@@ -202,7 +202,7 @@ const SERVICE_TARGETS = [
     name: 'DocsAPI',
     description: 'Documentation content service',
     category: 'api',
-    defaultPort: 3400,
+    defaultPort: 3401,
     portEnv: 'SERVICE_LAUNCHER_DOCS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCS_URL',
   }),
@@ -235,14 +235,14 @@ const SERVICE_TARGETS = [
     path: '/',
   }),
   createServiceTarget({
-    id: 'docusaurus',
-    name: 'Docusaurus',
-    description: 'Site oficial de documentação técnica',
+    id: 'docs-hub',
+    name: 'Documentation Hub',
+    description: 'Static Docusaurus build served via docs-hub container (NGINX)',
     category: 'docs',
     defaultPort: 3400,
-    portEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_PORT',
-    urlEnv: 'SERVICE_LAUNCHER_DOCUSAURUS_URL',
-    path: '/health', // Use health endpoint (returns 200 OK, no redirect)
+    portEnv: ['SERVICE_LAUNCHER_DOCS_HUB_PORT', 'SERVICE_LAUNCHER_DOCUSAURUS_PORT'],
+    urlEnv: ['SERVICE_LAUNCHER_DOCS_HUB_URL', 'SERVICE_LAUNCHER_DOCUSAURUS_URL'],
+    path: '/health', // NGINX container exposes dedicated health endpoint
   }),
   createServiceTarget({
     id: 'prometheus',
@@ -501,7 +501,19 @@ async function executeHealthCheckScript() {
   };
 
   try {
-    const { stdout, stderr } = await execFileAsync(HEALTH_SCRIPT_PATH, args, execOptions);
+    const execResult = await execFileAsync(HEALTH_SCRIPT_PATH, args, execOptions);
+    const stdout =
+      typeof execResult === 'string' || Buffer.isBuffer(execResult)
+        ? execResult.toString()
+        : typeof execResult?.stdout === 'string' || Buffer.isBuffer(execResult?.stdout)
+          ? execResult.stdout.toString()
+          : '';
+    const stderr =
+      typeof execResult === 'string' || Buffer.isBuffer(execResult)
+        ? ''
+        : typeof execResult?.stderr === 'string' || Buffer.isBuffer(execResult?.stderr)
+          ? execResult.stderr.toString()
+          : '';
     let parsed;
     try {
       parsed = JSON.parse(stdout);
@@ -524,6 +536,10 @@ async function executeHealthCheckScript() {
   } catch (error) {
     const durationMs = performance.now() - start;
     const stderr = error.stderr || '';
+
+    if (error.code === 'EJSONPARSE') {
+      throw error;
+    }
 
     // Script not found
     if (error.code === 'ENOENT') {
@@ -550,7 +566,11 @@ async function executeHealthCheckScript() {
       : Number.isFinite(Number(error.code))
         ? Number(error.code)
         : null;
-    const stdout = error.stdout || '';
+    const stdout = Buffer.isBuffer(error.stdout)
+      ? error.stdout.toString()
+      : typeof error.stdout === 'string'
+        ? error.stdout
+        : '';
 
     // Exit codes 1-2 still provide structured data (degraded/critical)
     if (exitCode === 1 || exitCode === 2) {

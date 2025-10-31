@@ -12,6 +12,12 @@
 4. **Feedback**: Collect user feedback for continuous improvement
 5. **Support**: Provide clear channels for questions and issues
 
+## Metrics & Evidence
+
+- **KPI**: `engagementRate = participantes que visualizaram/interagiram ÷ público-alvo` (meta ≥ 80% nas comunicações principais).
+- **Registro**: Após cada marco (T-14, T-7, T-1, Launch, T+7), atualizar `review-tracking.csv` (`GovernanceStatus`, `LastAuditDate`) e anexar captura/export das métricas no campo `EvidenceLink`.
+- **Feedback qualitativo**: Consolidar principais dúvidas/respostas e anexar na mesma evidência ou issue relacionada.
+
 ## Communication Timeline
 
 ### T-14 Days (Nov 1): Pre-Launch Announcement
@@ -25,14 +31,12 @@
 We're excited to announce that the new TradingSystem documentation (docs) will launch on **November 15, 2025**!
 
 **What's New:**
-✅ Comprehensive app documentation (Workspace, TP Capital, Order Manager, Data Capture)
-✅ Complete API specifications with Redoc integration
-✅ Frontend design system and engineering guidelines
-✅ Database schemas, migrations, and operational runbooks
-✅ 46 tool guides (Node.js, .NET, Python, Docker, etc.)
-✅ Product requirements (PRD) and software design docs (SDD)
-✅ Auto-generated content (ports table, design tokens)
-✅ 26 PlantUML diagrams for architecture visualization
+✅ Apps: TP Capital, Workspace e Telegram Gateway com documentação completa (overview, config, runbook)
+✅ APIs: Catálogo atualizado com specs do Workspace, Documentation API e integrações auxiliares
+✅ Frontend & Design System: Tokens gerados automaticamente e guias de implementação
+✅ Governança & Operações: Checklists e planos revisados (cutover, manutenção, comunicação)
+✅ Ferramentas & Scripts: 46 guias ativos + port summary gerado automaticamente
+✅ Arquitetura: Diagrama atualizado no hub (26 PlantUML renderizados na nova estrutura)
 
 **How to Access:**
 - Local dev (docs): http://localhost:3400
@@ -148,8 +152,8 @@ Join us for a 30-minute walkthrough of the new documentation system!
 **New Documentation Hub:** http://tradingsystem.local/docs
 
 **What's Available:**
-📱 **Apps**: Workspace, TP Capital, Order Manager, Data Capture (20 pages)
-🔌 **APIs**: Order Manager, Data Capture, Workspace (3 pages + Redoc)
+📱 **Apps**: TP Capital, Workspace e Telegram Gateway (20 páginas revisadas)
+🔌 **APIs**: Workspace API, Documentation API e Telegram Gateway API (Redoc integrado)
 🎨 **Frontend**: Design system, guidelines, engineering (14 pages)
 🗄️ **Database**: Schemas, migrations, backup/retention (4 pages)
 🛠️ **Tools**: Node.js, .NET, Python, Docker, and more (46 pages)

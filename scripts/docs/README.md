@@ -1,4 +1,4 @@
-# Docusaurus Automation Scripts
+# Docs Automation Scripts
 
 Utility scripts for the `docs` workspace live here so they can be reused by CI,
 local developers, and future automation hooks described in the OpenSpec plan.

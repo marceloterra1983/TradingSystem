@@ -9,8 +9,8 @@ const __dirname = dirname(__filename);
 
 // Navigate from frontend/dashboard/scripts to project root
 const projectRoot = join(__dirname, '../../..');
-const docsSource = join(projectRoot, 'docs/context/shared/product/prd');
-const docsTarget = join(__dirname, '../public/docs/context/shared/product/prd');
+const docsSource = join(projectRoot, 'docs/content/prd');
+const docsTarget = join(__dirname, '../public/docs/content/prd');
 
 console.log('👀 Watching for PRD file changes...');
 console.log(`   Source: ${docsSource}`);

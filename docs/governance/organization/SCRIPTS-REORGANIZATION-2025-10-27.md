@@ -110,19 +110,13 @@ bash scripts/maintenance/dangerous/cleanup-and-restart.sh
 
 ```
 scripts/
-├── core/                           (11 scripts - 4 removidos)
+├── core/                           (6 scripts após limpeza)
 │   ├── diagnose-services.sh        ✅ Keep
-│   ├── launch-service.sh           ✅ Keep
 │   ├── restart-dashboard-stack.sh  ✅ Keep
-│   ├── start-all.sh               ❌ REMOVIDO
+│   ├── run-docsapi-local.sh        ✅ Keep
 │   ├── start-dashboard-stack.sh    ✅ Keep
-│   ├── start-tradingsystem-full.sh ❌ REMOVIDO
-│   ├── status-tradingsystem.sh     ✅ Keep
-│   ├── status.sh                   ✅ Keep
-│   ├── stop-all.sh                ❌ REMOVIDO
-│   ├── stop-dashboard-stack.sh     ✅ Keep
-│   ├── stop-tradingsystem-full.sh ❌ REMOVIDO
-│   └── welcome-message.sh          ✅ Keep
+│   ├── start-trading-system-dev.sh ✅ Keep
+│   └── stop-dashboard-stack.sh     ✅ Keep
 │
 ├── docker/                         (7 scripts - 6 movidos)
 │   ├── buildkit-*.sh (6 scripts)  🔀 MOVIDOS → experimental/buildkit/

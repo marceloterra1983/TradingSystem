@@ -7,6 +7,13 @@
 **Next Review**: 2026-01-24 (Q1 2026)
 **Last Maintenance Run**: 2025-10-29 — Docs hub cutover to ports `3400/3401` and validation thresholds recalibrated.
 
+## Metrics & Evidence
+
+- **KPI**: `%Freshness = arquivos com lastReviewed < 90 dias / total de arquivos monitorados` (meta 100% ou plano de ação registrado).
+- **Registro**: Salvar o relatório gerado em `docs/reports/frontmatter-validation-YYYYMMDD.json` e registrar no `review-tracking.csv` (`LastAuditDate`, `EvidenceLink`).
+- **Evidência adicional**: Para itens que entraram em ação corretiva, abrir issue ou checklist e apontar o link no campo `EvidenceLink`.
+- **Follow-up**: Indicar no final deste arquivo os percentuais obtidos e principais ajustes planejados.
+
 ## Quarterly Review Checklist
 
 ### Week 1: Content Freshness Review

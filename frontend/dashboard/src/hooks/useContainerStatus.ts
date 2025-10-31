@@ -5,11 +5,12 @@
  * Uses simple HTTP health checks to verify container availability.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface UseContainerStatusResult {
   isRunning: boolean;
   isLoading: boolean;
+  hasChecked: boolean;
   error: string | null;
   checkStatus: () => Promise<void>;
 }
@@ -57,12 +58,30 @@ export function useContainerStatus(
 ): UseContainerStatusResult {
   const [isRunning, setIsRunning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasChecked, setHasChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!containerName || !healthCheckUrl) {
+      setIsRunning(false);
+      setIsLoading(false);
+      setError(null);
+      setHasChecked(true);
+      return;
+    }
+
+    setIsRunning(false);
+    setIsLoading(true);
+    setError(null);
+    setHasChecked(false);
+  }, [containerName, healthCheckUrl]);
 
   const checkStatus = useCallback(async () => {
     if (!containerName || !healthCheckUrl) {
       setIsRunning(false);
       setIsLoading(false);
+      setHasChecked(true);
       return;
     }
 
@@ -77,22 +96,37 @@ export function useContainerStatus(
       setIsRunning(false);
     } finally {
       setIsLoading(false);
+      setHasChecked(true);
     }
   }, [containerName, healthCheckUrl]);
 
   useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     // Initial check
     checkStatus();
 
-    // Poll every 10 seconds to keep status updated
-    const interval = setInterval(checkStatus, 10000);
+    // Only set up polling if we have valid container info
+    if (containerName && healthCheckUrl) {
+      intervalRef.current = setInterval(checkStatus, 10000);
+    }
 
-    return () => clearInterval(interval);
-  }, [checkStatus]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [containerName, healthCheckUrl, checkStatus]);
 
   return {
     isRunning,
     isLoading,
+    hasChecked,
     error,
     checkStatus,
   };

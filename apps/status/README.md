@@ -293,10 +293,10 @@ Use estas variáveis para customizar portas dos serviços monitorados:
 |----------|---------|---------|
 | `SERVICE_LAUNCHER_WORKSPACE_PORT` | `3200` | Workspace API *(reads legacy `SERVICE_LAUNCHER_LIBRARY_PORT` if present)* |
 | `SERVICE_LAUNCHER_TP_CAPITAL_PORT` | `3200` | TP Capital Signals |
-| `SERVICE_LAUNCHER_DOCS_PORT` | `3400` | Documentation API |
+| `SERVICE_LAUNCHER_DOCS_PORT` | `3401` | Documentation API |
 | `SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT` | `3600` | Firecrawl Proxy |
 | `SERVICE_LAUNCHER_DASHBOARD_PORT` | `3103` | Dashboard UI |
-| `SERVICE_LAUNCHER_DOCUSAURUS_PORT` | `3400` | Docusaurus |
+| `SERVICE_LAUNCHER_DOCUSAURUS_PORT` | `3400` | Documentation Hub (docs-hub container) |
 | `SERVICE_LAUNCHER_PROMETHEUS_PORT` | `9090` | Prometheus |
 | `SERVICE_LAUNCHER_GRAFANA_PORT` | `3000` | Grafana |
 | `SERVICE_LAUNCHER_QUESTDB_HTTP_PORT` | `9000` | QuestDB Console |
@@ -486,7 +486,7 @@ SERVICE_LAUNCHER_LOG_LEVEL=debug npm start
 | documentation-api | DocsAPI | api | 3400 |
 | firecrawl-proxy | Firecrawl Proxy | api | 3600 |
 | dashboard-ui | Dashboard | ui | 3103 |
-| docusaurus | Docusaurus | docs | 3400 |
+| docs-hub | Documentation Hub | docs | 3400 |
 | prometheus | Prometheus | monitoring | 9090 |
 | grafana | Grafana | monitoring | 3000 |
 | questdb-http | QuestDB HTTP | data | 9000 |

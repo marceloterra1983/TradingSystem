@@ -6,6 +6,12 @@
 
 **Timeline**: Run during Week 3 of review (Nov 7-14) and before every release
 
+## Metrics & Evidence
+
+- **KPI**: Tempo total da suíte (`totalValidationMinutes`) — meta ≤ 20 minutos por execução.
+- **Registro**: Após cada rodada, registrar duração e status no `review-tracking.csv` (`GovernanceStatus`, `LastAuditDate`) e anexar log da execução (arquivo `.log` ou captura) em `EvidenceLink`.
+- **Checkpoint**: Se alguma etapa falhar, abrir issue vinculada e registrar o link no mesmo campo.
+
 ## Validation Suite Overview
 
 **The complete validation suite consists of 10 validation layers:**

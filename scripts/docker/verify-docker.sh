@@ -9,12 +9,17 @@
 
 set -euo pipefail
 
-# Load libraries
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/lib/common.sh
-source "$SCRIPT_DIR/../lib/common.sh"
-# shellcheck source=scripts/lib/docker.sh
-source "$SCRIPT_DIR/../lib/docker.sh"
+# Basic formatting helpers (inline para evitar dependência de libs removidas)
+COLOR_GREEN='\033[0;32m'
+COLOR_YELLOW='\033[1;33m'
+COLOR_RED='\033[0;31m'
+COLOR_BLUE='\033[0;34m'
+COLOR_NC='\033[0m'
+
+command_exists() { command -v "$1" >/dev/null 2>&1; }
+log_info() { echo -e "${COLOR_BLUE}[INFO]${COLOR_NC} $*"; }
+log_warning() { echo -e "${COLOR_YELLOW}[WARN]${COLOR_NC} $*"; }
+section() { echo -e "\n${COLOR_BLUE}=== $1 ===${COLOR_NC}\n"; }
 
 section "Docker Verification - TradingSystem"
 
@@ -126,4 +131,3 @@ fi
 
 echo ""
 exit "$FAIL"
-

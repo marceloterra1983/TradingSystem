@@ -21,6 +21,7 @@ governance/
 ├── VALIDATION-GUIDE.md             # Validation guide
 ├── MAINTENANCE-CHECKLIST.md        # Maintenance procedures
 ├── COMMUNICATION-PLAN.md           # Launch communication plan
+├── PLANO-REVISAO-GOVERNANCA.md     # Governance plan (RACI, KPIs, cadência)
 ├── ENV-AUDIT-REPORT.md            # Environment variables audit
 │
 ├── audits/                         # Quality audits (NEW)
@@ -120,6 +121,20 @@ governance/
 - Launch day: Go-live announcement
 - T+7 days: Feedback survey
 - T+30 days: Transition complete
+
+---
+
+### 5. [PLANO-REVISAO-GOVERNANCA.md](PLANO-REVISAO-GOVERNANCA.md)
+
+**Purpose**: Consolidar papéis (RACI), KPIs e cadência trimestral das rotinas de governança.
+
+**Audience**: DocsOps, ProductOps, release/QA, guildas técnicas.
+
+**Usage**:
+- Consultar responsabilidades por processo (RACI).
+- Seguir ciclo trimestral padronizado (preparação → execução → auditoria → retrospectiva).
+- Atualizar `review-tracking.csv` com as colunas `GovernanceStatus`, `LastAuditDate`, `EvidenceLink`.
+- Priorizar backlog de melhorias (quick wins e médio prazo).
 
 ---
 
@@ -224,7 +239,7 @@ governance/
 
 **Automation**:
 - [docs README](../README.md) - Automation and helpers
-- [docs-auto.mjs](../../scripts/docusaurus/docs-auto.mjs) - Content generation script
+- [docs-auto.mjs](../../scripts/docs/docs-auto.mjs) - Content generation script
 - [validate-frontmatter.py](../../scripts/docs/validate-frontmatter.py) - Frontmatter validation
 
 ---
