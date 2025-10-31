@@ -3,9 +3,48 @@ import { useEffect } from 'react';
 import { libraryService } from '../../../../services/libraryService';
 import type { Item, ItemFormWithStatus } from '../types/workspace.types';
 
+const areItemsEqual = (previous: Item[], next: Item[]): boolean => {
+  if (previous.length !== next.length) {
+    return false;
+  }
+
+  const previousById = new Map(previous.map((item) => [item.id, item]));
+
+  for (const nextItem of next) {
+    const previousItem = previousById.get(nextItem.id);
+    if (!previousItem) {
+      return false;
+    }
+
+    if (
+      previousItem.title !== nextItem.title ||
+      previousItem.description !== nextItem.description ||
+      previousItem.category !== nextItem.category ||
+      previousItem.priority !== nextItem.priority ||
+      previousItem.status !== nextItem.status ||
+      previousItem.createdAt !== nextItem.createdAt
+    ) {
+      return false;
+    }
+
+    if (previousItem.tags.length !== nextItem.tags.length) {
+      return false;
+    }
+
+    for (let index = 0; index < previousItem.tags.length; index++) {
+      if (previousItem.tags[index] !== nextItem.tags[index]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
 interface WorkspaceState {
   items: Item[];
   loading: boolean;
+  syncing: boolean;
   error: Error | null;
   lastSyncedAt: string | null;
   loadItems: (options?: { force?: boolean }) => Promise<void>;
@@ -32,6 +71,7 @@ let ongoingLoad: Promise<void> | null = null;
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   items: [],
   loading: false,
+  syncing: false,
   error: null,
   lastSyncedAt: null,
   loadItems: async ({ force } = {}) => {
@@ -39,19 +79,32 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       return ongoingLoad;
     }
 
-    set({ loading: true, error: null });
+    const hasExistingItems = get().items.length > 0;
+    set({
+      loading: hasExistingItems ? false : true,
+      syncing: hasExistingItems,
+      error: null,
+    });
 
     const request = (async () => {
       try {
         const data = await libraryService.getAllItems();
-        set({
-          items: data,
-          loading: false,
-          error: null,
-          lastSyncedAt: new Date().toISOString(),
+        set((state) => {
+          const itemsChanged = !areItemsEqual(state.items, data);
+          return {
+            items: itemsChanged ? data : state.items,
+            loading: false,
+            syncing: false,
+            error: null,
+            lastSyncedAt: new Date().toISOString(),
+          };
         });
       } catch (err) {
-        set({ error: err as Error, loading: false });
+        set((state) => ({
+          error: err as Error,
+          loading: state.items.length === 0 ? false : state.loading,
+          syncing: false,
+        }));
         console.error('Error loading items:', err);
         throw err;
       } finally {
@@ -72,11 +125,12 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       set((state) => ({
         items: [created, ...state.items.filter((item) => item.id !== created.id)],
         error: null,
+        syncing: false,
         lastSyncedAt: new Date().toISOString(),
       }));
       return created;
     } catch (err) {
-      set({ error: err as Error });
+      set({ error: err as Error, syncing: false });
       throw err;
     }
   },
@@ -97,11 +151,12 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       set((state) => ({
         items: state.items.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)),
         error: null,
+        syncing: false,
         lastSyncedAt: new Date().toISOString(),
       }));
       return updated;
     } catch (err) {
-      set({ error: err as Error });
+      set({ error: err as Error, syncing: false });
       throw err;
     }
   },
@@ -115,10 +170,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       set((state) => ({
         items: state.items.filter((item) => item.id !== id),
         error: null,
+        syncing: false,
         lastSyncedAt: new Date().toISOString(),
       }));
     } catch (err) {
-      set({ error: err as Error });
+      set({ error: err as Error, syncing: false });
       throw err;
     }
   },
@@ -136,12 +192,7 @@ export function useInitializeWorkspaceEvents() {
     // Initial load
     void loadItems().catch(() => undefined);
 
-    // Set up automatic polling every 15 seconds
-    const intervalId = setInterval(() => {
-      void loadItems({ force: true }).catch(() => undefined);
-    }, 15000); // 15 seconds
-
-    // Cleanup interval on unmount
-    return () => clearInterval(intervalId);
+    // Polling temporarily disabled to prevent UI flicker.
+    return undefined;
   }, [loadItems]);
 }

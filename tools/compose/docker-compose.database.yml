@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_DB: trading
       POSTGRES_USER: timescale
-      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD}
+      POSTGRES_PASSWORD: ${TIMESCALEDB_PASSWORD:-pass_timescale}
       TIMESCALEDB_TELEMETRY: 'off'
     restart: unless-stopped
     healthcheck:
@@ -57,6 +57,11 @@ services:
   timescaledb-pgadmin:
     image: "${IMG_DATA_TIMESCALEDB_PGADMIN:-dpage/pgadmin4:latest}"
     container_name: data-timescale-pgadmin
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
     ports:
       - "${PGADMIN_HOST_PORT:-5050}:80"
     environment:
@@ -70,14 +75,25 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   timescaledb-pgweb:
     image: "${IMG_DATA_TIMESCALEDB_PGWEB:-sosedoff/pgweb:latest}"
     container_name: data-timescale-pgweb
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
     ports:
       - "${PGWEB_PORT:-8081}:8081"
     environment:
-      PGWEB_DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-changeme}@timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
+      PGWEB_DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-pass_timescale}@data-timescale:5432/${TIMESCALEDB_DB:-tradingsystem}?sslmode=disable'
     restart: unless-stopped
     env_file:
       - ../../.env
@@ -86,10 +102,21 @@ services:
         condition: service_healthy
     networks:
       - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   timescaledb-adminer:
     image: "${IMG_DATA_TIMESCALEDB_ADMINER:-adminer:latest}"
     container_name: data-timescale-admin
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
     ports:
       - "${ADMINER_PORT:-8080}:8080"
     environment:
@@ -102,10 +129,21 @@ services:
       - ../../.env
     depends_on:
       - timescaledb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   postgress-langgraph:
     image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres:15}"
     container_name: data-postgres-langgraph
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
     ports:
       - "5435:5432"
     environment:
@@ -115,10 +153,21 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tradingsystem}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   qdrant:
     image: "${IMG_DATA_QDRANT:-qdrant/qdrant:latest}"
     container_name: data-qdrant
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
     ports:
       - "${QDRANT_PORT:-6333}:6333"
       - "${QDRANT_GRPC_PORT:-6334}:6334"
@@ -129,10 +178,23 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '18BD' /proc/net/tcp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   questdb:
     image: "${IMG_DATA_QUESTDB:-questdb/questdb:latest}"
     container_name: data-questdb
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
     ports:
       - "${QUESTDB_HTTP_PORT_NEW:-9000}:9000"
       - "${QUESTDB_PG_PORT_NEW:-9009}:9009"
@@ -143,6 +205,12 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '2328' /proc/net/tcp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 # ========================================
 # Networks

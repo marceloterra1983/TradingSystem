@@ -337,7 +337,7 @@ function LlamaIndexEndpointBanner(): JSX.Element {
 
   const info = endpointInfo();
 
-  async function doHealthCheck() {
+  const doHealthCheck = useCallback(async () => {
     try {
       setHealth('unknown');
       setHealthMsg('');
@@ -376,19 +376,17 @@ function LlamaIndexEndpointBanner(): JSX.Element {
         });
       }
     }
-  }
+  }, []); // Empty deps - uses setState updaters
 
   useEffect(() => {
     doHealthCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mode, doHealthCheck]);
 
   // Auto health every 30s
   useEffect(() => {
-    const id = setInterval(() => { doHealthCheck(); }, 30000);
+    const id = setInterval(doHealthCheck, 30000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [doHealthCheck]);
 
   return (
     <>

@@ -5,13 +5,14 @@ import { useItemDragDrop } from '../hooks/useItemDragDrop';
 import { DroppableColumn } from './DroppableColumn';
 import { WorkspaceItemDragPreview } from './DraggableItemCard';
 import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, RefreshCw } from 'lucide-react';
 import { STATUS_CONFIG } from '../constants/workspace.constants';
 import type { ItemStatus, Item } from '../types/workspace.types';
 
 export function StatusBoardSection() {
   const items = useWorkspaceStore((state) => state.items);
   const loading = useWorkspaceStore((state) => state.loading);
+  const syncing = useWorkspaceStore((state) => state.syncing);
   const { sensors, activeItem, handleDragStart, handleDragEnd } = useItemDragDrop();
 
   // Group items by status
@@ -33,7 +34,7 @@ export function StatusBoardSection() {
     return groups;
   }, [items]);
 
-  if (loading) {
+  if (loading && items.length === 0) {
     return (
       <CollapsibleCard cardId="workspace-status-board">
         <CollapsibleCardHeader>
@@ -63,6 +64,12 @@ export function StatusBoardSection() {
               Arraste itens entre colunas para alterar o status
             </CollapsibleCardDescription>
           </div>
+          {syncing && (
+            <div className="flex items-center gap-2 text-xs text-cyan-600 dark:text-cyan-300">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              Sincronizando
+            </div>
+          )}
         </CollapsibleCardHeader>
         <CollapsibleCardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">

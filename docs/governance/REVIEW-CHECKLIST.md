@@ -31,6 +31,12 @@
 - [ ] Manual edits outside generated sections
 - [ ] Timestamps current (for generated content)
 
+## Metrics & Evidence
+
+- **KPI**: `completionRate = capítulos aprovados / capítulos totais` (meta ≥ 95% por ciclo).
+- **Registro**: Atualizar `docs/governance/review-tracking.csv` (`Status`, `GovernanceStatus`, `LastAuditDate`) ao encerrar cada fase.
+- **Evidência**: Linkar ata/issue de sign-off na coluna `EvidenceLink` e resumir o resultado na seção de sign-off ao final deste arquivo.
+
 ## Chapter 1: Apps Documentation (20 files)
 
 **Owner**: DocsOps

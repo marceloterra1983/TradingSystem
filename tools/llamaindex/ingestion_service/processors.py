@@ -38,6 +38,9 @@ class DocumentProcessor:
         """Process a single file and return chunks with metadata."""
         try:
             mime_type = magic.from_file(file_path, mime=True)
+            extension = Path(file_path).suffix.lower()
+            if mime_type == 'text/plain' and extension in {'.md', '.mdx'}:
+                mime_type = 'text/markdown'
             processor = self.get_processor_for_type(mime_type)
             if not processor:
                 raise ValueError(f"Unsupported file type: {mime_type}")

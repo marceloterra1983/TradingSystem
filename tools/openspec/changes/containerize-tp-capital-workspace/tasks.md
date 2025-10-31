@@ -45,29 +45,15 @@
 
 ## 2. Containerização - TP Capital
 
-**Objective**: Create development-friendly Docker container for TP Capital
+**Objective**: Consolidate TP Capital container using the existing governance-compliant Dockerfile
 
-- [ ] 2.1 **Criar `apps/tp-capital/Dockerfile.dev`**
-  ```dockerfile
-  FROM node:20-alpine
-  WORKDIR /app
+- [ ] 2.1 **Revisar `apps/tp-capital/Dockerfile.dev` (já existente)**
+  - Confirmar que o arquivo copia `backend/shared/**` (logger, middleware, config) antes de instalar dependências.
+  - Documentar via comentário que o contexto de build deve ser a raiz do repositório (`TradingSystem/`) para que os caminhos `apps/tp-capital/**/*` funcionem.
+  - Garantir que o `HEALTHCHECK` continue ativo e alinhado à governança de containers (`docs/governance/CONTAINER-NAMING-CONVENTION.md`).
+  **Validation**: `docker build -f apps/tp-capital/Dockerfile.dev .` executado na raiz completa sem erros.
 
-  # Install dependencies first (cache layer)
-  COPY package*.json ./
-  RUN npm ci
-
-  # Copy source code (will be overridden by volume in dev)
-  COPY . .
-
-  # Expose port
-  EXPOSE 4005
-
-  # Use nodemon for hot-reload
-  CMD ["npm", "run", "dev"]
-  ```
-  **Validation**: File exists at correct path
-
-- [ ] 2.2 **Criar `apps/tp-capital/.dockerignore`**
+- [ ] 2.2 **Criar/atualizar `apps/tp-capital/.dockerignore`**
   ```
   node_modules
   npm-debug.log
@@ -105,14 +91,14 @@
 
 - [ ] 2.4 **Testar build isolado**
   ```bash
-  cd apps/tp-capital
-  docker build -f Dockerfile.dev -t tp-capital:dev .
+  # Executar a partir da raiz do projeto
+  docker build -f apps/tp-capital/Dockerfile.dev -t tradingsystem/tp-capital:dev .
   ```
   **Validation**: Build succeeds without errors, image size < 500MB
 
 - [ ] 2.5 **Testar run isolado**
   ```bash
-  docker run --rm -p 4005:4005 --env-file ../../.env --name tp-capital-test tp-capital:dev
+  docker run --rm -p 4005:4005 --env-file .env --name tp-capital-test tradingsystem/tp-capital:dev
   # In another terminal
   curl http://localhost:4005/health
   ```
@@ -122,29 +108,15 @@
 
 ## 3. Containerização - Workspace
 
-**Objective**: Create development-friendly Docker container for Workspace with TimescaleDB only
+**Objective**: Consolidate Workspace container (TimescaleDB only) usando o Dockerfile existente
 
-- [ ] 3.1 **Criar `backend/api/workspace/Dockerfile.dev`**
-  ```dockerfile
-  FROM node:20-alpine
-  WORKDIR /app
+- [ ] 3.1 **Revisar `backend/api/workspace/Dockerfile.dev` (já existente)**
+  - Confirmar que o arquivo mantém a instalação das dependências compartilhadas (`backend/shared/**`).
+  - Explicitar em comentário que o build deve ser executado a partir da raiz para resolver `api/workspace/*`.
+  - Validar `HEALTHCHECK` ativo com `http://localhost:3200/health`.
+  **Validation**: `docker build -f backend/api/workspace/Dockerfile.dev .` executado na raiz sem erros.
 
-  # Install dependencies
-  COPY package*.json ./
-  RUN npm ci
-
-  # Copy source code
-  COPY . .
-
-  # Expose port
-  EXPOSE 3200
-
-  # Use nodemon for hot-reload
-  CMD ["npm", "run", "dev"]
-  ```
-  **Validation**: File exists at correct path
-
-- [ ] 3.2 **Criar `backend/api/workspace/.dockerignore`**
+- [ ] 3.2 **Criar/atualizar `backend/api/workspace/.dockerignore`**
   ```
   node_modules
   npm-debug.log
@@ -193,9 +165,8 @@
 
 - [ ] 3.6 **Testar build e run isolado**
   ```bash
-  cd backend/api/workspace
-  docker build -f Dockerfile.dev -t workspace:dev .
-  docker run --rm -p 3200:3200 --env-file ../../../.env --name workspace-test workspace:dev
+  docker build -f backend/api/workspace/Dockerfile.dev -t tradingsystem/workspace:dev .
+  docker run --rm -p 3200:3200 --env-file .env --name workspace-test tradingsystem/workspace:dev
   # Test
   curl http://localhost:3200/health
   curl http://localhost:3200/api/items
@@ -208,80 +179,42 @@
 
 **Objective**: Integrate both services into Docker Compose stack
 
-- [ ] 4.1 **Criar `tools/compose/docker-compose.apps.yml`**
+- [ ] 4.1 **Revisar `tools/compose/docker-compose.apps.yml` (arquivo real)**
+  - Manter `build.context: ../..` e `dockerfile: apps/tp-capital/Dockerfile.dev` / `api/workspace/Dockerfile.dev` para resolver módulos compartilhados.
+  - Documentar que os serviços usam a rede externa `tradingsystem_backend` e dependem do container `data-timescale` fornecido pelo stack de bancos (`docker-compose.database.yml`), portanto **remover/evitar** `depends_on` local inexistente.
+  - Garantir `container_name` segue convenção (`apps-tpcapital`, `apps-workspace`) e `env_file` aponta para `../../.env`, conforme governança.
   ```yaml
-  name: tradingsystem-apps
-
   services:
     tp-capital:
-      container_name: tp-capital
+      container_name: apps-tpcapital
       build:
-        context: ../../apps/tp-capital
-        dockerfile: Dockerfile.dev
-      image: tradingsystem/tp-capital:dev
-      ports:
-        - "4005:4005"
+        context: ../..
+        dockerfile: apps/tp-capital/Dockerfile.dev
       env_file:
         - ../../.env
-      volumes:
-        - ../../apps/tp-capital/src:/app/src:ro
-        - ../../apps/tp-capital/package.json:/app/package.json:ro
-        - tp-capital-node-modules:/app/node_modules
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
       networks:
         - tradingsystem_backend
-      depends_on:
-        timescaledb:
-          condition: service_healthy
       healthcheck:
-        test: ["CMD", "wget", "-q", "-O-", "http://localhost:4005/health"]
-        interval: 30s
-        timeout: 10s
-        start_period: 20s
-        retries: 3
-      restart: unless-stopped
-      labels:
-        - "com.tradingsystem.service=tp-capital"
-        - "com.tradingsystem.type=backend"
-
+        test: ["CMD", "node", "-e", "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
     workspace:
-      container_name: workspace
+      container_name: apps-workspace
       build:
-        context: ../../backend/api/workspace
-        dockerfile: Dockerfile.dev
-      image: tradingsystem/workspace:dev
-      ports:
-        - "3200:3200"
+        context: ../..
+        dockerfile: backend/api/workspace/Dockerfile.dev
       env_file:
         - ../../.env
-      volumes:
-        - ../../backend/api/workspace/src:/app/src:ro
-        - ../../backend/api/workspace/package.json:/app/package.json:ro
-        - workspace-node-modules:/app/node_modules
       networks:
         - tradingsystem_backend
-      depends_on:
-        timescaledb:
-          condition: service_healthy
       healthcheck:
-        test: ["CMD", "wget", "-q", "-O-", "http://localhost:3200/health"]
-        interval: 30s
-        timeout: 10s
-        start_period: 20s
-        retries: 3
-      restart: unless-stopped
-      labels:
-        - "com.tradingsystem.service=workspace"
-        - "com.tradingsystem.type=backend"
-
-  volumes:
-    tp-capital-node-modules:
-    workspace-node-modules:
-
+        test: ["CMD", "node", "-e", "require('http').get('http://localhost:3200/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
   networks:
     tradingsystem_backend:
+      name: tradingsystem_backend
       external: true
   ```
-  **Validation**: File syntax valid (`docker compose -f ... config`)
+  **Validation**: `docker compose -f tools/compose/docker-compose.apps.yml config` executa sem warnings e mantém comentários explicando dependência do stack `database`.
 
 - [ ] 4.2 **Criar network se não existir**
   ```bash
@@ -519,6 +452,8 @@
 
   **Validation**: README has Docker examples
 
+---
+
 - [ ] 8.4 **Atualizar `docs/context/backend/guides/guide-tp-capital.md`**
   - Add containerization section
   - Update environment variables
@@ -543,11 +478,29 @@
 
 ---
 
-## 9. Cleanup & Finalization
+## 9. Governança & Manifesto
+
+**Objective**: Alinhar a governança de containers e manifestos com os serviços containerizados
+
+- [ ] 9.1 **Atualizar `config/services-manifest.json`**
+  - Alterar `start` para usar `scripts/docker/start-apps.sh tp-capital` / `scripts/docker/start-apps.sh workspace`.
+  - Ajustar `managed` para `"docker-compose"` (novo valor documentado) e manter `workspace: true`.
+  - Adicionar campo `stack: "apps"` (se ainda não existir) para aderir a `docs/governance/CONTAINER-NAMING-CONVENTION.md`.
+  **Validation**: `jq '.services[] | select(.id=="tp-capital-signals") | {managed, stack}' config/services-manifest.json` mostra `"docker-compose"` e `"apps"` (mesmo para `workspace-api`).
+
+- [ ] 9.2 **Atualizar governança de containers**
+  - `docs/governance/CONTAINER-INVENTORY-CURRENT.md`: marcar `apps-tpcapital` e `apps-workspace` como ativos/gerenciados via compose apps.
+  - `docs/governance/CONTAINER-NAMING-CONVENTION.md`: acrescentar exemplo/referência aos serviços `apps-tpcapital` e `apps-workspace`.
+  - `docs/governance/CONTAINER-MIGRATION-COMPLETE.md`: registrar esta migração (nova linha em "Histórico de mudanças").
+  **Validation**: Checklist de governança (VALIDATION-GUIDE) passa sem apontar pendências relacionadas a containers.
+
+---
+
+## 10. Cleanup & Finalization
 
 **Objective**: Clean up temporary artifacts and validate proposta
 
-- [ ] 9.1 **Remover código LowDB comentado (se tudo ok)**
+- [ ] 10.1 **Remover código LowDB comentado (se tudo ok)**
   ```bash
   # Search for commented LowDB code
   grep -r "lowdb" backend/api/workspace/src/ --include="*.js"
@@ -555,26 +508,26 @@
   ```
   **Validation**: No LowDB references in codebase
 
-- [ ] 9.2 **Atualizar `.gitignore` se necessário**
+- [ ] 10.2 **Atualizar `.gitignore` se necessário**
   - Ensure `Dockerfile*.local` ignored if created
   - Ensure `docker-compose.override.yml` ignored
 
   **Validation**: `.gitignore` covers all temporary files
 
-- [ ] 9.3 **Validar `.env.example` atualizado**
+- [ ] 10.3 **Validar `.env.example` atualizado**
   ```bash
   # Check for new vars needed
   diff <(grep -oP '^[A-Z_]+=' .env | sort) <(grep -oP '^[A-Z_]+=' .env.example | sort)
   ```
   **Validation**: `.env.example` has all required vars
 
-- [ ] 9.4 **Executar validação OpenSpec**
+- [ ] 10.4 **Executar validação OpenSpec**
   ```bash
   npm run openspec -- validate containerize-tp-capital-workspace --strict
   ```
   **Validation**: All checks pass
 
-- [ ] 9.5 **Commit com Conventional Commits**
+- [ ] 10.5 **Commit com Conventional Commits**
   ```bash
   git add .
   git commit -m "feat(containers)!: containerize TP Capital and Workspace services

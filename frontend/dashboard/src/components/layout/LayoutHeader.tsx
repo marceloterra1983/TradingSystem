@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 import { Page, getSectionByPageId } from '../../data/navigation';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Logo } from '../ui/logo';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { endpointInfo, checkHealth, setMode, getMode, type ServiceMode } from '../../services/llamaIndexService';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
@@ -40,18 +40,18 @@ export function LayoutHeader({
   const [ragHealthUrl, setRagHealthUrl] = useState<string>('');
   const [headerMode, setHeaderMode] = useState<ServiceMode>(getMode());
 
-  async function refreshRagHealth() {
+  const refreshRagHealth = useCallback(async () => {
     const h = await checkHealth();
     setRagResolved(h.resolved);
     setRagHealth(h.status);
     setRagHealthUrl(h.url);
-  }
+  }, []);
 
   useEffect(() => {
     refreshRagHealth();
-    const id = setInterval(() => { refreshRagHealth(); }, 60000);
+    const id = setInterval(refreshRagHealth, 60000);
     return () => clearInterval(id);
-  }, []);
+  }, [refreshRagHealth]);
 
   return (
     <header

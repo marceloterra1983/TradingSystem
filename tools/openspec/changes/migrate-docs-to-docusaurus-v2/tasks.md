@@ -22,9 +22,9 @@
 
 ## Phase 3 – Automation & Integrations
 - [ ] 3.1 Implement automation scripts (`docs:auto`) for Redoc summaries, ports table, MCP registry, PRD index, design tokens sync
-  - Scaffolding in place (`scripts/docusaurus/docs-auto.mjs`) with placeholder generation.
+  - Scaffolding in place (`scripts/docs/docs-auto.mjs`) with placeholder generation.
 - [x] 3.2 Add shell helpers (`build.sh`, `serve.sh`, `lint.sh`, `check-links.sh`) with consistent path handling
-  - Shell wrappers live under `scripts/docusaurus/`; `check-links.sh` rebuilds and runs Linkinator with skip controls.
+  - Shell wrappers live under `scripts/docs/`; `check-links.sh` rebuilds and runs Linkinator with skip controls.
 - [x] 3.3 Wire npm scripts (`docs:dev`, `docs:build`, `docs:serve`, `docs:lint`, `docs:auto`, `docs:check`, `docs:new`)
   - `docs/package.json` now exposes `docs:auto`, enhanced `docs:check`, `docs:links`, `docs:new`, and `docs:test`.
 - [x] 3.4 Integrate Husky hooks: `pre-commit` → lint, `pre-push` → `docs:check`
@@ -45,7 +45,7 @@
 - [ ] 5.1 Update Laucher configuration, ops scripts, and dashboard messaging to use `docs`
 - [ ] 5.2 Harden `.gitignore` for `docs/build/` and verify no `.env*` artifacts tracked
 - [ ] 5.3 Produce cut-over runbook with owners, verification checklist, and rollback plan
-- [ ] 5.4 Dry-run `scripts/docusaurus/check-links.sh` and `stale-report.ts`, publishing artifacts
+- [ ] 5.4 Dry-run `scripts/docs/check-links.sh` and `stale-report.ts`, publishing artifacts
 - [ ] 5.5 Communicate rollout timeline via release notes, README updates, and internal channels
 
 ## Phase 6 – Cut-over & Post-launch Hygiene

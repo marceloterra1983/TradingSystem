@@ -108,6 +108,8 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
 -   ✅ **Unified Domain** - Single domain access with Nginx reverse proxy
 -   ✅ **No CORS Required** - All services on same domain (tradingsystem.local)
 -   ✅ **Documentation Quality** - Automated link validation, 195+ docs with complete frontmatter
+-   ✅ **RAG Documentation Search** - LlamaIndex-powered semantic search and Q&A system
+-   ✅ **Secure API Proxy** - JWT-based backend proxy for RAG endpoints
 
 ## ✨ Features
 
@@ -146,6 +148,16 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
 -   Prometheus metrics
 -   Grafana dashboards
 -   Real-time performance monitoring
+
+### RAG Documentation System (NEW! 🔍)
+
+-   **Semantic Search** - Find documentation using natural language queries
+-   **Q&A with Context** - Ask questions and get answers with source references
+-   **Backend Proxy** - JWT-minted server-side for secure API access
+-   **Auto Health Checks** - Dashboard monitors proxy health every 30s
+-   **Mode Switching** - Runtime toggle between proxy/direct/auto modes
+-   **Copy to Clipboard** - One-click copy for answers, sources, and results
+-   **Powered by**: LlamaIndex + Qdrant + Ollama (mxbai-embed-large + llama3.2:3b)
 
 ## 🏗️ Architecture
 

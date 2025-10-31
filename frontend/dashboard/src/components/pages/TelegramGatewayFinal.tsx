@@ -343,7 +343,7 @@ export function TelegramGatewayFinal() {
     fetchData();
     const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
-  }, [fetchData, filterChannel]);
+  }, [filterChannel, filterLimit, fetchData]);
 
   const handleCreateChannel = async () => {
     if (!newChannelId.trim()) {

@@ -5,12 +5,12 @@ services:
   # TP Capital API (Trading Signals)
   # Production Configuration
   # ========================================
-  tp-capital-api:
+  tp-capital:
     build:
       context: ../../apps/tp-capital/api
       dockerfile: Dockerfile  # Production Dockerfile
-    image: tp-capital-api:production
-    container_name: tp-capital-api
+    image: img-apps-tpcapital:production
+    container_name: apps-tpcapital
 
     # Load environment from centralized root .env
     env_file:
@@ -80,8 +80,8 @@ services:
     build:
       context: ../../backend/api/workspace
       dockerfile: Dockerfile  # Production Dockerfile
-    image: workspace-service:production
-    container_name: workspace-service
+    image: img-apps-workspace:production
+    container_name: apps-workspace
     ports:
       - "3200:3200"
     environment:

@@ -1,0 +1,133 @@
+---
+title: "Vis\xE3o Geral do PRD - Trading App"
+description: Resumo dos requisitos de produto para o Trading App.
+tags:
+  - prd
+  - trading-app
+owner: ProductOps
+lastReviewed: '2025-10-26'
+language: pt
+translated_from: ./prd-overview.mdx
+translation_source_language: en
+translation_source_hash: f0204c44f6e048910bc28c4100280546de212c91
+---
+## Resumo Executivo
+
+**Trading App** é a superfície de produto unificada para o TradingSystem, abrangendo gestão de ideias (Workspace/Banco de Ideias), execução de ordens (Order Manager), visualização de dados de mercado (sinais TP Capital) e controles de risco. Ele oferece a traders e operadores um dashboard centralizado para capturar ideias, executar ordens com salvaguardas automatizadas, monitorar posições e acompanhar a saúde do sistema.
+
+**Contexto do Produto**
+
+TradingSystem é uma plataforma complexa com 6 sistemas independentes:
+
+1. **Dashboard** (Ciano) - UI/UX, KPIs, visualizações
+2. **Coleta de Dados** (Verde) - ProfitDLL, WebSocket, feeds
+3. **Banco de Dados** (Roxo) - Parquet, PostgreSQL, metadados
+4. **Análise de Dados** (Laranja) - ML, features, backtesting
+5. **Gestão de Riscos** (Vermelho) - Ordens, posições, limites
+6. **Documentação** (Azul) - Docs, PRDs, ADRs
+
+O Trading App funciona como a interface principal para:
+
+- Estruturar e acompanhar ideias de funcionalidades (Banco de Ideias)
+- Executar ordens com controles de risco (Order Manager)
+- Monitorar sinais TP Capital (Tabela de Sinais)
+- Visualizar posições e P&L (Dashboard)
+- Gerenciar configurações do sistema (Conexões)
+
+**Posicionamento**
+
+**Para:** Traders, operadores e desenvolvedores do TradingSystem  
+**Que:** Precisam gerenciar ideias, executar ordens com segurança e monitorar a atividade de trading  
+**O Trading App é:** Uma plataforma integrada de trading e operações  
+**Que:** Combina gestão de ideias, execução de ordens, controles de risco e monitoramento  
+**Diferente de:** Plataformas de trading genéricas ou ferramentas de gestão de projetos  
+**Nosso produto:** É feito sob medida para o TradingSystem com controles de risco integrados, rastreamento de ideias e agregação de sinais de múltiplas fontes
+
+## Problema e Oportunidade
+
+**Desafios Atuais**
+
+- Ideias espalhadas em notas, emails e mensagens sem rastreamento sistemático
+- Execução manual de ordens suscetível a erros e sem controles de risco automatizados
+- Múltiplas fontes de dados (Workspace, TP Capital) exigem correlação manual
+- Falta de monitoramento centralizado e trilha de auditoria
+- Dificuldade em priorizar funcionalidades e acompanhar o status de implementação
+
+**Oportunidade**
+
+- Gestão centralizada de ideias com categorização e priorização
+- Execução automatizada de ordens com validações de risco pré-negociação
+- Dashboard unificado para sinais, posições e saúde do sistema
+- Trilha de auditoria completa para compliance e debugging
+- Workflow integrado da captura de ideias até a execução de ordens
+
+## Objetivos e Critérios de Sucesso
+
+**Objetivos Primários**
+
+1. Disponibilizar gestão centralizada de ideias (Banco de Ideias/Workspace)
+2. Habilitar execução automatizada de ordens com segurança (Order Manager)
+3. Visualizar sinais TP Capital e dados de mercado
+4. Aplicar controles de risco (limites de perda diária, tamanho de posição, horários de negociação)
+5. Monitorar a saúde e a performance do sistema
+
+**Critérios de Sucesso**
+
+**Quantitativos**
+
+- 100% das ideias registradas em sistema centralizado
+- &lt;30 segundos para adicionar nova ideia
+- &lt;500ms p95 de latência de colocação de ordem
+- 99% de uptime do sistema
+- &lt;2 segundos de tempo de carregamento do dashboard
+- Suporte a 10.000+ ideias sem degradação de performance
+
+**Qualitativos**
+
+- Interface intuitiva (sem necessidade de treinamento)
+- Integração fluida entre funcionalidades
+- Visibilidade clara do roadmap via quadro de status
+- Controles de risco transparentes com feedback acionável
+- Trilha de auditoria completa para compliance
+
+## Roadmap
+
+| Funcionalidade | Status | Resumo | Responsável | Release Alvo |
+|----------------|--------|--------|-------------|---------------|
+| [Banco de Ideias/Workspace](./feature-idea-bank.pt.mdx) | Implementado | Gestão de ideias com quadro Kanban | Product & Frontend | v1.0 (Out 2025) |
+| [Order Manager](./feature-order-manager.pt.mdx) | Rascunho | Execução automatizada de ordens com salvaguardas de risco | Product & Frontend | v1.1 (Q1 2026) |
+| Sinais TP Capital *(documento planejado)* | Implementado | Ingestão e visualização de sinais do Telegram | Product & Frontend | v1.0 (Out 2025) |
+| Dashboard de Risco *(documento planejado)* | Planejado | Monitoramento de risco em tempo real e controles | Product & Ops | v1.2 (Q2 2026) |
+| Análise Multi-Agente *(documento planejado)* | Aprovado | Análise de mercado e geração de sinais com IA | Backend Guild | v1.1 (Q1 2026) |
+
+**Cronograma de Releases**
+
+- **v1.0** (Out 2025): Banco de Ideias, Sinais TP Capital, base do Dashboard ✅ Completo
+- **v1.1** (Q1 2026): Order Manager, integração Agno Agents 🔄 Em progresso
+- **v1.2** (Q2 2026): Dashboard de Risco, análises avançadas 📋 Planejado
+- **v2.0** (Q3 2026): Suporte multi-broker, tipos de ordem avançados 📋 Planejado
+
+## Dependências
+
+**Dependências Técnicas**
+
+- **APIs Backend**: Workspace (porta 3102), TP Capital (porta 3200), Order Manager (porta 3205)
+- **Bancos de Dados**: QuestDB (sinais TP Capital), TimescaleDB (Banco de Ideias), PostgreSQL (Order Manager)
+- **Externos**: ProfitDLL (execução de ordens), API do Telegram (ingestão de sinais)
+
+**Dependências de Documentação**
+
+- **SDD**: `/sdd/domain/schemas/v1/order`, `/sdd/flows/v1/place-order`, `/sdd/events/v1/order-created`
+- **API**: `/api/order-manager`, `/api/data-capture`, `/redoc/order-manager`
+- **Frontend**: `/frontend/engineering/architecture`, `/frontend/design-system/components`
+
+## Documentação Relacionada
+
+- [Funcionalidade: Banco de Ideias](./feature-idea-bank.pt.mdx)
+- [Funcionalidade: Order Manager](./feature-order-manager.pt.mdx)
+- Funcionalidade: Sinais TP Capital *(documento planejado)*
+- Funcionalidade: Dashboard de Risco *(documento planejado)*
+- Funcionalidade: Análise Multi-Agente *(documento planejado)*
+- [Templates de PRD](../../templates/prd-template)
+- Requisitos de negócio (migração pendente)
+- Visão geral de arquitetura (migração pendente)

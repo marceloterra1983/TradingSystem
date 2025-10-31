@@ -47,6 +47,22 @@ const DocsHybridSearchPage = React.lazy(
   () => import('../components/pages/DocsHybridSearchPage')
 );
 
+// ✅ MEMOIZED CUSTOM CONTENT ELEMENTS
+// Create stable references to prevent unnecessary re-renders and component remounts
+// Each element is created once and reused across renders
+const tpCapitalContent = <TPCapitalOpcoesPage />;
+const telegramGatewayContent = <TelegramGatewayFinal />;
+const workspaceContent = <WorkspacePageNew />;
+const docusaurusContent = <DocusaurusPageNew />;
+const databaseContent = <DatabasePageNew />;
+const miroContent = <MiroPage />;
+const docsHybridSearchContent = <DocsHybridSearchPage />;
+const langGraphContent = <LangGraphPage />;
+const llamaIndexContent = <LlamaIndexPage />;
+const langChainVectorContent = <LangChainVectorPage />;
+const agnoAgentsContent = <AgnoAgentsPage />;
+const launcherContent = <LauncherPage />;
+
 /**
  * Page Part - Collapsible section within a page
  */
@@ -165,7 +181,7 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Sinais Telegram em tempo real',
         },
         parts: [],
-        customContent: <TPCapitalOpcoesPage />,
+        customContent: tpCapitalContent,
       },
       {
         id: 'telegram-gateway',
@@ -175,7 +191,7 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Monitoramento do serviço MTProto, filas e mensagens persistidas',
         },
         parts: [],
-        customContent: <TelegramGatewayFinal />,
+        customContent: telegramGatewayContent,
       },
       {
         id: 'workspace',
@@ -186,7 +202,7 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [], // Empty - uses customContent
         // ✅ CustomizablePageLayout - 2 sections: CRUD table + Kanban board
-        customContent: <WorkspacePageNew />,
+        customContent: workspaceContent,
       },
     ],
   },
@@ -208,7 +224,7 @@ export const NAVIGATION_DATA: Section[] = [
             'Docs portal, context hub e referências operacionais atualizadas',
         },
         parts: [], // Empty - uses customContent
-        customContent: <DocusaurusPageNew />,
+        customContent: docusaurusContent,
       },
       {
         id: 'knowledge-database',
@@ -219,7 +235,7 @@ export const NAVIGATION_DATA: Section[] = [
             'QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel',
         },
         parts: [],
-        customContent: <DatabasePageNew />,
+        customContent: databaseContent,
       },
       {
         id: 'miro',
@@ -230,7 +246,7 @@ export const NAVIGATION_DATA: Section[] = [
             'Quadro colaborativo para planejamento visual e brainstorming',
         },
         parts: [],
-        customContent: <MiroPage />,
+        customContent: miroContent,
       },
       {
         id: 'docs-hybrid-search',
@@ -241,7 +257,7 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [],
         // Use the same lazy loading pattern as other pages; PageContent wraps with Suspense
-        customContent: <DocsHybridSearchPage />,
+        customContent: docsHybridSearchContent,
       },
     ],
   },
@@ -263,7 +279,7 @@ export const NAVIGATION_DATA: Section[] = [
             'State machine determinística para workflows multi-agente do LangChain.',
         },
         parts: [],
-        customContent: <LangGraphPage />,
+        customContent: langGraphContent,
         icon: <Workflow className="h-4 w-4" />,
       },
       {
@@ -275,7 +291,7 @@ export const NAVIGATION_DATA: Section[] = [
             'Consultas, ingestão e integrações RAG baseadas em LangChain.',
         },
         parts: [],
-        customContent: <LlamaIndexPage />,
+        customContent: llamaIndexContent,
         icon: <BrainCircuit className="h-4 w-4" />,
       },
       {
@@ -287,7 +303,7 @@ export const NAVIGATION_DATA: Section[] = [
             'Monitoramento e operações do banco vetorial utilizado pelos fluxos LangChain/LlamaIndex.',
         },
         parts: [],
-        customContent: <LangChainVectorPage />,
+        customContent: langChainVectorContent,
         icon: <Boxes className="h-4 w-4" />,
       },
       {
@@ -299,7 +315,7 @@ export const NAVIGATION_DATA: Section[] = [
             'Links operacionais, métricas e documentação do serviço Python',
         },
         parts: [],
-        customContent: <AgnoAgentsPage />,
+        customContent: agnoAgentsContent,
       },
       {
         id: 'status',
@@ -310,7 +326,7 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [], // Empty - uses customContent
         // ✅ CustomizablePageLayout - Drag-and-drop grid with collapsible cards
-        customContent: <LauncherPage />,
+        customContent: launcherContent,
         icon: <Gauge className="h-4 w-4" />,
       },
     ],

@@ -22,27 +22,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   New features and additions go here
+-   **RAG Query System**: Interactive LlamaIndex query tool in dashboard with semantic search and Q&A capabilities
+-   **Backend Proxy Routes**: JWT-based proxy in Documentation API (`/api/v1/rag/*`) for secure LlamaIndex access
+-   **Nginx Proxy Verifier**: Script to validate reverse proxy configuration and health endpoints
+-   **Auto Health Checks**: Dashboard auto-runs health checks every 30s with persistent status badges
+-   **Endpoint Mode Toggle**: Runtime switching between proxy/direct/auto modes with localStorage persistence
+-   **Copy to Clipboard**: Copy functionality for query answers, sources, and search results
+-   **MCP Filesystem Server**: Locally installed MCP server for enhanced file operations
 
 ### Changed
 
 -   Documentation Hub now serves via port `3400` (NGINX container) and DocsAPI via port `3401`, replacing the interim 3205/3400 mapping
-
-### Deprecated
-
--   Features that will be removed in upcoming releases go here
-
-### Removed
-
--   Removed features go here
+-   **LlamaIndex Embeddings**: Switched to `mxbai-embed-large` with new Qdrant collection (`docs_index_mxbai`)
+-   **LLM Model**: Updated to `llama3.2:3b` for faster query responses
+-   **Query Service**: Now uses AsyncQdrantClient with proper rate limiting
+-   **Dashboard Service**: Prefers proxy endpoints when `VITE_USE_UNIFIED_DOMAIN=true`
+-   **Proxy Verifier**: Extended to accept full base URL and print response body on errors
 
 ### Fixed
 
--   Bug fixes go here
+-   **Ollama Models**: Ensured both embedding and chat models are pulled during setup
+-   **Qdrant Client**: Fixed async client usage in vector store operations
+-   **FastAPI Endpoints**: Corrected rate limiter integration
+-   **Validator**: Made robust and ASCII-safe, respects `FORCE_OLLAMA_CONTAINER` flag
+-   **AgnoAgents**: Removed unused constants causing TypeScript errors
 
 ### Security
 
--   Security updates go here
+-   **JWT Token Minting**: Backend proxy now mints JWTs server-side, avoiding token exposure in browser
+-   **Unified Domain**: CORS simplified by routing all traffic through single domain
 
 ---
 

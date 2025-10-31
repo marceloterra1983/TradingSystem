@@ -14,7 +14,7 @@
    - Rationale: Minimal plugin set covering current needs while maintaining maintainability.
 
 2. **Automation Pipeline**
-   - All documentation generators reside in `scripts/docusaurus/**` with targeted folders (e.g., `api/`, `reference/`, `tools/`).
+   - All documentation generators reside in `scripts/docs/**` with targeted folders (e.g., `api/`, `reference/`, `tools/`).
    - `docs:auto` orchestrates generators (OpenAPI summaries, MCP registry, ports table, design tokens, PRD index).
    - `docs:check` enforces lint → automation → build sequence for CI/Husky gating.
    - Rationale: Prevent manual drift, guarantee reproducible artifacts, and support nightly reporting (stale report, broken links).

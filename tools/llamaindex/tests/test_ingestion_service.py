@@ -13,7 +13,9 @@ def test_health_check(test_client_ingestion):
     """Test health check endpoint."""
     response = test_client_ingestion.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
+    payload = response.json()
+    assert payload["status"] == "healthy"
+    assert payload["collection"] == "documentation"
 
 @pytest.mark.asyncio
 async def test_document_processor(tmp_path, mock_openai_embeddings):
@@ -80,14 +82,14 @@ async def test_error_handling(test_client_ingestion):
         "/ingest/directory",
         json={"directory_path": "/nonexistent/path"}
     )
-    assert response.status_code == 500
+    assert response.status_code == 400
     
     # Test non-existent file
     response = test_client_ingestion.post(
         "/ingest/document",
         json={"file_path": "/nonexistent/file.md"}
     )
-    assert response.status_code == 500
+    assert response.status_code == 400
 
 @pytest.mark.asyncio
 async def test_collection_management(

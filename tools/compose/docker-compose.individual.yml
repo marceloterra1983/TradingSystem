@@ -1,22 +1,6 @@
 name: individual
 
 services:
-  ollama:
-    image: "${IMG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
-    container_name: rag-ollama
-    # Enable GPU acceleration (requires NVIDIA Container Toolkit installed)
-    gpus: all
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    networks:
-      - tradingsystem_backend
-
   registry:
     image: "${IMG_OUTROS_CONTAINERS_REGISTRY:-registry}:${IMG_VERSION:-2}"
     container_name: individual-containers-registry
@@ -25,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+    networks:
+      - tradingsystem_backend
 
 networks:
   tradingsystem_backend:

@@ -32,8 +32,21 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
   const updateItem = useWorkspaceStore((state) => state.updateItem);
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
     setFormData(itemToFormState(item));
-  }, [item]);
+  }, [
+    open,
+    item.id,
+    item.title,
+    item.description,
+    item.category,
+    item.priority,
+    item.status,
+    item.createdAt,
+    item.tags.join(','),
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

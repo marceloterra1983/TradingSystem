@@ -76,9 +76,10 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 -   **Documentation Hub**: http://localhost:3400 (Docusaurus v3 via NGINX)
 -   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
 -   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
--   **Documentation API**: http://localhost:3401 (Express + FlexSearch)
+-   **Documentation API**: http://localhost:3401 (Express + FlexSearch + RAG Proxy)
 -   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
+-   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system)
 
 ## 🖥️ Claude Code CLI
 
@@ -359,6 +360,9 @@ if (bMarketConnected && bAtivo) {
 -   **Documentation**: `GET/POST /api/docs` - Documentation management
 -   **Service Launcher**: `GET /api/status` - Service health checks, `GET /api/health/full` - Comprehensive health status (services + containers + databases)
 -   **Firecrawl Proxy**: `POST /api/scrape` - Web scraping via Firecrawl
+-   **RAG System** (via Documentation API proxy):
+    -   `GET /api/v1/rag/search` - Semantic search across documentation (JWT minted server-side)
+    -   `POST /api/v1/rag/query` - Q&A with RAG context (JWT minted server-side)
 
 ### Future Trading Endpoints (Planned)
 
@@ -464,9 +468,9 @@ Se preferir iniciar serviços manualmente:
 cd frontend/dashboard
 npm install && npm run dev
 
-# Documentation Hub (Port 3400)
-cd docs
-npm install && npm run start -- --port 3400
+# Documentation Hub (Port 3400) - runs as Docker container (docs-hub)
+# Started automatically by `start` command via docker-compose.docs.yml
+# For manual start: docker compose -f tools/compose/docker-compose.docs.yml up -d
 
 # API Services (Ports 3200-3600)
 # Run each in a separate terminal
@@ -681,6 +685,19 @@ bash scripts/env/validate-env.sh
 -   **NEVER edit** files in `frontend/dashboard/public/docs/` (copied from `docs/content/` by build scripts)
 -   PRDs are organized by product within `docs/content/prd/`
 -   Follow governance checklists: `docs/governance/REVIEW-CHECKLIST.md`
+
+### When working with RAG/LlamaIndex system:
+
+-   **Use proxy endpoints** (`/api/v1/rag/*`) instead of direct access for security
+-   **JWT tokens** are minted server-side in Documentation API - never expose in browser
+-   **Unified domain mode**: Set `VITE_USE_UNIFIED_DOMAIN=true` to use reverse proxy automatically
+-   **Embedding model**: `mxbai-embed-large` (384 dimensions) is the current standard
+-   **LLM model**: `llama3.2:3b` for faster responses
+-   **Qdrant collection**: `docs_index_mxbai` (fallback to `docs_index` if empty)
+-   **Health checks**: Dashboard auto-checks proxy health every 30s with visual feedback
+-   **Mode switching**: Runtime toggle between proxy/direct/auto without restart
+-   **Validation**: Use `bash scripts/docker/validate-llamaindex-local.sh` before committing
+-   **Query script**: `bash scripts/tools/query-llamaindex.sh` for CLI testing
 
 ### Code Style:
 

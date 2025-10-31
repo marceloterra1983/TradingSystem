@@ -87,21 +87,35 @@
 ```dockerfile
 # apps/tp-capital/Dockerfile.dev
 FROM node:20-alpine
+
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
-# Install dependencies (cached layer)
-COPY package*.json ./
+# Copy service package manifests (context = raiz do repo)
+COPY apps/tp-capital/package*.json ./
+
+# Copy shared libraries required by runtime
+COPY backend/shared /backend/shared
+
+# Install dependencies (service + shared)
 RUN npm ci
+RUN cd /backend/shared/logger && npm ci && \
+    cd /backend/shared/middleware && npm ci && \
+    cd /backend/shared/config && npm install dotenv
 
-# Copy source (overridden by volume in compose)
-COPY . .
+# Copy service source (sobreposto por volume no compose)
+COPY apps/tp-capital .
 
-# Expose port
 EXPOSE 4005
 
-# Use nodemon for hot-reload
-CMD ["npm", "run", "dev"]
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=40s \
+  CMD node -e "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"
+
+CMD ["npm", "start"]
 ```
+
+> **Nota**: O build **deve** ser executado a partir da raiz do repositório (`docker build -f apps/tp-capital/Dockerfile.dev .`) para que os caminhos `apps/tp-capital/*` e `backend/shared/*` sejam resolvidos corretamente.
 
 **Volume Configuration (docker-compose.apps.yml)**:
 
@@ -208,13 +222,13 @@ export function getDbClient() {
 
 ### Decision 3: Healthchecks + Retry Logic (Both Layers)
 
-**Choice**: Implement **both** Docker Compose `depends_on` + application-level retry logic
+**Choice**: Usar healthchecks no compose + retry a nível de aplicação, confiando no stack de bancos externo (`docker-compose.database.yml`) para inicializar TimescaleDB antes dos serviços `apps`.
 
 **Rationale**:
-1. **Startup reliability**: Services don't crash if TimescaleDB slow to start
-2. **Graceful degradation**: Logs clearly indicate "waiting for dependency"
-3. **Docker healthcheck**: Orchestrator (Compose, Kubernetes) can react
-4. **Application retry**: Handles transient network issues, DB restarts
+1. **Startup reliability**: a stack `database` sobe separadamente e os serviços `apps` aguardam via retry.
+2. **Graceful degradation**: logs mostram "Waiting for TimescaleDB" sem loops de restart.
+3. **Docker healthcheck**: Compose monitora `/health` de cada serviço.
+4. **Simplicidade de stack**: evita `depends_on` entre arquivos de compose diferentes.
 
 **Layers**:
 
@@ -222,22 +236,25 @@ export function getDbClient() {
 
 ```yaml
 services:
-  workspace:
-    depends_on:
-      timescaledb:
-        condition: service_healthy  # Wait for DB healthy before starting
+  tp-capital:
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3200/health"]
-      interval: 30s
-      timeout: 10s
-      start_period: 20s
-      retries: 3
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+    networks:
+      - tradingsystem_backend
+  workspace:
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3200/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+    networks:
+      - tradingsystem_backend
+networks:
+  tradingsystem_backend:
+    external: true
 ```
 
 **Behavior**:
-- Container **waits** until TimescaleDB health check passes
-- If service unhealthy for 3 consecutive checks, marked as unhealthy
-- Compose can restart unhealthy containers (configurable)
+- Compose não declara `timescaledb` neste arquivo; espera-se que `docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb` esteja ativo.
+- Healthchecks marcam containers como `unhealthy` se os endpoints não responderem.
+- Logs do compose + Service Launcher evidenciam estado dos serviços `apps`.
 
 #### Layer 2: Application (Resilience)
 
@@ -250,62 +267,47 @@ async function connectWithRetry(maxRetries = 5, delay = 2000) {
       logger.info({ attempt: i + 1 }, 'TimescaleDB connected');
       return pool;
     } catch (err) {
-      logger.warn({
-        attempt: i + 1,
-        maxRetries,
-        error: err.message
-      }, 'TimescaleDB connection failed - retrying...');
-
+      logger.warn({ attempt: i + 1, maxRetries, error: err.message }, 'TimescaleDB connection failed - retrying...');
       if (i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
-
   throw new Error('TimescaleDB unavailable after max retries');
 }
-
-// Call on startup
-const pool = await connectWithRetry();
 ```
 
 **Retry Parameters**:
-- `maxRetries`: 5 (total 10 seconds)
-- `delay`: 2000ms exponential backoff optional
-- **Why 5 retries**: TimescaleDB typically starts in 5-8 seconds
+- `maxRetries`: 5 (total ~10 segundos de espera)
+- `delay`: 2000ms linear (pode evoluir para exponencial)
+- **Justificativa**: TimescaleDB no stack `data` demora ~5-8s para ficar pronto.
 
 **Alternatives Considered**:
 
 | Alternative | Pros | Cons | Decision |
 |-------------|------|------|----------|
-| Only Docker healthcheck | Simple | Container crashes if DB slow, restart loop | ❌ Insufficient |
-| Only application retry | Works anywhere | Compose can't detect dependency issues | ❌ Insufficient |
-| No retry (fail fast) | Simplest | Unreliable in CI/CD, slow networks | ❌ Rejected |
-| Infinite retry | Always succeeds eventually | Hides real issues, never fails | ❌ Dangerous |
+| Reintroduzir `depends_on` entre stacks | Start automático | Inválido entre arquivos compose separados | ❌ Rejected |
+| Apenas healthcheck (sem retry) | Simples | Serviço quebra se DB atrasar | ❌ Insufficient |
+| Retry infinito | Eventual sucesso | Oculta incidentes, não falha nunca | ❌ Dangerous |
 
 **Logging Strategy**:
 
 ```json
-// Structured logs (Pino)
 {
   "level": "warn",
-  "time": 1698765432000,
-  "pid": 1,
-  "hostname": "workspace",
+  "service": "workspace",
   "msg": "TimescaleDB connection failed - retrying...",
   "attempt": 3,
-  "maxRetries": 5,
-  "error": "Connection refused at localhost:5433"
+  "maxRetries": 5
 }
 ```
 
 **Benefits**:
-- ✅ Startup success rate > 99% (tested)
-- ✅ Clear logs indicate dependency state
-- ✅ Graceful handling of DB restarts during development
+- ✅ Startup sem race conditions mesmo com compose separado.
+- ✅ Visibilidade clara no Service Launcher + logs estruturados.
+- ✅ Evita dependências circulares entre stacks docker.
 
 ---
-
 ### Decision 4: Maintain Current Ports (3200, 4005)
 
 **Choice**: **Do not change** service ports during containerization
@@ -401,6 +403,11 @@ networks:
 - ✅ Clear separation of concerns
 - ✅ Independent lifecycle management
 - ✅ Consistent with project conventions
+
+### Governance Alignment
+- Containers seguem convenção `{stack}-{service}` documentada em `docs/governance/CONTAINER-NAMING-CONVENTION.md` (`apps-tpcapital`, `apps-workspace`).
+- Manifesto central (`config/services-manifest.json`) reflete `managed: "docker-compose"` e `stack: "apps"` para que o Service Launcher aplique as novas regras.
+- Inventário oficial (`docs/governance/CONTAINER-INVENTORY-CURRENT.md`) precisa registrar os dois containers como parte da stack apps.
 
 ---
 
@@ -560,16 +567,16 @@ docker compose up -d workspace  # Now succeeds
 4. Document current state (screenshots, API responses)
 
 ### Phase 2: Build Containers (Day 1-2, 3h)
-1. Create `Dockerfile.dev` for both services
-2. Create `.dockerignore` files
-3. Add retry logic to TimescaleDB clients
-4. Test builds locally
+1. Revisar e ajustar `Dockerfile.dev` de ambos serviços (garantir copy de `backend/shared`)
+2. Criar/atualizar `.dockerignore` específicos
+3. Adicionar retry logic a clientes TimescaleDB
+4. Testar builds localmente a partir da raiz (`docker build -f ... .`)
 
 ### Phase 3: Compose Integration (Day 2, 2h)
-1. Create `docker-compose.apps.yml`
-2. Configure volumes, networks, healthchecks
-3. Test startup with `docker compose up -d`
-4. Validate hot-reload works
+1. Atualizar `docker-compose.apps.yml` reutilizando rede externa `tradingsystem_backend`
+2. Configurar volumes, networks, healthchecks conforme governança (`apps-*`)
+3. Testar startup com `docker compose -f tools/compose/docker-compose.apps.yml up -d`
+4. Validar hot-reload via volumes montados
 
 ### Phase 4: Scripts Update (Day 2-3, 2h)
 1. Update `scripts/universal/start.sh`

@@ -1,18 +1,26 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, Loader2, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import documentationService from '../../services/documentationService';
 
 interface DocPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   url: string;
+  docPath: string;
 }
 
 /**
  * Modal overlay for previewing Docusaurus documents in-page
  * Opens as overlay on current page instead of new window
  */
-export function DocPreviewModal({ isOpen, onClose, title, url }: DocPreviewModalProps) {
+export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPreviewModalProps) {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // Close on ESC key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -32,6 +40,48 @@ export function DocPreviewModal({ isOpen, onClose, title, url }: DocPreviewModal
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setContent('');
+      setError(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !docPath) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      setContent('');
+
+      try {
+        const raw = await documentationService.getDocContent(docPath);
+        if (!cancelled) {
+          const stripped = raw.replace(/^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u, '');
+          setContent(stripped.trim());
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Falha ao carregar documento');
+          setContent('');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, docPath]);
 
   if (!isOpen) return null;
 
@@ -65,14 +115,32 @@ export function DocPreviewModal({ isOpen, onClose, title, url }: DocPreviewModal
           </button>
         </div>
 
-        {/* Content - Iframe */}
-        <div className="flex-1 bg-slate-50 dark:bg-slate-800 overflow-hidden">
-          <iframe
-            src={url}
-            className="w-full h-full border-0"
-            title={title}
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          />
+        {/* Content - Markdown preview */}
+        <div className="flex-1 overflow-hidden bg-slate-50 dark:bg-slate-900/60">
+          {loading ? (
+            <div className="flex min-h-full flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Carregando conteúdo…</span>
+            </div>
+          ) : error ? (
+            <div className="flex min-h-full flex-col items-center justify-center gap-4 px-6 text-center">
+              <AlertTriangle className="h-6 w-6 text-amber-500" />
+              <div className="space-y-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Não foi possível carregar a pré-visualização.
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{error}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="max-h-full overflow-y-auto">
+              <div className="prose prose-slate max-w-4xl p-8 dark:prose-invert prose-headings:scroll-mt-20">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {content}
+                </ReactMarkdown>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

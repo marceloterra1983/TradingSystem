@@ -1,0 +1,125 @@
+name: rag
+
+services:
+  ollama:
+    image: "${IMG_RAG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
+    container_name: rag-ollama
+    # Enable GPU acceleration (requires NVIDIA Container Toolkit installed)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          memory: 8G
+          cpus: '4'
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep ollama || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  llamaindex-ingestion:
+    image: "${IMG_RAG_LLAMAINDEX_INGEST:-img-rag-llamaindex-ingest}:${IMG_VERSION:-latest}"
+    container_name: rag-llamaindex-ingest
+    build:
+      context: ../llamaindex
+      dockerfile: Dockerfile.ingestion
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
+    ports:
+      - "${LLAMAINDEX_INGESTION_PORT:-8201}:8000"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://rag-ollama:11434}
+      - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3}
+      - JWT_SECRET_KEY=dev-secret
+      - JWT_ALGORITHM=HS256
+    volumes:
+      - ../../docs/content:/data/docs:ro
+      - ../../:/data/tradingsystem:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  llamaindex-query:
+    image: "${IMG_RAG_LLAMAINDEX_QUERY:-img-rag-llamaindex-query}:${IMG_VERSION:-latest}"
+    container_name: rag-llamaindex-query
+    build:
+      context: ../llamaindex
+      dockerfile: Dockerfile.query
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
+    ports:
+      - "${LLAMAINDEX_QUERY_PORT:-8202}:8000"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://rag-ollama:11434}
+      - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
+      - OLLAMA_REQUEST_TIMEOUT=300.0
+      - JWT_SECRET_KEY=dev-secret
+      - JWT_ALGORITHM=HS256
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  tradingsystem_backend:
+    external: true
+
+volumes:
+  ollama_models:
+    driver: local

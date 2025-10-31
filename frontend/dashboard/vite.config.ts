@@ -147,8 +147,20 @@ export default defineConfig(({ mode }) => {
         allow: [repoRoot],
       },
       proxy: {
-        // Docusaurus assets proxy (specific paths only - avoid dashboard assets)
+        // Docusaurus asset bundles (CSS/JS/Images/Fonts)
+        '^/assets/css/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
+        '^/assets/js/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
         '^/assets/images/.*': {
+          target: docsProxy.target,
+          changeOrigin: true,
+        },
+        '^/assets/fonts/.*': {
           target: docsProxy.target,
           changeOrigin: true,
         },
@@ -224,6 +236,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
         },
         '/docs': docsProxyConfig,
+        '^/next/.*': docsProxyConfig,
         // Note: /specs/ files are served directly from public/specs/ by Vite
         // No proxy needed - files are static assets served from same origin
         // This avoids CORS issues in API viewers (redoc, swagger, rapidoc)

@@ -65,13 +65,14 @@
       "id": "docusaurus",
       "type": "docs",
       "path": "docs",
-      "start": "npm start -- --port 3400",
+      "start": "docker compose -f tools/compose/docker-compose.docs.yml up -d",
       "build": "npm run build",
       "test": "npm test",
       "port": 3400,
       "env": null,
-      "workspace": true,
-      "managed": "internal"
+      "workspace": false,
+      "managed": "external",
+      "note": "Runs as Docker container (docs-hub) via docker-compose.docs.yml"
     },
     {
       "id": "alert-router",

@@ -18,7 +18,7 @@ export function useServiceStatusBanner() {
         return null;
       }
     },
-    refetchInterval: 15000,
+    refetchInterval: false,
     staleTime: 10000,
     retry: false
   });
@@ -35,4 +35,3 @@ export function useServiceStatusBanner() {
     downServices: data?.services?.filter((s: any) => s.status === 'down') ?? []
   };
 }
-

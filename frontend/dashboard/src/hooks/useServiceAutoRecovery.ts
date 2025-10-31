@@ -46,7 +46,7 @@ export function useServiceAutoRecovery() {
         return null;
       }
     },
-    refetchInterval: 15000,
+    refetchInterval: false,
     staleTime: 10000,
     retry: false
   });
@@ -106,4 +106,3 @@ export function useServiceAutoRecovery() {
     lastRecoveryAttempt: autoStartMutation.variables
   };
 }
-

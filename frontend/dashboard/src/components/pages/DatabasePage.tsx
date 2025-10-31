@@ -125,13 +125,20 @@ export function DatabasePageNew() {
   const hasIframeError = iframeErrors[activeView];
 
   // Hook for checking container status
-  const { isRunning: isContainerRunning, isLoading: isStatusLoading, checkStatus } = useContainerStatus(
-    containerName,
-    iframeUrl
-  );
+  const {
+    isRunning: isContainerRunning,
+    hasChecked: hasStatusCheckCompleted,
+    checkStatus,
+  } = useContainerStatus(containerName, iframeUrl);
 
   // Hook for starting containers
   const { mutate: startContainer, isPending: isStarting } = useStartContainer();
+
+  const isInitialStatusCheck =
+    Boolean(containerName) && !hasStatusCheckCompleted;
+  const shouldShowOfflineMessage =
+    Boolean(containerName) && hasStatusCheckCompleted && !isContainerRunning;
+  const shouldShowStartButton = shouldShowOfflineMessage;
 
   const handleOpenInNewTab = React.useCallback(() => {
     if (typeof window === 'undefined' || !iframeUrl) {
@@ -201,7 +208,7 @@ export function DatabasePageNew() {
             })}
           </div>
           <div className="flex gap-2">
-            {containerName && !isStatusLoading && !isContainerRunning && (
+            {shouldShowStartButton && (
               <Button
                 variant="default"
                 size="sm"
@@ -250,7 +257,12 @@ export function DatabasePageNew() {
         <div className="flex h-[calc(100%-40px)] w-full items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
           Nenhum endpoint configurado para esta ferramenta.
         </div>
-      ) : containerName && !isStatusLoading && !isContainerRunning ? (
+      ) : isInitialStatusCheck ? (
+        <div className="flex h-[calc(100%-40px)] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          <Loader2 className="mb-3 h-6 w-6 animate-spin text-cyan-600 dark:text-cyan-400" />
+          Verificando status do container...
+        </div>
+      ) : shouldShowOfflineMessage ? (
         <div className="flex h-[calc(100%-40px)] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
           <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
             O container {viewDefinition.label} não está rodando.
@@ -291,4 +303,3 @@ export function DatabasePageNew() {
 }
 
 export default DatabasePageNew;
-

@@ -24,8 +24,9 @@ lastReviewed: '2025-10-26'
 
 ## Project Structure
 
-- **Solution File**: `TradingSystem.sln` at the repository root.
-- **Service Layout**: `backend/services/data-capture/` and `backend/services/order-manager/` (proposed structure).
+> ⚠️ **Status:** Os serviços .NET estão em reestruturação e o repositório não inclui mais uma solução Visual Studio. Use esta seção como referência de arquitetura ao reconstruir os projetos.
+
+- **Layout Proposto**: `backend/services/data-capture/` e `backend/services/order-manager/`.
 - **Architecture Layers**:
   1. Domain — Aggregates, Value Objects, Domain Events.
   2. Application — Use cases plus command/query handlers.
@@ -41,18 +42,20 @@ lastReviewed: '2025-10-26'
 
 ### Commands
 
-```bash
-# Build solution
-dotnet build TradingSystem.sln
+Os exemplos abaixo assumem que os projetos `.csproj` foram recriados localmente. Ajuste os caminhos conforme a sua estrutura:
 
-# Build specific service
+```bash
+# Restaurar dependências
+dotnet restore backend/services/data-capture/DataCapture.csproj
+
+# Compilar serviço específico
 dotnet build backend/services/data-capture/DataCapture.csproj
 
-# Run service
+# Executar serviço
 dotnet run --project backend/services/data-capture/DataCapture.csproj
 
-# Run tests
-dotnet test
+# Executar testes
+dotnet test backend/services/data-capture.Tests/DataCapture.Tests.csproj
 ```
 
 ### Configuration & Debugging

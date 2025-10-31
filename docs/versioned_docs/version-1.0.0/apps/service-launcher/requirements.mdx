@@ -129,10 +129,10 @@ Service Launcher monitors these services (if configured):
 |---------|------|----------|---------|
 | Workspace API | 3200 | No | Workspace management |
 | TP Capital | 4005 | No | Signal ingestion |
-| Documentation API | 3400 | No | Documentation management |
+| Documentation API | 3401 | No | Documentation management |
 | Firecrawl Proxy | 3600 | No | Web scraping |
 | Dashboard | 3103 | No | UI frontend |
-| Docusaurus | 3205 | No | Documentation UI |
+| Documentation Hub | 3400 | No | Documentation UI (docs-hub container) |
 | Prometheus | 9090 | No | Metrics collection |
 | Grafana | 3000 | No | Metrics visualization |
 | QuestDB | 9000 | No | Time-series database |
@@ -158,7 +158,7 @@ Service Launcher monitors these services (if configured):
 ```bash
 SERVICE_LAUNCHER_PORT=3500
 SERVICE_LAUNCHER_LOG_LEVEL=info
-CORS_ORIGIN=http://localhost:3103,http://localhost:3205
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401
 ```
 
 **See**: [Configuration Guide](./config) for complete list
@@ -202,8 +202,8 @@ chmod 755 apps/status/
 
 - TCP 3103 (Dashboard)
 - TCP 3200 (Workspace API)
-- TCP 3205 (Docusaurus)
-- TCP 3400 (Documentation API)
+- TCP 3400 (Documentation Hub)
+- TCP 3401 (Documentation API)
 - TCP 3600 (Firecrawl Proxy)
 - TCP 4005 (TP Capital)
 - TCP 9000 (QuestDB)
@@ -219,8 +219,8 @@ sudo ufw allow from 192.168.1.0/24 to any port 3500 proto tcp
 # Allow outbound HTTP (health checks)
 sudo ufw allow out 3103/tcp
 sudo ufw allow out 3200/tcp
-sudo ufw allow out 3205/tcp
 sudo ufw allow out 3400/tcp
+sudo ufw allow out 3401/tcp
 sudo ufw allow out 3600/tcp
 sudo ufw allow out 4005/tcp
 sudo ufw allow out 9000/tcp

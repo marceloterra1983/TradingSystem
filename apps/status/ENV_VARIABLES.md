@@ -32,10 +32,10 @@ SERVICE_LAUNCHER_LOG_LEVEL=info          # Log level (debug|info|warn|error)
 # Use these to override the default ports if services are running on non-standard ports
 SERVICE_LAUNCHER_WORKSPACE_PORT=3200     # Workspace API port
 SERVICE_LAUNCHER_TP_CAPITAL_PORT=3200    # TP Capital signals API port
-SERVICE_LAUNCHER_DOCS_PORT=3400          # Documentation API port
+SERVICE_LAUNCHER_DOCS_PORT=3401          # Documentation API port
 SERVICE_LAUNCHER_FIRECRAWL_PROXY_PORT=3600  # Firecrawl Proxy API port
 SERVICE_LAUNCHER_DASHBOARD_PORT=3103     # Dashboard UI port (Vite)
-SERVICE_LAUNCHER_DOCUSAURUS_PORT=3400    # Docusaurus documentation port
+SERVICE_LAUNCHER_DOCUSAURUS_PORT=3400    # Documentation Hub (docs-hub container) port
 SERVICE_LAUNCHER_PROMETHEUS_PORT=9090    # Prometheus metrics port
 SERVICE_LAUNCHER_GRAFANA_PORT=3000       # Grafana dashboards port
 SERVICE_LAUNCHER_QUESTDB_HTTP_PORT=9000  # QuestDB HTTP console port
@@ -69,7 +69,7 @@ As seguintes variáveis já têm defaults razoáveis no código, mas podem ser c
 
 - `SERVICE_LAUNCHER_PORT`: Porta 3500 (padrão oficial do TradingSystem)
 - `SERVICE_LAUNCHER_TIMEOUT_MS`: 2500ms (2.5 segundos) para health checks
-- `CORS_ORIGIN`: Dashboard (3103) e Docusaurus/DocsAPI (3400/3401)
+- `CORS_ORIGIN`: Dashboard (3103) e Documentation Hub/DocsAPI (3400/3401)
 - `RATE_LIMIT_MAX`: 200 requests/minuto (suficiente para uso local)
 
 ## Defaults no Código
@@ -91,8 +91,6 @@ RATE_LIMIT_MAX: 200
 - [Service Launcher README](./README.md)
 - [OpenSpec Proposal](../../../infrastructure/openspec/changes/fix-service-launcher-critical-issues/proposal.md)
 - [Audit Plan](../../../docs/reports/service-launcher-audit-plan.md)
-
-
 
 
 

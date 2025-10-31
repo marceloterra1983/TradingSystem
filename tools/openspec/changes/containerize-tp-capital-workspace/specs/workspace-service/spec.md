@@ -250,24 +250,25 @@ The containerized Workspace SHALL provide structured logging and metrics for mon
 
 The containerized Workspace SHALL correctly manage TimescaleDB dependency during startup and runtime.
 
-#### Scenario: Docker Compose depends_on configuration
+#### Scenario: Stack database iniciado separadamente
 
-- **GIVEN** Docker Compose file includes `depends_on: timescaledb: condition: service_healthy`
-- **WHEN** developer runs `docker compose up -d workspace`
-- **THEN** Docker Compose waits for TimescaleDB container to be healthy before starting Workspace
-- **AND** if TimescaleDB health check fails, Workspace container does not start
-- **AND** Docker Compose logs show "Waiting for timescaledb to be healthy..."
+- **GIVEN** TimescaleDB foi iniciado via `docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb`
+- **AND** container `data-timescale` está `healthy`
+- **WHEN** developer executa `docker compose -f tools/compose/docker-compose.apps.yml up -d workspace`
+- **THEN** Docker Compose inicia o container `apps-workspace` imediatamente (sem depends_on)
+- **AND** healthcheck interno monitora `http://localhost:3200/health`
+- **AND** Service Launcher reflete status `starting` até o healthcheck retornar 200.
 
 #### Scenario: Application-level connection retry
 
-- **GIVEN** TimescaleDB is starting and not yet accepting connections
-- **AND** Workspace container has already started (past depends_on check)
-- **WHEN** service attempts initial database connection
-- **THEN** connection fails with "connection refused" error
-- **AND** service retries connection after 2 second delay
-- **AND** service logs "TimescaleDB connection retry 1/5"
-- **AND** when TimescaleDB becomes available, subsequent retry succeeds
-- **AND** service continues normal operation
+- **GIVEN** TimescaleDB está inicializando e ainda não aceita conexões
+- **AND** Workspace container foi iniciado (`apps-workspace` running)
+- **WHEN** o serviço tenta a conexão inicial
+- **THEN** a conexão falha com "connection refused"
+- **AND** o serviço registra `TimescaleDB connection failed - retrying` com tentativa 1/5
+- **AND** após 2 segundos o serviço tenta novamente
+- **AND** quando TimescaleDB fica disponível, a próxima tentativa é bem-sucedida
+- **AND** o serviço prossegue com operação normal.
 
 #### Scenario: Database connection pool exhaustion
 
