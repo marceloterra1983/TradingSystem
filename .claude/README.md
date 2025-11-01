@@ -1,128 +1,98 @@
-# Claude Configuration Directory
+# Claude Code Configuration
 
-Este diretório contém configurações para ferramentas de IA (Claude Code, Cline/Codex) no projeto TradingSystem.
+Este diretório contém as configurações locais do Claude Code CLI para o projeto TradingSystem.
 
-## 📁 Estrutura de Arquivos
+## 📁 Estrutura
 
 ```
-claude/
+.claude/
 ├── README.md                    # Este arquivo
-├── MCP-FILESYSTEM-SETUP.md     # Guia completo do MCP Filesystem Server
-├── mcp-servers.json            # Configuração de servidores MCP
-├── settings.local.json         # Configurações locais do Claude CLI
-├── test-mcp-fs.sh              # Script de teste do filesystem server
-└── agents/                     # Agentes especializados (se existirem)
+├── mcp-servers.json            # Configuração dos MCP servers
+├── settings.json               # Settings locais (hooks, etc)
+└── agents/                     # Agentes especializados
+    ├── mcp-*.md               # Agentes MCP
+    └── ...
 ```
 
-## 🔧 Configuração Atual
+## 🔌 MCP Servers Configurados
 
-### MCP Servers Configurados
+1. **fs-tradingsystem** - Filesystem operations
+2. **github** - GitHub integration
+3. **openapi-docs** - API specifications
+4. **docker-compose** - Docker management
+5. **postgres-frontend-apps** - PostgreSQL access
+6. **sentry** - Error tracking
 
-1. **fs-tradingsystem** - Filesystem Server
-   - Caminho: `/home/marce/Projetos/TradingSystem`
-   - Status: ✅ Configurado e testado
+## 🚀 Como Usar
 
-2. **github** - GitHub Integration
-   - Repositório: `marceloterra1983/TradingSystem`
-   - Status: ✅ Habilitado
+### Iniciar Claude Code no Projeto
 
-3. **openapi-docs** - OpenAPI Specifications
-   - Specs: workspace, documentation-api, tp-capital
-   - Status: ✅ Habilitado
+```bash
+# Sempre use o caminho completo e consistente
+cd /home/marce/Projetos/TradingSystem
+claude
+```
 
-4. **docker-compose** - Docker Management
-   - Status: ✅ Habilitado
+### Verificar MCPs Carregados
 
-5. **postgres-frontend-apps** - PostgreSQL Integration
-   - Status: ✅ Habilitado
+Dentro do Claude:
+```
+/mcp list
+```
 
-6. **sentry** - Error Tracking
-   - Status: ✅ Habilitado
+### Testar MCP Filesystem
+
+```bash
+bash .claude/test-mcp-fs.sh
+```
+
+## 🔧 Troubleshooting
+
+### MCPs não carregam?
+
+1. Verifique se está no diretório correto:
+   ```bash
+   pwd  # Deve retornar: /home/marce/Projetos/TradingSystem
+   ```
+
+2. Verifique o arquivo `.claude-plugin` na raiz:
+   ```bash
+   cat ../.claude-plugin
+   ```
+
+3. Verifique as variáveis de ambiente:
+   ```bash
+   echo $GITHUB_PERSONAL_ACCESS_TOKEN
+   echo $MCP_POSTGRES_URL
+   echo $SENTRY_AUTH_TOKEN
+   ```
+
+4. Execute Claude com debug:
+   ```bash
+   ANTHROPIC_LOG=debug claude
+   ```
+
+### Conflito de Configurações?
+
+O Claude Code resolve configurações nesta ordem:
+1. `.claude-plugin` na raiz do projeto (prioridade)
+2. `.claude/` no diretório atual
+3. `~/.claude.json` (global - fallback)
 
 ## 📚 Documentação
 
-### Guias Principais
+- **Guia completo**: `CLAUDE.md` na raiz do projeto
+- **MCP Setup**: `.claude/MCP-FILESYSTEM-SETUP.md`
+- **AI Agents**: `ai/AGENTS.md`
 
-- **[MCP-FILESYSTEM-SETUP.md](./MCP-FILESYSTEM-SETUP.md)** - Setup e troubleshooting do filesystem server
-- **[CLAUDE.md](../CLAUDE.md)** - Instruções principais do projeto para Claude Code
+## 🔗 Variáveis de Ambiente
 
-### Arquivos de Configuração
-
-- **`mcp-servers.json`** - Define os servidores MCP disponíveis
-- **`settings.local.json`** - Configurações específicas do Claude CLI
-
-### Referência Externa
-
-- **`config/mcp/servers.json`** - Lista de servidores habilitados (para Codex/Cline)
-- **`config/.env.defaults`** - Variáveis de ambiente padrão (incluindo `MCP_FS_ROOT`)
-
-## 🚀 Quick Start
-
-### Para Claude Code (CLI)
+As seguintes variáveis devem estar definidas no `.env` da raiz:
 
 ```bash
-# Navegar para o projeto
-cd /home/marce/Projetos/TradingSystem
-
-# Iniciar Claude Code CLI
-claude
-
-# Os servidores MCP serão carregados automaticamente
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...
+MCP_POSTGRES_URL=postgresql://...
+SENTRY_AUTH_TOKEN=...
 ```
 
-### Para Cline/Codex (VSCode Extension)
-
-1. Abrir VSCode no diretório do projeto
-2. Ativar extensão Cline
-3. Verificar servidores MCP na aba Settings
-4. Servidores listados em `config/mcp/servers.json` serão carregados
-
-## 🧪 Testes
-
-### Testar Filesystem Server
-
-```bash
-bash claude/test-mcp-fs.sh
-```
-
-### Verificar Instalação
-
-```bash
-npm list @modelcontextprotocol/server-filesystem
-```
-
-### Logs do Cline (VSCode)
-
-1. `Ctrl+Shift+P`
-2. Digite: "Developer: Show Logs"
-3. Selecione: "Extension Host"
-4. Procure por: "mcp" ou "filesystem"
-
-## 🔄 Atualizações Recentes
-
-### 2025-10-29: Correção MCP Filesystem
-
-- ✅ Corrigido `MCP_FS_ROOT` para caminho absoluto
-- ✅ Adicionada variável `ALLOWED_DIRECTORIES`
-- ✅ Criado script de teste automático
-- ✅ Documentação completa criada
-- ✅ Validação de funcionamento realizada
-
-## 📞 Suporte
-
-### Problemas Comuns
-
-1. **Servidor não inicia**: Reinicie o VSCode (`Ctrl+Shift+P` → "Reload Window")
-2. **Permissão negada**: Verifique permissões do diretório do projeto
-3. **Variáveis não expandem**: Use caminhos absolutos diretos
-
-### Documentação Completa
-
-Consulte [MCP-FILESYSTEM-SETUP.md](./MCP-FILESYSTEM-SETUP.md) para troubleshooting detalhado.
-
-## 🔗 Links Úteis
-
-- [MCP Specification](https://modelcontextprotocol.io/)
-- [MCP Servers Repository](https://github.com/modelcontextprotocol/servers)
-- [Cline Extension](https://github.com/cline/cline)
-- [Claude Code Documentation](https://docs.anthropic.com/claude/docs)
+**IMPORTANTE:** O Claude carrega variáveis do `.env` automaticamente quando inicia no projeto.

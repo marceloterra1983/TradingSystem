@@ -30,7 +30,7 @@ const API_SPECS: ApiSpec[] = [
     id: 'documentation-api',
     name: 'Documentation',
     description: 'Documentation management, ideas, specs, search, and files',
-    port: '3401',
+    port: '3402',
     specFile: 'documentation-api.openapi.yaml',
     docusaurusRoute: '/api/documentation-api',
   },

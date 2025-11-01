@@ -96,11 +96,17 @@ class GatewayDatabaseClient {
    */
   async getWaitingMessagesCount(channelId) {
     try {
-      const result = await this.query(`
+      const statuses = ['received', 'published'];
+      const result = await this.query(
+        `
         SELECT COUNT(*) as count
         FROM ${this.schema}.messages
-        WHERE channel_id = $1 AND status = 'received'
-      `, [channelId]);
+        WHERE channel_id = $1
+          AND status = ANY($2::text[])
+          AND COALESCE(metadata->>'processed_by', '') <> 'tp-capital'
+      `,
+        [channelId, statuses],
+      );
       return parseInt(result.rows[0]?.count || 0, 10);
     } catch (error) {
       logger.error({ err: error, channelId }, 'Failed to get waiting messages count');

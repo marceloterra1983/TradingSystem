@@ -174,8 +174,8 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     status: 'running',
     category: 'docs',
     description: 'DocsAPI (Express + FlexSearch) - Search, validation, CRUD',
-    ports: ['3401'],
-    url: 'http://localhost:3401/health',
+    ports: ['3402'],
+    url: 'http://localhost:3402/health',
   },
   
   // Firecrawl Services

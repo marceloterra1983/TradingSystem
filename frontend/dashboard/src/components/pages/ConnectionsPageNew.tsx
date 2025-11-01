@@ -145,11 +145,11 @@ function ServiceHealthSection() {
       check: 'curl http://localhost:3500/health',
     },
     {
-      name: 'Documentation API',
-      description: 'Busca e indexa documentação do Docusaurus',
-      port: '3401',
+      name: 'RAG Service',
+      description: 'Documentation API + LlamaIndex + RAG (docker-compose.rag.yml)',
+      port: '3402',
       scope: 'Container',
-      check: 'curl http://localhost:3401/health',
+      check: 'curl http://localhost:3402/health',
     },
   ];
 

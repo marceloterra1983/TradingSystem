@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
 
-AVAILABLE_PHASES=("infra-core" "data" "timescale" "frontend-apps" "monitoring" "docs" "infra" "langgraph-dev" "firecrawl")
+AVAILABLE_PHASES=("infra-core" "data" "timescale" "frontend-apps" "monitoring" "docs" "infra" "tools" "langgraph-dev" "firecrawl")
 PHASES_TO_START=()
 
 usage() {
@@ -78,6 +78,7 @@ phase_label() {
     monitoring) echo "Monitoring";;
     docs) echo "Documentation";;
     infra) echo "Infrastructure Services";;
+    tools) echo "Tools Stack";;
     langgraph-dev) echo "LangGraph Development (Port 8112)";;
     firecrawl) echo "Firecrawl";;
     *) echo "${phase}";;
@@ -119,6 +120,28 @@ ensure_network() {
     fi
     echo -e "${GREEN}✓ Network ${network} created${NC}"
   fi
+}
+
+port_in_use() {
+  local port=$1
+
+  if command -v ss >/dev/null 2>&1; then
+    if ss -ltn 2>/dev/null | awk '{print $4}' | grep -q ":${port}\$"; then
+      return 0
+    fi
+  fi
+
+  if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q ":${port}->"; then
+    return 0
+  fi
+
+  if command -v lsof >/dev/null 2>&1; then
+    if lsof -iTCP -sTCP:LISTEN -nP 2>/dev/null | awk '{print $9}' | grep -q ":${port}\$"; then
+      return 0
+    fi
+  fi
+
+  return 1
 }
 
 start_phase() {
@@ -168,6 +191,56 @@ start_phase() {
       ;;
     infra)
       compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.infra.yml" up -d --build
+      ;;
+    tools)
+      local compose="tools/compose/docker-compose.tools.yml"
+      local -a services=()
+      local -a services_without_kestra=()
+      local should_skip_kestra=0
+      local skip_reason=""
+      if has_compose_services "${compose}"; then
+        ensure_network "tradingsystem_backend"
+        mapfile -t services < <(compose_cmd -f "${REPO_ROOT}/${compose}" config --services)
+
+        if [[ -n "${SKIP_Kestra_AUTO_START:-}" ]]; then
+          should_skip_kestra=1
+          skip_reason="SKIP_Kestra_AUTO_START=1 detected."
+        else
+          local http_port="${KESTRA_HTTP_PORT:-8080}"
+          local mgmt_port="${KESTRA_MANAGEMENT_PORT:-8081}"
+
+          if port_in_use "${http_port}"; then
+            should_skip_kestra=1
+            skip_reason="Port ${http_port} already in use."
+          elif port_in_use "${mgmt_port}"; then
+            should_skip_kestra=1
+            skip_reason="Management port ${mgmt_port} already in use."
+          fi
+        fi
+
+        if (( should_skip_kestra )); then
+          if [[ -n "${SKIP_Kestra_AUTO_START:-}" ]]; then
+            echo -e "${YELLOW}↳ SKIP_Kestra_AUTO_START=1 detected; starting Tools stack without Kestra.${NC}"
+          else
+            echo -e "${YELLOW}↳ Kestra will be skipped: ${skip_reason}${NC}"
+            echo -e "${YELLOW}  Adjust KESTRA_HTTP_PORT/KESTRA_MANAGEMENT_PORT in .env or stop the conflicting process before retrying.${NC}"
+          fi
+          for svc in "${services[@]}"; do
+            if [[ "${svc}" != "kestra" ]]; then
+              services_without_kestra+=("${svc}")
+            fi
+          done
+          if [[ ${#services_without_kestra[@]} -gt 0 ]]; then
+            compose_cmd -f "${REPO_ROOT}/${compose}" up -d --build "${services_without_kestra[@]}"
+          else
+            echo -e "${YELLOW}↳ No other tools services to start (Kestra skipped).${NC}"
+          fi
+        else
+          compose_cmd -f "${REPO_ROOT}/${compose}" up -d --build
+        fi
+      else
+        echo -e "${YELLOW}↳ No tools services defined (skipping).${NC}"
+      fi
       ;;
     langgraph-dev)
       echo -e "${BLUE}🔬 Starting LangGraph Development Environment${NC}"
@@ -268,6 +341,10 @@ detect_compose
 
 if [[ -f "${ENV_FILE}" ]]; then
   COMPOSE_ARGS+=(--env-file "${ENV_FILE}")
+  set -o allexport
+  # shellcheck source=/dev/null
+  source "${ENV_FILE}"
+  set +o allexport
 else
   echo -e "${YELLOW}⚠️  Root .env not found at ${ENV_FILE}. Compose will use defaults.${NC}"
 fi
@@ -313,7 +390,7 @@ sleep 5
 echo ""
 
 echo -e "${BLUE}📊 Container Status:${NC}"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(infra-|data-|docs-|mon-|firecrawl-|apps-|STATUS)" || true
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(infra-|data-|docs-|mon-|firecrawl-|apps-|tools-|STATUS)" || true
 echo ""
 
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
@@ -346,6 +423,9 @@ echo ""
 echo -e "${GREEN}Firecrawl:${NC}"
 echo "  Firecrawl API:          http://localhost:3002"
 echo "  Firecrawl Proxy:        http://localhost:3600"
+echo ""
+echo -e "${GREEN}Tools:${NC}"
+echo "  Kestra Orchestrator:    http://localhost:${KESTRA_HTTP_PORT:-8080}"
 echo ""
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ Stack startup complete${NC}"

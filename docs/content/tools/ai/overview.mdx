@@ -322,6 +322,29 @@ print(response.response)
 print(response.source_nodes)  # Source citations
 ```
 
+### Ingest the Full TradingSystem Repository
+
+Need a collection that covers every doc, spec, and code file under `TradingSystem/`? Trigger a repository-wide ingestion once the RAG stack is online:
+
+```bash
+# 1. Ensure the RAG stack is running (Ollama + LlamaIndex services)
+docker compose -f tools/compose/docker-compose.rag.yml up -d
+
+# 2. Build a dedicated collection with the helper script
+bash scripts/rag/ingest-tradingsystem.sh \
+  --collection tradingsystem \
+  --allowed '*' \
+  --exclude '.git,.github,.idea,.vscode,node_modules,dist,build,.cache,.next' \
+  --max-mb 16
+
+# Optional: point to a different mount exposed inside the ingestion container
+# bash scripts/rag/ingest-tradingsystem.sh --dir /data/custom-path
+```
+
+The script talks to the ingestion service at `http://localhost:8201`, using the Docker volume mounted at `/data/tradingsystem`. Adjust `--allowed` to restrict file types (for example `md,mdx,ts,tsx,json`) or set `--max-mb 0` to disable the size guard. Every run can target a different collection via `--collection` or by posting `collection_name` directly to `/ingest/directory`.
+
+> **Querying the new data** – Restart `rag-llamaindex-query` with `QDRANT_COLLECTION=tradingsystem` (or your chosen name) so semantic search and `/query` calls read from the repository-wide index.
+
 ### Build LangGraph Workflow
 
 ```python

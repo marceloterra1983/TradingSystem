@@ -38,7 +38,7 @@ describe('CollectionService', () => {
 
     it('should use defaults when config not provided', () => {
       const defaultService = new CollectionService();
-      expect(defaultService.defaultCollection).toBe('documentation__nomic');
+      expect(defaultService.defaultCollection).toBe('documentation');
     });
 
     it('should strip trailing slashes from URLs', () => {

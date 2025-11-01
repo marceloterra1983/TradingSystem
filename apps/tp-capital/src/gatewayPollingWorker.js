@@ -162,8 +162,13 @@ export class GatewayPollingWorker {
    * Fetch unprocessed messages from Gateway database
    */
   async fetchUnprocessedMessages() {
-    const conditions = ['channel_id = $1', 'status = $2'];
-    const params = [this.channelId, 'received'];
+    const statusFilter = ['received', 'published'];
+    const conditions = [
+      'channel_id = $1',
+      'status = ANY($2::text[])',
+      `COALESCE(metadata->>'processed_by', '') <> 'tp-capital'`,
+    ];
+    const params = [this.channelId, statusFilter];
     let paramIndex = 3;
 
     // Filtro por message_type

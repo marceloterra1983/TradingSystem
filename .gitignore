@@ -252,9 +252,14 @@ frontend/apps/dashboard/cypress/downloads/
 # ============================================
 # Miscellaneous
 # ============================================
+tools/kestra/storage/
+!tools/kestra/storage/.gitkeep
+tools/kestra/workdir/
+!tools/kestra/workdir/.gitkeep
 reiniciar.log
 logs/services/*.log
 
 # Python Virtual Environment (auto-activation)
 .bashrc
 venv/
+.env.backup.*

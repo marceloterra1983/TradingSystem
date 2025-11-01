@@ -163,7 +163,7 @@ class MarkdownSearchService {
           files.push(...subFiles);
         } else if (
           entry.isFile() &&
-          (entry.name.endsWith('.md') || entry.name.endsWith('.mdx'))
+          (entry.name.endsWith('.md') || entry.name.endsWith('.mdx') || entry.name.endsWith('.txt') || entry.name.endsWith('.pdf'))
         ) {
           files.push(fullPath);
         }

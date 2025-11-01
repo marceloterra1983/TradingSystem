@@ -19,6 +19,9 @@ COLLECTION="tradingsystem"
 ALLOWED="*"
 EXCLUDE=".git,.github,.gitlab,.vscode,.idea,node_modules,dist,build,.cache,.next,.nuxt,tmp,temp,.venv,venv"
 MAX_MB="16"
+EMBED_MODEL=""
+CHUNK_SIZE=""
+CHUNK_OVERLAP=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -46,6 +49,18 @@ while [[ $# -gt 0 ]]; do
       MAX_MB="$2"
       shift 2
       ;;
+    --embed-model|--embedding-model)
+      EMBED_MODEL="$2"
+      shift 2
+      ;;
+    --chunk-size)
+      CHUNK_SIZE="$2"
+      shift 2
+      ;;
+    --chunk-overlap)
+      CHUNK_OVERLAP="$2"
+      shift 2
+      ;;
     --help|-h)
       cat <<'USAGE'
 Usage: ingest-tradingsystem.sh [options]
@@ -57,6 +72,9 @@ Options:
   --allowed LIST       Comma-separated extensions or '*' (default: *)
   --exclude LIST       Comma-separated directories to skip (default: common build/cache dirs)
   --max-mb VALUE       Max file size in MB (<=0 disables, default: 16)
+  --embed-model NAME   Embedding model to use (overrides service default)
+  --chunk-size VALUE   Chunk size override (tokens)
+  --chunk-overlap VAL  Chunk overlap override (tokens)
   -h, --help           Show this help
 USAGE
       exit 0
@@ -93,6 +111,9 @@ PAYLOAD=$(
   ALLOWED_INPUT="$ALLOWED" \
   EXCLUDE_INPUT="$EXCLUDE" \
   MAX_MB_VALUE="$MAX_MB" \
+  EMBED_MODEL_INPUT="$EMBED_MODEL" \
+  CHUNK_SIZE_INPUT="$CHUNK_SIZE" \
+  CHUNK_OVERLAP_INPUT="$CHUNK_OVERLAP" \
   "$PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -102,6 +123,9 @@ collection = os.environ["COLLECTION_NAME"]
 allowed_raw = os.environ.get("ALLOWED_INPUT", "").strip()
 exclude_raw = os.environ.get("EXCLUDE_INPUT", "").strip()
 max_mb_raw = os.environ.get("MAX_MB_VALUE", "").strip()
+embed_model_raw = os.environ.get("EMBED_MODEL_INPUT", "").strip()
+chunk_size_raw = os.environ.get("CHUNK_SIZE_INPUT", "").strip()
+chunk_overlap_raw = os.environ.get("CHUNK_OVERLAP_INPUT", "").strip()
 
 payload = {
     "directory_path": dir_path,
@@ -128,6 +152,25 @@ if max_mb_raw:
     except ValueError:
         raise SystemExit(f"Invalid --max-mb value: {max_mb_raw}")
 
+if embed_model_raw:
+    payload["embedding_model"] = embed_model_raw
+
+if chunk_size_raw:
+    try:
+        value = int(chunk_size_raw)
+        if value > 0:
+            payload["chunk_size"] = value
+    except ValueError:
+        raise SystemExit(f"Invalid --chunk-size value: {chunk_size_raw}")
+
+if chunk_overlap_raw:
+    try:
+        value = int(chunk_overlap_raw)
+        if value >= 0:
+            payload["chunk_overlap"] = value
+    except ValueError:
+        raise SystemExit(f"Invalid --chunk-overlap value: {chunk_overlap_raw}")
+
 print(json.dumps(payload))
 PY
 )
@@ -139,6 +182,17 @@ echo "        collection:  $COLLECTION"
 echo "        allowed:     $ALLOWED"
 echo "        exclude:     $EXCLUDE"
 echo "        max size MB: $MAX_MB"
+if [[ -n "$EMBED_MODEL" ]]; then
+  echo "        embed model: $EMBED_MODEL"
+else
+  echo "        embed model: (default do serviço)"
+fi
+if [[ -n "$CHUNK_SIZE" ]]; then
+  echo "        chunk size:  $CHUNK_SIZE"
+fi
+if [[ -n "$CHUNK_OVERLAP" ]]; then
+  echo "        chunk overlap: $CHUNK_OVERLAP"
+fi
 
 HTTP_BODY=$(mktemp)
 HTTP_STATUS=$(curl -s -w "%{http_code}" -o "$HTTP_BODY" \

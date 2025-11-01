@@ -49,7 +49,7 @@ wait_http() {
 }
 
 # Resolve embedding model early (read env or fallback)
-EMBED_MODEL="${OLLAMA_EMBED_MODEL:-${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}}"
+EMBED_MODEL="${OLLAMA_EMBED_MODEL:-${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}}"
 
 echo "[step] Ensure shared network tradingsystem_backend"
 if ! docker network ls --format '{{.Name}}' | grep -qx tradingsystem_backend; then

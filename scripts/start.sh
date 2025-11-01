@@ -71,6 +71,11 @@ declare -A SERVICE_START_TIMES
 declare -A SERVICE_RETRY_COUNTS
 START_SCRIPT_TIME=$(date +%s)
 
+DOCKER_FLAG_SET=false
+TARGET_MODE=false
+declare -a REQUESTED_SERVICES=()
+declare -A TARGET_SERVICES_MAP=()
+
 # Service definitions (name:directory:port:command:env_file:dependencies:max_retries)
 # Format: name=directory:port:command:optional_env_file:dependencies:max_retries
 # dependencies = comma-separated list of service names (empty if none)
@@ -95,6 +100,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-docker)
             SKIP_DOCKER=true
+            DOCKER_FLAG_SET=true
+            shift
+            ;;
+        --with-docker)
+            SKIP_DOCKER=false
+            DOCKER_FLAG_SET=true
             shift
             ;;
         --skip-services)
@@ -159,11 +170,23 @@ EOF
             exit 0
             ;;
         *)
-            log_error "Unknown option: $1"
-            exit 1
+            if [[ -n "${SERVICES[$1]:-}" ]]; then
+                REQUESTED_SERVICES+=("$1")
+                shift
+            else
+                log_error "Unknown option or service: $1"
+                exit 1
+            fi
             ;;
     esac
 done
+
+if [ ${#REQUESTED_SERVICES[@]} -gt 0 ]; then
+    TARGET_MODE=true
+    if [ "$DOCKER_FLAG_SET" = false ]; then
+        SKIP_DOCKER=true
+    fi
+fi
 
 # ==============================================================================
 # Signal Handlers
@@ -239,6 +262,30 @@ resolve_dependencies() {
     echo "${sorted_services[@]}"
 }
 
+add_target_service() {
+    local service=$1
+    if [[ -z "${SERVICES[$service]:-}" ]]; then
+        return
+    fi
+    if [[ -n "${TARGET_SERVICES_MAP[$service]:-}" ]]; then
+        return
+    fi
+
+    TARGET_SERVICES_MAP[$service]=1
+
+    local config="${SERVICES[$service]}"
+    local deps=$(echo "$config" | cut -d':' -f5)
+    if [ -n "$deps" ]; then
+        IFS=',' read -ra dep_array <<< "$deps"
+        for dep in "${dep_array[@]}"; do
+            dep=$(echo "$dep" | tr -d ' ')
+            if [ -n "$dep" ]; then
+                add_target_service "$dep"
+            fi
+        done
+    fi
+}
+
 # Function to check if port is in use (portable)
 port_in_use() {
     local port=$1
@@ -310,13 +357,13 @@ start_containers() {
                 log_success "✓ DATABASE stack already running and healthy (9 services)"
             else
                 log_info "DATABASE stack running but not healthy, restarting..."
-                docker compose -f "$DB_COMPOSE_FILE" restart
+                docker compose -p data -f "$DB_COMPOSE_FILE" restart
             fi
         else
             log_info "Starting DATABASE stack (9 services: TimescaleDB, QuestDB, Qdrant, PgAdmin, etc.)..."
 
             # Start entire DATABASE stack
-            docker compose -f "$DB_COMPOSE_FILE" up -d --remove-orphans
+            docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans
 
             # Wait for TimescaleDB to be healthy (primary database)
             log_info "Waiting for TimescaleDB health..."
@@ -432,7 +479,7 @@ start_docs_stack() {
     log_info "Starting DOCS stack (docs-api, docs-hub)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    docker compose -p documentation -f "$COMPOSE_FILE" up -d --remove-orphans
 
     # Wait for health
     local max_wait=30
@@ -464,20 +511,26 @@ start_rag_stack() {
     export IMG_RAG_OLLAMA="${IMG_RAG_OLLAMA:-ollama/ollama}"
     export IMG_VERSION="${IMG_VERSION:-latest}"
 
-    # Check if RAG stack is already running and healthy
-    local rag_running=$(docker ps --filter "name=rag-" --format "{{.Names}}" 2>/dev/null | wc -l)
-    if [ "$rag_running" -ge 3 ]; then
+    # If core containers already exist, avoid recreating them to prevent conflicts or accidental restarts
+    if docker ps -a --format '{{.Names}}' --filter "name=^rag-ollama$" | grep -q '^rag-ollama$'; then
+        local ollama_state=$(docker inspect --format='{{.State.Status}}' rag-ollama 2>/dev/null || echo "unknown")
         local ollama_health=$(docker inspect --format='{{.State.Health.Status}}' rag-ollama 2>/dev/null || echo "unknown")
-        if [ "$ollama_health" = "healthy" ]; then
-            log_success "✓ RAG stack already running and healthy (3 services)"
+
+        if [ "$ollama_state" = "running" ]; then
+            log_success "✓ RAG stack already running (rag-ollama container detected)"
             return 0
         fi
+
+        log_warning "RAG containers already exist but are not running (status: $ollama_state)."
+        log_info "Skip automatic recreate to avoid overwriting existing state."
+        log_info "Start manually if needed: docker compose -f tools/compose/docker-compose.rag.yml up -d"
+        return 0
     fi
 
     log_info "Starting RAG stack (Ollama, LlamaIndex)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    docker compose -p rag -f "$COMPOSE_FILE" up -d --remove-orphans
 
     # Wait for Ollama first
     log_info "Waiting for Ollama to be healthy..."
@@ -520,7 +573,7 @@ start_monitoring_stack() {
     log_info "Starting MONITORING stack (Prometheus, Grafana, Alertmanager)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    docker compose -p monitoring -f "$COMPOSE_FILE" up -d --remove-orphans
 
     log_success "✓ MONITORING stack started"
 }
@@ -548,7 +601,7 @@ start_tools_stack() {
     log_info "Starting TOOLS stack (LangGraph, Agno Agents)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    docker compose -p tools -f "$COMPOSE_FILE" up -d --remove-orphans
 
     log_success "✓ TOOLS stack started"
 }
@@ -574,7 +627,7 @@ start_firecrawl_stack() {
     log_info "Starting FIRECRAWL stack..."
 
     # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    docker compose -p firecrawl -f "$COMPOSE_FILE" up -d --remove-orphans
 
     log_success "✓ FIRECRAWL stack started"
 }
@@ -651,6 +704,23 @@ calculate_backoff() {
 # Function to save metrics to JSON file
 save_metrics() {
     local total_time=$(($(date +%s) - START_SCRIPT_TIME))
+    local total_declared
+    if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ]; then
+        total_declared=${#TARGET_SERVICES_MAP[@]}
+    else
+        total_declared=${#SERVICES[@]}
+    fi
+
+    local running_count=0
+    if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ]; then
+        for svc in "${!TARGET_SERVICES_MAP[@]}"; do
+            if [ -f "$SERVICES_DIR/${svc}.pid" ]; then
+                running_count=$((running_count + 1))
+            fi
+        done
+    else
+        running_count=$(ls -1 "$SERVICES_DIR"/*.pid 2>/dev/null | wc -l)
+    fi
     
     cat > "$METRICS_FILE" <<EOF
 {
@@ -696,8 +766,8 @@ EOF
   ],
   "failedServices": [],
   "summary": {
-    "totalServices": ${#SERVICES[@]},
-    "successfulServices": $(ls -1 "$SERVICES_DIR"/*.pid 2>/dev/null | wc -l),
+    "totalServices": $total_declared,
+    "successfulServices": $running_count,
     "failedServices": 0
   }
 }
@@ -978,6 +1048,15 @@ main() {
 
         # Resolve dependencies and get sorted order
         log_info "Resolving service dependencies..."
+        if [ "$TARGET_MODE" = true ]; then
+            log_info "Targeted services: ${REQUESTED_SERVICES[*]}"
+            for svc in "${REQUESTED_SERVICES[@]}"; do
+                add_target_service "$svc"
+            done
+            if [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ]; then
+                log_info "Resolved target set: ${!TARGET_SERVICES_MAP[@]}"
+            fi
+        fi
         local sorted_services
         sorted_services=$(resolve_dependencies SERVICES)
         log_info "Start order: $sorted_services"
@@ -986,6 +1065,10 @@ main() {
         local failed_services=()
         # Start services in dependency order
         for service in $sorted_services; do
+            if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ] && [[ -z "${TARGET_SERVICES_MAP[$service]:-}" ]]; then
+                log_info "Skipping ${service} (not requested)"
+                continue
+            fi
             if ! start_service "$service"; then
                 failed_services+=("$service")
             fi
@@ -1010,9 +1093,15 @@ main() {
     fi
 
     # Final summary
-    local total_services=${#SERVICES[@]}
+    local -a services_to_check=()
+    if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ]; then
+        services_to_check=("${!TARGET_SERVICES_MAP[@]}")
+    else
+        services_to_check=("${!SERVICES[@]}")
+    fi
+    local total_services=${#services_to_check[@]}
     local stopped_count=0
-    for service in "${!SERVICES[@]}"; do
+    for service in "${services_to_check[@]}"; do
         local pid_file="$SERVICES_DIR/${service}.pid"
         if [ ! -f "$pid_file" ]; then
             ((stopped_count++))

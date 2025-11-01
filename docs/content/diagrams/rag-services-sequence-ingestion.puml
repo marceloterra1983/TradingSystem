@@ -1,0 +1,69 @@
+@startuml RAG Services - Document Ingestion Sequence
+title Document Ingestion Flow with Cache Invalidation
+
+actor User
+participant "Dashboard" as FE
+participant "Collections API\n(Express)" as API
+participant "Collection Manager" as CM
+participant "Ingestion Service" as IS
+participant "Cache Service" as Cache
+participant "LlamaIndex API" as LI
+participant "Qdrant" as Q
+participant "Ollama" as O
+
+User -> FE: Upload/modify document
+FE -> API: POST /api/v1/rag/collections/{name}/ingest
+activate API
+
+API -> CM: validateCollection(name)
+activate CM
+CM -> Q: GET /collections/{name}
+Q --> CM: Collection exists
+CM --> API: Collection valid
+deactivate CM
+
+API -> IS: ingestFile(request)
+activate IS
+
+IS -> LI: POST /ingest/file
+note right: filePath, collectionName,\nchunkSize, chunkOverlap,\nembeddingModel
+activate LI
+
+LI -> LI: Read and chunk document
+LI -> O: POST /api/embeddings
+activate O
+O --> LI: Vector embeddings
+deactivate O
+
+LI -> Q: PUT /collections/{name}/points
+activate Q
+Q --> LI: Points stored
+deactivate Q
+
+LI --> IS: {jobId, status: "PENDING"}
+deactivate LI
+
+IS -> Cache: delete(`stats:${collectionName}`)
+note right: Invalidate cache\nafter ingestion
+activate Cache
+Cache --> IS: Cache invalidated
+deactivate Cache
+
+IS -> IS: logIngestion(jobId, "PENDING", metadata)
+
+IS --> API: {jobId, status, message}
+deactivate IS
+
+API --> FE: 200 OK\n{jobId, status}
+deactivate API
+
+FE --> User: Ingestion started
+
+== Background Processing ==
+
+LI -> LI: Process ingestion job
+LI -> Q: Verify points stored
+Q --> LI: Verification complete
+LI -> LI: Update job status: "COMPLETED"
+
+@enduml

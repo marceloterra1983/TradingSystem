@@ -109,10 +109,10 @@ const directConfig: ApiConfig = {
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || 'http://localhost:3600',
   docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs', // Proxied through Vite to NGINX (localhost:3400)
   // Note: Port 3400 serves static Docusaurus via NGINX (documentation container)
-  // Port 3401 serves DocsAPI (Express + FlexSearch) for search and API features
+  // Port 3402 serves RAG Service (Documentation API) with RAG/LlamaIndex integration
   // Vite proxy configuration: /docs -> http://localhost:3400 (no CORS issues)
-  // See DOCUMENTATION-CONTAINER-SOLUTION.md for 2-container architecture
-  docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3401',
+  // See docker-compose.rag.yml for complete RAG stack architecture
+  docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3402',
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,

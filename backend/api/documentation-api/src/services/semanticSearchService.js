@@ -9,53 +9,43 @@ import { config } from '../config/appConfig.js';
 export default class SemanticSearchService {
   constructor(options = {}) {
     this.qdrantUrl = options.qdrantUrl || config.vectors.qdrantUrl;
-    this.collection = options.collection || config.vectors.qdrantCollection;
+    this.defaultCollection = options.collection || config.vectors.qdrantCollection;
     this.ollamaBaseUrl = options.ollamaBaseUrl || config.vectors.ollamaBaseUrl;
-    this.embeddingModel = options.embeddingModel || config.vectors.ollamaEmbeddingModel;
+    this.defaultEmbeddingModel = options.embeddingModel || config.vectors.ollamaEmbeddingModel;
     this.client = new QdrantClient({ url: this.qdrantUrl });
-    this.vectorSize = null; // Lazily determined
-    this.ready = false;
+    this.readyCollections = new Set();
   }
 
-  async ensureReady() {
-    if (this.ready) return;
-    // Check if collection exists, else create with detected vector size
+  getDefaultCollection() {
+    return this.defaultCollection;
+  }
+
+  getDefaultEmbeddingModel() {
+    return this.defaultEmbeddingModel;
+  }
+
+  async ensureReady(collectionName = this.defaultCollection) {
+    if (this.readyCollections.has(collectionName)) {
+      return;
+    }
+
     try {
       const { collections } = await this.client.getCollections();
-      const exists = collections?.some((c) => c.name === this.collection);
+      const exists = collections?.some((c) => c.name === collectionName);
       if (!exists) {
-        // Determine dimension via a small embed call
-        const probe = await this.embedText('dimension probe');
-        this.vectorSize = probe.length;
-        await this.client.createCollection(this.collection, {
-          vectors: { size: this.vectorSize, distance: 'Cosine' },
-          optimizers_config: { default_segment_number: 2 },
-        });
-      } else {
-        // Fetch vector size from existing collection
-        try {
-          const info = await this.client.getCollection(this.collection);
-          const size = info?.result?.config?.params?.vectors?.size
-            || info?.result?.status?.optimizers_status?.vector_size; // fallback if shape differs
-          this.vectorSize = size || this.vectorSize;
-        } catch (getCollError) {
-          // Collection might not exist yet, will be created on first search if needed
-          // Reset ready flag so we try again
-          this.ready = false;
-          throw new Error(`Collection '${this.collection}' check failed: ${getCollError.message}`);
-        }
+        throw new Error(`Collection '${collectionName}' not found in Qdrant. Please index documents first.`);
       }
-      this.ready = true;
+      this.readyCollections.add(collectionName);
     } catch (error) {
       throw new Error(`Qdrant readiness failed: ${error.message}`);
     }
   }
 
-  async embedText(text) {
+  async embedText(text, embeddingModel = this.defaultEmbeddingModel) {
     try {
       const resp = await axios.post(
         `${this.ollamaBaseUrl}/api/embeddings`,
-        { model: this.embeddingModel, prompt: text },
+        { model: embeddingModel, prompt: text },
         { timeout: 60_000 }
       );
       const data = resp.data || {};
@@ -71,23 +61,26 @@ export default class SemanticSearchService {
     }
   }
 
-  async search(query, topK = 5, filter = undefined) {
+  async search(query, topK = 5, filter = undefined, options = {}) {
+    const targetCollection = options.collection || this.defaultCollection;
+    const embeddingModel = options.embeddingModel || this.defaultEmbeddingModel;
+
     try {
-      await this.ensureReady();
+      await this.ensureReady(targetCollection);
     } catch (readyError) {
       throw new Error(`Semantic search service not ready: ${readyError.message}`);
     }
 
     let queryVec;
     try {
-      queryVec = await this.embedText(query);
+      queryVec = await this.embedText(query, embeddingModel);
     } catch (embedError) {
       throw new Error(`Failed to generate embeddings: ${embedError.message}`);
     }
 
     let search;
     try {
-      search = await this.client.search(this.collection, {
+      search = await this.client.search(targetCollection, {
         vector: queryVec,
         limit: topK,
         with_payload: true,
@@ -97,7 +90,7 @@ export default class SemanticSearchService {
     } catch (searchError) {
       // Handle Qdrant "Not Found" errors gracefully
       if (searchError.message?.includes('Not Found') || searchError.message?.includes("doesn't exist")) {
-        throw new Error(`Collection '${this.collection}' not found in Qdrant. Please index documents first.`);
+        throw new Error(`Collection '${targetCollection}' not found in Qdrant. Please index documents first.`);
       }
       throw new Error(`Qdrant search failed: ${searchError.message}`);
     }

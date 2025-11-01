@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG API Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: orange; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>RAG API Test</h1>
+
+    <div id="results"></div>
+
+    <script>
+        const baseUrl = 'http://localhost:3402';
+        const results = document.getElementById('results');
+
+        async function testEndpoint(name, url) {
+            results.innerHTML += `<p class="loading">Testing ${name}...</p>`;
+
+            try {
+                const start = performance.now();
+                const response = await fetch(url);
+                const end = performance.now();
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    results.innerHTML += `<p class="success">✅ ${name} - OK (${Math.round(end - start)}ms)</p>`;
+                    results.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    results.innerHTML += `<p class="error">❌ ${name} - FAILED</p>`;
+                    results.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<p class="error">❌ ${name} - ERROR: ${error.message}</p>`;
+            }
+        }
+
+        async function runTests() {
+            await testEndpoint('Health Check', `${baseUrl}/health`);
+            await testEndpoint('Models API', `${baseUrl}/api/v1/rag/models`);
+            await testEndpoint('Collections API', `${baseUrl}/api/v1/rag/collections`);
+            await testEndpoint('Directories API', `${baseUrl}/api/v1/rag/directories`);
+        }
+
+        runTests();
+    </script>
+</body>
+</html>

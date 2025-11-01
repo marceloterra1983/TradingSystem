@@ -16,6 +16,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import documentationService, { DocsHybridItem } from '../../services/documentationService';
 import { DocPreviewModal } from './DocPreviewModal';
+import { CollectionSelector } from './CollectionSelector';
 import { normalizeDocsApiPath, resolveDocsPreviewUrl } from '../../utils/docusaurus';
 import {
   Select,
@@ -36,7 +37,9 @@ function useDebouncedValue<T>(value: T, delay = 350): T {
 
 const STORAGE_KEY_RESULTS = 'docsHybridSearch_results';
 const STORAGE_KEY_QUERY = 'docsHybridSearch_lastQuery';
+const STORAGE_KEY_COLLECTION = 'docsHybridSearch_collection';
 const HYBRID_SEARCH_LIMIT = 50;
+const DEFAULT_COLLECTION_SCOPE = 'default';
 
 type FacetOption = {
   value: string;
@@ -142,37 +145,131 @@ const buildFacetOptions = (
     });
 };
 
-const getStoredQuery = (): string => {
+const sanitizeCollection = (value?: string): string =>
+  (value ?? '').trim();
+
+const buildScopedKey = (baseKey: string, collection?: string): string => {
+  const scope = sanitizeCollection(collection) || DEFAULT_COLLECTION_SCOPE;
+  return `${baseKey}:${encodeURIComponent(scope)}`;
+};
+
+const safeGetItem = (key: string): string | null => {
   if (typeof window === 'undefined') {
-    return '';
+    return null;
   }
   try {
-    return localStorage.getItem(STORAGE_KEY_QUERY) || '';
+    return window.localStorage.getItem(key);
   } catch {
-    return '';
+    return null;
   }
 };
 
+const safeSetItem = (key: string, value: string): void => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    console.error('[DocsSearch] Failed to persist key', { key, error });
+  }
+};
+
+const safeRemoveItem = (key: string): void => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.error('[DocsSearch] Failed to remove key', { key, error });
+  }
+};
+
+const readStoredCollection = (): string => sanitizeCollection(safeGetItem(STORAGE_KEY_COLLECTION) ?? '');
+
+const writeStoredCollection = (collection: string): void => {
+  const sanitized = sanitizeCollection(collection);
+  if (!sanitized) {
+    safeRemoveItem(STORAGE_KEY_COLLECTION);
+    return;
+  }
+  safeSetItem(STORAGE_KEY_COLLECTION, sanitized);
+};
+
+const readStoredQuery = (collection?: string): string => {
+  const scopedValue = safeGetItem(buildScopedKey(STORAGE_KEY_QUERY, collection));
+  if (scopedValue !== null) {
+    return scopedValue;
+  }
+  return safeGetItem(STORAGE_KEY_QUERY) ?? '';
+};
+
+const writeStoredQuery = (collection: string, value: string): void => {
+  const key = buildScopedKey(STORAGE_KEY_QUERY, collection);
+  if (!value) {
+    safeRemoveItem(key);
+    return;
+  }
+  safeSetItem(key, value);
+};
+
+const readStoredResults = (collection?: string): DocsHybridItem[] => {
+  const scoped = safeGetItem(buildScopedKey(STORAGE_KEY_RESULTS, collection));
+  const raw = scoped ?? safeGetItem(STORAGE_KEY_RESULTS);
+  if (!raw) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+    console.warn('[DocsSearch] Stored results malformed, resetting cache');
+    return [];
+  } catch (error) {
+    console.error('[DocsSearch] Failed to parse cached results', error);
+    return [];
+  }
+};
+
+const writeStoredResults = (collection: string, results: DocsHybridItem[]): void => {
+  const key = buildScopedKey(STORAGE_KEY_RESULTS, collection);
+  if (!results.length) {
+    safeRemoveItem(key);
+    return;
+  }
+  safeSetItem(key, JSON.stringify(results));
+};
+
+const clearStoredState = (collection: string): void => {
+  const scopedQueryKey = buildScopedKey(STORAGE_KEY_QUERY, collection);
+  const scopedResultsKey = buildScopedKey(STORAGE_KEY_RESULTS, collection);
+  safeRemoveItem(scopedQueryKey);
+  safeRemoveItem(scopedResultsKey);
+};
+
 export default function DocsHybridSearchPage(): JSX.Element {
-  // Initialize from localStorage if available
-  const [query, setQuery] = useState<string>(getStoredQuery);
-  const [lastSearchedQuery, setLastSearchedQuery] = useState<string>(getStoredQuery);
+  const initialCollectionRef = useRef<string | null>(null);
+  if (initialCollectionRef.current === null) {
+    initialCollectionRef.current = readStoredCollection();
+  }
+  const initialCollection = initialCollectionRef.current || '';
+
+  const [collection, setCollection] = useState<string>(initialCollection);
+  const [query, setQuery] = useState<string>(() => readStoredQuery(initialCollection));
+  const [lastSearchedQuery, setLastSearchedQuery] = useState<string>(() => readStoredQuery(initialCollection));
   const [alpha, setAlpha] = useState(0.65);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<DocsHybridItem[]>(() => {
-    console.log('[DocsSearch] Initializing results state');
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY_RESULTS);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        console.log('[DocsSearch] Restored', parsed.length, 'results from localStorage');
-        return parsed;
-      }
-    } catch (e) {
-      console.error('[DocsSearch] Failed to restore results from localStorage:', e);
+    const restored = readStoredResults(initialCollection);
+    if (restored.length > 0) {
+      console.log('[DocsSearch] Restored', restored.length, 'results from localStorage', {
+        collection: initialCollection || 'default',
+      });
     }
-    return [];
+    return restored;
   });
   const [facets, setFacets] = useState<{ domains: { value: string; count: number }[]; types: { value: string; count: number }[]; statuses: { value: string; count: number }[]; tags: { value: string; count: number }[] }>({ domains: [], types: [], statuses: [], tags: [] });
 
@@ -259,35 +356,51 @@ export default function DocsHybridSearchPage(): JSX.Element {
     });
   };
 
-  // Persist results to localStorage
   useEffect(() => {
-    console.log('[DocsSearch] Results changed:', results.length, 'items');
-    try {
-      if (results.length > 0) {
-        localStorage.setItem(STORAGE_KEY_RESULTS, JSON.stringify(results));
-        console.log('[DocsSearch] Saved results to localStorage');
-      }
-    } catch (e) {
-      console.error('[DocsSearch] Failed to save results to localStorage:', e);
-    }
-  }, [results]);
+    console.log('[DocsSearch] Results changed', {
+      collection: collection || 'default',
+      count: results.length,
+    });
+    writeStoredResults(collection, results);
+  }, [collection, results]);
 
-  // Persist last searched query
   useEffect(() => {
-    if (lastSearchedQuery) {
-      try {
-        localStorage.setItem(STORAGE_KEY_QUERY, lastSearchedQuery);
-      } catch (e) {
-        console.error('[DocsSearch] Failed to save query to localStorage:', e);
-      }
-    }
-  }, [lastSearchedQuery]);
+    writeStoredQuery(collection, lastSearchedQuery);
+  }, [collection, lastSearchedQuery]);
+
+  useEffect(() => {
+    writeStoredCollection(collection);
+  }, [collection]);
 
   // Filters
   const [domain, setDomain] = useState<string | undefined>(undefined);
   const [dtype, setDtype] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
+
+  const collectionSwitchInitialized = useRef(false);
+  useEffect(() => {
+    if (!collectionSwitchInitialized.current) {
+      collectionSwitchInitialized.current = true;
+      return;
+    }
+
+    console.log('[DocsSearch] Collection changed', {
+      collection: collection || 'default',
+    });
+
+    const storedQueryForCollection = readStoredQuery(collection);
+    const storedResultsForCollection = readStoredResults(collection);
+
+    setQuery(storedQueryForCollection);
+    setLastSearchedQuery(storedQueryForCollection);
+    setResults(storedResultsForCollection);
+    setDomain(undefined);
+    setDtype(undefined);
+    setStatus(undefined);
+    setTags([]);
+    setError(null);
+  }, [collection]);
 
   const debouncedQuery = useDebouncedValue(query, 400);
   const mounted = useRef(true);
@@ -388,9 +501,15 @@ export default function DocsHybridSearchPage(): JSX.Element {
             type: dtype,
             status,
             tags,
+            collection,
           }
         );
-        console.log('[DocsSearch] Hybrid search succeeded:', data.results.length, 'results');
+        console.log('[DocsSearch] Hybrid search succeeded:', data.results.length, 'results', {
+          collection: data.collection || collection || 'default',
+        });
+        if (!collection && data.collection) {
+          setCollection(data.collection);
+        }
         if (mounted.current) {
           setResults(data.results);
           setLastSearchedQuery(debouncedQuery);
@@ -453,7 +572,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
       }
     }
     run();
-  }, [debouncedQuery, alpha, domain, dtype, status, tags]);
+  }, [debouncedQuery, alpha, domain, dtype, status, tags, collection]);
 
   const alphaPct = useMemo(() => Math.round(alpha * 100), [alpha]);
   const filteredResults = useMemo(() => {
@@ -526,63 +645,70 @@ export default function DocsHybridSearchPage(): JSX.Element {
           <CollapsibleCard cardId="hybrid-config" defaultCollapsed={false}>
           <CollapsibleCardHeader>
             <CollapsibleCardTitle>Consulta e ajustes</CollapsibleCardTitle>
-            <CollapsibleCardDescription>
-              Alpha pondera o peso da semântica (Qdrant) vs. lexical (FlexSearch).
+            <CollapsibleCardDescription className="flex flex-wrap items-center gap-2">
+              <span>Alpha pondera o peso da semântica (Qdrant) vs. lexical (FlexSearch).</span>
+              <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                Coleção ativa:
+                <Badge variant="outline">{collection || 'documentation'}</Badge>
+              </span>
             </CollapsibleCardDescription>
           </CollapsibleCardHeader>
           <CollapsibleCardContent>
             <div className="space-y-4">
-              {/* Query principal */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Buscar documentação
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ex.: docker, workspace api, docusaurus"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && query.trim()) {
-                        setQuery((q) => q.trim());
-                      }
-                      if (e.key === 'Escape') {
-                        setQuery('');
-                        setResults([]);
-                      }
-                    }}
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={() => setQuery((q) => q.trim())}
-                    disabled={!query.trim()}
-                    className="w-24"
-                  >
-                    Buscar
-                  </Button>
-                  {(query || results.length > 0) && (
-                    <Button
-                      onClick={() => {
-                        setQuery('');
-                        setResults([]);
-                        setError(null);
-                        setLastSearchedQuery('');
-                        // Clear localStorage
-                        try {
-                          localStorage.removeItem(STORAGE_KEY_RESULTS);
-                          localStorage.removeItem(STORAGE_KEY_QUERY);
-                          console.log('[DocsSearch] Cleared localStorage');
-                        } catch (e) {
-                          console.error('[DocsSearch] Failed to clear localStorage:', e);
-                        }
-                      }}
-                      variant="outline"
-                      className="w-24"
-                    >
-                      Limpar
-                    </Button>
-                  )}
+              {/* Query + Collection */}
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(240px,1fr)]">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Buscar documentação
+                  </label>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="flex flex-1 gap-2">
+                      <Input
+                        placeholder="Ex.: docker, workspace api, docusaurus"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && query.trim()) {
+                            setQuery((q) => q.trim());
+                          }
+                          if (e.key === 'Escape') {
+                            setQuery('');
+                            setResults([]);
+                          }
+                        }}
+                        className="flex-1 min-w-[220px]"
+                      />
+                      <Button
+                        onClick={() => setQuery((q) => q.trim())}
+                        disabled={!query.trim()}
+                        className="w-24"
+                      >
+                        Buscar
+                      </Button>
+                    </div>
+                    {(query || results.length > 0) && (
+                      <Button
+                        onClick={() => {
+                          setQuery('');
+                          setResults([]);
+                          setError(null);
+                          setLastSearchedQuery('');
+                          clearStoredState(collection);
+                        }}
+                        variant="outline"
+                        className="w-full sm:w-24"
+                      >
+                        Limpar
+                      </Button>
+                    )}
+                  </div>
                 </div>
+                <CollectionSelector
+                  value={collection}
+                  onChange={(next) => setCollection(next)}
+                  className="w-full"
+                  autoSelectFirst
+                />
               </div>
 
               {/* Filtros principais */}
@@ -908,6 +1034,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
     query,
     alphaPct,
     alpha,
+    collection,
     error,
     loading,
     results,

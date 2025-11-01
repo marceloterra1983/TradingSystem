@@ -159,6 +159,17 @@ else
 fi
 echo ""
 
+KES_TRA_STOP="${REPO_ROOT}/tools/kestra/scripts/stop.sh"
+if [[ -x "${KES_TRA_STOP}" ]]; then
+    echo -e "${YELLOW}📦 Kestra: Stopping orchestrator container(s)...${NC}"
+    if "${KES_TRA_STOP}"; then
+        echo -e "${GREEN}✓ Kestra orchestrator stop routine executed${NC}"
+    else
+        echo -e "${YELLOW}↳ Kestra stop routine retornou código diferente de zero. Verifique logs acima.${NC}"
+    fi
+    echo ""
+fi
+
 # Status final
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ All stacks stopped successfully!${NC}"
@@ -173,7 +184,7 @@ if [ $REMAINING -gt 0 ]; then
     echo ""
     
     # Find TradingSystem-related containers (infra-, data-, docs-, mon-, apps-, ollama, etc.)
-    TRADINGSYSTEM_CONTAINERS=$(docker ps --format "{{.Names}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|ollama)" || true)
+    TRADINGSYSTEM_CONTAINERS=$(docker ps --format "{{.Names}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|tools-|ollama)" || true)
     
     if [ -n "$TRADINGSYSTEM_CONTAINERS" ]; then
         echo -e "${YELLOW}📦 Stopping remaining TradingSystem containers...${NC}"
@@ -185,10 +196,10 @@ if [ $REMAINING -gt 0 ]; then
         echo ""
         
         # Check again
-        REMAINING_AFTER=$(docker ps --format "{{.Names}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|ollama)" | wc -l || echo "0")
+        REMAINING_AFTER=$(docker ps --format "{{.Names}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|tools-|ollama)" | wc -l || echo "0")
         if [ "$REMAINING_AFTER" -gt 0 ]; then
             echo -e "${YELLOW}⚠ Some containers still running:${NC}"
-            docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|ollama)"
+            docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "^(infra-|data-|docs-|mon-|firecrawl-|frontend-apps-|apps-|tools-|ollama)"
             echo ""
             echo -e "${YELLOW}💡 To force stop all containers:${NC}"
             echo "  docker stop \$(docker ps -q)"

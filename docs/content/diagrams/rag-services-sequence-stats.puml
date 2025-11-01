@@ -1,0 +1,110 @@
+@startuml RAG Services - Collection Stats Retrieval
+title Collection Stats with Redis Caching
+
+actor Admin
+participant "Dashboard" as FE
+participant "Collections API\n(Express)" as API
+participant "Collection Manager" as CM
+participant "Cache Service" as Cache
+participant "Redis" as R
+participant "Qdrant" as Q
+
+== First Request (Cache MISS) ==
+
+Admin -> FE: View collection stats
+FE -> API: GET /api/v1/rag/collections/{name}/stats
+activate API
+
+API -> CM: getCollectionStats(name, useCache=true)
+activate CM
+
+CM -> Cache: get(`stats:${name}`)
+activate Cache
+Cache -> R: GET rag:collections:stats:{name}
+activate R
+R --> Cache: null (key not found)
+deactivate R
+Cache --> CM: null
+deactivate Cache
+
+note right of CM: Cache MISS\nFetch fresh data
+
+CM -> Q: GET /collections/{name}
+activate Q
+Q --> CM: {points_count, vectors_count, ...}
+deactivate Q
+
+CM -> CM: computeCollectionMetrics(collection, qdrantStats)
+CM -> CM: collectFiles(directory)
+note right: Count files in directory\n(fast approximation)
+
+CM -> Cache: set(`stats:${name}`, result, TTL=600)
+activate Cache
+Cache -> R: SETEX rag:collections:stats:{name} 600 {json}
+activate R
+R --> Cache: OK
+deactivate R
+Cache --> CM: Cached
+deactivate Cache
+
+CM --> API: {qdrant, metrics}
+deactivate CM
+
+API --> FE: 200 OK\n{collection, cached: false, stats, timestamp}
+deactivate API
+FE --> Admin: Display stats\n(6ms response time)
+
+== Second Request (Cache HIT) ==
+
+Admin -> FE: Refresh stats
+FE -> API: GET /api/v1/rag/collections/{name}/stats?useCache=true
+activate API
+
+API -> CM: getCollectionStats(name, useCache=true)
+activate CM
+
+CM -> Cache: get(`stats:${name}`)
+activate Cache
+Cache -> R: GET rag:collections:stats:{name}
+activate R
+R --> Cache: {json} (cached result)
+deactivate R
+Cache --> CM: Cached stats
+deactivate Cache
+
+note right of CM: Cache HIT\nReturn immediately
+
+CM --> API: {qdrant, metrics} (from cache)
+deactivate CM
+
+API --> FE: 200 OK\n{collection, cached: true, stats, timestamp}
+deactivate API
+FE --> Admin: Display stats\n(4ms response time)
+
+== Cache Invalidation (After Update) ==
+
+Admin -> FE: Update collection config
+FE -> API: PATCH /api/v1/rag/collections/{name}
+activate API
+
+API -> CM: updateCollection(name, updates)
+activate CM
+
+CM -> CM: Validate and merge config
+CM -> Cache: delete(`stats:${name}`)
+activate Cache
+Cache -> R: DEL rag:collections:stats:{name}
+activate R
+R --> Cache: 1 (key deleted)
+deactivate R
+Cache --> CM: Deleted
+deactivate Cache
+
+CM --> API: Collection updated
+deactivate CM
+
+API --> FE: 200 OK
+deactivate API
+FE --> Admin: Update successful
+
+@enduml

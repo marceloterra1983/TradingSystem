@@ -10,7 +10,7 @@ from pathlib import Path
 
 import magic
 import frontmatter
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from llama_index.core.node_parser import SentenceSplitter
 
 from .monitoring import record_document_ingested, track_time, INGEST_TIME
