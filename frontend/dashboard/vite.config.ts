@@ -101,10 +101,15 @@ export default defineConfig(({ mode }) => {
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4005',
   );
-  // DocsAPI (dynamic) runs on 3401 by default; 3400 is static docs (NGINX)
-  const documentationProxy = resolveProxy(
-    env.VITE_DOCUMENTATION_PROXY_TARGET || env.VITE_DOCUMENTATION_API_URL,
+  // Docs API (FlexSearch + CRUD) runs on 3401; 3400 is static docs (NGINX)
+  const docsApiProxy = resolveProxy(
+    env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
     'http://localhost:3401',
+  );
+  // RAG Collections Service (Directories API) runs on 3403
+  const ragCollectionsProxy = resolveProxy(
+    env.VITE_RAG_COLLECTIONS_PROXY_TARGET || env.VITE_RAG_COLLECTIONS_API_URL,
+    'http://localhost:3403',
   );
   const serviceLauncherProxy = resolveProxy(
     env.VITE_SERVICE_LAUNCHER_PROXY_TARGET || env.VITE_SERVICE_LAUNCHER_API_URL,
@@ -189,27 +194,49 @@ export default defineConfig(({ mode }) => {
           rewrite: createRewrite(/^\/api\/tp-capital/, tpCapitalProxy.basePath),
         },
         '/api/docs': {
-          target: documentationProxy.target,
+          target: docsApiProxy.target,
           changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/docs/, documentationProxy.basePath),
+          rewrite: createRewrite(/^\/api\/docs/, docsApiProxy.basePath),
         },
         '/api/launcher': {
           target: serviceLauncherProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/launcher/, serviceLauncherProxy.basePath),
         },
+        // RAG Collections Service (port 3403) - Main collections API
+        '/api/v1/rag/collections': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/collections/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/collections` : '/api/v1/rag/collections'),
+        },
+        '/api/v1/rag/directories': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/directories/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/directories` : '/api/v1/rag/directories'),
+        },
+        '/api/v1/rag/models': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/models/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/models` : '/api/v1/rag/models'),
+        },
+        '/api/v1/rag/ingestion': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/ingestion/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/ingestion` : '/api/v1/rag/ingestion'),
+        },
+        // RAG Collections Service (port 3403) - fallback for other /api/v1/rag routes
         '/api/v1/rag': {
-          target: documentationProxy.target,
+          target: ragCollectionsProxy.target,
           changeOrigin: true,
           rewrite: (incomingPath) => {
             const stripped = incomingPath.replace(/^\/api\/v1\/rag/, '');
             const remainder = stripped.startsWith('/') ? stripped : `/${stripped}`;
-            if (!documentationProxy.basePath) {
+            if (!ragCollectionsProxy.basePath) {
               return `/api/v1/rag${remainder}`.replace(/\/+/g, '/') || '/api/v1/rag';
             }
-            const base = documentationProxy.basePath.startsWith('/')
-              ? documentationProxy.basePath
-              : `/${documentationProxy.basePath}`;
+            const base = ragCollectionsProxy.basePath.startsWith('/')
+              ? ragCollectionsProxy.basePath
+              : `/${ragCollectionsProxy.basePath}`;
             return `${base}/api/v1/rag${remainder}`.replace(/\/+/g, '/') || `${base}/api/v1/rag`;
           },
         },

@@ -3,7 +3,7 @@ import { Button } from '../../../ui/button';
 import { cn } from '../../../../lib/utils';
 import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG } from '../constants/workspace.constants';
 import type { Item } from '../types/workspace.types';
-import { Tag } from 'lucide-react';
+import { Tag, Folder } from 'lucide-react';
 
 interface ViewItemDialogProps {
   item: Item;
@@ -12,7 +12,7 @@ interface ViewItemDialogProps {
 }
 
 export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps) {
-  const CategoryIcon = CATEGORY_CONFIG[item.category].icon;
+  const CategoryIcon = Folder; // Dynamic categories use default icon
   const StatusIcon = STATUS_CONFIG[item.status].icon;
   const PriorityIcon = PRIORITY_CONFIG[item.priority].icon;
 
@@ -21,7 +21,7 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 pr-8">
-            <CategoryIcon className={cn('h-5 w-5 flex-shrink-0', CATEGORY_CONFIG[item.category].color)} />
+            <CategoryIcon className="h-5 w-5 flex-shrink-0 text-gray-600 dark:text-gray-400" />
             <span className="break-words">{item.title}</span>
           </DialogTitle>
           <DialogDescription>
@@ -49,10 +49,9 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
             <div>
               <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Categoria</h4>
               <div className="flex items-center gap-2">
-                <CategoryIcon className={cn('h-4 w-4', CATEGORY_CONFIG[item.category].color)} />
-                <span className="text-sm text-gray-900 dark:text-gray-100">{CATEGORY_CONFIG[item.category].label}</span>
+                <CategoryIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm text-gray-900 dark:text-gray-100">{item.category}</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{CATEGORY_CONFIG[item.category].description}</p>
             </div>
 
             {/* Priority */}

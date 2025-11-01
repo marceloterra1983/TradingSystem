@@ -13,6 +13,7 @@ import {
   createCorrelationIdMiddleware,
 } from '../../../shared/middleware/index.js';
 import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
+import { configureCompression, compressionMetrics } from '../../../shared/middleware/compression.js';
 
 // Application routes
 import systemsRoutes from './routes/systems.js';
@@ -25,6 +26,7 @@ import docsHealthRoutes from './routes/docs-health.js';
 import semanticRoutes from './routes/semantic.js';
 import ragProxyRoutes from './routes/rag-proxy.js';
 import ragStatusRoutes from './routes/rag-status.js';
+import ragCollectionsRoutes from './routes/rag-collections.js';
 import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
 import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
 import markdownContentRoutes from './routes/markdown-content.js';
@@ -76,6 +78,8 @@ const logger = createLogger('documentation-api', {
 
 // Middleware stack
 app.use(createCorrelationIdMiddleware());
+app.use(compressionMetrics);
+app.use(configureCompression({ logger }));
 app.use(configureHelmet({ logger }));
 app.use(configureCors({ logger, disableCors: config.cors.disable }));
 app.use(configureRateLimit({ logger }));
@@ -201,7 +205,12 @@ app.use('/api/v1/docs', markdownContentRoutes);
 app.use('/api/v1/docs/health', docsHealthRoutes);
 app.use('/api/v1/semantic', semanticRoutes);
 app.use('/api/v1/rag', ragProxyRoutes);
-app.use('/api/v1/rag/status', ragStatusRoutes);
+app.use('/api/v1/rag', ragStatusRoutes);
+app.use('/api/v1/rag/collections', ragCollectionsRoutes);
+app.use('/api/v1/rag/models', (req, res, next) => {
+  req.url = '/models';
+  return ragCollectionsRoutes(req, res, next);
+});
 
 // Prometheus metrics endpoint
 app.get('/metrics', metricsHandler);

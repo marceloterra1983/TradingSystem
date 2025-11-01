@@ -6,7 +6,6 @@ import {
   Server,
   Gauge,
   Workflow,
-  Boxes,
 } from 'lucide-react';
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
@@ -37,8 +36,8 @@ const LangGraphPage = React.lazy(
 const LlamaIndexPage = React.lazy(
   () => import('../components/pages/LlamaIndexPage')
 );
-const LangChainVectorPage = React.lazy(
-  () => import('../components/pages/LangChainVectorPage')
+const KestraPage = React.lazy(
+  () => import('../components/pages/KestraPage')
 );
 const TelegramGatewayFinal = React.lazy(
   () => import('../components/pages/TelegramGatewayFinal')
@@ -59,8 +58,8 @@ const miroContent = <MiroPage />;
 const docsHybridSearchContent = <DocsHybridSearchPage />;
 const langGraphContent = <LangGraphPage />;
 const llamaIndexContent = <LlamaIndexPage />;
-const langChainVectorContent = <LangChainVectorPage />;
 const agnoAgentsContent = <AgnoAgentsPage />;
+const kestraContent = <KestraPage />;
 const launcherContent = <LauncherPage />;
 
 /**
@@ -113,7 +112,7 @@ export interface Section {
  * Navigation Sections (current):
  * 0. Apps (Cyan) - TP Capital, Telegram Gateway, Workspace
  * 1. Knowledge (Indigo) - Docusaurus knowledge hub + documentation
- * 2. Infrastructure (Gray) - LangGraph, LlamaIndex, Launchers
+ * 2. Toolbox (Gray) - LangGraph, LlamaIndex, Launchers
  *
  * ===========================================================================
  * IMPORTANT: PAGE LAYOUT PATTERNS
@@ -201,7 +200,7 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Ideias, sugestões e brainstorming de funcionalidades',
         },
         parts: [], // Empty - uses customContent
-        // ✅ CustomizablePageLayout - 2 sections: CRUD table + Kanban board
+        // ✅ CustomizablePageLayout - 3 sections: Categories + CRUD table + Kanban board
         customContent: workspaceContent,
       },
     ],
@@ -263,12 +262,12 @@ export const NAVIGATION_DATA: Section[] = [
   },
 
   // ========================================
-  // 2. INFRASTRUCTURE (Gray)
+  // 2. TOOLBOX (Gray)
   // ========================================
   {
     id: 'configuracoes',
     icon: <Server className="h-5 w-5" />,
-    label: 'Infrastructure',
+    label: 'Toolbox',
     pages: [
       {
         id: 'langgraph-orchestrator',
@@ -283,10 +282,10 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <Workflow className="h-4 w-4" />,
       },
       {
-        id: 'llamaindex-services',
-        title: 'LlamaIndex',
+        id: 'rag-services',
+        title: 'RAG Services',
         header: {
-          title: 'LlamaIndex RAG Services',
+          title: 'RAG Services',
           subtitle:
             'Consultas, ingestão e integrações RAG baseadas em LangChain.',
         },
@@ -295,16 +294,16 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <BrainCircuit className="h-4 w-4" />,
       },
       {
-        id: 'langchain-vector-store',
-        title: 'Vector Store',
+        id: 'kestra-orchestrator',
+        title: 'Kestra',
         header: {
-          title: 'LangChain Vector Store (Qdrant)',
+          title: 'Kestra Orchestrator',
           subtitle:
-            'Monitoramento e operações do banco vetorial utilizado pelos fluxos LangChain/LlamaIndex.',
+            'Automação de pipelines declarativos com filas e storage dedicados.',
         },
         parts: [],
-        customContent: langChainVectorContent,
-        icon: <Boxes className="h-4 w-4" />,
+        customContent: kestraContent,
+        icon: <Server className="h-4 w-4" />,
       },
       {
         id: 'agno-agents',

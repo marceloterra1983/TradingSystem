@@ -24,8 +24,11 @@ export class CollectionService {
     this.queryBaseUrl = (config.queryBaseUrl || process.env.LLAMAINDEX_QUERY_URL || 'http://localhost:8202').replace(/\/+$/, '');
     this.ingestionBaseUrl = (config.ingestionBaseUrl || process.env.LLAMAINDEX_INGESTION_URL || 'http://localhost:8201').replace(/\/+$/, '');
     this.qdrantBaseUrl = (config.qdrantBaseUrl || process.env.QDRANT_URL || 'http://localhost:6333').replace(/\/+$/, '');
+    this.ollamaBaseUrl = (config.ollamaBaseUrl || process.env.OLLAMA_BASE_URL || 'http://rag-ollama:11434').replace(/\/+$/, '');
+    this.redisUrl = (config.redisUrl || process.env.REDIS_URL || 'redis://rag-redis:6379');
+    this.collectionsServiceUrl = (config.collectionsServiceUrl || process.env.COLLECTIONS_SERVICE_URL || 'http://rag-collections-service:3402').replace(/\/+$/, '');
     this.jwtSecret = config.jwtSecret || process.env.JWT_SECRET_KEY || '';
-    this.defaultCollection = config.defaultCollection || process.env.QDRANT_COLLECTION || 'documentation__nomic';
+    this.defaultCollection = config.defaultCollection || process.env.QDRANT_COLLECTION || 'documentation';
     this.defaultDocsDir = config.defaultDocsDir || process.env.LLAMAINDEX_DOCS_DIR || path.join(process.cwd(), '../../docs/content');
 
     // Status cache configuration
@@ -111,34 +114,94 @@ export class CollectionService {
   async getHealth() {
     const timestamp = new Date().toISOString();
 
-    const queryHealth = await this._fetchJson(`${this.queryBaseUrl}/health`);
-    const ingestionHealth = await this._fetchJson(`${this.ingestionBaseUrl}/health`);
+    // Check all RAG services
+    const [queryHealth, ingestionHealth, ollamaHealth, redisHealth, collectionsHealth] = await Promise.allSettled([
+      this._fetchJson(`${this.queryBaseUrl}/health`),
+      this._fetchJson(`${this.ingestionBaseUrl}/health`),
+      this._fetchJson(`${this.ollamaBaseUrl}/api/tags`), // Ollama doesn't have /health, use /api/tags
+      this._checkRedisHealth(),
+      this._fetchJson(`${this.collectionsServiceUrl}/health`),
+    ]);
 
     const buildMessage = (source) => {
-      if (!source) return 'unavailable';
-      if (source.ok) {
-        const data = source.data || {};
+      if (!source || source.status === 'rejected') return 'unavailable';
+      const value = source.value || source;
+      if (!value) return 'unavailable';
+      if (value.ok) {
+        const data = value.data || {};
         return data.message || data.status || 'ok';
       }
-      return source.error || (source.data && (source.data.message || source.data.detail)) || 'unavailable';
+      return value.error || (value.data && (value.data.message || value.data.detail)) || 'unavailable';
     };
+
+    const safeValue = (result) => result.status === 'fulfilled' ? result.value : null;
 
     return {
       timestamp,
       services: {
         query: {
-          ok: queryHealth.ok && (queryHealth.data?.status || '').toLowerCase() !== 'missing',
-          status: queryHealth.status,
+          ok: queryHealth.status === 'fulfilled' && queryHealth.value.ok && (queryHealth.value.data?.status || '').toLowerCase() !== 'missing',
+          status: queryHealth.status === 'fulfilled' ? queryHealth.value.status : 503,
           message: buildMessage(queryHealth),
-          collection: queryHealth.data?.collection ?? queryHealth.data?.configuredCollection ?? null,
+          collection: queryHealth.status === 'fulfilled' ? (queryHealth.value.data?.collection ?? queryHealth.value.data?.configuredCollection ?? null) : null,
         },
         ingestion: {
-          ok: ingestionHealth.ok && (ingestionHealth.data?.status || '').toLowerCase() !== 'degraded',
-          status: ingestionHealth.status,
+          ok: ingestionHealth.status === 'fulfilled' && ingestionHealth.value.ok && (ingestionHealth.value.data?.status || '').toLowerCase() !== 'degraded',
+          status: ingestionHealth.status === 'fulfilled' ? ingestionHealth.value.status : 503,
           message: buildMessage(ingestionHealth),
+        },
+        ollama: {
+          ok: ollamaHealth.status === 'fulfilled' && ollamaHealth.value.ok,
+          status: ollamaHealth.status === 'fulfilled' ? ollamaHealth.value.status : 503,
+          message: ollamaHealth.status === 'fulfilled' && ollamaHealth.value.ok 
+            ? `${ollamaHealth.value.data?.models?.length || 0} modelo(s)` 
+            : 'unavailable',
+        },
+        redis: {
+          ok: redisHealth.status === 'fulfilled' && redisHealth.value.ok,
+          status: redisHealth.status === 'fulfilled' ? redisHealth.value.status : 503,
+          message: buildMessage(redisHealth),
+        },
+        collections: {
+          ok: collectionsHealth.status === 'fulfilled' && collectionsHealth.value.ok,
+          status: collectionsHealth.status === 'fulfilled' ? collectionsHealth.value.status : 503,
+          message: buildMessage(collectionsHealth),
         },
       },
     };
+  }
+
+  /**
+   * Check Redis health via Collections Service
+   * (Collections Service uses Redis, so if it's healthy, Redis is working)
+   * @private
+   */
+  async _checkRedisHealth() {
+    try {
+      // Check if Collections Service can connect to Redis
+      // Collections Service has Redis dependency, so if it's up, Redis is working
+      const response = await this._fetchJson(`${this.collectionsServiceUrl}/health`);
+      
+      if (response.ok) {
+        return {
+          ok: true,
+          status: 200,
+          data: { status: 'ok', message: 'connected' }
+        };
+      }
+      
+      return {
+        ok: false,
+        status: response.status,
+        data: { status: 'degraded', message: 'Redis may be unavailable' }
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: 503,
+        data: { status: 'error', message: 'unavailable' }
+      };
+    }
   }
 
   /**
@@ -468,6 +531,45 @@ export class CollectionService {
         throw error;
       }
       throw new ExternalServiceError('Qdrant', error);
+    }
+  }
+
+  /**
+   * Fetch collection configuration from Collections Service
+   */
+  async getCollectionDefinition(collectionName) {
+    if (!collectionName) {
+      throw new NotFoundError('Collection name is required');
+    }
+
+    const target = collectionName.trim();
+    if (!target) {
+      throw new NotFoundError('Collection name is required');
+    }
+
+    const url = `${this.collectionsServiceUrl}/api/v1/rag/collections/${encodeURIComponent(target)}`;
+
+    try {
+      const response = await this._fetchJson(url);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new NotFoundError(`Collection '${target}' not found`);
+        }
+        throw new ExternalServiceError('Collections service', new Error('Failed to fetch collection metadata'), {
+          statusCode: response.status,
+        });
+      }
+
+      const data = response.data?.data ?? response.data;
+      return {
+        ...data,
+        name: data?.name ?? target,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof ExternalServiceError) {
+        throw error;
+      }
+      throw new ExternalServiceError('Collections service', error);
     }
   }
 }

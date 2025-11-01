@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
 import { Button } from '../../../ui/button';
-import { Lightbulb, Plus, AlertCircle, RefreshCw, Clock } from 'lucide-react';
+import { Lightbulb, Plus, AlertCircle, RefreshCw, Clock, Folder, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useItemFilters } from '../hooks/useItemFilters';
 import { AddItemDialog } from './AddItemDialog';
 import { ItemActions } from './ItemActions';
@@ -10,6 +10,9 @@ import { STATUS_CONFIG, PRIORITY_CONFIG, CATEGORY_CONFIG } from '../constants/wo
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import { formatTimestampShort } from '../../../../utils/dateUtils';
 
+type SortField = 'title' | 'category' | 'status' | 'priority' | 'createdAt';
+type SortDirection = 'asc' | 'desc' | null;
+
 export function WorkspaceListSection() {
   const loading = useWorkspaceStore((state) => state.loading);
   const syncing = useWorkspaceStore((state) => state.syncing);
@@ -17,16 +20,99 @@ export function WorkspaceListSection() {
   const lastSyncedAt = useWorkspaceStore((state) => state.lastSyncedAt);
   const { filteredItems } = useItemFilters(); // searchTerm and setters are not used here, but in a filter component
   const [showAddDialog, setShowAddDialog] = useState(false);
-  
-  const usingFallbackData = !!error; 
+  const [sortField, setSortField] = useState<SortField>('createdAt');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const usingFallbackData = !!error;
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Cycle through: desc -> asc -> null (default)
+      if (sortDirection === 'desc') {
+        setSortDirection('asc');
+      } else if (sortDirection === 'asc') {
+        setSortDirection(null);
+        setSortField('createdAt');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
 
   const sortedItems = useMemo(() => {
-    return [...filteredItems].sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }, [filteredItems]);
+    const items = [...filteredItems];
+
+    if (!sortDirection) {
+      // Default sort by createdAt desc
+      return items.sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    return items.sort((a, b) => {
+      let aValue: string | number | Date;
+      let bValue: string | number | Date;
+
+      switch (sortField) {
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case 'category':
+          aValue = a.category.toLowerCase();
+          bValue = b.category.toLowerCase();
+          break;
+        case 'status':
+          aValue = a.status.toLowerCase();
+          bValue = b.status.toLowerCase();
+          break;
+        case 'priority':
+          // Priority order: critical > high > medium > low
+          const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+          aValue = priorityOrder[a.priority as keyof typeof priorityOrder];
+          bValue = priorityOrder[b.priority as keyof typeof priorityOrder];
+          break;
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filteredItems, sortField, sortDirection]);
 
   const showLoadingState = loading && sortedItems.length === 0;
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
+    }
+    if (sortDirection === 'asc') {
+      return <ArrowUp className="h-3.5 w-3.5" />;
+    }
+    if (sortDirection === 'desc') {
+      return <ArrowDown className="h-3.5 w-3.5" />;
+    }
+    return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
+  };
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <th
+      className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-1.5">
+        {children}
+        {getSortIcon(field)}
+      </div>
+    </th>
+  );
 
   return (
     <CollapsibleCard cardId="workspace-list">
@@ -95,12 +181,12 @@ export function WorkspaceListSection() {
             <table className="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-800">
               <thead className="bg-gray-50 dark:bg-gray-900/60">
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Título</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Categoria</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Status</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Prioridade</th>
+                  <SortableHeader field="title">Título</SortableHeader>
+                  <SortableHeader field="category">Categoria</SortableHeader>
+                  <SortableHeader field="status">Status</SortableHeader>
+                  <SortableHeader field="priority">Prioridade</SortableHeader>
                   <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Tags</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Data</th>
+                  <SortableHeader field="createdAt">Data</SortableHeader>
                   <th className="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Ações</th>
                 </tr>
               </thead>
@@ -122,7 +208,7 @@ export function WorkspaceListSection() {
                   sortedItems.map((item) => {
                     const StatusIcon = STATUS_CONFIG[item.status].icon;
                     const PriorityIcon = PRIORITY_CONFIG[item.priority].icon;
-                    const CategoryIcon = CATEGORY_CONFIG[item.category].icon;
+                    const CategoryIcon = Folder; // Dynamic categories use default icon
 
                     return (
                       <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30">
@@ -134,9 +220,9 @@ export function WorkspaceListSection() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <CategoryIcon className={cn('h-4 w-4', CATEGORY_CONFIG[item.category].color)} />
+                            <CategoryIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                             <span className="text-gray-700 dark:text-gray-300 text-xs">
-                              {CATEGORY_CONFIG[item.category].label}
+                              {item.category}
                             </span>
                           </div>
                         </td>

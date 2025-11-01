@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG } from '../constants/workspace.constants';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import type { Item, ItemFormWithStatus, ItemCategory, ItemPriority, ItemStatus } from '../types/workspace.types';
+import { categoriesService, type Category } from '../../../../services/categoriesService';
 
 const itemToFormState = (item: Item): ItemFormWithStatus => ({
   title: item.title,
@@ -30,6 +31,8 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const updateItem = useWorkspaceStore((state) => state.updateItem);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -47,6 +50,29 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
     item.createdAt,
     item.tags.join(','),
   ]);
+
+  // Load categories from API
+  useEffect(() => {
+    if (!open) return;
+
+    const loadCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await categoriesService.getCategories({
+          active_only: true,
+          order_by: 'display_order'
+        });
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    void loadCategories();
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,16 +146,27 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value as ItemCategory })}
+                disabled={loadingCategories}
               >
                 <SelectTrigger id="edit-category">
-                  <SelectValue />
+                  <SelectValue placeholder={loadingCategories ? 'Carregando...' : 'Selecione'} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
+                  {loadingCategories ? (
+                    <SelectItem value="__loading__" disabled>
+                      Carregando categorias...
                     </SelectItem>
-                  ))}
+                  ) : categories.length > 0 ? (
+                    categories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__empty__" disabled>
+                      Nenhuma categoria disponível
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

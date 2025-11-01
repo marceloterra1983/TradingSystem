@@ -35,6 +35,24 @@ router.get('/status', asyncHandler(async (req, res) => {
 }));
 
 /**
+ * GET /api/v1/rag/status/health
+ * Lightweight health probe used by container orchestration
+ */
+router.get('/status/health', asyncHandler(async (_req, res) => {
+  const status = await collectionService.getCollectionStatus(null);
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    services: status?.services ?? {},
+    qdrant: {
+      ok: status?.qdrant?.ok ?? false,
+      collection: status?.qdrant?.collection ?? null,
+      count: status?.qdrant?.count ?? null,
+    },
+  });
+}));
+
+/**
  * POST /api/v1/rag/ingest
  * Trigger document ingestion
  *

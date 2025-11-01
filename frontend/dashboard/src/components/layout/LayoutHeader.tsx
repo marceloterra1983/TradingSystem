@@ -123,7 +123,7 @@ export function LayoutHeader({
           <button
             className="text-xs text-gray-600 dark:text-gray-300 hover:underline"
             title="Abrir LlamaIndex"
-            onClick={() => { window.location.hash = '#/llamaindex-services'; }}
+            onClick={() => { window.location.hash = '#/rag-services'; }}
           >
             RAG
           </button>

@@ -6,9 +6,13 @@ import { DeleteButton } from "../../ui/action-buttons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 import { Input } from "../../ui/input";
 import { AlertCircle, FileDown, FileSpreadsheet, RefreshCcw, RotateCcw } from "lucide-react";
+import { getApiUrl } from "../../../config/api";
 import { LIMIT_OPTIONS } from './constants';
 import { fetchSignals, deleteSignal } from './api';
 import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
+
+const TP_CAPITAL_API_URL = getApiUrl('tpCapital').replace(/\/$/, '');
+const SYNC_MESSAGES_URL = `${TP_CAPITAL_API_URL}/sync-messages`;
 
 export function SignalsTable() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -113,7 +117,7 @@ export function SignalsTable() {
     setSyncResult({ show: false, success: false, message: '' });
     
     try {
-      const response = await fetch('/api/tp-capital/sync-messages', {
+      const response = await fetch(SYNC_MESSAGES_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -399,4 +403,3 @@ export function SignalsTable() {
     </CollapsibleCard>
   );
 }
-

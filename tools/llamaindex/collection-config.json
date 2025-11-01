@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LlamaIndex Collection Configuration",
+  "description": "Defines available collections and their embedding models",
+  "version": "1.0.0",
+  "lastUpdated": "2025-10-31",
+  "defaultCollection": "documentation",
+  "collections": [
+    {
+      "name": "documentation",
+      "displayName": "Documentation (Nomic Embed)",
+      "embeddingModel": "nomic-embed-text",
+      "dimensions": 768,
+      "description": "Main documentation collection using Nomic Embed Text model (768 dimensions)",
+      "source": "docs/content",
+      "enabled": true,
+      "priority": 1,
+      "metadata": {
+        "modelSize": "274MB",
+        "language": "multilingual",
+        "optimizedFor": "semantic search, general purpose"
+      }
+    },
+    {
+      "name": "documentation_mxbai",
+      "displayName": "Documentation (MXBAI Embed)",
+      "embeddingModel": "mxbai-embed-large",
+      "dimensions": 384,
+      "description": "Documentation collection using MXBAI Embed Large model (384 dimensions, optimized for speed)",
+      "source": "docs/content",
+      "enabled": true,
+      "priority": 2,
+      "metadata": {
+        "modelSize": "669MB",
+        "language": "multilingual",
+        "optimizedFor": "fast retrieval, lower latency"
+      }
+    },
+    {
+      "name": "documentation_gemma",
+      "displayName": "Documentation (Gemma Embed)",
+      "embeddingModel": "embeddinggemma",
+      "dimensions": 768,
+      "description": "Documentation collection using Google Gemma embedding model (768 dimensions)",
+      "source": "docs/content",
+      "enabled": true,
+      "priority": 3,
+      "metadata": {
+        "modelSize": "621MB",
+        "language": "multilingual",
+        "optimizedFor": "high quality embeddings, contextual understanding"
+      }
+    },
+    {
+      "name": "repository__nomic",
+      "displayName": "Repository Code (Nomic Embed)",
+      "embeddingModel": "nomic-embed-text",
+      "dimensions": 768,
+      "description": "Source code repository indexed with Nomic Embed Text",
+      "source": ".",
+      "enabled": false,
+      "priority": 4,
+      "metadata": {
+        "modelSize": "274MB",
+        "language": "code",
+        "optimizedFor": "code search, semantic code understanding"
+      }
+    }
+  ],
+  "embeddingModels": [
+    {
+      "name": "nomic-embed-text",
+      "fullName": "nomic-embed-text:latest",
+      "dimensions": 768,
+      "contextLength": 8192,
+      "provider": "Nomic AI",
+      "description": "General-purpose embedding model with strong performance across domains",
+      "useCases": [
+        "semantic search",
+        "document retrieval",
+        "clustering"
+      ],
+      "performance": {
+        "speed": "fast",
+        "quality": "high",
+        "memoryUsage": "low"
+      }
+    },
+    {
+      "name": "mxbai-embed-large",
+      "fullName": "mxbai-embed-large:latest",
+      "dimensions": 384,
+      "contextLength": 512,
+      "provider": "Mixedbread AI",
+      "description": "Fast embedding model optimized for retrieval tasks",
+      "useCases": [
+        "fast retrieval",
+        "real-time search",
+        "large-scale indexing"
+      ],
+      "performance": {
+        "speed": "very fast",
+        "quality": "medium-high",
+        "memoryUsage": "low"
+      }
+    },
+    {
+      "name": "embeddinggemma",
+      "fullName": "embeddinggemma:latest",
+      "dimensions": 768,
+      "contextLength": 2048,
+      "provider": "Google",
+      "description": "Google's Gemma embedding model with strong contextual understanding",
+      "useCases": [
+        "contextual search",
+        "semantic similarity",
+        "multi-lingual retrieval"
+      ],
+      "performance": {
+        "speed": "medium",
+        "quality": "very high",
+        "memoryUsage": "medium"
+      }
+    }
+  ],
+  "collectionNamingConvention": {
+    "format": "{source}_{model_short}",
+    "examples": [
+      "documentation",
+      "documentation_mxbai",
+      "repository_nomic"
+    ],
+    "rules": [
+      "Use underscore (_) as separator",
+      "Source prefix: documentation, repository, workspace",
+      "Model suffix: nomic, mxbai, gemma",
+      "All lowercase, no spaces"
+    ]
+  },
+  "aliases": {
+    "documentation": "documentation",
+    "documentation__nomic": "documentation",
+    "docs": "documentation",
+    "docs_index": "documentation",
+    "docs_index_mxbai": "documentation_mxbai",
+    "repository": "repository_nomic",
+    "documentation__mxbai": "documentation_mxbai",
+    "documentation__gemma": "documentation_gemma"
+  }
+}

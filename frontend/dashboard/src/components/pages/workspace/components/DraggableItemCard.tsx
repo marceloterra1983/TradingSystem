@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '../../../ui/card';
-import { Eye } from 'lucide-react';
+import { Eye, Folder } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { CATEGORY_CONFIG, PRIORITY_CONFIG } from '../constants/workspace.constants';
 import type { Item } from '../types/workspace.types';
@@ -25,24 +25,21 @@ function WorkspaceItemCardContent({
   showViewButton = true,
   className,
 }: WorkspaceItemCardContentProps) {
-  const CategoryIcon = CATEGORY_CONFIG[item.category].icon;
+  const CategoryIcon = Folder; // Dynamic categories use default icon
   const PriorityIcon = PRIORITY_CONFIG[item.priority].icon;
 
   return (
     <Card
       className={cn(
         'hover:shadow-md transition-shadow',
-        CATEGORY_CONFIG[item.category].bgColor,
+        'bg-white dark:bg-gray-800',
         className,
       )}
     >
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start gap-2">
           <CategoryIcon
-            className={cn(
-              'h-4 w-4 mt-0.5 flex-shrink-0',
-              CATEGORY_CONFIG[item.category].color,
-            )}
+            className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-600 dark:text-gray-400"
           />
           <p className="text-sm font-medium line-clamp-2 flex-1 text-gray-900 dark:text-gray-100">
             {item.title}

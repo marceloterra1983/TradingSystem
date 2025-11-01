@@ -73,15 +73,19 @@ services:
       - DOCS_DIR=/app/docs
       - LLAMAINDEX_DOCS_DIR=/app/docs/content
       - LLAMAINDEX_INGESTION_DOCS_DIR=/data/docs
+      - LLAMAINDEX_REPOSITORY_DIR=/data/tradingsystem
       - DOCUMENTATION_DB_STRATEGY=none
       - LOG_LEVEL=info
       - QDRANT_URL=http://data-qdrant:6333
-      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_BASE_URL=http://rag-ollama:11434
+      - REDIS_URL=redis://rag-redis:6379
+      - COLLECTIONS_SERVICE_URL=http://rag-collections-service:3402
       - LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query:8000
       - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
     volumes:
       # Documentation source files
       - ../../docs:/app/docs:ro
+      - ../../:/data/tradingsystem:ro
       # Database (SQLite)
       - docs-api-data:/app/db
     restart: unless-stopped

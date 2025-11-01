@@ -136,6 +136,7 @@ export interface DocsHybridResponse {
   total: number;
   results: DocsHybridItem[];
   alpha: number;
+  collection?: string;
 }
 
 // ====================
@@ -149,9 +150,9 @@ class DocumentationService {
   private client: AxiosInstance;
 
   constructor() {
-    // getApiUrl('documentation') returns '/api/docs' which is proxied to http://localhost:3401
+    // getApiUrl('documentation') returns '/api/docs' which is proxied to http://localhost:3402 (rag-service)
     // Routes like '/api/v1/docs/facets' will be combined with baseURL to form '/api/docs/api/v1/docs/facets'
-    // The Vite proxy strips '/api/docs' and forwards to the backend at http://localhost:3401
+    // The Vite proxy strips '/api/docs' and forwards to the backend at http://localhost:3402
     this.client = axios.create({
       baseURL: getApiUrl('documentation'), // '/api/docs'
       timeout: 30000, // Increased to 30s for slow searches
@@ -250,7 +251,7 @@ class DocumentationService {
 
   async docsHybridSearch(
     query: string,
-    opts?: { limit?: number; alpha?: number; domain?: string; type?: string; status?: string; tags?: string[] }
+    opts?: { limit?: number; alpha?: number; domain?: string; type?: string; status?: string; tags?: string[]; collection?: string }
   ): Promise<DocsHybridResponse> {
     const params: Record<string, string | number> = { q: query };
     if (opts?.limit) params.limit = opts.limit;
@@ -259,6 +260,7 @@ class DocumentationService {
     if (opts?.type) params.type = opts.type;
     if (opts?.status) params.status = opts.status;
     if (opts?.tags?.length) params.tags = opts.tags.join(',');
+    if (opts?.collection) params.collection = opts.collection;
 
     const response = await this.client.get('/api/v1/docs/search-hybrid', { params });
     return response.data as DocsHybridResponse;

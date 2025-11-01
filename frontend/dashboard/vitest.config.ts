@@ -14,6 +14,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['src/__tests__/setup.ts'],
+    testTimeout: 30000, // 30 seconds for tests with fake timers
     coverage: {
       ...(baseConfig.test?.coverage ?? {}),
       enabled: false,

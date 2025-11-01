@@ -1,0 +1,65 @@
+{
+  "collections": [
+    {
+      "embeddingModel": "nomic-embed-text",
+      "chunkSize": 512,
+      "chunkOverlap": 50,
+      "fileTypes": [
+        "md",
+        "mdx"
+      ],
+      "recursive": true,
+      "enabled": true,
+      "autoUpdate": true,
+      "name": "documentation",
+      "description": "Complete TradingSystem documentation (all content)",
+      "directory": "/data/docs/content"
+    },
+    {
+      "embeddingModel": "nomic-embed-text",
+      "chunkSize": 512,
+      "chunkOverlap": 50,
+      "fileTypes": [
+        "md",
+        "mdx",
+        "py",
+        "ts",
+        "tsx",
+        "js",
+        "json"
+      ],
+      "recursive": true,
+      "enabled": true,
+      "autoUpdate": false,
+      "name": "tradingsystem",
+      "description": "TradingSystem complete codebase and documentation",
+      "directory": "/data/tradingsystem"
+    },
+    {
+      "name": "final-test",
+      "description": "Test final de persistencia",
+      "directory": "/data/docs",
+      "embeddingModel": "nomic-embed-text",
+      "chunkSize": 512,
+      "chunkOverlap": 50,
+      "fileTypes": [
+        "md"
+      ],
+      "recursive": false,
+      "enabled": false,
+      "autoUpdate": false
+    }
+  ],
+  "defaults": {
+    "embeddingModel": "nomic-embed-text",
+    "chunkSize": 512,
+    "chunkOverlap": 50,
+    "fileTypes": [
+      "md",
+      "mdx"
+    ],
+    "recursive": true,
+    "enabled": true,
+    "autoUpdate": true
+  }
+}
