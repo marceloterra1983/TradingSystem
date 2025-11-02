@@ -2,7 +2,8 @@ import { AlertCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useServiceStatusBanner } from '../hooks/useServiceStatusBanner';
 
 export function ServiceStatusBanner() {
-  const { shouldShowBanner, downCount, degradedCount, downServices } = useServiceStatusBanner();
+  const { shouldShowBanner, downCount, degradedCount, downServices } =
+    useServiceStatusBanner();
 
   if (!shouldShowBanner) return null;
 
@@ -33,12 +34,16 @@ export function ServiceStatusBanner() {
           >
             {hasCriticalIssues ? (
               <>
-                {downCount} {downCount === 1 ? 'serviço offline' : 'serviços offline'}
+                {downCount}{' '}
+                {downCount === 1 ? 'serviço offline' : 'serviços offline'}
                 {serviceNames && `: ${serviceNames}`}
               </>
             ) : (
               <>
-                {degradedCount} {degradedCount === 1 ? 'serviço degradado' : 'serviços degradados'}
+                {degradedCount}{' '}
+                {degradedCount === 1
+                  ? 'serviço degradado'
+                  : 'serviços degradados'}
               </>
             )}
           </p>
@@ -54,4 +59,3 @@ export function ServiceStatusBanner() {
     </div>
   );
 }
-

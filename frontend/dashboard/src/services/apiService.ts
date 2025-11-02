@@ -5,7 +5,8 @@ const DEFAULT_BASE_URL =
     ? window.location.origin
     : 'http://localhost:8000';
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')) ||
+  (import.meta.env.VITE_API_BASE_URL &&
+    import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')) ||
   DEFAULT_BASE_URL;
 
 class ApiService {
@@ -32,7 +33,7 @@ class ApiService {
       },
       (error) => {
         throw error;
-      }
+      },
     );
 
     // Response interceptor
@@ -41,7 +42,7 @@ class ApiService {
       (error: AxiosError) => {
         console.error('[API Error]', error.message);
         throw error;
-      }
+      },
     );
   }
 
@@ -105,10 +106,7 @@ class ApiService {
     return response.data;
   }
 
-  async activateKillSwitch(data: {
-    reason: string;
-    operator: string;
-  }) {
+  async activateKillSwitch(data: { reason: string; operator: string }) {
     const response = await this.client.post('/api/v1/risk/kill-switch', data);
     return response.data;
   }

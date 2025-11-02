@@ -25,7 +25,12 @@ export interface ClockProps {
  * <Clock showIcon showDate />
  * ```
  */
-export function Clock({ className, showIcon = false, showDate = false, timezone }: ClockProps) {
+export function Clock({
+  className,
+  showIcon = false,
+  showDate = false,
+  timezone,
+}: ClockProps) {
   const [time, setTime] = React.useState(new Date());
 
   React.useEffect(() => {
@@ -55,7 +60,7 @@ export function Clock({ className, showIcon = false, showDate = false, timezone 
         'bg-gray-100 dark:bg-gray-800',
         'border border-gray-200 dark:border-gray-700',
         'transition-colors',
-        className
+        className,
       )}
     >
       {showIcon && (
@@ -83,4 +88,3 @@ export function Clock({ className, showIcon = false, showDate = false, timezone 
 }
 
 export default Clock;
-

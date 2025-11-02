@@ -12,7 +12,13 @@ import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Clock, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import type { Collection } from '../../types/collections';
 
 interface LlamaIndexQueryToolProps {
@@ -40,7 +46,11 @@ const formatSeconds = (value?: number | null): string => {
   return `${numeric.toFixed(2)}s`;
 };
 
-function GpuSummary({ gpu }: { gpu?: LlamaIndexGpuMetadata }): JSX.Element | null {
+function GpuSummary({
+  gpu,
+}: {
+  gpu?: LlamaIndexGpuMetadata;
+}): JSX.Element | null {
   if (!gpu) return null;
   const forced = gpu.policy?.forced ?? false;
   const lockEnabled = gpu.lock?.enabled && gpu.lock?.path;
@@ -66,8 +76,12 @@ export function LlamaIndexQueryTool({
   const [loading, setLoading] = React.useState(false);
   const [history, setHistory] = React.useState<HistoryItem[]>([]);
   const [copied, setCopied] = React.useState<string | null>(null);
-  const [gpuPolicy, setGpuPolicy] = React.useState<GpuPolicyResponse | null>(null);
-  const [gpuPolicyError, setGpuPolicyError] = React.useState<string | null>(null);
+  const [gpuPolicy, setGpuPolicy] = React.useState<GpuPolicyResponse | null>(
+    null,
+  );
+  const [gpuPolicyError, setGpuPolicyError] = React.useState<string | null>(
+    null,
+  );
   const hasCollections = collections.length > 0;
 
   React.useEffect(() => {
@@ -78,7 +92,10 @@ export function LlamaIndexQueryTool({
         setGpuPolicyError(null);
       })
       .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Falha ao carregar política de GPU';
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Falha ao carregar política de GPU';
         setGpuPolicyError(message);
       });
   }, [collection]);
@@ -97,19 +114,28 @@ export function LlamaIndexQueryTool({
         onCollectionChange(value);
       }
     },
-    [onCollectionChange]
+    [onCollectionChange],
   );
 
   const handleRun = async () => {
     setLoading(true);
     const queryId = `query-${Date.now()}`;
-    const selectedCollection = collection && collection.trim().length > 0 ? collection.trim() : undefined;
+    const selectedCollection =
+      collection && collection.trim().length > 0
+        ? collection.trim()
+        : undefined;
 
     try {
       if (useLlm) {
-        const resp = await llamaIndexService.queryDocs(text, maxResults, selectedCollection);
+        const resp = await llamaIndexService.queryDocs(
+          text,
+          maxResults,
+          selectedCollection,
+        );
         const resolvedCollection =
-          (resp?.metadata?.collection as string | undefined) ?? selectedCollection ?? null;
+          (resp?.metadata?.collection as string | undefined) ??
+          selectedCollection ??
+          null;
         const item: HistoryItem = {
           id: queryId,
           query: text,
@@ -120,9 +146,15 @@ export function LlamaIndexQueryTool({
         };
         setHistory((prev) => [item, ...prev]);
       } else {
-        const items = await llamaIndexService.search(text, maxResults, selectedCollection);
+        const items = await llamaIndexService.search(
+          text,
+          maxResults,
+          selectedCollection,
+        );
         const fallbackCollection =
-          (items?.[0]?.metadata?.collection as string | undefined) ?? selectedCollection ?? null;
+          (items?.[0]?.metadata?.collection as string | undefined) ??
+          selectedCollection ??
+          null;
         const item: HistoryItem = {
           id: queryId,
           query: text,
@@ -168,7 +200,10 @@ export function LlamaIndexQueryTool({
     if (seconds < 60) return 'agora';
     if (minutes < 60) return `${minutes}m atrás`;
     if (hours < 24) return `${hours}h atrás`;
-    return date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    return date.toLocaleString('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
   };
 
   return (
@@ -196,7 +231,8 @@ export function LlamaIndexQueryTool({
             </SelectContent>
           </Select>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            A coleção selecionada define qual índice vetorial será utilizado para buscas e respostas.
+            A coleção selecionada define qual índice vetorial será utilizado
+            para buscas e respostas.
           </p>
         </div>
       )}
@@ -204,13 +240,18 @@ export function LlamaIndexQueryTool({
         <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-3 text-xs text-slate-600 dark:text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
           <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
             <Badge variant="outline">GPU</Badge>
-            <span className="font-semibold">{gpuPolicy.policy.forced ? 'Execução forçada na GPU' : 'GPU opcional'}</span>
+            <span className="font-semibold">
+              {gpuPolicy.policy.forced
+                ? 'Execução forçada na GPU'
+                : 'GPU opcional'}
+            </span>
           </div>
           <span>Concorrência máx.: {gpuPolicy.maxConcurrency}</span>
           <span>Cooldown: {formatSeconds(gpuPolicy.cooldownSeconds)}</span>
-          {gpuPolicy.policy.interprocess_lock_enabled && gpuPolicy.policy.lock_path && (
-            <span>Lock: {gpuPolicy.policy.lock_path}</span>
-          )}
+          {gpuPolicy.policy.interprocess_lock_enabled &&
+            gpuPolicy.policy.lock_path && (
+              <span>Lock: {gpuPolicy.policy.lock_path}</span>
+            )}
         </div>
       )}
       {gpuPolicyError && (
@@ -243,12 +284,19 @@ export function LlamaIndexQueryTool({
               min={1}
               max={10}
               value={maxResults}
-              onChange={(e) => setMaxResults(parseInt(e.target.value || '1', 10))}
+              onChange={(e) =>
+                setMaxResults(parseInt(e.target.value || '1', 10))
+              }
             />
           </div>
           <label className="flex items-center gap-2 mt-6">
-            <Checkbox checked={useLlm} onCheckedChange={(v) => setUseLlm(!!v)} />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Usar LLM (/query)</span>
+            <Checkbox
+              checked={useLlm}
+              onCheckedChange={(v) => setUseLlm(!!v)}
+            />
+            <span className="text-sm text-slate-600 dark:text-slate-400">
+              Usar LLM (/query)
+            </span>
           </label>
           <Button onClick={handleRun} disabled={loading} className="self-end">
             {loading ? 'Executando…' : 'Executar'}
@@ -292,7 +340,10 @@ export function LlamaIndexQueryTool({
                     {item.type === 'llm' ? 'LLM Query' : 'Search'}
                   </Badge>
                   {item.collection && (
-                    <Badge variant="outline" className="uppercase tracking-wide text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className="uppercase tracking-wide text-[10px]"
+                    >
                       {item.collection}
                     </Badge>
                   )}
@@ -331,14 +382,21 @@ export function LlamaIndexQueryTool({
                 </p>
                 <ul className="space-y-2">
                   {item.results.map((r, idx) => (
-                    <li key={idx} className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3">
+                    <li
+                      key={idx}
+                      className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline">Score {r.relevance.toFixed(3)}</Badge>
+                        <Badge variant="outline">
+                          Score {r.relevance.toFixed(3)}
+                        </Badge>
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleCopy(`${item.id}-res-${idx}`, r.content)}
+                            onClick={() =>
+                              handleCopy(`${item.id}-res-${idx}`, r.content)
+                            }
                           >
                             Copiar
                           </Button>
@@ -363,14 +421,20 @@ export function LlamaIndexQueryTool({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Conf {item.answer.confidence.toFixed(3)}</Badge>
-                      <Badge variant="outline">Fontes {item.answer.sources.length}</Badge>
+                      <Badge variant="outline">
+                        Conf {item.answer.confidence.toFixed(3)}
+                      </Badge>
+                      <Badge variant="outline">
+                        Fontes {item.answer.sources.length}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCopy(`${item.id}-answer`, item.answer!.answer)}
+                        onClick={() =>
+                          handleCopy(`${item.id}-answer`, item.answer!.answer)
+                        }
                       >
                         Copiar resposta
                       </Button>
@@ -398,17 +462,23 @@ export function LlamaIndexQueryTool({
                         className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline">Score {s.relevance.toFixed(3)}</Badge>
+                          <Badge variant="outline">
+                            Score {s.relevance.toFixed(3)}
+                          </Badge>
                           <div className="flex items-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleCopy(`${item.id}-src-${idx}`, s.content)}
+                              onClick={() =>
+                                handleCopy(`${item.id}-src-${idx}`, s.content)
+                              }
                             >
                               Copiar fonte
                             </Button>
                             {copied === `${item.id}-src-${idx}` && (
-                              <span className="text-xs text-emerald-600">✓</span>
+                              <span className="text-xs text-emerald-600">
+                                ✓
+                              </span>
                             )}
                           </div>
                         </div>
@@ -429,7 +499,9 @@ export function LlamaIndexQueryTool({
       {history.length === 0 && !loading && (
         <div className="text-center py-8 text-slate-500 dark:text-slate-400">
           <p className="text-sm">Nenhuma query executada ainda.</p>
-          <p className="text-xs mt-1">Digite uma pergunta acima e clique em "Executar".</p>
+          <p className="text-xs mt-1">
+            Digite uma pergunta acima e clique em "Executar".
+          </p>
         </div>
       )}
     </div>

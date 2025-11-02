@@ -1,0 +1,177 @@
+@startuml RAG Query Sequence Diagram
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title TradingSystem - RAG Query Flow (End-to-End)
+
+actor User
+participant "Dashboard\n(React)" as Dashboard
+participant "Kong Gateway\n(API Gateway)" as Kong
+participant "Documentation API\n(RAG Proxy)" as DocsAPI
+participant "LlamaIndex Query\n(FastAPI)" as LlamaIndex
+participant "Ollama\n(LLM Runtime)" as Ollama
+participant "Qdrant\n(Vector DB)" as Qdrant
+participant "Redis\n(Cache)" as Redis
+
+== Phase 1: User Initiates Query ==
+
+User -> Dashboard: Enter query:\n"How to configure RAG system?"
+activate Dashboard
+
+Dashboard -> Dashboard: Validate input\n(min 3 chars, max 1000 chars)
+Dashboard -> Dashboard: Check cache\n(localStorage)
+
+alt Cache Hit (< 5 minutes old)
+    Dashboard -> Dashboard: Return cached result
+    Dashboard -> User: Display cached results
+else Cache Miss
+    Dashboard -> Kong: POST /api/v1/rag/query\n{\n  "query": "How to configure RAG system?",\n  "limit": 5,\n  "collection": "docs_index_mxbai"\n}
+    activate Kong
+
+== Phase 2: API Gateway Processing ==
+
+    Kong -> Kong: Validate JWT token\n(Authorization: Bearer <token>)
+
+    alt JWT Invalid/Expired
+        Kong -> Dashboard: 401 Unauthorized
+        Dashboard -> User: Show login prompt
+    end
+
+    Kong -> Kong: Check rate limit\n(100 req/min per user)
+
+    alt Rate Limit Exceeded
+        Kong -> Dashboard: 429 Too Many Requests
+        Dashboard -> User: Show "Please wait" message
+    end
+
+    Kong -> Kong: Apply CORS headers\n(Allow origin: localhost:3103)
+    Kong -> DocsAPI: Forward request\n+ X-Service-Token header\n+ X-Correlation-ID header
+    activate DocsAPI
+
+== Phase 3: RAG Proxy Service ==
+
+    DocsAPI -> DocsAPI: Validate query params\n(sanitize input, check length)
+    DocsAPI -> DocsAPI: Extract metadata\n(user_id, correlation_id)
+
+    DocsAPI -> Redis: Check cache\nGET "rag:query:<hash>"
+    activate Redis
+
+    alt Cache Hit
+        Redis -> DocsAPI: Cached result (JSON)
+        DocsAPI -> Kong: 200 OK + Cache-Status: HIT
+        Kong -> Dashboard: Return result
+        Dashboard -> User: Display results
+    else Cache Miss
+        Redis -> DocsAPI: null
+        deactivate Redis
+
+        DocsAPI -> DocsAPI: Generate JWT for LlamaIndex\ncreateBea rer({ sub: 'dashboard' })
+
+        DocsAPI -> LlamaIndex: POST /query\nAuthorization: Bearer <jwt>\n{\n  "query": "How to configure RAG system?",\n  "max_results": 5,\n  "collection": "docs_index_mxbai"\n}
+        activate LlamaIndex
+
+== Phase 4: LlamaIndex Processing ==
+
+        LlamaIndex -> LlamaIndex: Validate JWT\n(verify signature, expiry)
+
+        alt JWT Invalid
+            LlamaIndex -> DocsAPI: 403 Forbidden
+            DocsAPI -> Kong: 502 Bad Gateway
+            Kong -> Dashboard: 502 Bad Gateway
+            Dashboard -> User: Show error message
+        end
+
+        LlamaIndex -> LlamaIndex: Preprocess query\n(normalize, tokenize)
+
+        LlamaIndex -> Ollama: POST /api/embeddings\nmodel: mxbai-embed-large\ntext: "How to configure RAG system?"
+        activate Ollama
+
+        Ollama -> Ollama: GPU inference\n(~2-3 seconds)
+        Ollama -> LlamaIndex: embedding_vector\n[384 dimensions]
+        deactivate Ollama
+
+        LlamaIndex -> Qdrant: POST /collections/docs_index_mxbai/points/search\n{\n  "vector": [0.123, -0.456, ...],\n  "limit": 5,\n  "score_threshold": 0.7\n}
+        activate Qdrant
+
+        Qdrant -> Qdrant: HNSW vector search\n(~50-100ms)
+        Qdrant -> LlamaIndex: Matched documents:\n[\n  {id, score, payload},\n  ...\n]
+        deactivate Qdrant
+
+        LlamaIndex -> LlamaIndex: Rank and filter results\n(score > 0.7)
+
+        alt Generate Answer (with LLM)
+            LlamaIndex -> Ollama: POST /api/generate\nmodel: llama3.2:3b\nprompt: <context> + query
+            activate Ollama
+            Ollama -> Ollama: GPU inference\n(~5-10 seconds)
+            Ollama -> LlamaIndex: Generated answer
+            deactivate Ollama
+        end
+
+        LlamaIndex -> DocsAPI: 200 OK\n{\n  "results": [...],\n  "answer": "To configure RAG...",\n  "metadata": {...}\n}
+        deactivate LlamaIndex
+
+== Phase 5: Response Processing ==
+
+        DocsAPI -> DocsAPI: Transform response\n(add correlation_id, timing)
+
+        DocsAPI -> Redis: SET "rag:query:<hash>"\nEX 600 (10 minutes)
+        activate Redis
+        Redis -> DocsAPI: OK
+        deactivate Redis
+
+        DocsAPI -> Kong: 200 OK + Cache-Status: MISS\n{\n  "results": [...],\n  "answer": "To configure RAG...",\n  "took_ms": 8234\n}
+        deactivate DocsAPI
+
+        Kong -> Kong: Log request metrics\n(latency, status, user)
+        Kong -> Dashboard: 200 OK\nX-Response-Time: 8234ms
+        deactivate Kong
+
+== Phase 6: UI Update ==
+
+        Dashboard -> Dashboard: Parse response
+        Dashboard -> Dashboard: Cache in localStorage\n(5 minute TTL)
+        Dashboard -> Dashboard: Render results\n(markdown formatting)
+        Dashboard -> User: Display answer + sources
+        deactivate Dashboard
+    end
+end
+
+== Error Handling Scenarios ==
+
+note over Dashboard, Redis
+  **Timeout Handling:**
+  • Dashboard timeout: 30s
+  • Documentation API timeout: 30s
+  • LlamaIndex timeout: 300s (5 min)
+
+  **Circuit Breaker (Planned):**
+  • Open after 5 consecutive failures
+  • Half-open after 30s cooldown
+  • Close after 3 successful requests
+
+  **Retry Logic:**
+  • Max 3 retries with exponential backoff
+  • Only retry on 5xx errors, not 4xx
+  • Don't retry on rate limit (429)
+end note
+
+note over DocsAPI, LlamaIndex
+  **Performance Metrics:**
+  • P50 latency: ~5 seconds
+  • P95 latency: ~12 seconds
+  • P99 latency: ~20 seconds
+
+  **Bottlenecks:**
+  1. Ollama embedding: ~2-3s
+  2. Qdrant search: ~50-100ms
+  3. Ollama LLM generation: ~5-10s
+
+  **Optimization Opportunities:**
+  • Cache embeddings for common queries
+  • Batch embedding requests
+  • Use smaller LLM model (faster inference)
+  • Add GPU horizontal scaling
+end note
+
+@enduml

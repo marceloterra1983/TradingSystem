@@ -57,7 +57,9 @@ export function DatabaseEmbedFrame({
     <div className="h-[calc(100vh-160px)] w-full">
       <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </h2>
           {options.length > 1 && (
             <div className="flex flex-wrap gap-2">
               {options.map((option, index) => (

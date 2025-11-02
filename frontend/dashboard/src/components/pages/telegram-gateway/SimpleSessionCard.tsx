@@ -14,7 +14,10 @@ interface SimpleSessionCardProps {
   isLoading: boolean;
 }
 
-export function SimpleSessionCard({ session, isLoading }: SimpleSessionCardProps) {
+export function SimpleSessionCard({
+  session,
+  isLoading,
+}: SimpleSessionCardProps) {
   const hasSession = session?.exists || false;
 
   const formatAge = (ms?: number) => {
@@ -62,7 +65,7 @@ export function SimpleSessionCard({ session, isLoading }: SimpleSessionCardProps
       <CardContent className="space-y-4">
         {/* Status Badge */}
         <div>
-          <Badge 
+          <Badge
             variant={hasSession ? 'default' : 'outline'}
             className={hasSession ? 'bg-emerald-500' : ''}
           >
@@ -81,7 +84,7 @@ export function SimpleSessionCard({ session, isLoading }: SimpleSessionCardProps
                   <code className="text-xs font-mono">{session.hash}</code>
                 </div>
               )}
-              
+
               {session?.updatedAt && (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -114,7 +117,9 @@ export function SimpleSessionCard({ session, isLoading }: SimpleSessionCardProps
             {/* Info Box */}
             <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950 p-3 text-xs text-emerald-800 dark:text-emerald-200">
               <p className="font-medium mb-1">✓ Sessão válida</p>
-              <p>O gateway pode se conectar ao Telegram sem solicitar código SMS.</p>
+              <p>
+                O gateway pode se conectar ao Telegram sem solicitar código SMS.
+              </p>
             </div>
           </>
         ) : (
@@ -134,4 +139,3 @@ export function SimpleSessionCard({ session, isLoading }: SimpleSessionCardProps
     </Card>
   );
 }
-

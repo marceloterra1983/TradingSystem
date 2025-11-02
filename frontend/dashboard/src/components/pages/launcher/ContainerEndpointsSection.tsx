@@ -40,7 +40,8 @@ const METHOD_COLORS: Record<HttpMethod, string> = {
   GET: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
   POST: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   PUT: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  PATCH: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  PATCH:
+    'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 };
 
@@ -168,12 +169,36 @@ const CONTAINER_SERVICES: ContainerService[] = [
     ports: ['9090'],
     endpoints: [
       { path: '/', description: 'Web UI and Graph Explorer' },
-      { method: 'GET', path: '/api/v1/query', description: 'Instant query (PromQL)' },
-      { method: 'GET', path: '/api/v1/query_range', description: 'Range query (PromQL)' },
-      { method: 'GET', path: '/api/v1/series', description: 'List time series' },
-      { method: 'GET', path: '/api/v1/labels', description: 'List label names' },
-      { method: 'GET', path: '/api/v1/targets', description: 'Active scrape targets' },
-      { method: 'GET', path: '/api/v1/rules', description: 'Alert and recording rules' },
+      {
+        method: 'GET',
+        path: '/api/v1/query',
+        description: 'Instant query (PromQL)',
+      },
+      {
+        method: 'GET',
+        path: '/api/v1/query_range',
+        description: 'Range query (PromQL)',
+      },
+      {
+        method: 'GET',
+        path: '/api/v1/series',
+        description: 'List time series',
+      },
+      {
+        method: 'GET',
+        path: '/api/v1/labels',
+        description: 'List label names',
+      },
+      {
+        method: 'GET',
+        path: '/api/v1/targets',
+        description: 'Active scrape targets',
+      },
+      {
+        method: 'GET',
+        path: '/api/v1/rules',
+        description: 'Alert and recording rules',
+      },
       { method: 'GET', path: '/api/v1/alerts', description: 'Active alerts' },
     ],
   },
@@ -188,9 +213,17 @@ const CONTAINER_SERVICES: ContainerService[] = [
       { path: '/', description: 'Home dashboard' },
       { path: '/dashboards', description: 'Dashboard browser' },
       { path: '/explore', description: 'Data exploration' },
-      { method: 'GET', path: '/api/dashboards/home', description: 'Home dashboard API' },
+      {
+        method: 'GET',
+        path: '/api/dashboards/home',
+        description: 'Home dashboard API',
+      },
       { method: 'GET', path: '/api/search', description: 'Search dashboards' },
-      { method: 'POST', path: '/api/datasources/proxy/:id/api/v1/query', description: 'Proxy Prometheus query' },
+      {
+        method: 'POST',
+        path: '/api/datasources/proxy/:id/api/v1/query',
+        description: 'Proxy Prometheus query',
+      },
     ],
   },
   {
@@ -202,11 +235,23 @@ const CONTAINER_SERVICES: ContainerService[] = [
     ports: ['9093'],
     endpoints: [
       { path: '/', description: 'Web UI' },
-      { method: 'GET', path: '/api/v2/alerts', description: 'List active alerts' },
+      {
+        method: 'GET',
+        path: '/api/v2/alerts',
+        description: 'List active alerts',
+      },
       { method: 'POST', path: '/api/v2/alerts', description: 'Create alert' },
       { method: 'GET', path: '/api/v2/silences', description: 'List silences' },
-      { method: 'POST', path: '/api/v2/silences', description: 'Create silence' },
-      { method: 'GET', path: '/api/v2/status', description: 'AlertManager status' },
+      {
+        method: 'POST',
+        path: '/api/v2/silences',
+        description: 'Create silence',
+      },
+      {
+        method: 'GET',
+        path: '/api/v2/status',
+        description: 'AlertManager status',
+      },
     ],
   },
   {
@@ -217,7 +262,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
     type: 'api',
     ports: ['8080'],
     endpoints: [
-      { method: 'POST', path: '/webhook', description: 'Receive alerts webhook' },
+      {
+        method: 'POST',
+        path: '/webhook',
+        description: 'Receive alerts webhook',
+      },
       { method: 'GET', path: '/health', description: 'Health check' },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
@@ -230,7 +279,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
     type: 'api',
     ports: ['9187'],
     endpoints: [
-      { method: 'GET', path: '/metrics', description: 'Prometheus metrics endpoint' },
+      {
+        method: 'GET',
+        path: '/metrics',
+        description: 'Prometheus metrics endpoint',
+      },
     ],
   },
 
@@ -247,7 +300,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
       { method: 'POST', path: '/invoke', description: 'Invoke workflow' },
       { method: 'GET', path: '/threads', description: 'List threads' },
       { method: 'POST', path: '/threads/:id', description: 'Create thread' },
-      { method: 'GET', path: '/threads/:id/state', description: 'Get thread state' },
+      {
+        method: 'GET',
+        path: '/threads/:id/state',
+        description: 'Get thread state',
+      },
     ],
   },
   {
@@ -260,7 +317,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
     endpoints: [
       { path: '/', description: 'Dashboard UI' },
       { method: 'GET', path: '/health', description: 'Health check' },
-      { method: 'POST', path: '/api/agents/execute', description: 'Execute agent task' },
+      {
+        method: 'POST',
+        path: '/api/agents/execute',
+        description: 'Execute agent task',
+      },
       { method: 'GET', path: '/api/agents', description: 'List agents' },
       { method: 'GET', path: '/api/tasks', description: 'List tasks' },
       { method: 'GET', path: '/api/metrics', description: 'Agent metrics' },
@@ -275,7 +336,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
     ports: ['3450'],
     endpoints: [
       { method: 'POST', path: '/query', description: 'Query documents (RAG)' },
-      { method: 'GET', path: '/indexes', description: 'List available indexes' },
+      {
+        method: 'GET',
+        path: '/indexes',
+        description: 'List available indexes',
+      },
       { method: 'GET', path: '/health', description: 'Health check' },
     ],
   },
@@ -289,10 +354,26 @@ const CONTAINER_SERVICES: ContainerService[] = [
     endpoints: [
       { path: '/', description: 'Web UI Dashboard' },
       { method: 'GET', path: '/collections', description: 'List collections' },
-      { method: 'POST', path: '/collections/{name}', description: 'Create collection' },
-      { method: 'PUT', path: '/collections/{name}/points', description: 'Upsert points (vectors)' },
-      { method: 'POST', path: '/collections/{name}/points/search', description: 'Search similar vectors' },
-      { method: 'GET', path: '/collections/{name}/points/{id}', description: 'Get point by ID' },
+      {
+        method: 'POST',
+        path: '/collections/{name}',
+        description: 'Create collection',
+      },
+      {
+        method: 'PUT',
+        path: '/collections/{name}/points',
+        description: 'Upsert points (vectors)',
+      },
+      {
+        method: 'POST',
+        path: '/collections/{name}/points/search',
+        description: 'Search similar vectors',
+      },
+      {
+        method: 'GET',
+        path: '/collections/{name}/points/{id}',
+        description: 'Get point by ID',
+      },
       { path: ':6334', description: 'gRPC API (high-performance)' },
     ],
   },
@@ -308,7 +389,11 @@ const CONTAINER_SERVICES: ContainerService[] = [
     endpoints: [
       { path: '/', description: 'Swagger UI' },
       { path: '/redoc', description: 'ReDoc UI' },
-      { method: 'GET', path: '/openapi.json', description: 'OpenAPI specification' },
+      {
+        method: 'GET',
+        path: '/openapi.json',
+        description: 'OpenAPI specification',
+      },
     ],
   },
 ];
@@ -323,13 +408,21 @@ export function ContainerEndpointsSection() {
     setTimeout(() => setCopiedUrl(null), 2000);
   };
 
-  const filteredServices = selectedCategory === 'all'
-    ? CONTAINER_SERVICES
-    : CONTAINER_SERVICES.filter(s => s.category === selectedCategory);
+  const filteredServices =
+    selectedCategory === 'all'
+      ? CONTAINER_SERVICES
+      : CONTAINER_SERVICES.filter((s) => s.category === selectedCategory);
 
-  const totalEndpoints = CONTAINER_SERVICES.reduce((sum, service) => sum + service.endpoints.length, 0);
-  const webUiCount = CONTAINER_SERVICES.filter(s => s.type === 'web-ui' || s.type === 'both').length;
-  const apiCount = CONTAINER_SERVICES.filter(s => s.type === 'api' || s.type === 'both').length;
+  const totalEndpoints = CONTAINER_SERVICES.reduce(
+    (sum, service) => sum + service.endpoints.length,
+    0,
+  );
+  const webUiCount = CONTAINER_SERVICES.filter(
+    (s) => s.type === 'web-ui' || s.type === 'both',
+  ).length;
+  const apiCount = CONTAINER_SERVICES.filter(
+    (s) => s.type === 'api' || s.type === 'both',
+  ).length;
 
   return (
     <CollapsibleCard cardId="launcher-container-endpoints">
@@ -354,22 +447,29 @@ export function ContainerEndpointsSection() {
                   {totalEndpoints} endpoints disponíveis
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {CONTAINER_SERVICES.length} serviços • {webUiCount} Web UIs • {apiCount} APIs
+                  {CONTAINER_SERVICES.length} serviços • {webUiCount} Web UIs •{' '}
+                  {apiCount} APIs
                 </p>
               </div>
               <div className="grid grid-cols-5 gap-2 text-xs">
                 {Object.entries(METHOD_COLORS).map(([method, colorClass]) => {
                   const count = CONTAINER_SERVICES.reduce(
                     (sum, service) =>
-                      sum + service.endpoints.filter((e) => e.method === method).length,
-                    0
+                      sum +
+                      service.endpoints.filter((e) => e.method === method)
+                        .length,
+                    0,
                   );
                   return (
                     <div key={method} className="text-center">
-                      <span className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-bold ${colorClass}`}>
+                      <span
+                        className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-bold ${colorClass}`}
+                      >
                         {method}
                       </span>
-                      <p className="mt-1 text-gray-600 dark:text-gray-400">{count}</p>
+                      <p className="mt-1 text-gray-600 dark:text-gray-400">
+                        {count}
+                      </p>
                     </div>
                   );
                 })}
@@ -390,7 +490,9 @@ export function ContainerEndpointsSection() {
               All Services ({CONTAINER_SERVICES.length})
             </button>
             {Object.entries(CATEGORY_META).map(([key, meta]) => {
-              const count = CONTAINER_SERVICES.filter(s => s.category === key).length;
+              const count = CONTAINER_SERVICES.filter(
+                (s) => s.category === key,
+              ).length;
               return (
                 <button
                   key={key}
@@ -412,7 +514,7 @@ export function ContainerEndpointsSection() {
           <div className="space-y-6">
             {filteredServices.map((service) => {
               const categoryMeta = CATEGORY_META[service.category];
-              
+
               return (
                 <div
                   key={service.name}
@@ -420,7 +522,9 @@ export function ContainerEndpointsSection() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <categoryMeta.icon className={`h-5 w-5 ${categoryMeta.textClass}`} />
+                      <categoryMeta.icon
+                        className={`h-5 w-5 ${categoryMeta.textClass}`}
+                      />
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {service.name}
                       </h3>

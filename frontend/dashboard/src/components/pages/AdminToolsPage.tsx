@@ -1,6 +1,13 @@
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { PlaceholderSection } from '../ui/placeholder-section';
-import { ServerCog, Activity, NotebookPen, Workflow, GaugeCircle, LifeBuoy } from 'lucide-react';
+import {
+  ServerCog,
+  Activity,
+  NotebookPen,
+  Workflow,
+  GaugeCircle,
+  LifeBuoy,
+} from 'lucide-react';
 
 /**
  * Admin Tools Page - Operational tooling and observability shortcuts

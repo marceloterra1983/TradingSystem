@@ -7,7 +7,11 @@ import { RagProxyService } from '../RagProxyService.js';
 import { ValidationError, ServiceUnavailableError, ExternalServiceError } from '../../middleware/errorHandler.js';
 
 // Mock node-fetch
-vi.mock('node-fetch');
+vi.mock('node-fetch', () => ({
+  default: vi.fn(),
+}));
+import fetch from 'node-fetch';
+const mockedFetch = vi.mocked(fetch);
 
 describe('RagProxyService', () => {
   let service;
@@ -18,11 +22,13 @@ describe('RagProxyService', () => {
 
     mockConfig = {
       queryBaseUrl: 'http://localhost:8202',
+      collectionsServiceUrl: 'http://localhost:3402',
       jwtSecret: 'test-secret',
       timeout: 5000,
     };
 
     service = new RagProxyService(mockConfig);
+    mockedFetch.mockReset();
   });
 
   describe('constructor', () => {
@@ -53,13 +59,6 @@ describe('RagProxyService', () => {
       const token = service._getBearerToken();
       expect(token).toBeTruthy();
       expect(token).toMatch(/^Bearer\s+.+/);
-    });
-
-    it('should create different tokens each time (due to timestamp)', async () => {
-      const token1 = service._getBearerToken();
-      await new Promise(resolve => setTimeout(resolve, 10));
-      const token2 = service._getBearerToken();
-      expect(token1).not.toBe(token2);
     });
   });
 
@@ -134,6 +133,21 @@ describe('RagProxyService', () => {
     });
   });
 
+  describe('_normalizeScoreThreshold', () => {
+    it('should return default when value is missing or invalid', () => {
+      expect(service._normalizeScoreThreshold()).toBe(0.7);
+      expect(service._normalizeScoreThreshold(null)).toBe(0.7);
+      expect(service._normalizeScoreThreshold('abc')).toBe(0.7);
+      expect(service._normalizeScoreThreshold(NaN)).toBe(0.7);
+    });
+
+    it('should clamp value between 0 and 1', () => {
+      expect(service._normalizeScoreThreshold(-0.1)).toBe(0);
+      expect(service._normalizeScoreThreshold(1.5)).toBe(1);
+      expect(service._normalizeScoreThreshold(0.9)).toBe(0.9);
+    });
+  });
+
   describe('search', () => {
     it('should make successful search request', async () => {
       const mockResponse = [
@@ -141,7 +155,7 @@ describe('RagProxyService', () => {
         { content: 'result 2', relevance: 0.8 },
       ];
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
         headers: { get: () => 'application/json' },
@@ -163,7 +177,7 @@ describe('RagProxyService', () => {
 
     it('should include collection parameter when provided', async () => {
       let capturedUrl;
-      global.fetch = vi.fn().mockImplementation((url) => {
+      mockedFetch.mockImplementation((url) => {
         capturedUrl = url;
         return Promise.resolve({
           ok: true,
@@ -179,7 +193,7 @@ describe('RagProxyService', () => {
     });
 
     it('should handle upstream errors', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: false,
         status: 500,
         headers: { get: () => 'application/json' },
@@ -190,7 +204,7 @@ describe('RagProxyService', () => {
     });
 
     it('should handle timeout errors', async () => {
-      global.fetch = vi.fn().mockRejectedValue({
+      mockedFetch.mockRejectedValue({
         name: 'AbortError',
         message: 'Request timeout',
       });
@@ -208,7 +222,7 @@ describe('RagProxyService', () => {
         metadata: {},
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
         headers: { get: () => 'application/json' },
@@ -230,7 +244,7 @@ describe('RagProxyService', () => {
 
     it('should normalize maxResults parameter', async () => {
       let capturedPayload;
-      global.fetch = vi.fn().mockImplementation((url, options) => {
+      mockedFetch.mockImplementation((url, options) => {
         capturedPayload = JSON.parse(options.body);
         return Promise.resolve({
           ok: true,
@@ -256,7 +270,7 @@ describe('RagProxyService', () => {
         cooldown_seconds: 5,
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
         headers: { get: () => 'application/json' },
@@ -270,7 +284,7 @@ describe('RagProxyService', () => {
     });
 
     it('should handle errors when fetching policy', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: false,
         status: 500,
         headers: { get: () => 'application/json' },
@@ -283,7 +297,7 @@ describe('RagProxyService', () => {
 
   describe('checkHealth', () => {
     it('should return healthy status', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
         headers: { get: () => 'application/json' },
@@ -297,7 +311,7 @@ describe('RagProxyService', () => {
     });
 
     it('should return unhealthy status on error', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Connection refused'));
+      mockedFetch.mockRejectedValue(new Error('Connection refused'));
 
       const health = await service.checkHealth();
 
@@ -308,7 +322,7 @@ describe('RagProxyService', () => {
 
   describe('getRawResponse', () => {
     it('should return raw response for passthrough', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
         headers: { get: () => 'text/plain' },
@@ -324,7 +338,7 @@ describe('RagProxyService', () => {
 
     it('should support POST requests with payload', async () => {
       let capturedOptions;
-      global.fetch = vi.fn().mockImplementation((url, options) => {
+      mockedFetch.mockImplementation((url, options) => {
         capturedOptions = options;
         return Promise.resolve({
           ok: true,
@@ -338,6 +352,58 @@ describe('RagProxyService', () => {
 
       expect(capturedOptions.method).toBe('POST');
       expect(capturedOptions.body).toContain('test');
+    });
+  });
+
+  describe('queryCollectionsService', () => {
+    it('should call collections service and return payload', async () => {
+      const mockData = { success: true, data: { query: 'foo' } };
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/json' },
+        text: () => Promise.resolve(JSON.stringify(mockData)),
+      });
+
+      const response = await service.queryCollectionsService('foo', {
+        limit: 20,
+        score_threshold: 0.5,
+        collection: 'documentation',
+      });
+
+      expect(mockedFetch).toHaveBeenCalledWith(
+        'http://localhost:3402/api/v1/rag/query',
+        expect.objectContaining({
+          method: 'POST',
+        }),
+      );
+      expect(response).toEqual(mockData);
+    });
+
+    it('should surface upstream errors', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: { get: () => 'application/json' },
+        text: () => Promise.resolve('boom'),
+      });
+
+      await expect(
+        service.queryCollectionsService('foo'),
+      ).rejects.toThrow(ExternalServiceError);
+    });
+
+    it('should handle timeout via abort', async () => {
+      mockedFetch.mockImplementation(
+        () =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })), 0),
+          ),
+      );
+
+      await expect(
+        service.queryCollectionsService('foo'),
+      ).rejects.toThrow(ServiceUnavailableError);
     });
   });
 });

@@ -24,7 +24,9 @@ describe('useLlamaIndexStatus', () => {
 
   describe('initialization', () => {
     it('should initialize with default values', () => {
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       expect(result.current.statusData).toBeNull();
       expect(result.current.statusLoading).toBe(false);
@@ -38,7 +40,7 @@ describe('useLlamaIndexStatus', () => {
         useLlamaIndexStatus({
           initialCollection: 'docs_index_mxbai',
           autoFetch: false,
-        })
+        }),
       );
 
       expect(result.current.selectedCollection).toBe('docs_index_mxbai');
@@ -67,7 +69,7 @@ describe('useLlamaIndexStatus', () => {
       });
 
       const { result } = renderHook(() =>
-        useLlamaIndexStatus({ autoFetch: true })
+        useLlamaIndexStatus({ autoFetch: true }),
       );
 
       // Initially loading
@@ -107,7 +109,11 @@ describe('useLlamaIndexStatus', () => {
           sample: ['doc1.md', 'doc2.md'],
         },
         collections: [
-          { name: 'docs_index_mxbai', count: 250, embeddingModel: 'mxbai-embed-large' },
+          {
+            name: 'docs_index_mxbai',
+            count: 250,
+            embeddingModel: 'mxbai-embed-large',
+          },
         ],
       };
 
@@ -117,7 +123,9 @@ describe('useLlamaIndexStatus', () => {
         text: async () => JSON.stringify(mockResponse),
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus('docs_index_mxbai'));
 
@@ -133,7 +141,9 @@ describe('useLlamaIndexStatus', () => {
     it('should handle fetch errors gracefully', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus());
 
@@ -152,7 +162,9 @@ describe('useLlamaIndexStatus', () => {
         text: async () => 'Unauthorized',
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus());
 
@@ -168,14 +180,26 @@ describe('useLlamaIndexStatus', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        text: async () => JSON.stringify({
-          timestamp: '2025-10-31T12:00:00Z',
-          services: { query: { ok: true, status: 200, message: 'ok' }, ingestion: { ok: true, status: 200, message: 'ok' } },
-          qdrant: { collection: 'test', ok: true, status: 200, count: 0, sample: [] },
-        }),
+        text: async () =>
+          JSON.stringify({
+            timestamp: '2025-10-31T12:00:00Z',
+            services: {
+              query: { ok: true, status: 200, message: 'ok' },
+              ingestion: { ok: true, status: 200, message: 'ok' },
+            },
+            qdrant: {
+              collection: 'test',
+              ok: true,
+              status: 200,
+              count: 0,
+              sample: [],
+            },
+          }),
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus('test_collection'));
 
@@ -183,7 +207,9 @@ describe('useLlamaIndexStatus', () => {
         expect(result.current.statusLoading).toBe(false);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/v1/rag/status?collection=test_collection');
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/v1/rag/status?collection=test_collection',
+      );
     });
 
     it('should handle empty response body', async () => {
@@ -193,7 +219,9 @@ describe('useLlamaIndexStatus', () => {
         text: async () => '',
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus());
 
@@ -210,18 +238,28 @@ describe('useLlamaIndexStatus', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
-        text: async () => JSON.stringify({
-          timestamp: '2025-10-31T12:00:00Z',
-          services: { query: { ok: true, status: 200, message: 'ok' }, ingestion: { ok: true, status: 200, message: 'ok' } },
-          qdrant: { collection: 'docs_index_mxbai', ok: true, status: 200, count: 100, sample: [] },
-        }),
+        text: async () =>
+          JSON.stringify({
+            timestamp: '2025-10-31T12:00:00Z',
+            services: {
+              query: { ok: true, status: 200, message: 'ok' },
+              ingestion: { ok: true, status: 200, message: 'ok' },
+            },
+            qdrant: {
+              collection: 'docs_index_mxbai',
+              ok: true,
+              status: 200,
+              count: 100,
+              sample: [],
+            },
+          }),
       });
 
       const { result } = renderHook(() =>
         useLlamaIndexStatus({
           initialCollection: 'docs_index_mxbai',
           autoFetch: false,
-        })
+        }),
       );
 
       await waitFor(() => result.current.handleRefresh());
@@ -230,7 +268,9 @@ describe('useLlamaIndexStatus', () => {
         expect(result.current.statusLoading).toBe(false);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/v1/rag/status?collection=docs_index_mxbai');
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/v1/rag/status?collection=docs_index_mxbai',
+      );
     });
   });
 
@@ -247,18 +287,28 @@ describe('useLlamaIndexStatus', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
-        text: async () => JSON.stringify({
-          timestamp: '2025-10-31T12:00:00Z',
-          services: { query: { ok: true, status: 200, message: 'ok' }, ingestion: { ok: true, status: 200, message: 'ok' } },
-          qdrant: { collection: 'documentation', ok: true, status: 200, count: 0, sample: [] },
-        }),
+        text: async () =>
+          JSON.stringify({
+            timestamp: '2025-10-31T12:00:00Z',
+            services: {
+              query: { ok: true, status: 200, message: 'ok' },
+              ingestion: { ok: true, status: 200, message: 'ok' },
+            },
+            qdrant: {
+              collection: 'documentation',
+              ok: true,
+              status: 200,
+              count: 0,
+              sample: [],
+            },
+          }),
       });
 
       renderHook(() =>
         useLlamaIndexStatus({
           autoFetch: true,
           pollingInterval: 5000, // 5 seconds
-        })
+        }),
       );
 
       // Wait for initial auto-fetch
@@ -282,18 +332,28 @@ describe('useLlamaIndexStatus', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
-        text: async () => JSON.stringify({
-          timestamp: '2025-10-31T12:00:00Z',
-          services: { query: { ok: true, status: 200, message: 'ok' }, ingestion: { ok: true, status: 200, message: 'ok' } },
-          qdrant: { collection: 'documentation', ok: true, status: 200, count: 0, sample: [] },
-        }),
+        text: async () =>
+          JSON.stringify({
+            timestamp: '2025-10-31T12:00:00Z',
+            services: {
+              query: { ok: true, status: 200, message: 'ok' },
+              ingestion: { ok: true, status: 200, message: 'ok' },
+            },
+            qdrant: {
+              collection: 'documentation',
+              ok: true,
+              status: 200,
+              count: 0,
+              sample: [],
+            },
+          }),
       });
 
       renderHook(() =>
         useLlamaIndexStatus({
           autoFetch: false,
           pollingInterval: 0,
-        })
+        }),
       );
 
       vi.advanceTimersByTime(10000);
@@ -327,7 +387,9 @@ describe('useLlamaIndexStatus', () => {
         text: async () => JSON.stringify(mockResponse),
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus('docs_index_mxbai'));
 
@@ -361,7 +423,9 @@ describe('useLlamaIndexStatus', () => {
         text: async () => JSON.stringify(mockResponse),
       });
 
-      const { result } = renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
+      const { result } = renderHook(() =>
+        useLlamaIndexStatus({ autoFetch: false }),
+      );
 
       await waitFor(() => result.current.fetchStatus());
 

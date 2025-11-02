@@ -1,11 +1,14 @@
 ---
 title: "API Documentation Guide - TradingSystem"
 sidebar_position: 1
+description: "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices"
 tags: [api, documentation, openapi, rest, guide]
 domain: api
 type: guide
 summary: "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices"
 status: active
+owner: BackendGuild
+lastReviewed: "2025-11-01"
 last_review: 2025-11-01
 ---
 
@@ -168,7 +171,7 @@ app.use('/api/v1/*', (req, res, next) => {
 });
 ```
 
-**See:** [DEBT-006: No API Versioning Strategy](../governance/planning/TECHNICAL-DEBT-TRACKER.md#debt-006-no-api-versioning-strategy)
+**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md) - Proposes API versioning strategy
 
 ---
 
@@ -543,7 +546,7 @@ describe('POST /api/items', () => {
 });
 ```
 
-**See:** [Technical Debt Tracker - DEBT-004: Limited Test Coverage](../governance/planning/TECHNICAL-DEBT-TRACKER.md#debt-004-limited-test-coverage-30)
+**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md) - Comprehensive testing roadmap
 
 ---
 
@@ -713,11 +716,11 @@ new_item = client.create_item(
 
 ## 📖 Related Documentation
 
-- [Architecture Review 2025-11-01](../governance/reviews/architecture-2025-11-01/index.md)
 - [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md)
-- [Technical Debt Tracker](../governance/planning/TECHNICAL-DEBT-TRACKER.md)
+- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md)
 - [Environment Variables Reference](../tools/security-config/env.mdx)
-- [CLAUDE.md - Architecture Guidelines](../../../CLAUDE.md#architecture--quality-guidelines)
+- [Testing Strategy](../reference/testing-strategy.mdx)
+- [API Guidelines](../reference/api-guidelines.mdx)
 
 ---
 

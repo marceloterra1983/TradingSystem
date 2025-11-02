@@ -51,7 +51,8 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
           Sessão MTProto
         </CollapsibleCardTitle>
         <CollapsibleCardDescription>
-          Status e metadados do arquivo de sessão utilizado para autenticação do gateway.
+          Status e metadados do arquivo de sessão utilizado para autenticação do
+          gateway.
         </CollapsibleCardDescription>
       </CollapsibleCardHeader>
       <CollapsibleCardContent className="pt-5">
@@ -67,7 +68,11 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
             <div className="flex flex-wrap items-center gap-3">
               <Badge
                 variant={exists ? 'default' : 'outline'}
-                className={exists ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' : ''}
+                className={
+                  exists
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+                    : ''
+                }
               >
                 {exists ? 'Sessão ativa' : 'Sessão ausente'}
               </Badge>
@@ -87,9 +92,12 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                     <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Tipo de Conta
                     </dt>
-                    <dd className="mt-1 text-sm font-medium">Usuário MTProto</dd>
+                    <dd className="mt-1 text-sm font-medium">
+                      Usuário MTProto
+                    </dd>
                     <dd className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                      {process.env.TELEGRAM_PHONE_NUMBER || 'Autenticação por telefone'}
+                      {process.env.TELEGRAM_PHONE_NUMBER ||
+                        'Autenticação por telefone'}
                     </dd>
                   </div>
                 </div>
@@ -99,7 +107,9 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                     <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       Última Atualização
                     </dt>
-                    <dd className="mt-1 text-sm">{formatTimestamp(session?.updatedAt)}</dd>
+                    <dd className="mt-1 text-sm">
+                      {formatTimestamp(session?.updatedAt)}
+                    </dd>
                     <dd className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       Idade: {formatAge(session?.ageMs)}
                     </dd>
@@ -113,7 +123,8 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                     {session?.path ?? '—'}
                   </dd>
                   <dd className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    Tamanho: {session?.sizeBytes ? `${session.sizeBytes} bytes` : '—'}
+                    Tamanho:{' '}
+                    {session?.sizeBytes ? `${session.sizeBytes} bytes` : '—'}
                   </dd>
                 </div>
               </dl>
@@ -128,8 +139,9 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                       Sessão autenticada e válida
                     </p>
                     <p className="text-emerald-700 dark:text-emerald-300">
-                      O gateway pode se conectar ao Telegram sem solicitar código SMS ou senha 2FA. Esta sessão
-                      permanece válida até que seja revogada manualmente ou expire.
+                      O gateway pode se conectar ao Telegram sem solicitar
+                      código SMS ou senha 2FA. Esta sessão permanece válida até
+                      que seja revogada manualmente ou expire.
                     </p>
                     <details className="mt-2">
                       <summary className="cursor-pointer font-medium text-emerald-800 hover:text-emerald-900 dark:text-emerald-200 dark:hover:text-emerald-100">
@@ -140,11 +152,16 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                         <ol className="ml-4 list-decimal space-y-1">
                           <li>Faça backup da sessão atual:</li>
                           <code className="block rounded bg-emerald-100 px-2 py-1 font-mono text-[10px] dark:bg-emerald-900/50">
-                            mv .session/telegram-gateway.session .session/backups/session-$(date +%Y%m%d%H%M%S).session
+                            mv .session/telegram-gateway.session
+                            .session/backups/session-$(date
+                            +%Y%m%d%H%M%S).session
                           </code>
-                          <li className="mt-1">Execute o script de autenticação:</li>
+                          <li className="mt-1">
+                            Execute o script de autenticação:
+                          </li>
                           <code className="block rounded bg-emerald-100 px-2 py-1 font-mono text-[10px] dark:bg-emerald-900/50">
-                            cd apps/telegram-gateway && ./authenticate-interactive.sh
+                            cd apps/telegram-gateway &&
+                            ./authenticate-interactive.sh
                           </code>
                         </ol>
                       </div>
@@ -157,10 +174,13 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <div className="flex-1 space-y-2 text-xs">
-                    <p className="font-medium text-amber-900 dark:text-amber-100">Sessão não encontrada</p>
+                    <p className="font-medium text-amber-900 dark:text-amber-100">
+                      Sessão não encontrada
+                    </p>
                     <p className="text-amber-700 dark:text-amber-300">
-                      O gateway não pode se conectar ao Telegram sem uma sessão válida. Execute o script de autenticação
-                      para criar uma nova sessão:
+                      O gateway não pode se conectar ao Telegram sem uma sessão
+                      válida. Execute o script de autenticação para criar uma
+                      nova sessão:
                     </p>
                     <code className="block rounded border border-amber-300 bg-white px-3 py-2 font-mono text-[11px] text-amber-900 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100">
                       cd apps/telegram-gateway && ./authenticate-interactive.sh

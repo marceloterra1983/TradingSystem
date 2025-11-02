@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw, Server, Plus } from 'lucide-react';
-import documentationService, { System } from '../../services/documentationService';
+import documentationService, {
+  System,
+} from '../../services/documentationService';
 
 export default function DocumentationSystemsPageSimple() {
   const [systems, setSystems] = useState<System[]>([]);
@@ -53,7 +55,9 @@ export default function DocumentationSystemsPageSimple() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documentation Systems</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Documentation Systems
+          </h1>
           <p className="text-gray-500 mt-2">
             Manage all documentation systems and their configurations
           </p>
@@ -83,8 +87,12 @@ export default function DocumentationSystemsPageSimple() {
       ) : systems.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <Server className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No systems found</h3>
-          <p className="text-gray-500 mb-4">Get started by creating your first documentation system</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No systems found
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Get started by creating your first documentation system
+          </p>
           <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             <Plus className="h-4 w-4" />
             Create System
@@ -101,17 +109,22 @@ export default function DocumentationSystemsPageSimple() {
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Server className="h-6 w-6" style={{ color: system.color || '#3b82f6' }} />
+                  <Server
+                    className="h-6 w-6"
+                    style={{ color: system.color || '#3b82f6' }}
+                  />
                   <div>
                     <h3 className="font-semibold text-lg">{system.name}</h3>
                     {system.description && (
-                      <p className="text-sm text-gray-500 mt-1">{system.description}</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {system.description}
+                      </p>
                     )}
                   </div>
                 </div>
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(
-                    system.status
+                    system.status,
                   )}`}
                 >
                   {system.status || 'unknown'}
@@ -174,7 +187,10 @@ export default function DocumentationSystemsPageSimple() {
             <strong>{systems.length}</strong> systems total
           </div>
           <div className="text-sm text-gray-600">
-            <strong>{systems.filter((s) => s.status === 'online').length}</strong> online
+            <strong>
+              {systems.filter((s) => s.status === 'online').length}
+            </strong>{' '}
+            online
           </div>
         </div>
       )}

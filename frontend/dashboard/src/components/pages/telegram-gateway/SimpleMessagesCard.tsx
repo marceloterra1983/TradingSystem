@@ -42,16 +42,17 @@ export function SimpleMessagesCard({
   onLoadMore,
   hasMore,
   selectedStatus: controlledStatus,
-  onStatusChange
+  onStatusChange,
 }: SimpleMessagesCardProps) {
   // Use controlled state if provided, otherwise use internal state
   const [internalStatus, setInternalStatus] = useState<string>('all');
   const selectedStatus = controlledStatus ?? internalStatus;
   const setSelectedStatus = onStatusChange ?? setInternalStatus;
 
-  const filteredMessages = selectedStatus === 'all' 
-    ? messages 
-    : messages.filter(m => m.status === selectedStatus);
+  const filteredMessages =
+    selectedStatus === 'all'
+      ? messages
+      : messages.filter((m) => m.status === selectedStatus);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -63,11 +64,16 @@ export function SimpleMessagesCard({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'received': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'published': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300';
-      case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'queued': return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      case 'received':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'published':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300';
+      case 'failed':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'queued':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
 
@@ -92,13 +98,15 @@ export function SimpleMessagesCard({
                 <SelectItem value="queued">Na fila</SelectItem>
               </SelectContent>
             </Select>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={onRefresh}
               disabled={isLoading}
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
             </Button>
           </div>
         </div>
@@ -110,15 +118,15 @@ export function SimpleMessagesCard({
           </div>
         ) : filteredMessages.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {total === 0 
+            {total === 0
               ? 'Nenhuma mensagem recebida ainda. Aguardando mensagens dos canais monitorados...'
               : 'Nenhuma mensagem com este filtro.'}
           </div>
         ) : (
           <div className="space-y-3">
             {filteredMessages.map((message) => (
-              <div 
-                key={message.id} 
+              <div
+                key={message.id}
                 className="rounded-lg border p-4 hover:bg-accent transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -137,20 +145,24 @@ export function SimpleMessagesCard({
                       )}
                     </div>
                     <p className="text-sm">
-                      {message.text || message.caption || <em className="text-muted-foreground">Sem texto</em>}
+                      {message.text || message.caption || (
+                        <em className="text-muted-foreground">Sem texto</em>
+                      )}
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>ID: {message.messageId}</span>
-                      <span>{formatDate(message.receivedAt)}</span>
+                      <span>
+                        {formatDate(message.telegramDate || message.receivedAt)}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-            
+
             {hasMore && onLoadMore && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full mt-4"
                 onClick={onLoadMore}
               >
@@ -163,4 +175,3 @@ export function SimpleMessagesCard({
     </Card>
   );
 }
-

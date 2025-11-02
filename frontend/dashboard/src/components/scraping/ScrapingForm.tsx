@@ -19,7 +19,11 @@ export const AVAILABLE_FORMATS: ScrapeFormat[] = [
   'json',
 ];
 
-export const ScrapingForm: React.FC<ScrapingFormProps> = ({ onSubmit, loading, error }) => {
+export const ScrapingForm: React.FC<ScrapingFormProps> = ({
+  onSubmit,
+  loading,
+  error,
+}) => {
   const [url, setUrl] = React.useState('');
   const [formats, setFormats] = React.useState<ScrapeFormat[]>(['markdown']);
   const [onlyMainContent, setOnlyMainContent] = React.useState(true);
@@ -69,7 +73,9 @@ export const ScrapingForm: React.FC<ScrapingFormProps> = ({ onSubmit, loading, e
               });
             }
           }}
-          className={errors.url ? 'border-red-500 focus:ring-red-500' : undefined}
+          className={
+            errors.url ? 'border-red-500 focus:ring-red-500' : undefined
+          }
         />
         {errors.url && <p className="text-xs text-red-600">{errors.url}</p>}
       </div>
@@ -94,7 +100,9 @@ export const ScrapingForm: React.FC<ScrapingFormProps> = ({ onSubmit, loading, e
             </label>
           ))}
         </div>
-        {errors.formats && <p className="text-xs text-red-600">{errors.formats}</p>}
+        {errors.formats && (
+          <p className="text-xs text-red-600">{errors.formats}</p>
+        )}
       </div>
 
       <div className="space-y-2">

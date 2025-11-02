@@ -34,7 +34,9 @@ export const TestModelsPage: React.FC = () => {
       } catch (err) {
         console.error('🧪 [TestModelsPage] Error:', err);
         if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load models');
+          setError(
+            err instanceof Error ? err.message : 'Failed to load models',
+          );
           setLoading(false);
         }
       }
@@ -51,24 +53,40 @@ export const TestModelsPage: React.FC = () => {
     modelsCount: models.length,
     loading,
     error,
-    selectedModel
+    selectedModel,
   });
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
       <h1>🧪 Models Test Page</h1>
 
-      <div style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0' }}>
-        <p><strong>Render Count:</strong> {renderCountRef.current}</p>
-        <p><strong>Models Loaded:</strong> {models.length}</p>
-        <p><strong>Loading:</strong> {loading ? 'Yes' : 'No'}</p>
-        <p><strong>Error:</strong> {error || 'None'}</p>
+      <div
+        style={{ marginBottom: '20px', padding: '10px', background: '#f0f0f0' }}
+      >
+        <p>
+          <strong>Render Count:</strong> {renderCountRef.current}
+        </p>
+        <p>
+          <strong>Models Loaded:</strong> {models.length}
+        </p>
+        <p>
+          <strong>Loading:</strong> {loading ? 'Yes' : 'No'}
+        </p>
+        <p>
+          <strong>Error:</strong> {error || 'None'}
+        </p>
       </div>
 
       {loading && <p>Loading models...</p>}
 
       {error && (
-        <div style={{ padding: '10px', background: '#fee', border: '1px solid red' }}>
+        <div
+          style={{
+            padding: '10px',
+            background: '#fee',
+            border: '1px solid red',
+          }}
+        >
           <strong>Error:</strong> {error}
         </div>
       )}
@@ -85,9 +103,10 @@ export const TestModelsPage: React.FC = () => {
           <div style={{ marginTop: '20px' }}>
             <h3>Models List:</h3>
             <ul>
-              {models.map(model => (
+              {models.map((model) => (
                 <li key={model.name}>
-                  {model.name} - {model.dimensions}d - {model.available ? '✅' : '❌'}
+                  {model.name} - {model.dimensions}d -{' '}
+                  {model.available ? '✅' : '❌'}
                 </li>
               ))}
             </ul>

@@ -1,4 +1,10 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ExternalLink, Loader2, AlertTriangle } from 'lucide-react';
@@ -32,7 +38,10 @@ interface PRD {
 const resolveDocsHubBase = (): string => {
   const env = import.meta.env as Record<string, string | undefined>;
   const override = env.VITE_PRD_BASE_URL;
-  const candidate = typeof override === 'string' && override.trim() ? override : apiConfig.docsUrl;
+  const candidate =
+    typeof override === 'string' && override.trim()
+      ? override
+      : apiConfig.docsUrl;
   return normalizeDocsBase(candidate);
 };
 
@@ -140,7 +149,7 @@ function PRDSection({
   prds,
   language,
   title,
-  description
+  description,
 }: {
   prds: PRD[];
   language: 'pt' | 'en';
@@ -187,28 +196,40 @@ function PRDSection({
           try {
             const response = await fetch(candidate.url);
             if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              throw new Error(
+                `HTTP ${response.status}: ${response.statusText}`,
+              );
             }
             const content = await response.text();
-            const contentWithoutFrontmatter = content.replace(/^---\n[\s\S]*?\n---\n/, '');
+            const contentWithoutFrontmatter = content.replace(
+              /^---\n[\s\S]*?\n---\n/,
+              '',
+            );
             setPrdContent(contentWithoutFrontmatter);
             setActivePrdUrl(candidate.url);
             setLoadError(null);
             return;
           } catch (candidateError) {
             const message =
-              candidateError instanceof Error ? candidateError.message : 'Unexpected error';
+              candidateError instanceof Error
+                ? candidateError.message
+                : 'Unexpected error';
             console.warn('[PRD Viewer] attempt failed', candidate.url, message);
             lastError = message;
           }
         }
 
         throw new Error(
-          `Failed to load PRD from docs and legacy sources. Last error: ${lastError ?? 'unknown error'}`
+          `Failed to load PRD from docs and legacy sources. Last error: ${lastError ?? 'unknown error'}`,
         );
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unexpected error';
-        console.error('[PRD Viewer] error loading file', selectedPRD?.fileName, message);
+        const message =
+          error instanceof Error ? error.message : 'Unexpected error';
+        console.error(
+          '[PRD Viewer] error loading file',
+          selectedPRD?.fileName,
+          message,
+        );
         setPrdContent('');
         setActivePrdUrl('');
         setLoadError(
@@ -218,7 +239,7 @@ function PRDSection({
               ? 'Verify docs build or disable VITE_USE_DOCS_V2_PRD until migration completes.'
               : 'Legacy static fallback also failed. Confirm public/docs export is present.',
             `Detail: ${message}`,
-          ].join(' ')
+          ].join(' '),
         );
       } finally {
         setLoadingContent(false);
@@ -325,7 +346,11 @@ function PRDSection({
                         ? buildDocsUrl(selectedPRD.docsSlug, docsHubBase)
                         : fallbackUrl);
                     if (preferredUrl) {
-                      window.open(preferredUrl, '_blank', 'noopener,noreferrer');
+                      window.open(
+                        preferredUrl,
+                        '_blank',
+                        'noopener,noreferrer',
+                      );
                     }
                   }}
                 >
@@ -350,7 +375,8 @@ function PRDSection({
                 )}
 
                 {!loadingContent && !loadError && prdContent && (
-                  <article className="prose prose-slate dark:prose-invert max-w-none p-8
+                  <article
+                    className="prose prose-slate dark:prose-invert max-w-none p-8
                     prose-headings:text-gray-900 dark:prose-headings:text-gray-100
                     prose-h1:text-3xl prose-h1:font-bold prose-h1:mb-4 prose-h1:pb-3 prose-h1:border-b prose-h1:border-gray-200 dark:prose-h1:border-gray-700
                     prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4
@@ -368,8 +394,12 @@ function PRDSection({
                     prose-th:bg-gray-100 dark:prose-th:bg-gray-800 prose-th:border prose-th:border-gray-300 dark:prose-th:border-gray-600 prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold
                     prose-td:border prose-td:border-gray-300 dark:prose-td:border-gray-600 prose-td:px-4 prose-td:py-2
                     prose-hr:border-gray-300 dark:prose-hr:border-gray-700
-                  ">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  "
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                    >
                       {prdContent}
                     </ReactMarkdown>
                   </article>
@@ -379,7 +409,8 @@ function PRDSection({
                 Content source:{' '}
                 {activePrdUrl
                   ? activePrdUrl
-                  : `/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`} (docs migration mode{' '}
+                  : `/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`}{' '}
+                (docs migration mode{' '}
                 {docsHubFlagEnabled ? 'enabled' : 'disabled'})
               </p>
             </div>

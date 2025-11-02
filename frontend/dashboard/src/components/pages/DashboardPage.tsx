@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../ui/card';
 import { useTradingStore } from '../../store/appStore';
 import type { Trade } from '../../store/appStore';
 import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
@@ -19,7 +25,7 @@ export function DashboardKPIs() {
   const totalPnL = positions.reduce((sum, pos) => sum + pos.pnl, 0);
   const totalPositions = positions.length;
   const activeOrders = orders.filter(
-    (o) => o.status === 'SUBMITTED' || o.status === 'PARTIAL'
+    (o) => o.status === 'SUBMITTED' || o.status === 'PARTIAL',
   ).length;
   const recentSignals = signals.slice(0, 10).length;
 
@@ -63,14 +69,20 @@ export function DashboardKPIs() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                  <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{kpi.value}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {kpi.title}
+                  </p>
+                  <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    {kpi.value}
+                  </p>
                   <p
                     className={cn(
                       'mt-1 text-sm font-medium',
-                      kpi.trend === 'up' && 'text-green-600 dark:text-green-400',
+                      kpi.trend === 'up' &&
+                        'text-green-600 dark:text-green-400',
                       kpi.trend === 'down' && 'text-red-600 dark:text-red-400',
-                      kpi.trend === 'neutral' && 'text-gray-500 dark:text-gray-400'
+                      kpi.trend === 'neutral' &&
+                        'text-gray-500 dark:text-gray-400',
                     )}
                   >
                     {kpi.change}
@@ -81,15 +93,17 @@ export function DashboardKPIs() {
                     'rounded-full p-3',
                     kpi.trend === 'up' && 'bg-green-100',
                     kpi.trend === 'down' && 'bg-red-100',
-                    kpi.trend === 'neutral' && 'bg-gray-100 dark:bg-gray-800'
+                    kpi.trend === 'neutral' && 'bg-gray-100 dark:bg-gray-800',
                   )}
                 >
                   <Icon
                     className={cn(
                       'h-6 w-6',
-                      kpi.trend === 'up' && 'text-green-600 dark:text-green-400',
+                      kpi.trend === 'up' &&
+                        'text-green-600 dark:text-green-400',
                       kpi.trend === 'down' && 'text-red-600 dark:text-red-400',
-                      kpi.trend === 'neutral' && 'text-gray-600 dark:text-gray-400'
+                      kpi.trend === 'neutral' &&
+                        'text-gray-600 dark:text-gray-400',
                     )}
                   />
                 </div>
@@ -131,7 +145,9 @@ export function DashboardMarketOverview() {
                 className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 p-3"
               >
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{trade.symbol}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    {trade.symbol}
+                  </p>
                   <p className="text-sm text-gray-500">
                     Vol: {trade.volume.toLocaleString()}
                   </p>
@@ -143,7 +159,9 @@ export function DashboardMarketOverview() {
                   <p
                     className={cn(
                       'text-sm font-medium',
-                      trade.aggressor === 'BUY' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      trade.aggressor === 'BUY'
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400',
                     )}
                   >
                     {trade.aggressor}
@@ -183,7 +201,9 @@ export function DashboardRecentActivity() {
                   key={idx}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{trade.symbol}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {trade.symbol}
+                  </span>
                   <span className="font-mono text-gray-700">
                     ${trade.price.toFixed(2)}
                   </span>
@@ -192,7 +212,7 @@ export function DashboardRecentActivity() {
                       'rounded px-2 py-0.5 text-xs font-medium',
                       trade.aggressor === 'BUY'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400'
+                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
                     )}
                   >
                     {trade.aggressor}
@@ -220,17 +240,23 @@ export function DashboardRecentActivity() {
                   key={order.orderId}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{order.symbol}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {order.symbol}
+                  </span>
                   <span className="text-gray-700">
                     {order.quantity} @ ${order.price?.toFixed(2) || 'Market'}
                   </span>
                   <span
                     className={cn(
                       'rounded px-2 py-0.5 text-xs font-medium',
-                      order.status === 'FILLED' && 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
-                      order.status === 'SUBMITTED' && 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-400',
-                      order.status === 'CANCELED' && 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-                      order.status === 'REJECTED' && 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400'
+                      order.status === 'FILLED' &&
+                        'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
+                      order.status === 'SUBMITTED' &&
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-400',
+                      order.status === 'CANCELED' &&
+                        'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+                      order.status === 'REJECTED' &&
+                        'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
                     )}
                   >
                     {order.status}

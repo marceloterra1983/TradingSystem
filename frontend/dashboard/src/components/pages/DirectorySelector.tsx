@@ -8,7 +8,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Folder, FolderOpen, ChevronRight, Home, RefreshCw, AlertCircle } from 'lucide-react';
+import {
+  Folder,
+  FolderOpen,
+  ChevronRight,
+  RefreshCw,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
@@ -56,9 +62,11 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
   onChange,
   baseUrl = 'http://localhost:3403',
   className = '',
-  disabled = false
+  disabled = false,
 }) => {
-  const [currentPath, setCurrentPath] = useState<string>(value || '/data/tradingsystem');
+  const [currentPath, setCurrentPath] = useState<string>(
+    value || '/data/tradingsystem',
+  );
   const [directories, setDirectories] = useState<DirectoryEntry[]>([]);
   const [parent, setParent] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -74,7 +82,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
 
     try {
       const response = await fetch(
-        `${baseUrl}/api/v1/rag/directories/browse?path=${encodeURIComponent(path)}`
+        `${baseUrl}/api/v1/rag/directories/browse?path=${encodeURIComponent(path)}`,
       );
 
       if (!response.ok) {
@@ -201,7 +209,9 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
               disabled={loading || disabled}
               className="shrink-0"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+              />
             </Button>
           </div>
 

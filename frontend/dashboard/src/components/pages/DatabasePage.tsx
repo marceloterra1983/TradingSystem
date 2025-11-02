@@ -45,7 +45,7 @@ const uniqueByUrl = (options: EndpointOption[]): EndpointOption[] => {
 
 const buildEndpointOptions = (
   primaryUrl: string,
-  alternates: EndpointOption[] = []
+  alternates: EndpointOption[] = [],
 ): EndpointOption[] => {
   const baseOption: EndpointOption = { label: 'Auto', url: primaryUrl };
   return uniqueByUrl([baseOption, ...alternates]);

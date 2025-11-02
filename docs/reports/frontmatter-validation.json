@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "scan_date": "2025-10-27T20:41:20.154255",
+    "scan_date": "2025-11-02T04:28:54.573899",
     "docs_directory": [
       "docs/content"
     ],
@@ -9,34 +9,52 @@
     "schema": "v2"
   },
   "summary": {
-    "total_files": 209,
-    "files_with_frontmatter": 209,
-    "files_missing_frontmatter": 0,
-    "files_with_issues": 0,
-    "files_incomplete_frontmatter": 0,
-    "issue_counts": {},
+    "total_files": 223,
+    "files_with_frontmatter": 221,
+    "files_missing_frontmatter": 2,
+    "files_with_issues": 13,
+    "files_incomplete_frontmatter": 11,
+    "issue_counts": {
+      "missing_field": 34,
+      "invalid_value": 2,
+      "invalid_date": 1
+    },
     "owner_distribution": {
       "MCPGuild": 12,
+      "unknown": 11,
       "BackendGuild": 11,
       "DocsOps": 85,
       "ReleaseOps": 1,
       "DataOps": 4,
+      "DevOps": 1,
       "SupportOps": 4,
       "FrontendGuild": 15,
       "ProductOps": 12,
       "PromptOps": 4,
       "ArchitectureGuild": 21,
-      "ToolingGuild": 36,
+      "ToolingGuild": 35,
+      "OpsGuild": 1,
       "SecurityOps": 4
     }
   },
   "freshness_analysis": {
     "outdated_documents": [],
     "threshold_days": 90,
-    "analysis_date": "2025-10-27",
+    "analysis_date": "2025-11-02",
     "date_field": "lastReviewed"
   },
   "results": [
+    {
+      "file": "docs/content/TESTE-FINAL-LOGS-1762032785.md",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
     {
       "file": "docs/content/agents/agno-agents/flows.mdx",
       "has_frontmatter": true,
@@ -117,6 +135,17 @@
       }
     },
     {
+      "file": "docs/content/agents/mmm.mdx",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
+    {
       "file": "docs/content/agents/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -128,6 +157,43 @@
         ],
         "owner": "MCPGuild",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/api/API-DOCUMENTATION-GUIDE.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "API Documentation Guide - TradingSystem",
+        "sidebar_position": 1,
+        "tags": [
+          "api",
+          "documentation",
+          "openapi",
+          "rest",
+          "guide"
+        ],
+        "domain": "api",
+        "type": "guide",
+        "summary": "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices",
+        "status": "active",
+        "last_review": "2025-11-01"
       }
     },
     {
@@ -1308,6 +1374,116 @@
       }
     },
     {
+      "file": "docs/content/development/SHARED-MODULES-MIGRATION.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "Shared Modules Migration Report",
+        "sidebar_position": 1,
+        "tags": [
+          "development",
+          "architecture",
+          "refactoring",
+          "migration"
+        ],
+        "domain": "development",
+        "type": "migration-report",
+        "summary": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
+        "status": "completed",
+        "last_review": "2025-10-29"
+      }
+    },
+    {
+      "file": "docs/content/development/code-quality-checklist.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "Code Quality Checklist",
+        "sidebar_position": 5,
+        "tags": [
+          "development",
+          "quality",
+          "linting",
+          "testing"
+        ],
+        "domain": "development",
+        "type": "guide",
+        "summary": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
+        "status": "active",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/development/npm-run-dev-pattern.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "DevOps",
+          "allowed": [
+            "MCPGuild",
+            "DocsOps",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "PromptOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "DataOps",
+            "FrontendGuild",
+            "ProductOps",
+            "ReleaseOps"
+          ],
+          "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Padrão npm run dev com Auto-Kill de Porta",
+        "sidebar_position": 5,
+        "description": "Padrão de desenvolvimento para evitar erros EADDRINUSE em serviços Node.js",
+        "tags": [
+          "development",
+          "nodejs",
+          "best-practices"
+        ],
+        "owner": "DevOps",
+        "lastReviewed": "2025-10-29"
+      }
+    },
+    {
       "file": "docs/content/diagrams/diagrams.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -1590,14 +1766,14 @@
       "issues": [],
       "frontmatter": {
         "id": "index",
-        "title": "TradingSystem Documentation v2",
-        "description": "Dual-hosted documentation workspace scaffolding for the Docusaurus v2 rollout.",
+        "title": "TradingSystem Documentation Hub",
+        "description": "Entry point for the Docusaurus v3 knowledge base and DocsAPI automation.",
         "tags": [
           "overview",
-          "migration"
+          "navigation"
         ],
         "owner": "DocsOps",
-        "lastReviewed": "2025-10-26"
+        "lastReviewed": "2025-10-29"
       }
     },
     {
@@ -1893,6 +2069,45 @@
       }
     },
     {
+      "file": "docs/content/reference/adrs/2025-10-28-centralized-database-architecture.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "ADR-008: Centralized Database Architecture",
+        "sidebar_position": 8,
+        "tags": [
+          "adr",
+          "database",
+          "architecture",
+          "timescaledb"
+        ],
+        "domain": "infrastructure",
+        "type": "decision-record",
+        "summary": "Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications",
+        "status": "accepted",
+        "date": "2025-10-28",
+        "deciders": [
+          "System Architect"
+        ]
+      }
+    },
+    {
       "file": "docs/content/reference/adrs/ADR-0001.md",
       "has_frontmatter": true,
       "issues": [],
@@ -1905,6 +2120,150 @@
         ],
         "owner": "ArchitectureGuild",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "ADR-003: API Gateway Implementation for Centralized Authentication and Routing",
+        "date": "2025-11-01",
+        "status": "proposed",
+        "tags": [
+          "architecture",
+          "security",
+          "infrastructure",
+          "api-gateway"
+        ],
+        "domain": "infrastructure",
+        "type": "adr",
+        "summary": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "ADR-005: Test Coverage Strategy - Systematic Quality Improvement",
+        "date": "2025-11-02",
+        "status": "proposed",
+        "tags": [
+          "architecture",
+          "testing",
+          "quality",
+          "ci-cd"
+        ],
+        "domain": "development-process",
+        "type": "adr",
+        "summary": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "ADR-001: Redis Caching Strategy for Collection Stats",
+        "sidebar_position": 1,
+        "tags": [
+          "adr",
+          "rag-services",
+          "caching",
+          "performance"
+        ],
+        "domain": "rag-services",
+        "type": "adr",
+        "summary": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
+        "status": "accepted",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "ADR-002: File Watcher Auto-Ingestion Architecture",
+        "sidebar_position": 2,
+        "tags": [
+          "adr",
+          "rag-services",
+          "file-watcher",
+          "automation"
+        ],
+        "domain": "rag-services",
+        "type": "adr",
+        "summary": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
+        "status": "accepted",
+        "last_review": "2025-11-01"
       }
     },
     {
@@ -2081,7 +2440,34 @@
     {
       "file": "docs/content/reference/ports.mdx",
       "has_frontmatter": true,
-      "issues": [],
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "MCPGuild",
+            "DocsOps",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "PromptOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "DataOps",
+            "FrontendGuild",
+            "ProductOps",
+            "ReleaseOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        },
+        {
+          "type": "invalid_date",
+          "field": "lastReviewed",
+          "value": "TBD",
+          "message": "Invalid date format 'TBD'. Expected: YYYY-MM-DD"
+        }
+      ],
       "frontmatter": {
         "title": "Ports Matrix",
         "description": "Service port assignments across TradingSystem.",
@@ -2089,8 +2475,8 @@
           "reference",
           "networking"
         ],
-        "owner": "ToolingGuild",
-        "lastReviewed": "2025-10-27"
+        "owner": "OpsGuild",
+        "lastReviewed": "TBD"
       }
     },
     {
@@ -2807,6 +3193,36 @@
       }
     },
     {
+      "file": "docs/content/tools/kestra.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "tags",
+          "message": "Missing required field: tags"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "Kestra",
+        "sidebar_position": 80
+      }
+    },
+    {
       "file": "docs/content/tools/linting/commitlint-husky.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -2933,6 +3349,77 @@
         ],
         "owner": "ToolingGuild",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "RAG Services Architecture",
+        "sidebar_position": 1,
+        "tags": [
+          "rag",
+          "architecture",
+          "documentation"
+        ],
+        "domain": "rag-services",
+        "type": "architecture",
+        "summary": "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment",
+        "status": "active",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/multi-collection-architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "Multi-Collection Architecture",
+        "sidebar_position": 5,
+        "tags": [
+          "rag",
+          "llamaindex",
+          "qdrant",
+          "embedding"
+        ],
+        "domain": "tools",
+        "type": "technical-spec",
+        "summary": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "status": "active",
+        "last_review": "2025-10-31"
       }
     },
     {
@@ -3441,7 +3928,148 @@
       }
     }
   ],
-  "missing_frontmatter": [],
-  "incomplete_frontmatter": [],
-  "invalid_values": []
+  "missing_frontmatter": [
+    "docs/content/TESTE-FINAL-LOGS-1762032785.md",
+    "docs/content/agents/mmm.mdx"
+  ],
+  "incomplete_frontmatter": [
+    {
+      "file": "docs/content/api/API-DOCUMENTATION-GUIDE.mdx",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/development/SHARED-MODULES-MIGRATION.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/development/code-quality-checklist.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/reference/adrs/2025-10-28-centralized-database-architecture.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/tools/kestra.mdx",
+      "missing_fields": [
+        "description",
+        "tags",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/tools/rag/architecture.mdx",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    },
+    {
+      "file": "docs/content/tools/rag/multi-collection-architecture.mdx",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    }
+  ],
+  "invalid_values": [
+    {
+      "file": "docs/content/development/npm-run-dev-pattern.md",
+      "field": "owner",
+      "value": "DevOps",
+      "allowed": [
+        "MCPGuild",
+        "DocsOps",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "PromptOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "DataOps",
+        "FrontendGuild",
+        "ProductOps",
+        "ReleaseOps"
+      ],
+      "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/reference/ports.mdx",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "MCPGuild",
+        "DocsOps",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "PromptOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "DataOps",
+        "FrontendGuild",
+        "ProductOps",
+        "ReleaseOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/reference/ports.mdx",
+      "field": "lastReviewed",
+      "value": "TBD",
+      "allowed": null,
+      "message": "Invalid date format 'TBD'. Expected: YYYY-MM-DD"
+    }
+  ]
 }

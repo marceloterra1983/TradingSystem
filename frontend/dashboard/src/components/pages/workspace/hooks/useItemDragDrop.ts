@@ -4,11 +4,19 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import type { ItemStatus } from '../types/workspace.types';
 
-const STATUS_VALUES: ItemStatus[] = ['new', 'review', 'in-progress', 'completed', 'rejected'];
+const STATUS_VALUES: ItemStatus[] = [
+  'new',
+  'review',
+  'in-progress',
+  'completed',
+  'rejected',
+];
 
 // Check if a value corresponds to a valid ItemStatus
 function isItemStatus(value: unknown): value is ItemStatus {
-  return typeof value === 'string' && STATUS_VALUES.includes(value as ItemStatus);
+  return (
+    typeof value === 'string' && STATUS_VALUES.includes(value as ItemStatus)
+  );
 }
 
 function getStatusFromOver(over: DragEndEvent['over']): ItemStatus | null {
@@ -21,7 +29,8 @@ function getStatusFromOver(over: DragEndEvent['over']): ItemStatus | null {
     return sortableContainerId;
   }
 
-  const sortableDataStatus = over.data?.current?.sortable?.data?.current?.status as unknown;
+  const sortableDataStatus = over.data?.current?.sortable?.data?.current
+    ?.status as unknown;
   if (isItemStatus(sortableDataStatus)) {
     return sortableDataStatus;
   }

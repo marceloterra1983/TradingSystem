@@ -21,7 +21,10 @@
  * sanitizeUrl('  ', 'http://default')
  * // Returns: 'http://default'
  */
-export function sanitizeUrl(value: string | undefined, fallback: string): string {
+export function sanitizeUrl(
+  value: string | undefined,
+  fallback: string,
+): string {
   if (!value || typeof value !== 'string') {
     return fallback;
   }
@@ -51,7 +54,7 @@ export function sanitizeUrl(value: string | undefined, fallback: string): string
  */
 export function normalizeCollectionName(
   collectionName: string | null | undefined,
-  defaultValue = 'documentation'
+  defaultValue = 'documentation',
 ): string {
   if (!collectionName || typeof collectionName !== 'string') {
     return defaultValue;
@@ -84,7 +87,9 @@ export function normalizeCollectionName(
  * normalizeIndexedPath('/docs/README.txt')
  * // Returns: null (invalid extension)
  */
-export function normalizeIndexedPath(value: string | null | undefined): string | null {
+export function normalizeIndexedPath(
+  value: string | null | undefined,
+): string | null {
   if (!value || typeof value !== 'string') {
     return null;
   }
@@ -131,7 +136,9 @@ export function normalizeIndexedPath(value: string | null | undefined): string |
  * inferModelFromName('repository_gemma')
  * // Returns: 'embeddinggemma:latest'
  */
-export function inferModelFromName(collectionName: string | null | undefined): string | null {
+export function inferModelFromName(
+  collectionName: string | null | undefined,
+): string | null {
   if (!collectionName || typeof collectionName !== 'string') {
     return null;
   }
@@ -173,7 +180,7 @@ export function inferModelFromName(collectionName: string | null | undefined): s
  */
 export function formatNumber(
   value: number | null | undefined,
-  fallback = '–'
+  fallback = '–',
 ): string {
   return typeof value === 'number' ? value.toLocaleString() : fallback;
 }

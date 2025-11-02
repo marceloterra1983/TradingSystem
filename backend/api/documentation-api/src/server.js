@@ -224,49 +224,58 @@ app.use(
   })
 );
 
-// Start server
-const server = app.listen(PORT, async () => {
-  logger.startup('Documentation API started', {
-    port: PORT,
-    env: config.server.env,
-  });
+let server = null;
+const shouldAutoStart =
+  process.env.NODE_ENV !== 'test' &&
+  process.env.VITEST !== 'true' &&
+  typeof process.env.VITEST_WORKER_ID === 'undefined';
 
-  // Initialize database schema (if configured)
-  try {
-    if (isQuestDbStrategy()) {
-      await questdbClient.initialize();
-      logger.info('QuestDB connection initialized');
-    } else if (isPostgresStrategy()) {
-      await ensurePrismaConnection();
-      logger.info('Prisma/PostgreSQL connection initialized');
-    } else {
-      logger.info('No database configured - using FlexSearch only');
+if (shouldAutoStart) {
+  server = app.listen(PORT, async () => {
+    logger.startup('Documentation API started', {
+      port: PORT,
+      env: config.server.env,
+    });
+
+    // Initialize database schema (if configured)
+    try {
+      if (isQuestDbStrategy()) {
+        await questdbClient.initialize();
+        logger.info('QuestDB connection initialized');
+      } else if (isPostgresStrategy()) {
+        await ensurePrismaConnection();
+        logger.info('Prisma/PostgreSQL connection initialized');
+      } else {
+        logger.info('No database configured - using FlexSearch only');
+      }
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to initialize database connection');
     }
-  } catch (error) {
-    logger.error({ err: error }, 'Failed to initialize database connection');
-  }
 
-  // Initialize markdown search index
-  try {
-    logger.info('Indexing markdown documentation...');
-    const indexResult = await markdownSearchService.indexMarkdownFiles();
-    logger.info({ indexed: indexResult }, 'Markdown documentation indexed');
-  } catch (error) {
-    logger.error({ err: error }, 'Failed to index markdown documentation');
-  }
+    // Initialize markdown search index
+    try {
+      logger.info('Indexing markdown documentation...');
+      const indexResult = await markdownSearchService.indexMarkdownFiles();
+      logger.info({ indexed: indexResult }, 'Markdown documentation indexed');
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to index markdown documentation');
+    }
 
-  console.log(`\n📚 Documentation API running on http://localhost:${PORT}`);
-  console.log(`   Health:       http://localhost:${PORT}/health`);
-  console.log(`   API Docs:     http://localhost:${PORT}/docs`);
-  console.log(`   OpenAPI:      http://localhost:${PORT}/spec/openapi.yaml`);
-  console.log(`   AsyncAPI:     http://localhost:${PORT}/spec/asyncapi.yaml`);
-  console.log(`   Systems:      http://localhost:${PORT}/api/v1/systems`);
-  console.log(`   Ideas:        http://localhost:${PORT}/api/v1/ideas`);
-  console.log(`   Files:        http://localhost:${PORT}/api/v1/files`);
-  console.log(`   Stats:        http://localhost:${PORT}/api/v1/stats`);
-  console.log(`   Docs Search:  http://localhost:${PORT}/api/v1/docs/search`);
-  console.log(`   Docs Facets:  http://localhost:${PORT}/api/v1/docs/facets\n`);
-});
+    console.log(`\n📚 Documentation API running on http://localhost:${PORT}`);
+    console.log(`   Health:       http://localhost:${PORT}/health`);
+    console.log(`   API Docs:     http://localhost:${PORT}/docs`);
+    console.log(`   OpenAPI:      http://localhost:${PORT}/spec/openapi.yaml`);
+    console.log(`   AsyncAPI:     http://localhost:${PORT}/spec/asyncapi.yaml`);
+    console.log(`   Systems:      http://localhost:${PORT}/api/v1/systems`);
+    console.log(`   Ideas:        http://localhost:${PORT}/api/v1/ideas`);
+    console.log(`   Files:        http://localhost:${PORT}/api/v1/files`);
+    console.log(`   Stats:        http://localhost:${PORT}/api/v1/stats`);
+    console.log(`   Docs Search:  http://localhost:${PORT}/api/v1/docs/search`);
+    console.log(`   Docs Facets:  http://localhost:${PORT}/api/v1/docs/facets\n`);
+  });
+} else {
+  logger.info('Test mode detected - HTTP server auto-start disabled');
+}
 
 // Graceful shutdown
 const shutdown = async (signal) => {
@@ -279,10 +288,12 @@ const shutdown = async (signal) => {
 
   try {
     // Close server first
-    await new Promise((resolve) => {
-      server.close(resolve);
-      logger.info('HTTP server closed');
-    });
+    if (server) {
+      await new Promise((resolve) => {
+        server.close(resolve);
+        logger.info('HTTP server closed');
+      });
+    }
 
     // Close database connections
     if (isQuestDbStrategy()) {
@@ -312,4 +323,7 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   logger.error({ reason, promise }, 'Unhandled promise rejection');
 });
+
+export { app, server };
+export default app;
 

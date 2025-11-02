@@ -8,14 +8,20 @@
  */
 
 import React, { useState } from 'react';
-import { AlertTriangle, Trash2, Database, FileText, Package } from 'lucide-react';
+import {
+  AlertTriangle,
+  Trash2,
+  Database,
+  FileText,
+  Package,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Alert, AlertDescription } from '../ui/alert';
@@ -41,7 +47,7 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
   onClose,
   onConfirm,
   collection,
-  isLoading = false
+  isLoading = false,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -70,7 +76,7 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
       return {
         vectors: 0,
         points: 0,
-        hasData: false
+        hasData: false,
       };
     }
 
@@ -78,7 +84,8 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
       vectors: collection.stats.vectorsCount || 0,
       points: collection.stats.pointsCount || 0,
       hasData:
-        (collection.stats.vectorsCount || 0) > 0 || (collection.stats.pointsCount || 0) > 0
+        (collection.stats.vectorsCount || 0) > 0 ||
+        (collection.stats.pointsCount || 0) > 0,
     };
   };
 
@@ -93,8 +100,8 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
             Deletar Coleção
           </DialogTitle>
           <DialogDescription>
-            Esta ação não pode ser desfeita. Todos os dados indexados serão permanentemente
-            removidos.
+            Esta ação não pode ser desfeita. Todos os dados indexados serão
+            permanentemente removidos.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,12 +109,16 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
           {/* Collection Info */}
           <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Coleção</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                Coleção
+              </p>
               <p className="font-semibold text-lg">{collection.name}</p>
             </div>
 
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Descrição</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                Descrição
+              </p>
               <p className="text-sm">{collection.description}</p>
             </div>
 
@@ -129,7 +140,9 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <div>
-                    <p className="text-sm text-red-600 dark:text-red-400">Vetores</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      Vetores
+                    </p>
                     <p className="text-lg font-bold text-red-800 dark:text-red-200">
                       {stats.vectors.toLocaleString()}
                     </p>
@@ -139,7 +152,9 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <div>
-                    <p className="text-sm text-red-600 dark:text-red-400">Pontos</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      Pontos
+                    </p>
                     <p className="text-lg font-bold text-red-800 dark:text-red-200">
                       {stats.points.toLocaleString()}
                     </p>

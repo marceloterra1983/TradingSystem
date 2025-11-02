@@ -132,6 +132,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - LOG_LEVEL=info
+      - DOCS_DIR=/app/docs
+      - LLAMAINDEX_DOCS_DIR=/app/docs/content
       - LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query:8000
       - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
       - QDRANT_URL=http://data-qdrant:6333
@@ -142,6 +144,10 @@ services:
       - STATUS_CACHE_TTL_MS=30000
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret}
       - JWT_ALGORITHM=HS256
+    volumes:
+      # 🔧 FIX: Mount documentation source for FlexSearch indexing
+      - ../../docs:/app/docs:ro
+      - ../../:/data/tradingsystem:ro
     networks:
       - tradingsystem_backend
     depends_on:
@@ -198,6 +204,7 @@ services:
       - REDIS_ENABLED=true
     volumes:
       - ../rag-services/collections-config.json:/app/collections-config.json
+      - ../../data/logs/rag-ingestion:/app/data/logs
       - ../../docs:/data/docs:ro
       - ../../:/data/tradingsystem:ro
     networks:

@@ -20,7 +20,10 @@ function formatBytes(size?: number) {
   if (typeof size !== 'number' || Number.isNaN(size)) return '—';
   if (size === 0) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB'];
-  const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+  const exponent = Math.min(
+    Math.floor(Math.log(size) / Math.log(1024)),
+    units.length - 1,
+  );
   return `${(size / 1024 ** exponent).toFixed(1)} ${units[exponent]}`;
 }
 
@@ -40,7 +43,11 @@ function formatTimestamp(timestamp?: string | null) {
   }
 }
 
-export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCardProps) {
+export function FailureQueueCard({
+  queue,
+  isLoading,
+  onRefresh,
+}: FailureQueueCardProps) {
   const hasPreview = (queue?.preview?.length ?? 0) > 0;
 
   return (
@@ -105,7 +112,9 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
               <div className="md:col-span-2 rounded-md border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <FileWarning className="h-4 w-4 text-amber-500" />
-                  <span className="font-semibold uppercase tracking-wide">Arquivo</span>
+                  <span className="font-semibold uppercase tracking-wide">
+                    Arquivo
+                  </span>
                 </div>
                 <p className="mt-2 break-all text-sm font-medium text-slate-700 dark:text-slate-200">
                   {queue?.path ?? '—'}
@@ -117,7 +126,8 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                   <span>Pré-visualização (mais recentes)</span>
                   <span>
-                    Exibindo {queue?.previewCount ?? 0} de {queue?.totalMessages ?? 0}
+                    Exibindo {queue?.previewCount ?? 0} de{' '}
+                    {queue?.totalMessages ?? 0}
                   </span>
                 </div>
                 <ScrollArea className="max-h-60">
@@ -129,10 +139,15 @@ export function FailureQueueCard({ queue, isLoading, onRefresh }: FailureQueueCa
                             Canal: <strong>{entry.channelId ?? 'N/D'}</strong>
                           </span>
                           <span>
-                            Mensagem: <strong>{entry.messageId ?? 'N/D'}</strong>
+                            Mensagem:{' '}
+                            <strong>{entry.messageId ?? 'N/D'}</strong>
                           </span>
-                          <span>Falhou em {formatTimestamp(entry.failedAt)}</span>
-                          {entry.queuedAt && <span>Fila: {formatTimestamp(entry.queuedAt)}</span>}
+                          <span>
+                            Falhou em {formatTimestamp(entry.failedAt)}
+                          </span>
+                          {entry.queuedAt && (
+                            <span>Fila: {formatTimestamp(entry.queuedAt)}</span>
+                          )}
                         </div>
                         <p className="mt-2 line-clamp-3 text-sm text-slate-700 dark:text-slate-200">
                           {entry.textPreview || '(sem mensagem)'}

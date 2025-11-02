@@ -10,11 +10,33 @@ function buildPrismaClient() {
     throw new Error('DOCUMENTATION_DATABASE_URL must be configured to use the postgres strategy');
   }
 
+  // Parse connection string and add connection pooling parameters
+  const url = new URL(config.postgres.url);
+
+  // Add connection pooling parameters if not already present
+  if (!url.searchParams.has('connection_limit')) {
+    url.searchParams.set('connection_limit', process.env.DATABASE_CONNECTION_LIMIT || '10');
+  }
+  if (!url.searchParams.has('pool_timeout')) {
+    url.searchParams.set('pool_timeout', process.env.DATABASE_POOL_TIMEOUT || '10');
+  }
+  if (!url.searchParams.has('connect_timeout')) {
+    url.searchParams.set('connect_timeout', process.env.DATABASE_CONNECT_TIMEOUT || '10');
+  }
+
+  const optimizedUrl = url.toString();
+
+  logger.info('Initializing Prisma with connection pooling', {
+    connectionLimit: url.searchParams.get('connection_limit'),
+    poolTimeout: url.searchParams.get('pool_timeout'),
+    connectTimeout: url.searchParams.get('connect_timeout'),
+  });
+
   return new PrismaClient({
     log: process.env.PRISMA_LOG_LEVEL ? process.env.PRISMA_LOG_LEVEL.split(',') : ['error'],
     datasources: {
       db: {
-        url: config.postgres.url
+        url: optimizedUrl
       }
     }
   });

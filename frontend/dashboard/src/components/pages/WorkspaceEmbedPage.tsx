@@ -22,7 +22,7 @@ export function WorkspaceEmbedPage() {
         content: <StatusBoardSection />,
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -37,4 +37,3 @@ export function WorkspaceEmbedPage() {
 }
 
 export default WorkspaceEmbedPage;
-

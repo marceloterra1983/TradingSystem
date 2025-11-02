@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test localStorage Issue</title>
+</head>
+<body>
+    <h1>DocsHybridSearch localStorage Debug</h1>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <pre id="output"></pre>
+
+    <script>
+        function checkStorage() {
+            const keys = Object.keys(localStorage).filter(k => k.includes('docsHybrid'));
+            const output = document.getElementById('output');
+            output.textContent = 'LocalStorage keys:\n\n';
+            
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                output.textContent += `${key}:\n${value}\n\n`;
+            });
+            
+            if (keys.length === 0) {
+                output.textContent = 'No docsHybridSearch keys found in localStorage';
+            }
+        }
+
+        function clearStorage() {
+            const keys = Object.keys(localStorage).filter(k => k.includes('docsHybrid'));
+            keys.forEach(key => localStorage.removeItem(key));
+            checkStorage();
+        }
+
+        // Auto-check on load
+        checkStorage();
+
+        // Monitor changes
+        const originalSetItem = localStorage.setItem;
+        const originalRemoveItem = localStorage.removeItem;
+
+        localStorage.setItem = function(key, value) {
+            if (key.includes('docsHybrid')) {
+                console.log('[localStorage.setItem]', key, value);
+            }
+            return originalSetItem.apply(this, arguments);
+        };
+
+        localStorage.removeItem = function(key) {
+            if (key.includes('docsHybrid')) {
+                console.log('[localStorage.removeItem]', key);
+            }
+            return originalRemoveItem.apply(this, arguments);
+        };
+    </script>
+</body>
+</html>

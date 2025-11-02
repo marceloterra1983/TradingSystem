@@ -1,0 +1,130 @@
+@startuml TP Capital - Message Processing Sequence
+!define PRIMARY_COLOR #4A90E2
+!define SUCCESS_COLOR #7ED321
+!define ERROR_COLOR #D0021B
+!define DATABASE_COLOR #BD10E0
+
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam defaultFontSize 11
+
+title TP Capital - Message Processing Flow (Gateway Polling Mode)
+
+actor "Telegram\nGateway" as Gateway
+participant "Gateway DB\n(telegram_gateway)" as GatewayDB #BD10E0
+participant "Polling Worker" as Worker #4A90E2
+participant "parseSignal()" as Parser #50E3C2
+participant "TimescaleClient" as TSClient #50E3C2
+database "TimescaleDB\n(tp_capital)" as TimescaleDB #BD10E0
+participant "Metrics" as Metrics #50E3C2
+
+== Ingestion Phase (Telegram Gateway) ==
+
+Gateway -> GatewayDB: INSERT message\n(status='received')
+activate GatewayDB
+GatewayDB --> Gateway: OK
+deactivate GatewayDB
+
+== Polling Phase (Every 5 seconds) ==
+
+Worker -> GatewayDB: SELECT messages\nWHERE status='received'\nAND channel_id='-1001649127710'\nAND processed_by<>'tp-capital'\nLIMIT 100
+activate GatewayDB
+GatewayDB --> Worker: messages[]
+deactivate GatewayDB
+
+alt No messages
+  Worker --> Worker: Sleep 5s
+else Messages found
+  
+  loop For each message
+    
+    == Parsing Phase ==
+    
+    Worker -> Parser: parseSignal(text)
+    activate Parser
+    
+    alt Valid signal format
+      Parser --> Worker: signal object
+      deactivate Parser
+      
+      alt Incomplete signal (no buy values)
+        Worker -> GatewayDB: UPDATE status='reprocessed'\nmetadata.ignored=true
+        Worker -> Metrics: inc(messagesProcessed, {status: 'ignored_incomplete'})
+        note right: Message parsed but\nnot a complete signal
+      else Complete signal
+        
+        == Duplicate Check ==
+        
+        Worker -> TimescaleDB: SELECT 1 FROM tp_capital_signals\nWHERE raw_message=$1\nAND channel=$2
+        activate TimescaleDB
+        
+        alt Duplicate found
+          TimescaleDB --> Worker: 1 row
+          deactivate TimescaleDB
+          Worker -> GatewayDB: UPDATE status='published'
+          Worker -> Metrics: inc(messagesProcessed, {status: 'duplicate'})
+          
+        else New signal
+          TimescaleDB --> Worker: 0 rows
+          deactivate TimescaleDB
+          
+          == Signal Insertion ==
+          
+          Worker -> TSClient: insertSignal(signal)
+          activate TSClient
+          TSClient -> TimescaleDB: INSERT INTO tp_capital_signals\n(ts, channel, asset, buy_min, buy_max, ...)
+          activate TimescaleDB
+          TimescaleDB --> TSClient: id, ts
+          deactivate TimescaleDB
+          TSClient --> Worker: {id, ts}
+          deactivate TSClient
+          
+          == Mark as Published ==
+          
+          Worker -> GatewayDB: UPDATE messages\nSET status='published',\nmetadata={processed_by: 'tp-capital', ...}
+          activate GatewayDB
+          GatewayDB --> Worker: OK
+          deactivate GatewayDB
+          
+          Worker -> Metrics: inc(messagesProcessed, {status: 'published'})
+          Worker -> Metrics: observe(processingDuration, duration_seconds)
+          
+        end
+      end
+      
+    else Invalid signal format (parse error)
+      Parser --> Worker: throw Error
+      deactivate Parser
+      
+      Worker -> GatewayDB: UPDATE status='failed'\nmetadata.error=parseError.message
+      activate GatewayDB
+      GatewayDB --> Worker: OK
+      deactivate GatewayDB
+      
+      Worker -> Metrics: inc(messagesProcessed, {status: 'parse_failed'})
+    end
+    
+  end
+  
+  Worker --> Worker: Sleep 5s
+end
+
+note over Worker, TimescaleDB
+  **Performance Characteristics:**
+  - Poll interval: 5000ms
+  - Batch size: 100 messages
+  - Processing time: ~50-200ms/message
+  - Duplicate check: O(1) with proper indexing
+end note
+
+note right of Worker #ERROR_COLOR
+  **Issues:**
+  1. No circuit breaker (DB failures cascade)
+  2. No retry logic for transient errors
+  3. Processing blocks polling (should use queue)
+  4. No distributed locking (multi-instance race condition)
+end note
+
+@enduml
+
+

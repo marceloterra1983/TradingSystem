@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { 
+import {
   useTelegramGatewayOverview,
   useTelegramGatewayMessages,
   useTelegramGatewayChannels,
@@ -22,19 +22,17 @@ export function TelegramGatewayPageNew() {
   const {
     data: overview,
     isLoading: overviewLoading,
-    refetch: refetchOverview
+    refetch: refetchOverview,
   } = useTelegramGatewayOverview(30000); // Poll every 30s instead of 10s to reduce flicker
 
-  const {
-    data: channels = [],
-    isLoading: channelsLoading,
-  } = useTelegramGatewayChannels();
+  const { data: channels = [], isLoading: channelsLoading } =
+    useTelegramGatewayChannels();
 
   // Extract active channel IDs for filtering messages
   const activeChannelIds = useMemo(() => {
     return channels
-      .filter(channel => channel.isActive)
-      .map(channel => channel.channelId);
+      .filter((channel) => channel.isActive)
+      .map((channel) => channel.channelId);
   }, [channels]);
 
   const {
@@ -61,24 +59,33 @@ export function TelegramGatewayPageNew() {
     refetchMessages();
   }, [refetchOverview, refetchMessages]);
 
-  const handleCreateChannel = useCallback(async (data: { 
-    channelId: string; 
-    label?: string; 
-    description?: string 
-  }) => {
-    await createChannel.mutateAsync(data);
-  }, [createChannel]);
+  const handleCreateChannel = useCallback(
+    async (data: {
+      channelId: string;
+      label?: string;
+      description?: string;
+    }) => {
+      await createChannel.mutateAsync(data);
+    },
+    [createChannel],
+  );
 
-  const handleToggleChannel = useCallback(async (id: string, isActive: boolean) => {
-    await updateChannel.mutateAsync({ id, isActive: !isActive });
-  }, [updateChannel]);
+  const handleToggleChannel = useCallback(
+    async (id: string, isActive: boolean) => {
+      await updateChannel.mutateAsync({ id, isActive: !isActive });
+    },
+    [updateChannel],
+  );
 
-  const handleDeleteChannel = useCallback(async (id: string) => {
-    await deleteChannel.mutateAsync(id);
-  }, [deleteChannel]);
+  const handleDeleteChannel = useCallback(
+    async (id: string) => {
+      await deleteChannel.mutateAsync(id);
+    },
+    [deleteChannel],
+  );
 
   const handleLoadMore = useCallback(() => {
-    setMessageOffset(prev => prev + messageLimit);
+    setMessageOffset((prev) => prev + messageLimit);
   }, [messageLimit]);
 
   // Extract data
@@ -149,22 +156,26 @@ export function TelegramGatewayPageNew() {
             🔧 Debug Info (somente em desenvolvimento)
           </summary>
           <pre className="mt-2 text-xs bg-muted p-4 rounded-lg overflow-auto">
-            {JSON.stringify({
-              overview: {
-                health: overview?.health,
-                messagesTotal: overview?.messages?.total,
-                sessionExists: overview?.session?.exists,
+            {JSON.stringify(
+              {
+                overview: {
+                  health: overview?.health,
+                  messagesTotal: overview?.messages?.total,
+                  sessionExists: overview?.session?.exists,
+                },
+                messagesData: {
+                  count: messages.length,
+                  total: totalMessages,
+                  hasMore,
+                },
+                channels: {
+                  total: channels.length,
+                  active: channels.filter((c) => c.isActive).length,
+                },
               },
-              messagesData: {
-                count: messages.length,
-                total: totalMessages,
-                hasMore,
-              },
-              channels: {
-                total: channels.length,
-                active: channels.filter(c => c.isActive).length,
-              },
-            }, null, 2)}
+              null,
+              2,
+            )}
           </pre>
         </details>
       )}
@@ -173,4 +184,3 @@ export function TelegramGatewayPageNew() {
 }
 
 export default TelegramGatewayPageNew;
-

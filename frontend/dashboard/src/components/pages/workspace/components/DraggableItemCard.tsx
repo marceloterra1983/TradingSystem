@@ -4,7 +4,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from '../../../ui/card';
 import { Eye, Folder } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { CATEGORY_CONFIG, PRIORITY_CONFIG } from '../constants/workspace.constants';
+import {
+  PRIORITY_CONFIG,
+} from '../constants/workspace.constants';
 import type { Item } from '../types/workspace.types';
 import { ViewItemDialog } from './ViewItemDialog';
 
@@ -38,9 +40,7 @@ function WorkspaceItemCardContent({
     >
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start gap-2">
-          <CategoryIcon
-            className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-600 dark:text-gray-400"
-          />
+          <CategoryIcon className="h-4 w-4 mt-0.5 flex-shrink-0 text-gray-600 dark:text-gray-400" />
           <p className="text-sm font-medium line-clamp-2 flex-1 text-gray-900 dark:text-gray-100">
             {item.title}
           </p>
@@ -107,11 +107,23 @@ export function DraggableItemCard({ item }: DraggableItemCardProps) {
         />
       </div>
 
-      {showView && <ViewItemDialog item={item} open={showView} onOpenChange={setShowView} />}
+      {showView && (
+        <ViewItemDialog
+          item={item}
+          open={showView}
+          onOpenChange={setShowView}
+        />
+      )}
     </>
   );
 }
 
 export function WorkspaceItemDragPreview({ item }: { item: Item }) {
-  return <WorkspaceItemCardContent item={item} showViewButton={false} className="shadow-lg" />;
+  return (
+    <WorkspaceItemCardContent
+      item={item}
+      showViewButton={false}
+      className="shadow-lg"
+    />
+  );
 }

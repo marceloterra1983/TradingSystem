@@ -40,18 +40,18 @@ const sizeClasses = {
 
 /**
  * Logo Component
- * 
+ *
  * Componente reutilizável para exibir o logo do TradingSystem
  * com suporte automático para dark/light mode
- * 
+ *
  * @example
  * // Logo ícone pequeno
  * <Logo variant="icon" size="sm" />
- * 
+ *
  * @example
  * // Logo completo com texto
  * <Logo variant="compact" size="md" />
- * 
+ *
  * @example
  * // Logo clicável
  * <Logo variant="icon" onClick={() => navigate('/')} />
@@ -95,8 +95,9 @@ export function Logo({
       className={cn(
         'w-auto object-contain transition-all duration-300',
         sizeClass,
-        onClick && 'cursor-pointer hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]',
-        className
+        onClick &&
+          'cursor-pointer hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]',
+        className,
       )}
       onClick={onClick}
       onError={(e) => {
@@ -117,4 +118,3 @@ export function Logo({
 }
 
 export default Logo;
-

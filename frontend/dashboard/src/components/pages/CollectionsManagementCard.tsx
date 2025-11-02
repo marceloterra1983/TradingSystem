@@ -30,6 +30,7 @@ import { CollectionFormDialog } from './CollectionFormDialog';
 import { CollectionDeleteDialog } from './CollectionDeleteDialog';
 import { IngestionLogsViewer } from './collections/IngestionLogsViewer';
 import { CollectionFilesTable } from './collections/CollectionFilesTable';
+import { BatchIngestionProgressModal } from './collections/BatchIngestionProgressModal';
 import type {
   Collection,
   CollectionDialogMode,
@@ -46,7 +47,10 @@ interface CollectionsManagementCardProps {
   isLoading: boolean;
   error?: string | null;
   onCreateCollection: (request: CreateCollectionRequest) => Promise<void>;
-  onUpdateCollection: (name: string, updates: UpdateCollectionRequest) => Promise<void>;
+  onUpdateCollection: (
+    name: string,
+    updates: UpdateCollectionRequest,
+  ) => Promise<void>;
   onCloneCollection: (name: string, newName: string) => Promise<void>;
   onDeleteCollection: (name: string) => Promise<void>;
   onIngestCollection: (name: string) => Promise<void>;
@@ -54,7 +58,9 @@ interface CollectionsManagementCardProps {
   onClearError?: () => void;
 }
 
-export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps> = ({
+export const CollectionsManagementCard: React.FC<
+  CollectionsManagementCardProps
+> = ({
   className,
   collections,
   models,
@@ -64,7 +70,7 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
   onUpdateCollection,
   onCloneCollection,
   onDeleteCollection,
-  onIngestCollection,
+  onIngestCollection: _onIngestCollection,
   onRefreshCollections,
   onClearError,
 }) => {
@@ -72,13 +78,27 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<CollectionDialogMode>('create');
-  const [selectedCollection, setSelectedCollection] = useState<Collection | undefined>();
+  const [selectedCollection, setSelectedCollection] = useState<
+    Collection | undefined
+  >();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [collectionToDelete, setCollectionToDelete] = useState<Collection | undefined>();
+  const [collectionToDelete, setCollectionToDelete] = useState<
+    Collection | undefined
+  >();
   const [operationLoading, setOperationLoading] = useState<string | null>(null);
-  const [viewFilesCollection, setViewFilesCollection] = useState<string | null>(null);
+  const [viewFilesCollection, setViewFilesCollection] = useState<string | null>(
+    null,
+  );
   const [filesTableExpanded, setFilesTableExpanded] = useState(true);
   const [filesTableKey, setFilesTableKey] = useState(0); // Force refresh of files table
+
+  // Batch ingestion state
+  const [batchIngestionJobId, setBatchIngestionJobId] = useState<string | null>(
+    null,
+  );
+  const [batchIngestionModalOpen, setBatchIngestionModalOpen] = useState(false);
+  const [batchIngestionCollection, setBatchIngestionCollection] =
+    useState<string>('');
 
   // Auto-select first collection
   React.useEffect(() => {
@@ -88,17 +108,17 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
   }, [collections, viewFilesCollection]);
 
   // Auto-refresh collections every 10 seconds to detect file changes
+  // Paused when dialog is open to prevent interference
   React.useEffect(() => {
-    if (!onRefreshCollections) return;
-    
+    if (!onRefreshCollections || dialogOpen) return; // Stop refresh when dialog is open
+
     const interval = setInterval(() => {
       console.log('🔄 Auto-refreshing collections stats...');
       onRefreshCollections();
     }, 10000); // 10 seconds
 
     return () => clearInterval(interval);
-  }, [onRefreshCollections]);
-
+  }, [onRefreshCollections, dialogOpen]);
 
   const filteredCollections = useMemo(() => {
     if (!searchTerm) return collections;
@@ -138,19 +158,60 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
     setDeleteDialogOpen(true);
   };
 
+  /**
+   * Helper to show toast AND persist to backend logs
+   */
+  const toastAndLog = async (
+    level: 'info' | 'success' | 'error' | 'warn',
+    message: string,
+    collectionName: string,
+    details?: Record<string, any>,
+  ) => {
+    // Show toast in UI
+    switch (level) {
+      case 'success':
+        toast.success(message, 5000);
+        break;
+      case 'error':
+        toast.error(message);
+        break;
+      case 'warn':
+        toast.warning(message);
+        break;
+      default:
+        toast.info(message);
+    }
+
+    // Persist to backend logs
+    try {
+      await fetch('/api/v1/rag/ingestion/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level,
+          message,
+          collection: collectionName,
+          details,
+        }),
+      });
+    } catch (error) {
+      console.warn('Failed to persist toast log:', error);
+    }
+  };
+
   const handleIngest = async (collection: Collection) => {
     try {
       setOperationLoading(`ingest-${collection.name}`);
-      
+
       const stats = collection.stats;
       const hasOrphans = (stats?.orphanChunks ?? 0) > 0;
       const hasPending = (stats?.pendingFiles ?? 0) > 0;
       const pendingCount = stats?.pendingFiles ?? 0;
       const orphansCount = stats?.orphanChunks ?? 0;
 
-      console.log('🔄 Ingest triggered:', { 
-        collection: collection.name, 
-        hasOrphans, 
+      console.log('🔄 Ingest triggered:', {
+        collection: collection.name,
+        hasOrphans,
         hasPending,
         pendingCount,
         orphansCount,
@@ -158,37 +219,119 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
 
       // If nothing to do, exit early
       if (!hasOrphans && !hasPending) {
-        toast.info('Nenhuma alteração detectada. Todos os arquivos já estão indexados.');
+        await toastAndLog(
+          'info',
+          'Nenhuma alteração detectada. Todos os arquivos já estão indexados.',
+          collection.name,
+          { pendingFiles: 0, orphanChunks: 0 },
+        );
         console.log('✓ No orphans or pending files to process');
         return;
       }
 
+      // Use batch ingestion for large collections (> 20 files)
+      const BATCH_THRESHOLD = 20;
+      if (pendingCount > BATCH_THRESHOLD) {
+        console.log(
+          `📦 Large collection detected (${pendingCount} files), using batch ingestion`,
+        );
+
+        await toastAndLog(
+          'info',
+          `Iniciando ingestão em lote: ${pendingCount} arquivo(s). Processando em blocos para evitar travamentos...`,
+          collection.name,
+          { pendingFiles: pendingCount, batchMode: true },
+        );
+
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_RAG_SERVICE_URL || 'http://localhost:3403'}/api/v1/rag/ingestion/batch/${collection.name}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ batchSize: 10 }),
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`Batch ingestion failed: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          if (data.success) {
+            setBatchIngestionJobId(data.data.jobId);
+            setBatchIngestionCollection(collection.name);
+            setBatchIngestionModalOpen(true);
+
+            await toastAndLog(
+              'success',
+              `Ingestão em lote iniciada! ${data.data.totalFiles} arquivo(s) em ${data.data.estimatedBatches} lote(s).`,
+              collection.name,
+              { jobId: data.data.jobId, totalFiles: data.data.totalFiles },
+            );
+          }
+        } catch (error) {
+          console.error('❌ Batch ingestion failed:', error);
+          await toastAndLog(
+            'error',
+            `Falha ao iniciar ingestão em lote: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            collection.name,
+            { error: error instanceof Error ? error.message : 'Unknown error' },
+          );
+        } finally {
+          setOperationLoading(null);
+        }
+        return;
+      }
+
       // Show informative toast with estimated time
-      const estimatedSeconds = (orphansCount > 0 ? 2 : 0) + (pendingCount * 2);
-      toast.info(
+      const estimatedSeconds = (orphansCount > 0 ? 2 : 0) + pendingCount * 2;
+      await toastAndLog(
+        'info',
         `Iniciando ingestão: ${pendingCount} arquivo(s) pendente(s)${hasOrphans ? ` + ${orphansCount} chunk(s) órfão(s)` : ''}. ` +
-        `Tempo estimado: ~${estimatedSeconds}s. Acompanhe no console.`,
-        6000 // 6 seconds
+          `Tempo estimado: ~${estimatedSeconds}s.`,
+        collection.name,
+        {
+          pendingFiles: pendingCount,
+          orphanChunks: orphansCount,
+          estimatedSeconds,
+        },
       );
 
       // Step 1: Clean orphans first
       if (hasOrphans) {
         console.log(`🧹 Limpando ${orphansCount} chunk(s) órfão(s)...`);
-        toast.info(`Limpando ${orphansCount} chunk(s) órfão(s)...`, 3000);
-        
+        await toastAndLog(
+          'info',
+          `🧹 Limpando ${orphansCount} chunk(s) órfão(s)...`,
+          collection.name,
+          { orphanChunks: orphansCount },
+        );
+
         try {
           const cleanStart = Date.now();
-          const cleanResponse = await fetch(`/api/v1/rag/collections/${collection.name}/clean-orphans`, {
-            method: 'POST',
-          });
+          const cleanResponse = await fetch(
+            `/api/v1/rag/collections/${collection.name}/clean-orphans`,
+            {
+              method: 'POST',
+            },
+          );
           const cleanData = await cleanResponse.json();
           const cleanDuration = Date.now() - cleanStart;
-          
+
           if (cleanData.success) {
             const cleaned = cleanData.data?.deletedChunks || orphansCount;
-            console.log(`✓ Órfãos limpos em ${cleanDuration}ms:`, cleanData.data);
-            toast.success(`✅ ${cleaned} chunk(s) órfão(s) removido(s) (${(cleanDuration / 1000).toFixed(1)}s)`);
-            
+            console.log(
+              `✓ Órfãos limpos em ${cleanDuration}ms:`,
+              cleanData.data,
+            );
+            await toastAndLog(
+              'success',
+              `✅ ${cleaned} chunk(s) órfão(s) removido(s) (${(cleanDuration / 1000).toFixed(1)}s)`,
+              collection.name,
+              { deletedChunks: cleaned, durationSeconds: cleanDuration / 1000 },
+            );
+
             // Refresh stats to update UI
             if (onRefreshCollections) {
               onRefreshCollections();
@@ -196,7 +339,12 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
           }
         } catch (error) {
           console.error('Failed to clean orphans:', error);
-          toast.error('Erro ao limpar chunks órfãos');
+          await toastAndLog(
+            'error',
+            'Erro ao limpar chunks órfãos',
+            collection.name,
+            { error: error instanceof Error ? error.message : 'Unknown error' },
+          );
         }
       }
 
@@ -204,58 +352,99 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
       if (hasPending) {
         console.log(`📥 Indexando ${pendingCount} arquivo(s) pendente(s)...`);
         console.log(`⏱️  Estimativa: ~${pendingCount * 2}s (com GPU RTX 5090)`);
-        toast.info(`Indexando ${pendingCount} arquivo(s) pendente(s)... Tempo estimado: ~${pendingCount * 2}s`, 5000);
-        
+        await toastAndLog(
+          'info',
+          `📚 Indexando ${pendingCount} arquivo(s) pendente(s)... Tempo estimado: ~${pendingCount * 2}s`,
+          collection.name,
+          { pendingFiles: pendingCount, estimatedSeconds: pendingCount * 2 },
+        );
+
         const ingestStart = Date.now();
-        
+
         try {
-          const response = await fetch(`/api/v1/rag/collections/${collection.name}/ingest`, {
-            method: 'POST',
-          });
+          const response = await fetch(
+            `/api/v1/rag/collections/${collection.name}/ingest`,
+            {
+              method: 'POST',
+            },
+          );
           const result = await response.json();
-          
+
           const ingestDuration = Date.now() - ingestStart;
-          
+
           // Extract details from response
-          const filesProcessed = result.data?.job?.files_ingested || 
-                                (result.data?.job?.message?.match(/indexed (\d+) files/) || [])[1] ||
-                                pendingCount;
-          const chunksCreated = result.data?.job?.chunks_generated ||
-                               (result.data?.job?.message?.match(/with (\d+) chunks/) || [])[1] ||
-                               0;
-          
-          // Calculate NEWLY indexed files (before vs after)
-          const statsBeforeIndexed = stats?.indexedFiles || 0;
-          const statsBeforeChunks = stats?.chunkCount || 0;
-          
+          const filesProcessed =
+            result.data?.job?.files_ingested ||
+            (result.data?.job?.message?.match(/indexed (\d+) files/) ||
+              [])[1] ||
+            pendingCount;
+          const chunksCreated =
+            result.data?.job?.chunks_generated ||
+            (result.data?.job?.message?.match(/with (\d+) chunks/) || [])[1] ||
+            0;
+
           // filesProcessed is total files scanned, NOT new files
           // We need to show ONLY new files indexed
           const newFiles = pendingCount; // We know how many were pending
           const newChunks = chunksCreated; // Chunks created are new
-          
-          console.log(`✅ Ingestão concluída em ${ingestDuration}ms (${(ingestDuration / 1000).toFixed(2)}s)`);
+
+          console.log(
+            `✅ Ingestão concluída em ${ingestDuration}ms (${(ingestDuration / 1000).toFixed(2)}s)`,
+          );
           console.log(`   📄 Arquivos NOVOS indexados: ${newFiles}`);
           console.log(`   🗄️  Chunks NOVOS criados: ${newChunks}`);
-          console.log(`   ⚡ Throughput: ${(filesProcessed / (ingestDuration / 1000)).toFixed(1)} arquivos/segundo`);
-          console.log(`   🎯 Performance: ${(chunksCreated / (ingestDuration / 1000)).toFixed(1)} chunks/segundo`);
-          
-          // Show ONLY new files in toast
-          const successMessage = newFiles > 0
-            ? `${newFiles} arquivo(s) NOVO(S) indexado(s) • ${newChunks} chunks NOVOS`
-            : `Nenhum arquivo novo (${filesProcessed} total verificados)`;
-          
-          toast.success(
-            `Ingestão concluída! ${successMessage}`,
-            5000
+          console.log(
+            `   ⚡ Throughput: ${(filesProcessed / (ingestDuration / 1000)).toFixed(1)} arquivos/segundo`,
           );
-          
+          console.log(
+            `   🎯 Performance: ${(chunksCreated / (ingestDuration / 1000)).toFixed(1)} chunks/segundo`,
+          );
+
+          // Show ONLY new files in toast
+          const successMessage =
+            newFiles > 0
+              ? `${newFiles} arquivo(s) NOVO(S) indexado(s) • ${newChunks} chunks NOVOS`
+              : `Nenhum arquivo novo (${filesProcessed} total verificados)`;
+
+          await toastAndLog(
+            'success',
+            `✅ Ingestão concluída! ${successMessage}`,
+            collection.name,
+            {
+              newFiles,
+              newChunks,
+              filesProcessed,
+              durationSeconds: ingestDuration / 1000,
+              throughputFilesPerSecond: (
+                filesProcessed /
+                (ingestDuration / 1000)
+              ).toFixed(1),
+              throughputChunksPerSecond: (
+                chunksCreated /
+                (ingestDuration / 1000)
+              ).toFixed(1),
+            },
+          );
+
           // Trigger parent's onIngestCollection for any additional cleanup
           // (but we already called the API directly above)
         } catch (error) {
           const ingestDuration = Date.now() - ingestStart;
           console.error('❌ Ingestion failed:', error);
-          console.log(`   ⏱️  Failed after: ${(ingestDuration / 1000).toFixed(2)}s`);
-          toast.error(`❌ Falha na ingestão após ${(ingestDuration / 1000).toFixed(1)}s`);
+          console.log(
+            `   ⏱️  Failed after: ${(ingestDuration / 1000).toFixed(2)}s`,
+          );
+
+          await toastAndLog(
+            'error',
+            `❌ Falha na ingestão após ${(ingestDuration / 1000).toFixed(1)}s`,
+            collection.name,
+            {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              durationSeconds: ingestDuration / 1000,
+            },
+          );
+
           throw error;
         }
       }
@@ -305,7 +494,7 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
       };
       await onUpdateCollection(selectedCollection.name, updates);
       // Force refresh of files table after updating collection
-      setFilesTableKey(prev => prev + 1);
+      setFilesTableKey((prev) => prev + 1);
     } else if (dialogMode === 'clone' && selectedCollection) {
       await onCloneCollection(selectedCollection.name, data.name);
     }
@@ -332,18 +521,23 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
         </div>
         <div className="flex items-center gap-2">
           {onRefreshCollections && (
-            <Button 
+            <Button
               onClick={async () => {
                 console.log('🔄 Manual refresh button clicked');
-                console.log('📊 Current collections count:', collections.length);
+                console.log(
+                  '📊 Current collections count:',
+                  collections.length,
+                );
                 await onRefreshCollections();
                 console.log('✓ Refresh completed');
-              }} 
-              size="sm" 
+              }}
+              size="sm"
               variant="outline"
               disabled={isLoading}
             >
-              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
               Atualizar
             </Button>
           )}
@@ -422,28 +616,38 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
             <TableBody>
               {filteredCollections.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-slate-500">
+                  <TableCell
+                    colSpan={9}
+                    className="py-8 text-center text-slate-500"
+                  >
                     Nenhuma coleção corresponde à busca &quot;{searchTerm}&quot;
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredCollections.map((collection) => {
                   const stats = collection.stats ?? null;
-                  const chunkCount = stats?.chunkCount ?? stats?.pointsCount ?? stats?.vectorsCount ?? 0;
+                  const chunkCount =
+                    stats?.chunkCount ??
+                    stats?.pointsCount ??
+                    stats?.vectorsCount ??
+                    0;
                   const totalFiles = stats?.totalFiles ?? 0;
                   const indexedFiles = stats?.indexedFiles ?? 0;
                   const orphanChunks = stats?.orphanChunks ?? 0;
                   const pendingFiles = stats?.pendingFiles ?? 0;
                   const directorySizeMB = stats?.directorySizeMB ?? 0;
-                  const statusLabel = stats?.status ?? 'unknown';
-                  const isRunning = operationLoading === `ingest-${collection.name}`;
+                  const isRunning =
+                    operationLoading === `ingest-${collection.name}`;
 
                   return (
-                    <TableRow 
-                      key={collection.name} 
+                    <TableRow
+                      key={collection.name}
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
                       onClick={() => {
-                        console.log('🖱️ Collection row clicked:', collection.name);
+                        console.log(
+                          '🖱️ Collection row clicked:',
+                          collection.name,
+                        );
                         setViewFilesCollection(collection.name);
                       }}
                     >
@@ -456,7 +660,9 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
                         </div>
                       </TableCell>
                       <TableCell className="align-middle">
-                        <Badge variant="outline">{collection.embeddingModel}</Badge>
+                        <Badge variant="outline">
+                          {collection.embeddingModel}
+                        </Badge>
                       </TableCell>
                       <TableCell className="align-middle text-xs text-slate-500">
                         <TooltipProvider>
@@ -502,7 +708,10 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
                         {orphanChunks.toLocaleString()}
                       </TableCell>
                       <TableCell className="align-middle text-right">
-                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex items-center justify-end gap-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -545,11 +754,15 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
                                   onClick={() => handleIngest(collection)}
                                   disabled={isRunning}
                                 >
-                                  <RefreshCw className={`h-4 w-4 ${isRunning ? 'animate-spin' : ''}`} />
+                                  <RefreshCw
+                                    className={`h-4 w-4 ${isRunning ? 'animate-spin' : ''}`}
+                                  />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                {isRunning ? 'Ingestão em andamento...' : 'Executar ingestão'}
+                                {isRunning
+                                  ? 'Ingestão em andamento...'
+                                  : 'Executar ingestão'}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -586,13 +799,25 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
           <CollectionFilesTable
             key={`${viewFilesCollection}-${filesTableKey}`}
             collectionName={viewFilesCollection}
-            collectionDirectory={collections.find(c => c.name === viewFilesCollection)?.directory || ''}
-            collectionModel={collections.find(c => c.name === viewFilesCollection)?.embeddingModel || ''}
-            directorySizeMB={collections.find(c => c.name === viewFilesCollection)?.stats?.directorySizeMB || 0}
+            collectionDirectory={
+              collections.find((c) => c.name === viewFilesCollection)
+                ?.directory || ''
+            }
+            collectionModel={
+              collections.find((c) => c.name === viewFilesCollection)
+                ?.embeddingModel || ''
+            }
+            directorySizeMB={
+              collections.find((c) => c.name === viewFilesCollection)?.stats
+                ?.directorySizeMB || 0
+            }
             onClose={() => setFilesTableExpanded(!filesTableExpanded)}
             isExpanded={filesTableExpanded}
             onChangeCollection={setViewFilesCollection}
-            availableCollections={collections.map(c => ({ name: c.name, label: c.name }))}
+            availableCollections={collections.map((c) => ({
+              name: c.name,
+              label: c.name,
+            }))}
           />
         </div>
       )}
@@ -626,6 +851,21 @@ export const CollectionsManagementCard: React.FC<CollectionsManagementCardProps>
           collection={collectionToDelete}
         />
       )}
+
+      {/* Batch Ingestion Progress Modal */}
+      <BatchIngestionProgressModal
+        isOpen={batchIngestionModalOpen}
+        onClose={() => {
+          setBatchIngestionModalOpen(false);
+          setBatchIngestionJobId(null);
+          // Refresh collections after closing modal
+          if (onRefreshCollections) {
+            onRefreshCollections();
+          }
+        }}
+        jobId={batchIngestionJobId}
+        collectionName={batchIngestionCollection}
+      />
     </div>
   );
 };

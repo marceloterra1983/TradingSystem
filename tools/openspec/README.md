@@ -258,7 +258,7 @@ npm run openspec -- show change-id --json --deltas-only | jq '.deltas'
 
 - **[Project Root](../../README.md)** - Documentação principal do projeto
 - **[CLAUDE.md](../../CLAUDE.md)** - Instruções para Claude Code (raiz)
-- **[AI Agents](../../ai/AGENTS.md)** - Visão geral de ferramentas de IA
+- **[AI Agents](../../AGENTS.md)** - Visão geral de ferramentas de IA
 
 ## ❌ OBSOLETO: /openspec/ na Raiz
 
@@ -274,4 +274,3 @@ Ele era uma duplicação acidental. Todas as proposals antigas foram movidas par
 **Última atualização:** 2025-10-31  
 **Mantido por:** TradingSystem Development Team  
 **Compatibilidade:** OpenSpec CLI v1.0+
-

@@ -56,13 +56,20 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const STATUS_BADGE_CLASSNAME: Record<string, string> = {
-  received: 'border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300',
-  retrying: 'border-amber-400 text-amber-600 dark:border-amber-400/60 dark:text-amber-300',
-  published: 'border-emerald-400 text-emerald-600 dark:border-emerald-400/60 dark:text-emerald-300',
-  queued: 'border-cyan-400 text-cyan-600 dark:border-cyan-400/60 dark:text-cyan-300',
-  failed: 'border-red-400 text-red-600 dark:border-red-400/60 dark:text-red-300',
-  reprocess_pending: 'border-blue-400 text-blue-600 dark:border-blue-400/60 dark:text-blue-300',
-  reprocessed: 'border-violet-400 text-violet-600 dark:border-violet-400/60 dark:text-violet-300',
+  received:
+    'border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300',
+  retrying:
+    'border-amber-400 text-amber-600 dark:border-amber-400/60 dark:text-amber-300',
+  published:
+    'border-emerald-400 text-emerald-600 dark:border-emerald-400/60 dark:text-emerald-300',
+  queued:
+    'border-cyan-400 text-cyan-600 dark:border-cyan-400/60 dark:text-cyan-300',
+  failed:
+    'border-red-400 text-red-600 dark:border-red-400/60 dark:text-red-300',
+  reprocess_pending:
+    'border-blue-400 text-blue-600 dark:border-blue-400/60 dark:text-blue-300',
+  reprocessed:
+    'border-violet-400 text-violet-600 dark:border-violet-400/60 dark:text-violet-300',
 };
 
 function formatDate(value?: string) {
@@ -99,7 +106,9 @@ export function MessagesTable({
   isDeleting,
 }: MessagesTableProps) {
   const [search, setSearch] = useState(filters.search ?? '');
-  const [highlightedMessages, setHighlightedMessages] = useState<Set<string>>(new Set());
+  const [highlightedMessages, setHighlightedMessages] = useState<Set<string>>(
+    new Set(),
+  );
   const previousMessageIdsRef = useRef<Set<string>>(new Set());
 
   const messages = data?.data ?? [];
@@ -110,8 +119,8 @@ export function MessagesTable({
     if (!messages || messages.length === 0) return;
 
     const currentMessageIds = new Set(messages.map((msg) => msg.id));
-    
-    // Se é o primeiro carregamento (previousMessageIdsRef está vazio), 
+
+    // Se é o primeiro carregamento (previousMessageIdsRef está vazio),
     // apenas inicializar sem destacar nada
     if (previousMessageIdsRef.current.size === 0) {
       previousMessageIdsRef.current = currentMessageIds;
@@ -152,9 +161,9 @@ export function MessagesTable({
   }, [messages]);
 
   const currentStatus = filters.status?.[0] ?? 'all';
-  const currentChannel = Array.isArray(filters.channelId) 
-    ? filters.channelId[0] ?? 'all' 
-    : filters.channelId ?? 'all';
+  const currentChannel = Array.isArray(filters.channelId)
+    ? (filters.channelId[0] ?? 'all')
+    : (filters.channelId ?? 'all');
   const limit = filters.limit ?? 25;
   const offset = filters.offset ?? 0;
 
@@ -225,7 +234,8 @@ export function MessagesTable({
               Mensagens persistidas
             </CollapsibleCardTitle>
             <CollapsibleCardDescription>
-              Consulta direta ao TimescaleDB com filtros rápidos por status, canal e termo.
+              Consulta direta ao TimescaleDB com filtros rápidos por status,
+              canal e termo.
             </CollapsibleCardDescription>
           </div>
           <Button
@@ -289,7 +299,10 @@ export function MessagesTable({
               ))}
             </SelectContent>
           </Select>
-          <Select value={String(limit)} onValueChange={(value) => handleLimitChange(Number(value))}>
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => handleLimitChange(Number(value))}
+          >
             <SelectTrigger className="text-sm">
               <SelectValue placeholder="Itens por página" />
             </SelectTrigger>
@@ -329,13 +342,19 @@ export function MessagesTable({
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+                    <td
+                      colSpan={6}
+                      className="px-3 py-6 text-center text-slate-500 dark:text-slate-400"
+                    >
                       Carregando mensagens...
                     </td>
                   </tr>
                 ) : messages.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+                    <td
+                      colSpan={6}
+                      className="px-3 py-6 text-center text-slate-500 dark:text-slate-400"
+                    >
                       Nenhum registro corresponde aos filtros atuais.
                     </td>
                   </tr>
@@ -349,79 +368,82 @@ export function MessagesTable({
                           'transition-colors duration-300',
                           isHighlighted
                             ? 'bg-yellow-100/80 dark:bg-yellow-900/20'
-                            : 'bg-white dark:bg-slate-950/60'
+                            : 'bg-white dark:bg-slate-950/60',
                         )}
                       >
                         <td className="px-3 py-3 align-top font-mono text-xs text-slate-500 dark:text-slate-400">
-                        {message.channelId}
-                        {message.threadId && (
-                          <span className="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">
-                            thread: {message.threadId}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
-                        <span className="font-mono text-[11px]">#{message.messageId}</span>
-                        <span className="mt-1 block text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                          {message.source ?? 'unknown'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 align-top">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            'text-xs font-semibold capitalize',
-                            STATUS_BADGE_CLASSNAME[message.status as keyof typeof STATUS_BADGE_CLASSNAME] ??
-                              'text-slate-600 dark:text-slate-300',
+                          {message.channelId}
+                          {message.threadId && (
+                            <span className="mt-1 block text-[10px] text-slate-400 dark:text-slate-500">
+                              thread: {message.threadId}
+                            </span>
                           )}
-                        >
-                          {message.status}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
-                        {formatDate(message.receivedAt)}
-                        {message.publishedAt && (
-                          <span className="mt-1 block text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                            publicado {formatDate(message.publishedAt)}
+                        </td>
+                        <td className="px-3 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
+                          <span className="font-mono text-[11px]">
+                            #{message.messageId}
                           </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-3 align-top max-w-xs text-sm text-slate-700 dark:text-slate-200">
-                        {truncate(message.text || message.caption)}
-                      </td>
-                      <td className="px-3 py-3 align-top text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
+                          <span className="mt-1 block text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                            {message.source ?? 'unknown'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 align-top">
+                          <Badge
                             variant="outline"
-                            size="sm"
-                            className="h-9 w-9 p-0"
-                            onClick={() => void onReprocess(message)}
-                            disabled={isReprocessing}
-                            title="Solicitar reprocessamento"
-                          >
-                            {isReprocessing ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Undo className="h-3.5 w-3.5" />
+                            className={cn(
+                              'text-xs font-semibold capitalize',
+                              STATUS_BADGE_CLASSNAME[
+                                message.status as keyof typeof STATUS_BADGE_CLASSNAME
+                              ] ?? 'text-slate-600 dark:text-slate-300',
                             )}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="h-9 w-9 p-0"
-                            onClick={() => void onDelete(message)}
-                            disabled={isDeleting}
-                            title="Marcar como removida"
                           >
-                            {isDeleting ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
+                            {message.status}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
+                          {formatDate(message.receivedAt)}
+                          {message.publishedAt && (
+                            <span className="mt-1 block text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                              publicado {formatDate(message.publishedAt)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 align-top max-w-xs text-sm text-slate-700 dark:text-slate-200">
+                          {truncate(message.text || message.caption)}
+                        </td>
+                        <td className="px-3 py-3 align-top text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-9 w-9 p-0"
+                              onClick={() => void onReprocess(message)}
+                              disabled={isReprocessing}
+                              title="Solicitar reprocessamento"
+                            >
+                              {isReprocessing ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Undo className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-9 w-9 p-0"
+                              onClick={() => void onDelete(message)}
+                              disabled={isDeleting}
+                              title="Marcar como removida"
+                            >
+                              {isDeleting ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })
                 )}
@@ -433,13 +455,24 @@ export function MessagesTable({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
           <div>
             Exibindo {messages.length} registros
-            {pagination?.total ? ` de ${pagination.total}` : ''} • Página {Math.floor(offset / limit) + 1}
+            {pagination?.total ? ` de ${pagination.total}` : ''} • Página{' '}
+            {Math.floor(offset / limit) + 1}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handlePrev} disabled={offset <= 0}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrev}
+              disabled={offset <= 0}
+            >
               Anterior
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleNext} disabled={!pagination?.hasMore}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleNext}
+              disabled={!pagination?.hasMore}
+            >
               Próximo
             </Button>
           </div>

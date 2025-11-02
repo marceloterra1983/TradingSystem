@@ -45,7 +45,10 @@ const toService = (value: unknown): ServiceLauncherService => {
     };
   }
 
-  const payload = value as Partial<ServiceLauncherService> & { id?: string; name?: string };
+  const payload = value as Partial<ServiceLauncherService> & {
+    id?: string;
+    name?: string;
+  };
   return {
     id: payload.id ?? payload.name ?? 'unknown',
     name: payload.name ?? payload.id ?? 'Unknown service',
@@ -75,7 +78,8 @@ const normalizeSummary = (value: unknown): ServiceLauncherStatusSummary => {
     degradedCount: ensureNumber(payload.degradedCount),
     downCount: ensureNumber(payload.downCount),
     averageLatencyMs: ensureNumber(payload.averageLatencyMs),
-    lastCheckAt: typeof payload.lastCheckAt === 'string' ? payload.lastCheckAt : null,
+    lastCheckAt:
+      typeof payload.lastCheckAt === 'string' ? payload.lastCheckAt : null,
     services: Array.isArray(payload.services)
       ? payload.services.map((service) => toService(service))
       : [],
@@ -104,7 +108,9 @@ export async function fetchServiceLauncherStatus(): Promise<ServiceLauncherStatu
   ) {
     const inner =
       ('data' in payload ? (payload as { data?: unknown }).data : undefined) ??
-      ('result' in payload ? (payload as { result?: unknown }).result : undefined);
+      ('result' in payload
+        ? (payload as { result?: unknown }).result
+        : undefined);
     return normalizeSummary(inner);
   }
 

@@ -3,7 +3,11 @@ import { useToastStore, ToastType } from '../store/toastStore';
 export function useToast() {
   const { addToast } = useToastStore();
 
-  const toast = (message: string, type: ToastType = 'info', duration?: number) => {
+  const toast = (
+    message: string,
+    type: ToastType = 'info',
+    duration?: number,
+  ) => {
     addToast({ message, type, duration });
   };
 
@@ -31,4 +35,3 @@ export function useToast() {
     info,
   };
 }
-

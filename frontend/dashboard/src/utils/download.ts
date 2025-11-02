@@ -6,15 +6,20 @@ const formatTimestamp = () => {
   return `${date}-${time}`;
 };
 
-export const downloadFile = (filename: string, mimeType: string, content: string | Blob) => {
+export const downloadFile = (
+  filename: string,
+  mimeType: string,
+  content: string | Blob,
+) => {
   const timestamp = formatTimestamp();
   const nameWithoutTimestamp = filename.replace(/\d{8}-\d{6}/, ''); // Remove any existing timestamp
   const finalName = nameWithoutTimestamp.replace(
     /^(.*?)(?:-raw)?\.([^.]+)$/,
-    `$1-${timestamp}${nameWithoutTimestamp.includes('-raw') ? '-raw' : ''}.$2`
+    `$1-${timestamp}${nameWithoutTimestamp.includes('-raw') ? '-raw' : ''}.$2`,
   );
 
-  const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+  const blob =
+    content instanceof Blob ? content : new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement('a');
@@ -30,7 +35,7 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/jpeg',
   'image/webp',
-  'image/gif'
+  'image/gif',
 ];
 
 const DEFAULT_MIME_TYPE = 'image/png';
@@ -61,7 +66,11 @@ export const downloadScreenshot = (dataUri: string) => {
   return processScreenshot(dataUri, mimeType, extension);
 };
 
-const processScreenshot = (dataUri: string, mimeType: string, extension: string) => {
+const processScreenshot = (
+  dataUri: string,
+  mimeType: string,
+  extension: string,
+) => {
   try {
     // Extract base64 data
     const base64Data = dataUri.split(',')[1];
@@ -77,7 +86,11 @@ const processScreenshot = (dataUri: string, mimeType: string, extension: string)
     }
 
     const blob = new Blob([buffer], { type: mimeType });
-    downloadFile(`screenshot-${formatTimestamp()}.${extension}`, mimeType, blob);
+    downloadFile(
+      `screenshot-${formatTimestamp()}.${extension}`,
+      mimeType,
+      blob,
+    );
   } catch (error) {
     console.error('Error processing screenshot:', error);
     throw new Error('Failed to process screenshot data');

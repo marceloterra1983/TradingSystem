@@ -3,107 +3,118 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #06b6d4; /* Cyan */
-  --color-primary-dark: #0891b2;
-  --color-primary-light: #22d3ee;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+    --color-primary: #06b6d4; /* Cyan */
+    --color-primary-dark: #0891b2;
+    --color-primary-light: #22d3ee;
+    --color-success: #10b981;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* Base typography and backgrounds */
 @layer base {
-  body {
-    @apply text-gray-900 bg-gray-50 dark:text-gray-100 dark:bg-gray-950;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+    body {
+        @apply text-gray-900 bg-gray-50 dark:text-gray-100 dark:bg-gray-950;
+        font-family:
+            -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+            "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 
-  a {
-    @apply text-sky-700 dark:text-sky-300;
-  }
+    a {
+        @apply text-sky-700 dark:text-sky-300;
+    }
 
-  a:hover {
-    @apply underline;
-  }
+    a:hover {
+        @apply underline;
+    }
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-family:
+        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 /* Custom scrollbar - Light mode */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+    background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+    background: #94a3b8;
 }
 
 /* Custom scrollbar - Dark mode */
 .dark ::-webkit-scrollbar-track {
-  background: #1f2937;
+    background: #1f2937;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 4px;
+    background: #4b5563;
+    border-radius: 4px;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+    background: #6b7280;
 }
 
 /* Animations */
 @keyframes pulse-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 .animate-pulse-slow {
-  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Real-time data animations */
 @keyframes flash-green {
-  0% { background-color: rgba(16, 185, 129, 0.2); }
-  100% { background-color: transparent; }
+    0% {
+        background-color: rgba(16, 185, 129, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
 }
 
 @keyframes flash-red {
-  0% { background-color: rgba(239, 68, 68, 0.2); }
-  100% { background-color: transparent; }
+    0% {
+        background-color: rgba(239, 68, 68, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
 }
 
 .flash-up {
-  animation: flash-green 0.5s ease-out;
+    animation: flash-green 0.5s ease-out;
 }
 
 .flash-down {
-  animation: flash-red 0.5s ease-out;
+    animation: flash-red 0.5s ease-out;
 }

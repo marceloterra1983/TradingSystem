@@ -37,6 +37,13 @@ import { createTelegramUserForwarderPolling } from './telegramUserForwarderPolli
 import { formatTimestamp } from './timeUtils.js';
 import ingestionRouter from '../api/src/routes/ingestion.js';
 
+// Authentication & Validation (NEW)
+import { requireApiKey, optionalApiKey } from './middleware/authMiddleware.js';
+import { validateBody, validateQuery, validateParams } from './middleware/validationMiddleware.js';
+import { CreateChannelSchema, UpdateChannelSchema, ChannelIdParamSchema } from './schemas/channelSchemas.js';
+import { CreateBotSchema, UpdateBotSchema, BotIdParamSchema } from './schemas/botSchemas.js';
+import { GetSignalsQuerySchema, DeleteSignalSchema, SyncMessagesSchema } from './schemas/signalSchemas.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -161,16 +168,18 @@ app.get('/metrics', async (_req, res) => {
   res.send(await register.metrics());
 });
 
-app.post('/sync-messages', async (req, res) => {
+app.post('/sync-messages', requireApiKey, async (req, res) => {
   try {
     logger.info('[SyncMessages] Sincronização solicitada via dashboard');
     
     // Chamar o endpoint de sincronização do Telegram Gateway com limite de 500 mensagens
-    const gatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4006);
+    const gatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4010);  // ✅ Corrigido de 4006 para 4010
     const gatewayUrl = process.env.TELEGRAM_GATEWAY_URL || `http://localhost:${gatewayPort}`;
     
+    logger.info(`[SyncMessages] Gateway config: port=${gatewayPort}, url=${gatewayUrl}, env=${process.env.TELEGRAM_GATEWAY_PORT}`);
+    
     try {
-      const response = await fetch(`${gatewayUrl}/sync-messages`, {
+      const response = await fetch(`${gatewayUrl}/api/telegram-gateway/sync-messages`, {  // ✅ Endpoint correto
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,40 +190,39 @@ app.post('/sync-messages', async (req, res) => {
       const result = await response.json();
       
       if (response.ok && result.success) {
-        const channelId = config.gateway.signalsChannelId;
-        const channelData = result.data.channelsSynced.find(c => c.channelId === channelId);
-        const messagesSynced = channelData?.messagesSynced || 0;
+        const totalSynced = result.data.totalMessagesSynced || 0;
+        const totalSaved = result.data.totalMessagesSaved || 0;
+        const channelsSynced = result.data.channelsSynced || [];
         
         logger.info(
-          { channelId, messagesSynced },
+          { totalSynced, totalSaved, channelCount: channelsSynced.length },
           '[SyncMessages] Mensagens sincronizadas do Telegram para Gateway'
         );
         
-        // Converter mensagens 'queued' para 'received' para que o worker as processe
+        // Converter mensagens 'queued' para 'received' para TODOS os canais
         const gatewayDb = await getGatewayDatabaseClient();
         const updateQuery = `
           UPDATE telegram_gateway.messages
           SET status = 'received'
-          WHERE channel_id = $1
-          AND status = 'queued'
+          WHERE status = 'queued'
         `;
-        const updateResult = await gatewayDb.query(updateQuery, [channelId]);
+        const updateResult = await gatewayDb.query(updateQuery);
         
         logger.info(
           { queuedConverted: updateResult.rowCount },
-          '[SyncMessages] Mensagens queued convertidas para received'
+          '[SyncMessages] Mensagens queued convertidas para received (TODOS os canais)'
         );
         
         return res.json({
           success: true,
-          message: messagesSynced > 0 
-            ? `${messagesSynced} mensagem(ns) sincronizada(s). Processamento iniciado.`
+          message: totalSynced > 0 
+            ? `${totalSynced} mensagem(ns) sincronizada(s) de ${channelsSynced.length} canal(is). ${totalSaved} salvas no banco.`
             : 'Todas as mensagens estão sincronizadas',
           data: {
-            messagesSynced,
+            totalMessagesSynced: totalSynced,
+            totalMessagesSaved: totalSaved,
             queuedConverted: updateResult.rowCount,
-            channelId,
-            channelLabel: channelData?.label || 'TP Capital',
+            channelsSynced: channelsSynced,
             filters: config.gateway.filters,
             timestamp: new Date().toISOString()
           }
@@ -231,7 +239,7 @@ app.post('/sync-messages', async (req, res) => {
       
       return res.status(503).json({
         success: false,
-        message: 'Telegram Gateway não está acessível. Verifique se o serviço está rodando na porta 4006.',
+        message: `Telegram Gateway não está acessível. Verifique se o serviço está rodando na porta ${gatewayPort}.`,  // ✅ Porta dinâmica
         error: fetchError.message
       });
     }
@@ -245,7 +253,7 @@ app.post('/sync-messages', async (req, res) => {
   }
 });
 
-app.get('/signals', async (req, res) => {
+app.get('/signals', optionalApiKey, validateQuery(GetSignalsQuerySchema), async (req, res) => {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
     const channel = req.query.channel ? String(req.query.channel) : undefined;
@@ -267,10 +275,11 @@ app.get('/signals', async (req, res) => {
         )
       : rows;
 
-    // Convert ts from Date object to timestamp in milliseconds for frontend
+    // Convert ts to number (already in milliseconds as BIGINT)
+    // Convert Date objects to ISO strings
     const normalized = filtered.map(row => ({
       ...row,
-      ts: row.ts ? new Date(row.ts).getTime() : null,
+      ts: row.ts ? Number(row.ts) : null,  // ✅ ts is BIGINT, just convert to number
       ingested_at: row.ingested_at ? new Date(row.ingested_at).toISOString() : null,
       created_at: row.created_at ? new Date(row.created_at).toISOString() : null,
       updated_at: row.updated_at ? new Date(row.updated_at).toISOString() : null,
@@ -295,7 +304,16 @@ app.get('/forwarded-messages', async (req, res) => {
       toTs: req.query.to ? Number(req.query.to) || Date.parse(String(req.query.to)) : undefined,
     });
 
-    res.json({ data: rows });
+    // Normalizar timestamps e adicionar campo ts
+    const normalized = rows.map(row => ({
+      ...row,
+      ts: row.original_timestamp ? new Date(row.original_timestamp).getTime() : null,  // ✅ Adicionar ts
+      source_channel_id: row.channel_id,  // Alias para compatibilidade com frontend
+      source_channel_name: null,  // TODO: Buscar nome do canal
+      forwarded_at: row.received_at ? new Date(row.received_at).toISOString() : null,
+    }));
+
+    res.json({ data: normalized });
   } catch (error) {
     logger.error({ err: error }, 'Failed to fetch forwarded messages');
     res.status(500).json({ error: 'Failed to fetch forwarded messages' });
@@ -314,7 +332,7 @@ app.get('/telegram-channels', async (req, res) => {
   }
 });
 
-app.post('/telegram-channels', async (req, res) => {
+app.post('/telegram-channels', requireApiKey, validateBody(CreateChannelSchema), async (req, res) => {
   try {
     const { label, channel_id, channel_type, description } = req.body;
     
@@ -340,7 +358,7 @@ app.post('/telegram-channels', async (req, res) => {
   }
 });
 
-app.put('/telegram-channels/:id', async (req, res) => {
+app.put('/telegram-channels/:id', requireApiKey, validateParams(ChannelIdParamSchema), validateBody(UpdateChannelSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -355,7 +373,7 @@ app.put('/telegram-channels/:id', async (req, res) => {
   }
 });
 
-app.delete('/telegram-channels/:id', async (req, res) => {
+app.delete('/telegram-channels/:id', requireApiKey, validateParams(ChannelIdParamSchema), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -376,7 +394,7 @@ app.get('/logs', (req, res) => {
   res.json({ data: logs });
 });
 
-app.delete('/signals', async (req, res) => {
+app.delete('/signals', requireApiKey, validateBody(DeleteSignalSchema), async (req, res) => {
   try {
     const ingestedAt = req.body?.ingestedAt ? String(req.body.ingestedAt) : null;
     if (!ingestedAt) {
@@ -466,7 +484,7 @@ app.get('/telegram/bots', async (_req, res) => {
 });
 
 // Create new telegram bot
-app.post('/telegram/bots', async (req, res) => {
+app.post('/telegram/bots', requireApiKey, validateBody(CreateBotSchema), async (req, res) => {
   try {
     const { username, token, bot_type, description } = req.body;
 
@@ -492,7 +510,7 @@ app.post('/telegram/bots', async (req, res) => {
 });
 
 // Update telegram bot
-app.put('/telegram/bots/:id', async (req, res) => {
+app.put('/telegram/bots/:id', requireApiKey, validateParams(BotIdParamSchema), validateBody(UpdateBotSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { username, token, bot_type, description, status } = req.body;
@@ -514,7 +532,7 @@ app.put('/telegram/bots/:id', async (req, res) => {
 });
 
 // Delete telegram bot (soft delete)
-app.delete('/telegram/bots/:id', async (req, res) => {
+app.delete('/telegram/bots/:id', requireApiKey, validateParams(BotIdParamSchema), async (req, res) => {
   try {
     const { id } = req.params;
     await timescaleClient.deleteTelegramBot(id);
@@ -702,7 +720,7 @@ loadChannelsAndStartForwarder().then(forwarder => {
 });
 
 // Endpoint para recarregar canais dinamicamente
-app.post('/reload-channels', async (req, res) => {
+app.post('/reload-channels', requireApiKey, async (req, res) => {
   try {
     const channels = await timescaleClient.getTelegramChannels();
     const activeChannels = channels

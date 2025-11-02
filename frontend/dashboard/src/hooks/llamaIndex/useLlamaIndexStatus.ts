@@ -120,7 +120,10 @@ export interface UseLlamaIndexStatusReturn {
   /**
    * Fetch status for a specific collection (or default if null)
    */
-  fetchStatus: (targetCollection?: string | null, preserveMessage?: boolean) => Promise<void>;
+  fetchStatus: (
+    targetCollection?: string | null,
+    preserveMessage?: boolean,
+  ) => Promise<void>;
 
   /**
    * Refresh current status (convenience wrapper around fetchStatus)
@@ -163,7 +166,7 @@ export interface UseLlamaIndexStatusReturn {
  * ```
  */
 export function useLlamaIndexStatus(
-  options: UseLlamaIndexStatusOptions = {}
+  options: UseLlamaIndexStatusOptions = {},
 ): UseLlamaIndexStatusReturn {
   const {
     initialCollection = null,
@@ -172,10 +175,14 @@ export function useLlamaIndexStatus(
   } = options;
 
   // State management
-  const [statusData, setStatusData] = useState<LlamaIndexStatusResponse | null>(null);
+  const [statusData, setStatusData] = useState<LlamaIndexStatusResponse | null>(
+    null,
+  );
   const [statusLoading, setStatusLoading] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [selectedCollection, _setSelectedCollection] = useState<string | null>(initialCollection);
+  const [selectedCollection, _setSelectedCollection] = useState<string | null>(
+    initialCollection,
+  );
   const [loadedCollection, setLoadedCollection] = useState<string | null>(null);
 
   // Note: Collection selection will be managed by useLlamaIndexCollections hook
@@ -212,13 +219,21 @@ export function useLlamaIndexStatus(
 
         // Determine effective collection (may differ from requested due to fallback)
         const effectiveCollection =
-          json?.requestedCollection || json?.qdrant?.collection || targetCollection || null;
+          json?.requestedCollection ||
+          json?.qdrant?.collection ||
+          targetCollection ||
+          null;
         setLoadedCollection(effectiveCollection);
       } catch (err: unknown) {
-        const rawMessage = err instanceof Error ? err.message : 'Falha ao carregar status do LlamaIndex';
+        const rawMessage =
+          err instanceof Error
+            ? err.message
+            : 'Falha ao carregar status do LlamaIndex';
 
         // Provide user-friendly error messages
-        const is401Error = rawMessage.includes('401') || rawMessage.toLowerCase().includes('unauthorized');
+        const is401Error =
+          rawMessage.includes('401') ||
+          rawMessage.toLowerCase().includes('unauthorized');
         const friendly = is401Error
           ? 'A requisição foi rejeitada (401). Certifique-se de que o RAG Service (porta 3402) esteja em execução via docker-compose.rag.yml ou configure um VITE_LLAMAINDEX_JWT para acesso direto.'
           : rawMessage;
@@ -235,7 +250,7 @@ export function useLlamaIndexStatus(
         setStatusLoading(false);
       }
     },
-    []
+    [],
   );
 
   /**

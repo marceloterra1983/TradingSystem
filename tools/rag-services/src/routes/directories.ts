@@ -202,21 +202,65 @@ router.get('/browse', async (req: Request, res: Response) => {
     // Read directory contents
     const entries = await readdir(normalizedPath, { withFileTypes: true });
 
-    // Get details for each entry
-    const details: DirectoryEntry[] = await Promise.all(
-      entries.map(async (entry) => {
-        const fullPath = join(normalizedPath, entry.name);
-        const stats = await stat(fullPath);
+    // Filter patterns for performance (exclude common bloat)
+    const EXCLUDED_PATTERNS = [
+      /^\./,              // Hidden files/dirs (.git, .vscode, .cache, etc.)
+      /^node_modules$/,   // Node modules
+      /^__pycache__$/,    // Python cache
+      /^\.pytest_cache$/, // Pytest cache
+      /^dist$/,           // Build output
+      /^build$/,          // Build output
+      /^coverage$/,       // Coverage reports
+      /^\.next$/,         // Next.js cache
+      /^\.nuxt$/,         // Nuxt cache
+      /^vendor$/,         // PHP/Go vendor
+      /^target$/,         // Rust/Java target
+      /^\.turbo$/,        // Turborepo cache
+    ];
+    
+    const shouldExclude = (name: string): boolean => {
+      return EXCLUDED_PATTERNS.some(pattern => pattern.test(name));
+    };
 
-        return {
+    // Get details for each entry (filtered)
+    const details: DirectoryEntry[] = [];
+    let excludedCount = 0;
+    
+    for (const entry of entries) {
+      // Skip excluded entries
+      if (shouldExclude(entry.name)) {
+        excludedCount++;
+        continue;
+      }
+      
+      const fullPath = join(normalizedPath, entry.name);
+      
+      try {
+        const stats = await stat(fullPath);
+        details.push({
           name: entry.name,
           path: fullPath,
           isDirectory: entry.isDirectory(),
           size: stats.size,
           modified: stats.mtime,
-        };
-      }),
-    );
+        });
+      } catch (error) {
+        // Skip entries that can't be accessed
+        logger.debug('Skipping inaccessible entry', {
+          path: fullPath,
+          error: error instanceof Error ? error.message : 'Unknown',
+        });
+      }
+    }
+    
+    if (excludedCount > 0) {
+      logger.debug('Excluded entries from directory listing', {
+        path: normalizedPath,
+        excludedCount,
+        totalEntries: entries.length,
+        keptEntries: details.length,
+      });
+    }
 
     // Sort: directories first, then alphabetically
     const sorted = details.sort((a, b) => {

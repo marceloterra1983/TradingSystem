@@ -2,18 +2,25 @@ import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getApiUrl } from '../config/api';
 
-const TELEGRAM_GATEWAY_API_BASE = getApiUrl('telegramGateway').replace(/\/$/, '');
+const TELEGRAM_GATEWAY_API_BASE = getApiUrl('telegramGateway').replace(
+  /\/$/,
+  '',
+);
 const TELEGRAM_GATEWAY_SERVICE_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
 const TELEGRAM_GATEWAY_MESSAGES_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/messages`;
 const TELEGRAM_GATEWAY_CHANNELS_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/channels`;
 const TELEGRAM_GATEWAY_TOKEN =
-  (import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined)?.trim() ||
+  (
+    import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined
+  )?.trim() ||
   (import.meta.env.VITE_API_SECRET_TOKEN as string | undefined)?.trim() ||
   '';
 
 if (import.meta.env.DEV && TELEGRAM_GATEWAY_TOKEN.length === 0) {
   // eslint-disable-next-line no-console
-  console.warn('[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401');
+  console.warn(
+    '[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401',
+  );
 }
 
 export type GatewayHealthStatus = 'healthy' | 'unhealthy' | 'unknown';
@@ -209,7 +216,8 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
             : 'unknown error'
       }`,
     );
-    (error as Error & { status?: number; details?: unknown }).status = response.status;
+    (error as Error & { status?: number; details?: unknown }).status =
+      response.status;
     (error as Error & { status?: number; details?: unknown }).details = details;
     throw error;
   }
@@ -221,9 +229,10 @@ export function useTelegramGatewayOverview(pollingMs = 10000) {
   return useQuery<TelegramGatewayOverview>({
     queryKey: ['telegram-gateway', 'overview'],
     queryFn: async () => {
-      const payload = await fetchJson<{ success: boolean; data: TelegramGatewayOverview }>(
-        `${TELEGRAM_GATEWAY_SERVICE_BASE}/overview`,
-      );
+      const payload = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayOverview;
+      }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/overview`);
       return payload.data;
     },
     refetchInterval: pollingMs,
@@ -247,14 +256,18 @@ export interface TelegramGatewayMessagesFilters {
   sort?: 'asc' | 'desc';
 }
 
-export function useTelegramGatewayMessages(filters: TelegramGatewayMessagesFilters) {
+export function useTelegramGatewayMessages(
+  filters: TelegramGatewayMessagesFilters,
+) {
   const queryParams = useMemo(() => {
     const params = new URLSearchParams();
 
     // Handle channelId - support both single string and array
     if (filters.channelId) {
       if (Array.isArray(filters.channelId)) {
-        filters.channelId.forEach((channelId) => params.append('channelId', channelId));
+        filters.channelId.forEach((channelId) =>
+          params.append('channelId', channelId),
+        );
       } else {
         params.set('channelId', filters.channelId);
       }
@@ -314,25 +327,33 @@ export function useTelegramGatewayReprocess() {
 
   return useMutation({
     mutationKey: ['telegram-gateway', 'reprocess'],
-    mutationFn: async ({ id, requestedBy }: { id: string; requestedBy?: string }) => {
-      const payload = await fetchJson<{ success: boolean; data: TelegramGatewayMessage }>(
-        `${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}/reprocess`,
-        {
-          method: 'POST',
-          body: JSON.stringify(
-            requestedBy
-              ? {
-                  requestedBy,
-                }
-              : {},
-          ),
-        },
-      );
+    mutationFn: async ({
+      id,
+      requestedBy,
+    }: {
+      id: string;
+      requestedBy?: string;
+    }) => {
+      const payload = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayMessage;
+      }>(`${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}/reprocess`, {
+        method: 'POST',
+        body: JSON.stringify(
+          requestedBy
+            ? {
+                requestedBy,
+              }
+            : {},
+        ),
+      });
       return payload.data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['telegram-gateway'] });
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'messages'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'messages'],
+      });
     },
   });
 }
@@ -343,18 +364,20 @@ export function useTelegramGatewayDeleteMessage() {
   return useMutation({
     mutationKey: ['telegram-gateway', 'delete'],
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const payload = await fetchJson<{ success: boolean; data: TelegramGatewayMessage }>(
-        `${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}`,
-        {
-          method: 'DELETE',
-          body: JSON.stringify(reason ? { reason } : {}),
-        },
-      );
+      const payload = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayMessage;
+      }>(`${TELEGRAM_GATEWAY_MESSAGES_BASE}/${id}`, {
+        method: 'DELETE',
+        body: JSON.stringify(reason ? { reason } : {}),
+      });
       return payload.data;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['telegram-gateway'] });
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'messages'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'messages'],
+      });
     },
   });
 }
@@ -363,9 +386,10 @@ export function useTelegramGatewayChannels() {
   return useQuery<TelegramGatewayChannel[]>({
     queryKey: ['telegram-gateway', 'channels'],
     queryFn: async () => {
-      const payload = await fetchJson<{ success: boolean; data: TelegramGatewayChannel[] }>(
-        `${TELEGRAM_GATEWAY_CHANNELS_BASE}`,
-      );
+      const payload = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayChannel[];
+      }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}`);
       return payload.data ?? [];
     },
   });
@@ -381,17 +405,19 @@ export function useCreateTelegramGatewayChannel() {
       description?: string;
       isActive?: boolean;
     }) => {
-      const response = await fetchJson<{ success: boolean; data: TelegramGatewayChannel }>(
-        `${TELEGRAM_GATEWAY_CHANNELS_BASE}`,
-        {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayChannel;
+      }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
       return response.data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'channels'],
+      });
       // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
@@ -411,17 +437,19 @@ export function useUpdateTelegramGatewayChannel() {
       description?: string;
       isActive?: boolean;
     }) => {
-      const response = await fetchJson<{ success: boolean; data: TelegramGatewayChannel }>(
-        `${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayChannel;
+      }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      });
       return response.data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'channels'],
+      });
       // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
@@ -432,12 +460,17 @@ export function useDeleteTelegramGatewayChannel() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`, {
-        method: 'DELETE',
-      });
+      await fetchJson<{ success: boolean }>(
+        `${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`,
+        {
+          method: 'DELETE',
+        },
+      );
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'channels'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'channels'],
+      });
       // Don't invalidate entire overview, channels mutation doesn't affect overview data
     },
   });
@@ -447,9 +480,10 @@ export function useTelegramGatewayAuthStatus(pollingMs = 2000) {
   return useQuery<TelegramGatewayAuthStatus>({
     queryKey: ['telegram-gateway', 'auth', 'status'],
     queryFn: async () => {
-      const payload = await fetchJson<{ success: boolean; data: TelegramGatewayAuthStatus }>(
-        `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/status`,
-      );
+      const payload = await fetchJson<{
+        success: boolean;
+        data: TelegramGatewayAuthStatus;
+      }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/status`);
       return payload.data;
     },
     refetchInterval: pollingMs,
@@ -461,12 +495,17 @@ export function useTelegramGatewayAuthStart() {
 
   return useMutation({
     mutationFn: async () => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/start`, {
-        method: 'POST',
-      });
+      await fetchJson<{ success: boolean }>(
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/start`,
+        {
+          method: 'POST',
+        },
+      );
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'auth', 'status'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'auth', 'status'],
+      });
     },
   });
 }
@@ -476,13 +515,18 @@ export function useTelegramGatewayAuthSubmit() {
 
   return useMutation({
     mutationFn: async (value: string) => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/input`, {
-        method: 'POST',
-        body: JSON.stringify({ value }),
-      });
+      await fetchJson<{ success: boolean }>(
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/input`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ value }),
+        },
+      );
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'auth', 'status'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'auth', 'status'],
+      });
     },
   });
 }
@@ -492,12 +536,17 @@ export function useTelegramGatewayAuthCancel() {
 
   return useMutation({
     mutationFn: async () => {
-      await fetchJson<{ success: boolean }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/cancel`, {
-        method: 'POST',
-      });
+      await fetchJson<{ success: boolean }>(
+        `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/cancel`,
+        {
+          method: 'POST',
+        },
+      );
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['telegram-gateway', 'auth', 'status'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['telegram-gateway', 'auth', 'status'],
+      });
     },
   });
 }

@@ -54,7 +54,7 @@ async function checkContainerHealth(url: string): Promise<boolean> {
  */
 export function useContainerStatus(
   containerName: 'pgadmin' | 'pgweb' | 'adminer' | 'questdb' | null,
-  healthCheckUrl: string | null
+  healthCheckUrl: string | null,
 ): UseContainerStatusResult {
   const [isRunning, setIsRunning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

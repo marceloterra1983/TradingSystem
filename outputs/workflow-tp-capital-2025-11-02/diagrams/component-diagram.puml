@@ -1,0 +1,148 @@
+@startuml TP Capital - Component Diagram
+!define RECTANGLE_COLOR #4A90E2
+!define INTERFACE_COLOR #50E3C2
+!define DATABASE_COLOR #BD10E0
+!define EXTERNAL_COLOR #F5A623
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 12
+skinparam defaultFontName Arial
+
+title TP Capital - Current Architecture (As-Is)
+
+' External Systems
+component "Telegram Gateway\n(Port 4006)" <<External>> #F5A623 as TelegramGateway
+database "Gateway DB\n(telegram_gateway schema)" <<PostgreSQL>> #BD10E0 as GatewayDB
+
+database "TimescaleDB\n(tp_capital schema)" <<PostgreSQL>> #BD10E0 as TimescaleDB
+
+' TP Capital Components
+package "TP Capital Service (Port 4005)" {
+  
+  ' Entry Points
+  component "Express Server" #4A90E2 as ExpressServer {
+    rectangle "Middleware Stack" as Middleware {
+      rectangle "Correlation ID" as CorrID
+      rectangle "Compression" as Compress
+      rectangle "Helmet (Security)" as Helmet
+      rectangle "CORS" as CORS
+      rectangle "Rate Limiting" as RateLimit
+    }
+    
+    rectangle "Routes" as Routes {
+      rectangle "/health" as HealthRoute
+      rectangle "/signals" as SignalsRoute
+      rectangle "/sync-messages" as SyncRoute
+      rectangle "/telegram-channels" as ChannelsRoute
+      rectangle "/ingest" as IngestRoute
+    }
+  }
+  
+  ' Workers
+  component "Gateway Polling Worker" #4A90E2 as PollingWorker {
+    rectangle "Poll Loop\n(5s interval)" as PollLoop
+    rectangle "Message Processor" as MsgProcessor
+    rectangle "Duplicate Check" as DupCheck
+  }
+  
+  component "Telegram User Forwarder" #4A90E2 as Forwarder {
+    rectangle "MTProto Client" as MTProto
+    rectangle "Channel Listener" as ChannelListener
+  }
+  
+  ' Data Layer
+  component "TimescaleClient" #50E3C2 as TSClient {
+    rectangle "Connection Pool\n(max: 10)" as TSPool
+    rectangle "insertSignal()" as InsertSignal
+    rectangle "fetchSignals()" as FetchSignals
+    rectangle "CRUD Methods" as CRUD
+  }
+  
+  component "GatewayDatabaseClient" #50E3C2 as GWClient {
+    rectangle "Connection Pool\n(max: 5)" as GWPool
+    rectangle "query()" as GWQuery
+    rectangle "getWaitingMessagesCount()" as GWCount
+  }
+  
+  ' Utilities
+  component "parseSignal()" #50E3C2 as ParseSignal
+  component "Logger (Pino)" #50E3C2 as Logger
+  component "Metrics (Prometheus)" #50E3C2 as Metrics
+}
+
+' External Client
+component "Dashboard\n(Port 3103)" <<React>> #F5A623 as Dashboard
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+' External → TP Capital
+TelegramGateway -down-> GatewayDB : writes\nmessages
+Dashboard -down-> ExpressServer : HTTP Requests
+
+' Express Server Flow
+ExpressServer --> Routes
+Middleware -[hidden]down- Routes
+CorrID -[hidden]down- Compress
+Compress -[hidden]down- Helmet
+Helmet -[hidden]down- CORS
+CORS -[hidden]down- RateLimit
+
+' Routes → Clients
+SignalsRoute --> TSClient : fetch/delete signals
+ChannelsRoute --> TSClient : CRUD channels
+SyncRoute --> TelegramGateway : POST /sync-messages
+IngestRoute --> TSClient : insertSignalWithIdempotency()
+
+' Polling Worker Flow
+PollingWorker --> GWClient : fetchUnprocessedMessages()
+GWClient --> GatewayDB : SELECT messages\n(status='received')
+PollingWorker --> ParseSignal : parse text
+PollingWorker --> TSClient : insertSignal()
+PollingWorker --> GWClient : UPDATE status='published'
+
+' Forwarder Flow
+Forwarder --> MTProto : authenticate
+MTProto --> ChannelListener : listen to channels
+Forwarder --> ExpressServer : POST /ingest
+
+' Data Access
+TSClient --> TimescaleDB : queries
+GWClient --> GatewayDB : queries
+
+' Observability
+ExpressServer --> Logger
+PollingWorker --> Logger
+Forwarder --> Logger
+ExpressServer --> Metrics
+
+note right of PollingWorker
+  **Issues:**
+  - Direct DB access (no repository)
+  - Business logic in worker
+  - No circuit breaker
+  - No retry with exponential backoff
+end note
+
+note right of ExpressServer
+  **Issues:**
+  - 780 lines (too long)
+  - Mixed responsibilities
+  - 16 endpoints in single file
+  - No authentication
+end note
+
+note bottom of TimescaleDB
+  **Schema:** tp_capital
+  **Tables:**
+  - tp_capital_signals
+  - forwarded_messages
+  - telegram_bots
+  - telegram_channels
+end note
+
+@enduml
+
+

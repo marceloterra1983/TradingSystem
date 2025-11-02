@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, Book, Code, FileJson, ChevronDown, Server } from 'lucide-react';
+import {
+  ExternalLink,
+  Book,
+  Code,
+  FileJson,
+  ChevronDown,
+  Server,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 
 /**
@@ -188,7 +195,9 @@ export function APIViewerPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           {/* API Selection - Dropdown */}
           <div className="relative api-dropdown flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">API</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
+              API
+            </span>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="group flex min-w-[180px] items-center justify-between gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/50"
@@ -227,19 +236,23 @@ export function APIViewerPage() {
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
                         <Server className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span className={`truncate text-sm font-medium ${
-                          selectedApi.id === api.id
-                            ? 'text-white'
-                            : 'text-gray-900 dark:text-gray-100'
-                        }`}>
+                        <span
+                          className={`truncate text-sm font-medium ${
+                            selectedApi.id === api.id
+                              ? 'text-white'
+                              : 'text-gray-900 dark:text-gray-100'
+                          }`}
+                        >
                           {api.name}
                         </span>
                       </div>
-                      <span className={`flex-shrink-0 text-xs font-medium ${
-                        selectedApi.id === api.id
-                          ? 'text-white/90'
-                          : 'text-blue-600 dark:text-cyan-400'
-                      }`}>
+                      <span
+                        className={`flex-shrink-0 text-xs font-medium ${
+                          selectedApi.id === api.id
+                            ? 'text-white/90'
+                            : 'text-blue-600 dark:text-cyan-400'
+                        }`}
+                      >
                         :{api.port}
                       </span>
                     </button>
@@ -254,14 +267,17 @@ export function APIViewerPage() {
 
           {/* Viewer Type Selection - Compact Pills */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">Viewer</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-500">
+              Viewer
+            </span>
             <div className="flex gap-1.5">
-              {(['redoc', 'swagger', 'rapidoc', 'raw'] as ViewerType[]).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setViewerType(type)}
-                  title={getViewerDescription(type)}
-                  className={`
+              {(['redoc', 'swagger', 'rapidoc', 'raw'] as ViewerType[]).map(
+                (type) => (
+                  <button
+                    key={type}
+                    onClick={() => setViewerType(type)}
+                    title={getViewerDescription(type)}
+                    className={`
                     group relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200
                     ${
                       viewerType === type
@@ -269,14 +285,15 @@ export function APIViewerPage() {
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:scale-102 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80'
                     }
                   `}
-                >
-                  {getViewerIcon(type)}
-                  <span className="capitalize">{type}</span>
-                  {viewerType === type && (
-                    <span className="absolute -bottom-1 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-white" />
-                  )}
-                </button>
-              ))}
+                  >
+                    {getViewerIcon(type)}
+                    <span className="capitalize">{type}</span>
+                    {viewerType === type && (
+                      <span className="absolute -bottom-1 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-white" />
+                    )}
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
@@ -327,7 +344,9 @@ export function APIViewerPage() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => window.open(`/specs/${selectedApi.specFile}`, '_blank')}
+                  onClick={() =>
+                    window.open(`/specs/${selectedApi.specFile}`, '_blank')
+                  }
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
                   View Raw Spec

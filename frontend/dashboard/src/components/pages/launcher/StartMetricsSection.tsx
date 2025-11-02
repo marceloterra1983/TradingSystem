@@ -43,7 +43,9 @@ interface StartMetrics {
 
 async function fetchStartMetrics(): Promise<StartMetrics | null> {
   try {
-    const response = await fetch(`${SERVICE_LAUNCHER_BASE_URL}/api/start-metrics`);
+    const response = await fetch(
+      `${SERVICE_LAUNCHER_BASE_URL}/api/start-metrics`,
+    );
     if (!response.ok) {
       if (response.status === 404) {
         return null; // No metrics available yet
@@ -104,7 +106,9 @@ export function StartMetricsSection() {
           disabled={isRefreshing}
           aria-label="Atualizar métricas"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
         </Button>
       </CollapsibleCardHeader>
       <CollapsibleCardContent>
@@ -121,8 +125,11 @@ export function StartMetricsSection() {
               <p className="font-semibold">Nenhuma métrica disponível</p>
             </div>
             <p className="text-xs">
-              Execute <code className="rounded bg-gray-200 px-1 py-0.5 dark:bg-gray-700">bash scripts/universal/start.sh</code> para
-              gerar métricas de inicialização.
+              Execute{' '}
+              <code className="rounded bg-gray-200 px-1 py-0.5 dark:bg-gray-700">
+                bash scripts/universal/start.sh
+              </code>{' '}
+              para gerar métricas de inicialização.
             </p>
           </div>
         ) : (
@@ -145,7 +152,8 @@ export function StartMetricsSection() {
                   <span>Sucesso</span>
                 </div>
                 <p className="mt-1 text-lg font-bold text-emerald-700 dark:text-emerald-400">
-                  {metrics.summary.successfulServices}/{metrics.summary.totalServices}
+                  {metrics.summary.successfulServices}/
+                  {metrics.summary.totalServices}
                 </p>
               </div>
 
@@ -201,8 +209,8 @@ export function StartMetricsSection() {
                           {service.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {service.status === 'success' ? 'Iniciado' : 'Falhou'} em{' '}
-                          {formatDuration(service.startTimeSeconds)}
+                          {service.status === 'success' ? 'Iniciado' : 'Falhou'}{' '}
+                          em {formatDuration(service.startTimeSeconds)}
                         </p>
                       </div>
                     </div>
@@ -215,14 +223,15 @@ export function StartMetricsSection() {
                           </span>
                         </div>
                       )}
-                      {service.status === 'success' && service.retryCount === 0 && (
-                        <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 dark:bg-emerald-900">
-                          <Zap className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
-                          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                            1st try
-                          </span>
-                        </div>
-                      )}
+                      {service.status === 'success' &&
+                        service.retryCount === 0 && (
+                          <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-1 dark:bg-emerald-900">
+                            <Zap className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                              1st try
+                            </span>
+                          </div>
+                        )}
                     </div>
                   </div>
                 ))
@@ -234,4 +243,3 @@ export function StartMetricsSection() {
     </CollapsibleCard>
   );
 }
-

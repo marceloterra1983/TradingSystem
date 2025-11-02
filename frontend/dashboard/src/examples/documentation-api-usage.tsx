@@ -28,7 +28,7 @@ async function basicSearch(query: string): Promise<SearchResult[]> {
 // Example 2: Advanced Search with Filters
 async function advancedSearch(
   query: string,
-  filters: SearchFilters
+  filters: SearchFilters,
 ): Promise<SearchResult[]> {
   const response = await fetch('/api/v1/search', {
     method: 'POST',
@@ -66,14 +66,18 @@ function useDocumentationSearch() {
 // Example 4: Getting Document Details
 // Example 4: Get documentation facets (domain/type/tags/status)
 async function getDocsFacets(query = '') {
-  const url = query ? `/api/v1/docs/facets?q=${encodeURIComponent(query)}` : '/api/v1/docs/facets';
+  const url = query
+    ? `/api/v1/docs/facets?q=${encodeURIComponent(query)}`
+    : '/api/v1/docs/facets';
   const response = await fetch(url);
   return response.json();
 }
 
 // Example 5: Getting Search Suggestions
 async function getSearchSuggestions(query: string) {
-  const response = await fetch(`/api/v1/suggest?q=${encodeURIComponent(query)}`);
+  const response = await fetch(
+    `/api/v1/suggest?q=${encodeURIComponent(query)}`,
+  );
   return response.json();
 }
 
@@ -98,11 +102,7 @@ function DocumentationSearch() {
     const suggestions = await getSearchSuggestions('clean arch');
   };
 
-  return (
-    <div>
-      {/* Your search UI components */}
-    </div>
-  );
+  return <div>{/* Your search UI components */}</div>;
 }
 
 // Example 6: Real-time Search with Debounce
@@ -130,7 +130,16 @@ function useDebounceSearch(delay = 300) {
 }
 
 // Example 7: Search documentation content (Markdown index)
-async function docsSearch(query: string, opts?: { domain?: string; type?: string; tags?: string[]; status?: string; limit?: number; }) {
+async function docsSearch(
+  query: string,
+  opts?: {
+    domain?: string;
+    type?: string;
+    tags?: string[];
+    status?: string;
+    limit?: number;
+  },
+) {
   const params = new URLSearchParams();
   if (query) params.set('q', query);
   if (opts?.domain) params.set('domain', opts.domain);

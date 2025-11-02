@@ -17,12 +17,18 @@ import {
 describe('pathNormalizer', () => {
   describe('sanitizeUrl', () => {
     it('should remove trailing slashes', () => {
-      expect(sanitizeUrl('http://localhost:8202/', 'fallback')).toBe('http://localhost:8202');
-      expect(sanitizeUrl('http://localhost:8202///', 'fallback')).toBe('http://localhost:8202');
+      expect(sanitizeUrl('http://localhost:8202/', 'fallback')).toBe(
+        'http://localhost:8202',
+      );
+      expect(sanitizeUrl('http://localhost:8202///', 'fallback')).toBe(
+        'http://localhost:8202',
+      );
     });
 
     it('should trim whitespace', () => {
-      expect(sanitizeUrl('  http://localhost:8202  ', 'fallback')).toBe('http://localhost:8202');
+      expect(sanitizeUrl('  http://localhost:8202  ', 'fallback')).toBe(
+        'http://localhost:8202',
+      );
     });
 
     it('should return fallback for invalid inputs', () => {
@@ -32,14 +38,18 @@ describe('pathNormalizer', () => {
     });
 
     it('should handle URLs without trailing slashes', () => {
-      expect(sanitizeUrl('http://localhost:8202', 'fallback')).toBe('http://localhost:8202');
+      expect(sanitizeUrl('http://localhost:8202', 'fallback')).toBe(
+        'http://localhost:8202',
+      );
     });
   });
 
   describe('normalizeCollectionName', () => {
     it('should convert to lowercase and trim', () => {
       expect(normalizeCollectionName('  DOCS_INDEX  ')).toBe('docs_index');
-      expect(normalizeCollectionName('DocumentationV2')).toBe('documentationv2');
+      expect(normalizeCollectionName('DocumentationV2')).toBe(
+        'documentationv2',
+      );
     });
 
     it('should return default for null/undefined', () => {
@@ -53,14 +63,20 @@ describe('pathNormalizer', () => {
     });
 
     it('should accept custom default value', () => {
-      expect(normalizeCollectionName(null, 'custom_default')).toBe('custom_default');
+      expect(normalizeCollectionName(null, 'custom_default')).toBe(
+        'custom_default',
+      );
     });
   });
 
   describe('normalizeIndexedPath', () => {
     it('should extract path after /docs/', () => {
-      expect(normalizeIndexedPath('/data/docs/content/api/overview.md')).toBe('content/api/overview.md');
-      expect(normalizeIndexedPath('/home/user/project/docs/guide.mdx')).toBe('guide.mdx');
+      expect(normalizeIndexedPath('/data/docs/content/api/overview.md')).toBe(
+        'content/api/overview.md',
+      );
+      expect(normalizeIndexedPath('/home/user/project/docs/guide.mdx')).toBe(
+        'guide.mdx',
+      );
     });
 
     it('should handle /data/docs/ prefix', () => {
@@ -69,11 +85,15 @@ describe('pathNormalizer', () => {
 
     it('should handle Windows-style paths', () => {
       // Function normalizes backslashes to forward slashes
-      expect(normalizeIndexedPath('C:\\project\\docs\\content\\guide.mdx')).toBe('content/guide.mdx');
+      expect(
+        normalizeIndexedPath('C:\\project\\docs\\content\\guide.mdx'),
+      ).toBe('content/guide.mdx');
     });
 
     it('should remove leading slashes for relative paths', () => {
-      expect(normalizeIndexedPath('/content/guide.md')).toBe('content/guide.md');
+      expect(normalizeIndexedPath('/content/guide.md')).toBe(
+        'content/guide.md',
+      );
     });
 
     it('should validate file extensions', () => {
@@ -97,8 +117,12 @@ describe('pathNormalizer', () => {
 
   describe('inferModelFromName', () => {
     it('should infer gemma model', () => {
-      expect(inferModelFromName('docs_index_gemma')).toBe('embeddinggemma:latest');
-      expect(inferModelFromName('repository_GEMMA')).toBe('embeddinggemma:latest');
+      expect(inferModelFromName('docs_index_gemma')).toBe(
+        'embeddinggemma:latest',
+      );
+      expect(inferModelFromName('repository_GEMMA')).toBe(
+        'embeddinggemma:latest',
+      );
     });
 
     it('should infer mxbai model', () => {
@@ -112,7 +136,9 @@ describe('pathNormalizer', () => {
     });
 
     it('should infer e5 model', () => {
-      expect(inferModelFromName('multilingual_e5')).toBe('intfloat/multilingual-e5-large');
+      expect(inferModelFromName('multilingual_e5')).toBe(
+        'intfloat/multilingual-e5-large',
+      );
     });
 
     it('should infer minilm model', () => {

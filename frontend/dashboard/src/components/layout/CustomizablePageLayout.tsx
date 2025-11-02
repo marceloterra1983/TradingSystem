@@ -25,6 +25,8 @@ interface CustomizablePageLayoutProps {
   sections: PageSection[];
   /** Default number of columns */
   defaultColumns?: ColumnCount;
+  /** Optional left-aligned actions rendered beside layout controls */
+  leftActions?: ReactNode;
 }
 
 export function CustomizablePageLayout({
@@ -33,6 +35,7 @@ export function CustomizablePageLayout({
   subtitle: _subtitle,
   sections,
   defaultColumns = 2,
+  leftActions,
 }: CustomizablePageLayoutProps) {
   const {
     columns,
@@ -58,7 +61,10 @@ export function CustomizablePageLayout({
 
     // Update localStorage for all card IDs
     sections.forEach((section) => {
-      safeLocalStorageSet(`card-collapsed-${section.id}`, JSON.stringify(newState));
+      safeLocalStorageSet(
+        `card-collapsed-${section.id}`,
+        JSON.stringify(newState),
+      );
     });
 
     // Trigger a custom event to notify CollapsibleCard components
@@ -113,19 +119,34 @@ export function CustomizablePageLayout({
     });
 
     return ordered;
-  }, [columns, getComponentsInColumn, getComponentColumn, sectionMap, sections]);
+  }, [
+    columns,
+    getComponentsInColumn,
+    getComponentColumn,
+    sectionMap,
+    sections,
+  ]);
 
   return (
     <div className="h-full flex flex-col">
       {/* Layout Controls */}
-      <div className="flex items-start justify-end mb-6">
-        <LayoutControls
-          columns={columns}
-          onColumnsChange={setColumns}
-          onReset={resetLayout}
-          onToggleCollapseAll={handleToggleCollapseAll}
-          allCollapsed={allCollapsed}
-        />
+      <div
+        className={`mb-6 flex flex-col gap-3 sm:flex-row sm:items-center ${
+          leftActions ? 'sm:justify-between' : 'sm:justify-end'
+        }`}
+      >
+        {leftActions ? (
+          <div className="flex flex-wrap items-center gap-2">{leftActions}</div>
+        ) : null}
+        <div className="flex justify-end sm:justify-end">
+          <LayoutControls
+            columns={columns}
+            onColumnsChange={setColumns}
+            onReset={resetLayout}
+            onToggleCollapseAll={handleToggleCollapseAll}
+            allCollapsed={allCollapsed}
+          />
+        </div>
       </div>
 
       {/* Draggable Grid - Direct rendering without wrapper card */}

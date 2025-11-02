@@ -72,7 +72,8 @@ const STATUS_META: Record<
   },
   completed: {
     label: 'Sessão autenticada',
-    description: 'Sessão salva com sucesso. O gateway pode ser iniciado normalmente.',
+    description:
+      'Sessão salva com sucesso. O gateway pode ser iniciado normalmente.',
     accent: 'text-emerald-600 dark:text-emerald-400',
   },
   cancelled: {
@@ -141,7 +142,9 @@ export function AuthenticationCard() {
   const canCancel = running && status !== 'cancelling';
   const canSubmitInput =
     running &&
-    (status === 'waiting_code' || status === 'waiting_password' || status === 'processing_code');
+    (status === 'waiting_code' ||
+      status === 'waiting_password' ||
+      status === 'processing_code');
 
   const resolveAuthErrorMessage = (error: unknown, fallback: string) => {
     if (error && typeof error === 'object') {
@@ -151,7 +154,10 @@ export function AuthenticationCard() {
       }
       if (err.details && typeof err.details === 'object') {
         const details = err.details as { message?: unknown; error?: unknown };
-        if (typeof details.message === 'string' && details.message.trim() !== '') {
+        if (
+          typeof details.message === 'string' &&
+          details.message.trim() !== ''
+        ) {
           return details.message.trim();
         }
         if (typeof details.error === 'string' && details.error.trim() !== '') {
@@ -165,7 +171,10 @@ export function AuthenticationCard() {
   const handleAuthError = (error: unknown, fallback: string) => {
     const message = resolveAuthErrorMessage(error, fallback);
     const statusCode =
-      error && typeof error === 'object' && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      typeof (error as { status?: unknown }).status === 'number'
         ? (error as { status?: number }).status
         : undefined;
     if (statusCode === 409) {
@@ -178,7 +187,9 @@ export function AuthenticationCard() {
   const handleStart = async () => {
     try {
       await startMutation.mutateAsync();
-      toast.success('Fluxo de autenticação iniciado. Acompanhe os logs para próximos passos.');
+      toast.success(
+        'Fluxo de autenticação iniciado. Acompanhe os logs para próximos passos.',
+      );
       setIsTerminalOpen(true);
     } catch (error) {
       handleAuthError(error, 'Não foi possível iniciar a autenticação.');
@@ -259,7 +270,8 @@ export function AuthenticationCard() {
                 Autenticação Telegram
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Execute o fluxo de login para renovar a sessão MTProto do gateway diretamente pelo dashboard.
+                Execute o fluxo de login para renovar a sessão MTProto do
+                gateway diretamente pelo dashboard.
               </CollapsibleCardDescription>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -311,26 +323,37 @@ export function AuthenticationCard() {
           </div>
         </CollapsibleCardHeader>
         <CollapsibleCardContent className="space-y-4 pt-5">
-
           <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-            <div className={`text-sm font-semibold ${meta.accent}`}>{meta.label}</div>
-            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{meta.description}</div>
+            <div className={`text-sm font-semibold ${meta.accent}`}>
+              {meta.label}
+            </div>
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {meta.description}
+            </div>
             <div className="mt-3 grid gap-2 text-xs text-slate-500 dark:text-slate-400 md:grid-cols-3">
               <div>
-                <span className="font-semibold text-slate-600 dark:text-slate-300">Início:</span>{' '}
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Início:
+                </span>{' '}
                 {authStatus?.startedAt
                   ? new Date(authStatus.startedAt).toLocaleString('pt-BR')
                   : '—'}
               </div>
               <div>
-                <span className="font-semibold text-slate-600 dark:text-slate-300">Fim:</span>{' '}
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Fim:
+                </span>{' '}
                 {authStatus?.finishedAt
                   ? new Date(authStatus.finishedAt).toLocaleString('pt-BR')
                   : '—'}
               </div>
               <div>
-                <span className="font-semibold text-slate-600 dark:text-slate-300">Saída:</span>{' '}
-                {typeof authStatus?.exitCode === 'number' ? authStatus.exitCode : '—'}
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Saída:
+                </span>{' '}
+                {typeof authStatus?.exitCode === 'number'
+                  ? authStatus.exitCode
+                  : '—'}
               </div>
             </div>
           </div>
@@ -350,7 +373,11 @@ export function AuthenticationCard() {
             <Button
               variant="default"
               onClick={() => void handleSubmit()}
-              disabled={!canSubmitInput || !inputValue.trim() || submitMutation.isPending}
+              disabled={
+                !canSubmitInput ||
+                !inputValue.trim() ||
+                submitMutation.isPending
+              }
             >
               {submitMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -385,22 +412,29 @@ export function AuthenticationCard() {
                   <li className="text-slate-500">{emptyLogsMessage}</li>
                 ) : (
                   logs.map((log, index) => {
-                    const levelMeta =
-                      LOG_STYLES[log.level] ?? {
-                        className: 'text-slate-600 dark:text-slate-400',
-                        label: `[${log.level}]`,
-                      };
+                    const levelMeta = LOG_STYLES[log.level] ?? {
+                      className: 'text-slate-600 dark:text-slate-400',
+                      label: `[${log.level}]`,
+                    };
                     return (
-                      <li key={`${log.timestamp}-${index}`} className="text-slate-700 dark:text-slate-200">
+                      <li
+                        key={`${log.timestamp}-${index}`}
+                        className="text-slate-700 dark:text-slate-200"
+                      >
                         <span className="text-slate-500 dark:text-slate-500">
-                          [{new Date(log.timestamp).toLocaleTimeString('pt-BR', {
+                          [
+                          {new Date(log.timestamp).toLocaleTimeString('pt-BR', {
                             hour: '2-digit',
                             minute: '2-digit',
                             second: '2-digit',
                           })}
                           ]
                         </span>{' '}
-                        <span className={`${levelMeta.className} font-semibold`}>{levelMeta.label}</span>{' '}
+                        <span
+                          className={`${levelMeta.className} font-semibold`}
+                        >
+                          {levelMeta.label}
+                        </span>{' '}
                         <span>{log.message}</span>
                       </li>
                     );
@@ -420,7 +454,9 @@ export function AuthenticationCard() {
               Terminal de autenticação MTProto
             </DialogTitle>
             <DialogDescription className="text-slate-400">
-              Fluxo interativo do script <code>authenticate-interactive.sh</code>. Responda aos prompts abaixo.
+              Fluxo interativo do script{' '}
+              <code>authenticate-interactive.sh</code>. Responda aos prompts
+              abaixo.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -433,13 +469,15 @@ export function AuthenticationCard() {
                   <p className="text-slate-500">{emptyLogsMessage}</p>
                 ) : (
                   logs.map((log, index) => {
-                    const levelMeta =
-                      LOG_STYLES[log.level] ?? {
-                        className: 'text-slate-400',
-                        label: `[${log.level}]`,
-                      };
+                    const levelMeta = LOG_STYLES[log.level] ?? {
+                      className: 'text-slate-400',
+                      label: `[${log.level}]`,
+                    };
                     return (
-                      <div key={`${log.timestamp}-${index}`} className="whitespace-pre-wrap text-slate-200">
+                      <div
+                        key={`${log.timestamp}-${index}`}
+                        className="whitespace-pre-wrap text-slate-200"
+                      >
                         <span className="text-slate-500">
                           {new Date(log.timestamp).toLocaleTimeString('pt-BR', {
                             hour: '2-digit',
@@ -447,7 +485,11 @@ export function AuthenticationCard() {
                             second: '2-digit',
                           })}
                         </span>{' '}
-                        <span className={`${levelMeta.className} font-semibold`}>{levelMeta.label}</span>{' '}
+                        <span
+                          className={`${levelMeta.className} font-semibold`}
+                        >
+                          {levelMeta.label}
+                        </span>{' '}
                         <span>{log.message}</span>
                       </div>
                     );
@@ -468,13 +510,18 @@ export function AuthenticationCard() {
                   className="border-slate-700 bg-slate-950 text-slate-100 placeholder:text-slate-600 focus-visible:ring-cyan-500"
                 />
                 <p className="text-xs text-slate-500">
-                  Informe o código recebido via SMS ou a senha de dois fatores quando solicitado nos logs.
+                  Informe o código recebido via SMS ou a senha de dois fatores
+                  quando solicitado nos logs.
                 </p>
               </div>
               <Button
                 variant="primary"
                 onClick={() => void handleSubmit()}
-                disabled={!canSubmitInput || !inputValue.trim() || submitMutation.isPending}
+                disabled={
+                  !canSubmitInput ||
+                  !inputValue.trim() ||
+                  submitMutation.isPending
+                }
               >
                 {submitMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -490,7 +537,9 @@ export function AuthenticationCard() {
           <DialogFooter className="flex flex-col-reverse gap-2 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <span className="flex items-center gap-1">
-                <div className={`h-2 w-2 rounded-full ${running ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+                <div
+                  className={`h-2 w-2 rounded-full ${running ? 'bg-emerald-400' : 'bg-slate-500'}`}
+                />
                 Status: {meta.label}
               </span>
               <span>
@@ -506,14 +555,22 @@ export function AuthenticationCard() {
               <span>
                 Fim:{' '}
                 {authStatus?.finishedAt
-                  ? new Date(authStatus.finishedAt).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })
+                  ? new Date(authStatus.finishedAt).toLocaleTimeString(
+                      'pt-BR',
+                      {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      },
+                    )
                   : '—'}
               </span>
-              <span>Exit code: {typeof authStatus?.exitCode === 'number' ? authStatus.exitCode : '—'}</span>
+              <span>
+                Exit code:{' '}
+                {typeof authStatus?.exitCode === 'number'
+                  ? authStatus.exitCode
+                  : '—'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -531,7 +588,11 @@ export function AuthenticationCard() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsTerminalOpen(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsTerminalOpen(false)}
+              >
                 Fechar
               </Button>
             </div>

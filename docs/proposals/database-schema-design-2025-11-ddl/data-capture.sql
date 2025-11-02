@@ -323,3 +323,9 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA data_capture TO timescale;
 -- =============================================================================
 
 
+
+
+
+
+
+

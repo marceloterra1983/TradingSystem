@@ -1,10 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Columns, FileDiff, LayoutList, MoveLeft, MoveRight } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import {
+  Columns,
+  FileDiff,
+  LayoutList,
+  MoveLeft,
+  MoveRight,
+} from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 import { computeDiff, DiffMode, formatSimilarity } from '../../utils/diff';
 import type { Job } from '../../types/jobs';
 import { useJob } from '../../hooks/useJobs';
@@ -24,7 +42,15 @@ interface DiffableValue {
   right: unknown;
 }
 
-const PREFERRED_ORDER = ['markdown', 'html', 'rawHtml', 'json', 'metadata', 'links', 'screenshot'];
+const PREFERRED_ORDER = [
+  'markdown',
+  'html',
+  'rawHtml',
+  'json',
+  'metadata',
+  'links',
+  'screenshot',
+];
 
 function toComparable(value: unknown): string | object {
   if (typeof value === 'string') {
@@ -62,28 +88,33 @@ function formatForDisplay(value: unknown): string {
   return String(value);
 }
 
-function collectDiffableValues(left: Job | null, right: Job | null): DiffableValue[] {
+function collectDiffableValues(
+  left: Job | null,
+  right: Job | null,
+): DiffableValue[] {
   const values = new Map<string, DiffableValue>();
 
   const merge = (source: unknown, side: 'left' | 'right') => {
     if (!source || typeof source !== 'object') {
       return;
     }
-    Object.entries(source as Record<string, unknown>).forEach(([key, value]) => {
-      const diffKey = key;
-      const entry = values.get(diffKey) ?? {
-        key: diffKey,
-        label: key,
-        left: '',
-        right: ''
-      };
-      if (side === 'left') {
-        entry.left = value;
-      } else {
-        entry.right = value;
-      }
-      values.set(diffKey, entry);
-    });
+    Object.entries(source as Record<string, unknown>).forEach(
+      ([key, value]) => {
+        const diffKey = key;
+        const entry = values.get(diffKey) ?? {
+          key: diffKey,
+          label: key,
+          left: '',
+          right: '',
+        };
+        if (side === 'left') {
+          entry.left = value;
+        } else {
+          entry.right = value;
+        }
+        values.set(diffKey, entry);
+      },
+    );
   };
 
   merge(left?.results ?? null, 'left');
@@ -94,7 +125,7 @@ function collectDiffableValues(left: Job | null, right: Job | null): DiffableVal
     key: 'options',
     label: 'Options (JSON)',
     left: left?.options ?? '',
-    right: right?.options ?? ''
+    right: right?.options ?? '',
   });
 
   const sorted = Array.from(values.values()).sort((a, b) => {
@@ -121,7 +152,11 @@ function defaultModeForKey(key: string): DiffMode {
   return 'lines';
 }
 
-export function ResultsComparison({ open, onOpenChange, jobs }: ResultsComparisonProps) {
+export function ResultsComparison({
+  open,
+  onOpenChange,
+  jobs,
+}: ResultsComparisonProps) {
   const [leftJob, rightJob] = jobs;
   const pairSelected = jobs.length === 2;
   const leftQuery = useJob(open ? leftJob?.id : null);
@@ -130,9 +165,16 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
   const left = leftQuery.data ?? leftJob ?? null;
   const right = rightQuery.data ?? rightJob ?? null;
 
-  const comparableValues = useMemo(() => collectDiffableValues(left, right), [left, right]);
-  const [selectedKey, setSelectedKey] = useState<string | null>(comparableValues[0]?.key ?? null);
-  const [mode, setMode] = useState<DiffMode>(defaultModeForKey(comparableValues[0]?.key ?? 'markdown'));
+  const comparableValues = useMemo(
+    () => collectDiffableValues(left, right),
+    [left, right],
+  );
+  const [selectedKey, setSelectedKey] = useState<string | null>(
+    comparableValues[0]?.key ?? null,
+  );
+  const [mode, setMode] = useState<DiffMode>(
+    defaultModeForKey(comparableValues[0]?.key ?? 'markdown'),
+  );
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const changeRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const changeIndexRef = useRef(0);
@@ -142,14 +184,18 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
       setSelectedKey(null);
       return;
     }
-    if (!selectedKey || !comparableValues.some((item) => item.key === selectedKey)) {
+    if (
+      !selectedKey ||
+      !comparableValues.some((item) => item.key === selectedKey)
+    ) {
       const nextKey = comparableValues[0]?.key ?? null;
       setSelectedKey(nextKey);
       setMode(defaultModeForKey(nextKey ?? 'markdown'));
     }
   }, [comparableValues, selectedKey]);
 
-  const selectedValue = comparableValues.find((item) => item.key === selectedKey) ?? null;
+  const selectedValue =
+    comparableValues.find((item) => item.key === selectedKey) ?? null;
 
   const diffResult = useMemo(() => {
     if (!selectedValue) {
@@ -184,7 +230,7 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
     }
     changeIndexRef.current = Math.min(
       Math.max(changeIndexRef.current + direction, 0),
-      changeIndices.length - 1
+      changeIndices.length - 1,
     );
     const targetIndex = changeIndices[changeIndexRef.current];
     const node = changeRefs.current[targetIndex];
@@ -223,7 +269,10 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
             </SelectContent>
           </Select>
 
-          <Select value={mode} onValueChange={(value) => setMode(value as DiffMode)}>
+          <Select
+            value={mode}
+            onValueChange={(value) => setMode(value as DiffMode)}
+          >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Diff mode" />
             </SelectTrigger>
@@ -234,7 +283,10 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
             </SelectContent>
           </Select>
 
-          <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) => setViewMode(value as ViewMode)}
+          >
             <TabsList>
               <TabsTrigger value="split">
                 <Columns className="mr-2 h-4 w-4" />
@@ -247,33 +299,35 @@ export function ResultsComparison({ open, onOpenChange, jobs }: ResultsCompariso
             </TabsList>
           </Tabs>
 
-  <div className="ml-auto flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-    <span>
-      Similarity:{' '}
-      {diffResult ? formatSimilarity(diffResult.summary.similarity) : '—'}
-    </span>
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      onClick={() => handleNavigate(-1)}
-      disabled={changeIndices.length === 0}
-    >
-      <MoveLeft className="mr-2 h-4 w-4" />
-      Previous change
-    </Button>
-    <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      onClick={() => handleNavigate(1)}
-      disabled={changeIndices.length === 0}
-    >
-      Next change
-      <MoveRight className="ml-2 h-4 w-4" />
-    </Button>
-  </div>
-</div>
+          <div className="ml-auto flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+            <span>
+              Similarity:{' '}
+              {diffResult
+                ? formatSimilarity(diffResult.summary.similarity)
+                : '—'}
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleNavigate(-1)}
+              disabled={changeIndices.length === 0}
+            >
+              <MoveLeft className="mr-2 h-4 w-4" />
+              Previous change
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => handleNavigate(1)}
+              disabled={changeIndices.length === 0}
+            >
+              Next change
+              <MoveRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
         <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
           {!pairSelected ? (

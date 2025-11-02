@@ -26,6 +26,8 @@ import directoriesRoutes from './routes/directories';
 import adminRoutes from './routes/admin';
 import docsRoutes from './routes/docs';
 import ingestionLogsRoutes from './routes/ingestion-logs';
+import ingestionBatchRoutes from './routes/ingestion-batch';
+import queryRoutes from './routes/query';
 
 /**
  * Create Express application
@@ -138,6 +140,8 @@ app.use('/api/v1/rag/collections', collectionsRoutes);
 app.use('/api/v1/rag/models', modelsRoutes);
 app.use('/api/v1/rag/directories', directoriesRoutes);
 app.use('/api/v1/rag/ingestion/logs', ingestionLogsRoutes);
+app.use('/api/v1/rag/ingestion', ingestionBatchRoutes);  // Batch ingestion
+app.use('/api/v1/rag', queryRoutes);  // Query endpoint (generic, must come after specific routes!)
 app.use('/api/v1/admin', adminRoutes);
 
 /**

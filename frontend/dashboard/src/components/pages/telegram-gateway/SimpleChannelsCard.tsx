@@ -16,7 +16,11 @@ interface Channel {
 interface SimpleChannelsCardProps {
   channels: Channel[];
   isLoading: boolean;
-  onCreate: (data: { channelId: string; label?: string; description?: string }) => Promise<void>;
+  onCreate: (data: {
+    channelId: string;
+    label?: string;
+    description?: string;
+  }) => Promise<void>;
   onToggle: (id: string, currentIsActive: boolean) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
@@ -26,7 +30,7 @@ export function SimpleChannelsCard({
   isLoading,
   onCreate,
   onToggle,
-  onDelete
+  onDelete,
 }: SimpleChannelsCardProps) {
   const [channelId, setChannelId] = useState('');
   const [label, setLabel] = useState('');
@@ -61,7 +65,7 @@ export function SimpleChannelsCard({
     }
   };
 
-  const activeCount = channels.filter(c => c.isActive).length;
+  const activeCount = channels.filter((c) => c.isActive).length;
 
   return (
     <Card>
@@ -72,7 +76,8 @@ export function SimpleChannelsCard({
             <CardTitle>Canais Monitorados</CardTitle>
           </div>
           <Badge variant="outline">
-            {activeCount} ativo{activeCount !== 1 ? 's' : ''} / {channels.length} total
+            {activeCount} ativo{activeCount !== 1 ? 's' : ''} /{' '}
+            {channels.length} total
           </Badge>
         </div>
       </CardHeader>
@@ -92,8 +97,8 @@ export function SimpleChannelsCard({
               onChange={(e) => setLabel(e.target.value)}
             />
           </div>
-          <Button 
-            onClick={handleCreate} 
+          <Button
+            onClick={handleCreate}
             disabled={!channelId.trim() || isSaving}
             className="w-full"
           >
@@ -109,29 +114,39 @@ export function SimpleChannelsCard({
           <div className="text-center py-8 text-muted-foreground">
             <Radio className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p>Nenhum canal configurado</p>
-            <p className="text-xs mt-1">Modo permissivo: todas as mensagens serão processadas</p>
+            <p className="text-xs mt-1">
+              Modo permissivo: todas as mensagens serão processadas
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
             {channels.map((channel) => (
-              <div 
+              <div
                 key={channel.id}
                 className="flex items-center justify-between p-3 rounded-lg border"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <code className="text-sm font-mono">{channel.channelId}</code>
+                    <code className="text-sm font-mono">
+                      {channel.channelId}
+                    </code>
                     {channel.isActive ? (
-                      <Badge variant="default" className="bg-emerald-500">Ativo</Badge>
+                      <Badge variant="default" className="bg-emerald-500">
+                        Ativo
+                      </Badge>
                     ) : (
                       <Badge variant="outline">Inativo</Badge>
                     )}
                   </div>
                   {channel.label && (
-                    <p className="text-sm text-muted-foreground">{channel.label}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {channel.label}
+                    </p>
                   )}
                   {channel.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{channel.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {channel.description}
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -180,8 +195,9 @@ export function SimpleChannelsCard({
           <div className="rounded-lg bg-blue-50 dark:bg-blue-950 p-3 text-xs text-blue-800 dark:text-blue-200">
             <p className="font-medium mb-1">ℹ️ Modo Permissivo Ativo</p>
             <p>
-              Sem canais configurados, o gateway processará mensagens de TODOS os canais.
-              Para maior segurança, adicione apenas os canais autorizados.
+              Sem canais configurados, o gateway processará mensagens de TODOS
+              os canais. Para maior segurança, adicione apenas os canais
+              autorizados.
             </p>
           </div>
         )}
@@ -189,8 +205,3 @@ export function SimpleChannelsCard({
     </Card>
   );
 }
-
-
-
-
-

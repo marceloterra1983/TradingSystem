@@ -41,9 +41,11 @@ export function useCrawl() {
       } else {
         toast.error(result.error || 'Failed to start crawl job');
       }
-      queryClient.invalidateQueries({ queryKey: ['crawl-jobs'] }).catch((error) => {
-        console.warn('Failed to invalidate crawl jobs query', error);
-      });
+      queryClient
+        .invalidateQueries({ queryKey: ['crawl-jobs'] })
+        .catch((error) => {
+          console.warn('Failed to invalidate crawl jobs query', error);
+        });
     },
     onError: (error) => {
       toast.error(resolveErrorMessage(error, 'Failed to start crawl job'));
@@ -55,12 +57,18 @@ interface UseCrawlStatusOptions {
   enabled?: boolean;
 }
 
-export function useCrawlStatus(crawlId: string | null, options?: UseCrawlStatusOptions) {
+export function useCrawlStatus(
+  crawlId: string | null,
+  options?: UseCrawlStatusOptions,
+) {
   return useQuery<CrawlStatus>({
     queryKey: ['crawl-status', crawlId],
     queryFn: () => {
       if (!crawlId) {
-        return Promise.resolve({ success: false, error: 'No crawl ID provided' });
+        return Promise.resolve({
+          success: false,
+          error: 'No crawl ID provided',
+        });
       }
       return firecrawlService.getCrawlStatus(crawlId);
     },
@@ -68,7 +76,8 @@ export function useCrawlStatus(crawlId: string | null, options?: UseCrawlStatusO
     staleTime: 0,
     retry: 3,
     refetchInterval: (query) => {
-      const status = (query.state.data as CrawlStatus | undefined)?.data?.status;
+      const status = (query.state.data as CrawlStatus | undefined)?.data
+        ?.status;
       return status === 'scraping' ? 5000 : false;
     },
   });

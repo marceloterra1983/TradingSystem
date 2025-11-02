@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { isBrowser, safeLocalStorageGet, safeLocalStorageSet } from '../utils/browser';
+import {
+  isBrowser,
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+} from '../utils/browser';
 
 /**
  * Custom Layout Hook
@@ -34,9 +38,17 @@ interface UseCustomLayoutReturn {
   /** Get column index for a component */
   getComponentColumn: (componentId: string) => number;
   /** Move component to a specific column */
-  moveComponent: (componentId: string, targetColumn: number, targetIndex?: number) => void;
+  moveComponent: (
+    componentId: string,
+    targetColumn: number,
+    targetIndex?: number,
+  ) => void;
   /** Reorder components within a column */
-  reorderWithinColumn: (columnIndex: number, oldIndex: number, newIndex: number) => void;
+  reorderWithinColumn: (
+    columnIndex: number,
+    oldIndex: number,
+    newIndex: number,
+  ) => void;
   /** Get all components in a specific column (ordered) */
   getComponentsInColumn: (columnIndex: number) => string[];
   /** Reset layout to default */
@@ -66,7 +78,10 @@ export function useCustomLayout({
             typeof parsed.componentLayout === 'object'
           ) {
             if (!parsed.columnOrder || typeof parsed.columnOrder !== 'object') {
-              const defaultLayout = createDefaultLayout(componentIds, parsed.columns);
+              const defaultLayout = createDefaultLayout(
+                componentIds,
+                parsed.columns,
+              );
               parsed.columnOrder = defaultLayout.columnOrder;
             } else {
               for (let i = 0; i < parsed.columns; i++) {
@@ -79,7 +94,10 @@ export function useCustomLayout({
           }
         }
       } catch (error) {
-        console.error('[useCustomLayout] Failed to load layout from localStorage:', error);
+        console.error(
+          '[useCustomLayout] Failed to load layout from localStorage:',
+          error,
+        );
       }
     }
 
@@ -95,14 +113,19 @@ export function useCustomLayout({
     try {
       safeLocalStorageSet(storageKey, JSON.stringify(layout));
     } catch (error) {
-      console.error('[useCustomLayout] Failed to save layout to localStorage:', error);
+      console.error(
+        '[useCustomLayout] Failed to save layout to localStorage:',
+        error,
+      );
     }
   }, [layout, storageKey]);
 
   // Ensure new components introduced after persistence are added to the layout
   useEffect(() => {
     setLayout((prev) => {
-      const missingComponents = componentIds.filter((id) => !(id in prev.componentLayout));
+      const missingComponents = componentIds.filter(
+        (id) => !(id in prev.componentLayout),
+      );
       if (missingComponents.length === 0) {
         return prev;
       }
@@ -129,143 +152,174 @@ export function useCustomLayout({
   }, [componentIds]);
 
   // Set number of columns and redistribute components
-  const setColumns = useCallback((cols: ColumnCount) => {
-    setLayout((prev) => {
-      const sortedComponents = [...componentIds].sort((a, b) => {
-        const colA = prev.componentLayout[a] ?? 0;
-        const colB = prev.componentLayout[b] ?? 0;
-        if (colA !== colB) {
-          return colA - colB;
-        }
+  const setColumns = useCallback(
+    (cols: ColumnCount) => {
+      setLayout((prev) => {
+        const sortedComponents = [...componentIds].sort((a, b) => {
+          const colA = prev.componentLayout[a] ?? 0;
+          const colB = prev.componentLayout[b] ?? 0;
+          if (colA !== colB) {
+            return colA - colB;
+          }
 
-        const orderA = prev.columnOrder[colA] ?? [];
-        const indexA = orderA.indexOf(a);
-        const indexB = orderA.indexOf(b);
+          const orderA = prev.columnOrder[colA] ?? [];
+          const indexA = orderA.indexOf(a);
+          const indexB = orderA.indexOf(b);
 
-        if (indexA !== -1 && indexB !== -1) {
-          return indexA - indexB;
-        }
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB;
+          }
 
-        if (indexA !== -1) {
-          return -1;
-        }
+          if (indexA !== -1) {
+            return -1;
+          }
 
-        if (indexB !== -1) {
-          return 1;
-        }
+          if (indexB !== -1) {
+            return 1;
+          }
 
-        return 0;
+          return 0;
+        });
+
+        return createDefaultLayout(sortedComponents, cols);
       });
-
-      return createDefaultLayout(sortedComponents, cols);
-    });
-  }, [componentIds]);
+    },
+    [componentIds],
+  );
 
   // Get column index for a component
-  const getComponentColumn = useCallback((componentId: string): number => {
-    return layout.componentLayout[componentId] ?? 0;
-  }, [layout]);
+  const getComponentColumn = useCallback(
+    (componentId: string): number => {
+      return layout.componentLayout[componentId] ?? 0;
+    },
+    [layout],
+  );
 
   // Move component to a specific column
-  const moveComponent = useCallback((componentId: string, targetColumn: number, targetIndex?: number) => {
-    setLayout((prev) => {
-      const clampedColumn = Math.max(0, Math.min(targetColumn, prev.columns - 1));
-      const oldColumn = prev.componentLayout[componentId] ?? 0;
+  const moveComponent = useCallback(
+    (componentId: string, targetColumn: number, targetIndex?: number) => {
+      setLayout((prev) => {
+        const clampedColumn = Math.max(
+          0,
+          Math.min(targetColumn, prev.columns - 1),
+        );
+        const oldColumn = prev.componentLayout[componentId] ?? 0;
 
-      // Update column order
-      const newColumnOrder = { ...prev.columnOrder };
+        // Update column order
+        const newColumnOrder = { ...prev.columnOrder };
 
-      const removeFromColumn = (column: number) => {
-        const items = newColumnOrder[column] ?? [];
-        newColumnOrder[column] = items.filter((id) => id !== componentId);
-      };
+        const removeFromColumn = (column: number) => {
+          const items = newColumnOrder[column] ?? [];
+          newColumnOrder[column] = items.filter((id) => id !== componentId);
+        };
 
-      const insertIntoColumn = (column: number, index?: number) => {
-        const existingItems = newColumnOrder[column] ?? [];
-        const filteredItems = existingItems.filter((id) => id !== componentId);
-        const insertionIndex =
-          index === undefined
-            ? filteredItems.length
-            : Math.max(0, Math.min(index, filteredItems.length));
-        filteredItems.splice(insertionIndex, 0, componentId);
-        newColumnOrder[column] = filteredItems;
-      };
+        const insertIntoColumn = (column: number, index?: number) => {
+          const existingItems = newColumnOrder[column] ?? [];
+          const filteredItems = existingItems.filter(
+            (id) => id !== componentId,
+          );
+          const insertionIndex =
+            index === undefined
+              ? filteredItems.length
+              : Math.max(0, Math.min(index, filteredItems.length));
+          filteredItems.splice(insertionIndex, 0, componentId);
+          newColumnOrder[column] = filteredItems;
+        };
 
-      removeFromColumn(oldColumn);
-      insertIntoColumn(clampedColumn, targetIndex);
+        removeFromColumn(oldColumn);
+        insertIntoColumn(clampedColumn, targetIndex);
 
-      return {
-        ...prev,
-        componentLayout: {
-          ...prev.componentLayout,
-          [componentId]: clampedColumn,
-        },
-        columnOrder: newColumnOrder,
-      };
-    });
-  }, []);
+        return {
+          ...prev,
+          componentLayout: {
+            ...prev.componentLayout,
+            [componentId]: clampedColumn,
+          },
+          columnOrder: newColumnOrder,
+        };
+      });
+    },
+    [],
+  );
 
   // Reorder components within a column
-  const reorderWithinColumn = useCallback((columnIndex: number, oldIndex: number, newIndex: number) => {
-    setLayout((prev) => {
-      const baseItems = componentIds.filter((id) => {
-        const col = prev.componentLayout[id] ?? 0;
+  const reorderWithinColumn = useCallback(
+    (columnIndex: number, oldIndex: number, newIndex: number) => {
+      setLayout((prev) => {
+        const baseItems = componentIds.filter((id) => {
+          const col = prev.componentLayout[id] ?? 0;
+          return col === columnIndex;
+        });
+
+        const existingOrder = prev.columnOrder[columnIndex] ?? [];
+        const orderedItems = [
+          ...existingOrder.filter((id) => baseItems.includes(id)),
+          ...baseItems.filter((id) => !existingOrder.includes(id)),
+        ];
+
+        if (orderedItems.length === 0) {
+          return prev;
+        }
+
+        const fromIndex = Math.max(
+          0,
+          Math.min(oldIndex, orderedItems.length - 1),
+        );
+        const toIndex = Math.max(
+          0,
+          Math.min(newIndex, orderedItems.length - 1),
+        );
+
+        if (fromIndex === toIndex) {
+          return prev;
+        }
+
+        const updatedOrder = [...orderedItems];
+        const [movedItem] = updatedOrder.splice(fromIndex, 1);
+
+        if (!movedItem) {
+          return prev;
+        }
+
+        updatedOrder.splice(toIndex, 0, movedItem);
+
+        return {
+          ...prev,
+          columnOrder: {
+            ...prev.columnOrder,
+            [columnIndex]: updatedOrder,
+          },
+        };
+      });
+    },
+    [componentIds],
+  );
+
+  // Get all components in a specific column (ordered)
+  const getComponentsInColumn = useCallback(
+    (columnIndex: number): string[] => {
+      const columnOrder = layout.columnOrder[columnIndex] || [];
+      const componentsInColumn = componentIds.filter((id) => {
+        const col = layout.componentLayout[id] ?? 0;
         return col === columnIndex;
       });
 
-      const existingOrder = prev.columnOrder[columnIndex] ?? [];
-      const orderedItems = [
-        ...existingOrder.filter((id) => baseItems.includes(id)),
-        ...baseItems.filter((id) => !existingOrder.includes(id)),
-      ];
-
-      if (orderedItems.length === 0) {
-        return prev;
+      // Return ordered list if available, otherwise fallback to unordered
+      if (columnOrder.length > 0) {
+        // Ensure all components in column are in the order array
+        const missingItems = componentsInColumn.filter(
+          (id) => !columnOrder.includes(id),
+        );
+        return [
+          ...columnOrder.filter((id) => componentsInColumn.includes(id)),
+          ...missingItems,
+        ];
       }
 
-      const fromIndex = Math.max(0, Math.min(oldIndex, orderedItems.length - 1));
-      const toIndex = Math.max(0, Math.min(newIndex, orderedItems.length - 1));
-
-      if (fromIndex === toIndex) {
-        return prev;
-      }
-
-      const updatedOrder = [...orderedItems];
-      const [movedItem] = updatedOrder.splice(fromIndex, 1);
-
-      if (!movedItem) {
-        return prev;
-      }
-
-      updatedOrder.splice(toIndex, 0, movedItem);
-
-      return {
-        ...prev,
-        columnOrder: {
-          ...prev.columnOrder,
-          [columnIndex]: updatedOrder,
-        },
-      };
-    });
-  }, [componentIds]);
-
-  // Get all components in a specific column (ordered)
-  const getComponentsInColumn = useCallback((columnIndex: number): string[] => {
-    const columnOrder = layout.columnOrder[columnIndex] || [];
-    const componentsInColumn = componentIds.filter((id) => {
-      const col = layout.componentLayout[id] ?? 0;
-      return col === columnIndex;
-    });
-
-    // Return ordered list if available, otherwise fallback to unordered
-    if (columnOrder.length > 0) {
-      // Ensure all components in column are in the order array
-      const missingItems = componentsInColumn.filter(id => !columnOrder.includes(id));
-      return [...columnOrder.filter(id => componentsInColumn.includes(id)), ...missingItems];
-    }
-
-    return componentsInColumn;
-  }, [componentIds, layout]);
+      return componentsInColumn;
+    },
+    [componentIds, layout],
+  );
 
   // Reset layout to default
   const resetLayout = useCallback(() => {
@@ -288,7 +342,7 @@ export function useCustomLayout({
  */
 function createDefaultLayout(
   componentIds: string[],
-  columns: ColumnCount
+  columns: ColumnCount,
 ): LayoutConfig {
   const componentLayout: Record<string, number> = {};
   const columnOrder: Record<number, string[]> = {};

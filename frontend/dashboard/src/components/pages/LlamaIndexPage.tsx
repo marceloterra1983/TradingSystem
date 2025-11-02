@@ -6,9 +6,19 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, RefreshCw, Database, Zap, Search, Server, Layers } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw,
+  Zap,
+  Server,
+  Layers,
+} from 'lucide-react';
 import { Button } from '../ui/button';
-import { CustomizablePageLayout, type PageSection } from '../layout/CustomizablePageLayout';
+import {
+  CustomizablePageLayout,
+  type PageSection,
+} from '../layout/CustomizablePageLayout';
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
@@ -39,7 +49,12 @@ interface OverviewCardProps {
   onRefresh: () => void;
 }
 
-function OverviewCardContent({ loading, error, status, onRefresh }: OverviewCardProps) {
+function OverviewCardContent({
+  loading,
+  error,
+  status,
+  onRefresh,
+}: OverviewCardProps) {
   const services = useMemo(() => {
     if (!status) return [];
     return [
@@ -55,7 +70,7 @@ function OverviewCardContent({ loading, error, status, onRefresh }: OverviewCard
         label: 'Ingestion Service',
         ok: status.services?.ingestion?.ok ?? false,
         message: status.services?.ingestion?.message ?? 'Sem dados',
-        icon: Database,
+        icon: Server,
       },
       {
         id: 'ollama',
@@ -76,7 +91,7 @@ function OverviewCardContent({ loading, error, status, onRefresh }: OverviewCard
         label: 'Collections Service',
         ok: status.services?.collections?.ok ?? false,
         message: status.services?.collections?.message ?? 'Sem dados',
-        icon: Database,
+        icon: RefreshCw,
       },
       {
         id: 'qdrant',
@@ -85,7 +100,7 @@ function OverviewCardContent({ loading, error, status, onRefresh }: OverviewCard
         message: status.qdrant
           ? `${status.qdrant.collection} • ${formatNumber(status.qdrant.count)} vetores`
           : 'Sem dados',
-        icon: Search,
+        icon: Zap,
       },
     ];
   }, [status]);
@@ -115,7 +130,7 @@ function OverviewCardContent({ loading, error, status, onRefresh }: OverviewCard
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {services.length === 0 && (
           <div className="col-span-full flex items-center gap-3 rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-            <Activity className="h-5 w-5 animate-spin text-slate-400" />
+            <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
             Aguardando resposta dos serviços…
           </div>
         )}
@@ -183,7 +198,9 @@ export function LlamaIndexPage(): JSX.Element {
       setActiveCollection(collections[0].name);
       return;
     }
-    const exists = collections.some((collection) => collection.name === activeCollection);
+    const exists = collections.some(
+      (collection) => collection.name === activeCollection,
+    );
     if (!exists) {
       setActiveCollection(collections[0].name);
     }
@@ -207,11 +224,10 @@ export function LlamaIndexPage(): JSX.Element {
         content: (
           <CollapsibleCard id="rag-overview">
             <CollapsibleCardHeader>
-              <CollapsibleCardTitle icon={Activity}>
-                Visão Geral RAG
-              </CollapsibleCardTitle>
+              <CollapsibleCardTitle>Visão Geral RAG</CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Status e monitoramento do sistema de Retrieval-Augmented Generation
+                Status e monitoramento do sistema de Retrieval-Augmented
+                Generation
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -233,11 +249,12 @@ export function LlamaIndexPage(): JSX.Element {
         content: (
           <CollapsibleCard id="collections-management">
             <CollapsibleCardHeader>
-              <CollapsibleCardTitle icon={Database}>
+              <CollapsibleCardTitle>
                 Gerenciamento de Coleções
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Configure e gerencie coleções RAG, modelos de embedding e diretórios de origem
+                Configure e gerencie coleções RAG, modelos de embedding e
+                diretórios de origem
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -246,7 +263,9 @@ export function LlamaIndexPage(): JSX.Element {
                 models={models}
                 isLoading={collectionsLoading}
                 error={collectionsError}
-                onCreateCollection={createCollection}
+                onCreateCollection={async (request) => {
+                  await createCollection(request);
+                }}
                 onUpdateCollection={async (name, updates) => {
                   await updateCollection({ name, updates });
                 }}
@@ -273,7 +292,7 @@ export function LlamaIndexPage(): JSX.Element {
         content: (
           <CollapsibleCard id="query-tool">
             <CollapsibleCardHeader>
-              <CollapsibleCardTitle icon={Search}>
+              <CollapsibleCardTitle>
                 Ferramenta de Consulta
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
@@ -309,7 +328,7 @@ export function LlamaIndexPage(): JSX.Element {
       ingestCollection,
       resetCollectionsError,
       handleCollectionChange,
-    ]
+    ],
   );
 
   return (

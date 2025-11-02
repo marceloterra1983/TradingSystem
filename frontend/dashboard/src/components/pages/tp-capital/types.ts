@@ -39,4 +39,3 @@ export interface FetchLogsResult {
   usingFallback: boolean;
   errorMessage?: string;
 }
-

@@ -3,11 +3,15 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import fetch from 'node-fetch';
 import { CollectionService } from '../CollectionService.js';
-import { ServiceUnavailableError, ExternalServiceError } from '../../middleware/errorHandler.js';
+import { ExternalServiceError } from '../../middleware/errorHandler.js';
 
 // Mock node-fetch
-vi.mock('node-fetch');
+vi.mock('node-fetch', () => ({
+  default: vi.fn(),
+}));
+const mockedFetch = vi.mocked(fetch);
 
 describe('CollectionService', () => {
   let service;
@@ -15,6 +19,7 @@ describe('CollectionService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedFetch.mockReset();
 
     mockConfig = {
       queryBaseUrl: 'http://localhost:8202',
@@ -127,21 +132,17 @@ describe('CollectionService', () => {
   describe('getHealth', () => {
     it('should return health status for all services', async () => {
       // Mock successful responses
-      const mockFetch = vi.fn()
-        .mockResolvedValueOnce({
-          // Query health
-          ok: true,
-          status: 200,
-          text: () => Promise.resolve(JSON.stringify({ status: 'ok' })),
-        })
-        .mockResolvedValueOnce({
-          // Ingestion health
-          ok: true,
-          status: 200,
-          text: () => Promise.resolve(JSON.stringify({ status: 'ok' })),
-        });
-
-      global.fetch = mockFetch;
+      const fetchSpy = vi.spyOn(service, '_fetchJson').mockImplementation(async (url) => {
+        if (url.includes('/gpu/policy')) {
+          return { ok: true, status: 200, data: { policy: 'round-robin' } };
+        }
+        return { ok: true, status: 200, data: { status: 'ok' } };
+      });
+      vi.spyOn(service, '_checkRedisHealth').mockResolvedValue({
+        ok: true,
+        status: 200,
+        data: { status: 'ok' },
+      });
 
       const health = await service.getHealth();
 
@@ -151,27 +152,34 @@ describe('CollectionService', () => {
       expect(health.services).toHaveProperty('ingestion');
       expect(health.services.query.ok).toBe(true);
       expect(health.services.ingestion.ok).toBe(true);
+      expect(fetchSpy).toHaveBeenCalled();
     });
 
     it('should handle service failures gracefully', async () => {
-      const mockFetch = vi.fn()
-        .mockRejectedValueOnce(new Error('Connection refused'))
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          text: () => Promise.resolve(JSON.stringify({ status: 'ok' })),
-        });
+      vi.spyOn(service, '_fetchJson').mockImplementation(async (url) => {
+        if (url.includes('/health')) {
+          return { ok: false, status: 503, data: { status: 'error', message: 'unavailable' } };
+        }
+        return { ok: true, status: 200, data: { status: 'ok' } };
+      });
+      vi.spyOn(service, '_checkRedisHealth').mockResolvedValue({
+        ok: false,
+        status: 503,
+        data: { status: 'error', message: 'redis unavailable' },
+      });
 
-      global.fetch = mockFetch;
+      const health = await service.getHealth();
 
-      await expect(service.getHealth()).rejects.toThrow(ExternalServiceError);
+      expect(health.services.query.ok).toBe(false);
+      expect(health.services.redis.ok).toBe(false);
+      expect(health.services.query.message).toBe('unavailable');
     });
   });
 
   describe('validation', () => {
-    it('should validate collection names', () => {
-      expect(() => service.deleteCollection('')).rejects.toThrow();
-      expect(() => service.deleteCollection('   ')).rejects.toThrow();
+    it('should validate collection names', async () => {
+      await expect(service.deleteCollection('')).rejects.toThrow();
+      await expect(service.deleteCollection('   ')).rejects.toThrow();
     });
   });
 });

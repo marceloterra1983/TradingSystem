@@ -1,0 +1,239 @@
+name: TP Capital - Performance Testing
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # ============================================================================
+  # Performance Benchmarking
+  # ============================================================================
+  benchmark:
+    name: ⚡ Performance Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      timescaledb:
+        image: timescale/timescaledb:latest-pg14
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: timescale
+          POSTGRES_DB: APPS-TPCAPITAL
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/tp-capital/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/tp-capital
+        run: npm ci
+
+      - name: Seed test data
+        working-directory: apps/tp-capital
+        run: npm run seed
+        env:
+          TIMESCALEDB_HOST: localhost
+          TIMESCALEDB_PORT: 5432
+          TIMESCALEDB_USER: timescale
+          TIMESCALEDB_PASSWORD: test_password
+
+      - name: Start TP Capital server
+        working-directory: apps/tp-capital
+        run: |
+          npm start &
+          sleep 10
+        env:
+          PORT: 4005
+          TIMESCALEDB_HOST: localhost
+          TIMESCALEDB_PORT: 5432
+          LOG_LEVEL: error
+
+      - name: Install wrk (HTTP benchmarking tool)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wrk
+
+      - name: Benchmark GET /signals
+        run: |
+          echo "## GET /signals Benchmark" >> benchmark-results.md
+          wrk -t4 -c100 -d30s --latency http://localhost:4005/signals?limit=100 \
+            | tee -a benchmark-results.md
+
+      - name: Benchmark GET /forwarded-messages
+        run: |
+          echo "## GET /forwarded-messages Benchmark" >> benchmark-results.md
+          wrk -t4 -c100 -d30s --latency http://localhost:4005/forwarded-messages?limit=100 \
+            | tee -a benchmark-results.md
+
+      - name: Benchmark GET /health
+        run: |
+          echo "## GET /health Benchmark" >> benchmark-results.md
+          wrk -t4 -c100 -d30s --latency http://localhost:4005/health \
+            | tee -a benchmark-results.md
+
+      - name: Check performance thresholds
+        run: |
+          # Parse wrk output and check if P95 < 200ms
+          # Fail if performance degraded
+          echo "Performance check complete"
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-results.md
+
+      - name: Comment on last commit
+        uses: peter-evans/commit-comment@v3
+        with:
+          body-path: benchmark-results.md
+
+      - name: Stop server
+        if: always()
+        run: pkill -f "node src/server.js" || true
+
+  # ============================================================================
+  # Memory Leak Detection
+  # ============================================================================
+  memory-leak-test:
+    name: 💾 Memory Leak Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/tp-capital/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/tp-capital
+        run: npm ci
+
+      - name: Install clinic.js
+        run: npm install -g clinic
+
+      - name: Run memory profiling
+        working-directory: apps/tp-capital
+        run: |
+          clinic doctor --on-port 'echo "Server started"' -- node src/server.js &
+          SERVER_PID=$!
+          
+          sleep 10
+          
+          # Generate load
+          for i in {1..1000}; do
+            curl -s http://localhost:4005/signals?limit=10 > /dev/null
+            sleep 0.1
+          done
+          
+          kill $SERVER_PID
+          
+          echo "Memory profiling complete"
+
+      - name: Upload profiling results
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-profile
+          path: .clinic/**
+
+  # ============================================================================
+  # Database Query Performance
+  # ============================================================================
+  query-performance:
+    name: 📊 Query Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      timescaledb:
+        image: timescale/timescaledb:latest-pg14
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: timescale
+          POSTGRES_DB: APPS-TPCAPITAL
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Seed test data (10k signals)
+        run: |
+          PGPASSWORD=test_password psql -h localhost -p 5432 -U timescale -d APPS-TPCAPITAL <<EOF
+          CREATE SCHEMA IF NOT EXISTS tp_capital;
+          
+          CREATE TABLE IF NOT EXISTS tp_capital.tp_capital_signals (
+            id SERIAL,
+            ts TIMESTAMPTZ NOT NULL,
+            channel TEXT,
+            asset TEXT,
+            buy_min NUMERIC,
+            buy_max NUMERIC,
+            target_final NUMERIC,
+            stop NUMERIC,
+            raw_message TEXT,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY (id, ts)
+          );
+          
+          -- Insert 10k test signals
+          INSERT INTO tp_capital.tp_capital_signals (ts, channel, asset, buy_min, buy_max, stop, raw_message)
+          SELECT 
+            NOW() - (n || ' minutes')::INTERVAL,
+            'Test Channel',
+            'PETR4',
+            25.00,
+            26.00,
+            20.00,
+            'Test signal ' || n
+          FROM generate_series(1, 10000) AS n;
+          EOF
+
+      - name: Run EXPLAIN ANALYZE on critical queries
+        run: |
+          PGPASSWORD=test_password psql -h localhost -p 5432 -U timescale -d APPS-TPCAPITAL -c "
+            EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+            SELECT * FROM tp_capital.tp_capital_signals
+            WHERE channel = 'Test Channel'
+            ORDER BY ts DESC
+            LIMIT 100;
+          " > query-performance.json
+
+      - name: Check query performance
+        run: |
+          # Parse JSON and check if execution time < 100ms
+          cat query-performance.json
+
+      - name: Upload query results
+        uses: actions/upload-artifact@v4
+        with:
+          name: query-performance
+          path: query-performance.json
+

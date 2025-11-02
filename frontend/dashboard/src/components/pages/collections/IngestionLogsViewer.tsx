@@ -7,7 +7,7 @@
  * @module components/pages/collections/IngestionLogsViewer
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   CollapsibleCard,
@@ -17,8 +17,20 @@ import {
   CollapsibleCardContent,
 } from '../../ui/collapsible-card';
 import { Button } from '../../ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { AlertCircle, RefreshCcw, Info, CheckCircle, XCircle, Loader2, FileText, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select';
+import {
+  RefreshCcw,
+  Loader2,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import {
   Table,
@@ -145,7 +157,7 @@ function getLevelColor(level: string): string {
  */
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
-  
+
   // Always show date and time
   return date.toLocaleString('pt-BR', {
     day: '2-digit',
@@ -162,23 +174,25 @@ function formatTimestamp(timestamp: string): string {
  */
 function formatDuration(durationMs: number | undefined): string {
   if (!durationMs || durationMs < 0) return '-';
-  
+
   if (durationMs < 1000) {
     return `${durationMs}ms`;
   }
-  
+
   const seconds = Math.floor(durationMs / 1000);
   if (seconds < 60) {
     return `${seconds}s`;
   }
-  
+
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  
+
   if (minutes < 60) {
-    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+    return remainingSeconds > 0
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
   }
-  
+
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   return `${hours}h ${remainingMinutes}m`;
@@ -200,7 +214,10 @@ export function IngestionLogsViewer({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const logsQuery = useQuery({
-    queryKey: ['ingestion-logs', { limit, collection: collectionFilter, level: levelFilter }],
+    queryKey: [
+      'ingestion-logs',
+      { limit, collection: collectionFilter, level: levelFilter },
+    ],
     queryFn: () =>
       fetchIngestionLogs({
         limit,
@@ -214,7 +231,7 @@ export function IngestionLogsViewer({
   // Sort logs
   const sortedLogs = useMemo(() => {
     const data = logsQuery.data || [];
-    
+
     if (!sortDirection) return data;
 
     return [...data].sort((a, b) => {
@@ -222,7 +239,8 @@ export function IngestionLogsViewer({
 
       switch (sortField) {
         case 'timestamp':
-          comparison = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+          comparison =
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
           break;
         case 'level':
           const levelPriority = { error: 0, warn: 1, info: 2, success: 3 };
@@ -262,10 +280,11 @@ export function IngestionLogsViewer({
       return age < 10000; // 10 seconds
     });
 
-    return recentLogs.some((log) =>
-      log.message.toLowerCase().includes('processing') ||
-      log.message.toLowerCase().includes('indexing') ||
-      log.message.toLowerCase().includes('ingestion')
+    return recentLogs.some(
+      (log) =>
+        log.message.toLowerCase().includes('processing') ||
+        log.message.toLowerCase().includes('indexing') ||
+        log.message.toLowerCase().includes('ingestion'),
     );
   }, [logs]);
 
@@ -292,9 +311,11 @@ export function IngestionLogsViewer({
     if (sortField !== field || !sortDirection) {
       return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
     }
-    return sortDirection === 'asc' 
-      ? <ArrowUp className="h-3 w-3 ml-1" />
-      : <ArrowDown className="h-3 w-3 ml-1" />;
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="h-3 w-3 ml-1" />
+    ) : (
+      <ArrowDown className="h-3 w-3 ml-1" />
+    );
   };
 
   return (
@@ -344,14 +365,19 @@ export function IngestionLogsViewer({
             <SelectContent>
               <SelectItem value="all">Todos ({logCounts.total})</SelectItem>
               <SelectItem value="info">ℹ Info ({logCounts.info})</SelectItem>
-              <SelectItem value="success">✓ OK ({logCounts.success})</SelectItem>
+              <SelectItem value="success">
+                ✓ OK ({logCounts.success})
+              </SelectItem>
               <SelectItem value="warn">⚠ Warn ({logCounts.warn})</SelectItem>
               <SelectItem value="error">✗ Erro ({logCounts.error})</SelectItem>
             </SelectContent>
           </Select>
 
           {/* Limit */}
-          <Select value={limit.toString()} onValueChange={(val) => setLimit(Number(val))}>
+          <Select
+            value={limit.toString()}
+            onValueChange={(val) => setLimit(Number(val))}
+          >
             <SelectTrigger className="h-7 w-24 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -370,7 +396,9 @@ export function IngestionLogsViewer({
             onClick={() => logsQuery.refetch()}
             disabled={logsQuery.isFetching}
           >
-            <RefreshCcw className={`h-3 w-3 ${logsQuery.isFetching ? 'animate-spin' : ''}`} />
+            <RefreshCcw
+              className={`h-3 w-3 ${logsQuery.isFetching ? 'animate-spin' : ''}`}
+            />
           </Button>
 
           <Button
@@ -398,7 +426,10 @@ export function IngestionLogsViewer({
         {logsQuery.error && (
           <div className="rounded border border-red-300 bg-red-50 p-2 dark:border-red-700 dark:bg-red-950">
             <p className="text-xs text-red-600 dark:text-red-400">
-              ✗ Erro: {logsQuery.error instanceof Error ? logsQuery.error.message : 'Erro ao carregar logs'}
+              ✗ Erro:{' '}
+              {logsQuery.error instanceof Error
+                ? logsQuery.error.message
+                : 'Erro ao carregar logs'}
             </p>
           </div>
         )}
@@ -419,7 +450,7 @@ export function IngestionLogsViewer({
               <Table>
                 <TableHeader className="sticky top-0 bg-white dark:bg-gray-800 z-10">
                   <TableRow className="h-8">
-                    <TableHead 
+                    <TableHead
                       className="w-44 py-1 text-xs bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => handleSort('timestamp')}
                     >
@@ -428,7 +459,7 @@ export function IngestionLogsViewer({
                         {getSortIcon('timestamp')}
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="w-12 py-1 text-xs text-center bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => handleSort('level')}
                     >
@@ -436,7 +467,7 @@ export function IngestionLogsViewer({
                         {getSortIcon('level')}
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="py-1 text-xs bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => handleSort('message')}
                     >
@@ -445,7 +476,7 @@ export function IngestionLogsViewer({
                         {getSortIcon('message')}
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="w-32 py-1 text-xs text-center bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => handleSort('collection')}
                     >
@@ -454,7 +485,7 @@ export function IngestionLogsViewer({
                         {getSortIcon('collection')}
                       </div>
                     </TableHead>
-                    <TableHead 
+                    <TableHead
                       className="w-24 py-1 text-xs text-center bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => handleSort('duration')}
                     >
@@ -467,12 +498,17 @@ export function IngestionLogsViewer({
                 </TableHeader>
                 <TableBody>
                   {logs.map((log, index) => (
-                    <TableRow key={`${log.timestamp}-${index}`} className="h-8 border-0">
+                    <TableRow
+                      key={`${log.timestamp}-${index}`}
+                      className="h-8 border-0"
+                    >
                       <TableCell className="py-1 text-xs text-gray-500 dark:text-gray-400">
                         {formatTimestamp(log.timestamp)}
                       </TableCell>
                       <TableCell className="py-1 text-center">
-                        <span className={`text-sm font-bold ${getLevelColor(log.level)}`}>
+                        <span
+                          className={`text-sm font-bold ${getLevelColor(log.level)}`}
+                        >
                           {getLevelIcon(log.level)}
                         </span>
                       </TableCell>
@@ -488,14 +524,20 @@ export function IngestionLogsViewer({
                           )}
                         </div>
                         {log.details?.currentFile && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate" title={log.details.currentFile}>
+                          <div
+                            className="text-xs text-gray-500 dark:text-gray-400 truncate"
+                            title={log.details.currentFile}
+                          >
                             {log.details.currentFile.split('/').pop()}
                           </div>
                         )}
                       </TableCell>
                       <TableCell className="py-1 text-center text-xs">
                         {log.collection && (
-                          <Badge variant="outline" className="text-xs px-1.5 py-0">
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-1.5 py-0"
+                          >
                             {log.collection}
                           </Badge>
                         )}
@@ -523,4 +565,3 @@ export function IngestionLogsViewer({
 }
 
 export default IngestionLogsViewer;
-

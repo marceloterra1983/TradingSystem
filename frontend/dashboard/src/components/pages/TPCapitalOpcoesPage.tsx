@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
-import { SignalsTable } from "./tp-capital/SignalsTable";
-import { LogsViewer } from "./tp-capital/LogsViewer";
+import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { SignalsTable } from './tp-capital/SignalsTable';
+import { LogsViewer } from './tp-capital/LogsViewer';
 
 /**
  * TP Capital Opções Page

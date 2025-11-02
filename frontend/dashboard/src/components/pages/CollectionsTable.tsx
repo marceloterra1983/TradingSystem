@@ -33,7 +33,10 @@ interface CollectionsTableProps {
   selectedCollection?: string;
 }
 
-export function CollectionsTable({ onSelectCollection, selectedCollection }: CollectionsTableProps) {
+export function CollectionsTable({
+  onSelectCollection,
+  selectedCollection,
+}: CollectionsTableProps) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +53,7 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
     try {
       const response = await fetch('/api/v1/rag/collections');
       const data: CollectionsResponse = await response.json();
-      
+
       if (data.success) {
         setCollections(data.collections);
         setDefaultCollection(data.defaultCollection);
@@ -100,7 +103,9 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading collections...</span>
+        <span className="ml-3 text-gray-600 dark:text-gray-400">
+          Loading collections...
+        </span>
       </div>
     );
   }
@@ -110,13 +115,25 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
       <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            <svg
+              className="h-5 w-5 text-red-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Error loading collections</h3>
-            <div className="mt-2 text-sm text-red-700 dark:text-red-300">{error}</div>
+            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+              Error loading collections
+            </h3>
+            <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
           </div>
         </div>
       </div>
@@ -128,21 +145,29 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
       {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Collections</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Total Collections
+          </div>
           <div className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
             {collections.length}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Ready</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Ready
+          </div>
           <div className="mt-1 text-3xl font-semibold text-green-600 dark:text-green-400">
-            {collections.filter(c => c.status === 'ready').length}
+            {collections.filter((c) => c.status === 'ready').length}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Chunks</div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            Total Chunks
+          </div>
           <div className="mt-1 text-3xl font-semibold text-blue-600 dark:text-blue-400">
-            {collections.reduce((sum, c) => sum + (c.count || 0), 0).toLocaleString()}
+            {collections
+              .reduce((sum, c) => sum + (c.count || 0), 0)
+              .toLocaleString()}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             across all collections
@@ -156,22 +181,40 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Collection
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Model
                 </th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Dimensions
                 </th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Chunks
                 </th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Status
                 </th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                >
                   Actions
                 </th>
               </tr>
@@ -181,7 +224,9 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
                 <tr
                   key={collection.name}
                   className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                    selectedCollection === collection.name ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                    selectedCollection === collection.name
+                      ? 'bg-blue-50 dark:bg-blue-900/20'
+                      : ''
                   }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -219,11 +264,13 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex flex-col items-center">
-                      <div className={`text-lg font-bold ${
-                        collection.count && collection.count > 0 
-                          ? 'text-blue-600 dark:text-blue-400' 
-                          : 'text-gray-400 dark:text-gray-500'
-                      }`}>
+                      <div
+                        className={`text-lg font-bold ${
+                          collection.count && collection.count > 0
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-gray-400 dark:text-gray-500'
+                        }`}
+                      >
                         {formatCount(collection.count)}
                       </div>
                       {collection.count && collection.count > 0 && (
@@ -246,7 +293,9 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
-                        {selectedCollection === collection.name ? '✓ Selected' : 'Select'}
+                        {selectedCollection === collection.name
+                          ? '✓ Selected'
+                          : 'Select'}
                       </button>
                     )}
                     {collection.status !== 'ready' && (
@@ -279,7 +328,8 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
           </span>
         </div>
         <div className="text-xs text-gray-400 dark:text-gray-500">
-          💡 Chunks are document segments stored in Qdrant. Each document is split into multiple chunks for better retrieval.
+          💡 Chunks are document segments stored in Qdrant. Each document is
+          split into multiple chunks for better retrieval.
         </div>
       </div>
     </div>
@@ -287,4 +337,3 @@ export function CollectionsTable({ onSelectCollection, selectedCollection }: Col
 }
 
 export default CollectionsTable;
-

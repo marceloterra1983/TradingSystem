@@ -1,5 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import viteCompression from 'vite-plugin-compression';
+import { preloadHints } from './vite-plugin-preload-hints';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -142,7 +145,37 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    plugins: [react()],
+    plugins: [
+      react(),
+      visualizer({
+        filename: './dist/stats.html',
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        template: 'treemap', // or 'sunburst', 'network'
+      }),
+      // Preload critical chunks for faster initial load
+      preloadHints({
+        chunks: ['react-vendor', 'ui-radix', 'icons-vendor', 'utils-vendor'],
+        modulepreload: true,
+      }),
+      // Gzip compression
+      viteCompression({
+        verbose: true,
+        disable: !isProd,
+        threshold: 10240, // Only compress files > 10KB
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+      // Brotli compression (better than gzip, ~15-20% smaller)
+      viteCompression({
+        verbose: true,
+        disable: !isProd,
+        threshold: 10240,
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
+    ],
     server: {
       port: dashboardPort,
       strictPort: true,
@@ -293,20 +326,64 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'react/jsx-runtime'],
-            'state-vendor': ['zustand', '@tanstack/react-query'],
-            'ui-radix': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-tooltip',
-              '@radix-ui/react-collapsible',
-              '@radix-ui/react-scroll-area',
-            ],
-            'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-            'markdown-vendor': ['react-markdown', 'remark-gfm', 'rehype-raw'],
-            'utils-vendor': ['axios', 'clsx', 'tailwind-merge'],
+          manualChunks(id) {
+            // Vendor chunks - Core React (most stable)
+            if (id.includes('node_modules/react/') || 
+                id.includes('node_modules/react-dom/') ||
+                id.includes('node_modules/react/jsx-runtime')) {
+              return 'react-vendor';
+            }
+            
+            // State management (Zustand + React Query)
+            if (id.includes('node_modules/zustand') || 
+                id.includes('node_modules/@tanstack/react-query')) {
+              return 'state-vendor';
+            }
+            
+            // Radix UI components (large, stable)
+            if (id.includes('node_modules/@radix-ui/')) {
+              return 'ui-radix';
+            }
+            
+            // Drag and Drop (DnD Kit)
+            if (id.includes('node_modules/@dnd-kit/')) {
+              return 'dnd-vendor';
+            }
+            
+            // Markdown (only loaded when needed - lazy loaded)
+            if (id.includes('node_modules/react-markdown') || 
+                id.includes('node_modules/remark-') || 
+                id.includes('node_modules/rehype-')) {
+              return 'markdown-vendor';
+            }
+            
+            // Lucide icons (large icon library)
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons-vendor';
+            }
+            
+            // Utilities (Axios, Clsx, etc)
+            if (id.includes('node_modules/axios') ||
+                id.includes('node_modules/clsx') ||
+                id.includes('node_modules/tailwind-merge')) {
+              return 'utils-vendor';
+            }
+
+            // Chart libraries (Recharts ~100KB)
+            if (id.includes('node_modules/recharts') ||
+                id.includes('node_modules/chart.js')) {
+              return 'charts-vendor';
+            }
+
+            // Animation library (Framer Motion ~80KB)
+            if (id.includes('node_modules/framer-motion')) {
+              return 'animation-vendor';
+            }
+
+            // Other node_modules
+            if (id.includes('node_modules/')) {
+              return 'vendor';
+            }
           },
           chunkFileNames: 'assets/[name]-[hash].js',
           entryFileNames: 'assets/[name]-[hash].js',

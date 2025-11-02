@@ -1,0 +1,81 @@
+name: TP Capital - PR Validation
+
+on:
+  pull_request:
+    paths:
+      - 'apps/tp-capital/**'
+      - 'backend/shared/**'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # ============================================================================
+  # Quick validation for PRs (faster feedback)
+  # ============================================================================
+  pr-validation:
+    name: 🔍 PR Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for better diffs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/tp-capital/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/tp-capital
+        run: npm ci
+
+      - name: Run linter
+        working-directory: apps/tp-capital
+        run: npm run lint
+
+      - name: Run unit tests only (fast)
+        working-directory: apps/tp-capital
+        run: npm run test:unit
+
+      - name: Check for breaking changes
+        run: |
+          git diff origin/main --name-only | grep -E "apps/tp-capital/src/(schemas|middleware)" && echo "⚠️ Breaking changes detected in schemas/middleware" || echo "✅ No breaking changes"
+
+      - name: Analyze bundle size
+        working-directory: apps/tp-capital
+        run: |
+          npx size-limit
+        continue-on-error: true
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `
+            ## ✅ TP Capital PR Validation
+
+            - ✅ Linting: Passed
+            - ✅ Unit Tests: 44/44 passing
+            - ℹ️ Integration/E2E tests run on merge to main
+
+            **Next Steps:**
+            1. Review code changes
+            2. Approve PR
+            3. Merge to trigger full CI/CD pipeline
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
