@@ -11,7 +11,7 @@ const config = {
   tagline: 'Product knowledge, runbooks, and specs in one place',
   url: 'https://example.com',
   baseUrl: '/',
-  onBrokenLinks: 'warn',  // Temporariamente alterado de 'throw' para 'warn' para permitir build
+  onBrokenLinks: 'warn',  // Temporarily warn - broken links need fixing (see validation report)
   favicon: 'img/favicon.svg',
   organizationName: 'TradingSystem',
   projectName: 'docs',

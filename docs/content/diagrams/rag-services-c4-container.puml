@@ -1,0 +1,50 @@
+@startuml RAG Services - C4 Container Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title RAG Services System - Container Diagram (C4 Level 2)
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "Developer/User", "Uses documentation and RAG features")
+Person(admin, "System Administrator", "Manages system")
+
+System_Boundary(rag_collections, "RAG Collections Service (Port 3403)") {
+    Container(express_app, "Express.js Server", "Node.js, TypeScript", "REST API for collection management")
+    Container(collection_mgr, "Collection Manager", "TypeScript", "Manages collection configurations and metadata")
+    Container(file_watcher, "File Watcher", "Chokidar", "Monitors directories for file changes")
+    Container(ingestion_client, "Ingestion Client", "Axios", "Communicates with ingestion service")
+    Container(cache_service, "Cache Service", "Redis Client", "Manages caching with Redis fallback")
+}
+
+ContainerDb(redis, "Redis Cache", "Redis 7", "Caches collection stats (TTL: 10min)")
+ContainerDb(qdrant, "Qdrant Vector DB", "Qdrant", "Stores document vectors and metadata")
+
+Container(llamaindex_ingest, "LlamaIndex Ingestion", "FastAPI, Python", "Processes documents, generates embeddings")
+Container(llamaindex_query, "LlamaIndex Query", "FastAPI, Python", "Handles semantic search and Q&A")
+
+Container(ollama_svc, "Ollama Service", "Go", "Provides embedding and LLM models")
+
+Container_Ext(dashboard_fe, "Dashboard Frontend", "React, TypeScript", "User interface")
+
+Rel(user, dashboard_fe, "Uses UI", "HTTPS")
+Rel(admin, express_app, "Manages collections", "HTTPS/REST")
+Rel(dashboard_fe, express_app, "API calls", "HTTPS/REST")
+
+Rel(express_app, collection_mgr, "Uses", "In-Process")
+Rel(express_app, file_watcher, "Uses", "In-Process")
+Rel(express_app, ingestion_client, "Uses", "In-Process")
+Rel(express_app, cache_service, "Uses", "In-Process")
+
+Rel(cache_service, redis, "Cache operations", "Redis Protocol")
+Rel(collection_mgr, qdrant, "Query collection stats", "HTTP")
+Rel(ingestion_client, llamaindex_ingest, "Trigger ingestion", "HTTP/REST")
+Rel(file_watcher, ingestion_client, "Auto-trigger on file changes", "In-Process")
+
+Rel(llamaindex_ingest, ollama_svc, "Generate embeddings", "HTTP")
+Rel(llamaindex_ingest, qdrant, "Store vectors", "gRPC/HTTP")
+Rel(llamaindex_query, ollama_svc, "Generate query embeddings", "HTTP")
+Rel(llamaindex_query, qdrant, "Retrieve vectors", "gRPC/HTTP")
+
+Rel(dashboard_fe, llamaindex_query, "Semantic search/Q&A", "HTTPS/REST")
+
+@enduml

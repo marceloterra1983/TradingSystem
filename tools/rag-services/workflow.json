@@ -1,0 +1,359 @@
+{
+  "name": "rag-services-local-workflow",
+  "version": "1.0.0",
+  "description": "Local development workflow for RAG Services with automated testing and validation",
+  "environment": {
+    "NODE_ENV": "development",
+    "LOG_LEVEL": "info"
+  },
+  "workflows": {
+    "pre-commit": {
+      "description": "Pre-commit validation workflow",
+      "tasks": [
+        {
+          "id": "lint-check",
+          "name": "ESLint validation",
+          "type": "shell",
+          "command": "npm run lint",
+          "timeout": 30000,
+          "on_failure": ["format-code"]
+        },
+        {
+          "id": "format-code",
+          "name": "Auto-format code",
+          "type": "shell",
+          "command": "npm run format",
+          "timeout": 30000
+        },
+        {
+          "id": "type-check",
+          "name": "TypeScript type checking",
+          "type": "shell",
+          "command": "npm run type-check",
+          "depends_on": ["lint-check"],
+          "timeout": 60000
+        },
+        {
+          "id": "unit-tests",
+          "name": "Run unit tests",
+          "type": "shell",
+          "command": "npm run test:unit",
+          "depends_on": ["type-check"],
+          "timeout": 120000
+        }
+      ]
+    },
+    "full-validation": {
+      "description": "Complete validation before PR",
+      "tasks": [
+        {
+          "id": "clean",
+          "name": "Clean build artifacts",
+          "type": "shell",
+          "command": "rm -rf dist coverage",
+          "timeout": 5000
+        },
+        {
+          "id": "install",
+          "name": "Install dependencies",
+          "type": "shell",
+          "command": "npm ci",
+          "depends_on": ["clean"],
+          "timeout": 120000
+        },
+        {
+          "id": "lint",
+          "name": "Lint code",
+          "type": "shell",
+          "command": "npm run lint",
+          "depends_on": ["install"],
+          "timeout": 30000
+        },
+        {
+          "id": "format-check",
+          "name": "Check code formatting",
+          "type": "shell",
+          "command": "npm run format:check",
+          "depends_on": ["install"],
+          "timeout": 30000
+        },
+        {
+          "id": "type-check",
+          "name": "TypeScript type check",
+          "type": "shell",
+          "command": "npm run type-check",
+          "depends_on": ["install"],
+          "timeout": 60000
+        },
+        {
+          "id": "test-coverage",
+          "name": "Run tests with coverage",
+          "type": "shell",
+          "command": "npm run test:coverage",
+          "depends_on": ["lint", "format-check", "type-check"],
+          "timeout": 180000
+        },
+        {
+          "id": "build",
+          "name": "Build TypeScript",
+          "type": "shell",
+          "command": "npm run build",
+          "depends_on": ["test-coverage"],
+          "timeout": 120000
+        },
+        {
+          "id": "verify-build",
+          "name": "Verify build artifacts",
+          "type": "shell",
+          "command": "test -d dist && ls -la dist/ || (echo 'Build failed' && exit 1)",
+          "depends_on": ["build"],
+          "timeout": 5000
+        }
+      ]
+    },
+    "quick-test": {
+      "description": "Quick testing workflow for development",
+      "tasks": [
+        {
+          "id": "format",
+          "name": "Auto-format code",
+          "type": "shell",
+          "command": "npm run format",
+          "timeout": 30000
+        },
+        {
+          "id": "test-watch",
+          "name": "Run tests in watch mode",
+          "type": "shell",
+          "command": "npm run test:watch",
+          "depends_on": ["format"],
+          "timeout": 0,
+          "interactive": true
+        }
+      ]
+    },
+    "ci-local": {
+      "description": "Simulate CI pipeline locally",
+      "tasks": [
+        {
+          "id": "parallel-quality-checks",
+          "name": "Parallel quality checks",
+          "type": "parallel",
+          "tasks": [
+            {
+              "id": "lint",
+              "name": "ESLint",
+              "command": "npm run lint"
+            },
+            {
+              "id": "format-check",
+              "name": "Prettier check",
+              "command": "npm run format:check"
+            },
+            {
+              "id": "type-check",
+              "name": "TypeScript",
+              "command": "npm run type-check"
+            }
+          ],
+          "wait_for": "all",
+          "timeout": 120000
+        },
+        {
+          "id": "test-matrix",
+          "name": "Test on multiple Node versions",
+          "type": "matrix",
+          "matrix": {
+            "node_version": ["18", "20"]
+          },
+          "task": {
+            "type": "shell",
+            "command": "nvm use ${matrix.node_version} && npm run test:ci"
+          },
+          "depends_on": ["parallel-quality-checks"],
+          "timeout": 180000
+        },
+        {
+          "id": "build",
+          "name": "Production build",
+          "type": "shell",
+          "command": "npm run build",
+          "depends_on": ["test-matrix"],
+          "timeout": 120000
+        },
+        {
+          "id": "report",
+          "name": "Generate CI report",
+          "type": "shell",
+          "command": "echo 'CI pipeline completed successfully!'",
+          "depends_on": ["build"],
+          "timeout": 5000
+        }
+      ]
+    },
+    "cache-maintenance": {
+      "description": "Cache cleanup and optimization",
+      "schedule": "0 2 * * *",
+      "tasks": [
+        {
+          "id": "backup-cache",
+          "name": "Backup Redis cache",
+          "type": "shell",
+          "command": "redis-cli --rdb /backup/redis-$(date +%Y%m%d).rdb",
+          "timeout": 300000
+        },
+        {
+          "id": "clean-expired",
+          "name": "Clean expired entries",
+          "type": "http",
+          "method": "DELETE",
+          "url": "http://localhost:3403/api/v1/rag/admin/cache",
+          "headers": {
+            "Authorization": "Bearer ${env.ADMIN_JWT_TOKEN}"
+          },
+          "depends_on": ["backup-cache"],
+          "timeout": 60000
+        },
+        {
+          "id": "verify-health",
+          "name": "Verify cache health",
+          "type": "http",
+          "method": "GET",
+          "url": "http://localhost:3403/api/v1/rag/admin/cache/stats",
+          "headers": {
+            "Authorization": "Bearer ${env.ADMIN_JWT_TOKEN}"
+          },
+          "depends_on": ["clean-expired"],
+          "timeout": 10000
+        }
+      ]
+    },
+    "collection-sync": {
+      "description": "Synchronize all collections with latest documents",
+      "schedule": "0 */6 * * *",
+      "tasks": [
+        {
+          "id": "get-collections",
+          "name": "Fetch all collections",
+          "type": "http",
+          "method": "GET",
+          "url": "http://localhost:3403/api/v1/rag/collections",
+          "timeout": 30000
+        },
+        {
+          "id": "trigger-ingestion",
+          "name": "Trigger ingestion for each collection",
+          "type": "loop",
+          "items_from": "${tasks.get-collections.response.data.collections}",
+          "task": {
+            "type": "http",
+            "method": "POST",
+            "url": "http://localhost:3403/api/v1/rag/collections/${item.name}/ingest",
+            "timeout": 300000
+          },
+          "depends_on": ["get-collections"],
+          "parallel": false,
+          "stop_on_failure": false
+        },
+        {
+          "id": "verify-stats",
+          "name": "Verify collection stats",
+          "type": "loop",
+          "items_from": "${tasks.get-collections.response.data.collections}",
+          "task": {
+            "type": "http",
+            "method": "GET",
+            "url": "http://localhost:3403/api/v1/rag/collections/${item.name}/stats",
+            "timeout": 30000
+          },
+          "depends_on": ["trigger-ingestion"],
+          "parallel": true
+        }
+      ]
+    },
+    "health-check": {
+      "description": "Comprehensive health check",
+      "tasks": [
+        {
+          "id": "check-services",
+          "name": "Check all service dependencies",
+          "type": "parallel",
+          "tasks": [
+            {
+              "id": "check-redis",
+              "name": "Redis health",
+              "command": "redis-cli ping"
+            },
+            {
+              "id": "check-qdrant",
+              "name": "Qdrant health",
+              "command": "curl -f http://localhost:6333/healthz"
+            },
+            {
+              "id": "check-llamaindex-ingestion",
+              "name": "LlamaIndex Ingestion health",
+              "command": "curl -f http://localhost:8201/health"
+            },
+            {
+              "id": "check-llamaindex-query",
+              "name": "LlamaIndex Query health",
+              "command": "curl -f http://localhost:8202/health"
+            }
+          ],
+          "wait_for": "all",
+          "timeout": 30000
+        },
+        {
+          "id": "check-rag-api",
+          "name": "RAG Services API health",
+          "type": "http",
+          "method": "GET",
+          "url": "http://localhost:3403/api/v1/rag/health",
+          "depends_on": ["check-services"],
+          "timeout": 10000
+        },
+        {
+          "id": "report",
+          "name": "Generate health report",
+          "type": "shell",
+          "command": "echo 'All services healthy!'",
+          "depends_on": ["check-rag-api"],
+          "timeout": 5000
+        }
+      ]
+    }
+  },
+  "notifications": {
+    "slack": {
+      "webhook_url": "${env.SLACK_WEBHOOK_URL}",
+      "channel": "#rag-services",
+      "username": "RAG Workflow Bot"
+    },
+    "email": {
+      "smtp_host": "${env.SMTP_HOST}",
+      "smtp_port": "${env.SMTP_PORT}",
+      "from": "noreply@tradingsystem.com",
+      "to": ["dev-team@tradingsystem.com"]
+    }
+  },
+  "hooks": {
+    "pre_workflow": [
+      {
+        "name": "Set environment",
+        "command": "export NODE_ENV=development"
+      }
+    ],
+    "post_workflow": [
+      {
+        "name": "Cleanup",
+        "command": "echo 'Workflow completed'"
+      }
+    ],
+    "on_failure": [
+      {
+        "name": "Notify failure",
+        "command": "echo 'Workflow failed! Check logs.'"
+      }
+    ]
+  }
+}

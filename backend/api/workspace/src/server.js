@@ -22,11 +22,13 @@ import {
   createCorrelationIdMiddleware,
 } from '../../../shared/middleware/index.js';
 import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
+import { configureCompression, compressionMetrics } from '../../../shared/middleware/compression.js';
 
 // Service-specific modules
 import { config, timescaledbConfig } from './config.js';
 import { getDbClient } from './db/index.js';
 import { itemsRouter } from './routes/items.js';
+import categoriesRouter from './routes/categories.js';
 
 // Create logger
 const logger = createLogger('workspace-api', {
@@ -61,20 +63,24 @@ promClient.collectDefaultMetrics({ prefix: 'workspace_api_' });
 // 1. Correlation ID (must be first for tracing)
 app.use(createCorrelationIdMiddleware());
 
-// 2. Security headers (Helmet)
+// 2. Response compression (OPT-001: 40% payload reduction, ~60ms savings)
+app.use(compressionMetrics);
+app.use(configureCompression({ logger }));
+
+// 3. Security headers (Helmet)
 app.use(configureHelmet({ logger }));
 
-// 3. CORS configuration
+// 4. CORS configuration
 app.use(configureCors({ logger }));
 
-// 4. Body parsers
+// 5. Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 5. Rate limiting (environment-based)
+// 6. Rate limiting (environment-based)
 app.use(configureRateLimit({ logger }));
 
-// 6. Request metrics (Prometheus)
+// 7. Request metrics (Prometheus)
 app.use((req, res, next) => {
   const start = Date.now();
 
@@ -152,6 +158,7 @@ app.get('/metrics', async (_req, res) => {
 
 // API routes
 app.use('/api/items', itemsRouter);
+app.use('/api/categories', categoriesRouter);
 
 // ============================================================================
 // ERROR HANDLING (using shared modules)

@@ -25,13 +25,13 @@ Essential files that should always remain in the project root:
 | **CHANGELOG.md** | 7.8K | Version history and release notes | `/CHANGELOG.md` |
 | **QUICK-START.md** | 3.4K | Quick start guide for developers | `/QUICK-START.md` |
 
-## AI Agent Instructions (/ai/)
+## AI Agent Instructions (/)
 
 Instructions and guidelines for AI assistants working with this codebase:
 
 | File | Size | Description | Location |
 |------|------|-------------|----------|
-| **AGENTS.md** | 3.1K | Repository guidelines for AI agents | `/ai/AGENTS.md` |
+| **AGENTS.md** | 3.1K | Repository guidelines for AI agents | `/AGENTS.md` |
 | **GEMINI.md** | 4.4K | Gemini-specific instructions | `/ai/GEMINI.md` |
 
 **Note**: CLAUDE.md in the root is the canonical source - it's kept in root for easy access.
@@ -145,7 +145,7 @@ The following files were deleted because their content was consolidated into `DO
 
 ### For AI Assistants
 - Main instructions: [`/CLAUDE.md`](/CLAUDE.md)
-- Repository guidelines: [`/ai/AGENTS.md`](/ai/AGENTS.md)
+- Repository guidelines: [`/AGENTS.md`](/AGENTS.md)
 - Gemini-specific: [`/ai/GEMINI.md`](/ai/GEMINI.md)
 
 ### For Project Managers

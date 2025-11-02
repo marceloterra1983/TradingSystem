@@ -9,7 +9,15 @@ import {
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { Activity, BrainCircuit, ExternalLink, Gauge, Network, Server, Workflow } from 'lucide-react';
+import {
+  Activity,
+  BrainCircuit,
+  ExternalLink,
+  Gauge,
+  Network,
+  Server,
+  Workflow,
+} from 'lucide-react';
 import { DatabaseEmbedFrame } from './database/DatabaseEmbedFrame';
 import { buildDocsUrl } from '../../lib/docsUrl';
 
@@ -32,7 +40,7 @@ const resolveLangGraphUrl = (): string => {
     env.VITE_LANGGRAPH_URL ||
       env.VITE_LANGGRAPH_BASE_URL ||
       env.VITE_LANGCHAIN_URL ||
-      DEFAULT_LANGGRAPH_URL
+      DEFAULT_LANGGRAPH_URL,
   );
 };
 
@@ -136,7 +144,8 @@ export function LangGraphPage(): JSX.Element {
                 LangGraph Orchestrator
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                State machine determinística para workflows de trading e documentação com persistência e telemetria.
+                State machine determinística para workflows de trading e
+                documentação com persistência e telemetria.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -155,12 +164,16 @@ export function LangGraphPage(): JSX.Element {
                   </h4>
                   <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-400 space-y-1">
                     <li>
-                      <strong>Trading:</strong> análise → risco → execução (modo paper/live).
+                      <strong>Trading:</strong> análise → risco → execução (modo
+                      paper/live).
                     </li>
                     <li>
-                      <strong>Docs:</strong> review e enrichment integrados ao DocsAPI + Firecrawl.
+                      <strong>Docs:</strong> review e enrichment integrados ao
+                      DocsAPI + Firecrawl.
                     </li>
-                    <li>Suporte a idempotência, rollback e checkpoints por etapa.</li>
+                    <li>
+                      Suporte a idempotência, rollback e checkpoints por etapa.
+                    </li>
                   </ul>
                 </div>
 
@@ -171,8 +184,13 @@ export function LangGraphPage(): JSX.Element {
                   </h4>
                   <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-400 space-y-1">
                     <li>Agno Agents (8200) – análise de mercado e risco.</li>
-                    <li>DocsAPI (3400) e Firecrawl Proxy (3600) – fluxo de documentação.</li>
-                    <li>PostgreSQL / QuestDB para persistência e telemetria.</li>
+                    <li>
+                      DocsAPI (3400) e Firecrawl Proxy (3600) – fluxo de
+                      documentação.
+                    </li>
+                    <li>
+                      PostgreSQL / QuestDB para persistência e telemetria.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -190,7 +208,8 @@ export function LangGraphPage(): JSX.Element {
                 Acesso rápido
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Abra as interfaces expostas pelo serviço LangGraph e monitore dependências em segundos.
+                Abra as interfaces expostas pelo serviço LangGraph e monitore
+                dependências em segundos.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -205,11 +224,19 @@ export function LangGraphPage(): JSX.Element {
                         {link.icon}
                       </span>
                       <div>
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">{link.label}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{link.helper}</p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">
+                          {link.label}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {link.helper}
+                        </p>
                       </div>
                     </div>
-                    <Button variant="outline" onClick={handleOpen(link.href)} className="justify-start gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleOpen(link.href)}
+                      className="justify-start gap-2"
+                    >
                       <ExternalLink className="w-4 h-4" />
                       Abrir em nova aba
                     </Button>
@@ -240,9 +267,17 @@ export function LangGraphPage(): JSX.Element {
                     key={item.id}
                     className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4"
                   >
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">{item.label}</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.description}</p>
-                    <Button variant="outline" onClick={handleOpen(item.href)} className="gap-2">
+                    <p className="font-semibold text-slate-900 dark:text-slate-100">
+                      {item.label}
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                      {item.description}
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={handleOpen(item.href)}
+                      className="gap-2"
+                    >
                       <ExternalLink className="w-4 h-4" />
                       Abrir documentação
                     </Button>
@@ -263,14 +298,17 @@ export function LangGraphPage(): JSX.Element {
                 Snippets CLI úteis
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Comandos prontos para validação, observabilidade e execução de workflows.
+                Comandos prontos para validação, observabilidade e execução de
+                workflows.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
               <div className="space-y-4">
                 {CLI_SNIPPETS.map((snippet) => (
                   <div key={snippet.id} className="space-y-2">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{snippet.title}</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      {snippet.title}
+                    </p>
                     <pre className="bg-slate-900/90 text-slate-50 text-xs p-3 rounded-lg overflow-x-auto">
                       <code>{snippet.command}</code>
                     </pre>
@@ -306,7 +344,7 @@ export function LangGraphPage(): JSX.Element {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (

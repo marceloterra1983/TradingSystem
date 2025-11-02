@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Models API</title>
+</head>
+<body>
+    <h1>Testing /api/v1/rag/models</h1>
+    <button onclick="testAPI()">Test API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const baseUrl = 'http://localhost:3402';
+            const result = document.getElementById('result');
+            
+            try {
+                result.textContent = 'Fetching models from ' + baseUrl + '/api/v1/rag/models...\n';
+                
+                const response = await fetch(baseUrl + '/api/v1/rag/models', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                result.textContent += 'Response status: ' + response.status + '\n';
+                result.textContent += 'Response headers:\n' + JSON.stringify([...response.headers.entries()], null, 2) + '\n\n';
+                
+                const data = await response.json();
+                result.textContent += 'Response data:\n' + JSON.stringify(data, null, 2);
+                
+                console.log('Models:', data);
+            } catch (error) {
+                result.textContent += 'ERROR: ' + error.message + '\n';
+                result.textContent += error.stack;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

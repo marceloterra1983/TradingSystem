@@ -26,10 +26,13 @@ export interface StartContainerResponse {
 
 export interface AllowedContainersResponse {
   success: boolean;
-  containers: Record<string, {
-    port: number;
-    healthCheck: string;
-  }>;
+  containers: Record<
+    string,
+    {
+      port: number;
+      healthCheck: string;
+    }
+  >;
   timestamp: string;
 }
 
@@ -44,7 +47,7 @@ class ContainerService {
    * Start a database tool container
    */
   async startContainer(
-    containerName: StartContainerRequest['containerName']
+    containerName: StartContainerRequest['containerName'],
   ): Promise<StartContainerResponse> {
     const response = await fetch(
       `${this.baseUrl}/api/containers/${containerName}/start`,
@@ -53,13 +56,13 @@ class ContainerService {
         headers: {
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        errorData.error || `Failed to start container: ${response.statusText}`
+        errorData.error || `Failed to start container: ${response.statusText}`,
       );
     }
 

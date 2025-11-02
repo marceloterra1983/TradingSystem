@@ -16,16 +16,16 @@ interface AutoStartResult {
   error?: string;
 }
 
-const CRITICAL_SERVICES = [
-  'workspace-api',
-  'documentation-api'
-];
+const CRITICAL_SERVICES = ['workspace-api', 'documentation-api'];
 
 async function autoStartService(serviceId: string): Promise<AutoStartResult> {
-  const response = await fetch(`${SERVICE_LAUNCHER_URL}/api/auto-start/${serviceId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const response = await fetch(
+    `${SERVICE_LAUNCHER_URL}/api/auto-start/${serviceId}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
   return response.json();
 }
 
@@ -48,7 +48,7 @@ export function useServiceAutoRecovery() {
     },
     refetchInterval: false,
     staleTime: 10000,
-    retry: false
+    retry: false,
   });
 
   const autoStartMutation = useMutation({
@@ -60,7 +60,7 @@ export function useServiceAutoRecovery() {
     },
     onError: (error, serviceId) => {
       console.error(`[Auto-Recovery] Failed to start ${serviceId}:`, error);
-    }
+    },
   });
 
   useEffect(() => {
@@ -71,20 +71,25 @@ export function useServiceAutoRecovery() {
 
     console.log('[Auto-Recovery] Checking services...', {
       totalServices: statusData.services.length,
-      attemptedStarts: Array.from(attemptedStarts.current)
+      attemptedStarts: Array.from(attemptedStarts.current),
     });
 
     const downServices = statusData.services.filter(
-      (service: ServiceStatus) => 
-        service.status === 'down' && 
+      (service: ServiceStatus) =>
+        service.status === 'down' &&
         CRITICAL_SERVICES.includes(service.id) &&
-        !attemptedStarts.current.has(service.id)
+        !attemptedStarts.current.has(service.id),
     );
 
-    console.log('[Auto-Recovery] Critical services down:', downServices.map((s: ServiceStatus) => s.id));
+    console.log(
+      '[Auto-Recovery] Critical services down:',
+      downServices.map((s: ServiceStatus) => s.id),
+    );
 
     downServices.forEach((service: ServiceStatus) => {
-      console.warn(`[Auto-Recovery] Attempting to start: ${service.name} (${service.id})`);
+      console.warn(
+        `[Auto-Recovery] Attempting to start: ${service.name} (${service.id})`,
+      );
       attemptedStarts.current.add(service.id);
       autoStartMutation.mutate(service.id);
     });
@@ -94,15 +99,16 @@ export function useServiceAutoRecovery() {
       .filter((s: ServiceStatus) => s.status === 'ok')
       .forEach((s: ServiceStatus) => {
         if (attemptedStarts.current.has(s.id)) {
-          console.log(`[Auto-Recovery] Service ${s.id} is back online, clearing attempt`);
+          console.log(
+            `[Auto-Recovery] Service ${s.id} is back online, clearing attempt`,
+          );
           attemptedStarts.current.delete(s.id);
         }
       });
-
   }, [statusData, autoStartMutation]);
 
   return {
     isRecovering: autoStartMutation.isPending,
-    lastRecoveryAttempt: autoStartMutation.variables
+    lastRecoveryAttempt: autoStartMutation.variables,
   };
 }

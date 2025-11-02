@@ -3,65 +3,66 @@ import {
   BookOpen,
   BarChart3,
   BrainCircuit,
-  Server,
   Gauge,
+  Server,
   Workflow,
-  Boxes,
 } from 'lucide-react';
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
 // This ensures only the current page's code is loaded, reducing initial bundle size by 40-60%
 
 const LauncherPage = React.lazy(
-  () => import('../components/pages/LauncherPage')
+  () => import('../components/pages/LauncherPage'),
 );
 const WorkspacePageNew = React.lazy(
-  () => import('../components/pages/WorkspacePageNew')
+  () => import('../components/pages/WorkspacePageNew'),
 );
 const TPCapitalOpcoesPage = React.lazy(
-  () => import('../components/pages/TPCapitalOpcoesPage')
+  () => import('../components/pages/TPCapitalOpcoesPage'),
 );
 const DocusaurusPageNew = React.lazy(
-  () => import('../components/pages/DocusaurusPage')
+  () => import('../components/pages/DocusaurusPage'),
 );
 const DatabasePageNew = React.lazy(
-  () => import('../components/pages/DatabasePage')
+  () => import('../components/pages/DatabasePage'),
 );
 const MiroPage = React.lazy(() => import('../components/pages/MiroPage'));
 const AgnoAgentsPage = React.lazy(
-  () => import('../components/pages/AgnoAgentsPage')
+  () => import('../components/pages/AgnoAgentsPage'),
 );
 const LangGraphPage = React.lazy(
-  () => import('../components/pages/LangGraphPage')
+  () => import('../components/pages/LangGraphPage'),
 );
 const LlamaIndexPage = React.lazy(
-  () => import('../components/pages/LlamaIndexPage')
+  () => import('../components/pages/LlamaIndexPage'),
 );
-const LangChainVectorPage = React.lazy(
-  () => import('../components/pages/LangChainVectorPage')
+const KestraPage = React.lazy(() => import('../components/pages/KestraPage'));
+const CatalogPage = React.lazy(
+  () => import('../components/pages/CatalogPage'),
 );
 const TelegramGatewayFinal = React.lazy(
-  () => import('../components/pages/TelegramGatewayFinal')
+  () => import('../components/pages/TelegramGatewayFinal'),
 );
-const DocsHybridSearchPage = React.lazy(
-  () => import('../components/pages/DocsHybridSearchPage')
+const AnythingLLMPage = React.lazy(
+  () => import('../components/pages/AnythingLLMPage'),
 );
 
-// ✅ MEMOIZED CUSTOM CONTENT ELEMENTS
-// Create stable references to prevent unnecessary re-renders and component remounts
-// Each element is created once and reused across renders
-const tpCapitalContent = <TPCapitalOpcoesPage />;
-const telegramGatewayContent = <TelegramGatewayFinal />;
-const workspaceContent = <WorkspacePageNew />;
-const docusaurusContent = <DocusaurusPageNew />;
-const databaseContent = <DatabasePageNew />;
-const miroContent = <MiroPage />;
-const docsHybridSearchContent = <DocsHybridSearchPage />;
-const langGraphContent = <LangGraphPage />;
-const llamaIndexContent = <LlamaIndexPage />;
-const langChainVectorContent = <LangChainVectorPage />;
-const agnoAgentsContent = <AgnoAgentsPage />;
-const launcherContent = <LauncherPage />;
+// ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
+// Use functions instead of eager instantiation to enable true code splitting
+// Benefits: Smaller initial bundle, faster load time, better performance
+const tpCapitalContent = () => <TPCapitalOpcoesPage />;
+const telegramGatewayContent = () => <TelegramGatewayFinal />;
+const workspaceContent = () => <WorkspacePageNew />;
+const docusaurusContent = () => <DocusaurusPageNew />;
+const databaseContent = () => <DatabasePageNew />;
+const miroContent = () => <MiroPage />;
+const langGraphContent = () => <LangGraphPage />;
+const llamaIndexContent = () => <LlamaIndexPage />;
+const anythingLLMContent = () => <AnythingLLMPage />;
+const agnoAgentsContent = () => <AgnoAgentsPage />;
+const kestraContent = () => <KestraPage />;
+const claudeCatalogContent = () => <CatalogPage />;
+const launcherContent = () => <LauncherPage />;
 
 /**
  * Page Part - Collapsible section within a page
@@ -80,6 +81,7 @@ export interface PagePart {
  * - `customContent`: For pages with CustomizablePageLayout (drag-and-drop grid)
  *   Example: Escopo page, Banco de Ideias, Connections
  *   Benefits: Drag-and-drop, multi-column layout, collapse/expand all
+ *   Can be React.ReactNode (eager) or () => React.ReactNode (lazy - recommended)
  *
  * - `parts`: For simple accordion-based pages (legacy pattern)
  *   Used for basic pages that don't need advanced layout features
@@ -93,7 +95,7 @@ export interface Page {
     subtitle?: string;
   };
   parts: PagePart[];
-  customContent?: React.ReactNode;
+  customContent?: React.ReactNode | (() => React.ReactNode);
   icon?: React.ReactNode;
 }
 
@@ -113,7 +115,7 @@ export interface Section {
  * Navigation Sections (current):
  * 0. Apps (Cyan) - TP Capital, Telegram Gateway, Workspace
  * 1. Knowledge (Indigo) - Docusaurus knowledge hub + documentation
- * 2. Infrastructure (Gray) - LangGraph, LlamaIndex, Launchers
+ * 2. Toolbox (Gray) - LangGraph, LlamaIndex, Launchers
  *
  * ===========================================================================
  * IMPORTANT: PAGE LAYOUT PATTERNS
@@ -188,7 +190,8 @@ export const NAVIGATION_DATA: Section[] = [
         title: 'Telegram Gateway',
         header: {
           title: 'Telegram Gateway',
-          subtitle: 'Monitoramento do serviço MTProto, filas e mensagens persistidas',
+          subtitle:
+            'Monitoramento do serviço MTProto, filas e mensagens persistidas',
         },
         parts: [],
         customContent: telegramGatewayContent,
@@ -201,7 +204,7 @@ export const NAVIGATION_DATA: Section[] = [
           subtitle: 'Ideias, sugestões e brainstorming de funcionalidades',
         },
         parts: [], // Empty - uses customContent
-        // ✅ CustomizablePageLayout - 2 sections: CRUD table + Kanban board
+        // ✅ CustomizablePageLayout - 3 sections: Categories + CRUD table + Kanban board
         customContent: workspaceContent,
       },
     ],
@@ -215,6 +218,17 @@ export const NAVIGATION_DATA: Section[] = [
     icon: <BookOpen className="w-5 h-5" />,
     label: 'Knowledge',
     pages: [
+      {
+        id: 'catalog',
+        title: 'Catalog',
+        header: {
+          title: 'Catalog',
+          subtitle:
+            'Catálogo unificado dos agentes Claude e comandos personalizados, comutável diretamente no cabeçalho.',
+        },
+        parts: [],
+        customContent: claudeCatalogContent,
+      },
       {
         id: 'docs',
         title: 'Docs',
@@ -248,27 +262,16 @@ export const NAVIGATION_DATA: Section[] = [
         parts: [],
         customContent: miroContent,
       },
-      {
-        id: 'docs-hybrid-search',
-        title: 'Docs Search (Hybrid)',
-        header: {
-          title: 'Docs Hybrid Search',
-          subtitle: 'Busca híbrida (lexical + vetorial) com reranking e âncoras',
-        },
-        parts: [],
-        // Use the same lazy loading pattern as other pages; PageContent wraps with Suspense
-        customContent: docsHybridSearchContent,
-      },
     ],
   },
 
   // ========================================
-  // 2. INFRASTRUCTURE (Gray)
+  // 2. TOOLBOX (Gray)
   // ========================================
   {
     id: 'configuracoes',
     icon: <Server className="h-5 w-5" />,
-    label: 'Infrastructure',
+    label: 'Toolbox',
     pages: [
       {
         id: 'langgraph-orchestrator',
@@ -283,10 +286,10 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <Workflow className="h-4 w-4" />,
       },
       {
-        id: 'llamaindex-services',
-        title: 'LlamaIndex',
+        id: 'rag-services',
+        title: 'RAG Services',
         header: {
-          title: 'LlamaIndex RAG Services',
+          title: 'RAG Services',
           subtitle:
             'Consultas, ingestão e integrações RAG baseadas em LangChain.',
         },
@@ -295,16 +298,28 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <BrainCircuit className="h-4 w-4" />,
       },
       {
-        id: 'langchain-vector-store',
-        title: 'Vector Store',
+        id: 'anythingllm',
+        title: 'AnythingLLM',
         header: {
-          title: 'LangChain Vector Store (Qdrant)',
+          title: 'AnythingLLM',
           subtitle:
-            'Monitoramento e operações do banco vetorial utilizado pelos fluxos LangChain/LlamaIndex.',
+            'Interface visual para RAG com múltiplos LLMs e gestão de documentos.',
         },
         parts: [],
-        customContent: langChainVectorContent,
-        icon: <Boxes className="h-4 w-4" />,
+        customContent: anythingLLMContent,
+        icon: <BrainCircuit className="h-4 w-4" />,
+      },
+      {
+        id: 'kestra-orchestrator',
+        title: 'Kestra',
+        header: {
+          title: 'Kestra Orchestrator',
+          subtitle:
+            'Automação de pipelines declarativos com filas e storage dedicados.',
+        },
+        parts: [],
+        customContent: kestraContent,
+        icon: <Server className="h-4 w-4" />,
       },
       {
         id: 'agno-agents',
@@ -333,6 +348,14 @@ export const NAVIGATION_DATA: Section[] = [
   },
 ];
 
+const LEGACY_PAGE_ALIASES: Record<string, string> = {
+  'ai-agents-directory': 'catalog',
+  'claude-commands': 'catalog',
+};
+
+const resolvePageId = (pageId: string) =>
+  LEGACY_PAGE_ALIASES[pageId] ?? pageId;
+
 /**
  * Flatten all pages from all sections for easy lookup
  */
@@ -342,15 +365,17 @@ export const ALL_PAGES = NAVIGATION_DATA.flatMap((section) => section.pages);
  * Get page by ID
  */
 export function getPageById(pageId: string): Page | undefined {
-  return ALL_PAGES.find((page) => page.id === pageId);
+  const resolvedId = resolvePageId(pageId);
+  return ALL_PAGES.find((page) => page.id === resolvedId);
 }
 
 /**
  * Get section by page ID
  */
 export function getSectionByPageId(pageId: string): Section | undefined {
+  const resolvedId = resolvePageId(pageId);
   return NAVIGATION_DATA.find((section) =>
-    section.pages.some((page) => page.id === pageId)
+    section.pages.some((page) => page.id === resolvedId),
   );
 }
 

@@ -228,3 +228,15 @@ sudo npm run kill-port
 **Status:** ✅ Ativo - Aplicar em todos os novos serviços
 
 
+
+
+
+
+
+
+
+
+
+
+
+

@@ -7,7 +7,9 @@ interface DocsUrlOptions {
 
 const HTTP_REGEX = /^https?:\/\//i;
 
-function pickFirstNonEmpty(...values: Array<string | undefined>): string | undefined {
+function pickFirstNonEmpty(
+  ...values: Array<string | undefined>
+): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim() !== '') {
       return value.trim();
@@ -24,7 +26,9 @@ function ensureLeadingSlash(value: string): string {
 }
 
 function trimTrailingSlash(value: string): string {
-  return value.endsWith('/') && value.length > 1 ? value.replace(/\/+$/, '') : value;
+  return value.endsWith('/') && value.length > 1
+    ? value.replace(/\/+$/, '')
+    : value;
 }
 
 function resolveRawBase(): string {
@@ -55,7 +59,8 @@ export function resolveDocsBase(options: DocsUrlOptions = {}): string {
 export function buildDocsUrl(path = '/', options: DocsUrlOptions = {}): string {
   const base = resolveDocsBase({ absolute: options.absolute });
   const normalizedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
-  const isVersionedPath = /^\/(next|current|version-[^/]+|\d+\.\d+\.\d+)(\/|$)/.test(normalizedPath);
+  const isVersionedPath =
+    /^\/(next|current|version-[^/]+|\d+\.\d+\.\d+)(\/|$)/.test(normalizedPath);
 
   let result: string;
   if (isVersionedPath) {
@@ -113,11 +118,15 @@ export function resolveDocsPreviewUrl(
 ): string {
   const normalizedPath = normalizeDocsApiPath(rawUrl, version);
   // Ensure trailing slash for Docusaurus URLs (except root)
-  const pathWithSlash = normalizedPath !== `/${version}` && !normalizedPath.endsWith('/')
-    ? `${normalizedPath}/`
-    : normalizedPath;
+  const pathWithSlash =
+    normalizedPath !== `/${version}` && !normalizedPath.endsWith('/')
+      ? `${normalizedPath}/`
+      : normalizedPath;
   if (options.absolute && typeof window !== 'undefined') {
     return `${window.location.origin.replace(/\/+$/, '')}${pathWithSlash}`;
   }
-  return buildDocsUrl(pathWithSlash, { ...options, trailingSlash: options.trailingSlash ?? true });
+  return buildDocsUrl(pathWithSlash, {
+    ...options,
+    trailingSlash: options.trailingSlash ?? true,
+  });
 }

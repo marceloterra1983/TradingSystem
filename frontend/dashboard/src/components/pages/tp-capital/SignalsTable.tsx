@@ -1,11 +1,29 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from "../../ui/collapsible-card";
-import { Button } from "../../ui/button";
-import { DeleteButton } from "../../ui/action-buttons";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { Input } from "../../ui/input";
-import { AlertCircle, FileDown, FileSpreadsheet, RefreshCcw, RotateCcw } from "lucide-react";
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import {
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardDescription,
+  CollapsibleCardContent,
+} from '../../ui/collapsible-card';
+import { Button } from '../../ui/button';
+import { DeleteButton } from '../../ui/action-buttons';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select';
+import { Input } from '../../ui/input';
+import {
+  AlertCircle,
+  FileDown,
+  FileSpreadsheet,
+  RefreshCcw,
+  RotateCcw,
+} from 'lucide-react';
 import { LIMIT_OPTIONS } from './constants';
 import { fetchSignals, deleteSignal } from './api';
 import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
@@ -13,18 +31,22 @@ import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
 export function SignalsTable() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [limit, setLimit] = useState(10);
-  const [channelFilter, setChannelFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [channelFilter, setChannelFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [usingFallbackData, setUsingFallbackData] = useState(false);
   const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
-  
+
   // Message sync state
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{show: boolean; success: boolean; message: string}>({
+  const [syncResult, setSyncResult] = useState<{
+    show: boolean;
+    success: boolean;
+    message: string;
+  }>({
     show: false,
     success: false,
-    message: ''
+    message: '',
   });
 
   const query = useQuery({
@@ -45,7 +67,9 @@ export function SignalsTable() {
       setLastErrorMessage(query.data.errorMessage ?? null);
     } else if (query.error) {
       const message =
-        query.error instanceof Error ? query.error.message : 'Failed to fetch TP Capital signals';
+        query.error instanceof Error
+          ? query.error.message
+          : 'Failed to fetch TP Capital signals';
       setUsingFallbackData(true);
       setLastErrorMessage(message);
     }
@@ -65,11 +89,15 @@ export function SignalsTable() {
 
   const filteredSignals = useMemo(() => {
     return signals.filter((row) => {
-      const matchesChannel = channelFilter === 'all' || row.channel === channelFilter;
-      const matchesType = typeFilter === 'all' || row.signal_type === typeFilter;
+      const matchesChannel =
+        channelFilter === 'all' || row.channel === channelFilter;
+      const matchesType =
+        typeFilter === 'all' || row.signal_type === typeFilter;
       const matchesSearch = searchTerm
         ? row.asset.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (row.raw_message || '').toLowerCase().includes(searchTerm.toLowerCase())
+          (row.raw_message || '')
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
         : true;
       return matchesChannel && matchesType && matchesSearch;
     });
@@ -79,19 +107,22 @@ export function SignalsTable() {
     if (!window.confirm('Tem certeza que deseja deletar este sinal?')) {
       return;
     }
-    
+
     setDeletingId(ingestedAt);
     try {
       await deleteSignal(ingestedAt);
       console.log('✅ Signal deleted successfully, refetching...');
-      
+
       // Forçar refetch com invalidação da query
       await query.refetch();
-      
+
       console.log('✅ Data refetched');
     } catch (error) {
       console.error('❌ Failed to delete signal:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao deletar sinal';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Erro desconhecido ao deletar sinal';
       alert(`Falha ao deletar sinal:\n\n${errorMessage}`);
     } finally {
       setDeletingId(null);
@@ -111,14 +142,11 @@ export function SignalsTable() {
   const handleSyncMessages = async () => {
     setIsSyncing(true);
     setSyncResult({ show: false, success: false, message: '' });
-    
+
     try {
-      const response = await fetch('/api/tp-capital/sync-messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // ✅ Using authenticated helper from utils/tpCapitalApi
+      const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+      const response = await tpCapitalApi.post('/sync-messages');
 
       const result = await response.json();
 
@@ -127,9 +155,10 @@ export function SignalsTable() {
         setSyncResult({
           show: true,
           success: true,
-          message: result.message || `${messagesSynced} mensagem(ns) sincronizada(s)`
+          message:
+            result.message || `${messagesSynced} mensagem(ns) sincronizada(s)`,
         });
-        
+
         // Recarregar sinais após sincronização
         if (messagesSynced > 0) {
           await query.refetch();
@@ -138,18 +167,21 @@ export function SignalsTable() {
         setSyncResult({
           show: true,
           success: false,
-          message: result.message || 'Erro ao sincronizar mensagens'
+          message: result.message || 'Erro ao sincronizar mensagens',
         });
       }
     } catch (error) {
       setSyncResult({
         show: true,
         success: false,
-        message: 'Erro ao conectar com o serviço de sincronização'
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Erro ao conectar com o serviço de sincronização',
       });
     } finally {
       setIsSyncing(false);
-      
+
       // Auto-hide após 5 segundos
       setTimeout(() => {
         setSyncResult({ show: false, success: false, message: '' });
@@ -190,13 +222,15 @@ export function SignalsTable() {
               </>
             )}
           </Button>
-          
+
           {syncResult.show && (
-            <div className={`px-3 py-1.5 rounded-md text-sm font-medium ${
-              syncResult.success 
-                ? 'bg-emerald-950/50 border border-emerald-800 text-emerald-300' 
-                : 'bg-red-950/50 border border-red-800 text-red-300'
-            }`}>
+            <div
+              className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                syncResult.success
+                  ? 'bg-emerald-950/50 border border-emerald-800 text-emerald-300'
+                  : 'bg-red-950/50 border border-red-800 text-red-300'
+              }`}
+            >
               {syncResult.message}
             </div>
           )}
@@ -209,11 +243,14 @@ export function SignalsTable() {
               <div>
                 <p className="font-semibold">Serviço TP-Capital indisponível</p>
                 <p className="mt-1">
-                  Exibindo dados de exemplo enquanto o serviço não está acessível.
-                  Inicie o backend em `apps/tp-capital` com `npm run dev` para restaurar os dados ao vivo.
+                  Exibindo dados de exemplo enquanto o serviço não está
+                  acessível. Inicie o backend em `apps/tp-capital` com `npm run
+                  dev` para restaurar os dados ao vivo.
                 </p>
                 {lastErrorMessage && (
-                  <p className="mt-1 text-xs opacity-80">Erro original: {lastErrorMessage}</p>
+                  <p className="mt-1 text-xs opacity-80">
+                    Erro original: {lastErrorMessage}
+                  </p>
                 )}
               </div>
             </div>
@@ -225,7 +262,10 @@ export function SignalsTable() {
               <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 Quantidade
               </label>
-              <Select value={String(limit)} onValueChange={(value) => setLimit(Number(value))}>
+              <Select
+                value={String(limit)}
+                onValueChange={(value) => setLimit(Number(value))}
+              >
                 <SelectTrigger className="h-8 w-full text-sm">
                   <SelectValue placeholder="Limite" />
                 </SelectTrigger>
@@ -323,7 +363,11 @@ export function SignalsTable() {
 
         <div className="flex items-center justify-between px-1 py-2">
           <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Exibindo <span className="font-bold text-cyan-600 dark:text-cyan-400">{filteredSignals.length}</span> de <span className="font-bold">{signals.length}</span> registros
+            Exibindo{' '}
+            <span className="font-bold text-cyan-600 dark:text-cyan-400">
+              {filteredSignals.length}
+            </span>{' '}
+            de <span className="font-bold">{signals.length}</span> registros
             {filteredSignals.length !== signals.length && (
               <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
                 (filtrados)
@@ -342,52 +386,99 @@ export function SignalsTable() {
           <table className="w-full text-left text-sm bg-white dark:bg-slate-950">
             <thead className="bg-slate-100 dark:bg-slate-800">
               <tr>
-                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">DATA</th>
-                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">ATIVO</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">COMPRA MIN</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">COMPRA MAX</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">ALVO 1</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">ALVO 2</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">ALVO FINAL</th>
-                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">STOP</th>
-                <th className="px-3 py-2 font-medium text-center text-slate-900 dark:text-slate-100">AÇÕES</th>
+                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">
+                  DATA
+                </th>
+                <th className="px-3 py-2 font-medium text-slate-900 dark:text-slate-100">
+                  ATIVO
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  COMPRA MIN
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  COMPRA MAX
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  ALVO 1
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  ALVO 2
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  ALVO FINAL
+                </th>
+                <th className="px-3 py-2 font-medium text-right text-slate-900 dark:text-slate-100">
+                  STOP
+                </th>
+                <th className="px-3 py-2 font-medium text-center text-slate-900 dark:text-slate-100">
+                  AÇÕES
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredSignals.map((row, idx) => {
                 const formattedDate = formatTimestamp(row.ts);
-                const isDateObject = formattedDate && typeof formattedDate === 'object' && 'time' in formattedDate;
+                const isDateObject =
+                  formattedDate &&
+                  typeof formattedDate === 'object' &&
+                  'time' in formattedDate;
                 return (
-                <tr key={`${row.ingested_at}-${idx}`} className="border-t border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50">
-                  <td className="px-3 py-2 whitespace-nowrap text-slate-900 dark:text-slate-100">
-                    {isDateObject ? (
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{formattedDate.time}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">{formattedDate.date}</span>
-                      </div>
-                    ) : (
-                      <span>{String(formattedDate)}</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 font-mono font-semibold text-slate-900 dark:text-slate-100">{row.asset}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.buy_min)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.buy_max)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.target_1)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.target_2)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.target_final)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">{formatNumber(row.stop)}</td>
-                  <td className="px-3 py-2 text-center">
-                    <DeleteButton
-                      onClick={() => handleDelete(row.ingested_at)}
-                      disabled={deletingId === row.ingested_at || usingFallbackData}
-                    />
-                  </td>
-                </tr>
-              );
+                  <tr
+                    key={`${row.ingested_at}-${idx}`}
+                    className="border-t border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                  >
+                    <td className="px-3 py-2 whitespace-nowrap text-slate-900 dark:text-slate-100">
+                      {isDateObject ? (
+                        <div className="flex flex-col">
+                          <span className="font-semibold">
+                            {formattedDate.time}
+                          </span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {formattedDate.date}
+                          </span>
+                        </div>
+                      ) : (
+                        <span>{String(formattedDate)}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 font-mono font-semibold text-slate-900 dark:text-slate-100">
+                      {row.asset}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.buy_min)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.buy_max)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.target_1)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.target_2)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.target_final)}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono text-slate-900 dark:text-slate-100">
+                      {formatNumber(row.stop)}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <DeleteButton
+                        onClick={() => handleDelete(row.ingested_at)}
+                        disabled={
+                          deletingId === row.ingested_at || usingFallbackData
+                        }
+                      />
+                    </td>
+                  </tr>
+                );
               })}
               {filteredSignals.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500 dark:text-slate-400">
+                  <td
+                    colSpan={9}
+                    className="px-3 py-8 text-center text-slate-500 dark:text-slate-400"
+                  >
                     Nenhum sinal encontrado
                   </td>
                 </tr>
@@ -399,4 +490,3 @@ export function SignalsTable() {
     </CollapsibleCard>
   );
 }
-

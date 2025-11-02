@@ -1,11 +1,21 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../ui/collapsible-card';
+import {
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardDescription,
+  CollapsibleCardContent,
+} from '../../ui/collapsible-card';
 import { Button } from '../../ui/button';
-import { Plus, Trash2, RefreshCw, Settings, CheckCircle, XCircle } from 'lucide-react';
-import { getApiUrl } from '../../../config/api';
-
-const TP_CAPITAL_API_URL = getApiUrl('tpCapital');
+import {
+  Plus,
+  Trash2,
+  RefreshCw,
+  Settings,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 
 interface TelegramChannel {
   id: string;
@@ -28,34 +38,34 @@ interface ChannelFormData {
 }
 
 async function fetchChannels(): Promise<TelegramChannel[]> {
-  const response = await fetch(`${TP_CAPITAL_API_URL}/telegram-channels`);
+  // ✅ Using authenticated helper
+  const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+  const response = await tpCapitalApi.get('/telegram-channels');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.json();
   return data.data || [];
 }
 
 async function createChannel(channel: ChannelFormData) {
-  const response = await fetch(`${TP_CAPITAL_API_URL}/telegram-channels`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(channel),
-  });
+  // ✅ Using authenticated helper
+  const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+  const response = await tpCapitalApi.post('/telegram-channels', channel);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
 
 async function deleteChannel(id: string) {
-  const response = await fetch(`${TP_CAPITAL_API_URL}/telegram-channels/${id}`, {
-    method: 'DELETE',
-  });
+  // ✅ Using authenticated helper
+  const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+  const response = await tpCapitalApi.delete(`/telegram-channels/${id}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
 
 async function reloadChannels() {
-  const response = await fetch(`${TP_CAPITAL_API_URL}/reload-channels`, {
-    method: 'POST',
-  });
+  // ✅ Using authenticated helper
+  const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+  const response = await tpCapitalApi.post('/reload-channels');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
@@ -70,7 +80,12 @@ export function TelegramChannelsManager() {
     description: '',
   });
 
-  const { data: channels = [], isLoading, error, refetch } = useQuery({
+  const {
+    data: channels = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['telegram-channels'],
     queryFn: fetchChannels,
     refetchInterval: 30000,
@@ -81,7 +96,12 @@ export function TelegramChannelsManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['telegram-channels'] });
       setIsFormOpen(false);
-      setFormData({ label: '', channel_id: '', channel_type: 'source', description: '' });
+      setFormData({
+        label: '',
+        channel_id: '',
+        channel_type: 'source',
+        description: '',
+      });
       // Recarregar canais no forwarder
       reloadMutation.mutate();
     },
@@ -151,7 +171,10 @@ export function TelegramChannelsManager() {
       <CollapsibleCardContent>
         {/* Form */}
         {isFormOpen && (
-          <form onSubmit={handleSubmit} className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+          <form
+            onSubmit={handleSubmit}
+            className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+          >
             <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100">
               Adicionar Novo Canal
             </h3>
@@ -164,7 +187,9 @@ export function TelegramChannelsManager() {
                   type="text"
                   required
                   value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, label: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   placeholder="Ex: TP Capital, Jonas Esteves"
                 />
@@ -177,7 +202,9 @@ export function TelegramChannelsManager() {
                   type="text"
                   required
                   value={formData.channel_id}
-                  onChange={(e) => setFormData({ ...formData, channel_id: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, channel_id: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   placeholder="Ex: -1001234567890"
                 />
@@ -188,7 +215,12 @@ export function TelegramChannelsManager() {
                 </label>
                 <select
                   value={formData.channel_type}
-                  onChange={(e) => setFormData({ ...formData, channel_type: e.target.value as 'source' | 'destination' })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      channel_type: e.target.value as 'source' | 'destination',
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                 >
                   <option value="source">Origem (Source)</option>
@@ -202,7 +234,9 @@ export function TelegramChannelsManager() {
                 <input
                   type="text"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   placeholder="Descrição do canal"
                 />
@@ -285,7 +319,9 @@ export function TelegramChannelsManager() {
                             : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                         }`}
                       >
-                        {channel.channel_type === 'source' ? 'Origem' : 'Destino'}
+                        {channel.channel_type === 'source'
+                          ? 'Origem'
+                          : 'Destino'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -320,4 +356,3 @@ export function TelegramChannelsManager() {
     </CollapsibleCard>
   );
 }
-

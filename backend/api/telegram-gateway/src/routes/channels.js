@@ -6,10 +6,12 @@ import {
   deleteChannel,
 } from '../db/channelsRepository.js';
 import { invalidateCaches } from '../services/telegramGatewayFacade.js';
+import { cacheStatic, invalidateCache } from '../middleware/cachingMiddleware.js';
 
 export const channelsRouter = Router();
 
-channelsRouter.get('/', async (req, res, next) => {
+// Cache channel list for 5 minutes (rarely changes)
+channelsRouter.get('/', cacheStatic(300), async (req, res, next) => {
   try {
     const channels = await listChannels({ logger: req.log });
     res.json({

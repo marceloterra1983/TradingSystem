@@ -4,7 +4,13 @@ import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import { useItemDragDrop } from '../hooks/useItemDragDrop';
 import { DroppableColumn } from './DroppableColumn';
 import { WorkspaceItemDragPreview } from './DraggableItemCard';
-import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
+import {
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardDescription,
+  CollapsibleCardContent,
+} from '../../../ui/collapsible-card';
 import { BarChart3, RefreshCw } from 'lucide-react';
 import { STATUS_CONFIG } from '../constants/workspace.constants';
 import type { ItemStatus, Item } from '../types/workspace.types';
@@ -13,7 +19,8 @@ export function StatusBoardSection() {
   const items = useWorkspaceStore((state) => state.items);
   const loading = useWorkspaceStore((state) => state.loading);
   const syncing = useWorkspaceStore((state) => state.syncing);
-  const { sensors, activeItem, handleDragStart, handleDragEnd } = useItemDragDrop();
+  const { sensors, activeItem, handleDragStart, handleDragEnd } =
+    useItemDragDrop();
 
   // Group items by status
   const statusGroups = useMemo(() => {
@@ -40,7 +47,9 @@ export function StatusBoardSection() {
         <CollapsibleCardHeader>
           <div className="flex-1">
             <CollapsibleCardTitle>Kanban dos Itens</CollapsibleCardTitle>
-            <CollapsibleCardDescription>Carregando...</CollapsibleCardDescription>
+            <CollapsibleCardDescription>
+              Carregando...
+            </CollapsibleCardDescription>
           </div>
         </CollapsibleCardHeader>
       </CollapsibleCard>

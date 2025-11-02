@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
@@ -32,7 +33,7 @@ def test_client_query():
     with TestClient(query_app) as client:
         yield client
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def qdrant_test_client():
     """Create a Qdrant test client with temporary collection."""
     # Connect to Qdrant
@@ -42,7 +43,10 @@ async def qdrant_test_client():
     )
     
     # Create temporary collection
-    client.recreate_collection(
+    if client.collection_exists("test_collection"):
+        client.delete_collection("test_collection")
+
+    client.create_collection(
         collection_name="test_collection",
         vectors_config=models.VectorParams(
             size=1536,  # OpenAI embedding size

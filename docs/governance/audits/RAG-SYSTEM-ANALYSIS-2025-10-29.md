@@ -359,7 +359,7 @@ Body: {"directory_path": "/data/docs"}
 **Supported File Types**:
 
 - Markdown (`.md`, `.mdx`)
-- PDF (`.pdf`) - via PyPDF2
+- PDF (`.pdf`) - via pypdf
 - Plain Text (`.txt`)
 
 ### 2.5 FlexSearch Configuration

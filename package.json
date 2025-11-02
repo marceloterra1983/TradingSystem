@@ -9,9 +9,14 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "compression": "^1.8.1",
+    "dotenv": "^17.2.3",
     "express-rate-limit": "^8.1.0",
+    "ioredis": "^5.3.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "redis": "^4.6.13",
+    "yaml": "^2.5.1"
   },
   "scripts": {
     "start": "bash scripts/universal/start.sh --force-kill",
@@ -35,6 +40,10 @@
     "smoke:docsapi": "bash scripts/maintenance/smoke-docsapi.sh",
     "docs:restart": "bash scripts/maintenance/restart-docusaurus.sh",
     "dashboard:restart": "bash scripts/maintenance/restart-dashboard.sh",
-    "dev:stack": "bash -c 'bash scripts/maintenance/restart-docusaurus.sh && bash scripts/maintenance/restart-dashboard.sh'"
+    "dev:stack": "bash -c 'bash scripts/maintenance/restart-docusaurus.sh && bash scripts/maintenance/restart-dashboard.sh'",
+    "rag:ask": "node scripts/rag/query-cli.mjs",
+    "openspec": "node tools/openspec/cli.mjs",
+    "commands:build": "node scripts/commands/generate-commands-db.mjs",
+    "commands:watch": "node scripts/commands/watch-commands.mjs"
   }
 }

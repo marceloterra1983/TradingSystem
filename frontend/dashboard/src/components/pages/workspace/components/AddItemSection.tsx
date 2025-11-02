@@ -1,12 +1,25 @@
 import { useState } from 'react';
-import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
+import {
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardDescription,
+  CollapsibleCardContent,
+} from '../../../ui/collapsible-card';
 import { Button } from '../../../ui/button';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Plus, Clock } from 'lucide-react';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import type { ItemFormState, ItemCategory, ItemPriority } from '../types/workspace.types';
-import { CATEGORY_CONFIG, PRIORITY_CONFIG } from '../constants/workspace.constants';
+import type {
+  ItemFormState,
+  ItemCategory,
+  ItemPriority,
+} from '../types/workspace.types';
+import {
+  CATEGORY_CONFIG,
+  PRIORITY_CONFIG,
+} from '../constants/workspace.constants';
 import { cn } from '../../../../lib/utils';
 
 const INITIAL_ITEM_FORM: ItemFormState = {
@@ -19,9 +32,14 @@ const INITIAL_ITEM_FORM: ItemFormState = {
 
 export function AddItemSection() {
   const createItem = useWorkspaceStore((state) => state.createItem);
-  const [formData, setFormData] = useState<ItemFormState>({ ...INITIAL_ITEM_FORM });
+  const [formData, setFormData] = useState<ItemFormState>({
+    ...INITIAL_ITEM_FORM,
+  });
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +47,21 @@ export function AddItemSection() {
     setMessage(null);
 
     try {
-      const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      const tagsArray = formData.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
       const created = await createItem({ ...formData, tags: tagsArray });
-      
-      setMessage({ type: 'success', text: `Item "${created.title}" criado com sucesso!` });
+
+      setMessage({
+        type: 'success',
+        text: `Item "${created.title}" criado com sucesso!`,
+      });
       setFormData({ ...INITIAL_ITEM_FORM });
 
       setTimeout(() => {
         setMessage(null);
       }, 3000);
-
     } catch (error) {
       console.error('Failed to create item:', error);
       setMessage({ type: 'error', text: 'Erro ao criar item.' });
@@ -67,12 +90,14 @@ export function AddItemSection() {
           }}
           className="space-y-4"
         >
-           <div>
+          <div>
             <Label htmlFor="add-title">Título *</Label>
             <Input
               id="add-title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="Ex: Implementar stop loss dinâmico"
               required
             />
@@ -83,7 +108,9 @@ export function AddItemSection() {
             <textarea
               id="add-description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Descreva o item em detalhes..."
               rows={4}
               className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
@@ -97,7 +124,12 @@ export function AddItemSection() {
               <select
                 id="add-category"
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as ItemCategory })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    category: e.target.value as ItemCategory,
+                  })
+                }
                 className="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
               >
                 {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
@@ -113,7 +145,12 @@ export function AddItemSection() {
               <select
                 id="add-priority"
                 value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value as ItemPriority })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    priority: e.target.value as ItemPriority,
+                  })
+                }
                 className="w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
               >
                 {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
@@ -130,7 +167,9 @@ export function AddItemSection() {
             <Input
               id="add-tags"
               value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, tags: e.target.value })
+              }
               placeholder="Ex: ml, backtesting, performance"
             />
           </div>
@@ -141,7 +180,7 @@ export function AddItemSection() {
                 'rounded-lg p-4 text-sm',
                 message.type === 'success'
                   ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-950 dark:border-green-800 dark:text-green-400'
-                  : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400'
+                  : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400',
               )}
             >
               {message.text}

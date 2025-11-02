@@ -17,6 +17,7 @@ Este arquivo é a fonte de dados para geração automática das tabelas de porta
 | Firecrawl API | firecrawl-api | http://localhost:3002 | Upstream Firecrawl auto-hospedado |
 | LangGraph | infra-langgraph | http://localhost:8111 | Orquestração de agentes LangGraph |
 | LangGraph Dev | infra-langgraph-dev | http://localhost:8112 | Ambiente de desenvolvimento LangGraph |
+| Kestra Orchestrator | tools-kestra | http://localhost:8180 (management: 8685) | Orquestração de pipelines (start: `tools/kestra/scripts/run.sh`) |
 
 ## Dados e Monitoramento
 

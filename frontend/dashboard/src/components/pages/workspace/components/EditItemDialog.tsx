@@ -1,13 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
 import { Button } from '../../../ui/button';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../ui/select';
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG } from '../constants/workspace.constants';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../ui/select';
+import {
+  PRIORITY_CONFIG,
+  STATUS_CONFIG,
+} from '../constants/workspace.constants';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import type { Item, ItemFormWithStatus, ItemCategory, ItemPriority, ItemStatus } from '../types/workspace.types';
+import type {
+  Item,
+  ItemFormWithStatus,
+  ItemCategory,
+  ItemPriority,
+  ItemStatus,
+} from '../types/workspace.types';
+import {
+  categoriesService,
+  type Category,
+} from '../../../../services/categoriesService';
 
 const itemToFormState = (item: Item): ItemFormWithStatus => ({
   title: item.title,
@@ -25,11 +51,20 @@ interface EditItemDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: EditItemDialogProps) {
-  const [formData, setFormData] = useState<ItemFormWithStatus>(itemToFormState(item));
+export function EditItemDialog({
+  item,
+  usingFallbackData,
+  open,
+  onOpenChange,
+}: EditItemDialogProps) {
+  const [formData, setFormData] = useState<ItemFormWithStatus>(
+    itemToFormState(item),
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const updateItem = useWorkspaceStore((state) => state.updateItem);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -48,13 +83,38 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
     item.tags.join(','),
   ]);
 
+  // Load categories from API
+  useEffect(() => {
+    if (!open) return;
+
+    const loadCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await categoriesService.getCategories({
+          active_only: true,
+          order_by: 'display_order',
+        });
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    void loadCategories();
+  }, [open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
     if (usingFallbackData) {
-      setError('Não é possível editar dados de exemplo. Inicie o servidor da API para editar itens reais.');
+      setError(
+        'Não é possível editar dados de exemplo. Inicie o servidor da API para editar itens reais.',
+      );
       setSubmitting(false);
       return;
     }
@@ -71,7 +131,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
       onOpenChange(false);
     } catch (err) {
       console.error('Failed to update item:', err);
-      setError('Erro ao atualizar o item. Verifique a consola para mais detalhes.');
+      setError(
+        'Erro ao atualizar o item. Verifique a consola para mais detalhes.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +160,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
             <Input
               id="edit-title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
             />
           </div>
@@ -108,7 +172,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
             <Textarea
               id="edit-description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={4}
               required
             />
@@ -119,17 +185,34 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
               <Label htmlFor="edit-category">Categoria *</Label>
               <Select
                 value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value as ItemCategory })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, category: value as ItemCategory })
+                }
+                disabled={loadingCategories}
               >
                 <SelectTrigger id="edit-category">
-                  <SelectValue />
+                  <SelectValue
+                    placeholder={
+                      loadingCategories ? 'Carregando...' : 'Selecione'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
+                  {loadingCategories ? (
+                    <SelectItem value="__loading__" disabled>
+                      Carregando categorias...
                     </SelectItem>
-                  ))}
+                  ) : categories.length > 0 ? (
+                    categories.map((category) => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="__empty__" disabled>
+                      Nenhuma categoria disponível
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -138,7 +221,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
               <Label htmlFor="edit-priority">Prioridade *</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => setFormData({ ...formData, priority: value as ItemPriority })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, priority: value as ItemPriority })
+                }
               >
                 <SelectTrigger id="edit-priority">
                   <SelectValue />
@@ -157,7 +242,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
               <Label htmlFor="edit-status">Status *</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value as ItemStatus })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value as ItemStatus })
+                }
               >
                 <SelectTrigger id="edit-status">
                   <SelectValue />
@@ -178,7 +265,9 @@ export function EditItemDialog({ item, usingFallbackData, open, onOpenChange }: 
             <Input
               id="edit-tags"
               value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, tags: e.target.value })
+              }
               placeholder="Ex: performance, backend, api"
             />
           </div>

@@ -93,10 +93,25 @@
       "start": "python -m src.main",
       "build": null,
       "test": "pytest",
-      "port": 8080,
+      "port": 8180,
       "env": ".env.example",
       "workspace": false,
       "managed": "external"
+    },
+    {
+      "id": "kestra-orchestrator",
+      "type": "tools",
+      "path": "tools/kestra",
+      "start": "docker compose -f tools/compose/docker-compose.tools.yml up -d kestra",
+      "stop": "docker compose -f tools/compose/docker-compose.tools.yml stop kestra",
+      "status": "tools/kestra/scripts/status.sh",
+      "build": null,
+      "test": null,
+      "port": 8080,
+      "env": ".env.example",
+      "workspace": true,
+      "managed": "docker-compose",
+      "stack": "tools"
     },
     {
       "id": "firecrawl",

@@ -20,10 +20,11 @@ import { ConnectionDiagnosticCard } from './telegram-gateway/ConnectionDiagnosti
 import { RefreshCw } from 'lucide-react';
 
 export function TelegramGatewayPage() {
-  const [messageFilters, setMessageFilters] = useState<TelegramGatewayMessagesFilters>({
-    limit: 25,
-    sort: 'desc',
-  });
+  const [messageFilters, setMessageFilters] =
+    useState<TelegramGatewayMessagesFilters>({
+      limit: 25,
+      sort: 'desc',
+    });
 
   const {
     data: overview,
@@ -61,7 +62,9 @@ export function TelegramGatewayPage() {
     async (message: TelegramGatewayMessage) => {
       const confirmed =
         typeof window !== 'undefined'
-          ? window.confirm('Tem certeza que deseja marcar esta mensagem como removida?')
+          ? window.confirm(
+              'Tem certeza que deseja marcar esta mensagem como removida?',
+            )
           : true;
       if (!confirmed) return;
 
@@ -80,9 +83,12 @@ export function TelegramGatewayPage() {
     <div className="space-y-6 pb-12">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Telegram Gateway</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            Telegram Gateway
+          </h1>
           <p className="mt-1 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
-            Monitoramento em tempo real do serviço MTProto, consumo da API local e telemetria persistida no TimescaleDB.
+            Monitoramento em tempo real do serviço MTProto, consumo da API local
+            e telemetria persistida no TimescaleDB.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -111,7 +117,7 @@ export function TelegramGatewayPage() {
         lastUpdated={overview?.timestamp}
       />
 
-      <ConnectionDiagnosticCard 
+      <ConnectionDiagnosticCard
         overview={overview}
         isLoading={overviewLoading}
       />
@@ -130,7 +136,10 @@ export function TelegramGatewayPage() {
             isReprocessing={reprocessMutation.isPending}
             isDeleting={deleteMutation.isPending}
           />
-          <MetricsOverview metrics={metricsSummary} isLoading={overviewLoading && !metricsSummary} />
+          <MetricsOverview
+            metrics={metricsSummary}
+            isLoading={overviewLoading && !metricsSummary}
+          />
         </div>
         <div className="space-y-4">
           <FailureQueueCard
@@ -138,7 +147,10 @@ export function TelegramGatewayPage() {
             isLoading={overviewLoading && !queueStatus}
             onRefresh={() => void refetchOverview()}
           />
-          <SessionCard session={sessionStatus} isLoading={overviewLoading && !sessionStatus} />
+          <SessionCard
+            session={sessionStatus}
+            isLoading={overviewLoading && !sessionStatus}
+          />
           <ChannelsManagerCard />
           <AuthenticationCard />
         </div>

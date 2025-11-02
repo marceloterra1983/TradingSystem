@@ -7,7 +7,7 @@ import os
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Depends, Request, Response
@@ -50,6 +50,7 @@ from gpu import (  # type: ignore # pylint: disable=wrong-import-position
     GPU_FORCE_ENABLED,
     GPU_MAX_CONCURRENCY,
 )
+from qdrant_utils import ensure_payload_on_search  # type: ignore # pylint: disable=wrong-import-position
 
 # Configure logging
 logging.basicConfig(
@@ -91,7 +92,7 @@ except Exception as e:
     qdrant_client = None
     async_qdrant_client = None
  
-LEGACY_COLLECTION_PREFERENCE = ["documentation", "docs_index"]
+LEGACY_COLLECTION_PREFERENCE = ["documentation", "documentation__nomic", "docs_index"]
 
 
 def _get_collection_info(name: str) -> Tuple[bool, int]:
@@ -172,6 +173,7 @@ if qdrant_client is not None and async_qdrant_client is not None:
             aclient=async_qdrant_client,
             collection_name=ACTIVE_QDRANT_COLLECTION,
         )
+        ensure_payload_on_search(vector_store)
         app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
         logger.info(
             "Vector store initialised. active_collection=%s (configured=%s, vectors=%s)",
@@ -196,10 +198,14 @@ else:
     logger.warning("Qdrant clients not initialized. Vector store will not be available.")
     vector_store = None
     app.state.qdrant_collection = ACTIVE_QDRANT_COLLECTION
+
+# Cache per-collection vector stores and indexes (populated on-demand)
+vector_store_cache: Dict[str, QdrantVectorStore] = {}
+index_cache: Dict[str, VectorStoreIndex] = {}
 # Configure embeddings with Ollama (local)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Support both OLLAMA_EMBED_MODEL (service-local) and OLLAMA_EMBEDDING_MODEL (repo-wide)
-OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL") or os.getenv("OLLAMA_EMBEDDING_MODEL") or "nomic-embed-text"
+OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL") or os.getenv("OLLAMA_EMBEDDING_MODEL") or "mxbai-embed-large"
 Settings.embed_model = OllamaEmbedding(
     model_name=OLLAMA_EMBED_MODEL,
     base_url=OLLAMA_BASE_URL,
@@ -225,15 +231,17 @@ else:
 # Allows model to synthesize information and use context intelligently
 CUSTOM_QA_PROMPT = PromptTemplate(
     template=(
-        "You are a helpful AI assistant answering questions about the TradingSystem project documentation.\n\n"
-        "Context information from the documentation:\n"
+        "You are an expert technical assistant for the TradingSystem project. Use only the supplied context (and general knowledge when explicitly required).\n\n"
+        "Context from documentation and code:\n"
         "---------------------\n"
         "{context_str}\n"
         "---------------------\n\n"
-        "Using the context above and your understanding of software development concepts, "
-        "provide a clear and accurate answer to the following question. "
-        "If the context doesn't contain enough information, you may use general knowledge "
-        "but clearly indicate when you're doing so.\n\n"
+        "When answering the user request, follow the structure below:\n"
+        "1. A short summary (max 2 sentences).\n"
+        "2. Detailed explanation with bullet points. Each bullet must cite the most relevant source in parentheses using the pattern [path].\n"
+        "3. If there are important gaps or assumptions, list them under 'Pending questions'.\n\n"
+        "Always cite sources using their file paths or URLs taken from the context metadata.\n"
+        "If the context is insufficient, say so explicitly and suggest next steps.\n\n"
         "Question: {query_str}\n\n"
         "Answer:"
     )
@@ -242,6 +250,8 @@ CUSTOM_QA_PROMPT = PromptTemplate(
 # Build index from existing vector store
 if vector_store is not None:
     index = VectorStoreIndex.from_vector_store(vector_store)
+    vector_store_cache[ACTIVE_QDRANT_COLLECTION] = vector_store
+    index_cache[ACTIVE_QDRANT_COLLECTION] = index
 else:
     logger.warning("Index not initialized - vector_store is None. Queries will fail until Qdrant is available.")
     index = None
@@ -254,11 +264,64 @@ logger.info(
     GPU_COOLDOWN_SECONDS,
 )
 
+def normalize_collection_name(raw: Optional[str]) -> str:
+    """
+    Normalize incoming collection hints and fall back to the active collection.
+    """
+    if raw is None:
+        return ACTIVE_QDRANT_COLLECTION
+    normalized = raw.strip()
+    return normalized or ACTIVE_QDRANT_COLLECTION
+
+
+def get_index_for_collection(collection_hint: Optional[str]) -> Tuple[VectorStoreIndex, str]:
+    """
+    Resolve (and lazily initialize) a vector index for the requested collection.
+    """
+    target_collection = normalize_collection_name(collection_hint)
+
+    if qdrant_client is None or async_qdrant_client is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
+        )
+
+    # Return cached index when available
+    if target_collection in index_cache:
+        return index_cache[target_collection], target_collection
+
+    exists, _ = _get_collection_info(target_collection)
+    if not exists:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Collection '{target_collection}' not found in Qdrant."
+        )
+
+    try:
+        vector_store_local = QdrantVectorStore(
+            client=qdrant_client,
+            aclient=async_qdrant_client,
+            collection_name=target_collection,
+        )
+        ensure_payload_on_search(vector_store_local)
+        index_local = VectorStoreIndex.from_vector_store(vector_store_local)
+    except Exception as exc:  # pragma: no cover - defensive sanity clause
+        logger.error("Failed to initialize vector store for collection %s: %s", target_collection, exc)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to initialize vector store for collection '{target_collection}': {exc}"
+        ) from exc
+
+    vector_store_cache[target_collection] = vector_store_local
+    index_cache[target_collection] = index_local
+    return index_local, target_collection
+
 class QueryRequest(BaseModel):
     """Query request model."""
     query: str
     max_results: Optional[int] = 5
     filters: Optional[dict] = None
+    collection: Optional[str] = None
 
 class SearchResult(BaseModel):
     """Search result model."""
@@ -292,28 +355,26 @@ async def query_documents(
     """
     Execute a natural language query against the document collection.
     """
-    if index is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
-        )
     if not LLM_ENABLED:
         raise HTTPException(
             status_code=503,
             detail="LLM não configurado. Defina OLLAMA_MODEL para habilitar respostas geradas."
         )
     try:
+        index_for_request, resolved_collection = get_index_for_collection(payload.collection)
+
         # Check cache
-        cache_key = f"query:{payload.query}"
+        cache_key = f"query:{resolved_collection}:{payload.query}"
         cache_client = get_cache_client()
         cached_response = await cache_client.get(cache_key)
         if cached_response:
             response.headers["X-GPU-Wait-Seconds"] = "0"
             response.headers["X-GPU-Max-Concurrency"] = str(GPU_MAX_CONCURRENCY)
+            response.headers["X-Qdrant-Collection"] = resolved_collection
             return cached_response
 
         async with acquire_gpu_slot("query") as gpu_usage:
-            query_engine = index.as_query_engine(
+            query_engine = index_for_request.as_query_engine(
                 similarity_top_k=payload.max_results,
                 filters=payload.filters,
                 text_qa_template=CUSTOM_QA_PROMPT,
@@ -328,11 +389,17 @@ async def query_documents(
             # Support both NodeWithScore.node.text and NodeWithScore.text
             text = getattr(node, "text", None) or getattr(getattr(node, "node", None), "text", "")
             meta = getattr(node, "metadata", None) or getattr(getattr(node, "node", None), "metadata", {})
+            prepared_meta = {}
+            if isinstance(meta, dict):
+                prepared_meta.update(meta)
+            elif meta:
+                prepared_meta["raw"] = meta
+            prepared_meta.setdefault("collection", resolved_collection)
             sources.append(
                 SearchResult(
                     content=text,
                     relevance=float(getattr(node, "score", 0.0) or 0.0),
-                    metadata=meta,
+                    metadata=prepared_meta,
                 )
             )
 
@@ -344,7 +411,7 @@ async def query_documents(
                 "timestamp": datetime.utcnow().isoformat(),
                 "user": current_user["username"],
                 "query_type": "semantic",
-                "collection": ACTIVE_QDRANT_COLLECTION,
+                "collection": resolved_collection,
                 "gpu": build_gpu_metadata(
                     gpu_usage["wait_time_seconds"],
                     operation=gpu_usage.get("operation"),
@@ -355,6 +422,7 @@ async def query_documents(
 
         response.headers["X-GPU-Wait-Seconds"] = f"{gpu_usage['wait_time_seconds']:.4f}"
         response.headers["X-GPU-Max-Concurrency"] = str(GPU_MAX_CONCURRENCY)
+        response.headers["X-Qdrant-Collection"] = resolved_collection
 
         # Cache response
         response_payload = query_response.model_dump()
@@ -362,6 +430,8 @@ async def query_documents(
 
         return response_payload
 
+    except HTTPException:
+        raise
     except Exception as e:
         error_msg = str(e) if str(e) else f"{type(e).__name__}: (no message)"
         logger.error(f"Error processing query: {error_msg}", exc_info=True)
@@ -388,6 +458,7 @@ async def semantic_search(
     request: Request,
     response: Response,
     max_results: int = 5,
+    collection: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -395,23 +466,20 @@ async def semantic_search(
     """
     # Allow search without LLM; requires only embeddings
     try:
+        index_for_request, resolved_collection = get_index_for_collection(collection)
+
         # Check cache
-        cache_key = f"search:{query}:{max_results}"
+        cache_key = f"search:{resolved_collection}:{query}:{max_results}"
         cache_client = get_cache_client()
         cached_response = await cache_client.get(cache_key)
         if cached_response:
             response.headers["X-GPU-Wait-Seconds"] = "0"
             response.headers["X-GPU-Max-Concurrency"] = str(GPU_MAX_CONCURRENCY)
+            response.headers["X-Qdrant-Collection"] = resolved_collection
             return cached_response
 
-        if index is None:
-            raise HTTPException(
-                status_code=503,
-                detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable."
-            )
-
         async with acquire_gpu_slot("search") as gpu_usage:
-            query_engine = index.as_query_engine(
+            query_engine = index_for_request.as_query_engine(
                 similarity_top_k=max_results,
                 response_mode="no_text",
             )
@@ -424,16 +492,23 @@ async def semantic_search(
         for node in li_response.source_nodes:
             text = getattr(node, "text", None) or getattr(getattr(node, "node", None), "text", "")
             meta = getattr(node, "metadata", None) or getattr(getattr(node, "node", None), "metadata", {})
+            prepared_meta = {}
+            if isinstance(meta, dict):
+                prepared_meta.update(meta)
+            elif meta:
+                prepared_meta["raw"] = meta
+            prepared_meta.setdefault("collection", resolved_collection)
             results.append(
                 SearchResult(
                     content=text,
                     relevance=float(getattr(node, "score", 0.0) or 0.0),
-                    metadata=meta,
+                    metadata=prepared_meta,
                 )
             )
 
         response.headers["X-GPU-Wait-Seconds"] = f"{gpu_usage['wait_time_seconds']:.4f}"
         response.headers["X-GPU-Max-Concurrency"] = str(GPU_MAX_CONCURRENCY)
+        response.headers["X-Qdrant-Collection"] = resolved_collection
 
         # Cache results
         payload = [item.model_dump() for item in results]
@@ -441,6 +516,8 @@ async def semantic_search(
 
         return payload
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error performing search: {str(e)}")
         raise HTTPException(
@@ -449,37 +526,44 @@ async def semantic_search(
         )
 
 @app.get("/health")
-async def health_check():
+async def health_check(collection: Optional[str] = None):
     """
     Health check endpoint.
     """
+    target_collection = normalize_collection_name(collection)
+    payload = {
+        "collection": target_collection,
+        "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
+        "activeCollection": ACTIVE_QDRANT_COLLECTION,
+    }
+
     try:
         if qdrant_client is None:
-            return {
+            payload.update({
                 "status": "degraded",
                 "message": "Qdrant client not initialized",
-                "collection": ACTIVE_QDRANT_COLLECTION,
-                "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
-            }
+            })
+            return payload
         # Check Qdrant connection
         qdrant_client.get_collections()
-        exists, current_count = _get_collection_info(ACTIVE_QDRANT_COLLECTION)
-        return {
-            "status": "healthy",
-            "collection": ACTIVE_QDRANT_COLLECTION,
+        exists, current_count = _get_collection_info(target_collection)
+        status_value = "healthy" if exists else "missing"
+        payload.update({
+            "status": status_value,
             "collectionExists": exists,
             "vectors": current_count,
-            "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
             "fallbackApplied": ACTIVE_QDRANT_COLLECTION != CONFIGURED_QDRANT_COLLECTION,
-        }
+        })
+        if not exists:
+            payload["message"] = f"Collection '{target_collection}' not found."
+        return payload
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
-        return {
+        payload.update({
             "status": "degraded",
             "error": str(e),
-            "collection": ACTIVE_QDRANT_COLLECTION,
-            "configuredCollection": CONFIGURED_QDRANT_COLLECTION,
-        }
+        })
+        return payload
 
 if __name__ == "__main__":
     import uvicorn

@@ -71,7 +71,7 @@ else
 fi
 
 # 3) Check embedding model presence (skip if using container-only)
-EMBED_MODEL="${OLLAMA_EMBED_MODEL:-${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}}"
+EMBED_MODEL="${OLLAMA_EMBED_MODEL:-${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}}"
 if [ "${FORCE_OLLAMA_CONTAINER:-0}" = "1" ]; then
   echo "[info] Skipping host embedding model check (FORCE_OLLAMA_CONTAINER=1)"
 else

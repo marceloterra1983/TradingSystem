@@ -29,22 +29,22 @@ export function useStartContainer() {
       if (result.success) {
         if (result.healthy) {
           toast.success(
-            `Container ${result.containerName} started successfully and is healthy!`
+            `Container ${result.containerName} started successfully and is healthy!`,
           );
         } else {
           toast.warning(
-            `Container ${result.containerName} started but health check timed out. Refresh the page to retry.`
+            `Container ${result.containerName} started but health check timed out. Refresh the page to retry.`,
           );
         }
       } else {
-        toast.error(result.error || `Failed to start container ${result.containerName}`);
+        toast.error(
+          result.error || `Failed to start container ${result.containerName}`,
+        );
       }
     },
 
     onError: (error) => {
-      toast.error(
-        resolveErrorMessage(error, 'Failed to start container')
-      );
+      toast.error(resolveErrorMessage(error, 'Failed to start container'));
     },
   });
 }

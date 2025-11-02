@@ -1,14 +1,18 @@
 import express from 'express';
 import { query, validationResult } from 'express-validator';
 import SemanticSearchService from '../services/semanticSearchService.js';
+import CollectionService from '../services/CollectionService.js';
 
 // Router and shared instances
 const router = express.Router();
 let markdownSearchService; // injected by initializeHybridRoute
-const semanticService = new SemanticSearchService();
+let semanticService;
+let collectionService;
 
-export function initializeHybridRoute(deps) {
+export function initializeHybridRoute(deps = {}) {
   markdownSearchService = deps.markdownSearchService;
+  semanticService = deps.semanticSearchService || new SemanticSearchService();
+  collectionService = deps.collectionService || new CollectionService();
 }
 
 const validate = [
@@ -19,6 +23,7 @@ const validate = [
   query('type').optional().isString(),
   query('tags').optional().isString(),
   query('status').optional().isString(),
+  query('collection').optional().isString().trim().isLength({ min: 1, max: 128 }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -61,6 +66,28 @@ router.get('/search-hybrid', validate, async (req, res) => {
   try {
     const { q, limit = 10 } = req.query;
     const alpha = typeof req.query.alpha === 'number' ? req.query.alpha : 0.65;
+    const requestedCollectionRaw = typeof req.query.collection === 'string' ? req.query.collection.trim() : '';
+    const defaultCollection = semanticService?.getDefaultCollection?.() || 'documentation';
+    let targetCollection = requestedCollectionRaw || defaultCollection;
+
+    let collectionMeta = null;
+    if (collectionService) {
+      try {
+        collectionMeta = await collectionService.getCollectionDefinition(targetCollection);
+        targetCollection = collectionMeta?.name || targetCollection;
+      } catch (err) {
+        if (requestedCollectionRaw) {
+          const statusCode = err?.statusCode || 400;
+          return res.status(statusCode).json({
+            error: 'Invalid collection',
+            message: err?.message || `Collection '${requestedCollectionRaw}' not found`,
+          });
+        }
+        // fallback silently to default collection if metadata is unavailable
+      }
+    }
+
+    const embeddingModelOverride = collectionMeta?.embeddingModel || semanticService?.getDefaultEmbeddingModel?.();
 
     // Parse filters
     const tagArray = req.query.tags
@@ -118,7 +145,10 @@ router.get('/search-hybrid', validate, async (req, res) => {
     let semRaw = [];
     let semanticItems = [];
     try {
-      semRaw = await semanticService.search(q, Number(limit) * 4);
+      semRaw = await semanticService.search(q, Number(limit) * 4, undefined, {
+        collection: targetCollection,
+        embeddingModel: embeddingModelOverride,
+      });
       for (const item of semRaw) {
         const p = item.payload || {};
         // Apply filters on semantic payload, best-effort
@@ -196,11 +226,15 @@ router.get('/search-hybrid', validate, async (req, res) => {
     results.sort((a, b) => b.score - a.score);
     const final = results.slice(0, Number(limit));
 
-    return res.json({ total: final.length, results: final, alpha });
+    return res.json({
+      total: final.length,
+      results: final,
+      alpha,
+      collection: targetCollection,
+    });
   } catch (error) {
     return res.status(500).json({ error: 'Hybrid search failed', message: error.message });
   }
 });
 
 export default router;
-

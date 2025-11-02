@@ -128,12 +128,20 @@ interface ActionButtonProps {
   className?: string;
 }
 
-export function ViewButton({ onClick, disabled, tooltip = 'Visualizar', className }: ActionButtonProps) {
+export function ViewButton({
+  onClick,
+  disabled,
+  tooltip = 'Visualizar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
-      className={cn('h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800', className)}
+      className={cn(
+        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800',
+        className,
+      )}
       onClick={onClick}
       disabled={disabled}
       title={tooltip}
@@ -143,12 +151,20 @@ export function ViewButton({ onClick, disabled, tooltip = 'Visualizar', classNam
   );
 }
 
-export function EditButton({ onClick, disabled, tooltip = 'Editar', className }: ActionButtonProps) {
+export function EditButton({
+  onClick,
+  disabled,
+  tooltip = 'Editar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
-      className={cn('h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800', className)}
+      className={cn(
+        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800',
+        className,
+      )}
       onClick={onClick}
       disabled={disabled}
       title={tooltip}
@@ -158,14 +174,19 @@ export function EditButton({ onClick, disabled, tooltip = 'Editar', className }:
   );
 }
 
-export function DeleteButton({ onClick, disabled, tooltip = 'Deletar', className }: ActionButtonProps) {
+export function DeleteButton({
+  onClick,
+  disabled,
+  tooltip = 'Deletar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
       className={cn(
         'h-10 w-10 p-0 hover:bg-red-50 dark:hover:bg-red-950 text-red-600 hover:text-red-700',
-        className
+        className,
       )}
       onClick={onClick}
       disabled={disabled}
@@ -176,14 +197,19 @@ export function DeleteButton({ onClick, disabled, tooltip = 'Deletar', className
   );
 }
 
-export function CheckButton({ onClick, disabled, tooltip = 'Verificar', className }: ActionButtonProps) {
+export function CheckButton({
+  onClick,
+  disabled,
+  tooltip = 'Verificar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
       className={cn(
         'h-10 w-10 p-0 hover:bg-green-50 dark:hover:bg-green-950 text-green-600 hover:text-green-700',
-        className
+        className,
       )}
       onClick={onClick}
       disabled={disabled}
@@ -194,12 +220,20 @@ export function CheckButton({ onClick, disabled, tooltip = 'Verificar', classNam
   );
 }
 
-export function UncheckButton({ onClick, disabled, tooltip = 'Desmarcar', className }: ActionButtonProps) {
+export function UncheckButton({
+  onClick,
+  disabled,
+  tooltip = 'Desmarcar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="ghost"
       size="sm"
-      className={cn('h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600', className)}
+      className={cn(
+        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600',
+        className,
+      )}
       onClick={onClick}
       disabled={disabled}
       title={tooltip}
@@ -209,7 +243,12 @@ export function UncheckButton({ onClick, disabled, tooltip = 'Desmarcar', classN
   );
 }
 
-export function AddButton({ onClick, disabled, tooltip = 'Adicionar', className }: ActionButtonProps) {
+export function AddButton({
+  onClick,
+  disabled,
+  tooltip = 'Adicionar',
+  className,
+}: ActionButtonProps) {
   return (
     <Button
       variant="default"

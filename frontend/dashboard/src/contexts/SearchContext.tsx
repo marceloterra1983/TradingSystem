@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from 'react';
 
 interface SearchResult {
   content: string;
@@ -42,7 +47,10 @@ const SearchContext = createContext<{
   selectResult: (result: SearchResult | null) => void;
 } | null>(null);
 
-const searchReducer = (state: SearchState, action: SearchAction): SearchState => {
+const searchReducer = (
+  state: SearchState,
+  action: SearchAction,
+): SearchState => {
   switch (action.type) {
     case 'SET_QUERY':
       return { ...state, query: action.payload };
@@ -59,7 +67,9 @@ const searchReducer = (state: SearchState, action: SearchAction): SearchState =>
   }
 };
 
-export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(searchReducer, initialState);
 
   const search = useCallback(async (query: string) => {
@@ -83,7 +93,10 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const results = await response.json();
       dispatch({ type: 'SET_RESULTS', payload: results });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Search failed' });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Search failed',
+      });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -101,7 +114,9 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <SearchContext.Provider value={{ state, dispatch, search, clearSearch, selectResult }}>
+    <SearchContext.Provider
+      value={{ state, dispatch, search, clearSearch, selectResult }}
+    >
       {children}
     </SearchContext.Provider>
   );

@@ -12,14 +12,14 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'bg-white rounded-lg border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700',
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 Card.displayName = 'Card';
@@ -33,18 +33,22 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
     return (
       <div
         ref={ref}
-        className={cn('px-6 py-4 border-b border-gray-200 dark:border-gray-700', className)}
+        className={cn(
+          'px-6 py-4 border-b border-gray-200 dark:border-gray-700',
+          className,
+        )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardHeader.displayName = 'CardHeader';
 
-export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+export interface CardTitleProps
+  extends React.HTMLAttributes<HTMLHeadingElement> {
   children: React.ReactNode;
 }
 
@@ -53,34 +57,39 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={cn('text-lg font-semibold text-gray-900 dark:text-gray-100', className)}
+        className={cn(
+          'text-lg font-semibold text-gray-900 dark:text-gray-100',
+          className,
+        )}
         {...props}
       >
         {children}
       </h3>
     );
-  }
+  },
 );
 
 CardTitle.displayName = 'CardTitle';
 
-export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
+export interface CardDescriptionProps
+  extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode;
 }
 
-export const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p
-        ref={ref}
-        className={cn('text-sm text-gray-600 mt-1 dark:text-gray-400', className)}
-        {...props}
-      >
-        {children}
-      </p>
-    );
-  }
-);
+export const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  CardDescriptionProps
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p
+      ref={ref}
+      className={cn('text-sm text-gray-600 mt-1 dark:text-gray-400', className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
+});
 
 CardDescription.displayName = 'CardDescription';
 
@@ -95,7 +104,7 @@ export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardContent.displayName = 'CardContent';
@@ -109,13 +118,16 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
     return (
       <div
         ref={ref}
-        className={cn('px-6 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950', className)}
+        className={cn(
+          'px-6 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950',
+          className,
+        )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 
 CardFooter.displayName = 'CardFooter';

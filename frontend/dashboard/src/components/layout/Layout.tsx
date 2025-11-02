@@ -4,7 +4,11 @@ import { LayoutHeader } from './LayoutHeader';
 import { PageContent } from './PageContent';
 import { ServiceStatusBanner } from '../ServiceStatusBanner';
 import { getPageById, getDefaultPage } from '../../data/navigation';
-import { isBrowser, safeLocalStorageGet, safeLocalStorageSet } from '../../utils/browser';
+import {
+  isBrowser,
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+} from '../../utils/browser';
 
 export interface LayoutProps {
   children?: React.ReactNode;
@@ -51,11 +55,12 @@ export function Layout({ defaultPageId }: LayoutProps) {
     return Number.isFinite(parsed) ? parsed : 280; // Default to 280px
   });
 
-
   // Get initial page from hash or default
   const getInitialPage = React.useCallback(() => {
     const hash = isBrowser ? window.location.hash : ''; // e.g., '#/agents'
-    const id = hash.startsWith('#/') ? hash.slice(2) : (defaultPageId || getDefaultPage().id);
+    const id = hash.startsWith('#/')
+      ? hash.slice(2)
+      : defaultPageId || getDefaultPage().id;
     return getPageById(id)?.id || getDefaultPage().id;
   }, [defaultPageId]);
 
@@ -85,7 +90,6 @@ export function Layout({ defaultPageId }: LayoutProps) {
   React.useEffect(() => {
     safeLocalStorageSet('sidebar-width', sidebarWidth.toString());
   }, [sidebarWidth]);
-
 
   // Handle page change with useCallback - update hash
   const handlePageChange = React.useCallback((pageId: string) => {

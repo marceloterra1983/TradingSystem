@@ -1,12 +1,15 @@
 ---
 title: "ADR-008: Centralized Database Architecture"
 sidebar_position: 8
+description: Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications
 tags: [adr, database, architecture, timescaledb]
 domain: infrastructure
 type: decision-record
 summary: Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications
 status: accepted
 date: 2025-10-28
+owner: ArchitectureGuild
+lastReviewed: "2025-10-28"
 deciders: [System Architect]
 ---
 

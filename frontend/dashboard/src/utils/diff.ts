@@ -22,9 +22,12 @@ export interface DiffResult {
   summary: DiffSummary;
 }
 
-function mapChunk(
-  chunk: { value: string; added?: boolean; removed?: boolean; count?: number }
-): DiffChunk {
+function mapChunk(chunk: {
+  value: string;
+  added?: boolean;
+  removed?: boolean;
+  count?: number;
+}): DiffChunk {
   let type: DiffChunkType = 'unchanged';
   if (chunk.added) {
     type = 'added';
@@ -68,13 +71,15 @@ function summarize(chunks: DiffChunk[]): DiffSummary {
 export function computeDiff(
   original: string | object | null | undefined,
   updated: string | object | null | undefined,
-  mode: DiffMode = 'lines'
+  mode: DiffMode = 'lines',
 ): DiffResult {
   const left = original ?? '';
   const right = updated ?? '';
 
-  const originalString = typeof left === 'string' ? left : JSON.stringify(left, null, 2);
-  const updatedString = typeof right === 'string' ? right : JSON.stringify(right, null, 2);
+  const originalString =
+    typeof left === 'string' ? left : JSON.stringify(left, null, 2);
+  const updatedString =
+    typeof right === 'string' ? right : JSON.stringify(right, null, 2);
 
   const diffChunks =
     mode === 'json'

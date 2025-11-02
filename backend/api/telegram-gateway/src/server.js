@@ -13,6 +13,7 @@ import {
 import { messagesRouter } from './routes/messages.js';
 import { channelsRouter } from './routes/channels.js';
 import { telegramGatewayRouter } from './routes/telegramGateway.js';
+import { compressionMiddleware } from './middleware/compressionMiddleware.js';
 
 const logger = pino({ level: config.logLevel });
 

@@ -45,25 +45,42 @@ function isValidCssSelector(selector: string): boolean {
 }
 
 function isGenericSelector(selector: string): boolean {
-  const generic = ['div', 'span', 'p', 'a', 'img', 'table', 'tr', 'td', 'li', 'ul', 'ol'];
+  const generic = [
+    'div',
+    'span',
+    'p',
+    'a',
+    'img',
+    'table',
+    'tr',
+    'td',
+    'li',
+    'ul',
+    'ol',
+  ];
   return generic.includes(selector.trim().toLowerCase());
 }
 
-export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: ScrapeValidationOptions = {}): ValidationResult {
+export function validateScrapeOptions(
+  options: Partial<ScrapeOptions>,
+  config: ScrapeValidationOptions = {},
+): ValidationResult {
   const errors: Record<string, string> = {};
   const warnings: Record<string, string> = {};
   const requireUrl = config.requireUrl ?? true;
 
   if (requireUrl) {
     if (!options.url || !isValidUrl(options.url)) {
-      errors.url = 'Please provide a valid URL starting with http:// or https://';
+      errors.url =
+        'Please provide a valid URL starting with http:// or https://';
     }
   } else if (options.url) {
     if (!isValidUrl(options.url)) {
       errors.url = 'Default URL must start with http:// or https://';
     }
   } else {
-    warnings.url = 'No default URL provided. Users must supply one when running the template.';
+    warnings.url =
+      'No default URL provided. Users must supply one when running the template.';
   }
 
   if (!options.formats || options.formats.length === 0) {
@@ -73,7 +90,11 @@ export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: S
   }
 
   if (options.waitFor !== undefined) {
-    if (Number.isNaN(options.waitFor) || options.waitFor < 0 || options.waitFor > 30_000) {
+    if (
+      Number.isNaN(options.waitFor) ||
+      options.waitFor < 0 ||
+      options.waitFor > 30_000
+    ) {
       errors.waitFor = 'Wait time must be between 0 and 30000 milliseconds';
     } else if (options.waitFor > 10000) {
       warnings.waitFor = 'Long wait times may slow down scraping.';
@@ -81,20 +102,27 @@ export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: S
   }
 
   if (options.timeout !== undefined) {
-    if (Number.isNaN(options.timeout) || options.timeout < 1000 || options.timeout > 120_000) {
+    if (
+      Number.isNaN(options.timeout) ||
+      options.timeout < 1000 ||
+      options.timeout > 120_000
+    ) {
       errors.timeout = 'Timeout must be between 1000 and 120000 milliseconds';
     } else {
       if (options.waitFor !== undefined && options.timeout < options.waitFor) {
         errors.timeout = 'Timeout must be greater than wait time.';
       }
       if (options.timeout > 60_000) {
-        warnings.timeout = 'Timeout greater than 60s may cause resource issues.';
+        warnings.timeout =
+          'Timeout greater than 60s may cause resource issues.';
       }
     }
   }
 
   if (options.includeTags?.length) {
-    const invalid = options.includeTags.filter((tag) => !isValidCssSelector(tag));
+    const invalid = options.includeTags.filter(
+      (tag) => !isValidCssSelector(tag),
+    );
     if (invalid.length) {
       errors.includeTags = `Invalid CSS selectors: ${invalid.join(', ')}`;
     }
@@ -105,7 +133,9 @@ export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: S
   }
 
   if (options.excludeTags?.length) {
-    const invalid = options.excludeTags.filter((tag) => !isValidCssSelector(tag));
+    const invalid = options.excludeTags.filter(
+      (tag) => !isValidCssSelector(tag),
+    );
     if (invalid.length) {
       errors.excludeTags = `Invalid CSS selectors: ${invalid.join(', ')}`;
     }
@@ -122,7 +152,9 @@ export function validateScrapeOptions(options: Partial<ScrapeOptions>, config: S
   };
 }
 
-export function validateCrawlOptions(options: Partial<CrawlOptions>): ValidationResult {
+export function validateCrawlOptions(
+  options: Partial<CrawlOptions>,
+): ValidationResult {
   const errors: Record<string, string> = {};
   const warnings: Record<string, string> = {};
 
@@ -156,4 +188,3 @@ export function validateCrawlOptions(options: Partial<CrawlOptions>): Validation
     warnings: Object.keys(warnings).length ? warnings : undefined,
   };
 }
-

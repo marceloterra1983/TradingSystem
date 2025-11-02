@@ -32,11 +32,12 @@ describe('fetchServiceLauncherStatus', () => {
       ],
     };
 
-    const fetchMock: typeof fetch = vi.fn(async () =>
-      new Response(JSON.stringify(mockPayload), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock: typeof fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify(mockPayload), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
     );
 
     vi.stubGlobal('fetch', fetchMock);
@@ -49,11 +50,12 @@ describe('fetchServiceLauncherStatus', () => {
   });
 
   it('throws descriptive error when response is not ok', async () => {
-    const fetchMock: typeof fetch = vi.fn(async () =>
-      new Response(JSON.stringify({ error: 'service unavailable' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      }),
+    const fetchMock: typeof fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ error: 'service unavailable' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        }),
     );
 
     vi.stubGlobal('fetch', fetchMock);

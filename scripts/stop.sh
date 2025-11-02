@@ -54,7 +54,20 @@ SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 # Node.js service ports
 # NOTE: Port 3400 removed - docs-hub container (not Node.js service)
 # NOTE: Port 3401 removed - docs-api container (not Node.js service)
-PORTS=(4006 4010 3103 3500)
+declare -A SERVICE_PORTS=(
+    ["telegram-gateway"]=4006
+    ["telegram-gateway-api"]=4010
+    ["dashboard"]=3103
+    ["status"]=3500
+)
+
+PORTS=("${SERVICE_PORTS[@]}")
+
+declare -a REQUESTED_SERVICES=()
+TARGET_MODE=false
+DOCKER_FLAG_SET=false
+declare -A TARGET_SERVICES_MAP=()
+declare -a STOPPED_SERVICE_NAMES=()
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -69,6 +82,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         --skip-docker)
             SKIP_DOCKER=true
+            DOCKER_FLAG_SET=true
+            shift
+            ;;
+        --with-docker)
+            SKIP_DOCKER=false
+            DOCKER_FLAG_SET=true
             shift
             ;;
         --skip-services)
@@ -125,11 +144,26 @@ EOF
             exit 0
             ;;
         *)
-            log_error "Unknown option: $1"
-            exit 1
+            if [[ -n "${SERVICE_PORTS[$1]:-}" || "$1" == "docs-watcher" ]]; then
+                REQUESTED_SERVICES+=("$1")
+                shift
+            else
+                log_error "Unknown option or service: $1"
+                exit 1
+            fi
             ;;
     esac
 done
+
+if [ ${#REQUESTED_SERVICES[@]} -gt 0 ]; then
+    TARGET_MODE=true
+    if [ "$DOCKER_FLAG_SET" = false ]; then
+        SKIP_DOCKER=true
+    fi
+    for svc in "${REQUESTED_SERVICES[@]}"; do
+        TARGET_SERVICES_MAP["$svc"]=1
+    done
+fi
 
 # Function to stop service on port
 stop_port() {
@@ -260,6 +294,16 @@ stop_firecrawl_stack() {
     log_success "✓ FIRECRAWL stack stopped"
 }
 
+mark_service_stopped() {
+    local name=$1
+    for existing in "${STOPPED_SERVICE_NAMES[@]}"; do
+        if [ "$existing" = "$name" ]; then
+            return
+        fi
+    done
+    STOPPED_SERVICE_NAMES+=("$name")
+}
+
 # Function to stop services by PID files
 stop_services_by_pidfiles() {
     if [ ! -d "$SERVICES_DIR" ]; then
@@ -275,6 +319,10 @@ stop_services_by_pidfiles() {
     echo "$pidfiles" | while read -r pidfile; do
         local service=$(basename "$pidfile" .pid)
         local pid=$(cat "$pidfile" 2>/dev/null || echo "")
+
+        if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ] && [[ -z "${TARGET_SERVICES_MAP[$service]:-}" ]]; then
+            continue
+        fi
 
         if [ -z "$pid" ]; then
             rm -f "$pidfile"
@@ -313,6 +361,7 @@ stop_services_by_pidfiles() {
 
         rm -f "$pidfile"
         log_success "✓ $service stopped"
+        mark_service_stopped "$service"
     done
 }
 
@@ -320,43 +369,75 @@ stop_services_by_pidfiles() {
 main() {
     section "TradingSystem - Universal Stop v2.0"
 
-    local stopped_count=0
+    STOPPED_SERVICE_NAMES=()
 
     # Step 1: Stop Node.js services
     if [ "$SKIP_SERVICES" = false ]; then
         section "Stopping Node.js Services"
 
+        if [ "$TARGET_MODE" = true ]; then
+            log_info "Targeted services: ${REQUESTED_SERVICES[*]}"
+        fi
+
         # Stop by PID files
         stop_services_by_pidfiles
 
+        local -a ports_to_stop=("${PORTS[@]}")
+        if [ "$TARGET_MODE" = true ] && [ ${#TARGET_SERVICES_MAP[@]} -gt 0 ]; then
+            ports_to_stop=()
+            for svc in "${!TARGET_SERVICES_MAP[@]}"; do
+                if [[ -n "${SERVICE_PORTS[$svc]:-}" ]]; then
+                    ports_to_stop+=("${SERVICE_PORTS[$svc]}")
+                fi
+            done
+        fi
+
         # Stop by known ports
-        for port in "${PORTS[@]}"; do
+        for port in "${ports_to_stop[@]}"; do
             if lsof -ti :"$port" >/dev/null 2>&1; then
+                local service_name=""
+                for candidate in "${!SERVICE_PORTS[@]}"; do
+                    if [ "${SERVICE_PORTS[$candidate]}" = "$port" ]; then
+                        service_name=$candidate
+                        break
+                    fi
+                done
+                if [ -n "$service_name" ]; then
+                    log_info "Stopping ${service_name} (port ${port})"
+                fi
                 stop_port "$port"
-                stopped_count=$((stopped_count + 1))
+                if [ -n "$service_name" ]; then
+                    mark_service_stopped "$service_name"
+                else
+                    mark_service_stopped "port-${port}"
+                fi
             fi
         done
 
+        # Stop docs-watcher (file watcher without port)
+        if [ "$TARGET_MODE" = false ] || [[ -n "${TARGET_SERVICES_MAP["docs-watcher"]:-}" ]]; then
+            if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
+                log_info "Stopping docs-watcher..."
+                if [ "$FORCE" = true ]; then
+                    pkill -9 -f "watch-docs.js" || true
+                else
+                    pkill -15 -f "watch-docs.js" || true
+                    sleep 1
+                    # Force kill if still alive
+                    if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
+                        pkill -9 -f "watch-docs.js" || true
+                    fi
+                fi
+                log_success "✓ Stopped docs-watcher"
+                mark_service_stopped "docs-watcher"
+            fi
+        fi
+
+        local stopped_count=${#STOPPED_SERVICE_NAMES[@]}
         if [ $stopped_count -eq 0 ]; then
             log_info "No Node.js services running"
         else
             log_success "✓ Stopped $stopped_count service(s)"
-        fi
-
-        # Stop docs-watcher (file watcher without port)
-        if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
-            log_info "Stopping docs-watcher..."
-            if [ "$FORCE" = true ]; then
-                pkill -9 -f "watch-docs.js" || true
-            else
-                pkill -15 -f "watch-docs.js" || true
-                sleep 1
-                # Force kill if still alive
-                if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
-                    pkill -9 -f "watch-docs.js" || true
-                fi
-            fi
-            log_success "✓ Stopped docs-watcher"
         fi
     else
         log_info "Skipping local services (--skip-services)"

@@ -25,7 +25,13 @@ import {
 interface DockerContainer {
   name: string;
   status: 'running' | 'stopped' | 'unknown';
-  category: 'data' | 'monitoring' | 'ai' | 'docs' | 'infrastructure' | 'firecrawl';
+  category:
+    | 'data'
+    | 'monitoring'
+    | 'ai'
+    | 'docs'
+    | 'infrastructure'
+    | 'firecrawl';
   description: string;
   ports?: string[];
   url?: string;
@@ -78,7 +84,7 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     description: 'PostgreSQL (Infrastructure)',
     ports: ['5432'],
   },
-  
+
   // Monitoring Services
   {
     name: 'mon-prometheus',
@@ -119,7 +125,7 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     description: 'TimescaleDB Prometheus Exporter',
     ports: ['9187'],
   },
-  
+
   // AI Services
   {
     name: 'infra-langgraph',
@@ -159,7 +165,7 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     ports: ['6333', '6334'],
     url: 'http://localhost:6333',
   },
-  
+
   // Documentation Services (2-container architecture)
   {
     name: 'documentation',
@@ -174,10 +180,10 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     status: 'running',
     category: 'docs',
     description: 'DocsAPI (Express + FlexSearch) - Search, validation, CRUD',
-    ports: ['3401'],
-    url: 'http://localhost:3401/health',
+    ports: ['3402'],
+    url: 'http://localhost:3402/health',
   },
-  
+
   // Firecrawl Services
   {
     name: 'firecrawl-api',
@@ -207,7 +213,7 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     category: 'firecrawl',
     description: 'Internal PostgreSQL database',
   },
-  
+
   // Application Services
   // Infrastructure Services
   {
@@ -304,9 +310,14 @@ const STATUS_META = {
 
 export function DockerContainersSection() {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | Category>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | Category>(
+    'all',
+  );
 
-  const categoryEntries = Object.entries(CATEGORY_META) as [Category, typeof CATEGORY_META[Category]][];
+  const categoryEntries = Object.entries(CATEGORY_META) as [
+    Category,
+    (typeof CATEGORY_META)[Category],
+  ][];
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -316,12 +327,17 @@ export function DockerContainersSection() {
     }, 1000);
   };
 
-  const filteredContainers = selectedCategory === 'all'
-    ? DOCKER_CONTAINERS
-    : DOCKER_CONTAINERS.filter(c => c.category === selectedCategory);
+  const filteredContainers =
+    selectedCategory === 'all'
+      ? DOCKER_CONTAINERS
+      : DOCKER_CONTAINERS.filter((c) => c.category === selectedCategory);
 
-  const runningCount = DOCKER_CONTAINERS.filter(c => c.status === 'running').length;
-  const stoppedCount = DOCKER_CONTAINERS.filter(c => c.status === 'stopped').length;
+  const runningCount = DOCKER_CONTAINERS.filter(
+    (c) => c.status === 'running',
+  ).length;
+  const stoppedCount = DOCKER_CONTAINERS.filter(
+    (c) => c.status === 'stopped',
+  ).length;
 
   return (
     <CollapsibleCard cardId="launcher-docker-containers">
@@ -343,7 +359,9 @@ export function DockerContainersSection() {
           disabled={isRefreshing}
           aria-label="Atualizar status dos containers"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
         </Button>
       </CollapsibleCardHeader>
       <CollapsibleCardContent>
@@ -357,25 +375,33 @@ export function DockerContainersSection() {
                   {runningCount} containers ativos
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {stoppedCount > 0 ? `${stoppedCount} parados` : 'Todos os containers operacionais'}
+                  {stoppedCount > 0
+                    ? `${stoppedCount} parados`
+                    : 'Todos os containers operacionais'}
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-300 md:grid-cols-3">
               <div>
-                <p className="font-semibold text-gray-700 dark:text-gray-200">Total</p>
+                <p className="font-semibold text-gray-700 dark:text-gray-200">
+                  Total
+                </p>
                 <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                   {DOCKER_CONTAINERS.length}
                 </p>
               </div>
               <div>
-                <p className="font-semibold text-gray-700 dark:text-gray-200">Running</p>
+                <p className="font-semibold text-gray-700 dark:text-gray-200">
+                  Running
+                </p>
                 <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                   {runningCount}
                 </p>
               </div>
               <div>
-                <p className="font-semibold text-gray-700 dark:text-gray-200">Stopped</p>
+                <p className="font-semibold text-gray-700 dark:text-gray-200">
+                  Stopped
+                </p>
                 <p className="text-sm font-semibold text-red-600 dark:text-red-400">
                   {stoppedCount}
                 </p>
@@ -396,7 +422,9 @@ export function DockerContainersSection() {
               All ({DOCKER_CONTAINERS.length})
             </button>
             {categoryEntries.map(([key, meta]) => {
-              const count = DOCKER_CONTAINERS.filter(c => c.category === key).length;
+              const count = DOCKER_CONTAINERS.filter(
+                (c) => c.category === key,
+              ).length;
               return (
                 <button
                   key={key}
@@ -453,7 +481,9 @@ export function DockerContainersSection() {
                           {container.description}
                         </p>
                         <div className="flex items-center gap-2 text-xs">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${categoryMeta.bgClass} ${categoryMeta.textClass}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${categoryMeta.bgClass} ${categoryMeta.textClass}`}
+                          >
                             <categoryMeta.icon className="h-3 w-3" />
                             {categoryMeta.label}
                           </span>
@@ -466,8 +496,12 @@ export function DockerContainersSection() {
                       </div>
                     </div>
                     <div className="flex items-center justify-end gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${statusMeta.dotClass}`} />
-                      <span className={`text-xs font-semibold ${statusMeta.textClass}`}>
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${statusMeta.dotClass}`}
+                      />
+                      <span
+                        className={`text-xs font-semibold ${statusMeta.textClass}`}
+                      >
                         {statusMeta.label}
                       </span>
                     </div>
@@ -481,10 +515,3 @@ export function DockerContainersSection() {
     </CollapsibleCard>
   );
 }
-
-
-
-
-
-
-

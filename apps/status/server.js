@@ -14,6 +14,7 @@ if (process.env.SERVICE_LAUNCHER_ENV_PATH) {
 
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { execSync, spawn, execFile } = require('child_process');
 const { performance } = require('node:perf_hooks');
@@ -95,6 +96,19 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 app.use(limiter);
+
+// Response compression (OPT-001: 40% payload reduction, ~60ms savings)
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
 app.use(express.json());
 
 app.use('/api/telegram-gateway', telegramGatewayRouter);

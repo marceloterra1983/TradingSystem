@@ -12,6 +12,7 @@ import {
   createCorrelationIdMiddleware,
 } from '../../../shared/middleware/index.js';
 import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
+import { configureCompression, compressionMetrics } from '../../../shared/middleware/compression.js';
 
 const app = express();
 const PORT = process.env.PORT || 3600;
@@ -29,6 +30,8 @@ const logger = createLogger('firecrawl-proxy', {
 
 // Middleware stack
 app.use(createCorrelationIdMiddleware());
+app.use(compressionMetrics);
+app.use(configureCompression({ logger }));
 app.use(configureHelmet({ logger }));
 app.use(configureCors({ logger }));
 app.use(configureRateLimit({ logger }));

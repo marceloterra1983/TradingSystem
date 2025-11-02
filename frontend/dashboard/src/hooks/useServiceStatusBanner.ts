@@ -14,13 +14,16 @@ export function useServiceStatusBanner() {
         }
         return response.json();
       } catch (error) {
-        console.warn('[ServiceStatusBanner] Failed to fetch service status:', error);
+        console.warn(
+          '[ServiceStatusBanner] Failed to fetch service status:',
+          error,
+        );
         return null;
       }
     },
     refetchInterval: false,
     staleTime: 10000,
-    retry: false
+    retry: false,
   });
 
   const downCount = data?.downCount ?? 0;
@@ -32,6 +35,6 @@ export function useServiceStatusBanner() {
     downCount,
     degradedCount,
     overallStatus,
-    downServices: data?.services?.filter((s: any) => s.status === 'down') ?? []
+    downServices: data?.services?.filter((s: any) => s.status === 'down') ?? [],
   };
 }

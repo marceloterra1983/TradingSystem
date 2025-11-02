@@ -1,0 +1,1096 @@
+openapi: 3.0.0
+info:
+  title: RAG Services API
+  version: 1.0.0
+  description: |
+    Retrieval-Augmented Generation (RAG) Services API for managing document collections,
+    embeddings, vector search, and semantic querying.
+
+    ## Features
+    - Collection management (CRUD operations)
+    - Document ingestion and processing
+    - Vector search with Qdrant
+    - Semantic querying with LlamaIndex
+    - Redis caching for performance
+    - JWT authentication for admin endpoints
+
+    ## Authentication
+    Admin endpoints require JWT authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+
+    ## Rate Limiting
+    - Public endpoints: 100 requests per minute
+    - Admin endpoints: 50 requests per minute
+
+  contact:
+    name: TradingSystem Dev Team
+    email: dev@tradingsystem.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3401/api/v1
+    description: Development server (Documentation API)
+  - url: http://localhost:3400/api/v1
+    description: Development server (NGINX reverse proxy)
+
+tags:
+  - name: Collections
+    description: Collection management operations
+  - name: Models
+    description: Embedding model information and management
+  - name: Directories
+    description: File system browsing for collection sources
+  - name: Ingestion
+    description: Document ingestion endpoints
+  - name: Query
+    description: Search and query operations
+  - name: Admin
+    description: Administrative operations (requires JWT)
+  - name: Health
+    description: Health check and status endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the RAG Services API is healthy and all dependencies are accessible
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: healthy
+                      timestamp:
+                        type: string
+                        format: date-time
+                      version:
+                        type: string
+                        example: 1.0.0
+                      dependencies:
+                        type: object
+                        properties:
+                          redis:
+                            type: string
+                            example: connected
+                          qdrant:
+                            type: string
+                            example: connected
+                          llamaindex:
+                            type: string
+                            example: connected
+
+  /collections:
+    get:
+      summary: List all collections
+      description: Retrieve a list of all RAG collections with their statistics
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: Successfully retrieved collections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CollectionWithStats'
+                      total:
+                        type: integer
+                        example: 3
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new collection
+      description: Create a new RAG collection with specified configuration
+      tags:
+        - Collections
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionRequest'
+      responses:
+        '201':
+          description: Collection created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        $ref: '#/components/schemas/Collection'
+                      message:
+                        type: string
+                        example: Collection created successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/CollectionAlreadyExists'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /collections/{name}:
+    get:
+      summary: Get a specific collection
+      description: Retrieve detailed information about a specific collection
+      tags:
+        - Collections
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+      responses:
+        '200':
+          description: Successfully retrieved collection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CollectionWithStats'
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a collection
+      description: Update an existing collection's configuration
+      tags:
+        - Collections
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionRequest'
+      responses:
+        '200':
+          description: Collection updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        $ref: '#/components/schemas/Collection'
+                      message:
+                        type: string
+                        example: Collection updated successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a collection
+      description: Delete a collection and all its associated vectors
+      tags:
+        - Collections
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+      responses:
+        '200':
+          description: Collection deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Collection deleted successfully
+                      deletedCollection:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: my-docs
+                          stats:
+                            type: object
+                            properties:
+                              vectorsCount:
+                                type: integer
+                                example: 1234
+                              pointsCount:
+                                type: integer
+                                example: 1234
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /collections/{name}/stats:
+    get:
+      summary: Get collection statistics
+      description: Retrieve detailed statistics for a specific collection
+      tags:
+        - Collections
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+        - name: useCache
+          in: query
+          description: Whether to use cached statistics
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successfully retrieved statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        type: string
+                        example: my-docs
+                      cached:
+                        type: boolean
+                        example: true
+                      stats:
+                        $ref: '#/components/schemas/CollectionStats'
+                      timestamp:
+                        type: string
+                        format: date-time
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /collections/{name}/ingest:
+    post:
+      summary: Trigger collection ingestion
+      description: Manually trigger document ingestion for a collection
+      tags:
+        - Ingestion
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+      responses:
+        '200':
+          description: Ingestion job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Ingestion job created
+                      job:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: job-123
+                          status:
+                            type: string
+                            example: pending
+                          collectionName:
+                            type: string
+                            example: my-docs
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /collections/{name}/clean-orphans:
+    post:
+      summary: Clean orphaned vectors
+      description: Remove vectors whose source files no longer exist
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CollectionName'
+      responses:
+        '200':
+          description: Orphan cleaning completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Orphan cleaning not yet implemented
+                      collection:
+                        type: string
+                        example: my-docs
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/CollectionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rag/models:
+    get:
+      summary: List available embedding models
+      description: Retrieve list of available embedding models from Ollama
+      tags:
+        - Models
+      responses:
+        '200':
+          description: Successfully retrieved models
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      models:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Model'
+                      total:
+                        type: integer
+                        example: 2
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rag/models/{modelName}:
+    get:
+      summary: Get model details
+      description: Retrieve detailed information about a specific embedding model
+      tags:
+        - Models
+      parameters:
+        - name: modelName
+          in: path
+          required: true
+          description: Name of the embedding model
+          schema:
+            type: string
+            example: mxbai-embed-large
+      responses:
+        '200':
+          description: Successfully retrieved model details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Model'
+        '404':
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rag/directories:
+    get:
+      summary: List available base directories
+      description: Retrieve list of allowed base directories for collection sources
+      tags:
+        - Directories
+      responses:
+        '200':
+          description: Successfully retrieved directories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      directories:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DirectoryEntry'
+                      total:
+                        type: integer
+                        example: 4
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rag/directories/browse:
+    get:
+      summary: Browse directory contents
+      description: List files and subdirectories within a given path
+      tags:
+        - Directories
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Directory path to browse
+          schema:
+            type: string
+            example: /data/docs
+      responses:
+        '200':
+          description: Successfully retrieved directory contents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                        example: /data/docs
+                      parent:
+                        type: string
+                        nullable: true
+                        example: /data
+                      directories:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DirectoryEntry'
+                      files:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DirectoryEntry'
+                      totalDirectories:
+                        type: integer
+                        example: 5
+                      totalFiles:
+                        type: integer
+                        example: 23
+        '400':
+          description: Invalid path parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access to directory not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Directory not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rag/directories/validate:
+    get:
+      summary: Validate directory path
+      description: Check if a directory path exists and is accessible
+      tags:
+        - Directories
+      parameters:
+        - name: path
+          in: query
+          required: true
+          description: Directory path to validate
+          schema:
+            type: string
+            example: /data/docs/content
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                        example: /data/docs/content
+                      valid:
+                        type: boolean
+                        example: true
+                      isDirectory:
+                        type: boolean
+                        example: true
+                      accessible:
+                        type: boolean
+                        example: true
+                      reason:
+                        type: string
+                        nullable: true
+        '400':
+          description: Invalid path parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cache/{key}:
+    delete:
+      summary: Delete cache entry
+      description: Delete a specific cache entry by key
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Cache key to delete
+          schema:
+            type: string
+            example: stats:my-docs
+      responses:
+        '200':
+          description: Cache entry deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Cache entry deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cache:
+    delete:
+      summary: Clear cache by pattern
+      description: Delete cache entries matching a pattern
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: pattern
+          in: query
+          required: false
+          description: Pattern to match cache keys (supports wildcards)
+          schema:
+            type: string
+            default: '*'
+            example: 'stats:*'
+      responses:
+        '200':
+          description: Cache entries deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Cache cleared
+                      deleted:
+                        type: integer
+                        example: 42
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/cache/stats:
+    get:
+      summary: Get cache statistics
+      description: Retrieve cache performance metrics
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved cache statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      entries:
+                        type: integer
+                        example: 120
+                      hitRate:
+                        type: number
+                        format: float
+                        example: 0.85
+                      memoryUsage:
+                        type: string
+                        example: 10.2MB
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for admin endpoints
+
+  parameters:
+    CollectionName:
+      name: name
+      in: path
+      required: true
+      description: Name of the collection
+      schema:
+        type: string
+        pattern: '^[a-z0-9-_]+$'
+        example: my-docs
+
+  schemas:
+    Collection:
+      type: object
+      required:
+        - name
+        - description
+        - directory
+        - embeddingModel
+        - chunkSize
+        - chunkOverlap
+        - fileTypes
+        - recursive
+        - enabled
+        - autoUpdate
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9-_]+$'
+          minLength: 1
+          maxLength: 50
+          example: my-docs
+          description: Unique collection name (lowercase letters, numbers, hyphens, underscores)
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Documentation collection for my project
+        directory:
+          type: string
+          example: /path/to/documents
+          description: Absolute path to the documents directory
+        embeddingModel:
+          type: string
+          enum:
+            - nomic-embed-text
+            - mxbai-embed-large
+          example: mxbai-embed-large
+          description: Embedding model to use for vectorization
+        chunkSize:
+          type: integer
+          minimum: 128
+          maximum: 2048
+          default: 512
+          example: 512
+          description: Size of text chunks for processing
+        chunkOverlap:
+          type: integer
+          minimum: 0
+          maximum: 512
+          default: 50
+          example: 50
+          description: Overlap between consecutive chunks
+        fileTypes:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-z0-9]+$'
+          minItems: 1
+          maxItems: 10
+          example: ['md', 'mdx', 'txt']
+          description: File extensions to process
+        recursive:
+          type: boolean
+          default: true
+          example: true
+          description: Whether to process subdirectories recursively
+        enabled:
+          type: boolean
+          default: true
+          example: true
+          description: Whether the collection is enabled
+        autoUpdate:
+          type: boolean
+          default: false
+          example: true
+          description: Whether to automatically ingest on file changes
+
+    CollectionWithStats:
+      allOf:
+        - $ref: '#/components/schemas/Collection'
+        - type: object
+          properties:
+            stats:
+              $ref: '#/components/schemas/CollectionStats'
+
+    CollectionStats:
+      type: object
+      properties:
+        qdrant:
+          type: object
+          properties:
+            vectors_count:
+              type: integer
+              example: 1234
+            points_count:
+              type: integer
+              example: 1234
+            segments_count:
+              type: integer
+              example: 1
+            status:
+              type: string
+              example: ready
+            config:
+              type: object
+              nullable: true
+        metrics:
+          type: object
+          properties:
+            totalFiles:
+              type: integer
+              example: 220
+            indexedFiles:
+              type: integer
+              example: 215
+            pendingFiles:
+              type: integer
+              example: 5
+            orphanChunks:
+              type: integer
+              example: 0
+            chunkCount:
+              type: integer
+              example: 1234
+            note:
+              type: string
+              example: Fresh stats computed
+
+    CreateCollectionRequest:
+      allOf:
+        - $ref: '#/components/schemas/Collection'
+
+    UpdateCollectionRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+        directory:
+          type: string
+        embeddingModel:
+          type: string
+          enum:
+            - nomic-embed-text
+            - mxbai-embed-large
+        chunkSize:
+          type: integer
+          minimum: 128
+          maximum: 2048
+        chunkOverlap:
+          type: integer
+          minimum: 0
+          maximum: 512
+        fileTypes:
+          type: array
+          items:
+            type: string
+        recursive:
+          type: boolean
+        enabled:
+          type: boolean
+        autoUpdate:
+          type: boolean
+
+    Model:
+      type: object
+      required:
+        - name
+        - displayName
+        - dimensions
+        - provider
+        - available
+      properties:
+        name:
+          type: string
+          example: mxbai-embed-large
+          description: Model identifier
+        displayName:
+          type: string
+          example: MxBai Embed Large
+          description: Human-readable model name
+        dimensions:
+          type: integer
+          example: 384
+          description: Embedding vector dimensions
+        maxTokens:
+          type: integer
+          example: 512
+          description: Maximum input tokens
+        provider:
+          type: string
+          example: Ollama
+          description: Model provider
+        available:
+          type: boolean
+          example: true
+          description: Whether model is currently available
+
+    DirectoryEntry:
+      type: object
+      required:
+        - name
+        - path
+        - isDirectory
+      properties:
+        name:
+          type: string
+          example: content
+          description: Directory or file name
+        path:
+          type: string
+          example: /data/docs/content
+          description: Full path
+        isDirectory:
+          type: boolean
+          example: true
+          description: Whether entry is a directory
+        size:
+          type: integer
+          example: 4096
+          description: File size in bytes (directories show allocated size)
+        modified:
+          type: string
+          format: date-time
+          example: 2025-11-01T12:34:56Z
+          description: Last modification timestamp
+        exists:
+          type: boolean
+          example: true
+          description: Whether path exists (for base directories only)
+
+    Error:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Request validation failed
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  path:
+                    type: string
+                    example: name
+                  message:
+                    type: string
+                    example: Collection name is required
+                  code:
+                    type: string
+                    example: too_small
+
+  responses:
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: Request validation failed
+              details:
+                - path: name
+                  message: Collection name is required
+                  code: too_small
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: Authorization header required
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: Insufficient permissions
+
+    CollectionNotFound:
+      description: Collection not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: COLLECTION_NOT_FOUND
+              message: Collection 'my-docs' not found
+
+    CollectionAlreadyExists:
+      description: Collection already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: COLLECTION_ALREADY_EXISTS
+              message: Collection 'my-docs' already exists
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: An unexpected error occurred

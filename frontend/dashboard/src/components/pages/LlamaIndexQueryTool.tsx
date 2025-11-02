@@ -12,6 +12,20 @@ import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Clock, Trash2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import type { Collection } from '../../types/collections';
+
+interface LlamaIndexQueryToolProps {
+  collection?: string | null;
+  collections: Collection[];
+  onCollectionChange?: (collection: string) => void;
+}
 
 interface HistoryItem {
   id: string;
@@ -21,15 +35,22 @@ interface HistoryItem {
   answer?: QueryResponse;
   results?: SearchResultItem[];
   error?: string;
+  collection?: string | null;
 }
 
-const formatSeconds = (value: number): string => {
-  if (Number.isNaN(value)) return '-';
-  if (value < 0.01) return '<0.01s';
-  return `${value.toFixed(2)}s`;
+const formatSeconds = (value?: number | null): string => {
+  if (value == null) return '-';
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return '-';
+  if (numeric < 0.01) return '<0.01s';
+  return `${numeric.toFixed(2)}s`;
 };
 
-function GpuSummary({ gpu }: { gpu?: LlamaIndexGpuMetadata }): JSX.Element | null {
+function GpuSummary({
+  gpu,
+}: {
+  gpu?: LlamaIndexGpuMetadata;
+}): JSX.Element | null {
   if (!gpu) return null;
   const forced = gpu.policy?.forced ?? false;
   const lockEnabled = gpu.lock?.enabled && gpu.lock?.path;
@@ -44,15 +65,24 @@ function GpuSummary({ gpu }: { gpu?: LlamaIndexGpuMetadata }): JSX.Element | nul
   );
 }
 
-export function LlamaIndexQueryTool(): JSX.Element {
+export function LlamaIndexQueryTool({
+  collection,
+  collections,
+  onCollectionChange,
+}: LlamaIndexQueryToolProps): JSX.Element {
   const [text, setText] = React.useState('Explain our docs structure');
   const [maxResults, setMaxResults] = React.useState(3);
   const [useLlm, setUseLlm] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [history, setHistory] = React.useState<HistoryItem[]>([]);
   const [copied, setCopied] = React.useState<string | null>(null);
-  const [gpuPolicy, setGpuPolicy] = React.useState<GpuPolicyResponse | null>(null);
-  const [gpuPolicyError, setGpuPolicyError] = React.useState<string | null>(null);
+  const [gpuPolicy, setGpuPolicy] = React.useState<GpuPolicyResponse | null>(
+    null,
+  );
+  const [gpuPolicyError, setGpuPolicyError] = React.useState<string | null>(
+    null,
+  );
+  const hasCollections = collections.length > 0;
 
   React.useEffect(() => {
     llamaIndexService
@@ -62,10 +92,13 @@ export function LlamaIndexQueryTool(): JSX.Element {
         setGpuPolicyError(null);
       })
       .catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Falha ao carregar política de GPU';
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Falha ao carregar política de GPU';
         setGpuPolicyError(message);
       });
-  }, []);
+  }, [collection]);
 
   const handleCopy = async (label: string, text: string) => {
     try {
@@ -75,29 +108,60 @@ export function LlamaIndexQueryTool(): JSX.Element {
     } catch {}
   };
 
+  const handleCollectionSelect = React.useCallback(
+    (value: string) => {
+      if (onCollectionChange) {
+        onCollectionChange(value);
+      }
+    },
+    [onCollectionChange],
+  );
+
   const handleRun = async () => {
     setLoading(true);
     const queryId = `query-${Date.now()}`;
+    const selectedCollection =
+      collection && collection.trim().length > 0
+        ? collection.trim()
+        : undefined;
 
     try {
       if (useLlm) {
-        const resp = await llamaIndexService.queryDocs(text, maxResults);
+        const resp = await llamaIndexService.queryDocs(
+          text,
+          maxResults,
+          selectedCollection,
+        );
+        const resolvedCollection =
+          (resp?.metadata?.collection as string | undefined) ??
+          selectedCollection ??
+          null;
         const item: HistoryItem = {
           id: queryId,
           query: text,
           timestamp: new Date(),
           type: 'llm',
           answer: resp,
+          collection: resolvedCollection,
         };
         setHistory((prev) => [item, ...prev]);
       } else {
-        const items = await llamaIndexService.search(text, maxResults);
+        const items = await llamaIndexService.search(
+          text,
+          maxResults,
+          selectedCollection,
+        );
+        const fallbackCollection =
+          (items?.[0]?.metadata?.collection as string | undefined) ??
+          selectedCollection ??
+          null;
         const item: HistoryItem = {
           id: queryId,
           query: text,
           timestamp: new Date(),
           type: 'search',
           results: items,
+          collection: fallbackCollection,
         };
         setHistory((prev) => [item, ...prev]);
       }
@@ -108,6 +172,7 @@ export function LlamaIndexQueryTool(): JSX.Element {
         timestamp: new Date(),
         type: useLlm ? 'llm' : 'search',
         error: e?.message || 'Unknown error',
+        collection: selectedCollection ?? null,
       };
       setHistory((prev) => [item, ...prev]);
     } finally {
@@ -135,22 +200,58 @@ export function LlamaIndexQueryTool(): JSX.Element {
     if (seconds < 60) return 'agora';
     if (minutes < 60) return `${minutes}m atrás`;
     if (hours < 24) return `${hours}h atrás`;
-    return date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    return date.toLocaleString('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
   };
 
   return (
     <div className="space-y-4">
+      {hasCollections && (
+        <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3 space-y-2">
+          <Label htmlFor="li-collection">Coleção (Qdrant)</Label>
+          <Select
+            value={collection ?? undefined}
+            onValueChange={handleCollectionSelect}
+            disabled={!onCollectionChange}
+          >
+            <SelectTrigger id="li-collection" className="w-full">
+              <SelectValue placeholder="Selecione a coleção para consultar" />
+            </SelectTrigger>
+            <SelectContent>
+              {collections.map((item) => (
+                <SelectItem key={item.name} value={item.name}>
+                  {item.name}
+                  {typeof item.stats?.vectorsCount === 'number'
+                    ? ` • ${item.stats.vectorsCount.toLocaleString()} vetores`
+                    : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            A coleção selecionada define qual índice vetorial será utilizado
+            para buscas e respostas.
+          </p>
+        </div>
+      )}
       {gpuPolicy && (
         <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-3 text-xs text-slate-600 dark:text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
           <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
             <Badge variant="outline">GPU</Badge>
-            <span className="font-semibold">{gpuPolicy.policy.forced ? 'Execução forçada na GPU' : 'GPU opcional'}</span>
+            <span className="font-semibold">
+              {gpuPolicy.policy.forced
+                ? 'Execução forçada na GPU'
+                : 'GPU opcional'}
+            </span>
           </div>
           <span>Concorrência máx.: {gpuPolicy.maxConcurrency}</span>
           <span>Cooldown: {formatSeconds(gpuPolicy.cooldownSeconds)}</span>
-          {gpuPolicy.policy.interprocess_lock_enabled && gpuPolicy.policy.lock_path && (
-            <span>Lock: {gpuPolicy.policy.lock_path}</span>
-          )}
+          {gpuPolicy.policy.interprocess_lock_enabled &&
+            gpuPolicy.policy.lock_path && (
+              <span>Lock: {gpuPolicy.policy.lock_path}</span>
+            )}
         </div>
       )}
       {gpuPolicyError && (
@@ -183,12 +284,19 @@ export function LlamaIndexQueryTool(): JSX.Element {
               min={1}
               max={10}
               value={maxResults}
-              onChange={(e) => setMaxResults(parseInt(e.target.value || '1', 10))}
+              onChange={(e) =>
+                setMaxResults(parseInt(e.target.value || '1', 10))
+              }
             />
           </div>
           <label className="flex items-center gap-2 mt-6">
-            <Checkbox checked={useLlm} onCheckedChange={(v) => setUseLlm(!!v)} />
-            <span className="text-sm text-slate-600 dark:text-slate-400">Usar LLM (/query)</span>
+            <Checkbox
+              checked={useLlm}
+              onCheckedChange={(v) => setUseLlm(!!v)}
+            />
+            <span className="text-sm text-slate-600 dark:text-slate-400">
+              Usar LLM (/query)
+            </span>
           </label>
           <Button onClick={handleRun} disabled={loading} className="self-end">
             {loading ? 'Executando…' : 'Executar'}
@@ -231,6 +339,14 @@ export function LlamaIndexQueryTool(): JSX.Element {
                   <Badge variant={item.type === 'llm' ? 'default' : 'outline'}>
                     {item.type === 'llm' ? 'LLM Query' : 'Search'}
                   </Badge>
+                  {item.collection && (
+                    <Badge
+                      variant="outline"
+                      className="uppercase tracking-wide text-[10px]"
+                    >
+                      {item.collection}
+                    </Badge>
+                  )}
                   <span className="text-xs text-slate-500">
                     {formatTimestamp(item.timestamp)}
                   </span>
@@ -250,14 +366,6 @@ export function LlamaIndexQueryTool(): JSX.Element {
             </div>
 
             <GpuSummary gpu={item.answer?.metadata?.gpu} />
-            {item.answer?.metadata?.collection && (
-              <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                Coleção ativa:&nbsp;
-                <code className="bg-slate-200/60 dark:bg-slate-800 px-1 py-0.5 rounded">
-                  {item.answer.metadata.collection}
-                </code>
-              </div>
-            )}
 
             {/* Error */}
             {item.error && (
@@ -274,14 +382,21 @@ export function LlamaIndexQueryTool(): JSX.Element {
                 </p>
                 <ul className="space-y-2">
                   {item.results.map((r, idx) => (
-                    <li key={idx} className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3">
+                    <li
+                      key={idx}
+                      className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline">Score {r.relevance.toFixed(3)}</Badge>
+                        <Badge variant="outline">
+                          Score {r.relevance.toFixed(3)}
+                        </Badge>
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleCopy(`${item.id}-res-${idx}`, r.content)}
+                            onClick={() =>
+                              handleCopy(`${item.id}-res-${idx}`, r.content)
+                            }
                           >
                             Copiar
                           </Button>
@@ -306,14 +421,20 @@ export function LlamaIndexQueryTool(): JSX.Element {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Conf {item.answer.confidence.toFixed(3)}</Badge>
-                      <Badge variant="outline">Fontes {item.answer.sources.length}</Badge>
+                      <Badge variant="outline">
+                        Conf {item.answer.confidence.toFixed(3)}
+                      </Badge>
+                      <Badge variant="outline">
+                        Fontes {item.answer.sources.length}
+                      </Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCopy(`${item.id}-answer`, item.answer!.answer)}
+                        onClick={() =>
+                          handleCopy(`${item.id}-answer`, item.answer!.answer)
+                        }
                       >
                         Copiar resposta
                       </Button>
@@ -341,17 +462,23 @@ export function LlamaIndexQueryTool(): JSX.Element {
                         className="rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline">Score {s.relevance.toFixed(3)}</Badge>
+                          <Badge variant="outline">
+                            Score {s.relevance.toFixed(3)}
+                          </Badge>
                           <div className="flex items-center gap-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleCopy(`${item.id}-src-${idx}`, s.content)}
+                              onClick={() =>
+                                handleCopy(`${item.id}-src-${idx}`, s.content)
+                              }
                             >
                               Copiar fonte
                             </Button>
                             {copied === `${item.id}-src-${idx}` && (
-                              <span className="text-xs text-emerald-600">✓</span>
+                              <span className="text-xs text-emerald-600">
+                                ✓
+                              </span>
                             )}
                           </div>
                         </div>
@@ -372,7 +499,9 @@ export function LlamaIndexQueryTool(): JSX.Element {
       {history.length === 0 && !loading && (
         <div className="text-center py-8 text-slate-500 dark:text-slate-400">
           <p className="text-sm">Nenhuma query executada ainda.</p>
-          <p className="text-xs mt-1">Digite uma pergunta acima e clique em "Executar".</p>
+          <p className="text-xs mt-1">
+            Digite uma pergunta acima e clique em "Executar".
+          </p>
         </div>
       )}
     </div>

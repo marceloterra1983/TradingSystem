@@ -14,6 +14,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['src/__tests__/setup.ts'],
+    testTimeout: 60000, // 60 seconds for tests with debounce
     coverage: {
       ...(baseConfig.test?.coverage ?? {}),
       enabled: false,

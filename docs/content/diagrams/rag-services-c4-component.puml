@@ -1,0 +1,67 @@
+@startuml RAG Services - C4 Component Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title RAG Collections Service - Component Diagram (C4 Level 3)
+
+LAYOUT_WITH_LEGEND()
+
+Container_Boundary(express_server, "Express.js Application") {
+    Component(server, "Server", "server.ts", "Main application entry point, middleware setup")
+    Component(cors_config, "CORS Config", "config/cors.ts", "CORS and security headers")
+    Component(error_handler, "Error Handler", "middleware/errorHandler.ts", "Global error handling")
+    Component(response_wrapper, "Response Wrapper", "middleware/responseWrapper.ts", "Standardized API responses")
+
+    Component(collections_routes, "Collections Routes", "routes/collections.ts", "CRUD for collections, stats endpoint")
+    Component(models_routes, "Models Routes", "routes/models.ts", "Embedding model management")
+    Component(directories_routes, "Directories Routes", "routes/directories.ts", "Directory configuration")
+    Component(admin_routes, "Admin Routes", "routes/admin.ts", "Cache management, system admin")
+}
+
+Container_Boundary(services, "Business Logic Services") {
+    Component(collection_manager, "Collection Manager", "services/collectionManager.ts", "Collection lifecycle, stats computation")
+    Component(file_watcher, "File Watcher Service", "services/fileWatcher.ts", "File monitoring, auto-ingestion")
+    Component(ingestion_service, "Ingestion Service", "services/ingestionService.ts", "Document ingestion orchestration")
+    Component(cache_service, "Cache Service", "services/cacheService.ts", "Redis caching with memory fallback")
+}
+
+Container_Boundary(utils, "Utilities") {
+    Component(logger, "Winston Logger", "utils/logger.ts", "Structured JSON logging")
+}
+
+ContainerDb(redis_db, "Redis", "Redis 7", "Cache storage")
+ContainerDb(qdrant_db, "Qdrant", "Vector DB", "Vector storage")
+Container_Ext(llamaindex_api, "LlamaIndex Ingestion API", "FastAPI", "Document processing")
+
+Rel(server, collections_routes, "Registers", "/api/v1/rag/collections")
+Rel(server, models_routes, "Registers", "/api/v1/rag/models")
+Rel(server, directories_routes, "Registers", "/api/v1/rag/directories")
+Rel(server, admin_routes, "Registers", "/api/v1/admin")
+Rel(server, cors_config, "Uses")
+Rel(server, error_handler, "Uses")
+Rel(server, collection_manager, "Initializes")
+Rel(server, file_watcher, "Starts")
+Rel(server, cache_service, "Initializes")
+
+Rel(collections_routes, collection_manager, "Calls")
+Rel(collections_routes, response_wrapper, "Uses")
+Rel(models_routes, collection_manager, "Calls")
+Rel(directories_routes, collection_manager, "Calls")
+Rel(admin_routes, cache_service, "Calls")
+Rel(admin_routes, response_wrapper, "Uses")
+
+Rel(collection_manager, cache_service, "Caches stats")
+Rel(collection_manager, qdrant_db, "Queries collections", "HTTP")
+Rel(collection_manager, logger, "Logs operations")
+
+Rel(file_watcher, collection_manager, "Gets auto-update collections")
+Rel(file_watcher, ingestion_service, "Triggers ingestion")
+Rel(file_watcher, logger, "Logs events")
+
+Rel(ingestion_service, llamaindex_api, "HTTP POST", "Ingestion jobs")
+Rel(ingestion_service, cache_service, "Invalidates cache after ingestion")
+Rel(ingestion_service, logger, "Logs jobs")
+
+Rel(cache_service, redis_db, "Cache operations", "Redis Protocol")
+Rel(cache_service, logger, "Logs cache operations")
+
+@enduml

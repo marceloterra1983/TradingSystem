@@ -35,9 +35,17 @@ interface DraggableGridLayoutProps {
     content: ReactNode;
   }[];
   /** Callback when component is moved to a different column */
-  onComponentMove: (componentId: string, targetColumn: number, targetIndex?: number) => void;
+  onComponentMove: (
+    componentId: string,
+    targetColumn: number,
+    targetIndex?: number,
+  ) => void;
   /** Callback when components are reordered within the same column */
-  onReorderWithinColumn: (columnIndex: number, oldIndex: number, newIndex: number) => void;
+  onReorderWithinColumn: (
+    columnIndex: number,
+    oldIndex: number,
+    newIndex: number,
+  ) => void;
 }
 
 export function DraggableGridLayout({
@@ -55,7 +63,7 @@ export function DraggableGridLayout({
       activationConstraint: {
         distance: 8, // 8px movement required to start drag
       },
-    })
+    }),
   );
 
   // Group components by column for faster lookup and ordering
@@ -65,7 +73,10 @@ export function DraggableGridLayout({
       groups[i] = [];
     }
     components.forEach((component) => {
-      const columnIndex = Math.max(0, Math.min(component.columnIndex, columns - 1));
+      const columnIndex = Math.max(
+        0,
+        Math.min(component.columnIndex, columns - 1),
+      );
       if (!groups[columnIndex]) {
         groups[columnIndex] = [];
       }
@@ -104,14 +115,21 @@ export function DraggableGridLayout({
     }
 
     const activeId = active.id as string;
-    const activeContainerId = active.data.current?.sortable?.containerId as string | undefined;
+    const activeContainerId = active.data.current?.sortable?.containerId as
+      | string
+      | undefined;
     const overContainerId =
-      (over.data.current?.sortable?.containerId as string | undefined) || (over.id as string);
+      (over.data.current?.sortable?.containerId as string | undefined) ||
+      (over.id as string);
 
-    const fallbackSourceColumn = components.find((c) => c.id === activeId)?.columnIndex ?? 0;
+    const fallbackSourceColumn =
+      components.find((c) => c.id === activeId)?.columnIndex ?? 0;
     const sourceColumnIndex = Math.max(
       0,
-      Math.min(parseColumnIndex(activeContainerId) ?? fallbackSourceColumn, columns - 1)
+      Math.min(
+        parseColumnIndex(activeContainerId) ?? fallbackSourceColumn,
+        columns - 1,
+      ),
     );
     const targetColumnIndexRaw = parseColumnIndex(overContainerId);
 
@@ -121,7 +139,10 @@ export function DraggableGridLayout({
       return;
     }
 
-    const targetColumnIndex = Math.max(0, Math.min(targetColumnIndexRaw, columns - 1));
+    const targetColumnIndex = Math.max(
+      0,
+      Math.min(targetColumnIndexRaw, columns - 1),
+    );
 
     const sourceItems = columnGroups[sourceColumnIndex] ?? [];
     const sourceIndex =
@@ -184,7 +205,7 @@ export function DraggableGridLayout({
           columns === 1 && 'grid-cols-1',
           columns === 2 && 'grid-cols-1 lg:grid-cols-2',
           columns === 3 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-          columns === 4 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+          columns === 4 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
         )}
       >
         {Array.from({ length: columns }, (_, columnIndex) => (
@@ -224,7 +245,12 @@ interface DroppableColumnProps {
   isOver: boolean;
 }
 
-function DroppableColumn({ columnIndex, components, isDragging, isOver }: DroppableColumnProps) {
+function DroppableColumn({
+  columnIndex,
+  components,
+  isDragging,
+  isOver,
+}: DroppableColumnProps) {
   // Use SortableContext for the column
   const items = components.map((c) => c.id);
 
@@ -248,8 +274,8 @@ function DroppableColumn({ columnIndex, components, isDragging, isOver }: Droppa
           isOver
             ? 'border-cyan-500 bg-cyan-50/50 dark:border-cyan-400 dark:bg-cyan-950/20 scale-[1.02]'
             : isDragging
-            ? 'border-gray-300 dark:border-gray-600 bg-gray-50/30 dark:bg-gray-800/30'
-            : 'border-transparent'
+              ? 'border-gray-300 dark:border-gray-600 bg-gray-50/30 dark:bg-gray-800/30'
+              : 'border-transparent',
         )}
       >
         {/* Column Number Indicator */}
@@ -296,7 +322,12 @@ interface SortableItemProps {
   children: ReactNode;
 }
 
-function SortableItem({ id, index, showPositions, children }: SortableItemProps) {
+function SortableItem({
+  id,
+  index,
+  showPositions,
+  children,
+}: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -324,10 +355,7 @@ function SortableItem({ id, index, showPositions, children }: SortableItemProps)
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        'relative group',
-        isOver && !isDragging && 'scale-[1.02]'
-      )}
+      className={cn('relative group', isOver && !isDragging && 'scale-[1.02]')}
     >
       {/* Drag Handle - Left side vertical bar */}
       <div
@@ -340,7 +368,7 @@ function SortableItem({ id, index, showPositions, children }: SortableItemProps)
           'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
           'cursor-grab active:cursor-grabbing',
           'hover:bg-cyan-500 hover:w-2',
-          'z-40'
+          'z-40',
         )}
         title="Arrastar para mover"
       />
@@ -356,8 +384,11 @@ function SortableItem({ id, index, showPositions, children }: SortableItemProps)
       <div
         className={cn(
           'transition-all duration-200',
-          isDragging && 'ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-gray-900 shadow-2xl',
-          isOver && !isDragging && 'ring-2 ring-cyan-300 ring-offset-1 dark:ring-cyan-600'
+          isDragging &&
+            'ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-gray-900 shadow-2xl',
+          isOver &&
+            !isDragging &&
+            'ring-2 ring-cyan-300 ring-offset-1 dark:ring-cyan-600',
         )}
       >
         {children}

@@ -1,0 +1,33 @@
+---
+title: Kestra
+sidebar_position: 80
+description: Kestra workflow orchestration UI embedded interface
+tags: [tools, workflow, orchestration, kestra]
+owner: ToolingGuild
+lastReviewed: "2025-11-02"
+---
+
+import Admonition from '@theme/Admonition';
+
+<Admonition type="info" title="Recurso local">
+  A interface abaixo carrega o Kestra executando no seu ambiente (`http://localhost:8180/ui`).  
+  Certifique-se de ter iniciado a stack Tools (`bash scripts/docker/start-stacks.sh --phase tools`) antes de acessar.
+</Admonition>
+
+<iframe
+  src="http://localhost:8180/ui"
+  title="Kestra UI"
+  style={{
+    width: '100%',
+    minHeight: '80vh',
+    border: '1px solid var(--ifm-color-emphasis-300)',
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+  }}
+  loading="lazy"
+/>
+
+<Admonition type="caution" title="Autenticação">
+  Use as credenciais definidas no `.env` (`KESTRA_BASICAUTH_USERNAME` e `KESTRA_BASICAUTH_PASSWORD`).  
+  Para ambientes compartilhados, considere proteger o proxy HTTP com VPN ou SSO.
+</Admonition>

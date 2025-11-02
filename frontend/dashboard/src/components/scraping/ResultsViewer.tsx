@@ -3,7 +3,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { downloadFile } from '../../utils/download';
-import type { ScrapeData, CrawlResultData } from '../../services/firecrawlService';
+import type {
+  ScrapeData,
+  CrawlResultData,
+} from '../../services/firecrawlService';
 
 type ResultsData = ScrapeData | CrawlResultData | Record<string, unknown>;
 
@@ -18,7 +21,10 @@ interface ResultsViewerProps {
   selectedFormats: string[];
 }
 
-export const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, selectedFormats }) => {
+export const ResultsViewer: React.FC<ResultsViewerProps> = ({
+  result,
+  selectedFormats,
+}) => {
   if (!result?.data) return null;
 
   const data = result.data as ResultsData;
@@ -32,13 +38,17 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, selectedFo
   const rawHtmlContent = typeof rawHtmlValue === 'string' ? rawHtmlValue : null;
 
   const hasData =
-    availableTabs.length > 0 || (rawHtmlContent && selectedFormats.includes('rawHtml'));
+    availableTabs.length > 0 ||
+    (rawHtmlContent && selectedFormats.includes('rawHtml'));
 
   if (!hasData) {
     return (
       <div className="rounded-md border border-gray-200 p-4 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400">
         <p className="font-medium">No Data Available</p>
-        <p className="mt-1">No content is available in the selected formats. Try selecting different output formats or verify the scraping options.</p>
+        <p className="mt-1">
+          No content is available in the selected formats. Try selecting
+          different output formats or verify the scraping options.
+        </p>
       </div>
     );
   }
@@ -48,7 +58,11 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, selectedFo
       return;
     }
     const timestamp = new Date().getTime();
-    downloadFile(`scrape-result-${timestamp}-raw.html`, 'text/html;charset=utf-8', rawHtmlContent);
+    downloadFile(
+      `scrape-result-${timestamp}-raw.html`,
+      'text/html;charset=utf-8',
+      rawHtmlContent,
+    );
   };
 
   const handleDownload = (format: string, content: unknown) => {
@@ -57,7 +71,11 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, selectedFo
     const mimeType = format === 'json' ? 'application/json' : 'text/plain';
     const formattedContent =
       typeof content === 'string' ? content : JSON.stringify(content, null, 2);
-    downloadFile(`scrape-result-${timestamp}.${extension}`, mimeType, formattedContent);
+    downloadFile(
+      `scrape-result-${timestamp}.${extension}`,
+      mimeType,
+      formattedContent,
+    );
   };
 
   return (
@@ -70,7 +88,10 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({ result, selectedFo
               Download Raw HTML
             </Button>
           )}
-          <Link to="#/history" className="text-sm text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300">
+          <Link
+            to="#/history"
+            className="text-sm text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
+          >
             View History
           </Link>
         </div>

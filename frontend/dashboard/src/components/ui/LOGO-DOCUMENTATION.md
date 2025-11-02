@@ -19,7 +19,7 @@ Componente React reutilizável para exibir o logo oficial do TradingSystem com s
 ### Importação
 
 ```tsx
-import { Logo } from '../components/ui/logo';
+import { Logo } from "../components/ui/logo";
 ```
 
 ### Exemplos
@@ -56,11 +56,7 @@ import { Logo } from '../components/ui/logo';
 #### Logo Clicável
 
 ```tsx
-<Logo 
-  variant="icon" 
-  size="md" 
-  onClick={() => navigate('/')}
-/>
+<Logo variant="icon" size="md" onClick={() => navigate("/")} />
 ```
 
 #### Logo Apenas Ícone (forçado)
@@ -72,53 +68,56 @@ import { Logo } from '../components/ui/logo';
 
 ## 🎨 Props
 
-| Prop | Tipo | Padrão | Descrição |
-|------|------|--------|-----------|
-| `variant` | `'icon' \| 'compact' \| 'full'` | `'compact'` | Tipo de logo a exibir |
-| `size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Tamanho do logo |
-| `className` | `string` | `undefined` | Classes CSS adicionais |
-| `iconOnly` | `boolean` | `false` | Forçar exibir apenas ícone |
-| `onClick` | `() => void` | `undefined` | Callback ao clicar |
+| Prop        | Tipo                                   | Padrão      | Descrição                  |
+| ----------- | -------------------------------------- | ----------- | -------------------------- |
+| `variant`   | `'icon' \| 'compact' \| 'full'`        | `'compact'` | Tipo de logo a exibir      |
+| `size`      | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'`      | Tamanho do logo            |
+| `className` | `string`                               | `undefined` | Classes CSS adicionais     |
+| `iconOnly`  | `boolean`                              | `false`     | Forçar exibir apenas ícone |
+| `onClick`   | `() => void`                           | `undefined` | Callback ao clicar         |
 
 ## 📐 Tamanhos
 
 ### Icon
 
 | Size | Dimensões |
-|------|-----------|
-| `xs` | 24x24px |
-| `sm` | 32x32px |
-| `md` | 40x40px |
-| `lg` | 48x48px |
-| `xl` | 64x64px |
+| ---- | --------- |
+| `xs` | 24x24px   |
+| `sm` | 32x32px   |
+| `md` | 40x40px   |
+| `lg` | 48x48px   |
+| `xl` | 64x64px   |
 
 ### Compact & Full
 
 | Size | Altura |
-|------|--------|
-| `xs` | 24px |
-| `sm` | 32px |
-| `md` | 40px |
-| `lg` | 48px |
-| `xl` | 64px |
+| ---- | ------ |
+| `xs` | 24px   |
+| `sm` | 32px   |
+| `md` | 40px   |
+| `lg` | 48px   |
+| `xl` | 64px   |
 
-*Largura ajusta automaticamente mantendo proporções*
+_Largura ajusta automaticamente mantendo proporções_
 
 ## 🎨 Variantes
 
 ### `variant="icon"`
+
 - Apenas o símbolo quadrado com fundo
 - Arquivo: `/assets/branding/logo-icon.svg`
 - Uso: Favicons, ícones pequenos
 
 ### `variant="compact"` (Padrão)
+
 - Símbolo + texto "TradingSystem"
 - Arquivos:
-  - Light: `/assets/branding/logo-compact.svg`
-  - Dark: `/assets/branding/logo-compact-dark.svg`
+    - Light: `/assets/branding/logo-compact.svg`
+    - Dark: `/assets/branding/logo-compact-dark.svg`
 - Uso: Sidebars, headers
 
 ### `variant="full"`
+
 - Versão completa com espaçamento
 - Arquivo: `/assets/branding/logo-full.svg`
 - Uso: Landing pages, banners
@@ -142,6 +141,7 @@ Quando a prop `onClick` é fornecida:
 ```
 
 Efeitos aplicados:
+
 - **Scale**: `scale(1.1)` - cresce 10%
 - **Glow**: `drop-shadow(0 0 8px rgba(6,182,212,0.5))` - brilho cyan
 - **Cursor**: `pointer`
@@ -152,18 +152,14 @@ Efeitos aplicados:
 ### Classes Tailwind
 
 ```tsx
-<Logo 
-  variant="icon" 
-  size="md"
-  className="opacity-80 hover:opacity-100 mx-auto"
-/>
+<Logo variant="icon" size="md" className="opacity-80 hover:opacity-100 mx-auto" />
 ```
 
 ### Inline Styles
 
 ```tsx
-<div style={{ display: 'flex', justifyContent: 'center' }}>
-  <Logo variant="compact" size="lg" />
+<div style={{ display: "flex", justifyContent: "center" }}>
+    <Logo variant="compact" size="lg" />
 </div>
 ```
 
@@ -172,19 +168,17 @@ Efeitos aplicados:
 ### Sidebar (`LayoutSidebar.tsx`)
 
 ```tsx
-{!isCollapsed ? (
-  <Logo variant="compact" size="md" />
-) : (
-  <Logo variant="icon" size="sm" />
-)}
+{
+    !isCollapsed ? <Logo variant="compact" size="md" /> : <Logo variant="icon" size="sm" />;
+}
 ```
 
 ### Header Mobile (`LayoutHeader.tsx`)
 
 ```tsx
-{isMobile && (
-  <Logo variant="icon" size="sm" className="lg:hidden" />
-)}
+{
+    isMobile && <Logo variant="icon" size="sm" className="lg:hidden" />;
+}
 ```
 
 ### Favicon (`index.html`)
@@ -198,13 +192,14 @@ Efeitos aplicados:
 ### Logo não aparece
 
 1. **Verifique os arquivos SVG**:
-   ```bash
-   ls -la frontend/dashboard/public/assets/branding/
-   ```
+
+    ```bash
+    ls -la frontend/dashboard/public/assets/branding/
+    ```
 
 2. **Verifique o console**:
-   - Erros de carregamento aparecem no console
-   - Fallback automático para emoji 📊
+    - Erros de carregamento aparecem no console
+    - Fallback automático para emoji 📊
 
 ### Logo borrado/pixelado
 
@@ -237,4 +232,3 @@ Efeitos aplicados:
 **Criado**: Outubro 2025  
 **Versão**: 1.0.0  
 **Autor**: TradingSystem Team
-

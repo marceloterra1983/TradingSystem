@@ -3,17 +3,17 @@ import type { LucideIcon } from 'lucide-react';
 /**
  * Data Structures
  */
-export type ItemCategory =
-  | 'documentacao'
-  | 'coleta-dados'
-  | 'banco-dados'
-  | 'analise-dados'
-  | 'gestao-riscos'
-  | 'dashboard';
+// Categories are now loaded dynamically from the API
+export type ItemCategory = string;
 
 export type ItemPriority = 'low' | 'medium' | 'high' | 'critical';
 
-export type ItemStatus = 'new' | 'review' | 'in-progress' | 'completed' | 'rejected';
+export type ItemStatus =
+  | 'new'
+  | 'review'
+  | 'in-progress'
+  | 'completed'
+  | 'rejected';
 
 export interface Item {
   id: string;

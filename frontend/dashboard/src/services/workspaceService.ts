@@ -1,5 +1,10 @@
 import axios from 'axios';
-import type { Item, ItemCategory, ItemPriority, ItemStatus } from '../components/pages/workspace/types/workspace.types';
+import type {
+  Item,
+  ItemCategory,
+  ItemPriority,
+  ItemStatus,
+} from '../components/pages/workspace/types/workspace.types';
 
 // Base URL for workspace API
 const WORKSPACE_API_URL = '/api/workspace';
@@ -33,7 +38,10 @@ class WorkspaceService {
   }
 
   async updateItem(id: string, payload: UpdateItemPayload): Promise<Item> {
-    const response = await axios.put(`${WORKSPACE_API_URL}/items/${id}`, payload);
+    const response = await axios.put(
+      `${WORKSPACE_API_URL}/items/${id}`,
+      payload,
+    );
     return response.data.data;
   }
 
@@ -43,4 +51,3 @@ class WorkspaceService {
 }
 
 export const workspaceService = new WorkspaceService();
-

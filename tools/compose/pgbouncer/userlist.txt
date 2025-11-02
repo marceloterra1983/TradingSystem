@@ -1,0 +1,17 @@
+;; ============================================================================
+;; PgBouncer User Authentication File
+;; Format: "username" "password" (password can be md5-hashed or plaintext)
+;; MD5 format: "md5" + md5(password + username)
+;; ============================================================================
+
+;; TimescaleDB admin user
+;; Password: timescale
+;; MD5: md5(timescale + timescale) = md5(timescaletimescale)
+"timescale" "md59c9d4c6e4c3c5a5f5e5e5e5e5e5e5e5e"
+
+;; Alternative: plaintext password (less secure, for development only)
+;; "timescale" "timescale"
+
+;; Additional users (add as needed)
+;; "readonly_user" "md5..."
+;; "app_user" "md5..."

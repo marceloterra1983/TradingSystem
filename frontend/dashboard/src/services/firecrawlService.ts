@@ -153,13 +153,17 @@ export const firecrawlService = {
 
       if (!response.ok) {
         const payload = await parseJsonResponse<ScrapeResult>(response);
-        const errorMessage = payload?.error || `HTTP error! status: ${response.status}`;
+        const errorMessage =
+          payload?.error || `HTTP error! status: ${response.status}`;
         return { success: false, error: errorMessage };
       }
 
       const payload = await parseJsonResponse<unknown>(response);
       if (!payload) {
-        return { success: false, error: 'Invalid response from Firecrawl scrape endpoint' };
+        return {
+          success: false,
+          error: 'Invalid response from Firecrawl scrape endpoint',
+        };
       }
 
       if (isBarePayload(payload)) {
@@ -178,7 +182,8 @@ export const firecrawlService = {
       };
     } catch (error) {
       console.error('Error calling Firecrawl scrape endpoint:', error);
-      const message = error instanceof Error ? error.message : 'Unknown scrape error';
+      const message =
+        error instanceof Error ? error.message : 'Unknown scrape error';
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
@@ -204,13 +209,17 @@ export const firecrawlService = {
 
       if (!response.ok) {
         const payload = await parseJsonResponse<CrawlResult>(response);
-        const errorMessage = payload?.error || `HTTP error! status: ${response.status}`;
+        const errorMessage =
+          payload?.error || `HTTP error! status: ${response.status}`;
         return { success: false, error: errorMessage };
       }
 
       const payload = await parseJsonResponse<CrawlResult>(response);
       if (!payload) {
-        return { success: false, error: 'Invalid response from Firecrawl crawl endpoint' };
+        return {
+          success: false,
+          error: 'Invalid response from Firecrawl crawl endpoint',
+        };
       }
 
       return {
@@ -220,24 +229,31 @@ export const firecrawlService = {
       };
     } catch (error) {
       console.error('Error starting Firecrawl crawl job:', error);
-      const message = error instanceof Error ? error.message : 'Unknown crawl error';
+      const message =
+        error instanceof Error ? error.message : 'Unknown crawl error';
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
 
   async getCrawlStatus(crawlId: string): Promise<CrawlStatus> {
     try {
-      const response = await fetch(`${API_V1_BASE_URL}/crawl/${encodeURIComponent(crawlId)}`);
+      const response = await fetch(
+        `${API_V1_BASE_URL}/crawl/${encodeURIComponent(crawlId)}`,
+      );
 
       if (!response.ok) {
         const payload = await parseJsonResponse<CrawlStatus>(response);
-        const errorMessage = payload?.error || `HTTP error! status: ${response.status}`;
+        const errorMessage =
+          payload?.error || `HTTP error! status: ${response.status}`;
         return { success: false, error: errorMessage };
       }
 
       const payload = await parseJsonResponse<unknown>(response);
       if (!payload) {
-        return { success: false, error: 'Invalid response from Firecrawl crawl status endpoint' };
+        return {
+          success: false,
+          error: 'Invalid response from Firecrawl crawl status endpoint',
+        };
       }
 
       if (isBarePayload(payload)) {
@@ -256,7 +272,8 @@ export const firecrawlService = {
       };
     } catch (error) {
       console.error('Error fetching Firecrawl crawl status:', error);
-      const message = error instanceof Error ? error.message : 'Unknown crawl status error';
+      const message =
+        error instanceof Error ? error.message : 'Unknown crawl status error';
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
@@ -265,12 +282,16 @@ export const firecrawlService = {
     try {
       const response = await fetch(`${API_BASE_URL}/health`);
       if (!response.ok) {
-        return { status: 'error', error: `HTTP error! status: ${response.status}` };
+        return {
+          status: 'error',
+          error: `HTTP error! status: ${response.status}`,
+        };
       }
       return { status: 'ok' };
     } catch (error) {
       console.error('Error checking Firecrawl proxy health:', error);
-      const message = error instanceof Error ? error.message : 'Unknown health check error';
+      const message =
+        error instanceof Error ? error.message : 'Unknown health check error';
       return { status: 'error', error: normalizeFirecrawlError(message) };
     }
   },

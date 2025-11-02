@@ -2,15 +2,17 @@ import { useMemo } from 'react';
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { WorkspaceListSection } from './workspace/components/WorkspaceListSection';
 import { StatusBoardSection } from './workspace/components/StatusBoardSection';
+import { CategoriesSection } from './workspace/components/CategoriesSection';
 import { useInitializeWorkspaceEvents } from './workspace/store/useWorkspaceStore';
 
 /**
- * Workspace Page - CRUD Table + Kanban Board
- * Two-section layout similar to TP-Capital structure
- * 
+ * Workspace Page - CRUD Table + Kanban Board + Categories Management
+ * Three-section layout with customizable grid
+ *
  * Sections:
- * 1. WorkspaceListSection - CRUD table with "+" button in header
- * 2. StatusBoardSection - Kanban board with drag & drop
+ * 1. CategoriesSection - Categories CRUD management
+ * 2. WorkspaceListSection - CRUD table with "+" button in header
+ * 3. StatusBoardSection - Kanban board with drag & drop
  */
 
 export function WorkspacePageNew() {
@@ -18,6 +20,10 @@ export function WorkspacePageNew() {
 
   const sections = useMemo(
     () => [
+      {
+        id: 'workspace-categories',
+        content: <CategoriesSection />,
+      },
       {
         id: 'workspace-table',
         content: <WorkspaceListSection />,
@@ -42,4 +48,3 @@ export function WorkspacePageNew() {
 }
 
 export default WorkspacePageNew;
-

@@ -1,0 +1,93 @@
+@startuml RAG Services - File Watcher Auto-Ingestion
+title Automatic Document Ingestion on File Changes
+
+participant "File System" as FS
+participant "Chokidar Watcher" as FW
+participant "File Watcher Service" as FWS
+participant "Collection Manager" as CM
+participant "Ingestion Service" as IS
+participant "LlamaIndex API" as LI
+participant "Qdrant" as Q
+
+== Initialization ==
+
+FWS -> CM: getAutoUpdateCollections()
+activate CM
+CM --> FWS: [collections with autoUpdate=true]
+deactivate CM
+
+FWS -> FW: watch(watchPaths, options)
+note right: Watches directories\nwith glob patterns
+
+== File Change Event ==
+
+FS -> FW: File added/modified
+activate FW
+
+FW -> FW: awaitWriteFinish\n(stability: 2s)
+note right: Wait for file\nwrite to complete
+
+FW -> FWS: handleFileEvent('change', filePath)
+deactivate FW
+activate FWS
+
+FWS -> CM: getCollectionByDirectory(dirname(filePath))
+activate CM
+CM --> FWS: collection config
+deactivate CM
+
+FWS -> FWS: Check file extension\nmatches collection.fileTypes
+
+alt File extension matches
+    FWS -> FWS: scheduleIngestion(filePath, collection)
+    note right: Debounce: 5 seconds\nBatch rapid changes
+
+    FWS -> FWS: Store pending change\nwith setTimeout
+
+    == Debounce Period Elapses ==
+
+    FWS -> FWS: triggerIngestion(filePath, collection)
+
+    FWS -> IS: ingestFile({filePath, collectionName, ...})
+    activate IS
+
+    IS -> LI: POST /ingest/file
+    activate LI
+
+    LI -> LI: Process document
+    LI -> LI: Generate chunks
+    LI -> Q: Store vectors
+    activate Q
+    Q --> LI: Success
+    deactivate Q
+
+    LI --> IS: {jobId, status}
+    deactivate LI
+
+    IS --> FWS: Ingestion job created
+    deactivate IS
+
+    FWS -> FWS: Log: "Auto-ingestion job created"
+    note right: eventsProcessed++\nlastEvent = {...}
+
+else File extension doesn't match
+    FWS -> FWS: Ignore event
+end
+
+deactivate FWS
+
+== Status Query ==
+
+actor Admin
+Admin -> FWS: getStatus()
+activate FWS
+
+FWS -> CM: getAutoUpdateCollections()
+activate CM
+CM --> FWS: collections
+deactivate CM
+
+FWS --> Admin: {\n  enabled: true,\n  watching: true,\n  watchedDirectories: [...],\n  eventsProcessed: 42,\n  lastEvent: {...},\n  pendingIngestions: 2\n}
+deactivate FWS
+
+@enduml

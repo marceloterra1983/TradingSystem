@@ -15,13 +15,13 @@ last_review: "2025-10-23"
 
 These instructions are for AI assistants working in this project.
 
-Always open `@/openspec/AGENTS.md` when the request:
+Always open `@tools/openspec/AGENTS.md` when the request:
 
 -   Mentions planning or proposals (words like proposal, spec, change, plan)
 -   Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
 -   Sounds ambiguous and you need the authoritative spec before coding
 
-Use `@/openspec/AGENTS.md` to learn:
+Use `@tools/openspec/AGENTS.md` to learn:
 
 -   How to create and apply change proposals
 -   Spec format and conventions
@@ -100,14 +100,14 @@ claude
 
 ### Features
 
--   ✅ **Custom Commands** - Project-specific shortcuts (`claude/commands/`)
--   ✅ **MCP Servers** - 7 integrated servers (filesystem, git, fetch, memory, etc.)
+-   ✅ **Custom Commands** - Project-specific shortcuts (`.claude/commands/`)
+-   ✅ **MCP Servers** - 6 integrated servers (filesystem, github, openapi, docker, postgres, sentry)
 -   ✅ **Terminal Integration** - Works seamlessly in Cursor's terminal (WSL2)
 -   ✅ **Project Configuration** - Automatic loading of rules and settings
 
 ### Documentation
 
-**Complete CLI guide**: [`claude/CLAUDE-CLI.md`](claude/CLAUDE-CLI.md)
+**Complete CLI guide**: [`.claude/README.md`](.claude/README.md)
 
 **Custom commands**:
 
@@ -119,10 +119,11 @@ claude
 
 **Configuration files**:
 
--   `~/.claude.json` - Global config (API key, MCP servers)
--   `.claude-plugin` - Project settings
--   `claude/commands/` - Custom commands
--   `claude/mcp-servers.json` - MCP configuration
+-   `~/.claude.json` - Global config (API key, authentication)
+-   `.claude-plugin` - Project settings (LOCAL - forces use of project config)
+-   `.claude/commands/` - Custom commands
+-   `.claude/mcp-servers.json` - MCP configuration
+-   `.claude/settings.json` - Local settings (hooks, etc)
 
 ## Permissions
 
@@ -777,6 +778,161 @@ bash scripts/env/validate-env.sh
 -   Delphi example: `tools/ProfitDLL/Exemplo Delphi/`
 -   C++ example: `tools/ProfitDLL/Exemplo C++/main.cpp`
 
+## 🏛️ Architecture & Quality Guidelines
+
+### Architecture Review Status
+
+**Last Review:** 2025-11-01 | **Grade:** B+ (Good, with room for optimization)
+**Report:** [docs/governance/reviews/architecture-2025-11-01/index.md](docs/governance/reviews/architecture-2025-11-01/index.md)
+
+### Current Architectural Strengths
+
+✅ **Clean Architecture + DDD** - Well-defined layers and domain boundaries
+✅ **Microservices** - Single responsibility per service with clear APIs
+✅ **Security-First** - JWT authentication, rate limiting, CORS, Helmet
+✅ **Modern Stack** - React 18, Zustand, TanStack Query, Docker Compose
+✅ **Documentation** - 135+ pages with Docusaurus v3, RAG-powered search
+✅ **Observability** - Health checks, structured logging, Prometheus metrics
+
+### Critical Improvement Areas (Active)
+
+⚠️ **No API Gateway** - Centralized auth/routing needed (Kong/Traefik)
+⚠️ **Inter-Service Auth Missing** - Services trust each other without verification
+⚠️ **Single DB Instance** - TimescaleDB needs read replicas for HA
+⚠️ **Limited Test Coverage** - Currently ~30%, target 80%
+⚠️ **No API Versioning** - Breaking changes will affect clients
+⚠️ **Frontend Bundle Size** - ~800KB, needs code splitting
+⚠️ **Circuit Breakers Missing** - WebSocket/ProfitDLL paths lack fault tolerance
+
+### Best Practices (Newly Documented)
+
+#### Service Layer Pattern
+```javascript
+// ✅ GOOD: Separate business logic from HTTP handlers
+class OrderService {
+  async createOrder(orderData) {
+    // Validation, business rules, risk checks
+    const validatedOrder = await this.validateOrder(orderData);
+    return await this.orderRepository.save(validatedOrder);
+  }
+}
+
+// ❌ BAD: Business logic in route handler
+app.post('/api/orders', (req, res) => {
+  // Mixing HTTP and business logic
+  if (!req.body.symbol) return res.status(400).json({...});
+  db.query('INSERT INTO orders...'); // Direct DB access
+});
+```
+
+#### Circuit Breaker for Critical Paths
+```javascript
+// ✅ GOOD: Protect external calls with circuit breaker
+import CircuitBreaker from 'opossum';
+
+const breaker = new CircuitBreaker(callProfitDLL, {
+  timeout: 3000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000
+});
+
+breaker.fallback(() => ({ error: 'Service unavailable' }));
+breaker.on('open', () => logger.error('Circuit breaker opened!'));
+```
+
+#### Inter-Service Authentication
+```javascript
+// ✅ GOOD: Verify service-to-service calls
+const INTER_SERVICE_SECRET = process.env.INTER_SERVICE_SECRET;
+
+function verifyServiceAuth(req, res, next) {
+  const serviceToken = req.headers['x-service-token'];
+  if (serviceToken !== INTER_SERVICE_SECRET) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+}
+
+app.use('/internal/*', verifyServiceAuth);
+```
+
+#### API Versioning Strategy
+```javascript
+// ✅ GOOD: URL-based versioning for breaking changes
+app.use('/api/v1/orders', ordersRouterV1);
+app.use('/api/v2/orders', ordersRouterV2);
+
+// ⚠️ ACCEPTABLE: Header-based versioning
+app.use((req, res, next) => {
+  const version = req.headers['api-version'] || 'v1';
+  req.apiVersion = version;
+  next();
+});
+```
+
+#### Frontend Code Splitting
+```typescript
+// ✅ GOOD: Route-based lazy loading
+import { lazy, Suspense } from 'react';
+
+const LlamaIndexPage = lazy(() => import('./components/pages/LlamaIndexPage'));
+const WorkspacePage = lazy(() => import('./components/pages/WorkspacePageNew'));
+
+<Route path="/llama" element={
+  <Suspense fallback={<LoadingSpinner />}>
+    <LlamaIndexPage />
+  </Suspense>
+} />
+```
+
+#### Error Boundaries (React)
+```typescript
+// ✅ GOOD: Catch runtime errors gracefully
+class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    logger.error({ error, errorInfo });
+    // Send to Sentry/monitoring
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback />;
+    }
+    return this.props.children;
+  }
+}
+
+// Usage
+<ErrorBoundary>
+  <App />
+</ErrorBoundary>
+```
+
+### Technical Debt Tracking
+
+**Critical (P1):**
+- Missing tests (Effort: 4 weeks)
+- No API gateway (Effort: 2 weeks)
+- Single DB instance (Effort: 3 weeks)
+
+**High (P2):**
+- Circular dependencies (Effort: 2 weeks)
+- No API versioning (Effort: 1 week)
+
+**Medium (P3):**
+- Code duplication (Effort: 2 weeks)
+- Hardcoded configurations (Effort: 1 week)
+
+**See:** [Architecture Review](docs/governance/reviews/architecture-2025-11-01/index.md) for detailed action plan.
+
+---
+
 ## ⚠️ Important Reminders
 
 -   ✅ Always build x64 (ProfitDLL requirement)
@@ -785,6 +941,10 @@ bash scripts/env/validate-env.sh
 -   ✅ Use UTC timezone, adjust for market hours
 -   ✅ Test with replay data before live
 -   ✅ Run health checks before deployments (`bash scripts/maintenance/health-check-all.sh`)
+-   ✅ Follow architecture patterns (Service Layer, Circuit Breaker, Error Boundaries)
+-   ✅ Implement security best practices (inter-service auth, API versioning)
 -   ❌ Never skip risk checks
 -   ❌ Never hardcode credentials
 -   ❌ Never process heavy logic in callbacks
+-   ❌ Never create services without circuit breakers for external calls
+-   ❌ Never deploy without adequate test coverage (target: 80%)

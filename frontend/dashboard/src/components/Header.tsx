@@ -36,7 +36,9 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           {/* Market Status */}
           <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
             <Activity className="w-4 h-4 text-green-600" />
-            <span className="text-sm font-medium text-green-700">Market Open</span>
+            <span className="text-sm font-medium text-green-700">
+              Market Open
+            </span>
           </div>
 
           {/* Current Time */}

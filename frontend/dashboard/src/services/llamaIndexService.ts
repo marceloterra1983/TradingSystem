@@ -79,10 +79,14 @@ function resolveEndpoints(): EndpointPlan {
   const env = import.meta.env as Record<string, string | undefined>;
   const useUnified = `${env.VITE_USE_UNIFIED_DOMAIN}`.toLowerCase() === 'true';
   const apiBase = env.VITE_API_BASE_URL?.trim();
-  const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(/\/+$/, '');
-  const proxy = apiBase && apiBase.length > 0
-    ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
-    : DEFAULT_PROXY_PATH;
+  const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(
+    /\/+$/,
+    '',
+  );
+  const proxy =
+    apiBase && apiBase.length > 0
+      ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
+      : DEFAULT_PROXY_PATH;
   const preferProxy = Boolean(proxy);
 
   if (overrideMode === 'proxy' && proxy) {
@@ -113,7 +117,10 @@ function shouldRetry(status: number): boolean {
   return [401, 403, 404, 408, 429, 500, 502, 503, 504].includes(status);
 }
 
-async function fetchWithFallback(path: string, init: RequestInit = {}): Promise<Response> {
+async function fetchWithFallback(
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
   const plan = resolveEndpoints();
   const auth = authHeader();
 
@@ -132,21 +139,30 @@ async function fetchWithFallback(path: string, init: RequestInit = {}): Promise<
     });
 
     try {
-      const response = await fetch(`${attempt.base}${path}`, { ...init, headers });
+      const response = await fetch(`${attempt.base}${path}`, {
+        ...init,
+        headers,
+      });
       if (response.ok || attempt.kind === 'secondary' || !plan.secondary) {
         if (!response.ok) {
           const text = await response.text();
-          throw new Error(`Request failed (${response.status}): ${text || response.statusText}`);
+          throw new Error(
+            `Request failed (${response.status}): ${text || response.statusText}`,
+          );
         }
         return response;
       }
 
       if (!shouldRetry(response.status)) {
         const text = await response.text();
-        throw new Error(`Request failed (${response.status}): ${text || response.statusText}`);
+        throw new Error(
+          `Request failed (${response.status}): ${text || response.statusText}`,
+        );
       }
 
-      lastError = new Error(`Request failed (${response.status}). Retrying via fallback.`);
+      lastError = new Error(
+        `Request failed (${response.status}). Retrying via fallback.`,
+      );
     } catch (err: any) {
       if (attempt.kind === 'secondary' || !plan.secondary) {
         if (err?.name === 'TypeError' && err?.message === 'Failed to fetch') {
@@ -161,11 +177,21 @@ async function fetchWithFallback(path: string, init: RequestInit = {}): Promise<
   throw lastError || new Error('Falha ao contatar serviço LlamaIndex.');
 }
 
-export async function search(query: string, maxResults = 5): Promise<SearchResultItem[]> {
-  const resp = await fetchWithFallback(
-    `/search?query=${encodeURIComponent(query)}&max_results=${maxResults}`,
-    { method: 'GET' }
-  );
+export async function search(
+  query: string,
+  maxResults = 5,
+  collection?: string,
+): Promise<SearchResultItem[]> {
+  const params = new URLSearchParams({
+    query,
+    max_results: String(maxResults),
+  });
+  if (collection) {
+    params.set('collection', collection);
+  }
+  const resp = await fetchWithFallback(`/search?${params.toString()}`, {
+    method: 'GET',
+  });
   if (!resp.ok) {
     const msg = await resp.text();
     throw new Error(`Search failed (${resp.status}): ${msg}`);
@@ -173,11 +199,22 @@ export async function search(query: string, maxResults = 5): Promise<SearchResul
   return (await resp.json()) as SearchResultItem[];
 }
 
-export async function queryDocs(queryText: string, maxResults = 5): Promise<QueryResponse> {
+export async function queryDocs(
+  queryText: string,
+  maxResults = 5,
+  collection?: string,
+): Promise<QueryResponse> {
+  const payload: Record<string, unknown> = {
+    query: queryText,
+    max_results: maxResults,
+  };
+  if (collection) {
+    payload.collection = collection;
+  }
   const resp = await fetchWithFallback('/query', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: queryText, max_results: maxResults }),
+    body: JSON.stringify(payload),
   });
   if (!resp.ok) {
     const msg = await resp.text();
@@ -195,31 +232,63 @@ export async function fetchGpuPolicy(): Promise<GpuPolicyResponse> {
   return (await resp.json()) as GpuPolicyResponse;
 }
 
-export function endpointInfo(): { url: string; mode: ServiceMode; resolved: 'proxy' | 'direct' } {
+export function endpointInfo(): {
+  url: string;
+  mode: ServiceMode;
+  resolved: 'proxy' | 'direct';
+} {
   const plan = resolveEndpoints();
-  const resolved: 'proxy' | 'direct' = plan.primaryKind === 'proxy' ? 'proxy' : 'direct';
+  const resolved: 'proxy' | 'direct' =
+    plan.primaryKind === 'proxy' ? 'proxy' : 'direct';
   return { url: plan.primary, mode: overrideMode, resolved };
 }
 
-export async function checkHealth(): Promise<{ status: 'ok' | 'error'; message: string; url: string; resolved: 'proxy' | 'direct' }> {
+export async function checkHealth(): Promise<{
+  status: 'ok' | 'error';
+  message: string;
+  url: string;
+  resolved: 'proxy' | 'direct';
+}> {
   const env = import.meta.env as Record<string, string | undefined>;
   const apiBase = (env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-  const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(/\/+$/, '');
+  const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(
+    /\/+$/,
+    '',
+  );
   const info = endpointInfo();
   let url = '';
   if (info.resolved === 'proxy') {
     // documentation-api health endpoint (supports unified domain + local dev proxy)
-    url = apiBase ? `${apiBase}/api/v1/docs/health` : '/api/v1/docs/health';
+    url = apiBase
+      ? `${apiBase}/api/v1/rag/status/health`
+      : '/api/v1/rag/status/health';
   } else {
     url = `${direct}/health`;
   }
   try {
-    const resp = await fetch(url, { method: 'GET' });
-    if (resp.ok) return { status: 'ok', message: 'OK', url, resolved: info.resolved };
-    return { status: 'error', message: `HTTP ${resp.status}`, url, resolved: info.resolved };
+    const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+    if (resp.ok || resp.status === 304) {
+      return { status: 'ok', message: 'OK', url, resolved: info.resolved };
+    }
+    return {
+      status: 'error',
+      message: `HTTP ${resp.status}`,
+      url,
+      resolved: info.resolved,
+    };
   } catch (e: any) {
-    return { status: 'error', message: e?.message || 'Network error', url, resolved: info.resolved };
+    return {
+      status: 'error',
+      message: e?.message || 'Network error',
+      url,
+      resolved: info.resolved,
+    };
   }
 }
 
-export const llamaIndexService = { search, queryDocs, checkHealth, fetchGpuPolicy };
+export const llamaIndexService = {
+  search,
+  queryDocs,
+  checkHealth,
+  fetchGpuPolicy,
+};

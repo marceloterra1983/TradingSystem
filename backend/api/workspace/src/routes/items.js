@@ -5,14 +5,22 @@ import { nanoid } from '../utils/id.js';
 
 const router = Router();
 
-const categories = [
-  'documentacao',
-  'coleta-dados',
-  'banco-dados',
-  'analise-dados',
-  'gestao-riscos',
-  'dashboard',
-];
+// Dynamic category validation - fetches from workspace_categories table
+const validateCategory = async (value) => {
+  const db = getDbClient();
+  await db.init();
+
+  const result = await db.pool.query(
+    'SELECT name FROM workspace_categories WHERE name = $1 AND is_active = true',
+    [value]
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error('Invalid category. Please select an active category from the list.');
+  }
+
+  return true;
+};
 
 const priorities = ['low', 'medium', 'high', 'critical'];
 const statuses = ['new', 'review', 'in-progress', 'completed', 'rejected'];
@@ -21,8 +29,10 @@ const baseValidators = [
   body('title').trim().notEmpty().withMessage('title is required'),
   body('description').trim().notEmpty().withMessage('description is required'),
   body('category')
-    .isIn(categories)
-    .withMessage(`category must be one of: ${categories.join(', ')}`),
+    .trim()
+    .notEmpty()
+    .withMessage('category is required')
+    .custom(validateCategory),
   body('priority')
     .isIn(priorities)
     .withMessage(`priority must be one of: ${priorities.join(', ')}`),
@@ -41,8 +51,7 @@ const updateValidators = [
   body('description').optional().trim().notEmpty(),
   body('category')
     .optional()
-    .isIn(categories)
-    .withMessage(`category must be one of: ${categories.join(', ')}`),
+    .custom(validateCategory),
   body('priority')
     .optional()
     .isIn(priorities)

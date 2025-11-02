@@ -3,7 +3,13 @@ import { ExternalLink, Search } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { buildDocsUrl } from '@/lib/docsUrl';
 import documentationService, {
@@ -18,7 +24,9 @@ export const DocumentationPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query.trim(), 400);
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
+  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(
+    null,
+  );
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +61,9 @@ export const DocumentationPage: React.FC = () => {
             if (!current) {
               return searchResponse.results?.[0] ?? null;
             }
-            const stillExists = searchResponse.results?.find((r) => r.id === current.id);
+            const stillExists = searchResponse.results?.find(
+              (r) => r.id === current.id,
+            );
             return stillExists ?? searchResponse.results?.[0] ?? null;
           });
           setError(null);
@@ -61,7 +71,9 @@ export const DocumentationPage: React.FC = () => {
       } catch (err) {
         if (!ignore) {
           const message =
-            err instanceof Error ? err.message : 'Falha ao buscar na documentação';
+            err instanceof Error
+              ? err.message
+              : 'Falha ao buscar na documentação';
           setError(message);
           setResults([]);
           setSuggestions([]);
@@ -120,15 +132,19 @@ export const DocumentationPage: React.FC = () => {
             Documentação do TradingSystem
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Busque endpoints, eventos assíncronos e guias diretamente do portal oficial. Os
-            resultados mostram metadados e links para o conteúdo completo no Docusaurus.
+            Busque endpoints, eventos assíncronos e guias diretamente do portal
+            oficial. Os resultados mostram metadados e links para o conteúdo
+            completo no Docusaurus.
           </p>
         </header>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-slate-900">
             <div className="flex flex-col gap-2">
-              <label htmlFor="doc-search" className="text-sm font-medium text-slate-500">
+              <label
+                htmlFor="doc-search"
+                className="text-sm font-medium text-slate-500"
+              >
                 Buscar
               </label>
               <div className="flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
@@ -227,7 +243,9 @@ export const DocumentationPage: React.FC = () => {
                     {result.description || 'Sem descrição disponível'}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    {result.source && <Badge variant="secondary">{result.source}</Badge>}
+                    {result.source && (
+                      <Badge variant="secondary">{result.source}</Badge>
+                    )}
                     {result.version && (
                       <Badge variant="outline" className="text-xs">
                         v{result.version}
@@ -260,13 +278,16 @@ export const DocumentationPage: React.FC = () => {
                   </CardTitle>
                   <CardDescription className="text-xs">
                     Fonte: {selectedResult.source ?? 'desconhecida'}
-                    {selectedResult.version ? ` • v${selectedResult.version}` : ''}
+                    {selectedResult.version
+                      ? ` • v${selectedResult.version}`
+                      : ''}
                     {selectedResult.method ? ` • ${selectedResult.method}` : ''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <p className="text-slate-700 dark:text-slate-200">
-                    {selectedResult.description || 'Sem descrição fornecida para este item.'}
+                    {selectedResult.description ||
+                      'Sem descrição fornecida para este item.'}
                   </p>
                   {selectedResult.path && (
                     <div className="rounded-lg bg-slate-100 p-3 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -274,8 +295,8 @@ export const DocumentationPage: React.FC = () => {
                     </div>
                   )}
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Resultado mostrado a partir do índice interno. Para conteúdo completo,
-                    utilize o portal oficial.
+                    Resultado mostrado a partir do índice interno. Para conteúdo
+                    completo, utilize o portal oficial.
                   </div>
                 </CardContent>
               </Card>

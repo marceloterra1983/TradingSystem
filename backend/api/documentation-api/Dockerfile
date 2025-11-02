@@ -9,7 +9,7 @@ FROM node:22-alpine AS base
 WORKDIR /app
 
 # Install production dependencies only
-COPY package*.json ./
+COPY backend/api/documentation-api/package*.json ./
 RUN npm ci --only=production && \
     npm cache clean --force
 
@@ -62,9 +62,10 @@ WORKDIR /app
 COPY --from=base --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Copy application code
-COPY --chown=nodejs:nodejs package*.json ./
-COPY --chown=nodejs:nodejs prisma ./prisma
-COPY --chown=nodejs:nodejs src ./src
+COPY --chown=nodejs:nodejs backend/api/documentation-api/package*.json ./
+COPY --from=development --chown=nodejs:nodejs /shared /shared
+COPY --chown=nodejs:nodejs backend/api/documentation-api/prisma ./prisma
+COPY --chown=nodejs:nodejs backend/api/documentation-api/src ./src
 
 # Create uploads directory with proper permissions
 RUN mkdir -p uploads && \

@@ -35,10 +35,12 @@ export function LayoutSidebar({
   width = 280,
   onWidthChange,
 }: LayoutSidebarProps) {
-  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(() => {
-    // Always expand all sections by default
-    return new Set(NAVIGATION_DATA.map(section => section.id));
-  });
+  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(
+    () => {
+      // Always expand all sections by default
+      return new Set(NAVIGATION_DATA.map((section) => section.id));
+    },
+  );
 
   const [isResizing, setIsResizing] = React.useState(false);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
@@ -61,12 +63,15 @@ export function LayoutSidebar({
     setIsResizing(true);
   }, []);
 
-  const handleMouseMove = React.useCallback((e: MouseEvent) => {
-    if (!isResizing || !onWidthChange) return;
-    
-    const newWidth = Math.max(200, Math.min(500, e.clientX));
-    onWidthChange(newWidth);
-  }, [isResizing, onWidthChange]);
+  const handleMouseMove = React.useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !onWidthChange) return;
+
+      const newWidth = Math.max(200, Math.min(500, e.clientX));
+      onWidthChange(newWidth);
+    },
+    [isResizing, onWidthChange],
+  );
 
   const handleMouseUp = React.useCallback(() => {
     setIsResizing(false);
@@ -113,7 +118,7 @@ export function LayoutSidebar({
             <Logo variant="icon" size="sm" />
           </div>
         )}
-        
+
         {/* Collapse Button */}
         <button
           onClick={onToggleCollapse}
@@ -207,7 +212,7 @@ function SidebarSection({
           hasActivePage
             ? 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-400'
             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
-          isCollapsed && 'justify-center px-2'
+          isCollapsed && 'justify-center px-2',
         )}
         title={isCollapsed ? section.label : undefined}
       >
@@ -246,14 +251,16 @@ function SidebarSection({
                   'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors',
                   isActive
                     ? 'bg-cyan-100 font-medium text-cyan-700 dark:bg-cyan-950 dark:text-cyan-400'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
                 )}
               >
                 {page.icon ? (
                   <span
                     className={cn(
                       'flex h-4 w-4 items-center justify-center',
-                      isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-400 dark:text-gray-500'
+                      isActive
+                        ? 'text-cyan-600 dark:text-cyan-400'
+                        : 'text-gray-400 dark:text-gray-500',
                     )}
                   >
                     {page.icon}
@@ -262,7 +269,9 @@ function SidebarSection({
                   <div
                     className={cn(
                       'h-1.5 w-1.5 rounded-full',
-                      isActive ? 'bg-cyan-600 dark:bg-cyan-400' : 'bg-gray-400 dark:bg-gray-600'
+                      isActive
+                        ? 'bg-cyan-600 dark:bg-cyan-400'
+                        : 'bg-gray-400 dark:bg-gray-600',
                     )}
                   />
                 )}

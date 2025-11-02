@@ -1,4 +1,11 @@
-import { X, Calendar, Hash, MessageSquare, Image as ImageIcon, Send } from 'lucide-react';
+import {
+  X,
+  Calendar,
+  Hash,
+  MessageSquare,
+  Image as ImageIcon,
+  Send,
+} from 'lucide-react';
 import type { ForwardedMessage } from './ForwardedMessagesTable';
 
 interface MessageDetailModalProps {
@@ -7,7 +14,11 @@ interface MessageDetailModalProps {
   onClose: () => void;
 }
 
-export function MessageDetailModal({ message, isOpen, onClose }: MessageDetailModalProps) {
+export function MessageDetailModal({
+  message,
+  isOpen,
+  onClose,
+}: MessageDetailModalProps) {
   if (!isOpen || !message) return null;
 
   const formatFullDate = (dateStr: string) => {
@@ -75,7 +86,8 @@ export function MessageDetailModal({ message, isOpen, onClose }: MessageDetailMo
                   Canal de Origem
                 </p>
                 <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-                  {message.source_channel_name || `Canal ${message.source_channel_id}`}
+                  {message.source_channel_name ||
+                    `Canal ${message.source_channel_id}`}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   ID: {message.source_channel_id}
@@ -90,7 +102,9 @@ export function MessageDetailModal({ message, isOpen, onClose }: MessageDetailMo
                   Método de Encaminhamento
                 </p>
                 <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-                  {message.forward_method === 'copy' ? 'Cópia (restrição)' : 'Encaminhamento direto'}
+                  {message.forward_method === 'copy'
+                    ? 'Cópia (restrição)'
+                    : 'Encaminhamento direto'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Message ID: {message.message_id}
@@ -140,11 +154,15 @@ export function MessageDetailModal({ message, isOpen, onClose }: MessageDetailMo
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
-                        const errorMsg = target.nextElementSibling as HTMLElement;
+                        const errorMsg =
+                          target.nextElementSibling as HTMLElement;
                         if (errorMsg) errorMsg.style.display = 'block';
                       }}
                     />
-                    <div style={{ display: 'none' }} className="text-center text-red-600 dark:text-red-400">
+                    <div
+                      style={{ display: 'none' }}
+                      className="text-center text-red-600 dark:text-red-400"
+                    >
                       <p className="text-sm">Erro ao carregar imagem</p>
                     </div>
                     {message.image_width && message.image_height && (
@@ -212,4 +230,3 @@ export function MessageDetailModal({ message, isOpen, onClose }: MessageDetailMo
     </div>
   );
 }
-

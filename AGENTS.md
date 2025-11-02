@@ -497,8 +497,9 @@ bash scripts/env/validate-env.sh
 ### For AI Agents
 
 1. **[CLAUDE.md](../CLAUDE.md)** - Main instructions for Claude Code
-2. **[ai/AGENTS.md](ai/AGENTS.md)** - This file (AI tools overview)
+2. **[AGENTS.md](AGENTS.md)** - This file (AI tools overview)
 3. **[tools/openspec/AGENTS.md](tools/openspec/AGENTS.md)** - OpenSpec framework guide
+4. **[agents-raiox.md](.claude/agents/agents-raiox.md)** - Catálogo completo dos agentes com filtros por domínio
 
 ### For Development
 

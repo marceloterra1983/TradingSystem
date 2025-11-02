@@ -11,7 +11,10 @@ interface ConnectionStatusProps {
  * Note: WebSocket functionality has been removed from this version
  * This component now shows a static "active" status
  */
-export function ConnectionStatus({ showDetails = false, className = '' }: ConnectionStatusProps) {
+export function ConnectionStatus({
+  showDetails = false,
+  className = '',
+}: ConnectionStatusProps) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className="flex items-center gap-1.5">

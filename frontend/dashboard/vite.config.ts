@@ -1,5 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import viteCompression from 'vite-plugin-compression';
+import { preloadHints } from './vite-plugin-preload-hints';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -101,10 +104,15 @@ export default defineConfig(({ mode }) => {
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4005',
   );
-  // DocsAPI (dynamic) runs on 3401 by default; 3400 is static docs (NGINX)
-  const documentationProxy = resolveProxy(
-    env.VITE_DOCUMENTATION_PROXY_TARGET || env.VITE_DOCUMENTATION_API_URL,
+  // Docs API (FlexSearch + CRUD) runs on 3401; 3400 is static docs (NGINX)
+  const docsApiProxy = resolveProxy(
+    env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
     'http://localhost:3401',
+  );
+  // RAG Collections Service (Directories API) runs on 3403
+  const ragCollectionsProxy = resolveProxy(
+    env.VITE_RAG_COLLECTIONS_PROXY_TARGET || env.VITE_RAG_COLLECTIONS_API_URL,
+    'http://localhost:3403',
   );
   const serviceLauncherProxy = resolveProxy(
     env.VITE_SERVICE_LAUNCHER_PROXY_TARGET || env.VITE_SERVICE_LAUNCHER_API_URL,
@@ -137,7 +145,37 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    plugins: [react()],
+    plugins: [
+      react(),
+      visualizer({
+        filename: './dist/stats.html',
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        template: 'treemap', // or 'sunburst', 'network'
+      }),
+      // Preload critical chunks for faster initial load
+      preloadHints({
+        chunks: ['react-vendor', 'ui-radix', 'icons-vendor', 'utils-vendor'],
+        modulepreload: true,
+      }),
+      // Gzip compression
+      viteCompression({
+        verbose: true,
+        disable: !isProd,
+        threshold: 10240, // Only compress files > 10KB
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+      // Brotli compression (better than gzip, ~15-20% smaller)
+      viteCompression({
+        verbose: true,
+        disable: !isProd,
+        threshold: 10240,
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
+    ],
     server: {
       port: dashboardPort,
       strictPort: true,
@@ -189,27 +227,49 @@ export default defineConfig(({ mode }) => {
           rewrite: createRewrite(/^\/api\/tp-capital/, tpCapitalProxy.basePath),
         },
         '/api/docs': {
-          target: documentationProxy.target,
+          target: docsApiProxy.target,
           changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/docs/, documentationProxy.basePath),
+          rewrite: createRewrite(/^\/api\/docs/, docsApiProxy.basePath),
         },
         '/api/launcher': {
           target: serviceLauncherProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/launcher/, serviceLauncherProxy.basePath),
         },
+        // RAG Collections Service (port 3403) - Main collections API
+        '/api/v1/rag/collections': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/collections/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/collections` : '/api/v1/rag/collections'),
+        },
+        '/api/v1/rag/directories': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/directories/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/directories` : '/api/v1/rag/directories'),
+        },
+        '/api/v1/rag/models': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/models/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/models` : '/api/v1/rag/models'),
+        },
+        '/api/v1/rag/ingestion': {
+          target: ragCollectionsProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/api\/v1\/rag\/ingestion/, ragCollectionsProxy.basePath ? `${ragCollectionsProxy.basePath}/api/v1/rag/ingestion` : '/api/v1/rag/ingestion'),
+        },
+        // RAG Collections Service (port 3403) - fallback for other /api/v1/rag routes
         '/api/v1/rag': {
-          target: documentationProxy.target,
+          target: ragCollectionsProxy.target,
           changeOrigin: true,
           rewrite: (incomingPath) => {
             const stripped = incomingPath.replace(/^\/api\/v1\/rag/, '');
             const remainder = stripped.startsWith('/') ? stripped : `/${stripped}`;
-            if (!documentationProxy.basePath) {
+            if (!ragCollectionsProxy.basePath) {
               return `/api/v1/rag${remainder}`.replace(/\/+/g, '/') || '/api/v1/rag';
             }
-            const base = documentationProxy.basePath.startsWith('/')
-              ? documentationProxy.basePath
-              : `/${documentationProxy.basePath}`;
+            const base = ragCollectionsProxy.basePath.startsWith('/')
+              ? ragCollectionsProxy.basePath
+              : `/${ragCollectionsProxy.basePath}`;
             return `${base}/api/v1/rag${remainder}`.replace(/\/+/g, '/') || `${base}/api/v1/rag`;
           },
         },
@@ -266,20 +326,93 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom', 'react/jsx-runtime'],
-            'state-vendor': ['zustand', '@tanstack/react-query'],
-            'ui-radix': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-tooltip',
-              '@radix-ui/react-collapsible',
-              '@radix-ui/react-scroll-area',
-            ],
-            'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-            'markdown-vendor': ['react-markdown', 'remark-gfm', 'rehype-raw'],
-            'utils-vendor': ['axios', 'clsx', 'tailwind-merge'],
+          manualChunks(id) {
+            // Vendor chunks - Core React (most stable)
+            if (id.includes('node_modules/react/') || 
+                id.includes('node_modules/react-dom/') ||
+                id.includes('node_modules/react/jsx-runtime')) {
+              return 'react-vendor';
+            }
+            
+            // State management (Zustand + React Query)
+            if (id.includes('node_modules/zustand') || 
+                id.includes('node_modules/@tanstack/react-query')) {
+              return 'state-vendor';
+            }
+            
+            // Radix UI components (large, stable)
+            if (id.includes('node_modules/@radix-ui/')) {
+              return 'ui-radix';
+            }
+            
+            // Drag and Drop (DnD Kit)
+            if (id.includes('node_modules/@dnd-kit/')) {
+              return 'dnd-vendor';
+            }
+            
+            // Markdown (only loaded when needed - lazy loaded)
+            if (id.includes('node_modules/react-markdown') || 
+                id.includes('node_modules/remark-') || 
+                id.includes('node_modules/rehype-')) {
+              return 'markdown-vendor';
+            }
+            
+            // Lucide icons (large icon library)
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons-vendor';
+            }
+            
+            // Utilities (Axios, Clsx, etc)
+            if (id.includes('node_modules/axios') ||
+                id.includes('node_modules/clsx') ||
+                id.includes('node_modules/tailwind-merge')) {
+              return 'utils-vendor';
+            }
+
+            // Chart libraries (Recharts ~100KB)
+            if (id.includes('node_modules/recharts') ||
+                id.includes('node_modules/chart.js')) {
+              return 'charts-vendor';
+            }
+
+            // Animation library (Framer Motion ~80KB)
+            if (id.includes('node_modules/framer-motion')) {
+              return 'animation-vendor';
+            }
+
+            // Catalog views with large data files (661KB agents directory)
+            // Split these into separate chunks for better caching
+            if (id.includes('/catalog/AgentsCatalogView') ||
+                id.includes('/data/aiAgentsDirectory')) {
+              return 'agents-catalog';
+            }
+
+            if (id.includes('/catalog/CommandsCatalogView') ||
+                id.includes('/data/commandsDirectory')) {
+              return 'commands-catalog';
+            }
+
+            // Heavy pages (>50KB) - Split for better lazy loading
+            if (id.includes('/pages/LlamaIndexPage')) {
+              return 'page-llama';
+            }
+
+            if (id.includes('/pages/DocusaurusPage')) {
+              return 'page-docusaurus';
+            }
+
+            if (id.includes('/pages/WorkspacePageNew')) {
+              return 'page-workspace';
+            }
+
+            if (id.includes('/pages/TPCapitalOpcoesPage')) {
+              return 'page-tpcapital';
+            }
+
+            // Other node_modules
+            if (id.includes('node_modules/')) {
+              return 'vendor';
+            }
           },
           chunkFileNames: 'assets/[name]-[hash].js',
           entryFileNames: 'assets/[name]-[hash].js',

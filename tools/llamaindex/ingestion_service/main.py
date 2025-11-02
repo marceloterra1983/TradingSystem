@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
@@ -16,11 +16,14 @@ from llama_index.core import (
     VectorStoreIndex,
     StorageContext,
     Settings,
+    Document,
 )
 from llama_index.core import SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.embeddings.ollama import OllamaEmbedding
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
 
 # Configure logging
 logging.basicConfig(
@@ -87,6 +90,18 @@ def _float_env(var_name: str, default: Optional[float]) -> Optional[float]:
         return value if value > 0 else None
     except ValueError:
         logger.warning("Invalid float for %s: %s. Using default %s", var_name, raw, default)
+        return default
+
+
+def _int_env(var_name: str, default: int) -> int:
+    raw = os.getenv(var_name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        value = int(raw)
+        return value if value > 0 else default
+    except ValueError:
+        logger.warning("Invalid int for %s: %s. Using default %s", var_name, raw, default)
         return default
 
 
@@ -170,14 +185,18 @@ SKIP_HIDDEN_DIRS = _bool_env("LLAMAINDEX_SKIP_HIDDEN_DIRS", True)
 SKIP_HIDDEN_FILES = _bool_env("LLAMAINDEX_SKIP_HIDDEN_FILES", True)
 MAX_FILE_SIZE_MB = _float_env("LLAMAINDEX_MAX_FILE_SIZE_MB", 8.0)
 MAX_FILE_SIZE_BYTES = int(MAX_FILE_SIZE_MB * 1024 * 1024) if MAX_FILE_SIZE_MB else None
+CHUNK_SIZE = _int_env("LLAMAINDEX_CHUNK_SIZE", 512)
+CHUNK_OVERLAP = _int_env("LLAMAINDEX_CHUNK_OVERLAP", 96)
 
 logger.info(
-    "Ingestion filters - allowed_exts=%s, excluded_dirs=%s, skip_hidden_dirs=%s, skip_hidden_files=%s, max_file_size_mb=%s",
+    "Ingestion filters - allowed_exts=%s, excluded_dirs=%s, skip_hidden_dirs=%s, skip_hidden_files=%s, max_file_size_mb=%s, chunk_size=%s, chunk_overlap=%s",
     "ALL" if ALLOWED_EXTENSIONS is None else sorted(ALLOWED_EXTENSIONS),
     sorted(EXCLUDED_DIRECTORIES),
     SKIP_HIDDEN_DIRS,
     SKIP_HIDDEN_FILES,
     MAX_FILE_SIZE_MB,
+    CHUNK_SIZE,
+    CHUNK_OVERLAP,
 )
 
 # Ensure shared helpers are importable when running as a script
@@ -185,6 +204,15 @@ CURRENT_DIR = Path(__file__).resolve().parent
 SHARED_DIR = CURRENT_DIR.parent / "shared"
 if SHARED_DIR.exists() and str(SHARED_DIR) not in sys.path:
     sys.path.insert(0, str(SHARED_DIR))
+
+try:
+    from collection_config import CollectionConfigManager  # type: ignore
+except Exception as config_err:  # pragma: no cover - defensive fallback
+    CollectionConfigManager = None  # type: ignore
+    collection_config_manager = None
+    logger.warning("Collection configuration unavailable: %s", config_err)
+else:
+    collection_config_manager = CollectionConfigManager()
 
 from gpu import (  # type: ignore # pylint: disable=wrong-import-position
     acquire_gpu_slot,
@@ -194,6 +222,7 @@ from gpu import (  # type: ignore # pylint: disable=wrong-import-position
     GPU_FORCE_ENABLED,
     GPU_MAX_CONCURRENCY,
 )
+from qdrant_utils import ensure_payload_on_search  # type: ignore # pylint: disable=wrong-import-position
 
 # Ensure NLTK resources available (stopwords, punkt)
 try:
@@ -245,7 +274,9 @@ if qdrant_client is not None:
         default_vector_store = QdrantVectorStore(
             client=qdrant_client,
             collection_name=QDRANT_COLLECTION,
+            prefer_grpc=False,
         )
+        ensure_payload_on_search(default_vector_store)
         default_storage_context = StorageContext.from_defaults(vector_store=default_vector_store)
         vector_store_cache[QDRANT_COLLECTION] = default_vector_store
         storage_context_cache[QDRANT_COLLECTION] = default_storage_context
@@ -294,7 +325,9 @@ def get_or_create_storage_context(collection_name: Optional[str]) -> StorageCont
         vector_store_local = QdrantVectorStore(
             client=qdrant_client,
             collection_name=name,
+            prefer_grpc=False,
         )
+        ensure_payload_on_search(vector_store_local)
         storage_context_local = StorageContext.from_defaults(vector_store=vector_store_local)
     except Exception as exc:  # pragma: no cover - defensive logging
         logger.error("Failed to initialize vector store for collection %s: %s", name, exc)
@@ -319,6 +352,197 @@ Settings.embed_model = OllamaEmbedding(
     ollama_additional_kwargs=get_ollama_gpu_options(),
 )
 
+
+def _resolve_embedding_model_name(
+    collection_name: Optional[str],
+    model_hint: Optional[str],
+) -> str:
+    """Determine which embedding model should be used for a collection."""
+    candidate = (model_hint or "").strip()
+    if candidate:
+        return candidate
+
+    resolved_collection = _resolve_collection_for_config(collection_name)
+    if resolved_collection and collection_config_manager is not None:
+        try:
+            info = collection_config_manager.get_collection(resolved_collection)
+        except Exception as err:  # pragma: no cover - defensive logging
+            logger.debug("Failed to load collection info for %s: %s", resolved_collection, err)
+        else:
+            if info and getattr(info, "embedding_model", None):
+                return info.embedding_model
+
+    return OLLAMA_EMBED_MODEL
+
+
+def _format_size(size_bytes: int) -> str:
+    """Return human-readable size for logging."""
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    kb = size_bytes / 1024
+    if kb < 1024:
+        return f"{kb:.1f} KiB"
+    mb = kb / 1024
+    if mb < 1024:
+        return f"{mb:.2f} MiB"
+    gb = mb / 1024
+    return f"{gb:.2f} GiB"
+
+
+def _resolve_collection_for_config(name: Optional[str]) -> Optional[str]:
+    """Resolve collection aliases using configuration when available."""
+    if not name or collection_config_manager is None:
+        return name
+    try:
+        return collection_config_manager.resolve_collection_name(name)
+    except Exception as err:  # pragma: no cover - defensive logging
+        logger.debug("Failed to resolve collection alias %s: %s", name, err)
+        return name
+
+
+def _get_context_limit_for_model(model_name: Optional[str]) -> Optional[int]:
+    """Return the configured context length for an embedding model, if known."""
+    if not model_name or collection_config_manager is None:
+        return None
+    try:
+        info = collection_config_manager.get_embedding_model(model_name)
+    except Exception as err:  # pragma: no cover - defensive logging
+        logger.debug("Failed to load embedding model info for %s: %s", model_name, err)
+        return None
+    return getattr(info, "context_length", None) if info else None
+
+
+def _normalize_chunk_params(
+    chunk_size: Optional[int] = None,
+    chunk_overlap: Optional[int] = None,
+    model_name: Optional[str] = None,
+) -> Tuple[int, int, Optional[int]]:
+    """Resolve chunk parameters combining request overrides with defaults."""
+    effective_size = chunk_size if chunk_size and chunk_size > 0 else CHUNK_SIZE
+    effective_overlap = (
+        chunk_overlap if chunk_overlap is not None and chunk_overlap >= 0 else CHUNK_OVERLAP
+    )
+
+    context_limit = _get_context_limit_for_model(model_name)
+    if context_limit:
+        # Apply a conservative limit to avoid hitting the embed model context cap.
+        candidates = [
+            int(context_limit * 0.6),
+            context_limit - 128,
+            context_limit // 2,
+        ]
+        candidates = [value for value in candidates if value is not None and value >= 64]
+        if candidates:
+            max_allowed = max(64, min(candidates))
+        else:
+            max_allowed = max(64, context_limit - 64)
+        if effective_size > max_allowed:
+            logger.info(
+                "Adjusting chunk size from %s to %s to respect context window %s for model %s",
+                effective_size,
+                max_allowed,
+                context_limit,
+                model_name,
+            )
+            effective_size = max_allowed
+            # Clamp overlap proportionally when chunk size shrinks.
+            if effective_overlap >= effective_size:
+                effective_overlap = max(effective_size // 4, 0)
+
+    if effective_overlap >= effective_size:
+        logger.warning(
+            "Chunk overlap %s is greater than or equal to chunk size %s. Adjusting overlap.",
+            effective_overlap,
+            effective_size,
+        )
+        effective_overlap = max(effective_size // 4, 0)
+    return effective_size, effective_overlap, context_limit
+
+
+def _build_node_parser(chunk_size: int, chunk_overlap: int) -> SentenceSplitter:
+    """Build a sentence splitter configured with the provided parameters."""
+    return SentenceSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+
+
+def _chunk_documents(
+    documents: List[Document],
+    chunk_size: int,
+    chunk_overlap: int,
+) -> List[Document]:
+    """Split loaded documents into smaller chunks that fit embedding context."""
+    if not documents:
+        return documents
+
+    splitter = _build_node_parser(chunk_size, chunk_overlap)
+    chunked: List[Document] = []
+
+    for doc in documents:
+        text: Optional[str] = getattr(doc, "text", None)
+        if not text and hasattr(doc, "get_content"):
+            try:
+                text = doc.get_content()  # type: ignore[attr-defined]
+            except Exception as err:
+                logger.warning("Failed to read text content for %s: %s", getattr(doc, "id_", "unknown"), err)
+                text = None
+
+        if not text:
+            chunked.append(doc)
+            continue
+
+        pieces = splitter.split_text(text)
+        if len(pieces) == 1:
+            chunked.append(doc)
+            continue
+
+        metadata = dict(getattr(doc, "metadata", {}) or {})
+        source_hint = metadata.get("source") or metadata.get("file_path") or metadata.get("path")
+        doc_id = getattr(doc, "id_", None)
+
+        for idx, piece in enumerate(pieces):
+            chunk_metadata = dict(metadata)
+            chunk_metadata["chunk_index"] = idx
+            chunk_metadata["chunk_total"] = len(pieces)
+            if source_hint:
+                chunk_metadata.setdefault("source", source_hint)
+
+            doc_kwargs: Dict[str, object] = {
+                "text": piece,
+                "metadata": chunk_metadata,
+            }
+            excluded_embed = getattr(doc, "excluded_embed_metadata_keys", None)
+            excluded_llm = getattr(doc, "excluded_llm_metadata_keys", None)
+            if excluded_embed:
+                doc_kwargs["excluded_embed_metadata_keys"] = excluded_embed
+            if excluded_llm:
+                doc_kwargs["excluded_llm_metadata_keys"] = excluded_llm
+            if doc_id:
+                doc_kwargs["id_"] = f"{doc_id}::chunk-{idx}"
+
+            chunked.append(Document(**doc_kwargs))
+
+        logger.debug(
+            "Document %s split into %s chunks (source=%s)",
+            doc_id or source_hint or "unknown",
+            len(pieces),
+            source_hint,
+        )
+
+    return chunked
+
+
+def _create_embed_model(model_name: Optional[str]) -> OllamaEmbedding:
+    """Create an Ollama embedding model using the resolved model name or defaults."""
+    resolved = (model_name or OLLAMA_EMBED_MODEL or "").strip() or OLLAMA_EMBED_MODEL
+    return OllamaEmbedding(
+        model_name=resolved,
+        base_url=OLLAMA_BASE_URL,
+        ollama_additional_kwargs=get_ollama_gpu_options(),
+        request_timeout=float(os.getenv("OLLAMA_REQUEST_TIMEOUT", "120.0")),
+    )
+
 logger.info(
     "GPU policy: forced=%s, options=%s, max_concurrency=%s, cooldown=%s",
     GPU_FORCE_ENABLED,
@@ -331,14 +555,22 @@ class ProcessingResult(BaseModel):
     """Response model for document processing results."""
     success: bool
     message: str
+    job_id: Optional[str] = None  # Job ID for tracking (optional, generated by caller)
     documents_processed: Optional[int] = None
+    documents_loaded: Optional[int] = None
+    chunks_generated: Optional[int] = None
     files_considered: Optional[int] = None
     files_ingested: Optional[int] = None
     files_skipped: Optional[int] = None
     skipped_by_extension: Optional[int] = None
     skipped_by_size: Optional[int] = None
+    skipped_files_size: Optional[List[str]] = None
     skipped_hidden: Optional[int] = None
     collection: Optional[str] = None
+    embedding_model: Optional[str] = None
+    chunk_size: Optional[int] = None
+    chunk_overlap: Optional[int] = None
+    largest_files: Optional[List[str]] = None
     errors: Optional[List[str]] = None
     gpu: Optional[dict] = None
 
@@ -348,11 +580,17 @@ class DirectoryIngestRequest(BaseModel):
     allowed_extensions: Optional[List[str]] = None
     exclude_dirs: Optional[List[str]] = None
     max_file_size_mb: Optional[float] = None
+    embedding_model: Optional[str] = None
+    chunk_size: Optional[int] = None
+    chunk_overlap: Optional[int] = None
 
 class DocumentIngestRequest(BaseModel):
     file_path: str
     collection_name: Optional[str] = None
     max_file_size_mb: Optional[float] = None
+    embedding_model: Optional[str] = None
+    chunk_size: Optional[int] = None
+    chunk_overlap: Optional[int] = None
 
 @app.post("/ingest/directory", response_model=ProcessingResult)
 async def ingest_directory(request: DirectoryIngestRequest):
@@ -394,6 +632,8 @@ async def ingest_directory(request: DirectoryIngestRequest):
         skipped_extension = 0
         skipped_size = 0
         skipped_hidden = 0
+        skipped_size_files: List[str] = []
+        largest_files: List[Tuple[int, str]] = []
 
         for root, dirs, files in os.walk(request.directory_path):
             # Remove excluded/hidden directories in-place to avoid traversal
@@ -423,8 +663,22 @@ async def ingest_directory(request: DirectoryIngestRequest):
 
                 file_path = os.path.join(root, name)
                 try:
-                    if effective_max_size_bytes and os.path.getsize(file_path) > effective_max_size_bytes:
+                    size_bytes = os.path.getsize(file_path)
+                    largest_files.append((size_bytes, file_path))
+                    largest_files.sort(reverse=True)
+                    if len(largest_files) > 25:
+                        largest_files = largest_files[:25]
+
+                    if effective_max_size_bytes and size_bytes > effective_max_size_bytes:
                         skipped_size += 1
+                        size_label = _format_size(size_bytes)
+                        skipped_size_files.append(f"{file_path} ({size_label})")
+                        logger.debug(
+                            "Skipping %s due to size limit (%s > %s MB)",
+                            file_path,
+                            size_label,
+                            request.max_file_size_mb or MAX_FILE_SIZE_MB,
+                        )
                         continue
                 except OSError as size_err:
                     logger.warning("Failed to stat %s: %s", file_path, size_err)
@@ -439,18 +693,67 @@ async def ingest_directory(request: DirectoryIngestRequest):
                 detail=f"No supported documents found in {request.directory_path}",
             )
 
-        documents = SimpleDirectoryReader(input_files=files_to_ingest).load_data()
-        if not documents:
+        raw_documents = SimpleDirectoryReader(input_files=files_to_ingest).load_data()
+        if not raw_documents:
             raise HTTPException(
                 status_code=400,
                 detail=f"No supported documents found in {request.directory_path}",
             )
 
+        resolved_model_name = _resolve_embedding_model_name(collection_name, request.embedding_model)
+        effective_chunk_size, effective_chunk_overlap, context_limit = _normalize_chunk_params(
+            request.chunk_size,
+            request.chunk_overlap,
+            resolved_model_name,
+        )
+
+        documents = _chunk_documents(
+            raw_documents,
+            effective_chunk_size,
+            effective_chunk_overlap,
+        )
+        documents_loaded = len(raw_documents)
+        chunks_generated = len(documents)
+
+        if skipped_size_files:
+            logger.info("Skipped %s oversized files: %s", len(skipped_size_files), skipped_size_files)
+
+        if largest_files:
+            top_display = [f"{path} ({_format_size(size)})" for size, path in largest_files[:10]]
+            logger.info("Largest files considered (top 10): %s", top_display)
+
+        logger.info(
+            "Ingestion configuration: collection=%s model=%s context_limit=%s chunk_size=%s overlap=%s",
+            collection_name,
+            resolved_model_name,
+            context_limit if context_limit is not None else "unknown",
+            effective_chunk_size,
+            effective_chunk_overlap,
+        )
+
+        embedding_model = _create_embed_model(resolved_model_name)
+        previous_embed_model = Settings.embed_model
+        previous_node_parser = getattr(Settings, "node_parser", None)
+
         async with acquire_gpu_slot("ingest_directory") as gpu_usage:
-            VectorStoreIndex.from_documents(
-                documents,
-                storage_context=storage_context,
-            )
+            try:
+                Settings.embed_model = embedding_model
+                try:
+                    if hasattr(Settings, "node_parser"):
+                        Settings.node_parser = _build_node_parser(
+                            effective_chunk_size,
+                            effective_chunk_overlap,
+                        )
+                except Exception as parser_err:
+                    logger.debug("Unable to set custom node parser: %s", parser_err)
+                VectorStoreIndex.from_documents(
+                    documents,
+                    storage_context=storage_context,
+                )
+            finally:
+                Settings.embed_model = previous_embed_model
+                if hasattr(Settings, "node_parser"):
+                    Settings.node_parser = previous_node_parser
 
         gpu_meta = build_gpu_metadata(
             gpu_usage["wait_time_seconds"],
@@ -462,10 +765,11 @@ async def ingest_directory(request: DirectoryIngestRequest):
         files_skipped = max(files_considered - files_ingested, 0)
 
         logger.info(
-            "Ingestion completed: collection=%s, directory=%s, documents=%s, files_considered=%s, skipped_ext=%s, skipped_size=%s, skipped_hidden=%s",
+            "Ingestion completed: collection=%s, directory=%s, raw_documents=%s, chunks=%s, files_considered=%s, skipped_ext=%s, skipped_size=%s, skipped_hidden=%s",
             collection_name,
             request.directory_path,
-            len(documents),
+            documents_loaded,
+            chunks_generated,
             files_considered,
             skipped_extension,
             skipped_size,
@@ -475,17 +779,24 @@ async def ingest_directory(request: DirectoryIngestRequest):
         return ProcessingResult(
             success=True,
             message=(
-                f"Successfully processed {len(documents)} documents from {request.directory_path} "
-                f"into collection '{collection_name}'"
+                f"Successfully processed {chunks_generated} chunks from {documents_loaded} documents "
+                f"in {request.directory_path} into collection '{collection_name}'"
             ),
-            documents_processed=len(documents),
+            documents_processed=chunks_generated,
+            documents_loaded=documents_loaded,
+            chunks_generated=chunks_generated,
             files_considered=files_considered,
             files_ingested=files_ingested,
             files_skipped=files_skipped,
             skipped_by_extension=skipped_extension,
             skipped_by_size=skipped_size,
+            skipped_files_size=skipped_size_files or None,
             skipped_hidden=skipped_hidden,
             collection=collection_name,
+            embedding_model=embedding_model.model_name,
+            chunk_size=effective_chunk_size,
+            chunk_overlap=effective_chunk_overlap,
+            largest_files=[f"{path} ({_format_size(size)})" for size, path in largest_files[:10]] or None,
             gpu=gpu_meta,
         )
 
@@ -548,15 +859,57 @@ async def ingest_document(request: DocumentIngestRequest):
                 ),
             )
 
-        documents = SimpleDirectoryReader(input_files=[request.file_path]).load_data()
-        if not documents:
+        raw_documents = SimpleDirectoryReader(input_files=[request.file_path]).load_data()
+        if not raw_documents:
             raise HTTPException(status_code=400, detail="No content found in document")
 
+        resolved_model_name = _resolve_embedding_model_name(collection_name, request.embedding_model)
+        effective_chunk_size, effective_chunk_overlap, context_limit = _normalize_chunk_params(
+            request.chunk_size,
+            request.chunk_overlap,
+            resolved_model_name,
+        )
+
+        documents = _chunk_documents(
+            raw_documents,
+            effective_chunk_size,
+            effective_chunk_overlap,
+        )
+        documents_loaded = len(raw_documents)
+        chunks_generated = len(documents)
+
+        logger.info(
+            "Document ingestion configuration: collection=%s model=%s context_limit=%s chunk_size=%s overlap=%s",
+            collection_name,
+            resolved_model_name,
+            context_limit if context_limit is not None else "unknown",
+            effective_chunk_size,
+            effective_chunk_overlap,
+        )
+
+        embedding_model = _create_embed_model(resolved_model_name)
+        previous_embed_model = Settings.embed_model
+        previous_node_parser = getattr(Settings, "node_parser", None)
+
         async with acquire_gpu_slot("ingest_document") as gpu_usage:
-            VectorStoreIndex.from_documents(
-                documents,
-                storage_context=storage_context,
-            )
+            try:
+                Settings.embed_model = embedding_model
+                try:
+                    if hasattr(Settings, "node_parser"):
+                        Settings.node_parser = _build_node_parser(
+                            effective_chunk_size,
+                            effective_chunk_overlap,
+                        )
+                except Exception as parser_err:
+                    logger.debug("Unable to set custom node parser: %s", parser_err)
+                VectorStoreIndex.from_documents(
+                    documents,
+                    storage_context=storage_context,
+                )
+            finally:
+                Settings.embed_model = previous_embed_model
+                if hasattr(Settings, "node_parser"):
+                    Settings.node_parser = previous_node_parser
 
         gpu_meta = build_gpu_metadata(
             gpu_usage["wait_time_seconds"],
@@ -571,14 +924,19 @@ async def ingest_document(request: DocumentIngestRequest):
         return ProcessingResult(
             success=True,
             message=(
-                f"Successfully processed document {request.file_path} "
-                f"into collection '{collection_name}'"
+                f"Successfully processed {chunks_generated} chunks from document "
+                f"{request.file_path} into collection '{collection_name}'"
             ),
-            documents_processed=1,
+            documents_processed=chunks_generated,
+            documents_loaded=documents_loaded,
+            chunks_generated=chunks_generated,
             files_considered=1,
             files_ingested=1,
             files_skipped=0,
             collection=collection_name,
+            embedding_model=embedding_model.model_name,
+            chunk_size=effective_chunk_size,
+            chunk_overlap=effective_chunk_overlap,
             gpu=gpu_meta,
         )
 

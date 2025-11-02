@@ -103,7 +103,10 @@ interface TradingState {
   removeConnectedSymbol: (symbol: string) => void;
   clearTrades: () => void;
   setPorts: (ports: PortInfo[]) => void;
-  updatePortStatus: (port: number, status: 'online' | 'offline' | 'unknown') => void;
+  updatePortStatus: (
+    port: number,
+    status: 'online' | 'offline' | 'unknown',
+  ) => void;
   reset: () => void;
 }
 
@@ -127,7 +130,7 @@ export const useTradingStore = create<TradingState>()(
             trades: [trade, ...state.trades].slice(0, 1000), // Keep last 1000 trades
           }),
           false,
-          'addTrade'
+          'addTrade',
         ),
 
       updateOrderBook: (orderBook) =>
@@ -138,17 +141,16 @@ export const useTradingStore = create<TradingState>()(
             return { orderBooks: newOrderBooks };
           },
           false,
-          'updateOrderBook'
+          'updateOrderBook',
         ),
 
-      setPositions: (positions) =>
-        set({ positions }, false, 'setPositions'),
+      setPositions: (positions) => set({ positions }, false, 'setPositions'),
 
       updatePosition: (position) =>
         set(
           (state) => {
             const index = state.positions.findIndex(
-              (p) => p.symbol === position.symbol
+              (p) => p.symbol === position.symbol,
             );
             if (index >= 0) {
               const newPositions = [...state.positions];
@@ -158,17 +160,16 @@ export const useTradingStore = create<TradingState>()(
             return { positions: [...state.positions, position] };
           },
           false,
-          'updatePosition'
+          'updatePosition',
         ),
 
-      setOrders: (orders) =>
-        set({ orders }, false, 'setOrders'),
+      setOrders: (orders) => set({ orders }, false, 'setOrders'),
 
       updateOrder: (order) =>
         set(
           (state) => {
             const index = state.orders.findIndex(
-              (o) => o.orderId === order.orderId
+              (o) => o.orderId === order.orderId,
             );
             if (index >= 0) {
               const newOrders = [...state.orders];
@@ -178,7 +179,7 @@ export const useTradingStore = create<TradingState>()(
             return { orders: [...state.orders, order] };
           },
           false,
-          'updateOrder'
+          'updateOrder',
         ),
 
       addSignal: (signal) =>
@@ -187,7 +188,7 @@ export const useTradingStore = create<TradingState>()(
             signals: [signal, ...state.signals].slice(0, 100), // Keep last 100 signals
           }),
           false,
-          'addSignal'
+          'addSignal',
         ),
 
       setRiskLimits: (limits) =>
@@ -199,7 +200,7 @@ export const useTradingStore = create<TradingState>()(
             connectedSymbols: new Set([...state.connectedSymbols, symbol]),
           }),
           false,
-          'addConnectedSymbol'
+          'addConnectedSymbol',
         ),
 
       removeConnectedSymbol: (symbol) =>
@@ -210,14 +211,12 @@ export const useTradingStore = create<TradingState>()(
             return { connectedSymbols: newSymbols };
           },
           false,
-          'removeConnectedSymbol'
+          'removeConnectedSymbol',
         ),
 
-      clearTrades: () =>
-        set({ trades: [] }, false, 'clearTrades'),
+      clearTrades: () => set({ trades: [] }, false, 'clearTrades'),
 
-      setPorts: (ports) =>
-        set({ ports }, false, 'setPorts'),
+      setPorts: (ports) => set({ ports }, false, 'setPorts'),
 
       updatePortStatus: (port, status) =>
         set(
@@ -225,12 +224,12 @@ export const useTradingStore = create<TradingState>()(
             const newPorts = state.ports.map((p) =>
               p.port === port
                 ? { ...p, status, lastUpdated: new Date().toISOString() }
-                : p
+                : p,
             );
             return { ports: newPorts };
           },
           false,
-          'updatePortStatus'
+          'updatePortStatus',
         ),
 
       reset: () =>
@@ -246,9 +245,9 @@ export const useTradingStore = create<TradingState>()(
             ports: [],
           },
           false,
-          'reset'
+          'reset',
         ),
     }),
-    { name: 'TradingStore' }
-  )
+    { name: 'TradingStore' },
+  ),
 );

@@ -15,7 +15,14 @@ import {
   CollapsibleCardHeader,
   CollapsibleCardTitle,
 } from '../../ui/collapsible-card';
-import { Loader2, PlusCircle, Save, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import {
+  Loader2,
+  PlusCircle,
+  Save,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+} from 'lucide-react';
 
 export function ChannelsManagerCard() {
   const { data: channels = [], isLoading } = useTelegramGatewayChannels();
@@ -48,18 +55,22 @@ export function ChannelsManagerCard() {
 
   const handleEdit = async (
     id: string,
-    current: { label?: string | null; description?: string | null; channelId: string },
+    current: {
+      label?: string | null;
+      description?: string | null;
+      channelId: string;
+    },
   ) => {
     const newLabel =
       typeof window !== 'undefined'
         ? window.prompt('Descrição curta (opcional):', current.label ?? '')
-        : current.label ?? '';
+        : (current.label ?? '');
     if (newLabel === null) return;
 
     const newDescription =
       typeof window !== 'undefined'
         ? window.prompt('Observações (opcional):', current.description ?? '')
-        : current.description ?? '';
+        : (current.description ?? '');
     if (newDescription === null) return;
 
     await updateMutation.mutateAsync({
@@ -73,7 +84,9 @@ export function ChannelsManagerCard() {
     const confirmed =
       typeof window === 'undefined'
         ? true
-        : window.confirm(`Remover canal ${channel}? As mensagens deixarão de ser processadas.`);
+        : window.confirm(
+            `Remover canal ${channel}? As mensagens deixarão de ser processadas.`,
+          );
     if (!confirmed) return;
     await deleteMutation.mutateAsync(id);
   };
@@ -86,8 +99,8 @@ export function ChannelsManagerCard() {
           Canais monitorados
         </CollapsibleCardTitle>
         <CollapsibleCardDescription>
-          Registre os canais Telegram autorizados para coleta. Quando houver canais ativos, somente eles serão
-          processados.
+          Registre os canais Telegram autorizados para coleta. Quando houver
+          canais ativos, somente eles serão processados.
         </CollapsibleCardDescription>
       </CollapsibleCardHeader>
       <CollapsibleCardContent className="space-y-4 pt-5">
@@ -153,20 +166,29 @@ export function ChannelsManagerCard() {
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-3 py-6 text-center text-slate-500 dark:text-slate-400"
+                  >
                     Carregando canais...
                   </td>
                 </tr>
               ) : channels.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate-500 dark:text-slate-400">
-                    Nenhum canal cadastrado. Enquanto a lista estiver vazia, o gateway processará todos os canais
-                    recebidos.
+                  <td
+                    colSpan={5}
+                    className="px-3 py-6 text-center text-slate-500 dark:text-slate-400"
+                  >
+                    Nenhum canal cadastrado. Enquanto a lista estiver vazia, o
+                    gateway processará todos os canais recebidos.
                   </td>
                 </tr>
               ) : (
                 channels.map((channel) => (
-                  <tr key={channel.id} className="bg-white dark:bg-slate-950/60">
+                  <tr
+                    key={channel.id}
+                    className="bg-white dark:bg-slate-950/60"
+                  >
                     <td className="px-3 py-3 align-top text-sm font-semibold text-slate-700 dark:text-slate-200">
                       {channel.channelId}
                     </td>
@@ -193,7 +215,9 @@ export function ChannelsManagerCard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => void handleToggle(channel.id, channel.isActive)}
+                          onClick={() =>
+                            void handleToggle(channel.id, channel.isActive)
+                          }
                           disabled={updateMutation.isPending}
                         >
                           {updateMutation.isPending ? (
@@ -227,7 +251,9 @@ export function ChannelsManagerCard() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => void handleDelete(channel.id, channel.channelId)}
+                          onClick={() =>
+                            void handleDelete(channel.id, channel.channelId)
+                          }
                           disabled={deleteMutation.isPending}
                         >
                           {deleteMutation.isPending ? (

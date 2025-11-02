@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Server, Lightbulb, FileText, TrendingUp } from 'lucide-react';
+import {
+  RefreshCw,
+  Server,
+  Lightbulb,
+  FileText,
+  TrendingUp,
+} from 'lucide-react';
 import documentationService from '../../services/documentationService';
 
 interface DocumentationStatsPayload {
@@ -85,7 +91,9 @@ export default function DocumentationStatsPageSimple() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Documentation Statistics</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Documentation Statistics
+          </h1>
           <p className="text-gray-500 mt-2">
             Analytics and insights for documentation systems and ideas
           </p>
@@ -105,7 +113,9 @@ export default function DocumentationStatsPageSimple() {
         {/* Systems Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Total Systems</span>
+            <span className="text-sm font-medium text-gray-600">
+              Total Systems
+            </span>
             <Server className="h-4 w-4 text-gray-400" />
           </div>
           <div className="text-2xl font-bold">{stats.systems?.total || 0}</div>
@@ -117,7 +127,9 @@ export default function DocumentationStatsPageSimple() {
         {/* Ideas Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Total Ideas</span>
+            <span className="text-sm font-medium text-gray-600">
+              Total Ideas
+            </span>
             <Lightbulb className="h-4 w-4 text-gray-400" />
           </div>
           <div className="text-2xl font-bold">{stats.ideas?.total || 0}</div>
@@ -129,7 +141,9 @@ export default function DocumentationStatsPageSimple() {
         {/* Files Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Total Files</span>
+            <span className="text-sm font-medium text-gray-600">
+              Total Files
+            </span>
             <FileText className="h-4 w-4 text-gray-400" />
           </div>
           <div className="text-2xl font-bold">{stats.files?.total || 0}</div>
@@ -141,7 +155,9 @@ export default function DocumentationStatsPageSimple() {
         {/* Completion Rate Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Completion Rate</span>
+            <span className="text-sm font-medium text-gray-600">
+              Completion Rate
+            </span>
             <TrendingUp className="h-4 w-4 text-gray-400" />
           </div>
           <div className="text-2xl font-bold">
@@ -168,10 +184,10 @@ export default function DocumentationStatsPageSimple() {
                       status === 'online'
                         ? 'bg-green-500'
                         : status === 'offline'
-                        ? 'bg-red-500'
-                        : status === 'degraded'
-                        ? 'bg-orange-500'
-                        : 'bg-yellow-500'
+                          ? 'bg-red-500'
+                          : status === 'degraded'
+                            ? 'bg-orange-500'
+                            : 'bg-yellow-500'
                     }`}
                   />
                   <span className="text-sm capitalize">{status}</span>
@@ -196,13 +212,15 @@ export default function DocumentationStatsPageSimple() {
                       status === 'done'
                         ? 'bg-green-500'
                         : status === 'in_progress'
-                        ? 'bg-blue-500'
-                        : status === 'cancelled'
-                        ? 'bg-red-500'
-                        : 'bg-gray-500'
+                          ? 'bg-blue-500'
+                          : status === 'cancelled'
+                            ? 'bg-red-500'
+                            : 'bg-gray-500'
                     }`}
                   />
-                  <span className="text-sm capitalize">{status.replace('_', ' ')}</span>
+                  <span className="text-sm capitalize">
+                    {status.replace('_', ' ')}
+                  </span>
                 </div>
                 <span className="text-sm font-semibold">{count as number}</span>
               </div>
@@ -216,12 +234,19 @@ export default function DocumentationStatsPageSimple() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-lg font-semibold mb-4">Ideas by Category</h2>
           <div className="space-y-3">
-            {Object.entries(stats.ideas.by_category).map(([category, count]) => (
-              <div key={category} className="flex items-center justify-between">
-                <span className="text-sm capitalize">{category}</span>
-                <span className="text-sm font-semibold">{count as number}</span>
-              </div>
-            ))}
+            {Object.entries(stats.ideas.by_category).map(
+              ([category, count]) => (
+                <div
+                  key={category}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm capitalize">{category}</span>
+                  <span className="text-sm font-semibold">
+                    {count as number}
+                  </span>
+                </div>
+              ),
+            )}
           </div>
         </div>
       )}
@@ -231,23 +256,30 @@ export default function DocumentationStatsPageSimple() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-lg font-semibold mb-4">Ideas by Priority</h2>
           <div className="space-y-3">
-            {Object.entries(stats.ideas.by_priority).map(([priority, count]) => (
-              <div key={priority} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-3 w-3 rounded-full ${
-                      priority === 'high'
-                        ? 'bg-red-500'
-                        : priority === 'medium'
-                        ? 'bg-yellow-500'
-                        : 'bg-gray-500'
-                    }`}
-                  />
-                  <span className="text-sm capitalize">{priority}</span>
+            {Object.entries(stats.ideas.by_priority).map(
+              ([priority, count]) => (
+                <div
+                  key={priority}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-3 w-3 rounded-full ${
+                        priority === 'high'
+                          ? 'bg-red-500'
+                          : priority === 'medium'
+                            ? 'bg-yellow-500'
+                            : 'bg-gray-500'
+                      }`}
+                    />
+                    <span className="text-sm capitalize">{priority}</span>
+                  </div>
+                  <span className="text-sm font-semibold">
+                    {count as number}
+                  </span>
                 </div>
-                <span className="text-sm font-semibold">{count as number}</span>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
       )}

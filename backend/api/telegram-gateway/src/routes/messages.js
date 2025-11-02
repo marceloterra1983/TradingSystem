@@ -6,6 +6,7 @@ import {
   markReprocessRequested,
 } from '../db/messagesRepository.js';
 import { invalidateCaches } from '../services/telegramGatewayFacade.js';
+import { cacheWithETag, invalidateCache } from '../middleware/cachingMiddleware.js';
 
 export const messagesRouter = Router();
 
@@ -14,7 +15,8 @@ const parseBoolean = (value, fallback = false) => {
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase().trim());
 };
 
-messagesRouter.get('/', async (req, res, next) => {
+// Cache message list for 60 seconds (frequently accessed)
+messagesRouter.get('/', cacheWithETag(60), async (req, res, next) => {
   try {
     const filters = {
       channelId: req.query.channelId
@@ -82,7 +84,8 @@ messagesRouter.get('/:id', async (req, res, next) => {
   }
 });
 
-messagesRouter.delete('/:id', async (req, res, next) => {
+// Invalidate cache after delete
+messagesRouter.delete('/:id', invalidateCache(['/api/messages']), async (req, res, next) => {
   try {
     const message = await softDeleteMessage(req.params.id, {
       reason: req.body?.reason,

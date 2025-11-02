@@ -1,6 +1,12 @@
 import { Activity, Network, PlugZap, ShieldCheck } from 'lucide-react';
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import ConnectionStatus from '../ConnectionStatus';
@@ -50,18 +56,25 @@ function WebSocketStatusSection() {
           <Badge variant="outline">Local only</Badge>
         </div>
         <CardDescription>
-          Conexão em tempo real entre o dashboard e os serviços de execução. Todo o tráfego é
-          mantido em localhost para evitar dependência externa.
+          Conexão em tempo real entre o dashboard e os serviços de execução.
+          Todo o tráfego é mantido em localhost para evitar dependência externa.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <ConnectionStatus showDetails className="text-sm" />
         <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-          <p className="font-medium text-slate-700 dark:text-slate-200">Checklist rápido</p>
+          <p className="font-medium text-slate-700 dark:text-slate-200">
+            Checklist rápido
+          </p>
           <ul className="space-y-1">
-            <li>• Serviço `apps-status` inicializado (`docker compose up apps-status`).</li>
+            <li>
+              • Serviço `apps-status` inicializado (`docker compose up
+              apps-status`).
+            </li>
             <li>• Porta 3500 disponível para o Service Launcher.</li>
-            <li>• Sem proxies intermediários (independente do container launcher).</li>
+            <li>
+              • Sem proxies intermediários (independente do container launcher).
+            </li>
           </ul>
         </div>
         <Alert>
@@ -98,17 +111,24 @@ function ProfitDLLStatusSection() {
           <Badge variant="secondary">Windows Host</Badge>
         </div>
         <CardDescription>
-          Biblioteca responsável por distribuir cotações em alta frequência e receber ordens do
-          Profit Chart. Mantida fora de containers por limitações do ambiente.
+          Biblioteca responsável por distribuir cotações em alta frequência e
+          receber ordens do Profit Chart. Mantida fora de containers por
+          limitações do ambiente.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
         <div>
-          <p className="font-medium text-slate-700 dark:text-slate-200">Status esperado</p>
+          <p className="font-medium text-slate-700 dark:text-slate-200">
+            Status esperado
+          </p>
           <ul className="space-y-1 pt-1">
-            <li>• Serviço Windows rodando como `TradingSystem.ProfitBridge`.</li>
+            <li>
+              • Serviço Windows rodando como `TradingSystem.ProfitBridge`.
+            </li>
             <li>• Named pipe `\\\\.\\pipe\\TradingSystem.Profit` ativo.</li>
-            <li>• Heartbeat enviado a cada 5 segundos para o Service Launcher.</li>
+            <li>
+              • Heartbeat enviado a cada 5 segundos para o Service Launcher.
+            </li>
           </ul>
         </div>
         <Alert>
@@ -117,10 +137,14 @@ function ProfitDLLStatusSection() {
             <p>
               • Reiniciar o serviço:&nbsp;
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
-                sc stop TradingSystem.ProfitBridge && sc start TradingSystem.ProfitBridge
+                sc stop TradingSystem.ProfitBridge && sc start
+                TradingSystem.ProfitBridge
               </code>
             </p>
-            <p>• Certifique-se de que o Profit Chart esteja autenticado antes de iniciar o bridge.</p>
+            <p>
+              • Certifique-se de que o Profit Chart esteja autenticado antes de
+              iniciar o bridge.
+            </p>
           </AlertDescription>
         </Alert>
       </CardContent>
@@ -145,11 +169,12 @@ function ServiceHealthSection() {
       check: 'curl http://localhost:3500/health',
     },
     {
-      name: 'Documentation API',
-      description: 'Busca e indexa documentação do Docusaurus',
-      port: '3401',
+      name: 'RAG Service',
+      description:
+        'Documentation API + LlamaIndex + RAG (docker-compose.rag.yml)',
+      port: '3402',
       scope: 'Container',
-      check: 'curl http://localhost:3401/health',
+      check: 'curl http://localhost:3402/health',
     },
   ];
 
@@ -164,8 +189,8 @@ function ServiceHealthSection() {
           <Badge variant="outline">Atualizado manualmente</Badge>
         </div>
         <CardDescription>
-          Guia rápido para verificar os principais serviços locais e containerizados que suportam o
-          dashboard.
+          Guia rápido para verificar os principais serviços locais e
+          containerizados que suportam o dashboard.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
@@ -188,7 +213,9 @@ function ServiceHealthSection() {
                 {service.description}
               </p>
               <p className="mt-3 text-xs">
-                <span className="font-medium text-slate-600 dark:text-slate-300">Healthcheck:</span>{' '}
+                <span className="font-medium text-slate-600 dark:text-slate-300">
+                  Healthcheck:
+                </span>{' '}
                 <code className="rounded bg-slate-100 px-2 py-0.5 text-[11px] dark:bg-slate-900">
                   {service.check}
                 </code>
@@ -200,7 +227,10 @@ function ServiceHealthSection() {
           <AlertTitle>Checklist após alterações</AlertTitle>
           <AlertDescription className="space-y-1 text-xs">
             <p>1. Rode `docker compose up -d` para containers dependentes.</p>
-            <p>2. Confirme que os logs não possuem erros críticos antes de liberar em produção.</p>
+            <p>
+              2. Confirme que os logs não possuem erros críticos antes de
+              liberar em produção.
+            </p>
             <p>3. Atualize este painel com a data do último teste manual.</p>
           </AlertDescription>
         </Alert>

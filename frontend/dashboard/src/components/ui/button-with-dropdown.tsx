@@ -52,7 +52,10 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
     };
   }, [isOpen]);
 
-  const variantClasses: Record<NonNullable<ButtonWithDropdownProps['variant']>, string> = {
+  const variantClasses: Record<
+    NonNullable<ButtonWithDropdownProps['variant']>,
+    string
+  > = {
     default:
       'bg-cyan-600 text-white hover:bg-cyan-700 focus:ring-cyan-500 dark:bg-cyan-700 dark:hover:bg-cyan-600',
     outline:
@@ -65,7 +68,10 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600',
   };
 
-  const sizeClasses: Record<NonNullable<ButtonWithDropdownProps['size']>, string> = {
+  const sizeClasses: Record<
+    NonNullable<ButtonWithDropdownProps['size']>,
+    string
+  > = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-base',
     lg: 'px-6 py-3 text-lg',
@@ -102,7 +108,7 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
         className={cn(
           'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
           variantClasses[variant],
-          sizeClasses[size]
+          sizeClasses[size],
         )}
         disabled={disabled}
         type="button"
@@ -124,7 +130,7 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
                   'w-full px-4 py-2 text-left text-sm transition-colors',
                   option.value === selectedValue
                     ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
                 )}
               >
                 {option.label}

@@ -28,7 +28,7 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
     data,
     isLoading,
     error: queryError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['trading-data', symbol],
     queryFn: async (): Promise<TradingData> => {
@@ -66,7 +66,7 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
     refetch: () => {
       setError(null);
       void refetch();
-    }
+    },
   };
 }
 
@@ -75,12 +75,20 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
  * Demonstra composição ao invés de herança
  */
 export function useMultipleTradingData(symbols: string[]) {
-  console.warn('useMultipleTradingData is deprecated; use individual useTradingData calls instead.', symbols);
+  console.warn(
+    'useMultipleTradingData is deprecated; use individual useTradingData calls instead.',
+    symbols,
+  );
   return {
     data: [] as TradingData[],
     loading: false,
     hasError: false,
     refetchAll: () => undefined,
-    results: symbols.map(() => ({ data: null, loading: false, error: null, refetch: () => undefined })),
+    results: symbols.map(() => ({
+      data: null,
+      loading: false,
+      error: null,
+      refetch: () => undefined,
+    })),
   };
 }

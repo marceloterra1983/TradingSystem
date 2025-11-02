@@ -1,5 +1,8 @@
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { cn } from '../../../../lib/utils';
 import { STATUS_CONFIG } from '../constants/workspace.constants';
 import type { Item, ItemStatus } from '../types/workspace.types';
@@ -29,9 +32,13 @@ export function DroppableColumn({ status, items }: DroppableColumnProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon className="h-4 w-4" />
-            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">{config.label}</span>
+            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+              {config.label}
+            </span>
           </div>
-          <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{items.length}</span>
+          <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+            {items.length}
+          </span>
         </div>
       </div>
 
@@ -40,7 +47,9 @@ export function DroppableColumn({ status, items }: DroppableColumnProps) {
         ref={setNodeRef}
         className={cn(
           'space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto p-2 rounded-lg border-2 border-dashed transition-colors',
-          isOver ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950' : 'border-gray-200 dark:border-gray-700'
+          isOver
+            ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-950'
+            : 'border-gray-200 dark:border-gray-700',
         )}
       >
         <SortableContext

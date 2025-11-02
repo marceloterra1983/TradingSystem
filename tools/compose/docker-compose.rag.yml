@@ -4,6 +4,7 @@ services:
   ollama:
     image: "${IMG_RAG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
     container_name: rag-ollama
+    runtime: nvidia
     # Enable GPU acceleration (requires NVIDIA Container Toolkit installed)
     deploy:
       resources:
@@ -51,16 +52,16 @@ services:
     env_file:
       - ../../.env
     environment:
-      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_HOST=data-qdrant
       - QDRANT_PORT=${QDRANT_PORT:-6333}
       - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://rag-ollama:11434}
       - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3}
-      - JWT_SECRET_KEY=dev-secret
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret}
       - JWT_ALGORITHM=HS256
     volumes:
-      - ../../docs/content:/data/docs:ro
+      - ../../docs:/data/docs:ro
       - ../../:/data/tradingsystem:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -93,12 +94,12 @@ services:
     env_file:
       - ../../.env
     environment:
-      - QDRANT_HOST=${QDRANT_HOST:-data-qdrant}
+      - QDRANT_HOST=data-qdrant
       - QDRANT_PORT=${QDRANT_PORT:-6333}
       - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://rag-ollama:11434}
       - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
       - OLLAMA_REQUEST_TIMEOUT=300.0
       - JWT_SECRET_KEY=dev-secret
       - JWT_ALGORITHM=HS256
@@ -116,10 +117,139 @@ services:
       retries: 3
       start_period: 40s
 
+  rag-service:
+    image: "${IMG_RAG_SERVICE:-img-rag-service}:${IMG_VERSION:-latest}"
+    container_name: rag-service
+    build:
+      context: ../..
+      dockerfile: backend/api/documentation-api/Dockerfile
+    ports:
+      - "${DOCUMENTATION_API_PORT:-3402}:3000"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=info
+      - DOCS_DIR=/app/docs
+      - LLAMAINDEX_DOCS_DIR=/app/docs/content
+      - LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query:8000
+      - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
+      - QDRANT_URL=http://data-qdrant:6333
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://rag-ollama:11434}
+      - OLLAMA_EMBEDDING_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      - RAG_TIMEOUT_MS=30000
+      - STATUS_CACHE_TTL_MS=30000
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret}
+      - JWT_ALGORITHM=HS256
+    volumes:
+      # 🔧 FIX: Mount documentation source for FlexSearch indexing
+      - ../../docs:/app/docs:ro
+      - ../../:/data/tradingsystem:ro
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      llamaindex-query:
+        condition: service_healthy
+      llamaindex-ingestion:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/api/v1/rag/status/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  rag-collections-service:
+    image: "${IMG_RAG_COLLECTIONS_SERVICE:-img-rag-collections-service}:${IMG_VERSION:-latest}"
+    container_name: rag-collections-service
+    build:
+      context: ../rag-services
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+    ports:
+      - "${RAG_COLLECTIONS_PORT:-3403}:3402"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3402
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3103}
+      - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
+      - QDRANT_URL=http://data-qdrant:6333
+      - OLLAMA_EMBEDDINGS_URL=http://rag-ollama:11434
+      - FILE_WATCHER_ENABLED=true
+      - FILE_WATCHER_DEBOUNCE_MS=5000
+      - COLLECTIONS_CONFIG_PATH=/app/collections-config.json
+      - INTER_SERVICE_SECRET=${INTER_SERVICE_SECRET:-dev-secret}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-secret}
+      - INGESTION_TIMEOUT_MS=300000
+      - REDIS_URL=redis://rag-redis:6379
+      - REDIS_CACHE_TTL=600
+      - REDIS_ENABLED=true
+    volumes:
+      - ../rag-services/collections-config.json:/app/collections-config.json
+      - ../../data/logs/rag-ingestion:/app/data/logs
+      - ../../docs:/data/docs:ro
+      - ../../:/data/tradingsystem:ro
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      llamaindex-ingestion:
+        condition: service_healthy
+      rag-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3402/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  rag-redis:
+    image: redis:7-alpine
+    container_name: rag-redis
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    ports:
+      - "${RAG_REDIS_PORT:-6380}:6379"
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - rag_redis_data:/data
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
 networks:
   tradingsystem_backend:
     external: true
 
 volumes:
   ollama_models:
+    driver: local
+  rag_redis_data:
     driver: local

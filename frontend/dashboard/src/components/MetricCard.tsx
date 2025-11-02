@@ -63,7 +63,13 @@ export function MetricCard({
 
   if (loading) {
     return (
-      <div className={clsx('bg-white rounded-lg p-6 shadow-sm', getVariantStyles(), className)}>
+      <div
+        className={clsx(
+          'bg-white rounded-lg p-6 shadow-sm',
+          getVariantStyles(),
+          className,
+        )}
+      >
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded w-1/3 mb-3"></div>
           <div className="h-8 bg-gray-200 rounded w-2/3 mb-2"></div>
@@ -74,7 +80,13 @@ export function MetricCard({
   }
 
   return (
-    <div className={clsx('bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow', getVariantStyles(), className)}>
+    <div
+      className={clsx(
+        'bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow',
+        getVariantStyles(),
+        className,
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
