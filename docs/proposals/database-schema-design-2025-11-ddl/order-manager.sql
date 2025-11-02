@@ -490,3 +490,4 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA order_manager TO timescale;
 
 
 
+

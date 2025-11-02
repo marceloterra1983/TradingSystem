@@ -380,6 +380,35 @@ export default defineConfig(({ mode }) => {
               return 'animation-vendor';
             }
 
+            // Catalog views with large data files (661KB agents directory)
+            // Split these into separate chunks for better caching
+            if (id.includes('/catalog/AgentsCatalogView') ||
+                id.includes('/data/aiAgentsDirectory')) {
+              return 'agents-catalog';
+            }
+
+            if (id.includes('/catalog/CommandsCatalogView') ||
+                id.includes('/data/commandsDirectory')) {
+              return 'commands-catalog';
+            }
+
+            // Heavy pages (>50KB) - Split for better lazy loading
+            if (id.includes('/pages/LlamaIndexPage')) {
+              return 'page-llama';
+            }
+
+            if (id.includes('/pages/DocusaurusPage')) {
+              return 'page-docusaurus';
+            }
+
+            if (id.includes('/pages/WorkspacePageNew')) {
+              return 'page-workspace';
+            }
+
+            if (id.includes('/pages/TPCapitalOpcoesPage')) {
+              return 'page-tpcapital';
+            }
+
             // Other node_modules
             if (id.includes('node_modules/')) {
               return 'vendor';
