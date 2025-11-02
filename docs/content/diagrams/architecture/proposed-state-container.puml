@@ -1,0 +1,137 @@
+@startuml Proposed State Architecture - Container Diagram with API Gateway
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title TradingSystem - Proposed State Architecture with API Gateway (2026 Q1)
+
+Person(user, "User", "Trader/Developer")
+Person(admin, "Admin", "System Administrator")
+
+System_Boundary(tradingsystem, "TradingSystem") {
+    Container(dashboard, "Dashboard", "React 18 + Vite", "Main UI for trading operations, documentation, and monitoring")
+    Container(docs_hub, "Documentation Hub", "Docusaurus v3 + NGINX", "Comprehensive documentation portal with search")
+
+    Container_Boundary(gateway_layer, "API Gateway Layer") {
+        Container(kong_gateway, "Kong API Gateway", "Kong 3.4 + OpenResty", "Centralized auth, routing, rate limiting, security")
+        ContainerDb(kong_db, "Kong Database", "PostgreSQL", "Gateway configuration and state")
+    }
+
+    Container_Boundary(backend_services, "Backend Services") {
+        Container(workspace_api, "Workspace API", "Node.js + Express", "Manages workspace items and categories")
+        Container(tp_capital_api, "TP Capital API", "Node.js + Express", "Telegram signal ingestion and processing")
+        Container(docs_api, "Documentation API", "Node.js + Express", "Documentation search, FlexSearch, RAG proxy")
+        Container(service_launcher, "Service Launcher", "Node.js + Express", "Service orchestration and health checks")
+        Container(telegram_gateway, "Telegram Gateway", "Node.js + Express", "MTProto client for Telegram")
+    }
+
+    Container_Boundary(rag_stack, "RAG Stack") {
+        Container(rag_ollama, "Ollama", "LLM Runtime", "Hosts llama3.2:3b for RAG")
+        Container(rag_llamaindex_query, "LlamaIndex Query", "FastAPI + Python", "RAG query engine with context retrieval")
+        Container(rag_llamaindex_ingest, "LlamaIndex Ingestion", "FastAPI + Python", "Document ingestion and embedding")
+        Container(rag_collections, "RAG Collections", "Node.js + Express", "Collection management and batch ingestion")
+    }
+
+    Container_Boundary(data_layer, "Data Layer") {
+        Container(pgbouncer, "PgBouncer", "Connection Pooler", "Transaction-mode pooling, 1000 max connections")
+        ContainerDb(timescale_primary, "TimescaleDB Primary", "PostgreSQL + TimescaleDB", "Primary database (read+write)")
+        ContainerDb(timescale_replica1, "TimescaleDB Replica 1", "PostgreSQL + TimescaleDB", "Read replica (async replication)")
+        ContainerDb(timescale_replica2, "TimescaleDB Replica 2", "PostgreSQL + TimescaleDB", "Read replica (async replication)")
+        Container(patroni, "Patroni + etcd", "HA Manager", "Automatic failover and consensus")
+        ContainerDb(qdrant, "Qdrant", "Vector Database", "Document embeddings for semantic search")
+        ContainerDb(redis, "Redis", "Cache + Rate Limiting", "RAG query caching + Kong rate limits")
+    }
+}
+
+System_Ext(telegram, "Telegram", "External messaging platform")
+
+' User interactions
+Rel(user, dashboard, "Uses", "HTTPS")
+Rel(user, docs_hub, "Views docs", "HTTPS")
+Rel(admin, service_launcher, "Manages services", "HTTPS")
+
+' Dashboard → API Gateway
+Rel(dashboard, kong_gateway, "All API calls", "HTTPS + JWT")
+
+' API Gateway → Backend Services
+Rel(kong_gateway, workspace_api, "Route /api/workspace", "HTTP + X-Service-Token")
+Rel(kong_gateway, tp_capital_api, "Route /api/tp-capital", "HTTP + X-Service-Token")
+Rel(kong_gateway, docs_api, "Route /api/docs", "HTTP + X-Service-Token")
+Rel(kong_gateway, rag_collections, "Route /api/rag/collections", "HTTP + X-Service-Token")
+Rel(kong_gateway, service_launcher, "Route /api/services", "HTTP + X-Service-Token")
+
+' Kong Gateway dependencies
+Rel(kong_gateway, kong_db, "Read/Write config", "PostgreSQL")
+Rel(kong_gateway, redis, "Rate limiting", "Redis protocol")
+
+' Inter-service communication (authenticated)
+Rel(docs_api, rag_llamaindex_query, "Proxy RAG queries", "HTTP + JWT + X-Service-Token")
+Rel(docs_api, rag_collections, "Collection ops", "HTTP + X-Service-Token")
+Rel(rag_collections, rag_llamaindex_ingest, "Trigger ingestion", "HTTP + JWT + X-Service-Token")
+Rel(tp_capital_api, telegram_gateway, "Poll messages", "HTTP + X-Service-Token")
+
+' RAG Stack
+Rel(rag_llamaindex_query, rag_ollama, "LLM inference", "HTTP")
+Rel(rag_llamaindex_ingest, rag_ollama, "Generate embeddings", "HTTP")
+Rel(rag_llamaindex_query, qdrant, "Vector search", "HTTP")
+Rel(rag_llamaindex_ingest, qdrant, "Store embeddings", "HTTP")
+Rel(rag_collections, redis, "Cache results", "Redis protocol")
+
+' Database connections via PgBouncer
+Rel(workspace_api, pgbouncer, "Read/Write", "PostgreSQL")
+Rel(tp_capital_api, pgbouncer, "Read/Write", "PostgreSQL")
+Rel(docs_api, pgbouncer, "Metadata", "PostgreSQL")
+
+' PgBouncer → TimescaleDB cluster
+Rel(pgbouncer, timescale_primary, "Writes", "PostgreSQL")
+Rel(pgbouncer, timescale_replica1, "Reads", "PostgreSQL")
+Rel(pgbouncer, timescale_replica2, "Reads", "PostgreSQL")
+
+' High Availability
+Rel(timescale_primary, timescale_replica1, "Streaming replication", "PostgreSQL replication protocol")
+Rel(timescale_primary, timescale_replica2, "Streaming replication", "PostgreSQL replication protocol")
+Rel(patroni, timescale_primary, "Health checks + Failover", "PostgreSQL")
+Rel(patroni, timescale_replica1, "Health checks + Promotion", "PostgreSQL")
+Rel(patroni, timescale_replica2, "Health checks + Promotion", "PostgreSQL")
+
+' External
+Rel(telegram_gateway, telegram, "MTProto", "TCP")
+
+note right of kong_gateway
+  **Security Improvements:**
+  • JWT validation
+  • Rate limiting (Redis-backed)
+  • CORS policies
+  • Request logging
+  • IP whitelisting
+  • Circuit breakers
+end note
+
+note right of pgbouncer
+  **Connection Pooling:**
+  • 1000 max client connections
+  • 20 connections per pool
+  • Transaction mode
+  • Load balancing
+end note
+
+note right of patroni
+  **High Availability:**
+  • Automatic failover <30s
+  • Health checks every 10s
+  • Split-brain prevention
+  • RTO: <5 minutes
+end note
+
+note bottom
+  **Improvements in Proposed State:**
+  ✅ API Gateway - Centralized security & routing
+  ✅ Inter-service authentication - X-Service-Token
+  ✅ Database HA - Read replicas + automatic failover
+  ✅ Connection pooling - PgBouncer (10x efficiency)
+  ✅ Rate limiting - Redis-backed (persistent)
+
+  **Expected Grade: A**
+end note
+
+@enduml

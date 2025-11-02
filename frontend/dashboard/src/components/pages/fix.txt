@@ -1,0 +1,11 @@
+  useEffect(() => {
+    // Only persist results after initial search is done
+    // This prevents overwriting localStorage on mount before restoration completes
+    if (!initialSearchDone.current) return;
+    
+    logger.debug('[DocsSearch] Persisting results', {
+      collection: collection || 'default',
+      count: results.length,
+    });
+    writeStoredResults(collection, results);
+  }, [collection, results]);

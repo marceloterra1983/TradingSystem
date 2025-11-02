@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { CustomizablePageLayout, PageSection } from '../layout/CustomizablePageLayout';
+import {
+  CustomizablePageLayout,
+  PageSection,
+} from '../layout/CustomizablePageLayout';
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
@@ -52,7 +55,8 @@ export function URLsPage() {
     {
       id: 'application-services',
       title: 'Application & Service URLs',
-      description: 'Primary HTTP services that make up the local TradingSystem stack.',
+      description:
+        'Primary HTTP services that make up the local TradingSystem stack.',
       links: [
         { name: 'Dashboard (Vite UI)', url: 'http://localhost:3103' },
         { name: 'Workspace API', url: 'http://localhost:3200/api/items' },
@@ -63,18 +67,31 @@ export function URLsPage() {
         { name: 'Firecrawl', url: 'http://localhost:3002' },
         { name: 'Firecrawl Proxy', url: 'http://localhost:3600' },
         { name: 'Agent MCP Dashboard', url: 'http://localhost:8080' },
-        { name: 'Docusaurus Docs (manual override)', url: 'http://localhost:3400', optional: true },
+        {
+          name: 'Docusaurus Docs (manual override)',
+          url: 'http://localhost:3400',
+          optional: true,
+        },
       ],
     },
     {
       id: 'database-ui-tools',
       title: 'Database UI Tools',
-      description: 'Web interfaces that connect to TimescaleDB and QuestDB for database administration and exploration.',
+      description:
+        'Web interfaces that connect to TimescaleDB and QuestDB for database administration and exploration.',
       links: [
         { name: 'pgAdmin', url: 'http://localhost:5050' },
         { name: 'pgweb', url: 'http://localhost:8081' },
-        { name: 'Adminer (optional)', url: 'http://localhost:8082', optional: true },
-        { name: 'Azimutt (optional)', url: 'http://localhost:8084', optional: true },
+        {
+          name: 'Adminer (optional)',
+          url: 'http://localhost:8082',
+          optional: true,
+        },
+        {
+          name: 'Azimutt (optional)',
+          url: 'http://localhost:8084',
+          optional: true,
+        },
       ],
     },
     {
@@ -82,31 +99,45 @@ export function URLsPage() {
       title: 'QuestDB',
       description: 'QuestDB admin endpoints and connection helpers.',
       links: [
-        { name: 'QuestDB Web Console (REST/SQL)', url: 'http://localhost:9000' },
+        {
+          name: 'QuestDB Web Console (REST/SQL)',
+          url: 'http://localhost:9000',
+        },
         {
           name: 'QuestDB Influx (ILP)',
           value: 'tcp://localhost:9009',
-          description: 'Line protocol endpoint for ILP clients (no HTTP interface).',
+          description:
+            'Line protocol endpoint for ILP clients (no HTTP interface).',
         },
-        { name: 'QuestDB PostgreSQL (psql)', value: 'postgresql://admin:quest@localhost:8812/qdb', description: 'Default credentials shown. Update if you changed QuestDB auth.' },
+        {
+          name: 'QuestDB PostgreSQL (psql)',
+          value: 'postgresql://admin:quest@localhost:8812/qdb',
+          description:
+            'Default credentials shown. Update if you changed QuestDB auth.',
+        },
       ],
     },
     {
       id: 'timescaledb',
       title: 'TimescaleDB',
-      description: 'Connection helpers for TimescaleDB (primary analytical store).',
+      description:
+        'Connection helpers for TimescaleDB (primary analytical store).',
       links: [
         {
           name: 'TimescaleDB (psql)',
-          value: 'postgresql://timescale:<TIMESCALEDB_PASSWORD>@localhost:5433/tradingsystem',
-          description: 'Replace <TIMESCALEDB_PASSWORD> with the value configured in the root .env file.',
+          value:
+            'postgresql://timescale:<TIMESCALEDB_PASSWORD>@localhost:5433/tradingsystem',
+          description:
+            'Replace <TIMESCALEDB_PASSWORD> with the value configured in the root .env file.',
         },
       ],
     },
     {
       id: 'openapi',
       title: 'Swagger / OpenAPI',
-      links: [{ name: 'Swagger / OpenAPI UI', url: 'http://localhost:8200/docs' }],
+      links: [
+        { name: 'Swagger / OpenAPI UI', url: 'http://localhost:8200/docs' },
+      ],
     },
   ];
 
@@ -117,7 +148,9 @@ export function URLsPage() {
         <CollapsibleCardHeader className="flex-col items-start md:flex-row md:items-center md:justify-between gap-2">
           <CollapsibleCardTitle>{section.title}</CollapsibleCardTitle>
           {section.description && (
-            <CollapsibleCardDescription>{section.description}</CollapsibleCardDescription>
+            <CollapsibleCardDescription>
+              {section.description}
+            </CollapsibleCardDescription>
           )}
         </CollapsibleCardHeader>
         <CollapsibleCardContent>
@@ -125,7 +158,9 @@ export function URLsPage() {
             {section.links.map((link) => (
               <div key={link.name} className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-800 dark:text-gray-200">{link.name}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                    {link.name}
+                  </span>
                   {link.optional && (
                     <span className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200">
                       Optional
@@ -152,7 +187,9 @@ export function URLsPage() {
                   )
                 )}
                 {link.description && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{link.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {link.description}
+                  </p>
                 )}
               </div>
             ))}

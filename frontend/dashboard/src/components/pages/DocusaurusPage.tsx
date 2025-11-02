@@ -3,21 +3,26 @@ import { ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import EscopoPageNew from './EscopoPageNew';
 import APIViewerPage from './APIViewerPage';
+import DocsHybridSearchPage from './DocsHybridSearchPage';
 import { apiConfig } from '../../config/api';
 import { resolveDocsVersionRoot } from '../../utils/docusaurus';
 
 export function DocusaurusPageNew() {
-  const [activeView, setActiveView] = useState<'overview' | 'docs' | 'docsApi'>('docs');
+  const [activeView, setActiveView] = useState<
+    'overview' | 'docs' | 'docsApi' | 'docsHybrid'
+  >('docs');
   const isOverview = activeView === 'overview';
   const isDocsView = activeView === 'docs';
   const isDocsApiView = activeView === 'docsApi';
+  const isDocsHybridView = activeView === 'docsHybrid';
 
   const docsVersionRoot = resolveDocsVersionRoot('next', {
     absolute: true,
     trailingSlash: true,
   });
   const iframeSrc = isDocsView ? docsVersionRoot : undefined;
-  const iframeTitle = activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
+  const iframeTitle =
+    activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
 
   console.log('[DocusaurusPage] activeView:', activeView);
   console.log('[DocusaurusPage] iframeSrc:', iframeSrc);
@@ -30,7 +35,17 @@ export function DocusaurusPageNew() {
       return;
     }
     if (isOverview) {
-      window.open(`${window.location.origin}/#/escopo`, '_blank', 'noopener,noreferrer');
+      window.open(
+        `${window.location.origin}/#/escopo`,
+        '_blank',
+        'noopener,noreferrer',
+      );
+    } else if (isDocsHybridView) {
+      window.open(
+        `${window.location.origin}/#/docs-hybrid-search`,
+        '_blank',
+        'noopener,noreferrer',
+      );
     } else if (isDocsApiView) {
       window.open(apiConfig.docsApiUrl, '_blank', 'noopener,noreferrer');
     } else if (iframeSrc) {
@@ -38,13 +53,18 @@ export function DocusaurusPageNew() {
     }
   };
 
-  const handleViewChange = (view: 'overview' | 'docs' | 'docsApi') => {
+  const handleViewChange = (
+    view: 'overview' | 'docs' | 'docsApi' | 'docsHybrid',
+  ) => {
     console.log('[DocusaurusPage] Changing view to:', view);
     setActiveView(view);
   };
 
+  const canOpenInNewTab =
+    isOverview || isDocsApiView || isDocsHybridView || Boolean(iframeSrc);
+
   return (
-    <div className="h-[calc(100vh-160px)] w-full">
+    <div className="min-h-[calc(100vh-160px)] w-full">
       <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -83,12 +103,24 @@ export function DocusaurusPageNew() {
           >
             DocsAPI
           </Button>
+          <Button
+            variant={isDocsHybridView ? 'primary' : 'outline'}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleViewChange('docsHybrid');
+            }}
+            disabled={isDocsHybridView}
+          >
+            Docs Search
+          </Button>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={handleOpenInNewTab}
-          disabled={isOverview ? false : (!iframeSrc && !isDocsApiView)}
+          disabled={!canOpenInNewTab}
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Open in new tab
@@ -102,14 +134,20 @@ export function DocusaurusPageNew() {
         </div>
       ) : isDocsApiView ? (
         <APIViewerPage />
+      ) : isDocsHybridView ? (
+        <DocsHybridSearchPage />
       ) : (
-        <div className="h-[calc(100%-40px)] w-full flex flex-col">
+        <div className="h-[calc(100vh-200px)] w-full flex flex-col">
           <div className="mb-2 p-2 bg-blue-50 dark:bg-slate-800 rounded text-sm">
             <p className="text-gray-800 dark:text-gray-200">
-              <strong>Status:</strong> {iframeSrc ? `Carregando de: ${iframeSrc}` : 'Sem URL configurada'}
+              <strong>Status:</strong>{' '}
+              {iframeSrc
+                ? `Carregando de: ${iframeSrc}`
+                : 'Sem URL configurada'}
             </p>
             <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
-              Se o conteúdo não aparecer, verifique se o Docusaurus está rodando em {iframeSrc}
+              Se o conteúdo não aparecer, verifique se o Docusaurus está rodando
+              em {iframeSrc}
             </p>
           </div>
           {iframeSrc ? (
@@ -118,8 +156,12 @@ export function DocusaurusPageNew() {
               src={iframeSrc}
               title={iframeTitle}
               className="flex-1 w-full rounded-lg border-2 border-blue-500 shadow-sm"
-              onLoad={() => console.log('[DocusaurusPage] Iframe carregado com sucesso')}
-              onError={() => console.error('[DocusaurusPage] Erro ao carregar iframe')}
+              onLoad={() =>
+                console.log('[DocusaurusPage] Iframe carregado com sucesso')
+              }
+              onError={() =>
+                console.error('[DocusaurusPage] Erro ao carregar iframe')
+              }
             />
           ) : (
             <div className="flex flex-1 items-center justify-center text-gray-500">

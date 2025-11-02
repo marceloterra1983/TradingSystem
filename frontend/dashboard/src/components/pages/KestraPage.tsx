@@ -19,7 +19,7 @@ const resolveKestraUrls = () => {
   const env = import.meta.env as Record<string, string | undefined>;
   const baseUrl = sanitizeUrl(
     env.VITE_KESTRA_BASE_URL,
-    DEFAULT_KESTRA_HTTP_URL
+    DEFAULT_KESTRA_HTTP_URL,
   );
   return {
     uiUrl: `${baseUrl}/ui`,

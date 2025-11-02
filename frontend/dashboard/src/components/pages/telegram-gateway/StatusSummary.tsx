@@ -1,4 +1,11 @@
-import { AlertTriangle, CheckCircle, Loader2, RefreshCw, Server, Zap } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
+  RefreshCw,
+  Server,
+  Zap,
+} from 'lucide-react';
 import { Button } from '../../ui/button';
 import {
   CollapsibleCard,
@@ -101,7 +108,8 @@ export function StatusSummary({
               Status do Telegram Gateway
             </CollapsibleCardTitle>
             <CollapsibleCardDescription>
-              Visão rápida da conectividade MTProto, API REST e armazenamento TimescaleDB.
+              Visão rápida da conectividade MTProto, API REST e armazenamento
+              TimescaleDB.
             </CollapsibleCardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -150,21 +158,32 @@ export function StatusSummary({
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
               <div className="flex items-center gap-2">
                 <Icon className={`h-5 w-5 ${meta.className}`} />
-                <span className={`text-sm font-medium ${meta.className}`}>{meta.label}</span>
+                <span className={`text-sm font-medium ${meta.className}`}>
+                  {meta.label}
+                </span>
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                Uptime: <span className="font-semibold text-slate-700 dark:text-slate-200">{formatDuration(overview?.health?.uptime)}</span>
+                Uptime:{' '}
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
+                  {formatDuration(overview?.health?.uptime)}
+                </span>
               </p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Atualizado em {formatTimestamp(overview?.timestamp || lastUpdated)}
+                Atualizado em{' '}
+                {formatTimestamp(overview?.timestamp || lastUpdated)}
               </p>
             </div>
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className={`border-transparent px-2 py-0.5 text-xs font-semibold ${telegramClass}`}>
+                <Badge
+                  variant="outline"
+                  className={`border-transparent px-2 py-0.5 text-xs font-semibold ${telegramClass}`}
+                >
                   Telegram
                 </Badge>
-                <span className={`text-sm font-medium ${telegramClass}`}>{telegramLabel}</span>
+                <span className={`text-sm font-medium ${telegramClass}`}>
+                  {telegramLabel}
+                </span>
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 Conexão MTProto {connectionOk ? 'ativa' : 'inativa'}

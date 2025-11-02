@@ -16,10 +16,10 @@ interface TradingCardProps {
 export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
   data,
   onCardClick,
-  className = ''
+  className = '',
 }) {
   const { symbol, price, change, volume, lastUpdate } = data;
-  
+
   const isPositive = change >= 0;
   const changeIcon = isPositive ? TrendingUp : TrendingDown;
   const changeColor = isPositive ? 'text-green-600' : 'text-red-600';
@@ -30,7 +30,7 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
   };
 
   return (
-    <div 
+    <div
       className={`p-4 rounded-lg border shadow-sm hover:shadow-md transition-shadow cursor-pointer ${bgColor} ${className}`}
       onClick={handleClick}
       role="button"
@@ -50,22 +50,25 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
             {lastUpdate.toLocaleTimeString()}
           </span>
         </div>
-        
+
         <div className="space-y-1">
           <p className="text-2xl font-bold text-gray-900">
             R$ {price.toFixed(2)}
           </p>
-          
+
           <div className={`flex items-center gap-1 ${changeColor}`}>
-            {React.createElement(changeIcon, { 
+            {React.createElement(changeIcon, {
               size: 16,
-              'aria-label': isPositive ? 'Tendência positiva' : 'Tendência negativa'
+              'aria-label': isPositive
+                ? 'Tendência positiva'
+                : 'Tendência negativa',
             })}
             <span className="font-medium">
-              {isPositive ? '+' : ''}{change.toFixed(2)}%
+              {isPositive ? '+' : ''}
+              {change.toFixed(2)}%
             </span>
           </div>
-          
+
           <p className="text-sm text-gray-600">
             Volume: {volume.toLocaleString()}
           </p>
@@ -77,6 +80,3 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
 
 // ✅ PropTypes equivalent com TypeScript
 TradingCard.displayName = 'TradingCard';
-
-
-

@@ -71,10 +71,10 @@ export class CollectionManager {
       // Load configuration file
       const config = await this.loadConfig();
 
-      // Validate and register collections
+      // Validate and register collections (skip persist during init)
       for (const collectionConfig of config.collections) {
         if (collectionConfig.enabled) {
-          await this.registerCollection(collectionConfig);
+          await this.registerCollection(collectionConfig, true); // skipPersist=true
         }
       }
 
@@ -128,7 +128,7 @@ export class CollectionManager {
   /**
    * Register a collection (now public for use by routes)
    */
-  async registerCollection(config: CollectionConfig): Promise<void> {
+  async registerCollection(config: CollectionConfig, skipPersist = false): Promise<void> {
     try {
       // Validate directory exists and is accessible
       await this.validateDirectory(config.directory);
@@ -145,19 +145,26 @@ export class CollectionManager {
       // Register in memory
       this.collections.set(config.name, config);
 
-      // PERSIST TO FILE to survive container restarts (optional - may fail if read-only)
-      try {
-        await this.saveConfig();
-        logger.info('Collection registered and persisted', {
+      // PERSIST TO FILE to survive container restarts (skip during initialization)
+      if (!skipPersist) {
+        try {
+          await this.saveConfig();
+          logger.info('Collection registered and persisted', {
+            collection: config.name,
+            directory: config.directory,
+            autoUpdate: config.autoUpdate,
+          });
+        } catch (saveError) {
+          logger.warn('Collection registered but NOT persisted (file system may be read-only)', {
+            collection: config.name,
+            directory: config.directory,
+            error: saveError instanceof Error ? saveError.message : 'Unknown error',
+          });
+        }
+      } else {
+        logger.info('Collection registered (in-memory only)', {
           collection: config.name,
           directory: config.directory,
-          autoUpdate: config.autoUpdate,
-        });
-      } catch (saveError) {
-        logger.warn('Collection registered but NOT persisted (file system may be read-only)', {
-          collection: config.name,
-          directory: config.directory,
-          error: saveError instanceof Error ? saveError.message : 'Unknown error',
         });
       }
     } catch (error) {
@@ -174,12 +181,18 @@ export class CollectionManager {
    */
   private async saveConfig(): Promise<void> {
     try {
-      const currentConfig = await this.loadConfig();
+      // Use in-memory collections as source of truth (do NOT reload from file)
       const collections = Array.from(this.collections.values());
       
       const updatedConfig: CollectionsConfigFile = {
-        ...currentConfig,
         collections,
+        defaults: {
+          chunkSize: 512,
+          chunkOverlap: 50,
+          fileTypes: ['md', 'mdx', 'txt'],
+          embeddingModel: 'mxbai-embed-large',
+          autoUpdate: false,
+        },
       };
 
       await fs.writeFile(
@@ -320,7 +333,16 @@ export class CollectionManager {
       // Remove from memory
       this.collections.delete(collectionName);
 
-      logger.info('Collection deleted successfully', { collection: collectionName });
+      // PERSIST TO FILE to survive container restarts
+      try {
+        await this.saveConfig();
+        logger.info('Collection deleted and persisted', { collection: collectionName });
+      } catch (saveError) {
+        logger.warn('Collection deleted but NOT persisted (file system may be read-only)', {
+          collection: collectionName,
+          error: saveError instanceof Error ? saveError.message : 'Unknown error',
+        });
+      }
     } catch (error) {
       logger.error('Failed to delete collection', {
         collection: collectionName,

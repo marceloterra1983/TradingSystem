@@ -48,8 +48,13 @@ interface WorkspaceState {
   error: Error | null;
   lastSyncedAt: string | null;
   loadItems: (options?: { force?: boolean }) => Promise<void>;
-  createItem: (formData: Omit<Item, 'id' | 'createdAt' | 'status'>) => Promise<Item>;
-  updateItem: (id: string, formData: Partial<ItemFormWithStatus>) => Promise<Item>;
+  createItem: (
+    formData: Omit<Item, 'id' | 'createdAt' | 'status'>,
+  ) => Promise<Item>;
+  updateItem: (
+    id: string,
+    formData: Partial<ItemFormWithStatus>,
+  ) => Promise<Item>;
   deleteItem: (id: string) => Promise<void>;
 }
 
@@ -123,7 +128,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     try {
       const created = await libraryService.createItem(formData);
       set((state) => ({
-        items: [created, ...state.items.filter((item) => item.id !== created.id)],
+        items: [
+          created,
+          ...state.items.filter((item) => item.id !== created.id),
+        ],
         error: null,
         syncing: false,
         lastSyncedAt: new Date().toISOString(),
@@ -149,7 +157,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     try {
       const updated = await libraryService.updateItem(id, updatePayload);
       set((state) => ({
-        items: state.items.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)),
+        items: state.items.map((item) =>
+          item.id === updated.id ? { ...item, ...updated } : item,
+        ),
         error: null,
         syncing: false,
         lastSyncedAt: new Date().toISOString(),

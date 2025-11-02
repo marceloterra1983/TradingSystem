@@ -11,7 +11,9 @@ const LOCALE = 'pt-BR';
  * @param value - ISO timestamp string or Date object
  * @returns Formatted date string (dd/mm/yyyy, hh:mm:ss)
  */
-export function formatTimestamp(value: string | Date | null | undefined): string {
+export function formatTimestamp(
+  value: string | Date | null | undefined,
+): string {
   if (!value) return '–';
 
   const date = value instanceof Date ? value : new Date(value);
@@ -27,7 +29,7 @@ export function formatTimestamp(value: string | Date | null | undefined): string
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
   });
 }
 
@@ -36,7 +38,9 @@ export function formatTimestamp(value: string | Date | null | undefined): string
  * @param value - ISO timestamp string or Date object
  * @returns Formatted date string (dd/mm/yyyy, hh:mm)
  */
-export function formatTimestampShort(value: string | Date | null | undefined): string {
+export function formatTimestampShort(
+  value: string | Date | null | undefined,
+): string {
   if (!value) return '–';
 
   const date = value instanceof Date ? value : new Date(value);
@@ -48,7 +52,7 @@ export function formatTimestampShort(value: string | Date | null | undefined): s
   return date.toLocaleString(LOCALE, {
     timeZone: TIMEZONE,
     dateStyle: 'short',
-    timeStyle: 'short'
+    timeStyle: 'short',
   });
 }
 
@@ -70,14 +74,16 @@ export function formatDate(value: string | Date | null | undefined): string {
     timeZone: TIMEZONE,
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 }
 
 /**
  * Format a timestamp to a short label (dd/MM)
  */
-export function formatShortDate(value: string | Date | null | undefined): string {
+export function formatShortDate(
+  value: string | Date | null | undefined,
+): string {
   if (!value) {
     return '–';
   }
@@ -90,7 +96,7 @@ export function formatShortDate(value: string | Date | null | undefined): string
   return date.toLocaleString(LOCALE, {
     timeZone: TIMEZONE,
     day: '2-digit',
-    month: '2-digit'
+    month: '2-digit',
   });
 }
 
@@ -112,7 +118,7 @@ export function formatTime(value: string | Date | null | undefined): string {
     timeZone: TIMEZONE,
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
   });
 }
 
@@ -132,6 +138,6 @@ export function getNow(): Date {
 export function utcToSaoPaulo(utcTimestamp: string): string {
   const date = new Date(utcTimestamp);
   return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE
+    timeZone: TIMEZONE,
   });
 }

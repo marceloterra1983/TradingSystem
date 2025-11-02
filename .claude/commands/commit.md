@@ -1,166 +1,305 @@
----
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*), Bash(git diff:*), Bash(git log:*)
-argument-hint: [message] | --no-verify | --amend
-description: Create well-formatted commits with conventional commit format and emoji
----
+# Orchestration Commit Command
 
-# Smart Git Commit
+Create git commits aligned with task completion, maintaining clean version control synchronized with task progress.
 
-Create well-formatted commit: $ARGUMENTS
+## Usage
 
-## Current Repository State
+```
+/orchestration/commit [TASK-ID] [options]
+```
 
-- Git status: !`git status --porcelain`
-- Current branch: !`git branch --show-current`
-- Staged changes: !`git diff --cached --stat`
-- Unstaged changes: !`git diff --stat`
-- Recent commits: !`git log --oneline -5`
+## Description
 
-## What This Command Does
+Automatically creates well-structured commits when tasks move to QA or completion, using task metadata to generate meaningful commit messages following Conventional Commits specification.
 
-1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
-   - `pnpm lint` to ensure code quality
-   - `pnpm build` to verify the build succeeds
-   - `pnpm generate:docs` to update documentation
-2. Checks which files are staged with `git status`
-3. If 0 files are staged, automatically adds all modified and new files with `git add`
-4. Performs a `git diff` to understand what changes are being committed
-5. Analyzes the diff to determine if multiple distinct logical changes are present
-6. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
-7. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format
+## Basic Commands
 
-## Best Practices for Commits
+### Commit Current Task
+```
+/orchestration/commit
+```
+Commits changes for the task currently in progress.
 
-- **Verify before committing**: Ensure code is linted, builds correctly, and documentation is updated
-- **Atomic commits**: Each commit should contain related changes that serve a single purpose
-- **Split large changes**: If changes touch multiple concerns, split them into separate commits
-- **Conventional commit format**: Use the format `<type>: <description>` where type is one of:
-  - `feat`: A new feature
-  - `fix`: A bug fix
-  - `docs`: Documentation changes
-  - `style`: Code style changes (formatting, etc)
-  - `refactor`: Code changes that neither fix bugs nor add features
-  - `perf`: Performance improvements
-  - `test`: Adding or fixing tests
-  - `chore`: Changes to the build process, tools, etc.
-- **Present tense, imperative mood**: Write commit messages as commands (e.g., "add feature" not "added feature")
-- **Concise first line**: Keep the first line under 72 characters
-- **Emoji**: Each commit type is paired with an appropriate emoji:
-  - ✨ `feat`: New feature
-  - 🐛 `fix`: Bug fix
-  - 📝 `docs`: Documentation
-  - 💄 `style`: Formatting/style
-  - ♻️ `refactor`: Code refactoring
-  - ⚡️ `perf`: Performance improvements
-  - ✅ `test`: Tests
-  - 🔧 `chore`: Tooling, configuration
-  - 🚀 `ci`: CI/CD improvements
-  - 🗑️ `revert`: Reverting changes
-  - 🧪 `test`: Add a failing test
-  - 🚨 `fix`: Fix compiler/linter warnings
-  - 🔒️ `fix`: Fix security issues
-  - 👥 `chore`: Add or update contributors
-  - 🚚 `refactor`: Move or rename resources
-  - 🏗️ `refactor`: Make architectural changes
-  - 🔀 `chore`: Merge branches
-  - 📦️ `chore`: Add or update compiled files or packages
-  - ➕ `chore`: Add a dependency
-  - ➖ `chore`: Remove a dependency
-  - 🌱 `chore`: Add or update seed files
-  - 🧑‍💻 `chore`: Improve developer experience
-  - 🧵 `feat`: Add or update code related to multithreading or concurrency
-  - 🔍️ `feat`: Improve SEO
-  - 🏷️ `feat`: Add or update types
-  - 💬 `feat`: Add or update text and literals
-  - 🌐 `feat`: Internationalization and localization
-  - 👔 `feat`: Add or update business logic
-  - 📱 `feat`: Work on responsive design
-  - 🚸 `feat`: Improve user experience / usability
-  - 🩹 `fix`: Simple fix for a non-critical issue
-  - 🥅 `fix`: Catch errors
-  - 👽️ `fix`: Update code due to external API changes
-  - 🔥 `fix`: Remove code or files
-  - 🎨 `style`: Improve structure/format of the code
-  - 🚑️ `fix`: Critical hotfix
-  - 🎉 `chore`: Begin a project
-  - 🔖 `chore`: Release/Version tags
-  - 🚧 `wip`: Work in progress
-  - 💚 `fix`: Fix CI build
-  - 📌 `chore`: Pin dependencies to specific versions
-  - 👷 `ci`: Add or update CI build system
-  - 📈 `feat`: Add or update analytics or tracking code
-  - ✏️ `fix`: Fix typos
-  - ⏪️ `revert`: Revert changes
-  - 📄 `chore`: Add or update license
-  - 💥 `feat`: Introduce breaking changes
-  - 🍱 `assets`: Add or update assets
-  - ♿️ `feat`: Improve accessibility
-  - 💡 `docs`: Add or update comments in source code
-  - 🗃️ `db`: Perform database related changes
-  - 🔊 `feat`: Add or update logs
-  - 🔇 `fix`: Remove logs
-  - 🤡 `test`: Mock things
-  - 🥚 `feat`: Add or update an easter egg
-  - 🙈 `chore`: Add or update .gitignore file
-  - 📸 `test`: Add or update snapshots
-  - ⚗️ `experiment`: Perform experiments
-  - 🚩 `feat`: Add, update, or remove feature flags
-  - 💫 `ui`: Add or update animations and transitions
-  - ⚰️ `refactor`: Remove dead code
-  - 🦺 `feat`: Add or update code related to validation
-  - ✈️ `feat`: Improve offline support
+### Commit Specific Task
+```
+/orchestration/commit TASK-003
+```
+Commits changes related to a specific task.
 
-## Guidelines for Splitting Commits
+### Batch Commit
+```
+/orchestration/commit --batch
+```
+Groups related completed tasks into logical commits.
 
-When analyzing the diff, consider splitting commits based on these criteria:
+## Commit Message Generation
 
-1. **Different concerns**: Changes to unrelated parts of the codebase
-2. **Different types of changes**: Mixing features, fixes, refactoring, etc.
-3. **File patterns**: Changes to different types of files (e.g., source code vs documentation)
-4. **Logical grouping**: Changes that would be easier to understand or review separately
-5. **Size**: Very large changes that would be clearer if broken down
+### Automatic Format
+Based on task type and content:
+```
+feat(auth): implement JWT token validation
+
+- Add token verification middleware
+- Implement refresh token logic
+- Add expiration handling
+
+Task: TASK-003
+Status: todos -> in_progress -> qa
+Time: 4.5 hours
+```
+
+### Type Mapping
+```
+Task Type     -> Commit Type
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+feature       -> feat:
+bugfix        -> fix:
+refactor      -> refactor:
+test          -> test:
+docs          -> docs:
+performance   -> perf:
+security      -> fix:        (with security note)
+```
+
+## Workflow Integration
+
+### Auto-commit on Status Change
+```
+/orchestration/move TASK-003 qa --auto-commit
+```
+Automatically commits when moving to QA status.
+
+### Pre-commit Validation
+```
+/orchestration/commit --validate
+```
+Checks:
+- All tests pass
+- No linting errors
+- Task requirements met
+- Files match task scope
+
+## Options
+
+### Custom Message
+```
+/orchestration/commit TASK-003 --message "Custom commit message"
+```
+Override automatic message generation.
+
+### Scope Detection
+```
+/orchestration/commit --detect-scope
+```
+Automatically detects scope from changed files:
+- `auth` for auth-related files
+- `api` for API changes
+- `ui` for frontend changes
+
+### Breaking Changes
+```
+/orchestration/commit --breaking
+```
+Adds breaking change indicator:
+```
+feat(api)!: restructure authentication endpoints
+
+BREAKING CHANGE: Auth endpoints moved from /auth to /api/v2/auth
+```
+
+## Batch Operations
+
+### Commit by Feature
+```
+/orchestration/commit --feature authentication
+```
+Groups all completed auth tasks into one commit.
+
+### Commit by Status
+```
+/orchestration/commit --status qa
+```
+Commits all tasks currently in QA.
+
+### Smart Grouping
+```
+/orchestration/commit --smart-group
+```
+Intelligently groups related tasks:
+```
+Feature Group: Authentication (3 tasks)
+- TASK-001: Database schema
+- TASK-003: JWT implementation  
+- TASK-005: Login endpoint
+
+Suggested commit: feat(auth): implement complete authentication system
+```
+
+## Worktree Support
+
+### Worktree-Aware Commits
+```
+/orchestration/commit --worktree
+```
+Detects current worktree and commits only relevant tasks.
+
+### Cross-Worktree Status
+```
+/orchestration/commit --all-worktrees
+```
+Shows commit status across all worktrees:
+```
+Worktree Status:
+- feature/auth: 2 tasks ready to commit
+- feature/payments: 1 task ready to commit
+- feature/ui: No uncommitted changes
+```
+
+## Validation Features
+
+### Pre-commit Checks
+```
+## Pre-commit Validation
+✓ All tests passing
+✓ No linting errors
+✓ Task requirements met
+✗ Uncommitted files outside task scope: src/unrelated.js
+
+Proceed with commit? [y/n]
+```
+
+### Task Alignment
+```
+## Task Alignment Check
+Changed files:
+- src/auth/jwt.ts ✓ (matches TASK-003)
+- src/auth/validate.ts ✓ (matches TASK-003)
+- src/payments/stripe.ts ✗ (not in TASK-003 scope)
+
+Warning: Changes outside task scope detected
+```
+
+## Integration Features
+
+### Link to Task
+```
+/orchestration/commit --link-task
+```
+Adds task URL/reference to commit:
+```
+feat(auth): implement JWT validation
+
+Task: TASK-003
+Link: http://orchestration/03_15_2024/auth_system/tasks/TASK-003
+```
+
+### Update Status Tracker
+```
+/orchestration/commit --update-tracker
+```
+Updates TASK-STATUS-TRACKER.yaml with commit info:
+```yaml
+git_tracking:
+  TASK-003:
+    commits: ["abc123def"]
+    commit_message: "feat(auth): implement JWT validation"
+    committed_at: "2024-03-15T14:30:00Z"
+```
 
 ## Examples
 
-Good commit messages:
-- ✨ feat: add user authentication system
-- 🐛 fix: resolve memory leak in rendering process
-- 📝 docs: update API documentation with new endpoints
-- ♻️ refactor: simplify error handling logic in parser
-- 🚨 fix: resolve linter warnings in component files
-- 🧑‍💻 chore: improve developer tooling setup process
-- 👔 feat: implement business logic for transaction validation
-- 🩹 fix: address minor styling inconsistency in header
-- 🚑️ fix: patch critical security vulnerability in auth flow
-- 🎨 style: reorganize component structure for better readability
-- 🔥 fix: remove deprecated legacy code
-- 🦺 feat: add input validation for user registration form
-- 💚 fix: resolve failing CI pipeline tests
-- 📈 feat: implement analytics tracking for user engagement
-- 🔒️ fix: strengthen authentication password requirements
-- ♿️ feat: improve form accessibility for screen readers
+### Example 1: Simple Task Commit
+```
+/orchestration/commit TASK-003
 
-Example of splitting commits:
-- First commit: ✨ feat: add new solc version type definitions
-- Second commit: 📝 docs: update documentation for new solc versions
-- Third commit: 🔧 chore: update package.json dependencies
-- Fourth commit: 🏷️ feat: add type definitions for new API endpoints
-- Fifth commit: 🧵 feat: improve concurrency handling in worker threads
-- Sixth commit: 🚨 fix: resolve linting issues in new code
-- Seventh commit: ✅ test: add unit tests for new solc version features
-- Eighth commit: 🔒️ fix: update dependencies with security vulnerabilities
+Generated commit:
+feat(auth): implement JWT token validation
 
-## Command Options
+- Add verification middleware
+- Handle token expiration
+- Implement refresh logic
 
-- `--no-verify`: Skip running the pre-commit checks (lint, build, generate:docs)
+Task: TASK-003 (4.5 hours)
+```
 
-## Important Notes
+### Example 2: Batch Feature Commit
+```
+/orchestration/commit --feature authentication --batch
 
-- By default, pre-commit checks (`pnpm lint`, `pnpm build`, `pnpm generate:docs`) will run to ensure code quality
-- If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
-- If specific files are already staged, the command will only commit those files
-- If no files are staged, it will automatically stage all modified and new files
-- The commit message will be constructed based on the changes detected
-- Before committing, the command will review the diff to identify if multiple commits would be more appropriate
-- If suggesting multiple commits, it will help you stage and commit the changes separately
-- Always reviews the commit diff to ensure the message matches the changes
+Grouping 3 related tasks:
+feat(auth): complete authentication system implementation
+
+- Set up database schema (TASK-001)
+- Implement JWT validation (TASK-003)
+- Create login endpoints (TASK-005)
+
+Tasks: TASK-001, TASK-003, TASK-005 (12 hours total)
+```
+
+### Example 3: Fix with Test
+```
+/orchestration/commit TASK-007
+
+Generated commit:
+fix(auth): resolve token expiration race condition
+
+- Fix async validation timing issue
+- Add comprehensive test coverage
+- Prevent edge case in refresh flow
+
+Fixes: #123
+Task: TASK-007 (2 hours)
+```
+
+## Commit Templates
+
+### Feature Template
+```
+feat(<scope>): <task-title>
+
+- <implementation-detail-1>
+- <implementation-detail-2>
+- <implementation-detail-3>
+
+Task: <task-id> (<duration>)
+Status: <status-transition>
+```
+
+### Fix Template
+```
+fix(<scope>): <issue-description>
+
+- <root-cause>
+- <solution>
+- <test-coverage>
+
+Fixes: #<issue-number>
+Task: <task-id>
+```
+
+## Best Practices
+
+1. **Commit at Natural Breakpoints**: When moving tasks to QA
+2. **Keep Commits Atomic**: One logical change per commit
+3. **Use Batch Wisely**: Only group truly related tasks
+4. **Validate First**: Always run validation before committing
+5. **Update Status**: Ensure task status is current
+
+## Configuration
+
+### Auto-commit Rules
+Set in orchestration config:
+```yaml
+auto_commit:
+  on_qa: true
+  on_complete: false
+  require_tests: true
+  require_validation: true
+```
+
+## Notes
+
+- Integrates with task-commit-manager agent for complex scenarios
+- Respects .gitignore and excluded files
+- Supports conventional commits specification
+- Maintains traceable history between tasks and commits

@@ -48,4 +48,3 @@ export function WorkspacePageNew() {
 }
 
 export default WorkspacePageNew;
-

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 /**
  * Input component following shadcn/ui patterns
@@ -24,12 +25,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           'placeholder:text-gray-400 dark:placeholder:text-gray-500',
           'focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 Input.displayName = 'Input';

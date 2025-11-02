@@ -124,7 +124,7 @@ export interface DocsHybridItem {
   path: string;
   snippet?: string;
   score: number;
-  source: 'hybrid' | 'lexical';
+  source: 'hybrid' | 'lexical' | 'rag';
   components: { semantic: boolean; lexical: boolean };
   tags?: string[];
   domain?: string;
@@ -143,8 +143,16 @@ export interface DocsHybridResponse {
 // Docs Facets (domains/types/tags/statuses)
 // ====================
 
-export interface DocFacetItem { value: string; count: number }
-export interface DocsFacets { domains: DocFacetItem[]; types: DocFacetItem[]; tags: DocFacetItem[]; statuses: DocFacetItem[] }
+export interface DocFacetItem {
+  value: string;
+  count: number;
+}
+export interface DocsFacets {
+  domains: DocFacetItem[];
+  types: DocFacetItem[];
+  tags: DocFacetItem[];
+  statuses: DocFacetItem[];
+}
 
 class DocumentationService {
   private client: AxiosInstance;
@@ -175,7 +183,7 @@ class DocumentationService {
       },
       (error) => {
         throw error;
-      }
+      },
     );
 
     // Response interceptor
@@ -188,7 +196,7 @@ class DocumentationService {
           console.error('Response status:', error.response.status);
         }
         throw error;
-      }
+      },
     );
   }
 
@@ -196,7 +204,15 @@ class DocumentationService {
   // SYSTEMS API
   // ====================
 
-  async getSystems(params?: { status?: string; limit?: number }): Promise<{ success: boolean; data: System[]; count: number; total: number }> {
+  async getSystems(params?: {
+    status?: string;
+    limit?: number;
+  }): Promise<{
+    success: boolean;
+    data: System[];
+    count: number;
+    total: number;
+  }> {
     const response = await this.client.get('/api/v1/systems', { params });
     return response.data;
   }
@@ -206,17 +222,24 @@ class DocumentationService {
     return response.data;
   }
 
-  async createSystem(system: Omit<System, 'id' | 'created_at' | 'updated_at'>): Promise<{ success: boolean; data: System }> {
+  async createSystem(
+    system: Omit<System, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<{ success: boolean; data: System }> {
     const response = await this.client.post('/api/v1/systems', system);
     return response.data;
   }
 
-  async updateSystem(id: string, updates: Partial<Omit<System, 'id' | 'created_at' | 'updated_at'>>): Promise<{ success: boolean; data: System }> {
+  async updateSystem(
+    id: string,
+    updates: Partial<Omit<System, 'id' | 'created_at' | 'updated_at'>>,
+  ): Promise<{ success: boolean; data: System }> {
     const response = await this.client.put(`/api/v1/systems/${id}`, updates);
     return response.data;
   }
 
-  async deleteSystem(id: string): Promise<{ success: boolean; message: string }> {
+  async deleteSystem(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
     const response = await this.client.delete(`/api/v1/systems/${id}`);
     return response.data;
   }
@@ -225,7 +248,15 @@ class DocumentationService {
   // SEARCH API
   // ====================
 
-  async search(query: string, params?: { type?: string; source?: string; limit?: number; version?: string }): Promise<SearchResponse> {
+  async search(
+    query: string,
+    params?: {
+      type?: string;
+      source?: string;
+      limit?: number;
+      version?: string;
+    },
+  ): Promise<SearchResponse> {
     const response = await this.client.get('/api/v1/search', {
       params: {
         q: query,
@@ -251,7 +282,15 @@ class DocumentationService {
 
   async docsHybridSearch(
     query: string,
-    opts?: { limit?: number; alpha?: number; domain?: string; type?: string; status?: string; tags?: string[]; collection?: string }
+    opts?: {
+      limit?: number;
+      alpha?: number;
+      domain?: string;
+      type?: string;
+      status?: string;
+      tags?: string[];
+      collection?: string;
+    },
   ): Promise<DocsHybridResponse> {
     const params: Record<string, string | number> = { q: query };
     if (opts?.limit) params.limit = opts.limit;
@@ -262,7 +301,9 @@ class DocumentationService {
     if (opts?.tags?.length) params.tags = opts.tags.join(',');
     if (opts?.collection) params.collection = opts.collection;
 
-    const response = await this.client.get('/api/v1/docs/search-hybrid', { params });
+    const response = await this.client.get('/api/v1/docs/search-hybrid', {
+      params,
+    });
     return response.data as DocsHybridResponse;
   }
 
@@ -279,8 +320,26 @@ class DocumentationService {
 
   async docsLexicalSearch(
     query: string,
-    opts?: { limit?: number; domain?: string; type?: string; status?: string; tags?: string[] }
-  ): Promise<{ total: number; results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; status?: string; score?: number }> }> {
+    opts?: {
+      limit?: number;
+      domain?: string;
+      type?: string;
+      status?: string;
+      tags?: string[];
+    },
+  ): Promise<{
+    total: number;
+    results: Array<{
+      title: string;
+      path: string;
+      summary?: string;
+      tags?: string[];
+      domain?: string;
+      type?: string;
+      status?: string;
+      score?: number;
+    }>;
+  }> {
     const params: Record<string, string | number> = { q: query };
     if (opts?.limit) params.limit = opts.limit;
     if (opts?.domain) params.domain = opts.domain;
@@ -291,7 +350,16 @@ class DocumentationService {
     const response = await this.client.get('/api/v1/docs/search', { params });
     return response.data as {
       total: number;
-      results: Array<{ title: string; path: string; summary?: string; tags?: string[]; domain?: string; type?: string; status?: string; score?: number }>;
+      results: Array<{
+        title: string;
+        path: string;
+        summary?: string;
+        tags?: string[];
+        domain?: string;
+        type?: string;
+        status?: string;
+        score?: number;
+      }>;
     };
   }
 
@@ -348,7 +416,9 @@ class DocumentationService {
     }
 
     if (lastError instanceof Error) {
-      throw new Error(`Não foi possível carregar conteúdo para ${docPath}: ${lastError.message}`);
+      throw new Error(
+        `Não foi possível carregar conteúdo para ${docPath}: ${lastError.message}`,
+      );
     }
 
     throw new Error(`Não foi possível carregar conteúdo para ${docPath}`);
@@ -365,7 +435,12 @@ class DocumentationService {
     system_id?: string;
     assigned_to?: string;
     limit?: number;
-  }): Promise<{ success: boolean; data: Idea[]; count: number; total: number }> {
+  }): Promise<{
+    success: boolean;
+    data: Idea[];
+    count: number;
+    total: number;
+  }> {
     const response = await this.client.get('/api/v1/ideas', { params });
     return response.data;
   }
@@ -380,12 +455,17 @@ class DocumentationService {
     return response.data;
   }
 
-  async createIdea(idea: Omit<Idea, 'id' | 'created_at' | 'updated_at' | 'completed_at'>): Promise<{ success: boolean; data: Idea }> {
+  async createIdea(
+    idea: Omit<Idea, 'id' | 'created_at' | 'updated_at' | 'completed_at'>,
+  ): Promise<{ success: boolean; data: Idea }> {
     const response = await this.client.post('/api/v1/ideas', idea);
     return response.data;
   }
 
-  async updateIdea(id: string, updates: Partial<Omit<Idea, 'id' | 'created_at'>>): Promise<{ success: boolean; data: Idea }> {
+  async updateIdea(
+    id: string,
+    updates: Partial<Omit<Idea, 'id' | 'created_at'>>,
+  ): Promise<{ success: boolean; data: Idea }> {
     const response = await this.client.put(`/api/v1/ideas/${id}`, updates);
     return response.data;
   }
@@ -399,7 +479,11 @@ class DocumentationService {
   // FILES API
   // ====================
 
-  async uploadFiles(ideaId: string, files: File[], uploadedBy?: string): Promise<{ success: boolean; data: FileMetadata[] }> {
+  async uploadFiles(
+    ideaId: string,
+    files: File[],
+    uploadedBy?: string,
+  ): Promise<{ success: boolean; data: FileMetadata[] }> {
     const formData = new FormData();
     files.forEach((file) => {
       formData.append('files', file);
@@ -408,15 +492,21 @@ class DocumentationService {
       formData.append('uploaded_by', uploadedBy);
     }
 
-    const response = await this.client.post(`/api/v1/ideas/${ideaId}/files`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    const response = await this.client.post(
+      `/api/v1/ideas/${ideaId}/files`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       },
-    });
+    );
     return response.data;
   }
 
-  async getIdeaFiles(ideaId: string): Promise<{ success: boolean; data: FileMetadata[]; count: number }> {
+  async getIdeaFiles(
+    ideaId: string,
+  ): Promise<{ success: boolean; data: FileMetadata[]; count: number }> {
     const response = await this.client.get(`/api/v1/ideas/${ideaId}/files`);
     return response.data;
   }
@@ -428,7 +518,9 @@ class DocumentationService {
     return response.data;
   }
 
-  async getFileMetadata(fileId: string): Promise<{ success: boolean; data: FileMetadata }> {
+  async getFileMetadata(
+    fileId: string,
+  ): Promise<{ success: boolean; data: FileMetadata }> {
     const response = await this.client.get(`/api/v1/files/${fileId}/metadata`);
     return response.data;
   }
@@ -447,7 +539,9 @@ class DocumentationService {
     return response.data;
   }
 
-  async deleteFile(fileId: string): Promise<{ success: boolean; message: string }> {
+  async deleteFile(
+    fileId: string,
+  ): Promise<{ success: boolean; message: string }> {
     const response = await this.client.delete(`/api/v1/files/${fileId}`);
     return response.data;
   }
@@ -456,12 +550,19 @@ class DocumentationService {
   // STATISTICS API
   // ====================
 
-  async getStatistics(): Promise<{ success: boolean; data: Statistics; cached?: boolean; generated_at?: string }> {
+  async getStatistics(): Promise<{
+    success: boolean;
+    data: Statistics;
+    cached?: boolean;
+    generated_at?: string;
+  }> {
     const response = await this.client.get('/api/v1/stats');
     return response.data;
   }
 
-  async getActivityTimeline(days: number = 30): Promise<{ success: boolean; data: ActivityData[]; cached?: boolean }> {
+  async getActivityTimeline(
+    days: number = 30,
+  ): Promise<{ success: boolean; data: ActivityData[]; cached?: boolean }> {
     const response = await this.client.get('/api/v1/stats/activity', {
       params: { days },
     });
@@ -483,7 +584,12 @@ class DocumentationService {
   // HEALTH CHECK
   // ====================
 
-  async healthCheck(): Promise<{ status: string; timestamp?: string; version?: string; error?: string }> {
+  async healthCheck(): Promise<{
+    status: string;
+    timestamp?: string;
+    version?: string;
+    error?: string;
+  }> {
     try {
       const response = await this.client.get('/health');
       return response.data;

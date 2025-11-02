@@ -1,7 +1,17 @@
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
 import { Button } from '../../../ui/button';
 import { cn } from '../../../../lib/utils';
-import { CATEGORY_CONFIG, PRIORITY_CONFIG, STATUS_CONFIG } from '../constants/workspace.constants';
+import {
+  PRIORITY_CONFIG,
+  STATUS_CONFIG,
+} from '../constants/workspace.constants';
 import type { Item } from '../types/workspace.types';
 import { Tag, Folder } from 'lucide-react';
 
@@ -11,7 +21,11 @@ interface ViewItemDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps) {
+export function ViewItemDialog({
+  item,
+  open,
+  onOpenChange,
+}: ViewItemDialogProps) {
   const CategoryIcon = Folder; // Dynamic categories use default icon
   const StatusIcon = STATUS_CONFIG[item.status].icon;
   const PriorityIcon = PRIORITY_CONFIG[item.priority].icon;
@@ -25,11 +39,12 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
             <span className="break-words">{item.title}</span>
           </DialogTitle>
           <DialogDescription>
-            Criada em {new Date(item.createdAt).toLocaleDateString('pt-BR', {
+            Criada em{' '}
+            {new Date(item.createdAt).toLocaleDateString('pt-BR', {
               timeZone: 'America/Sao_Paulo',
               day: '2-digit',
               month: 'long',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </DialogDescription>
         </DialogHeader>
@@ -37,9 +52,13 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
         <div className="space-y-4">
           {/* Description */}
           <div>
-            <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Descrição</h4>
+            <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+              Descrição
+            </h4>
             <div className="max-h-64 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200">
-              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">{item.description}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
+                {item.description}
+              </p>
             </div>
           </div>
 
@@ -47,17 +66,28 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Category */}
             <div>
-              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Categoria</h4>
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                Categoria
+              </h4>
               <div className="flex items-center gap-2">
                 <CategoryIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <span className="text-sm text-gray-900 dark:text-gray-100">{item.category}</span>
+                <span className="text-sm text-gray-900 dark:text-gray-100">
+                  {item.category}
+                </span>
               </div>
             </div>
 
             {/* Priority */}
             <div>
-              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Prioridade</h4>
-              <div className={cn('inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium', PRIORITY_CONFIG[item.priority].color)}>
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                Prioridade
+              </h4>
+              <div
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium',
+                  PRIORITY_CONFIG[item.priority].color,
+                )}
+              >
                 <PriorityIcon className="h-4 w-4" />
                 {PRIORITY_CONFIG[item.priority].label}
               </div>
@@ -65,8 +95,15 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
 
             {/* Status */}
             <div>
-              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Status</h4>
-              <div className={cn('inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium', STATUS_CONFIG[item.status].color)}>
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                Status
+              </h4>
+              <div
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium',
+                  STATUS_CONFIG[item.status].color,
+                )}
+              >
                 <StatusIcon className="h-4 w-4" />
                 {STATUS_CONFIG[item.status].label}
               </div>
@@ -76,10 +113,15 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
           {/* Tags */}
           {item.tags.length > 0 && (
             <div>
-              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Tags</h4>
+              <h4 className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                Tags
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200">
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200"
+                  >
                     <Tag className="h-3 w-3" />
                     {tag}
                   </span>
@@ -97,7 +139,7 @@ export function ViewItemDialog({ item, open, onOpenChange }: ViewItemDialogProps
               <div>
                 <span className="font-semibold">Data de criação:</span>{' '}
                 {new Date(item.createdAt).toLocaleString('pt-BR', {
-                  timeZone: 'America/Sao_Paulo'
+                  timeZone: 'America/Sao_Paulo',
                 })}
               </div>
             </div>

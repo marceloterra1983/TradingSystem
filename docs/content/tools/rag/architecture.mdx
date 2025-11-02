@@ -1,11 +1,14 @@
 ---
 title: RAG Services Architecture
 sidebar_position: 1
+description: "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment"
 tags: [rag, architecture, documentation]
 domain: rag-services
 type: architecture
 summary: "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment"
 status: active
+owner: ArchitectureGuild
+lastReviewed: "2025-11-01"
 last_review: "2025-11-01"
 ---
 
@@ -749,10 +752,10 @@ docker logs rag-collections-service | grep "File change detected"
 - [ADR-001: Redis Caching Strategy](../../reference/adrs/rag-services/ADR-001-redis-caching-strategy.md)
 - [ADR-002: File Watcher Auto-Ingestion](../../reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md)
 
-### Implementation Reports
-- [RAG Cache Implementation](../../../RAG-CACHE-IMPLEMENTATION-2025-11-01.md)
-- [RAG Corrections Validation](../../../RAG-CORRECTIONS-VALIDATION-2025-11-01.md)
-- [RAG Technical Review](../../../RAG-TECHNICAL-REVIEW-2025-11-01.md)
+### Implementation Details
+- **Cache Implementation**: See `tools/rag-services/src/services/cacheService.ts`
+- **Validation Tests**: See `tools/rag-services/tests/` directory
+- **Technical Review**: Documented in ADRs below
 
 ---
 

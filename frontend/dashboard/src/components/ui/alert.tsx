@@ -34,7 +34,10 @@ export const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm font-semibold leading-none tracking-tight', className)}
+    className={cn(
+      'text-sm font-semibold leading-none tracking-tight',
+      className,
+    )}
     {...props}
   />
 ));

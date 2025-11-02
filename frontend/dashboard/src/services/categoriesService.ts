@@ -6,7 +6,8 @@
 
 // Extract base URL from VITE_WORKSPACE_API_URL (remove /items if present)
 const getBaseApiUrl = () => {
-  const workspaceUrl = import.meta.env.VITE_WORKSPACE_API_URL || 'http://localhost:3200/api';
+  const workspaceUrl =
+    import.meta.env.VITE_WORKSPACE_API_URL || 'http://localhost:3200/api';
   // Remove /items from the end if present
   return workspaceUrl.replace(/\/items$/, '');
 };
@@ -144,10 +145,12 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       if (result.errors && result.errors.length > 0) {
-        const errorMessages = result.errors.map(e => e.msg).join(', ');
+        const errorMessages = result.errors.map((e) => e.msg).join(', ');
         throw new Error(errorMessages);
       }
-      throw new Error(result.error || result.message || 'Failed to create category');
+      throw new Error(
+        result.error || result.message || 'Failed to create category',
+      );
     }
 
     if (!result.data) {
@@ -173,10 +176,12 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       if (result.errors && result.errors.length > 0) {
-        const errorMessages = result.errors.map(e => e.msg).join(', ');
+        const errorMessages = result.errors.map((e) => e.msg).join(', ');
         throw new Error(errorMessages);
       }
-      throw new Error(result.error || result.message || 'Failed to update category');
+      throw new Error(
+        result.error || result.message || 'Failed to update category',
+      );
     }
 
     if (!result.data) {
@@ -200,7 +205,9 @@ class CategoriesService {
     const result: CategoryResponse<void> = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.error || result.message || 'Failed to delete category');
+      throw new Error(
+        result.error || result.message || 'Failed to delete category',
+      );
     }
   }
 
@@ -218,7 +225,9 @@ class CategoriesService {
     const result: CategoryResponse<Category> = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.error || result.message || 'Failed to toggle category');
+      throw new Error(
+        result.error || result.message || 'Failed to toggle category',
+      );
     }
 
     if (!result.data) {

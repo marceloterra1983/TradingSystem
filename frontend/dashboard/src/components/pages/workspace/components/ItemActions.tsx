@@ -25,7 +25,13 @@ export function ItemActions({ item, usingFallbackData }: ItemActionsProps) {
         deleteDisabled={usingFallbackData}
       />
 
-      {showView && <ViewItemDialog item={item} open={showView} onOpenChange={setShowView} />}
+      {showView && (
+        <ViewItemDialog
+          item={item}
+          open={showView}
+          onOpenChange={setShowView}
+        />
+      )}
       {showEdit && (
         <EditItemDialog
           item={item}

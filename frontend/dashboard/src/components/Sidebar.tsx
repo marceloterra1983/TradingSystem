@@ -29,18 +29,38 @@ const menuItems = [
 
 const systemLinks = [
   { id: 'home', label: 'Home', icon: Home, url: '/' },
-  { id: 'docs', label: 'Documentation', icon: BookOpen, url: '/documentation-hub' },
-  { id: 'data-capture', label: 'Data Capture', icon: Settings, url: '/data-capture-ui' },
+  {
+    id: 'docs',
+    label: 'Documentation',
+    icon: BookOpen,
+    url: '/documentation-hub',
+  },
+  {
+    id: 'data-capture',
+    label: 'Data Capture',
+    icon: Settings,
+    url: '/data-capture-ui',
+  },
   { id: 'database', label: 'Database', icon: Database, url: '/database-ui' },
-  { id: 'risk', label: 'Risk Management', icon: Shield, url: '/risk-management-ui' },
+  {
+    id: 'risk',
+    label: 'Risk Management',
+    icon: Shield,
+    url: '/risk-management-ui',
+  },
 ];
 
-export function Sidebar({ currentView, onViewChange, isOpen, onToggle }: SidebarProps) {
+export function Sidebar({
+  currentView,
+  onViewChange,
+  isOpen,
+  onToggle,
+}: SidebarProps) {
   return (
     <aside
       className={clsx(
         'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
-        isOpen ? 'w-64' : 'w-20'
+        isOpen ? 'w-64' : 'w-20',
       )}
     >
       {/* Logo / Header */}
@@ -68,7 +88,12 @@ export function Sidebar({ currentView, onViewChange, isOpen, onToggle }: Sidebar
 
       {/* Main Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        <div className={clsx('text-xs font-semibold text-gray-500 uppercase mb-2', !isOpen && 'text-center')}>
+        <div
+          className={clsx(
+            'text-xs font-semibold text-gray-500 uppercase mb-2',
+            !isOpen && 'text-center',
+          )}
+        >
           {isOpen ? 'Dashboard' : '━'}
         </div>
 
@@ -85,7 +110,7 @@ export function Sidebar({ currentView, onViewChange, isOpen, onToggle }: Sidebar
                 isActive
                   ? 'bg-cyan-50 text-cyan-700 font-medium'
                   : 'text-gray-700 hover:bg-gray-100',
-                !isOpen && 'justify-center'
+                !isOpen && 'justify-center',
               )}
               title={!isOpen ? item.label : undefined}
             >
@@ -98,7 +123,12 @@ export function Sidebar({ currentView, onViewChange, isOpen, onToggle }: Sidebar
 
       {/* System Links */}
       <div className="p-4 border-t border-gray-200">
-        <div className={clsx('text-xs font-semibold text-gray-500 uppercase mb-2', !isOpen && 'text-center')}>
+        <div
+          className={clsx(
+            'text-xs font-semibold text-gray-500 uppercase mb-2',
+            !isOpen && 'text-center',
+          )}
+        >
           {isOpen ? 'Systems' : '━'}
         </div>
 
@@ -112,7 +142,7 @@ export function Sidebar({ currentView, onViewChange, isOpen, onToggle }: Sidebar
                 href={link.url}
                 className={clsx(
                   'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                  !isOpen && 'justify-center'
+                  !isOpen && 'justify-center',
                 )}
                 title={!isOpen ? link.label : undefined}
               >

@@ -1,4 +1,10 @@
-import { Activity, BarChart3, Repeat, ShieldAlert, TrendingUp } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Repeat,
+  ShieldAlert,
+  TrendingUp,
+} from 'lucide-react';
 import {
   CollapsibleCard,
   CollapsibleCardContent,
@@ -15,7 +21,8 @@ interface MetricsOverviewProps {
 }
 
 function formatNumber(value: number | null | undefined) {
-  if (value === null || typeof value === 'undefined' || Number.isNaN(value)) return '—';
+  if (value === null || typeof value === 'undefined' || Number.isNaN(value))
+    return '—';
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
   return Math.round(value).toString();
@@ -75,7 +82,10 @@ export function MetricsOverview({ metrics, isLoading }: MetricsOverviewProps) {
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={`skeleton-card-${index}`} className="h-24 rounded-md" />
+              <Skeleton
+                key={`skeleton-card-${index}`}
+                className="h-24 rounded-md"
+              />
             ))}
           </div>
         ) : (
@@ -94,7 +104,9 @@ export function MetricsOverview({ metrics, isLoading }: MetricsOverviewProps) {
                 <div className="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
                   {value}
                 </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {description}
+                </p>
               </div>
             ))}
           </div>

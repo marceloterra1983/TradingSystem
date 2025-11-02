@@ -10,24 +10,30 @@
     "dev:stable": "node src/server.js",
     "kill-port": "lsof -ti:4005 | xargs kill -9 2>/dev/null || true",
     "lint": "eslint ./src --ext .js",
-    "test": "node --test",
+    "test": "node --test 'src/**/*.test.js' '__tests__/**/*.test.js'",
+    "test:unit": "node --test --test-name-pattern='parseSignal|GatewayPollingWorker'",
+    "test:integration": "node --test --test-name-pattern='TimescaleClient'",
+    "test:e2e": "node --test --test-name-pattern='E2E'",
+    "test:coverage": "node --test --experimental-test-coverage 'src/**/*.test.js' '__tests__/**/*.test.js'",
     "seed": "node scripts/seed-sample-data.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.1",
     "helmet": "^7.0.0",
     "input": "^1.0.1",
+    "opossum": "^5.0.1",
     "pg": "^8.16.3",
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2",
     "prom-client": "^15.1.3",
     "telegraf": "^4.15.0",
     "telegram": "^2.22.2",
-    "compression": "^1.7.4"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "eslint": "^8.56.0"

@@ -11,7 +11,7 @@
       "recursive": true,
       "enabled": true,
       "autoUpdate": true,
-      "name": "documentation",
+      "name": "documentation__nomic",
       "description": "Complete TradingSystem documentation (all content)",
       "directory": "/data/docs/content"
     },
@@ -31,7 +31,7 @@
       "recursive": true,
       "enabled": true,
       "autoUpdate": false,
-      "name": "tradingsystem",
+      "name": "tradingsystem_v2",
       "description": "TradingSystem complete codebase and documentation",
       "directory": "/data/tradingsystem"
     },

@@ -1,9 +1,5 @@
-import { useCallback, useMemo } from 'react';
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { collectionsService } from '../../services/collectionsService';
 import type {
   Collection,
@@ -65,8 +61,12 @@ const normalizeError = (err: unknown): string | null => {
 const apiBase =
   (import.meta.env.VITE_API_BASE_URL || '').trim() || 'http://localhost:3402';
 
-async function fetchStatus(collection?: string | null): Promise<RagStatusResponse | null> {
-  const querySuffix = collection ? `?collection=${encodeURIComponent(collection)}` : '';
+async function fetchStatus(
+  collection?: string | null,
+): Promise<RagStatusResponse | null> {
+  const querySuffix = collection
+    ? `?collection=${encodeURIComponent(collection)}`
+    : '';
   const response = await fetch(`${apiBase}/api/v1/rag/status${querySuffix}`);
   const raw = await response.text();
   if (!response.ok) {
@@ -159,7 +159,9 @@ export function useRagManager(options: UseRagManagerOptions = {}) {
   }, [queryClient, collectionsQuery, modelsQuery]);
 
   const refreshStatus = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.status(statusCollection) });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.status(statusCollection),
+    });
   }, [queryClient, statusCollection]);
 
   return {
@@ -180,7 +182,8 @@ export function useRagManager(options: UseRagManagerOptions = {}) {
     deleteCollection: deleteMutation.mutateAsync,
     ingestCollection: ingestMutation.mutateAsync,
     cleanOrphans: cleanOrphansMutation.mutateAsync,
-    resetCollectionsError: collectionsQuery.reset,
+    resetCollectionsError: () =>
+      queryClient.resetQueries({ queryKey: queryKeys.collections }),
     pendingOperation:
       createMutation.isPending ||
       updateMutation.isPending ||

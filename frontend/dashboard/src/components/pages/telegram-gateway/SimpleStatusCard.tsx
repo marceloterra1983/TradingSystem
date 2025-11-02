@@ -1,5 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { CheckCircle, AlertTriangle, XCircle, Activity, Database, Wifi } from 'lucide-react';
+import {
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Activity,
+  Database,
+  Wifi,
+} from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 
@@ -19,7 +26,13 @@ interface SimpleStatusCardProps {
   onRefresh: () => void;
 }
 
-export function SimpleStatusCard({ health, messages, session, isLoading, onRefresh }: SimpleStatusCardProps) {
+export function SimpleStatusCard({
+  health,
+  messages,
+  session,
+  isLoading,
+  onRefresh,
+}: SimpleStatusCardProps) {
   const gatewayStatus = health?.status || 'unknown';
   const telegramStatus = health?.telegram || 'unknown';
   const totalMessages = messages?.total || 0;
@@ -36,9 +49,9 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xl font-bold">Status do Sistema</CardTitle>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onRefresh}
           disabled={isLoading}
         >
@@ -64,7 +77,10 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
                 Status: <span className="font-medium">{gatewayStatus}</span>
               </p>
               <p className="text-muted-foreground">
-                Uptime: <span className="font-medium">{formatUptime(health?.uptime)}</span>
+                Uptime:{' '}
+                <span className="font-medium">
+                  {formatUptime(health?.uptime)}
+                </span>
               </p>
             </div>
           </div>
@@ -81,12 +97,20 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
             </div>
             <div className="space-y-1 text-sm">
               <p className="text-muted-foreground">
-                <Badge variant={telegramStatus === 'connected' ? 'default' : 'destructive'}>
-                  {telegramStatus === 'connected' ? 'Conectado' : 'Desconectado'}
+                <Badge
+                  variant={
+                    telegramStatus === 'connected' ? 'default' : 'destructive'
+                  }
+                >
+                  {telegramStatus === 'connected'
+                    ? 'Conectado'
+                    : 'Desconectado'}
                 </Badge>
               </p>
               <p className="text-xs text-muted-foreground">
-                {telegramStatus === 'connected' ? 'MTProto ativo' : 'Verificar autenticação'}
+                {telegramStatus === 'connected'
+                  ? 'MTProto ativo'
+                  : 'Verificar autenticação'}
               </p>
             </div>
           </div>
@@ -127,7 +151,9 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
         </div>
 
         {/* Alert if system not fully operational */}
-        {(gatewayStatus !== 'healthy' || telegramStatus !== 'connected' || !hasSession) && (
+        {(gatewayStatus !== 'healthy' ||
+          telegramStatus !== 'connected' ||
+          !hasSession) && (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
@@ -137,13 +163,16 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
                 </p>
                 <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
                   {gatewayStatus !== 'healthy' && (
-                    <li>• Gateway MTProto não está respondendo (porta 4006)</li>
+                    <li>• Gateway MTProto não está respondendo (porta 4010)</li>
                   )}
                   {telegramStatus !== 'connected' && (
                     <li>• Telegram desconectado - verificar autenticação</li>
                   )}
                   {!hasSession && (
-                    <li>• Arquivo de sessão ausente - executar authenticate-interactive.sh</li>
+                    <li>
+                      • Arquivo de sessão ausente - executar
+                      authenticate-interactive.sh
+                    </li>
                   )}
                 </ul>
               </div>
@@ -154,8 +183,3 @@ export function SimpleStatusCard({ health, messages, session, isLoading, onRefre
     </Card>
   );
 }
-
-
-
-
-

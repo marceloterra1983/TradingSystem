@@ -1,6 +1,6 @@
 /**
  * Ingestion Progress Modal
- * 
+ *
  * Real-time progress visualization for ingestion jobs
  * Connects to SSE stream and displays:
  * - Progress bar with percentage
@@ -8,18 +8,37 @@
  * - Live log stream
  * - Cancel button
  * - Estimated time remaining
- * 
+ *
  * @module components/pages/collections/IngestionProgressModal
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { X, CheckCircle2, XCircle, AlertTriangle, Loader2, FileText, Database, Clock, Zap } from 'lucide-react';
+import {
+  X,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Loader2,
+  FileText,
+  Database,
+  Clock,
+  Zap,
+} from 'lucide-react';
 import { Button } from '../../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../../ui/dialog';
 import { Progress } from '../../ui/progress';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Badge } from '../../ui/badge';
-import { useIngestionProgress, type IngestionLogEntry } from '../../../hooks/useIngestionProgress';
+import {
+  useIngestionProgress,
+  type IngestionLogEntry,
+} from '../../../hooks/useIngestionProgress';
 
 /**
  * Component Props
@@ -88,17 +107,25 @@ function getLevelStyle(level: IngestionLogEntry['level']): {
  */
 const LogEntry: React.FC<{ log: IngestionLogEntry }> = ({ log }) => {
   const { icon, colorClass } = getLevelStyle(log.level);
-  const time = new Date(log.timestamp).toLocaleTimeString('pt-BR');
+  const time = new Date(log.timestamp).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
   return (
-    <div className="flex items-start gap-2 py-1 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded">
+    <div className="flex items-start gap-2 py-1.5 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded transition-colors">
       <span className={`shrink-0 mt-0.5 ${colorClass}`}>{icon}</span>
-      <span className="text-slate-500 dark:text-slate-400 shrink-0 font-mono">{time}</span>
-      <span className="text-slate-700 dark:text-slate-300 flex-1">{log.message}</span>
+      <span className="text-slate-500 dark:text-slate-400 shrink-0 font-mono w-16">
+        {time}
+      </span>
+      <span className="text-slate-700 dark:text-slate-300 flex-1 leading-relaxed">
+        {log.message}
+      </span>
       {log.progress !== undefined && log.progress > 0 && (
-        <span className="text-slate-500 dark:text-slate-400 shrink-0 font-mono">
+        <Badge variant="outline" className="font-mono text-xs shrink-0">
           {log.progress}%
-        </span>
+        </Badge>
       )}
     </div>
   );
@@ -113,8 +140,16 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   jobId,
   collectionName,
 }) => {
-  const { progress, logs, status, isConnected, isComplete, error, cancel, clearLogs } =
-    useIngestionProgress(jobId);
+  const {
+    progress,
+    logs,
+    status,
+    isConnected,
+    isComplete,
+    error,
+    cancel,
+    clearLogs,
+  } = useIngestionProgress(jobId);
 
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = React.useState(true);
@@ -135,7 +170,9 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
     if (autoScroll && scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]',
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -145,7 +182,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   // Estimated time remaining
   const estimatedTimeRemaining = useMemo(() => {
     if (progress.progress === 0 || progress.progress === 100) return null;
-    
+
     const elapsedMs = elapsedTime;
     const progressDecimal = progress.progress / 100;
     const estimatedTotalMs = elapsedMs / progressDecimal;
@@ -160,7 +197,11 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
 
     switch (status) {
       case 'PENDING':
-        return <Badge variant="outline" className="text-blue-600">Aguardando</Badge>;
+        return (
+          <Badge variant="outline" className="text-blue-600">
+            Aguardando
+          </Badge>
+        );
       case 'PROCESSING':
         return <Badge className="bg-blue-600">Processando</Badge>;
       case 'COMPLETED':
@@ -168,7 +209,11 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
       case 'FAILED':
         return <Badge variant="destructive">Falhou</Badge>;
       case 'CANCELLED':
-        return <Badge variant="outline" className="text-amber-600">Cancelado</Badge>;
+        return (
+          <Badge variant="outline" className="text-amber-600">
+            Cancelado
+          </Badge>
+        );
     }
   }, [status]);
 
@@ -178,7 +223,9 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
 
     return (
       <div className="flex items-center gap-1.5">
-        <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+        <div
+          className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
+        />
         <span className="text-xs text-slate-500">
           {isConnected ? 'Conectado' : 'Desconectado'}
         </span>
@@ -187,7 +234,10 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   }, [isConnected, isComplete]);
 
   const handleClose = () => {
-    if (isComplete || confirm('A ingestão está em andamento. Deseja fechar mesmo assim?')) {
+    if (
+      isComplete ||
+      confirm('A ingestão está em andamento. Deseja fechar mesmo assim?')
+    ) {
       clearLogs();
       onClose();
     }
@@ -278,7 +328,9 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
                 <span className="text-xs text-slate-500">Restante</span>
               </div>
               <div className="font-mono text-lg font-semibold text-slate-700 dark:text-slate-200">
-                {estimatedTimeRemaining ? formatDuration(estimatedTimeRemaining) : '--'}
+                {estimatedTimeRemaining
+                  ? formatDuration(estimatedTimeRemaining)
+                  : '--'}
               </div>
             </div>
           </div>
@@ -330,7 +382,10 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
             </div>
           </div>
 
-          <ScrollArea className="h-64 border border-slate-200 dark:border-slate-800 rounded-lg" ref={scrollAreaRef}>
+          <ScrollArea
+            className="h-64 border border-slate-200 dark:border-slate-800 rounded-lg"
+            ref={scrollAreaRef}
+          >
             <div className="p-2">
               {logs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-slate-500">
@@ -363,7 +418,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
               </Button>
             )}
           </div>
-          
+
           <Button
             variant={isComplete ? 'default' : 'outline'}
             size="sm"
@@ -377,34 +432,4 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   );
 };
 
-/**
- * Log Entry Component
- */
-const LogEntry: React.FC<{ log: IngestionLogEntry }> = ({ log }) => {
-  const { icon, colorClass } = getLevelStyle(log.level);
-  const time = new Date(log.timestamp).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-
-  return (
-    <div className="flex items-start gap-2 py-1.5 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded transition-colors">
-      <span className={`shrink-0 mt-0.5 ${colorClass}`}>{icon}</span>
-      <span className="text-slate-500 dark:text-slate-400 shrink-0 font-mono w-16">
-        {time}
-      </span>
-      <span className="text-slate-700 dark:text-slate-300 flex-1 leading-relaxed">
-        {log.message}
-      </span>
-      {log.progress !== undefined && log.progress > 0 && (
-        <Badge variant="outline" className="font-mono text-xs shrink-0">
-          {log.progress}%
-        </Badge>
-      )}
-    </div>
-  );
-};
-
 export default IngestionProgressModal;
-

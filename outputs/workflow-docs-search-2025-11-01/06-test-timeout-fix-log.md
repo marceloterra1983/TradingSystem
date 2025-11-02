@@ -69,7 +69,8 @@ Object.defineProperty(global, 'localStorage', {
 1. ✅ Added try-finally blocks to ensure `vi.useRealTimers()` cleanup
 2. ✅ Replaced `vi.advanceTimersByTime()` with async version
 3. ✅ Added `await vi.runAllTimersAsync()` after timer advancement
-4. ⏳ Increased global test timeout from 5s to 30s in `vitest.config.ts`
+4. ❌ Increased global test timeout from 5s to 30s in `vitest.config.ts` (didn't work)
+5. ✅ Added `{ timeout: 30000 }` to each individual test declaration (final fix)
 
 **Alternative Considered (Not Used)**:
 - Removing fake timers from tests that don't specifically test debounce behavior

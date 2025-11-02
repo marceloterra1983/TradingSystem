@@ -1,11 +1,14 @@
 ---
 title: "ADR-001: Redis Caching Strategy for Collection Stats"
 sidebar_position: 1
+description: "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load"
 tags: [adr, rag-services, caching, performance]
 domain: rag-services
 type: adr
 summary: "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load"
 status: accepted
+owner: ArchitectureGuild
+lastReviewed: "2025-11-01"
 last_review: "2025-11-01"
 ---
 
@@ -14,7 +17,7 @@ last_review: "2025-11-01"
 **Status**: Accepted
 **Date**: 2025-11-01
 **Deciders**: Development Team
-**Technical Story**: [RAG-CACHE-IMPLEMENTATION-2025-11-01.md](../../../RAG-CACHE-IMPLEMENTATION-2025-11-01.md)
+**Technical Story**: _Implementation details tracked in project commits_
 
 ## Context and Problem Statement
 
@@ -207,8 +210,8 @@ real    0m0.008s  # 8ms (60% faster)
 - ✅ Adheres to **Single Responsibility** (dedicated cache service)
 
 **Documentation**:
-- [RAG-CACHE-IMPLEMENTATION-2025-11-01.md](../../../RAG-CACHE-IMPLEMENTATION-2025-11-01.md) - Implementation details
-- [RAG-CORRECTIONS-VALIDATION-2025-11-01.md](../../../RAG-CORRECTIONS-VALIDATION-2025-11-01.md) - Validation tests
+- Implementation details: `tools/rag-services/src/services/cacheService.ts`
+- Validation tests: `tools/rag-services/tests/cache/` (planned)
 
 ## Future Evolution
 
@@ -233,7 +236,7 @@ real    0m0.008s  # 8ms (60% faster)
 
 **Related ADRs**:
 - [ADR-002: File Watcher Auto-Ingestion](./ADR-002-file-watcher-auto-ingestion.md)
-- [ADR-003: Collection Stats Performance Optimization](./ADR-003-collection-stats-optimization.md)
+- ADR-003: Collection Stats Performance Optimization (planned)
 
 **Change Log**:
 - 2025-11-01: Initial decision - Redis caching with memory fallback

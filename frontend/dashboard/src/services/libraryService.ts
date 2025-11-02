@@ -17,7 +17,10 @@ const itemsEndpoint = (suffix = '') => {
     return withSuffix(trimmedBase.replace(/\/ideas$/i, '/items'));
   }
 
-  if (/\/api\/workspace$/i.test(trimmedBase) || /\/workspace$/i.test(trimmedBase)) {
+  if (
+    /\/api\/workspace$/i.test(trimmedBase) ||
+    /\/workspace$/i.test(trimmedBase)
+  ) {
     return withSuffix(`${trimmedBase}/items`);
   }
 
@@ -66,7 +69,9 @@ export const libraryService = {
   /**
    * Create a new item
    */
-  async createItem(itemData: Omit<Item, 'id' | 'createdAt' | 'status'>): Promise<Item> {
+  async createItem(
+    itemData: Omit<Item, 'id' | 'createdAt' | 'status'>,
+  ): Promise<Item> {
     try {
       const response = await fetch(itemsEndpoint(), {
         method: 'POST',
@@ -78,7 +83,9 @@ export const libraryService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`,
+        );
       }
 
       const result: ApiResponse<Item> = await response.json();
@@ -95,7 +102,10 @@ export const libraryService = {
   /**
    * Update an existing item
    */
-  async updateItem(id: string, itemData: Partial<Omit<Item, 'id' | 'createdAt'>>): Promise<Item> {
+  async updateItem(
+    id: string,
+    itemData: Partial<Omit<Item, 'id' | 'createdAt'>>,
+  ): Promise<Item> {
     try {
       const response = await fetch(itemsEndpoint(`/${id}`), {
         method: 'PUT',
@@ -107,7 +117,9 @@ export const libraryService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`,
+        );
       }
 
       const result: ApiResponse<Item> = await response.json();
@@ -132,7 +144,9 @@ export const libraryService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`,
+        );
       }
     } catch (error) {
       console.error('Error deleting item:', error);

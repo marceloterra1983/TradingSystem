@@ -1,4 +1,10 @@
-import { ExternalLink, BookOpen, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import {
+  ExternalLink,
+  BookOpen,
+  FileText,
+  CheckCircle2,
+  Sparkles,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { apiConfig } from '../../config/api';
 
@@ -9,7 +15,7 @@ import { apiConfig } from '../../config/api';
  */
 export function DocsLinkSection() {
   const handleOpenDocs = () => {
-    window.open(apiConfig.docsUrl, '_blank', "noopener,noreferrer");
+    window.open(apiConfig.docsUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -25,7 +31,8 @@ export function DocsLinkSection() {
               Documentação Técnica (Docusaurus)
             </h3>
             <p className="text-blue-700 dark:text-blue-300 text-base leading-relaxed">
-              Acesse o hub de conhecimento com MDX + React, navegação versionada, i18n e componentes interativos.
+              Acesse o hub de conhecimento com MDX + React, navegação
+              versionada, i18n e componentes interativos.
             </p>
           </div>
         </div>
@@ -36,30 +43,39 @@ export function DocsLinkSection() {
         <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="flex items-center gap-2 mb-2">
             <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h4 className="font-semibold text-slate-900 dark:text-slate-100">Conteúdo</h4>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+              Conteúdo
+            </h4>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Arquitetura, guias, APIs, runbooks, PRDs, templates e glossário centralizado.
+            Arquitetura, guias, APIs, runbooks, PRDs, templates e glossário
+            centralizado.
           </p>
         </div>
 
         <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-            <h4 className="font-semibold text-slate-900 dark:text-slate-100">Dev Experience</h4>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+              Dev Experience
+            </h4>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Hot reload com Node 20+, navegação no `sidebars.ts` e metadados validados em CI.
+            Hot reload com Node 20+, navegação no `sidebars.ts` e metadados
+            validados em CI.
           </p>
         </div>
 
         <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <h4 className="font-semibold text-slate-900 dark:text-slate-100">MDX + React</h4>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+              MDX + React
+            </h4>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Componentes reutilizáveis para tabs, admonitions, diagramas e integrações com o design system.
+            Componentes reutilizáveis para tabs, admonitions, diagramas e
+            integrações com o design system.
           </p>
         </div>
       </div>
@@ -76,7 +92,8 @@ export function DocsLinkSection() {
               Abrir documentação Docusaurus
             </h3>
             <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-              A documentação está disponível através do Nginx Reverse Proxy em modo unificado.
+              A documentação está disponível através do Nginx Reverse Proxy em
+              modo unificado.
             </p>
           </div>
 
@@ -91,7 +108,8 @@ export function DocsLinkSection() {
 
           <div className="pt-4 border-t border-slate-200 dark:border-slate-700 mt-6">
             <p className="text-sm text-slate-500 dark:text-slate-500">
-              URL: <code className="px-2 py-1 bg-slate-100 dark:bg-slate-900 rounded text-blue-600 dark:text-blue-400 font-mono text-xs">
+              URL:{' '}
+              <code className="px-2 py-1 bg-slate-100 dark:bg-slate-900 rounded text-blue-600 dark:text-blue-400 font-mono text-xs">
                 {apiConfig.docsUrl}
               </code>
             </p>
@@ -159,8 +177,16 @@ export function DocsLinkSection() {
       <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4">
         <div className="flex gap-3">
           <div className="flex-shrink-0">
-            <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-amber-600 dark:text-amber-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <div>
@@ -168,7 +194,9 @@ export function DocsLinkSection() {
               Nota importante
             </h4>
             <p className="text-sm text-amber-700 dark:text-amber-300">
-              Garanta que o Docusaurus esteja rodando localmente com o servidor Nginx em execução para que o domínio unificado funcione corretamente.
+              Garanta que o Docusaurus esteja rodando localmente com o servidor
+              Nginx em execução para que o domínio unificado funcione
+              corretamente.
             </p>
           </div>
         </div>

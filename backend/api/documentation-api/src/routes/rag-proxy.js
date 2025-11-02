@@ -26,12 +26,17 @@ router.get('/search', asyncHandler(async (req, res) => {
 
 /**
  * POST /api/v1/rag/query
- * Question answering with context retrieval
+ * Semantic search using RAG Collections Service (NEW - preferred method)
  */
 router.post('/query', asyncHandler(async (req, res) => {
-  const { query, max_results, collection } = req.body || {};
+  const { query, limit, collection, score_threshold } = req.body || {};
 
-  const result = await ragProxyService.query(query, max_results, collection || null);
+  const result = await ragProxyService.queryCollectionsService(query, {
+    limit: limit || req.body.max_results,
+    collection,
+    score_threshold,
+  });
+  
   res.json(result);
 }));
 

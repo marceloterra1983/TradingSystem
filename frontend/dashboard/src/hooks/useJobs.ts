@@ -1,8 +1,10 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Job, JobStatistics, StatisticsFilters } from '../types/jobs';
 
-const RAW_JOBS_API_BASE =
-  ((import.meta.env as Record<string, string | undefined>).VITE_JOBS_API_URL ?? '').trim();
+const RAW_JOBS_API_BASE = (
+  (import.meta.env as Record<string, string | undefined>).VITE_JOBS_API_URL ??
+  ''
+).trim();
 const JOBS_API_BASE = RAW_JOBS_API_BASE.replace(/\/+$/, '');
 const HAS_JOBS_API = JOBS_API_BASE.length > 0;
 
@@ -56,7 +58,9 @@ const toStatistics = (payload: unknown): JobStatistics => {
     totals: {
       jobs: base.totals?.jobs ?? 0,
       successRate:
-        typeof base.totals?.successRate === 'number' ? base.totals.successRate : 0,
+        typeof base.totals?.successRate === 'number'
+          ? base.totals.successRate
+          : 0,
       templates: base.totals?.templates ?? 0,
     },
     byStatus: { ...(base.byStatus ?? {}) },
@@ -104,7 +108,9 @@ async function fetchJson<T>(input: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-async function loadStatistics(filters: StatisticsFilters): Promise<JobStatistics> {
+async function loadStatistics(
+  filters: StatisticsFilters,
+): Promise<JobStatistics> {
   if (!HAS_JOBS_API) {
     return DEFAULT_STATISTICS;
   }
@@ -113,9 +119,12 @@ async function loadStatistics(filters: StatisticsFilters): Promise<JobStatistics
     const url = new URL(`${JOBS_API_BASE}/statistics`);
     if (filters.dateFrom) url.searchParams.set('dateFrom', filters.dateFrom);
     if (filters.dateTo) url.searchParams.set('dateTo', filters.dateTo);
-    if (filters.templateId) url.searchParams.set('templateId', filters.templateId);
+    if (filters.templateId)
+      url.searchParams.set('templateId', filters.templateId);
     if (filters.status && filters.status.length > 0) {
-      filters.status.forEach((status) => url.searchParams.append('status', status));
+      filters.status.forEach((status) =>
+        url.searchParams.append('status', status),
+      );
     }
 
     const payload = await fetchJson<ApiEnvelope<JobStatistics>>(url.toString());

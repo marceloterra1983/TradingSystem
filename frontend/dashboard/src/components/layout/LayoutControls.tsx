@@ -1,7 +1,16 @@
-import { Columns2, Columns3, Columns4, RotateCcw, ChevronsDownUp, ChevronsUpDown, Rows } from 'lucide-react';
+import {
+  Columns2,
+  Columns3,
+  Columns4,
+  RotateCcw,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Rows,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { ColumnCount } from '../../hooks/useCustomLayout';
+import { Button } from '../ui/button';
 
 /**
  * Layout Controls Component
@@ -21,7 +30,11 @@ interface LayoutControlsProps {
   allCollapsed?: boolean;
 }
 
-const COLUMN_OPTIONS: { value: ColumnCount; icon: LucideIcon; label: string }[] = [
+const COLUMN_OPTIONS: {
+  value: ColumnCount;
+  icon: LucideIcon;
+  label: string;
+}[] = [
   { value: 1, icon: Rows, label: '1 Coluna' },
   { value: 2, icon: Columns2, label: '2 Colunas' },
   { value: 3, icon: Columns3, label: '3 Colunas' },
@@ -33,68 +46,79 @@ export function LayoutControls({
   onColumnsChange,
   onReset,
   onToggleCollapseAll,
-  allCollapsed = false
+  allCollapsed = false,
 }: LayoutControlsProps) {
   return (
     <div className="flex items-center justify-end gap-2">
-      {/* Collapse/Expand All Button - First position (highlighted in yellow) */}
+      {/* Collapse/Expand All */}
       {onToggleCollapseAll && (
-        <button
+        <Button
           onClick={onToggleCollapseAll}
+          type="button"
+          variant="outline"
+          size="icon"
           className={cn(
-            'p-1.5 rounded transition-all',
-            'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-            'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700',
-            'shadow-sm'
+            'h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300',
+            'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
           )}
-          title={allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'}
+          title={
+            allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'
+          }
+          aria-pressed={allCollapsed}
         >
           {allCollapsed ? (
             <ChevronsDownUp className="h-4 w-4" />
           ) : (
             <ChevronsUpDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
       )}
 
-      {/* Column Selector - Subtle Buttons */}
-      <div className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
-        {COLUMN_OPTIONS.map((option) => {
+      {/* Column Selector */}
+      <div className="flex items-center overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        {COLUMN_OPTIONS.map((option, index) => {
           const Icon = option.icon;
           const isActive = columns === option.value;
 
           return (
-            <button
+            <Button
               key={option.value}
               onClick={() => onColumnsChange(option.value)}
+              type="button"
+              variant="ghost"
+              size="icon"
               className={cn(
-                'p-1.5 rounded transition-all',
+                'h-9 w-9 rounded-none border-none transition-colors',
+                index === 0 && 'rounded-l-md',
+                index === COLUMN_OPTIONS.length - 1 && 'rounded-r-md',
                 isActive
-                  ? 'bg-cyan-500 text-white shadow-sm dark:bg-cyan-600'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                  ? 'bg-cyan-600 text-white hover:bg-cyan-500 focus:ring-cyan-500 dark:bg-cyan-600 dark:hover:bg-cyan-500'
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
               )}
               title={option.label}
+              aria-pressed={isActive}
             >
               <Icon className="h-4 w-4" />
-            </button>
+            </Button>
           );
         })}
       </div>
 
-      {/* Reset Button - Subtle */}
+      {/* Reset Layout */}
       {onReset && (
-        <button
+        <Button
           onClick={onReset}
+          type="button"
+          variant="outline"
+          size="icon"
           className={cn(
-            'p-1.5 rounded transition-all',
-            'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-            'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700',
-            'shadow-sm'
+            'h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300',
+            'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
           )}
           title="Resetar layout"
         >
           <RotateCcw className="h-4 w-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

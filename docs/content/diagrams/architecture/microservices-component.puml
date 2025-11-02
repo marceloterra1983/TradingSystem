@@ -1,0 +1,111 @@
+@startuml Microservices Component Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title TradingSystem - Microservices Internal Structure (Clean Architecture)
+
+Container_Boundary(workspace_api, "Workspace API") {
+    Component(workspace_routes, "Routes", "Express Router", "HTTP endpoints: /api/items, /api/categories")
+    Component(workspace_middleware, "Middleware", "Express Middleware", "Auth, CORS, rate limiting, validation")
+    Component(workspace_service, "Service Layer", "Business Logic", "Item creation, validation, category management")
+    Component(workspace_repo, "Repository", "Data Access", "TimescaleDB queries, transaction management")
+    ComponentDb(workspace_db, "DB Client", "pg.Pool", "Connection pool to TimescaleDB")
+}
+
+Container_Boundary(docs_api, "Documentation API") {
+    Component(docs_routes, "Routes", "Express Router", "Search, semantic, RAG proxy, collections")
+    Component(docs_middleware, "Middleware", "Express Middleware", "Auth, CORS, input sanitization")
+    Component(docs_search_service, "SearchService", "FlexSearch", "Full-text search across markdown")
+    Component(docs_rag_proxy, "RagProxyService", "RAG Integration", "Proxies queries to LlamaIndex, mints JWT")
+    Component(docs_collection_service, "CollectionService", "Collection Mgmt", "CRUD operations for RAG collections")
+    Component(docs_repo, "Repository", "Data Access", "File system + TimescaleDB metadata")
+}
+
+Container_Boundary(rag_collections, "RAG Collections Service") {
+    Component(rag_routes, "Routes", "Express Router", "Collections, directories, ingestion")
+    Component(rag_middleware, "Middleware", "Express Middleware", "Inter-service auth, validation")
+    Component(rag_collection_manager, "CollectionManager", "Business Logic", "Collection CRUD, file watching")
+    Component(rag_ingestion_service, "IngestionService", "Batch Processing", "Triggers LlamaIndex ingestion jobs")
+    Component(rag_directory_service, "DirectoryService", "File System", "Scans directories, filters files")
+    ComponentDb(rag_redis, "Redis Client", "ioredis", "Caching, job queues")
+}
+
+Container_Boundary(shared_layer, "Shared Libraries") {
+    Component(shared_logger, "Logger", "Pino", "Structured logging with correlation IDs")
+    Component(shared_middleware, "Middleware", "Express", "CORS, Helmet, rate limiting, compression")
+    Component(shared_auth, "Auth Utilities", "JWT", "Token generation, validation")
+    Component(shared_metrics, "Metrics", "Prometheus", "Request counters, histograms")
+}
+
+' External dependencies
+ContainerDb(timescaledb, "TimescaleDB", "PostgreSQL")
+ContainerDb(qdrant, "Qdrant", "Vector DB")
+Container(llamaindex_query, "LlamaIndex Query", "FastAPI")
+Container(llamaindex_ingest, "LlamaIndex Ingestion", "FastAPI")
+
+' Workspace API flow
+Rel(workspace_routes, workspace_middleware, "Uses")
+Rel(workspace_routes, workspace_service, "Calls")
+Rel(workspace_service, workspace_repo, "Calls")
+Rel(workspace_repo, workspace_db, "Uses")
+Rel(workspace_db, timescaledb, "SQL")
+Rel(workspace_routes, shared_logger, "Logs")
+Rel(workspace_middleware, shared_middleware, "Extends")
+
+' Documentation API flow
+Rel(docs_routes, docs_middleware, "Uses")
+Rel(docs_routes, docs_search_service, "Calls")
+Rel(docs_routes, docs_rag_proxy, "Calls")
+Rel(docs_routes, docs_collection_service, "Calls")
+Rel(docs_rag_proxy, llamaindex_query, "HTTP + JWT")
+Rel(docs_collection_service, docs_repo, "Calls")
+Rel(docs_repo, timescaledb, "Metadata")
+Rel(docs_routes, shared_logger, "Logs")
+
+' RAG Collections flow
+Rel(rag_routes, rag_middleware, "Uses")
+Rel(rag_routes, rag_collection_manager, "Calls")
+Rel(rag_collection_manager, rag_ingestion_service, "Triggers")
+Rel(rag_collection_manager, rag_directory_service, "Scans")
+Rel(rag_ingestion_service, llamaindex_ingest, "HTTP + JWT")
+Rel(rag_ingestion_service, qdrant, "HTTP")
+Rel(rag_collection_manager, rag_redis, "Cache")
+Rel(rag_routes, shared_logger, "Logs")
+Rel(rag_routes, shared_metrics, "Records")
+
+note right of workspace_service
+  **Clean Architecture Pattern**
+  • Business logic isolated
+  • No direct DB access
+  • Testable without infrastructure
+  • Domain-driven design
+end note
+
+note right of docs_rag_proxy
+  **Proxy Pattern**
+  • Hides LlamaIndex complexity
+  • Centralizes JWT minting
+  • Handles retries & timeouts
+  • Circuit breaker (planned)
+end note
+
+note right of rag_collection_manager
+  **Service Layer Pattern**
+  • Orchestrates operations
+  • Manages transactions
+  • Enforces business rules
+  • Delegates to repositories
+end note
+
+note bottom
+  **Architecture Patterns:**
+  ✅ Layered Architecture - Routes → Services → Repositories
+  ✅ Dependency Injection - Services receive dependencies
+  ✅ Repository Pattern - Data access abstraction
+  ✅ Service Layer - Business logic isolation
+  ✅ Proxy Pattern - External service integration
+  ⚠️ Missing: Circuit Breaker, Saga Pattern, CQRS
+end note
+
+@enduml

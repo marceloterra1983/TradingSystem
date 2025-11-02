@@ -58,7 +58,8 @@ const unifiedConfig: ApiConfig = {
   serviceLauncherApi: `${
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
   }/api/launcher`,
-  telegramGatewayApi: import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local',
+  telegramGatewayApi:
+    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local',
   firecrawlProxyApi: `${
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
   }/api/firecrawl`,
@@ -75,7 +76,7 @@ const unifiedConfig: ApiConfig = {
       }/questdb-console`,
       'http://localhost:9000',
       'http://localhost:8813',
-      'http://localhost:9002'
+      'http://localhost:9002',
     ) || 'http://localhost:9000',
   questdbUiUrl:
     pickFirst(
@@ -86,7 +87,7 @@ const unifiedConfig: ApiConfig = {
       }/questdb-ui`,
       'http://localhost:9010',
       'http://localhost:8813',
-      'http://localhost:9009'
+      'http://localhost:9009',
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
@@ -98,13 +99,11 @@ const directConfig: ApiConfig = {
   baseUrl: '',
   libraryApi:
     resolveEnv('VITE_WORKSPACE_API_URL') || 'http://localhost:3200/api',
-  tpCapitalApi:
-    import.meta.env.VITE_TP_CAPITAL_API_URL || '/api/tp-capital',
+  tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || '/api/tp-capital',
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || '/api/docs',
   serviceLauncherApi:
     import.meta.env.VITE_SERVICE_LAUNCHER_API_URL || '/api/launcher',
-  telegramGatewayApi:
-    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || '',
+  telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || '',
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || 'http://localhost:3600',
   docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs', // Proxied through Vite to NGINX (localhost:3400)
@@ -118,14 +117,14 @@ const directConfig: ApiConfig = {
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
       'http://localhost:9000',
       'http://localhost:8813',
-      'http://localhost:9002'
+      'http://localhost:9002',
     ) || 'http://localhost:9000',
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
       'http://localhost:9010',
       'http://localhost:8813',
-      'http://localhost:9009'
+      'http://localhost:9009',
     ) || 'http://localhost:9010',
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',

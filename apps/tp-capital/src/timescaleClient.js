@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { config } from './config.js';
 import { logger } from './logger.js';
+import { createTimescaleCircuitBreaker, withRetry } from './resilience/circuitBreaker.js';
 
 const { Pool } = pg;
 
@@ -119,16 +120,27 @@ class TimescaleClient {
    * @returns {Promise<pg.QueryResult>}
    */
   async query(sql, params = []) {
-    try {
-      return await this.pool.query(sql, params);
-    } catch (error) {
-      logger.error({
-        err: error,
-        sql: sql.substring(0, 100),
-        params
-      }, 'TP Capital DB query error');
-      throw error;
-    }
+    // Wrap query with retry logic for transient errors
+    return withRetry(
+      async () => {
+        try {
+          return await this.pool.query(sql, params);
+        } catch (error) {
+          logger.error({
+            err: error,
+            sql: sql.substring(0, 100),
+            params,
+            code: error.code,
+          }, 'TP Capital DB query error');
+          throw error;
+        }
+      },
+      {
+        maxRetries: 2,
+        initialDelay: 500,
+        retryableErrors: ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ECONNRESET'],
+      }
+    );
   }
 
   async healthcheck() {
@@ -303,7 +315,7 @@ class TimescaleClient {
         SELECT 
           id, ts, channel, signal_type, asset, buy_min, buy_max, 
           target_1, target_2, target_final, stop, raw_message, 
-          source, created_at as ingested_at, created_at, updated_at
+          source, ingested_at, created_at, updated_at
         FROM "${this.schema}".tp_capital_signals
         WHERE 1=1
       `;

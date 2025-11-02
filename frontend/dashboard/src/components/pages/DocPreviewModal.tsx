@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
 import documentationService from '../../services/documentationService';
+
+// Lazy load markdown rendering to reduce bundle size
+const MarkdownPreview = lazy(() =>
+  import('../ui/MarkdownPreview').then((mod) => ({
+    default: mod.MarkdownPreview,
+  })),
+);
 
 interface DocPreviewModalProps {
   isOpen: boolean;
@@ -17,7 +21,13 @@ interface DocPreviewModalProps {
  * Modal overlay for previewing Docusaurus documents in-page
  * Opens as overlay on current page instead of new window
  */
-export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPreviewModalProps) {
+export function DocPreviewModal({
+  isOpen,
+  onClose,
+  title,
+  url,
+  docPath,
+}: DocPreviewModalProps) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,12 +73,17 @@ export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPre
       try {
         const raw = await documentationService.getDocContent(docPath);
         if (!cancelled) {
-          const stripped = raw.replace(/^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u, '');
+          const stripped = raw.replace(
+            /^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u,
+            '',
+          );
           setContent(stripped.trim());
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Falha ao carregar documento');
+          setError(
+            err instanceof Error ? err.message : 'Falha ao carregar documento',
+          );
           setContent('');
         }
       } finally {
@@ -102,9 +117,7 @@ export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPre
         <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-sky-500 to-sky-600 dark:from-sky-600 dark:to-sky-700 text-white">
           <div className="flex-1 min-w-0">
             <h2 className="text-xl font-semibold truncate">{title}</h2>
-            <p className="text-sm opacity-90 truncate mt-1">
-              {url}
-            </p>
+            <p className="text-sm opacity-90 truncate mt-1">{url}</p>
           </div>
           <button
             onClick={onClose}
@@ -129,15 +142,26 @@ export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPre
                 <p className="text-sm text-slate-600 dark:text-slate-300">
                   Não foi possível carregar a pré-visualização.
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{error}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {error}
+                </p>
               </div>
             </div>
           ) : (
             <div className="max-h-full overflow-y-auto">
               <div className="prose prose-slate max-w-4xl p-8 dark:prose-invert prose-headings:scroll-mt-20">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                  {content}
-                </ReactMarkdown>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center gap-2 py-8">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-slate-500">
+                        Carregando preview...
+                      </span>
+                    </div>
+                  }
+                >
+                  <MarkdownPreview content={content} />
+                </Suspense>
               </div>
             </div>
           )}
@@ -146,7 +170,11 @@ export function DocPreviewModal({ isOpen, onClose, title, url, docPath }: DocPre
         {/* Footer */}
         <div className="px-6 py-3 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-sm">
           <div className="text-slate-600 dark:text-slate-400">
-            Pressione <kbd className="px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 font-mono text-xs">ESC</kbd> ou clique fora para fechar
+            Pressione{' '}
+            <kbd className="px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 font-mono text-xs">
+              ESC
+            </kbd>{' '}
+            ou clique fora para fechar
           </div>
           <a
             href={url}

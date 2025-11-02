@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
 import { Button } from '../../../ui/button';
 import { useWorkspaceStore } from '../store/useWorkspaceStore';
 import type { Item } from '../types/workspace.types';
@@ -11,7 +18,12 @@ interface DeleteItemDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function DeleteItemDialog({ item, usingFallbackData, open, onOpenChange }: DeleteItemDialogProps) {
+export function DeleteItemDialog({
+  item,
+  usingFallbackData,
+  open,
+  onOpenChange,
+}: DeleteItemDialogProps) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const deleteItem = useWorkspaceStore((state) => state.deleteItem);
@@ -43,12 +55,17 @@ export function DeleteItemDialog({ item, usingFallbackData, open, onOpenChange }
         <DialogHeader>
           <DialogTitle>Confirmar Exclusão</DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja deletar este item? Esta ação não pode ser desfeita.
+            Tem certeza que deseja deletar este item? Esta ação não pode ser
+            desfeita.
           </DialogDescription>
         </DialogHeader>
         <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-4">
-          <p className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">{item.title}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{item.description}</p>
+          <p className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">
+            {item.title}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            {item.description}
+          </p>
         </div>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-400 px-4 py-3 rounded">
@@ -56,7 +73,12 @@ export function DeleteItemDialog({ item, usingFallbackData, open, onOpenChange }
           </div>
         )}
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={deleting}
+          >
             Cancelar
           </Button>
           <Button

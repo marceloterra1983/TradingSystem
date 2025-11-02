@@ -13,7 +13,7 @@ import type {
   Collection,
   CreateCollectionRequest,
   UpdateCollectionRequest,
-  EmbeddingModel
+  EmbeddingModel,
 } from '../../types/collections';
 
 interface UseCollectionsState {
@@ -29,7 +29,10 @@ interface UseCollectionsReturn extends UseCollectionsState {
   refreshModels: () => Promise<void>;
   getCollection: (name: string) => Promise<Collection | null>;
   createCollection: (request: CreateCollectionRequest) => Promise<Collection>;
-  updateCollection: (name: string, updates: UpdateCollectionRequest) => Promise<Collection>;
+  updateCollection: (
+    name: string,
+    updates: UpdateCollectionRequest,
+  ) => Promise<Collection>;
   deleteCollection: (name: string) => Promise<void>;
   cloneCollection: (name: string, newName: string) => Promise<Collection>;
   ingestCollection: (name: string) => Promise<void>;
@@ -43,11 +46,13 @@ interface UseCollectionsOptions {
   loadModels?: boolean;
 }
 
-export function useCollections(options: UseCollectionsOptions = {}): UseCollectionsReturn {
+export function useCollections(
+  options: UseCollectionsOptions = {},
+): UseCollectionsReturn {
   const {
     autoRefresh = false,
     refreshInterval = 15000,
-    loadModels = true
+    loadModels = true,
   } = options;
 
   const [state, setState] = useState<UseCollectionsState>({
@@ -55,7 +60,7 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
     models: [],
     isLoading: true,
     error: null,
-    isRefreshing: false
+    isRefreshing: false,
   });
 
   const mountedRef = useRef(true);
@@ -66,24 +71,32 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
   const functionsRef = useRef({
     refreshCollections: async () => {
       try {
-        setState(prev => ({ ...prev, isRefreshing: true, error: null }));
+        setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
         console.log('🔄 Fetching collections with useCache=false...');
         const collections = await collectionsService.getCollections(false); // Force fresh data
 
         if (mountedRef.current) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             collections,
             isRefreshing: false,
-            isLoading: false
+            isLoading: false,
           }));
           console.log('✓ Collections refreshed:', collections.length);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch collections';
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to fetch collections';
         console.error('Error refreshing collections:', error);
         if (mountedRef.current) {
-          setState(prev => ({ ...prev, error: errorMessage, isLoading: false, isRefreshing: false }));
+          setState((prev) => ({
+            ...prev,
+            error: errorMessage,
+            isLoading: false,
+            isRefreshing: false,
+          }));
         }
       }
     },
@@ -100,7 +113,7 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
         console.log('🔵 [useCollections] Models fetched:', models);
 
         if (mountedRef.current) {
-          setState(prev => ({ ...prev, models }));
+          setState((prev) => ({ ...prev, models }));
           console.log('🔵 [useCollections] Models state updated');
         }
       } catch (error) {
@@ -117,47 +130,67 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
       }
     },
 
-    createCollection: async (request: CreateCollectionRequest): Promise<Collection> => {
+    createCollection: async (
+      request: CreateCollectionRequest,
+    ): Promise<Collection> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
+        setState((prev) => ({ ...prev, error: null }));
         const collection = await collectionsService.createCollection(request);
         await functionsRef.current.refreshCollections();
         return collection;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create collection';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to create collection';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
-    updateCollection: async (name: string, updates: UpdateCollectionRequest): Promise<Collection> => {
+    updateCollection: async (
+      name: string,
+      updates: UpdateCollectionRequest,
+    ): Promise<Collection> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
-        const collection = await collectionsService.updateCollection(name, updates);
+        setState((prev) => ({ ...prev, error: null }));
+        const collection = await collectionsService.updateCollection(
+          name,
+          updates,
+        );
         await functionsRef.current.refreshCollections();
         return collection;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to update collection';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to update collection';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
     deleteCollection: async (name: string): Promise<void> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
+        setState((prev) => ({ ...prev, error: null }));
         await collectionsService.deleteCollection(name);
         await functionsRef.current.refreshCollections();
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to delete collection';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete collection';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
-    cloneCollection: async (name: string, newName: string): Promise<Collection> => {
+    cloneCollection: async (
+      name: string,
+      newName: string,
+    ): Promise<Collection> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
+        setState((prev) => ({ ...prev, error: null }));
         const original = await collectionsService.getCollection(name);
 
         if (!original) {
@@ -174,46 +207,52 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
           fileTypes: original.fileTypes,
           recursive: original.recursive,
           enabled: original.enabled,
-          autoUpdate: original.autoUpdate
+          autoUpdate: original.autoUpdate,
         };
 
-        const clonedCollection = await collectionsService.createCollection(cloneRequest);
+        const clonedCollection =
+          await collectionsService.createCollection(cloneRequest);
         await functionsRef.current.refreshCollections();
         return clonedCollection;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to clone collection';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to clone collection';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
     ingestCollection: async (name: string): Promise<void> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
+        setState((prev) => ({ ...prev, error: null }));
         await collectionsService.ingestCollection(name);
         setTimeout(() => functionsRef.current.refreshCollections(), 2000);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to trigger ingestion';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to trigger ingestion';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
     cleanOrphans: async (name: string): Promise<void> => {
       try {
-        setState(prev => ({ ...prev, error: null }));
+        setState((prev) => ({ ...prev, error: null }));
         await collectionsService.cleanOrphans(name);
         setTimeout(() => functionsRef.current.refreshCollections(), 1000);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to clean orphans';
-        setState(prev => ({ ...prev, error: errorMessage }));
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to clean orphans';
+        setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
     },
 
     clearError: () => {
-      setState(prev => ({ ...prev, error: null }));
-    }
+      setState((prev) => ({ ...prev, error: null }));
+    },
   });
 
   // Initial load - ONLY ONCE
@@ -241,7 +280,10 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
       return;
     }
 
-    console.log('🔵 [useCollections] Setting up auto-refresh:', refreshInterval);
+    console.log(
+      '🔵 [useCollections] Setting up auto-refresh:',
+      refreshInterval,
+    );
     intervalRef.current = setInterval(() => {
       console.log('🔵 [useCollections] Auto-refresh tick');
       functionsRef.current.refreshCollections();
@@ -282,7 +324,7 @@ export function useCollections(options: UseCollectionsOptions = {}): UseCollecti
     cloneCollection: functionsRef.current.cloneCollection,
     ingestCollection: functionsRef.current.ingestCollection,
     cleanOrphans: functionsRef.current.cleanOrphans,
-    clearError: functionsRef.current.clearError
+    clearError: functionsRef.current.clearError,
   };
 }
 

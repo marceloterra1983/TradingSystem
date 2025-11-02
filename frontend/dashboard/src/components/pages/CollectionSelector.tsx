@@ -31,15 +31,19 @@ export function CollectionSelector({
     try {
       const response = await fetch('/api/v1/rag/collections');
       const data = await response.json();
-      
+
       if (data.success) {
         // Filtrar apenas coleções prontas
-        const readyCollections = data.collections.filter((c: Collection) => c.status === 'ready');
+        const readyCollections = data.collections.filter(
+          (c: Collection) => c.status === 'ready',
+        );
         setCollections(readyCollections);
         onLoaded?.(readyCollections);
 
         if (autoSelectFirst && readyCollections.length > 0) {
-          const hasValue = readyCollections.some((collection) => collection.name === value);
+          const hasValue = readyCollections.some(
+            (collection: Collection) => collection.name === value,
+          );
           if (!hasValue) {
             onChange(readyCollections[0].name);
           }
@@ -75,7 +79,10 @@ export function CollectionSelector({
 
   return (
     <div className={className}>
-      <label htmlFor="collection-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label
+        htmlFor="collection-select"
+        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+      >
         Collection
       </label>
       <select
@@ -86,12 +93,14 @@ export function CollectionSelector({
       >
         {collections.map((collection) => (
           <option key={collection.name} value={collection.name}>
-            {collection.displayName} ({collection.count?.toLocaleString() || 0} docs, {collection.dimensions}d)
+            {collection.displayName} ({collection.count?.toLocaleString() || 0}{' '}
+            docs, {collection.dimensions}d)
           </option>
         ))}
       </select>
       <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        {collections.find(c => c.name === value)?.embeddingModel || 'Select a collection'}
+        {collections.find((c) => c.name === value)?.embeddingModel ||
+          'Select a collection'}
       </div>
     </div>
   );

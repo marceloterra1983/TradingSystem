@@ -1,8 +1,23 @@
-import { AlertTriangle, CheckCircle, XCircle, Info, ExternalLink } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import {
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Info,
+  ExternalLink,
+} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
-import { TelegramGatewayOverview, useTelegramGatewayChannels } from '../../../hooks/useTelegramGateway';
+import {
+  TelegramGatewayOverview,
+  useTelegramGatewayChannels,
+} from '../../../hooks/useTelegramGateway';
 
 interface ConnectionDiagnosticCardProps {
   overview?: TelegramGatewayOverview;
@@ -21,7 +36,10 @@ interface DiagnosticItem {
   };
 }
 
-export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiagnosticCardProps) {
+export function ConnectionDiagnosticCard({
+  overview,
+  isLoading,
+}: ConnectionDiagnosticCardProps) {
   const { data: channels = [] } = useTelegramGatewayChannels();
   const diagnostics: DiagnosticItem[] = [];
 
@@ -30,24 +48,24 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
   const telegramConnected = overview?.health?.telegram === 'connected';
   const hasMessages = (overview?.messages?.total ?? 0) > 0;
   const queueSize = overview?.queue?.totalMessages ?? 0;
-  const activeChannelsCount = channels.filter(c => c.isActive).length;
+  const activeChannelsCount = channels.filter((c) => c.isActive).length;
   const recentMessages = overview?.messages?.recent ?? [];
 
   // Gateway Status
   if (gatewayHealthy) {
     diagnostics.push({
       id: 'gateway',
-      label: 'Gateway MTProto (porta 4006)',
+      label: 'Gateway MTProto (porta 4010)',
       status: 'ok',
       message: 'Gateway está online e respondendo',
     });
   } else {
     diagnostics.push({
       id: 'gateway',
-      label: 'Gateway MTProto (porta 4006)',
+      label: 'Gateway MTProto (porta 4010)',
       status: 'error',
       message: 'Gateway não está respondendo',
-      suggestion: 'Execute: cd apps/telegram-gateway && npm start',
+      suggestion: 'Execute: cd backend/api/telegram-gateway && npm run dev',
     });
   }
 
@@ -65,7 +83,8 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
       label: 'Conexão Telegram',
       status: 'warning',
       message: 'Telegram desconectado ou sessão inválida',
-      suggestion: 'Execute o script de autenticação: ./authenticate-interactive.sh',
+      suggestion:
+        'Execute o script de autenticação: ./authenticate-interactive.sh',
     });
   }
 
@@ -95,7 +114,8 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
       label: 'Canais Configurados',
       status: 'info',
       message: 'Modo permissivo: todos os canais serão processados',
-      suggestion: 'Para maior segurança, registre apenas os canais autorizados na aba "Canais"',
+      suggestion:
+        'Para maior segurança, registre apenas os canais autorizados na aba "Canais"',
     });
   } else if (activeChannelsCount === 0) {
     diagnostics.push({
@@ -103,7 +123,8 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
       label: 'Canais Configurados',
       status: 'warning',
       message: `${channels.length} canal(is) registrado(s), mas nenhum ativo`,
-      suggestion: 'Ative pelo menos um canal na aba "Canais" para receber mensagens',
+      suggestion:
+        'Ative pelo menos um canal na aba "Canais" para receber mensagens',
     });
   } else {
     diagnostics.push({
@@ -116,7 +137,7 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
 
   // Messages in Database
   if (hasMessages) {
-    const lastMessageTime = recentMessages[0]?.receivedAt 
+    const lastMessageTime = recentMessages[0]?.receivedAt
       ? new Date(recentMessages[0].receivedAt).toLocaleString('pt-BR')
       : null;
     diagnostics.push({
@@ -124,7 +145,9 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
       label: 'Mensagens no Banco',
       status: 'ok',
       message: `${overview?.messages?.total} mensagens armazenadas`,
-      suggestion: lastMessageTime ? `Última mensagem: ${lastMessageTime}` : undefined,
+      suggestion: lastMessageTime
+        ? `Última mensagem: ${lastMessageTime}`
+        : undefined,
     });
   } else {
     diagnostics.push({
@@ -132,11 +155,12 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
       label: 'Mensagens no Banco',
       status: 'warning',
       message: 'Nenhuma mensagem foi salva ainda',
-      suggestion: gatewayHealthy && telegramConnected 
-        ? activeChannelsCount === 0 && channels.length > 0
-          ? 'Ative pelo menos um canal para começar a receber mensagens'
-          : 'Verifique se o bot/usuário tem acesso aos canais ou envie uma mensagem de teste'
-        : 'Aguardando conexão com o Telegram',
+      suggestion:
+        gatewayHealthy && telegramConnected
+          ? activeChannelsCount === 0 && channels.length > 0
+            ? 'Ative pelo menos um canal para começar a receber mensagens'
+            : 'Verifique se o bot/usuário tem acesso aos canais ou envie uma mensagem de teste'
+          : 'Aguardando conexão com o Telegram',
     });
   }
 
@@ -178,7 +202,8 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
               Diagnóstico do Sistema
             </CardTitle>
             <CardDescription>
-              Status dos componentes necessários para captura e armazenamento de mensagens
+              Status dos componentes necessários para captura e armazenamento de
+              mensagens
             </CardDescription>
           </div>
           {allOk && (
@@ -223,7 +248,9 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
                   </p>
                   {item.suggestion && (
                     <div className="mt-2 rounded border border-slate-200 bg-white p-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
-                      <strong className="text-slate-700 dark:text-slate-300">Sugestão:</strong>{' '}
+                      <strong className="text-slate-700 dark:text-slate-300">
+                        Sugestão:
+                      </strong>{' '}
                       {item.suggestion}
                     </div>
                   )}
@@ -250,19 +277,29 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
                       Sistema pronto, aguardando mensagens
                     </p>
                     <p className="text-blue-700 dark:text-blue-300">
-                      O gateway está conectado e operacional. Para começar a receber mensagens:
+                      O gateway está conectado e operacional. Para começar a
+                      receber mensagens:
                     </p>
                     <ol className="ml-4 list-decimal space-y-1 text-blue-700 dark:text-blue-300">
-                      <li>Verifique se os canais estão configurados na aba "Canais"</li>
-                      <li>Certifique-se de que o bot/usuário tem acesso aos canais</li>
-                      <li>Envie uma mensagem de teste em um dos canais monitorados</li>
+                      <li>
+                        Verifique se os canais estão configurados na aba
+                        "Canais"
+                      </li>
+                      <li>
+                        Certifique-se de que o bot/usuário tem acesso aos canais
+                      </li>
+                      <li>
+                        Envie uma mensagem de teste em um dos canais monitorados
+                      </li>
                       <li>Aguarde alguns segundos e atualize esta página</li>
                     </ol>
                     <Button
                       variant="outline"
                       size="sm"
                       className="mt-2"
-                      onClick={() => window.open('http://localhost:4006/metrics', '_blank')}
+                      onClick={() =>
+                        window.open('http://localhost:4006/metrics', '_blank')
+                      }
                     >
                       <ExternalLink className="mr-2 h-3.5 w-3.5" />
                       Ver métricas do gateway
@@ -277,4 +314,3 @@ export function ConnectionDiagnosticCard({ overview, isLoading }: ConnectionDiag
     </Card>
   );
 }
-

@@ -7,13 +7,7 @@ import {
   CollapsibleCardContent,
 } from '../../ui/collapsible-card';
 import { Button } from '../../ui/button';
-import {
-  ExternalLink,
-  Copy,
-  Check,
-  Globe,
-  Server,
-} from 'lucide-react';
+import { ExternalLink, Copy, Check, Globe, Server } from 'lucide-react';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -36,7 +30,8 @@ const METHOD_COLORS: Record<HttpMethod, string> = {
   GET: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
   POST: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   PUT: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  PATCH: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  PATCH:
+    'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 };
 
@@ -49,13 +44,25 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
     color: 'text-blue-600 dark:text-blue-400',
     endpoints: [
       { method: 'GET', path: '/health', description: 'Health check endpoint' },
-      { method: 'GET', path: '/api/status', description: 'Get all services status' },
-      { method: 'POST', path: '/launch', description: 'Launch a service in terminal' },
-      { method: 'GET', path: '/circuit-breaker', description: 'Get circuit breaker stats' },
+      {
+        method: 'GET',
+        path: '/api/status',
+        description: 'Get all services status',
+      },
+      {
+        method: 'POST',
+        path: '/launch',
+        description: 'Launch a service in terminal',
+      },
+      {
+        method: 'GET',
+        path: '/circuit-breaker',
+        description: 'Get circuit breaker stats',
+      },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
-  
+
   // Workspace API
   {
     name: 'Workspace API',
@@ -64,15 +71,35 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
     color: 'text-cyan-600 dark:text-cyan-400',
     endpoints: [
       { method: 'GET', path: '/health', description: 'Health check endpoint' },
-      { method: 'GET', path: '/api/items', description: 'List all workspace items' },
-      { method: 'POST', path: '/api/items', description: 'Create a new workspace item' },
-      { method: 'PUT', path: '/api/items/:id', description: 'Update an existing workspace item' },
-      { method: 'DELETE', path: '/api/items/:id', description: 'Delete a workspace item' },
-      { method: 'GET', path: '/api/prds/:language', description: 'Get PRD by language (en/pt)' },
+      {
+        method: 'GET',
+        path: '/api/items',
+        description: 'List all workspace items',
+      },
+      {
+        method: 'POST',
+        path: '/api/items',
+        description: 'Create a new workspace item',
+      },
+      {
+        method: 'PUT',
+        path: '/api/items/:id',
+        description: 'Update an existing workspace item',
+      },
+      {
+        method: 'DELETE',
+        path: '/api/items/:id',
+        description: 'Delete a workspace item',
+      },
+      {
+        method: 'GET',
+        path: '/api/prds/:language',
+        description: 'Get PRD by language (en/pt)',
+      },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
-  
+
   // TP Capital API
   {
     name: 'TP Capital API',
@@ -80,10 +107,26 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
     icon: Server,
     color: 'text-orange-600 dark:text-orange-400',
     endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check with TimescaleDB status' },
-      { method: 'GET', path: '/signals', description: 'Get trading signals from TimescaleDB' },
-      { method: 'GET', path: '/signals/recent', description: 'Get recent signals (last 24h)' },
-      { method: 'DELETE', path: '/signals', description: 'Delete all signals (maintenance)' },
+      {
+        method: 'GET',
+        path: '/health',
+        description: 'Health check with TimescaleDB status',
+      },
+      {
+        method: 'GET',
+        path: '/signals',
+        description: 'Get trading signals from TimescaleDB',
+      },
+      {
+        method: 'GET',
+        path: '/signals/recent',
+        description: 'Get recent signals (last 24h)',
+      },
+      {
+        method: 'DELETE',
+        path: '/signals',
+        description: 'Delete all signals (maintenance)',
+      },
       { method: 'GET', path: '/logs', description: 'Get ingestion logs' },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
@@ -96,12 +139,20 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
     icon: Server,
     color: 'text-purple-600 dark:text-purple-400',
     endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check with index stats' },
-      { method: 'GET', path: '/docs', description: 'ReDoc API documentation UI' },
+      {
+        method: 'GET',
+        path: '/health',
+        description: 'Health check with index stats',
+      },
+      {
+        method: 'GET',
+        path: '/docs',
+        description: 'ReDoc API documentation UI',
+      },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
-  
+
   // Firecrawl Proxy API
   {
     name: 'Firecrawl Proxy API',
@@ -109,9 +160,21 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
     icon: Server,
     color: 'text-pink-600 dark:text-pink-400',
     endpoints: [
-      { method: 'GET', path: '/health', description: 'Health check with Firecrawl status' },
-      { method: 'POST', path: '/api/v1/scrape', description: 'Scrape a single URL' },
-      { method: 'POST', path: '/api/v1/crawl', description: 'Crawl multiple pages' },
+      {
+        method: 'GET',
+        path: '/health',
+        description: 'Health check with Firecrawl status',
+      },
+      {
+        method: 'POST',
+        path: '/api/v1/scrape',
+        description: 'Scrape a single URL',
+      },
+      {
+        method: 'POST',
+        path: '/api/v1/crawl',
+        description: 'Crawl multiple pages',
+      },
       { method: 'GET', path: '/metrics', description: 'Prometheus metrics' },
     ],
   },
@@ -127,11 +190,15 @@ export function EndpointsSection() {
     setTimeout(() => setCopiedEndpoint(null), 2000);
   };
 
-  const filteredServices = selectedService === 'all'
-    ? SERVICES_ENDPOINTS
-    : SERVICES_ENDPOINTS.filter(s => s.name === selectedService);
+  const filteredServices =
+    selectedService === 'all'
+      ? SERVICES_ENDPOINTS
+      : SERVICES_ENDPOINTS.filter((s) => s.name === selectedService);
 
-  const totalEndpoints = SERVICES_ENDPOINTS.reduce((sum, service) => sum + service.endpoints.length, 0);
+  const totalEndpoints = SERVICES_ENDPOINTS.reduce(
+    (sum, service) => sum + service.endpoints.length,
+    0,
+  );
 
   return (
     <CollapsibleCard cardId="launcher-endpoints">
@@ -163,15 +230,21 @@ export function EndpointsSection() {
                 {Object.entries(METHOD_COLORS).map(([method, colorClass]) => {
                   const count = SERVICES_ENDPOINTS.reduce(
                     (sum, service) =>
-                      sum + service.endpoints.filter((e) => e.method === method).length,
-                    0
+                      sum +
+                      service.endpoints.filter((e) => e.method === method)
+                        .length,
+                    0,
                   );
                   return (
                     <div key={method} className="text-center">
-                      <span className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-bold ${colorClass}`}>
+                      <span
+                        className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-bold ${colorClass}`}
+                      >
                         {method}
                       </span>
-                      <p className="mt-1 text-gray-600 dark:text-gray-400">{count}</p>
+                      <p className="mt-1 text-gray-600 dark:text-gray-400">
+                        {count}
+                      </p>
                     </div>
                   );
                 })}
@@ -292,11 +365,3 @@ export function EndpointsSection() {
     </CollapsibleCard>
   );
 }
-
-
-
-
-
-
-
-

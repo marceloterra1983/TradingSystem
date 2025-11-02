@@ -8,13 +8,20 @@
  */
 
 import React from 'react';
-import { Check, AlertCircle, CheckCircle, Zap, Target, Sparkles } from 'lucide-react';
+import {
+  Check,
+  AlertCircle,
+  CheckCircle,
+  Zap,
+  Target,
+  Sparkles,
+} from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
@@ -55,13 +62,13 @@ export const EmbeddingModelSelector: React.FC<EmbeddingModelSelectorProps> = ({
   value,
   onChange,
   disabled = false,
-  className
+  className,
 }) => {
   /**
    * Get display name for selected model
    */
   const getSelectedModelDisplay = (): string => {
-    const selected = models.find(m => m.name === value);
+    const selected = models.find((m) => m.name === value);
     if (!selected) return 'Selecione um modelo';
 
     return `${selected.name} (${selected.dimensions}d)`;
@@ -86,7 +93,11 @@ export const EmbeddingModelSelector: React.FC<EmbeddingModelSelectorProps> = ({
   }, [models]);
 
   return (
-    <Select value={value} onValueChange={onChange} disabled={disabled || models.length === 0}>
+    <Select
+      value={value}
+      onValueChange={onChange}
+      disabled={disabled || models.length === 0}
+    >
       <SelectTrigger className={cn('w-full', className)}>
         <SelectValue placeholder="Selecione um modelo">
           {getSelectedModelDisplay()}

@@ -1,6 +1,14 @@
 import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
 import { PlaceholderSection } from '../ui/placeholder-section';
-import { User, Bell, Palette, Globe, Shield, Database, Zap } from 'lucide-react';
+import {
+  User,
+  Bell,
+  Palette,
+  Globe,
+  Shield,
+  Database,
+  Zap,
+} from 'lucide-react';
 
 /**
  * Settings Page - System configuration and user preferences

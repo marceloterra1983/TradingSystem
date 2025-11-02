@@ -1,0 +1,76 @@
+#!/usr/bin/bash
+#
+# kill-all-tp-capital.sh
+# Mata TODOS os processos Node.js relacionados ao TP Capital
+# Incluindo processos como root, nodemon, PM2, e containers Docker
+#
+
+set -e
+
+echo "=========================================================="
+echo "🔪 Eliminar TODOS os Processos TP Capital"
+echo "=========================================================="
+echo ""
+
+# 1. Parar container Docker
+echo "1️⃣  Parando container Docker apps-tpcapital..."
+cd /home/marce/Projetos/TradingSystem
+docker compose -f tools/compose/docker-compose.apps.yml stop tp-capital 2>/dev/null || echo "   Container já estava parado"
+echo ""
+
+# 2. Matar nodemon (pode estar rodando como root)
+echo "2️⃣  Eliminando processos nodemon..."
+sudo pkill -9 -f "nodemon.*tp-capital" 2>/dev/null || true
+sudo pkill -9 -f "nodemon src/server.js" 2>/dev/null || true
+echo "   ✅ Nodemon eliminado"
+echo ""
+
+# 3. Matar todos os processos Node src/server.js (incluindo root)
+echo "3️⃣  Eliminando processos Node.js..."
+sudo ps aux | grep "[n]ode src/server.js" | awk '{print $2}' | xargs -r sudo kill -9 2>/dev/null || true
+echo "   ✅ Processos Node eliminados"
+echo ""
+
+# 4. Matar processos na porta 4005
+echo "4️⃣  Liberando porta 4005..."
+sudo lsof -ti:4005 | xargs -r sudo kill -9 2>/dev/null || true
+echo "   ✅ Porta 4005 liberada"
+echo ""
+
+# 5. Esperar e verificar
+echo "5️⃣  Aguardando limpeza..."
+sleep 5
+echo ""
+
+# 6. Validação Final
+echo "=========================================================="
+echo "✅ Validação Final"
+echo "=========================================================="
+echo ""
+
+REMAINING=$(ps aux | grep "[n]ode src/server.js" | wc -l)
+if [ "$REMAINING" -eq "0" ]; then
+  echo "✅ SUCESSO: Nenhum processo Node.js rodando"
+else
+  echo "⚠️  ATENÇÃO: Ainda há $REMAINING processo(s) Node.js:"
+  ps aux | grep "[n]ode src/server.js"
+fi
+echo ""
+
+PORT_CHECK=$(sudo lsof -ti:4005 2>/dev/null | wc -l)
+if [ "$PORT_CHECK" -eq "0" ]; then
+  echo "✅ SUCESSO: Porta 4005 está livre"
+else
+  echo "⚠️  ATENÇÃO: Porta 4005 ainda em uso:"
+  sudo lsof -i:4005
+fi
+echo ""
+
+echo "=========================================================="
+echo "🎉 Limpeza Concluída!"
+echo "=========================================================="
+echo ""
+echo "📝 Próximo Passo:"
+echo "   bash scripts/setup/start-tp-capital-clean.sh"
+echo ""
+

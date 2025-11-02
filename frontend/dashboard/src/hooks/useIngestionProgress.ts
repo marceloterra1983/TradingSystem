@@ -1,9 +1,9 @@
 /**
  * useIngestionProgress Hook
- * 
+ *
  * Connects to SSE endpoint for real-time ingestion progress updates
  * Manages connection lifecycle, events, and error handling
- * 
+ *
  * @module hooks/useIngestionProgress
  */
 
@@ -37,7 +37,12 @@ export interface IngestionLogEntry {
 /**
  * Job Status
  */
-export type IngestionJobStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+export type IngestionJobStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'CANCELLED';
 
 /**
  * Hook State
@@ -50,7 +55,7 @@ export interface UseIngestionProgressReturn {
   isConnected: boolean;
   isComplete: boolean;
   error: string | null;
-  
+
   // Actions
   cancel: () => Promise<void>;
   reconnect: () => void;
@@ -60,19 +65,21 @@ export interface UseIngestionProgressReturn {
 /**
  * useIngestionProgress Hook
  */
-export function useIngestionProgress(jobId: string | null): UseIngestionProgressReturn {
+export function useIngestionProgress(
+  jobId: string | null,
+): UseIngestionProgressReturn {
   const [progress, setProgress] = useState<IngestionProgress>({
     filesProcessed: 0,
     filesTotal: 0,
     chunksCreated: 0,
     progress: 0,
   });
-  
+
   const [logs, setLogs] = useState<IngestionLogEntry[]>([]);
   const [status, setStatus] = useState<IngestionJobStatus | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -122,7 +129,10 @@ export function useIngestionProgress(jobId: string | null): UseIngestionProgress
         filesProcessed: job.files_processed || 0,
         filesTotal: job.files_total || 0,
         chunksCreated: job.chunks_created || 0,
-        progress: calculateProgress(job.files_processed || 0, job.files_total || 0),
+        progress: calculateProgress(
+          job.files_processed || 0,
+          job.files_total || 0,
+        ),
       });
     });
 
@@ -166,7 +176,7 @@ export function useIngestionProgress(jobId: string | null): UseIngestionProgress
         chunksCreated: data.chunksCreated || 0,
         progress: 100,
       });
-      
+
       // Close connection after completion
       setTimeout(() => {
         eventSource.close();
@@ -192,7 +202,7 @@ export function useIngestionProgress(jobId: string | null): UseIngestionProgress
       const data = JSON.parse(event.data);
       setStatus('CANCELLED');
       setError(data.reason || 'Job cancelled');
-      
+
       setTimeout(() => {
         eventSource.close();
         setIsConnected(false);
@@ -206,11 +216,16 @@ export function useIngestionProgress(jobId: string | null): UseIngestionProgress
 
       // Auto-reconnect with exponential backoff
       if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+        const delay = Math.min(
+          1000 * Math.pow(2, reconnectAttemptsRef.current),
+          30000,
+        );
         reconnectAttemptsRef.current++;
 
-        console.log(`[SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})...`);
-        
+        console.log(
+          `[SSE] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})...`,
+        );
+
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
         }, delay);
@@ -279,7 +294,8 @@ export function useIngestionProgress(jobId: string | null): UseIngestionProgress
     };
   }, [jobId, connect]);
 
-  const isComplete = status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED';
+  const isComplete =
+    status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED';
 
   return {
     progress,
@@ -301,4 +317,3 @@ function calculateProgress(processed: number, total: number): number {
   if (total === 0) return 0;
   return Math.min(100, Math.round((processed / total) * 100));
 }
-

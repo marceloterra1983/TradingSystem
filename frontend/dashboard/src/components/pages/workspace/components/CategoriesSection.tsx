@@ -4,7 +4,13 @@
  * CollapsibleCard wrapper for CategoriesCRUDCard
  */
 
-import { CollapsibleCard, CollapsibleCardHeader, CollapsibleCardTitle, CollapsibleCardDescription, CollapsibleCardContent } from '../../../ui/collapsible-card';
+import {
+  CollapsibleCard,
+  CollapsibleCardHeader,
+  CollapsibleCardTitle,
+  CollapsibleCardDescription,
+  CollapsibleCardContent,
+} from '../../../ui/collapsible-card';
 import CategoriesCRUDCard from '../CategoriesCRUDCard';
 import { Folder } from 'lucide-react';
 

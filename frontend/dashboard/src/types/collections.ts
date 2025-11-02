@@ -52,6 +52,7 @@ export interface CollectionStats {
   pendingFiles?: number;
   orphanChunks?: number;
   chunkCount?: number;
+  directorySizeMB?: number;
 }
 
 /**

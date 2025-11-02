@@ -172,50 +172,85 @@ telegramGatewayRouter.get('/queue/preview-limit', (_req, res) => {
   });
 });
 
+// PROTECTED ENDPOINT: Require API key authentication
 telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
+  // Validate API key first
+  const apiKey = req.headers['x-api-key'];
+  const expectedKey = process.env.TELEGRAM_GATEWAY_API_KEY;
+  
+  if (!expectedKey) {
+    req.log?.error?.('[Auth] TELEGRAM_GATEWAY_API_KEY not configured');
+    return res.status(500).json({
+      success: false,
+      error: 'API authentication not configured',
+      message: 'Server misconfiguration: API key not set',
+    });
+  }
+  
+  if (!apiKey || apiKey !== expectedKey) {
+    req.log?.warn?.({ ip: req.ip, path: req.path }, '[Auth] Invalid or missing API key');
+    return res.status(apiKey ? 403 : 401).json({
+      success: false,
+      error: apiKey ? 'Forbidden' : 'Unauthorized',
+      message: apiKey ? 'Invalid API key' : 'Missing X-API-Key header',
+    });
+  }
+  
+  // API key validated, continue with sync logic
   try {
-    req.log.info('[SyncMessages] Sincronização solicitada via dashboard');
+    req.log.info('[SyncMessages] Sync requested via dashboard (authenticated)');
     
-    // Este endpoint faz proxy para o gateway MTProto (porta 4006)
-    // que tem acesso ao TelegramClient
-    const gatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4006);
-    const gatewayUrl = process.env.TELEGRAM_GATEWAY_URL || `http://localhost:${gatewayPort}`;
+    const { limit = 500, channels, concurrency = 3 } = req.body;
     
-    try {
-      const proxyResponse = await fetch(`${gatewayUrl}/sync-messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      const result = await proxyResponse.json();
-      
-      if (proxyResponse.ok) {
-        req.log.info(
-          { totalSynced: result.data?.totalMessagesSynced },
-          '[SyncMessages] Sincronização concluída com sucesso'
-        );
-        return res.json(result);
-      } else {
-        req.log.warn({ result }, '[SyncMessages] Gateway retornou erro');
-        return res.status(proxyResponse.status).json(result);
+    // Get Telegram client
+    const { getTelegramClient } = await import('../services/TelegramClientService.js');
+    const telegramClient = await getTelegramClient();
+    await telegramClient.connect();
+    
+    // Determine which channels to sync
+    const { listChannels } = await import('../db/channelsRepository.js');
+    const activeChannels = await listChannels({ logger: req.log });
+    const activeChannelIds = activeChannels
+      .filter(ch => ch.isActive)
+      .map(ch => ch.channelId);
+    
+    const channelsToSync = channels || 
+                          (activeChannelIds.length > 0 ? activeChannelIds : [process.env.TELEGRAM_SIGNALS_CHANNEL_ID]);
+    
+    req.log.info(
+      { channelCount: channelsToSync.length },
+      '[SyncMessages] Channels to sync determined'
+    );
+    
+    // REFACTORED: Delegate to service layer (Clean Architecture)
+    const { MessageSyncService } = await import('../services/MessageSyncService.js');
+    const syncService = new MessageSyncService(telegramClient, req.log);
+    
+    const result = await syncService.syncChannels({
+      channelIds: channelsToSync,
+      limit,
+      concurrency
+    });
+    
+    // HTTP response handling (route responsibility)
+    return res.json({
+      success: true,
+      message: result.totalMessagesSynced > 0 
+        ? `${result.totalMessagesSynced} mensagem(ns) sincronizada(s) de ${result.channelsSynced.length} canal(is). ${result.totalMessagesSaved} salvas no banco.`
+        : 'Todas as mensagens estão sincronizadas',
+      data: {
+        totalMessagesSynced: result.totalMessagesSynced,
+        totalMessagesSaved: result.totalMessagesSaved,
+        channelsSynced: result.channelsSynced,
+        timestamp: new Date().toISOString()
       }
-    } catch (fetchError) {
-      req.log.error(
-        { err: fetchError, gatewayUrl },
-        '[SyncMessages] Erro ao conectar com Telegram Gateway MTProto'
-      );
-      
-      return res.status(503).json({
-        success: false,
-        message: 'Telegram Gateway MTProto não está acessível. Verifique se o serviço está rodando na porta 4006.',
-        error: fetchError.message,
-        data: { totalMessagesSynced: 0 }
-      });
-    }
-    
+    });
   } catch (error) {
-    next(error);
+    req.log.error({ err: error }, '[SyncMessages] Unexpected error');
+    return res.status(500).json({
+      success: false,
+      message: 'Erro interno ao processar sincronização',
+      error: error.message,
+    });
   }
 });

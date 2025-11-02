@@ -20,7 +20,7 @@ export interface HealthCheckResult {
  */
 export async function checkPortHealth(
   url: string,
-  timeout: number = 5000
+  timeout: number = 5000,
 ): Promise<HealthCheckResult> {
   const startTime = Date.now();
   const lastChecked = new Date().toISOString();
@@ -91,13 +91,13 @@ export async function checkPortHealth(
  * @returns Map of URL to health check result
  */
 export async function checkMultiplePorts(
-  urls: string[]
+  urls: string[],
 ): Promise<Map<string, HealthCheckResult>> {
   const results = await Promise.all(
     urls.map(async (url) => {
       const result = await checkPortHealth(url);
       return [url, result] as [string, HealthCheckResult];
-    })
+    }),
   );
 
   return new Map(results);
@@ -110,7 +110,7 @@ export async function checkMultiplePorts(
  */
 export async function checkTcpPort(
   host: string,
-  port: number
+  port: number,
 ): Promise<HealthCheckResult> {
   const lastChecked = new Date().toISOString();
   const url = `http://${host}:${port}`;

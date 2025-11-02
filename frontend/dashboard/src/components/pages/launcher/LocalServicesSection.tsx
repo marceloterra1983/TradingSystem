@@ -152,13 +152,16 @@ async function fetchServiceLauncherStatus(): Promise<ServiceStatusSummary> {
   }
 
   const data = await response.json();
-  
+
   return {
     overallStatus: resolveServiceStatus(data.overallStatus),
-    totalServices: typeof data.totalServices === 'number' ? data.totalServices : 0,
-    degradedCount: typeof data.degradedCount === 'number' ? data.degradedCount : 0,
+    totalServices:
+      typeof data.totalServices === 'number' ? data.totalServices : 0,
+    degradedCount:
+      typeof data.degradedCount === 'number' ? data.degradedCount : 0,
     downCount: typeof data.downCount === 'number' ? data.downCount : 0,
-    averageLatencyMs: typeof data.averageLatencyMs === 'number' ? data.averageLatencyMs : null,
+    averageLatencyMs:
+      typeof data.averageLatencyMs === 'number' ? data.averageLatencyMs : null,
     lastCheckAt: typeof data.lastCheckAt === 'string' ? data.lastCheckAt : null,
     services: Array.isArray(data.services)
       ? data.services.map((raw: RawServiceEntry) => {
@@ -168,13 +171,22 @@ async function fetchServiceLauncherStatus(): Promise<ServiceStatusSummary> {
               : undefined;
           return {
             id: typeof raw.id === 'string' ? raw.id : undefined,
-            name: typeof raw.name === 'string' && raw.name.trim().length > 0 ? raw.name : 'Unknown',
-            description: typeof raw.description === 'string' ? raw.description : undefined,
-            category: typeof raw.category === 'string' ? raw.category : undefined,
+            name:
+              typeof raw.name === 'string' && raw.name.trim().length > 0
+                ? raw.name
+                : 'Unknown',
+            description:
+              typeof raw.description === 'string' ? raw.description : undefined,
+            category:
+              typeof raw.category === 'string' ? raw.category : undefined,
             port: typeof raw.port === 'number' ? raw.port : undefined,
-            status: resolveServiceStatus(typeof raw.status === 'string' ? raw.status : undefined),
-            latencyMs: typeof raw.latencyMs === 'number' ? raw.latencyMs : undefined,
-            updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : undefined,
+            status: resolveServiceStatus(
+              typeof raw.status === 'string' ? raw.status : undefined,
+            ),
+            latencyMs:
+              typeof raw.latencyMs === 'number' ? raw.latencyMs : undefined,
+            updatedAt:
+              typeof raw.updatedAt === 'string' ? raw.updatedAt : undefined,
             details,
           } satisfies ServiceStatusEntry;
         })
@@ -187,9 +199,11 @@ function buildServiceUrl(port?: number): string | null {
   return `http://localhost:${port}`;
 }
 
-function summarizeServiceDetail(details?: ServiceStatusDetails | null): string | null {
+function summarizeServiceDetail(
+  details?: ServiceStatusDetails | null,
+): string | null {
   if (!details || typeof details !== 'object') return null;
-  
+
   const keys = ['message', 'reason', 'lastError'] as const;
   for (const key of keys) {
     const value = details[key];
@@ -202,7 +216,7 @@ function summarizeServiceDetail(details?: ServiceStatusDetails | null): string |
 
 export function LocalServicesSection() {
   const queryClient = useQueryClient();
-  
+
   const {
     data = FALLBACK_SUMMARY,
     isLoading,
@@ -222,19 +236,21 @@ export function LocalServicesSection() {
     mutationFn: async (serviceId: string) => {
       const response = await fetch(
         `${SERVICE_LAUNCHER_BASE_URL}/api/auto-start/${serviceId}`,
-        { method: 'POST' }
+        { method: 'POST' },
       );
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['service-launcher-status'] });
-    }
+    },
   });
 
   const overallStatus = resolveServiceStatus(data?.overallStatus);
   const overallMeta = OVERALL_STATUS_META[overallStatus];
   const services = data?.services ?? [];
-  const lastCheckLabel = data?.lastCheckAt ? formatTimestampShort(data.lastCheckAt) : null;
+  const lastCheckLabel = data?.lastCheckAt
+    ? formatTimestampShort(data.lastCheckAt)
+    : null;
   const isRefreshing = isFetching && !isLoading;
   const errorMessage =
     error instanceof Error
@@ -263,7 +279,9 @@ export function LocalServicesSection() {
           disabled={isRefreshing}
           aria-label="Atualizar status dos serviços"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
         </Button>
       </CollapsibleCardHeader>
       <CollapsibleCardContent>
@@ -291,13 +309,17 @@ export function LocalServicesSection() {
           <div className="space-y-4">
             <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-3">
-                <overallMeta.icon className={`h-5 w-5 ${overallMeta.textClass}`} />
+                <overallMeta.icon
+                  className={`h-5 w-5 ${overallMeta.textClass}`}
+                />
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {overallMeta.label}
                   </p>
                   {overallMeta.helper ? (
-                    <p className={`text-xs ${overallMeta.textClass}`}>{overallMeta.helper}</p>
+                    <p className={`text-xs ${overallMeta.textClass}`}>
+                      {overallMeta.helper}
+                    </p>
                   ) : null}
                   {lastCheckLabel ? (
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -308,25 +330,33 @@ export function LocalServicesSection() {
               </div>
               <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 dark:text-gray-300 md:grid-cols-4">
                 <div>
-                  <p className="font-semibold text-gray-700 dark:text-gray-200">Serviços</p>
+                  <p className="font-semibold text-gray-700 dark:text-gray-200">
+                    Serviços
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                     {data?.totalServices ?? services.length}
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-700 dark:text-gray-200">Degradados</p>
+                  <p className="font-semibold text-gray-700 dark:text-gray-200">
+                    Degradados
+                  </p>
                   <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
                     {data?.degradedCount ?? 0}
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-700 dark:text-gray-200">Offline</p>
+                  <p className="font-semibold text-gray-700 dark:text-gray-200">
+                    Offline
+                  </p>
                   <p className="text-sm font-semibold text-red-600 dark:text-red-400">
                     {data?.downCount ?? 0}
                   </p>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-700 dark:text-gray-200">Latência média</p>
+                  <p className="font-semibold text-gray-700 dark:text-gray-200">
+                    Latência média
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                     {typeof data?.averageLatencyMs === 'number'
                       ? `${data.averageLatencyMs} ms`
@@ -381,7 +411,9 @@ export function LocalServicesSection() {
                           ) : null}
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {service.category || '—'}
-                            {typeof service.port === 'number' && serviceUrl && status === 'ok' ? (
+                            {typeof service.port === 'number' &&
+                            serviceUrl &&
+                            status === 'ok' ? (
                               <>
                                 {' · '}
                                 <a
@@ -416,8 +448,12 @@ export function LocalServicesSection() {
                         </div>
                       </div>
                       <div className="flex items-center justify-end gap-2">
-                        <span className={`h-2.5 w-2.5 rounded-full ${meta.dotClass}`} />
-                        <span className={`text-xs font-semibold ${meta.textClass}`}>
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${meta.dotClass}`}
+                        />
+                        <span
+                          className={`text-xs font-semibold ${meta.textClass}`}
+                        >
                           {meta.label}
                         </span>
                         {status === 'down' && service.id && (
@@ -449,14 +485,3 @@ export function LocalServicesSection() {
     </CollapsibleCard>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

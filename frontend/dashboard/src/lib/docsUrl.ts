@@ -25,7 +25,10 @@ export function buildDocsUrl(path = '', base?: string): string {
     return normalizedBase;
   }
 
-  const sanitizedPath = path.replace(/^\/+/, '').replace(/\.mdx?$/, '').replace(/\.html?$/, '');
+  const sanitizedPath = path
+    .replace(/^\/+/, '')
+    .replace(/\.mdx?$/, '')
+    .replace(/\.html?$/, '');
   if (!normalizedBase) {
     return `/${sanitizedPath}`;
   }
@@ -34,7 +37,10 @@ export function buildDocsUrl(path = '', base?: string): string {
     return normalizedBase;
   }
 
-  if (normalizedBase.toLowerCase().endsWith('/docs') && sanitizedPath.toLowerCase().startsWith('docs/')) {
+  if (
+    normalizedBase.toLowerCase().endsWith('/docs') &&
+    sanitizedPath.toLowerCase().startsWith('docs/')
+  ) {
     return `${normalizedBase}/${sanitizedPath.slice(5)}`;
   }
 

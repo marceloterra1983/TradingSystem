@@ -1,11 +1,14 @@
 ---
 title: "ADR-002: File Watcher Auto-Ingestion Architecture"
 sidebar_position: 2
+description: "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection"
 tags: [adr, rag-services, file-watcher, automation]
 domain: rag-services
 type: adr
 summary: "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection"
 status: accepted
+owner: ArchitectureGuild
+lastReviewed: "2025-11-01"
 last_review: "2025-11-01"
 ---
 
@@ -303,7 +306,7 @@ curl -X POST http://localhost:3403/api/v1/admin/file-watcher/flush
 
 **Related ADRs**:
 - [ADR-001: Redis Caching Strategy](./ADR-001-redis-caching-strategy.md)
-- [ADR-003: Collection Stats Performance Optimization](./ADR-003-collection-stats-optimization.md)
+- ADR-003: Collection Stats Performance Optimization (planned)
 
 **Change Log**:
 - 2025-10-30: Initial decision - Chokidar file watcher with debouncing

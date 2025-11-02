@@ -14,7 +14,8 @@ vi.mock('@/services/documentationService', () => ({
 import documentationService from '@/services/documentationService';
 
 const mockedSearch = documentationService.search as unknown as vi.Mock;
-const mockedSuggestions = documentationService.getSuggestions as unknown as vi.Mock;
+const mockedSuggestions =
+  documentationService.getSuggestions as unknown as vi.Mock;
 
 describe('DocumentationPage', () => {
   beforeEach(() => {

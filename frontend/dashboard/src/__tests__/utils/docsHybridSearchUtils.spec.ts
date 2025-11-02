@@ -37,7 +37,14 @@ const STATUS_LABEL_MAP: Record<string, string> = {
   deprecated: 'Depreciado',
 };
 
-const STATUS_ORDER = ['active', 'planned', 'accepted', 'completed', 'draft', 'deprecated'];
+const STATUS_ORDER = [
+  'active',
+  'planned',
+  'accepted',
+  'completed',
+  'draft',
+  'deprecated',
+];
 
 const DEFAULT_COLLECTION_SCOPE = 'default';
 
@@ -71,11 +78,7 @@ const formatFacetLabel = (raw?: string): string => {
   if (!cleaned) {
     return UNCLASSIFIED_LABEL;
   }
-  return cleaned
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(toTitleCase)
-    .join(' ');
+  return cleaned.split(/\s+/).filter(Boolean).map(toTitleCase).join(' ');
 };
 
 const normalizeTag = (tag?: string): string => tag?.trim().toLowerCase() ?? '';
@@ -88,11 +91,7 @@ const formatTagLabel = (raw?: string): string => {
   if (!cleaned) {
     return UNCLASSIFIED_LABEL;
   }
-  return cleaned
-    .split(' ')
-    .filter(Boolean)
-    .map(toTitleCase)
-    .join(' ');
+  return cleaned.split(' ').filter(Boolean).map(toTitleCase).join(' ');
 };
 
 const formatStatusLabel = (raw?: string): string => {
@@ -103,8 +102,7 @@ const formatStatusLabel = (raw?: string): string => {
   return STATUS_LABEL_MAP[normalized] ?? formatFacetLabel(raw);
 };
 
-const sanitizeCollection = (value?: string): string =>
-  (value ?? '').trim();
+const sanitizeCollection = (value?: string): string => (value ?? '').trim();
 
 const buildScopedKey = (baseKey: string, collection?: string): string => {
   const scope = sanitizeCollection(collection) || DEFAULT_COLLECTION_SCOPE;
@@ -119,14 +117,16 @@ type FacetOption = {
 
 const buildFacetOptions = (
   items: { value: string; count: number }[] | undefined,
-  formatter: (value: string) => string
+  formatter: (value: string) => string,
 ): FacetOption[] => {
   if (!items || items.length === 0) {
     return [];
   }
 
   return items
-    .filter((item): item is { value: string; count: number } => Boolean(item?.value))
+    .filter((item): item is { value: string; count: number } =>
+      Boolean(item?.value),
+    )
     .map((item) => ({
       value: item.value,
       label: formatter(item.value),
@@ -166,7 +166,9 @@ describe('docsHybridSearchUtils', () => {
   describe('formatFacetLabel', () => {
     it('should return UNCLASSIFIED_LABEL for null/undefined', () => {
       expect(formatFacetLabel()).toBe(UNCLASSIFIED_LABEL);
-      expect(formatFacetLabel(null as unknown as string)).toBe(UNCLASSIFIED_LABEL);
+      expect(formatFacetLabel(null as unknown as string)).toBe(
+        UNCLASSIFIED_LABEL,
+      );
       expect(formatFacetLabel(undefined)).toBe(UNCLASSIFIED_LABEL);
     });
 
@@ -193,21 +195,33 @@ describe('docsHybridSearchUtils', () => {
 
     it('should replace slashes with › separator', () => {
       expect(formatFacetLabel('tools/docker')).toBe('Tools › Docker');
-      expect(formatFacetLabel('frontend/components/ui')).toBe('Frontend › Components › UI');
+      expect(formatFacetLabel('frontend/components/ui')).toBe(
+        'Frontend › Components › UI',
+      );
     });
 
     it('should apply title case to each segment', () => {
-      expect(formatFacetLabel('docker compose setup')).toBe('Docker Compose Setup');
-      expect(formatFacetLabel('api gateway configuration')).toBe('API Gateway Configuration');
+      expect(formatFacetLabel('docker compose setup')).toBe(
+        'Docker Compose Setup',
+      );
+      expect(formatFacetLabel('api gateway configuration')).toBe(
+        'API Gateway Configuration',
+      );
     });
 
     it('should handle complex paths', () => {
-      expect(formatFacetLabel('tools/docker/compose-setup.md')).toBe('Tools › Docker › Compose Setup');
-      expect(formatFacetLabel('frontend/components/ui-button_component.mdx')).toBe('Frontend › Components › UI Button Component');
+      expect(formatFacetLabel('tools/docker/compose-setup.md')).toBe(
+        'Tools › Docker › Compose Setup',
+      );
+      expect(
+        formatFacetLabel('frontend/components/ui-button_component.mdx'),
+      ).toBe('Frontend › Components › UI Button Component');
     });
 
     it('should collapse multiple spaces', () => {
-      expect(formatFacetLabel('docker    compose    setup')).toBe('Docker Compose Setup');
+      expect(formatFacetLabel('docker    compose    setup')).toBe(
+        'Docker Compose Setup',
+      );
     });
   });
 
@@ -247,7 +261,9 @@ describe('docsHybridSearchUtils', () => {
       // Note: "end" is <=3 chars, so it becomes "END" (uppercased)
       expect(formatTagLabel('front-end')).toBe('Front END');
       expect(formatTagLabel('api_gateway')).toBe('API Gateway');
-      expect(formatTagLabel('docker-compose_setup')).toBe('Docker Compose Setup');
+      expect(formatTagLabel('docker-compose_setup')).toBe(
+        'Docker Compose Setup',
+      );
     });
 
     it('should apply title case', () => {
@@ -257,7 +273,9 @@ describe('docsHybridSearchUtils', () => {
     });
 
     it('should handle multiple spaces', () => {
-      expect(formatTagLabel('docker   compose   setup')).toBe('Docker Compose Setup');
+      expect(formatTagLabel('docker   compose   setup')).toBe(
+        'Docker Compose Setup',
+      );
     });
   });
 
@@ -291,7 +309,9 @@ describe('docsHybridSearchUtils', () => {
 
   describe('sanitizeCollection', () => {
     it('should return trimmed string', () => {
-      expect(sanitizeCollection('  docs_index_mxbai  ')).toBe('docs_index_mxbai');
+      expect(sanitizeCollection('  docs_index_mxbai  ')).toBe(
+        'docs_index_mxbai',
+      );
       expect(sanitizeCollection('custom_collection')).toBe('custom_collection');
     });
 
@@ -308,30 +328,48 @@ describe('docsHybridSearchUtils', () => {
 
   describe('buildScopedKey', () => {
     it('should build key with collection scope', () => {
-      expect(buildScopedKey('docsHybridSearch_results', 'docs_index_mxbai')).toBe('docsHybridSearch_results:docs_index_mxbai');
-      expect(buildScopedKey('docsHybridSearch_lastQuery', 'custom_collection')).toBe('docsHybridSearch_lastQuery:custom_collection');
+      expect(
+        buildScopedKey('docsHybridSearch_results', 'docs_index_mxbai'),
+      ).toBe('docsHybridSearch_results:docs_index_mxbai');
+      expect(
+        buildScopedKey('docsHybridSearch_lastQuery', 'custom_collection'),
+      ).toBe('docsHybridSearch_lastQuery:custom_collection');
     });
 
     it('should use default scope for empty collection', () => {
-      expect(buildScopedKey('docsHybridSearch_results', '')).toBe('docsHybridSearch_results:default');
-      expect(buildScopedKey('docsHybridSearch_results', '   ')).toBe('docsHybridSearch_results:default');
+      expect(buildScopedKey('docsHybridSearch_results', '')).toBe(
+        'docsHybridSearch_results:default',
+      );
+      expect(buildScopedKey('docsHybridSearch_results', '   ')).toBe(
+        'docsHybridSearch_results:default',
+      );
     });
 
     it('should use default scope for null/undefined collection', () => {
-      expect(buildScopedKey('docsHybridSearch_results', null as unknown as string)).toBe('docsHybridSearch_results:default');
-      expect(buildScopedKey('docsHybridSearch_results', undefined)).toBe('docsHybridSearch_results:default');
+      expect(
+        buildScopedKey('docsHybridSearch_results', null as unknown as string),
+      ).toBe('docsHybridSearch_results:default');
+      expect(buildScopedKey('docsHybridSearch_results', undefined)).toBe(
+        'docsHybridSearch_results:default',
+      );
     });
 
     it('should encode URI components in collection', () => {
-      expect(buildScopedKey('docsHybridSearch_results', 'docs/index')).toBe('docsHybridSearch_results:docs%2Findex');
-      expect(buildScopedKey('docsHybridSearch_results', 'collection:v2')).toBe('docsHybridSearch_results:collection%3Av2');
+      expect(buildScopedKey('docsHybridSearch_results', 'docs/index')).toBe(
+        'docsHybridSearch_results:docs%2Findex',
+      );
+      expect(buildScopedKey('docsHybridSearch_results', 'collection:v2')).toBe(
+        'docsHybridSearch_results:collection%3Av2',
+      );
     });
   });
 
   describe('buildFacetOptions', () => {
     it('should return empty array for null/undefined/empty input', () => {
       expect(buildFacetOptions(undefined, formatFacetLabel)).toEqual([]);
-      expect(buildFacetOptions(null as unknown as [], formatFacetLabel)).toEqual([]);
+      expect(
+        buildFacetOptions(null as unknown as [], formatFacetLabel),
+      ).toEqual([]);
       expect(buildFacetOptions([], formatFacetLabel)).toEqual([]);
     });
 
@@ -413,20 +451,23 @@ describe('docsHybridSearchUtils', () => {
       const normalized = tags.map(normalizeTag);
       const duration = performance.now() - start;
 
-      expect(normalized.every(t => t === 'docker-compose')).toBe(true);
+      expect(normalized.every((t) => t === 'docker-compose')).toBe(true);
       expect(duration).toBeLessThan(10); // Should complete in <10ms
     });
 
     it('formatFacetLabel should handle complex paths efficiently', () => {
-      const paths = Array.from({ length: 500 }, (_, i) =>
-        `tools/docker/compose_setup-v${i}.md`
+      const paths = Array.from(
+        { length: 500 },
+        (_, i) => `tools/docker/compose_setup-v${i}.md`,
       );
 
       const start = performance.now();
       const formatted = paths.map(formatFacetLabel);
       const duration = performance.now() - start;
 
-      expect(formatted.every(f => f.includes('Tools › Docker › Compose Setup'))).toBe(true);
+      expect(
+        formatted.every((f) => f.includes('Tools › Docker › Compose Setup')),
+      ).toBe(true);
       expect(duration).toBeLessThan(50); // Should complete in <50ms
     });
   });

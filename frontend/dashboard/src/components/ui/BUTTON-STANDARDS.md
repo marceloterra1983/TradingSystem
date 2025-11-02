@@ -2,12 +2,12 @@
 title: Button Standards - TradingSystem Dashboard
 sidebar_position: 1
 tags:
-  - frontend
+    - frontend
 domain: frontend
 type: guide
 summary: 'RULE: All "Add" buttons must use ONLY the "+" icon, NO TEXT.'
 status: active
-last_review: '2025-10-23'
+last_review: "2025-10-23"
 ---
 
 # Button Standards - TradingSystem Dashboard
@@ -19,17 +19,13 @@ last_review: '2025-10-23'
 ### ✅ Correct Usage
 
 ```tsx
-import { Plus } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Plus } from "lucide-react";
+import { Button } from "../ui/button";
 
 // Correct: Icon-only with tooltip
-<Button
-  onClick={handleAdd}
-  className="h-10 w-10 p-0"
-  title="Adicionar Ideia"
->
-  <Plus className="h-5 w-5" />
-</Button>
+<Button onClick={handleAdd} className="h-10 w-10 p-0" title="Adicionar Ideia">
+    <Plus className="h-5 w-5" />
+</Button>;
 ```
 
 ### ❌ Incorrect Usage

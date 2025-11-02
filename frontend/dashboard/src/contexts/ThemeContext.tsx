@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { isBrowser, safeLocalStorageGet, safeLocalStorageSet } from '../utils/browser';
+import {
+  isBrowser,
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+} from '../utils/browser';
 
 type Theme = 'light' | 'dark' | 'system';
 type ResolvedTheme = 'light' | 'dark';
@@ -11,7 +15,9 @@ interface ThemeContextValue {
   toggleTheme: () => void;
 }
 
-const ThemeContext = React.createContext<ThemeContextValue | undefined>(undefined);
+const ThemeContext = React.createContext<ThemeContextValue | undefined>(
+  undefined,
+);
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -28,7 +34,9 @@ export function ThemeProvider({
     if (!isBrowser || !window.matchMedia) {
       return 'light';
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }, []);
 
   const [theme, setThemeState] = React.useState<Theme>(() => {
@@ -36,17 +44,20 @@ export function ThemeProvider({
     return (stored as Theme) || defaultTheme;
   });
 
-  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>(() => {
-    const stored = safeLocalStorageGet(storageKey) as Theme;
-    const initialTheme = stored || defaultTheme;
-    const resolved = initialTheme === 'system' ? getSystemTheme() : initialTheme;
-    if (isBrowser) {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolved);
-    }
-    return resolved;
-  });
+  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>(
+    () => {
+      const stored = safeLocalStorageGet(storageKey) as Theme;
+      const initialTheme = stored || defaultTheme;
+      const resolved =
+        initialTheme === 'system' ? getSystemTheme() : initialTheme;
+      if (isBrowser) {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(resolved);
+      }
+      return resolved;
+    },
+  );
 
   React.useEffect(() => {
     if (!isBrowser) {
@@ -57,12 +68,15 @@ export function ThemeProvider({
     root.classList.add(resolvedTheme);
   }, [resolvedTheme]);
 
-  const setTheme = React.useCallback((newTheme: Theme) => {
-    safeLocalStorageSet(storageKey, newTheme);
-    setThemeState(newTheme);
-    const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
-    setResolvedTheme(resolved);
-  }, [storageKey, getSystemTheme]);
+  const setTheme = React.useCallback(
+    (newTheme: Theme) => {
+      safeLocalStorageSet(storageKey, newTheme);
+      setThemeState(newTheme);
+      const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
+      setResolvedTheme(resolved);
+    },
+    [storageKey, getSystemTheme],
+  );
 
   const toggleTheme = React.useCallback(() => {
     const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
@@ -92,10 +106,12 @@ export function ThemeProvider({
       setTheme,
       toggleTheme,
     }),
-    [theme, resolvedTheme, setTheme, toggleTheme]
+    [theme, resolvedTheme, setTheme, toggleTheme],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {
