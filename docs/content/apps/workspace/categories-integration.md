@@ -301,7 +301,7 @@ http://localhost:3103
 | Bundle Size | +15KB (gzipped) |
 | Initial Load | +40ms |
 | API Response | 40-60ms |
-| Render Time | <50ms |
+| Render Time | &lt;50ms |
 
 ## 🐛 Troubleshooting
 
