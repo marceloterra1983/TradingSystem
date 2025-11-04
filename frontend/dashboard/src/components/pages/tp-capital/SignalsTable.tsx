@@ -230,10 +230,10 @@ export function SignalsTable() {
                     Ativo
                   </th>
                   <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
-                    Compra Menor
+                    Compra Min.
                   </th>
                   <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
-                    Compra Maior
+                    Compra Max.
                   </th>
                   <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
                     Alvo 1
