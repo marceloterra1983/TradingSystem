@@ -183,14 +183,16 @@ class TimescaleClient {
       `;
 
       const now = new Date();
+      
+      // ts column is BIGINT (milliseconds) - must be a number
       const tsValue =
-        signal.ts instanceof Date
+        typeof signal.ts === 'number'
           ? signal.ts
-          : typeof signal.ts === 'number'
-            ? new Date(signal.ts)
+          : signal.ts instanceof Date
+            ? signal.ts.getTime()
             : signal.ts
-              ? new Date(signal.ts)
-              : now;
+              ? new Date(signal.ts).getTime()
+              : now.getTime();
       const ingestedAtValue =
         signal.ingested_at instanceof Date
           ? signal.ingested_at
