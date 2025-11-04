@@ -43,7 +43,7 @@ import { DEFAULT_LIMIT } from './constants';
  */
 export function SignalsTable() {
   // State management
-  const [limit, setLimit] = useState(DEFAULT_LIMIT);
+  const [limit, setLimit] = useState(200); // Aumentado para 200 (era 10) - mostrar mais sinais
   const [channelFilter, setChannelFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -74,6 +74,9 @@ export function SignalsTable() {
   // Apply filters
   const filteredSignals = useMemo(() => {
     let filtered = signals;
+
+    // SEMPRE filtrar checkpoints (canal system - registros internos)
+    filtered = filtered.filter((s) => s.asset !== '__checkpoint__' && s.channel !== 'system');
 
     if (channelFilter !== 'all') {
       filtered = filtered.filter((s) => s.channel === channelFilter);
