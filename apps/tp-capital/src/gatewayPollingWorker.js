@@ -256,22 +256,10 @@ export class GatewayPollingWorker {
       return;
     }
 
-    // 2. Validar se é um sinal COMPLETO (com valores de compra)
-    // APENAS sinais completos devem ser salvos na tabela
-    if (!signal.buy_min || !signal.buy_max) {
-      logger.debug({
-        messageId: msg.message_id,
-        asset: signal.asset,
-        hasBuyMin: !!signal.buy_min,
-        hasBuyMax: !!signal.buy_max
-      }, 'Message parsed but incomplete signal (no buy values) - ignoring');
-
-      await this.markMessageAsIgnored(msg.message_id, 'Incomplete signal - missing buy values');
-      if (this.metrics) {
-        this.metrics.messagesProcessed.inc({ status: 'ignored_incomplete' });
-      }
-      return;
-    }
+    // 2. SALVAR TODOS OS SINAIS (completos ou incompletos)
+    // Usuário solicitou: "deve importar todos os sinais já que está na tabela do telegram gateway"
+    // Removida validação que bloqueava sinais sem valores de compra
+    // Sinais narrativos (análises sem valores) agora serão salvos também
 
     // 3. Check for duplicate (idempotency)
     const isDuplicate = await this.checkDuplicate(msg);

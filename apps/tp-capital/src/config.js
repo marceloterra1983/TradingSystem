@@ -345,15 +345,16 @@ export const config = {
         .map(s => s.trim())
         .filter(Boolean),
       // Regex para detectar sinais de trading
-      // Padrão: contém Ativo: ou Compra: ou Alvo ou Stop
+      // DESABILITADO: Importar TODAS as mensagens do canal (sem filtro de texto)
+      // Motivo: Mensagens têm formatos variados (estruturado e narrativo)
       textContains: 
         process.env.TP_CAPITAL_GATEWAY_FILTER_TEXT_CONTAINS ||
         process.env.GATEWAY_FILTER_TEXT_CONTAINS || 
-        '(Ativo:|Compra:|Alvo|Stop:?)', 
+        '', // ✅ VAZIO = Sem filtro (importa tudo)
       textNotContains: 
         process.env.TP_CAPITAL_GATEWAY_FILTER_TEXT_NOT_CONTAINS ||
         process.env.GATEWAY_FILTER_TEXT_NOT_CONTAINS || 
-        '(spam|teste|demo)',
+        '', // ✅ VAZIO = Sem exclusão (importa tudo)
     }
   },
   server: {
