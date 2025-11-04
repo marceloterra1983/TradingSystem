@@ -248,7 +248,57 @@ export class MessageSyncService {
     const { saveMessages } = await import('../db/messagesRepository.js');
     const savedCount = await saveMessages(messagesToSave, this.logger);
 
+    // HYBRID Architecture: Publish Redis events for subscribers (PUSH)
+    if (savedCount > 0) {
+      await this.publishNewMessagesEvent(channelId, messagesToSave);
+    }
+
     return savedCount;
+  }
+
+  /**
+   * Publica evento Redis quando mensagens são salvas (HYBRID Push)
+   * TP-Capital subscribers receberão notificação instantânea
+   * 
+   * @private
+   */
+  async publishNewMessagesEvent(channelId, messages) {
+    try {
+      // Lazy initialize Redis client
+      if (!this.redisClient) {
+        const redis = await import('redis');
+        this.redisClient = redis.createClient({
+          url: process.env.REDIS_URL || 'redis://localhost:6379'
+        });
+        await this.redisClient.connect();
+        
+        this.logger.info('[MessageSync] Redis client connected for Pub/Sub');
+      }
+
+      // Publicar evento para cada mensagem
+      for (const msg of messages) {
+        await this.redisClient.publish('tp-capital:new-message', JSON.stringify({
+          channelId,
+          messageId: msg.message_id || msg.id,
+          text: msg.text || msg.message_text,
+          caption: msg.caption,
+          telegramDate: msg.telegram_date || msg.original_timestamp,
+          timestamp: Date.now()
+        }));
+      }
+
+      this.logger.debug({
+        channelId,
+        count: messages.length
+      }, '[MessageSync] Published Redis events for TP-Capital subscribers');
+
+    } catch (error) {
+      // Log mas não falha (Redis é opcional - fallback via polling)
+      this.logger.warn({
+        err: error,
+        channelId
+      }, '[MessageSync] Failed to publish Redis events (non-critical - fallback via polling)');
+    }
   }
 
   /**

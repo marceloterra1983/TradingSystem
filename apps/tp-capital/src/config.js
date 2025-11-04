@@ -312,10 +312,12 @@ export const config = {
     ssl: gatewayDbConfig.ssl,
     pool: gatewayDbConfig.pool,
     
+    // HYBRID Architecture: Polling agora é fallback (60s)
+    // Primary method: Redis Pub/Sub (real-time)
     pollingIntervalMs: Number(
       process.env.TP_CAPITAL_GATEWAY_POLLING_INTERVAL_MS || 
       process.env.GATEWAY_POLLING_INTERVAL_MS || 
-      5000
+      60000  // 60 segundos (era 5s) - agora é fallback, não primário
     ),
     signalsChannelId: 
       process.env.TP_CAPITAL_SIGNALS_CHANNEL_ID ||

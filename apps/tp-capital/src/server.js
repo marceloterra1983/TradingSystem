@@ -41,6 +41,7 @@ import ingestionRouter from '../api/src/routes/ingestion.js';
 // Authentication & Validation (NEW)
 import { requireApiKey, optionalApiKey } from './middleware/authMiddleware.js';
 import { FullScanWorker } from './workers/fullScanWorker.js';
+import { RedisSubscriberWorker } from './workers/redisSubscriberWorker.js';
 import { validateBody, validateQuery, validateParams } from './middleware/validationMiddleware.js';
 import { CreateChannelSchema, UpdateChannelSchema, ChannelIdParamSchema } from './schemas/channelSchemas.js';
 import { CreateBotSchema, UpdateBotSchema, BotIdParamSchema } from './schemas/botSchemas.js';
@@ -750,8 +751,37 @@ async function startGatewayPollingWorker() {
   }
 }
 
-// Start polling worker
+// HYBRID ARCHITECTURE: Start both Push (Redis) and Pull (Polling)
+// Initialize global workers
+let globalRedisSubscriber = null;
+
+// Start Redis Subscriber (PRIMARY - Push, real-time)
+async function startRedisSubscriber() {
+  try {
+    logger.info('[HYBRID] Starting Redis subscriber (PUSH - primary method)');
+    
+    globalRedisSubscriber = new RedisSubscriberWorker({
+      tpCapitalDb: timescaleClient,
+      metrics: gatewayMetrics
+    });
+    
+    await globalRedisSubscriber.start();
+    
+    logger.info('[HYBRID] ✅ Redis subscriber started successfully');
+    logger.info('[HYBRID] Architecture: Push (Redis < 100ms) + Pull (Polling 60s fallback)');
+    
+  } catch (error) {
+    logger.error({ err: error }, '[HYBRID] Redis subscriber failed to start');
+    logger.warn('[HYBRID] ⚠️  Falling back to polling-only mode (Pull every 60s)');
+    // Não falha startup - polling worker continua funcionando como fallback
+  }
+}
+
+// Start polling worker (FALLBACK - Pull, every 60s)
 startGatewayPollingWorker();
+
+// Start Redis subscriber (PRIMARY - Push, real-time)
+startRedisSubscriber();
 
 // Start historical sync worker (backfill - runs once)
 async function startHistoricalSyncWorker() {
@@ -850,9 +880,15 @@ async function gracefulShutdown(signal) {
     // Stop components gracefully
     const stopPromises = [];
 
-    // Stop polling worker
+    // Stop Redis subscriber (PUSH)
+    if (globalRedisSubscriber) {
+      logger.info('[HYBRID] Stopping Redis subscriber...');
+      stopPromises.push(globalRedisSubscriber.stop());
+    }
+
+    // Stop polling worker (PULL fallback)
     if (globalPollingWorker) {
-      logger.info('Stopping Gateway polling worker...');
+      logger.info('[HYBRID] Stopping Gateway polling worker...');
       stopPromises.push(globalPollingWorker.stop());
     }
 
