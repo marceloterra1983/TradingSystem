@@ -30,8 +30,8 @@ export const ENDPOINTS = {
    * @description HTTP REST APIs for application services
    */
   
-  /** Workspace API - Port 3201 (Docker container) */
-  workspace: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3201',
+  /** Workspace API - Port 3210 (PostgreSQL Autonomous Stack) */
+  workspace: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3210',
   
   /** TP Capital Signals API - Port 4008 (Autonomous Stack) */
   tpCapital: import.meta.env.VITE_TP_CAPITAL_API_URL || 'http://localhost:4008',
@@ -39,8 +39,8 @@ export const ENDPOINTS = {
   /** Documentation API - Port 3405 (Docker container) */
   documentation: import.meta.env.VITE_DOCUMENTATION_API_URL || 'http://localhost:3405',
   
-  /** Telegram Gateway API - Port 4010 (Node.js service) */
-  telegramGateway: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4010',
+  /** Telegram Gateway API - Port 4006 (Node.js service) - Corrected */
+  telegramGateway: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4006',
   
   /**
    * Database UI Tools
