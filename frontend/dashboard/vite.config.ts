@@ -102,7 +102,7 @@ export default defineConfig(({ mode }) => {
   );
   const tpCapitalProxy = resolveProxy(
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
-    'http://localhost:4005',
+    'http://localhost:4008',
   );
   // Docs API (FlexSearch + CRUD) runs on 3405; 3404 is static docs (NGINX)
   const docsApiProxy = resolveProxy(
@@ -291,7 +291,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
         '/api/telegram-photo': {
-          target: 'http://localhost:4006',
+          target: 'http://localhost:4008',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
         },

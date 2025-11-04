@@ -1,0 +1,74 @@
+# ============================================
+# WORKSPACE - NEON DATABASE CONFIGURATION
+# ============================================
+# 
+# INSTRUÇÕES PARA ADICIONAR AO .env RAIZ:
+# 1. Copie o conteúdo abaixo
+# 2. Cole no final do arquivo .env na raiz do projeto
+# 3. Salve o arquivo
+# 4. Reinicie os containers se já estiverem rodando
+#
+
+# Database Strategy (CRÍTICO: Define qual DB usar)
+LIBRARY_DB_STRATEGY=neon
+
+# Neon Connection (Internal Docker Network)
+NEON_HOST=workspace-db-compute
+NEON_PORT=55432
+NEON_DATABASE=workspace
+NEON_USER=postgres
+NEON_PASSWORD=neon_secure_pass
+NEON_SCHEMA=workspace
+
+# Connection String (alternativa ao uso de variáveis separadas)
+NEON_DATABASE_URL=postgresql://postgres:neon_secure_pass@workspace-db-compute:55432/workspace
+
+# Connection Pool Settings
+NEON_POOL_MAX=50
+NEON_POOL_MIN=2
+NEON_IDLE_TIMEOUT=30000
+NEON_CONNECTION_TIMEOUT=5000
+
+# Query Timeouts (opcional - previne queries travadas)
+NEON_STATEMENT_TIMEOUT=30000
+NEON_QUERY_TIMEOUT=30000
+
+# SSL (desenvolvimento local = false, produção = true)
+NEON_SSL=false
+
+# Workspace API Configuration
+WORKSPACE_PORT=3200
+WORKSPACE_EXTERNAL_PORT=3200
+
+# CORS - Permitir Dashboard e Documentação
+CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401
+
+# Rate Limiting (proteção contra abuse)
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX=120
+
+# Logging
+LOG_LEVEL=info
+
+# Metrics
+METRICS_ENABLED=true
+CORRELATION_ID_HEADER=x-correlation-id
+
+# ============================================
+# FUTURO: REDIS CACHE (IMPLEMENTAR - P1)
+# ============================================
+# Descomentar quando adicionar Redis ao stack
+
+# REDIS_URL=redis://workspace-cache:6379
+# CACHE_TTL=60
+# CACHE_ENABLED=true
+
+# ============================================
+# FUTURO: JWT AUTHENTICATION (IMPLEMENTAR - P0)
+# ============================================
+# Gerar secret com: openssl rand -base64 32
+
+# JWT_SECRET=GERAR_SECRET_AQUI
+# JWT_EXPIRES_IN=24h
+# JWT_REFRESH_EXPIRES_IN=7d
+

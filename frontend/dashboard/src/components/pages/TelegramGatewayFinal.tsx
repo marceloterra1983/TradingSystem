@@ -55,6 +55,9 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { GatewayLogsCard } from '../telegram/GatewayLogsCard';
+import { TwitterPreview } from '../telegram/TwitterPreview';
+import { YouTubePreview } from '../telegram/YouTubePreview';
+import { InstagramPreview } from '../telegram/InstagramPreview';
 
 // interface GatewayData {
 //   health?: {
@@ -1267,79 +1270,6 @@ export function TelegramGatewayFinal() {
 
           {selectedMessage && (
             <div className="space-y-4 mt-4">
-              {/* Message Info Grid */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    Canal
-                  </p>
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {getChannelLabel(selectedMessage.channelId)}
-                    </p>
-                    <p className="font-mono text-xs text-slate-500 dark:text-slate-500">
-                      {selectedMessage.channelId}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    Message ID
-                  </p>
-                  <p className="font-mono text-sm text-slate-900 dark:text-slate-100">
-                    #{selectedMessage.messageId}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    Status
-                  </p>
-                  <Badge
-                    variant={
-                      selectedMessage.status === 'published'
-                        ? 'success'
-                        : selectedMessage.status === 'failed'
-                          ? 'destructive'
-                          : selectedMessage.status === 'queued'
-                            ? 'warning'
-                            : 'secondary'
-                    }
-                    className="capitalize"
-                  >
-                    {selectedMessage.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    Fonte
-                  </p>
-                  <p className="text-sm text-slate-900 dark:text-slate-100">
-                    {selectedMessage.source || '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    Enviada em
-                  </p>
-                  <p className="text-sm text-slate-900 dark:text-slate-100">
-                    {formatDate(
-                      selectedMessage.telegramDate ||
-                        selectedMessage.receivedAt,
-                    )}
-                  </p>
-                </div>
-                {selectedMessage.processedAt && (
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                      Processada em
-                    </p>
-                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                      {formatDate(selectedMessage.processedAt)}
-                    </p>
-                  </div>
-                )}
-              </div>
-
               {/* Reply To Message */}
               {selectedMessage.metadata?.replyTo?.text && (
                 <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800/50 border-l-4 border-cyan-500">
@@ -1364,17 +1294,42 @@ export function TelegramGatewayFinal() {
                     Imagem
                   </p>
                   <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-slate-950">
-                    <img
-                      src={`/api/telegram-photo/${selectedMessage.channelId}/${selectedMessage.messageId}`}
-                      alt="Imagem da mensagem"
-                      className="w-full h-auto max-h-96 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove(
-                          'hidden',
+                    {(() => {
+                      // Build photo URL using Gateway API endpoint
+                      const photoUrl = selectedMessage.photoUrl || 
+                        (selectedMessage.channelId && selectedMessage.messageId 
+                          ? `${import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4010'}/api/telegram-gateway/photos/${selectedMessage.channelId}/${selectedMessage.messageId}`
+                          : null);
+                      
+                      if (photoUrl) {
+                        return (
+                          <img
+                            src={photoUrl}
+                            alt="Imagem da mensagem"
+                            className="w-full h-auto max-h-96 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove(
+                                'hidden',
+                              );
+                            }}
+                          />
                         );
-                      }}
-                    />
+                      }
+                      
+                      // Fallback if no photo URL can be constructed
+                      return (
+                        <div className="p-8 text-center">
+                          <Image className="h-16 w-16 mx-auto mb-3 text-slate-400 dark:text-slate-600" />
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Foto do Telegram
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Informações insuficientes para carregar a foto
+                          </p>
+                        </div>
+                      );
+                    })()}
                     <div className="hidden p-4 text-center text-sm text-slate-500 dark:text-slate-400">
                       Erro ao carregar imagem
                     </div>
@@ -1401,6 +1356,36 @@ export function TelegramGatewayFinal() {
                   </div>
                 </div>
               </div>
+
+              {/* Twitter Link Preview */}
+              {selectedMessage.metadata?.linkPreview?.type === 'twitter' && (
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Link do Twitter
+                  </p>
+                  <TwitterPreview preview={selectedMessage.metadata.linkPreview} />
+                </div>
+              )}
+
+              {/* YouTube Link Preview */}
+              {selectedMessage.metadata?.linkPreview?.type === 'youtube' && (
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Vídeo do YouTube
+                  </p>
+                  <YouTubePreview preview={selectedMessage.metadata.linkPreview} />
+                </div>
+              )}
+
+              {/* Instagram Link Preview */}
+              {selectedMessage.metadata?.linkPreview?.type === 'instagram' && (
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    {selectedMessage.metadata.linkPreview.postType === 'reel' ? 'Reel do Instagram' : 'Post do Instagram'}
+                  </p>
+                  <InstagramPreview preview={selectedMessage.metadata.linkPreview} />
+                </div>
+              )}
 
               {/* Additional Fields if available */}
               {selectedMessage.threadId && (

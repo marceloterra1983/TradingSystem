@@ -6,6 +6,7 @@ import {
   getPool
 } from './messageStore.js';
 import { logger } from './logger.js';
+import { extractLinkPreviews } from './utils/linkPreview.js';
 
 const router = express.Router();
 
@@ -359,6 +360,26 @@ async function syncChannel(channelId, telegramClient, { logger, telegramLimit = 
           }
         }
         
+        // Detectar e buscar previews de links (Twitter, YouTube, etc.)
+        let linkPreview = null;
+        const messageText = msg.message || msg.text || '';
+        if (messageText && messageText.length > 0) {
+          try {
+            linkPreview = await extractLinkPreviews(messageText);
+            if (linkPreview) {
+              logger.info(
+                { channelId, messageId: msg.id, previewType: linkPreview.type },
+                '[SyncChannel] Link preview extracted'
+              );
+            }
+          } catch (linkError) {
+            logger.warn(
+              { err: linkError, channelId, messageId: msg.id },
+              '[SyncChannel] Failed to extract link preview'
+            );
+          }
+        }
+        
         // Usar a data original do Telegram (quando a mensagem foi realmente enviada)
         const originalDate = new Date(msg.date * 1000);
         
@@ -386,7 +407,8 @@ async function syncChannel(channelId, telegramClient, { logger, telegramLimit = 
             replyTo: msg.replyTo ? {
               messageId: msg.replyTo.replyToMsgId,
               text: replyToMessageText
-            } : null
+            } : null,
+            linkPreview: linkPreview // Twitter/X link preview metadata
           },
         };
 

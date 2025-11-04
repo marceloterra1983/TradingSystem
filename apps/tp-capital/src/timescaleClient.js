@@ -29,21 +29,20 @@ class TimescaleClient {
       poolConfig.ssl = config.timescale.ssl;
     }
 
-    if (this.schema) {
-      poolConfig.options = `-c search_path=${this.schema},public`;
-    }
-
     this.pool = new Pool(poolConfig);
 
     // Set search path for this connection pool
-    this.pool.on('connect', async (client) => {
-      try {
-        await client.query(`SET search_path TO ${this.schema}, public`);
-        logger.info({ schema: this.schema }, 'Search path set for connection');
-      } catch (err) {
-        logger.error({ err, schema: this.schema }, 'Failed to set search path');
-      }
-    });
+    // Note: Don't use poolConfig.options as it's not supported by PgBouncer
+    if (this.schema) {
+      this.pool.on('connect', async (client) => {
+        try {
+          await client.query(`SET search_path TO ${this.schema}, public`);
+          logger.debug({ schema: this.schema }, 'Search path set for connection');
+        } catch (err) {
+          logger.error({ err, schema: this.schema }, 'Failed to set search path');
+        }
+      });
+    }
 
     this.pool.on('error', (err) => {
       logger.error({ err }, 'Unexpected error on idle client');

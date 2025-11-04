@@ -1,10 +1,35 @@
 name: apps
 
+# ==============================================================================
+# NOTICE (2025-11-04): TP-Capital Migrated to Autonomous Stack
+# ==============================================================================
+# 
+# TP-Capital now runs as autonomous stack via docker-compose.tp-capital-stack.yml
+# 
+# New Stack:
+#   - File: tools/compose/docker-compose.tp-capital-stack.yml
+#   - Port: 4008 (was 4005)
+#   - Containers: 5 (TimescaleDB, PgBouncer, Redis×2, API)
+#   - Integration: HTTP API (was direct database)
+# 
+# To start new stack:
+#   bash scripts/docker/start-tp-capital-stack.sh
+# 
+# Legacy service below is DISABLED. Remove after 2025-11-11.
+# ==============================================================================
+
 services:
   # ========================================
-  # TP Capital API (Trading Signals)
+  # TP Capital API (Trading Signals) - LEGACY/DISABLED
   # ========================================
-  tp-capital:
+  # 
+  # ⚠️  DEPRECATED (2025-11-04): Migrated to autonomous stack
+  # Use docker-compose.tp-capital-stack.yml instead (port 4008)
+  # 
+  # Legacy service kept for reference only
+  # To remove: Delete this entire tp-capital service block after 1 week
+  # 
+  # tp-capital:
     image: "${IMG_APPS_TPCAPITAL:-img-apps-tpcapital}:${IMG_VERSION:-latest}"
     build:
       context: ../..

@@ -1,0 +1,594 @@
+name: tp-capital-stack
+
+# ==============================================================================
+# TP-Capital Autonomous Stack - Neon PostgreSQL Edition
+# ==============================================================================
+# Architecture: Serverless PostgreSQL (Neon) + caching + connection pooling
+# Purpose: Isolated, high-performance signal ingestion with auto-scaling
+# Resources: 4 vCPU, 6GB RAM total (vs 3.5 vCPU, 5.25GB with TimescaleDB)
+# ==============================================================================
+# 
+# Related ADR: docs/content/reference/adrs/008-tp-capital-autonomous-stack.md
+# Based on: Workspace Stack (proven Neon setup)
+# Migration from: Shared TimescaleDB (tradingsystem database, tp_capital schema)
+# Migration to: Dedicated Neon stack with serverless PostgreSQL
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # 1. Neon Pageserver - Storage Layer
+  # ============================================================================
+  tp-capital-db-pageserver:
+    build:
+      context: ../..
+      dockerfile: tools/compose/neon.Dockerfile
+      args:
+        NEON_VERSION: latest
+    image: neon-local:latest
+    container_name: tp-capital-db-pageserver
+    
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/pageserver &&
+      /usr/local/bin/pageserver \
+        --listen-http=0.0.0.0:9898 \
+        --listen-pg=0.0.0.0:6400 \
+        --id=1 \
+        --workdir=/data/pageserver
+      "
+    
+    ports:
+      - "${TP_CAPITAL_PAGESERVER_HTTP_PORT:-9898}:9898"  # HTTP API (metrics)
+      - "${TP_CAPITAL_PAGESERVER_PG_PORT:-6400}:6400"    # PostgreSQL protocol
+    
+    volumes:
+      - tp-capital-db-pageserver-data:/data
+    
+    networks:
+      - tp_capital_backend
+    
+    environment:
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+      - RUST_BACKTRACE=1
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9898/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    restart: unless-stopped
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=neon"
+      - "com.tradingsystem.component=pageserver"
+      - "com.tradingsystem.description=Neon storage layer for TP Capital"
+
+  # ============================================================================
+  # 2. Neon Safekeeper - Write-Ahead Log Service
+  # ============================================================================
+  tp-capital-db-safekeeper:
+    image: neon-local:latest
+    container_name: tp-capital-db-safekeeper
+    
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/safekeeper &&
+      /usr/local/bin/safekeeper \
+        --listen-http=0.0.0.0:7676 \
+        --listen-pg=0.0.0.0:5454 \
+        --id=1 \
+        --workdir=/data/safekeeper
+      "
+    
+    ports:
+      - "${TP_CAPITAL_SAFEKEEPER_HTTP_PORT:-7676}:7676"  # HTTP API (metrics)
+      - "${TP_CAPITAL_SAFEKEEPER_PG_PORT:-5454}:5454"    # PostgreSQL protocol
+    
+    volumes:
+      - tp-capital-db-safekeeper-data:/data
+    
+    networks:
+      - tp_capital_backend
+    
+    environment:
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+      - RUST_BACKTRACE=1
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7676/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    restart: unless-stopped
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=neon"
+      - "com.tradingsystem.component=safekeeper"
+      - "com.tradingsystem.description=Neon WAL service for TP Capital"
+
+  # ============================================================================
+  # 3. Neon Compute - PostgreSQL Endpoint
+  # ============================================================================
+  tp-capital-db-compute:
+    image: neon-local:latest
+    container_name: tp-capital-db-compute
+    
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/compute &&
+      /usr/local/bin/compute_ctl \
+        --pgdata=/data/compute/pgdata \
+        --connstr=postgresql://postgres@localhost:55432/${TP_CAPITAL_DB_NAME:-tp_capital_db} \
+        --spec-path=/data/compute/spec.json \
+        --mode=static \
+        --pageserver=tp-capital-db-pageserver:6400 \
+        --safekeepers=tp-capital-db-safekeeper:5454
+      "
+    
+    ports:
+      - "${TP_CAPITAL_DB_PORT:-5435}:55432"  # PostgreSQL port (external:internal)
+    
+    volumes:
+      - tp-capital-db-compute-data:/data
+      - ../../backend/data/neon/tp-capital:/docker-entrypoint-initdb.d:ro
+    
+    networks:
+      - tp_capital_backend
+    
+    environment:
+      - POSTGRES_USER=${TP_CAPITAL_DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - POSTGRES_DB=${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      - NEON_PAGESERVER=tp-capital-db-pageserver:6400
+      - NEON_SAFEKEEPER=tp-capital-db-safekeeper:5454
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+    
+    depends_on:
+      tp-capital-db-pageserver:
+        condition: service_healthy
+      tp-capital-db-safekeeper:
+        condition: service_healthy
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TP_CAPITAL_DB_USER:-postgres} -h localhost -p 55432"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=neon"
+      - "com.tradingsystem.component=compute"
+      - "com.tradingsystem.description=Neon PostgreSQL endpoint for TP Capital"
+
+  # ============================================================================
+  # 4. PgBouncer - Connection Pooling (Optional with Neon)
+  # ============================================================================
+  # Note: PgBouncer is less critical with Neon due to efficient connection handling,
+  # but kept for consistency and potential performance benefits
+  tp-capital-pgbouncer:
+    image: pgbouncer/pgbouncer:latest
+    container_name: tp-capital-pgbouncer
+    restart: unless-stopped
+    
+    environment:
+      - DATABASES_HOST=tp-capital-db-compute
+      - DATABASES_PORT=55432
+      - DATABASES_USER=${TP_CAPITAL_DB_USER:-postgres}
+      - DATABASES_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - DATABASES_DBNAME=${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=25
+      - MIN_POOL_SIZE=5
+      - RESERVE_POOL_SIZE=5
+      - MAX_DB_CONNECTIONS=50
+      - SERVER_RESET_QUERY=DISCARD ALL
+      - SERVER_CHECK_DELAY=10
+    
+    ports:
+      - "${TP_CAPITAL_PGBOUNCER_PORT:-6435}:6432"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    depends_on:
+      tp-capital-db-compute:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ['CMD-SHELL', 'PGPASSWORD=${TP_CAPITAL_DB_PASSWORD} psql -h localhost -p 6432 -U ${TP_CAPITAL_DB_USER:-postgres} -d ${TP_CAPITAL_DB_NAME:-tp_capital_db} -c "SELECT 1"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - tp_capital_backend
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=pgbouncer"
+      - "com.tradingsystem.description=Connection pooling for Neon PostgreSQL"
+
+  # ============================================================================
+  # 5. Redis Master - Hot Cache (Write Path)
+  # ============================================================================
+  tp-capital-redis-master:
+    container_name: tp-capital-redis-master
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --maxclients 1000
+    
+    ports:
+      - "${TP_CAPITAL_REDIS_PORT:-6381}:6379"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      tp_capital_backend:
+        aliases:
+          - tp-capital-redis-master
+          - redis-master
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.role=master"
+
+  # ============================================================================
+  # 6. Redis Replica - Read Scaling
+  # ============================================================================
+  tp-capital-redis-replica:
+    container_name: tp-capital-redis-replica
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --replicaof tp-capital-redis-master 6379
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --replica-read-only yes
+    
+    ports:
+      - "${TP_CAPITAL_REDIS_REPLICA_PORT:-6382}:6379"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    depends_on:
+      tp-capital-redis-master:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - tp_capital_backend
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.role=replica"
+
+  # ============================================================================
+  # 7. TP Capital API - Application Layer
+  # ============================================================================
+  tp-capital-api:
+    image: "${IMG_APPS_TPCAPITAL:-img-apps-tpcapital}:${IMG_VERSION:-latest}"
+    build:
+      context: ../..
+      dockerfile: apps/tp-capital/Dockerfile.dev
+    container_name: tp-capital-api
+    
+    env_file:
+      - ../../.env
+    
+    ports:
+      - "${TP_CAPITAL_EXTERNAL_PORT:-4005}:4005"
+    
+    environment:
+      # Server
+      - PORT=4005
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Database Strategy (Neon via PgBouncer)
+      - TP_CAPITAL_DB_STRATEGY=neon
+      
+      # Neon Connection (via PgBouncer - internal container network)
+      - TP_CAPITAL_DB_HOST=tp-capital-pgbouncer
+      - TP_CAPITAL_DB_PORT=6432
+      - TP_CAPITAL_DB_NAME=${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      - TP_CAPITAL_DB_USER=${TP_CAPITAL_DB_USER:-postgres}
+      - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - TP_CAPITAL_DB_SCHEMA=signals
+      
+      # Alternative: Direct Neon connection (bypass PgBouncer)
+      - NEON_HOST=tp-capital-db-compute
+      - NEON_PORT=55432
+      - NEON_DATABASE=${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      - NEON_USER=${TP_CAPITAL_DB_USER:-postgres}
+      - NEON_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - NEON_SCHEMA=signals
+      - NEON_DATABASE_URL=postgresql://${TP_CAPITAL_DB_USER:-postgres}:${TP_CAPITAL_DB_PASSWORD}@tp-capital-db-compute:55432/${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      
+      # Connection Pool
+      - TP_CAPITAL_POOL_MAX=25
+      - TP_CAPITAL_POOL_MIN=5
+      - TP_CAPITAL_IDLE_TIMEOUT=30000
+      - TP_CAPITAL_CONNECTION_TIMEOUT=5000
+      
+      # Redis Cache
+      - REDIS_ENABLED=true
+      - REDIS_MASTER_HOST=tp-capital-redis-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_REPLICA_HOST=tp-capital-redis-replica
+      - REDIS_REPLICA_PORT=6379
+      - REDIS_CACHE_TTL=30
+      
+      # Gateway Database Connection (for polling messages)
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-timescale:5432/telegram_gateway
+      - GATEWAY_DATABASE_HOST=telegram-timescale
+      - GATEWAY_DATABASE_PORT=5432
+      - GATEWAY_DATABASE_NAME=telegram_gateway
+      - GATEWAY_DATABASE_SCHEMA=telegram_gateway
+      - GATEWAY_DATABASE_USER=telegram
+      - GATEWAY_DATABASE_PASSWORD=${TELEGRAM_DB_PASSWORD}
+      
+      # Gateway Configuration
+      - GATEWAY_POLLING_INTERVAL_MS=${GATEWAY_POLLING_INTERVAL_MS:-5000}
+      - GATEWAY_SIGNALS_CHANNEL_ID=${GATEWAY_SIGNALS_CHANNEL_ID:--1001649127710}
+      - GATEWAY_BATCH_SIZE=${GATEWAY_BATCH_SIZE:-100}
+      
+      # Telegram Gateway Connection (host service)
+      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+      - TELEGRAM_GATEWAY_PORT=4010
+      
+      # CORS
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
+      
+      # Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=120
+      
+      # Circuit Breaker
+      - CIRCUIT_BREAKER_TIMEOUT=5000
+      - CIRCUIT_BREAKER_ERROR_THRESHOLD=50
+      - CIRCUIT_BREAKER_RESET_TIMEOUT=30000
+    
+    volumes:
+      # Hot-reload: mount source code
+      - ../../apps/tp-capital/src:/app/src:ro
+      - ../../apps/tp-capital/api:/app/api:ro
+      
+      # Mount shared modules
+      - ../../backend/shared:/app/backend/shared:ro
+      
+      # Anonymous volume prevents overwrite
+      - /app/node_modules
+    
+    networks:
+      - tp_capital_backend
+      - tradingsystem_backend  # Connect to main network for Dashboard
+      - telegram_backend        # Required to resolve telegram-timescale
+    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    depends_on:
+      tp-capital-pgbouncer:
+        condition: service_healthy
+      tp-capital-redis-master:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=application"
+      - "com.tradingsystem.service=api"
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+networks:
+  # Internal network for TP Capital stack only
+  tp_capital_backend:
+    name: tp_capital_backend
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.0.0/16
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+  
+  # External networks for inter-service communication
+  tradingsystem_backend:
+    name: tradingsystem_backend
+    external: true
+  
+  telegram_backend:
+    name: telegram_backend
+    external: true
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+volumes:
+  tp-capital-db-pageserver-data:
+    name: tp-capital-db-pageserver-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.component=neon"
+      - "com.tradingsystem.layer=storage"
+  
+  tp-capital-db-safekeeper-data:
+    name: tp-capital-db-safekeeper-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.component=neon"
+      - "com.tradingsystem.layer=wal"
+  
+  tp-capital-db-compute-data:
+    name: tp-capital-db-compute-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.component=neon"
+      - "com.tradingsystem.layer=compute"
+
+# ==============================================================================
+# USAGE EXAMPLES
+# ==============================================================================
+# 
+# Start entire TP Capital stack (Neon edition):
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml up -d
+# 
+# View logs (all services):
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml logs -f
+# 
+# View logs (specific service):
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml logs -f tp-capital-api
+# 
+# Check status:
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml ps
+# 
+# Connect to database:
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml exec tp-capital-db-compute \
+#     psql -U postgres -d tp_capital_db
+# 
+# Connect via PgBouncer:
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml exec tp-capital-pgbouncer \
+#     psql -h localhost -p 6432 -U postgres -d tp_capital_db
+# 
+# Check Neon metrics:
+#   curl http://localhost:9898/v1/status  # Pageserver
+#   curl http://localhost:7676/v1/status  # Safekeeper
+# 
+# Stop entire stack:
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml down
+# 
+# Stop and remove volumes (CAUTION):
+#   docker compose -f tools/compose/docker-compose.tp-capital-neon-stack.yml down -v
+# 
+# ==============================================================================
+

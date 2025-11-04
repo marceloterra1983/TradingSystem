@@ -31,10 +31,21 @@ echo ""
 # 2. Limpar porta 4007 e processos relacionados (robusto)
 echo "🔧 Liberando porta 4007 e processos relacionados..."
 
-# Matar processos npm/node do telegram-gateway
+# Matar TODOS os processos relacionados ao telegram-gateway
+echo "   🔍 Buscando processos conflitantes..."
 pkill -f "npm.*telegram-gateway" 2>/dev/null || true
 pkill -f "node.*telegram-gateway" 2>/dev/null || true
+pkill -f "node.*src/index.js" 2>/dev/null || true  # Matar processos node src/index.js genéricos
+pkill -f "nodemon.*telegram-gateway" 2>/dev/null || true
 sleep 2
+
+# Matar processos específicos que estão na porta 4007
+PORT_PIDS=$(lsof -ti :4007 2>/dev/null || true)
+if [ -n "$PORT_PIDS" ]; then
+  echo "   ⚠️  Encontrados processos na porta 4007: $PORT_PIDS"
+  echo "$PORT_PIDS" | xargs kill -9 2>/dev/null || true
+  sleep 2
+fi
 
 # Limpar porta 4007 múltiplas vezes
 max_attempts=5

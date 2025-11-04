@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import path from 'path';
+import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import {
   buildMessageSummary,
   cancelAuthentication,
@@ -170,6 +173,84 @@ telegramGatewayRouter.get('/queue/preview-limit', (_req, res) => {
       limit: getQueuePreviewLimit(),
     },
   });
+});
+
+// PHOTO DOWNLOAD ENDPOINT: Download Telegram photos via MTProto service
+telegramGatewayRouter.get('/photos/:channelId/:messageId', async (req, res) => {
+  const { channelId, messageId } = req.params;
+  
+  try {
+    // Define cache directory
+    const cacheDir = path.join(process.cwd(), 'cache', 'photos');
+    const cacheFile = path.join(cacheDir, `${channelId}_${messageId}.jpg`);
+    
+    // Check if photo is already cached
+    if (existsSync(cacheFile)) {
+      req.log?.info?.({ channelId, messageId }, '[PhotoDownload] Serving from cache');
+      
+      return res.sendFile(cacheFile, (err) => {
+        if (err) {
+          req.log?.error?.({ err, channelId, messageId }, '[PhotoDownload] Failed to send cached file');
+          res.status(500).json({ 
+            success: false, 
+            error: 'Failed to send cached photo' 
+          });
+        }
+      });
+    }
+    
+    req.log?.info?.({ channelId, messageId }, '[PhotoDownload] Fetching from MTProto service');
+    
+    // Fetch photo from MTProto service
+    const mtprotoServiceUrl = process.env.MTPROTO_SERVICE_URL || 'http://localhost:4007';
+    
+    const response = await fetch(`${mtprotoServiceUrl}/photo/${channelId}/${messageId}`, {
+      signal: AbortSignal.timeout(30000) // 30s timeout for photo download
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      req.log?.error?.({ 
+        channelId, 
+        messageId, 
+        status: response.status,
+        error: errorText
+      }, '[PhotoDownload] MTProto service returned error');
+      
+      return res.status(response.status).json({
+        success: false,
+        error: 'Failed to fetch photo from MTProto service',
+        details: errorText
+      });
+    }
+    
+    // Get photo buffer
+    const photoBuffer = Buffer.from(await response.arrayBuffer());
+    
+    // Create cache directory if it doesn't exist
+    await fs.mkdir(cacheDir, { recursive: true });
+    
+    // Save to cache (fire and forget - don't wait)
+    fs.writeFile(cacheFile, photoBuffer).catch(err => {
+      req.log?.warn?.({ err, channelId, messageId }, '[PhotoDownload] Failed to cache photo');
+    });
+    
+    // Send photo to client
+    res.set('Content-Type', 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    res.send(photoBuffer);
+    
+    req.log?.info?.({ channelId, messageId, size: photoBuffer.length }, '[PhotoDownload] Photo sent successfully');
+    
+  } catch (error) {
+    req.log?.error?.({ err: error, channelId, messageId }, '[PhotoDownload] Failed to download photo');
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to download photo',
+      message: error.message
+    });
+  }
 });
 
 // PROTECTED ENDPOINT: Require API key authentication

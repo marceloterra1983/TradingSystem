@@ -1,7 +1,21 @@
+/**
+ * Utils Module - TP-Capital
+ * 
+ * Utility functions for formatting, URL building, and data transformation
+ * 
+ * @module tp-capital/utils
+ */
+
 import { getApiUrl } from '../../../config/api';
-import { SignalRow } from './types';
+import type { SignalRow } from './types';
 import { XCircle, AlertTriangle, Info, Bug } from 'lucide-react';
 
+/**
+ * Resolves the TP-Capital API base URL
+ * 
+ * @returns Base URL without trailing slash
+ * @internal
+ */
 function resolveTpCapitalBase(): string {
   const API_BASE_URL = getApiUrl('tpCapital');
   const candidate =
@@ -14,12 +28,28 @@ function resolveTpCapitalBase(): string {
   return candidate.replace(/\/$/, '');
 }
 
+/**
+ * Builds query URL for fetching signals
+ * 
+ * @param params - Query parameters
+ * @param params.limit - Maximum number of signals to fetch
+ * @param params.channel - Optional channel filter
+ * @param params.signalType - Optional signal type filter
+ * @param params.search - Optional search term
+ * @returns Full URL with query parameters
+ * 
+ * @example
+ * ```ts
+ * buildQuery({ limit: 10, channel: 'TP Capital' })
+ * // Returns: '/api/tp-capital/signals?limit=10&channel=TP+Capital'
+ * ```
+ */
 export function buildQuery(params: {
   limit: number;
   channel?: string;
   signalType?: string;
   search?: string;
-}) {
+}): string {
   const base = resolveTpCapitalBase();
   const queryParams = new URLSearchParams();
   queryParams.set('limit', String(params.limit));
@@ -50,7 +80,19 @@ export function buildDeleteUrl() {
   return `${base}/signals`;
 }
 
-export function formatNumber(value: number | null) {
+/**
+ * Formats a number in PT-BR locale with 2 decimal places
+ * 
+ * @param value - Number to format (or null/undefined)
+ * @returns Formatted string or '?' for invalid values
+ * 
+ * @example
+ * ```ts
+ * formatNumber(1234.56) // Returns: '1.234,56'
+ * formatNumber(null)    // Returns: '?'
+ * ```
+ */
+export function formatNumber(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return '?';
   }

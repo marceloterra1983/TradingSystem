@@ -95,21 +95,50 @@ jobs:
 
       - name: Extract metrics from JSON reports
         id: metrics
+        continue-on-error: true
         run: |
           # Find latest audit directory
           AUDIT_DIR=$(find /tmp -maxdepth 1 -name "docs-audit-*" -type d | sort -r | head -n1)
           
           if [ -z "$AUDIT_DIR" ]; then
-            echo "No audit data found"
-            exit 1
+            echo "⚠️ No audit data found - audit step may have failed"
+            echo "Setting default metrics (N/A values)"
+            
+            # Set default/empty metrics when audit data is missing
+            echo "health_score=0" >> "$GITHUB_OUTPUT"
+            echo "total_files=0" >> "$GITHUB_OUTPUT"
+            echo "broken_links=0" >> "$GITHUB_OUTPUT"
+            echo "outdated_count=0" >> "$GITHUB_OUTPUT"
+            echo "frontmatter_missing=0" >> "$GITHUB_OUTPUT"
+            echo "duplicate_groups=0" >> "$GITHUB_OUTPUT"
+            echo "metrics_available=false" >> "$GITHUB_OUTPUT"
+            
+            echo "⚠️ Metrics extraction skipped - using defaults"
+            exit 0
           fi
           
-          echo "Found audit data in: $AUDIT_DIR"
+          echo "✅ Found audit data in: $AUDIT_DIR"
           
           # Extract metrics using jq
           FRONTMATTER_JSON="$AUDIT_DIR/frontmatter.json"
           LINKS_JSON="$AUDIT_DIR/links.json"
           DUPLICATES_JSON="$AUDIT_DIR/duplicates.json"
+          
+          # Verify JSON files exist
+          if [ ! -f "$FRONTMATTER_JSON" ] || [ ! -f "$LINKS_JSON" ] || [ ! -f "$DUPLICATES_JSON" ]; then
+            echo "⚠️ Missing required JSON files in audit directory"
+            echo "Setting default metrics"
+            
+            echo "health_score=0" >> "$GITHUB_OUTPUT"
+            echo "total_files=0" >> "$GITHUB_OUTPUT"
+            echo "broken_links=0" >> "$GITHUB_OUTPUT"
+            echo "outdated_count=0" >> "$GITHUB_OUTPUT"
+            echo "frontmatter_missing=0" >> "$GITHUB_OUTPUT"
+            echo "duplicate_groups=0" >> "$GITHUB_OUTPUT"
+            echo "metrics_available=false" >> "$GITHUB_OUTPUT"
+            
+            exit 0
+          fi
           
           # Calculate health score (same logic as docsHealthMetrics.js calculateHealthScore)
           # Weights: frontmatter 40%, links 30%, duplicates 30%
@@ -157,14 +186,36 @@ jobs:
           DUPLICATE_GROUPS=$(jq -r '.exact_duplicates // 0' "$DUPLICATES_JSON")
           echo "duplicate_groups=$DUPLICATE_GROUPS" >> "$GITHUB_OUTPUT"
           
-          echo "Extracted metrics: health_score=$HEALTH_SCORE, total_files=$TOTAL_FILES, broken_links=$BROKEN_LINKS"
+          # Mark metrics as successfully extracted
+          echo "metrics_available=true" >> "$GITHUB_OUTPUT"
+          
+          echo "✅ Extracted metrics: health_score=$HEALTH_SCORE, total_files=$TOTAL_FILES, broken_links=$BROKEN_LINKS"
 
       - name: Update Prometheus metrics via API
         id: update_metrics
         continue-on-error: true
         run: |
+          # Skip if metrics are not available
+          if [ "${{ steps.metrics.outputs.metrics_available }}" == "false" ]; then
+            echo "⚠️ Skipping Prometheus metrics update - metrics unavailable"
+            exit 0
+          fi
+          
           # Find latest audit directory
           AUDIT_DIR=$(find /tmp -maxdepth 1 -name "docs-audit-*" -type d | sort -r | head -n1)
+          
+          # Verify AUDIT_DIR exists and contains required files
+          if [ -z "$AUDIT_DIR" ]; then
+            echo "⚠️ No audit directory found - skipping metrics update"
+            exit 0
+          fi
+          
+          if [ ! -f "$AUDIT_DIR/frontmatter.json" ] || [ ! -f "$AUDIT_DIR/links.json" ] || [ ! -f "$AUDIT_DIR/duplicates.json" ]; then
+            echo "⚠️ Missing required JSON files in $AUDIT_DIR - skipping metrics update"
+            exit 0
+          fi
+          
+          echo "✅ Found audit data in: $AUDIT_DIR"
           
           # Combine JSON reports into single payload with health_score
           COMBINED_JSON=$(jq -s --arg health_score "${{ steps.metrics.outputs.health_score }}" '{
@@ -188,7 +239,7 @@ jobs:
             --max-time 10 \
             --silent \
             --fail \
-            || echo "Failed to update Prometheus metrics (API may not be accessible from CI)"
+            || echo "⚠️ Failed to update Prometheus metrics (API may not be accessible from CI)"
 
       - name: Generate Dashboard Metrics
         run: |
@@ -244,6 +295,13 @@ jobs:
       - name: Check for health degradation
         id: check_degradation
         run: |
+          # Skip degradation check if metrics are not available
+          if [ "${{ steps.metrics.outputs.metrics_available }}" == "false" ]; then
+            echo "⚠️ Skipping degradation check - metrics unavailable"
+            echo "degraded=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
           CURRENT_SCORE=${{ steps.metrics.outputs.health_score }}
           
           # Get previous score from last audit report
@@ -335,28 +393,49 @@ jobs:
           echo "# Documentation Health Audit Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Date**: $(date +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
-          echo "**Health Score**: ${{ steps.metrics.outputs.health_score }}/100" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Key Metrics" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total Files | ${{ steps.metrics.outputs.total_files }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Broken Links | ${{ steps.metrics.outputs.broken_links }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Outdated Documents | ${{ steps.metrics.outputs.outdated_count }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Missing Frontmatter | ${{ steps.metrics.outputs.frontmatter_missing }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Duplicate Groups | ${{ steps.metrics.outputs.duplicate_groups }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Status" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.check_degradation.outputs.degraded }}" == "true" ]; then
-            echo "⚠️ **Health Degradation Detected** (dropped ${{ steps.check_degradation.outputs.score_diff }} points)" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if metrics are available
+          if [ "${{ steps.metrics.outputs.metrics_available }}" == "false" ]; then
+            echo "**Status**: ⚠️ Audit failed - metrics unavailable" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Issue" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The documentation audit step failed to generate metrics. This could be due to:" >> $GITHUB_STEP_SUMMARY
+            echo "- Script errors in audit-documentation.sh" >> $GITHUB_STEP_SUMMARY
+            echo "- Missing dependencies (Python packages, jq)" >> $GITHUB_STEP_SUMMARY
+            echo "- File system permissions" >> $GITHUB_STEP_SUMMARY
+            echo "- Invalid documentation files" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Action Required" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Check the workflow logs for error messages" >> $GITHUB_STEP_SUMMARY
+            echo "2. Run the audit script locally: \`bash scripts/docs/audit-documentation.sh --docs-dir ./docs/content --verbose\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. Fix any reported issues" >> $GITHUB_STEP_SUMMARY
+            echo "4. Re-run the workflow" >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ **Health Stable or Improved**" >> $GITHUB_STEP_SUMMARY
+            echo "**Health Score**: ${{ steps.metrics.outputs.health_score }}/100" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Key Metrics" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Files | ${{ steps.metrics.outputs.total_files }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Broken Links | ${{ steps.metrics.outputs.broken_links }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Outdated Documents | ${{ steps.metrics.outputs.outdated_count }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Missing Frontmatter | ${{ steps.metrics.outputs.frontmatter_missing }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duplicate Groups | ${{ steps.metrics.outputs.duplicate_groups }} |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Status" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ steps.check_degradation.outputs.degraded }}" == "true" ]; then
+              echo "⚠️ **Health Degradation Detected** (dropped ${{ steps.check_degradation.outputs.score_diff }} points)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ **Health Stable or Improved**" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Resources" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- [View Full Report](../blob/main/docs/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md)" >> $GITHUB_STEP_SUMMARY
+            echo "- [Health Dashboard](http://localhost:3400/health)" >> $GITHUB_STEP_SUMMARY
+            echo "- [Grafana Dashboard](http://localhost:3000/d/docs-health)" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Resources" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- [View Full Report](../blob/main/docs/reports/${{ steps.audit.outputs.report_date }}-documentation-audit.md)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Health Dashboard](http://localhost:3400/health)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Grafana Dashboard](http://localhost:3000/d/docs-health)" >> $GITHUB_STEP_SUMMARY

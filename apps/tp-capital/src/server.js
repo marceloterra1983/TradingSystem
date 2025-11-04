@@ -30,8 +30,9 @@ import { configureCompression, compressionMetrics } from '../../../backend/share
 import { config, validateConfig } from './config.js';
 import { getLogs } from './logStore.js';
 import { timescaleClient } from './timescaleClient.js';
-import { getGatewayDatabaseClient, closeGatewayDatabaseClient } from './gatewayDatabaseClient.js';
+import { createGatewayHttpClient } from './clients/gatewayHttpClient.js';
 import { GatewayPollingWorker } from './gatewayPollingWorker.js';
+import { HistoricalSyncWorker } from './workers/historicalSyncWorker.js';
 import { gatewayMetrics } from './gatewayMetrics.js';
 import { createTelegramUserForwarderPolling } from './telegramUserForwarderPolling.js';
 import { formatTimestamp } from './timeUtils.js';
@@ -42,7 +43,7 @@ import { requireApiKey, optionalApiKey } from './middleware/authMiddleware.js';
 import { validateBody, validateQuery, validateParams } from './middleware/validationMiddleware.js';
 import { CreateChannelSchema, UpdateChannelSchema, ChannelIdParamSchema } from './schemas/channelSchemas.js';
 import { CreateBotSchema, UpdateBotSchema, BotIdParamSchema } from './schemas/botSchemas.js';
-import { GetSignalsQuerySchema, DeleteSignalSchema, SyncMessagesSchema } from './schemas/signalSchemas.js';
+import { GetSignalsQuerySchema, DeleteSignalSchema } from './schemas/signalSchemas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -117,11 +118,18 @@ app.get('/health', createHealthCheckHandler({
       if (!healthy) throw new Error('TimescaleDB unhealthy');
       return 'connected';
     },
-    gatewayDatabase: async () => {
-      const gatewayDb = getGatewayDatabaseClient();
-      const isConnected = await gatewayDb.testConnection();
-      if (!isConnected) throw new Error('Gateway DB disconnected');
-      return 'connected';
+    gatewayApi: async () => {
+      // Test Gateway API connection via HTTP
+      const gatewayUrl = config.gateway.url || 'http://localhost:4010';
+      try {
+        const response = await fetch(`${gatewayUrl}/health`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return 'connected';
+      } catch (error) {
+        throw new Error(`Gateway API disconnected: ${error.message}`);
+      }
     },
     pollingWorker: async () => {
       if (!globalPollingWorker) return 'not initialized';
@@ -207,19 +215,8 @@ app.post('/sync-messages', requireApiKey, async (req, res) => {
           '[SyncMessages] Mensagens sincronizadas do Telegram para Gateway'
         );
         
-        // Converter mensagens 'queued' para 'received' para TODOS os canais
-        const gatewayDb = await getGatewayDatabaseClient();
-        const updateQuery = `
-          UPDATE telegram_gateway.messages
-          SET status = 'received'
-          WHERE status = 'queued'
-        `;
-        const updateResult = await gatewayDb.query(updateQuery);
-        
-        logger.info(
-          { queuedConverted: updateResult.rowCount },
-          '[SyncMessages] Mensagens queued convertidas para received (TODOS os canais)'
-        );
+        // With HTTP API, no need to convert 'queued' to 'received'
+        // Gateway API handles status transitions internally
         
         return res.json({
           success: true,
@@ -229,7 +226,6 @@ app.post('/sync-messages', requireApiKey, async (req, res) => {
           data: {
             totalMessagesSynced: totalSynced,
             totalMessagesSaved: totalSaved,
-            queuedConverted: updateResult.rowCount,
             channelsSynced: channelsSynced,
             filters: config.gateway.filters,
             timestamp: new Date().toISOString()
@@ -656,27 +652,31 @@ let globalPollingWorker = null;
 
 async function startGatewayPollingWorker() {
   try {
-    // Initialize Gateway database client
-    const gatewayDb = getGatewayDatabaseClient();
+    // Initialize Gateway HTTP client (replaces database client)
+    const gatewayHttpClient = createGatewayHttpClient({
+      gatewayUrl: config.gateway.url || process.env.TELEGRAM_GATEWAY_URL || 'http://localhost:4010',
+      apiKey: config.gateway.apiKey || process.env.TELEGRAM_GATEWAY_API_KEY,
+      channelId: config.gateway.signalsChannelId,
+    });
 
     // Test connectivity
-    const isConnected = await gatewayDb.testConnection();
+    const isConnected = await gatewayHttpClient.testConnection();
     if (!isConnected) {
-      logger.error('Failed to connect to Gateway database');
+      logger.error('Failed to connect to Gateway API');
       return;
     }
 
-    logger.info('Gateway database connected successfully');
+    logger.info('[HTTP Mode] Gateway API connected successfully');
 
     // Create and start polling worker
     globalPollingWorker = new GatewayPollingWorker({
-      gatewayDb,
+      gatewayHttpClient,
       tpCapitalDb: timescaleClient,
       metrics: gatewayMetrics
     });
 
     await globalPollingWorker.start();
-    logger.info('Gateway polling worker started successfully');
+    logger.info('[HTTP Mode] Gateway polling worker started successfully');
 
   } catch (error) {
     logger.error({ err: error }, 'Failed to start Gateway polling worker');
@@ -686,6 +686,31 @@ async function startGatewayPollingWorker() {
 
 // Start polling worker
 startGatewayPollingWorker();
+
+// Start historical sync worker (backfill - runs once)
+async function startHistoricalSyncWorker() {
+  try {
+    // Wait 30s for database to be stable
+    await new Promise(resolve => setTimeout(resolve, 30000));
+    
+    logger.info('[HistoricalSync] Starting historical backfill worker (30s delay)...');
+    
+    const historicalSyncWorker = new HistoricalSyncWorker({
+      db: timescaleClient,
+    });
+    
+    await historicalSyncWorker.runIfNeeded();
+    
+    logger.info('[HistoricalSync] Historical sync worker completed');
+    
+  } catch (error) {
+    logger.error({ err: error }, '[HistoricalSync] Failed to run historical sync worker');
+    // Non-fatal: Don't crash the service
+  }
+}
+
+// Start historical sync (async, non-blocking)
+startHistoricalSyncWorker();
 
 // Load channels from database and launch forwarder
 async function loadChannelsAndStartForwarder() {
@@ -774,10 +799,9 @@ async function gracefulShutdown(signal) {
     await Promise.all(stopPromises);
 
     // Close database connections
-    await Promise.all([
-      timescaleClient.close().catch(err => logger.error({ err }, 'Error closing TimescaleDB')),
-      closeGatewayDatabaseClient().catch(err => logger.error({ err }, 'Error closing Gateway DB'))
-    ]);
+    await timescaleClient.close().catch(err => logger.error({ err }, 'Error closing TimescaleDB'));
+    
+    // HTTP client doesn't need explicit cleanup (no persistent connections)
 
     logger.info('TP Capital API stopped gracefully');
     process.exit(0);

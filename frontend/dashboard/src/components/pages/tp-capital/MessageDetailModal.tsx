@@ -148,7 +148,7 @@ export function MessageDetailModal({
                   // Imagem real baixada
                   <div className="flex flex-col items-center">
                     <img
-                      src={`http://localhost:4005${message.image_url}`}
+                      src={`http://localhost:4008${message.image_url}`}
                       alt="Imagem da mensagem"
                       className="max-w-full max-h-96 rounded-lg shadow-lg"
                       onError={(e) => {

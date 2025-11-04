@@ -1,56 +1,50 @@
-import { SignalRow, LogEntry } from './types';
+/**
+ * TP-Capital Constants
+ * 
+ * Centralized constants for configuration and options
+ * 
+ * @module tp-capital/constants
+ */
 
-export const LIMIT_OPTIONS = [10, 25, 50, 100, 250, 500, 1000];
-export const LOG_LIMIT_OPTIONS = [50, 100, 200];
+export const LIMIT_OPTIONS = [10, 20, 50, 100, 200] as const;
 
-export const SAMPLE_SIGNALS: SignalRow[] = [
+export const DEFAULT_LIMIT = 10;
+
+export const FALLBACK_SAMPLE_SIGNALS = [
   {
-    ts: new Date('2025-01-10T13:45:00.000Z').getTime(),
-    channel: 'tp-capital-premium',
+    id: 1,
+    ts: Date.now() - 3600000,
+    channel: 'TP Capital (exemplo)',
     signal_type: 'Swing Trade',
     asset: 'PETR4',
-    buy_min: 32.15,
-    buy_max: 32.45,
-    target_1: 32.9,
-    target_2: 33.25,
-    target_final: 33.7,
-    stop: 31.6,
-    raw_message:
-      'Compra em PETR4 entre 32,15 e 32,45 com alvos em 32,90 / 33,25 / 33,70',
-    source: 'sample',
-    ingested_at: '2025-01-10T13:45:03.000Z',
+    buy_min: 28.5,
+    buy_max: 29.0,
+    target_1: 30.0,
+    target_2: 31.0,
+    target_final: 32.0,
+    stop: 27.5,
+    raw_message: 'Exemplo de sinal - serviço offline',
+    source: 'telegram',
+    ingested_at: new Date(Date.now() - 3600000).toISOString(),
+    created_at: new Date(Date.now() - 3600000).toISOString(),
+    updated_at: new Date(Date.now() - 3600000).toISOString(),
   },
   {
-    ts: new Date('2025-01-10T14:05:00.000Z').getTime(),
-    channel: 'tp-capital-premium',
+    id: 2,
+    ts: Date.now() - 7200000,
+    channel: 'TP Capital (exemplo)',
     signal_type: 'Day Trade',
-    asset: 'WINJ25',
-    buy_min: 130450,
-    buy_max: 130520,
-    target_1: 130700,
-    target_2: 130820,
-    target_final: 130980,
-    stop: 130260,
-    raw_message:
-      'Compra em WINJ25 acima de 130.450 com proteção curta, alvos 130.700/130.820/130.980',
-    source: 'sample',
-    ingested_at: '2025-01-10T14:05:04.000Z',
-  },
-];
-
-export const SAMPLE_LOGS: LogEntry[] = [
-  {
-    timestamp: '2025-01-10T14:09:12.000Z',
-    level: 'warn',
-    message: 'API de sinais indisponível. Ativando dados de exemplo.',
-    context: {
-      service: 'tp-capital-signals',
-      hint: 'Verifique se o backend está rodando na porta 3201.',
-    },
-  },
-  {
-    timestamp: '2025-01-10T14:09:11.000Z',
-    level: 'info',
-    message: 'Nenhuma atualização em tempo real. Aguardando serviço retornar.',
+    asset: 'VALE3',
+    buy_min: 70.0,
+    buy_max: 71.0,
+    target_1: 72.0,
+    target_2: 73.0,
+    target_final: 74.0,
+    stop: 69.0,
+    raw_message: 'Exemplo de sinal - serviço offline',
+    source: 'telegram',
+    ingested_at: new Date(Date.now() - 7200000).toISOString(),
+    created_at: new Date(Date.now() - 7200000).toISOString(),
+    updated_at: new Date(Date.now() - 7200000).toISOString(),
   },
 ];

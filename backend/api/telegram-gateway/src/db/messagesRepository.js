@@ -484,4 +484,130 @@ export const saveMessages = async (messages, logger) => {
   }
 };
 
+/**
+ * Find unprocessed messages for a specific consumer
+ * Used by downstream services (e.g., TP-Capital) to poll for new messages
+ * 
+ * @param {Object} filters - Filter options
+ * @param {string} filters.channelId - Channel ID to filter
+ * @param {string[]} filters.statuses - Array of statuses (default: ['received'])
+ * @param {string} filters.excludeProcessedBy - Consumer name to exclude (e.g., 'tp-capital')
+ * @param {number} filters.limit - Max messages to return
+ * @param {Object} logger - Logger instance
+ * @returns {Promise<Array>} - Array of unprocessed messages
+ */
+export const findUnprocessed = async (filters = {}, logger) => {
+  const db = await getPool(logger);
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
+  // Channel filter
+  if (filters.channelId) {
+    conditions.push(`channel_id = $${paramIndex}`);
+    params.push(filters.channelId);
+    paramIndex += 1;
+  }
+
+  // Status filter (default: 'received')
+  const statuses = filters.statuses || ['received'];
+  const condition = buildArrayCondition('status', statuses, paramIndex);
+  if (condition) {
+    conditions.push(condition.clause);
+    params.push(...condition.params);
+    paramIndex = condition.next;
+  }
+
+  // Exclude already processed by specific consumer
+  if (filters.excludeProcessedBy) {
+    conditions.push(`COALESCE(metadata->>'processed_by', '') <> $${paramIndex}`);
+    params.push(filters.excludeProcessedBy);
+    paramIndex += 1;
+  }
+
+  // Deleted_at filter
+  conditions.push('deleted_at IS NULL');
+
+  const limit = Math.min(
+    Math.max(Number.parseInt(filters.limit, 10) || 100, 1),
+    config.pagination.maxLimit,
+  );
+  params.push(limit);
+
+  const query = `
+    SELECT
+      id,
+      channel_id,
+      message_id,
+      thread_id,
+      source,
+      message_type,
+      text,
+      caption,
+      media_type,
+      media_refs,
+      status,
+      received_at,
+      telegram_date,
+      published_at,
+      metadata,
+      created_at,
+      updated_at
+    FROM ${tableIdentifier}
+    WHERE ${conditions.join(' AND ')}
+    ORDER BY received_at ASC, id ASC
+    LIMIT $${paramIndex};
+  `;
+
+  const result = await db.query(query, params);
+  return result.rows.map(mapRow);
+};
+
+/**
+ * Mark messages as processed by a specific consumer
+ * Updates status to 'published' and adds processed_by metadata
+ * 
+ * @param {Array<string>} messageIds - Array of message IDs to mark
+ * @param {string} processedBy - Consumer name (e.g., 'tp-capital')
+ * @param {Object} logger - Logger instance
+ * @returns {Promise<number>} - Number of messages updated
+ */
+export const markAsProcessed = async (messageIds, processedBy, logger) => {
+  if (!messageIds || messageIds.length === 0) return 0;
+  
+  const db = await getPool(logger);
+  
+  const metadata = {
+    processed_by: processedBy,
+    processed_at: new Date().toISOString(),
+  };
+
+  // Convert messageIds to strings for comparison (message_id is TEXT type in database)
+  const messageIdsAsText = messageIds.map(id => String(id));
+  
+  const query = `
+    UPDATE ${tableIdentifier}
+    SET
+      status = 'published',
+      published_at = NOW(),
+      metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+    WHERE message_id = ANY($1::text[])
+      AND status != 'published'
+    RETURNING id, message_id;
+  `;
+
+  const result = await db.query(query, [messageIdsAsText, JSON.stringify(metadata)]);
+  
+  logger?.info?.(
+    { 
+      messageIds: messageIds.length, 
+      updated: result.rowCount, 
+      processedBy 
+    },
+    '[MarkAsProcessed] Messages marked as published'
+  );
+  
+  return result.rowCount;
+};
+
 export const getDatabasePool = getPool;

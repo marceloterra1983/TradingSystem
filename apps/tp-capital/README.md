@@ -1,50 +1,110 @@
 ---
 title: TP Capital Ingestion
 sidebar_position: 1
-tags: [api]
+tags: [api, autonomous-stack]
 domain: backend
 type: index
-summary: Node-based microservice that ingests TP Capital Telegram messages, normalizes the payload, and writes records into TimescaleDB.
+summary: Autonomous stack with dedicated TimescaleDB for TP Capital signal ingestion from Telegram Gateway via HTTP API.
 status: active
-last_review: "2025-10-23"
+last_review: "2025-11-04"
 ---
 
 # TP Capital Ingestion
 
-Node-based microservice that ingests TP Capital Telegram messages, normalizes the payload, and writes records into TimescaleDB.
+**Version:** 2.0.0 (Autonomous Stack)  
+**Port:** 4008 (dedicated stack)
+
+Autonomous microservice stack that ingests TP Capital trading signals from Telegram Gateway, processes and validates them, and stores in dedicated TimescaleDB.
+
+## Architecture (v2.0 - Updated 2025-11-04)
+
+**Autonomous Stack (5 containers):**
+- **TimescaleDB** (5440) - Dedicated time-series database
+- **PgBouncer** (6435) - Connection pooling
+- **Redis Master** (6381) - Primary cache
+- **Redis Replica** (6382) - Read scaling
+- **TP Capital API** (4008) - REST API & polling worker
+
+**Integration:**
+- 🔌 HTTP API with Telegram Gateway (decoupled from database)
+- 🔄 Automatic historical sync (backfill on startup)
+- ⚡ Circuit breaker for resilience
+- 🎯 Polling worker with exponential backoff
 
 ## Features
-- Telegram bot listener (polling or webhook).
-- Message parser that extracts asset, buy range, targets, and stop.
-- TimescaleDB writer with healthcheck endpoint.
-- Prometheus /metrics endpoint.
+- ✅ **Autonomous stack** with dedicated database (isolated from Gateway)
+- ✅ **HTTP API integration** (no direct database access to Gateway)
+- ✅ **Automatic historical sync** on startup (one-time backfill)
+- ✅ **Real-time polling** (5s interval with circuit breaker)
+- ✅ **Signal parsing** (extracts asset, buy range, targets, stop)
+- ✅ **Cache layer** (Redis master-replica for performance)
+- ✅ **Connection pooling** (PgBouncer for database efficiency)
+- ✅ **Health monitoring** (comprehensive health checks)
+- ✅ **Prometheus metrics** for observability
 
-## Getting Started
+## Quick Start (Autonomous Stack)
+
+### Prerequisites
+- Telegram Gateway API running on port 4010
+- Environment variables configured (see Configuration section)
+
+### Startup
+
 ```bash
-cd apps/tp-capital
-cp .env.example .env  # fill Telegram tokens as needed
-npm install
-npm run dev
+# Method 1: Using helper script (recommended)
+bash scripts/docker/start-tp-capital-stack.sh
+
+# Method 2: Docker Compose directly
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
 ```
 
-### Docker Compose stack (service + TimescaleDB)
-```bash
-cd apps/tp-capital
-cp .env.example .env
-# optional: adjust passwords/ports in .env
-docker compose up -d
+### Verify Stack Health
 
-# initialise or reset the schema
-./scripts/init-database.sh        # append --force to recreate from scratch
+```bash
+# Check all containers
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+
+# Test API health
+curl http://localhost:4008/health | jq '.checks'
+
+# Expected: All checks green (timescaledb, gatewayApi, pollingWorker)
 ```
 
-The stack exposes the API on `http://localhost:4005` and TimescaleDB on `localhost:5445`. Override the host port with `TIMESCALEDB_HOST_PORT` if it conflicts with another PostgreSQL instance.
+### View Logs
 
-### Seed sample data
 ```bash
-npm run seed
+# All containers
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f
+
+# Specific container
+docker logs -f tp-capital-api
 ```
-Ensure the Docker stack (or your target TimescaleDB instance) is running before seeding.
+
+## Configuration
+
+### Required Environment Variables (.env)
+
+```bash
+# Database (Dedicated Stack)
+TP_CAPITAL_DB_PASSWORD=<generated>
+TP_CAPITAL_DB_USER=tp_capital
+TP_CAPITAL_DB_NAME=tp_capital_db
+TP_CAPITAL_DB_PORT=5440
+TP_CAPITAL_DB_STRATEGY=timescale  # or 'neon'
+
+# Gateway Integration (HTTP API)
+TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+TELEGRAM_GATEWAY_API_KEY=<your-api-key>
+TP_CAPITAL_SIGNALS_CHANNEL_ID=-1001649127710
+
+# API
+TP_CAPITAL_API_KEY=<your-api-key>
+```
+
+Run setup script to generate passwords:
+```bash
+bash scripts/setup/add-tp-capital-env-vars.sh
+```
 
 ## Deployment
 

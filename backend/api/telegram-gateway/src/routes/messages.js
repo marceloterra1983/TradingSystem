@@ -4,6 +4,8 @@ import {
   getMessageById,
   softDeleteMessage,
   markReprocessRequested,
+  findUnprocessed,
+  markAsProcessed,
 } from '../db/messagesRepository.js';
 import { invalidateCaches } from '../services/telegramGatewayFacade.js';
 import { cacheWithETag, invalidateCache } from '../middleware/cachingMiddleware.js';
@@ -14,6 +16,103 @@ const parseBoolean = (value, fallback = false) => {
   if (typeof value !== 'string') return fallback;
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase().trim());
 };
+
+/**
+ * GET /api/messages/unprocessed - Fetch unprocessed messages for downstream consumers
+ * 
+ * Query Parameters:
+ * - channel: Channel ID (required)
+ * - excludeProcessedBy: Consumer name to exclude (optional, e.g., 'tp-capital')
+ * - limit: Max messages to return (default: 100, max: 200)
+ * 
+ * Used by TP-Capital and other services to poll for new messages
+ * IMPORTANT: This route MUST come BEFORE /:id to avoid matching "unprocessed" as an ID
+ */
+messagesRouter.get('/unprocessed', async (req, res, next) => {
+  try {
+    const channelId = req.query.channel ? String(req.query.channel).trim() : undefined;
+    
+    if (!channelId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query parameter "channel" is required',
+      });
+    }
+
+    const filters = {
+      channelId,
+      statuses: req.query.status 
+        ? String(req.query.status).split(',').map(s => s.trim())
+        : ['received'],
+      excludeProcessedBy: req.query.excludeProcessedBy 
+        ? String(req.query.excludeProcessedBy).trim()
+        : undefined,
+      limit: req.query.limit,
+    };
+
+    const messages = await findUnprocessed(filters, req.log);
+
+    res.json({
+      success: true,
+      data: messages,
+      count: messages.length,
+      filters: {
+        channelId: filters.channelId,
+        statuses: filters.statuses,
+        excludeProcessedBy: filters.excludeProcessedBy,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/messages/mark-processed - Mark messages as processed by a consumer
+ * 
+ * Body:
+ * - messageIds: Array of message IDs (required)
+ * - processedBy: Consumer name (required, e.g., 'tp-capital')
+ * 
+ * Used by downstream services to acknowledge message processing
+ * IMPORTANT: This route MUST come BEFORE /:id to avoid path conflicts
+ */
+messagesRouter.post('/mark-processed', async (req, res, next) => {
+  try {
+    const { messageIds, processedBy } = req.body;
+
+    if (!Array.isArray(messageIds) || messageIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Body parameter "messageIds" must be a non-empty array',
+      });
+    }
+
+    if (!processedBy || typeof processedBy !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Body parameter "processedBy" is required',
+      });
+    }
+
+    const updated = await markAsProcessed(messageIds, processedBy, req.log);
+
+    res.json({
+      success: true,
+      message: `${updated} message(s) marked as processed`,
+      data: {
+        requested: messageIds.length,
+        updated,
+        processedBy,
+      },
+    });
+    
+    // Invalidate caches after status change
+    invalidateCaches();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Cache message list for 60 seconds (frequently accessed)
 messagesRouter.get('/', cacheWithETag(60), async (req, res, next) => {

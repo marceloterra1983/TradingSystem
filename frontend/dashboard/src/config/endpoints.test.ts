@@ -14,7 +14,7 @@ describe('Endpoints Configuration', () => {
   describe('ENDPOINTS', () => {
     it('should have correct default backend API endpoints', () => {
       expect(ENDPOINTS.workspace).toBe('http://localhost:3201');
-      expect(ENDPOINTS.tpCapital).toBe('http://localhost:4006');
+      expect(ENDPOINTS.tpCapital).toBe('http://localhost:4008');
       expect(ENDPOINTS.documentation).toBe('http://localhost:3405');
       expect(ENDPOINTS.telegramGateway).toBe('http://localhost:4010');
     });

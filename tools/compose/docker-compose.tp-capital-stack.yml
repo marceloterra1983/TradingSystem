@@ -1,0 +1,457 @@
+name: tp-capital-stack
+
+# ==============================================================================
+# TP-Capital Autonomous Stack - 5 Dedicated Containers
+# ==============================================================================
+# Architecture: Dedicated database + caching + connection pooling
+# Purpose: Isolated, high-performance signal ingestion and serving
+# Resources: 3.5 CPU, 5.25GB RAM total
+# ==============================================================================
+# 
+# Related ADR: docs/content/reference/adrs/008-tp-capital-autonomous-stack.md
+# Migration from: Shared TimescaleDB (tradingsystem database, tp_capital schema)
+# Migration to: Dedicated stack with own database, cache, and pooling
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # 1. TimescaleDB - Dedicated Database for TP Capital
+  # ============================================================================
+  tp-capital-timescaledb:
+    container_name: tp-capital-timescale
+    image: timescale/timescaledb:latest-pg16
+    platform: linux/amd64
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+    
+    environment:
+      POSTGRES_DB: tp_capital_db
+      POSTGRES_USER: ${TP_CAPITAL_DB_USER:-tp_capital}
+      POSTGRES_PASSWORD: ${TP_CAPITAL_DB_PASSWORD}
+      TIMESCALEDB_TELEMETRY: 'off'
+      
+      # Performance tuning for signal ingestion workload
+      POSTGRES_INITDB_ARGS: >-
+        --encoding=UTF-8
+        --locale=C
+        --data-checksums
+    
+    ports:
+      - "5440:5432"
+    
+    volumes:
+      - tp-capital-timescaledb-data:/var/lib/postgresql/data
+      - ../../backend/data/timescaledb/tp-capital:/docker-entrypoint-initdb.d:ro
+      - ./tp-capital/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c shared_buffers=1GB
+      -c effective_cache_size=3GB
+      -c maintenance_work_mem=256MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=8MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c max_connections=200
+      -c shared_preload_libraries=timescaledb,pg_stat_statements
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', '${TP_CAPITAL_DB_USER:-tp_capital}', '-d', 'tp_capital_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    networks:
+      - tp_capital_backend
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=timescaledb"
+      - "com.tradingsystem.component=database"
+      - "com.tradingsystem.description=Dedicated TimescaleDB for TP Capital signals"
+
+  # ============================================================================
+  # 2. PgBouncer - Connection Pooling (CRITICAL FOR PERFORMANCE)
+  # ============================================================================
+  tp-capital-pgbouncer:
+    container_name: tp-capital-pgbouncer
+    image: pgbouncer/pgbouncer:latest
+    restart: unless-stopped
+    
+    environment:
+      - DATABASES_HOST=tp-capital-timescaledb
+      - DATABASES_PORT=5432
+      - DATABASES_USER=${TP_CAPITAL_DB_USER:-tp_capital}
+      - DATABASES_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - DATABASES_DBNAME=tp_capital_db
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=25
+      - MIN_POOL_SIZE=5
+      - RESERVE_POOL_SIZE=5
+      - RESERVE_POOL_TIMEOUT=3
+      - MAX_DB_CONNECTIONS=50
+      - MAX_USER_CONNECTIONS=50
+      - SERVER_RESET_QUERY=DISCARD ALL
+      - SERVER_CHECK_DELAY=10
+      - LOG_CONNECTIONS=1
+      - LOG_DISCONNECTIONS=1
+    
+    ports:
+      - "${TP_CAPITAL_PGBOUNCER_PORT:-6435}:6432"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    depends_on:
+      tp-capital-timescaledb:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ['CMD-SHELL', 'ps aux | grep -v grep | grep -q pgbouncer']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - tp_capital_backend
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=pgbouncer"
+      - "com.tradingsystem.component=connection-pooler"
+      - "com.tradingsystem.description=Connection pooling for TimescaleDB (reduces overhead 50ms → 5ms)"
+
+  # ============================================================================
+  # 3. Redis Master - Hot Cache (Write Path)
+  # ============================================================================
+  tp-capital-redis-master:
+    container_name: tp-capital-redis-master
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --maxclients 1000
+    
+    ports:
+      - "${TP_CAPITAL_REDIS_PORT:-6381}:6379"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      tp_capital_backend:
+        aliases:
+          - tp-capital-redis-master
+          - redis-master
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.role=master"
+      - "com.tradingsystem.description=Redis master for hot signal cache (30s TTL)"
+
+  # ============================================================================
+  # 4. Redis Replica - Read Scaling
+  # ============================================================================
+  tp-capital-redis-replica:
+    container_name: tp-capital-redis-replica
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+    command: >
+      redis-server
+      --replicaof tp-capital-redis-master 6379
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --replica-read-only yes
+    
+    ports:
+      - "${TP_CAPITAL_REDIS_REPLICA_PORT:-6382}:6379"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    
+    depends_on:
+      tp-capital-redis-master:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - tp_capital_backend
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.role=replica"
+      - "com.tradingsystem.description=Redis replica for read scaling and HA"
+
+  # ============================================================================
+  # 5. TP Capital API - Application Layer
+  # ============================================================================
+  tp-capital-api:
+    image: "${IMG_APPS_TPCAPITAL:-img-apps-tpcapital}:${IMG_VERSION:-latest}"
+    build:
+      context: ../..
+      dockerfile: apps/tp-capital/Dockerfile.dev
+    container_name: tp-capital-api
+    
+    # Enable host.docker.internal for accessing host services (Gateway API on port 4010)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    # Load environment from centralized root .env
+    env_file:
+      - ../../.env
+    
+    ports:
+      - "4008:4005"
+    
+    environment:
+      # Server
+      - PORT=4005
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Database Strategy (ALWAYS dedicated via PgBouncer)
+      - TP_CAPITAL_DB_STRATEGY=dedicated
+      
+      # TimescaleDB Connection (via PgBouncer - internal container network)
+      - TP_CAPITAL_DB_HOST=tp-capital-pgbouncer
+      - TP_CAPITAL_DB_PORT=6432
+      - TP_CAPITAL_DB_NAME=tp_capital_db
+      - TP_CAPITAL_DB_USER=${TP_CAPITAL_DB_USER:-tp_capital}
+      - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - TP_CAPITAL_DB_SCHEMA=signals
+      
+      # Connection Pool (application-level, on top of PgBouncer)
+      - TP_CAPITAL_POOL_MAX=25
+      - TP_CAPITAL_POOL_MIN=5
+      - TP_CAPITAL_IDLE_TIMEOUT=30000
+      - TP_CAPITAL_CONNECTION_TIMEOUT=5000
+      
+      # Redis Cache Configuration
+      - REDIS_ENABLED=true
+      - REDIS_MASTER_HOST=tp-capital-redis-master
+      - REDIS_MASTER_PORT=6379
+      - REDIS_REPLICA_HOST=tp-capital-redis-replica
+      - REDIS_REPLICA_PORT=6379
+      - REDIS_CACHE_TTL=30
+      - REDIS_MAX_RETRIES=3
+      - REDIS_RETRY_DELAY=1000
+      
+      # Gateway Database Connection (for polling messages)
+      # Updated: 2025-11-04 - Using dedicated Telegram TimescaleDB
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-timescale:5432/telegram_gateway
+      - GATEWAY_DATABASE_HOST=telegram-timescale
+      - GATEWAY_DATABASE_PORT=5432
+      - GATEWAY_DATABASE_NAME=telegram_gateway
+      - GATEWAY_DATABASE_SCHEMA=telegram_gateway
+      - GATEWAY_DATABASE_USER=telegram
+      - GATEWAY_DATABASE_PASSWORD=${TELEGRAM_DB_PASSWORD}
+      
+      # Gateway Configuration
+      - GATEWAY_POLLING_INTERVAL_MS=${GATEWAY_POLLING_INTERVAL_MS:-5000}
+      - GATEWAY_SIGNALS_CHANNEL_ID=${GATEWAY_SIGNALS_CHANNEL_ID:--1001649127710}
+      - GATEWAY_BATCH_SIZE=${GATEWAY_BATCH_SIZE:-100}
+      
+      # Telegram Gateway Connection (host service)
+      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+      - TELEGRAM_GATEWAY_PORT=4010
+      
+      # CORS
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
+      
+      # Rate Limiting (Increased to support dashboard auto-refresh)
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=120
+      
+      # Circuit Breaker Configuration
+      - CIRCUIT_BREAKER_TIMEOUT=5000
+      - CIRCUIT_BREAKER_ERROR_THRESHOLD=50
+      - CIRCUIT_BREAKER_RESET_TIMEOUT=30000
+    
+    volumes:
+      # Hot-reload: mount source code
+      - ../../apps/tp-capital/src:/app/src:ro
+      - ../../apps/tp-capital/api:/app/api:ro
+      
+      # Mount shared modules for hot-reload
+      - ../../backend/shared:/app/backend/shared:ro
+      
+      # Anonymous volume prevents overwrite
+      - /app/node_modules
+    
+    networks:
+      - tp_capital_backend
+      - tradingsystem_backend  # Connect to main network for Dashboard access
+      - telegram_backend        # Required to resolve telegram-timescale hostname
+    
+    depends_on:
+      tp-capital-pgbouncer:
+        condition: service_healthy
+      tp-capital-redis-master:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4005/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.tier=application"
+      - "com.tradingsystem.service=api"
+      - "com.tradingsystem.component=signal-ingestion"
+      - "com.tradingsystem.description=TP Capital signal ingestion and serving API"
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+networks:
+  # Use existing tradingsystem_backend network
+  tradingsystem_backend:
+    external: true
+    name: tradingsystem_backend
+  
+  # Internal network for TP Capital stack only (simplified, no IPAM conflicts)
+  tp_capital_backend:
+    name: tp_capital_backend
+    driver: bridge
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+  
+  telegram_backend:
+    name: telegram_backend
+    external: true
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+volumes:
+  tp-capital-timescaledb-data:
+    name: tp-capital-timescaledb-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=tp-capital"
+      - "com.tradingsystem.component=database"
+
+# ==============================================================================
+# USAGE EXAMPLES
+# ==============================================================================
+# 
+# Start entire TP Capital stack:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+# 
+# View logs (all services):
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f
+# 
+# View logs (specific service):
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f tp-capital-api
+# 
+# Check status:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+# 
+# Restart specific service:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+# 
+# Stop entire stack:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down
+# 
+# Stop and remove volumes (CAUTION - deletes data):
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down -v
+# 
+# Connect to database (via PgBouncer):
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-pgbouncer \
+#     psql -h localhost -p 6432 -U tp_capital -d tp_capital_db
+# 
+# Connect to database (direct):
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-timescaledb \
+#     psql -U tp_capital -d tp_capital_db
+# 
+# Check Redis cache status:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO
+# 
+# Monitor Redis replication:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO replication
+# 
+# Check PgBouncer stats:
+#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-pgbouncer \
+#     psql -h localhost -p 6432 -U pgbouncer pgbouncer -c "SHOW POOLS"
+# 
+# ==============================================================================
+

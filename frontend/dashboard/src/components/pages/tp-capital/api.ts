@@ -1,10 +1,35 @@
-import { FetchParams, FetchSignalsResult, FetchLogsResult } from './types';
-import { SAMPLE_SIGNALS, SAMPLE_LOGS } from './constants';
+/**
+ * API Module - TP-Capital
+ * 
+ * Handles all HTTP requests to TP-Capital backend
+ * 
+ * @module tp-capital/api
+ */
+
+import type { 
+  FetchSignalsParams, 
+  FetchSignalsResponse, 
+  FetchLogsResponse,
+  LogEntry
+} from './types';
+import { FALLBACK_SAMPLE_SIGNALS } from './constants';
 import { buildLogsQuery, buildDeleteUrl } from './utils';
+import { createLogger } from './utils/logger';
+
+const logger = createLogger('API');
+
+const SAMPLE_LOGS: LogEntry[] = [
+  {
+    level: 'info',
+    message: 'Exemplo de log - serviço offline',
+    timestamp: new Date().toISOString(),
+    context: { sample: true },
+  },
+];
 
 export async function fetchSignals(
-  params: FetchParams,
-): Promise<FetchSignalsResult> {
+  params: FetchSignalsParams,
+): Promise<FetchSignalsResponse> {
   try {
     // Dynamic import to avoid bundling issues
     const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
@@ -34,9 +59,9 @@ export async function fetchSignals(
       error instanceof Error
         ? error.message
         : 'Unknown error while fetching signals';
-    console.error('Failed to fetch TP Capital signals', error);
+    logger.error('Failed to fetch TP Capital signals', error);
     return {
-      rows: SAMPLE_SIGNALS,
+      rows: FALLBACK_SAMPLE_SIGNALS,
       usingFallback: true,
       errorMessage: message,
     };
@@ -46,7 +71,7 @@ export async function fetchSignals(
 export async function fetchLogs(params: {
   limit: number;
   level?: string;
-}): Promise<FetchLogsResult> {
+}): Promise<FetchLogsResponse> {
   try {
     const response = await fetch(buildLogsQuery(params.limit, params.level));
     if (!response.ok) {

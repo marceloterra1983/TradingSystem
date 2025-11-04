@@ -56,6 +56,7 @@ const parseDbUrl = (url) => {
 };
 
 const resolveTimescaleConfig = () => {
+  // Prioritize TP_CAPITAL_DB_* when using dedicated stack
   const connectionString =
     process.env.TP_CAPITAL_DATABASE_URL ||
     process.env.TP_CAPITAL_DB_URL ||
@@ -67,39 +68,45 @@ const resolveTimescaleConfig = () => {
   const parsed = parseDbUrl(connectionString);
 
   const host =
-    process.env.TIMESCALEDB_HOST ||
+    process.env.TP_CAPITAL_DB_HOST ||
     process.env.TP_CAPITAL_DATABASE_HOST ||
+    process.env.TIMESCALEDB_HOST ||
     parsed?.host ||
     'localhost';
 
   const port = toInt(
-    process.env.TIMESCALEDB_PORT ||
+    process.env.TP_CAPITAL_DB_PORT ||
       process.env.TP_CAPITAL_DATABASE_PORT ||
+      process.env.TIMESCALEDB_PORT ||
       parsed?.port,
     5433,
   );
 
   const database =
-    process.env.TIMESCALEDB_DATABASE ||
+    process.env.TP_CAPITAL_DB_NAME ||
     process.env.TP_CAPITAL_DATABASE ||
+    process.env.TIMESCALEDB_DATABASE ||
     parsed?.database ||
     'APPS-TPCAPITAL';
 
   const schema =
-    process.env.TIMESCALEDB_SCHEMA ||
+    process.env.TP_CAPITAL_DB_SCHEMA ||
     process.env.TP_CAPITAL_DATABASE_SCHEMA ||
+    process.env.TIMESCALEDB_SCHEMA ||
     parsed?.schema ||
     'tp_capital';
 
   const user =
-    process.env.TIMESCALEDB_USER ||
     process.env.TP_CAPITAL_DB_USER ||
+    process.env.TP_CAPITAL_DB_USER ||
+    process.env.TIMESCALEDB_USER ||
     parsed?.user ||
     'timescale';
 
   const password =
-    process.env.TIMESCALEDB_PASSWORD ||
     process.env.TP_CAPITAL_DB_PASSWORD ||
+    process.env.TP_CAPITAL_DB_PASSWORD ||
+    process.env.TIMESCALEDB_PASSWORD ||
     parsed?.password ||
     'pass_timescale';
 
@@ -120,14 +127,75 @@ const resolveTimescaleConfig = () => {
     password,
     ssl,
     pool: {
-      max: toInt(process.env.TIMESCALEDB_POOL_MAX, 10),
-      idleTimeoutMs: toInt(process.env.TIMESCALEDB_IDLE_TIMEOUT_MS, 30000),
-      connectionTimeoutMs: toInt(process.env.TIMESCALEDB_CONN_TIMEOUT_MS, 5000),
+      max: toInt(process.env.TP_CAPITAL_POOL_MAX || process.env.TIMESCALEDB_POOL_MAX, 10),
+      idleTimeoutMs: toInt(process.env.TP_CAPITAL_IDLE_TIMEOUT || process.env.TIMESCALEDB_IDLE_TIMEOUT_MS, 30000),
+      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT || process.env.TIMESCALEDB_CONN_TIMEOUT_MS, 5000),
     },
   };
 };
 
-const timescaleConfig = resolveTimescaleConfig();
+/**
+ * Resolve Neon PostgreSQL configuration
+ * Used when TP_CAPITAL_DB_STRATEGY=neon
+ */
+const resolveNeonConfig = () => {
+  // Neon connection (via PgBouncer in dedicated stack)
+  const host =
+    process.env.TP_CAPITAL_DB_HOST ||
+    process.env.NEON_HOST ||
+    'tp-capital-pgbouncer'; // Container name in stack
+  
+  const port = toInt(
+    process.env.TP_CAPITAL_DB_PORT ||
+      process.env.NEON_PORT,
+    6432, // PgBouncer port
+  );
+  
+  const database =
+    process.env.TP_CAPITAL_DB_NAME ||
+    process.env.NEON_DATABASE ||
+    'tp_capital_db';
+  
+  const schema =
+    process.env.TP_CAPITAL_DB_SCHEMA ||
+    process.env.NEON_SCHEMA ||
+    'signals';
+  
+  const user =
+    process.env.TP_CAPITAL_DB_USER ||
+    process.env.NEON_USER ||
+    'postgres';
+  
+  const password =
+    process.env.TP_CAPITAL_DB_PASSWORD ||
+    process.env.NEON_PASSWORD ||
+    '';
+  
+  const connectionString =
+    process.env.TP_CAPITAL_DATABASE_URL ||
+    process.env.NEON_DATABASE_URL ||
+    `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
+  
+  return {
+    connectionString,
+    host,
+    port,
+    database,
+    schema,
+    user,
+    password,
+    ssl: false, // Neon local doesn't use SSL
+    pool: {
+      max: toInt(process.env.TP_CAPITAL_POOL_MAX, 25),
+      idleTimeoutMs: toInt(process.env.TP_CAPITAL_IDLE_TIMEOUT, 30000),
+      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT, 5000),
+    },
+  };
+};
+
+// Database strategy: 'neon' (dedicated stack) or 'timescale' (shared/legacy)
+const dbStrategy = process.env.TP_CAPITAL_DB_STRATEGY || 'timescale';
+const timescaleConfig = dbStrategy === 'neon' ? resolveNeonConfig() : resolveTimescaleConfig();
 
 const resolveGatewayDbConfig = (defaultTimescaleConfig) => {
   const connectionString =
@@ -205,6 +273,9 @@ const resolveGatewayDbConfig = (defaultTimescaleConfig) => {
 const gatewayDbConfig = resolveGatewayDbConfig(timescaleConfig);
 
 export const config = {
+  // Database strategy
+  dbStrategy,
+  
   telegram: {
     ingestionBotToken: process.env.TELEGRAM_INGESTION_BOT_TOKEN || '',
     forwarderBotToken: process.env.TELEGRAM_FORWARDER_BOT_TOKEN || '',
@@ -226,6 +297,11 @@ export const config = {
   },
   timescale: timescaleConfig,
   gateway: {
+    // HTTP API configuration (primary method - replaces direct database access)
+    url: process.env.TELEGRAM_GATEWAY_URL || 'http://localhost:4010',
+    apiKey: process.env.TELEGRAM_GATEWAY_API_KEY || process.env.API_SECRET_TOKEN || '',
+    
+    // Database configuration (legacy - kept for backward compatibility)
     database: gatewayDbConfig.database,
     schema: gatewayDbConfig.schema,
     host: gatewayDbConfig.host,
@@ -235,6 +311,7 @@ export const config = {
     connectionString: gatewayDbConfig.connectionString,
     ssl: gatewayDbConfig.ssl,
     pool: gatewayDbConfig.pool,
+    
     pollingIntervalMs: Number(
       process.env.TP_CAPITAL_GATEWAY_POLLING_INTERVAL_MS || 
       process.env.GATEWAY_POLLING_INTERVAL_MS || 
@@ -287,32 +364,38 @@ export const config = {
 export function validateConfig(logger) {
   // Telegram bot token is now optional (Gateway polling replaces it)
   if (!config.telegram.ingestionBotToken) {
-    logger.info('TELEGRAM_INGESTION_BOT_TOKEN not set - using Gateway polling for signal ingestion');
+    logger.info('TELEGRAM_INGESTION_BOT_TOKEN not set - using Gateway HTTP API for signal ingestion');
   }
 
-  // TimescaleDB required
+  // Database required (Neon or TimescaleDB)
   if (!config.timescale.connectionString && !config.timescale.host) {
-    throw new Error('TimescaleDB connection details are required');
+    throw new Error('Database connection details are required (Neon or TimescaleDB)');
   }
 
-  // Gateway database required
-  if (!config.gateway.database) {
-    throw new Error('GATEWAY_DATABASE_NAME must be provided');
+  // Gateway API required
+  if (!config.gateway.url) {
+    throw new Error('TELEGRAM_GATEWAY_URL must be provided');
+  }
+  
+  if (!config.gateway.apiKey) {
+    logger.warn('TELEGRAM_GATEWAY_API_KEY not set - API calls may fail');
   }
 
   logger.info({
-    timescale: {
+    dbStrategy: config.dbStrategy,
+    database: {
+      type: config.dbStrategy,
       host: config.timescale.host,
       port: config.timescale.port,
-      database: config.timescale.database
+      database: config.timescale.database,
+      schema: config.timescale.schema,
     },
     gateway: {
-      database: config.gateway.database,
-      host: config.gateway.host,
-      port: config.gateway.port,
-      schema: config.gateway.schema,
+      mode: 'http-api',
+      url: config.gateway.url,
+      hasApiKey: !!config.gateway.apiKey,
       pollingIntervalMs: config.gateway.pollingIntervalMs,
       signalsChannelId: config.gateway.signalsChannelId
     }
-  }, 'Database configuration loaded');
+  }, 'TP-Capital configuration loaded');
 }
