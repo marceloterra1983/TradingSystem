@@ -254,9 +254,6 @@ export function SignalsTable() {
                     Ativo
                   </th>
                   <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
-                    Tipo
-                  </th>
-                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
                     Compra
                   </th>
                   <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
@@ -285,7 +282,7 @@ export function SignalsTable() {
                 {filteredSignals.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className="py-8 text-center text-gray-500 dark:text-gray-400"
                     >
                       {searchTerm || channelFilter !== 'all' || typeFilter !== 'all'

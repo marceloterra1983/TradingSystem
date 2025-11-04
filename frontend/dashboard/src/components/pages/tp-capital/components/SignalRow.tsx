@@ -36,11 +36,6 @@ export interface SignalRowProps {
 export function SignalRow(props: SignalRowProps) {
   const { signal, onDelete, isDeleting } = props;
 
-  const signalTypeBadge =
-    signal.signal_type === 'Day Trade'
-      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400';
-
   return (
     <tr className="border-b dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
       {/* Asset */}
@@ -53,15 +48,6 @@ export function SignalRow(props: SignalRowProps) {
             {signal.channel}
           </span>
         </div>
-      </td>
-
-      {/* Signal Type */}
-      <td className="py-3 px-4">
-        <span
-          className={`inline-block px-2.5 py-1 text-xs font-medium rounded-md ${signalTypeBadge}`}
-        >
-          {signal.signal_type}
-        </span>
       </td>
 
       {/* Buy Range */}

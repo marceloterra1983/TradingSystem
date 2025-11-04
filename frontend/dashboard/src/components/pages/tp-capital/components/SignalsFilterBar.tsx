@@ -153,26 +153,6 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
           </Select>
         </div>
 
-        {/* Type Filter */}
-        <div className="flex-1 min-w-[140px]">
-          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Tipo
-          </label>
-          <Select value={typeFilter} onValueChange={onTypeFilterChange}>
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os tipos</SelectItem>
-              {typeOptions.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Search Input */}
         <div className="flex-[2] min-w-[200px]">
           <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
