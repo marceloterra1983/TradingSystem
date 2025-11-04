@@ -101,37 +101,77 @@ export class FullScanWorker {
 
   /**
    * Busca TODAS as mensagens do canal (paginado)
+   * 
+   * Busca TODAS as mensagens (sem filtro de status) em lotes de 100
    */
   async fetchAllMessages() {
     const messages = [];
     let offset = 0;
     let hasMore = true;
 
+    logger.info({
+      channelId: this.channelId,
+      maxMessages: this.maxMessages
+    }, '[FullScan] Iniciando busca de mensagens no canal');
+
     while (hasMore && messages.length < this.maxMessages) {
-      const url = `${this.gatewayUrl}/api/messages?channel=${this.channelId}&limit=${this.batchSize}&offset=${offset}`;
+      // Buscar SEM filtro de status para pegar TODAS as mensagens
+      const url = `${this.gatewayUrl}/api/messages?channel=${this.channelId}&limit=${this.batchSize}`;
       
-      const response = await fetch(url, {
-        headers: {
-          'X-API-Key': this.apiKey
+      logger.info({ 
+        offset: messages.length, 
+        batchSize: this.batchSize 
+      }, '[FullScan] Buscando lote de mensagens');
+      
+      try {
+        const response = await fetch(url, {
+          headers: this.apiKey ? { 'X-API-Key': this.apiKey } : {}
+        });
+
+        if (!response.ok) {
+          logger.warn({ 
+            httpStatus: response.status,
+            statusText: response.statusText 
+          }, '[FullScan] Falha ao buscar mensagens');
+          break;
         }
-      });
 
-      if (!response.ok) {
-        logger.warn({ status: response.status, offset }, '[FullScan] Falha ao buscar mensagens');
+        const data = await response.json();
+        const batch = data.data || [];
+
+        logger.info({
+          batchSize: batch.length,
+          totalSoFar: messages.length,
+          hasMore: batch.length === this.batchSize
+        }, '[FullScan] Lote obtido');
+
+        if (batch.length === 0) {
+          hasMore = false;
+        } else {
+          // Adicionar mensagens, removendo duplicatas por ID
+          const newMessages = batch.filter(
+            msg => !messages.some(existing => existing.messageId === msg.messageId)
+          );
+          messages.push(...newMessages);
+          
+          // Se retornou menos que o limite, não há mais mensagens
+          if (batch.length < this.batchSize) {
+            hasMore = false;
+          }
+          
+          offset += batch.length;
+          
+          // Pequeno delay para evitar rate limit
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      } catch (error) {
+        logger.error({ err: error, offset }, '[FullScan] Erro ao buscar lote');
         break;
-      }
-
-      const data = await response.json();
-      const batch = data.data || [];
-
-      if (batch.length === 0) {
-        hasMore = false;
-      } else {
-        messages.push(...batch);
-        offset += batch.length;
       }
     }
 
+    logger.info({ total: messages.length }, '[FullScan] Busca de mensagens concluída');
+    
     return messages;
   }
 
@@ -144,10 +184,12 @@ export class FullScanWorker {
    * - Contém "Alvo" OU "Stop" (alvos/proteção)
    */
   filterStructuredSignals(messages) {
-    return messages.filter(msg => {
+    const filtered = [];
+    
+    for (const msg of messages) {
       const content = msg.text || msg.caption || '';
       
-      if (!content || content.length < 20) return false;
+      if (!content || content.length < 20) continue;
 
       const upper = content.toUpperCase();
       
@@ -163,8 +205,23 @@ export class FullScanWorker {
       
       const isStructured = hasAtivo && hasCompra && (hasAlvo || hasStop);
       
-      return isStructured;
-    });
+      if (isStructured) {
+        logger.debug({
+          messageId: msg.messageId,
+          preview: content.substring(0, 100)
+        }, '[FullScan] Mensagem estruturada encontrada');
+        
+        filtered.push(msg);
+      }
+    }
+    
+    logger.info({
+      total: messages.length,
+      filtered: filtered.length,
+      percentage: ((filtered.length / messages.length) * 100).toFixed(1) + '%'
+    }, '[FullScan] Filtragem concluída');
+    
+    return filtered;
   }
 
   /**
