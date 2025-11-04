@@ -25,7 +25,8 @@ export class FullScanWorker {
     
     // Configuração de varredura
     this.batchSize = 100; // Mensagens por requisição
-    this.maxMessages = 1000; // Máximo de mensagens para processar
+    this.maxMessages = 6000; // Máximo de mensagens para processar (5,595 no Gateway)
+    this.requestDelay = 500; // Delay entre requisições (ms) - evita rate limit
   }
 
   /**
@@ -108,6 +109,7 @@ export class FullScanWorker {
     const messages = [];
     let offset = 0;
     let hasMore = true;
+    let totalAvailable = 0;
 
     logger.info({
       channelId: this.channelId,
@@ -115,12 +117,13 @@ export class FullScanWorker {
     }, '[FullScan] Iniciando busca de mensagens no canal');
 
     while (hasMore && messages.length < this.maxMessages) {
-      // Buscar SEM filtro de status para pegar TODAS as mensagens
-      const url = `${this.gatewayUrl}/api/messages?channel=${this.channelId}&limit=${this.batchSize}`;
+      // Usar offset para paginação correta
+      const url = `${this.gatewayUrl}/api/messages?channel=${this.channelId}&limit=${this.batchSize}&offset=${offset}`;
       
       logger.info({ 
-        offset: messages.length, 
-        batchSize: this.batchSize 
+        offset, 
+        batchSize: this.batchSize,
+        collected: messages.length
       }, '[FullScan] Buscando lote de mensagens');
       
       try {
@@ -129,40 +132,58 @@ export class FullScanWorker {
         });
 
         if (!response.ok) {
-          logger.warn({ 
+          const errorText = await response.text().catch(() => response.statusText);
+          logger.error({ 
             httpStatus: response.status,
-            statusText: response.statusText 
-          }, '[FullScan] Falha ao buscar mensagens');
+            statusText: response.statusText,
+            errorBody: errorText,
+            offset,
+            url 
+          }, '[FullScan] Falha ao buscar mensagens - HTTP error');
           break;
         }
 
         const data = await response.json();
         const batch = data.data || [];
+        
+        // Capturar total disponível na primeira requisição
+        if (offset === 0 && data.pagination) {
+          totalAvailable = data.pagination.total || 0;
+          logger.info({ totalAvailable }, '[FullScan] Total de mensagens no Gateway');
+        }
 
         logger.info({
           batchSize: batch.length,
+          offset,
           totalSoFar: messages.length,
-          hasMore: batch.length === this.batchSize
+          totalAvailable
         }, '[FullScan] Lote obtido');
 
         if (batch.length === 0) {
+          logger.info('[FullScan] Nenhuma mensagem retornada, finalizando');
           hasMore = false;
         } else {
-          // Adicionar mensagens, removendo duplicatas por ID
+          // Adicionar mensagens (sem duplicatas)
           const newMessages = batch.filter(
             msg => !messages.some(existing => existing.messageId === msg.messageId)
           );
+          
           messages.push(...newMessages);
+          
+          // Atualizar offset para próxima página
+          offset += batch.length;
           
           // Se retornou menos que o limite, não há mais mensagens
           if (batch.length < this.batchSize) {
+            logger.info({ 
+              lastBatchSize: batch.length,
+              total: messages.length 
+            }, '[FullScan] Última página alcançada');
             hasMore = false;
           }
           
-          offset += batch.length;
-          
-          // Pequeno delay para evitar rate limit
-          await new Promise(resolve => setTimeout(resolve, 200));
+          // Delay para evitar rate limit (500ms por requisição = max 2 req/s)
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       } catch (error) {
         logger.error({ err: error, offset }, '[FullScan] Erro ao buscar lote');
@@ -170,7 +191,11 @@ export class FullScanWorker {
       }
     }
 
-    logger.info({ total: messages.length }, '[FullScan] Busca de mensagens concluída');
+    logger.info({ 
+      total: messages.length,
+      totalAvailable,
+      maxReached: messages.length >= this.maxMessages 
+    }, '[FullScan] Busca de mensagens concluída');
     
     return messages;
   }
