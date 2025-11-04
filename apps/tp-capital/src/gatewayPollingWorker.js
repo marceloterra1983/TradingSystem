@@ -210,6 +210,7 @@ export class GatewayPollingWorker {
         channel_id: msg.channelId,
         message_id: msg.messageId,
         text: msg.text,
+        caption: msg.caption, // ✅ ADICIONADO: Caption para fotos
         telegram_date: msg.telegramDate,
         received_at: msg.receivedAt,
         metadata: msg.metadata,
@@ -235,9 +236,12 @@ export class GatewayPollingWorker {
    */
   async processMessage(msg) {
     // 1. Try to parse signal
+    // Use text or caption (photos have caption instead of text)
+    const messageContent = msg.text || msg.caption || '';
+    
     let signal;
     try {
-      signal = parseSignal(msg.text, {
+      signal = parseSignal(messageContent, {
         timestamp: new Date(msg.telegram_date).getTime(),
         channel: msg.channel_id,
         source: 'telegram-gateway'
@@ -256,10 +260,27 @@ export class GatewayPollingWorker {
       return;
     }
 
-    // 2. SALVAR TODOS OS SINAIS (completos ou incompletos)
-    // Usuário solicitou: "deve importar todos os sinais já que está na tabela do telegram gateway"
-    // Removida validação que bloqueava sinais sem valores de compra
-    // Sinais narrativos (análises sem valores) agora serão salvos também
+    // 2. VALIDAR SE É UM ATIVO VÁLIDO
+    // Rejeitar palavras comuns que não são ativos (INVESTIDOR, ENTRADA, VAMOS, etc.)
+    const assetRegex = /^[A-Z]{3,6}\d{1,4}$/; // Ex: PETR4, CSNAW919, BBDCU159
+    const isValidAsset = assetRegex.test(signal.asset);
+    
+    // Também aceitar se tiver pelo menos um dos campos de trading preenchidos
+    const hasTradeFields = signal.buy_min || signal.target_1 || signal.stop;
+    
+    if (!isValidAsset && !hasTradeFields) {
+      logger.debug({
+        messageId: msg.message_id,
+        asset: signal.asset,
+        reason: 'Invalid asset format and no trade fields'
+      }, 'Skipping message - not a trading signal');
+      
+      await this.markMessageAsIgnored(msg.message_id, 'Not a trading signal');
+      if (this.metrics) {
+        this.metrics.messagesProcessed.inc({ status: 'ignored_invalid_asset' });
+      }
+      return;
+    }
 
     // 3. Check for duplicate (idempotency)
     const isDuplicate = await this.checkDuplicate(msg);
