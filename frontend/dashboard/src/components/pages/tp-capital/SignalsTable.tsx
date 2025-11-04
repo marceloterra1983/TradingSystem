@@ -23,7 +23,7 @@ import {
   CollapsibleCardContent,
 } from '../../ui/collapsible-card';
 import { AlertCircle } from 'lucide-react';
-import { fetchSignals, deleteSignal } from './api';
+import { fetchSignals } from './api';
 import { toCsv, downloadFile } from './utils';
 import { searchInMultiple } from './utils/filterHelpers';
 import { SignalsFilterBar, SignalRow, SignalsStats } from './components';
