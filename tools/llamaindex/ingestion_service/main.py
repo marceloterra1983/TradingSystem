@@ -303,6 +303,59 @@ else:
     default_storage_context = None
 
 
+def ensure_qdrant_ready(force: bool = False) -> bool:
+    """
+    Ensure Qdrant client and default storage context are ready.
+
+    This is called lazily by ingestion routes and the health check so the service
+    can recover automatically when Qdrant finishes booting after this process.
+    """
+    global qdrant_client  # pylint: disable=global-statement
+    global default_vector_store  # pylint: disable=global-statement
+    global default_storage_context  # pylint: disable=global-statement
+
+    if not force and qdrant_client is not None and default_vector_store is not None:
+        return True
+
+    try:
+        logger.info(
+            "Attempting %sinitialize Qdrant client at %s:%s",
+            "re" if force or qdrant_client is not None else "",
+            QDRANT_HOST,
+            QDRANT_PORT,
+        )
+        client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+        client.get_collections()
+
+        vector_store = QdrantVectorStore(
+            client=client,
+            collection_name=QDRANT_COLLECTION,
+            prefer_grpc=False,
+        )
+        ensure_payload_on_search(vector_store)
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.error(
+            "Failed to %sinitialize Qdrant client or vector store: %s",
+            "re" if force or qdrant_client is not None else "",
+            exc,
+        )
+        return False
+
+    # Replace previous caches to avoid stale clients
+    vector_store_cache.clear()
+    storage_context_cache.clear()
+
+    qdrant_client = client
+    default_vector_store = vector_store
+    default_storage_context = storage_context
+    vector_store_cache[QDRANT_COLLECTION] = vector_store
+    storage_context_cache[QDRANT_COLLECTION] = storage_context
+
+    logger.info("Qdrant connection ready for collection: %s", QDRANT_COLLECTION)
+    return True
+
+
 def _normalize_collection_name(value: Optional[str]) -> str:
     name = (value or "").strip()
     return name or QDRANT_COLLECTION
@@ -310,7 +363,7 @@ def _normalize_collection_name(value: Optional[str]) -> str:
 
 def get_or_create_storage_context(collection_name: Optional[str]) -> StorageContext:
     """Return a storage context for the requested collection, creating it if necessary."""
-    if qdrant_client is None:
+    if not ensure_qdrant_ready():
         raise HTTPException(
             status_code=503,
             detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable.",
@@ -599,7 +652,7 @@ async def ingest_directory(request: DirectoryIngestRequest):
     """
     collection_name = _normalize_collection_name(request.collection_name)
 
-    if qdrant_client is None:
+    if not ensure_qdrant_ready():
         raise HTTPException(
             status_code=503,
             detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable.",
@@ -816,7 +869,7 @@ async def ingest_document(request: DocumentIngestRequest):
     """
     collection_name = _normalize_collection_name(request.collection_name)
 
-    if qdrant_client is None:
+    if not ensure_qdrant_ready():
         raise HTTPException(
             status_code=503,
             detail="Qdrant vector store is not available. Service is still initializing or Qdrant is unreachable.",
@@ -954,7 +1007,7 @@ async def delete_collection(collection_name: str):
     """
     Delete a collection and all its documents.
     """
-    if qdrant_client is None:
+    if not ensure_qdrant_ready():
         raise HTTPException(
             status_code=503,
             detail="Qdrant client is not available. Service is still initializing or Qdrant is unreachable."
@@ -990,7 +1043,7 @@ async def health_check():
     Health check endpoint.
     """
     try:
-        if qdrant_client is None or default_vector_store is None:
+        if not ensure_qdrant_ready():
             return {
                 "status": "degraded",
                 "message": "Qdrant client or default vector store not initialized",

@@ -1,3 +1,14 @@
+---
+title: "Claude Commands Reference"
+sidebar_position: 3
+description: "Detailed reference for each custom Claude CLI command and supported flags."
+tags:
+  - ai
+  - claude
+  - reference
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # Lista de Comandos Claude Code - TradingSystem
 
 **Comandos customizados disponíveis no Claude Code CLI**
@@ -378,10 +389,10 @@ ls -la .claude/commands/
 
 ### Documentação Adicional
 
-- [Code Quality Checklist](docs/content/development/code-quality-checklist.md)
-- [Quick Reference](CODE-QUALITY-COMMANDS.md)
-- [Claude Commands Guide](CLAUDE-COMMANDS-READY.md)
-- [Workflow System](WORKFLOW-SYSTEM-READY.md)
+- [Code Quality Checklist](/development/code-quality-checklist)
+- [Code Quality Commands](/tools/development/code-quality-commands)
+- [Claude Commands Overview](/tools/ai/claude-commands-ready)
+- `reports/2025-11-02/WORKFLOW-SYSTEM-READY.md`
 
 ---
 
@@ -428,10 +439,10 @@ claude /quality-check --fix
 
 ## 🔗 Links Rápidos
 
-- **CLAUDE.md**: [CLAUDE.md](CLAUDE.md) - Instruções do projeto
-- **Comandos**: [.claude/commands/README.md](.claude/commands/README.md)
-- **Scripts**: [scripts/maintenance/](scripts/maintenance/)
-- **Health Checks**: [scripts/maintenance/health-check-all.sh](scripts/maintenance/health-check-all.sh)
+- **CLAUDE.md** (arquivo na raiz) – Instruções do projeto
+- **.claude/commands/README.md** – Índice completo dos comandos
+- **scripts/maintenance/** – Scripts utilitários de manutenção
+- **scripts/maintenance/health-check-all.sh** – Checklist de saúde completo
 
 ---
 

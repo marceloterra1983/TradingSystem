@@ -1,3 +1,14 @@
+---
+title: "Automation Universal Commands"
+sidebar_position: 2
+description: "Overview of the start, stop, and status wrappers installed by install-shortcuts.sh."
+tags:
+  - automation
+  - shortcuts
+  - cli
+owner: OpsGuild
+lastReviewed: '2025-11-02'
+---
 # 🚀 Comandos Universais do TradingSystem
 
 ## Instalação

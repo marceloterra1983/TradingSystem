@@ -1,3 +1,14 @@
+---
+title: "RAG Services Refactor Plan"
+sidebar_position: 8
+description: "Breakdown of the work required to split and stabilise LlamaIndexPage."
+tags:
+  - rag
+  - frontend
+  - refactor
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # 🔄 Plano de Refatoração: RAG Services Page
 
 **URL:** http://localhost:3103/#/rag-services

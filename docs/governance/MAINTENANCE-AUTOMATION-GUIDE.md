@@ -1,0 +1,605 @@
+# Documentation Maintenance Automation Guide
+
+**Purpose**: Comprehensive guide for automated documentation maintenance, validation, and quality assurance.
+
+**Audience**: DocsOps, Release Engineers, QA Team, DevOps
+
+**Last Updated**: 2025-11-03
+
+---
+
+## Overview
+
+The TradingSystem documentation maintenance system provides automated tools for:
+
+- **Comprehensive Validation** - Full validation suite (generation, linting, type checking, build, links, frontmatter)
+- **Quality Auditing** - Content freshness, completeness, and quality metrics
+- **Link Analysis** - Intelligent broken link detection with fix suggestions
+- **Health Dashboard** - Visual metrics and trend analysis
+- **Automated Reporting** - Detailed reports with actionable recommendations
+
+---
+
+## Quick Start
+
+### Daily Maintenance (Recommended)
+
+```bash
+# Full validation suite (recommended before commits)
+bash scripts/docs/docs-maintenance-validate.sh
+
+# Quick health check
+node scripts/docs/docs-health-dashboard.mjs
+
+# Link analysis (if broken links detected)
+python scripts/docs/analyze-broken-links.py --build-log /tmp/docs-build.txt
+```
+
+### Weekly Maintenance
+
+```bash
+# Run full audit
+cd docs
+npm run docs:check
+
+# Generate health dashboard
+node ../scripts/docs/docs-health-dashboard.mjs
+
+# Review reports
+ls -lh reports/maintenance-$(date +%Y-%m-%d)/
+```
+
+---
+
+## Maintenance Tools
+
+### 1. Comprehensive Validation Script
+
+**Script**: `scripts/docs/docs-maintenance-validate.sh`
+
+**Purpose**: Execute all validation layers in a single run with detailed reporting.
+
+**Usage**:
+```bash
+bash scripts/docs/docs-maintenance-validate.sh
+```
+
+**Validation Layers** (10 total):
+
+1. **Content Generation** - Generate auto-generated content (ports table, design tokens)
+2. **Generated Content Validation** - Verify markers and timestamps
+3. **Markdown Linting** - Check markdown syntax and style
+4. **TypeScript Type Checking** - Validate TypeScript in MDX files
+5. **Unit Tests** - Run automation script tests
+6. **Build Validation** - Ensure Docusaurus builds successfully
+7. **Link Validation** - Check all internal and external links
+8. **Frontmatter Validation** - Validate YAML frontmatter
+9. **Content Quality Audit** - Analyze TODO markers, placeholders, completeness
+10. **Health Metrics** - Calculate freshness score and documentation coverage
+
+**Output**:
+- Full report: `docs/reports/maintenance-YYYY-MM-DD/validation-report-TIMESTAMP.md`
+- JSON report: `docs/reports/maintenance-YYYY-MM-DD/validation-report-TIMESTAMP.json`
+
+**Exit Codes**:
+- `0` - All validations passed
+- `1` - Critical failures detected
+
+**Example Output**:
+```
+========================================
+1. CONTENT GENERATION
+========================================
+[INFO] Running docs:auto to generate content...
+[✓] Content generation completed successfully
+
+========================================
+2. GENERATED CONTENT VALIDATION
+========================================
+[✓] Generated content validation passed
+
+...
+
+========================================
+VALIDATION COMPLETE
+========================================
+
+📊 Validation Results:
+   Total Checks: 10
+   Passed: 9
+   Failed: 0
+   Warnings: 2
+
+📄 Reports Generated:
+   - Full Report: docs/reports/maintenance-2025-11-03/validation-report-14-30-45.md
+   - JSON Report: docs/reports/maintenance-2025-11-03/validation-report-14-30-45.json
+
+[✓] All validations passed! ✅
+```
+
+---
+
+### 2. Broken Link Analyzer
+
+**Script**: `scripts/docs/analyze-broken-links.py`
+
+**Purpose**: Intelligent analysis of broken links with categorization and fix suggestions.
+
+**Usage**:
+```bash
+# From build output
+npm run docs:build 2>&1 | python scripts/docs/analyze-broken-links.py --format both
+
+# From saved log
+python scripts/docs/analyze-broken-links.py --build-log /tmp/docs-build.txt --format markdown
+```
+
+**Options**:
+- `--build-log` - Path to Docusaurus build log file
+- `--output-dir` - Output directory for reports (default: `docs/reports`)
+- `--format` - Report format: `markdown`, `json`, or `both` (default: `both`)
+
+**Features**:
+
+1. **Link Categorization**:
+   - Governance links (not published)
+   - API documentation references
+   - PlantUML diagram sources
+   - Source code references
+   - Internal documentation links
+
+2. **Intelligent Suggestions**:
+   - Fuzzy matching to find similar files
+   - Path correction recommendations
+   - Alternative link strategies (GitHub links, Redocusaurus, embeddings)
+
+3. **Bulk Fix Commands**:
+   - Search and replace patterns
+   - Automated correction scripts
+
+**Example Output**:
+```markdown
+# Broken Links Analysis Report
+
+**Generated**: 2025-11-03 14:30:00
+**Total Broken Links**: 15
+**Categories Detected**: 4
+
+---
+
+## Summary
+
+- **Governance**: 5 links
+- **Internal Relative**: 4 links
+- **API**: 3 links
+- **Diagram**: 3 links
+
+---
+
+## Governance (5 links)
+
+### Source: `/next/`
+
+**Broken Link**: `/governance/documentation-index`
+
+**Reason**: Governance documents are not part of Docusaurus content
+
+**Suggested Fixes**:
+
+1. **External Link**
+   - Replace with: `https://github.com/marceloterra1983/TradingSystem/blob/main/docs/governance/DOCUMENTATION-INDEX.md`
+   - Governance files are not published, link to GitHub instead
+
+---
+
+## Quick Fix Commands
+
+### Remove All Governance Links (Not Published)
+
+```bash
+# Search for governance links
+grep -r '/governance/' docs/content/
+
+# Remove manually or create summary page
+```
+
+---
+
+## Recommendations
+
+1. **Governance Links**: Create a summary page in `content/` that describes governance processes with links to GitHub
+2. **Diagram Links**: Use `@theme/PlantUML` component to embed rendered diagrams instead of linking to .puml files
+3. **Source Code Links**: Replace with GitHub links or create code snippet examples in documentation
+```
+
+---
+
+### 3. Health Dashboard Generator
+
+**Script**: `scripts/docs/docs-health-dashboard.mjs`
+
+**Purpose**: Generate visual HTML dashboard showing documentation health metrics.
+
+**Usage**:
+```bash
+node scripts/docs/docs-health-dashboard.mjs
+```
+
+**Metrics Collected**:
+
+1. **Overview**:
+   - Total documentation files
+   - MDX vs MD breakdown
+   - Total size in KB
+
+2. **Coverage by Domain**:
+   - Apps documentation (count)
+   - API documentation (count)
+   - Frontend documentation (count)
+   - Tools documentation (count)
+   - SDD/PRD/Reference (counts)
+
+3. **Freshness Score** (0-100%):
+   - Recent (< 30 days)
+   - Moderate (30-90 days)
+   - Stale (> 90 days)
+
+4. **Quality Score** (0-100%):
+   - TODO/FIXME markers
+   - Placeholder content
+   - Issues per file ratio
+
+5. **Validation Score** (0-100%):
+   - Passed checks
+   - Failed checks
+   - Warnings
+
+6. **Overall Health Score**:
+   - Weighted average of all scores
+
+**Output**:
+- HTML Dashboard: `docs/reports/health-dashboard.html`
+- JSON Metrics: `docs/reports/health-metrics-TIMESTAMP.json`
+
+**Dashboard Features**:
+- Color-coded health indicators (green/yellow/red)
+- Progress bars for each metric
+- Domain coverage breakdown
+- Actionable recommendations
+- Responsive design (mobile-friendly)
+
+**Example Dashboard**:
+![Health Dashboard](../assets/images/health-dashboard-example.png)
+
+**Opening the Dashboard**:
+```bash
+# Linux/WSL
+xdg-open docs/reports/health-dashboard.html
+
+# macOS
+open docs/reports/health-dashboard.html
+
+# Windows
+start docs/reports/health-dashboard.html
+```
+
+---
+
+## Integration with CI/CD
+
+### GitHub Actions Workflow
+
+**File**: `.github/workflows/docs-validation.yml`
+
+```yaml
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          cd docs
+          npm install
+      
+      - name: Run full validation
+        run: |
+          bash scripts/docs/docs-maintenance-validate.sh
+      
+      - name: Generate health dashboard
+        if: always()
+        run: |
+          node scripts/docs/docs-health-dashboard.mjs
+      
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation-reports
+          path: docs/reports/maintenance-*/
+      
+      - name: Upload health dashboard
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: health-dashboard
+          path: docs/reports/health-dashboard.html
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'docs/reports/maintenance-*/validation-report-*.md';
+            // Read and post report summary to PR
+```
+
+### Pre-commit Hook
+
+**File**: `.husky/pre-commit`
+
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run validation on docs if changed
+if git diff --cached --name-only | grep -q "^docs/"; then
+  echo "📚 Running documentation validation..."
+  bash scripts/docs/docs-maintenance-validate.sh
+  
+  if [ $? -ne 0 ]; then
+    echo "❌ Documentation validation failed. Fix issues before committing."
+    exit 1
+  fi
+fi
+```
+
+---
+
+## Maintenance Schedules
+
+### Daily (Automated via Cron/Scheduled Job)
+
+```bash
+# 09:00 - Generate health dashboard
+0 9 * * * cd /path/to/TradingSystem && node scripts/docs/docs-health-dashboard.mjs
+
+# 18:00 - Full validation (end of day)
+0 18 * * * cd /path/to/TradingSystem && bash scripts/docs/docs-maintenance-validate.sh
+```
+
+### Weekly (Manual)
+
+**Every Friday**:
+1. Review health dashboard
+2. Address high-priority recommendations
+3. Update stale documentation (>90 days)
+4. Resolve TODO markers
+5. Fix broken links
+
+### Monthly (Manual)
+
+**First Monday of Month**:
+1. Run comprehensive audit
+2. Review all metrics and trends
+3. Plan documentation improvements
+4. Update maintenance procedures
+5. Archive old reports
+
+---
+
+## Troubleshooting
+
+### Issue: Validation Script Fails on Step 3 (Markdown Linting)
+
+**Symptoms**: High number of linting errors
+
+**Solution**:
+```bash
+# View detailed linting errors
+cd docs
+npm run docs:lint
+
+# Auto-fix common issues
+npm run docs:lint -- --fix
+
+# Review remaining errors manually
+```
+
+### Issue: Broken Link Analyzer Finds No Links
+
+**Symptoms**: Script reports "No broken links found" but build shows warnings
+
+**Solution**:
+```bash
+# Ensure you're passing the full build output
+npm run docs:build 2>&1 | tee /tmp/docs-build.txt
+python scripts/docs/analyze-broken-links.py --build-log /tmp/docs-build.txt
+```
+
+### Issue: Health Dashboard Shows Low Freshness Score
+
+**Symptoms**: Freshness score < 50%
+
+**Solution**:
+```bash
+# Find stale files
+find docs/content -name "*.mdx" -mtime +90
+
+# Update lastReviewed dates
+bash scripts/docs/update-last-reviewed.sh
+
+# Re-generate dashboard
+node scripts/docs/docs-health-dashboard.mjs
+```
+
+### Issue: Validation Takes Too Long (>30 minutes)
+
+**Symptoms**: Script hangs or times out
+
+**Solution**:
+```bash
+# Run individual steps to identify bottleneck
+cd docs
+
+time npm run docs:auto
+time npm run docs:lint
+time npm run docs:typecheck
+time npm run docs:build
+
+# Skip non-critical steps
+export SKIP_LINT=true
+bash scripts/docs/docs-maintenance-validate.sh
+```
+
+---
+
+## Best Practices
+
+### 1. Run Before Every Commit
+
+Always validate documentation before committing:
+```bash
+bash scripts/docs/docs-maintenance-validate.sh
+```
+
+### 2. Review Dashboard Weekly
+
+Check health dashboard every Friday:
+```bash
+node scripts/docs/docs-health-dashboard.mjs
+xdg-open docs/reports/health-dashboard.html
+```
+
+### 3. Address Warnings Promptly
+
+Don't let warnings accumulate:
+- Fix broken links immediately
+- Resolve TODO markers within 1 week
+- Update stale docs within 2 weeks
+
+### 4. Keep Reports for Trend Analysis
+
+Archive monthly reports for comparison:
+```bash
+mkdir -p docs/reports/archive/$(date +%Y-%m)
+mv docs/reports/maintenance-* docs/reports/archive/$(date +%Y-%m)/
+```
+
+### 5. Automate Routine Tasks
+
+Use npm scripts for common operations:
+```json
+{
+  "scripts": {
+    "docs:validate": "bash ../scripts/docs/docs-maintenance-validate.sh",
+    "docs:health": "node ../scripts/docs/docs-health-dashboard.mjs",
+    "docs:analyze-links": "npm run docs:build 2>&1 | python ../scripts/docs/analyze-broken-links.py"
+  }
+}
+```
+
+---
+
+## Maintenance Metrics
+
+### Key Performance Indicators (KPIs)
+
+| Metric | Target | Warning | Critical |
+|--------|--------|---------|----------|
+| Overall Health Score | ≥ 80% | 60-79% | < 60% |
+| Freshness Score | ≥ 70% | 50-69% | < 50% |
+| Quality Score | ≥ 85% | 70-84% | < 70% |
+| Validation Score | 100% | 90-99% | < 90% |
+| TODO Markers | ≤ 20 | 21-50 | > 50 |
+| Broken Links | 0 | 1-5 | > 5 |
+| Stale Docs (>90d) | ≤ 10% | 11-20% | > 20% |
+
+### Monthly Report Template
+
+```markdown
+# Documentation Health Report - [Month YYYY]
+
+## Executive Summary
+- Overall Health: [X]%
+- Total Files: [N]
+- Key Issues: [Summary]
+
+## Metrics Comparison
+
+| Metric | This Month | Last Month | Change |
+|--------|-----------|------------|---------|
+| Health Score | X% | Y% | +/- Z% |
+| Freshness | X% | Y% | +/- Z% |
+| Quality | X% | Y% | +/- Z% |
+| Validation | X% | Y% | +/- Z% |
+
+## Actions Taken
+1. [Action 1]
+2. [Action 2]
+
+## Open Issues
+1. [Issue 1]
+2. [Issue 2]
+
+## Next Month Goals
+1. [Goal 1]
+2. [Goal 2]
+```
+
+---
+
+## Related Documentation
+
+- [Validation Guide](./VALIDATION-GUIDE.md) - Detailed validation procedures
+- [Review Checklist](./REVIEW-CHECKLIST.md) - Chapter-by-chapter review
+- [Maintenance Checklist](./MAINTENANCE-CHECKLIST.md) - Quarterly hygiene
+- [CI/CD Integration](./CI-CD-INTEGRATION.md) - Automated workflows
+
+---
+
+## Support
+
+**Questions or Issues?**
+
+- Slack: `#docs-ops`
+- Email: `docs-team@tradingsystem.local`
+- GitHub Issues: Label with `documentation` and `maintenance`
+
+---
+
+**Last Updated**: 2025-11-03
+**Maintained By**: DocsOps Team
+**Version**: 1.0.0
+
+
+
+
+
+

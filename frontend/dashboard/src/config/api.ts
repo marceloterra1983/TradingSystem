@@ -2,6 +2,8 @@
  * Centralized API configuration for unified domain and direct port access
  */
 
+import { ENDPOINTS } from './endpoints';
+
 // Types
 export interface ApiConfig {
   baseUrl: string;
@@ -89,9 +91,9 @@ const unifiedConfig: ApiConfig = {
       'http://localhost:8813',
       'http://localhost:9009',
     ) || 'http://localhost:9010',
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
 };
 
 // Direct port configuration (legacy)
@@ -115,20 +117,22 @@ const directConfig: ApiConfig = {
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
+      ENDPOINTS.questdb,
       'http://localhost:9000',
       'http://localhost:8813',
       'http://localhost:9002',
-    ) || 'http://localhost:9000',
+    ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
+      ENDPOINTS.questdb,
       'http://localhost:9010',
       'http://localhost:8813',
       'http://localhost:9009',
-    ) || 'http://localhost:9010',
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || 'http://localhost:5050',
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || 'http://localhost:8081',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || 'http://localhost:8080',
+    ) || ENDPOINTS.questdb,
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
 };
 
 // Get current configuration based on environment

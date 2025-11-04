@@ -12,6 +12,10 @@ import {
   ExternalServiceError,
   ValidationError
 } from '../middleware/errorHandler.js';
+import { createCircuitBreaker, formatCircuitBreakerError } from '../middleware/circuitBreaker.js';
+import { createServiceAuthHeader } from '../../../../shared/middleware/serviceAuth.js';
+import ThreeTierCache from '../middleware/threeTierCache.js';
+import { createClient as createRedisClient } from 'redis';
 
 /**
  * RAG Proxy Service
@@ -30,6 +34,118 @@ export class RagProxyService {
       expiresAt: 0,
     };
     this._tokenTTL = config.tokenTTL || 5 * 60 * 1000; // 5 minutes default
+    
+    // Initialize Redis client for L2 cache
+    this._initRedisClient();
+    
+    // Initialize 3-tier cache (Memory + Redis + Qdrant)
+    this.cache = new ThreeTierCache({
+      redisClient: this.redisClient,
+      maxMemorySize: parseInt(process.env.CACHE_MEMORY_MAX) || 1000,
+      memoryTTL: parseInt(process.env.CACHE_MEMORY_TTL) || 300000,
+      redisTTL: parseInt(process.env.CACHE_REDIS_TTL) || 600,
+    });
+    
+    // Circuit breakers for upstream services (fault tolerance)
+    this._initCircuitBreakers();
+  }
+  
+  /**
+   * Initialize Redis client for caching
+   * @private
+   */
+  async _initRedisClient() {
+    if (process.env.REDIS_ENABLED !== 'true') {
+      this.redisClient = null;
+      return;
+    }
+    
+    try {
+      this.redisClient = createRedisClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        socket: {
+          connectTimeout: 5000,
+          reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+        },
+      });
+      
+      this.redisClient.on('error', (err) => {
+        console.error('Redis client error:', err.message);
+      });
+      
+      await this.redisClient.connect();
+      console.log('✅ Redis client connected for 3-tier cache');
+    } catch (error) {
+      console.warn('⚠️  Redis unavailable, using memory-only cache:', error.message);
+      this.redisClient = null;
+    }
+  }
+  
+  /**
+   * Initialize circuit breakers for upstream services
+   * @private
+   */
+  _initCircuitBreakers() {
+    // Circuit breaker for LlamaIndex Query Service
+    this.queryCircuitBreaker = createCircuitBreaker(
+      async (url, options) => {
+        const response = await fetch(url, options);
+        const text = await response.text();
+        return {
+          ok: response.ok,
+          status: response.status,
+          contentType: response.headers.get('content-type') || 'application/json',
+          body: text,
+          data: text ? this._parseJson(text) : null,
+        };
+      },
+      'LlamaIndex Query Service',
+      { timeout: this.timeout }
+    );
+    
+    // Circuit breaker for RAG Collections Service
+    this.collectionsCircuitBreaker = createCircuitBreaker(
+      async (url, options) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+        
+        try {
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
+          const text = await response.text();
+          return {
+            ok: response.ok,
+            status: response.status,
+            body: text,
+            data: text ? this._parseJson(text) : null,
+          };
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      },
+      'RAG Collections Service',
+      { timeout: this.timeout }
+    );
+  }
+  
+  /**
+   * Get circuit breaker states for health checks
+   */
+  getCircuitBreakerStates() {
+    return {
+      llamaindex_query: {
+        state: this.queryCircuitBreaker.opened ? 'open' : 
+               this.queryCircuitBreaker.halfOpen ? 'half-open' : 'closed',
+        stats: this.queryCircuitBreaker.stats,
+      },
+      rag_collections: {
+        state: this.collectionsCircuitBreaker.opened ? 'open' :
+               this.collectionsCircuitBreaker.halfOpen ? 'half-open' : 'closed',
+        stats: this.collectionsCircuitBreaker.stats,
+      },
+    };
   }
 
   /**
@@ -56,39 +172,62 @@ export class RagProxyService {
   }
 
   /**
-   * Make upstream request with authentication
+   * Make upstream request with authentication and circuit breaker protection
    * @private
    */
-  async _makeRequest(url, options = {}) {
+  async _makeRequest(url, options = {}, useCircuitBreaker = true) {
+    const headers = {
+      ...options.headers,
+      Authorization: this._getBearerToken(),
+      ...createServiceAuthHeader(),  // Add X-Service-Token for inter-service auth
+    };
+
+    const requestOptions = {
+      ...options,
+      headers,
+      timeout: options.timeout || this.timeout,
+    };
+
     try {
-      const headers = {
-        ...options.headers,
-        Authorization: this._getBearerToken(),
-      };
-
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        timeout: options.timeout || this.timeout,
-      });
-
-      const text = await response.text();
-
-      return {
-        ok: response.ok,
-        status: response.status,
-        contentType: response.headers.get('content-type') || 'application/json',
-        body: text,
-        data: text ? this._parseJson(text) : null,
-      };
+      // Determine which circuit breaker to use based on URL
+      const breaker = url.includes(this.queryBaseUrl) 
+        ? this.queryCircuitBreaker
+        : this.collectionsCircuitBreaker;
+      
+      if (useCircuitBreaker) {
+        // Use circuit breaker for fault tolerance
+        return await breaker.fire(url, requestOptions);
+      } else {
+        // Direct call (for health checks, etc.)
+        const response = await fetch(url, requestOptions);
+        const text = await response.text();
+        return {
+          ok: response.ok,
+          status: response.status,
+          contentType: response.headers.get('content-type') || 'application/json',
+          body: text,
+          data: text ? this._parseJson(text) : null,
+        };
+      }
     } catch (error) {
+      // Handle circuit breaker errors specifically
+      if (error.message && error.message.includes('Breaker is open')) {
+        const serviceName = url.includes(this.queryBaseUrl) 
+          ? 'LlamaIndex Query Service'
+          : 'RAG Collections Service';
+        throw new ServiceUnavailableError(serviceName, {
+          reason: 'Circuit breaker open',
+          retryAfter: Math.ceil(CIRCUIT_BREAKER_OPTIONS.resetTimeout / 1000),
+        });
+      }
+      
       if (error.name === 'AbortError' || error.code === 'ETIMEDOUT') {
-        throw new ServiceUnavailableError('LlamaIndex query service', {
+        throw new ServiceUnavailableError('Upstream service', {
           reason: 'Request timeout',
           timeout: this.timeout,
         });
       }
-      throw new ExternalServiceError('LlamaIndex query service', error);
+      throw new ExternalServiceError('Upstream service', error);
     }
   }
 
@@ -174,6 +313,19 @@ export class RagProxyService {
     const validQuery = this._validateQuery(query);
     const validMaxResults = this._validateMaxResults(maxResults);
 
+    // 🚀 QUICK WIN: Check cache first
+    const cacheKey = this.cache.generateKey(validQuery, { maxResults: validMaxResults, collection });
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return {
+        ...cached.data,
+        _cacheHit: true,
+        _cacheSource: cached.source,
+        _cacheTier: cached.tier,
+        _cacheLatency: cached.latency,
+      };
+    }
+
     // Build URL with query parameters
     const url = new URL(`${this.queryBaseUrl}/search`);
     url.searchParams.set('query', validQuery);
@@ -196,7 +348,7 @@ export class RagProxyService {
       );
     }
 
-    return {
+    const result = {
       success: true,
       results: response.data || [],
       metadata: {
@@ -204,7 +356,15 @@ export class RagProxyService {
         maxResults: validMaxResults,
         collection: collection || null,
       },
+      _cacheHit: false,
     };
+
+    // 🚀 QUICK WIN: Store in cache
+    this.cache.set(cacheKey, result).catch(err => {
+      console.warn('Cache set failed:', err.message);
+    });
+
+    return result;
   }
 
   /**
@@ -286,7 +446,26 @@ export class RagProxyService {
       payload.collection = collection.trim();
     }
 
-    // Make request
+    // ========================================================================
+    // 🚀 QUICK WIN: 3-Tier Cache (Memory + Redis + Qdrant)
+    // Expected: 70% cache hit rate, 3-5x speedup for cached queries
+    // ========================================================================
+    const cacheKey = this.cache.generateKey(validQuery, { maxResults: validMaxResults, collection });
+    
+    // Try cache first (L1: Memory < 1ms, L2: Redis 1-2ms)
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      return {
+        ...cached.data,
+        _cacheHit: true,
+        _cacheSource: cached.source,
+        _cacheTier: cached.tier,
+        _cacheLatency: cached.latency,
+      };
+    }
+    // ========================================================================
+
+    // Cache miss - Make request to upstream
     const response = await this._makeRequest(`${this.queryBaseUrl}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -301,13 +480,21 @@ export class RagProxyService {
       );
     }
 
-    return {
+    const result = {
       success: true,
       answer: response.data?.answer || '',
       confidence: response.data?.confidence || 0,
       sources: response.data?.sources || [],
       metadata: response.data?.metadata || {},
+      _cacheHit: false,
     };
+
+    // 🚀 QUICK WIN: Store in cache for future requests
+    this.cache.set(cacheKey, result).catch(err => {
+      console.warn('Cache set failed:', err.message);
+    });
+
+    return result;
   }
 
   /**
@@ -333,20 +520,23 @@ export class RagProxyService {
   }
 
   /**
-   * Check service health
+   * Check service health (includes circuit breaker status)
    */
   async checkHealth() {
     try {
-      const response = await this._makeRequest(`${this.queryBaseUrl}/health`, {
-        method: 'GET',
-        timeout: 5000, // Shorter timeout for health checks
-      });
+      const response = await this._makeRequest(
+        `${this.queryBaseUrl}/health`,
+        { method: 'GET', timeout: 5000 },
+        false  // Don't use circuit breaker for health checks
+      );
 
       return {
         ok: response.ok,
         status: response.status,
         message: response.data?.message || response.data?.status || 'unknown',
         data: response.data,
+        circuitBreakers: this.getCircuitBreakerStates(),
+        cache: this.cache.getStats(),  // Include cache statistics in health check
       };
     } catch (error) {
       return {
@@ -354,6 +544,7 @@ export class RagProxyService {
         status: 0,
         message: error.message,
         error: true,
+        circuitBreakers: this.getCircuitBreakerStates(),
       };
     }
   }

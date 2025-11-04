@@ -21,6 +21,7 @@ import {
   Box,
   Globe,
 } from 'lucide-react';
+import { ENDPOINTS } from '../../../config/endpoints';
 
 interface DockerContainer {
   name: string;
@@ -163,7 +164,7 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     category: 'ai',
     description: 'Qdrant vector database',
     ports: ['6333', '6334'],
-    url: 'http://localhost:6333',
+    url: ENDPOINTS.qdrant,
   },
 
   // Documentation Services (2-container architecture)

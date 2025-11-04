@@ -364,8 +364,10 @@ class DocsHealthMetrics {
     const result = await promClient.register.getSingleMetric(metricName);
     if (!result) return 0;
 
-    const values = result.get().values;
-    return values.length > 0 ? values[0].value : 0;
+    const metric = result.get();
+    if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
+    
+    return metric.values.length > 0 ? metric.values[0].value : 0;
   }
 
   /**
@@ -375,8 +377,10 @@ class DocsHealthMetrics {
     const result = await promClient.register.getSingleMetric(metricName);
     if (!result) return 0;
 
-    const values = result.get().values;
-    return values.reduce((sum, value) => sum + value.value, 0);
+    const metric = result.get();
+    if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
+    
+    return metric.values.reduce((sum, value) => sum + value.value, 0);
   }
 
   /**
@@ -386,8 +390,10 @@ class DocsHealthMetrics {
     const result = await promClient.register.getSingleMetric(metricName);
     if (!result) return 0;
 
-    const values = result.get().values;
-    return values.reduce((sum, value) => sum + value.value, 0);
+    const metric = result.get();
+    if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
+    
+    return metric.values.reduce((sum, value) => sum + value.value, 0);
   }
 
   /**

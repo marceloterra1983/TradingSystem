@@ -1,110 +1,211 @@
-# Workspace Service (Containerized)
+# Workspace Stack - Unified Container Deployment
 
-**Workspace API** for managing documentation backlog, ideas, and tasks - now fully containerized with TimescaleDB-only persistence.
+**Workspace application** with dedicated **Neon PostgreSQL database** - all containers managed as a single unified stack.
 
-## 🎯 Purpose
+## 🎯 Overview
 
-The Workspace Service provides:
+The Workspace Stack is a **self-contained deployment** containing:
 
-- REST API for CRUD operations on workspace items
-- **TimescaleDB-only persistence** (LowDB removed)
-- Data migration from LowDB to TimescaleDB
-- Hot-reload support for development
-- Prometheus metrics export
-- Docker containerization with health checks
+- **Workspace API** - Express REST API (Node.js 20)
+- **Neon Database** - PostgreSQL 17 with database branching
+  - Pageserver (storage layer)
+  - Safekeeper (WAL service)
+  - Compute (PostgreSQL endpoint)
+
+**Total**: 4 containers managed as one unit via `docker-compose.workspace-stack.yml`
 
 ## 🏗️ Architecture
 
 ```
-Client (Frontend Dashboard)
-    ↓ HTTP REST
-Workspace Service (CONTAINER - Port 3200)
-    ├─ GET /api/items - List items
-    ├─ POST /api/items - Create item
-    ├─ PUT /api/items/:id - Update item
-    ├─ DELETE /api/items/:id - Delete item
-    ├─ GET /health - Health check
-    └─ GET /metrics - Prometheus metrics
-    ↓ PostgreSQL
-TimescaleDB (CONTAINER - Port 5433)
-    └─ workspace.workspace_items table
+┌─────────────────────────────────────────────────┐
+│ Workspace Stack (workspace_network)             │
+│                                                  │
+│  Dashboard (Port 3103)                          │
+│      ↓ HTTP REST                                │
+│  workspace-api (Port 3200)                      │
+│      ├─ GET /api/items - List items             │
+│      ├─ POST /api/items - Create item           │
+│      ├─ PUT /api/items/:id - Update item        │
+│      ├─ DELETE /api/items/:id - Delete item     │
+│      ├─ GET /health - Health check              │
+│      └─ GET /metrics - Prometheus metrics       │
+│      ↓ PostgreSQL Wire Protocol                 │
+│  workspace-db-compute (Port 5433)               │
+│      ↓                        ↓                  │
+│  workspace-db-pageserver  workspace-db-safekeeper│
+│  (Storage Layer)         (WAL Service)          │
+│                                                  │
+└─────────────────────────────────────────────────┘
 ```
 
 ## 📋 Prerequisites
 
-- Docker & Docker Compose
-- TimescaleDB credentials (from project `.env`)
-- Node.js 20+ (for local development)
+- Docker & Docker Compose (version 2.0+)
+- 10GB+ free disk space (for Neon build)
+- Project root `.env` configured
+- Ports available: 3200, 5433, 6400, 9898, 5454, 7676
 
-## 🚀 Installation
+## 🚀 Quick Start
 
-### 1. Configuration
-
-The Workspace Service uses environment variables from the **project root `.env`** file.
-
-**Required variables:**
-```env
-# TimescaleDB Connection
-TIMESCALEDB_HOST=timescaledb
-TIMESCALEDB_PORT=5432
-TIMESCALEDB_DATABASE=APPS-TPCAPITAL
-TIMESCALEDB_USER=timescale
-TIMESCALEDB_PASSWORD=your_secure_password
-
-# Database Strategy (MUST be "timescaledb")
-LIBRARY_DB_STRATEGY=timescaledb
-
-# Server
-WORKSPACE_PORT=3200
-```
-
-### 2. Start with Docker Compose
+### Option A: Using Helper Scripts (Recommended)
 
 ```bash
-cd backend/api/workspace
+# 1. Build Neon image (first time only - ~30 minutes)
+bash scripts/database/build-neon-from-source.sh
 
-# Start Workspace + TimescaleDB
-docker compose up -d
+# 2. Start entire Workspace stack (Neon + API)
+bash scripts/docker/start-workspace-stack.sh
 
-# If port 5433 on the host is already in use, override it (example uses 5444)
-# TIMESCALEDB_HOST_PORT=5444 docker compose up -d
+# 3. Initialize database
+bash scripts/database/init-neon-workspace.sh
 
-# Check logs
-docker compose logs -f workspace
+# 4. Test connection
+bash scripts/database/test-neon-connection.sh
 
-# Check health
+# 5. Verify API
 curl http://localhost:3200/health
 ```
 
-### 3. Initialize Database Schema
-
-The `workspace_items` table will be created automatically on first run by the init script. If needed manually:
+### Option B: Using Docker Compose Directly
 
 ```bash
-WORKSPACE_DATABASE_URL="postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL" \
-WORKSPACE_DATABASE_SCHEMA=workspace \
-./scripts/init-database.sh
+# Build Neon (if not already built)
+docker build -f tools/compose/neon.Dockerfile -t neon-local:latest .
+
+# Start stack
+docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+
+# Check status
+docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+
+# Initialize database
+bash scripts/database/init-neon-workspace.sh
 ```
 
-Use `--force` to drop/recreate the schema when needed and `--seed` to load the sample data. The script ensures hypertables and grants are applied correctly.
+## 📝 Configuration
 
-### 4. Migrate Data from LowDB (If Applicable)
+### Environment Variables (from root `.env`)
 
-If you have existing data in `library.json` (LowDB format):
+```env
+# Database Strategy (locked to neon in workspace-stack)
+LIBRARY_DB_STRATEGY=neon
+
+# Neon Connection
+NEON_HOST=localhost
+NEON_PORT=5433
+NEON_DATABASE=workspace
+NEON_USER=postgres
+NEON_PASSWORD=neon_secure_pass
+NEON_SCHEMA=workspace
+
+# Connection Pool
+NEON_POOL_MAX=20
+NEON_POOL_MIN=2
+NEON_CONNECTION_TIMEOUT=5000
+
+# Server
+WORKSPACE_PORT=3200
+WORKSPACE_EXTERNAL_PORT=3200
+NODE_ENV=development
+LOG_LEVEL=info
+```
+
+## 📊 Database Schema
+
+### Tables
+
+**workspace_items** (~10k rows expected):
+- Primary key: `id` (SERIAL)
+- Fields: title, description, category, priority, status
+- Arrays: tags (TEXT[])
+- JSONB: metadata (flexible data)
+- Timestamps: created_at, updated_at
+- Audit: created_by, updated_by
+
+**workspace_categories** (6 fixed rows):
+- Primary key: name (VARCHAR)
+- Seeded with: documentacao, coleta-dados, banco-dados, analise-dados, gestao-riscos, dashboard
+
+### Indexes
+
+- B-tree: category, status, priority, created_at
+- GIN: tags (array search), metadata (JSONB search)
+- Partial: is_active (categories)
+
+## 🔄 Data Migration
+
+### From TimescaleDB to Neon
 
 ```bash
-# Inside container
-docker compose exec workspace npm run migrate:lowdb
+# Migrate with automatic backup
+bash scripts/database/migrate-workspace-to-neon.sh --backup
 
-# Or locally
+# Dry run (preview migration)
+bash scripts/database/migrate-workspace-to-neon.sh --dry-run
 npm run migrate:lowdb
 ```
 
 **Migration process:**
-1. Reads `backend/data/workspace/library.json`
-2. Inserts items into TimescaleDB with `ON CONFLICT DO NOTHING`
-3. Validates item count
-4. Renames JSON file to `library.migrated-YYYY-MM-DD.json`
+1. Exports data from TimescaleDB (categories + items)
+2. Creates backup in /tmp (if --backup flag used)
+3. Imports into Neon database
+4. Verifies record counts match
+5. Displays summary and next steps
+
+**Verification:**
+- Record counts compared automatically
+- Rollback plan documented
+- TimescaleDB backup retained for 14 days
+
+---
+
+## 🐳 Stack Management
+
+### Start/Stop Commands
+
+```bash
+# Start entire stack (4 containers)
+bash scripts/docker/start-workspace-stack.sh
+
+# Stop stack (preserves data)
+bash scripts/docker/stop-workspace-stack.sh
+
+# Stop and DELETE ALL DATA (⚠️ CAUTION!)
+bash scripts/docker/stop-workspace-stack.sh --remove-volumes
+
+# Restart stack
+docker compose -f tools/compose/docker-compose.workspace-stack.yml restart
+
+# View logs
+docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+```
+
+### Container Status
+
+```bash
+# Check all 4 containers
+docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+
+# Expected output:
+# workspace-api            Up (healthy)   0.0.0.0:3200->3200/tcp
+# workspace-db-compute     Up (healthy)   0.0.0.0:5433->55432/tcp
+# workspace-db-pageserver  Up (healthy)   0.0.0.0:6400->6400/tcp, 0.0.0.0:9898->9898/tcp
+# workspace-db-safekeeper  Up (healthy)   0.0.0.0:5454->5454/tcp, 0.0.0.0:7676->7676/tcp
+```
+
+### Resource Usage
+
+```bash
+# Monitor resources
+docker stats --no-stream | grep workspace
+
+# Expected usage:
+# workspace-api:            ~200MB RAM, ~5% CPU
+# workspace-db-compute:     ~500MB RAM, ~10% CPU
+# workspace-db-pageserver:  ~500MB RAM, ~20% CPU
+# workspace-db-safekeeper:  ~200MB RAM, ~10% CPU
+# TOTAL:                    ~1.4GB RAM, ~45% CPU
+```
 
 ---
 
@@ -120,11 +221,17 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-10-25T12:00:00.000Z",
+  "timestamp": "2025-11-03T12:00:00.000Z",
   "service": "workspace-api",
-  "dbStrategy": "timescaledb"
+  "version": "1.0.0",
+  "checks": {
+    "database": "neon connected"
+  },
+  "uptime": 3600
 }
 ```
+
+**Database strategy**: Always `neon` when using workspace-stack
 
 ### List Items
 

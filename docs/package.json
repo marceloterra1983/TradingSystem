@@ -20,8 +20,12 @@
     "docs:test": "node --test tests/**/*.test.mjs",
     "docs:validate-generated": "node tests/validate-generated-content.test.mjs",
     "docs:auto:verify": "npm run docs:auto && npm run docs:validate-generated",
+    "// docs:version": "Manual versioning (use docs:version:auto for automation)",
     "docs:version": "docusaurus docs:version",
-    "docs:version:list": "cat versions.json 2>/dev/null || echo 'No versions created yet'"
+    "docs:version:auto": "bash ../scripts/docs/auto-version.sh",
+    "docs:version:list": "cat versions.json 2>/dev/null || echo 'No versions created yet'",
+    "docs:metrics": "node ../scripts/docs/generate-metrics-dashboard.mjs",
+    "docs:metrics:verbose": "node ../scripts/docs/generate-metrics-dashboard.mjs --verbose"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",

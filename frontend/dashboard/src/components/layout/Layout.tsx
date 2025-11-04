@@ -109,7 +109,7 @@ export function Layout({ defaultPageId }: LayoutProps) {
   }, [currentPageId]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-[color:var(--ts-base-bg)] text-[color:var(--ts-text-primary)] transition-colors duration-200">
       {/* Sidebar */}
       <LayoutSidebar
         isCollapsed={isCollapsed}

@@ -12,6 +12,21 @@
 
 The TradingSystem documentation uses **Docusaurus native versioning** to maintain immutable snapshots aligned with system releases. This ensures users can access documentation for their specific version while the latest development docs remain accessible.
 
+### Automated Versioning
+
+🤖 **NEW**: Documentation versioning can now be automated via GitHub Actions!
+
+For automated versioning triggered by Git tags, see:
+- [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) - Automated workflow documentation
+- Workflow: `.github/workflows/docs-versioning.yml`
+- Script: `scripts/docs/auto-version.sh`
+
+**When to use automated vs manual**:
+- ✅ **Automated**: Regular releases, CI/CD pipeline available, consistency critical
+- ✅ **Manual**: Emergency hotfixes, local testing, troubleshooting, automation unavailable
+
+This guide documents the **manual process** for reference and troubleshooting.
+
 ### Key Concepts
 
 - **current** (Next): Unreleased development version (`/next/` path)
@@ -74,6 +89,10 @@ Before creating a version, ensure:
 - [ ] Release notes prepared
 
 ### Version Creation Procedure
+
+> **Note**: This procedure can be automated using `scripts/docs/auto-version.sh`.
+> See [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) for automated workflow.
+> The steps below document the manual process for reference.
 
 #### Step 1: Pre-Version Validation
 
@@ -536,6 +555,7 @@ Run this checklist every quarter:
 
 - [README.md](../README.md) - Quick versioning commands
 - [VALIDATION-GUIDE.md](./VALIDATION-GUIDE.md) - Validation procedures (includes version validation)
+- [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) - Automated versioning workflow
 - [MAINTENANCE-CHECKLIST.md](./MAINTENANCE-CHECKLIST.md) - Quarterly maintenance tasks
 - [COMMUNICATION-PLAN.md](./COMMUNICATION-PLAN.md) - Announcement templates
 

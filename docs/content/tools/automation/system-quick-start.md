@@ -1,3 +1,14 @@
+---
+title: "TradingSystem Quick Start"
+sidebar_position: 1
+description: "Fast reference to install shortcuts and manage the automation wrappers."
+tags:
+  - automation
+  - ops
+  - cli
+owner: OpsGuild
+lastReviewed: '2025-11-02'
+---
 # 🚀 TradingSystem - Quick Start Guide
 
 Guia rápido para iniciar e gerenciar o TradingSystem.

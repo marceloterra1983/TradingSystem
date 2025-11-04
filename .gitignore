@@ -110,11 +110,13 @@ backend/data/backups/**
 # ============================================
 # Secrets & Configuration (Critical)
 # ============================================
-# Root .env files - only .env.local is gitignored
+# Root .env files - NEVER commit these
+.env
 *.env.local
 .env.*.local
 .env.backup-*
 .env.test
+.env.production
 
 # Service-level .env files (should NOT exist per project rules)
 # These are blocked to prevent accidental commits

@@ -1,0 +1,306 @@
+---
+title: Performance Tuning Guide
+sidebar_position: 13
+description: Performance optimization guide for Telegram hybrid stack
+tags:
+  - telegram-gateway
+  - performance
+  - optimization
+  - tuning
+owner: Performance Team
+lastReviewed: '2025-11-03'
+---
+
+# Telegram Stack Performance Tuning
+
+## Performance Targets
+
+| Metric | Target | Critical Threshold |
+|--------|--------|--------------------|
+| Polling Latency (p95) | <15ms | >30ms |
+| Dedup Check | <5ms | >20ms |
+| Cache Hit Rate | >70% | <50% |
+| DB Query (p95) | <50ms | >100ms |
+| End-to-End | <1s | >5s |
+
+---
+
+## TimescaleDB Tuning
+
+### Current Configuration
+
+**File:** `tools/compose/telegram/postgresql.conf`
+
+```conf
+shared_buffers = 512MB              # 25% of 2GB RAM
+effective_cache_size = 1536MB       # 75% of RAM
+work_mem = 4MB                      # Per query operation
+maintenance_work_mem = 128MB
+max_connections = 100
+```
+
+### Optimization Recommendations
+
+#### For Write-Heavy Workload (>30 msg/s)
+
+```conf
+# Increase WAL buffers
+wal_buffers = 32MB                  # Was 16MB
+
+# Adjust checkpoint frequency
+checkpoint_timeout = 10min          # Was 15min
+checkpoint_completion_target = 0.7  # Was 0.9
+```
+
+#### For Read-Heavy Workload (analytics)
+
+```conf
+# Increase work memory for sorts/aggregations
+work_mem = 8MB                      # Was 4MB
+
+# More detailed query planner statistics
+default_statistics_target = 200     # Was 100
+```
+
+---
+
+## PgBouncer Tuning
+
+### Current Configuration
+
+**File:** `tools/compose/telegram/pgbouncer.ini`
+
+```ini
+pool_mode = transaction
+default_pool_size = 20
+min_pool_size = 5
+```
+
+### Optimization Recommendations
+
+#### For High Concurrency (>50 clients)
+
+```ini
+default_pool_size = 30              # Was 20
+max_client_conn = 200               # Was 100
+reserve_pool_size = 10              # Was 5
+```
+
+#### Monitor Pool Saturation
+
+```bash
+# Check pool stats
+docker exec telegram-pgbouncer psql -U telegram -d pgbouncer -c "SHOW POOLS"
+
+# Key metrics:
+# - cl_waiting: Should be 0 (clients waiting for connection)
+# - sv_active: Should be < default_pool_size
+# - sv_idle: Should be >= min_pool_size
+
+# Alert if cl_waiting > 5 for >2 minutes
+```
+
+---
+
+## Redis Tuning
+
+### Current Configuration
+
+```yaml
+# docker-compose.telegram.yml
+command: >
+  redis-server
+  --maxmemory 1gb
+  --maxmemory-policy allkeys-lru
+```
+
+### Optimization Recommendations
+
+#### For Higher Traffic (>40 msg/s)
+
+```yaml
+--maxmemory 2gb                     # Increase from 1gb
+--maxclients 2000                   # Increase from 1000
+```
+
+#### Memory Usage Analysis
+
+```bash
+# Check current memory
+docker exec telegram-redis-master redis-cli INFO memory | grep used_memory_human
+
+# Check eviction stats
+docker exec telegram-redis-master redis-cli INFO stats | grep evicted_keys
+
+# If evictions high (>100/sec):
+# 1. Increase maxmemory OR
+# 2. Reduce TTL OR
+# 3. Implement more aggressive cleanup
+```
+
+---
+
+## Application-Level Tuning
+
+### Gateway MTProto
+
+**Batch Processing:**
+```javascript
+// Process messages in batches instead of one-by-one
+async processBatch(messages) {
+  const pipeline = redis.pipeline();
+  
+  messages.forEach(msg => {
+    pipeline.setex(`telegram:msg:${msg.id}`, 3600, JSON.stringify(msg));
+  });
+  
+  await pipeline.exec();  // Single round trip
+}
+```
+
+**Connection Pooling:**
+```javascript
+// Reuse database connection
+const pool = new pg.Pool({
+  max: 10,              // Max connections
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
+});
+```
+
+---
+
+### TP Capital Polling Worker
+
+**Adaptive Polling:**
+```javascript
+// Adjust polling interval based on queue depth
+async adaptivePolling() {
+  const queueDepth = await getQueueDepth();
+  
+  if (queueDepth > 100) {
+    this.interval = 1000;  // 1s if backlog
+  } else if (queueDepth > 10) {
+    this.interval = 3000;  // 3s if moderate
+  } else {
+    this.interval = 5000;  // 5s if empty
+  }
+}
+```
+
+**Batch Size Optimization:**
+```javascript
+// Process larger batches when queue building
+const batchSize = queueDepth > 500 ? 200 : 100;
+```
+
+---
+
+## Load Testing
+
+### Synthetic Load Generator
+
+```bash
+# Generate 50 msg/s for 1 hour
+cd tools/testing
+node generate-synthetic-load.js --rate 50 --duration 3600
+
+# Monitor during test:
+# 1. Grafana dashboard (real-time)
+# 2. Resource usage (docker stats)
+# 3. Latency metrics (Prometheus)
+```
+
+### Performance Benchmarking
+
+```bash
+# Before optimization
+bash scripts/telegram/benchmark.sh --iterations 1000 > baseline.json
+
+# After optimization
+bash scripts/telegram/benchmark.sh --iterations 1000 > optimized.json
+
+# Compare
+python scripts/telegram/compare-benchmarks.py baseline.json optimized.json
+```
+
+---
+
+## Capacity Planning
+
+### Current Capacity
+
+**Tested:** 50 msg/s sustained for 1 hour  
+**Headroom:** ~100 msg/s burst for 5 minutes
+
+### Scaling Recommendations
+
+#### At 40 msg/s (80% capacity):
+- ✅ Monitor closely
+- ✅ Prepare scaling plan
+- ⚠️ Consider adding read replica
+
+#### At 50 msg/s (100% capacity):
+- 🔴 Scale Redis (2GB memory)
+- 🔴 Scale TimescaleDB (4 CPU, 4GB)
+- 🔴 Add read replica for analytics
+
+#### At 60+ msg/s (overload):
+- 🔴 Add RabbitMQ queue (mandatory)
+- 🔴 Horizontal scaling (multiple workers)
+- 🔴 Consider sharding by channel
+
+---
+
+## Quick Wins
+
+### 1. Apply Database Indexes (5 min)
+
+```bash
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -f /docker-entrypoint-initdb.d/03_optimization_indexes.sql
+```
+
+**Gain:** ↓ 30% query latency
+
+---
+
+### 2. Enable Continuous Aggregates (10 min)
+
+```bash
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -f /docker-entrypoint-initdb.d/04_continuous_aggregates.sql
+```
+
+**Gain:** ↓ 95% analytics queries (3s → 50ms)
+
+---
+
+### 3. Warm Redis Cache (2 min)
+
+```javascript
+// Add to Gateway startup
+async warmCache() {
+  const messages = await db.query(`
+    SELECT * FROM telegram_gateway.messages
+    WHERE received_at > NOW() - INTERVAL '1 hour'
+      AND status = 'received'
+  `);
+  
+  for (const msg of messages.rows) {
+    await cache.cacheMessage(msg);
+  }
+  
+  logger.info({ count: messages.rows.length }, 'Cache warmed');
+}
+```
+
+**Gain:** ↑ 30% initial hit rate
+
+---
+
+**Related:**
+- [Monitoring Guide](./monitoring-guide.mdx)
+- [Redis Cache Schema](../../../apps/telegram-gateway/src/cache/redis-schema.md)
+- [Database Analysis](../../../governance/reviews/telegram-database-architecture-2025-11-03.md)
+

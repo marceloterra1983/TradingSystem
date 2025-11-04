@@ -1,0 +1,266 @@
+@startuml RAG System - Deployment Diagram
+!theme plain
+skinparam nodeStyle rectangle
+
+title RAG System - Deployment Architecture\nDocker Compose Self-Hosted (v2.0)
+
+node "Host Machine (WSL2)\n16GB RAM, 8 CPU Cores" {
+    
+    package "Docker Network: tradingsystem_backend" {
+        
+        frame "Frontend Stack" #LightBlue {
+            node "dashboard-container" {
+                artifact "Dashboard React App" as dashboard
+                note right
+                  Port: 3103
+                  RAM: 512MB
+                  CPU: 0.5 core
+                end note
+            }
+        }
+        
+        frame "Gateway Stack" #LightGreen {
+            node "kong-db" {
+                artifact "PostgreSQL 15" as kongpg
+                note right
+                  Port: 5433
+                  RAM: 256MB
+                  CPU: 0.25 core
+                  Storage: 1GB
+                end note
+            }
+            
+            node "kong-gateway" {
+                artifact "Kong 3.4" as kong
+                note right
+                  Port 8000: HTTP
+                  Port 8443: HTTPS
+                  Port 8001: Admin
+                  RAM: 1GB
+                  CPU: 1 core
+                end note
+            }
+            
+            node "konga-ui" {
+                artifact "Konga Admin" as konga
+                note right
+                  Port: 1337
+                  RAM: 512MB
+                  CPU: 0.5 core
+                end note
+            }
+        }
+        
+        frame "Proxy Stack" #LightYellow {
+            node "rag-service" {
+                artifact "Documentation API" as docapi
+                note right
+                  Port: 3401/3402
+                  RAM: 1GB
+                  CPU: 1 core
+                end note
+            }
+            
+            node "rag-collections-service" {
+                artifact "Collections Service" as collsvc
+                note right
+                  Port: 3403
+                  RAM: 2GB
+                  CPU: 1 core
+                end note
+            }
+        }
+        
+        frame "Core RAG Stack" #LightCoral {
+            node "llamaindex-query" {
+                artifact "LlamaQuery FastAPI" as llquery
+                note right
+                  Port: 8202
+                  RAM: 4GB
+                  CPU: 2 cores
+                end note
+            }
+            
+            node "llamaindex-ingestion" {
+                artifact "LlamaIngest FastAPI" as llingest
+                note right
+                  Port: 8201
+                  RAM: 4GB
+                  CPU: 2 cores
+                end note
+            }
+            
+            node "ollama-container" {
+                artifact "Ollama Runtime" as ollama
+                note right
+                  Port: 11434
+                  RAM: 8GB
+                  CPU: 4 cores
+                  GPU: Optional (NVIDIA)
+                end note
+            }
+        }
+        
+        frame "Neon Stack" #Lavender {
+            node "neon-compute" {
+                artifact "PostgreSQL 15 + pgvector" as neonpg
+                note right
+                  Port: 5435
+                  RAM: 4GB
+                  CPU: 2 cores
+                  Storage: 50GB
+                end note
+            }
+            
+            node "neon-pageserver" {
+                artifact "Storage Layer (Rust)" as neonpage
+                note right
+                  Port: 6400
+                  RAM: 2GB
+                  CPU: 1 core
+                  Storage: 100GB
+                end note
+            }
+            
+            node "neon-safekeeper" {
+                artifact "WAL Service (Rust)" as neonsafe
+                note right
+                  Port: 7676
+                  RAM: 1GB
+                  CPU: 0.5 core
+                  Storage: 30GB
+                end note
+            }
+        }
+        
+        frame "Qdrant Cluster" #Lavender {
+            node "qdrant-node-1" {
+                artifact "Qdrant Leader" as q1
+                note right
+                  Port: 6333 (gRPC)
+                  Port: 6335 (P2P)
+                  RAM: 2GB
+                  CPU: 1 core
+                  Storage: 30GB
+                end note
+            }
+            
+            node "qdrant-node-2" {
+                artifact "Qdrant Follower 1" as q2
+                note right
+                  Port: 6334 (gRPC)
+                  Port: 6336 (P2P)
+                  RAM: 2GB
+                  CPU: 1 core
+                  Storage: 30GB
+                end note
+            }
+            
+            node "qdrant-node-3" {
+                artifact "Qdrant Follower 2" as q3
+                note right
+                  Port: 6337 (gRPC)
+                  Port: 6338 (P2P)
+                  RAM: 2GB
+                  CPU: 1 core
+                  Storage: 30GB
+                end note
+            }
+            
+            node "qdrant-lb" {
+                artifact "NGINX Load Balancer" as qlb
+                note right
+                  Port: 6333 (external)
+                  RAM: 256MB
+                  CPU: 0.25 core
+                end note
+            }
+        }
+        
+        frame "Cache Stack" #Lavender {
+            node "rag-redis" {
+                artifact "Redis 7 Alpine" as redis
+                note right
+                  Port: 6380
+                  RAM: 512MB
+                  CPU: 0.5 core
+                  Storage: 2GB
+                end note
+            }
+        }
+    }
+    
+    package "Persistent Volumes" {
+        storage "neon_compute_data" as neonvol1 #Azure
+        storage "neon_pageserver_data" as neonvol2 #Azure
+        storage "neon_safekeeper_data" as neonvol3 #Azure
+        storage "qdrant_data_1" as q1vol #Pink
+        storage "qdrant_data_2" as q2vol #Pink
+        storage "qdrant_data_3" as q3vol #Pink
+        storage "kong_data" as kongvol #LightGreen
+        storage "redis_data" as redisvol #Orange
+        storage "ollama_models" as ollamavol #Yellow
+    }
+}
+
+' Container → Volume relationships
+neonpg -down-> neonvol1 : "Mount"
+neonpage -down-> neonvol2 : "Mount"
+neonsafe -down-> neonvol3 : "Mount"
+q1 -down-> q1vol : "Mount"
+q2 -down-> q2vol : "Mount"
+q3 -down-> q3vol : "Mount"
+kongpg -down-> kongvol : "Mount"
+redis -down-> redisvol : "Mount"
+ollama -down-> ollamavol : "Mount"
+
+' Resource summary
+note right of "Host Machine (WSL2)\n16GB RAM, 8 CPU Cores"
+  **Total Resource Allocation**
+  
+  RAM Usage:
+  - Frontend: 0.5GB
+  - Gateway: 1.8GB (Kong + DB + Konga)
+  - Proxy: 3GB (DocAPI + Collections)
+  - Core RAG: 16GB (LlamaIndex + Ollama)
+  - Neon: 7GB (Compute + Pageserver + Safekeeper)
+  - Qdrant: 6.3GB (3 nodes + LB)
+  - Redis: 0.5GB
+  - Total: ~35GB (requires 40GB+ host)
+  
+  CPU Usage:
+  - Frontend: 0.5 core
+  - Gateway: 1.75 cores
+  - Proxy: 2 cores
+  - Core RAG: 8 cores
+  - Neon: 3.5 cores
+  - Qdrant: 3.25 cores
+  - Redis: 0.5 core
+  - Total: ~19.5 cores (requires 24+ core host)
+  
+  Storage:
+  - Neon: 180GB
+  - Qdrant: 90GB (3x30GB)
+  - Others: 10GB
+  - Total: ~280GB
+end note
+
+note bottom of "Docker Network: tradingsystem_backend"
+  **Network Configuration**
+  
+  Network: tradingsystem_backend (bridge)
+  Subnet: 172.20.0.0/16
+  
+  DNS Resolution:
+  - neon-compute.tradingsystem_backend
+  - qdrant-lb.tradingsystem_backend
+  - kong-gateway.tradingsystem_backend
+  
+  Firewall Rules:
+  - External: Only Kong :8000, Dashboard :3103
+  - Internal: All services communicate freely
+end note
+
+@enduml
+
+

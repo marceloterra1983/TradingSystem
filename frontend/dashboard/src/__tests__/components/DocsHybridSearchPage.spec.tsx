@@ -12,7 +12,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
 import DocsHybridSearchPage from '../../components/pages/DocsHybridSearchPage';
+
+// Wrapper component for tests
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <BrowserRouter>{children}</BrowserRouter>
+);
 
 // Mock dependencies with correct structure
 vi.mock('../../services/documentationService', () => ({
@@ -53,9 +59,16 @@ const mockedGetFacets =
 
 describe('DocsHybridSearchPage - Essential Tests', () => {
   beforeEach(() => {
-    // Clear localStorage
+    // Clear localStorage safely
     if (typeof localStorage !== 'undefined') {
-      Object.keys(localStorage).forEach((key) => localStorage.removeItem(key));
+      if (typeof localStorage.clear === 'function') {
+        localStorage.clear();
+      } else {
+        // Fallback if clear is not available
+        Object.keys(localStorage).forEach((key) => {
+          localStorage.removeItem(key);
+        });
+      }
     }
 
     // Reset all mocks
@@ -109,7 +122,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
   describe('1. Component Initialization', () => {
     it('should render search interface', () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       expect(
         screen.getByPlaceholderText(/Ex.: docker, workspace api, docusaurus/i),
@@ -120,7 +133,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     });
 
     it('should load facets on mount', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       await waitFor(() => {
         expect(mockedGetFacets).toHaveBeenCalled();
@@ -130,7 +143,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
   describe('2. Search Functionality', () => {
     it('should perform hybrid search after user input', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -154,7 +167,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     });
 
     it('should display search results', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -192,7 +205,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         ],
       });
 
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -215,7 +228,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     });
 
     it('should not search for queries less than 2 characters', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -232,7 +245,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
   describe('3. Clear Functionality', () => {
     it('should clear search results', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -264,7 +277,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         JSON.stringify([{ title: 'Test' }]),
       );
 
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const clearButton = screen.getByRole('button', { name: /limpar/i });
       await userEvent.click(clearButton);
@@ -298,7 +311,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         JSON.stringify(mockResults),
       );
 
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       // Should restore query
       const input = screen.getByPlaceholderText(
@@ -313,7 +326,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     });
 
     it('should persist search query to localStorage', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -333,7 +346,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
   describe('5. Keyboard Shortcuts', () => {
     it('should trigger search on Enter key', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -352,7 +365,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     });
 
     it('should clear search on Escape key', async () => {
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,
@@ -381,7 +394,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
       mockedHybridSearch.mockRejectedValue(new Error('Network error'));
       mockedLexicalSearch.mockRejectedValue(new Error('Network error'));
 
-      render(<DocsHybridSearchPage />);
+      render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
       const input = screen.getByPlaceholderText(
         /Ex.: docker, workspace api, docusaurus/i,

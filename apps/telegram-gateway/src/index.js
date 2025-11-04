@@ -121,10 +121,11 @@ app.get('/', (req, res) => {
 // API routes
 app.use('/', apiRoutes);
 
-// Start HTTP server
+// Start HTTP server (ENABLED for sync-messages endpoint)
 const server = app.listen(config.gateway.port, () => {
   logger.info({ port: config.gateway.port }, 'Telegram Gateway HTTP server listening');
 });
+logger.info({ port: config.gateway.port }, 'Telegram Gateway HTTP server enabled for sync operations');
 
 // Initialize Telegram Bot (Telegraf) if token is provided
 let bot;
@@ -504,10 +505,9 @@ setInterval(async () => {
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully...');
 
-  server.close(() => {
-    logger.info('HTTP server closed');
-  });
-
+  // HTTP server is disabled (using API on port 4010 instead)
+  // No need to close server since it's not running
+  
   if (bot) {
     await bot.stop('SIGTERM');
   }

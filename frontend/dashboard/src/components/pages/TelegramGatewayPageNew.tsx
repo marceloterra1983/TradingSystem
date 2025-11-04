@@ -8,7 +8,6 @@ import {
   useDeleteTelegramGatewayChannel,
 } from '../../hooks/useTelegramGateway';
 import { SimpleStatusCard } from './telegram-gateway/SimpleStatusCard';
-import { SimpleSessionCard } from './telegram-gateway/SimpleSessionCard';
 import { SimpleMessagesCard } from './telegram-gateway/SimpleMessagesCard';
 import { SimpleChannelsCard } from './telegram-gateway/SimpleChannelsCard';
 import { Button } from '../ui/button';
@@ -133,20 +132,16 @@ export function TelegramGatewayPageNew() {
           />
         </div>
 
-        {/* Session */}
-        <SimpleSessionCard
-          session={overview?.session}
-          isLoading={overviewLoading}
-        />
-
         {/* Channels */}
-        <SimpleChannelsCard
-          channels={channels}
-          isLoading={channelsLoading}
-          onCreate={handleCreateChannel}
-          onToggle={handleToggleChannel}
-          onDelete={handleDeleteChannel}
-        />
+        <div className="lg:col-span-2">
+          <SimpleChannelsCard
+            channels={channels}
+            isLoading={channelsLoading}
+            onCreate={handleCreateChannel}
+            onToggle={handleToggleChannel}
+            onDelete={handleDeleteChannel}
+          />
+        </div>
       </div>
 
       {/* Debug Info (dev only) */}

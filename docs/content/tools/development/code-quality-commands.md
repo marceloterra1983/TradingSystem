@@ -1,3 +1,14 @@
+---
+title: "Code Quality Commands"
+sidebar_position: 2
+description: "Reference for linting, type checking, testing, and security audit scripts."
+tags:
+  - development
+  - quality
+  - scripts
+owner: ToolingGuild
+lastReviewed: '2025-11-02'
+---
 # Code Quality Commands - Quick Reference 🚀
 
 **Comandos essenciais para verificação de qualidade, limpeza e eficiência do código**
@@ -342,7 +353,7 @@ npm install -g snyk
 
 ## 📖 Documentação Completa
 
-**Ver guia completo**: [docs/content/development/code-quality-checklist.md](docs/content/development/code-quality-checklist.md)
+**Ver guia completo**: [Code Quality Checklist](/development/code-quality-checklist)
 
 Inclui:
 - ✅ 12 categorias de verificação
@@ -393,10 +404,10 @@ npx vite-bundle-visualizer
 
 ## 🔗 Links Úteis
 
-- [CLAUDE.md](CLAUDE.md) - Instruções do projeto
-- [Code Quality Checklist](docs/content/development/code-quality-checklist.md) - Guia completo
-- [Workflow System](scripts/workflows/README.md) - Workflows automatizados
-- [Health Check](scripts/maintenance/health-check-all.sh) - Verificação de serviços
+- **CLAUDE.md** (arquivo na raiz) - Instruções do projeto
+- [Code Quality Checklist](/development/code-quality-checklist) - Guia completo
+- `scripts/workflows/README.md` - Workflows automatizados
+- `scripts/maintenance/health-check-all.sh` - Verificação de serviços
 
 ---
 

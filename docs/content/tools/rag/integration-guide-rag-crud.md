@@ -1,3 +1,14 @@
+---
+title: "RAG Collections Integration Guide"
+sidebar_position: 6
+description: "How to embed the collections management card into LlamaIndexPage."
+tags:
+  - rag
+  - frontend
+  - integration
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # 🔗 Guia de Integração - RAG Collections CRUD
 
 **Objetivo:** Integrar os novos componentes de gerenciamento de coleções no LlamaIndexPage.tsx

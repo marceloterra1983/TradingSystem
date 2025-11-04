@@ -1,7 +1,13 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 
 import DocumentationPage from '@/components/pages/DocumentationPage';
+
+// Wrapper component for tests
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <BrowserRouter>{children}</BrowserRouter>
+);
 
 vi.mock('@/services/documentationService', () => ({
   __esModule: true,
@@ -42,7 +48,7 @@ describe('DocumentationPage', () => {
   });
 
   it('performs a search and displays results', async () => {
-    render(<DocumentationPage />);
+    render(<DocumentationPage />, { wrapper: TestWrapper });
 
     const input = screen.getByPlaceholderText(/websocket health/i);
     fireEvent.input(input, { target: { value: 'order' } });
@@ -63,7 +69,7 @@ describe('DocumentationPage', () => {
   it('allows selecting results and opening documentation', async () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
-    render(<DocumentationPage />);
+    render(<DocumentationPage />, { wrapper: TestWrapper });
     const input = screen.getByPlaceholderText(/websocket health/i);
     fireEvent.input(input, { target: { value: 'execute order' } });
     await waitFor(() => expect(mockedSearch).toHaveBeenCalled());

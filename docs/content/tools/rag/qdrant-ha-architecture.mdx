@@ -1,0 +1,453 @@
+---
+title: Qdrant High Availability Architecture
+sidebar_position: 4
+tags: [qdrant, high-availability, infrastructure]
+domain: tools
+type: architecture
+summary: Qdrant 3-node HA cluster with Raft consensus and HAProxy load balancing
+status: active
+last_review: "2025-11-03"
+---
+
+# Qdrant High Availability Architecture
+
+## Overview
+
+The Qdrant High Availability (HA) setup consists of a **3-node cluster** with **Raft consensus** for leader election and **HAProxy** for load balancing.
+
+**Key Features:**
+- **3 Qdrant Nodes** - 1 leader + 2 replicas
+- **Replication Factor = 2** - Data replicated on 2 nodes
+- **Automatic Failover** - Raft consensus handles leader election
+- **Load Balancing** - HAProxy distributes read queries
+- **Zero Data Loss** - Write consistency ensures durability
+
+---
+
+## Architecture Diagram
+
+```
+                    ┌─────────────────┐
+                    │   HAProxy LB    │
+                    │  (Port 6340)    │
+                    └────────┬────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+    ┌─────▼─────┐     ┌─────▼─────┐     ┌─────▼─────┐
+    │  Node 1   │     │  Node 2   │     │  Node 3   │
+    │ (Leader)  │◄───►│ (Replica) │◄───►│ (Replica) │
+    │ :6333     │     │ :6336     │     │ :6338     │
+    └───────────┘     └───────────┘     └───────────┘
+         │                  │                  │
+    Raft :6335        Raft :6337        Raft :6339
+```
+
+---
+
+## Components
+
+### 1. Qdrant Nodes (3x)
+
+**Configuration:**
+```yaml
+services:
+  qdrant-node1:
+    image: qdrant/qdrant:v1.7.4
+    ports:
+      - "6333:6333"  # HTTP API
+      - "6335:6335"  # Raft internal
+    environment:
+      - QDRANT__CLUSTER__ENABLED=true
+      - QDRANT__CLUSTER__NODE_ID=1
+      - QDRANT__CLUSTER__RAFT__BOOTSTRAP=node1:6335,node2:6335,node3:6335
+```
+
+**Responsibilities:**
+- Store vector embeddings
+- Participate in Raft consensus
+- Replicate data across nodes
+- Handle read/write queries
+
+**Ports:**
+- **Node 1**: 6333 (API), 6335 (Raft)
+- **Node 2**: 6336 (API), 6337 (Raft)
+- **Node 3**: 6338 (API), 6339 (Raft)
+
+---
+
+### 2. HAProxy Load Balancer
+
+**Configuration:**
+```haproxy
+backend qdrant_cluster
+    balance roundrobin
+    option httpchk GET /health
+    server node1 qdrant-node1:6333 check
+    server node2 qdrant-node2:6333 check
+    server node3 qdrant-node3:6333 check
+```
+
+**Responsibilities:**
+- Distribute read queries across nodes
+- Health check each node (every 5s)
+- Remove unhealthy nodes from rotation
+- Provide single endpoint for clients
+
+**Endpoints:**
+- **API**: `http://localhost:6340` (load balanced)
+- **Stats**: `http://localhost:8404/stats` (HAProxy dashboard)
+
+---
+
+## Replication Strategy
+
+### Replication Factor = 2
+
+**What it means:**
+- Each vector is stored on **2 nodes**
+- If 1 node fails, data is still available
+- Provides **fault tolerance** without excessive storage
+
+**Write Consistency Factor = 1:**
+- Writes are acknowledged after **1 replica** confirms
+- Balances **durability** with **performance**
+
+**Example:**
+```
+Collection 'documentation' with 100,000 vectors:
+- Node 1: 100,000 vectors (full copy)
+- Node 2: 100,000 vectors (full copy)
+- Node 3: 0 vectors (no data)
+
+Total Storage: 2x original size
+```
+
+---
+
+## Failover Scenarios
+
+### Scenario 1: Leader Node Fails
+
+**What happens:**
+1. Raft detects leader failure (heartbeat timeout)
+2. Remaining nodes elect new leader (< 5 seconds)
+3. HAProxy removes failed node from load balancer
+4. Writes continue to new leader
+5. Reads continue to healthy replicas
+
+**Recovery:**
+1. Failed node restarts
+2. Rejoins cluster as follower
+3. Syncs data from leader
+4. HAProxy adds back to rotation
+
+**Downtime**: **~5 seconds** (election time)
+
+---
+
+### Scenario 2: Replica Node Fails
+
+**What happens:**
+1. HAProxy detects unhealthy node (health check fails)
+2. Removes node from load balancer
+3. Queries routed to remaining 2 nodes
+4. Writes continue normally (RF=2 still satisfied)
+
+**Recovery:**
+1. Failed node restarts
+2. Syncs missing data from leader
+3. HAProxy adds back to rotation
+
+**Downtime**: **0 seconds** (no impact on availability)
+
+---
+
+### Scenario 3: Split Brain (Network Partition)
+
+**Raft Prevents Split Brain:**
+- Requires **quorum** (2/3 nodes) to elect leader
+- If network splits 1-2:
+  - 2-node partition elects leader (has quorum)
+  - 1-node partition cannot elect (no quorum)
+- Ensures **only one active leader**
+
+**Example:**
+```
+Before Split:
+  Node1 (Leader) ↔ Node2 ↔ Node3
+
+After Network Split:
+  Node1 (isolated, becomes follower)
+  Node2 ↔ Node3 (elect new leader)
+```
+
+---
+
+## Performance Characteristics
+
+### Read Performance
+
+**Load Balancing:**
+- Queries distributed across **3 nodes** (round-robin)
+- Each node handles **~33%** of read traffic
+- **3x read throughput** vs single node
+
+**Example:**
+```
+Single Node: 100 queries/sec
+HA Cluster:  300 queries/sec (3x)
+```
+
+---
+
+### Write Performance
+
+**Write Path:**
+1. Client sends write to HAProxy
+2. HAProxy forwards to **leader node**
+3. Leader replicates to **1 follower** (RF=2)
+4. Write acknowledged after 1 follower confirms
+
+**Latency:**
+- Single node: ~5ms
+- HA cluster: ~8ms (+3ms for replication)
+
+**Throughput:**
+- Similar to single node (writes go to leader)
+- Bottleneck: leader node capacity
+
+---
+
+## Monitoring
+
+### Health Checks
+
+**HAProxy Health Checks:**
+```bash
+# Check HAProxy stats
+curl http://localhost:8404/stats
+
+# Expected: All 3 nodes "UP"
+```
+
+**Qdrant Cluster Status:**
+```bash
+# Check cluster health
+curl http://localhost:6340/cluster
+
+# Expected output:
+{
+  "status": "enabled",
+  "peer_count": 3,
+  "consensus_thread_status": {
+    "consensus_thread_status": "working"
+  }
+}
+```
+
+---
+
+### Metrics to Monitor
+
+1. **Node Health**
+   - All 3 nodes "UP" in HAProxy stats
+   - Cluster peer count = 3
+
+2. **Replication Lag**
+   - Check via `/cluster` endpoint
+   - Should be < 1 second
+
+3. **Query Distribution**
+   - HAProxy stats show balanced load
+   - Each node ~33% of queries
+
+4. **Failover Events**
+   - Monitor HAProxy logs for node state changes
+   - Check Qdrant logs for leader elections
+
+---
+
+## Migration from Single Node
+
+**Automated Migration:**
+```bash
+bash scripts/qdrant/migrate-to-ha-cluster.sh
+```
+
+**Steps:**
+1. Backup existing collections
+2. Stop single-node Qdrant
+3. Start 3-node HA cluster
+4. Create collections with RF=2
+5. Update service configurations
+6. Restart dependent services
+
+**Downtime**: ~2 minutes (during migration)
+
+---
+
+## Configuration Files
+
+**Docker Compose:**
+- `tools/compose/docker-compose.qdrant-ha.yml`
+
+**HAProxy Config:**
+- `tools/compose/haproxy-qdrant.cfg`
+
+**Migration Script:**
+- `scripts/qdrant/migrate-to-ha-cluster.sh`
+
+---
+
+## Best Practices
+
+### 1. Always Use Load Balancer Endpoint
+
+**✅ Correct:**
+```javascript
+const qdrantUrl = "http://qdrant-lb:6333";
+```
+
+**❌ Wrong:**
+```javascript
+const qdrantUrl = "http://qdrant-node1:6333"; // Don't target nodes directly
+```
+
+---
+
+### 2. Set Appropriate Replication Factor
+
+**For Production:**
+- RF = 2 (recommended for 3-node cluster)
+- Balances durability with storage
+
+**For Development:**
+- RF = 1 (save storage)
+
+---
+
+### 3. Monitor Cluster Health
+
+**Daily:**
+- Check HAProxy stats for node status
+- Verify all 3 nodes healthy
+
+**Weekly:**
+- Test failover (stop 1 node, verify recovery)
+- Check replication lag
+
+---
+
+### 4. Backup Strategy
+
+**Automated Backups:**
+- Backup 1 node's data daily
+- RF=2 ensures other nodes have same data
+
+**Disaster Recovery:**
+- Keep backups of collection metadata
+- Can recreate collections from metadata + raw data
+
+---
+
+## Troubleshooting
+
+### Issue: Node Won't Join Cluster
+
+**Symptoms:**
+- Node starts but not in cluster
+- Peer count < 3
+
+**Solution:**
+```bash
+# Check Raft bootstrap config
+docker logs qdrant-node2 | grep "bootstrap"
+
+# Ensure all nodes in bootstrap list
+# Restart node if needed
+docker restart qdrant-node2
+```
+
+---
+
+### Issue: Split Brain Detected
+
+**Symptoms:**
+- Multiple leaders
+- Inconsistent data
+
+**Solution:**
+```bash
+# Stop all nodes
+docker compose -f tools/compose/docker-compose.qdrant-ha.yml down
+
+# Clear data (DESTRUCTIVE!)
+docker volume rm qdrant_node1_data qdrant_node2_data qdrant_node3_data
+
+# Start fresh
+docker compose -f tools/compose/docker-compose.qdrant-ha.yml up -d
+```
+
+---
+
+### Issue: High Replication Lag
+
+**Symptoms:**
+- Raft lag > 5 seconds
+- Slow queries
+
+**Solution:**
+```bash
+# Check network between nodes
+docker exec qdrant-node1 ping -c 3 qdrant-node2
+
+# Check CPU/memory
+docker stats | grep qdrant
+
+# Scale up resources if needed
+```
+
+---
+
+## Security Considerations
+
+### 1. Authentication
+
+**Enable API Key:**
+```yaml
+environment:
+  - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
+```
+
+**Use in Clients:**
+```bash
+curl -H "api-key: ${QDRANT_API_KEY}" http://localhost:6340/collections
+```
+
+---
+
+### 2. Network Isolation
+
+**Raft Communication:**
+- Keep Raft ports (6335-6339) **internal only**
+- Only expose HAProxy port (6340) externally
+
+**HAProxy Stats:**
+- Change default password (`admin/admin`)
+- Or restrict to localhost only
+
+---
+
+## References
+
+- [Qdrant Clustering Docs](https://qdrant.tech/documentation/guides/distributed_deployment/)
+- [Raft Consensus Algorithm](https://raft.github.io/)
+- [HAProxy Documentation](http://www.haproxy.org/#docs)
+
+---
+
+**Last Updated**: 2025-11-03  
+**Status**: Production-Ready  
+**Sprint**: Sprint 2 - Epic 1
+

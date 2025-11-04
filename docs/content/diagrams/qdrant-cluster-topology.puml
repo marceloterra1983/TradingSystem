@@ -1,0 +1,225 @@
+@startuml Qdrant Cluster Topology
+!theme plain
+skinparam nodeStyle rectangle
+
+title Qdrant Vector Database - 3-Node Cluster Topology\nRaft Consensus + NGINX Load Balancing
+
+package "Qdrant Cluster" {
+    
+    node "Qdrant Node 1 (Leader)" as node1 #LightGreen {
+        component "Raft Leader" as raft1 {
+            [Leader Election]
+            [Log Replication]
+            [Commit Index]
+        }
+        component "HNSW Index" as hnsw1 {
+            [Vectors: 3,087]
+            [Dimensions: 384]
+            [Metric: Cosine]
+        }
+        database "Local Storage" as db1 {
+            folder "Collections"
+            folder "Segments"
+            folder "WAL"
+        }
+        component "gRPC Server" as grpc1
+    }
+    
+    node "Qdrant Node 2 (Follower)" as node2 #LightBlue {
+        component "Raft Follower" as raft2 {
+            [Receive Logs]
+            [Apply Commits]
+            [Vote in Elections]
+        }
+        component "HNSW Index (Replica)" as hnsw2 {
+            [Vectors: 3,087]
+            [Dimensions: 384]
+            [Metric: Cosine]
+        }
+        database "Local Storage (Replica)" as db2 {
+            folder "Collections"
+            folder "Segments"
+            folder "WAL"
+        }
+        component "gRPC Server" as grpc2
+    }
+    
+    node "Qdrant Node 3 (Follower)" as node3 #LightBlue {
+        component "Raft Follower" as raft3 {
+            [Receive Logs]
+            [Apply Commits]
+            [Vote in Elections]
+        }
+        component "HNSW Index (Replica)" as hnsw3 {
+            [Vectors: 3,087]
+            [Dimensions: 384]
+            [Metric: Cosine]
+        }
+        database "Local Storage (Replica)" as db3 {
+            folder "Collections"
+            folder "Segments"
+            folder "WAL"
+        }
+        component "gRPC Server" as grpc3
+    }
+    
+    component "NGINX Load Balancer" as nginx #LightYellow {
+        [Upstream Pool]
+        [Health Checks (5s)]
+        [Least Connections]
+        [Passive Health Checks]
+    }
+}
+
+' Client connections
+cloud "LlamaIndex Services" as client
+client -down-> nginx : "gRPC\nPort 6333\n(external)"
+
+' Load balancer → nodes
+nginx -down-> grpc1 : "Route requests\nleast_conn algorithm"
+nginx -down-> grpc2 : "Route requests\nleast_conn algorithm"
+nginx -down-> grpc3 : "Route requests\nleast_conn algorithm"
+
+' Raft consensus (leader → followers)
+raft1 -right-> raft2 : "Replicate writes\n(Raft AppendEntries RPC)\nP2P Port 6335-6336"
+raft1 -right-> raft3 : "Replicate writes\n(Raft AppendEntries RPC)\nP2P Port 6335-6338"
+
+' Heartbeats (followers → leader)
+raft2 -up-> raft1 : "Heartbeat\n(every 100ms)"
+raft3 -up-> raft1 : "Heartbeat\n(every 100ms)"
+
+' Data replication (async, after Raft commit)
+db1 -right-> db2 : "Sync vectors\n(async replication)"
+db1 -right-> db3 : "Sync vectors\n(async replication)"
+
+note right of node1
+  **Leader Node**
+  
+  Port: 6333 (gRPC)
+  Port: 6335 (P2P/Raft)
+  
+  Responsibilities:
+  - Accept all writes
+  - Coordinate consensus
+  - Replicate to followers
+  - Handle leader election
+  
+  Resources:
+  - RAM: 2GB
+  - CPU: 1 core
+  - Storage: 30GB
+  
+  Health:
+  - GET /health
+  - GET /cluster
+  - GET /collections/{name}
+end note
+
+note right of node2
+  **Follower Node 1**
+  
+  Port: 6334 (gRPC)
+  Port: 6336 (P2P/Raft)
+  
+  Responsibilities:
+  - Replicate leader data
+  - Serve read requests
+  - Vote in elections
+  - Promote to leader if needed
+  
+  Replication:
+  - Mode: Async (after commit)
+  - Lag: < 100ms (typical)
+  - Consistency: Eventually
+end note
+
+note right of nginx
+  **NGINX Load Balancer**
+  
+  Port: 6333 (external)
+  Algorithm: least_conn
+  
+  Upstream Pool:
+  - node1:6333 (weight=1)
+  - node2:6333 (weight=1)
+  - node3:6333 (weight=1)
+  
+  Health Checks:
+  - Active: GET /health every 5s
+  - Passive: 2 failures = unhealthy
+  - Timeout: 3s
+  
+  Failover:
+  - Automatic (no downtime)
+  - Removes unhealthy nodes
+  - Re-adds after recovery
+  
+  Performance:
+  - Latency overhead: < 1ms
+  - Max connections: 1024
+end note
+
+' Failover scenario
+note bottom of raft1
+  **Failover Scenario**
+  
+  If Leader (Node 1) fails:
+  1. Followers detect missing heartbeat (300ms)
+  2. Election timeout triggers (500ms)
+  3. Follower with most recent log becomes candidate
+  4. Candidate requests votes from other followers
+  5. Quorum reached (2/3 nodes vote yes)
+  6. New leader elected
+  7. NGINX detects old leader unhealthy (5s)
+  8. NGINX removes old leader from pool
+  9. Traffic routes to new leader
+  
+  Total failover time: < 6 seconds
+  Data loss: Zero (Raft guarantees consistency)
+end note
+
+' Write path
+note bottom of raft2
+  **Write Path (Raft Protocol)**
+  
+  Client → NGINX → Leader:
+  1. Client sends write (e.g., upsert vector)
+  2. NGINX routes to leader
+  3. Leader appends to Raft log
+  4. Leader replicates to followers (AppendEntries RPC)
+  5. Followers append to their logs
+  6. Followers ACK to leader
+  7. Leader waits for quorum (2/3 nodes)
+  8. Leader commits entry
+  9. Leader applies to state machine (HNSW index)
+  10. Leader responds to client (write confirmed)
+  11. Followers apply committed entry (async)
+  
+  Latency: ~10-15ms (includes replication to quorum)
+end note
+
+' Read path
+note bottom of raft3
+  **Read Path (Load Balanced)**
+  
+  Client → NGINX → Any Node:
+  1. Client sends search request
+  2. NGINX selects node (least connections)
+  3. Node performs HNSW search locally
+  4. Node returns results
+  
+  Read Consistency: Eventually consistent
+  - Reads may lag behind writes by < 100ms
+  - Acceptable for RAG use case (documentation search)
+  
+  Latency: ~5-8ms (no replication overhead)
+  
+  Read Distribution:
+  - Node 1 (Leader): ~33% reads
+  - Node 2: ~33% reads
+  - Node 3: ~33% reads
+end note
+
+@enduml
+
+

@@ -34,14 +34,6 @@ const WARNINGS = {
   'total': 'Total bundle size exceeds budget! Review large chunks and lazy load when possible.',
 };
 
-function parseSize(sizeStr) {
-  const match = sizeStr.match(/([\d.]+)\s*(kB|KB|MB)/i);
-  if (!match) return 0;
-  const value = parseFloat(match[1]);
-  const unit = match[2].toLowerCase();
-  return unit === 'mb' ? value * 1024 : value;
-}
-
 function analyzeBuildOutput() {
   const distPath = path.join(__dirname, '../dist');
   const assetsPath = path.join(distPath, 'assets');

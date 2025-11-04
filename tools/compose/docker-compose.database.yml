@@ -5,7 +5,7 @@ services:
     image: "${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     container_name: data-timescale
     ports:
-      - "5433:5432"
+      - "7000:5432"  # MUDOU de 5433 para 5432 (evita conflito com kong-db)
     env_file:
       - ../../.env
     environment:
@@ -30,7 +30,7 @@ services:
     image: "${IMG_DATA_TIMESCALEDB_BACKUP:-timescale/timescaledb}:${IMG_TIMESCALE_TAG:-latest-pg16}"
     container_name: data-timescale-backup
     ports:
-      - "5434:5432"
+      - "7001:5432"  # MUDOU de 5434 para 5437 (evita possíveis conflitos)
     environment:
       POSTGRES_DB: backup
       POSTGRES_USER: backup
@@ -43,7 +43,7 @@ services:
     image: "${IMG_DATA_TIMESCALEDB_EXPORTER:-prometheuscommunity/postgres-exporter:latest}"
     container_name: data-timescale-exporter
     ports:
-      - "${TIMESCALEDB_EXPORTER_PORT:-9187}:9187"
+      - "${TIMESCALEDB_EXPORTER_PORT:-7200}:9187"  # Migrado para range protegido 7200
     environment:
       DATA_SOURCE_URI: 'timescaledb:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
       DATA_SOURCE_USER: ${TIMESCALEDB_USER:-timescale}
@@ -63,7 +63,7 @@ services:
           memory: 1G
           cpus: '0.5'
     ports:
-      - "${PGADMIN_HOST_PORT:-5050}:80"
+      - "${PGADMIN_HOST_PORT:-7100}:80"  # Migrado para range protegido 7100
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin123}
@@ -91,9 +91,9 @@ services:
           memory: 512M
           cpus: '0.5'
     ports:
-      - "${PGWEB_PORT:-8081}:8081"
+      - "${PGWEB_PORT:-7102}:8081"  # Migrado para range protegido 7102
     environment:
-      PGWEB_DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-pass_timescale}@data-timescale:5432/${TIMESCALEDB_DB:-tradingsystem}?sslmode=disable'
+      PGWEB_DATABASE_URL: 'postgres://${TIMESCALEDB_USER:-timescale}:${TIMESCALEDB_PASSWORD:-pass_timescale}@data-timescale:5432/${TIMESCALEDB_DB:-trading}?sslmode=disable'
     restart: unless-stopped
     env_file:
       - ../../.env
@@ -118,7 +118,7 @@ services:
           memory: 512M
           cpus: '0.5'
     ports:
-      - "${ADMINER_PORT:-8080}:8080"
+      - "${ADMINER_PORT:-7101}:8080"  # Migrado para range protegido 7101
     environment:
       ADMINER_DEFAULT_SERVER: timescaledb
       ADMINER_DESIGN: nette
@@ -145,7 +145,7 @@ services:
           memory: 1G
           cpus: '1'
     ports:
-      - "5435:5432"
+      - "7002:5432"  # MUDOU de 5435 para 5438 (evita conflitos)
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-tradingsystem}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -160,33 +160,9 @@ services:
       retries: 5
       start_period: 30s
 
-  qdrant:
-    image: "${IMG_DATA_QDRANT:-qdrant/qdrant:latest}"
-    container_name: data-qdrant
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '2'
-    ports:
-      - "${QDRANT_PORT:-6333}:6333"
-      - "${QDRANT_GRPC_PORT:-6334}:6334"
-    environment:
-      QDRANT_ALLOW_RECOVERY: true
-      QDRANT_ENABLE_TLS: false
-      QDRANT_LOG_LEVEL: INFO
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-    networks:
-      - tradingsystem_backend
-    healthcheck:
-      test: ["CMD-SHELL", "grep -q '18BD' /proc/net/tcp"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
+  # REMOVED: Qdrant duplicado (já existe standalone + RAG stack)
+  # Use: docker run standalone OU tools/compose/docker-compose.rag.yml
+  
   questdb:
     image: "${IMG_DATA_QUESTDB:-questdb/questdb:latest}"
     container_name: data-questdb
@@ -196,9 +172,9 @@ services:
           memory: 4G
           cpus: '2'
     ports:
-      - "${QUESTDB_HTTP_PORT_NEW:-9000}:9000"
-      - "${QUESTDB_PG_PORT_NEW:-9009}:9009"
-      - "${QUESTDB_ILP_PORT:-8812}:8812"
+      - "${QUESTDB_HTTP_PORT:-7010}:9000"    # Migrado para range protegido 7010
+      - "${QUESTDB_ILP_PORT:-7011}:9009"      # Migrado para range protegido 7011
+      - "${QUESTDB_INFLUX_PORT:-7012}:8812"   # Migrado para range protegido 7012
     environment:
       QDB_TELEMETRY_ENABLED: false
       QDB_LOG_LEVEL: INFO

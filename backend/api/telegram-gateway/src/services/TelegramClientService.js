@@ -95,7 +95,9 @@ class TelegramClientService {
       await this.client.connect();
 
       // Se não tiver session, fazer autenticação
-      if (!sessionString) {
+      const sessionStr = session.save();
+      if (!sessionStr || sessionStr === '') {
+        console.log('[TelegramClient] No session found, will need to authenticate');
         console.log('[TelegramClient] Starting authentication...');
         await this.authenticate();
       } else {

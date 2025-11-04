@@ -1,0 +1,4545 @@
+{
+  "metadata": {
+    "scan_date": "2025-11-03T15:05:59.788424",
+    "docs_directory": [
+      "/home/marce/Projetos/TradingSystem/docs/content"
+    ],
+    "threshold_days": 90,
+    "script_version": "1.0.0",
+    "schema": "v2"
+  },
+  "summary": {
+    "total_files": 251,
+    "files_with_frontmatter": 249,
+    "files_missing_frontmatter": 2,
+    "files_with_issues": 8,
+    "files_incomplete_frontmatter": 1,
+    "issue_counts": {
+      "invalid_value": 7,
+      "invalid_date": 1,
+      "missing_field": 3
+    },
+    "owner_distribution": {
+      "MCPGuild": 12,
+      "BackendGuild": 13,
+      "DocsOps": 95,
+      "Backend Team": 1,
+      "ReleaseOps": 1,
+      "DataOps": 5,
+      "ToolingGuild": 38,
+      "DevOps": 1,
+      "SupportOps": 6,
+      "FrontendGuild": 16,
+      "ProductOps": 12,
+      "PromptOps": 4,
+      "ArchitectureGuild": 34,
+      "OpsGuild": 5,
+      "unknown": 1,
+      "SecurityOps": 5
+    }
+  },
+  "freshness_analysis": {
+    "outdated_documents": [],
+    "threshold_days": 90,
+    "analysis_date": "2025-11-03",
+    "date_field": "lastReviewed"
+  },
+  "results": [
+    {
+      "file": "docs/content/agents/agno-agents/flows.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Agent Execution Flows",
+        "description": "Execution flows and state transitions for Order Manager agents.",
+        "tags": [
+          "agents",
+          "order-manager",
+          "flows"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/agents/agno-agents/index.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Agno Agents Overview",
+        "description": "Overview of autonomous agents supporting the Order Manager workflow.",
+        "tags": [
+          "agents",
+          "order-manager"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/agents/agno-agents/mcp.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MCP Integration",
+        "description": "MCP capabilities and permissions required by the Order Manager agents.",
+        "tags": [
+          "agents",
+          "order-manager",
+          "mcp"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/agents/agno-agents/prompts.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Agent Prompt Patterns",
+        "description": "Prompt templates and variables used by Order Manager agents.",
+        "tags": [
+          "agents",
+          "order-manager",
+          "prompts"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/agents/agno-agents/tests.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Agent Test Suite",
+        "description": "Test coverage, examples, and validation procedures for Agno Agents.",
+        "tags": [
+          "agents",
+          "agno-agents",
+          "testing"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/agents/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Agent Catalog",
+        "description": "Governance, capabilities, and integration points for TradingSystem autonomous agents.",
+        "tags": [
+          "agents"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/api/API-DOCUMENTATION-GUIDE.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Documentation Guide - TradingSystem",
+        "description": "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices",
+        "tags": [
+          "api",
+          "documentation",
+          "openapi",
+          "rest",
+          "guide"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/api/alert-router.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Alert Router",
+        "sidebar_label": "Alert Router",
+        "sidebar_position": 4,
+        "description": "Prometheus alert routing service that creates and manages GitHub issues based on alert status",
+        "tags": [
+          "api",
+          "infrastructure",
+          "monitoring",
+          "prometheus",
+          "alerting",
+          "github"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27",
+        "slug": "/api/alert-router/guide"
+      }
+    },
+    {
+      "file": "docs/content/api/data-capture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Data Capture API",
+        "sidebar_position": 10,
+        "description": "Summary of the Data Capture API and references to generated documentation.",
+        "tags": [
+          "api",
+          "data-capture"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/api/documentation-api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation API",
+        "sidebar_position": 6,
+        "description": "REST API for managing documentation systems, ideas, specifications, search, and file attachments.",
+        "tags": [
+          "api",
+          "documentation",
+          "search",
+          "crud"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26",
+        "slug": "/api/documentation-api/guide"
+      }
+    },
+    {
+      "file": "docs/content/api/firecrawl-proxy.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Firecrawl Proxy API",
+        "sidebar_label": "Firecrawl Proxy",
+        "sidebar_position": 5,
+        "description": "Web scraping proxy service with Firecrawl integration, validation, rate limiting, and comprehensive error handling",
+        "tags": [
+          "api",
+          "infrastructure",
+          "web-scraping",
+          "proxy",
+          "firecrawl"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/integration-status.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Integration Status",
+        "sidebar_label": "Integration Status",
+        "sidebar_position": 2,
+        "description": "Current status of all TradingSystem API integrations, service health, and recent improvements",
+        "tags": [
+          "api",
+          "integration",
+          "status",
+          "dashboard"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/order-manager.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Order Manager API",
+        "sidebar_position": 11,
+        "description": "Summary of the Order Manager API and links to autogenerated documentation.",
+        "tags": [
+          "api",
+          "order-manager"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/api/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Catalog",
+        "sidebar_position": 1,
+        "description": "Complete catalog of TradingSystem REST APIs with OpenAPI specs, endpoint behavior, and integration guidelines",
+        "tags": [
+          "api",
+          "integration",
+          "catalog"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/rag-services.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "Backend Team",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'Backend Team'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "RAG Services API",
+        "description": "Complete REST API documentation for RAG Services including authentication, collections management, semantic search, and analytics",
+        "tags": [
+          "api",
+          "rag",
+          "rest",
+          "openapi"
+        ],
+        "domain": "api",
+        "type": "api-reference",
+        "summary": "REST API documentation for RAG (Retrieval-Augmented Generation) Services",
+        "status": "active",
+        "owner": "Backend Team",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/api/status-api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Status API",
+        "sidebar_label": "Status API",
+        "sidebar_position": 3,
+        "description": "Service orchestration and health monitoring API with comprehensive health checks, circuit breaker patterns, and service launching capabilities",
+        "tags": [
+          "api",
+          "infrastructure",
+          "monitoring",
+          "health-check",
+          "orchestration"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/telegram-gateway-api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Telegram Gateway API",
+        "sidebar_label": "Telegram Gateway API",
+        "sidebar_position": 9,
+        "description": "REST API for accessing Telegram messages, channels, and gateway status with TimescaleDB persistence",
+        "tags": [
+          "api",
+          "telegram",
+          "messaging",
+          "crud",
+          "timescaledb"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/tp-capital-api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "TP Capital API",
+        "sidebar_position": 8,
+        "description": "Trading signals ingestion, Telegram bot/channel management, and monitoring API with TimescaleDB persistence.",
+        "tags": [
+          "api",
+          "tp-capital",
+          "trading",
+          "telegram",
+          "signals"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/api/workspace-api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace API (Idea Bank)",
+        "sidebar_position": 7,
+        "description": "CRUD operations for idea items with QuestDB and LowDB persistence, health checks, and Prometheus metrics.",
+        "tags": [
+          "api",
+          "workspace",
+          "idea-bank",
+          "crud"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Surface",
+        "sidebar_position": 4,
+        "description": "API entry points and documentation links for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "api"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture",
+        "sidebar_position": 2,
+        "description": "System architecture and component interactions for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "sidebar_position": 9,
+        "description": "Release history for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "sidebar_position": 5,
+        "description": "Environment variables, feature flags, and port configuration for the Data Capture app.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "configuration"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/deployment.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Deployment Guide",
+        "sidebar_position": 6,
+        "description": "Steps to deploy the Data Capture application on Windows.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Operations",
+        "sidebar_position": 7,
+        "description": "Monitoring, logging, and maintenance procedures for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "operations"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Data Capture Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/requirements.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Functional Requirements",
+        "sidebar_position": 3,
+        "description": "Functional and non-functional requirements for the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/data-capture/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Incident Runbook",
+        "sidebar_position": 8,
+        "description": "Step-by-step procedures for recovering the Data Capture application.",
+        "tags": [
+          "apps",
+          "data-capture",
+          "runbook"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Surface",
+        "sidebar_position": 4,
+        "description": "Order Manager APIs and references to autogenerated documentation.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "api"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture",
+        "sidebar_position": 2,
+        "description": "Architecture diagrams and component responsibilities for the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "sidebar_position": 9,
+        "description": "Release history for the Order Manager application.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "sidebar_position": 5,
+        "description": "Environment variables, secrets, and runtime configuration for the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "configuration"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/deployment.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Deployment Guide",
+        "sidebar_position": 6,
+        "description": "Deploying the Order Manager application across environments.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Operations",
+        "sidebar_position": 7,
+        "description": "Monitoring, logging, and metrics for the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "operations"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Order Manager Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the Order Manager application.",
+        "tags": [
+          "apps",
+          "order-manager"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/requirements.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Functional Requirements",
+        "sidebar_position": 3,
+        "description": "Functional and non-functional requirements for the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/risk-controls.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Risk Controls",
+        "sidebar_position": 4,
+        "description": "Limits, kill switches, and trading windows enforced by the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "risk"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/order-manager/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Incident Runbook",
+        "sidebar_position": 8,
+        "description": "Recovery guide for incidents affecting the Order Manager.",
+        "tags": [
+          "apps",
+          "order-manager",
+          "runbook"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Applications Overview",
+        "sidebar_label": "Overview",
+        "sidebar_position": 0,
+        "tags": [
+          "apps",
+          "overview",
+          "catalog"
+        ],
+        "description": "Complete catalog of TradingSystem applications organized by function and criticality.",
+        "lastReviewed": "2025-10-27",
+        "owner": "DocsOps"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher API",
+        "sidebar_position": 2,
+        "description": "REST API endpoints for service orchestration and health monitoring.",
+        "tags": [
+          "api",
+          "service-launcher",
+          "health-monitoring"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Architecture",
+        "sidebar_position": 3,
+        "description": "System design, component interactions, and architectural decisions for Service Launcher.",
+        "tags": [
+          "architecture",
+          "service-launcher",
+          "infrastructure"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Changelog",
+        "sidebar_position": 9,
+        "description": "Version history, features, bug fixes, and breaking changes.",
+        "tags": [
+          "changelog",
+          "service-launcher",
+          "releases"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Configuration",
+        "sidebar_position": 4,
+        "description": "Environment variables, configuration options, and setup instructions.",
+        "tags": [
+          "configuration",
+          "service-launcher",
+          "environment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/deployment.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Deployment",
+        "sidebar_position": 5,
+        "description": "Deployment procedures, startup scripts, and Docker Compose setup.",
+        "tags": [
+          "deployment",
+          "service-launcher",
+          "docker"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Operations",
+        "sidebar_position": 6,
+        "description": "Day-to-day operational procedures, monitoring, and maintenance tasks.",
+        "tags": [
+          "operations",
+          "service-launcher",
+          "monitoring"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the Service Launcher orchestration and health monitoring application.",
+        "tags": [
+          "apps",
+          "service-launcher",
+          "orchestration",
+          "health-monitoring"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/requirements.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Requirements",
+        "sidebar_position": 7,
+        "description": "Dependencies, prerequisites, and system requirements for Service Launcher.",
+        "tags": [
+          "requirements",
+          "service-launcher",
+          "dependencies"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/service-launcher/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Service Launcher Runbook",
+        "sidebar_position": 8,
+        "description": "Troubleshooting guide, incident response procedures, and common solutions.",
+        "tags": [
+          "runbook",
+          "troubleshooting",
+          "service-launcher"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture",
+        "sidebar_position": 2,
+        "description": "Architecture and component responsibilities for the Telegram Gateway stack.",
+        "tags": [
+          "apps",
+          "telegram-gateway",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Telegram Gateway Changelog",
+        "sidebar_position": 9,
+        "description": "Release notes and operational changes for the Telegram Gateway stack.",
+        "tags": [
+          "apps",
+          "telegram-gateway",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "sidebar_position": 5,
+        "description": "Environment variables, secrets, and runtime configuration for the Telegram Gateway services.",
+        "tags": [
+          "apps",
+          "telegram-gateway",
+          "configuration"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Operations",
+        "sidebar_position": 7,
+        "description": "Monitoring, logging, and maintenance for the Telegram Gateway stack.",
+        "tags": [
+          "apps",
+          "telegram-gateway",
+          "operations"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Telegram Gateway Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the Telegram Gateway ingestion stack.",
+        "tags": [
+          "apps",
+          "telegram-gateway"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/telegram-gateway/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Incident Runbook",
+        "sidebar_position": 8,
+        "description": "Recovery steps for Telegram Gateway outages and degradations.",
+        "tags": [
+          "apps",
+          "telegram-gateway",
+          "runbook"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Surface",
+        "sidebar_position": 4,
+        "description": "TP Capital APIs and references to autogenerated documentation.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "api"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture",
+        "sidebar_position": 2,
+        "description": "Architecture diagrams and component responsibilities for the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "sidebar_position": 9,
+        "description": "Release history for the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "sidebar_position": 5,
+        "description": "Environment variables, secrets, and runtime configuration for the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "configuration"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/deployment.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Deployment Guide",
+        "sidebar_position": 6,
+        "description": "Deploying the TP Capital application across environments.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/mtproto-frontend-mockup.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MTProto Frontend Mockup",
+        "sidebar_position": 12,
+        "description": "Visual walkthrough of the TP Capital page before and after MTProto integration.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "frontend"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Operations",
+        "sidebar_position": 7,
+        "description": "Monitoring, logging, and metrics for the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "operations"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "TP Capital Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the TP Capital Telegram ingestion application.",
+        "tags": [
+          "apps",
+          "tp-capital"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/requirements.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Functional Requirements",
+        "sidebar_position": 3,
+        "description": "Functional and non-functional requirements for the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "requirements"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/tp-capital/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Incident Runbook",
+        "sidebar_position": 8,
+        "description": "Recovery guide for incidents affecting the TP Capital application.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "runbook"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/api.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Surface",
+        "sidebar_position": 4,
+        "description": "Workspace APIs and references to autogenerated documentation.",
+        "tags": [
+          "apps",
+          "workspace",
+          "api"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture",
+        "sidebar_position": 2,
+        "description": "Architecture diagrams and component responsibilities for the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/categories-crud-overview.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace Categories CRUD",
+        "sidebar_position": 10,
+        "description": "Summary of the Workspace categories CRUD implementation and data model.",
+        "tags": [
+          "apps",
+          "workspace",
+          "categories"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/categories-integration.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace Categories Integration",
+        "sidebar_position": 11,
+        "description": "How the categories CRUD embeds inside the Workspace application experience.",
+        "tags": [
+          "apps",
+          "workspace",
+          "categories"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "sidebar_position": 9,
+        "description": "Release history for the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "sidebar_position": 5,
+        "description": "Environment variables, secrets, and runtime configuration for the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "configuration"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/deployment.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Deployment Guide",
+        "sidebar_position": 6,
+        "description": "Deploying the Workspace application across environments.",
+        "tags": [
+          "apps",
+          "workspace",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/operations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Operations",
+        "sidebar_position": 7,
+        "description": "Monitoring, logging, and maintenance procedures for the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "operations"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace Overview",
+        "sidebar_position": 1,
+        "description": "Purpose, scope, and user journeys for the Workspace idea management application.",
+        "tags": [
+          "apps",
+          "workspace"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/requirements.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Functional Requirements",
+        "sidebar_position": 3,
+        "description": "Functional and non-functional requirements for the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "requirements"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Incident Runbook",
+        "sidebar_position": 8,
+        "description": "Recovery guide for incidents affecting the Workspace application.",
+        "tags": [
+          "apps",
+          "workspace",
+          "runbook"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/archive/2025-Q4/README.md",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
+    {
+      "file": "docs/content/archive/README.md",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
+    {
+      "file": "docs/content/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Release Changelog",
+        "description": "Timeline of TradingSystem releases, hotfixes, and documentation updates.",
+        "tags": [
+          "changelog",
+          "releases"
+        ],
+        "owner": "ReleaseOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/database/migrations.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Migrations",
+        "description": "Database migration workflows and tooling for TradingSystem.",
+        "tags": [
+          "database",
+          "migrations"
+        ],
+        "owner": "DataOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/database/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Data Platform",
+        "description": "Schemas, retention policies, and operational guidance for TradingSystem databases.",
+        "tags": [
+          "database",
+          "observability"
+        ],
+        "owner": "DataOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/database/rag-schema.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Services Database Schema",
+        "description": "Complete database schema documentation for RAG Services including tables, relationships, indexes, and performance optimization",
+        "tags": [
+          "database",
+          "schema",
+          "rag",
+          "timescaledb"
+        ],
+        "domain": "rag-services",
+        "type": "technical-reference",
+        "summary": "Complete database schema for RAG Services with TimescaleDB hypertables, continuous aggregates, and performance optimization",
+        "status": "active",
+        "owner": "DataOps",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/database/retention-backup.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Retention & Backup",
+        "description": "Data retention policies and backup/restore procedures.",
+        "tags": [
+          "database",
+          "operations"
+        ],
+        "owner": "DataOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/database/schema.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Schema Reference",
+        "description": "Entity relationships and schema details for TradingSystem databases.",
+        "tags": [
+          "database",
+          "schema"
+        ],
+        "owner": "DataOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/development/SHARED-MODULES-MIGRATION.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Shared Modules Migration Report",
+        "sidebar_position": 1,
+        "description": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
+        "tags": [
+          "development",
+          "architecture",
+          "refactoring",
+          "migration"
+        ],
+        "domain": "development",
+        "type": "migration-report",
+        "summary": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
+        "status": "completed",
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-29",
+        "last_review": "2025-10-29"
+      }
+    },
+    {
+      "file": "docs/content/development/code-quality-checklist.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Code Quality Checklist",
+        "sidebar_position": 5,
+        "description": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
+        "tags": [
+          "development",
+          "quality",
+          "linting",
+          "testing"
+        ],
+        "domain": "development",
+        "type": "guide",
+        "summary": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
+        "status": "active",
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/development/npm-run-dev-pattern.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "DevOps",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Padrão npm run dev com Auto-Kill de Porta",
+        "sidebar_position": 5,
+        "description": "Padrão de desenvolvimento para evitar erros EADDRINUSE em serviços Node.js",
+        "tags": [
+          "development",
+          "nodejs",
+          "best-practices"
+        ],
+        "owner": "DevOps",
+        "lastReviewed": "2025-10-29"
+      }
+    },
+    {
+      "file": "docs/content/diagrams/diagrams.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Diagram Index",
+        "description": "Index of PlantUML diagrams used across the documentation.",
+        "slug": "/diagrams",
+        "tags": [
+          "diagrams",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/faq.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Frequently Asked Questions",
+        "description": "Common troubleshooting answers and onboarding guidance.",
+        "tags": [
+          "faq",
+          "support"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/architecture/dashboard.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Dashboard Architecture",
+        "sidebar_position": 1,
+        "description": "React dashboard architecture, navigation structure, and component patterns",
+        "tags": [
+          "frontend",
+          "architecture",
+          "dashboard",
+          "react"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/frontend/design-system/components.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "UI Components Catalogue",
+        "description": "Overview of reusable UI components for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "design-system",
+          "components"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/design-system/patterns.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Interaction Patterns",
+        "description": "Documented UI patterns for the TradingSystem dashboard.",
+        "tags": [
+          "frontend",
+          "design-system",
+          "patterns"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/design-system/theming.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Theming Strategy",
+        "description": "Guidelines for theme management across TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "design-system",
+          "theming"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/design-system/tokens.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Design Tokens",
+        "description": "Canonical design tokens for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "design-system",
+          "tokens"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/engineering/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Frontend Architecture Summary",
+        "description": "High-level architectural overview for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "engineering",
+          "architecture"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/engineering/components.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Dashboard Components",
+        "sidebar_position": 2,
+        "description": "Key React components powering the TradingSystem Dashboard",
+        "tags": [
+          "frontend",
+          "components",
+          "react"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/frontend/engineering/conventions.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Engineering Conventions",
+        "description": "Coding conventions and folder structures for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "engineering",
+          "conventions"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/engineering/lint-format.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Linting & Formatting",
+        "description": "Linting, formatting, and quality tooling for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "engineering",
+          "linting"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/engineering/testing.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Frontend Testing Strategy",
+        "description": "Testing tools and expectations for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "engineering",
+          "testing"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/accessibility.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Accessibility Guidelines",
+        "description": "Accessibility expectations for TradingSystem frontend experiences.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "accessibility"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/hard-refresh.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Hard Refresh Checklist",
+        "description": "Steps to force a full reload of cached assets across supported browsers.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "support"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/i18n.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Internationalization Guidelines",
+        "description": "Internationalization strategy for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "i18n"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/performance.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Performance Guidelines",
+        "description": "Performance and loading targets for TradingSystem frontends.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "performance"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/style-guide.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Frontend Style Guide",
+        "description": "Editorial and UI writing guidelines for TradingSystem interfaces.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "style"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Frontend Engineering",
+        "description": "Design tokens, UI architecture, and dashboard implementation guidelines.",
+        "tags": [
+          "engineering",
+          "frontend"
+        ],
+        "primarySystems": [
+          "frontend/dashboard",
+          "backend/api"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/index.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "id": "index",
+        "title": "TradingSystem Documentation Hub",
+        "description": "Entry point for the Docusaurus v3 knowledge base and DocsAPI automation.",
+        "tags": [
+          "overview",
+          "navigation"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-29"
+      }
+    },
+    {
+      "file": "docs/content/mcp/connectors.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Connectors",
+        "description": "Recommended MCP servers for TradingSystem and how to configure them.",
+        "tags": [
+          "mcp",
+          "github",
+          "postgres",
+          "openapi",
+          "docker"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/mcp/permissions.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MCP Permissions",
+        "description": "Permission model and governance for MCP tools and agents.",
+        "tags": [
+          "mcp",
+          "security"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/mcp/registry.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MCP Registry",
+        "description": "Metadata, governance, and automation flows for the Model Context Protocol ecosystem.",
+        "tags": [
+          "mcp",
+          "automation"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/mcp/transports.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MCP Transports",
+        "description": "Supported transport layers and deployment modes for MCP services.",
+        "tags": [
+          "mcp",
+          "transports"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/archive/deprecated-features.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Deprecated Features",
+        "description": "Catalog of deprecated product features and their retirement rationale.",
+        "tags": [
+          "prd",
+          "archive"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Product Requirements (PRD)",
+        "description": "Product requirement docs, launch briefs, and solution context for TradingSystem initiatives.",
+        "tags": [
+          "prd",
+          "roadmap"
+        ],
+        "contentOwner": "ProductOps",
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/feature-idea-bank.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Feature Brief – Idea Bank",
+        "description": "Product requirements for the Idea Bank/Workspace feature within the Trading App.",
+        "tags": [
+          "prd",
+          "trading-app",
+          "idea-bank",
+          "workspace"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26",
+        "language": "en",
+        "translated_from": "./feature-idea-bank.pt.mdx",
+        "translation_source_language": "pt",
+        "translation_source_hash": "a76243efa1870153c6a887d146f61b09a7aad6bf"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/feature-idea-bank.pt.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Brief de Funcionalidade – Banco de Ideias",
+        "description": "Requisitos de produto para a funcionalidade Banco de Ideias/Workspace dentro do Trading App.",
+        "tags": [
+          "prd",
+          "trading-app",
+          "banco-ideias",
+          "workspace"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26",
+        "language": "pt"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/feature-order-manager.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Feature Brief – Order Manager",
+        "description": "Product requirements for the Order Manager feature within the Trading App.",
+        "tags": [
+          "prd",
+          "trading-app"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/feature-order-manager.pt.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Brief de Funcionalidade – Order Manager",
+        "description": "Requisitos de produto para a funcionalidade Order Manager dentro do Trading App.",
+        "tags": [
+          "prd",
+          "trading-app",
+          "order-manager"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26",
+        "language": "pt",
+        "translated_from": "./feature-order-manager.mdx",
+        "translation_source_language": "en",
+        "translation_source_hash": "d53b910baec02fc2676641aa5f068da471af67a6"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/prd-overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Trading App PRD Overview",
+        "description": "Summary of product requirements for the Trading App.",
+        "tags": [
+          "prd",
+          "trading-app"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/products/trading-app/prd-overview.pt.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Visão Geral do PRD - Trading App",
+        "description": "Resumo dos requisitos de produto para o Trading App.",
+        "tags": [
+          "prd",
+          "trading-app"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26",
+        "language": "pt",
+        "translated_from": "./prd-overview.mdx",
+        "translation_source_language": "en",
+        "translation_source_hash": "f0204c44f6e048910bc28c4100280546de212c91"
+      }
+    },
+    {
+      "file": "docs/content/prd/templates/feature-template.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Feature Brief Template",
+        "description": "Template for documenting individual features or enhancements.",
+        "tags": [
+          "prd",
+          "template"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prd/templates/prd-template.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "PRD Template",
+        "description": "Canonical template for Product Requirement Documents.",
+        "tags": [
+          "prd",
+          "template"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prompts/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Prompt Library",
+        "description": "Conversational playbooks, guardrails, and evaluation patterns for LLM-powered agents.",
+        "tags": [
+          "prompts",
+          "llm"
+        ],
+        "owner": "PromptOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prompts/patterns.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Prompt Patterns",
+        "description": "Reusable prompt patterns for TradingSystem automations.",
+        "tags": [
+          "prompts",
+          "llm"
+        ],
+        "owner": "PromptOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prompts/style-guide.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Prompt Style Guide",
+        "description": "Tone, formatting, and policy guidelines for authoring prompts.",
+        "tags": [
+          "prompts",
+          "style"
+        ],
+        "owner": "PromptOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/prompts/variables.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Prompt Variables",
+        "description": "Variable catalog and context construction rules for prompts.",
+        "tags": [
+          "prompts",
+          "variables"
+        ],
+        "owner": "PromptOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/2025-10-28-centralized-database-architecture.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-008: Centralized Database Architecture",
+        "sidebar_position": 8,
+        "description": "Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications",
+        "tags": [
+          "adr",
+          "database",
+          "architecture",
+          "timescaledb"
+        ],
+        "domain": "infrastructure",
+        "type": "decision-record",
+        "summary": "Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications",
+        "status": "accepted",
+        "date": "2025-10-28",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-28",
+        "deciders": [
+          "System Architect"
+        ]
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-0001.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-0001 – Example Decision",
+        "description": "Placeholder Architecture Decision Record documenting a sample decision.",
+        "tags": [
+          "adr",
+          "reference"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-003: API Gateway Implementation for Centralized Authentication and Routing",
+        "date": "2025-11-01",
+        "description": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
+        "status": "proposed",
+        "tags": [
+          "architecture",
+          "security",
+          "infrastructure",
+          "api-gateway"
+        ],
+        "domain": "infrastructure",
+        "type": "adr",
+        "summary": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-005: Test Coverage Strategy - Systematic Quality Improvement",
+        "date": "2025-11-02",
+        "description": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
+        "status": "proposed",
+        "tags": [
+          "architecture",
+          "testing",
+          "quality",
+          "ci-cd"
+        ],
+        "domain": "development-process",
+        "type": "adr",
+        "summary": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-001: Redis Caching Strategy for Collection Stats",
+        "sidebar_position": 1,
+        "description": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
+        "tags": [
+          "adr",
+          "rag-services",
+          "caching",
+          "performance"
+        ],
+        "domain": "rag-services",
+        "type": "adr",
+        "summary": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
+        "status": "accepted",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ADR-002: File Watcher Auto-Ingestion Architecture",
+        "sidebar_position": 2,
+        "description": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
+        "tags": [
+          "adr",
+          "rag-services",
+          "file-watcher",
+          "automation"
+        ],
+        "domain": "rag-services",
+        "type": "adr",
+        "summary": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
+        "status": "accepted",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/reference/api-guidelines.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Design Guidelines",
+        "description": "Standards for designing and evolving TradingSystem REST APIs.",
+        "tags": [
+          "reference",
+          "api"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/architecture/containerization.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Estratégia de Containerização",
+        "description": "Estratégia de containerização para serviços TradingSystem",
+        "tags": [
+          "reference",
+          "architecture",
+          "docker"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/reference/architecture/service-map.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Backend Service Map (Migrating)",
+        "description": "Placeholder stub for the backend service map reference during docs migration.",
+        "tags": [
+          "architecture",
+          "placeholder"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26",
+        "status": "draft"
+      }
+    },
+    {
+      "file": "docs/content/reference/architecture/technical-specification.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Architecture Technical Specification (Migrating)",
+        "description": "Placeholder stub while the architecture technical specification is migrated to docs.",
+        "tags": [
+          "architecture",
+          "placeholder"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26",
+        "status": "draft"
+      }
+    },
+    {
+      "file": "docs/content/reference/cli.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "CLI Reference",
+        "description": "Command-line interfaces and scripts available within TradingSystem.",
+        "tags": [
+          "reference",
+          "cli"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/deployment/checklist.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Production Deployment Checklist",
+        "description": "Checklist completo para deploy em produção",
+        "tags": [
+          "reference",
+          "deployment",
+          "checklist"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/reference/deployment/env-guide.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Production Environment Guide",
+        "description": "Guia de configuração de ambiente para produção",
+        "tags": [
+          "reference",
+          "deployment",
+          "environment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/reference/env-variables.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Environment Variables",
+        "description": "Central inventory of TradingSystem environment variables.",
+        "tags": [
+          "reference",
+          "configuration"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/inventory.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Inventário de Serviços",
+        "description": "Inventário completo de serviços e containers",
+        "tags": [
+          "reference",
+          "inventory"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/reference/migrations/v1-to-v2.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Migration – v1 to v2",
+        "description": "Steps and checklist for migrating from TradingSystem v1 to v2 documentation.",
+        "tags": [
+          "reference",
+          "migrations"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Reference Library",
+        "description": "Authoritative tables and generated resources that keep TradingSystem aligned.",
+        "tags": [
+          "reference",
+          "data-contracts"
+        ],
+        "lastSynced": "TBD",
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/ports.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        },
+        {
+          "type": "invalid_date",
+          "field": "lastReviewed",
+          "value": "TBD",
+          "message": "Invalid date format 'TBD'. Expected: YYYY-MM-DD"
+        }
+      ],
+      "frontmatter": {
+        "title": "Ports Matrix",
+        "description": "Service port assignments across TradingSystem.",
+        "tags": [
+          "reference",
+          "networking"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "TBD"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/adr.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Architecture Decision Record",
+        "description": "Template for documenting architecture decisions.",
+        "tags": [
+          "reference",
+          "template",
+          "adr",
+          "architecture"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/guide.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Implementation Guide",
+        "description": "Template for step-by-step implementation guides.",
+        "tags": [
+          "reference",
+          "template",
+          "guide"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/page.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Page",
+        "description": "Generic template for documentation pages.",
+        "tags": [
+          "reference",
+          "template"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/prd.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – PRD",
+        "description": "Template for product requirement documents.",
+        "tags": [
+          "reference",
+          "template",
+          "prd"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/runbook.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Operational Runbook",
+        "description": "Template for operational runbooks and incident response procedures.",
+        "tags": [
+          "reference",
+          "template",
+          "runbook",
+          "ops"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/sdd.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Software Design Document",
+        "description": "Template for detailed software design specifications.",
+        "tags": [
+          "reference",
+          "template",
+          "sdd",
+          "design"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/templates/tool.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Template – Tool Documentation",
+        "description": "Template for documenting internal tools, CLIs, and SDKs.",
+        "tags": [
+          "reference",
+          "template",
+          "tool"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reference/testing-strategy.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Testing Strategy",
+        "description": "Unified testing strategy covering APIs, frontend, and infrastructure.",
+        "tags": [
+          "reference",
+          "testing"
+        ],
+        "owner": "ProductOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/reports/daily/2025-10-27.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Daily Updates – 2025-10-27",
+        "description": "Daily summary of code changes and docs impact for 2025-10-27.",
+        "tags": [
+          "automation",
+          "daily",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/sdd/api/data-capture/v1/spec.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Specification (Planned)",
+        "description": "Placeholder for Data Capture API v1 specification.",
+        "tags": [
+          "sdd",
+          "data-capture",
+          "api"
+        ],
+        "status": "planned",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/api/order-manager/v1/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Design changes for Order Manager API v1.",
+        "tags": [
+          "sdd",
+          "order-manager",
+          "changelog"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/api/order-manager/v1/guidelines.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Guidelines",
+        "description": "Naming, error handling, and idempotency guidelines for Order Manager API v1.",
+        "tags": [
+          "sdd",
+          "order-manager",
+          "api"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/api/order-manager/v1/spec.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "API Specification",
+        "description": "Specification for Order Manager API v1.",
+        "tags": [
+          "sdd",
+          "order-manager",
+          "api"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/domain/schemas/v1/index.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Schema Catalogue v1",
+        "description": "Overview of domain schemas for version 1.",
+        "tags": [
+          "sdd",
+          "domain"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/domain/schemas/v1/order.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Order Schema",
+        "description": "Schema definition for order entities.",
+        "tags": [
+          "sdd",
+          "domain"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/domain/schemas/v1/risk-rule.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Risk Rule Schema",
+        "description": "Schema for risk rules and enforcement policies.",
+        "tags": [
+          "sdd",
+          "domain"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/events/v1/index.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Event Catalogue v1",
+        "description": "Overview of events emitted in version 1.",
+        "tags": [
+          "sdd",
+          "events"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/events/v1/order-canceled.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Event – Order Canceled",
+        "description": "Placeholder contract for the `order.canceled` event.",
+        "tags": [
+          "sdd",
+          "events"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/events/v1/order-created.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Event – Order Created",
+        "description": "Definition and payload contract for the `order.created` event.",
+        "tags": [
+          "sdd",
+          "events"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/events/v1/order-failed.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Event – Order Failed",
+        "description": "Contract for the `order.failed` event emitted after submission retries exhaust.",
+        "tags": [
+          "sdd",
+          "events"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/flows/v1/cancel-order.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Flow – Cancel Order",
+        "description": "Process flow for cancelling an order.",
+        "tags": [
+          "sdd",
+          "flows"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/flows/v1/place-order.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Flow – Place Order",
+        "description": "Process flow for placing an order through the TradingSystem platform.",
+        "tags": [
+          "sdd",
+          "flows"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Solution Design Docs (SDD)",
+        "description": "Architecture decisions, sequence diagrams, and trade-off analyses for new capabilities.",
+        "tags": [
+          "sdd",
+          "architecture"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/sdd/process.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "SDD Process",
+        "description": "How to initiate and deliver Solution Design Documents.",
+        "tags": [
+          "sdd",
+          "process"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/ai/claude-commands-ready.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Claude Commands Overview",
+        "sidebar_position": 2,
+        "description": "Summary of the custom Claude CLI commands available for TradingSystem.",
+        "tags": [
+          "ai",
+          "claude",
+          "automation"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/ai/claude-commands-reference.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Claude Commands Reference",
+        "sidebar_position": 3,
+        "description": "Detailed reference for each custom Claude CLI command and supported flags.",
+        "tags": [
+          "ai",
+          "claude",
+          "reference"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/ai/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "AI & LLM Tools",
+        "description": "AI agents, LangGraph workflows, LlamaIndex RAG, and local LLM runtime (Ollama)",
+        "tags": [
+          "ai",
+          "llm",
+          "agents",
+          "langgraph",
+          "llamaindex",
+          "ollama",
+          "rag"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/docusaurus-daily-agent.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Daily Agent",
+        "sidebar_position": 3,
+        "description": "Agent local que resume mudanças diárias no código e atualiza relatórios do Docusaurus.",
+        "tags": [
+          "automation",
+          "docs",
+          "agent"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/system-quick-start.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "TradingSystem Quick Start",
+        "sidebar_position": 1,
+        "description": "Fast reference to install shortcuts and manage the automation wrappers.",
+        "tags": [
+          "automation",
+          "ops",
+          "cli"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/universal-commands.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Automation Universal Commands",
+        "sidebar_position": 2,
+        "description": "Overview of the start, stop, and status wrappers installed by install-shortcuts.sh.",
+        "tags": [
+          "automation",
+          "shortcuts",
+          "cli"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/workflow-auditoria-completa.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Audit Workflow Blueprint",
+        "sidebar_position": 4,
+        "description": "End to end workflow proposal for auditing TradingSystem with local agents.",
+        "tags": [
+          "automation",
+          "governance",
+          "workflow"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/development/code-quality-commands.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Code Quality Commands",
+        "sidebar_position": 2,
+        "description": "Reference for linting, type checking, testing, and security audit scripts.",
+        "tags": [
+          "development",
+          "quality",
+          "scripts"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/development/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Development Tools",
+        "description": "OpenSpec, automation scripts, Firecrawl, and development utilities",
+        "tags": [
+          "development",
+          "tooling",
+          "openspec",
+          "scripts",
+          "automation",
+          "firecrawl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/docker/container-inventory.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DocsOps",
+            "ToolingGuild",
+            "ArchitectureGuild",
+            "MCPGuild",
+            "PromptOps",
+            "SupportOps",
+            "ProductOps",
+            "BackendGuild",
+            "ReleaseOps",
+            "DataOps",
+            "FrontendGuild",
+            "SecurityOps"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Docker Container Inventory",
+        "description": "Snapshot of core TradingSystem containers with status and roles.",
+        "tags": [
+          "tools",
+          "docker",
+          "ops"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/docker/documentation-container.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation Container",
+        "description": "Solução de 2 containers para documentação (NGINX + DocsAPI)",
+        "tags": [
+          "tools",
+          "docker",
+          "documentation"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/algolia-setup-guide.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Algolia DocSearch Setup",
+        "description": "How to request DocSearch access and configure the crawler for TradingSystem docs.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "search"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "History of Docusaurus configuration and dependency updates.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/commands.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Common Commands",
+        "description": "Useful scripts for working with the Docusaurus workspace.",
+        "tags": [
+          "tools",
+          "docusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "description": "Key configuration files and options for Docusaurus.",
+        "tags": [
+          "tools",
+          "docusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/deployment-guide.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation Deployment Guide",
+        "description": "Pipeline and automation steps for deploying the Docusaurus site.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/fix-instability.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Fixing Docusaurus Instability",
+        "description": "Root cause analysis and remediation steps for docs dev-server instability.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "stability"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing dependencies for the Docusaurus workspace.",
+        "tags": [
+          "tools",
+          "docusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Overview",
+        "description": "Structure and governance of the Docusaurus documentation workspace.",
+        "tags": [
+          "tools",
+          "docusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/ports-strategy.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Ports Strategy",
+        "description": "Port allocation strategy for docs services, API proxy, and previews.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "networking"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/ports-summary.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Ports Summary",
+        "description": "Quick lookup table for documentation related ports and services.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "networking"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/quick-commands.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Quick Commands",
+        "description": "Frequently used npm scripts and helpers for the documentation workspace.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "scripts"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/troubleshooting-instability.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Instability Troubleshooting",
+        "description": "Checklist to debug recurring issues with the Docusaurus workspace.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "support"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/troubleshooting.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting",
+        "description": "Common issues and fixes for the Docusaurus workspace.",
+        "tags": [
+          "tools",
+          "docusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation Tooling",
+        "description": "Docusaurus, PlantUML, Redocusaurus for comprehensive documentation",
+        "tags": [
+          "documentation",
+          "docusaurus",
+          "plantuml",
+          "redocusaurus",
+          "openapi"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/plantuml/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Updates to PlantUML tooling and conventions.",
+        "tags": [
+          "tools",
+          "plantuml",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/plantuml/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing PlantUML tooling locally.",
+        "tags": [
+          "tools",
+          "plantuml"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/plantuml/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "PlantUML Overview",
+        "description": "Usage guidelines and diagram standards for PlantUML.",
+        "tags": [
+          "tools",
+          "plantuml",
+          "diagrams",
+          "visualization",
+          "shared"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/plantuml/usage.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Usage Guide",
+        "description": "Workflow for authoring and embedding PlantUML diagrams.",
+        "tags": [
+          "tools",
+          "plantuml"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Updates to Redocusaurus integration and specs.",
+        "tags": [
+          "tools",
+          "redocusaurus",
+          "changelog"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/commands.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Commands",
+        "description": "Scripts for building and validating Redoc integrations.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "description": "Configuring Redocusaurus specs and theme options.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing and updating Redocusaurus within the docs workspace.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/redocusaurus/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Redocusaurus Overview",
+        "description": "Strategy for rendering OpenAPI specs with Redocusaurus.",
+        "tags": [
+          "tools",
+          "redocusaurus"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/infrastructure/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Infrastructure & Orchestration",
+        "description": "Docker Compose orchestration, Nginx proxy, service registry, and systemd services",
+        "tags": [
+          "infrastructure",
+          "docker",
+          "nginx",
+          "systemd",
+          "orchestration"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/kestra.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Kestra",
+        "sidebar_position": 80,
+        "description": "Kestra workflow orchestration UI embedded interface",
+        "tags": [
+          "tools",
+          "workflow",
+          "orchestration",
+          "kestra"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/linting/commitlint-husky.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Commitlint & Husky",
+        "description": "Commit message linting and Husky hook integration guidelines.",
+        "tags": [
+          "tools",
+          "linting",
+          "git"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/linting/markdownlint.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "markdownlint Guide",
+        "description": "Rules and usage for markdownlint within TradingSystem.",
+        "tags": [
+          "tools",
+          "linting",
+          "markdown"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/linting/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Linting Overview",
+        "description": "Code quality and linting standards for TradingSystem.",
+        "tags": [
+          "tools",
+          "linting",
+          "quality"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/mcp/resumo.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Resumo MCP",
+        "description": "Resumo da instalação de MCPs para o TradingSystem",
+        "tags": [
+          "tools",
+          "mcp"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/mcp/setup.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Setup MCP",
+        "description": "Instruções de configuração dos MCPs no Cursor",
+        "tags": [
+          "tools",
+          "mcp"
+        ],
+        "owner": "MCPGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/monitoring/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Monitoring & Observability",
+        "description": "Prometheus, Grafana, Alertmanager, and Alert Router for comprehensive system monitoring",
+        "tags": [
+          "monitoring",
+          "observability",
+          "prometheus",
+          "grafana",
+          "alerting"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Tools & Infrastructure",
+        "description": "Development tools, infrastructure components, and automation assets for the TradingSystem platform",
+        "tags": [
+          "tools",
+          "infrastructure",
+          "devops",
+          "monitoring",
+          "ai"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/ports-services/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Ports & Services Matrix",
+        "description": "Mapping of service names to ports and protocols.",
+        "tags": [
+          "tools",
+          "networking"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Services Architecture",
+        "sidebar_position": 1,
+        "description": "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment",
+        "tags": [
+          "rag",
+          "architecture",
+          "documentation"
+        ],
+        "domain": "rag-services",
+        "type": "architecture",
+        "summary": "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment",
+        "status": "active",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
+        "last_review": "2025-11-01"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/integration-guide-rag-crud.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Collections Integration Guide",
+        "sidebar_position": 6,
+        "description": "How to embed the collections management card into LlamaIndexPage.",
+        "tags": [
+          "rag",
+          "frontend",
+          "integration"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/multi-collection-architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Multi-Collection Architecture",
+        "sidebar_position": 5,
+        "description": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "tags": [
+          "rag",
+          "llamaindex",
+          "qdrant",
+          "embedding"
+        ],
+        "domain": "tools",
+        "type": "technical-spec",
+        "summary": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "status": "active",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-31",
+        "last_review": "2025-10-31"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/qdrant-ha-architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "missing_field",
+          "field": "description",
+          "message": "Missing required field: description"
+        },
+        {
+          "type": "missing_field",
+          "field": "owner",
+          "message": "Missing required field: owner"
+        },
+        {
+          "type": "missing_field",
+          "field": "lastReviewed",
+          "message": "Missing required field: lastReviewed"
+        }
+      ],
+      "frontmatter": {
+        "title": "Qdrant High Availability Architecture",
+        "sidebar_position": 4,
+        "tags": [
+          "qdrant",
+          "high-availability",
+          "infrastructure"
+        ],
+        "domain": "tools",
+        "type": "architecture",
+        "summary": "Qdrant 3-node HA cluster with Raft consensus and HAProxy load balancing",
+        "status": "active",
+        "last_review": "2025-11-03"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/rag-container-fixed.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Container Fix",
+        "sidebar_position": 7,
+        "description": "Running the collections service in Docker with native access to Ollama.",
+        "tags": [
+          "rag",
+          "docker",
+          "ops"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/refactor-plan-rag-services.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Services Refactor Plan",
+        "sidebar_position": 8,
+        "description": "Breakdown of the work required to split and stabilise LlamaIndexPage.",
+        "tags": [
+          "rag",
+          "frontend",
+          "refactor"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/urgent-fix-timeout.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Collections Timeout Fix",
+        "sidebar_position": 9,
+        "description": "Mitigation plan for the computeCollectionMetrics scroll timeout in Qdrant.",
+        "tags": [
+          "rag",
+          "bugfix",
+          "qdrant"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/docker-wsl/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Updates to Docker and WSL tooling configuration.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/docker-wsl/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docker & WSL Overview",
+        "description": "Overview of Docker Desktop and WSL usage for TradingSystem development.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/docker-wsl/setup.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Setup Guide",
+        "description": "Setting up Docker Desktop and WSL for TradingSystem.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/docker-wsl/troubleshooting.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting",
+        "description": "Resolving common Docker and WSL issues.",
+        "tags": [
+          "tools",
+          "docker",
+          "wsl"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Changes to .NET tooling, SDK versions, and build configurations.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing the .NET SDK and runtime for TradingSystem development.",
+        "tags": [
+          "tools",
+          "dotnet"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": ".NET Overview",
+        "description": "Supported .NET SDK versions and usage guidelines within TradingSystem.",
+        "tags": [
+          "tools",
+          "dotnet"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/testing.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Testing",
+        "description": "Testing strategy and tooling for .NET components.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "testing"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/dotnet/windows-x64.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Windows x64 Deployment",
+        "description": "Guidance for running .NET services on Windows x64 environments.",
+        "tags": [
+          "tools",
+          "dotnet",
+          "deployment"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Node.js and npm tooling changes and upgrade history.",
+        "tags": [
+          "tools",
+          "node",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/commands.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Common Commands",
+        "description": "Frequently used npm and Node.js commands.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/config.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Configuration",
+        "description": "Node.js and npm configuration standards for TradingSystem.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing Node.js and npm for TradingSystem development.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Node & npm Overview",
+        "description": "Supported Node.js versions, package management policies, and workspace layout.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/node-npm/troubleshooting.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting",
+        "description": "Common issues and resolutions for Node.js and npm tooling.",
+        "tags": [
+          "tools",
+          "node"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Runtime Environments",
+        "description": "Node.js, Python, .NET SDK, and Docker runtime environments",
+        "tags": [
+          "runtime",
+          "nodejs",
+          "python",
+          "dotnet",
+          "docker"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/python/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Python tooling updates and dependency management decisions.",
+        "tags": [
+          "tools",
+          "python",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/python/install.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Installation",
+        "description": "Installing Python environments for TradingSystem development.",
+        "tags": [
+          "tools",
+          "python"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/python/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Python Overview",
+        "description": "Supported Python versions and usage guidelines for TradingSystem.",
+        "tags": [
+          "tools",
+          "python"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/runtime/python/testing.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Testing",
+        "description": "Testing strategy for Python services and scripts.",
+        "tags": [
+          "tools",
+          "python",
+          "testing"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/security-config/audit.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Security Audit Procedures",
+        "description": "Security audit procedures and compliance checks for TradingSystem.",
+        "tags": [
+          "tools",
+          "security",
+          "audit",
+          "compliance"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/security-config/env.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Environment Variables Reference",
+        "description": "Complete reference of all environment variables used in TradingSystem.",
+        "tags": [
+          "tools",
+          "security",
+          "environment",
+          "configuration"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/security-config/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Security Configuration Overview",
+        "description": "Policies and controls for securing TradingSystem environments.",
+        "tags": [
+          "tools",
+          "security"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/security-config/p0-security-implementation.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "P0 Security Implementation",
+        "description": "Summary of the critical Telegram gateway security fixes executed.",
+        "tags": [
+          "tools",
+          "security",
+          "telegram"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/security-config/risk-limits.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Risk Limits Configuration",
+        "description": "Trading risk limits and controls for TradingSystem.",
+        "tags": [
+          "tools",
+          "security",
+          "risk",
+          "trading"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Trading Tools",
+        "description": "ProfitDLL integration for market data capture and order execution",
+        "tags": [
+          "trading",
+          "profitdll",
+          "market-data",
+          "order-execution"
+        ],
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/assets-format.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Assets Format",
+        "description": "Instrument formatting and conventions for ProfitDLL data.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/callbacks.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Callbacks",
+        "description": "Callback signatures and lifecycle events for ProfitDLL.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/changelog.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Change Log",
+        "description": "Updates to ProfitDLL bindings and tooling.",
+        "tags": [
+          "tools",
+          "profitdll",
+          "changelog"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/trading/profitdll/overview.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "ProfitDLL Overview",
+        "description": "Architecture and calling conventions for the ProfitDLL integration.",
+        "tags": [
+          "tools",
+          "profitdll"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/troubleshooting/dashboard-port-issue-fix.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Dashboard Port Fix",
+        "description": "Steps to realign the dashboard API base URL with the 3402 backend port.",
+        "tags": [
+          "troubleshooting",
+          "dashboard",
+          "ports"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/troubleshooting/docsapi-viewer-fix.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "DocsAPI Viewer Fix",
+        "description": "Fix para botões Redoc e Select API no DocsAPI tab",
+        "tags": [
+          "troubleshooting",
+          "docsapi",
+          "fix"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/troubleshooting/docusaurus-iframe-fix.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Iframe Fix",
+        "description": "Fix para loading do Docusaurus no Dashboard iframe",
+        "tags": [
+          "troubleshooting",
+          "docusaurus",
+          "fix"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/troubleshooting/general.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Troubleshooting Guide",
+        "description": "Guia de troubleshooting para containers, databases e issues comuns",
+        "tags": [
+          "troubleshooting",
+          "support"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/troubleshooting/infinite-loop-fixed.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Collections Infinite Loop Fix",
+        "description": "Resolution for the collection selection render loop in the dashboard.",
+        "tags": [
+          "troubleshooting",
+          "frontend",
+          "collections"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-11-02"
+      }
+    }
+  ],
+  "missing_frontmatter": [
+    "docs/content/archive/2025-Q4/README.md",
+    "docs/content/archive/README.md"
+  ],
+  "incomplete_frontmatter": [
+    {
+      "file": "docs/content/tools/rag/qdrant-ha-architecture.mdx",
+      "missing_fields": [
+        "description",
+        "owner",
+        "lastReviewed"
+      ]
+    }
+  ],
+  "invalid_values": [
+    {
+      "file": "docs/content/api/rag-services.mdx",
+      "field": "owner",
+      "value": "Backend Team",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'Backend Team'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/development/npm-run-dev-pattern.md",
+      "field": "owner",
+      "value": "DevOps",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/reference/ports.mdx",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/reference/ports.mdx",
+      "field": "lastReviewed",
+      "value": "TBD",
+      "allowed": null,
+      "message": "Invalid date format 'TBD'. Expected: YYYY-MM-DD"
+    },
+    {
+      "file": "docs/content/tools/automation/system-quick-start.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/automation/universal-commands.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/automation/workflow-auditoria-completa.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/docker/container-inventory.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DocsOps",
+        "ToolingGuild",
+        "ArchitectureGuild",
+        "MCPGuild",
+        "PromptOps",
+        "SupportOps",
+        "ProductOps",
+        "BackendGuild",
+        "ReleaseOps",
+        "DataOps",
+        "FrontendGuild",
+        "SecurityOps"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    }
+  ]
+}

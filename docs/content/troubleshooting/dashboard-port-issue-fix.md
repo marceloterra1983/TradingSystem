@@ -1,3 +1,13 @@
+---
+title: "Dashboard Port Fix"
+description: "Steps to realign the dashboard API base URL with the 3402 backend port."
+tags:
+  - troubleshooting
+  - dashboard
+  - ports
+owner: SupportOps
+lastReviewed: '2025-11-02'
+---
 # ✅ Problema da Porta Corrigido!
 
 ## 🔧 O Que Foi o Problema

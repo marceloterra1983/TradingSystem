@@ -1,0 +1,138 @@
+@startuml Telegram Architecture - TradingSystem
+!define RECTANGLE class
+
+skinparam rectangle {
+    BackgroundColor<<external>> LightBlue
+    BackgroundColor<<service>> LightGreen
+    BackgroundColor<<database>> LightYellow
+    BackgroundColor<<consumer>> LightCoral
+}
+
+skinparam arrow {
+    Color Black
+    FontColor Black
+}
+
+title Telegram Architecture - Data Flow & Components
+
+' External Systems
+rectangle "Telegram Servers\n(MTProto Protocol)" as TelegramServers <<external>>
+
+' Gateway Layer
+package "Gateway Layer (Port 4006)" {
+    rectangle "MTProto Gateway\n(apps/telegram-gateway)\n\n• Session management\n• Message capture\n• Retry logic\n• Failure queue" as Gateway <<service>>
+    
+    rectangle "Session Storage\n(.session/ files)\n\n• AES-256-GCM encrypted\n• File permissions 0600\n• Auto-backup" as Session <<database>>
+    
+    rectangle "Failure Queue\n(data/failure-queue.jsonl)\n\n• JSONL format\n• Exponential backoff\n• Manual recovery" as FailureQueue <<database>>
+}
+
+' Storage Layer
+package "Storage Layer (TimescaleDB)" {
+    database "APPS-TELEGRAM-GATEWAY\n\ntelegram_gateway schema\n\n• messages (hypertable)\n• channels\n• forwarding_rules" as GatewayDB <<database>>
+}
+
+' API Layer
+package "API Layer (Port 4010)" {
+    rectangle "Telegram Gateway\nREST API\n(backend/api/telegram-gateway)\n\n• GET /api/messages\n• GET /api/channels\n• X-API-Key auth\n• Prometheus metrics" as GatewayAPI <<service>>
+}
+
+' Processing Layer
+package "Processing Layer (Port 4005)" {
+    rectangle "TP Capital Service\n(apps/tp-capital)\n\n• Polling worker (5s interval)\n• Signal parsing\n• Idempotency checks\n• Metrics export" as TPCapital <<consumer>>
+    
+    rectangle "Gateway Polling\nWorker\n\n• Batch size: 100\n• Exponential backoff\n• Graceful shutdown" as PollingWorker <<consumer>>
+    
+    rectangle "Signal Parser\n(parseSignal.js)\n\n• Regex matching\n• Validation rules\n• Multi-format support" as Parser <<consumer>>
+}
+
+' Analytics Storage
+package "Analytics Storage (TimescaleDB)" {
+    database "APPS-TPCAPITAL\n\ntp_capital schema\n\n• tp_capital_signals\n  (hypertable)\n• Retention: 2 years" as TPCapitalDB <<database>>
+}
+
+' Monitoring
+package "Monitoring Stack" {
+    rectangle "Prometheus\nMetrics\n\n• Connection status\n• Polling lag\n• Processing duration\n• Queue depth" as Prometheus <<external>>
+    
+    rectangle "Grafana\nDashboards\n\n• Real-time metrics\n• Alerting rules\n• SLO tracking" as Grafana <<external>>
+}
+
+' Frontend
+rectangle "Dashboard\n(Port 3103)\n\n• Signal display\n• Real-time updates\n• Filtering/sorting" as Dashboard <<external>>
+
+' Relationships
+TelegramServers -down-> Gateway : "MTProto\n(authenticated)"
+Gateway -right-> Session : "read/write"
+Gateway -down-> GatewayDB : "INSERT messages\nstatus='received'"
+Gateway -right-> FailureQueue : "on API failure"
+
+GatewayDB -down-> GatewayAPI : "query"
+GatewayDB -down-> PollingWorker : "poll every 5s\nSELECT status='received'"
+
+PollingWorker -up-> TPCapital : "embedded"
+PollingWorker -right-> Parser : "parseSignal(text)"
+Parser -down-> TPCapitalDB : "INSERT signals"
+PollingWorker -up-> GatewayDB : "UPDATE\nstatus='published'"
+
+TPCapitalDB -down-> Dashboard : "GET /signals"
+
+Gateway -down-> Prometheus : "/metrics\n(port 4006)"
+TPCapital -down-> Prometheus : "/metrics\n(port 4005)"
+Prometheus -right-> Grafana : "query"
+
+note right of Gateway
+  **Security:**
+  • Session encryption (AES-256-GCM)
+  • Secure file permissions
+  • API token authentication
+end note
+
+note right of PollingWorker
+  **Resilience:**
+  • Exponential backoff (1s → 30s)
+  • Idempotent processing
+  • Graceful shutdown
+  • Batch processing (100 msgs)
+end note
+
+note bottom of GatewayDB
+  **State Machine:**
+  received → processing → processed
+  received → processing → failed
+  received → ignored
+end note
+
+note right of TPCapitalDB
+  **Data Retention:**
+  • Raw signals: 2 years
+  • Aggregated metrics: 5 years
+  • Backup: Daily incremental
+end note
+
+' Latency annotations
+note on link
+  < 500ms
+end note
+
+note on link
+  < 100ms
+end note
+
+note on link
+  < 5s
+  (polling interval)
+end note
+
+note on link
+  < 50ms
+  (parsing)
+end note
+
+note on link
+  < 100ms
+  (insert)
+end note
+
+@enduml
+

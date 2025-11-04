@@ -1,3 +1,14 @@
+---
+title: "Workspace Categories Integration"
+sidebar_position: 11
+description: "How the categories CRUD embeds inside the Workspace application experience."
+tags:
+  - apps
+  - workspace
+  - categories
+owner: DocsOps
+lastReviewed: '2025-11-02'
+---
 # Workspace Categories - Integração Completa ✅
 
 ## 📋 Resumo

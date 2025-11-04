@@ -53,10 +53,10 @@ const getAvailableCategories = () => {
 };
 
 const surfaceCardClass =
-  'rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/60';
-const mutedTextClass = 'text-slate-500 dark:text-slate-400';
+  'rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] shadow-[var(--ts-shadow-sm)] transition-shadow hover:shadow-[var(--ts-shadow-lg)]';
+const mutedTextClass = 'text-[color:var(--ts-text-muted)]';
 const filterBadgeClass =
-  'border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300';
+  'border-[color:var(--ts-accent)] text-[color:var(--ts-accent-strong)]';
 
 interface AgentsCatalogViewProps {
   headerActions?: ReactNode;
@@ -235,7 +235,7 @@ export default function AgentsCatalogView({
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div className="md:col-span-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ts-text-muted)]" />
                       <Input
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
@@ -246,7 +246,7 @@ export default function AgentsCatalogView({
                   </div>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger className="w-full">
-                      <Filter className="mr-2 h-4 w-4 text-slate-400" />
+                      <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
@@ -260,7 +260,7 @@ export default function AgentsCatalogView({
                   </Select>
                   <Select value={tagFilter} onValueChange={setTagFilter}>
                     <SelectTrigger className="w-full">
-                      <Filter className="mr-2 h-4 w-4 rotate-90 text-slate-400" />
+                      <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>
@@ -277,11 +277,11 @@ export default function AgentsCatalogView({
                 <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
                   <span>
                     Exibindo{' '}
-                    <strong className="text-slate-700 dark:text-slate-200">
+                    <strong className="text-[color:var(--ts-text-secondary)]">
                       {filteredAgents.length}
                     </strong>{' '}
                     de{' '}
-                    <strong className="text-slate-700 dark:text-slate-200">
+                    <strong className="text-[color:var(--ts-text-secondary)]">
                       {TOTAL_AGENTS}
                     </strong>{' '}
                     agentes cadastrados.
@@ -292,7 +292,7 @@ export default function AgentsCatalogView({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                      className="gap-2 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                       onClick={handleClearFilters}
                     >
                       Limpar filtros
@@ -302,7 +302,7 @@ export default function AgentsCatalogView({
 
                 {filteredAgents.length === 0 ? (
                   <div
-                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white/70 p-10 text-center text-sm dark:border-slate-700 dark:bg-slate-900/40 ${mutedTextClass}`}
+                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-10 text-center text-sm ${mutedTextClass}`}
                   >
                     <FileWarning className="h-6 w-6" />
                     Nenhum agente encontrado. Ajuste os filtros ou refine a busca.
@@ -312,16 +312,16 @@ export default function AgentsCatalogView({
                     {filteredAgents.map((agent) => (
                       <div
                         key={agent.id}
-                        className="flex h-full flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-cyan-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60"
+                        className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex flex-col gap-1">
-                            <span className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                            <span className="flex items-center gap-2 text-sm font-semibold text-[color:var(--ts-text-primary)]">
                               {agent.name}
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+                                className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                 onClick={() => handleCopyName(agent.name)}
                                 aria-label={`Copiar ${agent.name}`}
                               >
@@ -340,22 +340,22 @@ export default function AgentsCatalogView({
                           </Badge>
                         </div>
                         <div className="space-y-3 text-sm">
-                          <div className="text-slate-700 dark:text-slate-200">
+                          <div className="text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">Capacidades:</span>{' '}
                             {agent.capabilities}
                           </div>
-                          <div className="text-slate-600 dark:text-slate-300">
+                          <div className="text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">Momento de uso:</span>{' '}
                             {agent.usage}
                           </div>
                           <div className={`text-xs ${mutedTextClass}`}>
-                            <span className="font-medium text-slate-600 dark:text-slate-300">
+                            <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Exemplo prático:
                             </span>{' '}
                             {agent.example}
                           </div>
                           <div className={`text-xs ${mutedTextClass}`}>
-                            <span className="font-medium text-slate-600 dark:text-slate-300">
+                            <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Tipo de saída:
                             </span>{' '}
                             {agent.outputType}
@@ -380,7 +380,7 @@ export default function AgentsCatalogView({
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-8 w-8 text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+                            className="h-8 w-8 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                             onClick={() => handleOpenAgent(agent)}
                             aria-label={`Visualizar ${agent.name}`}
                           >
@@ -413,18 +413,18 @@ export default function AgentsCatalogView({
             <CollapsibleCardContent>
               {filteredAgents.length === 0 ? (
                 <div
-                  className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white/70 p-10 text-center text-sm dark:border-slate-700 dark:bg-slate-900/40 ${mutedTextClass}`}
+                  className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-10 text-center text-sm ${mutedTextClass}`}
                 >
                   <FileWarning className="h-6 w-6" />
                   Nenhum agente encontrado com os filtros atuais.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="space-y-3 border-b border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
+                <div className="overflow-x-auto rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)]">
+                  <div className="space-y-3 border-b border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-4 text-xs text-[color:var(--ts-text-secondary)]">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                       <div className="md:col-span-2">
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ts-text-muted)]" />
                           <Input
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
@@ -435,7 +435,7 @@ export default function AgentsCatalogView({
                       </div>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 text-slate-400" />
+                          <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
                           <SelectValue placeholder="Categoria" />
                         </SelectTrigger>
                         <SelectContent>
@@ -449,7 +449,7 @@ export default function AgentsCatalogView({
                       </Select>
                       <Select value={tagFilter} onValueChange={setTagFilter}>
                         <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 rotate-90 text-slate-400" />
+                          <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
                           <SelectValue placeholder="Tag" />
                         </SelectTrigger>
                         <SelectContent>
@@ -465,11 +465,11 @@ export default function AgentsCatalogView({
                     <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
                       <span>
                         Exibindo{' '}
-                        <strong className="text-slate-700 dark:text-slate-100">
+                        <strong className="text-[color:var(--ts-text-secondary)]">
                           {filteredAgents.length}
                         </strong>{' '}
                         de{' '}
-                        <strong className="text-slate-700 dark:text-slate-100">
+                        <strong className="text-[color:var(--ts-text-secondary)]">
                           {TOTAL_AGENTS}
                         </strong>{' '}
                         agentes.
@@ -480,7 +480,7 @@ export default function AgentsCatalogView({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                          className="gap-2 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           onClick={handleClearFilters}
                         >
                           Limpar filtros
@@ -489,8 +489,8 @@ export default function AgentsCatalogView({
                     </div>
                   </div>
 
-                  <table className="w-full text-left text-xs text-slate-600 dark:text-slate-200">
-                    <thead className="bg-slate-100 uppercase tracking-wide text-[10px] text-slate-500 dark:bg-slate-900/60 dark:text-slate-300">
+                  <table className="w-full text-left text-xs text-[color:var(--ts-text-secondary)]">
+                    <thead className="bg-[color:var(--ts-surface-1)] uppercase tracking-wide text-[10px] text-[color:var(--ts-text-muted)]">
                       <tr>
                         <th className="cursor-pointer px-4 py-3" onClick={() => handleSort('name')}>
                           <div className="flex items-center gap-2">
@@ -537,16 +537,16 @@ export default function AgentsCatalogView({
                         <th className="px-4 py-3 text-right">Ações</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                    <tbody className="divide-y divide-[color:var(--ts-surface-border)]">
                       {filteredAgents.map((agent) => (
-                        <tr key={`table-${agent.id}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                          <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-100">
+                        <tr key={`table-${agent.id}`} className="hover:bg-[color:var(--ts-surface-hover)]">
+                          <td className="px-4 py-3 font-semibold text-[color:var(--ts-text-secondary)]">
                               <div className="flex items-center gap-2">
                                 {agent.name}
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-6 w-6 text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                   onClick={() => handleCopyName(agent.name)}
                                   aria-label={`Copiar ${agent.name}`}
                                 >
@@ -555,10 +555,10 @@ export default function AgentsCatalogView({
                             </div>
                           </td>
                           <td className="px-4 py-3">{agent.category}</td>
-                          <td className="px-4 py-3 max-w-[240px] text-slate-600 dark:text-slate-300">
+                          <td className="px-4 py-3 max-w-[240px] text-[color:var(--ts-text-secondary)]">
                             {agent.capabilities}
                           </td>
-                          <td className="px-4 py-3 max-w-[220px] text-slate-600 dark:text-slate-300">
+                          <td className="px-4 py-3 max-w-[220px] text-[color:var(--ts-text-secondary)]">
                             {agent.usage}
                           </td>
                           <td className={`px-4 py-3 max-w-[220px] ${mutedTextClass}`}>
@@ -585,7 +585,7 @@ export default function AgentsCatalogView({
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100"
+                                className="h-8 w-8 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                 onClick={() => handleOpenAgent(agent)}
                                 aria-label={`Visualizar ${agent.name}`}
                               >
@@ -629,12 +629,12 @@ export default function AgentsCatalogView({
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="max-w-4xl overflow-hidden p-0">
-          <DialogHeader className="border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+          <DialogHeader className="border-b border-[color:var(--ts-surface-border)] px-6 py-4 ">
             <DialogTitle className="flex flex-col gap-1 text-base">
               {selectedAgent?.name ?? 'Agente não selecionado'}
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-[520px] bg-white dark:bg-slate-900">
+          <ScrollArea className="h-[520px] bg-[color:var(--ts-surface-0)]">
             {selectedAgent?.fileContent ? (
               <div className="p-6">
                 <MarkdownPreview content={selectedAgent.fileContent} className="max-w-none" />
@@ -648,7 +648,7 @@ export default function AgentsCatalogView({
               </div>
             )}
           </ScrollArea>
-          <DialogFooter className="flex flex-wrap gap-2 border-t border-slate-200 p-4 dark:border-slate-700">
+          <DialogFooter className="flex flex-wrap gap-2 border-t border-[color:var(--ts-surface-border)] p-4 ">
             <Button variant="default" size="sm" onClick={() => handleDialogOpenChange(false)}>
               Fechar
             </Button>

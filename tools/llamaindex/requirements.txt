@@ -30,3 +30,6 @@ python-jose>=3.3.0
 python-multipart>=0.0.6
 cachetools>=5.3.2
 redis>=5.0.1
+
+# Circuit Breaker (Fault Tolerance)
+circuitbreaker>=1.4.0

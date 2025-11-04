@@ -1,0 +1,328 @@
+name: workspace-stack
+
+# ==============================================================================
+# Workspace Stack - Unified Container Orchestration
+# ==============================================================================
+#
+# This stack contains ALL containers for the Workspace application:
+# - Neon Database (pageserver, safekeeper, compute) - 3 containers
+# - Workspace API service - 1 container
+#
+# Total: 4 containers managed as a single unit
+#
+# Usage:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml down
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+#
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # DATABASE LAYER - Neon PostgreSQL
+  # ============================================================================
+
+  # Neon Pageserver - Storage Layer
+  workspace-db-pageserver:
+    build:
+      context: ../..
+      dockerfile: tools/compose/neon.Dockerfile
+      args:
+        NEON_VERSION: latest
+    image: neon-local:latest
+    container_name: workspace-db-pageserver
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/pageserver &&
+      /usr/local/bin/pageserver \
+        --listen-http=0.0.0.0:9898 \
+        --listen-pg=0.0.0.0:6400 \
+        --id=1 \
+        --workdir=/data/pageserver
+      "
+    ports:
+      - "6400:6400"  # PostgreSQL protocol
+      - "9898:9898"  # HTTP API (metrics)
+    volumes:
+      - workspace-db-pageserver-data:/data
+    networks:
+      - workspace_network
+    environment:
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+      - RUST_BACKTRACE=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9898/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+      - "com.tradingsystem.layer=storage"
+
+  # Neon Safekeeper - Write-Ahead Log Service
+  workspace-db-safekeeper:
+    image: neon-local:latest
+    container_name: workspace-db-safekeeper
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/safekeeper &&
+      /usr/local/bin/safekeeper \
+        --listen-http=0.0.0.0:7676 \
+        --listen-pg=0.0.0.0:5454 \
+        --id=1 \
+        --workdir=/data/safekeeper
+      "
+    ports:
+      - "5454:5454"  # PostgreSQL protocol
+      - "7676:7676"  # HTTP API (metrics)
+    volumes:
+      - workspace-db-safekeeper-data:/data
+    networks:
+      - workspace_network
+    environment:
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+      - RUST_BACKTRACE=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7676/v1/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+      - "com.tradingsystem.layer=wal"
+
+  # Neon Compute - PostgreSQL Endpoint
+  workspace-db-compute:
+    image: neon-local:latest
+    container_name: workspace-db-compute
+    command: >
+      /bin/bash -c "
+      mkdir -p /data/compute &&
+      /usr/local/bin/compute_ctl \
+        --pgdata=/data/compute/pgdata \
+        --connstr=postgresql://postgres@localhost:55432/postgres \
+        --spec-path=/data/compute/spec.json \
+        --mode=static \
+        --pageserver=workspace-db-pageserver:6400 \
+        --safekeepers=workspace-db-safekeeper:5454
+      "
+    ports:
+      - "5433:55432"  # PostgreSQL port (external:internal)
+    volumes:
+      - workspace-db-compute-data:/data
+    networks:
+      - workspace_network
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${NEON_PASSWORD:-neon_secure_pass}
+      - POSTGRES_DB=postgres
+      - NEON_PAGESERVER=workspace-db-pageserver:6400
+      - NEON_SAFEKEEPER=workspace-db-safekeeper:5454
+      - RUST_LOG=${NEON_LOG_LEVEL:-info}
+    depends_on:
+      workspace-db-pageserver:
+        condition: service_healthy
+      workspace-db-safekeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost -p 55432"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+      - "com.tradingsystem.layer=compute"
+
+  # ============================================================================
+  # APPLICATION LAYER - Workspace API
+  # ============================================================================
+
+  workspace-api:
+    image: "${IMG_APPS_WORKSPACE:-img-apps-workspace}:${IMG_VERSION:-latest}"
+    build:
+      context: ../..
+      dockerfile: backend/api/workspace/Dockerfile.dev
+    container_name: workspace-api
+    
+    env_file:
+      - ../../.env
+    
+    ports:
+      - "${WORKSPACE_EXTERNAL_PORT:-3200}:3200"
+    
+    environment:
+      # Server Configuration
+      - WORKSPACE_PORT=3200
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Database Strategy (ALWAYS neon in this stack)
+      - LIBRARY_DB_STRATEGY=neon
+      
+      # Neon Connection (internal container network)
+      - NEON_HOST=workspace-db-compute
+      - NEON_PORT=55432
+      - NEON_DATABASE=${NEON_DATABASE:-workspace}
+      - NEON_USER=${NEON_USER:-postgres}
+      - NEON_PASSWORD=${NEON_PASSWORD:-neon_secure_pass}
+      - NEON_SCHEMA=workspace
+      - NEON_DATABASE_URL=postgresql://${NEON_USER:-postgres}:${NEON_PASSWORD:-neon_secure_pass}@workspace-db-compute:55432/${NEON_DATABASE:-workspace}
+      
+      # Connection Pool
+      - NEON_POOL_MAX=20
+      - NEON_POOL_MIN=2
+      - NEON_IDLE_TIMEOUT=30000
+      - NEON_CONNECTION_TIMEOUT=5000
+      
+      # CORS
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
+      
+      # Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX=120
+    
+    volumes:
+      # Hot-reload: mount source code
+      - ../../backend/api/workspace/src:/app/src:ro
+      - ../../backend/api/workspace/scripts:/app/scripts:ro
+      
+      # Mount shared modules for hot-reload
+      - ../../backend/shared:/app/backend/shared:ro
+      
+      # Anonymous volume prevents overwrite
+      - /app/node_modules
+    
+    networks:
+      - workspace_network
+      - tradingsystem_backend  # Connect to main network for Dashboard access
+    
+    depends_on:
+      workspace-db-compute:
+        condition: service_healthy
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3200/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=api"
+      - "com.tradingsystem.layer=application"
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+networks:
+  # Internal network for Workspace stack only
+  workspace_network:
+    name: workspace_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+    labels:
+      - "com.tradingsystem.stack=workspace"
+  
+  # External network for inter-service communication
+  tradingsystem_backend:
+    name: tradingsystem_backend
+    external: true
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+volumes:
+  workspace-db-pageserver-data:
+    name: workspace-db-pageserver-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+  
+  workspace-db-safekeeper-data:
+    name: workspace-db-safekeeper-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+  
+  workspace-db-compute-data:
+    name: workspace-db-compute-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+
+# ==============================================================================
+# USAGE EXAMPLES
+# ==============================================================================
+# 
+# Start entire Workspace stack:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+# 
+# View logs (all services):
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+# 
+# View logs (specific service):
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f workspace-api
+# 
+# Check status:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+# 
+# Restart specific service:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml restart workspace-api
+# 
+# Stop entire stack:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml down
+# 
+# Stop and remove volumes (CAUTION - deletes data):
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml down -v
+# 
+# Scale API horizontally:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d --scale workspace-api=3
+# 
+# Execute command in API container:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml exec workspace-api npm test
+# 
+# Connect to database:
+#   docker compose -f tools/compose/docker-compose.workspace-stack.yml exec workspace-db-compute \
+#     psql -U postgres -d workspace
+# 
+# ==============================================================================
+
+

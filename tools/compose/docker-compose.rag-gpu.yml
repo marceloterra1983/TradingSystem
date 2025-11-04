@@ -1,0 +1,172 @@
+# RAG Services with GPU Acceleration (PRODUCTION)
+# Requires: NVIDIA GPU + NVIDIA Container Toolkit installed on host
+
+name: rag-gpu
+
+services:
+  # Ollama with GPU Acceleration (10-100x faster!)
+  ollama-gpu:
+    image: "${IMG_RAG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
+    container_name: rag-ollama-gpu
+    runtime: nvidia  # NVIDIA Container Runtime
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1  # Use 1 GPU
+              capabilities: [gpu]
+        limits:
+          memory: 16G  # Increased for GPU workloads
+          cpus: '6'
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - OLLAMA_KEEP_ALIVE=24h  # Keep models loaded in GPU memory
+      - OLLAMA_NUM_PARALLEL=4  # Process 4 requests in parallel
+      - OLLAMA_MAX_LOADED_MODELS=2  # Keep 2 models in VRAM
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep ollama || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Preload models at startup
+    command: >
+      sh -c "
+        ollama serve &
+        sleep 10 &&
+        ollama pull mxbai-embed-large &&
+        ollama pull llama3.2:3b &&
+        wait
+      "
+
+  # LlamaIndex Query with GPU-optimized config
+  llamaindex-query-gpu:
+    image: "${IMG_RAG_LLAMAINDEX_QUERY:-img-rag-llamaindex-query}:${IMG_VERSION:-latest}"
+    container_name: rag-llamaindex-query-gpu
+    build:
+      context: ../llamaindex
+      dockerfile: Dockerfile.query
+    deploy:
+      resources:
+        limits:
+          memory: 6G  # Increased for better caching
+          cpus: '3'
+    ports:
+      - "${LLAMAINDEX_QUERY_PORT:-8202}:8000"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - QDRANT_HOST=data-qdrant
+      - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-documentation}
+      - OLLAMA_BASE_URL=http://rag-ollama-gpu:11434
+      - OLLAMA_EMBED_MODEL=${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}
+      - OLLAMA_MODEL=llama3.2:3b
+      - OLLAMA_REQUEST_TIMEOUT=30.0  # Reduced (GPU is fast!)
+      - JWT_SECRET_KEY=dev-secret
+      - JWT_ALGORITHM=HS256
+      # Performance tuning
+      - EMBEDDING_CACHE_SIZE=10000
+      - QUERY_CACHE_SIZE=5000
+      - CONNECTION_POOL_SIZE=20
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      ollama-gpu:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # RAG Service with enhanced caching
+  rag-service-gpu:
+    image: "${IMG_RAG_SERVICE:-img-rag-service}:${IMG_VERSION:-latest}"
+    container_name: rag-service-gpu
+    build:
+      context: ../..
+      dockerfile: backend/api/documentation-api/Dockerfile
+    ports:
+      - "${DOCUMENTATION_API_PORT:-3402}:3000"
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - LOG_LEVEL=info
+      - LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query-gpu:8000
+      - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
+      - QDRANT_URL=http://data-qdrant:6333
+      - OLLAMA_BASE_URL=http://rag-ollama-gpu:11434
+      - REDIS_URL=redis://rag-redis:6379
+      - REDIS_ENABLED=true
+      # Performance tuning
+      - CACHE_MEMORY_MAX=1000
+      - CACHE_MEMORY_TTL=300000
+      - CACHE_REDIS_TTL=600
+      - CONNECTION_POOL_SIZE=20
+    volumes:
+      - ../../docs:/app/docs:ro
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      llamaindex-query-gpu:
+        condition: service_healthy
+      rag-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis (same as before)
+  rag-redis:
+    image: redis:7-alpine
+    container_name: rag-redis-gpu
+    deploy:
+      resources:
+        limits:
+          memory: 1G  # Increased for more caching
+          cpus: '1'
+    ports:
+      - "${RAG_REDIS_PORT:-6380}:6379"
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 768mb --maxmemory-policy allkeys-lru
+    volumes:
+      - rag_redis_data:/data
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  tradingsystem_backend:
+    external: true
+
+volumes:
+  ollama_models:
+    driver: local
+  rag_redis_data:
+    driver: local
+

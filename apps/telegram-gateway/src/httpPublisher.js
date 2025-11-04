@@ -15,6 +15,27 @@ import {
  * @returns {Promise<{success: boolean, queued?: boolean}>}
  */
 export async function publishWithRetry(messageData, attempt = 0) {
+  // If API endpoints are disabled, save directly to local storage
+  if (!config.api.enabled || config.api.endpoints.length === 0) {
+    logger.info(
+      {
+        messageId: messageData.messageId,
+        channelId: messageData.channelId,
+        reason: 'API endpoints disabled - TP Capital separated',
+      },
+      'Message saved locally (not sent to external API)',
+    );
+
+    await recordMessageQueued(messageData, {
+      queuePath: config.failureQueue.path,
+      error: 'API endpoints disabled',
+      logger,
+    });
+
+    await saveToFailureQueue(messageData);
+    return { success: true, queued: true, local: true };
+  }
+
   const { maxRetries, baseDelayMs } = config.retry;
   let lastError;
 

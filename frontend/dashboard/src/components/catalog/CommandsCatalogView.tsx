@@ -43,10 +43,10 @@ const ALL_COMMANDS = commandsDatabase.commands;
 const TOTAL_COMMANDS = ALL_COMMANDS.length;
 
 const surfaceCardClass =
-  'rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/60';
-const mutedTextClass = 'text-slate-500 dark:text-slate-400';
+  'rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] shadow-[var(--ts-shadow-sm)] transition-shadow hover:shadow-[var(--ts-shadow-lg)]';
+const mutedTextClass = 'text-[color:var(--ts-text-muted)]';
 const filterBadgeClass =
-  'border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300';
+  'border-[color:var(--ts-accent)] text-[color:var(--ts-accent-strong)]';
 
 type SortField =
   | 'command'
@@ -331,7 +331,7 @@ export default function CommandsCatalogView({
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div className="md:col-span-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ts-text-muted)]" />
                       <Input
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
@@ -345,7 +345,7 @@ export default function CommandsCatalogView({
                     onValueChange={setCategoryFilter}
                   >
                     <SelectTrigger className="w-full">
-                      <Filter className="mr-2 h-4 w-4 text-slate-400" />
+                      <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
@@ -359,7 +359,7 @@ export default function CommandsCatalogView({
                   </Select>
                   <Select value={tagFilter} onValueChange={setTagFilter}>
                     <SelectTrigger className="w-full">
-                      <Filter className="mr-2 h-4 w-4 rotate-90 text-slate-400" />
+                      <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Tag" />
                     </SelectTrigger>
                     <SelectContent>
@@ -376,11 +376,11 @@ export default function CommandsCatalogView({
                 <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
                   <span>
                     Exibindo{' '}
-                    <strong className="text-slate-700 dark:text-slate-200">
+                    <strong className="text-[color:var(--ts-text-secondary)]">
                       {filteredCommands.length}
                     </strong>{' '}
                     de{' '}
-                    <strong className="text-slate-700 dark:text-slate-200">
+                    <strong className="text-[color:var(--ts-text-secondary)]">
                       {TOTAL_COMMANDS}
                     </strong>{' '}
                     comandos documentados.
@@ -391,7 +391,7 @@ export default function CommandsCatalogView({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                      className="gap-2 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                       onClick={handleClearFilters}
                     >
                       Limpar filtros
@@ -401,7 +401,7 @@ export default function CommandsCatalogView({
 
                 {filteredCommands.length === 0 ? (
                   <div
-                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white/70 p-10 text-center text-sm dark:border-slate-700 dark:bg-slate-900/40 ${mutedTextClass}`}
+                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-10 text-center text-sm ${mutedTextClass}`}
                   >
                     <FileWarning className="h-6 w-6" />
                     Nenhum comando encontrado. Ajuste os filtros ou refine a
@@ -412,17 +412,17 @@ export default function CommandsCatalogView({
                     {filteredCommands.map((command) => (
                       <div
                         key={command.command}
-                        className="flex h-full flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-cyan-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60"
+                        className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <code className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
                               {command.command}
                             </code>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                              className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                               onClick={() => handleCopyCommand(command)}
                               aria-label={`Copiar ${command.command}`}
                             >
@@ -437,13 +437,13 @@ export default function CommandsCatalogView({
                           </Badge>
                         </div>
                         {command.capacidades && (
-                          <div className="text-sm text-slate-700 dark:text-slate-200">
+                          <div className="text-sm text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">Capacidades:</span>{' '}
                             {command.capacidades}
                           </div>
                         )}
                         {command.momentoIdeal && (
-                          <div className="text-sm text-slate-600 dark:text-slate-300">
+                          <div className="text-sm text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">
                               Momento ideal:
                             </span>{' '}
@@ -452,7 +452,7 @@ export default function CommandsCatalogView({
                         )}
                         {command.exemploMomento && (
                           <div className={`text-xs ${mutedTextClass}`}>
-                            <span className="font-medium text-slate-600 dark:text-slate-300">
+                            <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Exemplo prático:
                             </span>{' '}
                             {command.exemploMomento}
@@ -460,7 +460,7 @@ export default function CommandsCatalogView({
                         )}
                         {command.tipoSaida && (
                           <div className={`text-xs ${mutedTextClass}`}>
-                            <span className="font-medium text-slate-600 dark:text-slate-300">
+                            <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Tipo de saída:
                             </span>{' '}
                             {command.tipoSaida}
@@ -471,7 +471,7 @@ export default function CommandsCatalogView({
                             {command.exemplos.map((example) => (
                               <div
                                 key={example}
-                                className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-900/40"
+                                className="flex items-center gap-1 rounded-md border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-2 py-1"
                               >
                                 <Badge variant="secondary" className="text-xs">
                                   {example}
@@ -479,7 +479,7 @@ export default function CommandsCatalogView({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-6 w-6 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                   onClick={() => handleCopyExample(example)}
                                   aria-label={`Copiar exemplo ${example}`}
                                 >
@@ -517,7 +517,7 @@ export default function CommandsCatalogView({
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-9 w-9 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                            className="h-9 w-9 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                             onClick={() => handleCopyPath(command)}
                             aria-label={`Copiar caminho ${command.command}`}
                           >
@@ -550,18 +550,18 @@ export default function CommandsCatalogView({
             <CollapsibleCardContent>
               {filteredCommands.length === 0 ? (
                 <div
-                  className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white/70 p-10 text-center text-sm dark:border-slate-700 dark:bg-slate-900/40 ${mutedTextClass}`}
+                  className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-10 text-center text-sm ${mutedTextClass}`}
                 >
                   <FileWarning className="h-6 w-6" />
                   Nenhum comando encontrado com os filtros atuais.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="space-y-3 border-b border-slate-200 bg-slate-50 p-4 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200">
+                <div className="overflow-x-auto rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)]">
+                  <div className="space-y-3 border-b border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-4 text-xs text-[color:var(--ts-text-secondary)]">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                       <div className="md:col-span-2">
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ts-text-muted)]" />
                           <Input
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
@@ -572,7 +572,7 @@ export default function CommandsCatalogView({
                       </div>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 text-slate-400" />
+                          <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
                           <SelectValue placeholder="Categoria" />
                         </SelectTrigger>
                         <SelectContent>
@@ -586,7 +586,7 @@ export default function CommandsCatalogView({
                       </Select>
                       <Select value={tagFilter} onValueChange={setTagFilter}>
                         <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 rotate-90 text-slate-400" />
+                          <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
                           <SelectValue placeholder="Tag" />
                         </SelectTrigger>
                         <SelectContent>
@@ -602,11 +602,11 @@ export default function CommandsCatalogView({
                     <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
                       <span>
                         Exibindo{' '}
-                        <strong className="text-slate-700 dark:text-slate-100">
+                        <strong className="text-[color:var(--ts-text-secondary)]">
                           {filteredCommands.length}
                         </strong>{' '}
                         de{' '}
-                        <strong className="text-slate-700 dark:text-slate-100">
+                        <strong className="text-[color:var(--ts-text-secondary)]">
                           {TOTAL_COMMANDS}
                         </strong>{' '}
                         comandos.
@@ -617,7 +617,7 @@ export default function CommandsCatalogView({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                          className="gap-2 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           onClick={handleClearFilters}
                         >
                           Limpar filtros
@@ -626,14 +626,14 @@ export default function CommandsCatalogView({
                     </div>
                   </div>
                   <div className="max-h-[420px] overflow-y-auto">
-                    <table className="min-w-full divide-y divide-slate-200 bg-white text-sm dark:divide-slate-700 dark:bg-slate-900/40">
-                      <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
+                    <table className="min-w-full divide-y divide-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-sm">
+                      <thead className="bg-[color:var(--ts-surface-1)] text-xs font-semibold uppercase tracking-wider text-[color:var(--ts-text-muted)]">
                         <tr>
                         <th scope="col" className="px-4 py-3 text-left">
                           <button
                             type="button"
                             onClick={() => handleSort('command')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Comando
                             {renderSortIcon('command')}
@@ -643,7 +643,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('category')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Categoria
                             {renderSortIcon('category')}
@@ -653,7 +653,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('capacidades')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Capacidades
                             {renderSortIcon('capacidades')}
@@ -663,7 +663,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('momentoIdeal')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Momento ideal
                             {renderSortIcon('momentoIdeal')}
@@ -673,7 +673,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('exemploMomento')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Exemplo prático
                             {renderSortIcon('exemploMomento')}
@@ -683,7 +683,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('tipoSaida')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Tipo de saída
                             {renderSortIcon('tipoSaida')}
@@ -693,7 +693,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('tags')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Tags
                             {renderSortIcon('tags')}
@@ -703,7 +703,7 @@ export default function CommandsCatalogView({
                           <button
                             type="button"
                             onClick={() => handleSort('exemplos')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                           >
                             Exemplos
                             {renderSortIcon('exemplos')}
@@ -711,18 +711,18 @@ export default function CommandsCatalogView({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-200">
+                    <tbody className="divide-y divide-[color:var(--ts-surface-border)] text-[color:var(--ts-text-secondary)]">
                       {filteredCommands.map((command) => (
-                        <tr key={`table-${command.command}`} className="hover:bg-slate-50 dark:hover:bg-slate-900/60">
+                        <tr key={`table-${command.command}`} className="hover:bg-[color:var(--ts-surface-hover)]">
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <code className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                              <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
                                 {command.command}
                               </code>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                                className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                 onClick={() => handleOpenCommand(command)}
                                 aria-label={`Visualizar ${command.command}`}
                               >
@@ -731,7 +731,7 @@ export default function CommandsCatalogView({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                                className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                 onClick={() => handleCopyCommand(command)}
                                 aria-label={`Copiar ${command.command}`}
                               >
@@ -748,22 +748,22 @@ export default function CommandsCatalogView({
                             </Badge>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-slate-600 dark:text-slate-300">
+                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
                               {command.capacidades ?? '—'}
                             </span>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-slate-600 dark:text-slate-300">
+                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
                               {command.momentoIdeal ?? '—'}
                             </span>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-slate-600 dark:text-slate-300">
+                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
                               {command.exemploMomento ?? '—'}
                             </span>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-slate-600 dark:text-slate-300">
+                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
                               {command.tipoSaida ?? '—'}
                             </span>
                           </td>
@@ -783,18 +783,18 @@ export default function CommandsCatalogView({
                             </div>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+                            <div className="flex flex-wrap gap-2 text-xs text-[color:var(--ts-text-secondary)]">
                               {command.exemplos.length > 0
                                 ? command.exemplos.map((example) => (
                                     <div
                                       key={`${command.command}-table-example-${example}`}
-                                      className="flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 dark:border-slate-700 dark:bg-slate-900/40"
+                                      className="flex items-center gap-1 rounded border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-2 py-0.5  bg-[color:var(--ts-surface-1)]"
                                     >
                                       <span>{example}</span>
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-5 w-5 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                                        className="h-5 w-5 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                                         onClick={() => handleCopyExample(example)}
                                         aria-label={`Copiar exemplo ${example}`}
                                       >
@@ -847,7 +847,7 @@ export default function CommandsCatalogView({
 
       <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
         <DialogContent className="max-w-4xl overflow-hidden p-0">
-          <ScrollArea className="h-[520px] bg-white dark:bg-slate-900">
+          <ScrollArea className="h-[520px] bg-[color:var(--ts-surface-0)]">
             {selectedCommand?.fileContent ? (
               <div className="p-6">
                 <MarkdownPreview
@@ -865,7 +865,7 @@ export default function CommandsCatalogView({
             )}
           </ScrollArea>
 
-          <DialogFooter className="flex flex-wrap gap-2 border-t border-slate-200 p-4 dark:border-slate-700">
+          <DialogFooter className="flex flex-wrap gap-2 border-t border-[color:var(--ts-surface-border)] p-4 ">
             {selectedCommand?.fileName && (
               <Button
                 size="icon"
@@ -881,7 +881,7 @@ export default function CommandsCatalogView({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-9 w-9 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                className="h-9 w-9 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                 onClick={() => handleCopyPath(selectedCommand)}
                 aria-label="Copiar caminho"
               >

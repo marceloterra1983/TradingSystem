@@ -1,3 +1,13 @@
+---
+title: "Collections Infinite Loop Fix"
+description: "Resolution for the collection selection render loop in the dashboard."
+tags:
+  - troubleshooting
+  - frontend
+  - collections
+owner: SupportOps
+lastReviewed: '2025-11-02'
+---
 # ✅ Loop Infinito Corrigido!
 
 ## 🐛 O Problema

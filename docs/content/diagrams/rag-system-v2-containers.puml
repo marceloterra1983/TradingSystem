@@ -1,0 +1,101 @@
+@startuml RAG System - Container Diagram (C4 Level 2)
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title RAG System - Container Architecture (v2.0)\nNeon Self-Hosted + Qdrant Cluster + Kong Gateway
+
+Person(user, "Developer/User", "Uses RAG search and Q&A capabilities")
+
+System_Boundary(frontend, "Frontend Layer") {
+    Container(dashboard, "Dashboard", "React 18 + TypeScript + Vite", "User interface for RAG features, workspace, documentation")
+}
+
+System_Boundary(gateway, "API Gateway Layer") {
+    Container(kong, "Kong Gateway", "Kong 3.4 + Lua", "API Gateway with auth, rate limiting, routing, observability")
+    ContainerDb(kongdb, "Kong Database", "PostgreSQL 15", "Gateway configuration, routes, plugins")
+    Container(konga, "Konga Admin UI", "Node.js + Angular", "Kong management interface")
+}
+
+System_Boundary(proxy, "Proxy & Orchestration Layer") {
+    Container(docapi, "Documentation API", "Node.js + Express", "RAG proxy with JWT minting, circuit breakers, 3-tier caching")
+    Container(collections, "Collections Service", "TypeScript + Express", "Collection management, file watching, ingestion orchestration")
+}
+
+System_Boundary(core, "Core RAG Services") {
+    Container(llamaquery, "LlamaIndex Query", "Python 3.11 + FastAPI", "Semantic search, Q&A with LLM, GPU management")
+    Container(llamaingest, "LlamaIndex Ingestion", "Python 3.11 + FastAPI", "Document processing, chunking, batch embedding")
+    Container(ollama, "Ollama Runtime", "Go", "Local LLM inference: mxbai-embed-large (384d), llama3.2:3b")
+}
+
+System_Boundary(data, "Data Layer") {
+    ' Neon Components
+    Container(neoncompute, "Neon Compute", "PostgreSQL 15 + pgvector", "RAG metadata, query logs, analytics")
+    Container(pageserver, "Neon Pageserver", "Rust", "Storage layer with copy-on-write, page-level management")
+    Container(safekeeper, "Neon Safekeeper", "Rust", "WAL durability, PITR, consensus")
+    
+    ' Qdrant Cluster
+    ContainerDb(qdrant1, "Qdrant Node 1", "Qdrant (Leader)", "Vector storage, HNSW index, Raft leader")
+    ContainerDb(qdrant2, "Qdrant Node 2", "Qdrant (Follower)", "Replicated vectors, HNSW index")
+    ContainerDb(qdrant3, "Qdrant Node 3", "Qdrant (Follower)", "Replicated vectors, HNSW index")
+    Container(qdrantlb, "Qdrant Load Balancer", "NGINX", "Round-robin distribution, health checks")
+    
+    ' Cache
+    ContainerDb(redis, "Redis Cache", "Redis 7 Alpine", "L2 cache: stats (10min), queries (10min), embeddings (1h)")
+}
+
+' Frontend → Gateway
+Rel(user, dashboard, "Uses", "HTTPS")
+Rel(dashboard, kong, "API calls", "HTTP/JSON")
+
+' Gateway → Database
+Rel(kong, kongdb, "Config storage", "PostgreSQL wire protocol")
+Rel(konga, kong, "Admin operations", "REST API :8001")
+Rel(konga, kongdb, "Config UI", "PostgreSQL wire protocol")
+
+' Gateway → Services
+Rel(kong, docapi, "Proxy /api/v1/rag/*", "HTTP + X-Service-Token + X-Correlation-ID")
+Rel(kong, collections, "Collection management", "HTTP + X-Service-Token")
+
+' Proxy → Core
+Rel(docapi, llamaquery, "Search/Query requests", "HTTP + JWT (server-minted)")
+Rel(docapi, collections, "Stats, health checks", "HTTP")
+Rel(collections, llamaingest, "Trigger ingestion", "HTTP + X-Service-Token")
+
+' Core → Infrastructure
+Rel(llamaquery, ollama, "Generate embeddings", "HTTP :11434")
+Rel(llamaingest, ollama, "Batch embeddings (10 chunks)", "HTTP :11434")
+
+Rel(llamaquery, qdrantlb, "Vector similarity search", "gRPC :6333")
+Rel(llamaingest, qdrantlb, "Upload vectors (batch)", "gRPC :6333")
+
+' Load Balancer → Qdrant Nodes
+Rel(qdrantlb, qdrant1, "Route read/write", "gRPC :6333")
+Rel(qdrantlb, qdrant2, "Route read", "gRPC :6333")
+Rel(qdrantlb, qdrant3, "Route read", "gRPC :6333")
+
+' Qdrant Cluster Replication
+Rel(qdrant1, qdrant2, "Replicate writes", "Raft P2P :6335")
+Rel(qdrant1, qdrant3, "Replicate writes", "Raft P2P :6335")
+Rel(qdrant2, qdrant1, "Heartbeat, voting", "Raft P2P")
+Rel(qdrant3, qdrant1, "Heartbeat, voting", "Raft P2P")
+
+' Cache Layer (3-tier)
+Rel(docapi, redis, "L2 cache operations", "Redis protocol :6380")
+Rel(collections, redis, "Cache collection stats", "Redis protocol :6380")
+Rel(llamaquery, redis, "Cache embeddings (1h TTL)", "Redis protocol :6380")
+
+' Metadata Storage (Neon)
+Rel(collections, neoncompute, "Store collection metadata", "PostgreSQL wire :5435")
+Rel(docapi, neoncompute, "Log queries (hypertable)", "PostgreSQL wire :5435")
+
+' Neon Internal Communication
+Rel(neoncompute, pageserver, "Fetch pages on-demand", "Internal protocol :6400")
+Rel(neoncompute, safekeeper, "Write WAL for durability", "Internal protocol :7676")
+Rel(pageserver, safekeeper, "WAL recovery on crash", "Internal protocol")
+
+SHOW_LEGEND()
+
+@enduml
+
+

@@ -1,5 +1,17 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+
+  // Clear localStorage between tests
+  if (typeof localStorage !== 'undefined' && typeof localStorage.clear === 'function') {
+    localStorage.clear();
+  }
+});
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -34,46 +46,57 @@ Object.defineProperty(window, 'matchMedia', {
 Object.defineProperty(navigator, 'clipboard', {
   value: {
     writeText: vi.fn(),
+    readText: vi.fn(() => Promise.resolve('')),
   },
   writable: true,
 });
 
 // Mock scroll behavior
-Element.prototype.scrollIntoView = vi.fn();
-window.scrollTo = vi.fn();
+if (typeof Element !== 'undefined') {
+  Element.prototype.scrollIntoView = vi.fn();
+}
+if (typeof window !== 'undefined') {
+  window.scrollTo = vi.fn();
+  window.scroll = vi.fn();
+}
 
-// Silence console warnings during tests
-console.warn = vi.fn();
+// Silence console during tests (optional - can be removed for debugging)
+const originalWarn = console.warn;
+const originalError = console.error;
 
-// Mock localStorage with a complete implementation
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value.toString();
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index: number) => {
-      const keys = Object.keys(store);
-      return keys[index] || null;
-    },
-  };
-})();
-
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock,
-  writable: true,
-  configurable: true,
+console.warn = vi.fn((message, ...args) => {
+  // Only silence known React warnings
+  if (
+    typeof message === 'string' &&
+    (message.includes('ReactDOM.render') ||
+     message.includes('act()') ||
+     message.includes('useLayoutEffect'))
+  ) {
+    return;
+  }
+  originalWarn(message, ...args);
 });
 
-// Tests may opt-in to fake timers explicitly.
+console.error = vi.fn((message, ...args) => {
+  // Only silence known React errors
+  if (
+    typeof message === 'string' &&
+    (message.includes('Not implemented: HTMLFormElement.prototype.submit') ||
+     message.includes('Could not parse CSS stylesheet'))
+  ) {
+    return;
+  }
+  originalError(message, ...args);
+});
+
+// Mock fetch globally for tests that don't explicitly mock it
+global.fetch = vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+    blob: () => Promise.resolve(new Blob()),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+  } as Response)
+);

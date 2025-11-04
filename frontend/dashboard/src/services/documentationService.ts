@@ -80,6 +80,52 @@ export interface ActivityData {
   files_uploaded: number;
 }
 
+export interface DocumentationMetrics {
+  metadata: {
+    generatedAt: string;
+    version: string;
+    source: string;
+  };
+  healthScore: {
+    current: number;
+    grade: string;
+    status: string;
+    trend: string;
+  };
+  freshness: {
+    distribution: Array<{
+      label: string;
+      count: number;
+      percentage: number;
+    }>;
+    outdatedCount: number;
+    averageAge: number;
+  };
+  issues: {
+    breakdown: Record<string, number>;
+    bySeverity: Record<string, number>;
+    total: number;
+  };
+  coverage: {
+    byOwner: Array<{
+      owner: string;
+      count: number;
+      percentage: number;
+    }>;
+    byCategory: Array<{
+      category: string;
+      count: number;
+      percentage: number;
+    }>;
+    totalFiles: number;
+  };
+  historical: Array<{
+    date: string;
+    healthScore: number;
+    issueCount: number;
+  }>;
+}
+
 export interface SystemHealth {
   id: string;
   name: string;
@@ -577,6 +623,20 @@ class DocumentationService {
     };
   }> {
     const response = await this.client.get('/api/v1/stats/health');
+    return response.data;
+  }
+
+  /**
+   * GET /api/v1/docs/health/dashboard-metrics
+   * Comprehensive documentation health metrics for dashboard visualisations.
+   */
+  async getDocumentationMetrics(): Promise<{
+    success: boolean;
+    data: DocumentationMetrics;
+  }> {
+    const response = await this.client.get(
+      '/api/v1/docs/health/dashboard-metrics',
+    );
     return response.data;
   }
 

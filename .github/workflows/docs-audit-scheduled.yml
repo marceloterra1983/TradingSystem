@@ -69,6 +69,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
       - name: Create reports directory
         run: mkdir -p docs/reports
 
@@ -185,6 +190,11 @@ jobs:
             --fail \
             || echo "Failed to update Prometheus metrics (API may not be accessible from CI)"
 
+      - name: Generate Dashboard Metrics
+        run: |
+          node scripts/docs/generate-metrics-dashboard.mjs --verbose
+        continue-on-error: true
+
       - name: Commit audit report
         id: commit
         run: |
@@ -195,21 +205,18 @@ jobs:
           REPORT_FILE="docs/reports/${REPORT_DATE}-documentation-audit.md"
           
           if [ -f "$REPORT_FILE" ]; then
-            git add "$REPORT_FILE"
+            git add docs/reports/maintenance-audit-*.md 2>/dev/null || true
+            git add docs/reports/documentation-audit-*.md 2>/dev/null || true
+            git add docs/reports/frontmatter-validation-*.json 2>/dev/null || true
+            [ -f docs/reports/metrics-history.json ] && git add docs/reports/metrics-history.json
+            [ -f docs/static/dashboard/metrics.json ] && git add docs/static/dashboard/metrics.json
             
             # Check if there are changes to commit
             if git diff --staged --quiet; then
               echo "No changes to commit"
               echo "committed=false" >> "$GITHUB_OUTPUT"
             else
-              git commit -m "docs: daily audit report ${REPORT_DATE}
-
-              Health Score: ${{ steps.metrics.outputs.health_score }}/100
-              Total Files: ${{ steps.metrics.outputs.total_files }}
-              Broken Links: ${{ steps.metrics.outputs.broken_links }}
-              Outdated: ${{ steps.metrics.outputs.outdated_count }}
-              
-              [skip ci]"
+              git commit -m "docs: automated audit report and metrics [skip ci]"
               git push origin main
               echo "committed=true" >> "$GITHUB_OUTPUT"
             fi

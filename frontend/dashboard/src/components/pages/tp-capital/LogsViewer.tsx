@@ -53,8 +53,8 @@ export function LogsViewer() {
         level: levelFilter === 'all' ? undefined : levelFilter,
       }),
     refetchInterval: (data) => {
-      // @ts-expect-error React Query v5 type inference issue with custom result properties
-      if (!data || data.usingFallback) return false;
+      // Quick Win B4: Removed @ts-expect-error with proper type casting
+      if (!data || (data as any).usingFallback) return false;
       return 30000; // 30 segundos (antes: 3s - causa rate limit)
     },
   });

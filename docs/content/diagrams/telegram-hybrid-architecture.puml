@@ -1,0 +1,184 @@
+@startuml Telegram Hybrid Architecture - Complete Stack
+!theme plain
+
+title Telegram Hybrid Architecture\nNative MTProto Service + 11 Docker Containers
+
+skinparam rectangle {
+    BackgroundColor<<native>> #90EE90
+    BackgroundColor<<container>> #ADD8E6
+    BackgroundColor<<monitoring>> #FFE4B5
+    BorderColor<<native>> #228B22
+    BorderColor<<container>> #4169E1
+    BorderColor<<monitoring>> #FFA500
+}
+
+skinparam database {
+    BackgroundColor #FFFACD
+}
+
+' External
+rectangle "Telegram Servers\n(MTProto Protocol)" as Telegram <<external>> #D3D3D3
+
+' Host Layer
+package "HOST SYSTEM (Linux/WSL)" {
+    
+    ' Native Service
+    rectangle "MTProto Gateway\n**NATIVE SERVICE**\n(systemd)\nPort 4006\n\n• Session files (0600)\n• /opt/telegram-gateway/\n• Resources: 0.5 CPU, 300MB\n• Uptime: managed by systemd" as MTProto <<native>>
+    
+    note right of MTProto
+        **Why Native?**
+        ✅ Session security
+        ✅ Max performance
+        ✅ Fast restart (2-5s)
+        ✅ Direct debugging
+        
+        **Commands:**
+        sudo systemctl start telegram-gateway
+        sudo systemctl status telegram-gateway
+        sudo journalctl -u telegram-gateway -f
+    end note
+    
+    ' Docker Engine
+    package "DOCKER ENGINE" {
+        
+        ' Data Layer
+        package "Data Layer (7 Containers)" <<container>> {
+            
+            database "TimescaleDB\n**CONTAINER**\nPort 5434\n\n• DB: telegram_gateway\n• Hypertable + Compression\n• Resources: 2 CPU, 2GB\n• Retention: 90 days" as TimescaleDB <<container>>
+            
+            rectangle "PgBouncer\n**CONTAINER**\nPort 6434\n\n• Transaction pooling\n• Pool size: 20\n• Resources: 0.5 CPU, 256MB" as PgBouncer <<container>>
+            
+            rectangle "Redis Master\n**CONTAINER**\nPort 6379\n\n• Hot cache (1h TTL)\n• Memory: 1GB\n• Resources: 1 CPU, 1GB" as RedisMaster <<container>>
+            
+            rectangle "Redis Replica\n**CONTAINER**\nPort 6380\n\n• Read scaling\n• Replication lag: <50ms\n• Resources: 1 CPU, 512MB" as RedisReplica <<container>>
+            
+            rectangle "Redis Sentinel\n**CONTAINER**\nPort 26379\n\n• HA monitoring\n• Failover: <10s\n• Resources: 0.5 CPU, 256MB" as Sentinel <<container>>
+            
+            queue "RabbitMQ\n**CONTAINER**\nPorts 5672, 15672\n\n• Event bus (optional)\n• Management UI\n• Resources: 1 CPU, 1GB" as RabbitMQ <<container>>
+            
+            rectangle "Gateway API\n**CONTAINER**\nPort 4010\n\n• REST interface\n• Query messages\n• Resources: 0.5 CPU, 256MB" as GatewayAPI <<container>>
+        }
+        
+        ' Monitoring Layer
+        package "Monitoring Stack (4 Containers)" <<monitoring>> {
+            rectangle "Prometheus\n**CONTAINER**\nPort 9090\n\n• Metrics collection\n• 8 alert rules\n• Retention: 30 days" as Prometheus <<monitoring>>
+            
+            rectangle "Grafana\n**CONTAINER**\nPort 3100\n\n• 6 Dashboards\n• Visualization\n• SLO tracking" as Grafana <<monitoring>>
+            
+            rectangle "Postgres\nExporter\nPort 9187" as PgExporter <<monitoring>>
+            
+            rectangle "Redis\nExporter\nPort 9121" as RedisExporter <<monitoring>>
+        }
+    }
+}
+
+' External Consumers
+rectangle "TP Capital Worker\nPort 4005\n\n• Cache-first polling\n• Signal processing\n• DB: tp_capital" as TPCapital <<external>> #D3D3D3
+
+rectangle "Dashboard\nPort 3103\n\n• Real-time metrics\n• Message monitoring\n• System health" as Dashboard <<external>> #D3D3D3
+
+' ==============================================================================
+' Connections - Data Flow
+' ==============================================================================
+
+Telegram --> MTProto : "MTProto\n< 500ms"
+
+' MTProto to Data Layer
+MTProto --> RedisMaster : "Cache write\n~5ms"
+MTProto -[#blue,dashed]-> RabbitMQ : "Publish\n~5ms\n(optional)"
+MTProto --> PgBouncer : "DB write\n(async)\n~100ms"
+
+' PgBouncer to TimescaleDB
+PgBouncer --> TimescaleDB : "Pooled\nconnection"
+
+' Redis Replication
+RedisMaster ..> RedisReplica : "Replication\n<50ms lag"
+Sentinel ..> RedisMaster : "Monitor"
+Sentinel ..> RedisReplica : "Monitor"
+
+' Gateway API
+GatewayAPI --> PgBouncer : "Query\nvia pool"
+GatewayAPI --> RedisMaster : "API cache"
+
+' External Consumers
+TPCapital --> RedisMaster : "Polling\n~10ms"
+TPCapital -[#blue,dashed]-> RabbitMQ : "Subscribe\n(optional)"
+TPCapital --> PgBouncer : "Fallback\n~50ms"
+
+Dashboard --> GatewayAPI : "HTTP REST\nMetrics"
+Dashboard --> Grafana : "View\ndashboards"
+
+' ==============================================================================
+' Connections - Monitoring
+' ==============================================================================
+
+MTProto -[#orange,dotted]-> Prometheus : "/metrics"
+GatewayAPI -[#orange,dotted]-> Prometheus : "/metrics"
+TPCapital -[#orange,dotted]-> Prometheus : "/metrics"
+PgExporter -[#orange,dotted]-> PgBouncer : "Query stats"
+PgExporter -[#orange,dotted]-> Prometheus : "Export"
+RedisExporter -[#orange,dotted]-> RedisMaster : "Query stats"
+RedisExporter -[#orange,dotted]-> Prometheus : "Export"
+RabbitMQ -[#orange,dotted]-> Prometheus : "/metrics"
+
+Grafana -[#orange]-> Prometheus : "Query\nmetrics"
+
+' ==============================================================================
+' Legends and Notes
+' ==============================================================================
+
+legend right
+    **Stack Summary**
+    
+    |= Layer |= Components |= Resources |
+    | Native | 1 service | 0.5 CPU, 300MB |
+    | Data | 7 containers | 6.5 CPU, 5.2GB |
+    | Monitoring | 4 containers | 2 CPU, 2GB |
+    | **TOTAL** | **12 components** | **9 CPU, 7.5GB** |
+    
+    **Performance Targets**
+    
+    |= Metric |= Current |= Target |= Gain |
+    | Polling | 50ms | 10ms | ↓ 80% |
+    | Dedup | 20ms | 2ms | ↓ 90% |
+    | Update | 200ms | 5ms | ↓ 97% |
+    | End-to-End | 5.9s | 530ms | ↓ 91% |
+    
+    **Network Communication**
+    • Native → Containers: localhost
+    • Container ↔ Container: Docker network
+    • External → Stack: Host ports
+    
+    **Color Legend**
+    • Green: Native service (systemd)
+    • Blue: Data containers
+    • Orange: Monitoring containers
+    • Gray: External systems
+end legend
+
+note bottom of TimescaleDB
+    **Optimizations Applied:**
+    • Partial indexes (↓ 90% size)
+    • Continuous aggregates (↓ 95% analytics latency)
+    • Compression 5:1 (↓ 80% storage)
+    • Connection pooling (↓ 90% overhead)
+end note
+
+note bottom of RedisMaster
+    **Cache Performance:**
+    • Hit rate target: >70%
+    • Memory: ~270MB for 1h data
+    • Eviction: LRU policy
+    • Failover: <10s with Sentinel
+end note
+
+note bottom of Prometheus
+    **Monitoring Capabilities:**
+    • 8 alert rules (4 critical, 4 warning)
+    • 6 Grafana dashboards
+    • 30-day metrics retention
+    • SLO tracking (99.9% availability)
+end note
+
+@enduml
+

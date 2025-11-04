@@ -65,17 +65,17 @@ log_info() {
 
 log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} ✅ $1"
-    ((PASSED_CHECKS++))
+    PASSED_CHECKS=$((PASSED_CHECKS + 1))
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} ❌ $1"
-    ((FAILED_CHECKS++))
+    FAILED_CHECKS=$((FAILED_CHECKS + 1))
 }
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} ⚠️  $1"
-    ((WARNING_CHECKS++))
+    WARNING_CHECKS=$((WARNING_CHECKS + 1))
 }
 
 log_section() {
@@ -121,8 +121,8 @@ parse_args() {
 
 # Initialize report directory
 init_report() {
+    mkdir -p "$REPORT_DIR"
     if [[ "$OUTPUT_FORMAT" == "html" ]] || [[ "$OUTPUT_FORMAT" == "json" ]]; then
-        mkdir -p "$REPORT_DIR"
         log_info "Report directory: $REPORT_DIR"
     fi
 }
@@ -133,7 +133,7 @@ init_report() {
 
 check_frontend_lint() {
     log_section "Frontend: ESLint"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -158,7 +158,7 @@ check_frontend_lint() {
 
 check_frontend_types() {
     log_section "Frontend: TypeScript Type Check"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -174,7 +174,7 @@ check_frontend_types() {
 
 check_frontend_tests() {
     log_section "Frontend: Unit Tests"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -200,7 +200,7 @@ check_frontend_tests() {
 
 check_frontend_security() {
     log_section "Frontend: Security Audit"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -221,7 +221,7 @@ check_frontend_duplication() {
     fi
 
     log_section "Frontend: Code Duplication"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -248,7 +248,7 @@ check_frontend_dead_code() {
     fi
 
     log_section "Frontend: Dead Code Detection"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -273,7 +273,7 @@ check_frontend_bundle() {
     fi
 
     log_section "Frontend: Bundle Size Analysis"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     cd frontend/dashboard
 
@@ -301,7 +301,7 @@ check_frontend_bundle() {
 
 check_backend_lint() {
     log_section "Backend: ESLint"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     local api_dirs=(
         "backend/api/workspace"
@@ -335,7 +335,7 @@ check_backend_lint() {
 
 check_backend_tests() {
     log_section "Backend: Unit Tests"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     local api_dirs=(
         "backend/api/workspace"
@@ -379,7 +379,7 @@ check_backend_tests() {
 
 check_docker_health() {
     log_section "Docker: Container Health"
-    ((TOTAL_CHECKS++))
+    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 
     log_info "Checking Docker containers..."
 

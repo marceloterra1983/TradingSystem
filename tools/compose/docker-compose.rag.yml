@@ -4,15 +4,15 @@ services:
   ollama:
     image: "${IMG_RAG_OLLAMA:-ollama/ollama}:${IMG_VERSION:-latest}"
     container_name: rag-ollama
-    runtime: nvidia
+    # runtime: nvidia  # DISABLED: NVIDIA runtime not available in WSL2
     # Enable GPU acceleration (requires NVIDIA Container Toolkit installed)
     deploy:
       resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+        # reservations:
+        #   devices:
+        #     - driver: nvidia
+        #       count: all
+        #       capabilities: [gpu]
         limits:
           memory: 8G
           cpus: '4'

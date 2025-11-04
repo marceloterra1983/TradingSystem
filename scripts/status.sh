@@ -73,10 +73,10 @@ Options:
   --help, -h    Show this help message
 
 Shows:
-  📊 Local Services (Telegram Gateway, Gateway API, Dashboard, Docusaurus, Status)
-  🐳 Docker Containers (all stacks with grouping)
-  🗄️  Databases (TimescaleDB connectivity)
+  🖥️  Local Services (Dashboard, Status API, Telegram Gateway API)
+  🐳 Docker Containers (APPS, DATA, DOCS, RAG, MONITORING, TOOLS stacks)
   💻 System Resources (CPU, Memory, Disk)
+  🌐 Quick Access URLs (all services with correct ports)
 
 Features:
   ✓ Color-coded status indicators
@@ -125,10 +125,9 @@ check_local_services() {
     fi
 
     local services=(
-        "telegram-gateway:4006"
+        # NOTE: telegram-gateway removed - conflicts with apps-tpcapital container (port 4006)
         "telegram-gateway-api:4010"
         "dashboard:3103"
-        # NOTE: docusaurus removed - docs-hub container (port 3400) serves Docusaurus instead
         "status:3500"
     )
 
@@ -318,13 +317,38 @@ show_summary() {
 
     echo -e "${BLUE}━━━ Quick Access ━━━${NC}"
     echo ""
-    echo -e "  Telegram Gateway:    ${CYAN}http://localhost:4006${NC}"
-    echo -e "  Gateway API:         ${CYAN}http://localhost:4010${NC}"
-    echo -e "  Dashboard:           ${CYAN}http://localhost:3103${NC}"
-    echo -e "  Documentation:       ${CYAN}http://localhost:3400${NC}"
-    echo -e "  Status API:          ${CYAN}http://localhost:3500${NC}"
-    echo -e "  TP Capital API:      ${CYAN}http://localhost:4005${NC}"
-    echo -e "  Workspace API:       ${CYAN}http://localhost:3200${NC}"
+    echo -e "${CYAN}🖥️  Local Services (Node.js):${NC}"
+    echo -e "  Dashboard:                ${CYAN}http://localhost:3103${NC}  (React + Vite)"
+    echo -e "  Status API:               ${CYAN}http://localhost:3500${NC}  (Service health)"
+    echo -e "  Telegram Gateway API:     ${CYAN}http://localhost:4010${NC}  (REST API)"
+    echo ""
+    echo -e "${CYAN}🐳 Business Services (Docker):${NC}"
+    echo -e "  TP Capital API:           ${CYAN}http://localhost:4006${NC}  (Telegram signals)"
+    echo -e "  Workspace API:            ${CYAN}http://localhost:3201${NC}  (Ideas & tasks)"
+    echo ""
+    echo -e "${CYAN}📚 Documentation (Docker):${NC}"
+    echo -e "  Documentation Hub:        ${CYAN}http://localhost:3404${NC}  (Docusaurus)"
+    echo -e "  DocsAPI:                  ${CYAN}http://localhost:3405${NC}  (FlexSearch + RAG)"
+    echo ""
+    echo -e "${CYAN}🧠 RAG Services (Docker):${NC}"
+    echo -e "  RAG Service:              ${CYAN}http://localhost:3402${NC}  (Unified API)"
+    echo -e "  Collections Service:      ${CYAN}http://localhost:3403${NC}  (Vector DB)"
+    echo -e "  LlamaIndex Query:         ${CYAN}http://localhost:8202${NC}  (Q&A)"
+    echo -e "  LlamaIndex Ingestion:     ${CYAN}http://localhost:8201${NC}  (Docs ingestion)"
+    echo -e "  Ollama:                   ${CYAN}http://localhost:11434${NC}  (LLM inference)"
+    echo ""
+    echo -e "${CYAN}🌐 Infrastructure (Docker):${NC}"
+    echo -e "  Kong Gateway:             ${CYAN}http://localhost:8000${NC}  (API Gateway)"
+    echo -e "  Kong Admin:               ${CYAN}http://localhost:8001${NC}  (Management)"
+    echo -e "  Kestra:                   ${CYAN}http://localhost:8100${NC}  (Workflow orchestration)"
+    echo -e "  Grafana:                  ${CYAN}http://localhost:3104${NC}  (Monitoring)"
+    echo -e "  Prometheus:               ${CYAN}http://localhost:9091${NC}  (Metrics)"
+    echo -e "  pgAdmin:                  ${CYAN}http://localhost:8082${NC}  (DB admin)"
+    echo ""
+    echo -e "${CYAN}📝 Management:${NC}"
+    echo -e "  Full health check:  ${BLUE}bash scripts/maintenance/health-check-all.sh${NC}"
+    echo -e "  Stop services:      ${BLUE}bash scripts/stop.sh${NC} (or: ${BLUE}stop${NC})"
+    echo -e "  View logs:          ${BLUE}tail -f /tmp/tradingsystem-logs/<service>-$(date +%Y%m%d).log${NC}"
     echo ""
 }
 

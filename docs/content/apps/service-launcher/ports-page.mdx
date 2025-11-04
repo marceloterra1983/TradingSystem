@@ -1,0 +1,300 @@
+---
+title: Ports Page
+sidebar_position: 6
+description: Página de monitoramento em tempo real de todas as portas dos serviços do TradingSystem
+tags:
+  - ports
+  - monitoring
+  - service-launcher
+  - dashboard
+owner: DocsOps
+lastReviewed: '2025-11-03'
+---
+
+# Ports Page
+
+Página de monitoramento em tempo real de todas as portas dos serviços do TradingSystem.
+
+## 📋 Visão Geral
+
+A **Ports Page** fornece uma visualização completa e em tempo real de todos os serviços do TradingSystem, organizados por porta. A página consulta o Service Launcher a cada 5 segundos para garantir informações atualizadas sobre o status de cada serviço.
+
+## 🎯 Funcionalidades
+
+### Overview Cards
+
+- **Total Services**: Número total de serviços configurados
+- **Healthy Services**: Serviços respondendo corretamente (com % de uptime)
+- **Unhealthy Services**: Serviços que não estão respondendo
+- **Query Time**: Tempo de resposta da consulta ao backend
+
+### Estatísticas por Categoria
+
+Visualização do status dos serviços agrupados por categoria:
+
+- **API**: Serviços de API REST (Workspace, TP Capital, Documentation API, etc.)
+- **UI**: Interfaces de usuário (Dashboard, Documentation Hub)
+- **Docs**: Serviços de documentação
+- **Monitoring**: Ferramentas de monitoramento (Prometheus, Grafana)
+- **Data**: Bancos de dados e storage (QuestDB, TimescaleDB)
+- **Messaging**: Serviços de mensageria (Telegram Gateway)
+- **Internal**: Serviços internos (Service Launcher)
+
+Cada categoria exibe:
+- Número de serviços saudáveis vs. total
+- Barra de progresso com código de cores
+- Percentual de saúde
+
+### Lista Completa de Serviços
+
+Cada serviço exibe:
+
+- **Nome e Descrição**: Identificação clara do serviço
+- **Categoria**: Badge colorido indicando a categoria
+- **Status**: Badge verde (Healthy) ou vermelho (Unhealthy)
+- **Porta**: Número da porta em destaque
+- **Response Time**: Tempo de resposta em ms
+- **Last Checked**: Quando foi verificado pela última vez
+- **Links Rápidos**: 
+  - Open Service (abre o serviço em nova aba)
+  - Health Endpoint (abre o endpoint de saúde)
+
+## 🔄 Atualização Automática
+
+A página implementa **polling automático** a cada 5 segundos usando `refetchInterval` do TanStack Query:
+
+```typescript
+const { data } = useQuery<PortsResponse>({
+  queryKey: ['ports'],
+  queryFn: fetchPorts,
+  refetchInterval: 5000, // Refetch every 5 seconds
+  staleTime: 3000,
+});
+```
+
+Indicador visual de auto-refresh no canto superior direito da página.
+
+## 🛠️ Implementação Técnica
+
+### Backend - Service Launcher
+
+**Endpoint**: `GET /api/ports`
+
+**Localização**: `apps/status/server.js`
+
+**Resposta**:
+
+```json
+{
+  "success": true,
+  "timestamp": "2025-11-03T14:45:00.000Z",
+  "durationMs": 150,
+  "stats": {
+    "total": 12,
+    "healthy": 10,
+    "unhealthy": 2,
+    "byCategory": {
+      "api": {"total": 5, "healthy": 4, "unhealthy": 1},
+      "ui": {"total": 2, "healthy": 2, "unhealthy": 0},
+      ...
+    }
+  },
+  "ports": [
+    {
+      "port": 3103,
+      "service": {
+        "id": "dashboard-ui",
+        "name": "Dashboard",
+        "description": "Frontend dashboard (Vite/React)",
+        "category": "ui"
+      },
+      "status": "healthy",
+      "health": {
+        "isHealthy": true,
+        "responseTimeMs": 45,
+        "lastChecked": "2025-11-03T14:45:00.000Z"
+      },
+      "urls": {
+        "health": "http://localhost:3103/health",
+        "base": "http://localhost:3103"
+      }
+    },
+    ...
+  ]
+}
+```
+
+### Frontend - Dashboard
+
+**Componente**: `PortsPage.tsx`
+
+**Localização**: `frontend/dashboard/src/components/pages/PortsPage.tsx`
+
+**Tecnologias**:
+- React + TypeScript
+- TanStack Query (data fetching e polling)
+- Lucide React (ícones)
+- Tailwind CSS (estilização)
+- shadcn/ui (Card components)
+
+**Features**:
+- Loading state com spinner
+- Error state com retry button
+- Empty state com instruções
+- Responsive design (mobile, tablet, desktop)
+- Dark mode support (via ThemeContext)
+- Código de cores por status e categoria
+
+## 📍 Navegação
+
+A página está disponível na seção **Toolbox** do sidebar:
+
+```
+Toolbox
+  ├─ LangGraph
+  ├─ RAG Services
+  ├─ AnythingLLM
+  ├─ Kestra
+  ├─ Agno Agents
+  ├─ Status
+  └─ Ports  ← Nova página
+```
+
+**URL**: `http://localhost:3103/#/ports`
+
+## 🧪 Como Testar
+
+### 1. Verificar Endpoint Backend
+
+```bash
+# Testar endpoint diretamente
+curl http://localhost:3500/api/ports | jq '.'
+
+# Ou usar o script de teste
+bash scripts/test-ports-endpoint.sh
+```
+
+### 2. Acessar Página no Dashboard
+
+```bash
+# Garantir que o dashboard está rodando
+cd frontend/dashboard
+npm run dev
+
+# Abrir no navegador
+open http://localhost:3103/#/ports
+```
+
+### 3. Verificar Auto-Refresh
+
+1. Abrir a página Ports
+2. Parar um serviço (ex: `docker stop workspace`)
+3. Aguardar 5 segundos
+4. Verificar se o status do serviço mudou para "Unhealthy"
+5. Reiniciar o serviço (`docker start workspace`)
+6. Verificar se o status volta para "Healthy"
+
+## 🎨 Esquema de Cores
+
+### Status
+- **Healthy**: Verde (`bg-green-500/20 text-green-400`)
+- **Unhealthy**: Vermelho (`bg-red-500/20 text-red-400`)
+
+### Categorias
+- **API**: Azul (`text-blue-400`)
+- **UI**: Roxo (`text-purple-400`)
+- **Docs**: Indigo (`text-indigo-400`)
+- **Monitoring**: Laranja (`text-orange-400`)
+- **Data**: Verde (`text-green-400`)
+- **Messaging**: Rosa (`text-pink-400`)
+- **Internal**: Cinza (`text-gray-400`)
+
+### Health Percentage
+- **100%**: Verde (`bg-green-500`)
+- **≥50%**: Amarelo (`bg-yellow-500`)
+- **<50%**: Vermelho (`bg-red-500`)
+
+## 🔧 Manutenção
+
+### Adicionar Nova Categoria
+
+Edite as funções de cores em `PortsPage.tsx`:
+
+```typescript
+function getCategoryColor(category: string): string {
+  const colors: Record<string, string> = {
+    // ... cores existentes
+    'nova-categoria': 'text-cyan-400',
+  };
+  return colors[category] || 'text-gray-400';
+}
+
+function getCategoryBadgeColor(category: string): string {
+  const colors: Record<string, string> = {
+    // ... cores existentes
+    'nova-categoria': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  };
+  return colors[category] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+}
+```
+
+### Modificar Intervalo de Polling
+
+Edite o `refetchInterval` na query:
+
+```typescript
+const { data } = useQuery<PortsResponse>({
+  queryKey: ['ports'],
+  queryFn: fetchPorts,
+  refetchInterval: 10000, // 10 segundos ao invés de 5
+  staleTime: 8000,
+});
+```
+
+### Adicionar Novo Serviço ao Monitoramento
+
+Os serviços são automaticamente detectados a partir da configuração do Service Launcher em `apps/status/server.js`:
+
+```javascript
+const SERVICE_TARGETS = [
+  createServiceTarget({
+    id: 'novo-servico',
+    name: 'Novo Serviço',
+    description: 'Descrição do novo serviço',
+    category: 'api', // ou outra categoria
+    defaultPort: 3700,
+    portEnv: 'SERVICE_LAUNCHER_NOVO_SERVICO_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_NOVO_SERVICO_URL',
+  }),
+  // ... outros serviços
+];
+```
+
+## 📊 Métricas e Observabilidade
+
+A página fornece métricas em tempo real:
+
+- **Total de serviços**: Quantos serviços estão configurados
+- **Taxa de disponibilidade**: % de serviços saudáveis
+- **Tempo de resposta**: Performance das verificações de health
+- **Distribuição por categoria**: Visão organizacional dos serviços
+
+Essas métricas são úteis para:
+- Identificar rapidamente problemas de infraestrutura
+- Monitorar a saúde geral do sistema
+- Detectar padrões de falha por categoria
+- Otimizar configurações de portas e serviços
+
+## 🔗 Links Relacionados
+
+- [Service Launcher Overview](./overview.mdx)
+- [Service Launcher Configuration](./config.mdx)
+- [Health Check System](../../tools/monitoring/health-checks.mdx)
+- [Service Port Map](../../tools/ports-services/port-map.mdx)
+
+---
+
+**Criado em**: 2025-11-03  
+**Última atualização**: 2025-11-03  
+**Mantido por**: DocsOps Team
+

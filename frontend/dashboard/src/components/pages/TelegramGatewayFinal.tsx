@@ -9,6 +9,10 @@ import {
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+// Quick Win P1-1: Hooks e componentes integrados!
+import { useGatewayData, useChannelManager } from './telegram-gateway/hooks';
+// import { GatewayFilters } from './telegram-gateway/components/GatewayFilters';
+import { usePolling } from '../../hooks';
 import {
   Select,
   SelectContent,
@@ -45,28 +49,32 @@ import {
   Filter,
   Image,
   RotateCcw,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { GatewayLogsCard } from '../telegram/GatewayLogsCard';
 
-interface GatewayData {
-  health?: {
-    status: string;
-    telegram: string;
-    uptime: number;
-  };
-  messages?: {
-    total: number;
-    recent: any[];
-  };
-  session?: {
-    exists: boolean;
-    path?: string;
-    hash?: string;
-    sizeBytes?: number;
-    updatedAt?: string;
-    ageMs?: number;
-  };
-}
+// interface GatewayData {
+//   health?: {
+//     status: string;
+//     telegram: string;
+//     uptime: number;
+//   };
+//   messages?: {
+//     total: number;
+//     recent: any[];
+//   };
+//   session?: {
+//     exists: boolean;
+//     path?: string;
+//     hash?: string;
+//     sizeBytes?: number;
+//     updatedAt?: string;
+//     ageMs?: number;
+//   };
+// }
 
 interface Channel {
   id: string;
@@ -86,10 +94,25 @@ const statusMutedTextClass =
   'text-xs text-slate-500 dark:text-slate-400';
 
 export function TelegramGatewayFinal() {
-  const [data, setData] = useState<GatewayData | null>(null);
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Message filters (needed before useGatewayData)
+  const [filterChannel, setFilterChannel] = useState<string>('all');
+  const [filterText, setFilterText] = useState<string>('');
+  const [filterDateFrom, setFilterDateFrom] = useState<string>('');
+  const [filterDateTo, setFilterDateTo] = useState<string>('');
+  const [filterLimit, setFilterLimit] = useState<string>('50');
+
+  // Sorting state
+  const [sortColumn, setSortColumn] = useState<'date' | 'channel' | 'text'>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // Default: última mensagem no topo
+
+  // Quick Win P1-1: Using extracted hooks
+  const {
+    data,
+    channels,
+    messages,
+    loading,
+    fetchData,
+  } = useGatewayData(filterChannel, filterLimit);
 
   // Channel form
   const [newChannelId, setNewChannelId] = useState('');
@@ -99,13 +122,6 @@ export function TelegramGatewayFinal() {
   // Message dialog
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Message filters
-  const [filterChannel, setFilterChannel] = useState<string>('all');
-  const [filterText, setFilterText] = useState<string>('');
-  const [filterDateFrom, setFilterDateFrom] = useState<string>('');
-  const [filterDateTo, setFilterDateTo] = useState<string>('');
-  const [filterLimit, setFilterLimit] = useState<string>('50');
 
   // Message sync
   const [isSyncing, setIsSyncing] = useState(false);
@@ -187,7 +203,7 @@ export function TelegramGatewayFinal() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'X-Gateway-Token': token } : {}),
+          ...(token ? { 'X-API-Key': token } : {}),
         },
       });
 
@@ -279,6 +295,18 @@ export function TelegramGatewayFinal() {
     });
   };
 
+  // Handler for sorting
+  const handleSort = (column: 'date' | 'channel' | 'text') => {
+    if (sortColumn === column) {
+      // Toggle direction
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New column, default to desc for date, asc for others
+      setSortColumn(column);
+      setSortDirection(column === 'date' ? 'desc' : 'asc');
+    }
+  };
+
   const filteredMessages = useMemo(() => {
     let filtered =
       messages.length > 0 ? messages : data?.messages?.recent || [];
@@ -321,7 +349,35 @@ export function TelegramGatewayFinal() {
       });
     }
 
-    return filtered;
+    // Sort messages
+    const sorted = [...filtered].sort((a: any, b: any) => {
+      let compareValue = 0;
+
+      switch (sortColumn) {
+        case 'date': {
+          const dateA = new Date(a.telegramDate || a.receivedAt || 0).getTime();
+          const dateB = new Date(b.telegramDate || b.receivedAt || 0).getTime();
+          compareValue = dateA - dateB;
+          break;
+        }
+        case 'channel': {
+          const labelA = getChannelLabel(a.channelId).toLowerCase();
+          const labelB = getChannelLabel(b.channelId).toLowerCase();
+          compareValue = labelA.localeCompare(labelB);
+          break;
+        }
+        case 'text': {
+          const textA = (a.text || a.caption || '').toLowerCase();
+          const textB = (b.text || b.caption || '').toLowerCase();
+          compareValue = textA.localeCompare(textB);
+          break;
+        }
+      }
+
+      return sortDirection === 'asc' ? compareValue : -compareValue;
+    });
+
+    return sorted;
   }, [
     messages,
     data?.messages?.recent,
@@ -329,216 +385,59 @@ export function TelegramGatewayFinal() {
     filterText,
     filterDateFrom,
     filterDateTo,
+    sortColumn,
+    sortDirection,
     getChannelLabel,
   ]);
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const headers = {
-        'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
-      };
+  // Quick Win P1-1 & P2-5: Using usePolling hook
+  usePolling(fetchData, {
+    interval: 15000,
+    immediate: true,
+  });
 
-      // Build messages URL with filters
-      const limit = filterLimit || '50';
-      let messagesUrl = `/api/messages?limit=${limit}&sort=desc`;
-      if (filterChannel !== 'all') {
-        messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc`;
-      }
+  // Quick Win P1-1: Using useChannelManager for CRUD operations
+  const {
+    createChannel,
+    updateChannel,
+    deleteChannel: deleteChannelApi,
+    toggleChannel: toggleChannelApi,
+  } = useChannelManager(fetchData);
 
-      const [overviewRes, channelsRes, messagesRes] = await Promise.all([
-        fetch('/api/telegram-gateway/overview', { headers }),
-        fetch('/api/channels', { headers }),
-        fetch(messagesUrl, { headers }),
-      ]);
+  const handleCreateChannel = useCallback(async () => {
+    const success = await createChannel({
+      channelId: newChannelId,
+      label: newChannelLabel,
+      description: newChannelDesc,
+    });
 
-      if (overviewRes.ok) {
-        const json = await overviewRes.json();
-        setData(json.data);
-      }
-
-      if (channelsRes.ok) {
-        const json = await channelsRes.json();
-        setChannels(json.data || []);
-      }
-
-      if (messagesRes.ok) {
-        const json = await messagesRes.json();
-        setMessages(json.data || []);
-      }
-    } catch (err) {
-      console.error('Error fetching data:', err);
-    } finally {
-      setLoading(false);
+    if (success) {
+      setNewChannelId('');
+      setNewChannelLabel('');
+      setNewChannelDesc('');
     }
-  }, [filterChannel, filterLimit]);
+  }, [createChannel, newChannelId, newChannelLabel, newChannelDesc]);
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 15000);
-    return () => clearInterval(interval);
-  }, [filterChannel, filterLimit, fetchData]);
+  const handleToggleChannel = useCallback(async (id: string, isActive: boolean) => {
+    await toggleChannelApi(id, isActive);
+  }, [toggleChannelApi]);
 
-  const handleCreateChannel = async () => {
-    if (!newChannelId.trim()) {
-      alert('Channel ID é obrigatório!');
-      return;
-    }
+  const handleDeleteChannel = useCallback(async (id: string, channelId: string) => {
+    await deleteChannelApi(id, channelId);
+  }, [deleteChannelApi]);
 
-    try {
-      console.log('[CreateChannel] Enviando:', {
-        channelId: newChannelId.trim(),
-        label: newChannelLabel.trim(),
-        description: newChannelDesc.trim(),
-      });
-
-      const response = await fetch('/api/channels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
-        },
-        body: JSON.stringify({
-          channelId: newChannelId.trim(),
-          label: newChannelLabel.trim() || undefined,
-          description: newChannelDesc.trim() || undefined,
-        }),
-      });
-
-      const result = await response.json();
-      console.log('[CreateChannel] Response:', result);
-
-      if (!response.ok) {
-        alert(`Erro ao criar canal: ${result.message || response.statusText}`);
-        return;
-      }
-
-      if (result.success) {
-        alert(`✅ Canal ${newChannelId} adicionado com sucesso!`);
-        setNewChannelId('');
-        setNewChannelLabel('');
-        setNewChannelDesc('');
-        await fetchData();
-      }
-    } catch (err) {
-      console.error('[CreateChannel] Error:', err);
-      const message = err instanceof Error ? err.message : String(err);
-      alert(`Erro ao criar canal: ${message}`);
-    }
-  };
-
-  const handleToggleChannel = async (id: string, isActive: boolean) => {
-    try {
-      const response = await fetch(`/api/channels/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
-        },
-        body: JSON.stringify({ isActive: !isActive }),
-      });
-
-      if (!response.ok) {
-        const raw = await response.text();
-        let message = response.statusText;
-        try {
-          const parsed = raw ? JSON.parse(raw) : null;
-          if (parsed && typeof parsed === 'object') {
-            message = parsed.message || JSON.stringify(parsed);
-          } else if (raw) {
-            message = raw;
-          }
-        } catch {
-          if (raw) {
-            message = raw;
-          }
-        }
-        alert(`Erro ao alterar status: ${message}`);
-        return;
-      }
-
-      await fetchData();
-      alert(`✅ Canal ${isActive ? 'desativado' : 'ativado'} com sucesso!`);
-    } catch (err) {
-      console.error('Error toggling channel:', err);
-      const message = err instanceof Error ? err.message : String(err);
-      alert(`Erro: ${message}`);
-    }
-  };
-
-  const handleDeleteChannel = async (id: string, channelId: string) => {
-    if (!confirm(`Remover canal ${channelId}?`)) return;
-
-    try {
-      const response = await fetch(`/api/channels/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
-        },
-      });
-
-      if (!response.ok) {
-        const result = await response.json();
-        alert(`Erro ao deletar: ${result.message || response.statusText}`);
-        return;
-      }
-
-      await fetchData();
-      alert(`✅ Canal ${channelId} removido com sucesso!`);
-    } catch (err) {
-      console.error('Error deleting channel:', err);
-      const message = err instanceof Error ? err.message : String(err);
-      alert(`Erro: ${message}`);
-    }
-  };
-
-  const handleEditChannel = async (id: string, current: Channel) => {
+  const handleEditChannel = useCallback(async (id: string, current: Channel) => {
     const newLabel = prompt('Novo rótulo:', current.label || '');
     if (newLabel === null) return;
 
     const newDesc = prompt('Nova descrição:', current.description || '');
     if (newDesc === null) return;
 
-    try {
-      const response = await fetch(`/api/channels/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Gateway-Token': 'gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA',
-        },
-        body: JSON.stringify({
-          label: newLabel || undefined,
-          description: newDesc || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const raw = await response.text();
-        let message = response.statusText;
-        try {
-          const parsed = raw ? JSON.parse(raw) : null;
-          if (parsed && typeof parsed === 'object') {
-            message = parsed.message || JSON.stringify(parsed);
-          } else if (raw) {
-            message = raw;
-          }
-        } catch {
-          if (raw) {
-            message = raw;
-          }
-        }
-        alert(`Erro ao editar: ${message}`);
-        return;
-      }
-
-      await fetchData();
-      alert('✅ Canal atualizado com sucesso!');
-    } catch (err) {
-      console.error('Error editing channel:', err);
-      const message = err instanceof Error ? err.message : String(err);
-      alert(`Erro: ${message}`);
-    }
-  };
+    await updateChannel(id, {
+      label: newLabel || undefined,
+      description: newDesc || undefined,
+    });
+  }, [updateChannel]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '—';
@@ -620,33 +519,31 @@ export function TelegramGatewayFinal() {
                 </Button>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 {/* Gateway */}
                 <div className={surfaceCardClass}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={statusLabelClass}>
-                      Gateway
-                    </span>
+                    <span className={statusLabelClass}>Gateway</span>
                     {data?.health?.status === 'healthy' ? (
                       <CheckCircle className="h-5 w-5 text-emerald-400" />
                     ) : (
                       <XCircle className="h-5 w-5 text-red-400" />
                     )}
                   </div>
-                  <p className={statusValueClass}>
-                    {data?.health?.status || 'unknown'}
-                  </p>
-                  <p className={cn(statusMutedTextClass, 'mt-1')}>
-                    Uptime: {formatUptime(data?.health?.uptime)}
-                  </p>
+                  <div className="flex items-baseline gap-2">
+                    <p className={statusValueClass}>
+                      {data?.health?.status || 'unknown'}
+                    </p>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      • {formatUptime(data?.health?.uptime)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Telegram */}
                 <div className={surfaceCardClass}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={statusLabelClass}>
-                      Telegram
-                    </span>
+                    <span className={statusLabelClass}>Telegram</span>
                     <Wifi
                       className={`h-5 w-5 ${data?.health?.telegram === 'connected' ? 'text-emerald-400' : 'text-red-400'}`}
                     />
@@ -654,45 +551,70 @@ export function TelegramGatewayFinal() {
                   <Badge
                     variant={data?.health?.telegram === 'connected' ? 'success' : 'destructive'}
                   >
-                    {data?.health?.telegram === 'connected'
-                      ? 'Conectado'
-                      : 'Desconectado'}
+                    {data?.health?.telegram === 'connected' ? 'Conectado' : 'Desconectado'}
                   </Badge>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {data?.health?.telegram === 'connected' ? 'MTProto ativo' : 'Verificar autenticação'}
+                  </p>
                 </div>
 
                 {/* Messages */}
                 <div className={surfaceCardClass}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={statusLabelClass}>
-                      Mensagens
-                    </span>
+                    <span className={statusLabelClass}>Mensagens</span>
                     <Database className="h-5 w-5 text-cyan-400" />
                   </div>
                   <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                     {data?.messages?.total || 0}
                   </p>
-                  <p className={cn(statusMutedTextClass, 'mt-1')}>TimescaleDB</p>
+                  <p className={cn(statusMutedTextClass, 'mt-1')}>Persistidas no TimescaleDB</p>
                 </div>
 
-                {/* Session */}
+                {/* Session - Compact and balanced */}
                 <div className={surfaceCardClass}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className={statusLabelClass}>
-                      Sessão
-                    </span>
+                    <span className={statusLabelClass}>Sessão</span>
                     <ShieldCheck
                       className={`h-5 w-5 ${data?.session?.exists ? 'text-emerald-400' : 'text-slate-600'}`}
                     />
                   </div>
+                  
                   <Badge
                     variant={data?.session?.exists ? 'success' : 'secondary'}
                     className={cn(
-                      !data?.session?.exists &&
-                        'text-slate-700 dark:text-slate-100',
+                      'mb-2',
+                      !data?.session?.exists && 'text-slate-700 dark:text-slate-100',
                     )}
                   >
-                    {data?.session?.exists ? 'Ativa' : 'Ausente'}
+                    {data?.session?.exists ? '✓ Autenticada' : 'Ausente'}
                   </Badge>
+
+                  {data?.session?.exists ? (
+                    <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                      {data.session.hash && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-500 dark:text-slate-500">Hash:</span>
+                          <code className="font-mono text-cyan-700 dark:text-cyan-400">
+                            {data.session.hash.substring(0, 12)}...
+                          </code>
+                        </div>
+                      )}
+                      {data.session.updatedAt && (
+                        <div>
+                          {formatDateOnly(data.session.updatedAt)}, {formatTime(data.session.updatedAt)}
+                        </div>
+                      )}
+                      {data.session.sizeBytes && (
+                        <div className="text-slate-500 dark:text-slate-500">
+                          {data.session.sizeBytes} bytes
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Execute authenticate-interactive.sh
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -951,17 +873,59 @@ export function TelegramGatewayFinal() {
                   <table className="w-full text-sm">
                     <thead className="border-b border-slate-200 dark:border-slate-700">
                       <tr className="text-left">
-                        <th className="px-4 pb-3 font-semibold text-slate-600 dark:text-slate-200">
-                          Enviada
+                        <th className="px-4 pb-3">
+                          <button
+                            onClick={() => handleSort('date')}
+                            className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                          >
+                            Enviada
+                            {sortColumn === 'date' ? (
+                              sortDirection === 'asc' ? (
+                                <ArrowUp className="h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="h-4 w-4" />
+                              )
+                            ) : (
+                              <ArrowUpDown className="h-4 w-4 opacity-40" />
+                            )}
+                          </button>
                         </th>
-                        <th className="px-4 pb-3 font-semibold text-slate-600 dark:text-slate-200">
-                          Canal
+                        <th className="px-4 pb-3">
+                          <button
+                            onClick={() => handleSort('channel')}
+                            className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                          >
+                            Canal
+                            {sortColumn === 'channel' ? (
+                              sortDirection === 'asc' ? (
+                                <ArrowUp className="h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="h-4 w-4" />
+                              )
+                            ) : (
+                              <ArrowUpDown className="h-4 w-4 opacity-40" />
+                            )}
+                          </button>
                         </th>
                         <th className="px-4 pb-3 text-center font-semibold text-slate-600 dark:text-slate-200">
                           Ações
                         </th>
-                        <th className="px-4 pb-3 font-semibold text-slate-600 dark:text-slate-200">
-                          Texto
+                        <th className="px-4 pb-3">
+                          <button
+                            onClick={() => handleSort('text')}
+                            className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                          >
+                            Texto
+                            {sortColumn === 'text' ? (
+                              sortDirection === 'asc' ? (
+                                <ArrowUp className="h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="h-4 w-4" />
+                              )
+                            ) : (
+                              <ArrowUpDown className="h-4 w-4 opacity-40" />
+                            )}
+                          </button>
                         </th>
                       </tr>
                     </thead>
@@ -1038,95 +1002,6 @@ export function TelegramGatewayFinal() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </CollapsibleCardContent>
-          </CollapsibleCard>
-        ),
-      },
-
-      // Session Card
-      {
-        id: 'session-info',
-        content: (
-          <CollapsibleCard
-            cardId="telegram-gateway-session"
-            defaultCollapsed={false}
-          >
-            <CollapsibleCardHeader>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                <CollapsibleCardTitle>Sessão MTProto</CollapsibleCardTitle>
-              </div>
-            </CollapsibleCardHeader>
-            <CollapsibleCardContent>
-              {data?.session ? (
-                <div className="space-y-4">
-                  <div>
-                    <Badge
-                      variant={data.session.exists ? 'success' : 'secondary'}
-                      className={cn(
-                        !data.session.exists &&
-                          'text-slate-700 dark:text-slate-100',
-                      )}
-                    >
-                      {data.session.exists ? 'Sessão Ativa' : 'Sessão Ausente'}
-                    </Badge>
-                  </div>
-
-                  {data.session.exists ? (
-                    <div className="space-y-3 text-sm">
-                      {data.session.hash && (
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
-                          <span className="text-slate-500 dark:text-slate-400">
-                            Hash:
-                          </span>
-                          <code className="text-xs font-mono text-cyan-700 dark:text-cyan-300">
-                            {data.session.hash}
-                          </code>
-                        </div>
-                      )}
-                      {data.session.updatedAt && (
-                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
-                          <span className="text-slate-500 dark:text-slate-400">
-                            Atualizado:
-                          </span>
-                          <span className="text-slate-700 dark:text-slate-200">
-                            {formatDate(data.session.updatedAt)}
-                          </span>
-                        </div>
-                      )}
-                      {data.session.sizeBytes && (
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
-                          Tamanho: {data.session.sizeBytes} bytes
-                        </div>
-                      )}
-
-                      <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-950/60">
-                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-100">
-                          ✓ Autenticado
-                        </p>
-                        <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-200">
-                          Conexão ativa com Telegram
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
-                      <p className="mb-2 font-semibold text-amber-700 dark:text-amber-100">
-                        Sessão não encontrada
-                      </p>
-                      <p className="mb-3 text-sm text-amber-700 dark:text-amber-200">
-                        Execute:
-                      </p>
-                      <code className="block rounded bg-slate-100 px-3 py-2 text-xs text-amber-700 dark:bg-black/50 dark:text-amber-200">
-                        cd apps/telegram-gateway &&
-                        ./authenticate-interactive.sh
-                      </code>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-slate-500 dark:text-slate-400">Sem dados</p>
               )}
             </CollapsibleCardContent>
           </CollapsibleCard>
@@ -1327,6 +1202,14 @@ export function TelegramGatewayFinal() {
           </CollapsibleCard>
         ),
       },
+
+      // Gateway Logs Card
+      {
+        id: 'gateway-logs',
+        content: (
+          <GatewayLogsCard />
+        ),
+      },
     ],
     [
       data,
@@ -1353,6 +1236,9 @@ export function TelegramGatewayFinal() {
       isSyncing,
       syncResult,
       handleCheckMessages,
+      sortColumn,
+      sortDirection,
+      handleSort,
     ],
   );
 

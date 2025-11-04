@@ -1,3 +1,14 @@
+---
+title: "Claude Commands Overview"
+sidebar_position: 2
+description: "Summary of the custom Claude CLI commands available for TradingSystem."
+tags:
+  - ai
+  - claude
+  - automation
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # Comandos Claude Code - Prontos para Uso! 🚀
 
 **Data**: 2025-11-02
@@ -472,26 +483,26 @@ echo "npx lint-staged" > .husky/pre-commit
 
 ### Guias
 
-1. **[Code Quality Checklist](docs/content/development/code-quality-checklist.md)** (3,600 linhas)
+1. **[Code Quality Checklist](/development/code-quality-checklist)** (3,600 linhas)
    - 12 categorias de verificação
    - 100+ comandos detalhados
    - Integração CI/CD
    - Métricas recomendadas
 
-2. **[Quick Reference](CODE-QUALITY-COMMANDS.md)** (250 linhas)
+2. **[Code Quality Commands](/tools/development/code-quality-commands)** (250 linhas)
    - Comandos mais usados
    - Checklists
    - Troubleshooting
 
-3. **[Claude Commands Index](.claude/commands/README.md)** (20+ comandos)
+3. **.claude/commands/README.md** (20+ comandos)
    - Todos os comandos customizados
    - Workflows recomendados
    - Como criar novos comandos
 
 ### Scripts
 
-- **[code-quality-check.sh](scripts/maintenance/code-quality-check.sh)** - Script automatizado
-- **[workflow-template.sh](scripts/workflows/workflow-template.sh)** - Template de workflow
+- **scripts/maintenance/code-quality-check.sh** - Script automatizado
+- **scripts/workflows/workflow-template.sh** - Template de workflow
 
 ---
 
@@ -568,8 +579,8 @@ du -sh frontend/dashboard/dist/
 
 ## 🔗 Links Úteis
 
-- **CLAUDE.md**: [CLAUDE.md](CLAUDE.md) - Instruções do projeto
-- **Workflow System**: [WORKFLOW-SYSTEM-READY.md](WORKFLOW-SYSTEM-READY.md)
+- **CLAUDE.md** (arquivo na raiz) - Instruções do projeto
+- `reports/2025-11-02/WORKFLOW-SYSTEM-READY.md` - Workflow System completo
 - **Health Checks**: [scripts/maintenance/health-check-all.sh](scripts/maintenance/health-check-all.sh)
 
 ---

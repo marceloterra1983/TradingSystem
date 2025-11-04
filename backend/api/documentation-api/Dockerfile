@@ -19,10 +19,10 @@ FROM node:22-alpine AS development
 WORKDIR /app
 
 # Copy package files
-COPY api/documentation-api/package*.json ./
+COPY backend/api/documentation-api/package*.json ./
 
 # Copy shared modules
-COPY shared /shared
+COPY backend/shared /shared
 
 # Install ALL dependencies (including dev)
 RUN npm install && \
@@ -34,7 +34,7 @@ RUN cd /shared/logger && npm ci && \
     cd /shared/config && npm ci
 
 # Copy source code
-COPY api/documentation-api .
+COPY backend/api/documentation-api .
 
 # Expose port
 EXPOSE 3000

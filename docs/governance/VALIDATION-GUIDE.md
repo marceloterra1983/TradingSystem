@@ -835,37 +835,34 @@ python scripts/docs/validate-frontmatter.py \
 4. Add new owner to ALLOWED_OWNERS if legitimate
 5. Re-run validation
 
----
 
 ## CI/CD Integration
 
-**GitHub Actions** (if configured):
+**Automated Validation**: All validation steps documented in this guide are automated in CI/CD pipelines.
 
-**Workflow**: `.github/workflows/docs-validation.yml`
+**Workflows**:
+- **docs-validation.yml** - Runs on PRs and commits (validate-frontmatter, maintenance-audit, docs:check, docs:links)
+- **docs-deploy.yml** - Runs on deployment (build, validate-frontmatter, link-check)
+- **docs-link-validation.yml** - Comprehensive link validation with PR comments
+- **docs-audit-scheduled.yml** - Daily health monitoring and metrics
 
-**Triggers**:
-- Push to main branch
-- Pull request to main
-- Manual workflow dispatch
+**Status Checks**: Required status checks configured in branch protection:
+- `validate-frontmatter` - Frontmatter validation must pass
+- `maintenance-audit` - Audit must pass (threshold: 10 issues)
+- `docs-check` - Full build pipeline must pass
+- `docs-links` - Link validation must pass
+- `build-docs` - Deployment build must pass
+- `validate-links` - Comprehensive link validation must pass
 
-**Steps**:
-1. Checkout code
-2. Setup Node.js 18+
-3. Install dependencies (`npm install`)
-4. Run docs:check
-5. Run docs:links
-6. Upload validation reports as artifacts
-7. Comment on PR with validation results
+**Slack Notifications**: Failures automatically notify team via Slack webhook.
 
-**Status Badge**: Add to README.md
-```markdown
-[![Docs Validation](https://github.com/org/TradingSystem/actions/workflows/docs-validation.yml/badge.svg)](https://github.com/org/TradingSystem/actions/workflows/docs-validation.yml)
-```
+**See**: `docs/governance/CI-CD-INTEGRATION.md` for complete CI/CD documentation, workflow details, troubleshooting, and setup instructions.
 
 ---
 
 ## Related Documentation
 
+- [CI/CD Integration](./CI-CD-INTEGRATION.md) - Automated validation workflows
 - [Review Checklist](./REVIEW-CHECKLIST.md) - Chapter-by-chapter review
 - [Maintenance Checklist](./MAINTENANCE-CHECKLIST.md) - Quarterly hygiene
 - [Communication Plan](./COMMUNICATION-PLAN.md) - Internal announcements

@@ -1,3 +1,13 @@
+---
+title: "Hard Refresh Checklist"
+description: "Steps to force a full reload of cached assets across supported browsers."
+tags:
+  - frontend
+  - guidelines
+  - support
+owner: FrontendGuild
+lastReviewed: '2025-11-02'
+---
 # 🔄 Como Atualizar o Frontend
 
 ## ⚡ Hard Refresh do Navegador

@@ -340,9 +340,17 @@ start_containers() {
         fi
     done
 
-    # Start database stack (ALL 9 services) first if compose file exists
+    # DATABASE stack - PORTAS REMAPEADAS (5433→5432, 9000→9001, etc.)
+    # Now compatible with all other stacks!
+    local SKIP_DATABASE_STACK=false  # HABILITADO!
+    
+    # Start database stack (ALL 8 services) first if compose file exists
     local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database.yml"
-    if [ -f "$DB_COMPOSE_FILE" ]; then
+    if [ "$SKIP_DATABASE_STACK" = true ]; then
+        log_info "Skipping DATABASE stack (disabled to avoid port conflicts)"
+        log_info "  Conflicts: TimescaleDB (5433) vs kong-db, QuestDB (9000), etc."
+        log_info "  Use 'bash scripts/start-clean.sh' for essential services only"
+    elif [ -f "$DB_COMPOSE_FILE" ]; then
         # Provide sane defaults for image variables when not set in .env
         export IMG_DATA_TIMESCALEDB="${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}"
         export IMG_DATA_QDRANT="${IMG_DATA_QDRANT:-qdrant/qdrant}"
@@ -356,14 +364,76 @@ start_containers() {
             if [ "$db_health" = "healthy" ]; then
                 log_success "✓ DATABASE stack already running and healthy (9 services)"
             else
-                log_info "DATABASE stack running but not healthy, restarting..."
-                docker compose -p data -f "$DB_COMPOSE_FILE" restart
+                log_warning "DATABASE stack running but not healthy (health: $db_health)"
+                log_info "Skipping automatic restart to avoid port conflicts (kong-db uses 5433)"
+                log_info "To restart manually: docker compose -p data -f $DB_COMPOSE_FILE restart"
             fi
         else
             log_info "Starting DATABASE stack (9 services: TimescaleDB, QuestDB, Qdrant, PgAdmin, etc.)..."
 
-            # Start entire DATABASE stack
-            docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans
+            # Track which services to start (exclude running standalone containers)
+            local exclude_services=""
+            
+            # List ALL possible database stack containers (complete list)
+            local all_db_containers=(
+                "data-qdrant"
+                "data-questdb"
+                "data-timescale"
+                "data-timescale-backup"
+                "data-timescale-pgadmin"
+                "data-postgres-langgraph"
+            )
+            
+            # Check and handle standalone containers
+            for container in "${all_db_containers[@]}"; do
+                if docker ps --format '{{.Names}}' | grep -qx "$container"; then
+                    # Container is running
+                    log_info "Container $container already running (standalone), skipping in compose"
+                    # Map container name to compose service name
+                    case "$container" in
+                        data-qdrant) exclude_services="$exclude_services qdrant";;
+                        data-questdb) exclude_services="$exclude_services questdb";;
+                        data-timescale) exclude_services="$exclude_services timescale";;
+                        data-timescale-backup) exclude_services="$exclude_services timescale-backup";;
+                        data-timescale-pgadmin) exclude_services="$exclude_services timescale-pgadmin";;
+                        data-postgres-langgraph) exclude_services="$exclude_services postgres-langgraph";;
+                    esac
+                elif docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
+                    # Container exists but is stopped
+                    log_warning "Removing stopped standalone container: $container"
+                    docker rm -f "$container" 2>/dev/null || true
+                fi
+            done
+
+            # Start DATABASE stack (excluding running standalone containers)
+            if [ -n "$exclude_services" ]; then
+                log_info "Excluding services from compose:$exclude_services"
+                # Start all services except excluded ones by listing specific services
+                # Get all services from compose file and filter out excluded
+                local all_services=$(docker compose -p data -f "$DB_COMPOSE_FILE" config --services 2>/dev/null)
+                local services_to_start=""
+                for svc in $all_services; do
+                    local should_exclude=false
+                    for excl in $exclude_services; do
+                        if [ "$svc" = "$excl" ]; then
+                            should_exclude=true
+                            break
+                        fi
+                    done
+                    if [ "$should_exclude" = false ]; then
+                        services_to_start="$services_to_start $svc"
+                    fi
+                done
+                
+                if [ -n "$services_to_start" ]; then
+                    docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans $services_to_start
+                else
+                    log_info "All DATABASE services already running"
+                fi
+            else
+                # Start entire DATABASE stack
+                docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans
+            fi
 
             # Wait for TimescaleDB to be healthy (primary database)
             log_info "Waiting for TimescaleDB health..."
@@ -387,6 +457,17 @@ start_containers() {
         log_warning "Database compose file not found; skipping DATABASE stack"
     fi
 
+    # APPS stack - Build contexts CORRIGIDOS!
+    # Now builds successfully with correct paths
+    local SKIP_APPS_STACK=false  # HABILITADO!
+    
+    if [ "$SKIP_APPS_STACK" = true ]; then
+        log_info "Skipping APPS stack (tp-capital, workspace) - disabled to avoid port conflicts"
+        log_info "  Conflicts: tp-capital (4005), workspace (3200)"
+        log_info "  These are optional services not needed for RAG functionality"
+        return 0
+    fi
+    
     # If ports are busy by host processes and --force-kill, free them
     if [ "$FORCE_KILL" = true ]; then
         for p in 4005 3200; do
@@ -458,6 +539,15 @@ start_containers() {
 
 # Function to start DOCS stack
 start_docs_stack() {
+    # DOCS stack - Build context CORRIGIDO!
+    local SKIP_DOCS_STACK=false  # HABILITADO!
+    
+    if [ "$SKIP_DOCS_STACK" = true ]; then
+        log_info "Skipping DOCS stack (disabled due to build errors)"
+        log_info "  Use RAG service (3402) for documentation API instead"
+        return 0
+    fi
+    
     local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.docs.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Docs compose file not found, skipping"
@@ -553,6 +643,14 @@ start_rag_stack() {
 
 # Function to start MONITORING stack
 start_monitoring_stack() {
+    # MONITORING stack - Optional but no conflicts now
+    local SKIP_MONITORING_STACK=false  # HABILITADO!
+    
+    if [ "$SKIP_MONITORING_STACK" = true ]; then
+        log_info "Skipping MONITORING stack (optional, can be added later if needed)"
+        return 0
+    fi
+    
     local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.monitoring.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Monitoring compose file not found, skipping"
@@ -580,6 +678,14 @@ start_monitoring_stack() {
 
 # Function to start TOOLS stack
 start_tools_stack() {
+    # TOOLS stack - Optional
+    local SKIP_TOOLS_STACK=false  # HABILITADO!
+    
+    if [ "$SKIP_TOOLS_STACK" = true ]; then
+        log_info "Skipping TOOLS stack (optional)"
+        return 0
+    fi
+    
     local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tools.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Tools compose file not found, skipping"
@@ -608,6 +714,14 @@ start_tools_stack() {
 
 # Function to start FIRECRAWL stack
 start_firecrawl_stack() {
+    # FIRECRAWL stack - Optional (pode ter conflitos, então deixar como false por enquanto)
+    local SKIP_FIRECRAWL_STACK=true  # Mantém desabilitado (opcional)
+    
+    if [ "$SKIP_FIRECRAWL_STACK" = true ]; then
+        log_info "Skipping FIRECRAWL stack (optional, enable manually if needed)"
+        return 0
+    fi
+    
     local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.firecrawl.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Firecrawl compose file not found, skipping"

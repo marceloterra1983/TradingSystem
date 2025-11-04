@@ -1,0 +1,268 @@
+---
+title: Redis Cache Guide
+sidebar_position: 12
+description: Guide for using and troubleshooting Redis cache layer
+tags:
+  - telegram-gateway
+  - redis
+  - cache
+  - performance
+owner: Backend Team
+lastReviewed: '2025-11-03'
+---
+
+# Redis Cache Layer Guide
+
+## Overview
+
+The Redis cache layer provides **80-90% latency reduction** for Telegram message polling by storing hot data in memory.
+
+```plantuml
+@startuml
+!include /home/marce/Projetos/TradingSystem/docs/content/diagrams/telegram-redis-cache-flow.puml
+@enduml
+```
+
+---
+
+## Cache Architecture
+
+### Three-Tier Storage
+
+**Tier 1: Redis Cache (Hot)** - 1 hour TTL
+- Recent messages
+- Fast polling (<10ms)
+- Automatic expiration
+
+**Tier 2: TimescaleDB (Warm)** - 90 days retention
+- All messages persisted
+- Analytics queries
+- Audit trail
+
+**Tier 3: Backups (Cold)** - Long-term archive
+- pg_dump daily
+- 30-day retention
+
+---
+
+## Redis Key Schema
+
+### Message Hash
+```
+Pattern: telegram:msg:{channel_id}:{message_id}
+TTL: 3600s (1 hour)
+Type: String (JSON)
+
+Example:
+SET telegram:msg:-1001649127710:123456 '{"text":"BUY PETR4...","status":"received"}' EX 3600
+```
+
+### Deduplication Flag
+```
+Pattern: telegram:dedup:{channel_id}:{message_id}
+TTL: 7200s (2 hours)
+Type: String ("1")
+
+Example:
+SET telegram:dedup:-1001649127710:123456 "1" EX 7200
+```
+
+### Channel Recent Messages
+```
+Pattern: telegram:channel:{channel_id}:recent
+TTL: None (member auto-expire)
+Type: Sorted Set (score: timestamp)
+
+Example:
+ZADD telegram:channel:-1001649127710:recent 1730649600000 123456
+```
+
+**Complete documentation:** [redis-schema.md](../../../apps/telegram-gateway/src/cache/redis-schema.md)
+
+---
+
+## Performance Gains
+
+### Before Cache (Database Only)
+```
+Operation: Fetch 100 unprocessed messages
+- SQL query: 50ms
+- Parse results: 5ms
+- Total: 55ms
+```
+
+### After Cache (Redis First)
+```
+Operation: Fetch 100 unprocessed messages
+- Redis ZRANGE: 2ms (get IDs)
+- Redis Pipeline GET: 8ms (fetch messages)
+- Parse results: 1ms
+- Total: 11ms
+
+Performance gain: 80% reduction (55ms → 11ms)
+```
+
+---
+
+## Cache Hit Rate Optimization
+
+### Target: >70% Hit Rate
+
+**Monitor:**
+```bash
+# Calculate hit rate
+docker exec telegram-redis-master redis-cli INFO stats | grep keyspace
+
+# Via Grafana
+# Dashboard: Redis Cluster → Cache Hit Rate panel
+```
+
+**Optimize if <70%:**
+
+#### 1. Increase TTL
+```javascript
+// apps/telegram-gateway/src/cache/RedisTelegramCache.js
+this.HOT_CACHE_TTL = 7200; // 2 hours (was 3600)
+```
+
+#### 2. Increase Memory
+```yaml
+# tools/compose/docker-compose.telegram.yml
+command: >
+  redis-server
+  --maxmemory 2gb  # Was 1gb
+```
+
+#### 3. Warm Cache on Startup
+```javascript
+// Load last 1000 messages from DB to cache
+async warmCache() {
+  const messages = await db.query(`
+    SELECT * FROM telegram_gateway.messages
+    WHERE received_at > NOW() - INTERVAL '1 hour'
+    ORDER BY received_at DESC
+    LIMIT 1000
+  `);
+  
+  for (const msg of messages.rows) {
+    await cache.cacheMessage(msg);
+  }
+}
+```
+
+---
+
+## High Availability
+
+### Redis Sentinel Configuration
+
+**Quorum:** 2 Sentinels must agree on failover
+
+**Failover Process:**
+1. Master becomes unavailable
+2. Sentinel detects failure (5s)
+3. Sentinel promotes replica to master (5s)
+4. Clients reconnect automatically
+5. **Total failover: <10 seconds**
+
+**Monitor Failover:**
+```bash
+# Check Sentinel status
+docker exec telegram-redis-sentinel redis-cli -p 26379 SENTINEL masters
+
+# Check replication
+docker exec telegram-redis-master redis-cli INFO replication
+```
+
+---
+
+## Troubleshooting
+
+### Cache Miss Rate High
+
+**Symptoms:**
+- Hit rate <50%
+- Increased database load
+- Polling latency higher than expected
+
+**Solutions:**
+```bash
+# 1. Check if messages are being cached
+docker exec telegram-redis-master redis-cli KEYS "telegram:msg:*" | wc -l
+
+# 2. Check TTL settings
+docker exec telegram-redis-master redis-cli TTL telegram:msg:-1001649127710:123456
+
+# 3. Check eviction stats
+docker exec telegram-redis-master redis-cli INFO stats | grep evicted
+
+# 4. Verify Gateway is writing to cache
+sudo journalctl -u telegram-gateway | grep "Message cached"
+```
+
+---
+
+### Redis Memory Full
+
+**Symptoms:**
+- `redis_memory_used_bytes` approaching `maxmemory`
+- Eviction rate increasing
+- Performance degradation
+
+**Solutions:**
+```bash
+# 1. Check memory usage
+docker exec telegram-redis-master redis-cli INFO memory
+
+# 2. Clear cache (if needed)
+docker exec telegram-redis-master redis-cli FLUSHDB  # ⚠️ Drastic measure
+
+# 3. Increase memory limit
+# Edit docker-compose.telegram.yml: maxmemory 2gb
+
+# 4. Reduce TTL
+# Edit RedisTelegramCache.js: HOT_CACHE_TTL = 1800 (30 min)
+```
+
+---
+
+### Replication Lag High
+
+**Symptoms:**
+- `redis_replication_lag_seconds` >1s
+- Replica behind master
+
+**Solutions:**
+```bash
+# 1. Check replica health
+docker exec telegram-redis-replica redis-cli INFO replication
+
+# 2. Check network latency between containers
+docker exec telegram-redis-master ping telegram-redis-replica
+
+# 3. Check replica resources
+docker stats telegram-redis-replica
+
+# 4. If persistent, investigate:
+docker logs telegram-redis-replica --tail 100
+```
+
+---
+
+## Best Practices
+
+1. ✅ **Always set TTL** on keys (prevent memory leaks)
+2. ✅ **Use pipelines** for batch operations (reduce round trips)
+3. ✅ **Monitor hit rate** daily (target >70%)
+4. ✅ **Implement fallback** to database (graceful degradation)
+5. ✅ **Use Sentinel** for automatic failover
+6. ✅ **Don't persist** cache (RDB/AOF disabled)
+7. ✅ **Test failover** regularly (chaos engineering)
+
+---
+
+**Related:**
+- [Redis Schema Documentation](../../../apps/telegram-gateway/src/cache/redis-schema.md)
+- [Performance Tuning](./performance-tuning.mdx)
+- [Monitoring Guide](./monitoring-guide.mdx)
+

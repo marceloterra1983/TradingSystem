@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "scan_date": "2025-11-02T04:28:54.573899",
+    "scan_date": "2025-11-03T14:30:11.724024",
     "docs_directory": [
       "docs/content"
     ],
@@ -9,52 +9,42 @@
     "schema": "v2"
   },
   "summary": {
-    "total_files": 223,
-    "files_with_frontmatter": 221,
+    "total_files": 251,
+    "files_with_frontmatter": 249,
     "files_missing_frontmatter": 2,
-    "files_with_issues": 13,
-    "files_incomplete_frontmatter": 11,
+    "files_with_issues": 8,
+    "files_incomplete_frontmatter": 1,
     "issue_counts": {
-      "missing_field": 34,
-      "invalid_value": 2,
-      "invalid_date": 1
+      "invalid_value": 7,
+      "invalid_date": 1,
+      "missing_field": 3
     },
     "owner_distribution": {
       "MCPGuild": 12,
-      "unknown": 11,
-      "BackendGuild": 11,
-      "DocsOps": 85,
+      "BackendGuild": 13,
+      "DocsOps": 95,
+      "Backend Team": 1,
       "ReleaseOps": 1,
-      "DataOps": 4,
+      "DataOps": 5,
+      "ToolingGuild": 38,
       "DevOps": 1,
-      "SupportOps": 4,
-      "FrontendGuild": 15,
+      "SupportOps": 6,
+      "FrontendGuild": 16,
       "ProductOps": 12,
       "PromptOps": 4,
-      "ArchitectureGuild": 21,
-      "ToolingGuild": 35,
-      "OpsGuild": 1,
-      "SecurityOps": 4
+      "ArchitectureGuild": 34,
+      "OpsGuild": 5,
+      "unknown": 1,
+      "SecurityOps": 5
     }
   },
   "freshness_analysis": {
     "outdated_documents": [],
     "threshold_days": 90,
-    "analysis_date": "2025-11-02",
+    "analysis_date": "2025-11-03",
     "date_field": "lastReviewed"
   },
   "results": [
-    {
-      "file": "docs/content/TESTE-FINAL-LOGS-1762032785.md",
-      "has_frontmatter": false,
-      "issues": [
-        {
-          "type": "no_frontmatter",
-          "message": "No YAML frontmatter found"
-        }
-      ],
-      "frontmatter": null
-    },
     {
       "file": "docs/content/agents/agno-agents/flows.mdx",
       "has_frontmatter": true,
@@ -135,17 +125,6 @@
       }
     },
     {
-      "file": "docs/content/agents/mmm.mdx",
-      "has_frontmatter": false,
-      "issues": [
-        {
-          "type": "no_frontmatter",
-          "message": "No YAML frontmatter found"
-        }
-      ],
-      "frontmatter": null
-    },
-    {
       "file": "docs/content/agents/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -162,26 +141,10 @@
     {
       "file": "docs/content/api/API-DOCUMENTATION-GUIDE.mdx",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "API Documentation Guide - TradingSystem",
-        "sidebar_position": 1,
+        "description": "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices",
         "tags": [
           "api",
           "documentation",
@@ -189,11 +152,8 @@
           "rest",
           "guide"
         ],
-        "domain": "api",
-        "type": "guide",
-        "summary": "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices",
-        "status": "active",
-        "last_review": "2025-11-01"
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-11-01"
       }
     },
     {
@@ -323,6 +283,49 @@
         ],
         "owner": "BackendGuild",
         "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/api/rag-services.mdx",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "Backend Team",
+          "allowed": [
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
+          ],
+          "message": "Invalid owner 'Backend Team'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "RAG Services API",
+        "description": "Complete REST API documentation for RAG Services including authentication, collections management, semantic search, and analytics",
+        "tags": [
+          "api",
+          "rag",
+          "rest",
+          "openapi"
+        ],
+        "domain": "api",
+        "type": "api-reference",
+        "summary": "REST API documentation for RAG (Retrieval-Augmented Generation) Services",
+        "status": "active",
+        "owner": "Backend Team",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
       }
     },
     {
@@ -1080,6 +1083,23 @@
       }
     },
     {
+      "file": "docs/content/apps/tp-capital/mtproto-frontend-mockup.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "MTProto Frontend Mockup",
+        "sidebar_position": 12,
+        "description": "Visual walkthrough of the TP Capital page before and after MTProto integration.",
+        "tags": [
+          "apps",
+          "tp-capital",
+          "frontend"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/apps/tp-capital/operations.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -1178,6 +1198,40 @@
         ],
         "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/categories-crud-overview.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace Categories CRUD",
+        "sidebar_position": 10,
+        "description": "Summary of the Workspace categories CRUD implementation and data model.",
+        "tags": [
+          "apps",
+          "workspace",
+          "categories"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/apps/workspace/categories-integration.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Workspace Categories Integration",
+        "sidebar_position": 11,
+        "description": "How the categories CRUD embeds inside the Workspace application experience.",
+        "tags": [
+          "apps",
+          "workspace",
+          "categories"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -1299,6 +1353,28 @@
       }
     },
     {
+      "file": "docs/content/archive/2025-Q4/README.md",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
+    {
+      "file": "docs/content/archive/README.md",
+      "has_frontmatter": false,
+      "issues": [
+        {
+          "type": "no_frontmatter",
+          "message": "No YAML frontmatter found"
+        }
+      ],
+      "frontmatter": null
+    },
+    {
       "file": "docs/content/changelog.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -1344,6 +1420,28 @@
       }
     },
     {
+      "file": "docs/content/database/rag-schema.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Services Database Schema",
+        "description": "Complete database schema documentation for RAG Services including tables, relationships, indexes, and performance optimization",
+        "tags": [
+          "database",
+          "schema",
+          "rag",
+          "timescaledb"
+        ],
+        "domain": "rag-services",
+        "type": "technical-reference",
+        "summary": "Complete database schema for RAG Services with TimescaleDB hypertables, continuous aggregates, and performance optimization",
+        "status": "active",
+        "owner": "DataOps",
+        "lastReviewed": "2025-11-02",
+        "last_review": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/database/retention-backup.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -1376,26 +1474,11 @@
     {
       "file": "docs/content/development/SHARED-MODULES-MIGRATION.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "Shared Modules Migration Report",
         "sidebar_position": 1,
+        "description": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
         "tags": [
           "development",
           "architecture",
@@ -1406,32 +1489,19 @@
         "type": "migration-report",
         "summary": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
         "status": "completed",
+        "owner": "BackendGuild",
+        "lastReviewed": "2025-10-29",
         "last_review": "2025-10-29"
       }
     },
     {
       "file": "docs/content/development/code-quality-checklist.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "Code Quality Checklist",
         "sidebar_position": 5,
+        "description": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
         "tags": [
           "development",
           "quality",
@@ -1442,6 +1512,8 @@
         "type": "guide",
         "summary": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
         "status": "active",
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02",
         "last_review": "2025-11-02"
       }
     },
@@ -1454,18 +1526,18 @@
           "field": "owner",
           "value": "DevOps",
           "allowed": [
-            "MCPGuild",
-            "DocsOps",
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
             "SupportOps",
             "BackendGuild",
             "SecurityOps",
-            "PromptOps",
-            "ToolingGuild",
-            "ArchitectureGuild",
-            "DataOps",
-            "FrontendGuild",
-            "ProductOps",
-            "ReleaseOps"
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
           ],
           "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
         }
@@ -1691,6 +1763,22 @@
         ],
         "owner": "FrontendGuild",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/frontend/guidelines/hard-refresh.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Hard Refresh Checklist",
+        "description": "Steps to force a full reload of cached assets across supported browsers.",
+        "tags": [
+          "frontend",
+          "guidelines",
+          "support"
+        ],
+        "owner": "FrontendGuild",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -2071,26 +2159,11 @@
     {
       "file": "docs/content/reference/adrs/2025-10-28-centralized-database-architecture.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "ADR-008: Centralized Database Architecture",
         "sidebar_position": 8,
+        "description": "Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications",
         "tags": [
           "adr",
           "database",
@@ -2102,6 +2175,8 @@
         "summary": "Migration from multiple isolated TimescaleDB containers to a single centralized instance for all applications",
         "status": "accepted",
         "date": "2025-10-28",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-28",
         "deciders": [
           "System Architect"
         ]
@@ -2125,26 +2200,11 @@
     {
       "file": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "ADR-003: API Gateway Implementation for Centralized Authentication and Routing",
         "date": "2025-11-01",
+        "description": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
         "status": "proposed",
         "tags": [
           "architecture",
@@ -2155,32 +2215,19 @@
         "domain": "infrastructure",
         "type": "adr",
         "summary": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
         "last_review": "2025-11-01"
       }
     },
     {
       "file": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "ADR-005: Test Coverage Strategy - Systematic Quality Improvement",
         "date": "2025-11-02",
+        "description": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
         "status": "proposed",
         "tags": [
           "architecture",
@@ -2191,32 +2238,19 @@
         "domain": "development-process",
         "type": "adr",
         "summary": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02",
         "last_review": "2025-11-02"
       }
     },
     {
       "file": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "ADR-001: Redis Caching Strategy for Collection Stats",
         "sidebar_position": 1,
+        "description": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
         "tags": [
           "adr",
           "rag-services",
@@ -2227,32 +2261,19 @@
         "type": "adr",
         "summary": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
         "status": "accepted",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
         "last_review": "2025-11-01"
       }
     },
     {
       "file": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "ADR-002: File Watcher Auto-Ingestion Architecture",
         "sidebar_position": 2,
+        "description": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
         "tags": [
           "adr",
           "rag-services",
@@ -2263,6 +2284,8 @@
         "type": "adr",
         "summary": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
         "status": "accepted",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
         "last_review": "2025-11-01"
       }
     },
@@ -2446,18 +2469,18 @@
           "field": "owner",
           "value": "OpsGuild",
           "allowed": [
-            "MCPGuild",
-            "DocsOps",
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
             "SupportOps",
             "BackendGuild",
             "SecurityOps",
-            "PromptOps",
-            "ToolingGuild",
-            "ArchitectureGuild",
-            "DataOps",
-            "FrontendGuild",
-            "ProductOps",
-            "ReleaseOps"
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
           ],
           "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
         },
@@ -2855,6 +2878,40 @@
       }
     },
     {
+      "file": "docs/content/tools/ai/claude-commands-ready.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Claude Commands Overview",
+        "sidebar_position": 2,
+        "description": "Summary of the custom Claude CLI commands available for TradingSystem.",
+        "tags": [
+          "ai",
+          "claude",
+          "automation"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/ai/claude-commands-reference.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Claude Commands Reference",
+        "sidebar_position": 3,
+        "description": "Detailed reference for each custom Claude CLI command and supported flags.",
+        "tags": [
+          "ai",
+          "claude",
+          "reference"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/tools/ai/overview.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -2880,6 +2937,7 @@
       "issues": [],
       "frontmatter": {
         "title": "Docusaurus Daily Agent",
+        "sidebar_position": 3,
         "description": "Agent local que resume mudanças diárias no código e atualiza relatórios do Docusaurus.",
         "tags": [
           "automation",
@@ -2888,6 +2946,137 @@
         ],
         "owner": "DocsOps",
         "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/system-quick-start.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "TradingSystem Quick Start",
+        "sidebar_position": 1,
+        "description": "Fast reference to install shortcuts and manage the automation wrappers.",
+        "tags": [
+          "automation",
+          "ops",
+          "cli"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/universal-commands.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Automation Universal Commands",
+        "sidebar_position": 2,
+        "description": "Overview of the start, stop, and status wrappers installed by install-shortcuts.sh.",
+        "tags": [
+          "automation",
+          "shortcuts",
+          "cli"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/automation/workflow-auditoria-completa.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Audit Workflow Blueprint",
+        "sidebar_position": 4,
+        "description": "End to end workflow proposal for auditing TradingSystem with local agents.",
+        "tags": [
+          "automation",
+          "governance",
+          "workflow"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/development/code-quality-commands.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Code Quality Commands",
+        "sidebar_position": 2,
+        "description": "Reference for linting, type checking, testing, and security audit scripts.",
+        "tags": [
+          "development",
+          "quality",
+          "scripts"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -2910,6 +3099,43 @@
       }
     },
     {
+      "file": "docs/content/tools/docker/container-inventory.md",
+      "has_frontmatter": true,
+      "issues": [
+        {
+          "type": "invalid_value",
+          "field": "owner",
+          "value": "OpsGuild",
+          "allowed": [
+            "DataOps",
+            "PromptOps",
+            "ReleaseOps",
+            "ProductOps",
+            "FrontendGuild",
+            "ToolingGuild",
+            "SupportOps",
+            "BackendGuild",
+            "SecurityOps",
+            "MCPGuild",
+            "DocsOps",
+            "ArchitectureGuild"
+          ],
+          "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+        }
+      ],
+      "frontmatter": {
+        "title": "Docker Container Inventory",
+        "description": "Snapshot of core TradingSystem containers with status and roles.",
+        "tags": [
+          "tools",
+          "docker",
+          "ops"
+        ],
+        "owner": "OpsGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/tools/docker/documentation-container.md",
       "has_frontmatter": true,
       "issues": [],
@@ -2923,6 +3149,22 @@
         ],
         "owner": "DocsOps",
         "lastReviewed": "2025-10-27"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/algolia-setup-guide.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Algolia DocSearch Setup",
+        "description": "How to request DocSearch access and configure the crawler for TradingSystem docs.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "search"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -2972,6 +3214,38 @@
       }
     },
     {
+      "file": "docs/content/tools/documentation/docusaurus/deployment-guide.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Documentation Deployment Guide",
+        "description": "Pipeline and automation steps for deploying the Docusaurus site.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "deployment"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/fix-instability.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Fixing Docusaurus Instability",
+        "description": "Root cause analysis and remediation steps for docs dev-server instability.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "stability"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/tools/documentation/docusaurus/install.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -2999,6 +3273,70 @@
         ],
         "owner": "DocsOps",
         "lastReviewed": "2025-10-26"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/ports-strategy.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Ports Strategy",
+        "description": "Port allocation strategy for docs services, API proxy, and previews.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "networking"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/ports-summary.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Ports Summary",
+        "description": "Quick lookup table for documentation related ports and services.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "networking"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/quick-commands.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Quick Commands",
+        "description": "Frequently used npm scripts and helpers for the documentation workspace.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "scripts"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/documentation/docusaurus/troubleshooting-instability.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Docusaurus Instability Troubleshooting",
+        "description": "Checklist to debug recurring issues with the Docusaurus workspace.",
+        "tags": [
+          "tools",
+          "docusaurus",
+          "support"
+        ],
+        "owner": "DocsOps",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -3195,31 +3533,19 @@
     {
       "file": "docs/content/tools/kestra.mdx",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "tags",
-          "message": "Missing required field: tags"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "Kestra",
-        "sidebar_position": 80
+        "sidebar_position": 80,
+        "description": "Kestra workflow orchestration UI embedded interface",
+        "tags": [
+          "tools",
+          "workflow",
+          "orchestration",
+          "kestra"
+        ],
+        "owner": "ToolingGuild",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -3354,26 +3680,11 @@
     {
       "file": "docs/content/tools/rag/architecture.mdx",
       "has_frontmatter": true,
-      "issues": [
-        {
-          "type": "missing_field",
-          "field": "description",
-          "message": "Missing required field: description"
-        },
-        {
-          "type": "missing_field",
-          "field": "owner",
-          "message": "Missing required field: owner"
-        },
-        {
-          "type": "missing_field",
-          "field": "lastReviewed",
-          "message": "Missing required field: lastReviewed"
-        }
-      ],
+      "issues": [],
       "frontmatter": {
         "title": "RAG Services Architecture",
         "sidebar_position": 1,
+        "description": "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment",
         "tags": [
           "rag",
           "architecture",
@@ -3383,11 +3694,53 @@
         "type": "architecture",
         "summary": "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment",
         "status": "active",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-01",
         "last_review": "2025-11-01"
       }
     },
     {
+      "file": "docs/content/tools/rag/integration-guide-rag-crud.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Collections Integration Guide",
+        "sidebar_position": 6,
+        "description": "How to embed the collections management card into LlamaIndexPage.",
+        "tags": [
+          "rag",
+          "frontend",
+          "integration"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/tools/rag/multi-collection-architecture.mdx",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Multi-Collection Architecture",
+        "sidebar_position": 5,
+        "description": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "tags": [
+          "rag",
+          "llamaindex",
+          "qdrant",
+          "embedding"
+        ],
+        "domain": "tools",
+        "type": "technical-spec",
+        "summary": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "status": "active",
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-10-31",
+        "last_review": "2025-10-31"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/qdrant-ha-architecture.mdx",
       "has_frontmatter": true,
       "issues": [
         {
@@ -3407,19 +3760,69 @@
         }
       ],
       "frontmatter": {
-        "title": "Multi-Collection Architecture",
-        "sidebar_position": 5,
+        "title": "Qdrant High Availability Architecture",
+        "sidebar_position": 4,
         "tags": [
-          "rag",
-          "llamaindex",
           "qdrant",
-          "embedding"
+          "high-availability",
+          "infrastructure"
         ],
         "domain": "tools",
-        "type": "technical-spec",
-        "summary": "Architecture for managing multiple Qdrant collections with different embedding models",
+        "type": "architecture",
+        "summary": "Qdrant 3-node HA cluster with Raft consensus and HAProxy load balancing",
         "status": "active",
-        "last_review": "2025-10-31"
+        "last_review": "2025-11-03"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/rag-container-fixed.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Container Fix",
+        "sidebar_position": 7,
+        "description": "Running the collections service in Docker with native access to Ollama.",
+        "tags": [
+          "rag",
+          "docker",
+          "ops"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/refactor-plan-rag-services.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Services Refactor Plan",
+        "sidebar_position": 8,
+        "description": "Breakdown of the work required to split and stabilise LlamaIndexPage.",
+        "tags": [
+          "rag",
+          "frontend",
+          "refactor"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
+      "file": "docs/content/tools/rag/urgent-fix-timeout.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "RAG Collections Timeout Fix",
+        "sidebar_position": 9,
+        "description": "Mitigation plan for the computeCollectionMetrics scroll timeout in Qdrant.",
+        "tags": [
+          "rag",
+          "bugfix",
+          "qdrant"
+        ],
+        "owner": "ArchitectureGuild",
+        "lastReviewed": "2025-11-02"
       }
     },
     {
@@ -3786,6 +4189,22 @@
       }
     },
     {
+      "file": "docs/content/tools/security-config/p0-security-implementation.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "P0 Security Implementation",
+        "description": "Summary of the critical Telegram gateway security fixes executed.",
+        "tags": [
+          "tools",
+          "security",
+          "telegram"
+        ],
+        "owner": "SecurityOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/tools/security-config/risk-limits.mdx",
       "has_frontmatter": true,
       "issues": [],
@@ -3881,6 +4300,22 @@
       }
     },
     {
+      "file": "docs/content/troubleshooting/dashboard-port-issue-fix.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Dashboard Port Fix",
+        "description": "Steps to realign the dashboard API base URL with the 3402 backend port.",
+        "tags": [
+          "troubleshooting",
+          "dashboard",
+          "ports"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-11-02"
+      }
+    },
+    {
       "file": "docs/content/troubleshooting/docsapi-viewer-fix.md",
       "has_frontmatter": true,
       "issues": [],
@@ -3926,96 +4361,31 @@
         "owner": "SupportOps",
         "lastReviewed": "2025-10-27"
       }
+    },
+    {
+      "file": "docs/content/troubleshooting/infinite-loop-fixed.md",
+      "has_frontmatter": true,
+      "issues": [],
+      "frontmatter": {
+        "title": "Collections Infinite Loop Fix",
+        "description": "Resolution for the collection selection render loop in the dashboard.",
+        "tags": [
+          "troubleshooting",
+          "frontend",
+          "collections"
+        ],
+        "owner": "SupportOps",
+        "lastReviewed": "2025-11-02"
+      }
     }
   ],
   "missing_frontmatter": [
-    "docs/content/TESTE-FINAL-LOGS-1762032785.md",
-    "docs/content/agents/mmm.mdx"
+    "docs/content/archive/2025-Q4/README.md",
+    "docs/content/archive/README.md"
   ],
   "incomplete_frontmatter": [
     {
-      "file": "docs/content/api/API-DOCUMENTATION-GUIDE.mdx",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/development/SHARED-MODULES-MIGRATION.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/development/code-quality-checklist.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/reference/adrs/2025-10-28-centralized-database-architecture.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/tools/kestra.mdx",
-      "missing_fields": [
-        "description",
-        "tags",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/tools/rag/architecture.mdx",
-      "missing_fields": [
-        "description",
-        "owner",
-        "lastReviewed"
-      ]
-    },
-    {
-      "file": "docs/content/tools/rag/multi-collection-architecture.mdx",
+      "file": "docs/content/tools/rag/qdrant-ha-architecture.mdx",
       "missing_fields": [
         "description",
         "owner",
@@ -4025,22 +4395,42 @@
   ],
   "invalid_values": [
     {
+      "file": "docs/content/api/rag-services.mdx",
+      "field": "owner",
+      "value": "Backend Team",
+      "allowed": [
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
+      ],
+      "message": "Invalid owner 'Backend Team'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
       "file": "docs/content/development/npm-run-dev-pattern.md",
       "field": "owner",
       "value": "DevOps",
       "allowed": [
-        "MCPGuild",
-        "DocsOps",
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
         "SupportOps",
         "BackendGuild",
         "SecurityOps",
-        "PromptOps",
-        "ToolingGuild",
-        "ArchitectureGuild",
-        "DataOps",
-        "FrontendGuild",
-        "ProductOps",
-        "ReleaseOps"
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
       ],
       "message": "Invalid owner 'DevOps'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
     },
@@ -4049,18 +4439,18 @@
       "field": "owner",
       "value": "OpsGuild",
       "allowed": [
-        "MCPGuild",
-        "DocsOps",
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
         "SupportOps",
         "BackendGuild",
         "SecurityOps",
-        "PromptOps",
-        "ToolingGuild",
-        "ArchitectureGuild",
-        "DataOps",
-        "FrontendGuild",
-        "ProductOps",
-        "ReleaseOps"
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
       ],
       "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
     },
@@ -4070,6 +4460,86 @@
       "value": "TBD",
       "allowed": null,
       "message": "Invalid date format 'TBD'. Expected: YYYY-MM-DD"
+    },
+    {
+      "file": "docs/content/tools/automation/system-quick-start.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/automation/universal-commands.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/automation/workflow-auditoria-completa.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
+    },
+    {
+      "file": "docs/content/tools/docker/container-inventory.md",
+      "field": "owner",
+      "value": "OpsGuild",
+      "allowed": [
+        "DataOps",
+        "PromptOps",
+        "ReleaseOps",
+        "ProductOps",
+        "FrontendGuild",
+        "ToolingGuild",
+        "SupportOps",
+        "BackendGuild",
+        "SecurityOps",
+        "MCPGuild",
+        "DocsOps",
+        "ArchitectureGuild"
+      ],
+      "message": "Invalid owner 'OpsGuild'. Allowed: ArchitectureGuild, BackendGuild, DataOps, DocsOps, FrontendGuild, MCPGuild, ProductOps, PromptOps, ReleaseOps, SecurityOps, SupportOps, ToolingGuild"
     }
   ]
 }

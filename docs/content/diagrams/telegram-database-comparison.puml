@@ -1,0 +1,142 @@
+@startuml Telegram Database Architecture - Current vs Proposed
+!theme plain
+
+title Telegram Database Architecture Comparison
+
+left to right direction
+
+package "CURRENT ARCHITECTURE (B+ / 85)" {
+    
+    rectangle "Telegram\nServers" as TelegramCurrent <<external>>
+    
+    rectangle "Gateway\nMTProto\n(Port 4006)" as GatewayCurrent <<service>> #LightGreen
+    
+    database "TimescaleDB\n(Only)\n\n• Hypertable\n• Compression 5:1\n• Retention 90d\n• ~10GB/month" as TimescaleCurrent <<database>> #LightYellow
+    
+    rectangle "TP Capital\nPolling Worker\n(Port 4005)\n\nPoll every 5s" as PollingCurrent <<consumer>> #LightCoral
+    
+    TelegramCurrent -down-> GatewayCurrent : "MTProto\n< 500ms"
+    GatewayCurrent -down-> TimescaleCurrent : "INSERT\n< 100ms"
+    PollingCurrent -up-> TimescaleCurrent : "SELECT\n50ms"
+    PollingCurrent -up-> TimescaleCurrent : "UPDATE\n200ms"
+    
+    note right of TimescaleCurrent
+      **Performance:**
+      • Write: < 100ms ✅
+      • Read: 50ms ⚠️
+      • Update: 200ms ⚠️
+      • Dedup: 20ms ⚠️
+      
+      **Issues:**
+      • No cache layer
+      • Updates expensive
+      • Polling overhead
+      • Direct coupling
+    end note
+    
+    note bottom of GatewayCurrent
+      **Latency Breakdown:**
+      1. Receive: < 500ms
+      2. Write DB: 100ms
+      3. Poll interval: 5000ms
+      4. Read DB: 50ms
+      5. Dedup check: 20ms
+      6. Update DB: 200ms
+      **TOTAL: ~5.9 seconds**
+    end note
+}
+
+package "PROPOSED ARCHITECTURE (A / 95)" {
+    
+    rectangle "Telegram\nServers" as TelegramProposed <<external>>
+    
+    rectangle "Gateway\nMTProto\n(Port 4006)" as GatewayProposed <<service>> #LightGreen
+    
+    rectangle "Redis Cluster\n(Hot Cache)\n\n• TTL: 1 hour\n• Dedup cache: 2h\n• Size: ~1GB" as Redis <<cache>> #Orange
+    
+    queue "RabbitMQ\n(Event Bus)\n\n• Pub/Sub\n• Persistence\n• Retry logic" as RabbitMQ <<queue>> #Cyan
+    
+    database "TimescaleDB\n(Persistent)\n\n• Hypertable\n• Compression 5:1\n• Retention 90d\n• Analytics" as TimescaleProposed <<database>> #LightYellow
+    
+    rectangle "TP Capital\nConsumer\n(Port 4005)\n\nQueue subscriber" as PollingProposed <<consumer>> #LightCoral
+    
+    TelegramProposed -down-> GatewayProposed : "MTProto\n< 500ms"
+    
+    GatewayProposed -down-> Redis : "1. Cache\n5ms"
+    GatewayProposed -down-> RabbitMQ : "2. Publish\n5ms"
+    GatewayProposed -down-> TimescaleProposed : "3. Persist\n(async)\n100ms"
+    
+    RabbitMQ -down-> PollingProposed : "Subscribe\n< 5ms"
+    
+    PollingProposed -up-> Redis : "Read\n10ms"
+    PollingProposed -up-> Redis : "Dedup\n2ms"
+    PollingProposed -up-> Redis : "Update\n5ms"
+    
+    note right of Redis
+      **Hot Data:**
+      • Recent messages (1h)
+      • Dedup cache (2h)
+      • Fast lookups (< 10ms)
+      • Auto-expiration (TTL)
+      
+      **Cost:** +$150/month
+    end note
+    
+    note right of RabbitMQ
+      **Decoupling:**
+      • Pub/Sub pattern
+      • Multiple consumers
+      • Message persistence
+      • Retry + DLQ
+      
+      **Cost:** +$180/month
+    end note
+    
+    note right of TimescaleProposed
+      **Long-term Storage:**
+      • Append-only writes
+      • Compression (5:1)
+      • Analytics queries
+      • Audit trail
+      
+      **Cost:** $200/month
+    end note
+    
+    note bottom of GatewayProposed
+      **Latency Breakdown:**
+      1. Receive: < 500ms
+      2. Cache write: 5ms
+      3. Queue publish: 5ms
+      4. Queue consume: < 5ms
+      5. Cache read: 10ms
+      6. Dedup check: 2ms
+      7. Cache update: 5ms
+      **TOTAL: ~530ms (91% faster)**
+    end note
+}
+
+legend right
+  **Performance Comparison**
+  
+  |= Metric |= Current |= Proposed |= Improvement |
+  | End-to-End | 5.9s | 530ms | ↓ 91% |
+  | Polling | 50ms | 10ms | ↓ 80% |
+  | Dedup | 20ms | 2ms | ↓ 90% |
+  | Update | 200ms | 5ms | ↓ 97% |
+  | Throughput | 20 msg/s | 50 msg/s | ↑ 150% |
+  | DB Load | 100% | 30% | ↓ 70% |
+  
+  **Cost Comparison**
+  
+  |= Item |= Current |= Proposed |= Delta |
+  | TimescaleDB | $200 | $200 | $0 |
+  | Redis | $0 | $150 | +$150 |
+  | RabbitMQ | $0 | $180 | +$180 |
+  | **TOTAL** | **$200** | **$530** | **+$330** |
+  
+  **ROI:** Break-even at 50 msg/s
+  (cheaper than scaling current architecture)
+end legend
+
+@enduml
+

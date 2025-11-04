@@ -1,0 +1,174 @@
+# ==============================================================================
+# Prometheus Alerting Rules for Telegram Stack
+# ==============================================================================
+
+groups:
+  # ===========================================================================
+  # Critical Alerts (P0 - Immediate Response Required)
+  # ===========================================================================
+  - name: telegram_critical
+    interval: 30s
+    rules:
+      - alert: TelegramGatewayDown
+        expr: up{job="telegram-gateway"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: mtproto-gateway
+          team: devops
+        annotations:
+          summary: "Telegram Gateway (MTProto) is down"
+          description: "Native MTProto service has been unreachable for {{ $value }} minutes. No messages are being ingested."
+          runbook: "https://docs.tradingsystem.local/apps/telegram-gateway/troubleshooting#gateway-down"
+          action: "Check systemd status: sudo systemctl status telegram-gateway"
+
+      - alert: HighPollingLag
+        expr: tp_capital_polling_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: critical
+          component: tp-capital-worker
+          team: backend
+        annotations:
+          summary: "High polling lag detected in TP Capital"
+          description: "Polling lag is {{ $value }}s (threshold: 30s). Messages may be significantly delayed."
+          runbook: "https://docs.tradingsystem.local/apps/tp-capital/troubleshooting#high-lag"
+          action: "Check TP Capital logs and database connection"
+
+      - alert: RedisClusterDown
+        expr: redis_up{job="telegram-redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: redis-cache
+          team: devops
+        annotations:
+          summary: "Redis cache cluster is unavailable"
+          description: "Cache layer has been down for {{ $value }} minutes. System degraded to database-only mode (50ms latency)."
+          runbook: "https://docs.tradingsystem.local/apps/telegram-gateway/redis-cache-guide#cluster-down"
+          action: "Check Redis containers: docker ps | grep telegram-redis"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pgbouncer_pools_cl_waiting > 10
+        for: 2m
+        labels:
+          severity: critical
+          component: pgbouncer
+          team: database
+        annotations:
+          summary: "Database connection pool saturated"
+          description: "{{ $value }} clients are waiting for database connections. Pool may be exhausted."
+          runbook: "https://docs.tradingsystem.local/apps/telegram-gateway/performance-tuning#pool-exhausted"
+          action: "Increase PgBouncer pool size or investigate slow queries"
+
+  # ===========================================================================
+  # Warning Alerts (P1 - Action Required Within Hours)
+  # ===========================================================================
+  - name: telegram_warning
+    interval: 1m
+    rules:
+      - alert: MessageQueueBuilding
+        expr: tp_capital_messages_waiting > 500
+        for: 10m
+        labels:
+          severity: warning
+          component: tp-capital-worker
+          team: backend
+        annotations:
+          summary: "Message queue building up in Gateway database"
+          description: "{{ $value }} messages waiting to be processed. May indicate processing bottleneck."
+          action: "Check TP Capital Worker performance and database health"
+
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            rate(redis_keyspace_hits_total[5m]) / 
+            (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+          ) < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          component: redis-cache
+          team: backend
+        annotations:
+          summary: "Low Redis cache hit rate detected"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 50%). Expected >70%."
+          action: "Check cache TTL settings and message volume"
+
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/var/lib/postgresql/data"} /
+            node_filesystem_size_bytes{mountpoint="/var/lib/postgresql/data"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: timescaledb
+          team: devops
+        annotations:
+          summary: "Low disk space on TimescaleDB volume"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining."
+          action: "Clean up old data or expand volume size"
+
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            container_memory_usage_bytes{name="telegram-timescale"} /
+            container_spec_memory_limit_bytes{name="telegram-timescale"}
+          ) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: timescaledb
+          team: database
+        annotations:
+          summary: "High memory usage on TimescaleDB container"
+          description: "Memory usage is {{ $value | humanizePercentage }} of limit (threshold: 80%)."
+          action: "Consider increasing memory limit or optimizing queries"
+
+  # ===========================================================================
+  # Performance Degradation Alerts
+  # ===========================================================================
+  - name: telegram_performance
+    interval: 1m
+    rules:
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95, 
+            rate(tp_capital_db_query_duration_seconds_bucket[5m])
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: timescaledb
+          team: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "P95 query latency is {{ $value }}s (threshold: 100ms)."
+          action: "Check pg_stat_statements for slow queries"
+
+      - alert: HighRedisEvictionRate
+        expr: rate(redis_evicted_keys_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: redis-cache
+          team: backend
+        annotations:
+          summary: "High Redis key eviction rate"
+          description: "Redis is evicting {{ $value }} keys/sec. May need more memory."
+          action: "Increase Redis maxmemory or adjust TTL policies"
+
+      - alert: RabbitMQQueueDepthHigh
+        expr: rabbitmq_queue_messages_ready > 1000
+        for: 10m
+        labels:
+          severity: warning
+          component: rabbitmq
+          team: backend
+        annotations:
+          summary: "RabbitMQ queue depth is high"
+          description: "{{ $value }} messages in ready state. Consumers may be slow."
+          action: "Check consumer health and processing rate"
+

@@ -58,7 +58,10 @@ export interface GpuPolicyResponse {
 const DEFAULT_QUERY_URL = 'http://localhost:8202';
 const DEFAULT_PROXY_PATH = '/api/v1/rag';
 
-export type ServiceMode = 'auto' | 'proxy' | 'direct';
+// UPDATED 2025-11-03: Support for Kong Gateway
+const KONG_GATEWAY_URL = import.meta.env.VITE_KONG_GATEWAY_URL || '';
+
+export type ServiceMode = 'auto' | 'proxy' | 'direct' | 'kong';
 let overrideMode: ServiceMode = 'auto';
 
 export function setMode(mode: ServiceMode) {
@@ -87,19 +90,33 @@ function resolveEndpoints(): EndpointPlan {
     apiBase && apiBase.length > 0
       ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
       : DEFAULT_PROXY_PATH;
+  
+  // UPDATED 2025-11-03: Kong Gateway support
+  const kong = KONG_GATEWAY_URL 
+    ? `${KONG_GATEWAY_URL.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
+    : '';
+  
   const preferProxy = Boolean(proxy);
+  const preferKong = Boolean(kong);
 
+  // Priority: kong > proxy > direct
+  if (overrideMode === 'kong' && kong) {
+    return { primary: kong, secondary: proxy || direct, primaryKind: 'proxy' };
+  }
   if (overrideMode === 'proxy' && proxy) {
     return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
   }
   if (overrideMode === 'direct') {
-    return { primary: direct, secondary: proxy, primaryKind: 'direct' };
+    return { primary: direct, secondary: proxy || kong, primaryKind: 'direct' };
   }
 
+  // Auto mode: prefer Kong > unified proxy > proxy > direct
+  if (preferKong) {
+    return { primary: kong, secondary: proxy || direct, primaryKind: 'proxy' };
+  }
   if (useUnified && proxy) {
     return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
   }
-
   if (preferProxy) {
     return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
   }

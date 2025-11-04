@@ -6,6 +6,10 @@ import {
   Activity,
   Database,
   Wifi,
+  ShieldCheck,
+  Clock,
+  Hash,
+  Info,
 } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
@@ -21,6 +25,11 @@ interface SimpleStatusCardProps {
   };
   session?: {
     exists?: boolean;
+    path?: string;
+    sizeBytes?: number;
+    updatedAt?: string;
+    hash?: string;
+    ageMs?: number;
   };
   isLoading: boolean;
   onRefresh: () => void;
@@ -43,6 +52,24 @@ export function SimpleStatusCard({
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     return `${hours}h ${mins}m`;
+  };
+
+  const formatAge = (ms?: number) => {
+    if (!ms) return '—';
+    const hours = Math.floor(ms / 3600000);
+    const days = Math.floor(hours / 24);
+    if (days > 0) return `${days}d ${hours % 24}h`;
+    if (hours > 0) return `${hours}h`;
+    return `${Math.floor(ms / 60000)}min`;
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    try {
+      return new Date(dateStr).toLocaleString('pt-BR');
+    } catch {
+      return dateStr;
+    }
   };
 
   return (
@@ -127,25 +154,72 @@ export function SimpleStatusCard({
             </div>
           </div>
 
-          {/* Session */}
-          <div className="rounded-lg border p-4">
+          {/* Session - Unified with detailed info */}
+          <div className="rounded-lg border p-4 md:col-span-2">
             <div className="flex items-center gap-2 mb-3">
               {hasSession ? (
-                <Activity className="h-5 w-5 text-emerald-500" />
+                <ShieldCheck className="h-5 w-5 text-emerald-500" />
               ) : (
-                <Activity className="h-5 w-5 text-red-500" />
+                <ShieldCheck className="h-5 w-5 text-red-500" />
               )}
-              <span className="font-semibold">Sessão</span>
+              <span className="font-semibold">Sessão MTProto</span>
             </div>
-            <div className="space-y-1 text-sm">
-              <p className="text-muted-foreground">
-                <Badge variant={hasSession ? 'default' : 'outline'}>
-                  {hasSession ? 'Ativa' : 'Ausente'}
+            
+            <div className="space-y-3">
+              {/* Status Badge */}
+              <div>
+                <Badge
+                  variant={hasSession ? 'default' : 'outline'}
+                  className={hasSession ? 'bg-emerald-500' : ''}
+                >
+                  {hasSession ? 'Sessão Ativa' : 'Sessão Ausente'}
                 </Badge>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {hasSession ? 'Arquivo encontrado' : 'Autenticar necessário'}
-              </p>
+              </div>
+
+              {hasSession ? (
+                <div className="space-y-2 text-sm">
+                  {/* Session Details */}
+                  {session?.hash && (
+                    <div className="flex items-center gap-2">
+                      <Hash className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground text-xs">Hash:</span>
+                      <code className="text-xs font-mono">{session.hash}</code>
+                    </div>
+                  )}
+
+                  {session?.updatedAt && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground text-xs">Atualizado:</span>
+                      <span className="text-xs">{formatDate(session.updatedAt)}</span>
+                    </div>
+                  )}
+
+                  {session?.ageMs && (
+                    <div className="flex items-center gap-2">
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-muted-foreground text-xs">Idade:</span>
+                      <span className="text-xs">{formatAge(session.ageMs)}</span>
+                    </div>
+                  )}
+
+                  {session?.sizeBytes && (
+                    <div className="text-xs text-muted-foreground">
+                      Tamanho: {session.sizeBytes} bytes
+                    </div>
+                  )}
+
+                  {session?.path && (
+                    <div className="text-xs text-muted-foreground break-all">
+                      Arquivo: {session.path}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Autenticação necessária - execute authenticate-interactive.sh
+                </p>
+              )}
             </div>
           </div>
         </div>

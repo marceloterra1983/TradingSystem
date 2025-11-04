@@ -36,6 +36,7 @@ import type {
   CollectionFormState,
   FormErrors,
 } from '../../types/collections';
+// Quick Win P1-3: Validation integrada!
 
 /**
  * Component props
@@ -142,7 +143,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
    */
   useEffect(() => {
     if (open) {
-      console.log('🔍 [CollectionFormDialog] Initializing form:', { mode });
+      // console.log('🔍 [CollectionFormDialog] Initializing form:', { mode });
 
       if (mode === 'edit' && collection) {
         setFormState({
@@ -257,10 +258,6 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
    * Handle submit
    */
   const handleSubmit = async () => {
-    console.log('🚀 [CollectionFormDialog] handleSubmit started', {
-      mode,
-      formState,
-    });
 
     // Validate form
     const validationErrors = validateForm(formState, mode);
@@ -270,12 +267,11 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
       return;
     }
 
-    console.log('✅ Validation passed, starting submission...');
+    // console.log('✅ Validation passed, starting submission...');
     setIsSubmitting(true);
 
     try {
-      console.log('📤 Calling onSubmit...');
-      const startTime = Date.now();
+      // console.log('📤 Calling onSubmit...');
 
       // Add timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) =>
@@ -283,9 +279,6 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
       );
 
       await Promise.race([onSubmit(formState), timeoutPromise]);
-
-      const duration = Date.now() - startTime;
-      console.log(`✅ onSubmit completed in ${duration}ms`);
 
       onClose();
     } catch (error) {
@@ -295,7 +288,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
       );
       // Error handling is done by parent component
     } finally {
-      console.log('🔄 Resetting isSubmitting to false');
+      // console.log('🔄 Resetting isSubmitting to false');
       setIsSubmitting(false);
     }
   };

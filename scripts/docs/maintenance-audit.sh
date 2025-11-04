@@ -1,8 +1,8 @@
 #!/bin/bash
 # Documentation Maintenance and Quality Audit System
 # Part of TradingSystem Documentation Governance
-# Version: 1.0.0
-# Last Updated: 2025-10-30
+# Version: 1.1.0
+# Last Updated: 2025-11-03
 
 set -euo pipefail
 
@@ -15,7 +15,8 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+PROJECT_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 DOCS_CONTENT_DIR="${PROJECT_ROOT}/docs/content"
 DOCS_GOVERNANCE_DIR="${PROJECT_ROOT}/docs/governance"
 REPORT_DIR="${PROJECT_ROOT}/docs/reports"
@@ -27,11 +28,17 @@ STALE_DAYS=90
 MIN_WORDS=50
 MAX_LINE_LENGTH=120
 
+# CI configuration
+CI_MODE=false
+CI_THRESHOLD=10
+
 # Statistics
 total_files=0
 stale_files=0
 short_files=0
 missing_frontmatter=0
+invalid_owner_count=0
+invalid_last_reviewed=0
 broken_links=0
 issues_found=0
 
@@ -144,36 +151,81 @@ validate_frontmatter() {
 
     echo -e "### Frontmatter Validation\n" >> "${REPORT_FILE}"
 
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "- ❌ python3 is required for frontmatter validation but is not available." >> "${REPORT_FILE}"
+        log_error "python3 not available; skipping frontmatter validation."
+        ((issues_found++))
+        return
+    fi
+
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "- ❌ jq is required to parse validation output but is not installed." >> "${REPORT_FILE}"
+        log_error "jq not available; skipping frontmatter validation."
+        ((issues_found++))
+        return
+    fi
+
+    local validation_script="${PROJECT_ROOT}/scripts/docs/validate-frontmatter.py"
+    if [[ ! -f "${validation_script}" ]]; then
+        echo "- ❌ Validation script not found at ${validation_script}" >> "${REPORT_FILE}"
+        log_error "Validation script missing; cannot validate frontmatter."
+        ((issues_found++))
+        return
+    fi
+
+    local validation_report="${REPORT_DIR}/frontmatter-validation-${TIMESTAMP}.json"
+    log_info "Running Python frontmatter validator..."
+    if python3 "${validation_script}" --schema v2 --docs-dir "${DOCS_CONTENT_DIR}" --output "${validation_report}"; then
+        log_success "Frontmatter validator completed."
+    else
+        local validator_exit=$?
+        log_warning "Frontmatter validator reported issues (exit code ${validator_exit}). Continuing with report generation."
+    fi
+
+    if [[ ! -f "${validation_report}" ]]; then
+        echo "- ❌ Validation report was not generated (expected ${validation_report})." >> "${REPORT_FILE}"
+        log_error "Frontmatter validation report missing."
+        ((issues_found++))
+        return
+    fi
+
     local missing_list="${REPORT_DIR}/missing-frontmatter-${TIMESTAMP}.txt"
+    local invalid_owner_list="${REPORT_DIR}/invalid-owners-${TIMESTAMP}.txt"
+    local invalid_last_reviewed_list="${REPORT_DIR}/invalid-last-reviewed-${TIMESTAMP}.txt"
     > "${missing_list}"
+    > "${invalid_owner_list}"
+    > "${invalid_last_reviewed_list}"
 
-    local required_fields=("title" "tags" "domain" "type" "status")
+    local missing_only
+    missing_only=$(jq '[.missing_frontmatter[]?] | length' "${validation_report}")
+    local incomplete_count
+    incomplete_count=$(jq '[.incomplete_frontmatter[]?] | length' "${validation_report}")
+    missing_frontmatter=$((missing_only + incomplete_count))
 
-    while IFS= read -r file; do
-        local has_frontmatter=false
-        local missing_fields=()
+    invalid_owner_count=$(jq '[.invalid_values[]? | select(.field=="owner")] | length' "${validation_report}")
+    invalid_last_reviewed=$(jq '[.invalid_values[]? | select(.field=="lastReviewed" or .field=="last_review")] | length' "${validation_report}")
 
-        # Check if file has frontmatter
-        if head -1 "$file" | grep -q "^---$"; then
-            has_frontmatter=true
+    jq -r '
+        .missing_frontmatter[]? | "\(.): missing frontmatter"
+    ' "${validation_report}" >> "${missing_list}"
 
-            # Check for required fields
-            for field in "${required_fields[@]}"; do
-                if ! grep -q "^${field}:" "$file"; then
-                    missing_fields+=("$field")
-                fi
-            done
-        else
-            missing_fields=("${required_fields[@]}")
-        fi
+    jq -r '
+        .incomplete_frontmatter[]? | "\(.file): missing \(.missing_fields | join(", "))"
+    ' "${validation_report}" >> "${missing_list}"
 
-        if [ ${#missing_fields[@]} -gt 0 ]; then
-            echo "$file: missing ${missing_fields[*]}" >> "${missing_list}"
-            ((missing_frontmatter++)) || true
-        fi
-    done < <(find "${DOCS_CONTENT_DIR}" -type f \( -name "*.md" -o -name "*.mdx" \) 2>/dev/null)
+    jq -r '
+        .invalid_values[]?
+        | select(.field=="owner")
+        | "\(.file): owner '\''\(.value // "unknown")'\'' not in allowed list"
+    ' "${validation_report}" >> "${invalid_owner_list}"
 
-    if [ "$missing_frontmatter" -gt 0 ]; then
+    jq -r '
+        .invalid_values[]?
+        | select(.field=="lastReviewed" or .field=="last_review")
+        | "\(.file): invalid lastReviewed '\''\(.value // "unknown")'\''"
+    ' "${validation_report}" >> "${invalid_last_reviewed_list}"
+
+    if [ "${missing_frontmatter}" -gt 0 ]; then
         echo "- ⚠️ **Files with incomplete frontmatter**: ${missing_frontmatter}" >> "${REPORT_FILE}"
         echo "- **Details**: See \`missing-frontmatter-${TIMESTAMP}.txt\`" >> "${REPORT_FILE}"
         log_warning "Found ${missing_frontmatter} files with incomplete frontmatter"
@@ -181,6 +233,26 @@ validate_frontmatter() {
     else
         echo "- ✅ **All files have complete frontmatter**" >> "${REPORT_FILE}"
         log_success "All files have complete frontmatter"
+    fi
+
+    if [ "$invalid_owner_count" -gt 0 ]; then
+        echo "- ⚠️ **Files with invalid owners**: ${invalid_owner_count}" >> "${REPORT_FILE}"
+        echo "- **Details**: See \`invalid-owners-${TIMESTAMP}.txt\`" >> "${REPORT_FILE}"
+        log_warning "Found ${invalid_owner_count} files with invalid owners"
+        ((issues_found += invalid_owner_count))
+    else
+        echo "- ✅ **All owners match the approved ownership list**" >> "${REPORT_FILE}"
+        log_success "All owners are valid"
+    fi
+
+    if [ "$invalid_last_reviewed" -gt 0 ]; then
+        echo "- ⚠️ **Files with invalid lastReviewed dates**: ${invalid_last_reviewed}" >> "${REPORT_FILE}"
+        echo "- **Details**: See \`invalid-last-reviewed-${TIMESTAMP}.txt\`" >> "${REPORT_FILE}"
+        log_warning "Found ${invalid_last_reviewed} files with invalid lastReviewed dates"
+        ((issues_found += invalid_last_reviewed))
+    else
+        echo "- ✅ **All lastReviewed fields use YYYY-MM-DD format**" >> "${REPORT_FILE}"
+        log_success "All lastReviewed fields use the correct format"
     fi
 
     echo "" >> "${REPORT_FILE}"
@@ -256,10 +328,35 @@ validate_internal_links() {
 
                 # Resolve relative path
                 local dir=$(dirname "$file")
-                local target="${dir}/${href}"
+                local clean_href="${href%%#*}"
+                clean_href="${clean_href%%\?*}"
+
+                if [[ -z "${clean_href}" ]]; then
+                    continue
+                fi
+
+                local target=""
+                if [[ "${clean_href}" == /* ]]; then
+                    local root_candidate="${DOCS_CONTENT_DIR}${clean_href}"
+                    if [[ -e "${root_candidate}" ]]; then
+                        target="${root_candidate}"
+                    elif [[ -e "${root_candidate}.md" ]]; then
+                        target="${root_candidate}.md"
+                    elif [[ -e "${root_candidate}.mdx" ]]; then
+                        target="${root_candidate}.mdx"
+                    else
+                        # Treat as site-root slug; skip to avoid false positives
+                        continue
+                    fi
+                else
+                    target="${dir}/${clean_href}"
+                fi
+
+                local normalized_target
+                normalized_target=$(realpath -m "${target}" 2>/dev/null || printf '%s' "${target}")
 
                 # Check if target exists
-                if [ ! -e "$target" ]; then
+                if [ ! -e "${normalized_target}" ]; then
                     echo "$file: broken link to $href" >> "${broken_list}"
                     ((broken_links++)) || true
                 fi
@@ -369,6 +466,8 @@ generate_summary() {
 | Stale files (>90 days) | ${stale_files} |\\
 | Short files (<50 words) | ${short_files} |\\
 | Incomplete frontmatter | ${missing_frontmatter} |\\
+| Invalid owners | ${invalid_owner_count} |\\
+| Invalid lastReviewed dates | ${invalid_last_reviewed} |\\
 | Broken internal links | ${broken_links} |\\
 | **Total issues** | **${issues_found}** |\\
 " "${REPORT_FILE}"
@@ -380,6 +479,8 @@ generate_summary() {
 
 ### Priority 1 (Critical)
 $([ "$missing_frontmatter" -gt 0 ] && echo "- ⚠️ Fix ${missing_frontmatter} files with incomplete frontmatter" || echo "- ✅ No critical issues")
+$([ "$invalid_owner_count" -gt 0 ] && echo "- ⚠️ Resolve ${invalid_owner_count} files with invalid owners" || echo "")
+$([ "$invalid_last_reviewed" -gt 0 ] && echo "- ⚠️ Correct ${invalid_last_reviewed} files with invalid lastReviewed dates" || echo "")
 $([ "$broken_links" -gt 0 ] && echo "- ⚠️ Repair ${broken_links} broken internal links" || echo "")
 
 ### Priority 2 (Important)
@@ -403,7 +504,7 @@ $([ "$short_files" -gt 5 ] && echo "- ⚠️ Expand ${short_files} short documen
 ---
 
 **Report Generated**: $(date '+%Y-%m-%d %H:%M:%S')
-**Audit Version**: 1.0.0
+**Audit Version**: 1.1.0
 **Automation**: TradingSystem Documentation Maintenance System
 
 EOF
@@ -413,6 +514,27 @@ EOF
 main() {
     log_info "Starting Documentation Maintenance Audit..."
     echo ""
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --ci-mode)
+                CI_MODE=true
+                shift
+                ;;
+            --ci-threshold)
+                if [[ $# -lt 2 ]]; then
+                    log_error "Missing value for --ci-threshold"
+                    exit 1
+                fi
+                CI_THRESHOLD="$2"
+                shift 2
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
 
     init_report
     audit_content_quality
@@ -439,6 +561,16 @@ main() {
     echo -e "${CYAN}║${NC} Broken links:          ${broken_links}"
     echo -e "${CYAN}╚═══════════════════════════════════════╝${NC}"
     echo ""
+
+    if [ "${CI_MODE}" = true ]; then
+        if [ "${issues_found}" -gt "${CI_THRESHOLD}" ]; then
+            log_error "CI Mode: Found ${issues_found} issues (threshold: ${CI_THRESHOLD})"
+            exit 1
+        else
+            log_success "CI Mode: Issues within threshold (${issues_found}/${CI_THRESHOLD})"
+            exit 0
+        fi
+    fi
 }
 
 # Run main function

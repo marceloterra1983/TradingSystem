@@ -1,0 +1,351 @@
+---
+title: Hybrid Deployment Guide
+sidebar_position: 9
+description: Complete guide for deploying Telegram Gateway in hybrid architecture
+tags:
+  - telegram-gateway
+  - deployment
+  - hybrid
+  - docker
+  - systemd
+owner: DevOps
+lastReviewed: '2025-11-03'
+---
+
+# Telegram Gateway - Hybrid Deployment Guide
+
+## Architecture Overview
+
+The Telegram Gateway uses **hybrid architecture** combining:
+- **1 Native Service** (MTProto Gateway via systemd)
+- **11 Docker Containers** (Data layer + Monitoring stack)
+
+```plantuml
+@startuml
+!include /home/marce/Projetos/TradingSystem/docs/content/diagrams/telegram-hybrid-architecture.puml
+@enduml
+```
+
+---
+
+## Why Hybrid Architecture?
+
+### Native MTProto Service
+**Advantages:**
+- ✅ **Session Security**: Direct filesystem access (no Docker volume risk)
+- ✅ **Performance**: Zero containerization overhead
+- ✅ **Fast Restart**: 2-5 seconds (vs 30s for containers)
+- ✅ **Debugging**: Direct access to logs and process
+
+### Containerized Data Layer
+**Advantages:**
+- ✅ **Isolation**: Dedicated resources per service
+- ✅ **Scalability**: Independent scaling (Redis, TimescaleDB)
+- ✅ **Portability**: Easy deployment across hosts
+- ✅ **Monitoring**: Standardized metrics collection
+
+---
+
+## Prerequisites
+
+### System Requirements
+- **OS:** Linux/WSL2 (Ubuntu 20.04+ recommended)
+- **Docker:** v24.0+ with Compose v2.0+
+- **Node.js:** v18+ (for native service)
+- **RAM:** 8GB minimum (16GB recommended)
+- **Disk:** 20GB free space minimum
+- **Network:** Stable internet for Telegram MTProto
+
+### Required Accounts
+- Telegram API credentials (`api_id`, `api_hash` from https://my.telegram.org/apps)
+- Phone number for Telegram authentication
+- 2FA password (if enabled on Telegram account)
+
+---
+
+## Installation
+
+### Step 1: Clone Repository & Install Dependencies
+
+```bash
+cd /home/marce/Projetos/TradingSystem
+
+# Install Gateway dependencies
+cd apps/telegram-gateway
+npm install --production
+
+# Install Gateway API dependencies
+cd ../../backend/api/telegram-gateway
+npm install --production
+```
+
+### Step 2: Configure Environment Variables
+
+```bash
+# Add to .env
+cat >> .env << 'EOF'
+# Telegram Stack Configuration
+TELEGRAM_DB_HOST=localhost
+TELEGRAM_DB_PORT=5434
+TELEGRAM_DB_NAME=telegram_gateway
+TELEGRAM_DB_USER=telegram
+TELEGRAM_DB_PASSWORD=<generate-secure-password>
+
+TELEGRAM_PGBOUNCER_PORT=6434
+TELEGRAM_REDIS_PORT=6379
+TELEGRAM_REDIS_REPLICA_PORT=6380
+TELEGRAM_REDIS_SENTINEL_PORT=26379
+
+TELEGRAM_RABBITMQ_PORT=5672
+TELEGRAM_RABBITMQ_MGMT_PORT=15672
+TELEGRAM_RABBITMQ_USER=telegram
+TELEGRAM_RABBITMQ_PASSWORD=<generate-secure-password>
+
+TELEGRAM_GRAFANA_PORT=3100
+TELEGRAM_PROMETHEUS_PORT=9090
+GRAFANA_ADMIN_PASSWORD=<generate-secure-password>
+EOF
+```
+
+**Generate secure passwords:**
+```bash
+# Generate random passwords
+openssl rand -base64 32  # For TELEGRAM_DB_PASSWORD
+openssl rand -base64 32  # For TELEGRAM_RABBITMQ_PASSWORD
+openssl rand -base64 32  # For GRAFANA_ADMIN_PASSWORD
+```
+
+### Step 3: Create Docker Network
+
+```bash
+# Create shared network (if doesn't exist)
+docker network create tradingsystem_backend || true
+```
+
+### Step 4: Deploy Docker Stack
+
+```bash
+cd /home/marce/Projetos/TradingSystem/tools/compose
+
+# Start data layer (7 containers)
+docker compose -f docker-compose.telegram.yml up -d
+
+# Wait for health checks (2-3 minutes)
+docker compose -f docker-compose.telegram.yml ps
+
+# Start monitoring stack (4 containers)
+docker compose -f docker-compose.telegram-monitoring.yml up -d
+```
+
+### Step 5: Install systemd Service
+
+```bash
+# Copy service file
+sudo cp /home/marce/Projetos/TradingSystem/tools/systemd/telegram-gateway.service \
+  /etc/systemd/system/
+
+# Reload systemd
+sudo systemctl daemon-reload
+
+# Enable auto-start on boot
+sudo systemctl enable telegram-gateway
+
+# Start service
+sudo systemctl start telegram-gateway
+
+# Verify status
+sudo systemctl status telegram-gateway
+```
+
+### Step 6: First-Time Telegram Authentication
+
+:::info
+Only required on first deployment or after session loss
+:::
+
+```bash
+# Monitor logs during authentication
+sudo journalctl -u telegram-gateway -f
+
+# Service will prompt for (via logs):
+# 1. Phone number verification code (SMS)
+# 2. 2FA password (if enabled)
+
+# After authentication, session saved to:
+# /opt/telegram-gateway/.session/telegram.session
+```
+
+---
+
+## Verification
+
+### Health Check
+
+```bash
+# Automated comprehensive check
+bash scripts/telegram/health-check-telegram.sh
+
+# Expected output: All ✅
+```
+
+### Manual Component Checks
+
+```bash
+# 1. Native service
+sudo systemctl is-active telegram-gateway
+# Expected: active
+
+# 2. Docker containers
+docker ps --filter "label=com.tradingsystem.stack=telegram"
+# Expected: 11 containers (all healthy)
+
+# 3. TimescaleDB
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway -c "SELECT 1"
+# Expected: Returns 1
+
+# 4. Redis
+docker exec telegram-redis-master redis-cli ping
+# Expected: PONG
+
+# 5. RabbitMQ
+curl -u telegram:${TELEGRAM_RABBITMQ_PASSWORD} http://localhost:15672/api/overview
+# Expected: JSON response
+
+# 6. Grafana
+curl http://localhost:3100/api/health
+# Expected: {"database":"ok"}
+
+# 7. Prometheus
+curl http://localhost:9090/-/healthy
+# Expected: Prometheus is Healthy
+```
+
+---
+
+## Management Commands
+
+### Start Stack
+
+```bash
+# Automated script
+bash scripts/telegram/start-telegram-stack.sh
+
+# Or manual:
+cd /home/marce/Projetos/TradingSystem/tools/compose
+docker compose -f docker-compose.telegram.yml up -d
+docker compose -f docker-compose.telegram-monitoring.yml up -d
+sudo systemctl start telegram-gateway
+```
+
+### Stop Stack
+
+```bash
+# Automated script (graceful shutdown)
+bash scripts/telegram/stop-telegram-stack.sh
+
+# Or manual:
+sudo systemctl stop telegram-gateway
+docker compose -f docker-compose.telegram-monitoring.yml down
+docker compose -f docker-compose.telegram.yml down
+```
+
+### Restart Components
+
+```bash
+# Restart native service
+sudo systemctl restart telegram-gateway
+
+# Restart specific container
+docker restart telegram-redis-master
+
+# Restart entire data stack
+docker compose -f docker-compose.telegram.yml restart
+```
+
+### View Logs
+
+```bash
+# Native service logs
+sudo journalctl -u telegram-gateway -f
+
+# Container logs
+docker logs -f telegram-timescale
+docker logs -f telegram-redis-master
+
+# All containers
+docker compose -f docker-compose.telegram.yml logs -f
+```
+
+---
+
+## Monitoring
+
+### Access Grafana Dashboards
+
+**URL:** http://localhost:3100  
+**Login:** admin / (password from `.env`)
+
+**Available Dashboards:**
+1. **Telegram Overview** - System-wide metrics
+2. **TimescaleDB Performance** - Database queries, locks, cache
+3. **Redis Cluster** - Hit rate, memory, replication
+4. **RabbitMQ Queue** - Depth, throughput, consumers
+5. **MTProto Service** - CPU, RAM, connections
+6. **SLO Tracking** - Availability, latency, error budgets
+
+### Access Prometheus
+
+**URL:** http://localhost:9090  
+**Targets:** http://localhost:9090/targets  
+**Alerts:** http://localhost:9090/alerts
+
+### Access RabbitMQ Management
+
+**URL:** http://localhost:15672  
+**Login:** telegram / (password from `.env`)
+
+---
+
+## Backup
+
+```bash
+# Automated backup script
+bash scripts/telegram/backup-telegram-stack.sh
+
+# Creates timestamped backup of:
+# - Session files (.session/)
+# - TimescaleDB (pg_dump)
+# - Redis snapshot (RDB)
+# - RabbitMQ definitions
+# - Configuration files
+```
+
+**Backup Location:** `/home/marce/Projetos/TradingSystem/backups/telegram-stack-YYYYMMDD-HHMMSS/`
+
+---
+
+## Performance Expectations
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Polling Latency (p95) | 50ms | 10ms | ↓ 80% |
+| Deduplication | 20ms | 2ms | ↓ 90% |
+| Update Latency | 200ms | 5ms | ↓ 97% |
+| End-to-End | 5.9s | 530ms | ↓ 91% |
+| Throughput | 20 msg/s | 50 msg/s | ↑ 150% |
+| Database Load | 100% | 30% | ↓ 70% |
+
+---
+
+## Troubleshooting
+
+See [Troubleshooting Guide](./troubleshooting.mdx) for common issues and solutions.
+
+---
+
+**Related Documentation:**
+- [Migration Runbook](./migration-runbook.mdx)
+- [Monitoring Guide](./monitoring-guide.mdx)
+- [Redis Cache Guide](./redis-cache-guide.mdx)
+- [Performance Tuning](./performance-tuning.mdx)
+

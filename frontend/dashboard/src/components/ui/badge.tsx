@@ -14,13 +14,13 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 function Badge({ className, variant = 'default', ...props }: BadgeProps) {
   const variantClasses = {
     default:
-      'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100',
+      'border-transparent bg-[color:var(--ts-surface-hover)] text-[color:var(--ts-text-secondary)]',
     secondary:
-      'border-transparent bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100',
+      'border border-[color:var(--ts-surface-border)] bg-transparent text-[color:var(--ts-text-secondary)]',
     destructive:
       'border-transparent bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
     outline:
-      'text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600',
+      'border border-[color:var(--ts-surface-border)] text-[color:var(--ts-text-secondary)]',
     success:
       'border-transparent bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
     warning:

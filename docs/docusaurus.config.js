@@ -36,6 +36,16 @@ const config = {
           showLastUpdateTime: true,
           // Versioning configuration
           lastVersion: 'current',
+          // Version configuration
+          // NOTE: Version labels are automatically updated by scripts/docs/auto-version.sh
+          // when creating new versions via GitHub Actions workflow (docs-versioning.yml)
+          //
+          // Label format:
+          // - Latest stable: "X.X.X (Stable) ✅" with path: '' (root)
+          // - Previous versions: "X.X.X" with path: 'vX.X.X'
+          // - Current (unreleased): "Next (Unreleased) 🚧" with path: 'next'
+          //
+          // See: docs/governance/VERSIONING-AUTOMATION.md for details
           versions: {
             current: {
               label: 'Next (Unreleased) 🚧',
@@ -44,9 +54,20 @@ const config = {
             },
             '1.0.0': {
               label: '1.0.0 (Stable) ✅',
-              path: '1.0.0',
+              path: '',
               banner: 'none',
             },
+            // Example when multiple versions exist:
+            // '2.0.0': {
+            //   label: '2.0.0 (Stable) ✅',
+            //   path: '',  // Latest stable at root
+            //   banner: 'none',
+            // },
+            // '1.0.0': {
+            //   label: '1.0.0',
+            //   path: 'v1.0.0',  // Previous version at versioned path
+            //   banner: 'none',
+            // },
           },
           // Only build current version in development for fast iteration
           onlyIncludeVersions: process.env.NODE_ENV === 'development' ? ['current'] : undefined,

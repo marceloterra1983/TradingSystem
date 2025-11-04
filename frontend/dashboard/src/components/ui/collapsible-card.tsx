@@ -67,8 +67,8 @@ export const CollapsibleCard = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'bg-white rounded-lg border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700',
-          'transition-all duration-200',
+          'rounded-xl border shadow-[var(--ts-shadow-sm)] transition-all duration-200',
+          'border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] hover:shadow-[var(--ts-shadow-lg)]',
           className,
         )}
         {...props}
@@ -144,8 +144,7 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'px-6 py-4 border-b border-gray-200 dark:border-gray-700',
-          'flex items-center gap-4 transition-colors',
+          'flex items-center gap-4 border-b border-[color:var(--ts-surface-border)] px-6 py-4 transition-colors',
           isCollapsed && 'border-b-0',
           className,
         )}
@@ -157,16 +156,16 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
           onClick={handleChevronClick}
           onKeyDown={handleChevronKeyDown}
           className={cn(
-            'flex-shrink-0 p-1 rounded-md transition-colors',
-            'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500',
+            'flex-shrink-0 rounded-md p-1 transition-colors',
+            'hover:bg-[color:var(--ts-surface-hover)]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ts-accent)]',
           )}
           aria-label={isCollapsed ? 'Expandir seção' : 'Recolher seção'}
           aria-expanded={!isCollapsed}
         >
           <ChevronDown
             className={cn(
-              'h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200',
+              'h-5 w-5 text-[color:var(--ts-text-muted)] transition-transform duration-200',
               isCollapsed && 'rotate-180',
             )}
           />
@@ -198,7 +197,7 @@ export const CollapsibleCardTitle = React.forwardRef<
     <h3
       ref={ref}
       className={cn(
-        'text-lg font-semibold text-gray-900 dark:text-gray-100',
+        'text-lg font-semibold text-[color:var(--ts-text-primary)]',
         className,
       )}
       {...props}
@@ -222,7 +221,7 @@ export const CollapsibleCardDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn('text-sm text-gray-600 mt-1 dark:text-gray-300', className)}
+      className={cn('mt-1 text-sm text-[color:var(--ts-text-muted)]', className)}
       {...props}
     >
       {children}
@@ -280,7 +279,7 @@ export const CollapsibleCardFooter = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'px-6 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950',
+        'border-t border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-6 py-4',
         className,
       )}
       {...props}

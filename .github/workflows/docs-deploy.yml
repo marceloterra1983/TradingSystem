@@ -149,50 +149,23 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Validate YAML front matter
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install Python dependencies
+        run: pip install -r requirements-docs.txt
+
+      - name: Prepare reports directory
+        run: mkdir -p docs/reports
+
+      - name: Validate frontmatter with Python script
         run: |
-          echo "Checking for required front matter fields..."
-
-          # Find all markdown files in docs/content
-          FILES=$(find docs/content -type f \( -name "*.mdx" -o -name "*.md" \))
-
-          ERRORS=0
-          for file in $FILES; do
-            # Skip if file doesn't have front matter
-            if ! grep -q "^---$" "$file"; then
-              echo "⚠️  Missing front matter: $file"
-              ERRORS=$((ERRORS + 1))
-              continue
-            fi
-
-            # Extract front matter
-            FRONT_MATTER=$(sed -n '/^---$/,/^---$/p' "$file" | sed '1d;$d')
-
-            # Check required fields
-            if ! echo "$FRONT_MATTER" | grep -q "^title:"; then
-              echo "❌ Missing 'title' field: $file"
-              ERRORS=$((ERRORS + 1))
-            fi
-
-            if ! echo "$FRONT_MATTER" | grep -q "^owner:"; then
-              echo "❌ Missing 'owner' field: $file"
-              ERRORS=$((ERRORS + 1))
-            fi
-
-            if ! echo "$FRONT_MATTER" | grep -q "^lastReviewed:"; then
-              echo "❌ Missing 'lastReviewed' field: $file"
-              ERRORS=$((ERRORS + 1))
-            fi
-
-            if ! echo "$FRONT_MATTER" | grep -q "^description:"; then
-              echo "❌ Missing 'description' field: $file"
-              ERRORS=$((ERRORS + 1))
-            fi
-          done
-
-          if [ $ERRORS -gt 0 ]; then
-            echo "❌ Found $ERRORS front matter validation errors"
-            exit 1
-          else
-            echo "✅ All front matter validation passed"
-          fi
+          python scripts/docs/validate-frontmatter.py \
+            --schema v2 \
+            --docs-dir ./docs/content \
+            --output ./docs/reports/frontmatter-validation-deploy.json \
+            --verbose

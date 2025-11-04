@@ -1,0 +1,496 @@
+---
+title: Monitoring & Alerting Guide
+sidebar_position: 11
+description: Comprehensive monitoring guide for Telegram hybrid stack
+tags:
+  - telegram-gateway
+  - monitoring
+  - prometheus
+  - grafana
+  - alerts
+owner: DevOps
+lastReviewed: '2025-11-03'
+---
+
+# Telegram Stack Monitoring & Alerting
+
+## Overview
+
+The Telegram hybrid stack includes comprehensive monitoring with **Prometheus** (metrics collection), **Grafana** (visualization), and **8 alerting rules** for proactive issue detection.
+
+```plantuml
+@startuml
+!include /home/marce/Projetos/TradingSystem/docs/content/diagrams/telegram-hybrid-with-monitoring.puml
+@enduml
+```
+
+---
+
+## Access Points
+
+**Grafana Dashboards:** http://localhost:3100  
+**Prometheus UI:** http://localhost:9090  
+**RabbitMQ Management:** http://localhost:15672
+
+**Credentials:**
+- Grafana: `admin` / (password from `.env`)
+- RabbitMQ: `telegram` / (password from `.env`)
+
+---
+
+## Grafana Dashboards
+
+### 1. Telegram Overview
+
+**Purpose:** System-wide health and performance metrics
+
+**Key Panels:**
+- **Message Processing Rate** - Messages received vs processed
+- **Polling Latency (p95)** - Target: <15ms
+- **Queue Depth** - Unprocessed messages waiting
+- **Cache Hit Rate** - Target: >70%
+- **System Health** - Service status (up/down)
+- **Database Connections** - Active, idle, waiting
+
+**Alert Thresholds:**
+- 🔴 Polling latency >15ms
+- 🟡 Queue depth >500 messages
+- 🟡 Cache hit rate <50%
+
+---
+
+### 2. TimescaleDB Performance
+
+**Purpose:** Database query performance and resource utilization
+
+**Key Panels:**
+- **Query Latency Histogram** - p50, p95, p99
+- **Connection Pool Stats** - Active, idle, waiting clients
+- **Cache Hit Rate** - PostgreSQL buffer cache
+- **Lock Waits** - Deadlocks and blocking queries
+- **Table Sizes** - Growth trends
+- **Index Usage** - Index scan counts
+
+**Queries:**
+```sql
+-- Top 10 slowest queries
+SELECT query, mean_exec_time, calls 
+FROM pg_stat_statements 
+ORDER BY mean_exec_time DESC LIMIT 10;
+
+-- Connection pool status
+SHOW POOLS;  -- via PgBouncer
+
+-- Cache hit rate
+SELECT 100.0 * sum(blks_hit) / NULLIF(sum(blks_hit + blks_read), 0) 
+FROM pg_stat_database;
+```
+
+---
+
+### 3. Redis Cluster
+
+**Purpose:** Cache performance and replication health
+
+**Key Panels:**
+- **Cache Hit/Miss Rate** - Hit rate percentage over time
+- **Memory Usage** - Used vs available (1GB limit)
+- **Eviction Rate** - Keys evicted per second
+- **Replication Lag** - Master → Replica delay (target: <50ms)
+- **Commands/sec** - Total command throughput
+- **Client Connections** - Active clients
+
+**Key Metrics:**
+```
+redis_keyspace_hits_total        - Cache hits (counter)
+redis_keyspace_misses_total      - Cache misses (counter)
+redis_memory_used_bytes          - Memory consumption
+redis_evicted_keys_total         - Evictions (LRU policy)
+redis_replication_lag_seconds    - Replica lag
+```
+
+**Troubleshooting:**
+- Hit rate <50% → Increase TTL or memory
+- Eviction rate high → Increase maxmemory
+- Replication lag >1s → Check network or replica resources
+
+---
+
+### 4. RabbitMQ Queue
+
+**Purpose:** Message queue depth and consumer performance
+
+**Key Panels:**
+- **Messages Ready/Unacked** - Queue backlog
+- **Publish/Deliver Rate** - Throughput (msg/s)
+- **Consumer Count** - Active consumers
+- **Queue Depth Trend** - Growing or shrinking
+
+**Key Metrics:**
+```
+rabbitmq_queue_messages_ready              - Messages waiting
+rabbitmq_queue_messages_unacknowledged     - Processing in progress
+rabbitmq_channel_messages_published_total  - Total published
+rabbitmq_queue_consumers                   - Active consumers
+```
+
+**Alert Thresholds:**
+- 🟡 Queue depth >1000 messages for 10 minutes
+- 🔴 No consumers for 5 minutes
+
+---
+
+### 5. MTProto Service (Native)
+
+**Purpose:** systemd service health and resource usage
+
+**Key Panels:**
+- **CPU Usage** - Percentage of allocated
+- **RAM Usage** - Memory consumption
+- **Network I/O** - Bytes sent/received
+- **Connection Status** - Telegram connection state
+- **Message Reception Rate** - Messages/second from Telegram
+
+**Metrics Collection:**
+```bash
+# CPU/RAM via systemd
+systemctl show telegram-gateway --property=CPUUsageNSec,MemoryCurrent
+
+# Application metrics
+curl http://localhost:4006/metrics
+```
+
+---
+
+### 6. SLO Tracking
+
+**Purpose:** Service Level Objective monitoring and error budgets
+
+**SLOs Defined:**
+- **Availability:** 99.9% monthly (error budget: 43 min/month)
+- **Latency (p95):** <15ms for polling
+- **Success Rate:** >99.5% message processing
+
+**Panels:**
+- **Availability Over Time** - Uptime percentage
+- **Latency Percentiles** - p50, p95, p99 trends
+- **Error Budget Remaining** - Days left before SLO breach
+- **Incidents Timeline** - Downtime events
+
+---
+
+## Prometheus Alerting
+
+### Critical Alerts (P0)
+
+#### 1. TelegramGatewayDown
+```yaml
+expr: up{job="telegram-gateway"} == 0
+for: 2m
+severity: critical
+```
+**Action:** Check systemd status: `sudo systemctl status telegram-gateway`
+
+#### 2. HighPollingLag
+```yaml
+expr: tp_capital_polling_lag_seconds > 30
+for: 5m
+severity: critical
+```
+**Action:** Investigate TP Capital Worker, check database performance
+
+#### 3. RedisClusterDown
+```yaml
+expr: redis_up{job="telegram-redis"} == 0
+for: 1m
+severity: critical
+```
+**Action:** Check Redis containers, verify Sentinel failover
+
+#### 4. DatabaseConnectionPoolExhausted
+```yaml
+expr: pgbouncer_pools_cl_waiting > 10
+for: 2m
+severity: critical
+```
+**Action:** Increase pool size or investigate slow queries
+
+---
+
+### Warning Alerts (P1)
+
+#### 5. MessageQueueBuilding
+```yaml
+expr: tp_capital_messages_waiting > 500
+for: 10m
+severity: warning
+```
+**Action:** Check TP Capital processing rate
+
+#### 6. LowCacheHitRate
+```yaml
+expr: cache_hit_rate < 0.5
+for: 15m
+severity: warning
+```
+**Action:** Adjust TTL or increase Redis memory
+
+#### 7. DiskSpaceLow
+```yaml
+expr: disk_free_percent < 10
+for: 5m
+severity: warning
+```
+**Action:** Clean old data or expand volume
+
+#### 8. HighMemoryUsage
+```yaml
+expr: memory_usage_percent > 80
+for: 10m
+severity: warning
+```
+**Action:** Optimize queries or increase limits
+
+---
+
+## Metrics Reference
+
+### Gateway Metrics (Port 4006)
+```
+telegram_messages_received_total       - Total messages from Telegram
+telegram_connection_status             - MTProto connection (0/1)
+telegram_session_loaded                - Session loaded successfully
+gateway_cache_writes_total             - Redis cache writes
+gateway_queue_publishes_total          - RabbitMQ publishes
+```
+
+### TP Capital Metrics (Port 4005)
+```
+tp_capital_messages_processed_total{status}  - Processed (success/failed/duplicate)
+tp_capital_polling_lag_seconds               - Polling delay
+tp_capital_processing_duration_seconds       - Processing time histogram
+tp_capital_cache_hits_total                  - Cache hits
+tp_capital_cache_misses_total                - Cache misses
+```
+
+### Database Metrics (Port 9187)
+```
+pg_stat_database_tup_fetched           - Rows fetched
+pg_stat_statements_mean_exec_time      - Average query time
+pg_database_size_bytes                 - Database size
+pgbouncer_pools_sv_active              - Active server connections
+```
+
+### Redis Metrics (Port 9121)
+```
+redis_keyspace_hits_total              - Cache hits
+redis_keyspace_misses_total            - Cache misses
+redis_memory_used_bytes                - Memory usage
+redis_replication_lag_seconds          - Replica lag
+```
+
+---
+
+## Alert Response Procedures
+
+### Gateway Down (Critical)
+
+**Detection:** Prometheus alert fires after 2 minutes
+
+**Steps:**
+```bash
+# 1. Check systemd status
+sudo systemctl status telegram-gateway
+
+# 2. View recent logs
+sudo journalctl -u telegram-gateway -n 100
+
+# 3. Common issues:
+#    - Session expired → Re-authenticate
+#    - Dependency unavailable → Check Redis, PgBouncer
+#    - Process crash → Check for OOM, errors in logs
+
+# 4. Restart service
+sudo systemctl restart telegram-gateway
+
+# 5. Verify recovery
+curl http://localhost:4006/health
+```
+
+---
+
+### High Polling Lag (Critical)
+
+**Detection:** Lag >30s for 5 minutes
+
+**Steps:**
+```bash
+# 1. Check TP Capital health
+curl http://localhost:4005/health
+
+# 2. Check database performance
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -c "SELECT * FROM telegram_gateway.performance_metrics_realtime"
+
+# 3. Check Redis cache hit rate
+curl -s http://localhost:9121/metrics | grep redis_keyspace
+
+# 4. Check message queue depth
+curl -s http://localhost:4005/metrics | grep messages_waiting
+
+# 5. If database slow, check for locks
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "SELECT * FROM pg_locks WHERE NOT granted"
+```
+
+---
+
+### Redis Cluster Down (Critical)
+
+**Detection:** Redis unreachable for 1 minute
+
+**Steps:**
+```bash
+# 1. Check Redis containers
+docker ps | grep telegram-redis
+
+# 2. Check Redis Sentinel
+docker exec telegram-redis-sentinel redis-cli -p 26379 SENTINEL masters
+
+# 3. Verify automatic failover occurred
+docker logs telegram-redis-sentinel --tail 50
+
+# 4. If master down, Sentinel should promote replica
+#    System continues with degraded performance (database-only mode)
+
+# 5. Manually restart Redis master
+docker restart telegram-redis-master
+
+# 6. Verify replication restored
+docker exec telegram-redis-master redis-cli INFO replication
+```
+
+---
+
+## Performance Tuning
+
+### Optimize Cache Hit Rate
+
+**Target:** >70%
+
+**If hit rate low (<50%):**
+```bash
+# 1. Increase TTL
+# Edit: apps/telegram-gateway/src/cache/RedisTelegramCache.js
+# Change: HOT_CACHE_TTL from 3600 to 7200
+
+# 2. Increase Redis memory
+# Edit: tools/compose/docker-compose.telegram.yml
+# Change: maxmemory from 1gb to 2gb
+
+# 3. Warm cache on startup
+# Implement: Load recent messages from DB to Redis on Gateway start
+```
+
+---
+
+### Optimize Database Queries
+
+**Target:** p95 latency <50ms
+
+**If queries slow (>100ms):**
+```bash
+# 1. Check slow queries
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -c "SELECT query, mean_exec_time, calls FROM pg_stat_statements 
+      ORDER BY mean_exec_time DESC LIMIT 10"
+
+# 2. Verify indexes used
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -c "EXPLAIN ANALYZE SELECT * FROM telegram_gateway.messages 
+      WHERE status='received' LIMIT 100"
+
+# 3. Increase PgBouncer pool if connection waits high
+# Edit: tools/compose/telegram/pgbouncer.ini
+# Change: default_pool_size from 20 to 30
+```
+
+---
+
+## Maintenance
+
+### Daily Tasks
+```bash
+# Health check
+bash scripts/telegram/health-check-telegram.sh
+
+# Backup
+bash scripts/telegram/backup-telegram-stack.sh
+
+# Check for alerts
+curl -s http://localhost:9090/api/v1/alerts | jq '.data.alerts[] | select(.state=="firing")'
+```
+
+### Weekly Tasks
+```bash
+# Review Grafana dashboards
+# Check for performance trends
+# Analyze alert frequency
+# Optimize based on metrics
+```
+
+### Monthly Tasks
+```bash
+# Review SLO compliance
+# Update alert thresholds if needed
+# Capacity planning based on growth
+# Rotate credentials
+```
+
+---
+
+## Troubleshooting
+
+### Metrics Not Appearing in Grafana
+
+**Check:**
+```bash
+# 1. Verify Prometheus targets
+curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.health != "up")'
+
+# 2. Check Prometheus logs
+docker logs telegram-prometheus --tail 100
+
+# 3. Verify exporters running
+docker ps | grep exporter
+
+# 4. Test manual scrape
+curl http://localhost:4006/metrics
+curl http://localhost:9187/metrics
+curl http://localhost:9121/metrics
+```
+
+---
+
+### Alerts Not Firing
+
+**Check:**
+```bash
+# 1. Verify alert rules loaded
+curl http://localhost:9090/api/v1/rules | jq '.data.groups[].rules[].name'
+
+# 2. Check alert rule syntax
+docker exec telegram-prometheus promtool check rules /etc/prometheus/alerts/telegram-alerts.yml
+
+# 3. Manually test alert condition
+curl -G http://localhost:9090/api/v1/query \
+  --data-urlencode 'query=up{job="telegram-gateway"}' | jq
+```
+
+---
+
+**Related:**
+- [Hybrid Deployment Guide](./hybrid-deployment.mdx)
+- [Troubleshooting Guide](./troubleshooting.mdx)
+- [Performance Tuning](./performance-tuning.mdx)
+

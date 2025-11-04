@@ -1,84 +1,64 @@
 name: monitoring
 
 services:
+  # Prometheus - Metrics Collection
   prometheus:
-    image: "${IMG_MON_PROMETHEUS:-prom/prometheus}:${IMG_VERSION:-latest}"
-    container_name: monitor-prometheus
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1'
+    image: prom/prometheus:latest
+    container_name: prometheus-rag
     ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
+      - "9091:9090"  # MUDOU de 9090 para 9091 (evita conflitos)
+    volumes:
+      - ../monitoring/prometheus-rag.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - tradingsystem_backend
     restart: unless-stopped
-    env_file:
-      - ../../.env
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 30s
 
-  alertmanager:
-    image: "${IMG_MON_ALERTMANAGER:-prom/alertmanager}:${IMG_VERSION:-latest}"
-    container_name: monitor-alertmanager
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-    ports:
-      - "${ALERTMANAGER_PORT:-9093}:9093"
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
+  # Grafana - Metrics Visualization
   grafana:
-    image: "${IMG_MON_GRAFANA:-grafana/grafana}:${IMG_VERSION:-latest}"
-    container_name: monitor-grafana
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
+    image: grafana/grafana:latest
+    container_name: grafana-rag
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      - "3104:3000"  # MUDOU de 3100 para 3104 (evita conflitos)
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_SERVER_ROOT_URL=http://localhost:3100
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ../monitoring/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ../monitoring/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      - prometheus
     restart: unless-stopped
-    env_file:
-      - ../../.env
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
-  alert-router:
-    image: "${IMG_MON_ALERT_ROUTER:-nginx}:${IMG_VERSION:-alpine}"
-    container_name: monitor-alert-router
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.25'
-    ports:
-      - "${ALERT_ROUTER_PORT:-9094}:80"
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+networks:
+  tradingsystem_backend:
+    external: true
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

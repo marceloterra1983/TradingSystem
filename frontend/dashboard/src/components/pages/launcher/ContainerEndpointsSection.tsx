@@ -17,6 +17,7 @@ import {
   Brain,
   FileText,
 } from 'lucide-react';
+import { ENDPOINTS } from '../../../config/endpoints';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -149,13 +150,13 @@ const CONTAINER_SERVICES: ContainerService[] = [
   },
   {
     name: 'PostgreSQL (Infrastructure)',
-    baseUrl: 'postgresql://localhost:5432',
+    baseUrl: `postgresql://localhost:${ENDPOINTS.timescaledb.port}`,
     description: 'PostgreSQL for infrastructure services',
     category: 'data',
     type: 'api',
-    ports: ['5432'],
+    ports: [ENDPOINTS.timescaledb.port.toString()],
     endpoints: [
-      { path: ':5432', description: 'PostgreSQL connection (pgwire)' },
+      { path: `:${ENDPOINTS.timescaledb.port}`, description: 'PostgreSQL connection (pgwire)' },
     ],
   },
 
@@ -346,7 +347,7 @@ const CONTAINER_SERVICES: ContainerService[] = [
   },
   {
     name: 'Qdrant',
-    baseUrl: 'http://localhost:6333',
+    baseUrl: ENDPOINTS.qdrant,
     description: 'Vector database',
     category: 'ai',
     type: 'both',

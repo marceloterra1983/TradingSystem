@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastContainer } from './components/ui/toast';
@@ -15,13 +16,16 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppContent() {
-  // Ativa auto-recovery global para serviços críticos
+interface AppContentProps {
+  defaultPageId?: string;
+}
+
+function AppContent({ defaultPageId = 'workspace' }: AppContentProps) {
   useServiceAutoRecovery();
 
   return (
     <TooltipProvider>
-      <Layout defaultPageId="workspace" />
+      <Layout defaultPageId={defaultPageId} />
       <ToastContainer />
     </TooltipProvider>
   );
@@ -29,9 +33,22 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system">
+    <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
-        <AppContent />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppContent defaultPageId="workspace" />} />
+            <Route
+              path="/documentation/metrics"
+              element={<AppContent defaultPageId="documentation-metrics" />}
+            />
+            <Route
+              path="/documentation-metrics"
+              element={<AppContent defaultPageId="documentation-metrics" />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
       </QueryClientProvider>
     </ThemeProvider>
   );

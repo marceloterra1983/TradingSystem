@@ -29,11 +29,27 @@ try:  # Local package import (tests, running as module)
     from .cache import get_cache_client
     from .rate_limit import rate_limiter
     from .monitoring import init_metrics, track_query_metrics
+    from .circuit_breaker import (
+        search_vectors_with_protection,
+        generate_answer_with_protection,
+        get_circuit_breaker_states,
+        format_circuit_breaker_error,
+        CircuitBreakerError,
+    )
+    from .embedding_cache import get_embedding_cache  # 🚀 QUICK WIN: Embedding cache
 except ImportError:  # pragma: no cover - fallback for production image layout
     from auth import get_current_user  # type: ignore
     from cache import get_cache_client  # type: ignore
     from rate_limit import rate_limiter  # type: ignore
     from monitoring import init_metrics, track_query_metrics  # type: ignore
+    from circuit_breaker import (  # type: ignore
+        search_vectors_with_protection,
+        generate_answer_with_protection,
+        get_circuit_breaker_states,
+        format_circuit_breaker_error,
+        CircuitBreakerError,
+    )
+    from embedding_cache import get_embedding_cache  # type: ignore # 🚀 QUICK WIN
 
 # Ensure shared helpers are importable when running as a module or script
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -74,8 +90,9 @@ app.add_middleware(
 init_metrics(app)
 
 # Initialize Qdrant clients (sync + async) with error handling
-QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
+# UPDATED 2025-11-03: Support for Qdrant Cluster via load balancer
+QDRANT_HOST = os.getenv("QDRANT_HOST", os.getenv("QDRANT_CLUSTER_URL", "http://qdrant-lb").replace("http://", "").replace("https://", "").split(":")[0])
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", os.getenv("QDRANT_LB_PORT", 6333)))
 try:
     qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
     async_qdrant_client = AsyncQdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
@@ -381,7 +398,15 @@ async def query_documents(
             )
 
             with track_query_metrics():
-                li_response = await query_engine.aquery(payload.query)
+                # Protected with circuit breaker
+                try:
+                    li_response = await search_vectors_with_protection(query_engine, payload.query)
+                except CircuitBreakerError as cb_error:
+                    logger.error("Circuit breaker open for query endpoint: %s", str(cb_error))
+                    raise HTTPException(
+                        status_code=503,
+                        detail=format_circuit_breaker_error(cb_error, "Qdrant/Ollama")
+                    )
 
         # Format response
         sources = []
@@ -485,7 +510,15 @@ async def semantic_search(
             )
 
             with track_query_metrics(query_type="similarity"):
-                li_response = await query_engine.aquery(query)
+                # Protected with circuit breaker
+                try:
+                    li_response = await search_vectors_with_protection(query_engine, query)
+                except CircuitBreakerError as cb_error:
+                    logger.error("Circuit breaker open for search endpoint: %s", str(cb_error))
+                    raise HTTPException(
+                        status_code=503,
+                        detail=format_circuit_breaker_error(cb_error, "Qdrant")
+                    )
 
         # Format results
         results = []
@@ -528,7 +561,7 @@ async def semantic_search(
 @app.get("/health")
 async def health_check(collection: Optional[str] = None):
     """
-    Health check endpoint.
+    Health check endpoint with circuit breaker status.
     """
     target_collection = normalize_collection_name(collection)
     payload = {
@@ -556,6 +589,11 @@ async def health_check(collection: Optional[str] = None):
         })
         if not exists:
             payload["message"] = f"Collection '{target_collection}' not found."
+        
+        # Add circuit breaker states
+        circuit_breaker_states = get_circuit_breaker_states()
+        payload["circuitBreakers"] = circuit_breaker_states
+        
         return payload
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")

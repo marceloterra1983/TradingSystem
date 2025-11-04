@@ -6,6 +6,11 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import docsHealthMetrics from '../services/docsHealthMetrics.js';
 import { logger } from '../config/logger.js';
 import { config } from '../config/appConfig.js';
+import {
+  computeCoverageMetrics,
+  computeFreshnessMetrics,
+  computeIssueBreakdown,
+} from '../../../../shared/docs/metrics.js';
 
 const router = express.Router();
 
@@ -285,8 +290,13 @@ router.get(
  * @returns {Promise<Array>} Time series data points
  */
 async function queryPrometheus(query, start, end, step = '1d') {
+  const prometheusUrl = config.prometheus?.url;
+  if (!prometheusUrl) {
+    logger.debug('[DocsHealth] Prometheus URL not configured; skipping query', { query });
+    return [];
+  }
+
   try {
-    const prometheusUrl = config.prometheus.url;
     const url = new URL('/api/v1/query_range', prometheusUrl);
     url.searchParams.append('query', query);
     url.searchParams.append('start', start.toString());
@@ -396,6 +406,316 @@ router.get(
 );
 
 /**
+ * GET /api/v1/docs/health/dashboard-metrics
+ * Aggregated metrics for dashboard visualisations
+ */
+router.get(
+  '/dashboard-metrics',
+  asyncHandler(async (req, res) => {
+    try {
+      const auditData = await loadAuditData();
+      const metrics = await docsHealthMetrics.getHealthMetrics();
+
+      const frontmatter = normalizeFrontmatterData(auditData.frontmatter || {});
+      const links = auditData.links || {};
+      const frontmatterEntries = extractFileEntries(frontmatter);
+
+      const freshness = computeFreshnessMetrics({
+        records: frontmatterEntries,
+        freshnessAnalysis: frontmatter.freshness_analysis ?? {},
+        outdatedCount: frontmatter.outdated_count,
+        staleCount: frontmatter.stale_count,
+      });
+
+      const issues = computeIssueBreakdown({
+        missingFrontmatter: getCount(
+          frontmatter.missing,
+          frontmatter.missing_count,
+          frontmatter.missing_files,
+          frontmatter.missing_frontmatter,
+          frontmatter.summary?.files_missing_frontmatter,
+        ),
+        incompleteFrontmatter: getCount(
+          frontmatter.incomplete,
+          frontmatter.incomplete_count,
+          frontmatter.incomplete_files,
+          frontmatter.incomplete_frontmatter,
+          frontmatter.summary?.files_incomplete_frontmatter,
+        ),
+        invalidFrontmatter: getCount(
+          frontmatter.invalid,
+          frontmatter.invalid_count,
+          frontmatter.invalid_values,
+          frontmatter.invalid_frontmatter,
+          frontmatter.summary?.issue_counts?.invalid_value,
+        ),
+        brokenLinks: getCount(
+          links.broken_links,
+          links.total_broken,
+          links.broken_links_list,
+        ),
+        staleFiles: getCount(
+          frontmatter.outdated_count,
+          frontmatter.stale_count,
+          frontmatter.outdated_files,
+          frontmatter.freshness_analysis?.outdated_documents,
+        ),
+        shortFiles: getCount(
+          frontmatter.short_files,
+          frontmatter.short_count,
+          frontmatter.short_files_list,
+        ),
+      });
+
+      const coverage = computeCoverageMetrics({
+        totalFiles:
+          frontmatter.total_files ?? frontmatter.total ?? frontmatter.summary?.total_files,
+        ownerDistribution:
+          frontmatter.owner_distribution ?? frontmatter.summary?.owner_distribution ?? {},
+        records: frontmatterEntries,
+      });
+
+      const historical = await getHistoricalMetrics(30);
+
+      res.json({
+        success: true,
+        data: {
+          metadata: {
+            generatedAt: new Date().toISOString(),
+            version: '1.0.0',
+            source: 'documentation-api',
+          },
+          healthScore: {
+            current: metrics.health_score ?? 0,
+            grade: metrics.grade ?? 'N/A',
+            status: metrics.status ?? 'No Data',
+            trend: calculateTrend(historical),
+          },
+          freshness,
+          issues,
+          coverage,
+          historical,
+        },
+      });
+    } catch (error) {
+      logger.error('[DocsHealth] Failed to generate dashboard metrics:', error);
+      res.json({
+        success: true,
+        data: {
+          metadata: {
+            generatedAt: new Date().toISOString(),
+            version: '1.0.0',
+            source: 'documentation-api',
+          },
+          healthScore: {
+            current: 0,
+            grade: 'N/A',
+            status: 'No Data',
+            trend: 'stable',
+          },
+          freshness: {
+            distribution: [],
+            outdatedCount: 0,
+            averageAge: 0,
+          },
+          issues: {
+            breakdown: {},
+            bySeverity: {},
+            total: 0,
+          },
+          coverage: {
+            byOwner: [],
+            byCategory: [],
+            totalFiles: 0,
+          },
+          historical: [],
+          hasData: false,
+          message:
+            'No audit data available. Run documentation audit script to populate dashboard metrics.',
+        },
+      });
+    }
+  })
+);
+
+function extractFileEntries(frontmatterData = {}) {
+  if (!frontmatterData) return [];
+  if (Array.isArray(frontmatterData.files)) {
+    return frontmatterData.files;
+  }
+  if (Array.isArray(frontmatterData.results)) {
+    return frontmatterData.results;
+  }
+  if (Array.isArray(frontmatterData.records)) {
+    return frontmatterData.records;
+  }
+  return [];
+}
+
+function getCount(...sources) {
+  let fallback = 0;
+
+  for (const source of sources) {
+    if (Array.isArray(source)) {
+      const length = source.length;
+      if (length > 0) {
+        return length;
+      }
+      fallback = Math.max(fallback, 0);
+      continue;
+    }
+
+    const numeric = Number(source);
+    if (Number.isFinite(numeric)) {
+      if (numeric > 0) {
+        return numeric;
+      }
+      fallback = Math.max(fallback, numeric);
+    }
+  }
+
+  return fallback;
+}
+
+function normalizeFrontmatterData(data = {}) {
+  if (!data || typeof data !== 'object') {
+    return {};
+  }
+
+  const summary = data.summary && typeof data.summary === 'object' ? data.summary : {};
+  const normalized = { ...data };
+
+  if (normalized.total_files == null && summary.total_files != null) {
+    normalized.total_files = summary.total_files;
+  }
+
+  if (!normalized.owner_distribution && summary.owner_distribution) {
+    normalized.owner_distribution = summary.owner_distribution;
+  }
+
+  if (!normalized.missing && Array.isArray(data.missing_frontmatter)) {
+    normalized.missing = data.missing_frontmatter;
+  }
+  if (!normalized.missing_files && Array.isArray(data.missing_frontmatter)) {
+    normalized.missing_files = data.missing_frontmatter;
+  }
+  if (normalized.missing_count == null) {
+    const missingCount =
+      summary.files_missing_frontmatter ??
+      (Array.isArray(normalized.missing_files) ? normalized.missing_files.length : undefined);
+    if (missingCount != null) {
+      normalized.missing_count = missingCount;
+    }
+  }
+
+  if (!normalized.incomplete && Array.isArray(data.incomplete_frontmatter)) {
+    normalized.incomplete = data.incomplete_frontmatter;
+  }
+  if (!normalized.incomplete_files && Array.isArray(data.incomplete_frontmatter)) {
+    normalized.incomplete_files = data.incomplete_frontmatter;
+  }
+  if (normalized.incomplete_count == null) {
+    const incompleteCount =
+      summary.files_incomplete_frontmatter ??
+      (Array.isArray(normalized.incomplete_files) ? normalized.incomplete_files.length : undefined);
+    if (incompleteCount != null) {
+      normalized.incomplete_count = incompleteCount;
+    }
+  }
+
+  if (!normalized.invalid && Array.isArray(data.invalid_values)) {
+    normalized.invalid = data.invalid_values;
+  }
+  if (!normalized.invalid_values && Array.isArray(data.invalid)) {
+    normalized.invalid_values = data.invalid;
+  }
+  if (normalized.invalid_count == null) {
+    const issueCounts = summary.issue_counts || {};
+    const invalidCountFromSummary =
+      (issueCounts.invalid_value ?? 0) + (issueCounts.invalid_date ?? 0);
+    const invalidCount =
+      invalidCountFromSummary > 0
+        ? invalidCountFromSummary
+        : Array.isArray(normalized.invalid_values)
+          ? normalized.invalid_values.length
+          : undefined;
+    if (invalidCount != null) {
+      normalized.invalid_count = invalidCount;
+    }
+  }
+
+  if (!normalized.outdated_files && Array.isArray(data.freshness_analysis?.outdated_documents)) {
+    normalized.outdated_files = data.freshness_analysis.outdated_documents;
+  }
+  if (normalized.outdated_count == null) {
+    const outdatedCount =
+      summary.outdated_documents ??
+      (Array.isArray(normalized.outdated_files) ? normalized.outdated_files.length : undefined);
+    if (outdatedCount != null) {
+      normalized.outdated_count = outdatedCount;
+    }
+  }
+  if (normalized.stale_count == null && normalized.outdated_count != null) {
+    normalized.stale_count = normalized.outdated_count;
+  }
+
+  return normalized;
+}
+
+async function getHistoricalMetrics(days = 30) {
+  const now = Math.floor(Date.now() / 1000);
+  const start = now - days * 24 * 60 * 60;
+
+  const [healthSeries, issueSeries] = await Promise.all([
+    queryPrometheus('docs_health_score', start, now),
+    queryPrometheus(
+      'docs_links_broken + docs_frontmatter_missing + docs_outdated_count',
+      start,
+      now,
+    ),
+  ]);
+
+  const timeline = new Map();
+
+  healthSeries.forEach(({ timestamp, value }) => {
+    timeline.set(timestamp, {
+      date: timestamp,
+      healthScore: value ?? 0,
+      issueCount: 0,
+    });
+  });
+
+  issueSeries.forEach(({ timestamp, value }) => {
+    const existing = timeline.get(timestamp) || {
+      date: timestamp,
+      healthScore: 0,
+      issueCount: 0,
+    };
+    existing.issueCount = value ?? 0;
+    timeline.set(timestamp, existing);
+  });
+
+  return Array.from(timeline.values()).sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
+}
+
+function calculateTrend(historical = []) {
+  if (!Array.isArray(historical) || historical.length < 2) {
+    return 'stable';
+  }
+
+  const recent = historical.slice(-7);
+  const first = recent[0]?.healthScore ?? 0;
+  const last = recent[recent.length - 1]?.healthScore ?? 0;
+  const delta = last - first;
+
+  if (delta > 5) return 'improving';
+  if (delta < -5) return 'declining';
+  return 'stable';
+}
+
+/**
  * POST /api/v1/docs/health/update-metrics
  * Update Prometheus metrics from audit data
  * Called by CI/CD workflow after audit run
@@ -416,9 +736,9 @@ router.post(
     docsHealthMetrics.updateHealthMetrics(auditData);
     docsHealthMetrics.recordAuditRun();
 
-    // Clear cache to force reload
-    cachedAuditData = null;
-    cacheTimestamp = null;
+    // Update cache with new data (so dashboard can read it)
+    cachedAuditData = auditData;
+    cacheTimestamp = Date.now();
 
     logger.info('[DocsHealth] Updated Prometheus metrics from audit data', {
       health_score: auditData.health_score,

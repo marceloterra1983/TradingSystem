@@ -1,0 +1,90 @@
+# ==============================================================================
+# Prometheus Configuration for Telegram Stack
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'telegram-stack'
+    environment: 'production'
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: 
+          # Uncomment when AlertManager is deployed
+          # - 'alertmanager:9093'
+
+# Rule files for alerting
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+
+# Scrape configurations
+scrape_configs:
+  # ===========================================================================
+  # MTProto Gateway (native systemd service on host)
+  # ===========================================================================
+  - job_name: 'telegram-gateway'
+    static_configs:
+      - targets: ['host.docker.internal:4006']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ===========================================================================
+  # Gateway REST API (container)
+  # ===========================================================================
+  - job_name: 'telegram-gateway-api'
+    static_configs:
+      - targets: ['telegram-gateway-api:4010']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # ===========================================================================
+  # TimescaleDB (via Postgres Exporter)
+  # ===========================================================================
+  - job_name: 'telegram-timescaledb'
+    static_configs:
+      - targets: ['telegram-postgres-exporter:9187']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ===========================================================================
+  # Redis Cluster (via Redis Exporter)
+  # ===========================================================================
+  - job_name: 'telegram-redis'
+    static_configs:
+      - targets: ['telegram-redis-exporter:9121']
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ===========================================================================
+  # RabbitMQ (management plugin metrics endpoint)
+  # ===========================================================================
+  - job_name: 'telegram-rabbitmq'
+    static_configs:
+      - targets: ['telegram-rabbitmq:15692']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # ===========================================================================
+  # TP Capital (external service consuming Telegram messages)
+  # ===========================================================================
+  - job_name: 'tp-capital'
+    static_configs:
+      - targets: ['host.docker.internal:4005']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # ===========================================================================
+  # PgBouncer Stats (via custom exporter or SQL queries)
+  # ===========================================================================
+  - job_name: 'telegram-pgbouncer'
+    static_configs:
+      - targets: ['telegram-postgres-exporter:9187']
+    metrics_path: '/metrics'
+    params:
+      database: ['pgbouncer']
+

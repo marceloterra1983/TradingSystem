@@ -10,6 +10,7 @@ import {
   CollapsibleCardDescription,
   CollapsibleCardContent,
 } from '../ui/collapsible-card';
+import { ENDPOINTS } from '../../config/endpoints';
 
 type LinkItem = {
   name: string;
@@ -80,11 +81,11 @@ export function URLsPage() {
       description:
         'Web interfaces that connect to TimescaleDB and QuestDB for database administration and exploration.',
       links: [
-        { name: 'pgAdmin', url: 'http://localhost:5050' },
-        { name: 'pgweb', url: 'http://localhost:8081' },
+        { name: 'pgAdmin', url: ENDPOINTS.pgAdmin },
+        { name: 'pgweb', url: ENDPOINTS.pgWeb },
         {
           name: 'Adminer (optional)',
-          url: 'http://localhost:8082',
+          url: ENDPOINTS.adminer,
           optional: true,
         },
         {

@@ -179,10 +179,18 @@ app.post('/sync-messages', requireApiKey, async (req, res) => {
     logger.info(`[SyncMessages] Gateway config: port=${gatewayPort}, url=${gatewayUrl}, env=${process.env.TELEGRAM_GATEWAY_PORT}`);
     
     try {
+      // ✅ Include X-API-Key header for authentication
+      const gatewayApiKey = process.env.TELEGRAM_GATEWAY_API_KEY;
+      
+      if (!gatewayApiKey) {
+        logger.warn('[SyncMessages] TELEGRAM_GATEWAY_API_KEY not configured');
+      }
+      
       const response = await fetch(`${gatewayUrl}/api/telegram-gateway/sync-messages`, {  // ✅ Endpoint correto
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(gatewayApiKey && { 'X-API-Key': gatewayApiKey }),
         },
         body: JSON.stringify({ limit: 500 })
       });

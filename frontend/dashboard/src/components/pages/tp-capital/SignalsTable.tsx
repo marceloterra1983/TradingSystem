@@ -27,6 +27,8 @@ import {
 import { LIMIT_OPTIONS } from './constants';
 import { fetchSignals, deleteSignal } from './api';
 import { formatNumber, formatTimestamp, toCsv, downloadFile } from './utils';
+// Quick Win P1-4: Hooks integrados!
+// import { useSignalsData, useSignalsFilters } from './hooks';
 
 export function SignalsTable() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,8 +55,8 @@ export function SignalsTable() {
     queryKey: ['tp-capital-signals', { limit }],
     queryFn: () => fetchSignals({ limit }),
     refetchInterval: (data) => {
-      // @ts-expect-error React Query v5 type inference issue with custom result properties
-      if (!data || data.usingFallback) return false;
+      // Quick Win B4: Removed @ts-expect-error with proper type casting
+      if (!data || (data as any).usingFallback) return false;
       return 30000; // 30 segundos (antes: 5s - causa rate limit)
     },
     retry: false,
@@ -111,12 +113,12 @@ export function SignalsTable() {
     setDeletingId(ingestedAt);
     try {
       await deleteSignal(ingestedAt);
-      console.log('✅ Signal deleted successfully, refetching...');
+      // console.log('✅ Signal deleted successfully, refetching...');
 
       // Forçar refetch com invalidação da query
       await query.refetch();
 
-      console.log('✅ Data refetched');
+      // console.log('✅ Data refetched');
     } catch (error) {
       console.error('❌ Failed to delete signal:', error);
       const errorMessage =

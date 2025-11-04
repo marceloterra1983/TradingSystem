@@ -40,11 +40,17 @@ const KestraPage = React.lazy(() => import('../components/pages/KestraPage'));
 const CatalogPage = React.lazy(
   () => import('../components/pages/CatalogPage'),
 );
+const DocumentationMetricsPage = React.lazy(
+  () => import('../components/pages/DocumentationMetricsPage'),
+);
 const TelegramGatewayFinal = React.lazy(
   () => import('../components/pages/TelegramGatewayFinal'),
 );
 const AnythingLLMPage = React.lazy(
   () => import('../components/pages/AnythingLLMPage'),
+);
+const PortsPage = React.lazy(
+  () => import('../components/pages/PortsPage'),
 );
 
 // ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
@@ -63,6 +69,8 @@ const agnoAgentsContent = () => <AgnoAgentsPage />;
 const kestraContent = () => <KestraPage />;
 const claudeCatalogContent = () => <CatalogPage />;
 const launcherContent = () => <LauncherPage />;
+const documentationMetricsContent = () => <DocumentationMetricsPage />;
+const portsContent = () => <PortsPage />;
 
 /**
  * Page Part - Collapsible section within a page
@@ -241,6 +249,17 @@ export const NAVIGATION_DATA: Section[] = [
         customContent: docusaurusContent,
       },
       {
+        id: 'documentation-metrics',
+        title: 'Documentation Metrics',
+        header: {
+          title: 'Documentation Metrics',
+          subtitle: 'Health scores, trends and quality metrics for the docs platform',
+        },
+        parts: [],
+        customContent: documentationMetricsContent,
+        icon: <BarChart3 className="h-4 w-4" />,
+      },
+      {
         id: 'knowledge-database',
         title: 'Database',
         header: {
@@ -343,6 +362,17 @@ export const NAVIGATION_DATA: Section[] = [
         // ✅ CustomizablePageLayout - Drag-and-drop grid with collapsible cards
         customContent: launcherContent,
         icon: <Gauge className="h-4 w-4" />,
+      },
+      {
+        id: 'ports',
+        title: 'Ports',
+        header: {
+          title: 'Ports Overview',
+          subtitle: 'Monitoramento em tempo real de todas as portas dos serviços',
+        },
+        parts: [], // Empty - uses customContent
+        customContent: portsContent,
+        icon: <Server className="h-4 w-4" />,
       },
     ],
   },

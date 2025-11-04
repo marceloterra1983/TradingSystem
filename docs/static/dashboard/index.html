@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentation Metrics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      .dashboard-container {
+        min-height: 100vh;
+        background: rgb(15 23 42);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 1) 0%, rgba(30, 41, 59, 1) 100%);
+      }
+
+      .card-shadow {
+        box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.4);
+      }
+
+      .chart-card {
+        min-height: 320px;
+      }
+
+      .loader {
+        border-top-color: transparent;
+      }
+    </style>
+  </head>
+  <body class="dashboard-container">
+    <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
+      <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Documentation Metrics Dashboard
+          </h1>
+          <p class="mt-2 text-sm text-slate-300">
+            Monitor documentation health, freshness, and quality across the TradingSystem project.
+          </p>
+          <p id="last-updated" class="mt-1 text-xs uppercase text-slate-400"></p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            id="refresh-button"
+            class="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+          >
+            <span>Refresh</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+              <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+            </svg>
+          </button>
+          <span id="status-indicator" class="rounded-full border border-slate-500 px-3 py-1 text-xs">
+            Loading…
+          </span>
+        </div>
+      </header>
+
+      <section
+        class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        aria-label="Overview metrics"
+      >
+        <article
+          class="card-shadow rounded-2xl bg-slate-900/60 p-5 ring-1 ring-slate-100/10"
+          aria-live="polite"
+        >
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-indigo-300">
+              Health Score
+            </h2>
+            <span id="health-grade" class="rounded-full bg-indigo-900/60 px-2.5 py-1 text-xs"></span>
+          </div>
+          <div class="mt-4 flex items-end gap-3">
+            <span id="health-score" class="text-4xl font-bold tracking-tight">0</span>
+            <div class="flex flex-col text-xs text-slate-400">
+              <span id="health-status">–</span>
+              <span id="health-trend">trend: –</span>
+            </div>
+          </div>
+          <div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+            <div id="health-progress" class="h-full rounded-full bg-green-400 transition-all"></div>
+          </div>
+        </article>
+
+        <article
+          class="card-shadow rounded-2xl bg-slate-900/60 p-5 ring-1 ring-slate-100/10"
+        >
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-300">Total Files</h2>
+          <p id="total-files" class="mt-4 text-4xl font-bold tracking-tight">0</p>
+          <p class="mt-2 text-xs text-slate-400">
+            Documentation tracked via maintenance audit.
+          </p>
+        </article>
+
+        <article
+          class="card-shadow rounded-2xl bg-slate-900/60 p-5 ring-1 ring-slate-100/10"
+        >
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-300">
+            Freshness Rate
+          </h2>
+          <p id="freshness-rate" class="mt-4 text-4xl font-bold tracking-tight">0%</p>
+          <p class="mt-2 text-xs text-slate-400">Files reviewed within the last 90 days.</p>
+          <div class="mt-6 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+            <div id="freshness-progress" class="h-full rounded-full bg-emerald-400 transition-all"></div>
+          </div>
+        </article>
+
+        <article
+          class="card-shadow rounded-2xl bg-slate-900/60 p-5 ring-1 ring-slate-100/10"
+        >
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-300">Issue Count</h2>
+          <p id="total-issues" class="mt-4 text-4xl font-bold tracking-tight text-rose-200">0</p>
+          <p class="mt-2 text-xs text-slate-400">Aggregated critical, high, medium, and low issues.</p>
+          <div id="severity-tags" class="mt-3 flex flex-wrap gap-2 text-xs"></div>
+        </article>
+      </section>
+
+      <section class="grid gap-4 lg:grid-cols-2">
+        <article
+          class="chart-card card-shadow rounded-2xl bg-slate-900/60 p-6 ring-1 ring-slate-100/10"
+        >
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-100">Health Score Trend</h2>
+            <span class="text-xs text-slate-400">Last 30 snapshots</span>
+          </header>
+          <canvas
+            id="chart-health-trend"
+            aria-label="Line chart showing the documentation health score trend over time"
+            role="img"
+            class="mt-4 h-64 w-full rounded-xl bg-slate-950/60 p-4"
+          ></canvas>
+        </article>
+
+        <article
+          class="chart-card card-shadow rounded-2xl bg-slate-900/60 p-6 ring-1 ring-slate-100/10"
+        >
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-100">Freshness Distribution</h2>
+            <span class="text-xs text-slate-400">Days since last review</span>
+          </header>
+          <canvas
+            id="chart-freshness"
+            aria-label="Bar chart showing documentation freshness distribution"
+            role="img"
+            class="mt-4 h-64 w-full rounded-xl bg-slate-950/60 p-4"
+          ></canvas>
+        </article>
+
+        <article
+          class="chart-card card-shadow rounded-2xl bg-slate-900/60 p-6 ring-1 ring-slate-100/10"
+        >
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-100">Issue Breakdown</h2>
+            <span class="text-xs text-slate-400">By issue type</span>
+          </header>
+          <canvas
+            id="chart-issues"
+            aria-label="Doughnut chart showing documentation issues by type"
+            role="img"
+            class="mt-4 h-64 w-full rounded-xl bg-slate-950/60 p-4"
+          ></canvas>
+        </article>
+
+        <article
+          class="chart-card card-shadow rounded-2xl bg-slate-900/60 p-6 ring-1 ring-slate-100/10"
+        >
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-100">Coverage by Owner</h2>
+            <span class="text-xs text-slate-400">Documentation ownership distribution</span>
+          </header>
+          <canvas
+            id="chart-coverage"
+            aria-label="Horizontal bar chart showing documentation coverage by owner"
+            role="img"
+            class="mt-4 h-64 w-full rounded-xl bg-slate-950/60 p-4"
+          ></canvas>
+        </article>
+
+        <article
+          class="chart-card card-shadow rounded-2xl bg-slate-900/60 p-6 ring-1 ring-slate-100/10"
+        >
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-slate-100">Coverage by Category</h2>
+            <span class="text-xs text-slate-400">Domain coverage inferred by path</span>
+          </header>
+          <canvas
+            id="chart-coverage-category"
+            aria-label="Horizontal bar chart showing documentation coverage by category"
+            role="img"
+            class="mt-4 h-64 w-full rounded-xl bg-slate-950/60 p-4"
+          ></canvas>
+        </article>
+      </section>
+
+      <footer class="mt-6 flex flex-col gap-3 rounded-2xl bg-slate-900/40 p-6 ring-1 ring-slate-100/10">
+        <div class="flex flex-col gap-2 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Need deeper insights? Explore the interactive dashboard and monitoring suite.
+          </p>
+          <nav class="flex flex-wrap gap-3 text-xs">
+            <a class="text-indigo-300 underline hover:text-indigo-200" href="/dashboard/">
+              Standalone Dashboard
+            </a>
+            <a class="text-indigo-300 underline hover:text-indigo-200" href="http://localhost:3103/documentation/metrics">
+              React Dashboard
+            </a>
+            <a class="text-indigo-300 underline hover:text-indigo-200" href="http://localhost:3000/d/docs-health/documentation-health-dashboard">
+              Grafana Dashboard
+            </a>
+            <a class="text-indigo-300 underline hover:text-indigo-200" href="https://github.com/marceloterra1983/TradingSystem">
+              Docs Repository
+            </a>
+          </nav>
+        </div>
+        <p class="text-xs text-slate-500">
+          Data sourced from daily maintenance audits and documentation health metrics.
+        </p>
+      </footer>
+    </div>
+
+    <template id="severity-tag-template">
+      <span class="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-1 text-xs font-medium">
+        <span class="inline-block h-2.5 w-2.5 rounded-full bg-slate-500"></span>
+        <span class="capitalize text-slate-300"></span>
+      </span>
+    </template>
+
+    <script>
+      const COLORS = {
+        primary: '#6366F1',
+        success: '#34D399',
+        warning: '#FCD34D',
+        danger: '#F97316',
+        critical: '#F87171',
+        slate700: '#334155',
+        slate900: '#0f172a',
+      };
+
+      const charts = {
+        healthTrend: null,
+        freshness: null,
+        issues: null,
+        coverage: null,
+        coverageCategory: null,
+      };
+
+      function setIndicator(status) {
+        const el = document.getElementById('status-indicator');
+        if (!el) return;
+
+        const map = {
+          loading: { text: 'Loading…', classes: 'border-slate-500 text-slate-200' },
+          success: { text: 'Live', classes: 'border-emerald-400 text-emerald-300' },
+          error: { text: 'Offline', classes: 'border-rose-400 text-rose-300' },
+        };
+
+        const preset = map[status] || map.loading;
+        el.className = `rounded-full border px-3 py-1 text-xs ${preset.classes}`;
+        el.textContent = preset.text;
+      }
+
+      async function fetchMetrics() {
+        const response = await fetch('./metrics.json', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch metrics: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      }
+
+      function applyHealthColor(score) {
+        if (score >= 90) return 'bg-emerald-400';
+        if (score >= 80) return 'bg-lime-400';
+        if (score >= 70) return 'bg-amber-400';
+        if (score >= 60) return 'bg-orange-400';
+        return 'bg-rose-500';
+      }
+
+      function renderOverviewCards(metrics) {
+        const {
+          healthScore,
+          coverage,
+          freshness,
+          issues: { total, bySeverity },
+        } = metrics;
+
+        const now = new Date(metrics.metadata.generatedAt);
+        document.getElementById('last-updated').textContent = `Last updated ${now.toLocaleString()}`;
+
+        const healthScoreEl = document.getElementById('health-score');
+        const healthGradeEl = document.getElementById('health-grade');
+        const healthStatusEl = document.getElementById('health-status');
+        const healthTrendEl = document.getElementById('health-trend');
+        const healthProgressEl = document.getElementById('health-progress');
+
+        healthScoreEl.textContent = Math.round((healthScore.current || 0) * 10) / 10;
+        healthGradeEl.textContent = healthScore.grade || 'N/A';
+        healthStatusEl.textContent = healthScore.status ? healthScore.status.toUpperCase() : 'NO DATA';
+        healthTrendEl.textContent = `trend: ${healthScore.trend || 'stable'}`;
+
+        const progressWidth = Math.min(100, Math.max(0, healthScore.current || 0));
+        healthProgressEl.style.width = `${progressWidth}%`;
+        healthProgressEl.className = `h-full rounded-full transition-all ${applyHealthColor(
+          healthScore.current || 0,
+        )}`;
+
+        document.getElementById('total-files').textContent = coverage.totalFiles || 0;
+
+        const freshnessRate =
+          freshness.distribution
+            .filter((item) => item.label !== '>90 days')
+            .reduce((sum, item) => sum + (item.percentage || 0), 0) || 0;
+
+        document.getElementById('freshness-rate').textContent = `${Math.round(freshnessRate)}%`;
+        document.getElementById('freshness-progress').style.width = `${Math.min(100, freshnessRate)}%`;
+
+        const totalIssuesEl = document.getElementById('total-issues');
+        totalIssuesEl.textContent = total || 0;
+
+        const severityTagsContainer = document.getElementById('severity-tags');
+        severityTagsContainer.innerHTML = '';
+        const template = document.getElementById('severity-tag-template');
+
+        Object.entries(bySeverity || {}).forEach(([severity, value]) => {
+          const clone = template.content.cloneNode(true);
+          const badge = clone.querySelector('span');
+          const dot = clone.querySelector('span > span');
+          const label = clone.querySelector('span:last-child');
+
+          if (badge) {
+            badge.setAttribute('data-severity', severity);
+          }
+
+          if (dot) {
+            const severityColor = {
+              critical: 'bg-rose-500',
+              high: 'bg-orange-400',
+              medium: 'bg-amber-300',
+              low: 'bg-blue-300',
+            }[severity] || 'bg-slate-400';
+            dot.className = `inline-block h-2.5 w-2.5 rounded-full ${severityColor}`;
+          }
+
+          if (label) {
+            label.textContent = `${severity} · ${value}`;
+          }
+
+          severityTagsContainer.appendChild(clone);
+        });
+      }
+
+      function renderHealthTrend(metrics) {
+        const ctx = document.getElementById('chart-health-trend');
+        if (!ctx) return;
+
+        const historical = (metrics.historical || []).slice(-30);
+        const labels = historical.map((entry) => new Date(entry.date).toLocaleDateString());
+        const data = historical.map((entry) => entry.healthScore || 0);
+
+        if (charts.healthTrend) {
+          charts.healthTrend.data.labels = labels;
+          charts.healthTrend.data.datasets[0].data = data;
+          charts.healthTrend.update();
+          return;
+        }
+
+        charts.healthTrend = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Health Score',
+                data,
+                borderColor: COLORS.primary,
+                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                borderWidth: 2.5,
+                tension: 0.35,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks: { color: '#CBD5F5' },
+                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+              },
+              x: {
+                ticks: { color: '#CBD5F5', maxTicksLimit: 6 },
+                grid: { display: false },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    return `Health Score: ${context.parsed.y}`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderFreshnessChart(metrics) {
+        const ctx = document.getElementById('chart-freshness');
+        if (!ctx) return;
+
+        const distribution = metrics.freshness?.distribution || [];
+        const labels = distribution.map((item) => item.label);
+        const counts = distribution.map((item) => item.count || 0);
+
+        if (charts.freshness) {
+          charts.freshness.data.labels = labels;
+          charts.freshness.data.datasets[0].data = counts;
+          charts.freshness.update();
+          return;
+        }
+
+        charts.freshness = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Files',
+                data: counts,
+                backgroundColor: [COLORS.success, '#FBBF24', '#F97316', '#F87171'],
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                ticks: { color: '#CBD5F5' },
+                grid: { display: false },
+              },
+              y: {
+                ticks: { color: '#CBD5F5' },
+                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const percentage = distribution[context.dataIndex]?.percentage ?? 0;
+                    return ` ${context.parsed.y} files · ${percentage}%`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderIssuesChart(metrics) {
+        const ctx = document.getElementById('chart-issues');
+        if (!ctx) return;
+
+        const breakdown = metrics.issues?.breakdown || {};
+        const labels = Object.keys(breakdown);
+        const values = Object.values(breakdown);
+        const colors = ['#F87171', '#FB923C', '#FCD34D'];
+
+        if (charts.issues) {
+          charts.issues.data.labels = labels;
+          charts.issues.data.datasets[0].data = values;
+          charts.issues.update();
+          return;
+        }
+
+        charts.issues = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: colors.slice(0, values.length),
+                borderWidth: 1,
+                borderColor: COLORS.slate900,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#CBD5F5' },
+              },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const total = values.reduce((sum, current) => sum + current, 0) || 1;
+                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                    return ` ${context.label}: ${context.parsed} issues (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderCoverageChart(metrics) {
+        const ctx = document.getElementById('chart-coverage');
+        if (!ctx) return;
+
+        const coverage = metrics.coverage?.byOwner || [];
+        const labels = coverage.map((item) => item.owner);
+        const values = coverage.map((item) => item.count);
+
+        if (charts.coverage) {
+          charts.coverage.data.labels = labels;
+          charts.coverage.data.datasets[0].data = values;
+          charts.coverage.update();
+          return;
+        }
+
+        charts.coverage = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: labels.map((_, index) => {
+                  const palette = ['#60A5FA', '#A78BFA', '#34D399', '#FBBF24', '#F472B6', '#38BDF8'];
+                  return palette[index % palette.length];
+                }),
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                ticks: { color: '#CBD5F5' },
+                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+              },
+              y: {
+                ticks: { color: '#CBD5F5' },
+                grid: { display: false },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const ownerData = coverage[context.dataIndex];
+                    const percentage = ownerData ? ownerData.percentage : 0;
+                    return ` ${context.label}: ${context.parsed} files (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderCoverageCategoryChart(metrics) {
+        const ctx = document.getElementById('chart-coverage-category');
+        if (!ctx) return;
+
+        const coverage = metrics.coverage?.byCategory || [];
+        const labels = coverage.map((item) => item.category);
+        const values = coverage.map((item) => item.count);
+
+        if (charts.coverageCategory) {
+          charts.coverageCategory.data.labels = labels;
+          charts.coverageCategory.data.datasets[0].data = values;
+          charts.coverageCategory.update();
+          return;
+        }
+
+        charts.coverageCategory = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: labels.map((_, index) => {
+                  const palette = ['#22d3ee', '#a855f7', '#f97316', '#10b981', '#f59e0b', '#3b82f6'];
+                  return palette[index % palette.length];
+                }),
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                ticks: { color: '#CBD5F5' },
+                grid: { color: 'rgba(148, 163, 184, 0.15)' },
+              },
+              y: {
+                ticks: { color: '#CBD5F5' },
+                grid: { display: false },
+              },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const categoryData = coverage[context.dataIndex];
+                    const percentage = categoryData ? categoryData.percentage : 0;
+                    return ` ${context.label}: ${context.parsed} files (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderDashboard(metrics) {
+        renderOverviewCards(metrics);
+        renderHealthTrend(metrics);
+        renderFreshnessChart(metrics);
+        renderIssuesChart(metrics);
+        renderCoverageChart(metrics);
+        renderCoverageCategoryChart(metrics);
+      }
+
+      async function loadDashboard() {
+        try {
+          setIndicator('loading');
+          const data = await fetchMetrics();
+          renderDashboard(data);
+          setIndicator('success');
+        } catch (error) {
+          console.error(error);
+          setIndicator('error');
+        }
+      }
+
+      function refreshDashboard() {
+        loadDashboard();
+      }
+
+      function initialize() {
+        const refreshButton = document.getElementById('refresh-button');
+        if (refreshButton) {
+          refreshButton.addEventListener('click', refreshDashboard);
+        }
+
+        loadDashboard();
+        setInterval(refreshDashboard, 5 * 60 * 1000);
+      }
+
+      if (document.readyState !== 'loading') {
+        initialize();
+      } else {
+        document.addEventListener('DOMContentLoaded', initialize);
+      }
+    </script>
+  </body>
+</html>

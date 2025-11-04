@@ -1,0 +1,209 @@
+@startuml Neon Internal Architecture
+!theme plain
+skinparam componentStyle rectangle
+
+title Neon Database - Internal Architecture\nStorage-Compute Separation
+
+package "Neon Self-Hosted Stack" {
+    
+    component "Neon Compute" as compute #LightBlue {
+        [PostgreSQL 15 Core]
+        [pgvector Extension]
+        [uuid-ossp Extension]
+        [pg_trgm Extension]
+        [Connection Pooler]
+        [Query Executor]
+    }
+    
+    component "Neon Pageserver" as pageserver #LightGreen {
+        [WAL Processor]
+        [Page Cache (1GB)]
+        [Compaction Engine]
+        [Storage Manager]
+        [Layer Manager]
+        [Garbage Collector]
+    }
+    
+    component "Neon Safekeeper" as safekeeper #LightCoral {
+        [WAL Receiver]
+        [WAL Archive]
+        [Consensus Module\n(Paxos)]
+        [PITR Manager]
+        [Checkpoint Manager]
+    }
+    
+    storage "Local Storage" as storage {
+        folder "Compute Data" {
+            file "pg_wal/" as wal1
+            file "base/" as base
+            file "pg_tblspc/" as tblspc
+        }
+        
+        folder "Pageserver Data" {
+            file "tenants/" as tenants
+            file "timelines/" as timelines
+            file "layers/" as layers
+            file "deltas/" as deltas
+        }
+        
+        folder "Safekeeper Data" {
+            file "wal_archive/" as walarch
+            file "checkpoints/" as checkpoints
+        }
+    }
+}
+
+' External connections
+cloud "Application\n(RAG Services)" as app
+app -down-> compute : "PostgreSQL wire protocol\nPort 5435\nMax connections: 100"
+
+' Internal connections
+compute -down-> pageserver : "Page requests\n(fetch pages on-demand)\nPort 6400"
+compute -down-> safekeeper : "WAL writes\n(durability guarantee)\nPort 7676"
+pageserver -right-> safekeeper : "WAL recovery\n(crash recovery scenario)"
+
+' Storage connections
+compute -down-> storage : "Write local WAL\n(before safekeeping)"
+pageserver -down-> storage : "Read/Write pages\n(layer-based storage)"
+safekeeper -down-> storage : "Archive WAL segments\n(PITR support)"
+
+note right of compute
+  **Neon Compute Node**
+  
+  Role: PostgreSQL instance
+  - Handles all SQL queries
+  - Manages connections (pooling)
+  - Executes transactions
+  - Maintains buffer cache
+  
+  Features:
+  - Standard PostgreSQL 15
+  - Hot standby support
+  - Streaming replication ready
+  - Extension support (pgvector)
+  
+  Resources:
+  - RAM: 4GB
+  - CPU: 2 cores
+  - Connections: 100 max, 20 pooled
+  
+  Performance:
+  - OLTP queries: < 5ms
+  - OLAP queries: < 50ms
+  - Connection time: < 10ms
+end note
+
+note right of pageserver
+  **Neon Pageserver (Storage Layer)**
+  
+  Role: Distributed storage backend
+  - Stores database pages
+  - Processes WAL records
+  - Manages compaction
+  - Serves page requests
+  
+  Features:
+  - Copy-on-write storage
+  - Layer-based architecture
+  - Incremental compaction
+  - Delta layers + image layers
+  
+  Storage Efficiency:
+  - Compression: zstd
+  - Deduplication: Yes
+  - Space saving: 50-70%
+  
+  Performance:
+  - Page fetch: < 1ms
+  - Compaction: Background
+  - Cache hit rate: 90%+
+end note
+
+note right of safekeeper
+  **Neon Safekeeper (WAL Service)**
+  
+  Role: WAL durability and PITR
+  - Receives WAL from compute
+  - Archives WAL segments
+  - Provides PITR capability
+  - Consensus for multi-safekeeper
+  
+  Features:
+  - Paxos consensus
+  - WAL retention: 30 days
+  - Point-in-time recovery
+  - Crash recovery support
+  
+  Durability:
+  - Sync mode: On (default)
+  - Flush: Every transaction
+  - Replication: Async to pageserver
+  
+  Recovery:
+  - RTO: < 5 minutes
+  - RPO: 0 (zero data loss)
+end note
+
+note bottom of storage
+  **Storage Layout**
+  
+  Compute Data (~2GB):
+  - pg_wal: Write-ahead logs
+  - base: Database files (minimal)
+  - pg_tblspc: Tablespaces
+  
+  Pageserver Data (~40GB):
+  - tenants: Multi-tenant isolation
+  - timelines: Branch history
+  - layers: Delta + image layers
+  - deltas: Incremental changes
+  
+  Safekeeper Data (~10GB):
+  - wal_archive: Compressed WAL
+  - checkpoints: Recovery points
+  
+  Total Storage: ~52GB
+end note
+
+' Data flow annotations
+note on link #compute to #pageserver
+  **Page Request Flow**
+  
+  1. Query needs page not in buffer
+  2. Compute requests from Pageserver
+  3. Pageserver returns page
+  4. Compute caches in buffer pool
+  
+  Frequency: 10-20% of queries
+  (90% buffer cache hit rate)
+end note
+
+note on link #compute to #safekeeper
+  **WAL Write Flow**
+  
+  1. Transaction commits
+  2. WAL record generated
+  3. Sent to Safekeeper
+  4. Safekeeper ACKs (durable)
+  5. Transaction confirmed
+  
+  Frequency: Every write transaction
+  Latency: < 2ms (local network)
+end note
+
+note on link #pageserver to #safekeeper
+  **WAL Recovery Flow**
+  
+  1. Pageserver needs WAL
+  2. Request from Safekeeper
+  3. Safekeeper provides WAL range
+  4. Pageserver replays WAL
+  5. Pages reconstructed
+  
+  Frequency: Crash recovery only
+  Duration: 30s - 5min (depends on WAL size)
+end note
+
+@enduml
+
+

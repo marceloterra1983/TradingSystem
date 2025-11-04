@@ -71,6 +71,7 @@ const normalizeTags = (tags?: unknown): string[] | undefined => {
   return undefined;
 };
 
+// Quick Win B5: Cleanup - ongoingLoad pattern (keeping for now, marked for review)
 let ongoingLoad: Promise<void> | null = null;
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({

@@ -1,3 +1,14 @@
+---
+title: "Workspace Categories CRUD"
+sidebar_position: 10
+description: "Summary of the Workspace categories CRUD implementation and data model."
+tags:
+  - apps
+  - workspace
+  - categories
+owner: DocsOps
+lastReviewed: '2025-11-02'
+---
 # Workspace Categories CRUD - Implementation Complete ✅
 
 ## 📋 Resumo Executivo

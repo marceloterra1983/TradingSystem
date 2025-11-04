@@ -1,0 +1,167 @@
+_format_version: "3.0"
+
+# ==============================================================================
+# Kong Declarative Configuration - RAG Services
+# ==============================================================================
+# This file defines services, routes, and plugins for the TradingSystem RAG API
+
+# ==============================================================================
+# Services - Backend upstream services
+# ==============================================================================
+services:
+  # RAG Service (Documentation API)
+  - name: rag-service
+    url: http://rag-service:3000
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    
+    # Routes - URL patterns that map to this service
+    routes:
+      # RAG API v1 Routes
+      - name: rag-api-v1
+        paths:
+          - /api/v1/rag
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        
+        # Plugins - Applied to this route only
+        plugins:
+          # Rate Limiting (100 requests per minute)
+          - name: rate-limiting
+            config:
+              minute: 100
+              policy: local
+              fault_tolerant: true
+              hide_client_headers: false
+              
+          # CORS (Allow dashboard access)
+          - name: cors
+            config:
+              origins:
+                - http://localhost:3103
+                - http://localhost:3000
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Authorization
+                - Content-Type
+                - X-Service-Token
+              credentials: true
+              max_age: 3600
+              
+          # Request Transformer (Add service token)
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - X-Service-Token:${INTER_SERVICE_SECRET}
+          
+          # Response Transformer (Add security headers)
+          - name: response-transformer
+            config:
+              add:
+                headers:
+                  - X-Content-Type-Options:nosniff
+                  - X-Frame-Options:DENY
+                  - X-XSS-Protection:1; mode=block
+            
+      # Health endpoint (no auth required)
+      - name: rag-health
+        paths:
+          - /api/v1/rag/status/health
+        strip_path: false
+        protocols:
+          - http
+          - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 300  # Higher limit for health checks
+              
+  # LlamaIndex Query Service
+  - name: llamaindex-query
+    url: http://rag-llamaindex-query:8000
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    
+    routes:
+      - name: llamaindex-api
+        paths:
+          - /api/v1/llamaindex
+        strip_path: true
+        protocols:
+          - http
+          - https
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+          - name: cors
+            config:
+              origins:
+                - http://localhost:3103
+              methods:
+                - GET
+                - POST
+              credentials: true
+
+# ==============================================================================
+# Global Plugins - Applied to all routes
+# ==============================================================================
+plugins:
+  # Request ID (for tracing)
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid
+      echo_downstream: true
+      
+  # Logging (structured logs)
+  - name: file-log
+    config:
+      path: /dev/stdout
+      reopen: true
+      
+  # IP Restriction (optional - whitelist trusted IPs)
+  # - name: ip-restriction
+  #   config:
+  #     allow:
+  #       - 127.0.0.1
+  #       - 192.168.0.0/16
+  #       - 172.16.0.0/12
+
+# ==============================================================================
+# Consumers - API clients (for JWT authentication)
+# ==============================================================================
+consumers:
+  # Dashboard Application
+  - username: dashboard
+    custom_id: dashboard-app
+    # JWT credentials will be added via Admin API
+    
+  # CLI Tools
+  - username: cli-tools
+    custom_id: cli-tools
+
+# ==============================================================================
+# Upstreams - Load balancing configuration (future use)
+# ==============================================================================
+# upstreams:
+#   - name: rag-service-upstream
+#     algorithm: round-robin
+#     slots: 10000
+#     targets:
+#       - target: rag-service:3000
+#         weight: 100
+

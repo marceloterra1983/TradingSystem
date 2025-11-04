@@ -104,11 +104,11 @@ export function LayoutSidebar({
         stiffness: 300,
         damping: 30,
       }}
-      className="relative flex flex-col border-r border-gray-200 bg-card/40 backdrop-blur-md dark:border-gray-700 dark:bg-gray-900/40"
+      className="relative flex flex-col border-r border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-muted)] backdrop-blur-lg transition-colors duration-200"
       style={{ width: isCollapsed ? '72px' : `${width}px` }}
     >
       {/* Logo Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-[color:var(--ts-surface-border)] p-4">
         {!isCollapsed ? (
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <Logo variant="compact" size="md" />
@@ -122,13 +122,13 @@ export function LayoutSidebar({
         {/* Collapse Button */}
         <button
           onClick={onToggleCollapse}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          className="rounded-lg p-1.5 transition-colors hover:bg-[color:var(--ts-surface-hover)]"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {isCollapsed ? (
-            <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-[color:var(--ts-text-muted)]" />
           ) : (
-            <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <ChevronLeft className="h-4 w-4 text-[color:var(--ts-text-muted)]" />
           )}
         </button>
       </div>
@@ -151,7 +151,7 @@ export function LayoutSidebar({
       </nav>
 
       {/* Footer - System Info */}
-      <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+      <div className="border-t border-[color:var(--ts-surface-border)] p-4">
         <motion.div
           initial={false}
           animate={{
@@ -160,7 +160,7 @@ export function LayoutSidebar({
           }}
           className="overflow-hidden"
         >
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-[color:var(--ts-text-muted)]">
             <div className="font-semibold">Dashboard v1.0.0</div>
             <div className="mt-1">React 18 + TypeScript</div>
           </div>
@@ -170,11 +170,11 @@ export function LayoutSidebar({
       {/* Resize Handle - Only show when not collapsed and onWidthChange is provided */}
       {!isCollapsed && onWidthChange && (
         <div
-          className="absolute top-0 right-0 w-1 h-full bg-transparent hover:bg-gray-300 dark:hover:bg-gray-600 cursor-ew-resize transition-colors group"
+          className="group absolute top-0 right-0 h-full w-1 cursor-ew-resize bg-transparent transition-colors hover:bg-[color:var(--ts-surface-hover)]/70"
           onMouseDown={handleMouseDown}
         >
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 flex items-center justify-center">
-            <GripVertical className="h-4 w-4 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute right-0 top-1/2 flex h-8 w-1 -translate-y-1/2 transform items-center justify-center">
+            <GripVertical className="h-4 w-4 text-[color:var(--ts-text-muted)] opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         </div>
       )}
@@ -210,8 +210,8 @@ function SidebarSection({
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
           hasActivePage
-            ? 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-400'
-            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
+            ? 'bg-[color:var(--ts-accent-soft)] text-[color:var(--ts-accent-strong)]'
+            : 'text-[color:var(--ts-text-secondary)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]',
           isCollapsed && 'justify-center px-2',
         )}
         title={isCollapsed ? section.label : undefined}
@@ -225,7 +225,7 @@ function SidebarSection({
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-[color:var(--ts-text-muted)]" />
             </motion.div>
           </>
         )}
@@ -250,8 +250,8 @@ function SidebarSection({
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors',
                   isActive
-                    ? 'bg-cyan-100 font-medium text-cyan-700 dark:bg-cyan-950 dark:text-cyan-400'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+                    ? 'bg-[color:var(--ts-accent-soft)] font-medium text-[color:var(--ts-accent-strong)]'
+                    : 'text-[color:var(--ts-text-muted)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]',
                 )}
               >
                 {page.icon ? (
@@ -259,8 +259,8 @@ function SidebarSection({
                     className={cn(
                       'flex h-4 w-4 items-center justify-center',
                       isActive
-                        ? 'text-cyan-600 dark:text-cyan-400'
-                        : 'text-gray-400 dark:text-gray-500',
+                        ? 'text-[color:var(--ts-accent-strong)]'
+                        : 'text-[color:var(--ts-text-muted)]',
                     )}
                   >
                     {page.icon}
@@ -270,8 +270,8 @@ function SidebarSection({
                     className={cn(
                       'h-1.5 w-1.5 rounded-full',
                       isActive
-                        ? 'bg-cyan-600 dark:bg-cyan-400'
-                        : 'bg-gray-400 dark:bg-gray-600',
+                        ? 'bg-[color:var(--ts-accent-strong)]'
+                        : 'bg-[color:var(--ts-text-muted)] opacity-60',
                     )}
                   />
                 )}

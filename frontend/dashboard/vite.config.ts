@@ -97,17 +97,17 @@ export default defineConfig(({ mode }) => {
 
   const libraryProxy = resolveProxy(
     env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL,
-    'http://localhost:3200',
+    'http://localhost:3201',
     '/api',
   );
   const tpCapitalProxy = resolveProxy(
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4005',
   );
-  // Docs API (FlexSearch + CRUD) runs on 3401; 3400 is static docs (NGINX)
+  // Docs API (FlexSearch + CRUD) runs on 3405; 3404 is static docs (NGINX)
   const docsApiProxy = resolveProxy(
     env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
-    'http://localhost:3401',
+    'http://localhost:3405',
   );
   // RAG Collections Service (Directories API) runs on 3403
   const ragCollectionsProxy = resolveProxy(
@@ -120,7 +120,7 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3400',
+    'http://localhost:3404',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,

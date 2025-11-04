@@ -1,0 +1,147 @@
+@startuml workspace-neon-architecture
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+title Workspace Stack - Unified Container Architecture (4 containers)
+
+LAYOUT_LEFT_RIGHT()
+
+' Define custom colors
+!define NEON_COLOR #00E5CC
+!define WORKSPACE_COLOR #667EEA
+!define STORAGE_COLOR #F6AD55
+!define COMPUTE_COLOR #48BB78
+
+' ==============================================================================
+' WORKSPACE API LAYER
+' ==============================================================================
+Container_Boundary(workspace_api, "Workspace API Service") {
+    Component(api_routes, "API Routes", "Express Router", "REST endpoints for CRUD operations", $sprite="expressjs")
+    Component(api_validators, "Validators", "express-validator", "Input validation and sanitization")
+    Component(api_middleware, "Middleware Stack", "Shared Middleware", "CORS, Helmet, Rate Limiting, Compression")
+    Component(neon_client, "NeonClient", "PostgreSQL Client", "Connection pooling, query execution, row mapping", $tags="neon")
+    Component(db_factory, "Database Factory", "Strategy Pattern", "Switches between Neon/TimescaleDB/LowDB")
+    ComponentDb(config, "Configuration", "Environment Variables", "NEON_HOST, NEON_PORT, NEON_DATABASE")
+}
+
+' ==============================================================================
+' NEON DATABASE LAYER
+' ==============================================================================
+Container_Boundary(workspace_stack, "Workspace Stack (workspace_network)", $tags="neon") {
+    Container(workspace_api_container, "workspace-api", "Express + Node.js", "REST API for workspace items\nPort: 3200\nContainer: workspace-api", $sprite="nodejs")
+    Container(neon_compute, "workspace-db-compute", "PostgreSQL 17", "SQL query processing\nPort: 5433 (ext) → 55432 (int)\nContainer: workspace-db-compute", $sprite="postgresql")
+    Container(neon_pageserver, "workspace-db-pageserver", "Rust Service", "Storage layer\nPage management\nHTTP: 9898, PostgreSQL: 6400\nContainer: workspace-db-pageserver")
+    Container(neon_safekeeper, "workspace-db-safekeeper", "Rust Service", "Write-Ahead Log service\nDurability guarantees\nHTTP: 7676, PostgreSQL: 5454\nContainer: workspace-db-safekeeper")
+}
+
+' ==============================================================================
+' STORAGE LAYER
+' ==============================================================================
+ContainerDb_Ext(persistent_storage, "Persistent Storage", "Docker Volumes", "Data persistence across restarts")
+
+' ==============================================================================
+' CLIENT APPLICATIONS
+' ==============================================================================
+Person(developer, "Developer", "Team member managing ideas and tasks")
+System_Ext(dashboard, "Dashboard", "React + Vite frontend\nKanban board + Table view")
+
+' ==============================================================================
+' ALTERNATIVE DATABASE (ROLLBACK)
+' ==============================================================================
+ContainerDb_Ext(timescaledb_backup, "TimescaleDB Backup", "PostgreSQL 15", "Fallback database (14-day retention)")
+
+' ==============================================================================
+' RELATIONSHIPS - API LAYER
+' ==============================================================================
+Rel(developer, dashboard, "Manages workspace items", "HTTPS")
+Rel(dashboard, workspace_api_container, "CRUD operations", "HTTP REST\nPort 3200")
+Rel(workspace_api_container, api_routes, "Routes requests")
+Rel(api_routes, api_validators, "Validates input")
+Rel(api_routes, api_middleware, "Applies security/rate limiting")
+Rel(api_routes, db_factory, "Get database client")
+Rel(db_factory, neon_client, "Returns NeonClient", "Strategy: neon")
+Rel(neon_client, config, "Reads connection params")
+
+' ==============================================================================
+' RELATIONSHIPS - NEON LAYER
+' ==============================================================================
+Rel(neon_client, neon_compute, "SQL queries", "PostgreSQL Wire Protocol\nPort 5433\nPool: 20 max, 2 min")
+Rel(neon_compute, neon_pageserver, "Page requests", "PostgreSQL Protocol\nPort 6400")
+Rel(neon_compute, neon_safekeeper, "WAL writes", "PostgreSQL Protocol\nPort 5454")
+Rel(neon_pageserver, persistent_storage, "Stores pages", "Docker Volume")
+Rel(neon_safekeeper, persistent_storage, "Stores WAL", "Docker Volume")
+
+' ==============================================================================
+' RELATIONSHIPS - MONITORING & FALLBACK
+' ==============================================================================
+Rel_Back(neon_pageserver, api_middleware, "Prometheus metrics", "HTTP :9898/metrics")
+Rel_Back(neon_safekeeper, api_middleware, "Prometheus metrics", "HTTP :7676/metrics")
+Rel_Back(db_factory, timescaledb_backup, "Rollback if needed", "LIBRARY_DB_STRATEGY=timescaledb")
+
+' ==============================================================================
+' NOTES
+' ==============================================================================
+note right of neon_compute
+  **Neon Compute Features**
+  • PostgreSQL 17 compatible
+  • Stateless (no local storage)
+  • Auto-scaling capable
+  • Scale-to-zero support
+  • Connection pooling via pgBouncer
+end note
+
+note right of neon_pageserver
+  **Separated Storage**
+  • Handles all persistent data
+  • Page-level storage
+  • HTTP API for monitoring
+  • Independent from compute
+  • Enables database branching
+end note
+
+note right of neon_safekeeper
+  **Write-Ahead Log Service**
+  • Durability guarantees
+  • Multi-replica support
+  • Consensus protocol
+  • Point-in-time recovery
+end note
+
+note left of neon_client
+  **Connection Configuration**
+  NEON_HOST=localhost
+  NEON_PORT=5433
+  NEON_DATABASE=workspace
+  NEON_SCHEMA=workspace
+  NEON_POOL_MAX=20
+  NEON_POOL_MIN=2
+end note
+
+' ==============================================================================
+' LEGEND
+' ==============================================================================
+legend right
+  |= Container |= Port |= Protocol |
+  | workspace-api | 3200 | HTTP REST |
+  | workspace-db-compute | 5433 (host) → 55432 (int) | PostgreSQL |
+  | workspace-db-pageserver | 6400, 9898 (HTTP) | PostgreSQL + HTTP |
+  | workspace-db-safekeeper | 5454, 7676 (HTTP) | PostgreSQL + HTTP |
+  | Dashboard | 3103 | HTTPS |
+  
+  **Unified Stack**
+  Stack: workspace-stack (4 containers)
+  Network: workspace_network (172.25.0.0/16)
+  Bridge: tradingsystem_backend (external)
+  
+  **Management**
+  Start: bash scripts/docker/start-workspace-stack.sh
+  Stop: bash scripts/docker/stop-workspace-stack.sh
+  Logs: docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+  
+  **Rollback**
+  LIBRARY_DB_STRATEGY=timescaledb
+  (14-day retention period)
+endlegend
+
+@enduml
+

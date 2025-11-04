@@ -102,6 +102,14 @@ router.post('/sync-messages', async (req, res) => {
     // 1. Buscar canais ativos
     const channels = await getActiveChannels({ logger });
     
+    logger.info(
+      { 
+        totalChannels: channels.length,
+        channels: channels.map(ch => ({ id: ch.channelId, label: ch.label, isActive: ch.isActive }))
+      },
+      '[SyncMessages] Active channels loaded from database'
+    );
+    
     if (channels.length === 0) {
       return res.json({
         success: true,
@@ -116,27 +124,55 @@ router.post('/sync-messages', async (req, res) => {
     
     let totalMessagesSynced = 0;
     const channelsSynced = [];
+    const channelsSkipped = [];
     
     // 2. Para cada canal, verificar e sincronizar
     for (const channel of channels) {
       try {
+        logger.info(
+          { channelId: channel.channelId, label: channel.label },
+          '[SyncMessages] Syncing channel...'
+        );
+        
         const result = await syncChannel(channel.channelId, userClient, { logger, telegramLimit });
         
-        if (result.messagesSynced > 0) {
-          totalMessagesSynced += result.messagesSynced;
-          channelsSynced.push({
-            channelId: channel.channelId,
-            label: channel.label,
-            messagesSynced: result.messagesSynced
-          });
+        // Always include in result (even if 0 messages synced)
+        totalMessagesSynced += result.messagesSynced || 0;
+        channelsSynced.push({
+          channelId: channel.channelId,
+          label: channel.label,
+          messagesSynced: result.messagesSynced || 0
+        });
+        
+        if (result.messagesSynced === 0) {
+          logger.info(
+            { channelId: channel.channelId, label: channel.label },
+            '[SyncMessages] Channel already up-to-date'
+          );
         }
       } catch (error) {
         logger.error(
-          { err: error, channelId: channel.channelId }, 
-          'Erro ao sincronizar canal'
+          { err: error, channelId: channel.channelId, label: channel.label }, 
+          '[SyncMessages] Error syncing channel'
         );
+        channelsSkipped.push({
+          channelId: channel.channelId,
+          label: channel.label,
+          reason: error.message
+        });
       }
     }
+    
+    logger.info(
+      { 
+        totalMessagesSynced, 
+        channelsSyncedCount: channelsSynced.length,
+        channelsSkippedCount: channelsSkipped.length,
+        channelsSynced: channelsSynced.map(ch => ch.label),
+        channelsSkipped: channelsSkipped.map(ch => ({ label: ch.label, reason: ch.reason }))
+      },
+      '[SyncMessages] Sync summary'
+    );
     
     logger.info(
       { totalMessagesSynced, channelsCount: channelsSynced.length },

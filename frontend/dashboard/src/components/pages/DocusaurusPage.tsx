@@ -138,18 +138,6 @@ export function DocusaurusPageNew() {
         <DocsHybridSearchPage />
       ) : (
         <div className="h-[calc(100vh-200px)] w-full flex flex-col">
-          <div className="mb-2 p-2 bg-blue-50 dark:bg-slate-800 rounded text-sm">
-            <p className="text-gray-800 dark:text-gray-200">
-              <strong>Status:</strong>{' '}
-              {iframeSrc
-                ? `Carregando de: ${iframeSrc}`
-                : 'Sem URL configurada'}
-            </p>
-            <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
-              Se o conteúdo não aparecer, verifique se o Docusaurus está rodando
-              em {iframeSrc}
-            </p>
-          </div>
           {iframeSrc ? (
             <iframe
               key={iframeSrc}

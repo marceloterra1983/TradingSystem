@@ -170,13 +170,17 @@ function toHealthUrl(port, path = '/health') {
  * }} config
  */
 function createServiceTarget(config) {
-  const port = resolvePort(config.portEnv, config.defaultPort);
+  const port = Number(resolvePort(config.portEnv, config.defaultPort));
   return {
     id: config.id,
     name: config.name,
     description: config.description,
     category: config.category,
     port,
+    internalPort: config.internalPort || null,
+    externalPort: port,
+    frontendPort: config.frontendPort || null, // Port used by frontend (via proxy or direct)
+    frontendPath: config.frontendPath || null, // Path prefix used by frontend
     method: config.method || 'GET',
     timeoutMs: config.timeoutMs,
     healthUrl: resolveUrl(config.urlEnv, toHealthUrl(port, config.path)),
@@ -190,6 +194,8 @@ const SERVICE_TARGETS = [
     description: 'Workspace item management (documentation backlog)',
     category: 'api',
     defaultPort: 3200,
+    frontendPort: 3103,
+    frontendPath: '/api/workspace',
     portEnv: ['SERVICE_LAUNCHER_WORKSPACE_PORT', 'SERVICE_LAUNCHER_LIBRARY_PORT'],
     urlEnv: ['SERVICE_LAUNCHER_WORKSPACE_URL', 'SERVICE_LAUNCHER_LIBRARY_URL'],
   }),
@@ -217,6 +223,8 @@ const SERVICE_TARGETS = [
     description: 'Documentation content service',
     category: 'api',
     defaultPort: 3401,
+    frontendPort: 3103,
+    frontendPath: '/api/docs',
     portEnv: 'SERVICE_LAUNCHER_DOCS_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DOCS_URL',
   }),
@@ -243,7 +251,9 @@ const SERVICE_TARGETS = [
     name: 'Dashboard',
     description: 'Frontend dashboard (Vite/React)',
     category: 'ui',
-    defaultPort: 3101,
+    defaultPort: 3103,
+    frontendPort: 3103,
+    frontendPath: '/',
     portEnv: 'SERVICE_LAUNCHER_DASHBOARD_PORT',
     urlEnv: 'SERVICE_LAUNCHER_DASHBOARD_URL',
     path: '/',
@@ -254,6 +264,8 @@ const SERVICE_TARGETS = [
     description: 'Static Docusaurus build served via docs-hub container (NGINX)',
     category: 'docs',
     defaultPort: 3400,
+    frontendPort: 3400,
+    frontendPath: '/',
     portEnv: ['SERVICE_LAUNCHER_DOCS_HUB_PORT', 'SERVICE_LAUNCHER_DOCUSAURUS_PORT'],
     urlEnv: ['SERVICE_LAUNCHER_DOCS_HUB_URL', 'SERVICE_LAUNCHER_DOCUSAURUS_URL'],
     path: '/health', // NGINX container exposes dedicated health endpoint
@@ -298,6 +310,200 @@ const SERVICE_TARGETS = [
     timeoutMs: DEFAULT_TIMEOUT_MS,
     healthUrl: process.env.SERVICE_LAUNCHER_SELF_URL || `http://localhost:${PORT}/health`,
   },
+  // Docker Containers - Databases
+  createServiceTarget({
+    id: 'timescale-db',
+    name: 'TimescaleDB',
+    description: 'Time-series PostgreSQL database',
+    category: 'data',
+    defaultPort: 7000,
+    internalPort: 5432,
+    portEnv: 'SERVICE_LAUNCHER_TIMESCALE_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_TIMESCALE_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'timescale-backup',
+    name: 'TimescaleDB Backup',
+    description: 'TimescaleDB backup instance',
+    category: 'data',
+    defaultPort: 7001,
+    internalPort: 5432,
+    portEnv: 'SERVICE_LAUNCHER_TIMESCALE_BACKUP_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_TIMESCALE_BACKUP_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'postgres-langgraph',
+    name: 'PostgreSQL LangGraph',
+    description: 'PostgreSQL database for LangGraph',
+    category: 'data',
+    defaultPort: 7002,
+    internalPort: 5432,
+    portEnv: 'SERVICE_LAUNCHER_POSTGRES_LANGGRAPH_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_POSTGRES_LANGGRAPH_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'kong-db',
+    name: 'Kong Database',
+    description: 'PostgreSQL database for Kong API Gateway',
+    category: 'data',
+    defaultPort: 7003,
+    internalPort: 5432,
+    portEnv: 'SERVICE_LAUNCHER_KONG_DB_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_KONG_DB_URL',
+    path: '/',
+  }),
+  // Docker Containers - Database Admin Tools
+  createServiceTarget({
+    id: 'pgadmin',
+    name: 'pgAdmin',
+    description: 'PostgreSQL administration and development platform',
+    category: 'data',
+    defaultPort: 7100,
+    internalPort: 80,
+    portEnv: 'SERVICE_LAUNCHER_PGADMIN_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_PGADMIN_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'adminer',
+    name: 'Adminer',
+    description: 'Database management in a single PHP file',
+    category: 'data',
+    defaultPort: 7101,
+    internalPort: 8080,
+    portEnv: 'SERVICE_LAUNCHER_ADMINER_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_ADMINER_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'pgweb',
+    name: 'pgWeb',
+    description: 'Web-based PostgreSQL database browser',
+    category: 'data',
+    defaultPort: 7102,
+    internalPort: 8081,
+    portEnv: 'SERVICE_LAUNCHER_PGWEB_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_PGWEB_URL',
+    path: '/',
+  }),
+  createServiceTarget({
+    id: 'timescale-exporter',
+    name: 'TimescaleDB Exporter',
+    description: 'Prometheus exporter for TimescaleDB metrics',
+    category: 'monitoring',
+    defaultPort: 7200,
+    internalPort: 9187,
+    portEnv: 'SERVICE_LAUNCHER_TIMESCALE_EXPORTER_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_TIMESCALE_EXPORTER_URL',
+    path: '/metrics',
+  }),
+  // Docker Containers - AI/ML Tools
+  createServiceTarget({
+    id: 'kestra',
+    name: 'Kestra',
+    description: 'Declarative data orchestration and scheduling',
+    category: 'ai-tools',
+    defaultPort: 8100,
+    internalPort: 8080,
+    portEnv: 'SERVICE_LAUNCHER_KESTRA_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_KESTRA_URL',
+    path: '/health',
+  }),
+  createServiceTarget({
+    id: 'langgraph',
+    name: 'LangGraph',
+    description: 'LangChain graph-based workflows',
+    category: 'ai-tools',
+    defaultPort: 8115,
+    internalPort: 8111,
+    portEnv: 'SERVICE_LAUNCHER_LANGGRAPH_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_LANGGRAPH_URL',
+    path: '/health',
+  }),
+  createServiceTarget({
+    id: 'agno-agents',
+    name: 'Agno Agents',
+    description: 'Multi-agent AI orchestration framework',
+    category: 'ai-tools',
+    defaultPort: 8204,
+    internalPort: 8200,
+    portEnv: 'SERVICE_LAUNCHER_AGNO_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_AGNO_URL',
+    path: '/health',
+  }),
+  createServiceTarget({
+    id: 'llamaindex-ingest',
+    name: 'LlamaIndex Ingest',
+    description: 'Document ingestion service for RAG',
+    category: 'ai-tools',
+    defaultPort: 8201,
+    internalPort: 8000,
+    portEnv: 'SERVICE_LAUNCHER_LLAMAINDEX_INGEST_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_LLAMAINDEX_INGEST_URL',
+    path: '/health',
+  }),
+  // Docker Containers - RAG Services
+  createServiceTarget({
+    id: 'rag-service',
+    name: 'RAG Service',
+    description: 'Main RAG query and retrieval service',
+    category: 'ai-tools',
+    defaultPort: 3402,
+    internalPort: 3000,
+    frontendPort: 3103,
+    frontendPath: '/api/rag',
+    portEnv: 'SERVICE_LAUNCHER_RAG_SERVICE_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_RAG_SERVICE_URL',
+    path: '/health',
+  }),
+  createServiceTarget({
+    id: 'rag-collections',
+    name: 'RAG Collections',
+    description: 'RAG collections management service',
+    category: 'ai-tools',
+    defaultPort: 3403,
+    internalPort: 3402,
+    portEnv: 'SERVICE_LAUNCHER_RAG_COLLECTIONS_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_RAG_COLLECTIONS_URL',
+    path: '/health',
+  }),
+  createServiceTarget({
+    id: 'docs-api-container',
+    name: 'Docs API',
+    description: 'Documentation API container (NGINX)',
+    category: 'docs',
+    defaultPort: 3405,
+    internalPort: 3000,
+    portEnv: 'SERVICE_LAUNCHER_DOCS_API_CONTAINER_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_DOCS_API_CONTAINER_URL',
+    path: '/health',
+  }),
+  // Docker Containers - RAG Monitoring
+  createServiceTarget({
+    id: 'prometheus-rag',
+    name: 'Prometheus RAG',
+    description: 'Prometheus metrics for RAG services',
+    category: 'monitoring',
+    defaultPort: 9091,
+    internalPort: 9090,
+    portEnv: 'SERVICE_LAUNCHER_PROMETHEUS_RAG_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_PROMETHEUS_RAG_URL',
+    path: '/-/healthy',
+  }),
+  createServiceTarget({
+    id: 'grafana-rag',
+    name: 'Grafana RAG',
+    description: 'Grafana dashboards for RAG metrics',
+    category: 'monitoring',
+    defaultPort: 3104,
+    internalPort: 3000,
+    portEnv: 'SERVICE_LAUNCHER_GRAFANA_RAG_PORT',
+    urlEnv: 'SERVICE_LAUNCHER_GRAFANA_RAG_URL',
+    path: '/api/health',
+  }),
 ];
 
 /**
@@ -329,6 +535,11 @@ async function evaluateService(service) {
       description: service.description,
       category: service.category,
       port: service.port,
+      internalPort: service.internalPort || null,
+      externalPort: service.externalPort || service.port,
+      frontendPort: service.frontendPort || null,
+      frontendPath: service.frontendPath || null,
+      healthUrl: service.healthUrl,
       status: 'down',
       latencyMs: null,
       updatedAt,
@@ -422,6 +633,12 @@ async function evaluateService(service) {
     description: service.description,
     category: service.category,
     port: service.port,
+    internalPort: service.internalPort || null,
+    externalPort: service.externalPort || service.port,
+    frontendPort: service.frontendPort || null,
+    frontendPath: service.frontendPath || null,
+    healthUrl: service.healthUrl,
+    responseTimeMs: latencyMs || 0,
     status,
     latencyMs,
     updatedAt,
@@ -634,6 +851,106 @@ app.get('/api/status', async (_req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to gather service status',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/ports - List all service ports with detailed information
+ * Returns structured data about all ports in the TradingSystem
+ */
+app.get('/api/ports', async (_req, res) => {
+  const startTime = performance.now();
+  
+  try {
+    // Get health check results for all services
+    const results = await gatherServiceStatuses(SERVICE_TARGETS);
+    
+    // Transform results into port information
+    const ports = results.map((service) => {
+      const healthUrl = service.healthUrl || `http://localhost:${service.port}/health`;
+      const baseUrl = healthUrl.replace(/\/health.*$/, '');
+      
+      return {
+        port: service.port,
+        internalPort: service.internalPort || null,
+        externalPort: service.externalPort || service.port,
+        frontendPort: service.frontendPort || null,
+        frontendPath: service.frontendPath || null,
+        service: {
+          id: service.id,
+          name: service.name,
+          description: service.description,
+          category: service.category,
+        },
+        status: service.status,
+        health: {
+          isHealthy: service.status === 'healthy',
+          responseTimeMs: service.responseTimeMs || 0,
+          lastChecked: new Date().toISOString(),
+        },
+        urls: {
+          health: healthUrl,
+          base: baseUrl,
+          frontend: service.frontendPort ? `http://localhost:${service.frontendPort}${service.frontendPath || ''}` : null,
+        },
+      };
+    });
+    
+    // Sort by port number
+    ports.sort((a, b) => a.port - b.port);
+    
+    // Calculate statistics
+    const stats = {
+      total: ports.length,
+      healthy: ports.filter((p) => p.health.isHealthy).length,
+      unhealthy: ports.filter((p) => !p.health.isHealthy).length,
+      byCategory: {},
+    };
+    
+    // Group by category
+    ports.forEach((port) => {
+      const category = port.service.category;
+      if (!stats.byCategory[category]) {
+        stats.byCategory[category] = {
+          total: 0,
+          healthy: 0,
+          unhealthy: 0,
+        };
+      }
+      stats.byCategory[category].total++;
+      if (port.health.isHealthy) {
+        stats.byCategory[category].healthy++;
+      } else {
+        stats.byCategory[category].unhealthy++;
+      }
+    });
+    
+    const durationMs = Math.round(performance.now() - startTime);
+    
+    logger.info(
+      { 
+        event: 'ports_query', 
+        duration: durationMs, 
+        totalPorts: stats.total, 
+        healthyPorts: stats.healthy 
+      },
+      'Ports query completed'
+    );
+    
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      durationMs,
+      stats,
+      ports,
+    });
+  } catch (error) {
+    logger.error({ err: error, event: 'ports_query_error' }, 'Failed to query ports');
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve port information',
       message: error.message,
     });
   }

@@ -30,6 +30,7 @@ import ragCollectionsRoutes from './routes/rag-collections.js';
 import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
 import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
 import markdownContentRoutes from './routes/markdown-content.js';
+import apiV1Router from './routes/api-v1.js';
 
 // Application services
 import MarkdownSearchService from './services/markdownSearchService.js';
@@ -83,7 +84,7 @@ app.use(configureCompression({ logger }));
 app.use(configureHelmet({ logger }));
 app.use(configureCors({ logger, disableCors: config.cors.disable }));
 app.use(configureRateLimit({ logger }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(metricsMiddleware);
 
 // Serve static files from docs directory

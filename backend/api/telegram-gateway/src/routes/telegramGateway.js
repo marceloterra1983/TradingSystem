@@ -174,9 +174,9 @@ telegramGatewayRouter.get('/queue/preview-limit', (_req, res) => {
 
 // PROTECTED ENDPOINT: Require API key authentication
 telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
-  // Validate API key first
-  const apiKey = req.headers['x-api-key'];
-  const expectedKey = process.env.TELEGRAM_GATEWAY_API_KEY;
+  // Validate API key first (accept both X-API-Key and X-Gateway-Token for compatibility)
+  const apiKey = req.headers['x-api-key'] || req.headers['x-gateway-token'];
+  const expectedKey = process.env.TELEGRAM_GATEWAY_API_KEY || process.env.TELEGRAM_GATEWAY_API_TOKEN;
   
   if (!expectedKey) {
     req.log?.error?.('[Auth] TELEGRAM_GATEWAY_API_KEY not configured');
@@ -192,7 +192,7 @@ telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
     return res.status(apiKey ? 403 : 401).json({
       success: false,
       error: apiKey ? 'Forbidden' : 'Unauthorized',
-      message: apiKey ? 'Invalid API key' : 'Missing X-API-Key header',
+      message: apiKey ? 'Invalid API key' : 'Missing X-API-Key or X-Gateway-Token header',
     });
   }
   
@@ -202,10 +202,9 @@ telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
     
     const { limit = 500, channels, concurrency = 3 } = req.body;
     
-    // Get Telegram client
-    const { getTelegramClient } = await import('../services/TelegramClientService.js');
-    const telegramClient = await getTelegramClient();
-    await telegramClient.connect();
+    // ARCHITECTURAL FIX: Delegate to MTProto service (port 4006) via HTTP
+    // This service already has an authenticated Telegram session
+    // Avoids duplicate authentication and follows single responsibility principle
     
     // Determine which channels to sync
     const { listChannels } = await import('../db/channelsRepository.js');
@@ -217,36 +216,100 @@ telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
     const channelsToSync = channels || 
                           (activeChannelIds.length > 0 ? activeChannelIds : [process.env.TELEGRAM_SIGNALS_CHANNEL_ID]);
     
+    if (channelsToSync.length === 0) {
+      req.log.warn('[SyncMessages] No active channels configured');
+      return res.json({
+        success: true,
+        message: 'Nenhum canal ativo configurado para sincronização',
+        data: {
+          totalMessagesSynced: 0,
+          totalMessagesSaved: 0,
+          channelsSynced: [],
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+    
     req.log.info(
-      { channelCount: channelsToSync.length },
-      '[SyncMessages] Channels to sync determined'
+      { channelCount: channelsToSync.length, channels: channelsToSync },
+      '[SyncMessages] Delegating to MTProto service'
     );
     
-    // REFACTORED: Delegate to service layer (Clean Architecture)
-    const { MessageSyncService } = await import('../services/MessageSyncService.js');
-    const syncService = new MessageSyncService(telegramClient, req.log);
+    // Call MTProto service endpoint (has authenticated session)
+    const mtprotoServiceUrl = process.env.MTPROTO_SERVICE_URL || 'http://localhost:4007';
+    const mtprotoApiKey = process.env.MTPROTO_SERVICE_API_KEY || expectedKey;
     
-    const result = await syncService.syncChannels({
-      channelIds: channelsToSync,
-      limit,
-      concurrency
+    const response = await fetch(`${mtprotoServiceUrl}/sync-messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': mtprotoApiKey  // Forward authentication to MTProto service
+      },
+      body: JSON.stringify({
+        limit  // MTProto service only uses limit, fetches channels internally
+      }),
+      signal: AbortSignal.timeout(60000) // 60s timeout
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      req.log.error(
+        { status: response.status, error: errorText },
+        '[SyncMessages] MTProto service returned error'
+      );
+      return res.status(502).json({
+        success: false,
+        message: 'Serviço MTProto não está disponível ou retornou erro',
+        error: `HTTP ${response.status}: ${errorText}`,
+      });
+    }
+    
+    const result = await response.json();
+    
+    const totalSynced = result.data?.totalMessagesSynced || 0;
+    const channelsSynced = result.data?.channelsSynced || [];
+    
+    req.log.info(
+      { 
+        totalSynced,
+        channelsCount: channelsSynced.length
+      },
+      '[SyncMessages] Sync completed via MTProto service'
+    );
     
     // HTTP response handling (route responsibility)
     return res.json({
       success: true,
-      message: result.totalMessagesSynced > 0 
-        ? `${result.totalMessagesSynced} mensagem(ns) sincronizada(s) de ${result.channelsSynced.length} canal(is). ${result.totalMessagesSaved} salvas no banco.`
+      message: totalSynced > 0 
+        ? `${totalSynced} mensagem(ns) sincronizada(s) de ${channelsSynced.length} canal(is). ${totalSynced} salvas no banco.`
         : 'Todas as mensagens estão sincronizadas',
       data: {
-        totalMessagesSynced: result.totalMessagesSynced,
-        totalMessagesSaved: result.totalMessagesSaved,
-        channelsSynced: result.channelsSynced,
+        totalMessagesSynced: totalSynced,
+        totalMessagesSaved: totalSynced, // MTProto service saves all synced messages
+        channelsSynced,
         timestamp: new Date().toISOString()
       }
     });
   } catch (error) {
     req.log.error({ err: error }, '[SyncMessages] Unexpected error');
+    
+    // Specific error messages
+    if (error.name === 'AbortError' || error.code === 'ETIMEDOUT') {
+      return res.status(504).json({
+        success: false,
+        message: 'Timeout ao conectar com serviço MTProto (60s)',
+        error: 'Gateway Timeout',
+      });
+    }
+    
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(503).json({
+        success: false,
+        message: 'Serviço MTProto não está rodando (porta 4006)',
+        error: 'Service Unavailable - verifique se o serviço MTProto está ativo',
+      });
+    }
+    
     return res.status(500).json({
       success: false,
       message: 'Erro interno ao processar sincronização',

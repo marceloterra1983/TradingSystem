@@ -1,0 +1,1580 @@
+openapi: 3.0.3
+info:
+  title: RAG Services API
+  description: |
+    **RAG (Retrieval-Augmented Generation) Services API** provides endpoints for managing document collections, performing semantic search, and tracking analytics.
+    
+    ## Features
+    - 📚 **Collections Management** - Create, update, and manage document collections
+    - 📄 **Documents** - Track and index documents within collections
+    - 🔍 **Semantic Search** - Perform semantic search and Q&A over documents
+    - 📊 **Analytics** - Monitor ingestion jobs and query performance
+    - 🤖 **Embedding Models** - Manage available embedding models
+    
+    ## Authentication
+    All endpoints require JWT authentication via `Authorization: Bearer <token>` header.
+    
+    ## Rate Limiting
+    - **Free Tier**: 100 requests/minute
+    - **Pro Tier**: 1000 requests/minute
+    
+    ## Base URL
+    - **Development**: `http://localhost:3402/api/v1`
+    - **Production**: `https://api.tradingsystem.com/api/v1`
+  
+  version: 1.0.0
+  contact:
+    name: TradingSystem API Support
+    email: api@tradingsystem.com
+    url: https://docs.tradingsystem.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3402/api/v1
+    description: Development server
+  - url: http://localhost:3403/api/v1
+    description: Collections service (standalone)
+  - url: https://api.tradingsystem.com/api/v1
+    description: Production server
+
+tags:
+  - name: Collections
+    description: Manage RAG document collections
+  - name: Documents
+    description: Manage documents within collections
+  - name: Chunks
+    description: Text chunks and vector mappings
+  - name: Search
+    description: Semantic search and Q&A
+  - name: Ingestion
+    description: Document ingestion jobs
+  - name: Analytics
+    description: Query and ingestion analytics
+  - name: Models
+    description: Embedding models catalog
+  - name: Health
+    description: Health check and status
+
+paths:
+  # ============================================================================
+  # COLLECTIONS
+  # ============================================================================
+  /rag/collections:
+    get:
+      tags:
+        - Collections
+      summary: List all collections
+      description: Retrieve a list of all RAG collections with optional filtering
+      operationId: listCollections
+      parameters:
+        - name: enabled
+          in: query
+          description: Filter by enabled status
+          schema:
+            type: boolean
+        - name: status
+          in: query
+          description: Filter by collection status
+          schema:
+            type: string
+            enum: [pending, indexing, ready, error, disabled]
+        - name: embedding_model
+          in: query
+          description: Filter by embedding model
+          schema:
+            type: string
+            enum: [nomic-embed-text, mxbai-embed-large, embeddinggemma]
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionsListResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      collections:
+                        - id: "123e4567-e89b-12d3-a456-426614174000"
+                          name: "documentation__nomic"
+                          display_name: "Documentation (Nomic Embed)"
+                          description: "Complete TradingSystem documentation"
+                          directory: "/data/docs/content"
+                          embedding_model: "nomic-embed-text"
+                          chunk_size: 512
+                          chunk_overlap: 50
+                          file_types: ["md", "mdx"]
+                          recursive: true
+                          enabled: true
+                          auto_update: true
+                          status: "ready"
+                          vector_dimensions: 768
+                          total_documents: 220
+                          indexed_documents: 220
+                          total_chunks: 3087
+                          total_size_bytes: 15420000
+                          created_at: "2025-11-01T10:00:00Z"
+                          updated_at: "2025-11-01T15:30:00Z"
+                          last_indexed_at: "2025-11-01T15:30:00Z"
+                      total: 3
+                      page: 1
+                      limit: 10
+                    meta:
+                      timestamp: "2025-11-02T10:00:00Z"
+                      request_id: "req_abc123"
+                      version: "v1"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+    post:
+      tags:
+        - Collections
+      summary: Create a new collection
+      description: Create a new RAG collection with specified configuration
+      operationId: createCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionRequest'
+            examples:
+              basic:
+                value:
+                  name: "api_docs__nomic"
+                  display_name: "API Documentation"
+                  description: "API reference documentation"
+                  directory: "/data/docs/content/api"
+                  embedding_model: "nomic-embed-text"
+                  chunk_size: 512
+                  chunk_overlap: 50
+                  file_types: ["md", "mdx"]
+                  recursive: true
+                  enabled: true
+                  auto_update: true
+      responses:
+        '201':
+          description: Collection created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      id: "123e4567-e89b-12d3-a456-426614174001"
+                      name: "api_docs__nomic"
+                      display_name: "API Documentation"
+                      status: "pending"
+                      created_at: "2025-11-02T10:00:00Z"
+                    meta:
+                      timestamp: "2025-11-02T10:00:00Z"
+                      request_id: "req_abc124"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Collection already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                conflict:
+                  value:
+                    success: false
+                    error:
+                      code: "COLLECTION_EXISTS"
+                      message: "Collection with name 'api_docs__nomic' already exists"
+                      details:
+                        existing_id: "123e4567-e89b-12d3-a456-426614174001"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  /rag/collections/{collectionId}:
+    get:
+      tags:
+        - Collections
+      summary: Get collection details
+      description: Retrieve detailed information about a specific collection
+      operationId: getCollection
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          description: Collection ID or name
+          schema:
+            type: string
+          examples:
+            uuid:
+              value: "123e4567-e89b-12d3-a456-426614174000"
+            name:
+              value: "documentation__nomic"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+    put:
+      tags:
+        - Collections
+      summary: Update collection
+      description: Update collection configuration (partial update supported)
+      operationId: updateCollection
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionRequest'
+            examples:
+              partial:
+                value:
+                  enabled: false
+                  auto_update: false
+              full:
+                value:
+                  display_name: "Updated Documentation"
+                  description: "Updated description"
+                  enabled: true
+                  auto_update: true
+                  chunk_size: 1024
+      responses:
+        '200':
+          description: Collection updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+    delete:
+      tags:
+        - Collections
+      summary: Delete collection
+      description: Delete a collection and all associated documents/chunks
+      operationId: deleteCollection
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: delete_vectors
+          in: query
+          description: Also delete vectors from Qdrant
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '204':
+          description: Collection deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  /rag/collections/{collectionId}/stats:
+    get:
+      tags:
+        - Collections
+      summary: Get collection statistics
+      description: Retrieve detailed statistics for a collection
+      operationId: getCollectionStats
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: use_cache
+          in: query
+          description: Use cached statistics (faster, may be slightly outdated)
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionStatsResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      collection: "documentation__nomic"
+                      cached: true
+                      stats:
+                        qdrant:
+                          status: "green"
+                          points_count: 3087
+                          segments_count: 2
+                          indexed_vectors_count: 3087
+                        metrics:
+                          total_documents: 220
+                          indexed_documents: 220
+                          pending_documents: 0
+                          failed_documents: 0
+                          total_chunks: 3087
+                          orphan_chunks: 0
+                          total_size_bytes: 15420000
+                        performance:
+                          avg_query_time_ms: 6
+                          p95_query_time_ms: 12
+                          cache_hit_rate: 0.82
+                          last_query_at: "2025-11-02T09:55:00Z"
+                      timestamp: "2025-11-02T10:00:00Z"
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  # ============================================================================
+  # SEARCH
+  # ============================================================================
+  /rag/search:
+    get:
+      tags:
+        - Search
+      summary: Semantic search
+      description: Perform semantic search across document collections
+      operationId: search
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Search query text
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 1000
+          example: "How to configure RAG system?"
+        - name: collection
+          in: query
+          description: Collection name (default: all collections)
+          schema:
+            type: string
+          example: "documentation__nomic"
+        - name: max_results
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+            maximum: 100
+        - name: score_threshold
+          in: query
+          description: Minimum relevance score (0-1)
+          schema:
+            type: number
+            format: float
+            default: 0.7
+            minimum: 0
+            maximum: 1
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      results:
+                        - content: "The RAG system requires Qdrant for vector storage and Ollama for embeddings..."
+                          relevance: 0.92
+                          metadata:
+                            source: "docs/content/tools/rag/architecture.mdx"
+                            title: "RAG Services Architecture"
+                            chunk_index: 5
+                            collection: "documentation__nomic"
+                        - content: "To configure RAG, set OLLAMA_BASE_URL and QDRANT_URL environment variables..."
+                          relevance: 0.88
+                          metadata:
+                            source: "docs/content/tools/rag/configuration.mdx"
+                            title: "RAG Configuration Guide"
+                            chunk_index: 2
+                            collection: "documentation__nomic"
+                      query: "How to configure RAG system?"
+                      total_results: 2
+                      max_results: 5
+                      collection: "documentation__nomic"
+                      performance:
+                        duration_ms: 8
+                        embedding_time_ms: 3
+                        vector_search_time_ms: 5
+                        cache_hit: false
+                    meta:
+                      timestamp: "2025-11-02T10:00:00Z"
+                      request_id: "req_search_123"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  /rag/query:
+    post:
+      tags:
+        - Search
+      summary: Question answering (Q&A)
+      description: Ask a question and get an AI-generated answer with sources
+      operationId: query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              basic:
+                value:
+                  query: "How does the RAG system work?"
+                  collection: "documentation__nomic"
+                  max_results: 5
+      responses:
+        '200':
+          description: Query response with answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      answer: |
+                        The RAG (Retrieval-Augmented Generation) system works by combining semantic search with LLM generation:
+                        
+                        1. **Document Ingestion**: Documents are split into chunks and embedded using models like nomic-embed-text
+                        2. **Vector Storage**: Embeddings are stored in Qdrant vector database
+                        3. **Query Processing**: User queries are embedded and matched against stored vectors
+                        4. **Context Retrieval**: Most relevant chunks are retrieved based on similarity
+                        5. **Answer Generation**: LLM (llama3.2:3b) generates answer using retrieved context
+                        
+                        The system achieves < 10ms response times with 80% cache hit rate.
+                      confidence: 0.95
+                      sources:
+                        - content: "RAG combines retrieval and generation..."
+                          relevance: 0.94
+                          metadata:
+                            source: "docs/content/tools/rag/architecture.mdx"
+                        - content: "The system uses Qdrant for vector storage..."
+                          relevance: 0.89
+                          metadata:
+                            source: "docs/content/tools/rag/overview.mdx"
+                      performance:
+                        duration_ms: 5420
+                        embedding_time_ms: 3
+                        vector_search_time_ms: 5
+                        llm_generation_time_ms: 5412
+                        gpu_wait_time_ms: 0
+                    meta:
+                      timestamp: "2025-11-02T10:00:00Z"
+                      request_id: "req_query_456"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          description: LLM service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                service_unavailable:
+                  value:
+                    success: false
+                    error:
+                      code: "LLM_UNAVAILABLE"
+                      message: "Ollama LLM service is unavailable"
+                      details:
+                        service: "ollama"
+                        url: "http://rag-ollama:11434"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  # ============================================================================
+  # INGESTION
+  # ============================================================================
+  /rag/collections/{collectionId}/ingest:
+    post:
+      tags:
+        - Ingestion
+      summary: Trigger ingestion job
+      description: Start document ingestion for a collection
+      operationId: triggerIngestion
+      parameters:
+        - name: collectionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionRequest'
+            examples:
+              full:
+                value:
+                  job_type: "full_index"
+                  force: false
+              incremental:
+                value:
+                  job_type: "incremental"
+                  file_paths: ["docs/content/api/workspace.mdx"]
+      responses:
+        '202':
+          description: Ingestion job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionJobResponse'
+              examples:
+                accepted:
+                  value:
+                    success: true
+                    data:
+                      job_id: "job_123e4567-e89b-12d3-a456-426614174000"
+                      collection_id: "123e4567-e89b-12d3-a456-426614174000"
+                      job_type: "full_index"
+                      status: "queued"
+                      started_at: "2025-11-02T10:00:00Z"
+                      estimated_duration_ms: 60000
+                    meta:
+                      timestamp: "2025-11-02T10:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Ingestion already in progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                conflict:
+                  value:
+                    success: false
+                    error:
+                      code: "INGESTION_IN_PROGRESS"
+                      message: "Ingestion job already running for this collection"
+                      details:
+                        active_job_id: "job_existing_123"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  /rag/jobs/{jobId}:
+    get:
+      tags:
+        - Ingestion
+      summary: Get ingestion job status
+      description: Retrieve status and progress of an ingestion job
+      operationId: getIngestionJob
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionJobDetailsResponse'
+              examples:
+                running:
+                  value:
+                    success: true
+                    data:
+                      job_id: "job_123e4567"
+                      collection_id: "123e4567-e89b-12d3-a456-426614174000"
+                      collection_name: "documentation__nomic"
+                      job_type: "full_index"
+                      trigger_type: "manual"
+                      status: "running"
+                      started_at: "2025-11-02T10:00:00Z"
+                      progress:
+                        documents_total: 220
+                        documents_processed: 150
+                        documents_failed: 2
+                        documents_skipped: 5
+                        percent_complete: 71
+                      performance:
+                        duration_ms: 45000
+                        avg_processing_time_ms: 200
+                        throughput_docs_per_sec: 5
+                      errors:
+                        - document: "docs/content/broken.mdx"
+                          error: "Invalid frontmatter"
+                completed:
+                  value:
+                    success: true
+                    data:
+                      job_id: "job_123e4567"
+                      status: "completed"
+                      started_at: "2025-11-02T10:00:00Z"
+                      completed_at: "2025-11-02T10:02:30Z"
+                      duration_ms: 150000
+                      documents_processed: 220
+                      chunks_generated: 3087
+                      vectors_generated: 3087
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  # ============================================================================
+  # ANALYTICS
+  # ============================================================================
+  /rag/analytics/queries:
+    get:
+      tags:
+        - Analytics
+      summary: Query analytics
+      description: Get aggregated query statistics
+      operationId: getQueryAnalytics
+      parameters:
+        - name: start_time
+          in: query
+          required: true
+          description: Start time (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2025-11-01T00:00:00Z"
+        - name: end_time
+          in: query
+          required: true
+          description: End time (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2025-11-02T00:00:00Z"
+        - name: collection
+          in: query
+          description: Filter by collection
+          schema:
+            type: string
+        - name: granularity
+          in: query
+          description: Time granularity for aggregation
+          schema:
+            type: string
+            enum: [hour, day, week]
+            default: hour
+      responses:
+        '200':
+          description: Query analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryAnalyticsResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      summary:
+                        total_queries: 15420
+                        successful_queries: 15200
+                        failed_queries: 220
+                        avg_duration_ms: 8
+                        p95_duration_ms: 15
+                        p99_duration_ms: 25
+                        cache_hit_rate: 0.82
+                        avg_results_count: 4
+                      by_hour:
+                        - hour: "2025-11-01T10:00:00Z"
+                          query_count: 450
+                          avg_duration_ms: 7
+                          cache_hit_rate: 0.85
+                        - hour: "2025-11-01T11:00:00Z"
+                          query_count: 520
+                          avg_duration_ms: 8
+                          cache_hit_rate: 0.80
+                      top_queries:
+                        - query: "How to configure RAG?"
+                          count: 150
+                          avg_duration_ms: 6
+                        - query: "RAG architecture overview"
+                          count: 120
+                          avg_duration_ms: 7
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  # ============================================================================
+  # EMBEDDING MODELS
+  # ============================================================================
+  /rag/models:
+    get:
+      tags:
+        - Models
+      summary: List embedding models
+      description: Get list of available embedding models
+      operationId: listModels
+      parameters:
+        - name: available
+          in: query
+          description: Filter by availability
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: List of models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelsListResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      models:
+                        - name: "nomic-embed-text"
+                          display_name: "Nomic Embed Text"
+                          provider: "Ollama"
+                          dimensions: 768
+                          max_tokens: 8192
+                          model_size_mb: 274
+                          available: true
+                          requires_gpu: false
+                          optimized_for: ["semantic search", "retrieval"]
+                          usage_count: 15420
+                        - name: "mxbai-embed-large"
+                          display_name: "MXBAI Embed Large"
+                          provider: "Ollama"
+                          dimensions: 384
+                          max_tokens: 8192
+                          model_size_mb: 669
+                          available: true
+                          requires_gpu: false
+                          optimized_for: ["fast retrieval", "low latency"]
+                          usage_count: 8500
+                      total: 3
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bearerAuth: []
+
+  # ============================================================================
+  # HEALTH
+  # ============================================================================
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check API health and service status
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  value:
+                    status: "healthy"
+                    timestamp: "2025-11-02T10:00:00Z"
+                    version: "1.0.0"
+                    environment: "production"
+                    services:
+                      database:
+                        status: "connected"
+                        latency_ms: 2
+                      cache:
+                        status: "connected"
+                        enabled: true
+                        memory_keys: 150
+                      qdrant:
+                        status: "connected"
+                        collections: 3
+                      ollama:
+                        status: "connected"
+                        models: 3
+        '503':
+          description: Service degraded or unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                degraded:
+                  value:
+                    status: "degraded"
+                    timestamp: "2025-11-02T10:00:00Z"
+                    version: "1.0.0"
+                    services:
+                      database:
+                        status: "connected"
+                      qdrant:
+                        status: "error"
+                        error: "Connection timeout"
+
+# ==============================================================================
+# COMPONENTS
+# ==============================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+  schemas:
+    # ========================================================================
+    # COLLECTIONS
+    # ========================================================================
+    Collection:
+      type: object
+      required:
+        - id
+        - name
+        - directory
+        - embedding_model
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique collection identifier
+        name:
+          type: string
+          pattern: '^[a-z0-9_-]+$'
+          description: Collection name (lowercase, alphanumeric, dashes, underscores)
+          example: "documentation__nomic"
+        display_name:
+          type: string
+          description: Human-readable collection name
+          example: "Documentation (Nomic Embed)"
+        description:
+          type: string
+          description: Collection description
+        directory:
+          type: string
+          description: Source directory path (absolute)
+          example: "/data/docs/content"
+        embedding_model:
+          type: string
+          enum: [nomic-embed-text, mxbai-embed-large, embeddinggemma]
+          description: Embedding model name
+        chunk_size:
+          type: integer
+          minimum: 128
+          maximum: 2048
+          default: 512
+          description: Text chunk size
+        chunk_overlap:
+          type: integer
+          minimum: 0
+          maximum: 512
+          default: 50
+          description: Chunk overlap size
+        file_types:
+          type: array
+          items:
+            type: string
+          description: Allowed file extensions
+          example: ["md", "mdx"]
+        recursive:
+          type: boolean
+          default: true
+          description: Recurse into subdirectories
+        enabled:
+          type: boolean
+          default: true
+          description: Collection is active
+        auto_update:
+          type: boolean
+          default: false
+          description: File watcher enabled
+        status:
+          type: string
+          enum: [pending, indexing, ready, error, disabled]
+          description: Collection status
+        vector_dimensions:
+          type: integer
+          description: Embedding vector dimensions
+          example: 768
+        total_documents:
+          type: integer
+          description: Total documents in collection
+        indexed_documents:
+          type: integer
+          description: Successfully indexed documents
+        total_chunks:
+          type: integer
+          description: Total chunks/vectors
+        total_size_bytes:
+          type: integer
+          format: int64
+          description: Total size in bytes
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        last_indexed_at:
+          type: string
+          format: date-time
+
+    CreateCollectionRequest:
+      type: object
+      required:
+        - name
+        - directory
+        - embedding_model
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9_-]+$'
+        display_name:
+          type: string
+        description:
+          type: string
+        directory:
+          type: string
+        embedding_model:
+          type: string
+          enum: [nomic-embed-text, mxbai-embed-large, embeddinggemma]
+        chunk_size:
+          type: integer
+          default: 512
+        chunk_overlap:
+          type: integer
+          default: 50
+        file_types:
+          type: array
+          items:
+            type: string
+          default: ["md", "mdx"]
+        recursive:
+          type: boolean
+          default: true
+        enabled:
+          type: boolean
+          default: true
+        auto_update:
+          type: boolean
+          default: false
+
+    UpdateCollectionRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        auto_update:
+          type: boolean
+        chunk_size:
+          type: integer
+        chunk_overlap:
+          type: integer
+
+    CollectionsListResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            collections:
+              type: array
+              items:
+                $ref: '#/components/schemas/Collection'
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    CollectionResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Collection'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    CollectionStatsResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            collection:
+              type: string
+            cached:
+              type: boolean
+            stats:
+              type: object
+              properties:
+                qdrant:
+                  type: object
+                metrics:
+                  type: object
+                performance:
+                  type: object
+            timestamp:
+              type: string
+              format: date-time
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ========================================================================
+    # SEARCH
+    # ========================================================================
+    SearchResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: '#/components/schemas/SearchResult'
+            query:
+              type: string
+            total_results:
+              type: integer
+            max_results:
+              type: integer
+            collection:
+              type: string
+            performance:
+              $ref: '#/components/schemas/PerformanceMetrics'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    SearchResult:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Matched text content
+        relevance:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance score (0-1)
+        metadata:
+          type: object
+          description: Result metadata
+
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 3
+          maxLength: 1000
+        collection:
+          type: string
+        max_results:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 100
+
+    QueryResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            answer:
+              type: string
+              description: AI-generated answer
+            confidence:
+              type: number
+              format: float
+              description: Answer confidence (0-1)
+            sources:
+              type: array
+              items:
+                $ref: '#/components/schemas/SearchResult'
+            performance:
+              $ref: '#/components/schemas/PerformanceMetrics'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ========================================================================
+    # INGESTION
+    # ========================================================================
+    IngestionRequest:
+      type: object
+      properties:
+        job_type:
+          type: string
+          enum: [full_index, incremental, single_document, reindex]
+          default: full_index
+        force:
+          type: boolean
+          default: false
+          description: Force re-indexing of unchanged documents
+        file_paths:
+          type: array
+          items:
+            type: string
+          description: Specific files to index (for single_document type)
+
+    IngestionJobResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            job_id:
+              type: string
+            collection_id:
+              type: string
+            job_type:
+              type: string
+            status:
+              type: string
+              enum: [queued, running, completed, failed, cancelled]
+            started_at:
+              type: string
+              format: date-time
+            estimated_duration_ms:
+              type: integer
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    IngestionJobDetailsResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            job_id:
+              type: string
+            collection_id:
+              type: string
+            collection_name:
+              type: string
+            job_type:
+              type: string
+            trigger_type:
+              type: string
+            status:
+              type: string
+            started_at:
+              type: string
+              format: date-time
+            completed_at:
+              type: string
+              format: date-time
+            progress:
+              type: object
+            performance:
+              type: object
+            errors:
+              type: array
+              items:
+                type: object
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ========================================================================
+    # ANALYTICS
+    # ========================================================================
+    QueryAnalyticsResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            summary:
+              type: object
+            by_hour:
+              type: array
+              items:
+                type: object
+            top_queries:
+              type: array
+              items:
+                type: object
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ========================================================================
+    # MODELS
+    # ========================================================================
+    ModelsListResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            models:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmbeddingModel'
+            total:
+              type: integer
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    EmbeddingModel:
+      type: object
+      properties:
+        name:
+          type: string
+        display_name:
+          type: string
+        provider:
+          type: string
+        dimensions:
+          type: integer
+        max_tokens:
+          type: integer
+        model_size_mb:
+          type: integer
+        available:
+          type: boolean
+        requires_gpu:
+          type: boolean
+        optimized_for:
+          type: array
+          items:
+            type: string
+        usage_count:
+          type: integer
+
+    # ========================================================================
+    # HEALTH
+    # ========================================================================
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, down]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        environment:
+          type: string
+        services:
+          type: object
+          additionalProperties:
+            type: object
+
+    # ========================================================================
+    # COMMON
+    # ========================================================================
+    PerformanceMetrics:
+      type: object
+      properties:
+        duration_ms:
+          type: integer
+          description: Total duration
+        embedding_time_ms:
+          type: integer
+          description: Embedding generation time
+        vector_search_time_ms:
+          type: integer
+          description: Vector search time
+        llm_generation_time_ms:
+          type: integer
+          description: LLM generation time (Q&A only)
+        gpu_wait_time_ms:
+          type: integer
+          description: GPU queue wait time
+        cache_hit:
+          type: boolean
+          description: Query served from cache
+
+    ResponseMeta:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        request_id:
+          type: string
+        version:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Additional error details
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  responses:
+    BadRequestError:
+      description: Bad request (invalid parameters)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validation_error:
+              value:
+                success: false
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Invalid request parameters"
+                  details:
+                    field: "chunk_size"
+                    constraint: "Must be between 128 and 2048"
+
+    UnauthorizedError:
+      description: Unauthorized (missing or invalid token)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_token:
+              value:
+                success: false
+                error:
+                  code: "UNAUTHORIZED"
+                  message: "Missing or invalid authentication token"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            not_found:
+              value:
+                success: false
+                error:
+                  code: "NOT_FOUND"
+                  message: "Collection not found"
+                  details:
+                    resource: "collection"
+                    id: "nonexistent_collection"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            rate_limit:
+              value:
+                success: false
+                error:
+                  code: "RATE_LIMIT_EXCEEDED"
+                  message: "Too many requests, please slow down"
+                  details:
+                    limit: 100
+                    window: "1 minute"
+                    retry_after: 45
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            internal_error:
+              value:
+                success: false
+                error:
+                  code: "INTERNAL_ERROR"
+                  message: "An unexpected error occurred"
+                  details:
+                    request_id: "req_abc123"
+                    support_email: "api@tradingsystem.com"
+
+security:
+  - bearerAuth: []
+

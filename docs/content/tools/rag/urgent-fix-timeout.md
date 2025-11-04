@@ -1,3 +1,14 @@
+---
+title: "RAG Collections Timeout Fix"
+sidebar_position: 9
+description: "Mitigation plan for the computeCollectionMetrics scroll timeout in Qdrant."
+tags:
+  - rag
+  - bugfix
+  - qdrant
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # CORREÇÃO URGENTE - Timeout no Endpoint Collections
 
 ## Problema Encontrado

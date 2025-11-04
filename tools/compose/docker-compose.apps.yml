@@ -16,7 +16,7 @@ services:
       - ../../.env
 
     ports:
-      - "4005:4005"
+      - "4006:4005"  # MUDOU de 4005 para 4006 (evita conflitos)
     environment:
       # Server
       - PORT=4005
@@ -32,14 +32,15 @@ services:
       - TIMESCALEDB_SCHEMA=tp_capital
 
       # Gateway Database Connection (for polling messages)
-      # Note: Using centralized data-timescale with schema telegram_gateway
-      - TELEGRAM_GATEWAY_DB_URL=postgresql://timescale:pass_timescale@data-timescale:5432/tradingsystem?schema=telegram_gateway
-      - GATEWAY_DATABASE_HOST=data-timescale
+      # Updated: 2025-11-03 - Using dedicated Telegram TimescaleDB
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-timescale:5432/telegram_gateway
+      - GATEWAY_DATABASE_HOST=telegram-timescale
+      - GATEWAY_DATABASE_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-timescale:5432/telegram_gateway
       - GATEWAY_DATABASE_PORT=5432
-      - GATEWAY_DATABASE_NAME=tradingsystem
+      - GATEWAY_DATABASE_NAME=telegram_gateway
       - GATEWAY_DATABASE_SCHEMA=telegram_gateway
-      - GATEWAY_DATABASE_USER=timescale
-      - GATEWAY_DATABASE_PASSWORD=pass_timescale
+      - GATEWAY_DATABASE_USER=telegram
+      - GATEWAY_DATABASE_PASSWORD=${TELEGRAM_DB_PASSWORD}
 
       # Gateway Configuration
       - GATEWAY_POLLING_INTERVAL_MS=${GATEWAY_POLLING_INTERVAL_MS:-5000}
@@ -77,6 +78,7 @@ services:
 
     networks:
       - tradingsystem_backend
+      - telegram_backend  # Required to resolve telegram-timescale hostname
 
     # Allow container to access host services (Telegram Gateway)
     extra_hosts:
@@ -101,69 +103,30 @@ services:
         max-file: "3"
 
   # ========================================
-  # Workspace Service (Ideas & Documentation)
+  # Workspace Service - MOVED TO DEDICATED STACK
   # ========================================
-  workspace:
-    image: "${IMG_APPS_WORKSPACE:-img-apps-workspace}:${IMG_VERSION:-latest}"
-    build:
-      context: ../../backend
-      dockerfile: api/workspace/Dockerfile.dev
-    container_name: apps-workspace
-
-    env_file:
-      - ../../.env
-
-    ports:
-      - "3200:3200"
-    environment:
-      # Server
-      - WORKSPACE_PORT=3200
-      - NODE_ENV=development
-      - LOG_LEVEL=info
-
-      # TimescaleDB Connection (Central Database)
-      - TIMESCALEDB_HOST=data-timescale
-      - TIMESCALEDB_PORT=5432
-      - TIMESCALEDB_DATABASE=APPS-WORKSPACE
-      - WORKSPACE_DATABASE=APPS-WORKSPACE
-      - TIMESCALEDB_USER=timescale
-      - TIMESCALEDB_PASSWORD=pass_timescale
-
-      # Database Strategy (TimescaleDB only)
-      - LIBRARY_DB_STRATEGY=timescaledb
-
-    volumes:
-      # Hot-reload: mount source code
-      - ../../backend/api/workspace/src:/app/src:ro
-      - ../../backend/api/workspace/scripts:/app/scripts:ro
-
-      # Anonymous volume prevents overwrite
-      - /app/node_modules
-
-    networks:
-      - tradingsystem_backend
-
-    restart: unless-stopped
-
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3200/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
-
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
+  # 
+  # The Workspace service has been moved to a dedicated stack for better isolation.
+  # 
+  # Workspace now runs in: docker-compose.workspace-stack.yml
+  # 
+  # This stack includes:
+  #   - Neon Database (pageserver, safekeeper, compute) - 3 containers
+  #   - Workspace API service - 1 container
+  #   Total: 4 containers managed as unified workspace-stack
+  # 
+  # To start Workspace:
+  #   docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+  # 
+  # Benefits:
+  #   ✅ Unified management (1 command for all Workspace containers)
+  #   ✅ Isolated Neon database (no sharing with TP Capital)
+  #   ✅ Clear dependencies (API depends_on database)
+  #   ✅ Dedicated network (workspace_network)
+  # 
+  # Migration date: 2025-11-03
+  # See: docs/content/reference/adrs/007-workspace-neon-migration.md
   # ========================================
-  # TimescaleDB (Shared Database)
-  # ========================================
-  # Note: Uses existing TimescaleDB from database stack
-  # Must be started separately via:
-  #   docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
 
 # ========================================
 # Networks
@@ -172,3 +135,6 @@ networks:
   tradingsystem_backend:
     name: tradingsystem_backend
     external: true  # Use existing network from infrastructure stack
+  telegram_backend:
+    name: telegram_backend
+    external: true  # Use existing network from Telegram stack

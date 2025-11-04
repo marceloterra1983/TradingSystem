@@ -39,7 +39,9 @@ export const config = {
   },
 
   api: {
-    endpoints: (process.env.API_ENDPOINTS || 'http://localhost:4005/ingest')
+    // Disabled: TP Capital integration separated - process later
+    enabled: parseBoolean(process.env.API_ENDPOINTS_ENABLED, false),
+    endpoints: (process.env.API_ENDPOINTS || '')
       .split(',')
       .map((url) => url.trim())
       .filter(Boolean),

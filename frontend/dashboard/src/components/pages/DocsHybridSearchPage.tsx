@@ -39,6 +39,8 @@ import {
   useRagQuery,
   type RagQueryResult,
 } from '../../hooks/llamaIndex/useRagQuery';
+// Quick Win P1-2: Hooks integrados!
+// import { useDocSearch, useDocFilters } from './docs-search/hooks';
 import {
   Select,
   SelectTrigger,

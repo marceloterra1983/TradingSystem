@@ -11,8 +11,68 @@
     }
     
     /* Light/Dark backgrounds (solid for readability) */
-    body.light-mode { background: #ffffff; }
-    body.dark-mode { background: #0b1220; }
+    body.light-mode { background: #ffffff; color: #0f172a; }
+    body.dark-mode { background: #0b1220; color: #f1f5f9; }
+    
+    #redoc-container,
+    #redoc-container .redoc-wrap {
+      min-height: 100vh;
+    }
+    
+    /* Light mode surface colors */
+    body.light-mode #redoc-container .redoc-wrap,
+    body.light-mode #redoc-container .api-content,
+    body.light-mode #redoc-container .content {
+      background: #ffffff;
+      color: #0f172a;
+    }
+    
+    body.light-mode #redoc-container .menu-content,
+    body.light-mode #redoc-container .scrollbar-container {
+      background: #f8fafc !important;
+    }
+    
+    body.light-mode #redoc-container .menu-content .menu-content {
+      background: transparent;
+    }
+    
+    body.light-mode #redoc-container .menu-item-label,
+    body.light-mode #redoc-container .operation-type,
+    body.light-mode #redoc-container .redoc-json,
+    body.light-mode #redoc-container p,
+    body.light-mode #redoc-container li {
+      color: #0f172a;
+    }
+    
+    /* Dark mode surface colors */
+    body.dark-mode #redoc-container .redoc-wrap,
+    body.dark-mode #redoc-container .api-content,
+    body.dark-mode #redoc-container .content {
+      background: #020617;
+      color: #f1f5f9;
+    }
+    
+    body.dark-mode #redoc-container .menu-content,
+    body.dark-mode #redoc-container .scrollbar-container {
+      background: #0f172a !important;
+      color: #cbd5e1;
+    }
+    
+    body.dark-mode #redoc-container .menu-content .menu-content {
+      background: transparent;
+    }
+    
+    body.dark-mode #redoc-container .menu-item-label,
+    body.dark-mode #redoc-container .operation-type,
+    body.dark-mode #redoc-container .redoc-json,
+    body.dark-mode #redoc-container p,
+    body.dark-mode #redoc-container li {
+      color: #e2e8f0;
+    }
+    
+    body.dark-mode #redoc-container table {
+      background: #0f172a;
+    }
     
     /* Theme toggle button */
     #theme-toggle {
@@ -254,6 +314,11 @@
           primary: '#0f172a',     // Slate-900 - texto escuro
           secondary: '#475569'    // Slate-600 - texto secundário
         },
+        background: {
+          main: '#ffffff',        // Fundo primário
+          general: '#f8fafc',     // Fundo de seções
+          alternative: '#f1f5f9'  // Fundo alternativo
+        },
         border: {
           dark: '#cbd5e1',        // Slate-300
           light: '#e2e8f0'        // Slate-200
@@ -339,6 +404,7 @@
       },
       codeBlock: {
         backgroundColor: '#1e293b',       // Slate-800 - código continua escuro
+        textColor: '#f8fafc',
         tokens: {}
       }
     };
@@ -373,6 +439,11 @@
         text: {
           primary: '#f1f5f9',     // Slate-100 - texto principal mais claro
           secondary: '#cbd5e1'    // Slate-300 - texto secundário
+        },
+        background: {
+          main: '#020617',        // Fundo principal muito escuro
+          general: '#0f172a',     // Painéis
+          alternative: '#111827'  // Alternativo
         },
         border: {
           dark: '#334155',        // Slate-700
@@ -459,6 +530,7 @@
       },
       codeBlock: {
         backgroundColor: '#0c1220',       // Ainda mais escuro para código
+        textColor: '#e2e8f0',
         tokens: {}
       }
     };

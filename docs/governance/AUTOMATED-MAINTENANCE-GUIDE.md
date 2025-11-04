@@ -1,12 +1,9 @@
 ---
 title: Automated Documentation Maintenance Guide
-sidebar_position: 10
+description: Comprehensive guide for automated documentation maintenance with quality assurance, validation, and regular update procedures
 tags: [documentation, maintenance, automation, quality-assurance]
-domain: governance
-type: guide
-summary: Comprehensive guide for automated documentation maintenance system with quality assurance, validation, and regular update procedures
-status: active
-last_review: "2025-10-30"
+owner: DocsOps
+lastReviewed: "2025-10-30"
 ---
 
 # Automated Documentation Maintenance Guide
@@ -94,7 +91,7 @@ MAX_LINE_LENGTH=120    # Maximum line length (excluding code blocks)
 **Purpose**: Enforce documentation standards and formatting
 
 **Checks**:
-- ✅ **YAML Frontmatter**: Required fields validation (title, tags, domain, type, status)
+- ✅ **YAML Frontmatter**: Required fields validation (title, description, tags, owner, lastReviewed)
 - ✅ **Line Length**: Warns on lines exceeding 120 characters
 - ⏳ **Heading Hierarchy**: (Future) Ensures proper H1 → H6 structure
 - ⏳ **List Formatting**: (Future) Consistent bullet/number usage
@@ -104,13 +101,21 @@ MAX_LINE_LENGTH=120    # Maximum line length (excluding code blocks)
 ```yaml
 ---
 title: "Document Title"
+description: "Brief description of content"
 tags: [tag1, tag2]
-domain: shared|frontend|backend|ops|governance
-type: guide|reference|tutorial|api|design|audit
-status: active|draft|deprecated|archived
-last_review: "YYYY-MM-DD"
+owner: DocsOps|ProductOps|ArchitectureGuild|FrontendGuild|BackendGuild|ToolingGuild|DataOps|SecurityOps|PromptOps|MCPGuild|SupportOps|ReleaseOps
+lastReviewed: "YYYY-MM-DD"
 ---
 ```
+
+**Allowed Owners**: DocsOps, ProductOps, ArchitectureGuild, FrontendGuild, BackendGuild, ToolingGuild, DataOps, SecurityOps, PromptOps, MCPGuild, SupportOps, ReleaseOps.
+
+### Schema Migration History
+
+- **Legacy Schema (pre-2025-11-03)**: title, tags, domain, type, status, summary, last_review, sidebar_position.
+- **V2 Schema (current)**: title, description, tags, owner, lastReviewed.
+- **Migration Completed**: 2025-11-03 via `migrate-frontmatter-to-v2.sh`.
+- **Reference Report**: `docs/reports/cleanup-audit-2025-11-03.md` documents the migration outputs and validation artifacts.
 
 ### 4. Quality Assurance Reporting
 
@@ -248,7 +253,7 @@ fi
 1. Review stale files list: `cat docs/reports/stale-files-*.txt`
 2. Prioritize by importance (high-traffic pages first)
 3. Batch update related files together
-4. Update `last_review` frontmatter field after review
+4. Update `lastReviewed` frontmatter field after review
 5. Consider archiving truly outdated content
 
 ### Broken Link Cascade
@@ -270,7 +275,7 @@ fi
 1. Review missing frontmatter list
 2. Create template for common file types
 3. Batch add missing fields with sed/awk
-4. Validate with `scripts/docs/validate-frontmatter.py`
+4. Validate with `python3 scripts/docs/validate-frontmatter.py --schema v2`
 5. Update governance documentation with examples
 
 ---
@@ -381,7 +386,7 @@ Average age: <60 days
 
 ### For Content Authors
 
-1. **Update `last_review` regularly** - Even if no changes, mark reviewed
+1. **Update `lastReviewed` regularly** - Even if no changes, mark reviewed
 2. **Complete frontmatter fully** - Don't skip required fields
 3. **Use relative links correctly** - Test links before committing
 4. **Write meaningful content** - Aim for >100 words for main docs

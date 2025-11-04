@@ -1,0 +1,144 @@
+@startuml Telegram Data Flow - End-to-End
+!theme plain
+
+title Telegram Signal Processing - End-to-End Flow
+
+actor "Telegram User" as User
+participant "Telegram\nServers" as Telegram
+participant "Gateway\n(MTProto)\nPort 4006" as Gateway
+database "TimescaleDB\ntelegram_gateway\n.messages" as GatewayDB
+participant "Polling Worker\n(TP Capital)\nPort 4005" as Worker
+participant "Signal Parser\n(parseSignal.js)" as Parser
+database "TimescaleDB\ntp_capital\n.signals" as SignalsDB
+participant "Dashboard\n(React)\nPort 3103" as Dashboard
+
+== 1. Message Reception ==
+User -> Telegram : Post message\n"BUY PETR4 8.50-8.55\nT1 8.70 T2 8.85\nS 8.30"
+activate Telegram
+
+Telegram -> Gateway : MTProto event\nchannel_post
+activate Gateway
+note right
+  **Latency:** < 500ms
+  **Protocol:** MTProto
+end note
+
+Gateway -> Gateway : Validate channel ID\n(-1001649127710)
+note right
+  Checks if channel is\nin monitored list
+end note
+
+Gateway -> GatewayDB : INSERT INTO messages\n(message_id, channel_id,\ntext, status='received')
+activate GatewayDB
+GatewayDB --> Gateway : OK (inserted)
+deactivate GatewayDB
+
+Gateway -> Gateway : Update metrics\ntgateway_messages_received_total++
+deactivate Gateway
+
+== 2. Polling & Detection (5s interval) ==
+Worker -> Worker : Sleep 5000ms
+note right
+  Polling interval\nconfigurable via\nGATEWAY_POLLING_INTERVAL_MS
+end note
+
+Worker -> GatewayDB : SELECT * FROM messages\nWHERE status='received'\nORDER BY received_at\nLIMIT 100
+activate GatewayDB
+GatewayDB --> Worker : 1 message found
+deactivate GatewayDB
+
+Worker -> Worker : messagesWaiting.set(1)
+note right
+  **Latency:** < 5s
+  **Batch size:** 100 messages
+end note
+
+== 3. Signal Parsing ==
+Worker -> Parser : parseSignal(msg.text)
+activate Parser
+
+Parser -> Parser : 1. Normalize text\n(uppercase, trim)
+Parser -> Parser : 2. Extract direction\n(BUY/SELL)
+Parser -> Parser : 3. Extract asset\n(PETR4)
+Parser -> Parser : 4. Extract buy range\n(8.50-8.55)
+Parser -> Parser : 5. Extract targets\n([8.70, 8.85])
+Parser -> Parser : 6. Extract stop\n(8.30)
+Parser -> Parser : 7. Validate rules\n(stop < buyMin)
+
+alt Parsing Success
+    Parser --> Worker : { asset: 'PETR4',\nbuy_min: 8.50,\nbuy_max: 8.55,\ntargets: [8.70, 8.85],\nstop: 8.30 }
+    note right
+      **Latency:** < 50ms
+      **Validation:** Business rules
+    end note
+else Parsing Failed
+    Parser --> Worker : throw Error('Asset not found')
+    Worker -> GatewayDB : UPDATE messages\nSET status='failed'
+    Worker -> Worker : messagesProcessed.inc\n{status: 'parse_failed'}
+end
+deactivate Parser
+
+== 4. Idempotency Check ==
+Worker -> SignalsDB : SELECT id\nFROM tp_capital_signals\nWHERE source_channel_id=$1\nAND source_message_id=$2
+activate SignalsDB
+
+alt Signal Already Exists
+    SignalsDB --> Worker : 1 row found
+    note right
+      **Idempotency:**
+      Prevents duplicate signals
+    end note
+    Worker -> GatewayDB : UPDATE messages\nSET status='published'
+    Worker -> Worker : messagesProcessed.inc\n{status: 'duplicate'}
+else New Signal
+    SignalsDB --> Worker : 0 rows
+    deactivate SignalsDB
+    
+    == 5. Signal Persistence ==
+    Worker -> SignalsDB : INSERT INTO\ntp_capital_signals\n(asset, buy_min, buy_max,\ntargets, stop,\nsource_channel_id,\nsource_message_id, ...)
+    activate SignalsDB
+    SignalsDB --> Worker : OK (signal_id: uuid)
+    deactivate SignalsDB
+    note right
+      **Latency:** < 100ms
+      **Storage:** Hypertable
+    end note
+    
+    Worker -> GatewayDB : UPDATE messages\nSET status='published',\nmetadata=jsonb_set(\n  metadata,\n  '{processed_by}',\n  '"tp-capital"'\n)
+    activate GatewayDB
+    GatewayDB --> Worker : OK (updated)
+    deactivate GatewayDB
+    
+    Worker -> Worker : messagesProcessed.inc\n{status: 'success'}
+    Worker -> Worker : processingDuration\n.observe(0.045)
+end
+
+== 6. Dashboard Consumption ==
+Dashboard -> SignalsDB : GET /api/signals\n?limit=50
+activate SignalsDB
+note right
+  Dashboard polls\nevery 15 seconds
+end note
+
+SignalsDB --> Dashboard : [{\n  id: 'uuid',\n  asset: 'PETR4',\n  buy_min: 8.50,\n  ...\n}]
+deactivate SignalsDB
+
+Dashboard -> Dashboard : Render signal card\n(real-time update)
+
+== Total End-to-End Latency ==
+note over User, Dashboard
+  **Total Time:** ~5-6 seconds
+  
+  • Telegram → Gateway: < 500ms
+  • Gateway → Database: < 100ms
+  • Database → Worker: < 5s (polling interval)
+  • Parsing + Validation: < 50ms
+  • Signal Persistence: < 100ms
+  • Dashboard Update: < 15s (polling interval)
+  
+  **Bottleneck:** Polling interval (5s)
+  **Optimization:** Reduce to 3s or use WebSocket
+end note
+
+@enduml
+

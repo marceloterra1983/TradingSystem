@@ -1,0 +1,179 @@
+@startuml Telegram Deployment Layers - Native vs Containers
+!theme plain
+
+title Telegram Stack - Deployment Topology
+
+' ==============================================================================
+' Layer 1: Operating System
+' ==============================================================================
+package "Operating System (Linux/WSL)" {
+    
+    ' ==============================================================================
+    ' Layer 2: Native Services (systemd)
+    ' ==============================================================================
+    package "Native Layer\n(systemd managed)" <<native>> #90EE90 {
+        rectangle "MTProto Gateway\n\n**Type:** Node.js process\n**User:** marce\n**WorkDir:** /opt/telegram-gateway\n**Logs:** journalctl -u telegram-gateway\n**Restart:** systemctl restart telegram-gateway" as MTProto
+        
+        rectangle "Session Files\n\n**Path:** /opt/telegram-gateway/.session/\n**Permissions:** 0600 (owner only)\n**Backup:** tar -czf sessions.tar.gz\n**Critical:** Never commit to git!" as Sessions
+        
+        MTProto --> Sessions : "Read/Write"
+    }
+    
+    ' ==============================================================================
+    ' Layer 3: Docker Engine
+    ' ==============================================================================
+    package "Docker Engine" {
+        
+        ' Data Containers
+        package "Data Stack\n(docker-compose.telegram.yml)" <<container>> #ADD8E6 {
+            database "TimescaleDB\n\n**Image:** timescale/timescaledb:latest-pg16\n**Volume:** telegram-timescaledb-data\n**Port:** 5434:5432\n**Resources:** 2 CPU, 2GB RAM" as DB
+            
+            rectangle "PgBouncer\n\n**Image:** edoburu/pgbouncer:1.21.0\n**Port:** 6434:5432\n**Pool:** 20 connections\n**Mode:** transaction" as PgBouncer
+            
+            rectangle "Redis Master\n\n**Image:** redis:7-alpine\n**Port:** 6379:6379\n**Memory:** 1GB (LRU)\n**Persistence:** disabled" as RedisMaster
+            
+            rectangle "Redis Replica\n\n**Image:** redis:7-alpine\n**Port:** 6380:6379\n**Mode:** read-only" as RedisReplica
+            
+            rectangle "Redis Sentinel\n\n**Image:** redis:7-alpine\n**Port:** 26379:26379\n**Quorum:** 2" as Sentinel
+            
+            queue "RabbitMQ\n\n**Image:** rabbitmq:3.12-management\n**Ports:** 5672, 15672\n**Volume:** telegram-rabbitmq-data" as RabbitMQ
+            
+            rectangle "Gateway API\n\n**Build:** backend/api/telegram-gateway\n**Port:** 4010:4010\n**Resources:** 0.5 CPU, 256MB" as API
+        }
+        
+        ' Monitoring Containers
+        package "Monitoring Stack\n(docker-compose.telegram-monitoring.yml)" <<monitoring>> #FFE4B5 {
+            rectangle "Prometheus\n\n**Image:** prom/prometheus:latest\n**Port:** 9090:9090\n**Volume:** telegram-prometheus-data\n**Retention:** 30 days" as Prometheus
+            
+            rectangle "Grafana\n\n**Image:** grafana/grafana:latest\n**Port:** 3100:3000\n**Volume:** telegram-grafana-data\n**Dashboards:** 6 pre-configured" as Grafana
+            
+            rectangle "Postgres\nExporter\n\n**Image:** postgres-exporter:latest\n**Port:** 9187:9187" as PgExp
+            
+            rectangle "Redis\nExporter\n\n**Image:** redis_exporter:latest\n**Port:** 9121:9121" as RedisExp
+        }
+    }
+    
+    ' ==============================================================================
+    ' Network Topology
+    ' ==============================================================================
+    package "Docker Networks" <<network>> #F0F0F0 {
+        rectangle "telegram_backend\n(internal network)\n172.25.0.0/16" as NetInternal
+        
+        rectangle "tradingsystem_backend\n(external network)\nShared with other stacks" as NetExternal
+    }
+}
+
+' ==============================================================================
+' Connections
+' ==============================================================================
+
+' Native to Docker
+MTProto -[#blue]-> RedisMaster : "localhost:6379"
+MTProto -[#blue]-> RabbitMQ : "localhost:5672"
+MTProto -[#blue]-> PgBouncer : "localhost:6434"
+
+' Data layer internal
+PgBouncer --> DB
+RedisMaster ..> RedisReplica : "Replication"
+Sentinel ..> RedisMaster : "Monitor"
+Sentinel ..> RedisReplica : "Monitor"
+
+API --> PgBouncer
+API --> RedisMaster
+
+' Monitoring connections
+PgExp --> PgBouncer
+PgExp --> Prometheus
+RedisExp --> RedisMaster
+RedisExp --> Prometheus
+MTProto -[#orange,dotted]-> Prometheus
+API -[#orange,dotted]-> Prometheus
+RabbitMQ -[#orange,dotted]-> Prometheus
+
+Prometheus --> Grafana
+
+' Networks
+DB -[hidden]-> NetInternal
+RedisMaster -[hidden]-> NetInternal
+API -[hidden]-> NetExternal
+
+' ==============================================================================
+' Deployment Commands
+' ==============================================================================
+note bottom of MTProto
+    **Native Service Deployment:**
+    
+    ```bash
+    # Install
+    sudo cp telegram-gateway.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable telegram-gateway
+    
+    # Manage
+    sudo systemctl start telegram-gateway
+    sudo systemctl stop telegram-gateway
+    sudo systemctl status telegram-gateway
+    
+    # Logs
+    sudo journalctl -u telegram-gateway -f
+    sudo journalctl -u telegram-gateway -n 100
+    ```
+end note
+
+note bottom of DB
+    **Container Stack Deployment:**
+    
+    ```bash
+    # Data stack (7 containers)
+    docker compose -f docker-compose.telegram.yml up -d
+    
+    # Monitoring stack (4 containers)
+    docker compose -f docker-compose.telegram-monitoring.yml up -d
+    
+    # Status
+    docker compose -f docker-compose.telegram.yml ps
+    
+    # Logs
+    docker logs -f telegram-timescale
+    docker logs -f telegram-redis-master
+    
+    # Management
+    bash scripts/telegram/start-telegram-stack.sh
+    bash scripts/telegram/stop-telegram-stack.sh
+    bash scripts/telegram/health-check-telegram.sh
+    ```
+end note
+
+' ==============================================================================
+' Resource Summary
+' ==============================================================================
+legend right
+    **Resource Allocation:**
+    
+    |= Layer |= Count |= CPU |= RAM |
+    | Native (systemd) | 1 | 0.5 | 300MB |
+    | Data Containers | 7 | 6.5 | 5.2GB |
+    | Monitoring | 4 | 2 | 2GB |
+    | **TOTAL** | **12** | **9 CPU** | **7.5GB** |
+    
+    **Port Map:**
+    • 4006: MTProto Gateway (native)
+    • 4010: Gateway API (container)
+    • 5434: TimescaleDB (container)
+    • 6434: PgBouncer (container)
+    • 6379: Redis Master (container)
+    • 6380: Redis Replica (container)
+    • 26379: Redis Sentinel (container)
+    • 5672: RabbitMQ AMQP (container)
+    • 15672: RabbitMQ UI (container)
+    • 9090: Prometheus (container)
+    • 3100: Grafana (container)
+    
+    **Access URLs:**
+    • Grafana: http://localhost:3100
+    • Prometheus: http://localhost:9090
+    • RabbitMQ: http://localhost:15672
+end legend
+
+@enduml
+

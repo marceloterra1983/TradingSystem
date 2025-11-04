@@ -1,3 +1,13 @@
+---
+title: "Docker Container Inventory"
+description: "Snapshot of core TradingSystem containers with status and roles."
+tags:
+  - tools
+  - docker
+  - ops
+owner: OpsGuild
+lastReviewed: '2025-11-02'
+---
 # 📊 Inventário de Containers - Trading System
 
 ## 📱 APPS (Aplicações)

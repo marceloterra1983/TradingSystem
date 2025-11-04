@@ -14,6 +14,7 @@ import { messagesRouter } from './routes/messages.js';
 import { channelsRouter } from './routes/channels.js';
 import { telegramGatewayRouter } from './routes/telegramGateway.js';
 import { compressionMiddleware } from './middleware/compressionMiddleware.js';
+import { initializeStartupSync } from './services/StartupSyncService.js';
 
 const logger = pino({ level: config.logLevel });
 
@@ -162,8 +163,14 @@ app.use((err, req, res, _next) => {
 });
 
 const server = app.listen(config.port, () => {
-logger.info({ port: config.port }, 'Telegram Gateway API started');
-logger.info({ platform: process.platform, nodeVersion: process.version }, 'Runtime environment');
+  logger.info({ port: config.port }, 'Telegram Gateway API started');
+  logger.info({ platform: process.platform, nodeVersion: process.version }, 'Runtime environment');
+  
+  // Initialize automatic message synchronization on startup
+  // This ensures the local database is always up-to-date with monitored channels
+  initializeStartupSync(logger).catch(err => {
+    logger.error({ err }, '[Startup] Failed to initialize startup sync - service will continue');
+  });
 });
 
 const gracefulShutdown = async () => {

@@ -1,3 +1,14 @@
+---
+title: "RAG Container Fix"
+sidebar_position: 7
+description: "Running the collections service in Docker with native access to Ollama."
+tags:
+  - rag
+  - docker
+  - ops
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
 # ✅ RAG Container Corrigido!
 
 ## 🎯 O Que Foi Feito

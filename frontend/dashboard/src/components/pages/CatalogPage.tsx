@@ -38,8 +38,8 @@ export default function CatalogPage(): JSX.Element {
           className={cn(
             'rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 disabled:opacity-100',
             isActive
-              ? 'border-cyan-500 bg-cyan-600 text-white shadow-sm hover:bg-cyan-500 focus:ring-cyan-500 dark:border-cyan-500 dark:bg-cyan-600 dark:text-white'
-              : 'border-slate-300 bg-white text-slate-700 hover:border-cyan-400 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-cyan-500 dark:hover:text-cyan-300',
+              ? 'border-[color:var(--ts-accent)] bg-[color:var(--ts-accent)] text-white shadow-sm hover:bg-[color:var(--ts-accent-strong)] focus:ring-[color:var(--ts-accent)]'
+              : 'border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-[color:var(--ts-text-secondary)] hover:border-[color:var(--ts-accent)] hover:text-[color:var(--ts-accent-strong)]',
           )}
         >
           {section.label}
@@ -75,8 +75,8 @@ export default function CatalogPage(): JSX.Element {
 function CatalogFallback({ message }: { message: string }) {
   return (
     <div className="flex min-h-[200px] items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-cyan-500 dark:border-gray-700 dark:border-t-cyan-400" />
+      <div className="flex flex-col items-center gap-3 text-sm text-[color:var(--ts-text-muted)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[color:var(--ts-surface-border)] border-t-[color:var(--ts-accent)]" />
         <span>{message}</span>
       </div>
     </div>

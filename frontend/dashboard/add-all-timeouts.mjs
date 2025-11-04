@@ -10,7 +10,7 @@ let content = readFileSync(filePath, 'utf8');
 const regex = /(\s+it\(['"](should [^'"]+)['"],\s*)async\s*\(\)\s*=>\s*\{/g;
 
 let modified = 0;
-const newContent = content.replace(regex, (match, prefix, testName) => {
+const newContent = content.replace(regex, (match, prefix, _testName) => {
   // Check if this test already has timeout
   if (match.includes('{ timeout:')) {
     return match;

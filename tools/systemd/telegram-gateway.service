@@ -1,11 +1,8 @@
 [Unit]
-Description=Telegram Gateway - Shared service for Telegram message ingestion
-Documentation=https://github.com/yourusername/TradingSystem
-After=network-online.target
+Description=Telegram Gateway (MTProto Native Service)
+Documentation=file:///home/marce/Projetos/TradingSystem/apps/telegram-gateway/README.md
+After=network-online.target docker.service
 Wants=network-online.target
-
-# Ensure TimescaleDB is available (if running as container)
-After=docker.service
 Requires=docker.service
 
 [Service]
@@ -14,40 +11,68 @@ User=marce
 Group=marce
 WorkingDirectory=/home/marce/Projetos/TradingSystem/apps/telegram-gateway
 
-# Environment variables (loaded from .env)
+# Environment variables (core config)
+Environment="NODE_ENV=production"
+Environment="GATEWAY_PORT=4006"
+Environment="LOG_LEVEL=info"
+
+# Database (via PgBouncer)
+Environment="TELEGRAM_DB_HOST=localhost"
+Environment="TELEGRAM_DB_PORT=6434"
+Environment="TELEGRAM_DB_NAME=telegram_gateway"
+Environment="TELEGRAM_DB_USER=telegram"
+
+# Redis Cache
+Environment="REDIS_HOST=localhost"
+Environment="REDIS_PORT=6379"
+Environment="REDIS_ENABLED=true"
+
+# RabbitMQ (optional)
+Environment="RABBITMQ_HOST=localhost"
+Environment="RABBITMQ_PORT=5672"
+Environment="RABBITMQ_ENABLED=false"
+
+# Load sensitive vars from .env
 EnvironmentFile=/home/marce/Projetos/TradingSystem/.env
 
-# Start command
-ExecStart=/usr/bin/node src/index.js
+# Pre-start validation
+ExecStartPre=/usr/bin/test -d /home/marce/Projetos/TradingSystem/apps/telegram-gateway/.session
+ExecStartPre=/usr/bin/test -f /home/marce/Projetos/TradingSystem/apps/telegram-gateway/src/index.js
+
+# Main process
+ExecStart=/usr/bin/node /home/marce/Projetos/TradingSystem/apps/telegram-gateway/src/index.js
 
 # Restart policy
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=10s
 StartLimitBurst=5
-StartLimitInterval=300
-
-# Security hardening
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=read-only
-ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/data
-ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/logs
-
-# Resource limits
-LimitNOFILE=65536
-MemoryMax=512M
-CPUQuota=100%
+StartLimitIntervalSec=60s
 
 # Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=telegram-gateway
 
-# Graceful shutdown
-TimeoutStopSec=30
-KillMode=mixed
-KillSignal=SIGTERM
+# Security hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/.session
+ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/logs
+ReadWritePaths=/home/marce/Projetos/TradingSystem/apps/telegram-gateway/data
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+CPUQuota=100%
+MemoryMax=512M
+MemoryHigh=384M
+
+# Performance
+Nice=-5
+IOSchedulingClass=best-effort
+IOSchedulingPriority=2
 
 [Install]
 WantedBy=multi-user.target

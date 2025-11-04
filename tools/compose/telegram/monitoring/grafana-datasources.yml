@@ -1,0 +1,48 @@
+# ==============================================================================
+# Grafana Datasources Configuration for Telegram Stack
+# ==============================================================================
+
+apiVersion: 1
+
+datasources:
+  # Prometheus - Primary metrics source
+  - name: Prometheus (Telegram)
+    type: prometheus
+    access: proxy
+    url: http://telegram-prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 60s
+      httpMethod: POST
+
+  # PostgreSQL - Direct database queries
+  - name: TimescaleDB (Telegram)
+    type: postgres
+    access: proxy
+    url: telegram-pgbouncer:5432
+    database: telegram_gateway
+    user: ${TELEGRAM_DB_USER}
+    secureJsonData:
+      password: ${TELEGRAM_DB_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: true
+
+  # Redis - Cache metrics (requires redis-datasource plugin)
+  - name: Redis (Telegram)
+    type: redis-datasource
+    access: proxy
+    url: redis://telegram-redis-master:6379
+    jsonData:
+      client: standalone
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0
+

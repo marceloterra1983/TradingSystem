@@ -1,3 +1,14 @@
+---
+title: "MTProto Frontend Mockup"
+sidebar_position: 12
+description: "Visual walkthrough of the TP Capital page before and after MTProto integration."
+tags:
+  - apps
+  - tp-capital
+  - frontend
+owner: DocsOps
+lastReviewed: '2025-11-02'
+---
 # 🎨 MTProto no Frontend - Mockup Visual
 
 ---

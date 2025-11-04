@@ -1,0 +1,397 @@
+{
+  "info": {
+    "name": "RAG Services API v1",
+    "description": "Complete Postman collection for RAG Services API testing and development",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "rag-services-v1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3402/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Collections",
+      "item": [
+        {
+          "name": "List Collections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/collections?enabled=true",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections"],
+              "query": [
+                {
+                  "key": "enabled",
+                  "value": "true",
+                  "description": "Filter by enabled status"
+                },
+                {
+                  "key": "status",
+                  "value": "ready",
+                  "disabled": true,
+                  "description": "Filter by status"
+                }
+              ]
+            },
+            "description": "Get list of all collections with optional filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Collection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"api_docs__nomic\",\n  \"display_name\": \"API Documentation\",\n  \"description\": \"API reference documentation\",\n  \"directory\": \"/data/docs/content/api\",\n  \"embedding_model\": \"nomic-embed-text\",\n  \"chunk_size\": 512,\n  \"chunk_overlap\": 50,\n  \"file_types\": [\"md\", \"mdx\"],\n  \"recursive\": true,\n  \"enabled\": true,\n  \"auto_update\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rag/collections",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections"]
+            },
+            "description": "Create a new RAG collection"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Collection Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/collections/documentation__nomic",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "documentation__nomic"]
+            },
+            "description": "Get detailed information about a specific collection"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Collection Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/collections/documentation__nomic/stats?use_cache=true",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "documentation__nomic", "stats"],
+              "query": [
+                {
+                  "key": "use_cache",
+                  "value": "true",
+                  "description": "Use cached statistics"
+                }
+              ]
+            },
+            "description": "Get collection statistics with caching option"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Collection",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false,\n  \"auto_update\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rag/collections/api_docs__nomic",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "api_docs__nomic"]
+            },
+            "description": "Update collection configuration (partial update)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Collection",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/collections/api_docs__nomic?delete_vectors=true",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "api_docs__nomic"],
+              "query": [
+                {
+                  "key": "delete_vectors",
+                  "value": "true",
+                  "description": "Also delete vectors from Qdrant"
+                }
+              ]
+            },
+            "description": "Delete collection and all associated data"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Semantic Search (Basic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/search?query=How to configure RAG system&max_results=5",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "How to configure RAG system",
+                  "description": "Search query"
+                },
+                {
+                  "key": "max_results",
+                  "value": "5",
+                  "description": "Maximum results"
+                }
+              ]
+            },
+            "description": "Perform semantic search (basic)"
+          },
+          "response": []
+        },
+        {
+          "name": "Semantic Search (Advanced)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/search?query=RAG architecture&collection=documentation__nomic&max_results=10&score_threshold=0.8",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "RAG architecture"
+                },
+                {
+                  "key": "collection",
+                  "value": "documentation__nomic",
+                  "description": "Specific collection"
+                },
+                {
+                  "key": "max_results",
+                  "value": "10"
+                },
+                {
+                  "key": "score_threshold",
+                  "value": "0.8",
+                  "description": "Minimum relevance score"
+                }
+              ]
+            },
+            "description": "Semantic search with collection and score threshold"
+          },
+          "response": []
+        },
+        {
+          "name": "Question Answering (Q&A)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"How does the RAG system work?\",\n  \"collection\": \"documentation__nomic\",\n  \"max_results\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rag/query",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "query"]
+            },
+            "description": "Ask a question and get AI-generated answer with sources"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ingestion",
+      "item": [
+        {
+          "name": "Trigger Full Index",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_type\": \"full_index\",\n  \"force\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rag/collections/documentation__nomic/ingest",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "documentation__nomic", "ingest"]
+            },
+            "description": "Trigger full collection indexing"
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger Incremental Index",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_type\": \"incremental\",\n  \"file_paths\": [\"docs/content/api/workspace.mdx\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/rag/collections/documentation__nomic/ingest",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "collections", "documentation__nomic", "ingest"]
+            },
+            "description": "Index specific files (incremental)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/jobs/{{job_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "jobs", "{{job_id}}"]
+            },
+            "description": "Get ingestion job status and progress"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Query Analytics (Last 24 Hours)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/analytics/queries?start_time={{yesterday}}&end_time={{now}}&granularity=hour",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "analytics", "queries"],
+              "query": [
+                {
+                  "key": "start_time",
+                  "value": "{{yesterday}}"
+                },
+                {
+                  "key": "end_time",
+                  "value": "{{now}}"
+                },
+                {
+                  "key": "granularity",
+                  "value": "hour"
+                }
+              ]
+            },
+            "description": "Get query analytics for last 24 hours"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Models",
+      "item": [
+        {
+          "name": "List Embedding Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rag/models?available=true",
+              "host": ["{{base_url}}"],
+              "path": ["rag", "models"],
+              "query": [
+                {
+                  "key": "available",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get list of available embedding models"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health and service status"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

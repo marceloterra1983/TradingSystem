@@ -4,6 +4,7 @@
 CREATE SCHEMA IF NOT EXISTS telegram_gateway;
 SET search_path TO telegram_gateway, public;
 
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS telegram_gateway.messages (

@@ -127,7 +127,7 @@ grep -r "old-path" docs/content/ | cut -d: -f1 | sort -u
 **Command**:
 ```bash
 # Run frontmatter validation for docs schema
-python scripts/docs/validate-frontmatter.py \
+python3 scripts/docs/validate-frontmatter.py \
   --schema v2 \
   --docs-dir ./docs/content \
   --output ./docs/reports/frontmatter-validation-$(date +%Y%m%d).json \
@@ -143,6 +143,14 @@ python scripts/docs/validate-frontmatter.py \
 - [ ] Update owner assignments if changed
 - [ ] Ensure all dates are current
 
+#### Schema Migration Completed 2025-11-03
+
+- Legacy fields (`domain`, `type`, `status`, `summary`, `last_review`, `sidebar_position`) removed from 215 documents.
+- V2 schema enforced across the repository with `title`, `description`, `tags`, `owner`, `lastReviewed`.
+- Ownership values normalized to the approved guild list; see `docs/reports/invalid-owners-2025-11-03.txt` for historical context.
+- Detailed activity captured in `docs/reports/cleanup-audit-2025-11-03.md`.
+- Future audits should treat any reintroduction of legacy fields as critical regressions.
+
 #### Step 2: Track Documentation Metrics
 
 **Metrics to Collect**:
@@ -150,7 +158,7 @@ python scripts/docs/validate-frontmatter.py \
 **Volume Metrics**:
 - Total files by category (apps, api, frontend, tools, etc.)
 - Files by owner (DocsOps, ProductOps, etc.)
-- Files by status (if using status field)
+- Files by review window (<30, 31-90, >90 days)
 - Average file size (lines, words)
 
 **Quality Metrics**:
@@ -193,7 +201,22 @@ grep -r "TODO\|TBD\|FIXME" docs/content/ | wc -l
 5. **Ownership Distribution**: Files by owner (pie chart)
 6. **Quarterly Trends**: Metrics over time (line chart)
 
-**Dashboard Location**: `docs/reports/metrics-dashboard.html` or Grafana
+**Dashboard Location**: `http://localhost:3400/dashboard/` (standalone), `http://localhost:3103/documentation/metrics` (React), `http://localhost:3000/d/docs-health` (Grafana)
+
+**Access Dashboards**:
+- **Standalone HTML**: Start docs site (`npm run docs:dev`), open `http://localhost:3400/dashboard/`
+- **React Dashboard**: Start dashboard app (`cd frontend/dashboard && npm run dev`), navigate to Documentation → Metrics
+- **Grafana**: Ensure Grafana is running, open `http://localhost:3000/d/docs-health/documentation-health-dashboard`
+
+**Update Metrics**:
+```bash
+# Generate latest reports
+bash scripts/docs/maintenance-audit.sh
+
+# Build metrics JSON
+cd docs
+npm run docs:metrics
+```
 
 ---
 
@@ -432,4 +455,5 @@ python scripts/docs/validate-frontmatter.py \
 - [Review Checklist](./REVIEW-CHECKLIST.md) - Chapter-by-chapter review
 - [Versioning Guide](./VERSIONING-GUIDE.md) - Version management procedures
 - [Validation Guide](./VALIDATION-GUIDE.md) - How to run validation suite (includes version validation)
+- [Metrics Dashboard Guide](./METRICS-DASHBOARD.md) - Dashboard usage and metrics explanation
 - [Communication Plan](./COMMUNICATION-PLAN.md) - Internal announcements

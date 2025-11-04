@@ -19,7 +19,7 @@ You are a full-stack developer with expertise across the entire application stac
 ### Backend Technologies
 - **Node.js/Express**: RESTful APIs and middleware architecture
 - **Python/FastAPI**: High-performance APIs with automatic documentation
-- **Database Integration**: PostgreSQL, MongoDB, Redis for caching
+- **Database Integration**: PostgreSQL/TimescaleDB, QuestDB, Redis for caching
 - **Authentication**: JWT, OAuth 2.0, Auth0, NextAuth.js
 - **API Design**: OpenAPI/Swagger, GraphQL, tRPC for type safety
 
@@ -175,13 +175,14 @@ app.use('*', (req, res) => {
 export { app };
 
 // server/routes/auth.ts - Authentication routes
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { User } from '../models/User';
 import { validateRequest } from '../middleware/validation';
 import { logger } from '../utils/logger';
+import { authMiddleware } from '../middleware/auth';
+import { userRepository } from '../repositories/userRepository';
 import type { LoginRequest, CreateUserRequest, AuthResponse } from '../../types/api';
 
 const router = Router();
@@ -202,7 +203,7 @@ router.post('/register', validateRequest(registerSchema), async (req, res, next)
     const { email, name, password }: CreateUserRequest = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await userRepository.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -214,34 +215,32 @@ router.post('/register', validateRequest(registerSchema), async (req, res, next)
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
-    const user = new User({
+    // Persist user in PostgreSQL/Timescale
+    const user = await userRepository.create({
       email,
       name,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
       role: 'user'
     });
 
-    await user.save();
-
     // Generate tokens
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: '1h' }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       process.env.JWT_REFRESH_SECRET!,
       { expiresIn: '7d' }
     );
 
-    logger.info('User registered successfully', { userId: user._id, email });
+    logger.info('User registered successfully', { userId: user.id, email });
 
     const response: AuthResponse = {
       user: {
-        id: user._id.toString(),
+        id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
@@ -267,7 +266,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res, next) => {
     const { email, password }: LoginRequest = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await userRepository.findByEmail(email);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -276,7 +275,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res, next) => {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
@@ -284,24 +283,26 @@ router.post('/login', validateRequest(loginSchema), async (req, res, next) => {
       });
     }
 
+    await userRepository.touchLastLogin(user.id);
+
     // Generate tokens
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: '1h' }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       process.env.JWT_REFRESH_SECRET!,
       { expiresIn: '7d' }
     );
 
-    logger.info('User logged in successfully', { userId: user._id, email });
+    logger.info('User logged in successfully', { userId: user.id, email });
 
     const response: AuthResponse = {
       user: {
-        id: user._id.toString(),
+        id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
@@ -334,7 +335,7 @@ router.post('/refresh', async (req, res, next) => {
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { userId: string };
-    const user = await User.findById(decoded.userId);
+    const user = await userRepository.findById(decoded.userId);
 
     if (!user) {
       return res.status(401).json({
@@ -344,7 +345,7 @@ router.post('/refresh', async (req, res, next) => {
     }
 
     const newToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: '1h' }
     );
@@ -359,151 +360,154 @@ router.post('/refresh', async (req, res, next) => {
   }
 });
 
+interface AuthenticatedRequest extends Request {
+  auth: {
+    userId: string;
+  };
+}
+
+// authMiddleware attaches `req.auth` when a token is valid
+router.get('/verify', authMiddleware, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const user = await userRepository.findById(req.auth.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString()
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { router as authRouter };
 ```
 
-### 3. Database Models with Mongoose
+### 3. Persistence Layer with TimescaleDB (PostgreSQL)
 ```typescript
-// server/models/User.ts
-import mongoose, { Document, Schema } from 'mongoose';
+// server/services/database.ts
+import { Kysely, PostgresDialect } from 'kysely';
+import { Pool } from 'pg';
+import type { Database } from './types';
 
-export interface IUser extends Document {
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30_000
+});
+
+export const db = new Kysely<Database>({
+  dialect: new PostgresDialect({ pool })
+});
+
+// server/services/types.ts
+export interface UsersTable {
+  id: string;
   email: string;
   name: string;
-  password: string;
+  passwordHash: string;
   role: 'admin' | 'user';
   emailVerified: boolean;
-  lastLogin: Date;
+  lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const userSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-    index: true
+export interface Database {
+  users: UsersTable;
+  // extend with QuestDB hypertables when modelling market data streams
+}
+
+// server/repositories/userRepository.ts
+import { db } from '../services/database';
+import type { UsersTable } from '../services/types';
+
+const userColumns = [
+  'id',
+  'email',
+  'name',
+  'role',
+  'emailVerified',
+  'lastLogin',
+  'createdAt',
+  'updatedAt'
+] as const satisfies (keyof UsersTable)[];
+
+export const userRepository = {
+  async findByEmail(email: string) {
+    return db
+      .selectFrom('users')
+      .selectAll()
+      .where('email', '=', email)
+      .executeTakeFirst();
   },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 50
+
+  async findById(id: string) {
+    return db
+      .selectFrom('users')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst();
   },
-  password: {
-    type: String,
-    required: true,
-    minlength: 8
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'user'],
-    default: 'user'
-  },
-  emailVerified: {
-    type: Boolean,
-    default: false
-  },
-  lastLogin: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true,
-  toJSON: {
-    transform: function(doc, ret) {
-      delete ret.password;
-      return ret;
+
+  async create(input: Pick<UsersTable, 'email' | 'name' | 'passwordHash' | 'role'>) {
+    const result = await db
+      .insertInto('users')
+      .values({
+        ...input,
+        emailVerified: false,
+        lastLogin: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning(userColumns)
+      .executeTakeFirst();
+
+    if (!result) {
+      throw new Error('Failed to create user');
     }
+
+    return result;
+  },
+
+  async touchLastLogin(id: string) {
+    await db
+      .updateTable('users')
+      .set({
+        lastLogin: new Date(),
+        updatedAt: new Date()
+      })
+      .where('id', '=', id)
+      .execute();
   }
-});
+};
 
-// Indexes for performance
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ createdAt: -1 });
+// Using QuestDB for time-series (example)
+// server/repositories/orderSignalRepository.ts
+import { questDb } from '../services/questdbClient';
 
-export const User = mongoose.model<IUser>('User', userSchema);
-
-// server/models/Post.ts
-import mongoose, { Document, Schema } from 'mongoose';
-
-export interface IPost extends Document {
-  title: string;
-  content: string;
-  slug: string;
-  tags: string[];
-  published: boolean;
-  authorId: mongoose.Types.ObjectId;
-  viewCount: number;
-  likeCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const postSchema = new Schema<IPost>({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 200
-  },
-  content: {
-    type: String,
-    required: true
-  },
-  slug: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    index: true
-  },
-  tags: [{
-    type: String,
-    trim: true,
-    lowercase: true
-  }],
-  published: {
-    type: Boolean,
-    default: false
-  },
-  authorId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  viewCount: {
-    type: Number,
-    default: 0
-  },
-  likeCount: {
-    type: Number,
-    default: 0
+export const orderSignalRepository = {
+  async appendSignal(payload: { symbol: string; price: number; signal: string; occurredAt: Date }) {
+    return questDb.execute(
+      `INSERT INTO order_signals (symbol, price, signal, occurred_at) VALUES (?, ?, ?, ?)`,
+      [payload.symbol, payload.price, payload.signal, payload.occurredAt.toISOString()]
+    );
   }
-}, {
-  timestamps: true
-});
-
-// Compound indexes for complex queries
-postSchema.index({ published: 1, createdAt: -1 });
-postSchema.index({ authorId: 1, published: 1 });
-postSchema.index({ tags: 1, published: 1 });
-postSchema.index({ title: 'text', content: 'text' });
-
-// Virtual populate for author
-postSchema.virtual('author', {
-  ref: 'User',
-  localField: 'authorId',
-  foreignField: '_id',
-  justOne: true
-});
-
-export const Post = mongoose.model<IPost>('Post', postSchema);
+};
 ```
 
 ### 4. Frontend React Application
@@ -756,7 +760,7 @@ import {
   ApiResponse 
 } from '../types/api';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3200/api';
 
 // Create axios instance
 const api = axios.create({

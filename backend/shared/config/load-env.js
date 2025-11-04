@@ -1,72 +1,21 @@
-/**
- * Centralized Environment Loader
- * Loads .env from project root for all backend services
- * 
- * Usage:
- *   import '../../../shared/config/load-env.js';
- *   // or
- *   require('../../../shared/config/load-env.js');
- */
-
-import fs from 'fs';
+import dotenv from 'dotenv';
 import path from 'path';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const moduleRequire = createRequire(__filename);
 
-async function resolveDotenv() {
-  try {
-    const module = await import('dotenv');
-    return module.default;
-  } catch (primaryError) {
-    try {
-      const servicePackageJson = path.join(process.cwd(), 'package.json');
-      if (fs.existsSync(servicePackageJson)) {
-        const serviceRequire = createRequire(servicePackageJson);
-        return serviceRequire('dotenv');
-      }
-    } catch (_serviceError) {
-      // Ignore and fall through to final attempt
-    }
+// Carregar .env do root do projeto
+const projectRoot = path.resolve(__dirname, '../../..');
+const envPath = path.join(projectRoot, '.env');
 
-    try {
-      return moduleRequire('dotenv');
-    } catch {
-      throw primaryError;
-    }
-  }
+console.log(`[load-env] Loading .env from: ${envPath}`);
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn(`[load-env] Warning: Could not load .env file: ${result.error.message}`);
+} else {
+  console.log('[load-env] .env loaded successfully');
 }
 
-const dotenv = await resolveDotenv();
-
-// Calculate path to project root (from backend/shared/config/ to root)
-const projectRoot = path.resolve(__dirname, '../../../');
-const envFiles = [
-  path.join(projectRoot, 'config', 'container-images.env'),
-  path.join(projectRoot, 'config', '.env.defaults'),
-  path.join(projectRoot, '.env'),
-  path.join(projectRoot, '.env.local'),
-  path.join(process.cwd(), '.env'), // Load service-specific .env
-];
-
-export function loadEnvironment() {
-  envFiles.forEach((file, index) => {
-    if (!fs.existsSync(file)) {
-      return;
-    }
-
-    const override = index >= 2; // allow .env, .env.local, and service-specific .env to override previous values
-    const result = dotenv.config({ path: file, override });
-
-    if (result.error) {
-      console.warn(`⚠️  Warning: Could not load environment file: ${file}`);
-    }
-  });
-}
-
-loadEnvironment();
-
-export default loadEnvironment;
+export default result;
