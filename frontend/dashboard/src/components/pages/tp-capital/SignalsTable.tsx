@@ -240,19 +240,28 @@ export function SignalsTable() {
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
+                    Horário/Data
+                  </th>
+                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
                     Ativo
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
-                    Compra
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Compra Menor
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
-                    Alvos
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Compra Maior
                   </th>
-                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Alvo 1
+                  </th>
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Alvo 2
+                  </th>
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
+                    Alvo Final
+                  </th>
+                  <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
                     Stop
-                  </th>
-                  <th className="py-3 px-4 text-left font-semibold text-gray-700 dark:text-gray-300">
-                    Fonte
                   </th>
                   <th className="py-3 px-4 text-center font-semibold text-gray-700 dark:text-gray-300">
                     Ações
@@ -271,7 +280,7 @@ export function SignalsTable() {
                 {filteredSignals.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={9}
                       className="py-8 text-center text-gray-500 dark:text-gray-400"
                     >
                       {searchTerm || channelFilter !== 'all'
