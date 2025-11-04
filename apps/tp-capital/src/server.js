@@ -258,6 +258,35 @@ app.post('/sync-messages', requireApiKey, async (req, res) => {
   }
 });
 
+// Clean signals endpoint - Limpar tabela de sinais (TEMPORÁRIO)
+app.post('/clean-signals', requireApiKey, async (req, res) => {
+  try {
+    logger.info('[CleanSignals] Limpeza de sinais solicitada');
+    
+    const result = await timescaleClient.pool.query(`
+      DELETE FROM signals.tp_capital_signals 
+      WHERE asset != '__checkpoint__'
+      RETURNING asset
+    `);
+    
+    logger.info({ deleted: result.rowCount }, '[CleanSignals] Sinais deletados');
+    
+    return res.json({
+      success: true,
+      message: `${result.rowCount} sinais deletados`,
+      deleted: result.rowCount
+    });
+    
+  } catch (error) {
+    logger.error({ err: error }, '[CleanSignals] Erro ao limpar sinais');
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao limpar sinais',
+      error: error.message
+    });
+  }
+});
+
 // Full scan endpoint - Varredura completa no Gateway
 app.post('/full-scan', requireApiKey, async (req, res) => {
   try {
