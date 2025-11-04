@@ -11,33 +11,26 @@
  */
 
 import { AlertTriangle } from 'lucide-react';
-import { DeleteButton } from '../../../ui/action-buttons';
 import { formatNumber, formatTimestamp } from '../utils';
 import { SignalRow as SignalRowType } from '../types';
 
 export interface SignalRowProps {
   signal: SignalRowType;
-  onDelete: (ingestedAt: string) => Promise<void>;
-  isDeleting: boolean;
 }
 
 /**
- * Signal row component with buy range, targets, stop, and actions
+ * Signal row component with mandatory 8 columns
  * 
- * @param props - Signal data and handlers
+ * @param props - Signal data
  * @returns Table row component
  * 
  * @example
  * ```tsx
- * <SignalRow
- *   signal={signalData}
- *   onDelete={handleDelete}
- *   isDeleting={deletingId === signal.ingested_at}
- * />
+ * <SignalRow signal={signalData} />
  * ```
  */
 export function SignalRow(props: SignalRowProps) {
-  const { signal, onDelete, isDeleting } = props;
+  const { signal } = props;
   
   const formattedTimestamp = formatTimestamp(signal.ts);
   const isDateObject = formattedTimestamp && typeof formattedTimestamp === 'object' && 'time' in formattedTimestamp;
@@ -112,15 +105,6 @@ export function SignalRow(props: SignalRowProps) {
             </span>
           </div>
         )}
-      </td>
-
-      {/* Actions */}
-      <td className="py-3 px-4 text-center">
-        <DeleteButton
-          onClick={() => onDelete(signal.ingested_at)}
-          disabled={isDeleting}
-          confirmMessage="Tem certeza que deseja deletar este sinal?"
-        />
       </td>
     </tr>
   );

@@ -43,7 +43,6 @@ import { DEFAULT_LIMIT } from './constants';
  */
 export function SignalsTable() {
   // State management
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [channelFilter, setChannelFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,21 +95,6 @@ export function SignalsTable() {
   }, [limit]);
 
   // Handlers
-  const handleDelete = async (ingestedAt: string) => {
-    if (!confirm('Tem certeza que deseja deletar este sinal?')) return;
-
-    setDeletingId(ingestedAt);
-    try {
-      await deleteSignal(ingestedAt);
-      await query.refetch();
-    } catch (error) {
-      console.error('Error deleting signal:', error);
-      alert('Erro ao deletar sinal');
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   const handleExportCsv = () => {
     const csv = toCsv(filteredSignals);
     downloadFile('tp-capital-signals.csv', 'text/csv;charset=utf-8', csv);
@@ -263,9 +247,6 @@ export function SignalsTable() {
                   <th className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
                     Stop
                   </th>
-                  <th className="py-3 px-4 text-center font-semibold text-gray-700 dark:text-gray-300">
-                    Ações
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -273,14 +254,12 @@ export function SignalsTable() {
                   <SignalRow
                     key={signal.ingested_at}
                     signal={signal}
-                    onDelete={handleDelete}
-                    isDeleting={deletingId === signal.ingested_at}
                   />
                 ))}
                 {filteredSignals.length === 0 && (
                   <tr>
                     <td
-                      colSpan={9}
+                      colSpan={8}
                       className="py-8 text-center text-gray-500 dark:text-gray-400"
                     >
                       {searchTerm || channelFilter !== 'all'
