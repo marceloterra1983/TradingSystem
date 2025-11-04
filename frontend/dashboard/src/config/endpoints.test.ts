@@ -16,7 +16,7 @@ describe('Endpoints Configuration', () => {
       expect(ENDPOINTS.workspace).toBe('http://localhost:3210');
       expect(ENDPOINTS.tpCapital).toBe('http://localhost:4008');
       expect(ENDPOINTS.documentation).toBe('http://localhost:3405');
-      expect(ENDPOINTS.telegramGateway).toBe('http://localhost:4010');
+      expect(ENDPOINTS.telegramGateway).toBe('http://localhost:4006'); // Corrected port
     });
 
     it('should have database UIs in protected range 7100-7199', () => {
