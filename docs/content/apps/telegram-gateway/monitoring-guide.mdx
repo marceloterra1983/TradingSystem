@@ -110,7 +110,7 @@ redis_replication_lag_seconds    - Replica lag
 ```
 
 **Troubleshooting:**
-- Hit rate <50% → Increase TTL or memory
+- Hit rate &lt;50% → Increase TTL or memory
 - Eviction rate high → Increase maxmemory
 - Replication lag >1s → Check network or replica resources
 
@@ -168,7 +168,7 @@ curl http://localhost:4006/metrics
 
 **SLOs Defined:**
 - **Availability:** 99.9% monthly (error budget: 43 min/month)
-- **Latency (p95):** <15ms for polling
+- **Latency (p95):** &lt;15ms for polling
 - **Success Rate:** >99.5% message processing
 
 **Panels:**
@@ -378,7 +378,7 @@ docker exec telegram-redis-master redis-cli INFO replication
 
 **Target:** >70%
 
-**If hit rate low (<50%):**
+**If hit rate low (&lt;50%):**
 ```bash
 # 1. Increase TTL
 # Edit: apps/telegram-gateway/src/cache/RedisTelegramCache.js
@@ -396,7 +396,7 @@ docker exec telegram-redis-master redis-cli INFO replication
 
 ### Optimize Database Queries
 
-**Target:** p95 latency <50ms
+**Target:** p95 latency &lt;50ms
 
 **If queries slow (>100ms):**
 ```bash

@@ -265,13 +265,13 @@ curl http://localhost:4006/health
 Monitor these metrics hourly:
 
 ```bash
-# 1. Polling lag (target: <30s)
+# 1. Polling lag (target: &lt;30s)
 curl -s http://localhost:4005/metrics | grep tp_capital_polling_lag_seconds
 
 # 2. Cache hit rate (target: >70%)
 echo "scale=2; $(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_hits_total \K\d+') / ($(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_hits_total \K\d+') + $(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_misses_total \K\d+')) * 100" | bc
 
-# 3. Error rate (target: <1%)
+# 3. Error rate (target: &lt;1%)
 curl -s http://localhost:4005/metrics | grep tp_capital_messages_processed_total
 
 # 4. System health
