@@ -7,7 +7,7 @@
  * @module tp-capital/components
  */
 
-import { TrendingUp, TrendingDown, Target, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Target, AlertTriangle } from 'lucide-react';
 import { DeleteButton } from '../../../ui/action-buttons';
 import { formatNumber } from '../utils';
 import { SignalRow as SignalRowType } from '../types';
