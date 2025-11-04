@@ -260,24 +260,32 @@ export class GatewayPollingWorker {
       return;
     }
 
-    // 2. VALIDAR SE É UM ATIVO VÁLIDO
-    // Rejeitar palavras comuns que não são ativos (INVESTIDOR, ENTRADA, VAMOS, etc.)
-    const assetRegex = /^[A-Z]{3,6}\d{1,4}$/; // Ex: PETR4, CSNAW919, BBDCU159
+    // 2. VALIDAR SE É UM SINAL DE TRADING VÁLIDO
+    // Critérios obrigatórios:
+    // - Ativo no formato LETRAS+NÚMEROS (ex: PETR4, CSNAW919, BBDCU159)
+    // - Pelo menos buy_min OU (target_1 E stop) preenchidos
+    
+    const assetRegex = /^[A-Z]{3,6}\d{1,4}$/;
     const isValidAsset = assetRegex.test(signal.asset);
     
-    // Também aceitar se tiver pelo menos um dos campos de trading preenchidos
-    const hasTradeFields = signal.buy_min || signal.target_1 || signal.stop;
+    // Sinal completo: tem valores de compra OU (tem alvos E stop)
+    const hasCompraValues = signal.buy_min && signal.buy_max;
+    const hasTargetAndStop = (signal.target_1 || signal.target_final) && signal.stop;
+    const isCompleteSignal = hasCompraValues || hasTargetAndStop;
     
-    if (!isValidAsset && !hasTradeFields) {
+    if (!isValidAsset || !isCompleteSignal) {
       logger.debug({
         messageId: msg.message_id,
         asset: signal.asset,
-        reason: 'Invalid asset format and no trade fields'
-      }, 'Skipping message - not a trading signal');
+        isValidAsset,
+        hasCompraValues,
+        hasTargetAndStop,
+        reason: !isValidAsset ? 'Invalid asset format' : 'Incomplete signal (no trade values)'
+      }, 'Skipping message - not a valid trading signal');
       
-      await this.markMessageAsIgnored(msg.message_id, 'Not a trading signal');
+      await this.markMessageAsIgnored(msg.message_id, 'Invalid or incomplete trading signal');
       if (this.metrics) {
-        this.metrics.messagesProcessed.inc({ status: 'ignored_invalid_asset' });
+        this.metrics.messagesProcessed.inc({ status: 'ignored_invalid' });
       }
       return;
     }
