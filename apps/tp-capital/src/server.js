@@ -40,6 +40,7 @@ import ingestionRouter from '../api/src/routes/ingestion.js';
 
 // Authentication & Validation (NEW)
 import { requireApiKey, optionalApiKey } from './middleware/authMiddleware.js';
+import { FullScanWorker } from './workers/fullScanWorker.js';
 import { validateBody, validateQuery, validateParams } from './middleware/validationMiddleware.js';
 import { CreateChannelSchema, UpdateChannelSchema, ChannelIdParamSchema } from './schemas/channelSchemas.js';
 import { CreateBotSchema, UpdateBotSchema, BotIdParamSchema } from './schemas/botSchemas.js';
@@ -252,6 +253,42 @@ app.post('/sync-messages', requireApiKey, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erro ao sincronizar mensagens',
+      error: error.message
+    });
+  }
+});
+
+// Full scan endpoint - Varredura completa no Gateway
+app.post('/full-scan', requireApiKey, async (req, res) => {
+  try {
+    logger.info('[FullScan] Varredura completa solicitada via dashboard');
+    
+    const scanner = new FullScanWorker({
+      gatewayUrl: config.gateway.url,
+      apiKey: config.gateway.apiKey,
+      tpCapitalDb: timescaleClient,
+      channelId: config.gateway.signalsChannelId
+    });
+    
+    const result = await scanner.runFullScan();
+    
+    return res.json({
+      success: true,
+      message: `Varredura completa: ${result.imported} sinais importados de ${result.scanned} mensagens`,
+      data: {
+        scanned: result.scanned,
+        structured: result.structured,
+        imported: result.imported,
+        skipped: result.skipped,
+        errors: result.errors
+      }
+    });
+    
+  } catch (error) {
+    logger.error({ err: error }, '[FullScan] Erro na varredura completa');
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao executar varredura completa',
       error: error.message
     });
   }
