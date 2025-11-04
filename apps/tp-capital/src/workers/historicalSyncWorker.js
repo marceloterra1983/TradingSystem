@@ -21,11 +21,11 @@ import { config } from '../config.js';
 export class HistoricalSyncWorker {
   constructor({ db }) {
     this.db = db;
-    this.gatewayUrl = config.gateway.url || 'http://localhost:4010';
+    this.gatewayUrl = config.gateway.url || 'http://localhost:4006'; // Corrected port
     this.apiKey = config.gateway.apiKey;
     this.batchSize = 500; // Max messages per sync request
     this.batchDelay = 10000; // 10s between batches
-    this.maxBatches = 20; // Max 10,000 messages (safety limit)
+    this.maxBatches = 50; // Increased: Max 25,000 messages (was 20)
   }
 
   /**

@@ -17,16 +17,16 @@ import { parseSignal } from '../parseSignal.js';
 
 export class FullScanWorker {
   constructor({ gatewayUrl, apiKey, tpCapitalDb, channelId }) {
-    this.gatewayUrl = gatewayUrl || config.gateway.url || 'http://localhost:4010';
+    this.gatewayUrl = gatewayUrl || config.gateway.url || 'http://localhost:4006'; // Corrected port
     this.apiKey = apiKey || config.gateway.apiKey;
     this.channelId = channelId || config.gateway.signalsChannelId;
     this.tpCapitalDb = tpCapitalDb;
     this.schema = config.timescale.schema;
     
     // Configuração de varredura
-    this.batchSize = 100; // Mensagens por requisição
-    this.maxMessages = 6000; // Máximo de mensagens para processar (5,595 no Gateway)
-    this.requestDelay = 500; // Delay entre requisições (ms) - evita rate limit
+    this.batchSize = 200; // Increased: 100 → 200 mensagens por requisição
+    this.maxMessages = 10000; // Increased: 6000 → 10000 para garantir todos
+    this.requestDelay = 1000; // Increased: 500 → 1000ms para evitar rate limit
   }
 
   /**
