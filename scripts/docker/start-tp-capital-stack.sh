@@ -44,5 +44,5 @@ docker compose -f "$COMPOSE_FILE" ps
 
 echo ""
 echo "To view logs: docker compose -f $COMPOSE_FILE logs -f"
-echo "To check health: curl http://localhost:4005/health"
+echo "To check health: curl http://localhost:4008/health"
 
