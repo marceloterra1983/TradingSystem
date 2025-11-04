@@ -241,8 +241,8 @@ docker compose restart workspace
 - Daily backups of both databases during transition period
 
 ### Step 3: Decision Points
-- **Day 3**: Performance review (if <200ms API response, proceed)
-- **Day 7**: Stability review (if <1 incident, proceed)
+- **Day 3**: Performance review (if &lt;200ms API response, proceed)
+- **Day 7**: Stability review (if &lt;1 incident, proceed)
 - **Day 14**: Final go/no-go decision
 
 ---
