@@ -46,7 +46,6 @@ export function SignalsTable() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [channelFilter, setChannelFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState({
@@ -73,21 +72,12 @@ export function SignalsTable() {
     return Array.from(channels).sort();
   }, [signals]);
 
-  const typeOptions = useMemo(() => {
-    const types = new Set(signals.map((s) => s.signal_type));
-    return Array.from(types).sort();
-  }, [signals]);
-
   // Apply filters
   const filteredSignals = useMemo(() => {
     let filtered = signals;
 
     if (channelFilter !== 'all') {
       filtered = filtered.filter((s) => s.channel === channelFilter);
-    }
-
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter((s) => s.signal_type === typeFilter);
     }
 
     if (searchTerm) {
@@ -97,12 +87,11 @@ export function SignalsTable() {
     }
 
     return filtered;
-  }, [signals, channelFilter, typeFilter, searchTerm]);
+  }, [signals, channelFilter, searchTerm]);
 
   // Reset filters when limit changes
   useEffect(() => {
     setChannelFilter('all');
-    setTypeFilter('all');
     setSearchTerm('');
   }, [limit]);
 
@@ -216,13 +205,13 @@ export function SignalsTable() {
         {/* Filter Bar */}
         <SignalsFilterBar
           channelFilter={channelFilter}
-          typeFilter={typeFilter}
+          typeFilter="all"
           searchTerm={searchTerm}
           limit={limit}
           channelOptions={channelOptions}
-          typeOptions={typeOptions}
+          typeOptions={[]}
           onChannelFilterChange={setChannelFilter}
-          onTypeFilterChange={setTypeFilter}
+          onTypeFilterChange={() => {}}
           onSearchTermChange={setSearchTerm}
           onLimitChange={setLimit}
           onRefresh={() => query.refetch()}
@@ -285,7 +274,7 @@ export function SignalsTable() {
                       colSpan={6}
                       className="py-8 text-center text-gray-500 dark:text-gray-400"
                     >
-                      {searchTerm || channelFilter !== 'all' || typeFilter !== 'all'
+                      {searchTerm || channelFilter !== 'all'
                         ? 'Nenhum sinal encontrado com os filtros aplicados'
                         : 'Nenhum sinal disponível'}
                     </td>
