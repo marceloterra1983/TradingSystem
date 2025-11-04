@@ -22,7 +22,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
-import { LOG_LIMIT_OPTIONS } from './constants';
+import { LIMIT_OPTIONS } from './constants';
 import { fetchLogs } from './api';
 import { formatTimestamp, formatContext, getLevelIcon } from './utils';
 
@@ -117,7 +117,7 @@ export function LogsViewer() {
                   <SelectValue placeholder="Limite" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LOG_LIMIT_OPTIONS.map((option) => (
+                  {LIMIT_OPTIONS.map((option) => (
                     <SelectItem key={option} value={String(option)}>
                       {option} itens
                     </SelectItem>
