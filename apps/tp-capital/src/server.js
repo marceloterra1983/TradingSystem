@@ -41,7 +41,8 @@ import ingestionRouter from '../api/src/routes/ingestion.js';
 // Authentication & Validation (NEW)
 import { requireApiKey, optionalApiKey } from './middleware/authMiddleware.js';
 import { FullScanWorker } from './workers/fullScanWorker.js';
-import { RedisSubscriberWorker } from './workers/redisSubscriberWorker.js';
+// TODO: Enable after Docker image includes redis package
+// import { RedisSubscriberWorker } from './workers/redisSubscriberWorker.js';
 import { validateBody, validateQuery, validateParams } from './middleware/validationMiddleware.js';
 import { CreateChannelSchema, UpdateChannelSchema, ChannelIdParamSchema } from './schemas/channelSchemas.js';
 import { CreateBotSchema, UpdateBotSchema, BotIdParamSchema } from './schemas/botSchemas.js';
@@ -756,9 +757,13 @@ async function startGatewayPollingWorker() {
 let globalRedisSubscriber = null;
 
 // Start Redis Subscriber (PRIMARY - Push, real-time)
+// TODO: Enable after Docker image includes redis package
+/*
 async function startRedisSubscriber() {
   try {
     logger.info('[HYBRID] Starting Redis subscriber (PUSH - primary method)');
+    
+    const { RedisSubscriberWorker } = await import('./workers/redisSubscriberWorker.js');
     
     globalRedisSubscriber = new RedisSubscriberWorker({
       tpCapitalDb: timescaleClient,
@@ -776,12 +781,14 @@ async function startRedisSubscriber() {
     // Não falha startup - polling worker continua funcionando como fallback
   }
 }
+*/
 
-// Start polling worker (FALLBACK - Pull, every 60s)
+// Start polling worker (PULL - every 60s)
 startGatewayPollingWorker();
 
 // Start Redis subscriber (PRIMARY - Push, real-time)
-startRedisSubscriber();
+// TODO: Uncomment after fixing Docker image
+// startRedisSubscriber();
 
 // Start historical sync worker (backfill - runs once)
 async function startHistoricalSyncWorker() {
