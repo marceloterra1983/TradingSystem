@@ -118,7 +118,7 @@ export class FullScanWorker {
 
     while (hasMore && messages.length < this.maxMessages) {
       // Usar offset para paginação correta
-      const url = `${this.gatewayUrl}/api/messages?channel=${this.channelId}&limit=${this.batchSize}&offset=${offset}`;
+      const url = `${this.gatewayUrl}/api/messages?channelId=${this.channelId}&limit=${this.batchSize}&offset=${offset}`;
       
       logger.info({ 
         offset, 
@@ -182,8 +182,8 @@ export class FullScanWorker {
             hasMore = false;
           }
           
-          // Delay para evitar rate limit (500ms por requisição = max 2 req/s)
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Delay para evitar rate limit
+          await new Promise(resolve => setTimeout(resolve, this.requestDelay));
         }
       } catch (error) {
         logger.error({ err: error, offset }, '[FullScan] Erro ao buscar lote');
