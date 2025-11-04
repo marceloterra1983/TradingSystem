@@ -97,7 +97,7 @@ export default defineConfig(({ mode }) => {
 
   const libraryProxy = resolveProxy(
     env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL,
-    'http://localhost:3201',
+    'http://localhost:3210',  // Updated from 3201 → 3210 (PostgreSQL stack)
     '/api',
   );
   const tpCapitalProxy = resolveProxy(
@@ -225,6 +225,14 @@ export default defineConfig(({ mode }) => {
           target: tpCapitalProxy.target,
           changeOrigin: true,
           rewrite: createRewrite(/^\/api\/tp-capital/, tpCapitalProxy.basePath),
+          configure: (proxy, _options) => {
+            proxy.on('proxyReq', (proxyReq, req) => {
+              // Forward X-API-Key header if present
+              if (req.headers['x-api-key']) {
+                proxyReq.setHeader('X-API-Key', req.headers['x-api-key'] as string);
+              }
+            });
+          },
         },
         '/api/docs': {
           target: docsApiProxy.target,
