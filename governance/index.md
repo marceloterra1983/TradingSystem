@@ -1,6 +1,6 @@
 # Governance Hub Index
 
-_Last generated: 2025-11-05T16:39:16.562Z_
+_Last generated: 2025-11-05T18:13:09.880Z_
 
 
 ## Controls
@@ -12,6 +12,7 @@ _Last generated: 2025-11-05T16:39:16.562Z_
 | Maintenance Automation Guide | DocsOps | 60d | 2025-10-29 | 🟢 Healthy |
 | Maintenance Checklist | DocsOps | 60d | 2025-10-29 | 🟢 Healthy |
 | Review Checklist | DocsOps | 60d | 2025-10-29 | 🟢 Healthy |
+| SOP - Rotação de Segredos e Variáveis de Ambiente | SecurityEngineering | 180d | 2025-11-05 | 🟢 Healthy |
 | Validation Guide | DocsOps | 60d | 2025-10-29 | 🟢 Healthy |
 
 ## Evidence
@@ -64,11 +65,21 @@ _Last generated: 2025-11-05T16:39:16.562Z_
 | Telegram Database Summary | DocsOps | 120d | 2025-10-29 | 🟢 Healthy |
 | Telegram Migration Summary 2025 11 03 | DocsOps | 120d | 2025-10-29 | 🟢 Healthy |
 
+## Policies
+| Artifact | Owner | Review Cycle | Last Reviewed | Status |
+|----------|-------|--------------|---------------|--------|
+| Política de Gerenciamento de Segredos e Variáveis de Ambiente | SecurityEngineering | 90d | 2025-11-05 | 🟢 Healthy |
+
 ## Registry
 | Artifact | Owner | Review Cycle | Last Reviewed | Status |
 |----------|-------|--------------|---------------|--------|
 | Code Docs Mapping | DocsOps | 120d | 2025-10-29 | 🟢 Healthy |
 | Registry | DocsOps | 120d | 2025-10-29 | 🟢 Healthy |
+
+## Standards
+| Artifact | Owner | Review Cycle | Last Reviewed | Status |
+|----------|-------|--------------|---------------|--------|
+| Padrão Técnico de Segredos e Variáveis de Ambiente | SecurityEngineering | 90d | 2025-11-05 | 🟢 Healthy |
 
 ## Strategy
 | Artifact | Owner | Review Cycle | Last Reviewed | Status |
