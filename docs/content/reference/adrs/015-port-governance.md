@@ -10,7 +10,7 @@
 ## 🎯 Contexto
 
 - 8–12 conflitos de portas por mês (porta duplicada em scripts, Compose e serviços locais).
-- Documentação desatualizada (<70% de acurácia) e `.env` divergentes.
+- Documentação desatualizada (menos de 70% de acurácia) e `.env` divergentes.
 - Integrações como Telegram MTProto dependiam de processos nativos (`localhost:4007`), quebrando containers.
 
 ## ✅ Decisão
