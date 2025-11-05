@@ -46,6 +46,8 @@ export function SignalsTable() {
   const [limit, setLimit] = useState(200); // Aumentado para 200 (era 10) - mostrar mais sinais
   const [channelFilter, setChannelFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState({
     show: false,
@@ -55,8 +57,13 @@ export function SignalsTable() {
 
   // Data fetching
   const query = useQuery({
-    queryKey: ['tp-capital-signals', limit],
-    queryFn: () => fetchSignals({ limit }),
+    queryKey: ['tp-capital-signals', limit, fromDate, toDate],
+    queryFn: () =>
+      fetchSignals({
+        limit,
+        from: fromDate || undefined,
+        to: toDate || undefined,
+      }),
     refetchInterval: 30000, // 30 seconds
     staleTime: 10000, // 10 seconds
   });
@@ -88,14 +95,48 @@ export function SignalsTable() {
       );
     }
 
+    const fromTs = fromDate ? new Date(fromDate).getTime() : undefined;
+    const toTs = toDate ? new Date(toDate).getTime() + 86_399_999 : undefined;
+
+    if (fromTs || toTs) {
+      filtered = filtered.filter((signal) => {
+        const tsValue =
+          typeof signal.ts === 'number'
+            ? signal.ts
+            : typeof signal.ts === 'string'
+              ? Date.parse(signal.ts)
+              : Date.parse(signal.ingested_at);
+
+        if (Number.isNaN(tsValue)) {
+          return false;
+        }
+
+        if (fromTs && tsValue < fromTs) {
+          return false;
+        }
+
+        if (toTs && tsValue > toTs) {
+          return false;
+        }
+
+        return true;
+      });
+    }
+
     return filtered;
-  }, [signals, channelFilter, searchTerm]);
+  }, [signals, channelFilter, searchTerm, fromDate, toDate]);
 
   // Reset filters when limit changes
   useEffect(() => {
     setChannelFilter('all');
     setSearchTerm('');
   }, [limit]);
+
+  useEffect(() => {
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      setToDate(fromDate);
+    }
+  }, [fromDate, toDate]);
 
   // Handlers
   const handleExportCsv = () => {
@@ -195,12 +236,16 @@ export function SignalsTable() {
           typeFilter="all"
           searchTerm={searchTerm}
           limit={limit}
+          fromDate={fromDate}
+          toDate={toDate}
           channelOptions={channelOptions}
           typeOptions={[]}
           onChannelFilterChange={setChannelFilter}
           onTypeFilterChange={() => {}}
           onSearchTermChange={setSearchTerm}
           onLimitChange={setLimit}
+          onFromDateChange={setFromDate}
+          onToDateChange={setToDate}
           onRefresh={() => query.refetch()}
           onSyncMessages={handleSyncMessages}
           onExportCsv={handleExportCsv}

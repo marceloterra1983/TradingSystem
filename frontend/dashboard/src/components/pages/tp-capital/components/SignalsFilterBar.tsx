@@ -25,6 +25,8 @@ export interface SignalsFilterBarProps {
   typeFilter: string;
   searchTerm: string;
   limit: number;
+  fromDate: string;
+  toDate: string;
 
   // Filter options
   channelOptions: string[];
@@ -35,6 +37,8 @@ export interface SignalsFilterBarProps {
   onTypeFilterChange: (value: string) => void;
   onSearchTermChange: (value: string) => void;
   onLimitChange: (value: number) => void;
+  onFromDateChange: (value: string) => void;
+  onToDateChange: (value: string) => void;
 
   // Action handlers
   onRefresh: () => void;
@@ -78,12 +82,16 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
     typeFilter,
     searchTerm,
     limit,
+    fromDate,
+    toDate,
     channelOptions,
     typeOptions,
     onChannelFilterChange,
     onTypeFilterChange,
     onSearchTermChange,
     onLimitChange,
+    onFromDateChange,
+    onToDateChange,
     onRefresh,
     onSyncMessages,
     onExportCsv,
@@ -151,6 +159,33 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Date Range */}
+        <div className="flex-1 min-w-[170px]">
+          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Data inicial
+          </label>
+          <Input
+            type="date"
+            value={fromDate}
+            max={toDate || undefined}
+            onChange={(e) => onFromDateChange(e.target.value)}
+            className="h-9"
+          />
+        </div>
+
+        <div className="flex-1 min-w-[170px]">
+          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Data final
+          </label>
+          <Input
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => onToDateChange(e.target.value)}
+            className="h-9"
+          />
         </div>
 
         {/* Search Input */}

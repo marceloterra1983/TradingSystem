@@ -29,7 +29,7 @@ services:
     environment:
       POSTGRES_DB: tp_capital_db
       POSTGRES_USER: ${TP_CAPITAL_DB_USER:-tp_capital}
-      POSTGRES_PASSWORD: ${TP_CAPITAL_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
       TIMESCALEDB_TELEMETRY: 'off'
       
       # Performance tuning for signal ingestion workload
@@ -101,7 +101,7 @@ services:
       - DATABASES_HOST=tp-capital-timescaledb
       - DATABASES_PORT=5432
       - DATABASES_USER=${TP_CAPITAL_DB_USER:-tp_capital}
-      - DATABASES_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - DATABASES_PASSWORD=${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
       - DATABASES_DBNAME=tp_capital_db
       - POOL_MODE=transaction
       - MAX_CLIENT_CONN=1000
@@ -285,7 +285,7 @@ services:
       - TP_CAPITAL_DB_PORT=6432
       - TP_CAPITAL_DB_NAME=tp_capital_db
       - TP_CAPITAL_DB_USER=${TP_CAPITAL_DB_USER:-tp_capital}
-      - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD}
+      - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
       - TP_CAPITAL_DB_SCHEMA=signals
       
       # Connection Pool (application-level, on top of PgBouncer)
@@ -306,13 +306,13 @@ services:
       
       # Gateway Database Connection (for polling messages)
       # Updated: 2025-11-04 - Using dedicated Telegram TimescaleDB
-      - TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-timescale:5432/telegram_gateway
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD:-telegram_secure_pass}@telegram-timescale:5432/telegram_gateway
       - GATEWAY_DATABASE_HOST=telegram-timescale
       - GATEWAY_DATABASE_PORT=5432
       - GATEWAY_DATABASE_NAME=telegram_gateway
       - GATEWAY_DATABASE_SCHEMA=telegram_gateway
       - GATEWAY_DATABASE_USER=telegram
-      - GATEWAY_DATABASE_PASSWORD=${TELEGRAM_DB_PASSWORD}
+      - GATEWAY_DATABASE_PASSWORD=${TELEGRAM_DB_PASSWORD:-telegram_secure_pass}
       
       # Gateway Configuration
       - GATEWAY_POLLING_INTERVAL_MS=${GATEWAY_POLLING_INTERVAL_MS:-5000}
@@ -320,8 +320,8 @@ services:
       - GATEWAY_BATCH_SIZE=${GATEWAY_BATCH_SIZE:-100}
       
       # Telegram Gateway Connection (host service)
-      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
-      - TELEGRAM_GATEWAY_PORT=4010
+      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4006
+      - TELEGRAM_GATEWAY_PORT=4006
       
       # CORS
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}

@@ -38,6 +38,8 @@ export interface FetchSignalsParams {
   channel?: string;
   signalType?: string;
   search?: string;
+  from?: string;
+  to?: string;
 }
 
 /**

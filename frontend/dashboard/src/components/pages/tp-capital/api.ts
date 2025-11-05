@@ -39,6 +39,8 @@ export async function fetchSignals(
     if (params.channel) queryParams.set('channel', params.channel);
     if (params.signalType) queryParams.set('type', params.signalType);
     if (params.search) queryParams.set('search', params.search);
+    if (params.from) queryParams.set('from', params.from);
+    if (params.to) queryParams.set('to', params.to);
 
     const query = queryParams.toString();
     const endpoint = query ? `/signals?${query}` : '/signals';
