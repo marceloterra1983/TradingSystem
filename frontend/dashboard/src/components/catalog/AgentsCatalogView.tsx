@@ -6,7 +6,7 @@ import {
   CollapsibleCardHeader,
   CollapsibleCardTitle,
 } from '../ui/collapsible-card';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { CustomizablePageLayout, type PageSection } from '@/components/layout/CustomizablePageLayout';
 import { Input } from '../ui/input';
 import {
   Select,
@@ -26,14 +26,12 @@ import {
 } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { MarkdownPreview } from '../ui/MarkdownPreview';
-import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, FileWarning, Filter, Search } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, FileWarning, Filter, Loader2, Search } from 'lucide-react';
 
-import {
-  AI_AGENTS_DIRECTORY,
-  AGENT_CATEGORY_ORDER,
-} from '../../data/aiAgentsDirectory';
+import { useAgentsData, type AgentsData } from '@/hooks/useAgentsData';
 
-type AgentRecord = (typeof AI_AGENTS_DIRECTORY)[number];
+// Type will be inferred from hook data
+type AgentRecord = AgentsData['agents'][number];
 type SortField =
   | 'name'
   | 'category'
@@ -44,12 +42,12 @@ type SortField =
   | 'tags';
 type SortDirection = 'asc' | 'desc';
 
-const ALL_AGENTS = AI_AGENTS_DIRECTORY;
-const TOTAL_AGENTS = ALL_AGENTS.length;
-
-const getAvailableCategories = () => {
-  const existing = new Set(ALL_AGENTS.map((agent) => agent.category));
-  return AGENT_CATEGORY_ORDER.filter((category) => existing.has(category));
+const getAvailableCategories = (
+  agents: AgentRecord[],
+  categoryOrder: string[],
+): string[] => {
+  const existing = new Set(agents.map((agent) => agent.category));
+  return categoryOrder.filter((category) => existing.has(category));
 };
 
 const surfaceCardClass =
@@ -73,14 +71,40 @@ export default function AgentsCatalogView({
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  const categories = useMemo(() => getAvailableCategories(), []);
-  const tagOptions = useMemo(
-    () =>
-      Array.from(new Set(ALL_AGENTS.flatMap((agent) => agent.tags ?? []))).sort(),
-    [],
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useAgentsData();
+
+  const sharedLayoutProps = {
+    pageId: 'ai-agents-directory',
+    title: 'AI Agents Directory',
+    subtitle: 'Catálogo dos agentes Claude configurados para o TradingSystem.',
+    defaultColumns: 1 as const,
+    leftActions: headerActions,
+  };
+
+  const resolvedData = data ?? null;
+  const agents: AgentRecord[] = resolvedData?.agents ?? [];
+  const categoryOrder: string[] = resolvedData?.categoryOrder ?? [];
+  const totalAgents = agents.length;
+
+  const categories = useMemo<string[]>(
+    () => getAvailableCategories(agents, categoryOrder),
+    [agents, categoryOrder],
+  );
+  const tagOptions = useMemo<string[]>(
+    () => {
+      const tags = agents.flatMap<string>((agent) => agent.tags ?? []);
+      return Array.from(new Set(tags)).sort();
+    },
+    [agents],
   );
 
-  const filteredAgents = useMemo(() => {
+  const filteredAgents = useMemo<AgentRecord[]>(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     const matchesSearch = (agent: AgentRecord) => {
@@ -92,8 +116,8 @@ export default function AgentsCatalogView({
         agent.category,
         agent.capabilities,
         agent.usage,
-        agent.example,
-        agent.outputType,
+        agent.example ?? '',
+        agent.outputType ?? '',
         (agent.tags ?? []).join(' '),
       ]
         .filter(Boolean)
@@ -120,9 +144,9 @@ export default function AgentsCatalogView({
         case 'usage':
           return agent.usage;
         case 'example':
-          return agent.example;
+          return agent.example ?? '';
         case 'outputType':
-          return agent.outputType;
+          return agent.outputType ?? '';
         case 'tags':
           return (agent.tags ?? []).join(', ');
         default:
@@ -130,7 +154,7 @@ export default function AgentsCatalogView({
       }
     };
 
-    const filtered = ALL_AGENTS.filter(
+    const filtered = agents.filter(
       (agent) => matchesSearch(agent) && matchesCategory(agent) && matchesTag(agent),
     );
 
@@ -153,7 +177,7 @@ export default function AgentsCatalogView({
       }
       return 0;
     });
-  }, [categoryFilter, sortDirection, sortField, tagFilter, searchTerm]);
+  }, [agents, categoryFilter, sortDirection, sortField, tagFilter, searchTerm]);
 
   const handleOpenAgent = (agent: AgentRecord) => {
     setSelectedAgent(agent);
@@ -209,7 +233,7 @@ export default function AgentsCatalogView({
     );
   };
 
-  const sections = useMemo(
+  const sections = useMemo<PageSection[]>(
     () => [
       {
         id: 'agents-catalog',
@@ -223,7 +247,7 @@ export default function AgentsCatalogView({
               <div className="flex items-center gap-3">
                 <CollapsibleCardTitle>Catálogo de Agentes Claude</CollapsibleCardTitle>
                 <Badge variant="secondary">
-                  {filteredAgents.length} de {TOTAL_AGENTS}
+                  {filteredAgents.length} de {totalAgents}
                 </Badge>
               </div>
               <CollapsibleCardDescription>
@@ -283,7 +307,7 @@ export default function AgentsCatalogView({
                     </strong>{' '}
                     de{' '}
                     <strong className="text-[color:var(--ts-text-secondary)]">
-                      {TOTAL_AGENTS}
+                      {totalAgents}
                     </strong>{' '}
                     agentes cadastrados.
                   </span>
@@ -314,14 +338,16 @@ export default function AgentsCatalogView({
                     className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 md:grid-cols-2 2xl:grid-cols-3"
                     data-testid="agents-card-grid"
                   >
-                    {filteredAgents.map((agent) => (
-                      <div
+                    {filteredAgents.map((agent) => {
+                      const agentTags = agent.tags ?? [];
+                      return (
+                        <div
                         key={agent.id}
                         className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
                         data-testid="agent-card"
                         data-agent-id={agent.id}
                         data-agent-category={agent.category}
-                        data-agent-tags={(agent.tags ?? []).join(',')}
+                        data-agent-tags={agentTags.join(',')}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex flex-col gap-1">
@@ -392,11 +418,11 @@ export default function AgentsCatalogView({
                             {agent.outputType}
                           </div>
                         </div>
-                        {agent.tags.length > 0 && (
+                        {agentTags.length > 0 && (
                           <div
                             className={`flex flex-wrap gap-1 text-[10px] uppercase tracking-wide ${mutedTextClass}`}
                           >
-                            {agent.tags.map((tag) => (
+                            {agentTags.map((tag) => (
                               <Badge
                                 key={`${agent.id}-tag-${tag}`}
                                 variant="outline"
@@ -419,7 +445,7 @@ export default function AgentsCatalogView({
                           </Button>
                         </div>
                       </div>
-                    ))}
+                    ); })}
                   </div>
                 )}
               </div>
@@ -503,7 +529,7 @@ export default function AgentsCatalogView({
                         </strong>{' '}
                         de{' '}
                         <strong className="text-[color:var(--ts-text-secondary)]">
-                          {TOTAL_AGENTS}
+                          {totalAgents}
                         </strong>{' '}
                         agentes.
                       </span>
@@ -578,16 +604,18 @@ export default function AgentsCatalogView({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[color:var(--ts-surface-border)]">
-                      {filteredAgents.map((agent) => (
-                        <tr
-                          key={`table-${agent.id}`}
-                          className="hover:bg-[color:var(--ts-surface-hover)]"
-                          data-agent-row
-                          data-agent-id={agent.id}
-                          data-agent-category={agent.category}
-                          data-agent-tags={(agent.tags ?? []).join(',')}
-                        >
-                          <td className="px-4 py-3 font-semibold text-[color:var(--ts-text-secondary)]">
+                      {filteredAgents.map((agent) => {
+                        const agentTags = agent.tags ?? [];
+                        return (
+                          <tr
+                            key={`table-${agent.id}`}
+                            className="hover:bg-[color:var(--ts-surface-hover)]"
+                            data-agent-row
+                            data-agent-id={agent.id}
+                            data-agent-category={agent.category}
+                            data-agent-tags={agentTags.join(',')}
+                          >
+                            <td className="px-4 py-3 font-semibold text-[color:var(--ts-text-secondary)]">
                               <div className="flex flex-col gap-1">
                                 <div>{agent.name}</div>
                                 <div className="flex items-center gap-1">
@@ -610,55 +638,56 @@ export default function AgentsCatalogView({
                                     <Eye className="h-3.5 w-3.5" />
                                   </Button>
                                 </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">{agent.category}</td>
-                          <td className="px-4 py-3 max-w-[240px] text-[color:var(--ts-text-secondary)]">
-                            {agent.capabilities}
-                          </td>
-                          <td className="px-4 py-3 max-w-[220px] text-[color:var(--ts-text-secondary)]">
-                            {agent.usage}
-                          </td>
-                          <td className={`px-4 py-3 max-w-[240px] ${mutedTextClass}`}>
-                            {agent.example}
-                          </td>
-                          <td className={`px-4 py-3 ${mutedTextClass}`}>
-                            {agent.outputType}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
-                            {agent.tags.map((tag) => (
-                              <Badge
-                                key={`table-tag-${agent.id}-${tag}`}
-                                variant="outline"
-                                className={`text-[10px] font-medium ${filterBadgeClass}`}
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 max-w-[280px]">
-                            <div className="flex items-center gap-2">
-                              <code className="rounded bg-[color:var(--ts-surface-1)] px-1.5 py-0.5 text-[10px] text-[color:var(--ts-text-secondary)]">
-                                {agent.shortExample || agent.example}
-                              </code>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 flex-shrink-0 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCopyName(agent.shortExample || agent.example);
-                                }}
-                                aria-label={`Copiar exemplo ${agent.name}`}
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">{agent.category}</td>
+                            <td className="px-4 py-3 max-w-[240px] text-[color:var(--ts-text-secondary)]">
+                              {agent.capabilities}
+                            </td>
+                            <td className="px-4 py-3 max-w-[220px] text-[color:var(--ts-text-secondary)]">
+                              {agent.usage}
+                            </td>
+                            <td className={`px-4 py-3 max-w-[240px] ${mutedTextClass}`}>
+                              {agent.example}
+                            </td>
+                            <td className={`px-4 py-3 ${mutedTextClass}`}>
+                              {agent.outputType}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-1">
+                                {agentTags.map((tag) => (
+                                  <Badge
+                                    key={`table-tag-${agent.id}-${tag}`}
+                                    variant="outline"
+                                    className={`text-[10px] font-medium ${filterBadgeClass}`}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 max-w-[280px]">
+                              <div className="flex items-center gap-2">
+                                <code className="rounded bg-[color:var(--ts-surface-1)] px-1.5 py-0.5 text-[10px] text-[color:var(--ts-text-secondary)]">
+                                  {agent.shortExample || agent.example}
+                                </code>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="flex-shrink-0 h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCopyName(agent.shortExample || agent.example);
+                                  }}
+                                  aria-label={`Copiar exemplo ${agent.name}`}
+                                >
+                                  <Copy className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -672,23 +701,58 @@ export default function AgentsCatalogView({
       categories,
       categoryFilter,
       filteredAgents,
+      handleClearFilters,
+      handleCopyName,
+      handleDialogOpenChange,
+      handleOpenAgent,
+      handleSort,
+      renderSortIcon,
       searchTerm,
       tagFilter,
       tagOptions,
-      sortField,
-      sortDirection,
+      totalAgents,
     ],
   );
+
+  if (error) {
+    return (
+      <CustomizablePageLayout
+        {...sharedLayoutProps}
+        sections={[
+          {
+            id: 'agents-directory-error',
+            content: (
+              <ErrorState
+                error={error}
+                onRetry={() => void refetch()}
+                isRetrying={isFetching && !isLoading}
+              />
+            ),
+          },
+        ]}
+      />
+    );
+  }
+
+  if (isLoading || !data) {
+    return (
+      <CustomizablePageLayout
+        {...sharedLayoutProps}
+        sections={[
+          {
+            id: 'agents-directory-loading',
+            content: <LoadingState />,
+          },
+        ]}
+      />
+    );
+  }
 
   return (
     <>
       <CustomizablePageLayout
-        pageId='ai-agents-directory'
-        title='AI Agents Directory'
-        subtitle='Catálogo dos agentes Claude configurados para o TradingSystem.'
+        {...sharedLayoutProps}
         sections={sections}
-        defaultColumns={1}
-        leftActions={headerActions}
       />
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
@@ -720,5 +784,58 @@ export default function AgentsCatalogView({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div
+      data-testid="agents-loading-state"
+      className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-8 text-center"
+    >
+      <Loader2 className="h-10 w-10 animate-spin text-[color:var(--ts-accent)]" aria-hidden="true" />
+      <div className="space-y-1">
+        <p className="text-sm text-[color:var(--ts-text-secondary)]">
+          Carregando diretório de agentes (661 KB)...
+        </p>
+        <p className="text-xs text-[color:var(--ts-text-muted)]">
+          Este pacote pesado só é baixado quando o catálogo é aberto.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface ErrorStateProps {
+  error: Error | null;
+  onRetry: () => void;
+  isRetrying: boolean;
+}
+
+function ErrorState({ error, onRetry, isRetrying }: ErrorStateProps) {
+  return (
+    <div
+      data-testid="agents-error-state"
+      className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center dark:border-red-800/40 dark:bg-red-950/30"
+    >
+      <FileWarning className="h-12 w-12 text-red-500" aria-hidden="true" />
+      <div className="space-y-1">
+        <p className="text-base font-semibold text-red-600 dark:text-red-300">
+          Não foi possível carregar o diretório de agentes.
+        </p>
+        <p className="text-sm text-red-500 dark:text-red-400 max-w-lg">
+          {error?.message ?? 'Erro desconhecido. Tente novamente em instantes.'}
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        className="gap-2"
+        onClick={onRetry}
+        disabled={isRetrying}
+      >
+        {isRetrying && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+        Tentar novamente
+      </Button>
+    </div>
   );
 }
