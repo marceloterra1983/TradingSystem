@@ -24,6 +24,10 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['json', { outputFile: 'playwright-report/results.json' }],
     ['list'],
+    ['./e2e/reporters/metrics-reporter.ts', {
+      slowTestThreshold: 10000,
+      outputDir: 'playwright-report'
+    }],
   ],
   
   /* Shared settings for all projects */
