@@ -1,6 +1,6 @@
 # Governance Hub Index
 
-_Last generated: 2025-11-05T20:29:12.013Z_
+_Last generated: 2025-11-05T21:09:31.417Z_
 
 
 ## Controls
@@ -97,9 +97,7 @@ _Last generated: 2025-11-05T20:29:12.013Z_
 
 ## Maintenance Log Snapshot
 **Review Status**
-- **Not Started**: 205
-- **Removed**: 1
+- **Done**: 6
 
 **Governance Status**
-- **Not Started**: 205
-- **Done**: 1
+- **Done**: 6
