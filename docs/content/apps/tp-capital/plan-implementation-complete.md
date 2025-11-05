@@ -355,8 +355,8 @@ apps/tp-capital/src/gatewayDatabaseClient.js.legacy
 - ✅ `AUTONOMOUS-STACK-IMPLEMENTED.md` (8,080 bytes)
 - ✅ `README.md` - Nova arquitetura documentada
 - ✅ `GATEWAY-INTEGRATION-COMPLETE.md`
-- ✅ `TP-CAPITAL-DEPLOYMENT-GUIDE.md`
-- ✅ `TP-CAPITAL-AUTONOMOUS-STACK-VALIDATION.md`
+- ✅ `reports/root-archive/tp-capital/TP-CAPITAL-DEPLOYMENT-GUIDE.md`
+- ✅ `reports/root-archive/tp-capital/TP-CAPITAL-AUTONOMOUS-STACK-VALIDATION.md`
 
 **Stack antiga:**
 ```yaml
@@ -511,8 +511,8 @@ services:
 ### Cleanup & Documentation (Phase 6)
 - ✅ Deleted: `apps/tp-capital/src/gatewayDatabaseClient.js`
 - ✅ Created: `AUTONOMOUS-STACK-IMPLEMENTED.md`
-- ✅ Created: `TP-CAPITAL-DEPLOYMENT-GUIDE.md`
-- ✅ Created: `TP-CAPITAL-AUTONOMOUS-STACK-VALIDATION.md`
+- ✅ Created: `reports/root-archive/tp-capital/TP-CAPITAL-DEPLOYMENT-GUIDE.md`
+- ✅ Created: `reports/root-archive/tp-capital/TP-CAPITAL-AUTONOMOUS-STACK-VALIDATION.md`
 - ✅ Updated: `apps/tp-capital/README.md`
 - ✅ Modified: `tools/compose/docker-compose.apps.yml` (commented old stack)
 
@@ -690,4 +690,3 @@ curl http://localhost:4005/health
 **Implemented By:** AI Agent  
 **Reviewed By:** User (implicitly via acceptance)  
 **Status:** ✅ **PRODUCTION READY**
-

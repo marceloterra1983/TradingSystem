@@ -6,8 +6,6 @@
  * @module tp-capital/utils/logger
  */
 
-// Internal type for future use (e.g., filtering, metrics)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogContext {
@@ -21,27 +19,51 @@ class TPCapitalLogger {
     this.context = context;
   }
 
+  private emit(level: LogLevel, message: string, context?: LogContext): void {
+    if (level === 'debug' && process.env.NODE_ENV !== 'development') {
+      return;
+    }
+
+    const prefix = `[TP-Capital:${this.context}]`;
+    const payload = context && Object.keys(context).length > 0 ? context : '';
+
+    switch (level) {
+      case 'debug':
+        console.debug(prefix, message, payload);
+        break;
+      case 'info':
+        console.info(prefix, message, payload);
+        break;
+      case 'warn':
+        console.warn(prefix, message, payload);
+        break;
+      case 'error':
+        console.error(prefix, message, payload);
+        break;
+      default:
+        console.log(prefix, message, payload);
+    }
+  }
+
   /**
    * Log debug message (development only)
    */
   debug(message: string, context?: LogContext): void {
-    if (process.env.NODE_ENV === 'development') {
-      console.debug(`[TP-Capital:${this.context}]`, message, context || '');
-    }
+    this.emit('debug', message, context);
   }
 
   /**
    * Log info message
    */
   info(message: string, context?: LogContext): void {
-    console.info(`[TP-Capital:${this.context}]`, message, context || '');
+    this.emit('info', message, context);
   }
 
   /**
    * Log warning message
    */
   warn(message: string, context?: LogContext): void {
-    console.warn(`[TP-Capital:${this.context}]`, message, context || '');
+    this.emit('warn', message, context);
   }
 
   /**
@@ -54,7 +76,7 @@ class TPCapitalLogger {
       stack: error.stack,
     } : error;
 
-    console.error(`[TP-Capital:${this.context}]`, message, {
+    this.emit('error', message, {
       error: errorInfo,
       ...context,
     });
@@ -98,4 +120,3 @@ export function createLogger(context: string): TPCapitalLogger {
  * Default logger for general use
  */
 export const logger = createLogger('Module');
-

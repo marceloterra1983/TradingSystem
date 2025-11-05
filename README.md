@@ -33,9 +33,11 @@ last_review: "2025-10-23"
     - [ML-Powered Analysis](#ml-powered-analysis)
     - [Order Execution \& Risk](#order-execution--risk)
     - [Observability](#observability)
+    - [RAG Documentation System (NEW! 🔍)](#rag-documentation-system-new-)
   - [🏗️ Architecture](#️-architecture)
     - [High-Level Design](#high-level-design)
     - [Principles](#principles)
+    - [Containerized Services (New! 🐳)](#containerized-services-new-)
   - [🛠️ Tech Stack](#️-tech-stack)
   - [⚙️ Environment Configuration](#️-environment-configuration)
     - [Quick Setup (3 steps)](#quick-setup-3-steps)
@@ -52,6 +54,10 @@ last_review: "2025-10-23"
     - [Development Setup](#development-setup)
       - [Pre-commit Hooks](#pre-commit-hooks)
     - [Environment Options](#environment-options)
+  - [📊 Architecture \& Quality Status](#-architecture--quality-status)
+    - [✅ Architectural Strengths](#-architectural-strengths)
+    - [🚀 Active Improvement Initiatives](#-active-improvement-initiatives)
+    - [📈 Technical Metrics](#-technical-metrics)
   - [📁 Project Structure](#-project-structure)
 
 ## 📚 Documentation
@@ -62,8 +68,9 @@ last_review: "2025-10-23"
 - 📖 [Documentation Hub](http://localhost:3400) (local runtime)
 - 📖 [Documentation Hub](http://tradingsystem.local/docs) (unified domain)
 - 🗂️ [Content Directory](docs/content/) - Browse all documentation
-- 📋 [Validation Guide](docs/governance/VALIDATION-GUIDE.md) - How to validate docs
-- ✅ [Review Checklist](docs/governance/REVIEW-CHECKLIST.md) - Quality standards
+- 📋 [Validation Guide](governance/controls/VALIDATION-GUIDE.md) - How to validate docs
+- ✅ [Review Checklist](governance/controls/REVIEW-CHECKLIST.md) - Quality standards
+- 🛡️ Knowledge → Governance (dashboard) - Live snapshot of strategy, controls & audits (reads `/data/governance/latest.json`)
 
 **Content Structure** (135+ pages):
 - **Apps**: Workspace, TP Capital, Order Manager, Data Capture
@@ -194,12 +201,12 @@ TradingSystem is a professional-grade, locally-hosted trading platform that:
 **As of October 2025**, TP Capital and Workspace services are fully containerized:
 
 ```
-Telegram Gateway (Local)  →  TP Capital API (Container)  →  TimescaleDB
+Telegram Gateway (Local)  →  TP Capital Stack (Container)  →  TP Capital DB (Timescale + PgBouncer)
        ↓                            ↓
-   Port 4006               Port 4005 (Signals)
+   Port 4007               Port 4005 (Signals)
                                     ↓
-                         Workspace API (Container)
-                              Port 3200 (Ideas & Docs)
+                         Workspace Stack (Container)
+                              Port 3200 (Ideas & Docs on dedicated PostgreSQL)
 ```
 
 **What's Containerized**:
@@ -209,17 +216,19 @@ Telegram Gateway (Local)  →  TP Capital API (Container)  →  TimescaleDB
 - ✅ **Health Checks** - Automatic health monitoring for all containers
 
 **What Runs Locally**:
-- 🖥️ **Telegram Gateway** - Shared message ingestion service (Port 4006)
+- 🐳 **Telegram Gateway** - Shared message ingestion service (Docker, Port 4007)
 - 🖥️ **Frontend Dashboard** - React UI (Port 3103)
 - 🖥️ **Other APIs** - Documentation, Status, etc.
 
 **Quick Start with Docker**:
 ```bash
-# Start containerized services (3 commands)
-docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
-docker compose -f tools/compose/docker-compose.apps.yml --env-file .env up -d
+# Start containerized services (dedicated stacks)
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.workspace-simple.yml up -d
+docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master telegram-rabbitmq
+
 curl http://localhost:4005/health  # Verify TP Capital API
-curl http://localhost:3200/health  # Verify Workspace API
+curl http://localhost:3210/health  # Verify Workspace API
 ```
 
 **See**: [DOCKER-QUICK-START.md](DOCKER-QUICK-START.md) for comprehensive Docker setup guide
@@ -263,7 +272,7 @@ bash scripts/docker/start-stacks.sh
 
 The setup script will:
 
--   ✅ Generate secure passwords automatically (TimescaleDB, PgAdmin, Grafana)
+-   ✅ Generate secure passwords automatically (TP Capital DB, Telegram DB, Workspace DB, Grafana)
 -   ✅ Prompt for OpenAI API key (required for AI features)
 -   ✅ Create `.env` file with all required variables
 -   ✅ Set secure file permissions (chmod 600)
@@ -379,7 +388,19 @@ health
     git clone https://github.com/marceloterra/TradingSystem.git
     cd TradingSystem
     ```
-4. **Run the environment bootstrap** (loads centralized `.env`, installs npm/yarn deps for docs/services):
+4. **Setup Python auto-activation with direnv** (recommended for automatic venv management):
+    ```bash
+    # Install and configure direnv (one-time setup)
+    bash scripts/setup/setup-direnv.sh
+    
+    # Reload shell and allow .envrc
+    source ~/.bashrc  # or ~/.zshrc
+    direnv allow
+    
+    # Python venv will now activate automatically when entering the project directory!
+    ```
+    > **Alternative:** If you prefer manual activation, skip this step and run `source venv/bin/activate` manually.
+5. **Run the environment bootstrap** (loads centralized `.env`, installs npm/yarn deps for docs/services):
     ```bash
     bash scripts/env/setup-env.sh
     bash scripts/env/validate-env.sh
@@ -390,11 +411,13 @@ health
     # Documentation Hub (Port 3400)
     cd docs && npm run start -- --host 0.0.0.0 --port 3400
     ```
-    In a second terminal:
+    In a second terminal start the **dashboard container** (mandatory from now on):
     ```bash
     # Dashboard (Port 3103)
-    cd frontend/dashboard && npm run dev -- --host 0.0.0.0 --port 3103
+    docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build
+    # or run `docker compose ... up -d` to daemonize (stop with the same command + down)
     ```
+    Stop with `docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml down`.
 6. **(Optional) Bring up supporting services** from WSL using Docker Compose:
     ```bash
     bash tools/scripts/start-all-stacks.sh
@@ -446,13 +469,17 @@ API endpoints: http://tradingsystem.local/api/*
 
 ### Development Setup
 
-To boot the dashboard and documentation together in local mode:
+To boot the documentation hub and the (containerized) dashboard together:
 
 ```bash
+# Terminal 1
+cd docs && npm run start -- --host 0.0.0.0 --port 3400
+
+# Terminal 2 — wraps docker compose up --build
 npm run dev:dashboard-docs
 ```
 
-This starts the dashboard at `http://localhost:3103` and the docs workspace at `http://localhost:3400`.
+`npm run dev:dashboard-docs` now invokes `docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
 
 #### Pre-commit Hooks
 
@@ -467,7 +494,7 @@ Hooks run automatically before each commit. To bypass (emergency only):
 git commit --no-verify -m "Emergency fix"
 ```
 
-See [Documentation Standards](docs/governance/README.md#documentation-standards) for frontmatter requirements.
+See [Documentation Standards](governance/README.md#documentation-standards) for frontmatter requirements.
 
 For detailed setup instructions, see:
 
@@ -518,7 +545,7 @@ You can access the system in two ways:
 - [ ] Add distributed rate limiting (Redis-backed)
 - [ ] Implement React Error Boundaries
 
-**Full Details:** [Architecture Review Report](docs/governance/reviews/architecture-2025-11-01/index.md)
+**Full Details:** [Architecture Review Report](governance/evidence/reports/reviews/architecture-2025-11-01/index.md)
 
 ### 📈 Technical Metrics
 

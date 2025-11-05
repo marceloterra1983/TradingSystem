@@ -13,7 +13,7 @@ export const config = {
   logLevel: process.env.LOG_LEVEL ?? 'info',
   // Database strategy: neon, postgresql, timescaledb, or lowdb
   dbStrategy:
-    (process.env.LIBRARY_DB_STRATEGY ?? 'timescaledb').toLowerCase(),
+    (process.env.LIBRARY_DB_STRATEGY ?? 'postgresql').toLowerCase(),
   lowdbPath:
     process.env.DB_PATH ??
     path.join(projectRoot, 'backend', 'data', 'workspace', 'library.json'),
@@ -27,35 +27,32 @@ const resolveBoolean = (value) => {
 export const timescaledbConfig = {
   connectionString:
     process.env.WORKSPACE_DATABASE_URL ??
-    process.env.TIMESCALEDB_DATABASE_URL ??
     process.env.FRONTEND_APPS_DATABASE_URL,
   host:
-    process.env.TIMESCALEDB_HOST ??
     process.env.WORKSPACE_DATABASE_HOST ??
     process.env.FRONTEND_APPS_DB_HOST ??
     'localhost',
   port: Number(
-    process.env.TIMESCALEDB_PORT ??
-      process.env.WORKSPACE_DATABASE_PORT ??
+    process.env.WORKSPACE_DATABASE_PORT ??
       process.env.FRONTEND_APPS_DB_PORT ??
-      5433,
+      5450,
   ),
   database:
-    process.env.TIMESCALEDB_DATABASE ??
+    process.env.WORKSPACE_DATABASE_NAME ??
     process.env.WORKSPACE_DATABASE ??
     process.env.FRONTEND_APPS_DB_NAME ??
-    'APPS-WORKSPACE',
+    'workspace',
   user:
-    process.env.TIMESCALEDB_USER ??
+    process.env.WORKSPACE_DATABASE_USER ??
     process.env.APP_WORKSPACE_DB_USER ??
     process.env.FRONTEND_APPS_DB_USER ??
-    'timescale',
+    'postgres',
   password:
-    process.env.TIMESCALEDB_PASSWORD ??
+    process.env.WORKSPACE_DATABASE_PASSWORD ??
     process.env.APP_WORKSPACE_DB_PASSWORD ??
     process.env.FRONTEND_APPS_DB_PASSWORD ??
-    'pass_timescale',
-  ssl: resolveBoolean(process.env.TIMESCALEDB_SSL ?? 'false')
+    'workspace_secure_pass',
+  ssl: resolveBoolean(process.env.WORKSPACE_DATABASE_SSL ?? 'false')
     ? { rejectUnauthorized: false }
     : false,
   max: 20,
@@ -63,7 +60,6 @@ export const timescaledbConfig = {
   connectionTimeoutMillis: 2000,
   schema:
     process.env.WORKSPACE_DATABASE_SCHEMA ??
-    process.env.TIMESCALEDB_SCHEMA ??
     process.env.FRONTEND_APPS_DB_SCHEMA ??
     'workspace',
   table: process.env.WORKSPACE_TABLE_NAME ?? 'workspace_items',

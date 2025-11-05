@@ -1,0 +1,35 @@
+name: Commands Directory
+
+on:
+  pull_request:
+    paths:
+      - '.claude/commands/**'
+      - 'scripts/commands/**'
+      - 'frontend/dashboard/src/data/commands-db.json'
+      - 'frontend/dashboard/src/data/commandsCatalog.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'reports/commands/**'
+      - '.github/workflows/commands-directory.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run commands generator & tests
+        run: npm run commands:ci
+
+      - name: Ensure catalog files are committed
+        run: git diff --exit-code

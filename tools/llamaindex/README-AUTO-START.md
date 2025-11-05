@@ -231,4 +231,4 @@ curl -X POST http://localhost:3401/api/v1/rag/status/ingest
 - **Startup Script:** `scripts/universal/start.sh`
 - **Stop Script:** `scripts/universal/stop.sh`
 - **Documentação Completa:** `tools/llamaindex/README-WATCHER.md`
-- **Análise RAG:** `docs/governance/audits/RAG-SYSTEM-ANALYSIS-2025-10-29.md`
+- **Análise RAG:** `governance/audits/RAG-SYSTEM-ANALYSIS-2025-10-29.md`

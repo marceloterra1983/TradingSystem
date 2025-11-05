@@ -13,6 +13,7 @@ import { join, resolve } from 'path';
 import type { Stats } from 'fs';
 import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../middleware/responseWrapper';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -117,7 +118,7 @@ const resolveDirectoryPath = async (requestedPath: string): Promise<string> => {
  * GET /api/v1/rag/directories
  * List available base directories
  */
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', asyncHandler(async (_req: Request, res: Response) => {
   try {
     logger.info('Listing available base directories');
 
@@ -160,7 +161,7 @@ router.get('/', async (_req: Request, res: Response) => {
       500,
     );
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/directories/browse
@@ -169,7 +170,7 @@ router.get('/', async (_req: Request, res: Response) => {
  * Query params:
  *   - path: Directory path to browse
  */
-router.get('/browse', async (req: Request, res: Response) => {
+router.get('/browse', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { path: requestedPath } = req.query;
 
@@ -309,7 +310,7 @@ router.get('/browse', async (req: Request, res: Response) => {
       500,
     );
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/directories/validate
@@ -318,7 +319,7 @@ router.get('/browse', async (req: Request, res: Response) => {
  * Query params:
  *   - path: Directory path to validate
  */
-router.get('/validate', async (req: Request, res: Response) => {
+router.get('/validate', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { path: requestedPath } = req.query;
 
@@ -370,6 +371,6 @@ router.get('/validate', async (req: Request, res: Response) => {
       500,
     );
   }
-});
+}));
 
 export default router;

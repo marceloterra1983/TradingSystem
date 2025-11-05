@@ -3,6 +3,8 @@
  * Runs before all tests
  */
 
+import { logger } from '../utils/logger';
+
 // Mock environment variables
 process.env.NODE_ENV = 'test';
 process.env.PORT = '3403';
@@ -18,9 +20,9 @@ jest.setTimeout(10000);
 
 // Global test utilities
 global.beforeAll(() => {
-  console.log('Starting test suite...');
+  logger.info('Starting test suite...');
 });
 
 global.afterAll(() => {
-  console.log('Test suite completed.');
+  logger.info('Test suite completed.');
 });

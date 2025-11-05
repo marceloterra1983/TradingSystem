@@ -6,6 +6,18 @@
 set -e
 
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
+ENV_FILE="$PROJECT_ROOT/.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "❌ Missing .env file at $ENV_FILE"
+  exit 1
+fi
+
+# Export root .env so docker compose picks up TELEGRAM_* overrides
+set -a
+source "$ENV_FILE"
+set +a
+
 cd "$PROJECT_ROOT/tools/compose"
 
 echo "🚀 Starting Telegram Stack..."
@@ -71,19 +83,26 @@ sleep 10
 echo ""
 echo "4️⃣ Starting native MTProto service (systemd)..."
 
-if systemctl is-active --quiet telegram-gateway; then
-  echo "  Already running ✅"
-else
-  sudo systemctl start telegram-gateway
-  sleep 5
-  
-  if systemctl is-active --quiet telegram-gateway; then
-    echo "  Started ✅"
+if command -v systemctl >/dev/null 2>&1; then
+  if sudo -n systemctl is-active --quiet telegram-gateway 2>/dev/null; then
+    echo "  Already running ✅"
   else
-    echo "  Failed to start ❌"
-    sudo journalctl -u telegram-gateway -n 50
-    exit 1
+    if sudo -n systemctl start telegram-gateway 2>/dev/null; then
+      sleep 5
+      if sudo -n systemctl is-active --quiet telegram-gateway 2>/dev/null; then
+        echo "  Started ✅"
+      else
+        echo "  Failed to start ❌"
+        sudo -n journalctl -u telegram-gateway -n 50 2>/dev/null || true
+        exit 1
+      fi
+    else
+      echo "  ⚠️ Unable to control telegram-gateway via systemd (sudo access required)."
+      echo "     Please run 'sudo systemctl start telegram-gateway' manually if needed."
+    fi
   fi
+else
+  echo "  Systemd not available; skipping native service start."
 fi
 
 # ==============================================================================
@@ -93,10 +112,10 @@ echo ""
 echo "5️⃣ Verifying stack health..."
 
 checks=(
-  "TimescaleDB:docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway -c 'SELECT 1'"
+  "TimescaleDB:PGPASSWORD=\"${TELEGRAM_DB_PASSWORD}\" psql -h localhost -p \"${TELEGRAM_PGBOUNCER_PORT:-6434}\" -U \"${TELEGRAM_DB_USER:-telegram}\" -d telegram_gateway -c 'SELECT 1'"
   "Redis Master:docker exec telegram-redis-master redis-cli ping"
   "RabbitMQ:docker exec telegram-rabbitmq rabbitmq-diagnostics ping"
-  "MTProto Gateway:curl -s http://localhost:4006/health"
+  "MTProto Gateway:curl -s http://localhost:${GATEWAY_PORT:-4006}/health"
   "Gateway API:curl -s http://localhost:4010/health"
   "Prometheus:curl -s http://localhost:9090/-/healthy"
   "Grafana:curl -s http://localhost:3100/api/health"
@@ -125,8 +144,7 @@ echo "  • Prometheus: http://localhost:9090"
 echo "  • RabbitMQ UI: http://localhost:15672"
 echo ""
 echo "🔗 Health Endpoints:"
-echo "  • MTProto: http://localhost:4006/health"
+echo "  • MTProto: http://localhost:${GATEWAY_PORT:-4006}/health"
 echo "  • Gateway API: http://localhost:4010/health"
-echo "  • Metrics: http://localhost:4006/metrics"
+echo "  • Metrics: http://localhost:${GATEWAY_PORT:-4006}/metrics"
 echo ""
-

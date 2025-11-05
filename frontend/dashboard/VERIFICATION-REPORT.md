@@ -74,7 +74,7 @@ O frontend está **compatível com as novas portas** e **pronto para produção*
 ```typescript
 /**
  * Database UI endpoints (Protected Range 7100-7199)
- * @see PORTS-CONVENTION.md
+ * @see reports/root-archive/ports-network/PORTS-CONVENTION.md
  */
 ```
 
@@ -357,4 +357,3 @@ const API_URL = ENDPOINTS.workspace;
 **Verification Type**: Comprehensive (Opção A)  
 **Duration**: 1.5 hours  
 **Status**: ✅ COMPLETE  
-

@@ -5,7 +5,7 @@ title Telegram Signal Processing - End-to-End Flow
 
 actor "Telegram User" as User
 participant "Telegram\nServers" as Telegram
-participant "Gateway\n(MTProto)\nPort 4006" as Gateway
+participant "Gateway\n(MTProto)\nPort 4007" as Gateway
 database "TimescaleDB\ntelegram_gateway\n.messages" as GatewayDB
 participant "Polling Worker\n(TP Capital)\nPort 4005" as Worker
 participant "Signal Parser\n(parseSignal.js)" as Parser

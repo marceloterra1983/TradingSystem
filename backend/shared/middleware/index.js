@@ -52,9 +52,20 @@ export function configureCors(options = {}) {
     allowedOrigins = Array.isArray(origin) ? origin : [origin];
   } else {
     // Read from environment
+    const registryDefaults = [
+      process.env.DASHBOARD_URL,
+      process.env.DOCUMENTATION_HUB_URL,
+      process.env.DOCUMENTATION_API_URL,
+    ].filter(Boolean);
+
+    const defaultOriginHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
+    const legacyFallbackOrigins = [3103, 3400, 3401]
+      .map((port) => `http://${defaultOriginHost}:${port}`)
+      .join(',');
+
     const rawCorsOrigin = process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim() !== ''
       ? process.env.CORS_ORIGIN
-      : 'http://localhost:3103,http://localhost:3400,http://localhost:3401'; // Default: dashboard + docs
+      : registryDefaults.join(',') || legacyFallbackOrigins;
 
     if (rawCorsOrigin === '*') {
       allowedOrigins = undefined; // Allow all origins

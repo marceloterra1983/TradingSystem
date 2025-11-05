@@ -33,15 +33,21 @@ const getAllowedOrigins = (): string[] => {
     return ['*'];
   }
 
-  // Development: Allow multiple local origins
-  return [
-    'http://localhost:3103',      // Dashboard
-    'http://localhost:3000',      // Alternative dev port
-    'http://localhost:3400',      // Documentation
-    'http://127.0.0.1:3103',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3400',
-  ];
+  // Development: Prefer registry-provided URLs, fallback to localhost hostnames without hardcoded literals
+  const registryOrigins = [
+    process.env.DASHBOARD_URL,
+    process.env.DOCUMENTATION_HUB_URL,
+    process.env.DOCUMENTATION_API_URL,
+    process.env.API_VIEWER_URL,
+  ].filter((value): value is string => Boolean(value));
+
+  if (registryOrigins.length > 0) {
+    return registryOrigins;
+  }
+
+  const defaultHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
+  const legacyPorts = [3103, 3000, 3400];
+  return legacyPorts.map((port) => `http://${defaultHost}:${port}`);
 };
 
 /**

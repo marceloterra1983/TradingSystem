@@ -19,6 +19,7 @@ import {
   updateCollectionSchema,
   statsQuerySchema,
 } from '../schemas/collection';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -28,7 +29,7 @@ const router = Router();
  * Query Parameters:
  * - useCache: boolean (default: true) - Whether to use cached stats
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     const useCache = req.query.useCache !== 'false'; // Default true, false if explicitly set
     
@@ -83,13 +84,13 @@ router.get('/', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTIONS_LIST_ERROR', 'Failed to list collections', 500);
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/collections/:name
  * Get a specific collection
  */
-router.get('/:name', async (req: Request, res: Response) => {
+router.get('/:name', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -138,13 +139,13 @@ router.get('/:name', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTION_GET_ERROR', 'Failed to get collection', 500);
   }
-});
+}));
 
 /**
  * POST /api/v1/rag/collections
  * Create a new collection
  */
-router.post('/', validate({ body: createCollectionSchema }), async (req: Request, res: Response) => {
+router.post('/', asyncHandler(validate({ body: createCollectionSchema })), asyncHandler(async (req: Request, res: Response) => {
   try {
     const collectionConfig = req.body;
 
@@ -202,13 +203,13 @@ router.post('/', validate({ body: createCollectionSchema }), async (req: Request
     });
     return sendError(res, 'COLLECTION_CREATE_ERROR', 'Failed to create collection', 500);
   }
-});
+}));
 
 /**
  * PUT /api/v1/rag/collections/:name
  * Update an existing collection
  */
-router.put('/:name', validate({ body: updateCollectionSchema }), async (req: Request, res: Response) => {
+router.put('/:name', asyncHandler(validate({ body: updateCollectionSchema })), asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
     const updates = req.body;
@@ -282,13 +283,13 @@ router.put('/:name', validate({ body: updateCollectionSchema }), async (req: Req
     });
     return sendError(res, 'COLLECTION_UPDATE_ERROR', 'Failed to update collection', 500);
   }
-});
+}));
 
 /**
  * DELETE /api/v1/rag/collections/:name
  * Delete a collection
  */
-router.delete('/:name', async (req: Request, res: Response) => {
+router.delete('/:name', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -345,13 +346,13 @@ router.delete('/:name', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTION_DELETE_ERROR', 'Failed to delete collection', 500);
   }
-});
+}));
 
 /**
  * POST /api/v1/rag/collections/:name/ingest
  * Trigger ingestion for a collection
  */
-router.post('/:name/ingest', async (req: Request, res: Response) => {
+router.post('/:name/ingest', asyncHandler(async (req: Request, res: Response) => {
   const overallStart = Date.now();
   const { name } = req.params;
   
@@ -453,13 +454,13 @@ router.post('/:name/ingest', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTION_INGEST_ERROR', 'Failed to trigger ingestion', 500);
   }
-});
+}));
 
 /**
  * POST /api/v1/rag/collections/:name/clean-orphans
  * Clean orphaned vectors from a collection
  */
-router.post('/:name/clean-orphans', async (req: Request, res: Response) => {
+router.post('/:name/clean-orphans', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -468,7 +469,7 @@ router.post('/:name/clean-orphans', async (req: Request, res: Response) => {
     // Check if collection exists
     const collection = collectionManager.getCollection(name);
     if (!collection) {
-      return res.status(404).json({ error: "Collection not found", code: "COLLECTION_NOT_FOUND" });
+      return res.status(404).json({ error: 'Collection not found', code: 'COLLECTION_NOT_FOUND' });
     }
 
     // Clean orphaned chunks
@@ -495,7 +496,7 @@ router.post('/:name/clean-orphans', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTION_CLEAN_ERROR', 'Failed to clean orphans', 500);
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/collections/:name/stats
@@ -504,7 +505,7 @@ router.post('/:name/clean-orphans', async (req: Request, res: Response) => {
  * Query Parameters:
  * - useCache: boolean (default: false) - Whether to use cached stats
  */
-router.get('/:name/stats', validate({ query: statsQuerySchema }), async (req: Request, res: Response) => {
+router.get('/:name/stats', asyncHandler(validate({ query: statsQuerySchema })), asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
     const useCache = req.query.useCache === 'true';
@@ -542,13 +543,13 @@ router.get('/:name/stats', validate({ query: statsQuerySchema }), async (req: Re
       500,
     );
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/collections/:name/files
  * Get list of indexed files with metadata (chunks, size, status)
  */
-router.get('/:name/files', async (req: Request, res: Response) => {
+router.get('/:name/files', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -557,7 +558,7 @@ router.get('/:name/files', async (req: Request, res: Response) => {
     // Check if collection exists
     const collection = collectionManager.getCollection(name);
     if (!collection) {
-      return res.status(404).json({ error: "Collection not found", code: "COLLECTION_NOT_FOUND" });
+      return res.status(404).json({ error: 'Collection not found', code: 'COLLECTION_NOT_FOUND' });
     }
 
     // Get indexed files with metadata
@@ -586,7 +587,6 @@ router.get('/:name/files', async (req: Request, res: Response) => {
     });
     return sendError(res, 'COLLECTION_FILES_ERROR', 'Failed to get indexed files', 500);
   }
-});
+}));
 
 export default router;
-

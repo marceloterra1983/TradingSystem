@@ -114,7 +114,7 @@ python scripts/docs/analyze-broken-links.py --build-log /tmp/docs-build.txt
 
 **Suggested Fixes**:
 1. **External Link**
-   - Replace with: `https://github.com/.../docs/governance/DOCUMENTATION-INDEX.md`
+   - Replace with: `https://github.com/.../governance/DOCUMENTATION-INDEX.md`
    - Governance files are not published, link to GitHub instead
 ```
 
@@ -173,7 +173,7 @@ node scripts/docs/docs-health-dashboard.mjs
 
 ### 4. Maintenance Automation Guide
 
-**File**: `docs/governance/MAINTENANCE-AUTOMATION-GUIDE.md`
+**File**: `governance/MAINTENANCE-AUTOMATION-GUIDE.md`
 
 **Purpose**: Comprehensive documentation for the maintenance system.
 
@@ -408,7 +408,7 @@ None identified. All critical validations passed.
 3. `scripts/docs/docs-health-dashboard.mjs` (576 lines)
    - Visual health dashboard generator
 
-4. `docs/governance/MAINTENANCE-AUTOMATION-GUIDE.md` (583 lines)
+4. `governance/MAINTENANCE-AUTOMATION-GUIDE.md` (583 lines)
    - Complete maintenance documentation
 
 5. `docs/reports/MAINTENANCE-SYSTEM-IMPLEMENTATION-REPORT.md` (this file)

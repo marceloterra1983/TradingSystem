@@ -61,17 +61,11 @@ echo ""
 echo -e "${CYAN}Step 4: Starting stacks in dependency order...${NC}"
 echo ""
 
-# 4.1 DATABASE Stack (first - everyone depends on it)
+# 4.1 DATABASE Stack (QuestDB + LangGraph Postgres)
 echo -e "${CYAN}📊 Starting DATABASE Stack...${NC}"
 if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" ]; then
     docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" up -d
-    echo -e "${GREEN}✓ DATABASE stack started${NC}"
-    echo "  Waiting for TimescaleDB to be healthy..."
-    sleep 10
-    while ! docker inspect --format='{{.State.Health.Status}}' data-timescale 2>/dev/null | grep -q healthy; do
-        sleep 2
-    done
-    echo -e "${GREEN}✓ TimescaleDB is healthy${NC}"
+    echo -e "${GREEN}✓ Shared analytics stack started (QuestDB + LangGraph Postgres)${NC}"
 else
     echo -e "${RED}✗ Database compose file not found${NC}"
 fi

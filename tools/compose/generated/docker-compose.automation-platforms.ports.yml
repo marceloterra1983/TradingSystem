@@ -1,0 +1,20 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: automation-platforms
+version: "3.9"
+
+x-tradingsystem-stack: "automation-platforms"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  kestra-orchestrator:
+    env: KESTRA_ORCHESTRATOR_PORT
+    port: 8180
+    protocol: http
+    owner: "ToolingGuild"
+    description: "Kestra orchestrator UI"
+  kestra-management:
+    env: KESTRA_MANAGEMENT_PORT
+    port: 8685
+    protocol: http
+    owner: "ToolingGuild"
+    description: "Kestra management/worker endpoint"

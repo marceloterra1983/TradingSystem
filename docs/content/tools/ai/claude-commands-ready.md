@@ -483,13 +483,13 @@ echo "npx lint-staged" > .husky/pre-commit
 
 ### Guias
 
-1. **[Code Quality Checklist](/development/code-quality-checklist)** (3,600 linhas)
+1. **[Code Quality Checklist](../../development/code-quality-checklist)** (3,600 linhas)
    - 12 categorias de verificação
    - 100+ comandos detalhados
    - Integração CI/CD
    - Métricas recomendadas
 
-2. **[Code Quality Commands](/tools/development/code-quality-commands)** (250 linhas)
+2. **[Code Quality Commands](../development/code-quality-commands)** (250 linhas)
    - Comandos mais usados
    - Checklists
    - Troubleshooting
@@ -581,7 +581,7 @@ du -sh frontend/dashboard/dist/
 
 - **CLAUDE.md** (arquivo na raiz) - Instruções do projeto
 - `reports/2025-11-02/WORKFLOW-SYSTEM-READY.md` - Workflow System completo
-- **Health Checks**: [scripts/maintenance/health-check-all.sh](scripts/maintenance/health-check-all.sh)
+- **Health Checks**: [scripts/maintenance/health-check-all.sh](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/maintenance/health-check-all.sh)
 
 ---
 

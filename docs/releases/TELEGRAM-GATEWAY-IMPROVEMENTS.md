@@ -254,7 +254,7 @@ cp .env.example .env
 
 ### 2. Serviços
 ```bash
-✅ Gateway MTProto inicia (porta 4006)
+✅ Gateway MTProto inicia (porta 4007)
 ✅ REST API inicia (porta 4010)
 ✅ Health checks retornam healthy
 ✅ Autenticação funcionando

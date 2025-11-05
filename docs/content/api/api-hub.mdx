@@ -140,7 +140,7 @@ Orchestrate and monitor TradingSystem services.
 - Dependency management
 
 **Quick Links:**
-- 📖 [Service Launcher Guide](/tools/service-launcher)
+- 📖 [Service Launcher Guide](../apps/service-launcher/overview)
 - ❤️ [Full Health Check](http://localhost:3500/api/health/full)
 
 **Key Endpoints:**
@@ -296,29 +296,29 @@ curl "http://localhost:3401/api/v1/rag/search?query=hybrid+architecture" | jq '.
 
 ### Quick Start Guides
 
-1. **[Telegram Gateway Quick Start](./telegram-gateway-quickstart.mdx)**
+1. **[Telegram Gateway Quick Start](/api/telegram-gateway-quickstart)**
    - Setup authentication
    - Sync messages
    - Query and filter
 
-2. **[Workspace API Quick Start](./workspace-quickstart.mdx)**
+2. **[Workspace API Guide](/api/workspace-api)**
    - Create items
    - Manage categories
    - Query data
 
-3. **[Documentation Search Quick Start](./documentation-api-quickstart.mdx)**
+3. **[Documentation Search Guide](/api/documentation-api)**
    - Full-text search
    - Semantic search (RAG)
    - Advanced filtering
 
 ### Integration Guides
 
-1. **[Frontend Integration](./frontend-integration.mdx)**
+1. **[Frontend Integration](../frontend/overview)**
    - React hooks
    - API clients
    - Error handling
 
-2. **[Backend Integration](./backend-integration.mdx)**
+2. **[Backend Integration](../apps/workspace/overview)**
    - Service-to-service communication
    - Authentication
    - Circuit breakers
@@ -485,15 +485,15 @@ curl -I http://localhost:4010/api/messages
 ## 📚 Additional Resources
 
 ### Documentation
-- [Architecture Overview](/tools/architecture)
-- [Database Schemas](/database/schema)
-- [Deployment Guide](/tools/deployment)
-- [Security Configuration](/tools/security-config)
+- [Architecture Overview](../apps/overview)
+- [Database Schemas](../database/schema)
+- [Deployment Guide](../tools/overview)
+- [Security Configuration](../tools/security-config/overview)
 
 ### Support
-- [Health Check Script](../../scripts/maintenance/health-check-all.sh)
-- [Service Launcher](../../backend/api/service-launcher)
-- [Docker Compose Files](../../tools/compose/)
+- [Health Check Script](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/maintenance/health-check-all.sh)
+- [Service Launcher](https://github.com/marceloterra1983/TradingSystem/tree/main/backend/api/service-launcher)
+- [Docker Compose Files](https://github.com/marceloterra1983/TradingSystem/tree/main/tools/compose)
 
 ### External APIs
 - [Telegram MTProto API](https://core.telegram.org/methods)
@@ -515,4 +515,3 @@ curl -I http://localhost:4010/api/messages
 **Last Updated:** 2025-11-04  
 **Maintained By:** TradingSystem Development Team  
 **API Version:** v1.0.0
-

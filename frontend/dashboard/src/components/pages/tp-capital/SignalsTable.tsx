@@ -22,12 +22,23 @@ import {
   CollapsibleCardDescription,
   CollapsibleCardContent,
 } from '../../ui/collapsible-card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select';
 import { AlertCircle } from 'lucide-react';
 import { fetchSignals } from './api';
 import { toCsv, downloadFile } from './utils';
 import { searchInMultiple } from './utils/filterHelpers';
 import { SignalsFilterBar, SignalRow, SignalsStats } from './components';
 import { DEFAULT_LIMIT } from './constants';
+import {
+  dateStringToSaoPauloTimestamp,
+  parseTimestampSafe,
+} from '../../../utils/timestampUtils';
 
 /**
  * Main signals table component
@@ -43,8 +54,9 @@ import { DEFAULT_LIMIT } from './constants';
  */
 export function SignalsTable() {
   // State management
-  const [limit, setLimit] = useState(200); // Aumentado para 200 (era 10) - mostrar mais sinais
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [channelFilter, setChannelFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -78,6 +90,11 @@ export function SignalsTable() {
     return Array.from(channels).sort();
   }, [signals]);
 
+  const typeOptions = useMemo(() => {
+    const signalTypes = new Set(signals.map((s) => s.signal_type).filter(Boolean));
+    return Array.from(signalTypes).sort();
+  }, [signals]);
+
   // Apply filters
   const filteredSignals = useMemo(() => {
     let filtered = signals;
@@ -89,28 +106,27 @@ export function SignalsTable() {
       filtered = filtered.filter((s) => s.channel === channelFilter);
     }
 
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter((s) => s.signal_type === typeFilter);
+    }
+
     if (searchTerm) {
       filtered = filtered.filter((s) =>
         searchInMultiple(searchTerm, s.asset, s.raw_message, s.channel)
       );
     }
 
-    const fromTs = fromDate ? new Date(fromDate).getTime() : undefined;
-    const toTs = toDate ? new Date(toDate).getTime() + 86_399_999 : undefined;
+    // Convert date strings to São Paulo timezone timestamps
+    // This ensures date filters work correctly regardless of user's timezone
+    const fromTs = fromDate ? dateStringToSaoPauloTimestamp(fromDate, false) : undefined;
+    const toTs = toDate ? dateStringToSaoPauloTimestamp(toDate, true) : undefined;
 
     if (fromTs || toTs) {
       filtered = filtered.filter((signal) => {
-        const tsValue =
-          typeof signal.ts === 'number'
-            ? signal.ts
-            : typeof signal.ts === 'string'
-              ? Date.parse(signal.ts)
-              : Date.parse(signal.ingested_at);
+        // Parse timestamp with validation and fallback
+        const tsValue = parseTimestampSafe(signal.ts, signal.ingested_at);
 
-        if (Number.isNaN(tsValue)) {
-          return false;
-        }
-
+        // Apply date range filter
         if (fromTs && tsValue < fromTs) {
           return false;
         }
@@ -124,11 +140,12 @@ export function SignalsTable() {
     }
 
     return filtered;
-  }, [signals, channelFilter, searchTerm, fromDate, toDate]);
+  }, [signals, channelFilter, typeFilter, searchTerm, fromDate, toDate]);
 
   // Reset filters when limit changes
   useEffect(() => {
     setChannelFilter('all');
+    setTypeFilter('all');
     setSearchTerm('');
   }, [limit]);
 
@@ -233,15 +250,12 @@ export function SignalsTable() {
         {/* Filter Bar */}
         <SignalsFilterBar
           channelFilter={channelFilter}
-          typeFilter="all"
           searchTerm={searchTerm}
           limit={limit}
           fromDate={fromDate}
           toDate={toDate}
           channelOptions={channelOptions}
-          typeOptions={[]}
           onChannelFilterChange={setChannelFilter}
-          onTypeFilterChange={() => {}}
           onSearchTermChange={setSearchTerm}
           onLimitChange={setLimit}
           onFromDateChange={setFromDate}
@@ -254,6 +268,27 @@ export function SignalsTable() {
           isSyncing={isSyncing}
           syncResult={syncResult}
         />
+
+        <div className="flex flex-wrap gap-3">
+          <div className="flex-1 min-w-[140px]">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+              Tipo
+            </label>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-9" aria-label="Tipo">
+                <SelectValue placeholder="Todos os tipos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                {typeOptions.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Stats */}
         <SignalsStats signals={signals} filteredSignals={filteredSignals} />
@@ -324,4 +359,3 @@ export function SignalsTable() {
     </CollapsibleCard>
   );
 }
-

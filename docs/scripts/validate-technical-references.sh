@@ -23,7 +23,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
-EXCLUDE_DIRS=("node_modules" ".git" "logs" ".github" "docs_v2" "docs_legacy/context" "docs/governance" "docs/migration" "tools/openspec" "frontend/dashboard/public/docs" "frontend/dashboard/dist" "docs/versioned_docs" "docs/build" "docs/archive")
+EXCLUDE_DIRS=("node_modules" ".git" "logs" ".github" "docs_v2" "docs_legacy/context" "governance" "docs/migration" "tools/openspec" "frontend/dashboard/public/docs" "frontend/dashboard/dist" "docs/versioned_docs" "docs/build" "docs/archive")
 EXCLUDE_FILES=("*.log" "COMPLETE-REFERENCE-INVENTORY.md" "REFERENCE-UPDATE-TRACKING.md" "reference-inventory.json" "validate-technical-references.sh")
 
 SEARCH_TOOL=""
@@ -379,10 +379,10 @@ fi
 # Validation 8: .env.example guidance
 #######################################
 log_info "Checking .env.example documentation hints..."
-if grep -q 'docs/governance' .env.example && grep -q '3400' .env.example; then
-  log_success ".env.example references docs governance guidance and port 3400"
+if grep -q 'governance/' .env.example && grep -q '3400' .env.example; then
+  log_success ".env.example references governance guidance and port 3400"
 else
-  log_warning ".env.example missing docs governance guidance or port 3400 references"
+  log_warning ".env.example missing governance guidance or port 3400 references"
 fi
 
 #######################################

@@ -56,29 +56,6 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     ports: ['5444'],
   },
   {
-    name: 'data-timescaledb',
-    status: 'running',
-    category: 'data',
-    description: 'TimescaleDB (PostgreSQL time-series)',
-    ports: ['5433'],
-  },
-  {
-    name: 'data-timescaledb-pgadmin',
-    status: 'running',
-    category: 'data',
-    description: 'pgAdmin (TimescaleDB UI)',
-    ports: ['5050'],
-    url: 'http://localhost:5050',
-  },
-  {
-    name: 'data-timescaledb-pgweb',
-    status: 'running',
-    category: 'data',
-    description: 'pgweb (Lightweight PostgreSQL client)',
-    ports: ['8081'],
-    url: 'http://localhost:8081',
-  },
-  {
     name: 'data-postgress-langgraph',
     status: 'running',
     category: 'data',
@@ -118,13 +95,6 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
     description: 'Alert Router',
     ports: ['8080'],
     url: 'http://localhost:8080',
-  },
-  {
-    name: 'data-timescaledb-exporter',
-    status: 'running',
-    category: 'monitoring',
-    description: 'TimescaleDB Prometheus Exporter',
-    ports: ['9187'],
   },
 
   // AI Services
@@ -217,12 +187,6 @@ const DOCKER_CONTAINERS: DockerContainer[] = [
 
   // Application Services
   // Infrastructure Services
-  {
-    name: 'data-timescaledb-backup',
-    status: 'running',
-    category: 'infrastructure',
-    description: 'TimescaleDB backup service',
-  },
   {
     name: 'infra-langgraph-dev',
     status: 'running',

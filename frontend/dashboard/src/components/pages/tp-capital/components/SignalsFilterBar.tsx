@@ -22,7 +22,6 @@ import { LIMIT_OPTIONS } from '../constants';
 export interface SignalsFilterBarProps {
   // Filter state
   channelFilter: string;
-  typeFilter: string;
   searchTerm: string;
   limit: number;
   fromDate: string;
@@ -30,11 +29,9 @@ export interface SignalsFilterBarProps {
 
   // Filter options
   channelOptions: string[];
-  typeOptions: string[];
 
   // Filter handlers
   onChannelFilterChange: (value: string) => void;
-  onTypeFilterChange: (value: string) => void;
   onSearchTermChange: (value: string) => void;
   onLimitChange: (value: number) => void;
   onFromDateChange: (value: string) => void;
@@ -70,7 +67,6 @@ export interface SignalsFilterBarProps {
  * ```tsx
  * <SignalsFilterBar
  *   channelFilter="all"
- *   typeFilter="all"
  *   onChannelFilterChange={setChannelFilter}
  *   // ... other props
  * />
@@ -79,15 +75,12 @@ export interface SignalsFilterBarProps {
 export function SignalsFilterBar(props: SignalsFilterBarProps) {
   const {
     channelFilter,
-    typeFilter,
     searchTerm,
     limit,
     fromDate,
     toDate,
     channelOptions,
-    typeOptions,
     onChannelFilterChange,
-    onTypeFilterChange,
     onSearchTermChange,
     onLimitChange,
     onFromDateChange,
@@ -265,4 +258,3 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
     </div>
   );
 }
-

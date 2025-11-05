@@ -50,7 +50,7 @@ lastReviewed: '2025-10-26'
 
    ```bash
    bash tools/scripts/start-local-telegram-gateway.sh
-   # Boots TimescaleDB, Gateway (4006/4010) and TP Capital API
+   # Boots TimescaleDB, Gateway (4007/4010) and TP Capital API
    ```
 
 6. **Verify**
@@ -108,7 +108,7 @@ npm run seed
 
    ```bash
    curl http://<host>:4005/health
-   curl http://<host>:4006/health    # Telegram Gateway
+   curl http://<host>:4007/health    # Telegram Gateway
    docker compose -f docker-compose.prod.yml logs -f tp-capital
    psql "postgresql://timescale:***@<host>:5433/APPS-TPCAPITAL" -c "SELECT COUNT(*) FROM tp_capital.tp_capital_signals LIMIT 5;"
    ```

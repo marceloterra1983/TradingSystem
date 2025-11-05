@@ -1,0 +1,32 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: monitoring
+version: "3.9"
+
+x-tradingsystem-stack: "monitoring"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  timescaledb-exporter:
+    env: TIMESCALEDB_EXPORTER_PORT
+    port: 9187
+    protocol: http
+    owner: "Observabilidade"
+    description: "Exporter Prometheus para o Timescale"
+  questdb:
+    env: QUESTDB_PORT
+    port: 9002
+    protocol: http
+    owner: "Observabilidade"
+    description: "QuestDB usado para telemetria de workflows"
+  prometheus:
+    env: PROMETHEUS_PORT
+    port: 9090
+    protocol: http
+    owner: "Observabilidade"
+    description: "Servidor Prometheus central"
+  alertmanager:
+    env: ALERTMANAGER_PORT
+    port: 9093
+    protocol: http
+    owner: "Observabilidade"
+    description: "Alertmanager para roteamento de alertas"

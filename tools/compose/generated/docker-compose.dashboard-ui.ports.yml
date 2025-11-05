@@ -1,0 +1,26 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: dashboard-ui
+version: "3.9"
+
+x-tradingsystem-stack: "dashboard-ui"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  api-viewer:
+    env: API_VIEWER_PORT
+    port: 3101
+    protocol: http
+    owner: "Documentacao"
+    description: "Visualização de especificações OpenAPI/AsyncAPI"
+  dashboard:
+    env: DASHBOARD_PORT
+    port: 3103
+    protocol: http
+    owner: "Frontend Guild"
+    description: "Frontend principal do TradingSystem"
+  documentation-api-viewer:
+    env: DOCUMENTATION_API_VIEWER_PORT
+    port: 3102
+    protocol: http
+    owner: "Documentacao"
+    description: "Viewer secundário usado em validações internas"

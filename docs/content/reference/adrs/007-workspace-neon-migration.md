@@ -1,3 +1,11 @@
+---
+title: "ADR 007: Workspace Database Migration to Neon PostgreSQL"
+slug: /reference/adrs/007-workspace-neon-migration
+description: Decision record evaluating Neon PostgreSQL as the dedicated database for the Workspace service.
+owner: ArchitectureGuild
+lastReviewed: '2025-11-02'
+---
+
 # ADR 007: Workspace Database Migration to Neon PostgreSQL
 
 **Status**: Proposed  
@@ -277,9 +285,9 @@ If Neon proves successful for Workspace:
 ## References
 
 - [Neon GitHub Repository](https://github.com/neondatabase/neon)
-- [Neon Setup Guide](../../database/neon-setup.mdx)
-- [Workspace Architecture Review](../../architecture-2025-11-01/workspace-api.md)
-- [TimescaleDB vs Neon Comparison](../../database/db-comparison.md)
+- [Neon Setup Guide](../../database/neon-setup)
+- [Workspace Architecture Review](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-01/index.md)
+- [TimescaleDB vs Neon Notes](../../database/neon-setup)
 
 ---
 
@@ -325,4 +333,3 @@ If Neon proves successful for Workspace:
 - ⏳ In Progress
 - ❌ Blocked
 - 📋 Planned
-

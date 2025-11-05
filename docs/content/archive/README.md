@@ -5,7 +5,7 @@ This directory collects documentation that has moved out of the active TradingSy
 ## Policy
 - Archive only content that has been superseded, deprecated, or formally retired from production workflows.
 - Every archived file needs `archived_date` (YYYY-MM-DD) and `archive_reason` in the frontmatter while retaining the original authoring metadata.
-- Items removed from here must follow the deletion checklist in `docs/governance/`.
+- Items removed from here must follow the deletion checklist in `governance/`.
 
 ## Structure
 - Quarterly folders (`YYYY-Q#`) provide predictable drop points. Keep empty folders in place so the structure is always ready for the next migration.

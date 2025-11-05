@@ -98,7 +98,7 @@ services:
       - ../../.env
     
     ports:
-      - "${WORKSPACE_EXTERNAL_PORT:-3210}:3200"  # Using 3210 externally (3200 in use)
+      - "3200:3200"  # Port 3200 (matching dashboard expectations)
     
     environment:
       # Server Configuration
@@ -109,7 +109,7 @@ services:
       # Database Strategy (POSTGRESQL instead of NEON)
       - LIBRARY_DB_STRATEGY=postgresql
       
-      # PostgreSQL Connection
+      # PostgreSQL Connection (internal network)
       - POSTGRES_HOST=workspace-db
       - POSTGRES_PORT=5432
       - POSTGRES_DATABASE=workspace
@@ -145,6 +145,10 @@ services:
       - workspace_network
       - tradingsystem_backend
     
+    # Allow access to host services
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
     depends_on:
       workspace-db:
         condition: service_healthy
@@ -177,6 +181,10 @@ networks:
   workspace_network:
     name: workspace_network
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
     ipam:
       config:
         - subnet: 172.25.0.0/16

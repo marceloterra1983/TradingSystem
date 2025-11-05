@@ -22,7 +22,7 @@ import * as api from '../api';
 vi.mock('../api');
 
 // Mock tpCapitalApi
-vi.mock('../../../utils/tpCapitalApi', () => ({
+vi.mock('@/utils/tpCapitalApi', () => ({
   tpCapitalApi: {
     get: vi.fn(),
     post: vi.fn(),
@@ -67,6 +67,20 @@ const mockSignals = [
     updated_at: '2023-11-03T12:00:00Z',
   },
 ];
+
+beforeAll(() => {
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(),
+      length: 0,
+    },
+    writable: true,
+  });
+});
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -248,7 +262,7 @@ describe('SignalsTable', () => {
 
   describe('Sync Messages', () => {
     it('should trigger sync when button clicked', async () => {
-      const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+      const { tpCapitalApi } = await import('@/utils/tpCapitalApi');
       vi.mocked(tpCapitalApi.post).mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -321,4 +335,3 @@ describe('SignalsTable', () => {
     });
   });
 });
-

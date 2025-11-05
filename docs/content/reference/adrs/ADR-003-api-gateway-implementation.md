@@ -54,7 +54,7 @@ The TradingSystem currently operates with a direct service-to-client architectur
 
 ### Architecture Review Findings
 
-From the [Architecture Review 2025-11-01](../../governance/reviews/architecture-2025-11-01/index.md):
+From the [Architecture Review 2025-11-01](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-01/index.md):
 - **Security Grade:** B+ (needs improvement)
 - **Critical Issue:** Missing API Gateway identified as Priority 1
 - **Impact:** High coupling, security vulnerabilities, operational overhead
@@ -352,7 +352,7 @@ curl -X POST http://localhost:8001/consumers/dashboard/jwt \
 
 ## References
 
-- [Architecture Review 2025-11-01](../../governance/reviews/architecture-2025-11-01/index.md)
+- [Architecture Review 2025-11-01](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-01/index.md)
 - [Kong Gateway Documentation](https://docs.konghq.com/gateway/latest/)
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [API Gateway Pattern (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/gateway)

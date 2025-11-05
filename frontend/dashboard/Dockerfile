@@ -1,17 +1,20 @@
 FROM node:20-alpine
 
-WORKDIR /workspace/frontend/dashboard
+WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+ENV SKIP_DASHBOARD_PREBUILD=1 \
+    DASHBOARD_PORT=3103
 
-# Install dependencies
+ARG DASHBOARD_DIR=frontend/dashboard
+
+RUN apk add --no-cache curl
+
+COPY ${DASHBOARD_DIR}/package*.json ./
+
 RUN npm ci
 
-# Copy all source files including scripts
-COPY . .
+COPY ${DASHBOARD_DIR} ./
 
-EXPOSE 3101
+EXPOSE 3103
 
-# Run in development mode (sem watch:docs)
 CMD ["npm", "run", "dev:vite"]

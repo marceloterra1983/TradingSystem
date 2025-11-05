@@ -1,0 +1,32 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: cache
+version: "3.9"
+
+x-tradingsystem-stack: "cache"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  telegram-redis-master:
+    env: TELEGRAM_REDIS_MASTER_PORT
+    port: 6379
+    protocol: redis
+    owner: "Telegram Squad"
+    description: "Redis master para cache quente do Telegram"
+  telegram-redis-replica:
+    env: TELEGRAM_REDIS_REPLICA_PORT
+    port: 6385
+    protocol: redis
+    owner: "Telegram Squad"
+    description: "Replica Redis dedicada a leituras do gateway"
+  qdrant:
+    env: QDRANT_PORT
+    port: 6333
+    protocol: http
+    owner: "AI Guild"
+    description: "Vector DB (Qdrant) para embeddings"
+  infra-redis-dev:
+    env: INFRA_REDIS_DEV_PORT
+    port: 6380
+    protocol: redis
+    owner: "AI Guild"
+    description: "Redis dev usado nos fluxos LangGraph"

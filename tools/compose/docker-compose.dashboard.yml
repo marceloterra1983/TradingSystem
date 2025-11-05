@@ -1,0 +1,46 @@
+name: dashboard
+
+services:
+  dashboard:
+    container_name: dashboard-ui
+    build:
+      context: ../..
+      dockerfile: frontend/dashboard/Dockerfile
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      - DASHBOARD_PORT=${DASHBOARD_PORT:-3103}
+      - SKIP_DASHBOARD_PREBUILD=1
+      # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
+      # TP Capital: Uses /api/tp-capital → proxied to tp-capital-api:4005
+      - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+      # Telegram Gateway: Direct access (same network)
+      - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=http://telegram-gateway-api:4010
+      # Workspace: Uses /api → proxied to workspace-api:3200
+      - VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+      # Telegram Gateway API Keys (for frontend authentication)
+      - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
+      - VITE_TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
+      - VITE_API_SECRET_TOKEN=${API_SECRET_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
+    ports:
+      - "${DASHBOARD_PORT:-3103}:${DASHBOARD_PORT:-3103}"
+    networks:
+      - tradingsystem_frontend
+      - tradingsystem_backend  # Hub network for API access (proxy)
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${DASHBOARD_PORT:-3103}/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    labels:
+      - "com.tradingsystem.stack=frontend-ui"
+      - "com.tradingsystem.service=dashboard"
+
+networks:
+  tradingsystem_frontend:
+    external: true
+  tradingsystem_backend:
+    external: true

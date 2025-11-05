@@ -60,6 +60,17 @@ import { YouTubePreview } from '../telegram/YouTubePreview';
 import { InstagramPreview } from '../telegram/InstagramPreview';
 import { GenericLinkPreview } from '../telegram/GenericLinkPreview';
 
+// Helper para converter string de input date (YYYY-MM-DD) para Date no horário local
+const parseDateInputHelper = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+  try {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  } catch {
+    return null;
+  }
+};
+
 // interface GatewayData {
 //   health?: {
 //     status: string;
@@ -207,7 +218,7 @@ export function TelegramGatewayFinal() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'X-API-Key': token } : {}),
+          ...(token ? { 'X-Gateway-Token': token } : {}),
         },
       });
 
@@ -339,13 +350,16 @@ export function TelegramGatewayFinal() {
         const msgDate = new Date(dateToFilter);
 
         if (filterDateFrom) {
-          const fromDate = new Date(filterDateFrom);
+          const fromDate = parseDateInputHelper(filterDateFrom);
+          if (!fromDate) return false;
+          fromDate.setHours(0, 0, 0, 0);
           if (msgDate < fromDate) return false;
         }
 
         if (filterDateTo) {
-          const toDate = new Date(filterDateTo);
-          toDate.setHours(23, 59, 59, 999); // Include the whole day
+          const toDate = parseDateInputHelper(filterDateTo);
+          if (!toDate) return false;
+          toDate.setHours(23, 59, 59, 999);
           if (msgDate > toDate) return false;
         }
 
@@ -837,7 +851,7 @@ export function TelegramGatewayFinal() {
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
                         De:{' '}
-                        {new Date(filterDateFrom).toLocaleDateString('pt-BR')}
+                        {parseDateInputHelper(filterDateFrom)?.toLocaleDateString('pt-BR') || filterDateFrom}
                       </Badge>
                     )}
                     {filterDateTo && (
@@ -846,7 +860,7 @@ export function TelegramGatewayFinal() {
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
                         Até:{' '}
-                        {new Date(filterDateTo).toLocaleDateString('pt-BR')}
+                        {parseDateInputHelper(filterDateTo)?.toLocaleDateString('pt-BR') || filterDateTo}
                       </Badge>
                     )}
                   </div>
@@ -1302,10 +1316,10 @@ export function TelegramGatewayFinal() {
                   </p>
                   <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-slate-950">
                     {(() => {
-                      // Build photo URL using Gateway API endpoint
+                      // Build photo URL using relative path (via Vite proxy)
                       const photoUrl = selectedMessage.photoUrl || 
                         (selectedMessage.channelId && selectedMessage.messageId 
-                          ? `${import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4010'}/api/telegram-gateway/photos/${selectedMessage.channelId}/${selectedMessage.messageId}`
+                          ? `/api/telegram-gateway/photos/${selectedMessage.channelId}/${selectedMessage.messageId}`
                           : null);
                       
                       if (photoUrl) {

@@ -74,11 +74,11 @@ export class DatabaseSeeder {
 
   constructor(
     private config = {
-      host: process.env.TIMESCALEDB_HOST || 'localhost',
-      port: parseInt(process.env.TIMESCALEDB_PORT || '7001'),
-      database: process.env.TIMESCALEDB_DATABASE || 'telegram_gateway',
-      user: process.env.TIMESCALEDB_USER || 'telegram',
-      password: process.env.TIMESCALEDB_PASSWORD || 'telegram_dev_pass',
+      host: process.env.TELEGRAM_GATEWAY_DB_HOST || 'localhost',
+      port: parseInt(process.env.TELEGRAM_GATEWAY_DB_PORT || '5434', 10),
+      database: process.env.TELEGRAM_GATEWAY_DB_NAME || 'telegram_gateway',
+      user: process.env.TELEGRAM_GATEWAY_DB_USER || 'telegram',
+      password: process.env.TELEGRAM_GATEWAY_DB_PASSWORD || 'telegram_secure_pass',
     }
   ) {}
 
@@ -92,7 +92,7 @@ export class DatabaseSeeder {
 
     try {
       this.client = await this.pool.connect();
-      console.log('✓ Connected to TimescaleDB for seeding');
+      console.log('✓ Connected to Telegram Gateway database for seeding');
     } catch (error) {
       console.error('✗ Failed to connect to database:', error);
       throw error;

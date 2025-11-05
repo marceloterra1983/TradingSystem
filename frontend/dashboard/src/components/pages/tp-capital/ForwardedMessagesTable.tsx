@@ -18,6 +18,8 @@ import {
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { MessageDetailModal } from './MessageDetailModal';
+import { normalizeTimestamp } from '../../../utils/timestampUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export interface ForwardedMessage {
   id: number;
@@ -104,15 +106,16 @@ export function ForwardedMessagesTable() {
     });
   }, [messages, channelFilter, mediaFilter, searchTerm]);
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
+  const formatDate = (dateStr: string | number) => {
+    const normalized = normalizeTimestamp(dateStr);
+    if (!normalized) return '–';
+
+    try {
+      const date = new Date(normalized);
+      return formatInTimeZone(date, 'America/Sao_Paulo', 'dd/MM/yy, HH:mm');
+    } catch {
+      return '–';
+    }
   };
 
   const truncateText = (text: string, maxLength: number) => {

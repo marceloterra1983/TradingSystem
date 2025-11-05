@@ -17,7 +17,7 @@ lastReviewed: '2025-10-26'
 |----------|---------|-------------------|---------|
 | `GET /health` | Service & dependency status | `{"status":"healthy","timescale":true,...}` | 30s |
 | `GET /signals?limit=1` | Data freshness | Timestamp &lt; 5 min behind market | 5m |
-| `http://localhost:4006/health` | Telegram Gateway MTProto status | `{"status":"healthy","telegram":"connected"}` | 1m |
+| `http://localhost:4007/health` | Telegram Gateway MTProto status | `{"status":"healthy","telegram":"connected"}` | 1m |
 | `psql -c "SELECT 1"` | TimescaleDB connectivity (`APPS-TPCAPITAL`) | `1` | Manual |
 
 ### Dashboards
@@ -84,7 +84,7 @@ Logs are JSON-formatted via `pino` with fields: `service`, `event`, `channel`, `
 
 1. Review dashboard for error/latency anomalies.
 2. Verify latest signal timestamp (`GET /signals?limit=1`).
-3. Check Gateway health (`curl http://localhost:4006/health`).
+3. Check Gateway health (`curl http://localhost:4007/health`).
 
 ### Weekly
 

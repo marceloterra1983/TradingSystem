@@ -157,7 +157,7 @@ rabbitmq_queue_consumers                   - Active consumers
 systemctl show telegram-gateway --property=CPUUsageNSec,MemoryCurrent
 
 # Application metrics
-curl http://localhost:4006/metrics
+curl http://localhost:4007/metrics
 ```
 
 ---
@@ -255,7 +255,7 @@ severity: warning
 
 ## Metrics Reference
 
-### Gateway Metrics (Port 4006)
+### Gateway Metrics (Port 4007)
 ```
 telegram_messages_received_total       - Total messages from Telegram
 telegram_connection_status             - MTProto connection (0/1)
@@ -314,7 +314,7 @@ sudo journalctl -u telegram-gateway -n 100
 sudo systemctl restart telegram-gateway
 
 # 5. Verify recovery
-curl http://localhost:4006/health
+curl http://localhost:4007/health
 ```
 
 ---
@@ -465,7 +465,7 @@ docker logs telegram-prometheus --tail 100
 docker ps | grep exporter
 
 # 4. Test manual scrape
-curl http://localhost:4006/metrics
+curl http://localhost:4007/metrics
 curl http://localhost:9187/metrics
 curl http://localhost:9121/metrics
 ```

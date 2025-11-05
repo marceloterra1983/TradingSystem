@@ -18,7 +18,7 @@ COMPOSE_ARGS=()
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-ENV_FILE="${REPO_ROOT}/.env"
+ENV_SHARED="${REPO_ROOT}/.env.shared"
 
 AVAILABLE_PHASES=("infra-core" "data" "timescale" "frontend-apps" "monitoring" "docs" "infra" "tools" "langgraph-dev" "firecrawl")
 PHASES_TO_START=()
@@ -339,14 +339,14 @@ parse_args() {
 
 detect_compose
 
-if [[ -f "${ENV_FILE}" ]]; then
-  COMPOSE_ARGS+=(--env-file "${ENV_FILE}")
+if [[ -f "${ENV_SHARED}" ]]; then
+  COMPOSE_ARGS+=(--env-file "${ENV_SHARED}")
   set -o allexport
   # shellcheck source=/dev/null
-  source "${ENV_FILE}"
+  source "${ENV_SHARED}"
   set +o allexport
 else
-  echo -e "${YELLOW}⚠️  Root .env not found at ${ENV_FILE}. Compose will use defaults.${NC}"
+  echo -e "${YELLOW}⚠️  Root .env not found at ${ENV_SHARED}. Compose will use defaults.${NC}"
 fi
 
 parse_args "$@"

@@ -27,7 +27,7 @@ router.use(verifyJWT);
  */
 router.get(
   '/cache/stats',
-  asyncHandler(async (_req: Request, res: Response) => {
+  asyncHandler((_req: Request, res: Response) => {
     const cacheService = getCacheService();
     const stats = cacheService.getStats();
 
@@ -49,7 +49,7 @@ router.get(
  */
 router.delete(
   '/cache/:key',
-  validate({ params: cacheKeySchema }),
+  asyncHandler(validate({ params: cacheKeySchema })),
   asyncHandler(async (req: Request, res: Response) => {
     const { key } = req.params;
 
@@ -77,7 +77,7 @@ router.delete(
  */
 router.delete(
   '/cache',
-  validate({ query: cachePatternSchema }),
+  asyncHandler(validate({ query: cachePatternSchema })),
   asyncHandler(async (req: Request, res: Response) => {
     const pattern = (req.query.pattern as string) || '*';
 
@@ -100,7 +100,7 @@ router.delete(
  */
 router.post(
   '/cache/cleanup',
-  asyncHandler(async (_req: Request, res: Response) => {
+  asyncHandler((_req: Request, res: Response) => {
     logger.info('Manual cache cleanup triggered');
 
     const cacheService = getCacheService();

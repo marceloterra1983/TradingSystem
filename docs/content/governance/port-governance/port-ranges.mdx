@@ -1,0 +1,56 @@
+---
+title: Port Range Policy
+description: Conjunto oficial de faixas de portas reservado para cada domínio do TradingSystem.
+tags:
+  - governance
+  - networking
+owner: Platform Architecture
+lastUpdated: '2025-11-05'
+---
+
+> **Status:** Ativo – Reflete `config/ports/registry.yaml` v1.0.  
+> **Fonte:** [port-governance-2025-11-05](../../../tools/openspec/changes/port-governance-2025-11-05/README.md)
+
+## 🎯 Objetivo
+
+Eliminar conflitos de portas definindo faixas exclusivas por domínio (frontend, APIs, integrações externas, dados, etc.) com pelo menos 20% de folga para crescimento futuro.
+
+## 📊 Faixas Oficiais
+
+| Stack / Domínio            | Range      | Uso Atual | Folga Aproximada |
+|---------------------------|------------|-----------|------------------|
+| `frontend-ui`             | 3000-3099  | 3         | 97%              |
+| `dashboard-ui`            | 3100-3199  | 1         | 90%              |
+| `integrations`            | 3200-3299  | 0         | 100%             |
+| `documentation`           | 3400-3499  | 2         | 98%              |
+| `automation`              | 3500-3699  | 2         | 94%              |
+| `external-integrations`   | 4000-4099  | 2         | 98%              |
+| `db-core`                 | 5000-5499  | 4         | 92%              |
+| `messaging`               | 5600-5699  | 1         | 99%              |
+| `cache`                   | 6300-6399  | 4         | 96%              |
+| `pgbouncer`               | 6400-6499  | 1         | 99%              |
+| `sentinel`                | 26000-26999| 1         | 99%              |
+| `devtools`                | 8000-8299  | 3         | 97%              |
+| `automation-platforms`    | 8180-8899  | 2         | 98%              |
+| `monitoring`              | 9000-9299  | 4         | 96%              |
+| `admin-ui-high`           | 15000-15999| 1         | 99%              |
+
+📁 Fonte viva: `config/ports/registry.yaml` (`ranges`).
+
+## 🧭 Diretrizes
+
+1. **Obrigatório** registrar novos serviços no `registry.yaml` antes de abrir PR.
+2. **Sem sobreposição:** cada faixa é exclusiva; exceções precisam de ADR.
+3. **Reserva de 20%:** alterações que reduzam a folga devem incluir plano de expansão.
+4. **Documentação automática:** executar `npm run ports:sync` para propagar ranges para `.env.shared`, dashboards e health scripts.
+
+## ✅ Processos
+
+- **Revisão:** Architecture + DevOps validam novas portas durante code review.
+- **Automação:** GitHub Action `port-governance.yml` barra PRs com portas fora da faixa.
+- **Inventário:** `reports/ports/port-inventory.xlsx` é atualizado junto ao registry.
+
+## 📌 Próximos Passos
+
+- Monitorar ocupação trimestralmente (relatório em `reports/ports/`).
+- Avaliar necessidade de novas faixas (ex.: gRPC, WebRTC) após migrações.

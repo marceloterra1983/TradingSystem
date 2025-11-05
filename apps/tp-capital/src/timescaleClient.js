@@ -50,7 +50,7 @@ class TimescaleClient {
 
     this.sampleSignals = [
       {
-        ts: '2025-10-07T17:25:59Z',
+        ts: new Date('2025-10-07T17:25:59Z').getTime(), // Convert to Unix timestamp in milliseconds
         channel: 'Desconhecido',
         signal_type: 'Swing Trade',
         asset: 'BEEFW655',
@@ -65,7 +65,7 @@ class TimescaleClient {
         ingested_at: '2025-10-07T17:25:59Z',
       },
       {
-        ts: '2025-10-06T15:44:14Z',
+        ts: new Date('2025-10-06T15:44:14Z').getTime(),
         channel: 'Desconhecido',
         signal_type: 'Swing Trade',
         asset: 'BEEFW655',
@@ -80,7 +80,7 @@ class TimescaleClient {
         ingested_at: '2025-10-06T15:44:14Z',
       },
       {
-        ts: '2025-10-06T15:44:01Z',
+        ts: new Date('2025-10-06T15:44:01Z').getTime(),
         channel: 'Desconhecido',
         signal_type: 'Swing Trade',
         asset: 'ABEVK122',
@@ -95,7 +95,7 @@ class TimescaleClient {
         ingested_at: '2025-10-06T15:44:01Z',
       },
       {
-        ts: '2025-10-06T15:43:52Z',
+        ts: new Date('2025-10-06T15:43:52Z').getTime(),
         channel: 'Desconhecido',
         signal_type: 'Swing Trade',
         asset: 'VALEW591',
@@ -308,6 +308,48 @@ class TimescaleClient {
     }
   }
 
+  /**
+   * Fetch trading signals from the database
+   *
+   * Queries the `tp_capital_signals` table with optional filtering by channel,
+   * signal type, and timestamp range. Supports pagination via limit parameter.
+   * Falls back to sample data if database is unavailable.
+   *
+   * **Database Schema:**
+   * - Table: `signals.tp_capital_signals`
+   * - Column: `ts` (BIGINT) - Signal timestamp in milliseconds since epoch (UTC)
+   * - Column: `ingested_at` (TIMESTAMPTZ) - Server ingestion timestamp
+   *
+   * **Type Safety Notes:**
+   * - `ts` column is BIGINT (milliseconds), requires numeric values
+   * - Input timestamps automatically converted to milliseconds if needed
+   * - Date objects are converted via `.getTime()` before passing to query
+   *
+   * @param {Object} [options={}] - Query options
+   * @param {number} [options.limit] - Maximum number of signals to return
+   * @param {string} [options.channel] - Filter by specific channel name
+   * @param {string} [options.signalType] - Filter by signal type (e.g., 'Swing Trade')
+   * @param {number|string|Date} [options.fromTs] - Start timestamp (auto-converts to milliseconds)
+   * @param {number|string|Date} [options.toTs] - End timestamp (auto-converts to milliseconds)
+   * @returns {Promise<Array<Object>>} Array of signal objects
+   * @returns {Promise<Array<{id: number, ts: number, channel: string, signal_type: string, asset: string, buy_min: number, buy_max: number, target_1: number, target_2: number, target_final: number, stop: number, raw_message: string, source: string, ingested_at: string}>>}
+   *
+   * @throws {Error} Returns sample data if database query fails
+   *
+   * @example
+   * // Fetch last 20 signals
+   * const signals = await fetchSignals({ limit: 20 });
+   *
+   * @example
+   * // Fetch swing trade signals from specific channel in date range
+   * const signals = await fetchSignals({
+   *   channel: 'TP Capital',
+   *   signalType: 'Swing Trade',
+   *   fromTs: 1730823600000,  // 2025-11-05 12:00 UTC
+   *   toTs: 1730910000000,    // 2025-11-06 12:00 UTC
+   *   limit: 50
+   * });
+   */
   async fetchSignals(options = {}) {
     try {
       const { limit, channel, signalType, fromTs, toTs } = options;
@@ -318,7 +360,7 @@ class TimescaleClient {
           target_1, target_2, target_final, stop, raw_message, 
           source, ingested_at, created_at, updated_at
         FROM "${this.schema}".tp_capital_signals
-        WHERE 1=1
+        WHERE asset != '__checkpoint__'
       `;
       const values = [];
       let paramCount = 1;
@@ -335,12 +377,16 @@ class TimescaleClient {
 
       if (fromTs) {
         query += ` AND ts >= $${paramCount++}`;
-        values.push(new Date(fromTs));
+        // Convert to Unix timestamp in milliseconds (BIGINT)
+        const fromTimestamp = typeof fromTs === 'number' ? fromTs : new Date(fromTs).getTime();
+        values.push(fromTimestamp);
       }
 
       if (toTs) {
         query += ` AND ts <= $${paramCount++}`;
-        values.push(new Date(toTs));
+        // Convert to Unix timestamp in milliseconds (BIGINT)
+        const toTimestamp = typeof toTs === 'number' ? toTs : new Date(toTs).getTime();
+        values.push(toTimestamp);
       }
 
       query += ` ORDER BY ts DESC`;
@@ -580,6 +626,45 @@ class TimescaleClient {
   // ========== FORWARDED MESSAGES METHODS ==========
   // Table created by migration: backend/data/timescaledb/tp-capital/01_create_forwarded_messages_table.sql
 
+  /**
+   * Fetch forwarded messages from the database
+   *
+   * Queries the `forwarded_messages` table with optional filtering by channel ID
+   * and timestamp range. Supports pagination via limit parameter.
+   *
+   * **Database Schema:**
+   * - Table: `forwarded_messages.messages`
+   * - Column: `original_timestamp` (TIMESTAMPTZ) - Message timestamp from Telegram
+   * - Column: `channel_id` (TEXT) - Source channel identifier
+   *
+   * **Type Safety Notes:**
+   * - JavaScript Date objects are automatically converted by pg driver to ISO strings
+   * - PostgreSQL TIMESTAMPTZ columns accept ISO strings in comparisons
+   * - This is correct and safe behavior (no manual conversion needed)
+   *
+   * @param {Object} [options={}] - Query options
+   * @param {number} [options.limit] - Maximum number of messages to return
+   * @param {string} [options.channelId] - Filter by specific channel ID
+   * @param {number} [options.fromTs] - Start timestamp (milliseconds since epoch, UTC)
+   * @param {number} [options.toTs] - End timestamp (milliseconds since epoch, UTC)
+   * @returns {Promise<Array<Object>>} Array of forwarded message objects
+   * @returns {Promise<Array<{id: number, channel_id: string, message_id: number, message_text: string, original_timestamp: string, photos: string, received_at: string}>>}
+   *
+   * @throws {Error} Database connection or query errors
+   *
+   * @example
+   * // Fetch last 50 messages
+   * const messages = await fetchForwardedMessages({ limit: 50 });
+   *
+   * @example
+   * // Fetch messages from specific channel in date range
+   * const messages = await fetchForwardedMessages({
+   *   channelId: '123456789',
+   *   fromTs: 1730823600000,  // 2025-11-05 12:00 UTC
+   *   toTs: 1730910000000,    // 2025-11-06 12:00 UTC
+   *   limit: 100
+   * });
+   */
   async fetchForwardedMessages(options = {}) {
     try {
       const { limit, channelId, fromTs, toTs } = options;

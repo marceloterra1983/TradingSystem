@@ -31,6 +31,8 @@ import {
 } from '../../ui/collapsible-card';
 import { Badge } from '../../ui/badge';
 import { cn } from '../../../lib/utils';
+import { normalizeTimestamp } from '../../../utils/timestampUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface MessagesTableProps {
   data?: TelegramGatewayMessagesResponse;
@@ -72,19 +74,17 @@ const STATUS_BADGE_CLASSNAME: Record<string, string> = {
     'border-violet-400 text-violet-600 dark:border-violet-400/60 dark:text-violet-300',
 };
 
-function formatDate(value?: string) {
+function formatDate(value?: string | number) {
   if (!value) return '—';
+
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) return '—';
+
   try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).format(new Date(value));
+    const date = new Date(normalized);
+    return formatInTimeZone(date, 'America/Sao_Paulo', 'dd/MM/yyyy, HH:mm:ss');
   } catch {
-    return value;
+    return '—';
   }
 }
 

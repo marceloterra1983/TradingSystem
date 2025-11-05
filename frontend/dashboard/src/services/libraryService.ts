@@ -5,8 +5,6 @@ const API_BASE_URL = getApiUrl('library');
 
 // Resolve workspace API endpoint ensuring it targets /api/items (or proxy-prefixed variant)
 const itemsEndpoint = (suffix = '') => {
-  const trimmedBase = API_BASE_URL.replace(/\/+$/, '');
-
   const withSuffix = (url: string) => `${url}${suffix}`;
 
   // FORCE PORT 3210 for Workspace (PostgreSQL Autonomous Stack)

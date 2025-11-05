@@ -235,7 +235,7 @@ docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
 
 # 3. Configurar load balancer (Nginx/Traefik) para split 90/10
 # - 90% tráfego → nova stack (porta 4005)
-# - 10% tráfego → stack antiga (porta 4006)
+# - 10% tráfego → stack antiga (porta 4007)
 
 # 4. Monitorar por 3-5 dias
 # - Comparar latências
@@ -266,7 +266,7 @@ export TIMESCALEDB_DATABASE=tradingsystem
 export TIMESCALEDB_SCHEMA=tp_capital
 
 # 4. Validar funcionamento
-curl http://localhost:4006/health
+curl http://localhost:4007/health
 ```
 
 **Backup disponível em:**
@@ -361,7 +361,7 @@ docker exec -it tp-capital-redis-replica redis-cli PING
 
 ### Documentação Interna
 - [ADR-008: TP-Capital Autonomous Stack](../../reference/adrs/008-tp-capital-autonomous-stack.md)
-- [Architecture Review (2025-11-04)](../../../ARCHITECTURE-REVIEW-TP-CAPITAL-2025-11-04.md)
+- [Architecture Review (2025-11-04)](https://github.com/marceloterra1983/TradingSystem/blob/main/reports/root-archive/tp-capital/ARCHITECTURE-REVIEW-TP-CAPITAL-2025-11-04.md)
 - [TP-Capital Overview](./overview.mdx)
 
 ### Documentação Externa
@@ -389,4 +389,3 @@ docker exec -it tp-capital-redis-replica redis-cli PING
 **Status:** 🟢 Pronto para implementação  
 **Última Atualização:** 2025-11-04  
 **Próxima Revisão:** Após migração completa
-

@@ -22,13 +22,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const { Pool } = pg;
+const defaultHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
+const workspaceApiBase =
+  process.env.WORKSPACE_API_URL ||
+  `http://${defaultHost}:${process.env.WORKSPACE_API_PORT || 3200}`;
 
 // Configuration
 const config = {
   lowdbPath: process.env.LOWDB_PATH || path.join(__dirname, '..', '..', '..', '..', 'backend', 'data', 'workspace', 'library.json'),
 
   timescale: {
-    host: process.env.TIMESCALEDB_HOST || 'localhost',
+    host: process.env.TIMESCALEDB_HOST || defaultHost,
     port: parseInt(process.env.TIMESCALEDB_PORT || '5433', 10),
     database: process.env.TIMESCALEDB_DATABASE || 'APPS-TPCAPITAL',
     user: process.env.TIMESCALEDB_USER || 'timescale',
@@ -194,7 +198,7 @@ async function main() {
   console.log(`  - Backup file: ${backupPath}`);
   console.log();
   console.log('Next steps:');
-  console.log('  1. Verify data in TimescaleDB: curl http://localhost:3200/api/items');
+  console.log(`  1. Verify data in TimescaleDB: curl ${workspaceApiBase}/api/items`);
   console.log('  2. Update LIBRARY_DB_STRATEGY to "timescaledb" in .env');
   console.log('  3. Restart Workspace service');
   console.log();

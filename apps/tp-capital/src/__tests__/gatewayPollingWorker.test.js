@@ -274,6 +274,22 @@ describe('GatewayPollingWorker', () => {
       const isDuplicate = await worker.checkDuplicate(msg);
       assert.strictEqual(isDuplicate, false);
     });
+
+    it('should use caption when text is missing and normalize message', async () => {
+      const msg = {
+        caption: '  ATIVO: PETR4 COMPRA: 25.00\r\n ',
+        channel_id: '-1001649127710',
+      };
+
+      mockTpCapitalDb.query.mock.mockImplementationOnce(async (_query, params) => {
+        assert.strictEqual(params[0], 'ATIVO: PETR4 COMPRA: 25.00');
+        assert.strictEqual(params[1], msg.channel_id);
+        return { rows: [] };
+      });
+
+      await worker.checkDuplicate(msg);
+      assert.strictEqual(mockTpCapitalDb.query.mock.calls.length, 1);
+    });
   });
 
   describe('getStatus', () => {

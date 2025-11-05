@@ -65,7 +65,7 @@ Target Coverage:     80%
 
 ### Architecture Review Findings
 
-From the [Architecture Review 2025-11-02](../../governance/reviews/architecture-2025-11-02/ARCHITECTURE-REVIEW-2025-11-02.md):
+From the [Architecture Review 2025-11-02](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-02/ARCHITECTURE-REVIEW-2025-11-02.md):
 - **Quality Grade:** C (Needs significant improvement)
 - **Priority:** P1 (Critical)
 - **Effort:** 4 weeks
@@ -896,9 +896,9 @@ flags:
 
 ## References
 
-- [Architecture Review 2025-11-02](../../governance/reviews/architecture-2025-11-02/ARCHITECTURE-REVIEW-2025-11-02.md)
-- [Test Coverage Roadmap](../../governance/reviews/architecture-2025-11-02/test-coverage-roadmap.md)
-- [GitHub Issue #3: Increase Test Coverage to 30%](../../governance/reviews/architecture-2025-11-02/github-issues.md#issue-3)
+- [Architecture Review 2025-11-02](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-02/ARCHITECTURE-REVIEW-2025-11-02.md)
+- [Test Coverage Roadmap](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-02/test-coverage-roadmap.md)
+- [GitHub Issue #3: Increase Test Coverage to 30%](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-02/github-issues.md#issue-3)
 - [Vitest Documentation](https://vitest.dev/)
 - [Testing Library](https://testing-library.com/)
 - [Playwright Documentation](https://playwright.dev/)

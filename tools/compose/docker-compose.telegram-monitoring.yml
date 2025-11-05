@@ -133,6 +133,9 @@ services:
     container_name: telegram-postgres-exporter
     image: prometheuscommunity/postgres-exporter:v0.15.0
     restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
     
     environment:
       DATA_SOURCE_URI: "telegram-timescale:5432/telegram_gateway?sslmode=disable"
@@ -180,6 +183,9 @@ services:
     container_name: telegram-redis-exporter
     image: oliver006/redis_exporter:v1.55.0-alpine
     restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
     
     environment:
       REDIS_ADDR: "telegram-redis-master:6379"
@@ -226,4 +232,3 @@ networks:
     external: true
   tradingsystem_backend:
     external: true
-

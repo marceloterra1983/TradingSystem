@@ -50,7 +50,8 @@ else
     echo -e "${YELLOW}⚠ Qdrant container doesn't exist, creating...${NC}"
     echo ""
     echo -e "${CYAN}Starting Qdrant from timescale compose...${NC}"
-    docker compose -f tools/compose/docker-compose.timescale.yml up -d data-qdrant
+    # New stack uses docker-compose.database.yml (Timescale/Qdrant)
+    docker compose -f tools/compose/docker-compose.database.yml up -d questdb
     
     echo ""
     echo -e "${CYAN}Waiting for Qdrant to be healthy (max 30s)...${NC}"
@@ -177,4 +178,3 @@ fi
 echo ""
 echo -e "${CYAN}Run 'status' to see updated container health${NC}"
 echo ""
-

@@ -132,7 +132,7 @@ def suggest_fix(link: Dict[str, any]) -> Dict[str, any]:
         if gov_path.exists():
             suggestion['fixes'].append({
                 'type': 'external_link',
-                'replacement': f'https://github.com/marceloterra1983/TradingSystem/blob/main/docs/governance/{Path(target).name}',
+                'replacement': f'https://github.com/marceloterra1983/TradingSystem/blob/main/governance/{Path(target).name}',
                 'description': 'Link to GitHub (governance files are not published)'
             })
         else:

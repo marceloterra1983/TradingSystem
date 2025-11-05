@@ -239,6 +239,21 @@ export class GatewayPollingWorker {
     // Use text or caption (photos have caption instead of text)
     const messageContent = msg.text || msg.caption || '';
     
+    // Skip empty messages (photos without caption/text)
+    if (!messageContent || messageContent.trim().length === 0) {
+      logger.debug({
+        messageId: msg.message_id,
+        hasPhoto: !!msg.photo_id,
+        mediaType: msg.media_type
+      }, '[GatewayPollingWorker] Empty message (photo without text), skipping');
+      
+      await this.markMessageAsFailed(msg.message_id, new Error('Empty message (photo without text)'));
+      if (this.metrics) {
+        this.metrics.messagesProcessed.inc({ status: 'empty_skipped' });
+      }
+      return;
+    }
+    
     let signal;
     try {
       signal = parseSignal(messageContent, {
@@ -327,6 +342,10 @@ export class GatewayPollingWorker {
    * Check if message was already processed (idempotency check)
    */
   async checkDuplicate(msg) {
+    const rawMessage = (msg.text || msg.caption || '')
+      .replace(/\r/gi, '')
+      .trim();
+
     const query = `
       SELECT 1 FROM ${this.tpCapitalSchema}.tp_capital_signals
       WHERE raw_message = $1
@@ -334,7 +353,7 @@ export class GatewayPollingWorker {
       LIMIT 1
     `;
 
-    const result = await this.tpCapitalDb.query(query, [msg.text, msg.channel_id]);
+    const result = await this.tpCapitalDb.query(query, [rawMessage, msg.channel_id]);
     return result.rows.length > 0;
   }
 

@@ -14,6 +14,9 @@ services:
     image: redis:7.2-alpine
     container_name: redis-cache
     restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
 
     command: >
       redis-server
@@ -28,7 +31,7 @@ services:
       --loglevel notice
 
     ports:
-      - "6379:6379"                    # Redis port
+      - "${REDIS_CACHE_PORT:-6379}:6379"
 
     volumes:
       - redis-data:/data
@@ -63,7 +66,7 @@ services:
       - REDIS_HOSTS=local:redis-cache:6379
 
     ports:
-      - "8081:8081"                    # Redis Commander web UI
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
 
     networks:
       - tradingsystem-network

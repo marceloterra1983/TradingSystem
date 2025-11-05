@@ -19,18 +19,14 @@ lastReviewed: '2025-11-02'
 
 ---
 
-## 🗄️ DATABASE (Bancos de Dados)
+## 🗄️ DATABASE (Bancos de Dados Compartilhados)
+
+> Desde novembro/2025 o TimescaleDB compartilhado foi desativado. Cada produto possui o próprio stack (`tp-capital-*`, `workspace-*`, `telegram-*`). Esta seção lista apenas os serviços realmente compartilhados entre stacks.
 
 | Container | Imagem | Status | Tipo |
 |-----------|--------|--------|------|
-| `data-timescaledb` | `timescale/timescaledb:latest-pg16` | ⏱️ 12 horas | TimescaleDB (Principal) ✅ |
-| `data-timescaledb-backup` | `timescale/timescaledb:latest-pg16` | ⏱️ 22 horas | TimescaleDB (Backup) |
-| `data-timescaledb-adminer` | `adminer:latest` | ⏱️ 22 horas | Admin UI |
-| `data-timescaledb-pgweb` | `sosedoff/pgweb` | ⏱️ 12 horas | Web Interface |
-| `data-timescaledb-pgadmin` | `dpage/pgadmin4` | ⏱️ 12 horas | PgAdmin |
-| `data-timescaledb-exporter` | `prometheuscommunity/postgres-exporter:latest` | ⏱️ 22 horas | Metrics Exporter |
-| `data-postgress-langgraph` | `postgres:15` | ⏱️ 22 horas | PostgreSQL (LangGraph) |
-| `data-questdb` | `questdb/questdb:latest` | ⏱️ 22 horas | QuestDB |
+| `data-postgres-langgraph` | `postgres:15` | ⏱️ 22 horas | PostgreSQL (LangGraph memory store) |
+| `data-questdb` | `questdb/questdb:latest` | ⏱️ 22 horas | QuestDB (market data) |
 | `data-qdrant` | `qdrant/qdrant` | ⏱️ 13 horas | Qdrant (Vector DB) |
 
 ---
@@ -88,18 +84,18 @@ lastReviewed: '2025-11-02'
 | Uptime | Quantidade | Containers |
 |--------|-----------|-----------|
 | < 1 hora | 3 | `apps-tp-capital`, `docs-api`, `tools-llamaindex-ingestion` |
-| 11-13 horas | 6 | `apps-workspace`, `documentation`, `data-timescaledb`, `data-timescaledb-pgweb`, `data-timescaledb-pgadmin`, `ollama`, `data-qdrant`, `tools-llamaindex-query` |
-| 22 horas | 21 | Infraestrutura principal (databases, monitoring, firecrawl) |
+| 11-13 horas | 5 | `apps-workspace`, `documentation`, `data-qdrant`, `ollama`, `tools-llamaindex-query` |
+| 22 horas | 21 | Infraestrutura principal (QuestDB, LangGraph Postgres, monitoring, firecrawl) |
 
 ### Serviços por Categoria
 ```
-📱 Apps:          2 containers (6.7%)
-🗄️ Databases:     9 containers (30%)
-📚 Documentation: 2 containers (6.7%)
-🕷️ Firecrawl:     5 containers (16.7%)
-📊 Monitoring:    4 containers (13.3%)
-🛠️ Tools:         3 containers (10%)
-📈 TradingSystem: 5 containers (16.7%)
+📱 Apps:          2 containers (8%)
+🗄️ Databases:     3 containers (12%)
+📚 Documentation: 2 containers (8%)
+🕷️ Firecrawl:     5 containers (20%)
+📊 Monitoring:    4 containers (16%)
+🛠️ Tools:         3 containers (12%)
+📈 TradingSystem: 6 containers (24%)
 ```
 
 ### 🔴 Containers Recém-Reiniciados (< 1h)
@@ -112,7 +108,9 @@ Estes containers foram reiniciados recentemente e merecem atenção:
 **Containers com Health Check Ativo:**
 - ✅ apps-tp-capital
 - ✅ apps-workspace
-- ✅ data-timescaledb
+- ✅ data-questdb
+- ✅ data-qdrant
+- ✅ data-postgres-langgraph
 - ✅ docs-api
 - ✅ documentation
 - ✅ firecrawl-proxy
@@ -120,9 +118,6 @@ Estes containers foram reiniciados recentemente e merecem atenção:
 ---
 
 **Última atualização:** 30 de outubro de 2025
-
-
-
 
 
 

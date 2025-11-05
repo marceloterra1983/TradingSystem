@@ -8,7 +8,7 @@ info:
   description: |
     REST API for accessing Telegram messages, channels, and gateway status with TimescaleDB persistence.
 
-    The Telegram Gateway API serves as the query interface for messages captured by the MTProto Gateway (Port 4006).
+    The Telegram Gateway API serves as the query interface for messages captured by the MTProto Gateway (Port 4007).
     It provides comprehensive CRUD operations for messages and channels, authentication management,
     and monitoring capabilities.
 
@@ -22,7 +22,7 @@ info:
     - Prometheus metrics export
 
     **Architecture:**
-    - MTProto Gateway (Port 4006) → Captures messages from Telegram
+    - MTProto Gateway (Port 4007) → Captures messages from Telegram
     - TimescaleDB → Stores messages and channels
     - This API (Port 4010) → Query interface for downstream services
 
@@ -794,7 +794,7 @@ paths:
       description: |
         Triggers message synchronization from Telegram channels.
 
-        **Note:** This proxies the request to the MTProto Gateway (Port 4006).
+        **Note:** This proxies the request to the MTProto Gateway (Port 4007).
       responses:
         '200':
           description: Sync completed

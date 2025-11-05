@@ -35,13 +35,6 @@ main() {
   # Base images retagged from upstream registries
   local base_images=(
     "data-frontend-apps=timescale/timescaledb:2.16.1-pg16"
-    "data-timescaledb=timescale/timescaledb:2.15.2-pg15"
-    "data-timescaledb-backup=prodrigestivill/postgres-backup-local:15"
-    "data-timescaledb-exporter=quay.io/prometheuscommunity/postgres-exporter:v0.14.0"
-    "data-timescaledb-pgadmin=dpage/pgadmin4:9.0"
-    "data-timescaledb-pgweb=sosedoff/pgweb:0.16.2"
-    "data-timescaledb-adminer=adminer:5.4.0"
-    "data-timescaledb-azimutt=ghcr.io/azimuttapp/azimutt:feat-dockerize-app"
     "data-postgress-langgraph=postgres:16-alpine"
     "infra-postgres-dev=postgres:16-alpine"
     "infra-redis-dev=redis:7-alpine"

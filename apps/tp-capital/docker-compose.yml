@@ -12,18 +12,18 @@ services:
       - NODE_ENV=development
       - PORT=4005
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - TIMESCALEDB_HOST=data-timescaledb
-      - TIMESCALEDB_PORT=5432
-      - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}
-      - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}
-      - TIMESCALEDB_PASSWORD=${TIMESCALEDB_PASSWORD:-pass_timescale}
-      - TIMESCALEDB_SCHEMA=${TIMESCALEDB_SCHEMA:-tp_capital}
-      - GATEWAY_DATABASE_HOST=${GATEWAY_DATABASE_HOST:-data-timescaledb}
-      - GATEWAY_DATABASE_PORT=${GATEWAY_DATABASE_PORT:-5432}
-      - GATEWAY_DATABASE_NAME=${GATEWAY_DATABASE_NAME:-${TIMESCALEDB_DATABASE:-APPS-TPCAPITAL}}
-      - GATEWAY_DATABASE_SCHEMA=${GATEWAY_DATABASE_SCHEMA:-telegram_gateway}
-      - GATEWAY_DATABASE_USER=${GATEWAY_DATABASE_USER:-timescale}
-      - GATEWAY_DATABASE_PASSWORD=${GATEWAY_DATABASE_PASSWORD:-pass_timescale}
+      - TP_CAPITAL_DB_HOST=${TP_CAPITAL_DB_HOST:-tp-capital-pgbouncer}
+      - TP_CAPITAL_DB_PORT=${TP_CAPITAL_DB_PORT:-5440}
+      - TP_CAPITAL_DB_NAME=${TP_CAPITAL_DB_NAME:-tp_capital_db}
+      - TP_CAPITAL_DB_USER=${TP_CAPITAL_DB_USER:-tp_capital}
+      - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
+      - TP_CAPITAL_DB_SCHEMA=${TP_CAPITAL_DB_SCHEMA:-signals}
+      - TELEGRAM_GATEWAY_DB_HOST=${TELEGRAM_GATEWAY_DB_HOST:-telegram-timescaledb}
+      - TELEGRAM_GATEWAY_DB_PORT=${TELEGRAM_GATEWAY_DB_PORT:-5434}
+      - TELEGRAM_GATEWAY_DB_NAME=${TELEGRAM_GATEWAY_DB_NAME:-telegram_gateway}
+      - TELEGRAM_GATEWAY_DB_SCHEMA=${TELEGRAM_GATEWAY_DB_SCHEMA:-telegram_gateway}
+      - TELEGRAM_GATEWAY_DB_USER=${TELEGRAM_GATEWAY_DB_USER:-telegram}
+      - TELEGRAM_GATEWAY_DB_PASSWORD=${TELEGRAM_GATEWAY_DB_PASSWORD:-telegram_secure_pass}
     volumes:
       - ./src:/app/src:ro
       - ./scripts:/app/scripts:ro
@@ -33,7 +33,7 @@ services:
     # depends_on:
     #   timescaledb:
     #     condition: service_healthy
-    # NOTE: Now using external data-timescaledb container
+    # NOTE: Now using dedicated tp-capital stack (tools/compose/docker-compose.tp-capital-stack.yml)
     restart: unless-stopped
     healthcheck:
       test:
@@ -67,7 +67,7 @@ services:
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5
-  # NOTE: Using external data-timescaledb container instead
+  # NOTE: Using dedicated tp-capital stack instead
 
 networks:
   tradingsystem_backend:

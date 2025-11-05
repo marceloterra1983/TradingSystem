@@ -15,10 +15,6 @@ const dashboardDocsPreviewDir = path.join(
   'frontend/dashboard/public/governance/docs',
 );
 
-function toPreviewFileName(artifactId) {
-  return artifactId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-}
-
 async function readRegistry() {
   const raw = await fs.readFile(registryPath, 'utf-8');
   return JSON.parse(raw);
@@ -68,10 +64,10 @@ async function writeDoc(artifact, publish) {
   );
 
   // Mirror raw markdown for dashboard preview pop-ups
-  await ensureDir(dashboardDocsPreviewDir);
-  const previewFileName = `${toPreviewFileName(artifact.id)}.md`;
+  const previewTarget = path.join(dashboardDocsPreviewDir, artifact.path);
+  await ensureDir(path.dirname(previewTarget));
   await fs.writeFile(
-    path.join(dashboardDocsPreviewDir, previewFileName),
+    previewTarget,
     source,
     'utf-8',
   );

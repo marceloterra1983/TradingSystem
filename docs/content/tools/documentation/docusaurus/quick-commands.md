@@ -623,8 +623,8 @@ npm run docs:build 2>&1 | grep -c "WARNING"
 - `reports/2025-11-02/REVIEW-INDEX-2025-11-02.md` - Índice completo
 
 **Guides**:
-- [Deployment Guide](/tools/documentation/docusaurus/deployment-guide) - Deploy procedures
-- [Algolia Setup](/tools/documentation/docusaurus/algolia-setup-guide) - Search setup
+- [Deployment Guide](./deployment-guide) - Deploy procedures
+- [Algolia Setup](./algolia-setup-guide) - Search setup
 
 **Reports**:
 - `reports/2025-11-02/DOCUSAURUS-REVIEW-REPORT-2025-11-02.md` - Technical analysis

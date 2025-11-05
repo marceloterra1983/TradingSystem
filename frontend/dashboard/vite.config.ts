@@ -88,9 +88,10 @@ export default defineConfig(({ mode }) => {
   );
   const env = { ...rootEnv, ...appEnv, ...processEnv };
   if (mode === 'development') {
+    console.log('[vite] VITE_GATEWAY_TOKEN=', env.VITE_GATEWAY_TOKEN);
     console.log('[vite] TELEGRAM_GATEWAY_API_URL=', env.VITE_TELEGRAM_GATEWAY_API_URL);
     console.log('[vite] TELEGRAM_GATEWAY_API_TOKEN=', env.VITE_TELEGRAM_GATEWAY_API_TOKEN);
-    console.log('[vite] API_SECRET_TOKEN=', env.API_SECRET_TOKEN);
+    console.log('[vite] API_SECRET_TOKEN=', env.VITE_API_SECRET_TOKEN);
   }
   const isProd = mode === 'production';
   const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
@@ -104,7 +105,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4008',
   );
-  // Docs API (FlexSearch + CRUD) runs on 3405; 3404 is static docs (NGINX)
+  // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX
   const docsApiProxy = resolveProxy(
     env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
     'http://localhost:3405',
@@ -120,7 +121,7 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3404',
+    'http://localhost:3400',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
@@ -311,8 +312,13 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
+      // CRITICAL: All VITE_* variables used in code MUST be defined here for production builds
+      // Otherwise they will be undefined in production!
+      'import.meta.env.VITE_GATEWAY_TOKEN': JSON.stringify(
+        env.VITE_GATEWAY_TOKEN || env.VITE_TELEGRAM_GATEWAY_API_TOKEN || env.TELEGRAM_GATEWAY_API_TOKEN || env.API_SECRET_TOKEN || '',
+      ),
       'import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN': JSON.stringify(
-        env.VITE_TELEGRAM_GATEWAY_API_TOKEN || env.API_SECRET_TOKEN || '',
+        env.VITE_TELEGRAM_GATEWAY_API_TOKEN || env.TELEGRAM_GATEWAY_API_TOKEN || env.API_SECRET_TOKEN || '',
       ),
       'import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL': JSON.stringify(
         env.VITE_TELEGRAM_GATEWAY_API_URL || env.VITE_API_BASE_URL || '',

@@ -1,0 +1,14 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: sentinel
+version: "3.9"
+
+x-tradingsystem-stack: "sentinel"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  telegram-redis-sentinel:
+    env: TELEGRAM_REDIS_SENTINEL_PORT
+    port: 26379
+    protocol: redis
+    owner: "Telegram Squad"
+    description: "Sentinel acompanha failover do cluster Redis"

@@ -23,7 +23,7 @@ Missão completa de **avaliação arquitetural**, **design de schema**, **especi
 
 ### 1. Architecture Review (Full-Stack Perspective)
 
-**Arquivo**: `docs/governance/reviews/architecture-2025-11-02-fullstack-review.mdx`
+**Arquivo**: `governance/reviews/architecture-2025-11-02-fullstack-review.mdx`
 
 **Conteúdo** (850 linhas):
 - ✅ Executive Summary com scorecard detalhado (10 categorias)
@@ -224,7 +224,7 @@ Missão completa de **avaliação arquitetural**, **design de schema**, **especi
 ## 🗂️ Todos os Arquivos Criados
 
 ### Categoria 1: Architecture Review (1 arquivo)
-- `docs/governance/reviews/architecture-2025-11-02-fullstack-review.mdx`
+- `governance/reviews/architecture-2025-11-02-fullstack-review.mdx`
 
 ### Categoria 2: Database Schema (8 arquivos)
 - `backend/data/timescaledb/rag/00_rag_schema_master.sql`
@@ -497,7 +497,7 @@ npm run openspec -- archive enhance-rag-services-architecture --yes
 - **[ER Diagram](../../../docs/content/diagrams/rag-services-er-diagram.puml)** - Visual
 
 ### Para Architects
-- **[Architecture Review](../../../docs/governance/reviews/architecture-2025-11-02-fullstack-review.mdx)** - Full assessment
+- **[Architecture Review](../../../governance/reviews/architecture-2025-11-02-fullstack-review.mdx)** - Full assessment
 - **[OpenSpec Proposal](../../../tools/openspec/changes/enhance-rag-services-architecture/proposal.md)** - Change proposal
 - **[Design Decisions](../../../tools/openspec/changes/enhance-rag-services-architecture/design.md)** - Technical choices
 

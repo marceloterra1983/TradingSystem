@@ -74,13 +74,13 @@ The service loads configuration from the repository root `.env`, optional `.env.
 | TimescaleDB | 5433 (host) / 5432 (container) | PostgreSQL | Signal storage (`tp_capital_signals`) |
 | Telegram Gateway DB | 5433 | PostgreSQL | Gateway queue (`telegram_gateway.messages`) |
 | Telegram Gateway API | 4010 | HTTP | Sync endpoint used by `/sync-messages` |
-| Telegram Gateway Service | 4006 | HTTP | Local MTProto service (`/health`, `/metrics`) |
+| Telegram Gateway Service | 4007 | HTTP | Local MTProto service (`/health`, `/metrics`) |
 
 ### Networking Requirements
 
 - **Development**: Service and TimescaleDB share Docker network. Dashboard proxies `/api/tp-capital` → `http://localhost:4005`.
 - **Production**: Reverse proxy exposes port 4005; TimescaleDB and Gateway DB remain internal on PostgreSQL ports.
-- **Telegram Gateway**: Runs locally (port 4006) and publishes to the API via HTTP POST or database queue.
+- **Telegram Gateway**: Runs locally (port 4007) and publishes to the API via HTTP POST or database queue.
 - **Firewall**: Allow inbound 4005 from dashboard/agents hosts; restrict PostgreSQL ports to internal networks; allow outbound HTTPS for Telegram API and telemetry.
 
 ### Port Conventions
@@ -118,7 +118,7 @@ If TimescaleDB is unavailable:
 
 - **Development**: `apps/tp-capital/infrastructure/docker-compose.yml` (builds service locally, mounts source, exposes ports 4005 and 5433).
 - **Production**: `apps/tp-capital/infrastructure/docker-compose.prod.yml` (pulls GHCR image, uses dedicated env file, exposes port 4005, persists `tp-capital-timescaledb-data` volume).
-- **Gateway Stack**: `tools/scripts/start-local-telegram-gateway.sh` provisions TimescaleDB schema, Gateway service (4006/4010), and TP Capital API.
+- **Gateway Stack**: `tools/scripts/start-local-telegram-gateway.sh` provisions TimescaleDB schema, Gateway service (4007/4010), and TP Capital API.
 
 ### Package.json Scripts
 

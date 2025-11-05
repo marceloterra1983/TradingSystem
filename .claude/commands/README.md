@@ -142,15 +142,22 @@ Gerenciamento de Docker Compose stacks.
 /docker-compose [action] [stack]
 ```
 
+**Codex alias**: `npm run codex:docker -- <action> [stack [service]]`
+ (aceita seletores de serviço/contêiner para `logs` e `ps`).
+
 **Actions**: start, stop, restart, logs, ps, down
 
 **Stacks**: infra, data, monitoring, rag, all
 
 **Exemplos**:
 ```bash
-/docker-compose start all        # Iniciar todos os stacks
-/docker-compose logs rag         # Ver logs do RAG stack
-/docker-compose restart infra    # Reiniciar infraestrutura
+/docker-compose start all             # Iniciar todos os stacks
+/docker-compose logs rag              # Ver logs do RAG stack
+/docker-compose restart infra         # Reiniciar infraestrutura
+/docker-compose logs rag rag-service  # Serviço específico
+
+# Codex CLI
+npm run codex:docker -- logs rag rag-service
 ```
 
 ---
@@ -184,10 +191,43 @@ Gerenciamento do service launcher.
 
 **Actions**: start, stop, restart, status
 
+**Codex alias**: `npm run codex:service-launcher -- <action>`
+
 **Exemplos**:
 ```bash
 /service-launcher status         # Ver status
 /service-launcher restart        # Reiniciar
+
+# Codex CLI
+npm run codex:service-launcher -- status
+npm run codex:service-launcher -- restart
+```
+
+---
+
+### `/scripts`
+Descoberta e execução rápida de utilitários em `scripts/`.
+
+```bash
+/scripts [list|search|run|summary]
+```
+
+**Actions**:
+- `list [subdir]` – Lista scripts em uma pasta
+- `search <pattern>` – Busca nomes de scripts
+- `run <path> [args]` – Executa scripts relativos à raiz
+- `summary` – Mostra o cheat sheet `scripts/README.md`
+
+**Codex alias**: `npm run codex:scripts -- <action> [...args]`
+
+**Exemplos**:
+```bash
+/scripts list docker
+/scripts run maintenance/health-check-all.sh --format json
+
+# Codex CLI
+npm run codex:scripts -- list
+npm run codex:scripts -- run maintenance/health-check-all.sh --format json
 ```
 
 ---

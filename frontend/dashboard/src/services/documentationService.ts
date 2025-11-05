@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import { getApiUrl } from '../config/api';
+import { apiConfig, getApiUrl } from '../config/api';
 
 export interface System {
   id: string;
@@ -199,6 +199,43 @@ export interface DocsFacets {
   tags: DocFacetItem[];
   statuses: DocFacetItem[];
 }
+
+const STATIC_METRICS_PATHS = [
+  '/docs/dashboard/metrics.json',
+  '/dashboard/metrics.json',
+  '/docs/metrics/index.json',
+  '/metrics/index.json',
+];
+
+const joinUrl = (base: string, path: string) => {
+  const sanitizedBase = base.replace(/\/+$/, '');
+  const sanitizedPath = path.replace(/^\/+/, '');
+  return `${sanitizedBase}/${sanitizedPath}`;
+};
+
+const buildStaticMetricsUrls = (): string[] => {
+  const candidates = new Set<string>();
+  const normalizedDocsUrl = (apiConfig.docsUrl || '').replace(/\/+$/, '');
+
+  const maybeAddAbsolute = (base: string | null | undefined) => {
+    if (!base) return;
+    for (const path of ['/dashboard/metrics.json', '/metrics/index.json']) {
+      candidates.add(joinUrl(base, path));
+    }
+  };
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    const origin = window.location.origin.replace(/\/+$/, '');
+    maybeAddAbsolute(`${origin}/docs`);
+    maybeAddAbsolute(origin);
+  }
+
+  maybeAddAbsolute(normalizedDocsUrl);
+
+  STATIC_METRICS_PATHS.forEach((path) => candidates.add(path));
+
+  return Array.from(candidates);
+};
 
 class DocumentationService {
   private client: AxiosInstance;
@@ -638,6 +675,53 @@ class DocumentationService {
       '/api/v1/docs/health/dashboard-metrics',
     );
     return response.data;
+  }
+
+  async getStaticDocumentationMetrics(): Promise<DocumentationMetrics> {
+    const candidates = buildStaticMetricsUrls();
+    let lastError: Error | null = null;
+
+    try {
+      for (const url of candidates) {
+        try {
+          const response = await fetch(url, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache',
+              Accept: 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            lastError = new Error(`HTTP ${response.status} ${response.statusText}`);
+            continue;
+          }
+
+          const payload = (await response.json()) as
+            | DocumentationMetrics
+            | { data?: DocumentationMetrics };
+
+          const data =
+            (payload as { data?: DocumentationMetrics })?.data ??
+            (payload as DocumentationMetrics);
+
+          if (!data || typeof data !== 'object' || !('healthScore' in data)) {
+            lastError = new Error('Invalid fallback metrics payload');
+            continue;
+          }
+
+          return data as DocumentationMetrics;
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+        }
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+
+    throw new Error(
+      `Fallback metrics request failed${lastError ? `: ${lastError.message}` : ''}`,
+    );
   }
 
   // ====================

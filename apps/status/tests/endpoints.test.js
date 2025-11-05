@@ -30,19 +30,19 @@ const defaultHealthData = {
   ],
   dockerContainers: [
     {
-      name: 'data-timescaledb',
+      name: 'data-questdb',
       status: 'running',
       health: 'healthy',
-      group: 'data-timescale',
-      service: 'timescaledb',
+      group: 'data-analytics',
+      service: 'questdb',
     },
   ],
   databases: [
     {
-      name: 'timescaledb',
+      name: 'questdb',
       status: 'up',
       host: 'localhost',
-      port: '5432',
+      port: '7010',
     },
   ],
   summary: {

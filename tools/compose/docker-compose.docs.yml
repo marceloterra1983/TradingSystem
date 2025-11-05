@@ -26,11 +26,12 @@ services:
     platform: linux/amd64
     env_file:
       - ../../.env
+      - ../../.env.shared
     build:
       context: ./documentation
       dockerfile: Dockerfile
     ports:
-      - "${DOCS_PORT:-3404}:80"  # MUDOU de 3400 para 3404 (evita conflitos)
+      - "${DOCUMENTATION_HUB_PORT:-3400}:80"
     volumes:
       # Docusaurus build (static site)
       - ../../docs/build:/usr/share/nginx/html:ro
@@ -61,12 +62,13 @@ services:
     platform: linux/amd64
     env_file:
       - ../../.env
+      - ../../.env.shared
     build:
       context: ../..  # CORRIGIDO: Project root para paths funcionarem
       dockerfile: backend/api/documentation-api/Dockerfile
       target: development
     ports:
-      - "${DOCS_API_PORT:-3405}:3000"  # MUDOU de 3401 para 3405 (evita conflitos)
+      - "${DOCUMENTATION_API_PORT:-3401}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000

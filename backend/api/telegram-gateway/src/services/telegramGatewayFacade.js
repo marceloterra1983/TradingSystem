@@ -459,14 +459,42 @@ export const getSession = async () => {
   if (cached) return cached;
 
   try {
-    const session = await readSessionMetadata();
-    return setCache(cacheKeys.SESSION, session);
+    // When MTProto is containerized, check session via MTProto health endpoint
+    const mtprotoServiceUrl = process.env.MTPROTO_SERVICE_URL || process.env.GATEWAY_SERVICE_URL || 'http://localhost:4007';
+    
+    const response = await fetch(`${mtprotoServiceUrl}/health`, {
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    if (!response.ok) {
+      return setCache(
+        cacheKeys.SESSION,
+        {
+          exists: false,
+          path: sessionFilePath,
+          error: 'MTProto service not accessible'
+        },
+        2000
+      );
+    }
+    
+    const health = await response.json();
+    const isConnected = health.telegram === 'connected';
+    
+    return setCache(cacheKeys.SESSION, {
+      exists: isConnected,
+      path: sessionFilePath,
+      connectedToTelegram: isConnected,
+      mtprotoUptime: health.uptime,
+      timestamp: health.timestamp,
+    });
   } catch (error) {
     return setCache(
       cacheKeys.SESSION,
       {
-        error: error.message,
+        exists: false,
         path: sessionFilePath,
+        error: error.message,
       },
       2000,
     );

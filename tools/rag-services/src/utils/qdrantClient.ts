@@ -111,7 +111,7 @@ export class QdrantClient {
 
         const response = await this.client.post<QdrantScrollResponse>(
           `/collections/${encodeURIComponent(collection)}/points/scroll`,
-          payload
+          payload,
         );
 
         if (response.data?.result?.points) {
@@ -166,7 +166,7 @@ export class QdrantClient {
         `/collections/${encodeURIComponent(collection)}/points/delete`,
         {
           points: pointIds,
-        }
+        },
       );
 
       const success = response.status === 200 && response.data?.status === 'ok';
@@ -242,4 +242,3 @@ export class QdrantClient {
  * Singleton instance
  */
 export const qdrantClient = new QdrantClient();
-

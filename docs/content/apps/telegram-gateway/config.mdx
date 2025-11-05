@@ -26,7 +26,7 @@ Run `scripts/env/validate-env.sh` whenever variables change.
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `GATEWAY_PORT` | HTTP port for health/metrics endpoints | `4006` |
+| `GATEWAY_PORT` | HTTP port for health/metrics endpoints | `4007` |
 | `TELEGRAM_API_ID` | Telegram API ID from my.telegram.org | `123456` |
 | `TELEGRAM_API_HASH` | Telegram API hash | `abc123def456` |
 | `TELEGRAM_PHONE_NUMBER` | Phone number linked to the Telegram account | `+5511999999999` |
@@ -81,7 +81,7 @@ If `TELEGRAM_GATEWAY_DB_URL` is omitted, the service falls back to TimescaleDB v
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Gateway Service | 4006 | Health/metrics, local management |
+| Gateway Service | 4007 | Health/metrics, local management |
 | Gateway REST API | 4010 | REST endpoints (`/api/messages`, `/api/channels`) |
 | TimescaleDB | 5433 (host) / 5432 (container) | Queue + TP Capital storage |
 
@@ -96,7 +96,7 @@ If `TELEGRAM_GATEWAY_DB_URL` is omitted, the service falls back to TimescaleDB v
 
 ## Validation
 
-1. Run Gateway locally: `npm install && npm start` (responds on `http://localhost:4006/health`).
+1. Run Gateway locally: `npm install && npm start` (responds on `http://localhost:4007/health`).
 2. Run REST API: `npm install && npm run dev` inside `backend/api/telegram-gateway`.
 3. Execute `./scripts/init-database.sh` (REST API) to ensure schema matches expectation.
 4. Verify end-to-end by hitting `http://localhost:4010/api/messages?limit=5` and checking message flow into TP Capital.

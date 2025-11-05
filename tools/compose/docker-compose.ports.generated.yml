@@ -1,0 +1,250 @@
+# Auto-generated port dictionary for Compose overrides
+# Do not edit manually. Run: npm run ports:sync
+# Generated: 2025-11-05T19:44:35.949Z
+
+x-tradingsystem-ports:
+  grafana:
+    env: GRAFANA_PORT
+    port: 3000
+    protocol: http
+    stack: frontend-ui
+    owner: "Observabilidade"
+    description: "Dashboards pré-provisionados para métricas internas"
+  firecrawl-api:
+    env: FIRECRAWL_API_PORT
+    port: 3002
+    protocol: http
+    stack: frontend-ui
+    owner: "Pesquisa"
+    description: "Instância self-hosted da API do Firecrawl"
+  documentation-legacy:
+    env: DOCUMENTATION_LEGACY_PORT
+    port: 3004
+    protocol: http
+    stack: frontend-ui
+    owner: "Documentacao"
+    description: "Hub de documentação Docusaurus v2 (legado)"
+  api-viewer:
+    env: API_VIEWER_PORT
+    port: 3101
+    protocol: http
+    stack: dashboard-ui
+    owner: "Documentacao"
+    description: "Visualização de especificações OpenAPI/AsyncAPI"
+  dashboard:
+    env: DASHBOARD_PORT
+    port: 3103
+    protocol: http
+    stack: dashboard-ui
+    owner: "Frontend Guild"
+    description: "Frontend principal do TradingSystem"
+  workspace-api:
+    env: WORKSPACE_API_PORT
+    port: 3200
+    protocol: http
+    stack: integrations
+    owner: "Workspace Team"
+    description: "API Workspace/Library para automações locais"
+  tp-capital-api:
+    env: TP_CAPITAL_API_PORT
+    port: 4008
+    protocol: http
+    stack: external-integrations
+    owner: "TP Capital Squad"
+    description: "API ingestora de sinais do TP Capital"
+  documentation-hub:
+    env: DOCUMENTATION_HUB_PORT
+    port: 3400
+    protocol: http
+    stack: documentation
+    owner: "Documentacao"
+    description: "Hub de documentação (Docusaurus v3)"
+  documentation-api:
+    env: DOCUMENTATION_API_PORT
+    port: 3401
+    protocol: http
+    stack: documentation
+    owner: "Documentacao"
+    description: "API de documentação (Express + FlexSearch)"
+  service-launcher:
+    env: SERVICE_LAUNCHER_PORT
+    port: 3500
+    protocol: http
+    stack: automation
+    owner: "Platform Ops"
+    description: "Service Launcher / Status UI para orquestração local"
+  firecrawl-proxy:
+    env: FIRECRAWL_PROXY_PORT
+    port: 3600
+    protocol: http
+    stack: automation
+    owner: "Pesquisa"
+    description: "Proxy Express que protege o Firecrawl upstream"
+  telegram-mtproto:
+    env: TELEGRAM_MTPROTO_PORT
+    port: 4007
+    protocol: http
+    stack: external-integrations
+    owner: "Telegram Squad"
+    description: "Gateway MTProto principal (HTTP + metrics)"
+  telegram-gateway-api:
+    env: TELEGRAM_GATEWAY_API_PORT
+    port: 4010
+    protocol: http
+    stack: external-integrations
+    owner: "Telegram Squad"
+    description: "API REST do Telegram Gateway (consulta e sync)"
+  documentation-api-viewer:
+    env: DOCUMENTATION_API_VIEWER_PORT
+    port: 3102
+    protocol: http
+    stack: dashboard-ui
+    owner: "Documentacao"
+    description: "Viewer secundário usado em validações internas"
+  telegram-timescale:
+    env: TELEGRAM_TIMESCALE_PORT
+    port: 5434
+    protocol: postgres
+    stack: db-core
+    owner: "Telegram Squad"
+    description: "TimescaleDB dedicado para ingestão do Telegram"
+  telegram-pgbouncer:
+    env: TELEGRAM_PGBOUNCER_PORT
+    port: 6434
+    protocol: postgres
+    stack: pgbouncer
+    owner: "Telegram Squad"
+    description: "PgBouncer conectado ao Timescale do Telegram"
+  telegram-redis-master:
+    env: TELEGRAM_REDIS_MASTER_PORT
+    port: 6379
+    protocol: redis
+    stack: cache
+    owner: "Telegram Squad"
+    description: "Redis master para cache quente do Telegram"
+  telegram-redis-replica:
+    env: TELEGRAM_REDIS_REPLICA_PORT
+    port: 6385
+    protocol: redis
+    stack: cache
+    owner: "Telegram Squad"
+    description: "Replica Redis dedicada a leituras do gateway"
+  telegram-redis-sentinel:
+    env: TELEGRAM_REDIS_SENTINEL_PORT
+    port: 26379
+    protocol: redis
+    stack: sentinel
+    owner: "Telegram Squad"
+    description: "Sentinel acompanha failover do cluster Redis"
+  telegram-rabbitmq:
+    env: TELEGRAM_RABBITMQ_PORT
+    port: 5672
+    protocol: rabbitmq
+    stack: messaging
+    owner: "Telegram Squad"
+    description: "Fila AMQP usada para pub/sub interno"
+  telegram-rabbitmq-admin:
+    env: TELEGRAM_RABBITMQ_ADMIN_PORT
+    port: 15672
+    protocol: http
+    stack: admin-ui-high
+    owner: "Telegram Squad"
+    description: "Console de gerenciamento do RabbitMQ"
+  timescaledb:
+    env: TIMESCALEDB_PORT
+    port: 5433
+    protocol: postgres
+    stack: db-core
+    owner: "Data Platform"
+    description: "TimescaleDB principal da stack Workspace"
+  postgres-langgraph:
+    env: POSTGRES_LANGGRAPH_PORT
+    port: 5432
+    protocol: postgres
+    stack: db-core
+    owner: "AI Guild"
+    description: "PostgreSQL usado pelos fluxos LangGraph"
+  timescaledb-pgadmin:
+    env: TIMESCALEDB_PGADMIN_PORT
+    port: 5050
+    protocol: http
+    stack: db-core
+    owner: "Data Platform"
+    description: "pgAdmin para administração do Timescale"
+  timescaledb-pgweb:
+    env: TIMESCALEDB_PGWEB_PORT
+    port: 8081
+    protocol: http
+    stack: devtools
+    owner: "Data Platform"
+    description: "pgWeb leve para consultas PostgreSQL"
+  timescaledb-exporter:
+    env: TIMESCALEDB_EXPORTER_PORT
+    port: 9187
+    protocol: http
+    stack: monitoring
+    owner: "Observabilidade"
+    description: "Exporter Prometheus para o Timescale"
+  questdb:
+    env: QUESTDB_PORT
+    port: 9002
+    protocol: http
+    stack: monitoring
+    owner: "Observabilidade"
+    description: "QuestDB usado para telemetria de workflows"
+  prometheus:
+    env: PROMETHEUS_PORT
+    port: 9090
+    protocol: http
+    stack: monitoring
+    owner: "Observabilidade"
+    description: "Servidor Prometheus central"
+  alertmanager:
+    env: ALERTMANAGER_PORT
+    port: 9093
+    protocol: http
+    stack: monitoring
+    owner: "Observabilidade"
+    description: "Alertmanager para roteamento de alertas"
+  qdrant:
+    env: QDRANT_PORT
+    port: 6333
+    protocol: http
+    stack: cache
+    owner: "AI Guild"
+    description: "Vector DB (Qdrant) para embeddings"
+  infra-redis-dev:
+    env: INFRA_REDIS_DEV_PORT
+    port: 6380
+    protocol: redis
+    stack: cache
+    owner: "AI Guild"
+    description: "Redis dev usado nos fluxos LangGraph"
+  langgraph:
+    env: LANGGRAPH_PORT
+    port: 8111
+    protocol: http
+    stack: devtools
+    owner: "AI Guild"
+    description: "Ambiente LangGraph produção local"
+  langgraph-dev:
+    env: LANGGRAPH_DEV_PORT
+    port: 8112
+    protocol: http
+    stack: devtools
+    owner: "AI Guild"
+    description: "Ambiente LangGraph dev/sandbox"
+  kestra-orchestrator:
+    env: KESTRA_ORCHESTRATOR_PORT
+    port: 8180
+    protocol: http
+    stack: automation-platforms
+    owner: "ToolingGuild"
+    description: "Kestra orchestrator UI"
+  kestra-management:
+    env: KESTRA_MANAGEMENT_PORT
+    port: 8685
+    protocol: http
+    stack: automation-platforms
+    owner: "ToolingGuild"
+    description: "Kestra management/worker endpoint"

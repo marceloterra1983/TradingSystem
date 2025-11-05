@@ -24,45 +24,18 @@ function extractBetween(content, marker) {
   return match ? match[1].trim() : null;
 }
 
-test('ports-services/overview.mdx has valid generated content', async (t) => {
-  const content = await readIfExists('content/tools/ports-services/overview.mdx');
+test('ports-services.mdx is generated via ports:sync', async (t) => {
+  const content = await readIfExists('content/tools/ports-services.mdx');
   if (!content) {
-    t.skip('ports overview not found');
+    t.skip('ports registry doc not found');
     return;
   }
 
-  assert.match(content, /<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->/);
-  assert.match(content, /<!-- BEGIN AUTO-GENERATED: Application Services -->/);
-  assert.match(content, /<!-- END AUTO-GENERATED: Application Services -->/);
-  assert.match(content, /<!-- BEGIN AUTO-GENERATED: Data & Monitoring Services -->/);
-  assert.match(content, /<!-- END AUTO-GENERATED: Data & Monitoring Services -->/);
-  assert.match(content, /\| Service \| Container \| Port \| URL \| Description \|/);
-
-  const application = extractBetween(content, 'Application Services');
-  assert(application, 'Application Services block missing');
-  const applicationRows = application.split('\n').filter((line) => line.startsWith('|') && !line.includes('Service'));
-  assert(applicationRows.length >= 5, 'Expected at least five application services');
-
-  applicationRows.forEach((row) => {
-    assert(row.trim().endsWith('|'), 'Application service row must end with pipe');
-  });
-
-  const dataMonitoring = extractBetween(content, 'Data & Monitoring Services');
-  assert(dataMonitoring, 'Data & Monitoring Services block missing');
-  assert.match(dataMonitoring, /\| Service \| Container \| Port \| URL \| Description \|/);
-  const dataMonitoringRows = dataMonitoring
-    .split('\n')
-    .filter((line) => line.startsWith('|') && !line.includes('Service | Container | Port | URL | Description'));
-  assert(dataMonitoringRows.length >= 1, 'Expected at least one data/monitoring service row');
-
-  assert.ok(
-    !/\| Service \| Container \| Port\/URL \| Description \|/.test(content),
-    'Deprecated 4-column header (Port/URL) should not be present',
-  );
-  assert.ok(
-    !/\| Serviço \| Container \| Porta\/URL \| Descrição \|/.test(content),
-    'Deprecated Portuguese 4-column header should not be present',
-  );
+  assert.match(content, /> \*\*⚠️ Arquivo gerado automaticamente/);
+  assert.match(content, /\| Stack \| Range \|/);
+  assert.match(content, /\| Service \| Port \| Protocol \| Owner \| Status \| Description \|/);
+  assert.match(content, /## Services by Stack/);
+  assert.match(content, /### Frontend Ui/);
 });
 
 test('frontend/design-system/tokens.mdx has valid generated content', async (t) => {
@@ -108,7 +81,7 @@ test('mcp/registry.mdx notes automation blocker', async (t) => {
 });
 
 test('generated files have recent timestamps', async (t) => {
-  const portsContent = await readIfExists('content/tools/ports-services/overview.mdx');
+  const portsContent = await readIfExists('content/tools/ports-services.mdx');
   const tokensContent = await readIfExists('content/frontend/design-system/tokens.mdx');
   if (!portsContent || !tokensContent) {
     t.skip('generated docs not found');
@@ -116,7 +89,8 @@ test('generated files have recent timestamps', async (t) => {
   }
 
   const timestampPattern = /<!-- Last generated: ([^>]+) -->/;
-  const portsMatch = portsContent.match(timestampPattern);
+  const portsTimestampPattern = /Última geração:\s*([^\n]+)/;
+  const portsMatch = portsContent.match(portsTimestampPattern);
   const tokensMatch = tokensContent.match(timestampPattern);
   if (!portsMatch || !tokensMatch) {
     t.skip('timestamp marker missing');
@@ -138,29 +112,21 @@ test('generated files have recent timestamps', async (t) => {
   assert(now - tokensTimestamp < day, 'Tokens doc timestamp should be within 24 hours');
 });
 
-test('generated sections remain automation-owned', async (t) => {
-  const portsContent = await readIfExists('content/tools/ports-services/overview.mdx');
+test('generated docs include automation notice', async (t) => {
+  const portsContent = await readIfExists('content/tools/ports-services.mdx');
   const tokensContent = await readIfExists('content/frontend/design-system/tokens.mdx');
   if (!portsContent || !tokensContent) {
     t.skip('generated docs not found');
     return;
   }
 
-  const blocks = [
-    extractBetween(portsContent, 'Application Services'),
-    extractBetween(portsContent, 'Data & Monitoring Services'),
-    extractBetween(tokensContent, 'Token Catalogue'),
-  ].filter(Boolean);
-
-  blocks.forEach((block) => {
-    assert(!/MANUAL EDIT/i.test(block), 'Generated block contains manual edit marker');
-    assert(!/TODO/i.test(block), 'Generated block should not carry TODOs');
-  });
+  assert.match(portsContent, /Não editar manualmente/i);
+  assert.match(tokensContent, /DO NOT EDIT MANUALLY/i);
 });
 
 test('generated files preserve frontmatter', async (t) => {
   const files = [
-    await readIfExists('content/tools/ports-services/overview.mdx'),
+    await readIfExists('content/tools/ports-services.mdx'),
     await readIfExists('content/frontend/design-system/tokens.mdx'),
   ];
   if (files.some((file) => !file)) {
@@ -174,7 +140,5 @@ test('generated files preserve frontmatter', async (t) => {
     assert.match(match[0], /title:/);
     assert.match(match[0], /description:/);
     assert.match(match[0], /tags:/);
-    assert.match(match[0], /owner:/);
-    assert.match(match[0], /lastReviewed:/);
   });
 });

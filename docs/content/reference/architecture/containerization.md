@@ -69,7 +69,7 @@ lastReviewed: '2025-10-27'
 
 ```
 ┌─────────────────────────────────────────┐
-│  Telegram Gateway (LOCAL - Port 4006)   │  ← systemd service
+│  Telegram Gateway (LOCAL - Port 4007)   │  ← systemd service
 │  - Telegram auth & session files        │
 │  - Message reception                    │
 │  - HTTP publisher                       │

@@ -69,44 +69,50 @@ export class FileWatcherService {
   /**
    * Initialize and start file watcher
    */
-  async start(): Promise<void> {
-    if (!this.enabled) {
-      logger.info('File Watcher is disabled');
-      return;
-    }
-
-    try {
-      logger.info('Starting File Watcher Service', {
-        debounceMs: this.debounceMs,
-      });
-
-      // Get collections with auto-update enabled
-      const collections = collectionManager.getAutoUpdateCollections();
-
-      if (collections.length === 0) {
-        logger.warn('No collections with auto-update enabled');
+  start(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.enabled) {
+        logger.info('File Watcher is disabled');
+        resolve();
         return;
       }
 
-      // Start watching directories
-      await this.initializeWatcher(collections);
+      try {
+        logger.info('Starting File Watcher Service', {
+          debounceMs: this.debounceMs,
+        });
 
-      logger.info('File Watcher Service started', {
-        watchedCollections: collections.length,
-        directories: collections.map(c => c.directory),
-      });
-    } catch (error) {
-      logger.error('Failed to start File Watcher Service', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-      throw error;
-    }
+        // Get collections with auto-update enabled
+        const collections = collectionManager.getAutoUpdateCollections();
+
+        if (collections.length === 0) {
+          logger.warn('No collections with auto-update enabled');
+          resolve();
+          return;
+        }
+
+        // Start watching directories
+        this.initializeWatcher(collections);
+
+        logger.info('File Watcher Service started', {
+          watchedCollections: collections.length,
+          directories: collections.map(c => c.directory),
+        });
+
+        resolve();
+      } catch (error) {
+        logger.error('Failed to start File Watcher Service', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+        reject(error instanceof Error ? error : new Error('Failed to start File Watcher Service'));
+      }
+    });
   }
 
   /**
    * Initialize chokidar watcher
    */
-  private async initializeWatcher(collections: CollectionConfig[]): Promise<void> {
+  private initializeWatcher(collections: CollectionConfig[]): void {
     // Build watch paths with glob patterns
     const watchPaths = collections.map(c => {
       const extensions = c.fileTypes.map(ext => ext.startsWith('.') ? ext : `.${ext}`);
@@ -196,7 +202,7 @@ export class FileWatcherService {
       // Handle based on event type
       if (eventType === 'unlink') {
         // File deleted - remove from vector database
-        this.handleFileDelete(filePath, collection);
+        void this.handleFileDelete(filePath, collection);
       } else {
         // File added or changed - schedule ingestion with debounce
         this.scheduleIngestion(filePath, collection);
@@ -224,9 +230,9 @@ export class FileWatcherService {
     }
 
     // Schedule new ingestion after debounce period
-    const timeout = setTimeout(async () => {
+    const timeout = setTimeout(() => {
       this.pendingChanges.delete(filePath);
-      await this.triggerIngestion(filePath, collection);
+      void this.triggerIngestion(filePath, collection);
     }, this.debounceMs);
 
     this.pendingChanges.set(filePath, {
@@ -276,7 +282,7 @@ export class FileWatcherService {
       // Delete all chunks for this file from Qdrant
       const chunksDeleted = await qdrantClient.deleteFileChunks(
         collection.name,
-        filePath
+        filePath,
       );
 
       if (chunksDeleted > 0) {

@@ -1,6 +1,17 @@
 /**
  * Utility formatters for Telegram Gateway
+ *
+ * @deprecated Date/time formatters migrated to timestampUtils.
+ * Use timestampUtils for robust timezone handling.
  */
+
+import {
+  normalizeTimestamp,
+  formatTimestamp as formatTsRobust,
+  formatRelativeTime as formatRelTsRobust,
+  APP_TIMEZONE,
+} from '../../../../utils/timestampUtils';
+import { formatInTimeZone } from 'date-fns-tz';
 
 /**
  * Format bytes to human-readable string
@@ -32,33 +43,28 @@ export function formatUptime(ms: number): string {
 
 /**
  * Format date to readable string
+ * @deprecated Use formatTimestamp from timestampUtils instead
  */
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+export function formatDate(dateString: string | number): string {
+  const normalized = normalizeTimestamp(dateString);
+  if (!normalized) return '–';
+
+  try {
+    const date = new Date(normalized);
+    return formatInTimeZone(date, APP_TIMEZONE, 'dd/MM/yyyy, HH:mm');
+  } catch (error) {
+    return '–';
+  }
 }
 
 /**
  * Format relative time (e.g., "2 minutes ago")
+ * @deprecated Use formatRelativeTime from timestampUtils instead
  */
-export function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
+export function formatRelativeTime(dateString: string | number): string {
+  const normalized = normalizeTimestamp(dateString);
+  if (!normalized) return '–';
 
-  if (diffDay > 0) return `${diffDay}d atrás`;
-  if (diffHour > 0) return `${diffHour}h atrás`;
-  if (diffMin > 0) return `${diffMin}min atrás`;
-  return `${diffSec}s atrás`;
+  return formatRelTsRobust(normalized);
 }
 

@@ -16,6 +16,7 @@ Implemented comprehensive API documentation for RAG Services using OpenAPI 3.0 s
 ✅ **Multiple Formats** - JSON and YAML OpenAPI specifications available
 ✅ **JWT Authentication** - Documented security scheme with examples
 ✅ **Request/Response Examples** - Comprehensive examples for all operations
+✅ **Latency Guard Visibility** - Documented `/latency-alerts` monitoring endpoint with schema support
 
 ---
 
@@ -100,6 +101,8 @@ paths:
   /admin/cache:
     get: # Get cache statistics
     delete: # Clear cache
+  /latency-alerts:
+    get: # List recent latency guard alerts (supports filters)
 
 components:
   securitySchemes:

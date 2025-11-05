@@ -389,9 +389,9 @@ ls -la .claude/commands/
 
 ### Documentação Adicional
 
-- [Code Quality Checklist](/development/code-quality-checklist)
-- [Code Quality Commands](/tools/development/code-quality-commands)
-- [Claude Commands Overview](/tools/ai/claude-commands-ready)
+- [Code Quality Checklist](../../development/code-quality-checklist)
+- [Code Quality Commands](../development/code-quality-commands)
+- [Claude Commands Overview](./claude-commands-ready)
 - `reports/2025-11-02/WORKFLOW-SYSTEM-READY.md`
 
 ---
@@ -442,7 +442,7 @@ claude /quality-check --fix
 - **CLAUDE.md** (arquivo na raiz) – Instruções do projeto
 - **.claude/commands/README.md** – Índice completo dos comandos
 - **scripts/maintenance/** – Scripts utilitários de manutenção
-- **scripts/maintenance/health-check-all.sh** – Checklist de saúde completo
+- **scripts/maintenance/health-check-all.sh** – Checklist de saúde completo (ver [repositório](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/maintenance/health-check-all.sh))
 
 ---
 

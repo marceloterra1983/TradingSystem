@@ -1,0 +1,9 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: {{STACK_NAME}}
+version: "3.9"
+
+x-tradingsystem-stack: "{{STACK_NAME}}"
+x-tradingsystem-generated-at: "{{TIMESTAMP}}"
+
+x-tradingsystem-ports:
+{{SERVICES}}

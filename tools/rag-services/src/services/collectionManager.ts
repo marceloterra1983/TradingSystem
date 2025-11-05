@@ -198,7 +198,7 @@ export class CollectionManager {
       await fs.writeFile(
         this.configPath,
         JSON.stringify(updatedConfig, null, 2),
-        'utf-8'
+        'utf-8',
       );
 
       logger.info('Collections configuration saved', {
@@ -480,7 +480,7 @@ export class CollectionManager {
     const totalFiles = filesInDirectory.length;
     
     // Scan ALL indexed files to get accurate pending count
-    let indexedFilePaths = new Set<string>();
+    const indexedFilePaths = new Set<string>();
     
     if (chunkCount > 0) {
       try {

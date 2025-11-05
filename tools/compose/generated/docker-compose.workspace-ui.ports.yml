@@ -1,0 +1,32 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: workspace-ui
+version: "3.9"
+
+x-tradingsystem-stack: "workspace-ui"
+x-tradingsystem-generated-at: "2025-11-05T15:12:31.659Z"
+
+x-tradingsystem-ports:
+  api-viewer:
+    env: API_VIEWER_PORT
+    port: 3101
+    protocol: http
+    owner: "Documentacao"
+    description: "Visualização de especificações OpenAPI/AsyncAPI"
+  dashboard:
+    env: DASHBOARD_PORT
+    port: 3103
+    protocol: http
+    owner: "Frontend Guild"
+    description: "Frontend principal do TradingSystem"
+  workspace-api:
+    env: WORKSPACE_API_PORT
+    port: 3200
+    protocol: http
+    owner: "Workspace Team"
+    description: "API Workspace/Library para automações locais"
+  documentation-api-viewer:
+    env: DOCUMENTATION_API_VIEWER_PORT
+    port: 3102
+    protocol: http
+    owner: "Documentacao"
+    description: "Viewer secundário usado em validações internas"

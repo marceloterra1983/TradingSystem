@@ -9,7 +9,7 @@ package "CURRENT ARCHITECTURE (B+ / 85)" {
     
     rectangle "Telegram\nServers" as TelegramCurrent <<external>>
     
-    rectangle "Gateway\nMTProto\n(Port 4006)" as GatewayCurrent <<service>> #LightGreen
+    rectangle "Gateway\nMTProto\n(Port 4007)" as GatewayCurrent <<service>> #LightGreen
     
     database "TimescaleDB\n(Only)\n\n• Hypertable\n• Compression 5:1\n• Retention 90d\n• ~10GB/month" as TimescaleCurrent <<database>> #LightYellow
     
@@ -50,7 +50,7 @@ package "PROPOSED ARCHITECTURE (A / 95)" {
     
     rectangle "Telegram\nServers" as TelegramProposed <<external>>
     
-    rectangle "Gateway\nMTProto\n(Port 4006)" as GatewayProposed <<service>> #LightGreen
+    rectangle "Gateway\nMTProto\n(Port 4007)" as GatewayProposed <<service>> #LightGreen
     
     rectangle "Redis Cluster\n(Hot Cache)\n\n• TTL: 1 hour\n• Dedup cache: 2h\n• Size: ~1GB" as Redis <<cache>> #Orange
     

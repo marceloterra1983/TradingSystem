@@ -14,6 +14,8 @@ import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../middleware/responseWrapper';
 import { getCacheService } from '../services/cacheService';
 import { collectionManager } from '../services/collectionManager';
+import { asyncHandler } from '../utils/asyncHandler';
+import { latencyMonitor } from '../services/latencyMonitor';
 
 const router = Router();
 
@@ -80,7 +82,7 @@ async function generateEmbedding(query: string, model: string): Promise<number[]
       },
       {
         timeout: 30000, // 30s timeout for embedding generation
-      }
+      },
     );
 
     if (!response.data || !response.data.embedding) {
@@ -104,7 +106,7 @@ async function searchQdrant(
   collectionName: string,
   embedding: number[],
   limit: number,
-  scoreThreshold: number
+  scoreThreshold: number,
 ): Promise<any[]> {
   try {
     const response = await axios.post(
@@ -118,7 +120,7 @@ async function searchQdrant(
       },
       {
         timeout: 10000, // 10s timeout for search
-      }
+      },
     );
 
     return response.data.result || [];
@@ -140,7 +142,7 @@ async function searchQdrant(
  * Semantic search using direct Qdrant vector similarity
  * (Bypasses LlamaIndex to avoid LLM overhead)
  */
-router.post('/query', async (req: Request, res: Response) => {
+router.post('/query', asyncHandler(async (req: Request, res: Response) => {
   const startTime = Date.now();
 
   try {
@@ -176,30 +178,39 @@ router.post('/query', async (req: Request, res: Response) => {
       score_threshold,
     });
 
-    // Check cache first
-    const cacheService = getCacheService();
-    const cacheKey = `query:${crypto
-      .createHash('md5')
-      .update(`${trimmedQuery}:${collection}:${limit}:${score_threshold}`)
-      .digest('hex')}`;
-
-    if (cacheService.isAvailable()) {
-      const cached = await cacheService.get<QueryCachePayload>(cacheKey);
-      if (cached) {
-        logger.debug('Returning cached query results', { query: trimmedQuery, collection });
-        return sendSuccess(res, {
-          ...cached,
-          cached: true,
-        });
-      }
-    }
-
     // Get collection config to determine embedding model
     const collectionConfig = collectionManager.getCollection(collection);
     const embeddingModel = collectionConfig?.embeddingModel || DEFAULT_EMBEDDING_MODEL;
 
     // Determine Qdrant collection name (may have model suffix)
     const qdrantCollectionName = collectionConfig?.name || collection;
+
+    // Check cache first
+    const cacheService = getCacheService();
+    const cacheKey = `query:${crypto
+      .createHash('md5')
+      .update(`${trimmedQuery}:${qdrantCollectionName}:${limit}:${score_threshold}`)
+      .digest('hex')}`;
+
+    if (cacheService.isAvailable()) {
+      const cached = await cacheService.get<QueryCachePayload>(cacheKey);
+      if (cached) {
+        logger.debug('Returning cached query results', { query: trimmedQuery, collection: qdrantCollectionName });
+        latencyMonitor.recordSample({
+          collection: qdrantCollectionName,
+          operation: 'query',
+          durationMs: Date.now() - startTime,
+          metadata: {
+            cached: true,
+            limit,
+          },
+        });
+        return sendSuccess(res, {
+          ...cached,
+          cached: true,
+        });
+      }
+    }
 
     logger.debug('Query configuration', {
       collection,
@@ -223,7 +234,7 @@ router.post('/query', async (req: Request, res: Response) => {
       qdrantCollectionName,
       embedding,
       limit,
-      score_threshold
+      score_threshold,
     );
     const searchTime = Date.now() - searchStart;
 
@@ -293,6 +304,17 @@ router.post('/query', async (req: Request, res: Response) => {
       await cacheService.set(cacheKey, results, 300);
     }
 
+    latencyMonitor.recordSample({
+      collection: qdrantCollectionName,
+      operation: 'query',
+      durationMs: executionTimeMs,
+      metadata: {
+        cached: false,
+        limit,
+        scoreThreshold: score_threshold,
+      },
+    });
+
     logger.info('RAG query completed successfully', {
       query: trimmedQuery.substring(0, 100),
       resultsCount: formattedResults.length,
@@ -325,6 +347,6 @@ router.post('/query', async (req: Request, res: Response) => {
 
     return sendError(res, 'QUERY_FAILED', 'Failed to execute query', 500);
   }
-});
+}));
 
 export default router;

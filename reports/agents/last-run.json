@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-11-05T12:01:27.880Z",
+  "schemaVersion": "1.1.0",
+  "mode": "local",
+  "includeAuto": false,
+  "agentsGenerated": 106,
+  "categories": [
+    "Arquitetura & Plataforma",
+    "Backend & Serviços",
+    "Frontend & UX",
+    "Dados & Analytics",
+    "IA, ML & RAG",
+    "Documentação & Conteúdo",
+    "Pesquisa & Estratégia",
+    "QA & Observabilidade",
+    "MCP & Automação"
+  ],
+  "status": "success",
+  "warnings": [],
+  "errors": []
+}

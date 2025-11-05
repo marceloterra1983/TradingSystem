@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+      - ../../.env.shared
     networks:
       - firecrawl_network
       - tradingsystem_backend
@@ -54,6 +55,7 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+      - ../../.env.shared
     networks:
       - firecrawl_network
     healthcheck:
@@ -80,6 +82,7 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+      - ../../.env.shared
     networks:
       - firecrawl_network
     healthcheck:
@@ -102,6 +105,7 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+      - ../../.env.shared
     networks:
       - firecrawl_network
     healthcheck:
@@ -124,6 +128,7 @@ services:
     restart: unless-stopped
     env_file:
       - ../../.env
+      - ../../.env.shared
     networks:
       - firecrawl_network
     healthcheck:

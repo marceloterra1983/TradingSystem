@@ -1,0 +1,32 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: db-core
+version: "3.9"
+
+x-tradingsystem-stack: "db-core"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  telegram-timescale:
+    env: TELEGRAM_TIMESCALE_PORT
+    port: 5434
+    protocol: postgres
+    owner: "Telegram Squad"
+    description: "TimescaleDB dedicado para ingestão do Telegram"
+  timescaledb:
+    env: TIMESCALEDB_PORT
+    port: 5433
+    protocol: postgres
+    owner: "Data Platform"
+    description: "TimescaleDB principal da stack Workspace"
+  postgres-langgraph:
+    env: POSTGRES_LANGGRAPH_PORT
+    port: 5432
+    protocol: postgres
+    owner: "AI Guild"
+    description: "PostgreSQL usado pelos fluxos LangGraph"
+  timescaledb-pgadmin:
+    env: TIMESCALEDB_PGADMIN_PORT
+    port: 5050
+    protocol: http
+    owner: "Data Platform"
+    description: "pgAdmin para administração do Timescale"

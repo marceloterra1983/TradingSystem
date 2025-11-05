@@ -49,7 +49,6 @@ services:
       - LOG_LEVEL=info
 
       # TimescaleDB Connection (Central Database)
-      - TIMESCALEDB_HOST=data-timescale
       - TIMESCALEDB_PORT=5432
       - TIMESCALEDB_DATABASE=${TIMESCALEDB_DATABASE:-tradingsystem}
       - TIMESCALEDB_USER=${TIMESCALEDB_USER:-timescale}

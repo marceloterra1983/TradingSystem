@@ -128,6 +128,7 @@ export default function DocumentationMetricsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [dataSource, setDataSource] = useState<'api' | 'static'>('api');
 
   const loadMetrics = useCallback(
     async (showSpinner: boolean = true) => {
@@ -136,18 +137,39 @@ export default function DocumentationMetricsPage() {
       }
       setError(null);
 
+      const applyMetrics = (data: DocumentationMetrics, source: 'api' | 'static') => {
+        setMetrics(data);
+        setDataSource(source);
+        setLastUpdated(
+          data.metadata?.generatedAt ? new Date(data.metadata.generatedAt) : new Date(),
+        );
+      };
+
       try {
         const response = await documentationService.getDocumentationMetrics();
-        if (!response.success) {
+        if (!response.success || !response.data) {
           throw new Error('Received unsuccessful response from documentation metrics API');
         }
 
-        setMetrics(response.data);
-        setLastUpdated(response.data.metadata?.generatedAt ? new Date(response.data.metadata.generatedAt) : new Date());
+        applyMetrics(response.data, 'api');
+        return;
       } catch (err) {
-        console.error('[DocumentationMetrics] Failed to load metrics:', err);
-        setError((err as Error).message);
-        setMetrics(null);
+        console.error('[DocumentationMetrics] Failed to load metrics from API, trying snapshot:', err);
+        try {
+          const fallback = await documentationService.getStaticDocumentationMetrics();
+          applyMetrics(fallback, 'static');
+          return;
+        } catch (fallbackErr) {
+          console.error('[DocumentationMetrics] Fallback snapshot load failed:', fallbackErr);
+          const apiMessage = err instanceof Error ? err.message : 'API request failed';
+          const fallbackMessage =
+            fallbackErr instanceof Error ? fallbackErr.message : 'Snapshot unavailable';
+          setError(
+            `Unable to load documentation metrics (API: ${apiMessage}; snapshot: ${fallbackMessage})`,
+          );
+          setMetrics(null);
+          setDataSource('api');
+        }
       } finally {
         if (showSpinner) {
           setLoading(false);
@@ -187,6 +209,8 @@ export default function DocumentationMetricsPage() {
   const trendMeta = getTrendMeta(metrics?.healthScore?.trend as Trend);
   const healthStatusClass =
     HEALTH_COLORS[(metrics?.healthScore?.status as keyof typeof HEALTH_COLORS) || 'good'] || '';
+  const sourceBadgeVariant = dataSource === 'api' ? 'success' : 'warning';
+  const sourceLabel = dataSource === 'api' ? 'Live API' : 'Docs Snapshot';
 
   const handleRefresh = () => {
     void loadMetrics();
@@ -264,11 +288,16 @@ export default function DocumentationMetricsPage() {
           </p>
           {lastUpdated && (
             <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-500">
-              Last updated {lastUpdated.toLocaleString()}
+              Last updated {lastUpdated.toLocaleString()} · Source {sourceLabel}
             </p>
           )}
         </div>
         <div className="flex items-center gap-3">
+          {metrics && (
+            <Badge variant={sourceBadgeVariant} className="capitalize">
+              {sourceLabel}
+            </Badge>
+          )}
           <Button
             onClick={handleRefresh}
             variant="primary"

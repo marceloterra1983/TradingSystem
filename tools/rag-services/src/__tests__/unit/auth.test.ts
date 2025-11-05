@@ -81,10 +81,10 @@ describe('Authentication Middleware', () => {
   });
 
   describe('verifyJWT middleware', () => {
-    it('should reject requests without Authorization header', async () => {
+    it('should reject requests without Authorization header', () => {
       mockRequest.headers = {};
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -99,12 +99,12 @@ describe('Authentication Middleware', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should reject requests with invalid Authorization format', async () => {
+    it('should reject requests with invalid Authorization format', () => {
       mockRequest.headers = {
         authorization: 'InvalidFormat token-here',
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -116,22 +116,22 @@ describe('Authentication Middleware', () => {
       );
     });
 
-    it('should reject requests with malformed Bearer token', async () => {
+    it('should reject requests with malformed Bearer token', () => {
       mockRequest.headers = {
         authorization: 'Bearer',
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
     });
 
-    it('should reject requests with invalid JWT token', async () => {
+    it('should reject requests with invalid JWT token', () => {
       mockRequest.headers = {
         authorization: 'Bearer invalid.jwt.token',
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -143,13 +143,13 @@ describe('Authentication Middleware', () => {
       );
     });
 
-    it('should accept requests with valid JWT token', async () => {
+    it('should accept requests with valid JWT token', () => {
       const token = generateToken({ userId: 'user-123', role: 'admin' });
       mockRequest.headers = {
         authorization: `Bearer ${token}`,
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(statusMock).not.toHaveBeenCalled();
@@ -157,14 +157,14 @@ describe('Authentication Middleware', () => {
       expect((mockRequest as any).user.userId).toBe('user-123');
     });
 
-    it('should attach user to request object', async () => {
+    it('should attach user to request object', () => {
       const payload = { userId: 'user-456', role: 'viewer' };
       const token = generateToken(payload);
       mockRequest.headers = {
         authorization: `Bearer ${token}`,
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect((mockRequest as any).user).toEqual(expect.objectContaining(payload));
     });
@@ -232,7 +232,7 @@ describe('Authentication Middleware', () => {
   });
 
   describe('integration: verifyJWT + requireRole', () => {
-    it('should work together for role-based access control', async () => {
+    it('should work together for role-based access control', () => {
       // Generate token for viewer
       const token = generateToken({ userId: 'user-789', role: 'viewer' });
       mockRequest.headers = {
@@ -240,7 +240,7 @@ describe('Authentication Middleware', () => {
       };
 
       // First, verify JWT
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
       expect(mockNext).toHaveBeenCalledTimes(1);
 
       // Reset mocks
@@ -255,13 +255,13 @@ describe('Authentication Middleware', () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should grant access for admin role on admin endpoints', async () => {
+    it('should grant access for admin role on admin endpoints', () => {
       const token = generateToken({ userId: 'admin-user', role: 'admin' });
       mockRequest.headers = {
         authorization: `Bearer ${token}`,
       };
 
-      await verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
+      verifyJWT(mockRequest as Request, mockResponse as Response, mockNext);
       expect(mockNext).toHaveBeenCalledTimes(1);
 
       mockNext.mockClear();

@@ -9,6 +9,57 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../../../../');
 dotenv.config({ path: path.join(projectRoot, '.env') });
 
+const resolveTimescaleConfig = () => {
+  const defaultHost =
+    process.env.TP_CAPITAL_DB_HOST ||
+    process.env.TP_CAPITAL_DATABASE_HOST ||
+    process.env.TIMESCALEDB_HOST ||
+    'localhost';
+
+  const defaultPort = Number(
+    process.env.TP_CAPITAL_DB_PORT ||
+      process.env.TP_CAPITAL_DATABASE_PORT ||
+      process.env.TIMESCALEDB_PORT ||
+      5440,
+  );
+
+  const defaultDatabase =
+    process.env.TP_CAPITAL_DB_NAME ||
+    process.env.TP_CAPITAL_DATABASE ||
+    process.env.TIMESCALEDB_DATABASE ||
+    'tp_capital_db';
+
+  const defaultSchema =
+    process.env.TP_CAPITAL_DB_SCHEMA ||
+    process.env.TP_CAPITAL_DATABASE_SCHEMA ||
+    process.env.TIMESCALEDB_SCHEMA ||
+    'signals';
+
+  const defaultUser =
+    process.env.TP_CAPITAL_DB_USER ||
+    process.env.TP_CAPITAL_DATABASE_USER ||
+    process.env.TIMESCALEDB_USER ||
+    'tp_capital';
+
+  const defaultPassword =
+    process.env.TP_CAPITAL_DB_PASSWORD ||
+    process.env.TP_CAPITAL_DATABASE_PASSWORD ||
+    process.env.TIMESCALEDB_PASSWORD ||
+    'tp_capital_secure_pass_2024';
+
+  return {
+    host: defaultHost,
+    port: defaultPort,
+    database: defaultDatabase,
+    schema: defaultSchema,
+    user: defaultUser,
+    password: defaultPassword,
+    maxConnections: Number(process.env.DB_POOL_MAX || process.env.TP_CAPITAL_POOL_MAX || 10),
+    idleTimeoutMs: Number(process.env.DB_POOL_IDLE_TIMEOUT || process.env.TP_CAPITAL_IDLE_TIMEOUT || 30000),
+    connectionTimeoutMs: Number(process.env.DB_POOL_CONNECTION_TIMEOUT || process.env.TP_CAPITAL_CONNECTION_TIMEOUT || 2000),
+  };
+};
+
 export const config = {
   server: {
     port: Number(process.env.PORT || 4005),
@@ -16,19 +67,7 @@ export const config = {
     logLevel: process.env.LOG_LEVEL || 'info',
   },
 
-  timescale: {
-    host: process.env.TIMESCALEDB_HOST || 'timescaledb',
-    port: Number(process.env.TIMESCALEDB_PORT || 5432),
-    database: process.env.TIMESCALEDB_DATABASE || 'APPS-TPCAPITAL',
-    schema: process.env.TIMESCALEDB_SCHEMA || 'tp_capital',
-    user: process.env.TIMESCALEDB_USER || 'timescale',
-    password: process.env.TIMESCALEDB_PASSWORD || '',
-
-    // Connection pool settings
-    maxConnections: Number(process.env.DB_POOL_MAX || 10),
-    idleTimeoutMs: Number(process.env.DB_POOL_IDLE_TIMEOUT || 30000),
-    connectionTimeoutMs: Number(process.env.DB_POOL_CONNECTION_TIMEOUT || 2000),
-  },
+  timescale: resolveTimescaleConfig(),
 
   gateway: {
     secretToken: process.env.GATEWAY_SECRET_TOKEN || '',
@@ -53,11 +92,11 @@ export function validateConfig(logger) {
   const errors = [];
 
   if (!config.timescale.host) {
-    errors.push('TIMESCALEDB_HOST must be provided');
+    errors.push('TP_CAPITAL_DB_HOST (or TIMESCALEDB_HOST) must be provided');
   }
 
   if (!config.timescale.password) {
-    errors.push('TIMESCALEDB_PASSWORD must be provided');
+    errors.push('TP_CAPITAL_DB_PASSWORD (or TIMESCALEDB_PASSWORD) must be provided');
   }
 
   if (!config.gateway.secretToken) {

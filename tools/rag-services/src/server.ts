@@ -27,6 +27,7 @@ import adminRoutes from './routes/admin';
 import docsRoutes from './routes/docs';
 import ingestionLogsRoutes from './routes/ingestion-logs';
 import ingestionBatchRoutes from './routes/ingestion-batch';
+import latencyRoutes from './routes/latency';
 import queryRoutes from './routes/query';
 
 /**
@@ -141,6 +142,7 @@ app.use('/api/v1/rag/models', modelsRoutes);
 app.use('/api/v1/rag/directories', directoriesRoutes);
 app.use('/api/v1/rag/ingestion/logs', ingestionLogsRoutes);
 app.use('/api/v1/rag/ingestion', ingestionBatchRoutes);  // Batch ingestion
+app.use('/api/v1/rag', latencyRoutes);
 app.use('/api/v1/rag', queryRoutes);  // Query endpoint (generic, must come after specific routes!)
 app.use('/api/v1/admin', adminRoutes);
 
@@ -273,8 +275,12 @@ async function shutdown(signal: string): Promise<void> {
 /**
  * Handle process signals
  */
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => {
+  void shutdown('SIGTERM');
+});
+process.on('SIGINT', () => {
+  void shutdown('SIGINT');
+});
 
 /**
  * Handle uncaught errors

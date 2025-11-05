@@ -1,0 +1,97 @@
+{
+  "name": "code-enhancement",
+  "version": "1.0.0",
+  "description": "End-to-end workflow for TradingSystem code enhancements with architecture, quality, and release gates.",
+  "trigger": {
+    "type": "manual",
+    "config": {
+      "command_hint": "/workflow-orchestrator run code-enhancement"
+    }
+  },
+  "environment": {
+    "NODE_ENV": "development"
+  },
+  "tasks": [
+    {
+      "id": "context-prime",
+      "name": "Load project context",
+      "type": "shell",
+      "command": "claude /context-prime",
+      "timeout": 120,
+      "retry": {
+        "attempts": 1,
+        "delay": 5000
+      },
+      "outputs": [
+        "README digest",
+        "Tracked files snapshot"
+      ]
+    },
+    {
+      "id": "commands-catalog",
+      "name": "Review available commands",
+      "type": "shell",
+      "command": "claude /commands-raiox",
+      "depends_on": [
+        "context-prime"
+      ],
+      "timeout": 60
+    },
+    {
+      "id": "architecture-alignment",
+      "name": "Align on architecture plan",
+      "type": "documentation",
+      "instructions": "Engage backend-architect for new service/API planning and architect-reviewer for boundary validation. Capture decisions in docs/content/reference/adrs or relevant design notes.",
+      "depends_on": [
+        "commands-catalog"
+      ]
+    },
+    {
+      "id": "feature-scaffold",
+      "name": "Scaffold feature work",
+      "type": "shell",
+      "command": "claude /create-feature ${env.FEATURE_NAME}",
+      "depends_on": [
+        "architecture-alignment"
+      ],
+      "timeout": 300
+    },
+    {
+      "id": "quality-gates",
+      "name": "Apply linting, tests, and reviews",
+      "type": "shell",
+      "command": "claude /lint --fix && claude /write-tests ${env.FEATURE_PATH} && claude /code-review --full ${env.FEATURE_PATH}",
+      "depends_on": [
+        "feature-scaffold"
+      ],
+      "timeout": 1200
+    },
+    {
+      "id": "optimization-and-release",
+      "name": "Optimize, document, and prep release",
+      "type": "shell",
+      "command": "claude /optimize-api-performance --rest && claude /prepare-release patch",
+      "depends_on": [
+        "quality-gates"
+      ],
+      "timeout": 900
+    },
+    {
+      "id": "documentation-sync",
+      "name": "Update documentation and changelog",
+      "type": "documentation",
+      "instructions": "Invoke documentation-expert to update README/docs plus changelog-generator for release notes. Ensure docs/content and CHANGELOG.md reflect the enhancement.",
+      "depends_on": [
+        "optimization-and-release"
+      ]
+    }
+  ],
+  "notifications": {
+    "channels": [
+      "slack",
+      "email"
+    ],
+    "on_completion": true,
+    "on_failure": true
+  }
+}

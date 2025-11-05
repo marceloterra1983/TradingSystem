@@ -5,6 +5,7 @@ import {
   BrainCircuit,
   Gauge,
   Server,
+  ShieldCheck,
   Workflow,
 } from 'lucide-react';
 
@@ -43,6 +44,9 @@ const CatalogPage = React.lazy(
 const DocumentationMetricsPage = React.lazy(
   () => import('../components/pages/DocumentationMetricsPage'),
 );
+const GovernancePage = React.lazy(
+  () => import('../components/pages/GovernancePage'),
+);
 const TelegramGatewayFinal = React.lazy(
   () => import('../components/pages/TelegramGatewayFinal'),
 );
@@ -70,6 +74,7 @@ const kestraContent = () => <KestraPage />;
 const claudeCatalogContent = () => <CatalogPage />;
 const launcherContent = () => <LauncherPage />;
 const documentationMetricsContent = () => <DocumentationMetricsPage />;
+const governanceContent = () => <GovernancePage />;
 const portsContent = () => <PortsPage />;
 
 /**
@@ -247,6 +252,17 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [], // Empty - uses customContent
         customContent: docusaurusContent,
+      },
+      {
+        id: 'governance',
+        title: 'Governance',
+        header: {
+          title: 'Governance Hub',
+          subtitle: 'Strategy, controls, evidence and review cadences em tempo real',
+        },
+        parts: [],
+        customContent: governanceContent,
+        icon: <ShieldCheck className="h-4 w-4" />,
       },
       {
         id: 'documentation-metrics',

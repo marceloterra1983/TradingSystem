@@ -19,7 +19,20 @@ reports/
 ├── ai-generated/                 🤖 Arquivos gerados por IA
 │   ├── analysis/               📊 Análises e relatórios
 │   └── summaries/              📝 Resumos e sínteses
-└── proposals/                  📋 Propostas temporárias
+├── proposals/                  📋 Propostas temporárias
+└── root-archive/               🗃️ Histórico da raiz (categoria temática)
+    ├── telegram/
+    ├── tp-capital/
+    ├── workspace/
+    ├── frontend/
+    ├── ports-network/
+    ├── deployment-ops/
+    ├── status-summaries/
+    ├── performance/
+    ├── testing/
+    ├── rag-ai/
+    ├── quick-wins/
+    └── misc/
 ```
 
 ---
@@ -33,6 +46,29 @@ Este diretório serve como **depósito organizado** para:
 - ✅ **Relatórios de sessão** - Documentação de sessões de trabalho
 - ✅ **Propostas temporárias** - Documentos de planejamento
 - ✅ **Análises de código** - Relatórios de qualidade, limpeza, etc.
+
+---
+
+## 🗂️ Root Archive (Legado da Raiz)
+
+Todos os relatórios históricos que antes ficavam na raiz do repositório foram migrados para `reports/root-archive/` e agrupados por tema. Use as subpastas abaixo sempre que precisar arquivar ou referenciar um desses arquivos:
+
+| Pasta | Conteúdo principal |
+|-------|--------------------|
+| `telegram/` | Status dos serviços MTProto, guias e migrações híbridas |
+| `tp-capital/` | Revisões arquiteturais, guias e validações da stack TP-Capital |
+| `workspace/` | Implementações Neon/Timescale e quickstarts do workspace |
+| `frontend/` | Relatórios finais e verificações do dashboard |
+| `ports-network/` | Convenções de portas, planos de proteção e conflitos resolvidos |
+| `deployment-ops/` | Playbooks de start/stop, checklists e guias de produção |
+| `performance/` | Tunings, comparativos e métricas de performance |
+| `status-summaries/` | Summaries executivos, estados finais e missões concluídas |
+| `quick-wins/` | Planos e relatórios de quick wins |
+| `testing/` | Resultados de testes, reports E2E e automação |
+| `rag-ai/` | Migrações e planos relacionados ao stack RAG |
+| `misc/` | Conteúdos diversos que não se encaixam nas categorias acima |
+
+> Sempre mova novos `.md` legados da raiz diretamente para `reports/root-archive/<categoria>/` e atualize os links/documentação para apontar para o caminho completo.
 
 ---
 

@@ -27,8 +27,9 @@ const dashboardSnapshotPath = path.join(
   'latest.json',
 );
 
-function toPreviewPath(artifactId) {
-  return `/governance/docs/${artifactId.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.md`;
+function toPreviewPath(artifactPath) {
+  if (!artifactPath) return null;
+  return `/governance/docs/${artifactPath.replace(/\\/g, '/')}`;
 }
 
 const MS_IN_DAY = 24 * 60 * 60 * 1000;
@@ -186,7 +187,7 @@ function mapArtifactsForSnapshot(artifacts) {
     lastReviewed: artifact.lastReviewed,
     reviewCycleDays: artifact.reviewCycleDays,
     publishSlug: artifact.publish?.slug || null,
-    previewPath: toPreviewPath(artifact.id),
+    previewPath: toPreviewPath(artifact.path),
   }));
 }
 

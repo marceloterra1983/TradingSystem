@@ -7,6 +7,23 @@ if [ "${SKIP_DOCS_HOOKS:-0}" = "1" ]; then
   exit 0
 fi
 
+if git diff --cached --name-only | grep -q "config/ports/registry.yaml"; then
+  echo "🔁 Registry modified, running ports:sync..."
+  npm run ports:sync
+  git add .env.shared \
+    config/ports/index.json \
+    docs/content/tools/ports-services.mdx \
+    tools/compose/docker-compose.ports.generated.yml \
+    scripts/maintenance/ports-health.sh
+fi
+
+if git diff --cached --name-only | grep -Eq "(config/ports/registry.yaml|tools/ports/)"; then
+  echo "🔍 ports:validate"
+  npm run ports:validate
+  echo "🔎 ports:scan-hardcoded"
+  npm run ports:scan-hardcoded
+fi
+
 if [ "${SKIP_DOCS_AUTO:-0}" = "1" ]; then
   echo "⚠️  Skipping docs:auto (SKIP_DOCS_AUTO=1)"
 else

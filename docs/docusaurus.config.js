@@ -4,17 +4,18 @@
 const {themes} = require('prism-react-renderer');
 const lightCodeTheme = themes.github;
 const darkCodeTheme = themes.dracula;
+const repoUrl = 'https://github.com/marceloterra1983/TradingSystem';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TradingSystem Docs',
   tagline: 'Product knowledge, runbooks, and specs in one place',
-  url: 'https://example.com',
+  url: 'https://docs.tradingsystem.local',
   baseUrl: '/',
-  onBrokenLinks: 'warn',  // Temporarily warn - broken links need fixing (see validation report)
+  onBrokenLinks: 'throw',
   favicon: 'img/favicon.svg',
-  organizationName: 'TradingSystem',
-  projectName: 'docs',
+  organizationName: 'marceloterra1983',
+  projectName: 'TradingSystem',
   markdown: {
     mermaid: true,
     hooks: {
@@ -31,11 +32,11 @@ const config = {
           path: 'content',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://github.com/TradingSystem/TradingSystem/tree/main/docs/',
+          editUrl: `${repoUrl}/tree/main/docs/`,
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           // Versioning configuration
-          lastVersion: 'current',
+          lastVersion: '1.0.0',
           // Version configuration
           // NOTE: Version labels are automatically updated by scripts/docs/auto-version.sh
           // when creating new versions via GitHub Actions workflow (docs-versioning.yml)
@@ -45,7 +46,7 @@ const config = {
           // - Previous versions: "X.X.X" with path: 'vX.X.X'
           // - Current (unreleased): "Next (Unreleased) 🚧" with path: 'next'
           //
-          // See: docs/governance/VERSIONING-AUTOMATION.md for details
+          // See: governance/strategy/VERSIONING-AUTOMATION.md for details
           versions: {
             current: {
               label: 'Next (Unreleased) 🚧',

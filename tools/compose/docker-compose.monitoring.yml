@@ -5,8 +5,11 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus-rag
+    env_file:
+      - ../../.env
+      - ../../.env.shared
     ports:
-      - "9091:9090"  # MUDOU de 9090 para 9091 (evita conflitos)
+      - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ../monitoring/prometheus-rag.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -29,13 +32,16 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana-rag
+    env_file:
+      - ../../.env
+      - ../../.env.shared
     ports:
-      - "3104:3000"  # MUDOU de 3100 para 3104 (evita conflitos)
+      - "${GRAFANA_PORT:-3000}:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
-      - GF_SERVER_ROOT_URL=http://localhost:3100
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:${GRAFANA_PORT:-3000}}
     volumes:
       - grafana_data:/var/lib/grafana
       - ../monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro

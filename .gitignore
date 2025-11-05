@@ -14,7 +14,7 @@ desktop.ini
 # IDEs, Editors & Local Assistants
 # ============================================
 .vs/
-.vscode/
+# .vscode/ - Commitado para compartilhar configurações do workspace (Python, terminal, atalhos)
 *.code-workspace
 .idea/
 *.iml

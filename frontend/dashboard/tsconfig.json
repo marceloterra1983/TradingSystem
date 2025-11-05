@@ -30,6 +30,7 @@
   "exclude": [
     "src/**/_archived/**",
     "src/__tests__/**",
+    "src/**/__tests__/**",
     "src/examples/**",
     "src/components/documentation/**"
   ],

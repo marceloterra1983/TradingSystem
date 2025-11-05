@@ -1,12 +1,12 @@
-name: telegram-stack
-
 # ==============================================================================
-# Telegram Hybrid Stack - 7 Dedicated Containers
+# Telegram Hybrid Stack - 8 Dedicated Containers
 # ==============================================================================
-# Architecture: Native MTProto service (systemd) + Containerized data layer
+# Architecture: Fully containerized MTProto service + data layer
 # Purpose: Isolated, high-performance Telegram message processing
 # Resources: 7 CPU, 5.5GB RAM total
 # ==============================================================================
+
+name: telegram-stack
 
 services:
   # ============================================================================
@@ -20,6 +20,7 @@ services:
     
     env_file:
       - ../../.env
+      - ../../.env.shared
     
     environment:
       POSTGRES_DB: telegram_gateway
@@ -92,6 +93,10 @@ services:
     image: pgbouncer/pgbouncer:latest
     restart: unless-stopped
     
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
     environment:
       - DATABASES_HOST=telegram-timescaledb
       - DATABASES_PORT=5432
@@ -116,7 +121,7 @@ services:
         condition: service_healthy
     
     healthcheck:
-      test: ['CMD-SHELL', 'PGPASSWORD=${TELEGRAM_DB_PASSWORD} psql -h localhost -p 6432 -U telegram -d telegram_gateway -c "SELECT 1"']
+      test: ['CMD-SHELL', 'nc -z localhost 6432']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -139,6 +144,10 @@ services:
     container_name: telegram-redis-master
     image: redis:7-alpine
     restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
     
     command: >
       redis-server
@@ -191,6 +200,10 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
     command: >
       redis-server
       --replicaof telegram-redis-master 6379
@@ -201,7 +214,7 @@ services:
       --replica-read-only yes
     
     ports:
-      - "${TELEGRAM_REDIS_REPLICA_PORT:-6380}:6379"
+      - "${TELEGRAM_REDIS_REPLICA_PORT:-6385}:6379"
     
     deploy:
       resources:
@@ -241,13 +254,25 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     
-    command: redis-sentinel /etc/redis/sentinel.conf
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    command: >
+      sh -c '
+        until MASTER_IP=$(getent hosts telegram-redis-master | awk "{print \$1}"); do
+          echo "[sentinel] waiting for redis master DNS resolution...";
+          sleep 1;
+        done;
+        sed "s/__MASTER_HOST__/$${MASTER_IP}/" /etc/redis/sentinel.template.conf > /tmp/sentinel.conf;
+        redis-sentinel /tmp/sentinel.conf
+      '
     
     ports:
       - "${TELEGRAM_REDIS_SENTINEL_PORT:-26379}:26379"
     
     volumes:
-      - ./telegram/sentinel-simple.conf:/etc/redis/sentinel.conf:ro
+      - ./telegram/sentinel-simple.template.conf:/etc/redis/sentinel.template.conf
     
     deploy:
       resources:
@@ -329,74 +354,130 @@ services:
       - "com.tradingsystem.description=Message queue for pub/sub pattern (optional)"
 
   # ============================================================================
-  # 7. Telegram Gateway REST API (PHASE 2 - COMMENTED OUT FOR NOW)
+  # 7. Telegram MTProto Gateway (Now containerized)
   # ============================================================================
-  # telegram-gateway-api:
-  #     container_name: telegram-gateway-api
-  #     build:
-  #       context: ../../backend/api/telegram-gateway
-  #       dockerfile: Dockerfile
-  #     restart: unless-stopped
-  #     
-  #     env_file:
-  #       - ../../.env
-  #     
-  #     environment:
-  #       - NODE_ENV=production
-  #       - TELEGRAM_GATEWAY_API_PORT=4010
-  #       
-  #       # Database (via PgBouncer - CRITICAL)
-  #       - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer
-  #       - TELEGRAM_GATEWAY_DB_PORT=5432
-  #       - TELEGRAM_GATEWAY_DB_NAME=telegram_gateway
-  #       - TELEGRAM_GATEWAY_DB_USER=${TELEGRAM_DB_USER:-telegram}
-  #       - TELEGRAM_GATEWAY_DB_PASSWORD=${TELEGRAM_DB_PASSWORD}
-  #       
-  #       # Redis (optional for API caching)
-  #       - REDIS_HOST=telegram-redis-master
-  #       - REDIS_PORT=6379
-  #       - REDIS_ENABLED=${TELEGRAM_REDIS_ENABLED:-true}
-  #       
-  #       # Gateway Service URL (native service on host)
-  #       - GATEWAY_SERVICE_URL=http://host.docker.internal:4006
-  #     
-  #     ports:
-  #       - "${TELEGRAM_GATEWAY_API_PORT:-4010}:4010"
-  #     
-  #     extra_hosts:
-  #       - "host.docker.internal:host-gateway"
-  #     
-  #     deploy:
-  #       resources:
-  #         limits:
-  #           cpus: '0.5'
-  #           memory: 256M
-  #         reservations:
-  #           cpus: '0.25'
-  #           memory: 128M
-  #     
-  #     depends_on:
-  #       telegram-pgbouncer:
-  #         condition: service_healthy
-  #       telegram-redis-master:
-  #         condition: service_healthy
-  #     
-  #     healthcheck:
-  #       test: ['CMD', 'node', '-e', "require('http').get('http://localhost:4010/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
-  #       interval: 30s
-  #       timeout: 10s
-  #       retries: 3
-  #       start_period: 30s
-  #     
-  #     networks:
-  #       - telegram_backend
-  #       - tradingsystem_backend
-  #     
-  #     labels:
-  #       - "com.tradingsystem.stack=telegram"
-  #       - "com.tradingsystem.tier=api"
-  #       - "com.tradingsystem.service=gateway-api"
-  #       - "com.tradingsystem.description=REST API for querying Telegram messages"
+  telegram-mtproto:
+    container_name: telegram-mtproto
+    build:
+      context: ../../apps/telegram-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    environment:
+      - NODE_ENV=production
+      - GATEWAY_PORT=${TELEGRAM_MTPROTO_PORT:-4007}
+      - TELEGRAM_GATEWAY_DB_URL=postgresql://${TELEGRAM_DB_USER:-telegram}:${TELEGRAM_DB_PASSWORD}@telegram-pgbouncer:6432/telegram_gateway
+      - TELEGRAM_GATEWAY_DB_SCHEMA=telegram_gateway
+      - TELEGRAM_GATEWAY_DB_TABLE=messages
+      - TELEGRAM_GATEWAY_DB_SSL=${TELEGRAM_GATEWAY_DB_SSL:-false}
+      - TELEGRAM_REDIS_ENABLED=${TELEGRAM_REDIS_ENABLED:-true}
+      - TELEGRAM_REDIS_HOST=telegram-redis-master
+      - TELEGRAM_REDIS_PORT=6379
+
+    ports:
+      - "${TELEGRAM_MTPROTO_PORT:-4007}:4007"
+
+    volumes:
+      - ../../apps/telegram-gateway/.session:/usr/src/app/.session
+      - ../../apps/telegram-gateway/data:/usr/src/app/data
+
+    depends_on:
+      telegram-pgbouncer:
+        condition: service_healthy
+      telegram-redis-master:
+        condition: service_healthy
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4007/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      - telegram_backend
+      - tradingsystem_backend
+
+    labels:
+      - "com.tradingsystem.stack=telegram"
+      - "com.tradingsystem.tier=gateway"
+      - "com.tradingsystem.service=mtproto"
+      - "com.tradingsystem.description=Telegram MTProto shared gateway"
+
+  # ============================================================================
+# 8. Telegram Gateway REST API
+# ============================================================================
+  telegram-gateway-api:
+    container_name: telegram-gateway-api
+    build:
+      context: ../../backend/api/telegram-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+    
+    environment:
+      - TELEGRAM_GATEWAY_DB_URL=
+      - NODE_ENV=production
+      - TELEGRAM_GATEWAY_API_PORT=4010
+      # Database (via PgBouncer - CRITICAL)
+      - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer
+      - TELEGRAM_GATEWAY_DB_PORT=6432
+      - TELEGRAM_GATEWAY_DB_NAME=telegram_gateway
+      - TELEGRAM_GATEWAY_DB_USER=${TELEGRAM_DB_USER:-telegram}
+      - TELEGRAM_GATEWAY_DB_PASSWORD=${TELEGRAM_DB_PASSWORD}
+      # Redis (optional for API caching)
+      - REDIS_HOST=telegram-redis-master
+      - REDIS_PORT=6379
+      - REDIS_ENABLED=${TELEGRAM_REDIS_ENABLED:-true}
+      # Gateway Service URL (containerized MTProto)
+      - GATEWAY_SERVICE_URL=http://telegram-mtproto:4007
+      - MTPROTO_SERVICE_URL=http://telegram-mtproto:4007
+      # Session file path (inside container)
+      - TELEGRAM_GATEWAY_SESSION_FILE=/usr/src/app/.session/telegram-gateway.session
+      - TELEGRAM_GATEWAY_FAILURE_QUEUE_PATH=/usr/src/app/data/failure-queue.jsonl
+    
+    ports:
+      - "${TELEGRAM_GATEWAY_API_PORT:-4010}:4010"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    depends_on:
+      telegram-pgbouncer:
+        condition: service_healthy
+      telegram-redis-master:
+        condition: service_healthy
+      telegram-mtproto:
+        condition: service_started
+    
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:4010/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    networks:
+      - telegram_backend
+      - tradingsystem_backend
+    
+    labels:
+      - "com.tradingsystem.stack=telegram"
+      - "com.tradingsystem.tier=api"
+      - "com.tradingsystem.service=gateway-api"
+      - "com.tradingsystem.description=REST API for querying Telegram messages"
   # 
   # volumes:
   #   telegram-timescaledb-data:
@@ -424,6 +505,8 @@ networks:
   telegram_backend:
     driver: bridge
     name: telegram_backend
+  tradingsystem_backend:
+    external: true
 
 # ============================================================================
 # VOLUMES

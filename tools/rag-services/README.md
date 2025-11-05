@@ -11,6 +11,7 @@
 - **JWT Authentication** - Secure admin endpoints with role-based access control
 - **Input Validation** - Comprehensive Zod schema validation
 - **Type Safety** - Full TypeScript implementation with strict mode
+- **Latency Guard** - Real-time latency sampling with automatic alerting and audit trail
 
 ## Quick Start
 
@@ -46,6 +47,12 @@ JWT_SECRET=your-secret-key-here
 
 # Collections Config
 COLLECTIONS_CONFIG_PATH=./collections-config.json
+
+# Latency Guard
+RAG_LATENCY_GUARD_ENABLED=true
+RAG_LATENCY_GUARD_MS=400
+RAG_LATENCY_BREACH_RATIO=0.05
+RAG_LATENCY_MIN_SAMPLES=20
 ```
 
 ### Development
@@ -141,6 +148,12 @@ DELETE /api/v1/rag/admin/cache/:key      - Delete cache entry
 DELETE /api/v1/rag/admin/cache          - Clear cache pattern
 GET    /api/v1/rag/admin/cache/stats     - Cache statistics
 GET    /api/v1/rag/health                 - Health check
+```
+
+### Monitoring Endpoints
+
+```
+GET /api/v1/rag/latency-alerts          - List recent latency guard alerts (filter by collection or operation)
 ```
 
 ### Example: Create Collection

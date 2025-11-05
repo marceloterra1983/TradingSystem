@@ -1,0 +1,14 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: integrations
+version: "3.9"
+
+x-tradingsystem-stack: "integrations"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  workspace-api:
+    env: WORKSPACE_API_PORT
+    port: 3200
+    protocol: http
+    owner: "Workspace Team"
+    description: "API Workspace/Library para automações locais"

@@ -354,7 +354,7 @@ npm run lint:fix
 ## 📞 Support
 
 For issues or questions, see:
-- [Architecture Review](docs/governance/reviews/architecture-2025-11-01/)
+- [Architecture Review](governance/reviews/architecture-2025-11-01/)
 - [TP-Capital Docs](docs/content/apps/tp-capital/)
 - [Frontend Guidelines](docs/content/frontend/guidelines/)
 

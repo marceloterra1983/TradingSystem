@@ -257,14 +257,15 @@ telegramGatewayRouter.get('/photos/:channelId/:messageId', async (req, res) => {
 telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
   // Validate API key first (accept both X-API-Key and X-Gateway-Token for compatibility)
   const apiKey = req.headers['x-api-key'] || req.headers['x-gateway-token'];
-  const expectedKey = process.env.TELEGRAM_GATEWAY_API_KEY || process.env.TELEGRAM_GATEWAY_API_TOKEN;
+  // Use TELEGRAM_GATEWAY_API_TOKEN (same as other endpoints)
+  const expectedKey = process.env.TELEGRAM_GATEWAY_API_TOKEN || process.env.API_SECRET_TOKEN || process.env.TELEGRAM_GATEWAY_API_KEY;
   
   if (!expectedKey) {
-    req.log?.error?.('[Auth] TELEGRAM_GATEWAY_API_KEY not configured');
+    req.log?.error?.('[Auth] TELEGRAM_GATEWAY_API_TOKEN not configured');
     return res.status(500).json({
       success: false,
       error: 'API authentication not configured',
-      message: 'Server misconfiguration: API key not set',
+      message: 'Server misconfiguration: API token not set',
     });
   }
   

@@ -13,7 +13,7 @@ lastReviewed: '2025-10-26'
 
 | Endpoint | Component | Expected Response | Cadence |
 |----------|-----------|-------------------|---------|
-| `http://localhost:4006/health` | Gateway service | `{"status":"healthy","telegram":"connected"}` | 30s |
+| `http://localhost:4007/health` | Gateway service | `{"status":"healthy","telegram":"connected"}` | 30s |
 | `http://localhost:4010/health` | REST API | `{"status":"healthy","database":true}` | 30s |
 | `psql ... -c "SELECT COUNT(*) FROM telegram_gateway.messages"` | TimescaleDB queue | `<row count>` | 5m |
 

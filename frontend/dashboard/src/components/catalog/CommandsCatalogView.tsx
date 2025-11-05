@@ -35,10 +35,9 @@ import {
   Search,
 } from 'lucide-react';
 
-import commandsDatabase from '../../data/commands-db.json';
+import { commandsDatabase } from '../../data/commandsCatalog';
 
-type CommandsDatabase = typeof commandsDatabase;
-type CommandRecord = CommandsDatabase['commands'][number];
+type CommandRecord = (typeof commandsDatabase.commands)[number];
 
 const ALL_COMMANDS = commandsDatabase.commands;
 const TOTAL_COMMANDS = ALL_COMMANDS.length;

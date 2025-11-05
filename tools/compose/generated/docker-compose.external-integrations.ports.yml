@@ -1,0 +1,26 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: external-integrations
+version: "3.9"
+
+x-tradingsystem-stack: "external-integrations"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  tp-capital-api:
+    env: TP_CAPITAL_API_PORT
+    port: 4008
+    protocol: http
+    owner: "TP Capital Squad"
+    description: "API ingestora de sinais do TP Capital"
+  telegram-mtproto:
+    env: TELEGRAM_MTPROTO_PORT
+    port: 4007
+    protocol: http
+    owner: "Telegram Squad"
+    description: "Gateway MTProto principal (HTTP + metrics)"
+  telegram-gateway-api:
+    env: TELEGRAM_GATEWAY_API_PORT
+    port: 4010
+    protocol: http
+    owner: "Telegram Squad"
+    description: "API REST do Telegram Gateway (consulta e sync)"

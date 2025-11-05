@@ -51,6 +51,7 @@
   - MCP servers (importa de `claude/mcp-servers.json`)
   - File tree navigation
   - Inline code suggestions
+  - Codex bridges para os comandos críticos `/quality-check`, `/health-check`, `/docker-compose`, `/service-launcher` e `/scripts` via `npm run codex:<cmd>` (ver `scripts/codex/README.md`)
 
 ### OpenSpec Framework
 - **Status**: ✅ Configurado
@@ -221,6 +222,23 @@ npm list @modelcontextprotocol/server-filesystem
 ---
 
 ## 🤖 Project Agents
+
+### Diretório, Taxonomia e CI
+
+- `npm run agents:generate` – sincroniza `.claude/agents/agents-raiox.md`, gera as visões filtradas e exporta `frontend/dashboard/src/data/aiAgentsDirectory.ts`. O log estruturado fica em `reports/agents/last-run.json`.
+- `npm run agents:test` – executa testes unitários do parser (frontmatter complexo, tags, schema).
+- `npm run agents:ci` – encadeia testes + geração; usado pelo workflow `agents-directory.yml`.
+- Tags dos agentes **devem** seguir taxonomia ASCII em `kebab-case`. Exemplos canônicos: `arquitetura`, `backend`, `frontend`, `dados-analytics`, `ia-ml`, `documentacao`, `pesquisa`, `qa`, `observabilidade`, `mcp`, `automacao`, `needs-curation`, `hidden`, `lang-en`, `model-sonnet`, `tool-bash`.
+- Sempre que o prompt do agente estiver em outra língua, inclua a tag `lang-en` (ou correspondente) no resumo e mantenha a descrição em português.
+
+> Qualquer erro de schema, tag ou link inválido faz o gerador falhar com `exit 1`, garantindo que o dashboard só consuma catálogos válidos.
+
+### Catálogo de Comandos
+
+- `npm run commands:generate` – valida `.claude/commands/commands-raiox.md`, sincroniza `frontend/dashboard/src/data/commands-db.json` (com `schemaVersion`) e registra `reports/commands/last-run.json`.
+- `npm run commands:test` – garante parsing correto de frontmatter com colchetes, pipes e arrays.
+- `npm run commands:ci` – encadeia testes + geração; usado pelo workflow `commands-directory.yml`.
+- Use `npm run commands:generate -- --include-auto` para reativar temporariamente a seção **Novos Comandos Automatizados** (delimitada por `<!-- AUTO-COMMANDS:START/END -->`). Rode sem a flag para removê-la após a curadoria.
 
 ### 1. Docusaurus Daily Agent
 
@@ -504,7 +522,7 @@ bash scripts/env/validate-env.sh
 ### For Development
 
 1. **[docs/README.md](docs/README.md)** - Documentation hub
-2. **[docs/governance/](docs/governance/)** - Documentation standards
+2. **[governance/](governance/README.md)** - Governance standards hub
 3. **[docs/content/reference/adrs/](docs/content/reference/adrs/)** - Architecture decisions
 
 ### For Operations
@@ -512,6 +530,7 @@ bash scripts/env/validate-env.sh
 1. **[.claude/README.md](claude/README.md)** - Claude configuration
 2. **[.claude/MCP-FILESYSTEM-SETUP.md](claude/MCP-FILESYSTEM-SETUP.md)** - MCP setup guide
 3. **[tools/compose/](tools/compose/)** - Docker Compose stacks
+- **Dashboard → Knowledge → Governance** - Live governance snapshot powered by `/governance`
 
 ---
 

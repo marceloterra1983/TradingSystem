@@ -39,7 +39,7 @@ import {
   AI_AGENTS_DIRECTORY,
   type AgentDirectoryEntry,
 } from '../../data/aiAgentsDirectory';
-import commandsDatabase from '../../data/commands-db.json';
+import { commandsDatabase } from '../../data/commandsCatalog';
 
 type CommandRecord = (typeof commandsDatabase.commands)[number];
 

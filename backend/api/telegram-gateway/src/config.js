@@ -57,27 +57,26 @@ const dbPort = toInt(
   process.env.TELEGRAM_GATEWAY_DB_PORT ||
     process.env.TIMESCALEDB_PORT ||
     parsedUrl?.port,
-  5433,
+  5434,
 );
 
-// Default to shared TimescaleDB database used across local dev
 const dbName =
   process.env.TELEGRAM_GATEWAY_DB_NAME ||
-  process.env.TIMESCALEDB_DATABASE ||
-  parsedUrl?.database ||
-  'tradingsystem';
+    process.env.TIMESCALEDB_DATABASE ||
+    parsedUrl?.database ||
+  'telegram_gateway';
 
 const dbUser =
   process.env.TELEGRAM_GATEWAY_DB_USER ||
-  process.env.TIMESCALEDB_USER ||
-  parsedUrl?.user ||
-  'timescale';
+    process.env.TIMESCALEDB_USER ||
+    parsedUrl?.user ||
+  'telegram';
 
 const dbPassword =
   process.env.TELEGRAM_GATEWAY_DB_PASSWORD ||
-  process.env.TIMESCALEDB_PASSWORD ||
-  parsedUrl?.password ||
-  'pass_timescale';
+    process.env.TIMESCALEDB_PASSWORD ||
+    parsedUrl?.password ||
+  'telegram_secure_pass';
 
 const dbSchema =
   process.env.TELEGRAM_GATEWAY_DB_SCHEMA ||

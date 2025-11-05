@@ -36,7 +36,7 @@ const activeJobs = new Map<string, {
 async function getFilesToIngest(
   directory: string,
   fileTypes: string[],
-  recursive: boolean
+  recursive: boolean,
 ): Promise<string[]> {
   const files: string[] = [];
   
@@ -74,10 +74,12 @@ async function processBatch(
   files: string[],
   batchSize: number,
   collection: any,
-  jobId: string
+  jobId: string,
 ): Promise<void> {
   const job = activeJobs.get(jobId);
-  if (!job) throw new Error('Job not found');
+  if (!job) {
+    throw new Error('Job not found');
+  }
   
   const batches = [];
   for (let i = 0; i < files.length; i += batchSize) {
@@ -180,7 +182,7 @@ router.post('/batch/:name', asyncHandler(async (req: Request, res: Response) => 
   const files = await getFilesToIngest(
     collection.directory,
     collection.fileTypes,
-    collection.recursive
+    collection.recursive,
   );
   
   logger.info('[BATCH_INGEST] Files found', {
@@ -238,7 +240,7 @@ router.post('/batch/:name', asyncHandler(async (req: Request, res: Response) => 
  * GET /api/v1/rag/ingestion/batch/:jobId/status
  * Get status of a batch ingestion job
  */
-router.get('/batch/:jobId/status', asyncHandler(async (req: Request, res: Response) => {
+router.get('/batch/:jobId/status', asyncHandler((req: Request, res: Response) => {
   const { jobId } = req.params;
   
   const job = activeJobs.get(jobId);
@@ -276,7 +278,7 @@ router.get('/batch/:jobId/status', asyncHandler(async (req: Request, res: Respon
  * POST /api/v1/rag/ingestion/batch/:jobId/cancel
  * Cancel a batch ingestion job
  */
-router.post('/batch/:jobId/cancel', asyncHandler(async (req: Request, res: Response) => {
+router.post('/batch/:jobId/cancel', asyncHandler((req: Request, res: Response) => {
   const { jobId } = req.params;
   
   const job = activeJobs.get(jobId);
@@ -302,7 +304,7 @@ router.post('/batch/:jobId/cancel', asyncHandler(async (req: Request, res: Respo
  * DELETE /api/v1/rag/ingestion/batch/:jobId
  * Delete a completed job from memory
  */
-router.delete('/batch/:jobId', asyncHandler(async (req: Request, res: Response) => {
+router.delete('/batch/:jobId', asyncHandler((req: Request, res: Response) => {
   const { jobId } = req.params;
   
   const job = activeJobs.get(jobId);
@@ -324,7 +326,7 @@ router.delete('/batch/:jobId', asyncHandler(async (req: Request, res: Response) 
  * GET /api/v1/rag/ingestion/batch
  * List all active and recent jobs
  */
-router.get('/batch', asyncHandler(async (_req: Request, res: Response) => {
+router.get('/batch', asyncHandler((_req: Request, res: Response) => {
   const jobs = Array.from(activeJobs.entries()).map(([jobId, job]) => ({
     jobId,
     collectionName: job.collectionName,
@@ -342,4 +344,3 @@ router.get('/batch', asyncHandler(async (_req: Request, res: Response) => {
 }));
 
 export default router;
-

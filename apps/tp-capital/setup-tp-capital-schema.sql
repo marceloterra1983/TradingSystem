@@ -1,6 +1,7 @@
 -- TP Capital Database Schema Setup
 -- Database: APPS-TPCAPITAL
--- Run with: docker exec -i data-timescaledb psql -U timescale -d "APPS-TPCAPITAL" -f setup-tp-capital-schema.sql
+-- Run with: docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-timescaledb \
+--   psql -U tp_capital -d tp_capital_db -f /app/setup-tp-capital-schema.sql
 
 -- Create schema
 CREATE SCHEMA IF NOT EXISTS tp_capital;

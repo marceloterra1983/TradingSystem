@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-11-05T12:29:19.561Z",
+  "schemaVersion": "1.1.0",
+  "mode": "local",
+  "includeAuto": false,
+  "commandsGenerated": 52,
+  "status": "success",
+  "warnings": [
+    {
+      "message": "Encontrados 99 comandos sem categoria definida. Rode o gerador com \"--include-auto\" para visualizar sugestões.",
+      "file": ".claude/commands/commands-raiox.md"
+    }
+  ],
+  "errors": []
+}

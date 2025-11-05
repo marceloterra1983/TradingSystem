@@ -23,7 +23,7 @@ rectangle "Telegram Servers\n(MTProto Protocol)" as Telegram <<external>> #D3D3D
 package "HOST SYSTEM (Linux/WSL)" {
     
     ' Native Service
-    rectangle "MTProto Gateway\n**NATIVE SERVICE**\n(systemd)\nPort 4006\n\n• Session files (0600)\n• /opt/telegram-gateway/\n• Resources: 0.5 CPU, 300MB\n• Uptime: managed by systemd" as MTProto <<native>>
+    rectangle "MTProto Gateway\n**NATIVE SERVICE**\n(systemd)\nPort 4007\n\n• Session files (0600)\n• /opt/telegram-gateway/\n• Resources: 0.5 CPU, 300MB\n• Uptime: managed by systemd" as MTProto <<native>>
     
     note right of MTProto
         **Why Native?**

@@ -1,0 +1,14 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: messaging
+version: "3.9"
+
+x-tradingsystem-stack: "messaging"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  telegram-rabbitmq:
+    env: TELEGRAM_RABBITMQ_PORT
+    port: 5672
+    protocol: rabbitmq
+    owner: "Telegram Squad"
+    description: "Fila AMQP usada para pub/sub interno"

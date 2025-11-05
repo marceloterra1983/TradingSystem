@@ -63,7 +63,7 @@ This runbook guides the migration of Telegram Gateway from current architecture 
 
 ```bash
 # 1.1 Verify current stack health
-curl http://localhost:4006/health
+curl http://localhost:4007/health
 docker ps | grep telegram
 
 # 1.2 Check database connectivity
@@ -148,7 +148,7 @@ docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
 # 1. Send test message to monitored Telegram channel
 # 2. Wait 5 seconds (polling interval)
 # 3. Verify message received by Gateway:
-curl http://localhost:4006/metrics | grep telegram_messages_received_total
+curl http://localhost:4007/metrics | grep telegram_messages_received_total
 
 # 4. Verify message processed by TP Capital:
 curl http://localhost:4005/signals?limit=1 | jq '.[0]'
@@ -253,7 +253,7 @@ cp .env.hybrid-backup .env
 docker start telegram-gateway
 
 # 5. Verify
-curl http://localhost:4006/health
+curl http://localhost:4007/health
 ```
 
 ---
@@ -388,8 +388,8 @@ Migration is considered successful if ALL criteria met:
 - L3: On-Call Engineer - PagerDuty
 
 **Documentation:**
-- Architecture Review: `/docs/governance/reviews/telegram-architecture-2025-11-03.md`
-- Database Analysis: `/docs/governance/reviews/telegram-database-architecture-2025-11-03.md`
+- Architecture Review: `/governance/reviews/telegram-architecture-2025-11-03.md`
+- Database Analysis: `/governance/reviews/telegram-database-architecture-2025-11-03.md`
 
 ---
 

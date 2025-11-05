@@ -46,13 +46,15 @@ fi
 
 cd "$PROJECT_ROOT"
 
-# Configuration: load only versioned defaults to avoid sourcing user secrets
-# and potentially invalid shell syntax in .env/.env.local. Per-service compose
-# files read env files themselves via env_file. We still export image defaults
-# to satisfy Compose variable substitution when launching stacks from here.
+# Load versioned defaults + generated .env.shared for port mapping
 if [ -f "$PROJECT_ROOT/config/.env.defaults" ]; then
     set -a
     . "$PROJECT_ROOT/config/.env.defaults"
+    set +a
+fi
+if [ -f "$PROJECT_ROOT/.env.shared" ]; then
+    set -a
+    . "$PROJECT_ROOT/.env.shared"
     set +a
 fi
 
@@ -82,13 +84,11 @@ declare -A TARGET_SERVICES_MAP=()
 # max_retries = number of restart attempts (default: 3)
 # NOTE: Workspace and TP Capital now run as Docker containers only
 declare -A SERVICES=(
-    ["telegram-gateway"]="apps/telegram-gateway:4007:npm start:::3"
-    ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev::telegram-gateway:3"
-    # NOTE: docs-api runs as Docker container (docs-api) on port 3401
-    # NOTE: docusaurus runs as Docker container (docs-hub) on port 3400
-    ["dashboard"]="frontend/dashboard:3103:npm run dev:::2"
-    ["status"]="apps/status:3500:npm start:::2"
-    ["docs-watcher"]="tools/llamaindex::npm run watch:::1"
+    ["telegram-gateway"]="apps/telegram-gateway:${TELEGRAM_MTPROTO_PORT:-4007}:npm start:::3"
+    ["telegram-gateway-api"]="backend/api/telegram-gateway:${TELEGRAM_GATEWAY_API_PORT:-4010}:npm run dev::telegram-gateway:3"
+    # NOTE: docs stacks run as Docker containers now; keeping entries for local overrides
+    ["dashboard"]="frontend/dashboard:${DASHBOARD_PORT:-3103}:npm run dev:::2"
+    ["status"]="apps/status:${SERVICE_LAUNCHER_PORT:-3500}:npm start:::2"
 )
 
 # Parse arguments
@@ -149,7 +149,7 @@ Services:
      - TP Capital stack → API 4008 + dedicated Timescale/PgBouncer/Redis
      - Workspace stack → API 3210 + PostgreSQL 5450
      - Telegram data stack → Timescale 5434 + Redis 6379 + RabbitMQ 5672
-     - TimescaleDB, QuestDB, Qdrant, and other shared infrastructure
+     - QuestDB, LangGraph Postgres, and other shared infrastructure
 
   🖥️  Local Dev Services:
      - Telegram Gateway (4007) - Native MTProto bridge + metrics
@@ -322,59 +322,81 @@ kill_port() {
     fi
 }
 
+load_env_value_from_file() {
+    local key="$1"
+    local file="$PROJECT_ROOT/.env"
+    if [ ! -f "$file" ]; then
+        return 0
+    fi
+    local line
+    line=$(grep -m1 "^${key}=" "$file" 2>/dev/null || true)
+    if [ -z "$line" ]; then
+        return 0
+    fi
+    echo "${line#*=}"
+}
+
+ensure_env_var_from_dotenv() {
+    local key="$1"
+    if [ -n "${!key:-}" ]; then
+        return 0
+    fi
+    local value
+    value=$(load_env_value_from_file "$key")
+    if [ -n "$value" ]; then
+        export "$key"="$value"
+        log_info "Loaded $key from .env for Docker Compose compatibility"
+    fi
+}
+
 # Function to start Docker containers
 start_containers() {
     section "Starting Docker Containers"
 
     # Ensure external networks exist (some stacks expect them)
-    for net in tradingsystem_backend tradingsystem_infra tradingsystem_data Database_default; do
+    for net in tradingsystem_backend tradingsystem_infra tradingsystem_data Database_default tradingsystem_frontend; do
         if ! docker network ls --format '{{.Name}}' | grep -qx "$net"; then
             log_info "Creating docker network: $net"
             docker network create "$net" >/dev/null || true
         fi
     done
 
-    # DATABASE stack - PORTAS REMAPEADAS (5433→5432, 9000→9001, etc.)
-    # Now compatible with all other stacks!
+    # DATABASE stack - now only QuestDB + auxiliary LangGraph Postgres
+    # Each product stack owns its own database (Timescale/Postgres) containers.
     local SKIP_DATABASE_STACK=false  # HABILITADO!
     
     # Start database stack (ALL 8 services) first if compose file exists
     local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database.yml"
     if [ "$SKIP_DATABASE_STACK" = true ]; then
-        log_info "Skipping DATABASE stack (disabled to avoid port conflicts)"
-        log_info "  Conflicts: TimescaleDB (5433) vs kong-db, QuestDB (9000), etc."
+        log_info "Skipping DATABASE stack (disabled via flag)"
         log_info "  Use 'bash scripts/start-clean.sh' for essential services only"
     elif [ -f "$DB_COMPOSE_FILE" ]; then
         # Provide sane defaults for image variables when not set in .env
-        export IMG_DATA_TIMESCALEDB="${IMG_DATA_TIMESCALEDB:-timescale/timescaledb}"
-        export IMG_DATA_QDRANT="${IMG_DATA_QDRANT:-qdrant/qdrant}"
         export IMG_VERSION="${IMG_VERSION:-latest}"
+        export QUESTDB_HTTP_PORT="${QUESTDB_HTTP_PORT:-7010}"
+        export QUESTDB_ILP_PORT="${QUESTDB_ILP_PORT:-7011}"
+        export QUESTDB_INFLUX_PORT="${QUESTDB_INFLUX_PORT:-7012}"
 
         # Check if DATABASE stack is already running
-        local db_running=$(docker ps --filter "name=data-timescale" --format "{{.Names}}" 2>/dev/null | wc -l)
+        local db_running=$(docker ps --filter "name=data-questdb" --format "{{.Names}}" 2>/dev/null | wc -l)
 
         if [ "$db_running" -gt 0 ]; then
-            local db_health=$(docker inspect --format='{{.State.Health.Status}}' data-timescale 2>/dev/null || echo "unknown")
-            if [ "$db_health" = "healthy" ]; then
-                log_success "✓ DATABASE stack already running and healthy (9 services)"
+            local db_health=$(docker inspect --format='{{.State.Health.Status}}' data-questdb 2>/dev/null || echo "unknown")
+            if [ "$db_health" = "healthy" ] || [ "$db_health" = "running" ]; then
+                log_success "✓ DATABASE stack already running and healthy (QuestDB + LangGraph Postgres)"
             else
-                log_warning "DATABASE stack running but not healthy (health: $db_health)"
-                log_info "Skipping automatic restart to avoid port conflicts (kong-db uses 5433)"
+                log_warning "DATABASE stack running but not healthy (QuestDB health: $db_health)"
                 log_info "To restart manually: docker compose -p data -f $DB_COMPOSE_FILE restart"
             fi
         else
-            log_info "Starting DATABASE stack (9 services: TimescaleDB, QuestDB, Qdrant, PgAdmin, etc.)..."
+            log_info "Starting DATABASE stack (QuestDB + LangGraph Postgres)..."
 
             # Track which services to start (exclude running standalone containers)
             local exclude_services=""
             
             # List ALL possible database stack containers (complete list)
             local all_db_containers=(
-                "data-qdrant"
                 "data-questdb"
-                "data-timescale"
-                "data-timescale-backup"
-                "data-timescale-pgadmin"
                 "data-postgres-langgraph"
             )
             
@@ -385,11 +407,7 @@ start_containers() {
                     log_info "Container $container already running (standalone), skipping in compose"
                     # Map container name to compose service name
                     case "$container" in
-                        data-qdrant) exclude_services="$exclude_services qdrant";;
                         data-questdb) exclude_services="$exclude_services questdb";;
-                        data-timescale) exclude_services="$exclude_services timescale";;
-                        data-timescale-backup) exclude_services="$exclude_services timescale-backup";;
-                        data-timescale-pgadmin) exclude_services="$exclude_services timescale-pgadmin";;
                         data-postgres-langgraph) exclude_services="$exclude_services postgres-langgraph";;
                     esac
                 elif docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
@@ -429,23 +447,6 @@ start_containers() {
                 docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans
             fi
 
-            # Wait for TimescaleDB to be healthy (primary database)
-            log_info "Waiting for TimescaleDB health..."
-            local max_db_wait=60
-            local waited_db=0
-            while [ $waited_db -lt $max_db_wait ]; do
-                local db_health
-                db_health=$(docker inspect --format='{{.State.Health.Status}}' data-timescale 2>/dev/null || echo starting)
-                if [ "$db_health" = "healthy" ]; then
-                    log_success "✓ TimescaleDB healthy"
-                    break
-                fi
-                sleep 2
-                waited_db=$((waited_db + 2))
-            done
-            if [ $waited_db -ge $max_db_wait ]; then
-                log_warning "⚠ TimescaleDB health check timed out; continuing anyway"
-            fi
         fi
     else
         log_warning "Database compose file not found; skipping DATABASE stack"
@@ -475,12 +476,75 @@ start_tp_capital_stack() {
         done
     fi
 
+    local -a stack_services=("tp-capital-timescaledb" "tp-capital-pgbouncer" "tp-capital-redis-master" "tp-capital-redis-replica" "tp-capital-api")
+    declare -A service_container_map=(
+        ["tp-capital-timescaledb"]="tp-capital-timescale"
+        ["tp-capital-pgbouncer"]="tp-capital-pgbouncer"
+        ["tp-capital-redis-master"]="tp-capital-redis-master"
+        ["tp-capital-redis-replica"]="tp-capital-redis-replica"
+        ["tp-capital-api"]="tp-capital-api"
+    )
+
+    local -a services_to_start=()
+
+    if [ "$FORCE_KILL" = true ]; then
+        log_warning "Force recreating TP Capital stack (--force-kill)"
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
+                docker rm -f "$container" >/dev/null 2>&1 || true
+            fi
+        done
+        services_to_start=("${stack_services[@]}")
+    else
+        local healthy_count=0
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            local state health
+            state=$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || echo "")
+            if [ -z "$state" ]; then
+                services_to_start+=("$service")
+                continue
+            fi
+            health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$container" 2>/dev/null || echo "")
+
+            local is_healthy=false
+            if [ -n "$health" ]; then
+                [ "$health" = "healthy" ] && is_healthy=true
+            else
+                [ "$state" = "running" ] && is_healthy=true
+            fi
+
+            if [ "$is_healthy" = true ]; then
+                ((healthy_count+=1))
+            else
+                log_warning "Container $container not healthy (state=$state, health=${health:-n/a}); recreating..."
+                docker rm -f "$container" >/dev/null 2>&1 || true
+                services_to_start+=("$service")
+            fi
+        done
+
+        if [ "$healthy_count" -eq "${#stack_services[@]}" ]; then
+            log_success "✓ TP Capital stack already running and healthy (5 services)"
+            return 0
+        fi
+
+        if [ ${#services_to_start[@]} -eq 0 ]; then
+            # Should not happen, but start everything just in case
+            services_to_start=("${stack_services[@]}")
+        fi
+    fi
+
+    if [ ${#services_to_start[@]} -lt "${#stack_services[@]}" ]; then
+        log_info "Starting TP Capital components: ${services_to_start[*]}"
+    fi
+
     local -a up_args=(up -d --remove-orphans)
     if [ "$FORCE_KILL" = true ]; then
         up_args+=(--force-recreate)
     fi
 
-    docker compose -p tp-capital -f "$COMPOSE_FILE" "${up_args[@]}"
+    docker compose -p tp-capital -f "$COMPOSE_FILE" "${up_args[@]}" "${services_to_start[@]}"
 
     local containers=("tp-capital-timescale" "tp-capital-pgbouncer" "tp-capital-redis-master" "tp-capital-redis-replica" "tp-capital-api")
     if wait_for_containers_health 180 "${containers[@]}"; then
@@ -499,6 +563,15 @@ start_workspace_stack() {
 
     log_info "Ensuring Workspace stack (API + PostgreSQL 17) is running..."
 
+    local compose_project="workspace"
+    local workspace_volume="workspace-db-data"
+    local volume_project=""
+    volume_project=$(docker volume inspect -f '{{index .Labels "com.docker.compose.project"}}' "$workspace_volume" 2>/dev/null || true)
+    if [ -n "$volume_project" ] && [ "$volume_project" != "$compose_project" ]; then
+        log_info "Detected workspace volume owned by project '$volume_project'; reusing it to avoid recreation prompts"
+        compose_project="$volume_project"
+    fi
+
     if [ "$FORCE_KILL" = true ]; then
         for port in 3210 5450; do
             if port_in_use "$port"; then
@@ -508,12 +581,69 @@ start_workspace_stack() {
         done
     fi
 
+    local -a stack_services=("workspace-db" "workspace-api")
+    declare -A service_container_map=(
+        ["workspace-db"]="workspace-db"
+        ["workspace-api"]="workspace-api"
+    )
+    local -a services_to_start=()
+
+    if [ "$FORCE_KILL" = true ]; then
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
+                docker rm -f "$container" >/dev/null 2>&1 || true
+            fi
+        done
+        services_to_start=("${stack_services[@]}")
+    else
+        local healthy_count=0
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            local state health
+            state=$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || echo "")
+            if [ -z "$state" ]; then
+                services_to_start+=("$service")
+                continue
+            fi
+            health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$container" 2>/dev/null || echo "")
+
+            local is_healthy=false
+            if [ -n "$health" ]; then
+                [ "$health" = "healthy" ] && is_healthy=true
+            else
+                [ "$state" = "running" ] && is_healthy=true
+            fi
+
+            if [ "$is_healthy" = true ]; then
+                ((healthy_count+=1))
+            else
+                log_warning "Workspace container $container not healthy (state=$state, health=${health:-n/a}); recreating..."
+                docker rm -f "$container" >/dev/null 2>&1 || true
+                services_to_start+=("$service")
+            fi
+        done
+
+        if [ "$healthy_count" -eq "${#stack_services[@]}" ]; then
+            log_success "✓ Workspace stack already running and healthy (2 services)"
+            return 0
+        fi
+
+        if [ ${#services_to_start[@]} -eq 0 ]; then
+            services_to_start=("${stack_services[@]}")
+        fi
+    fi
+
+    if [ ${#services_to_start[@]} -lt "${#stack_services[@]}" ]; then
+        log_info "Starting Workspace components: ${services_to_start[*]}"
+    fi
+
     local -a up_args=(up -d --remove-orphans)
     if [ "$FORCE_KILL" = true ]; then
         up_args+=(--force-recreate)
     fi
 
-    docker compose -p workspace -f "$COMPOSE_FILE" "${up_args[@]}"
+    docker compose -p "$compose_project" -f "$COMPOSE_FILE" "${up_args[@]}" "${services_to_start[@]}"
 
     local containers=("workspace-db" "workspace-api")
     if wait_for_containers_health 120 "${containers[@]}"; then
@@ -532,6 +662,18 @@ start_telegram_data_stack() {
 
     log_info "Ensuring Telegram data stack (TimescaleDB + Redis + RabbitMQ) is running..."
 
+    local compose_project="telegram"
+    local telegram_volume="telegram-timescaledb-data"
+    local volume_project=""
+    volume_project=$(docker volume inspect -f '{{index .Labels "com.docker.compose.project"}}' "$telegram_volume" 2>/dev/null || true)
+    if [ -n "$volume_project" ] && [ "$volume_project" != "$compose_project" ]; then
+        log_info "Detected telegram volume owned by project '$volume_project'; reusing it to avoid conflicts"
+        compose_project="$volume_project"
+    fi
+
+    ensure_env_var_from_dotenv "TELEGRAM_DB_PASSWORD"
+    ensure_env_var_from_dotenv "TELEGRAM_RABBITMQ_PASSWORD"
+
     if [ "$FORCE_KILL" = true ]; then
         for port in 5434 6379 5672 15672; do
             if port_in_use "$port"; then
@@ -541,13 +683,70 @@ start_telegram_data_stack() {
         done
     fi
 
+    local -a stack_services=("telegram-timescaledb" "telegram-redis-master" "telegram-rabbitmq")
+    declare -A service_container_map=(
+        ["telegram-timescaledb"]="telegram-timescale"
+        ["telegram-redis-master"]="telegram-redis-master"
+        ["telegram-rabbitmq"]="telegram-rabbitmq"
+    )
+    local -a services_to_start=()
+
+    if [ "$FORCE_KILL" = true ]; then
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
+                docker rm -f "$container" >/dev/null 2>&1 || true
+            fi
+        done
+        services_to_start=("${stack_services[@]}")
+    else
+        local healthy_count=0
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            local state health
+            state=$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || echo "")
+            if [ -z "$state" ]; then
+                services_to_start+=("$service")
+                continue
+            fi
+            health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$container" 2>/dev/null || echo "")
+
+            local is_healthy=false
+            if [ -n "$health" ]; then
+                [ "$health" = "healthy" ] && is_healthy=true
+            else
+                [ "$state" = "running" ] && is_healthy=true
+            fi
+
+            if [ "$is_healthy" = true ]; then
+                ((healthy_count+=1))
+            else
+                log_warning "Telegram container $container not healthy (state=$state, health=${health:-n/a}); recreating..."
+                docker rm -f "$container" >/dev/null 2>&1 || true
+                services_to_start+=("$service")
+            fi
+        done
+
+        if [ "$healthy_count" -eq "${#stack_services[@]}" ]; then
+            log_success "✓ Telegram data stack already running and healthy (3 services)"
+            return 0
+        fi
+
+        if [ ${#services_to_start[@]} -eq 0 ]; then
+            services_to_start=("${stack_services[@]}")
+        fi
+    fi
+
+    if [ ${#services_to_start[@]} -lt "${#stack_services[@]}" ]; then
+        log_info "Starting Telegram components: ${services_to_start[*]}"
+    fi
+
     local -a up_args=(up -d --remove-orphans)
     if [ "$FORCE_KILL" = true ]; then
         up_args+=(--force-recreate)
     fi
-    local -a services=(telegram-timescaledb telegram-redis-master telegram-rabbitmq)
 
-    docker compose -p telegram -f "$COMPOSE_FILE" "${up_args[@]}" "${services[@]}"
+    docker compose -p "$compose_project" -f "$COMPOSE_FILE" "${up_args[@]}" "${services_to_start[@]}"
 
     local containers=("telegram-timescale" "telegram-redis-master" "telegram-rabbitmq")
     if wait_for_containers_health 150 "${containers[@]}"; then
@@ -573,41 +772,94 @@ start_docs_stack() {
         log_warning "Docs compose file not found, skipping"
         return 0
     fi
+    
+    local compose_project="documentation"
+    local -a stack_services=("documentation" "docs-api")
+    declare -A service_container_map=(
+        ["documentation"]="docs-hub"
+        ["docs-api"]="docs-api"
+    )
+    local -a services_to_start=()
 
-    # Check if DOCS stack is already running and healthy
-    local docs_running=$(docker ps --filter "name=docs-" --format "{{.Names}}" 2>/dev/null | wc -l)
-    if [ "$docs_running" -ge 2 ]; then
-        local docs_api_health=$(docker inspect --format='{{.State.Health.Status}}' docs-api 2>/dev/null || echo "unknown")
-        local docs_hub_health=$(docker inspect --format='{{.State.Health.Status}}' docs-hub 2>/dev/null || echo "unknown")
+    if [ "$FORCE_KILL" = true ]; then
+        for port in "${DOCS_PORT:-3400}" "${DOCS_API_PORT:-3401}"; do
+            if port_in_use "$port"; then
+                log_warning "Killing host process on port $port (--force-kill)"
+                kill_port "$port"
+            fi
+        done
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            if docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
+                docker rm -f "$container" >/dev/null 2>&1 || true
+            fi
+        done
+        services_to_start=("${stack_services[@]}")
+    else
+        local healthy_count=0
+        for service in "${stack_services[@]}"; do
+            local container="${service_container_map[$service]}"
+            local state health
+            state=$(docker inspect --format '{{.State.Status}}' "$container" 2>/dev/null || echo "")
+            if [ -z "$state" ]; then
+                services_to_start+=("$service")
+                continue
+            fi
+            health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$container" 2>/dev/null || echo "")
 
-        if [ "$docs_api_health" = "healthy" ] && [ "$docs_hub_health" = "healthy" ]; then
+            local is_healthy=false
+            if [ -n "$health" ]; then
+                [ "$health" = "healthy" ] && is_healthy=true
+            else
+                [ "$state" = "running" ] && is_healthy=true
+            fi
+
+            if [ "$is_healthy" = true ]; then
+                ((healthy_count+=1))
+            else
+                log_warning "Docs container $container not healthy (state=$state, health=${health:-n/a}); recreating..."
+                docker rm -f "$container" >/dev/null 2>&1 || true
+                services_to_start+=("$service")
+            fi
+        done
+
+        if [ "$healthy_count" -eq "${#stack_services[@]}" ]; then
             log_success "✓ DOCS stack already running and healthy (2 services)"
             return 0
         fi
+
+        if [ ${#services_to_start[@]} -eq 0 ]; then
+            services_to_start=("${stack_services[@]}")
+        fi
     fi
 
-    log_info "Starting DOCS stack (docs-api, docs-hub)..."
+    if [ ${#services_to_start[@]} -lt "${#stack_services[@]}" ]; then
+        log_info "Starting DOCS components: ${services_to_start[*]}"
+    else
+        log_info "Starting DOCS stack (docs-api, docs-hub)..."
+    fi
 
-    # Start or restart containers (smart mode - only recreates if needed)
-    docker compose -p documentation -f "$COMPOSE_FILE" up -d --remove-orphans
+    local -a up_args=(up -d --remove-orphans)
+    if [ "$FORCE_KILL" = true ]; then
+        up_args+=(--force-recreate)
+    fi
 
-    # Wait for health
-    local max_wait=30
-    local waited=0
-    while [ $waited -lt $max_wait ]; do
-        local docs_api_health=$(docker inspect --format='{{.State.Health.Status}}' docs-api 2>/dev/null || echo starting)
-        local docs_hub_health=$(docker inspect --format='{{.State.Health.Status}}' docs-hub 2>/dev/null || echo starting)
+    local compose_status=0
+    set +e
+    docker compose -p "$compose_project" -f "$COMPOSE_FILE" "${up_args[@]}" "${services_to_start[@]}"
+    compose_status=$?
+    set -e
+    if [ $compose_status -ne 0 ]; then
+        log_warning "⚠ DOCS stack failed to start (docker compose exit $compose_status). Check for port conflicts on ${DOCS_PORT:-3400}/${DOCS_API_PORT:-3401} or rerun with --force-kill."
+        return 0
+    fi
 
-        if [ "$docs_api_health" = "healthy" ] && [ "$docs_hub_health" = "healthy" ]; then
-            log_success "✓ DOCS stack healthy"
-            return 0
-        fi
-
-        sleep 2
-        waited=$((waited + 2))
-    done
-
-    log_warning "⚠ DOCS stack may not be fully healthy yet"
+    local containers=("docs-hub" "docs-api")
+    if wait_for_containers_health 60 "${containers[@]}"; then
+        log_success "✓ DOCS stack healthy"
+    else
+        log_warning "⚠ DOCS stack may not be fully healthy yet; inspect logs with: docker compose -p documentation -f $COMPOSE_FILE logs -f"
+    fi
 }
 
 # Function to start RAG stack
@@ -640,7 +892,15 @@ start_rag_stack() {
     log_info "Starting RAG stack (Ollama, LlamaIndex)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
+    local compose_status=0
+    set +e
     docker compose -p rag -f "$COMPOSE_FILE" up -d --remove-orphans
+    compose_status=$?
+    set -e
+    if [ $compose_status -ne 0 ]; then
+        log_warning "⚠ RAG stack failed to start (docker compose exit $compose_status). Use --skip-vectors or build the required images (img-rag-*) before rerunning."
+        return 0
+    fi
 
     # Wait for Ollama first
     log_info "Waiting for Ollama to be healthy..."
@@ -691,7 +951,15 @@ start_monitoring_stack() {
     log_info "Starting MONITORING stack (Prometheus, Grafana, Alertmanager)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
+    local compose_status=0
+    set +e
     docker compose -p monitoring -f "$COMPOSE_FILE" up -d --remove-orphans
+    compose_status=$?
+    set -e
+    if [ $compose_status -ne 0 ]; then
+        log_warning "⚠ MONITORING stack failed to start (docker compose exit $compose_status). Inspect tools/compose/docker-compose.monitoring.yml manually."
+        return 0
+    fi
 
     log_success "✓ MONITORING stack started"
 }
@@ -727,7 +995,15 @@ start_tools_stack() {
     log_info "Starting TOOLS stack (LangGraph, Agno Agents)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
+    local compose_status=0
+    set +e
     docker compose -p tools -f "$COMPOSE_FILE" up -d --remove-orphans
+    compose_status=$?
+    set -e
+    if [ $compose_status -ne 0 ]; then
+        log_warning "⚠ TOOLS stack failed to start (docker compose exit $compose_status). Ensure custom images exist or skip this stack."
+        return 0
+    fi
 
     log_success "✓ TOOLS stack started"
 }
@@ -1013,17 +1289,6 @@ start_service() {
         return 0
     fi
 
-    # Special handling for PM2-managed watcher
-    if [ "$name" = "docs-watcher" ] && command -v pm2 >/dev/null 2>&1; then
-        if pm2 show docs-watcher >/dev/null 2>&1; then
-            if pm2 show docs-watcher 2>/dev/null | grep -qi "status\s*: online"; then
-                log_info "docs-watcher managed by PM2 (online); skipping local start"
-                echo $$ > "$pid_file"
-                return 0
-            fi
-        fi
-    fi
-
     # Check if already running
     if [ -f "$pid_file" ]; then
         local old_pid=$(cat "$pid_file")
@@ -1276,7 +1541,7 @@ main() {
     for service in "${services_to_check[@]}"; do
         local pid_file="$SERVICES_DIR/${service}.pid"
         if [ ! -f "$pid_file" ]; then
-            ((stopped_count++))
+            ((stopped_count+=1))
         fi
     done
 
@@ -1296,9 +1561,7 @@ main() {
     echo -e "  📚 Workspace Stack:   http://localhost:3210"
     echo -e "     └─ PostgreSQL:     postgresql://postgres:***@localhost:5450/workspace"
     echo -e "  📨 Telegram Data:     Timescale 5434 · Redis 6379 · RabbitMQ 5672"
-    echo -e "  💾 Shared Timescale:  postgresql://${TIMESCALEDB_USER:-timescale}:***@localhost:5433/${TIMESCALEDB_DB:-tradingsystem}"
-    echo -e "     ├─ pgAdmin:        http://localhost:${PGADMIN_HOST_PORT:-5050}"
-    echo -e "     └─ pgWeb:          http://localhost:${PGWEB_PORT:-8081}"
+    echo -e "  📈 QuestDB Analytics: http://localhost:${QUESTDB_HTTP_PORT:-7010}"
     echo ""
     echo -e "${CYAN}🖥️  Local Dev Services:${NC}"
     echo -e "  📨 Telegram Gateway:      http://localhost:4007  (health: /health)"

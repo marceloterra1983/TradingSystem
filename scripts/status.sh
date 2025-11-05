@@ -157,28 +157,6 @@ check_local_services() {
         fi
     done
 
-    # Check docs-watcher (no port, process-based detection)
-    local watcher_pid=$(pgrep -f "watch-docs.js" 2>/dev/null | head -n1 || echo "")
-    if [ -n "$watcher_pid" ]; then
-        ((++running))
-        ((++total))
-        if [ "$JSON_OUTPUT" = false ]; then
-            echo -e "  ${GREEN}✓${NC} $(printf '%-20s' "docs-watcher") ${GREEN}RUNNING${NC}  PID: $watcher_pid  (file watcher)"
-
-            if [ "$DETAILED" = true ]; then
-                local details=$(ps -p "$watcher_pid" -o %cpu,%mem,etime --no-headers 2>/dev/null | awk '{print "CPU: "$1"%, MEM: "$2"%, Uptime: "$3}')
-                if [ -n "$details" ]; then
-                    echo -e "    ${BLUE}└─${NC} $details"
-                fi
-            fi
-        fi
-    else
-        ((++total))
-        if [ "$JSON_OUTPUT" = false ]; then
-            echo -e "  ${RED}✗${NC} $(printf '%-20s' "docs-watcher") ${RED}STOPPED${NC}  (file watcher)"
-        fi
-    fi
-
     if [ "$JSON_OUTPUT" = false ]; then
         echo ""
         if [ $running -eq $total ]; then
@@ -327,7 +305,7 @@ show_summary() {
     echo -e "  Workspace API:            ${CYAN}http://localhost:3201${NC}  (Ideas & tasks)"
     echo ""
     echo -e "${CYAN}📚 Documentation (Docker):${NC}"
-    echo -e "  Documentation Hub:        ${CYAN}http://localhost:3404${NC}  (Docusaurus)"
+    echo -e "  Documentation Hub:        ${CYAN}http://localhost:3400${NC}  (Docusaurus)"
     echo -e "  DocsAPI:                  ${CYAN}http://localhost:3405${NC}  (FlexSearch + RAG)"
     echo ""
     echo -e "${CYAN}🧠 RAG Services (Docker):${NC}"

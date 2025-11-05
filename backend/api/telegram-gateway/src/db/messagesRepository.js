@@ -116,7 +116,7 @@ const getPool = async (logger) => {
       CREATE TABLE IF NOT EXISTS ${schemaIdent}.${tableNameIdent} (
         id BIGSERIAL PRIMARY KEY,
         channel_id BIGINT NOT NULL,
-        message_id TEXT NOT NULL,
+        message_id BIGINT NOT NULL,
         thread_id BIGINT,
         source TEXT NOT NULL DEFAULT 'unknown',
         message_type TEXT NOT NULL DEFAULT 'channel_post',
@@ -627,8 +627,8 @@ export const markAsProcessed = async (messageIds, processedBy, logger) => {
     processed_at: new Date().toISOString(),
   };
 
-  // Convert messageIds to strings for comparison (message_id is TEXT type in database)
-  const messageIdsAsText = messageIds.map(id => String(id));
+  // Convert to strings so Postgres can cast the array to BIGINT[] safely
+  const messageIdsAsText = messageIds.map((id) => String(id));
   
   const query = `
     UPDATE ${tableIdentifier}
@@ -636,7 +636,7 @@ export const markAsProcessed = async (messageIds, processedBy, logger) => {
       status = 'published',
       published_at = NOW(),
       metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
-    WHERE message_id = ANY($1::text[])
+    WHERE message_id = ANY($1::bigint[])
       AND status != 'published'
     RETURNING id, message_id;
   `;

@@ -58,7 +58,7 @@ ps aux | grep $(lsof -ti :4005)
 kill -9 $(lsof -ti :4005)
 
 # Option B: Change the port in docker-compose.apps.yml
-# Edit the ports section: "4006:4005" instead of "4005:4005"
+# Edit the ports section: "4007:4005" instead of "4005:4005"
 
 # Then restart
 docker compose -f tools/compose/docker-compose.apps.yml up -d
@@ -91,31 +91,32 @@ PGPASSWORD="pass_timescale" psql -h localhost -p 5433 -U timescale -d APPS-TPCAP
 **Solution A - Network Issue**:
 
 ```bash
-# Ensure TimescaleDB is on the correct network
-docker network connect --alias timescaledb tradingsystem_backend data-timescaledb
+# Ensure the dedicated TP Capital stack is running
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
 
-# Restart app containers
-docker compose -f tools/compose/docker-compose.apps.yml restart
+# Restart app containers if they still hold dead connections
+docker compose -f tools/compose/docker-compose.apps.yml restart apps-tpcapital
 ```
 
 **Solution B - Password Mismatch**:
 
 ```bash
-# Update database password
-docker exec data-timescaledb psql -U timescale -d postgres -c "ALTER USER timescale WITH PASSWORD 'pass_timescale';"
+# Update TP Capital DB password inside the dedicated stack
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-timescaledb \
+  psql -U tp_capital -d tp_capital_db -c "ALTER USER tp_capital WITH PASSWORD 'new_password';"
 
-# Update config/docker.env
-sed -i 's/TIMESCALEDB_PASSWORD=.*/TIMESCALEDB_PASSWORD=pass_timescale/' config/docker.env
+# Mirror the change in `.env`
+sed -i 's/TP_CAPITAL_DB_PASSWORD=.*/TP_CAPITAL_DB_PASSWORD=new_password/' .env
 
-# Restart containers
-docker compose -f tools/compose/docker-compose.apps.yml restart
+# Restart TP Capital API (PgBouncer picks up the new credentials)
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-pgbouncer tp-capital-api
 ```
 
 **Solution C - Database Not Running**:
 
 ```bash
-# Start TimescaleDB
-docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
+# Start the dedicated TP Capital stack (includes TimescaleDB + PgBouncer)
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
 
 # Wait for it to be healthy
 sleep 10
@@ -238,12 +239,11 @@ docker logs workspace-service
 
 ```bash
 # Some health checks test database connection
-# Ensure TimescaleDB is accessible
-docker exec workspace-service ping -c 3 timescaledb
+# Ensure dedicated Workspace DB is accessible
+docker exec workspace-service ping -c 3 workspace-db
 
-# If fails, reconnect to network:
-docker network connect --alias timescaledb tradingsystem_backend data-timescaledb
-docker restart workspace-service
+# If fails, restart the Workspace stack (it recreates DB + API):
+docker compose -f tools/compose/docker-compose.workspace-simple.yml up -d --force-recreate
 ```
 
 ---

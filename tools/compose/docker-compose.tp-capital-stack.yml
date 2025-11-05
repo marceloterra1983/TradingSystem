@@ -25,6 +25,7 @@ services:
     
     env_file:
       - ../../.env
+      - ../../.env.shared
     
     environment:
       POSTGRES_DB: tp_capital_db
@@ -269,7 +270,7 @@ services:
       - ../../.env
     
     ports:
-      - "4008:4005"
+      - "${TP_CAPITAL_API_PORT:-4008}:4005"
     
     environment:
       # Server
@@ -319,8 +320,8 @@ services:
       - GATEWAY_SIGNALS_CHANNEL_ID=${GATEWAY_SIGNALS_CHANNEL_ID:--1001649127710}
       - GATEWAY_BATCH_SIZE=${GATEWAY_BATCH_SIZE:-100}
       
-      # Telegram Gateway Connection (host service)
-      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+      # Telegram Gateway Connection (container service)
+      - TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010
       - TELEGRAM_GATEWAY_PORT=4010
       
       # CORS
@@ -454,4 +455,3 @@ volumes:
 #     psql -h localhost -p 6432 -U pgbouncer pgbouncer -c "SHOW POOLS"
 # 
 # ==============================================================================
-

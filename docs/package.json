@@ -11,7 +11,7 @@
     "docs:build": "docusaurus build",
     "docs:build:fast": "NODE_ENV=development npm run docs:build",
     "docs:serve": "docusaurus serve --dir build --host 0.0.0.0 --port 3400",
-    "docs:auto": "node ../scripts/docs/docs-auto.mjs",
+    "docs:auto": "npm --prefix .. run governance:auto && node ../scripts/docs/docs-auto.mjs",
     "docs:lint": "markdownlint \"content/**/*.{md,mdx}\" && remark content --ext mdx",
     "docs:typecheck": "tsc --noEmit",
     "docs:check": "npm run docs:auto && npm run docs:validate-generated && (npm run docs:lint || echo '⚠️  Lint errors found but not blocking') && npm run docs:typecheck && npm run docs:test && npm run docs:build",

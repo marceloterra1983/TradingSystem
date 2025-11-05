@@ -16,7 +16,7 @@ type AsyncRequestHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => Promise<void | Response>;
+) => void | Response | Promise<void | Response>;
 
 /**
  * Wraps an async Express route handler to properly catch and forward errors

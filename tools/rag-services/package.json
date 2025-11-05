@@ -15,7 +15,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPatterns=unit",
+    "test:unit": "jest --testPathPatterns=unit --runInBand",
     "test:integration": "jest --testPathPatterns=integration",
     "test:ci": "jest --coverage --ci --maxWorkers=2",
     "workflow": "node run-workflow.js",

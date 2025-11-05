@@ -1,9 +1,5 @@
-import { createRequire } from 'module';
 import { AI_AGENTS_DIRECTORY } from '../../src/data/aiAgentsDirectory';
-
-const require = createRequire(import.meta.url);
-type CommandsDatabase = typeof import('../../src/data/commands-db.json');
-const commandsDatabase = require('../../src/data/commands-db.json') as CommandsDatabase;
+import { commandsDatabase } from '../../src/data/commandsCatalog';
 
 /**
  * Catalog fixtures derive from the real data sources to keep the tests

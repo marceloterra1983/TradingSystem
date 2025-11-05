@@ -61,6 +61,59 @@ const logger = createLogger('tp-capital', {
 
 validateConfig(logger);
 
+/**
+ * Parse timestamp parameter with validation and fallback
+ *
+ * Handles multiple input formats:
+ * - Milliseconds timestamp: 1730823600000
+ * - Seconds timestamp: 1730823600 (auto-converts to ms)
+ * - ISO string: '2025-11-05T12:00:00Z'
+ * - Invalid: returns undefined
+ *
+ * @param {string | number | undefined} value - Timestamp parameter
+ * @returns {number | undefined} Timestamp in milliseconds or undefined
+ * @internal
+ */
+function parseTimestampParam(value) {
+  if (!value) return undefined;
+
+  // Try parsing as number first
+  const num = Number(value);
+  if (!isNaN(num)) {
+    // Handle edge case: 0 is valid (Unix epoch)
+    if (num === 0) return 0;
+
+    // If value is a reasonable timestamp, return it
+    // Valid range: year 2000 (946684800000ms) to year 2100 (4102444800000ms)
+    const YEAR_2000_MS = 946684800000;
+    const YEAR_2100_MS = 4102444800000;
+
+    // Check if already in milliseconds
+    if (num >= YEAR_2000_MS && num <= YEAR_2100_MS) {
+      return num;
+    }
+
+    // Check if in seconds (convert to milliseconds)
+    if (num >= YEAR_2000_MS / 1000 && num <= YEAR_2100_MS / 1000) {
+      return num * 1000;
+    }
+
+    // Out of valid range
+    logger.warn({ value, parsed: num }, 'Timestamp out of valid range (2000-2100)');
+    return undefined;
+  }
+
+  // Try parsing as ISO string
+  const parsed = Date.parse(String(value));
+  if (!isNaN(parsed)) {
+    return parsed;
+  }
+
+  // Invalid timestamp
+  logger.warn({ value }, 'Failed to parse timestamp parameter');
+  return undefined;
+}
+
 const app = express();
 
 // Expose shared resources to nested routers
@@ -372,8 +425,8 @@ app.get('/forwarded-messages', async (req, res) => {
     const rows = await timescaleClient.fetchForwardedMessages({
       limit,
       channelId,
-      fromTs: req.query.from ? Number(req.query.from) || Date.parse(String(req.query.from)) : undefined,
-      toTs: req.query.to ? Number(req.query.to) || Date.parse(String(req.query.to)) : undefined,
+      fromTs: parseTimestampParam(req.query.from),
+      toTs: parseTimestampParam(req.query.to),
     });
 
     // Normalizar timestamps e adicionar campo ts

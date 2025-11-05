@@ -11,6 +11,7 @@ import { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../middleware/responseWrapper';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -92,7 +93,7 @@ async function checkModelAvailability(modelName: string): Promise<boolean> {
  * GET /api/v1/rag/models
  * List all embedding models with availability status
  */
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', asyncHandler(async (_req: Request, res: Response) => {
   try {
     logger.info('Listing embedding models');
 
@@ -130,13 +131,13 @@ router.get('/', async (_req: Request, res: Response) => {
     });
     return sendError(res, 'MODELS_LIST_ERROR', 'Failed to list embedding models', 500);
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/models/:name
  * Get information about a specific embedding model
  */
-router.get('/:name', async (req: Request, res: Response) => {
+router.get('/:name', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -167,13 +168,13 @@ router.get('/:name', async (req: Request, res: Response) => {
     });
     return sendError(res, 'MODEL_GET_ERROR', 'Failed to get embedding model info', 500);
   }
-});
+}));
 
 /**
  * POST /api/v1/rag/models/:name/validate
  * Validate if a model is available and working in Ollama
  */
-router.post('/:name/validate', async (req: Request, res: Response) => {
+router.post('/:name/validate', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
 
@@ -268,13 +269,13 @@ router.post('/:name/validate', async (req: Request, res: Response) => {
     });
     return sendError(res, 'MODEL_VALIDATE_ERROR', 'Failed to validate embedding model', 500);
   }
-});
+}));
 
 /**
  * GET /api/v1/rag/models/compare/:model1/:model2
  * Compare two embedding models
  */
-router.get('/compare/:model1/:model2', async (req: Request, res: Response) => {
+router.get('/compare/:model1/:model2', asyncHandler(async (req: Request, res: Response) => {
   try {
     const { model1, model2 } = req.params;
 
@@ -338,6 +339,6 @@ router.get('/compare/:model1/:model2', async (req: Request, res: Response) => {
     });
     return sendError(res, 'MODEL_COMPARE_ERROR', 'Failed to compare embedding models', 500);
   }
-});
+}));
 
 export default router;

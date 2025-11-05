@@ -1,0 +1,14 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: pgbouncer
+version: "3.9"
+
+x-tradingsystem-stack: "pgbouncer"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  telegram-pgbouncer:
+    env: TELEGRAM_PGBOUNCER_PORT
+    port: 6434
+    protocol: postgres
+    owner: "Telegram Squad"
+    description: "PgBouncer conectado ao Timescale do Telegram"

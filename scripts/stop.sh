@@ -144,7 +144,7 @@ EOF
             exit 0
             ;;
         *)
-            if [[ -n "${SERVICE_PORTS[$1]:-}" || "$1" == "docs-watcher" ]]; then
+            if [[ -n "${SERVICE_PORTS[$1]:-}" ]]; then
                 REQUESTED_SERVICES+=("$1")
                 shift
             else
@@ -413,25 +413,6 @@ main() {
                 fi
             fi
         done
-
-        # Stop docs-watcher (file watcher without port)
-        if [ "$TARGET_MODE" = false ] || [[ -n "${TARGET_SERVICES_MAP["docs-watcher"]:-}" ]]; then
-            if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
-                log_info "Stopping docs-watcher..."
-                if [ "$FORCE" = true ]; then
-                    pkill -9 -f "watch-docs.js" || true
-                else
-                    pkill -15 -f "watch-docs.js" || true
-                    sleep 1
-                    # Force kill if still alive
-                    if pgrep -f "watch-docs.js" > /dev/null 2>&1; then
-                        pkill -9 -f "watch-docs.js" || true
-                    fi
-                fi
-                log_success "✓ Stopped docs-watcher"
-                mark_service_stopped "docs-watcher"
-            fi
-        fi
 
         local stopped_count=${#STOPPED_SERVICE_NAMES[@]}
         if [ $stopped_count -eq 0 ]; then

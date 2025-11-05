@@ -157,7 +157,7 @@ legend right
     | **TOTAL** | **12** | **9 CPU** | **7.5GB** |
     
     **Port Map:**
-    • 4006: MTProto Gateway (native)
+    • 4007: MTProto Gateway (native)
     • 4010: Gateway API (container)
     • 5434: TimescaleDB (container)
     • 6434: PgBouncer (container)

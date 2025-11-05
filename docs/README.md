@@ -85,7 +85,7 @@ npm run docs:build
 
 | File | Source | Generator | Status |
 |------|--------|-----------|--------|
-| `content/tools/ports-services/overview.mdx` | `docs/context/ops/service-port-map.md` | Ports table parser | ✅ Active |
+| `content/tools/ports-services.mdx` | `docs/context/ops/service-port-map.md` | Ports table parser | ✅ Active |
 | `content/frontend/design-system/tokens.mdx` | `frontend/dashboard/tailwind.config.js` | Tailwind token extractor | ✅ Active |
 | `content/mcp/registry.mdx` | `~/.claude.json`, `claude/mcp-servers.json` | MCP registry sync | ⚠️ TODO (blocked) |
 
@@ -138,7 +138,7 @@ npm run docs:check
 - Migration artifacts: `docs/migration/`
 - Migration tasks: `tools/openspec/changes/migrate-docs-to-docusaurus-v2/tasks.md`
 - Legacy docs: `docs/README.md`
-- Governance docs: `docs/governance/`
+- Governance hub sources: `governance/`
 
 **For Reviewers**:
 1. Review assigned chapters in `governance/REVIEW-CHECKLIST.md`

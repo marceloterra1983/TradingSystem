@@ -19,7 +19,7 @@ title Telegram Architecture - Data Flow & Components
 rectangle "Telegram Servers\n(MTProto Protocol)" as TelegramServers <<external>>
 
 ' Gateway Layer
-package "Gateway Layer (Port 4006)" {
+package "Gateway Layer (Port 4007)" {
     rectangle "MTProto Gateway\n(apps/telegram-gateway)\n\n• Session management\n• Message capture\n• Retry logic\n• Failure queue" as Gateway <<service>>
     
     rectangle "Session Storage\n(.session/ files)\n\n• AES-256-GCM encrypted\n• File permissions 0600\n• Auto-backup" as Session <<database>>
@@ -77,7 +77,7 @@ PollingWorker -up-> GatewayDB : "UPDATE\nstatus='published'"
 
 TPCapitalDB -down-> Dashboard : "GET /signals"
 
-Gateway -down-> Prometheus : "/metrics\n(port 4006)"
+Gateway -down-> Prometheus : "/metrics\n(port 4007)"
 TPCapital -down-> Prometheus : "/metrics\n(port 4005)"
 Prometheus -right-> Grafana : "query"
 

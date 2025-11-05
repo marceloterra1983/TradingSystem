@@ -58,7 +58,7 @@ Sentinel ..> RedisReplica : "Monitor"
 ' ==============================================================================
 ' Metrics Flow
 ' ==============================================================================
-Gateway -[#orange,dotted]-> Prom : "/metrics\n(4006)"
+Gateway -[#orange,dotted]-> Prom : "/metrics\n(4007)"
 API -[#orange,dotted]-> Prom : "/metrics\n(4010)"
 Worker -[#orange,dotted]-> Prom : "/metrics\n(4005)"
 

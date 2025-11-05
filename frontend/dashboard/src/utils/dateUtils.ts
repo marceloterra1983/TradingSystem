@@ -1,125 +1,126 @@
 /**
  * Date and time utilities for TradingSystem
  * All timestamps are displayed in São Paulo timezone (America/Sao_Paulo)
+ *
+ * @deprecated Most functions in this file are deprecated. Use timestampUtils instead.
+ * This file is kept for backward compatibility.
  */
 
-const TIMEZONE = 'America/Sao_Paulo';
+import {
+  normalizeTimestamp,
+  formatTimestamp as formatTsRobust,
+  formatISO,
+  APP_TIMEZONE,
+} from './timestampUtils';
+import { formatInTimeZone } from 'date-fns-tz';
+
+const TIMEZONE = APP_TIMEZONE;
 const LOCALE = 'pt-BR';
 
 /**
  * Format a timestamp string to Brazilian format with São Paulo timezone
- * @param value - ISO timestamp string or Date object
+ * @param value - ISO timestamp string, number, or Date object
  * @returns Formatted date string (dd/mm/yyyy, hh:mm:ss)
+ * @deprecated Use formatTimestamp from timestampUtils instead
  */
 export function formatTimestamp(
-  value: string | Date | null | undefined,
+  value: string | number | Date | null | undefined,
 ): string {
   if (!value) return '–';
 
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) {
     return typeof value === 'string' ? value : '–';
   }
 
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const result = formatTsRobust(normalized, false);
+  if (!result) return '–';
+
+  return `${result.date}, ${result.time}`;
 }
 
 /**
  * Format a timestamp string to short Brazilian format with São Paulo timezone
- * @param value - ISO timestamp string or Date object
+ * @param value - ISO timestamp string, number, or Date object
  * @returns Formatted date string (dd/mm/yyyy, hh:mm)
+ * @deprecated Use formatTimestamp from timestampUtils instead
  */
 export function formatTimestampShort(
-  value: string | Date | null | undefined,
+  value: string | number | Date | null | undefined,
 ): string {
   if (!value) return '–';
 
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) {
     return typeof value === 'string' ? value : '–';
   }
 
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+  try {
+    const date = new Date(normalized);
+    return formatInTimeZone(date, TIMEZONE, 'dd/MM/yyyy, HH:mm');
+  } catch (error) {
+    return '–';
+  }
 }
 
 /**
  * Format a timestamp string to date only (Brazilian format, São Paulo timezone)
- * @param value - ISO timestamp string or Date object
+ * @param value - ISO timestamp string, number, or Date object
  * @returns Formatted date string (dd/mm/yyyy)
+ * @deprecated Use formatTimestamp from timestampUtils and extract date field
  */
-export function formatDate(value: string | Date | null | undefined): string {
+export function formatDate(value: string | number | Date | null | undefined): string {
   if (!value) return '–';
 
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) {
     return typeof value === 'string' ? value : '–';
   }
 
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+  const result = formatTsRobust(normalized, false);
+  return result?.date || '–';
 }
 
 /**
  * Format a timestamp to a short label (dd/MM)
+ * @deprecated Use formatInTimeZone from date-fns-tz directly
  */
 export function formatShortDate(
-  value: string | Date | null | undefined,
+  value: string | number | Date | null | undefined,
 ): string {
   if (!value) {
     return '–';
   }
 
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) {
     return typeof value === 'string' ? value : '–';
   }
 
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-    day: '2-digit',
-    month: '2-digit',
-  });
+  try {
+    const date = new Date(normalized);
+    return formatInTimeZone(date, TIMEZONE, 'dd/MM');
+  } catch (error) {
+    return '–';
+  }
 }
 
 /**
  * Format a timestamp string to time only (São Paulo timezone)
- * @param value - ISO timestamp string or Date object
+ * @param value - ISO timestamp string, number, or Date object
  * @returns Formatted time string (hh:mm:ss)
+ * @deprecated Use formatTimestamp from timestampUtils and extract time field
  */
-export function formatTime(value: string | Date | null | undefined): string {
+export function formatTime(value: string | number | Date | null | undefined): string {
   if (!value) return '–';
 
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
+  const normalized = normalizeTimestamp(value);
+  if (!normalized) {
     return typeof value === 'string' ? value : '–';
   }
 
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const result = formatTsRobust(normalized, false);
+  return result?.time || '–';
 }
 
 /**
@@ -133,11 +134,15 @@ export function getNow(): Date {
 /**
  * Convert a UTC timestamp to São Paulo time
  * @param utcTimestamp - UTC timestamp string
- * @returns ISO string in São Paulo timezone
+ * @returns Formatted string in São Paulo timezone
+ * @deprecated Use formatTimestamp from timestampUtils instead
  */
-export function utcToSaoPaulo(utcTimestamp: string): string {
-  const date = new Date(utcTimestamp);
-  return date.toLocaleString(LOCALE, {
-    timeZone: TIMEZONE,
-  });
+export function utcToSaoPaulo(utcTimestamp: string | number): string {
+  const normalized = normalizeTimestamp(utcTimestamp);
+  if (!normalized) return '–';
+
+  const result = formatTsRobust(normalized, false);
+  if (!result) return '–';
+
+  return `${result.date}, ${result.time}`;
 }

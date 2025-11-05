@@ -5,8 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env from project root (shared configuration)
+// Load shared env files from project root
 const projectRoot = path.join(__dirname, '..', '..', '..');
+dotenv.config({ path: path.join(projectRoot, '.env.shared') });
 dotenv.config({ path: path.join(projectRoot, '.env') });
 
 const parseBoolean = (value, fallback = false) => {
@@ -19,15 +20,17 @@ const toInteger = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const legacyDbHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
 const defaultDbUrl =
   process.env.TELEGRAM_GATEWAY_DB_URL ||
+  process.env.TELEGRAM_TIMESCALE_URL ||
   process.env.TIMESCALEDB_URL ||
-  // Fallback aligned with local Timescale defaults (single DB 'tradingsystem' + schema 'telegram_gateway')
-  'postgresql://timescale:pass_timescale@localhost:5433/tradingsystem';
+  process.env.DATABASE_URL ||
+  `postgresql://timescale:pass_timescale@${legacyDbHost}:5433/tradingsystem`;
 
 export const config = {
   gateway: {
-    port: toInteger(process.env.GATEWAY_PORT, 4006),
+    port: toInteger(process.env.GATEWAY_PORT, 4007),
   },
 
   telegram: {

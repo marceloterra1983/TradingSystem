@@ -12,7 +12,7 @@ lastReviewed: '2025-10-26'
 
 Telegram Gateway is a two-part service that bridges Telegram channels and TradingSystem APIs:
 
-- **MTProto Gateway (apps/telegram-gateway, port 4006)** authenticates with Telegram, captures channel messages, and writes them to TimescaleDB queue tables (`telegram_gateway.messages`).
+- **MTProto Gateway (apps/telegram-gateway, port 4007)** authenticates with Telegram, captures channel messages, and writes them to TimescaleDB queue tables (`telegram_gateway.messages`).
 - **REST API (backend/api/telegram-gateway, port 4010)** exposes captured messages, health checks, and analytics for downstream consumers.
 
 It underpins TP Capital signal ingestion and any future Telegram-driven automations, providing a reliable, auditable pipeline with retry and failure queue support.

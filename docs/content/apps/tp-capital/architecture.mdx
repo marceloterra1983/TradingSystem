@@ -20,7 +20,7 @@ Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MT
 
 **Key Components**:
 
-1. **Telegram Gateway**: Local service (port 4006/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
+1. **Telegram Gateway**: Local service (port 4007/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
 2. **Gateway Polling Worker**: TP Capital component that fetches queued messages, validates content, and applies parsing rules.
 3. **Timescale Writer**: Persists normalized signals into `tp_capital.tp_capital_signals` with idempotency checks.
 4. **REST API**: Express server exposing `/signals`, `/forwarded-messages`, `/telegram-*`, `/sync-messages`, `/health`, and `/metrics`.
@@ -115,4 +115,4 @@ Shows parallel consumption patterns:
 - Deployed via `docker-compose.prod.yml` with production env file and mounted secrets.
 - Health check: `curl http://<host>:4005/health`.
 - TimescaleDB connectivity: `psql postgresql://timescale:***@<host>:5433/APPS-TPCAPITAL`.
-- Telegram Gateway runs as systemd unit on same host (4006/4010) with session files stored locally.
+- Telegram Gateway runs as systemd unit on same host (4007/4010) with session files stored locally.

@@ -1,0 +1,57 @@
+---
+title: Port Governance Kickoff Comms
+description: Pacote de comunicação (Slack, e-mail, FAQ e pitch deck outline) para iniciar o programa de governança de portas.
+tags:
+  - governance
+  - communications
+owner: Platform Architecture
+lastUpdated: '2025-11-05'
+---
+
+## 1. Slack Announcement ( #engineering )
+
+```
+🚦 **Port Governance entrou em produção**
+
+- Registro único: `config/ports/registry.yaml`
+- Comando oficial: `npm run ports:sync` (gera `.env.shared`, docs e health script)
+- CI bloqueia portas duplicadas / fora da faixa
+- Telegram MTProto agora roda em container (porta 4007) consumível pelos serviços
+
+👉 Ação: ao expor novas portas, atualize o registry e rode o sync. Guia completo: docs/content/governance/port-governance/port-ranges.mdx
+```
+
+## 2. Email Template
+
+**Assunto:** `[Ação requerida] Port Governance & MTProto containerizado`
+
+**Corpo (resumo):**
+
+1. Problema: conflitos mensais + docs divergentes.
+2. Solução: registro central, scripts gerados, CI, MTProto em Docker.
+3. Passos para devs:
+   - Ajustar scripts para consumir `.env.shared`.
+   - Rodar `npm run ports:sync` ao alterar portas/services.
+   - Consultar `reports/ports/port-inventory.xlsx` antes de propor novas portas.
+4. Links úteis:
+   - Port ranges
+   - ADR-015
+   - Health script
+
+## 3. All-Hands Outline (15 min)
+
+1. Contexto + métricas (3 min)
+2. Demonstração `ports:sync` + `.env.shared` (5 min)
+3. Estado do Telegram stack (3 min)
+4. Próximos passos / Q&A (4 min)
+
+## 4. FAQ (resumo)
+
+| Pergunta | Resposta |
+|----------|----------|
+| Preciso migrar meu serviço agora? | Sim para novas portas; serviços existentes serão migrados por fase, mas devem usar `.env.shared`. |
+| O que fazer se faltar faixa? | Abrir issue/PR atualizando `docs/content/governance/port-governance/port-ranges.mdx` com justificativa. |
+| Health script falhou, e agora? | Verifique se o serviço está rodando localmente. No CI, use `SKIP_PORT_HEALTH=1` apenas em casos aprovados. |
+| Como reportar conflito? | Abra ticket em `#port-governance` anexando trecho do inventário. |
+
+> Arquivos complementares (Google Slides + FAQ estendida) ficam em `/reports/ports/` para consulta.

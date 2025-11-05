@@ -174,10 +174,10 @@ echo -e "${BLUE}━━━ Summary ━━━${NC}"
 echo ""
 
 # Count current services
-local_services=$(ps aux | grep -E 'telegram-gateway|dashboard|status|docs-watcher' | grep -v grep | wc -l)
+local_services=$(ps aux | grep -E 'telegram-gateway|dashboard|status' | grep -v grep | wc -l)
 containers=$(docker ps -q | wc -l)
 
-echo -e "  ${GREEN}✓${NC} Local services running: $local_services/5"
+echo -e "  ${GREEN}✓${NC} Local services running: $local_services/4"
 echo -e "  ${GREEN}✓${NC} Docker containers running: $containers/27"
 
 if [ "$DRY_RUN" = true ]; then

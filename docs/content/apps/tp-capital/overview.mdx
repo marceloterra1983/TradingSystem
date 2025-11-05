@@ -23,7 +23,7 @@ Node.js 20 service that ingests TP Capital Telegram messages received by the **T
 
 ### Journey 1: Signal Ingestion
 
-1. Telegram Gateway (port 4006) authenticates with MTProto and stores messages in `telegram_gateway.messages`.
+1. Telegram Gateway (port 4007) authenticates with MTProto and stores messages in `telegram_gateway.messages`.
 2. TP Capital API polling worker fetches new rows, validates structure, and applies parsing rules (asset, buy range, targets, stop).
 3. Service writes normalized payload to TimescaleDB (`tp_capital_signals`) and tracks processing metrics.
 4. Gateway queue is marked as processed; API metrics reflect ingestion.

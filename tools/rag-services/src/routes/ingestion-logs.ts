@@ -12,6 +12,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
 import { sendSuccess, sendError } from '../middleware/responseWrapper';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -60,7 +61,9 @@ async function ensureLogsDirectory(): Promise<void> {
  * Load logs from persistent storage on startup
  */
 async function loadLogsFromDisk(): Promise<void> {
-  if (logsLoaded) return;
+  if (logsLoaded) {
+    return;
+  }
 
   try {
     await ensureLogsDirectory();
@@ -147,7 +150,7 @@ export function addIngestionLog(entry: Omit<IngestionLogEntry, 'timestamp'>): vo
  * GET /api/v1/rag/ingestion/logs
  * Retrieve ingestion logs with optional filtering
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
   try {
     // Load logs from disk on first request
     await loadLogsFromDisk();
@@ -188,13 +191,13 @@ router.get('/', async (req: Request, res: Response) => {
     });
     return sendError(res, 'LOGS_FETCH_ERROR', 'Failed to retrieve ingestion logs', 500);
   }
-});
+}));
 
 /**
  * POST /api/v1/rag/ingestion/logs
  * Add a new log entry (for internal use or webhook)
  */
-router.post('/', (req: Request, res: Response) => {
+router.post('/', asyncHandler((req: Request, res: Response) => {
   try {
     const { level, message, collection, details } = req.body;
 
@@ -218,20 +221,20 @@ router.post('/', (req: Request, res: Response) => {
     });
     return sendError(res, 'LOG_ADD_ERROR', 'Failed to add ingestion log', 500);
   }
-});
+}));
 
 /**
  * DELETE /api/v1/rag/ingestion/logs
  * Archive current logs and start fresh (does NOT delete, only archives)
  */
-router.delete('/', async (_req: Request, res: Response) => {
+router.delete('/', asyncHandler(async (_req: Request, res: Response) => {
   try {
     const previousCount = ingestionLogs.length;
 
     // Archive current logs instead of deleting
     const archivePath = path.join(
       LOGS_DIR,
-      `ingestion-logs-archive-${new Date().toISOString().replace(/:/g, '-')}.jsonl`
+      `ingestion-logs-archive-${new Date().toISOString().replace(/:/g, '-')}.jsonl`,
     );
 
     try {
@@ -270,6 +273,6 @@ router.delete('/', async (_req: Request, res: Response) => {
     });
     return sendError(res, 'LOGS_ARCHIVE_ERROR', 'Failed to archive ingestion logs', 500);
   }
-});
+}));
 
 export default router;

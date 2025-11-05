@@ -338,7 +338,7 @@ const SERVICE_TARGETS = [
     name: 'PostgreSQL LangGraph',
     description: 'PostgreSQL database for LangGraph',
     category: 'data',
-    defaultPort: 7002,
+    defaultPort: Number(process.env.POSTGRES_LANGGRAPH_PORT || 5432),
     internalPort: 5432,
     portEnv: 'SERVICE_LAUNCHER_POSTGRES_LANGGRAPH_PORT',
     urlEnv: 'SERVICE_LAUNCHER_POSTGRES_LANGGRAPH_URL',

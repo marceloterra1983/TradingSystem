@@ -23,6 +23,7 @@ const projectRoot = path.resolve(__dirname, '../../..');
 const envFiles = [
   path.join(projectRoot, 'config/container-images.env'),
   path.join(projectRoot, 'config/.env.defaults'),
+  path.join(projectRoot, '.env.shared'),
   path.join(projectRoot, '.env'),
   path.join(projectRoot, '.env.local'),
 ];

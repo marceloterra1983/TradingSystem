@@ -1,0 +1,75 @@
+name: Port Governance Check
+
+on:
+  pull_request:
+    paths:
+      - 'config/ports/**'
+      - 'tools/ports/**'
+      - '.env.shared'
+      - 'docs/content/tools/ports-services.mdx'
+      - 'scripts/maintenance/ports-health.sh'
+      - 'tools/compose/docker-compose.ports.generated.yml'
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate registry
+        run: npm run ports:validate
+
+      - name: Check duplicates
+        run: npm run ports:duplicates
+
+      - name: Verify ranges
+        run: npm run ports:check-ranges
+
+      - name: Verify generated artifacts are in sync
+        run: |
+          npm run ports:sync
+          if ! git diff --exit-code; then
+            echo "❌ Generated files out of sync. Run: npm run ports:sync"
+            git status -sb
+            exit 1
+          fi
+
+      - name: Scan for hardcoded ports
+        run: npm run ports:scan-hardcoded
+
+      - name: Generate governance report
+        run: npm run ports:report > port-governance-report.txt
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: port-governance-report
+          path: port-governance-report.txt
+
+      - name: Comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('port-governance-report.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ❌ Port Governance Check Failed\n\`\`\`\n${body}\n\`\`\``
+            });

@@ -5,6 +5,20 @@
 
 set -e
 
+# Load project .env so DB credentials/ports are available
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+ENV_FILE="$PROJECT_ROOT/.env"
+
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+else
+  echo "⚠️  Warning: .env file not found at $ENV_FILE; using default credentials." >&2
+fi
+
 # Parse arguments
 FORMAT="text"
 if [ "$1" == "--format" ] && [ "$2" == "json" ]; then
@@ -22,12 +36,33 @@ NC='\033[0m'
 declare -A HEALTH
 OVERALL_HEALTHY=true
 
+# Helper to run psql through PgBouncer from the host
+psql_through_pgbouncer() {
+  local target_db=$1
+  shift
+  local password="${TELEGRAM_DB_PASSWORD:-}"
+  local user="${TELEGRAM_DB_USER:-telegram}"
+  local port="${TELEGRAM_PGBOUNCER_PORT:-6434}"
+
+  if [ -n "$password" ]; then
+    PGPASSWORD="$password" psql -h localhost -p "$port" -U "$user" -d "$target_db" "$@"
+  else
+    psql -h localhost -p "$port" -U "$user" -d "$target_db" "$@"
+  fi
+}
+
 # ==============================================================================
 # Check Native Service
 # ==============================================================================
 check_systemd() {
-  if systemctl is-active --quiet telegram-gateway; then
+  local mtproto_url="http://localhost:${GATEWAY_PORT:-4006}/health"
+  if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet telegram-gateway; then
     HEALTH["mtproto_service"]="healthy"
+    return
+  fi
+
+  if curl -s -f "$mtproto_url" >/dev/null 2>&1; then
+    HEALTH["mtproto_service"]="healthy (http)"
   else
     HEALTH["mtproto_service"]="unhealthy"
     OVERALL_HEALTHY=false
@@ -69,13 +104,15 @@ check_containers() {
 # Check Database Connectivity
 # ==============================================================================
 check_database() {
-  if docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway -c "SELECT 1" &>/dev/null; then
+  if psql_through_pgbouncer telegram_gateway -c "SELECT 1" &>/dev/null; then
     HEALTH["database_connection"]="healthy"
     
     # Get connection pool stats
-    POOL_STATS=$(docker exec telegram-pgbouncer psql -U telegram -d pgbouncer -t -c "SHOW POOLS" | grep telegram_gateway | head -1)
-    ACTIVE_CONNS=$(echo "$POOL_STATS" | awk '{print $5}')
-    HEALTH["database_active_connections"]=$ACTIVE_CONNS
+    POOL_STATS=$(psql_through_pgbouncer pgbouncer -t -c "SHOW POOLS" 2>/dev/null | grep -m 1 telegram_gateway || true)
+    if [ -n "$POOL_STATS" ]; then
+      ACTIVE_CONNS=$(echo "$POOL_STATS" | awk '{print $5}')
+      HEALTH["database_active_connections"]=$ACTIVE_CONNS
+    fi
   else
     HEALTH["database_connection"]="unhealthy"
     OVERALL_HEALTHY=false
@@ -112,7 +149,7 @@ check_redis() {
 # ==============================================================================
 check_http_endpoints() {
   endpoints=(
-    "mtproto_gateway:http://localhost:4006/health"
+    "mtproto_gateway:http://localhost:${GATEWAY_PORT:-4006}/health"
     "gateway_api:http://localhost:4010/health"
     "prometheus:http://localhost:9090/-/healthy"
     "grafana:http://localhost:3100/api/health"
@@ -174,7 +211,7 @@ else
   for key in "${!HEALTH[@]}"; do
     status="${HEALTH[$key]}"
     
-    if [[ "$status" == "healthy" ]]; then
+    if [[ "$status" == healthy* ]]; then
       echo -e "  ${GREEN}✓${NC} $key: $status"
     elif [[ "$status" =~ ^[0-9]+$ ]] || [[ "$status" =~ [A-Z] ]]; then
       echo -e "  ${BLUE}ℹ${NC} $key: $status"
@@ -198,4 +235,3 @@ if [ "$OVERALL_HEALTHY" == "true" ]; then
 else
   exit 1
 fi
-

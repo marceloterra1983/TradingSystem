@@ -76,6 +76,7 @@ export class GatewayHttpClient {
   async fetchUnprocessedInternal({ limit }) {
     const url = new URL('/api/messages/unprocessed', this.gatewayUrl);
     url.searchParams.set('channel', this.channelId);
+    url.searchParams.set('status', 'received,queued'); // Include both received and queued messages
     url.searchParams.set('excludeProcessedBy', 'tp-capital');
     url.searchParams.set('limit', String(limit));
 

@@ -31,7 +31,7 @@ curl http://localhost:4005/health
 curl http://localhost:4005/signals?limit=1
 
 # Gateway status
-curl http://localhost:4006/health
+curl http://localhost:4007/health
 
 # Timescale connection
 psql "postgresql://timescale:pass_timescale@localhost:5433/APPS-TPCAPITAL?options=-csearch_path=tp_capital" -c "SELECT COUNT(*) FROM tp_capital_signals WHERE ts > now() - interval '5 minutes';"
@@ -66,7 +66,7 @@ If restart fails, confirm `.env` values and rerun `docker compose -f ... up -d -
 
 1. Inspect queue count: `curl http://localhost:4005/health | jq '.messagesWaiting'`.
 2. Trigger sync: `curl -X POST http://localhost:4005/sync-messages -H "Content-Type: application/json" -d '{"limit":200}'`.
-3. Verify Gateway still polling: `curl http://localhost:4006/metrics | grep polling`.
+3. Verify Gateway still polling: `curl http://localhost:4007/metrics | grep polling`.
 4. If backlog persists, restart Gateway service (`systemctl restart telegram-gateway` or `npm run start`).
 
 ### 4. No Signals Received

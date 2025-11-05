@@ -5,7 +5,7 @@ const { spawn } = require('child_process');
 
 const projectRoot = path.resolve(__dirname, '../../../..');
 
-const gatewayPort = Number(process.env.SERVICE_LAUNCHER_TELEGRAM_GATEWAY_PORT || 4006);
+const gatewayPort = Number(process.env.SERVICE_LAUNCHER_TELEGRAM_GATEWAY_PORT || 4007);
 const gatewayBaseUrl =
   process.env.SERVICE_LAUNCHER_TELEGRAM_GATEWAY_URL || `http://localhost:${gatewayPort}`;
 

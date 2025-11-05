@@ -70,31 +70,6 @@ fi
 
 echo ""
 
-# Check TimescaleDB (dependency)
-echo -e "${BLUE}💾 TimescaleDB (Port 5433) - Dependency:${NC}"
-
-if docker ps --format '{{.Names}}' | grep -q '^data-timescaledb$'; then
-    if command -v pg_isready >/dev/null 2>&1; then
-        if pg_isready -h localhost -p 5433 -t 2 >/dev/null 2>&1; then
-            echo -e "  Status: ${GREEN}✅ Running (pg_isready OK)${NC}"
-        else
-            echo -e "  Status: ${YELLOW}⚠️  Running (pg_isready failed)${NC}"
-        fi
-    else
-        echo -e "  Status: ${GREEN}✅ Running${NC} (pg_isready not installed)"
-    fi
-
-    echo "  Host:   localhost"
-    echo "  Port:   5433 (mapped to container 5432)"
-    echo "  Type:   🐳 Docker Container"
-else
-    echo -e "  Status: ${RED}❌ Not Running${NC}"
-    echo "  Type:   🐳 Docker Container (Required for DocsAPI)"
-    echo "  Hint:   docker compose --env-file .env -f tools/compose/docker-compose.timescale.yml up -d timescaledb"
-fi
-
-echo ""
-
 # Quick Links
 echo "╔════════════════════════════════════════════════════════════╗"
 echo "║                     Quick Links                             ║"
@@ -113,13 +88,13 @@ echo "║                  Management Commands                        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  Start DocsAPI:"
-echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml up -d"
+echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.docs.yml up -d"
 echo ""
 echo "  Test DocsAPI:"
 echo "    bash scripts/docker/test-docs-api.sh"
 echo ""
 echo "  View logs:"
-echo "    docker compose --env-file .env -f tools/compose/docker-compose.docs.yml logs -f"
+echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.docs.yml logs -f"
 echo ""
 echo "  Start Docusaurus (DEV):"
 echo "    cd docs && npm run start -- --port 3400"

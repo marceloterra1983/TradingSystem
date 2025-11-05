@@ -9,6 +9,7 @@
 import { getApiUrl } from '../../../config/api';
 import type { SignalRow } from './types';
 import { XCircle, AlertTriangle, Info, Bug } from 'lucide-react';
+import { formatTimestamp as formatTs, formatRelativeTime as formatRelTs } from '../../../utils/timestampUtils';
 
 /**
  * Resolves the TP-Capital API base URL
@@ -102,61 +103,28 @@ export function formatNumber(value: number | null | undefined): string {
   });
 }
 
+/**
+ * Format timestamp for display
+ * @deprecated Use formatTimestamp from timestampUtils instead
+ * Kept for backward compatibility
+ */
 export function formatTimestamp(ts: string | number) {
   if (!ts) return '?';
 
-  // Converter para número se for string
-  const timestamp = typeof ts === 'string' ? Number(ts) : ts;
+  const result = formatTs(ts, false);
 
-  // Se for NaN, retornar "?"
-  if (Number.isNaN(timestamp)) return '?';
-
-  // Criar data a partir do timestamp em milissegundos
-  const date = new Date(timestamp);
-
-  if (Number.isNaN(date.getTime())) {
-    return '?';
-  }
-
-  const time = date.toLocaleTimeString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-
-  const dateStr = date.toLocaleDateString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
-  return { time, date: dateStr };
+  return result || '?';
 }
 
+/**
+ * Format relative time (e.g., "há 5 minutos")
+ * @deprecated Use formatRelativeTime from timestampUtils instead
+ * Kept for backward compatibility
+ */
 export function formatRelativeTime(ts: string): string {
   if (!ts) return '?';
-  const date = new Date(ts);
-  if (Number.isNaN(date.getTime())) {
-    return ts;
-  }
 
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSeconds < 10) return 'agora mesmo';
-  if (diffSeconds < 60) return `há ${diffSeconds}s`;
-  if (diffMinutes < 60) return `há ${diffMinutes}min`;
-  if (diffHours < 24) return `há ${diffHours}h`;
-  if (diffDays === 1) return 'ontem';
-  if (diffDays < 7) return `há ${diffDays} dias`;
-
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return formatRelTs(ts);
 }
 
 export function formatContext(context: unknown) {

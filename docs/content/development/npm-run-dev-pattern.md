@@ -41,7 +41,7 @@ Adicione dois scripts:
 
 **Substitua `PORTA` pela porta do seu serviço:**
 - TP Capital: 4005
-- Telegram Gateway: 4006
+- Telegram Gateway: 4007
 - Documentation API: 4007
 - Workspace API: 4008
 - Dashboard: 3103
@@ -129,7 +129,7 @@ $ npm run dev
 | Serviço | Porta | Status |
 |---------|-------|--------|
 | TP Capital | 4005 | ✅ Implementado |
-| Telegram Gateway | 4006 | ⏳ Pendente |
+| Telegram Gateway | 4007 | ⏳ Pendente |
 | Documentation API | 4007 | ⏳ Pendente |
 | Workspace API | 4008 | ⏳ Pendente |
 | Dashboard (Vite) | 3103 | ⏳ Pendente |

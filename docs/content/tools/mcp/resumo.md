@@ -82,7 +82,7 @@ Este script mostra:
 | Arquivo | Descrição |
 |---------|-----------|
 | `MCP-SETUP-INSTRUCTIONS.md` | Instruções detalhadas de configuração |
-| `MCP-CONFIG-QUICK.json` | Configuração pronta para copiar |
+| `config/mcp/MCP-CONFIG-QUICK.json` | Configuração pronta para copiar |
 | `MCP-RESUMO.md` | Este arquivo - resumo geral |
 | `scripts/setup/check-mcp-status.sh` | Script de verificação |
 | `~/.cursor/mcp.json` | Configuração dos MCPs (atualizada) |

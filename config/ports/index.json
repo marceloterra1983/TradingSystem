@@ -1,0 +1,499 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-05",
+  "generatedAt": "2025-11-05T19:44:35.949Z",
+  "ranges": {
+    "frontend-ui": "3000-3099",
+    "dashboard-ui": "3100-3199",
+    "integrations": "3200-3299",
+    "documentation": "3400-3499",
+    "automation": "3500-3699",
+    "external-integrations": "4000-4099",
+    "db-core": "5000-5499",
+    "messaging": "5600-5699",
+    "cache": "6300-6399",
+    "pgbouncer": "6400-6499",
+    "sentinel": "26000-26999",
+    "devtools": "8000-8299",
+    "automation-platforms": "8180-8899",
+    "monitoring": "9000-9299",
+    "admin-ui-high": "15000-15999"
+  },
+  "services": [
+    {
+      "name": "grafana",
+      "stack": "frontend-ui",
+      "port": 3000,
+      "protocol": "http",
+      "owner": "Observabilidade",
+      "description": "Dashboards pré-provisionados para métricas internas",
+      "container": true,
+      "network": "monitoring_net",
+      "healthcheck": {
+        "endpoint": "/login",
+        "expected": 200
+      }
+    },
+    {
+      "name": "firecrawl-api",
+      "stack": "frontend-ui",
+      "port": 3002,
+      "protocol": "http",
+      "owner": "Pesquisa",
+      "description": "Instância self-hosted da API do Firecrawl",
+      "container": true,
+      "network": "firecrawl_net",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "documentation-legacy",
+      "stack": "frontend-ui",
+      "port": 3004,
+      "protocol": "http",
+      "owner": "Documentacao",
+      "description": "Hub de documentação Docusaurus v2 (legado)",
+      "container": true,
+      "network": "docs_net",
+      "deprecated": true,
+      "replacement": "documentation-hub",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "api-viewer",
+      "stack": "dashboard-ui",
+      "port": 3101,
+      "protocol": "http",
+      "owner": "Documentacao",
+      "description": "Visualização de especificações OpenAPI/AsyncAPI",
+      "container": true,
+      "network": "docs_net",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "documentation-api-viewer",
+      "stack": "dashboard-ui",
+      "port": 3102,
+      "protocol": "http",
+      "owner": "Documentacao",
+      "description": "Viewer secundário usado em validações internas",
+      "container": false,
+      "deprecated": true,
+      "replacement": "api-viewer",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "dashboard",
+      "stack": "dashboard-ui",
+      "port": 3103,
+      "protocol": "http",
+      "owner": "Frontend Guild",
+      "description": "Frontend principal do TradingSystem",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "workspace-api",
+      "stack": "integrations",
+      "port": 3200,
+      "protocol": "http",
+      "owner": "Workspace Team",
+      "description": "API Workspace/Library para automações locais",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "documentation-hub",
+      "stack": "documentation",
+      "port": 3400,
+      "protocol": "http",
+      "owner": "Documentacao",
+      "description": "Hub de documentação (Docusaurus v3)",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "documentation-api",
+      "stack": "documentation",
+      "port": 3401,
+      "protocol": "http",
+      "owner": "Documentacao",
+      "description": "API de documentação (Express + FlexSearch)",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "service-launcher",
+      "stack": "automation",
+      "port": 3500,
+      "protocol": "http",
+      "owner": "Platform Ops",
+      "description": "Service Launcher / Status UI para orquestração local",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "firecrawl-proxy",
+      "stack": "automation",
+      "port": 3600,
+      "protocol": "http",
+      "owner": "Pesquisa",
+      "description": "Proxy Express que protege o Firecrawl upstream",
+      "container": false,
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "telegram-mtproto",
+      "stack": "external-integrations",
+      "port": 4007,
+      "protocol": "http",
+      "owner": "Telegram Squad",
+      "description": "Gateway MTProto principal (HTTP + metrics)",
+      "container": true,
+      "network": "telegram_backend",
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "tp-capital-api",
+      "stack": "external-integrations",
+      "port": 4008,
+      "protocol": "http",
+      "owner": "TP Capital Squad",
+      "description": "API ingestora de sinais do TP Capital",
+      "container": true,
+      "network": "tp_capital_net",
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "telegram-gateway-api",
+      "stack": "external-integrations",
+      "port": 4010,
+      "protocol": "http",
+      "owner": "Telegram Squad",
+      "description": "API REST do Telegram Gateway (consulta e sync)",
+      "container": true,
+      "network": "telegram_backend",
+      "depends_on": [
+        "telegram-mtproto",
+        "telegram-pgbouncer",
+        "telegram-redis-master"
+      ],
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "timescaledb-pgadmin",
+      "stack": "db-core",
+      "port": 5050,
+      "protocol": "http",
+      "owner": "Data Platform",
+      "description": "pgAdmin para administração do Timescale",
+      "container": true,
+      "network": "data_backend",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "postgres-langgraph",
+      "stack": "db-core",
+      "port": 5432,
+      "protocol": "postgres",
+      "owner": "AI Guild",
+      "description": "PostgreSQL usado pelos fluxos LangGraph",
+      "container": true,
+      "network": "langgraph_net",
+      "notes": "Exposto somente quando LangGraph está ativo"
+    },
+    {
+      "name": "timescaledb",
+      "stack": "db-core",
+      "port": 5433,
+      "protocol": "postgres",
+      "owner": "Data Platform",
+      "description": "TimescaleDB principal da stack Workspace",
+      "container": true,
+      "network": "data_backend"
+    },
+    {
+      "name": "telegram-timescale",
+      "stack": "db-core",
+      "port": 5434,
+      "protocol": "postgres",
+      "owner": "Telegram Squad",
+      "description": "TimescaleDB dedicado para ingestão do Telegram",
+      "container": true,
+      "network": "telegram_backend",
+      "notes": "Host → container mapeado 5434:5432"
+    },
+    {
+      "name": "telegram-rabbitmq",
+      "stack": "messaging",
+      "port": 5672,
+      "protocol": "rabbitmq",
+      "owner": "Telegram Squad",
+      "description": "Fila AMQP usada para pub/sub interno",
+      "container": true,
+      "network": "telegram_backend"
+    },
+    {
+      "name": "qdrant",
+      "stack": "cache",
+      "port": 6333,
+      "protocol": "http",
+      "owner": "AI Guild",
+      "description": "Vector DB (Qdrant) para embeddings",
+      "container": true,
+      "network": "ai_backend",
+      "healthcheck": {
+        "endpoint": "/healthz",
+        "expected": 200
+      }
+    },
+    {
+      "name": "telegram-redis-master",
+      "stack": "cache",
+      "port": 6379,
+      "protocol": "redis",
+      "owner": "Telegram Squad",
+      "description": "Redis master para cache quente do Telegram",
+      "container": true,
+      "network": "telegram_backend"
+    },
+    {
+      "name": "infra-redis-dev",
+      "stack": "cache",
+      "port": 6380,
+      "protocol": "redis",
+      "owner": "AI Guild",
+      "description": "Redis dev usado nos fluxos LangGraph",
+      "container": true,
+      "network": "ai_backend"
+    },
+    {
+      "name": "telegram-redis-replica",
+      "stack": "cache",
+      "port": 6385,
+      "protocol": "redis",
+      "owner": "Telegram Squad",
+      "description": "Replica Redis dedicada a leituras do gateway",
+      "container": true,
+      "network": "telegram_backend",
+      "depends_on": [
+        "telegram-redis-master"
+      ],
+      "notes": "Host port movido para 6385 para evitar conflito com redis-dev"
+    },
+    {
+      "name": "telegram-pgbouncer",
+      "stack": "pgbouncer",
+      "port": 6434,
+      "protocol": "postgres",
+      "owner": "Telegram Squad",
+      "description": "PgBouncer conectado ao Timescale do Telegram",
+      "container": true,
+      "network": "telegram_backend",
+      "depends_on": [
+        "telegram-timescale"
+      ]
+    },
+    {
+      "name": "timescaledb-pgweb",
+      "stack": "devtools",
+      "port": 8081,
+      "protocol": "http",
+      "owner": "Data Platform",
+      "description": "pgWeb leve para consultas PostgreSQL",
+      "container": true,
+      "network": "data_backend",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "langgraph",
+      "stack": "devtools",
+      "port": 8111,
+      "protocol": "http",
+      "owner": "AI Guild",
+      "description": "Ambiente LangGraph produção local",
+      "container": true,
+      "network": "langgraph_net",
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "langgraph-dev",
+      "stack": "devtools",
+      "port": 8112,
+      "protocol": "http",
+      "owner": "AI Guild",
+      "description": "Ambiente LangGraph dev/sandbox",
+      "container": true,
+      "network": "langgraph_net",
+      "healthcheck": {
+        "endpoint": "/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "kestra-orchestrator",
+      "stack": "automation-platforms",
+      "port": 8180,
+      "protocol": "http",
+      "owner": "ToolingGuild",
+      "description": "Kestra orchestrator UI",
+      "container": true,
+      "network": "tools_net",
+      "healthcheck": {
+        "endpoint": "/actuator/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "kestra-management",
+      "stack": "automation-platforms",
+      "port": 8685,
+      "protocol": "http",
+      "owner": "ToolingGuild",
+      "description": "Kestra management/worker endpoint",
+      "container": true,
+      "network": "tools_net",
+      "depends_on": [
+        "kestra-orchestrator"
+      ],
+      "notes": "Interno, mas exposto para troubleshooting",
+      "healthcheck": {
+        "endpoint": "/actuator/health",
+        "expected": 200
+      }
+    },
+    {
+      "name": "questdb",
+      "stack": "monitoring",
+      "port": 9002,
+      "protocol": "http",
+      "owner": "Observabilidade",
+      "description": "QuestDB usado para telemetria de workflows",
+      "container": true,
+      "network": "monitoring_net",
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "prometheus",
+      "stack": "monitoring",
+      "port": 9090,
+      "protocol": "http",
+      "owner": "Observabilidade",
+      "description": "Servidor Prometheus central",
+      "container": true,
+      "network": "monitoring_net",
+      "healthcheck": {
+        "endpoint": "/-/healthy",
+        "expected": 200
+      }
+    },
+    {
+      "name": "alertmanager",
+      "stack": "monitoring",
+      "port": 9093,
+      "protocol": "http",
+      "owner": "Observabilidade",
+      "description": "Alertmanager para roteamento de alertas",
+      "container": true,
+      "network": "monitoring_net",
+      "healthcheck": {
+        "endpoint": "/#/status",
+        "expected": 200
+      }
+    },
+    {
+      "name": "timescaledb-exporter",
+      "stack": "monitoring",
+      "port": 9187,
+      "protocol": "http",
+      "owner": "Observabilidade",
+      "description": "Exporter Prometheus para o Timescale",
+      "container": true,
+      "network": "monitoring_net",
+      "healthcheck": {
+        "endpoint": "/metrics",
+        "expected": 200
+      }
+    },
+    {
+      "name": "telegram-rabbitmq-admin",
+      "stack": "admin-ui-high",
+      "port": 15672,
+      "protocol": "http",
+      "owner": "Telegram Squad",
+      "description": "Console de gerenciamento do RabbitMQ",
+      "container": true,
+      "network": "telegram_backend",
+      "depends_on": [
+        "telegram-rabbitmq"
+      ],
+      "healthcheck": {
+        "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "telegram-redis-sentinel",
+      "stack": "sentinel",
+      "port": 26379,
+      "protocol": "redis",
+      "owner": "Telegram Squad",
+      "description": "Sentinel acompanha failover do cluster Redis",
+      "container": true,
+      "network": "telegram_backend",
+      "depends_on": [
+        "telegram-redis-master"
+      ]
+    }
+  ]
+}

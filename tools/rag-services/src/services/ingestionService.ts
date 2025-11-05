@@ -12,6 +12,7 @@ import { randomUUID } from 'crypto';
 import { logger, logIngestion } from '../utils/logger';
 import { getCacheService } from './cacheService';
 import { addIngestionLog } from '../routes/ingestion-logs';
+import { latencyMonitor } from './latencyMonitor';
 
 /**
  * Ingestion request for a single file
@@ -74,6 +75,7 @@ export class IngestionService {
    * Ingest a single file
    */
   async ingestFile(request: IngestFileRequest): Promise<IngestionJobResponse> {
+    const operationStartedAt = Date.now();
     try {
       logger.info('Starting file ingestion', {
         filePath: request.filePath,
@@ -115,12 +117,33 @@ export class IngestionService {
         collection: request.collectionName,
       });
 
+      latencyMonitor.recordSample({
+        collection: request.collectionName,
+        operation: 'ingestion',
+        durationMs: Date.now() - operationStartedAt,
+        metadata: {
+          source: request.source,
+          type: 'file',
+        },
+      });
+
       return {
         jobId,
         status: 'PENDING',
         message: 'File ingestion job created successfully',
       };
     } catch (error) {
+      latencyMonitor.recordSample({
+        collection: request.collectionName,
+        operation: 'ingestion',
+        durationMs: Date.now() - operationStartedAt,
+        metadata: {
+          source: request.source,
+          type: 'file',
+          errored: true,
+        },
+      });
+
       logger.error('File ingestion failed', {
         filePath: request.filePath,
         collection: request.collectionName,
@@ -137,6 +160,7 @@ export class IngestionService {
   async ingestDirectory(request: IngestDirectoryRequest): Promise<IngestionJobResponse> {
     // Generate job ID locally BEFORE calling LlamaIndex
     const jobId = randomUUID();
+    const operationStartedAt = Date.now();
 
     try {
       logger.info('Starting directory ingestion', {
@@ -174,7 +198,7 @@ export class IngestionService {
       // Add detailed log entry for frontend
       const initialMsg = pendingFiles > 0 || orphanChunks > 0
         ? `Iniciando: ${pendingFiles} arquivo(s) NOVO(S)${orphanChunks > 0 ? ` + ${orphanChunks} orfao(s)` : ''} - GPU RTX 5090`
-        : `Re-indexacao completa (todos arquivos serao verificados)`;
+        : 'Re-indexacao completa (todos arquivos serao verificados)';
       
       addIngestionLog({
         level: 'info',
@@ -271,6 +295,17 @@ export class IngestionService {
         filesProcessed: files_ingested,
       });
 
+      latencyMonitor.recordSample({
+        collection: request.collectionName,
+        operation: 'ingestion',
+        durationMs: Date.now() - operationStartedAt,
+        metadata: {
+          source: request.source,
+          type: 'directory',
+          filesProcessed: files_ingested,
+        },
+      });
+
       return {
         jobId,
         status: 'COMPLETED',
@@ -295,6 +330,17 @@ export class IngestionService {
         message: `Falha na indexação (ID: ${jobId}): ${errorMessage}`,
         collection: request.collectionName,
         details: {},
+      });
+
+      latencyMonitor.recordSample({
+        collection: request.collectionName,
+        operation: 'ingestion',
+        durationMs: Date.now() - operationStartedAt,
+        metadata: {
+          source: request.source,
+          type: 'directory',
+          errored: true,
+        },
       });
 
       throw this.handleIngestionError(error);

@@ -1,0 +1,26 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: devtools
+version: "3.9"
+
+x-tradingsystem-stack: "devtools"
+x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+
+x-tradingsystem-ports:
+  timescaledb-pgweb:
+    env: TIMESCALEDB_PGWEB_PORT
+    port: 8081
+    protocol: http
+    owner: "Data Platform"
+    description: "pgWeb leve para consultas PostgreSQL"
+  langgraph:
+    env: LANGGRAPH_PORT
+    port: 8111
+    protocol: http
+    owner: "AI Guild"
+    description: "Ambiente LangGraph produção local"
+  langgraph-dev:
+    env: LANGGRAPH_DEV_PORT
+    port: 8112
+    protocol: http
+    owner: "AI Guild"
+    description: "Ambiente LangGraph dev/sandbox"

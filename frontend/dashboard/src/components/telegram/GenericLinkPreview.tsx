@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as LinkIcon, ExternalLink, Globe } from 'lucide-react';
+import { ExternalLink, Globe } from 'lucide-react';
 
 interface GenericLinkPreviewProps {
   preview: {
@@ -69,4 +69,3 @@ export const GenericLinkPreview: React.FC<GenericLinkPreviewProps> = ({ preview 
     </a>
   );
 };
-
