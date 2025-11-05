@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Governance Registry Schema",
+  "type": "object",
+  "required": ["version", "generatedAt", "artifacts"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "category",
+          "type",
+          "owner",
+          "reviewCycleDays",
+          "lastReviewed",
+          "tags",
+          "path",
+          "publish"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "category": {"type": "string"},
+          "type": {"type": "string"},
+          "owner": {"type": "string"},
+          "reviewCycleDays": {"type": "integer", "minimum": 1},
+          "lastReviewed": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "path": {"type": "string"},
+          "publish": {
+            "oneOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "required": ["docsPath", "slug", "sidebar"],
+                "properties": {
+                  "docsPath": {"type": "string"},
+                  "slug": {"type": "string"},
+                  "sidebar": {"type": "string"},
+                  "sidebarLabel": {"type": "string"},
+                  "sidebarPosition": {"type": "number"}
+                }
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

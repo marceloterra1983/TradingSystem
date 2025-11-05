@@ -101,6 +101,7 @@ backend/data/backups/**
 /data/
 /data/**
 !/data/.gitkeep
+tools/rag-services/data/
 /logs/**
 !/logs/.gitkeep
 *.log
@@ -109,38 +110,82 @@ backend/data/backups/**
 
 # ============================================
 # Secrets & Configuration (Critical)
+# POL-0002 Compliance - NEVER commit plaintext secrets
 # ============================================
+
 # Root .env files - NEVER commit these
 .env
 *.env.local
 .env.*.local
-.env.backup-*
+.env.backup*
 .env.test
 .env.production
+.env.staging
+.env.development
 
 # Service-level .env files (should NOT exist per project rules)
 # These are blocked to prevent accidental commits
 backend/api/**/.env
 backend/services/**/.env
 frontend/apps/**/.env
+apps/**/.env
+governance/**/.env
 
-# Allow template and default files
+# Allow ONLY template and default files
 !**/.env.example
 !.env.example
 !.env.*.example
 !config/.env.defaults
 !config/container-images.env
-!config/docker.env
+!config/docker.env.example
+!governance/registry/templates/.env.example
+!governance/registry/templates/*.example
+
+# Age encryption keys (NEVER commit private keys)
+*.age-key.txt
+age-key.txt
+**/age-key.txt
+.age/key.txt
+
+# Allow encrypted files (SOPS/age)
+# These are safe to version
+!**/*.enc.yaml
+!**/*.enc.json
+!**/.age-recipients.txt
+!config/.age-recipients.txt
+
+# SOPS configuration
+!.sops.yaml
 
 # Other sensitive files
 appsettings.Development.json
 appsettings.Production.json
 secrets.json
+secrets.yaml
+secrets.yml
+!secrets.enc.yaml
+!secrets.enc.json
 *.pfx
 *.key
 *.pem
 *.cer
 *.crt
+
+# Audit exceptions (may contain sensitive info)
+governance/evidence/audits/exceptions/*.md
+!governance/evidence/audits/exceptions/.gitkeep
+
+# TruffleHog scan results (may contain secrets)
+governance/evidence/audits/trufflehog-*.json
+governance/evidence/audits/trufflehog-scan.json
+
+# Temporary rotation artifacts
+governance/evidence/audits/rotation.log
+*.rotation.log
+
+# AnythingLLM data (may contain uploaded .env files)
+data/anythingllm/**
+!data/anythingllm/.gitkeep
 
 # ============================================
 # ML Models & Training Data
@@ -261,7 +306,11 @@ tools/kestra/workdir/
 reiniciar.log
 logs/services/*.log
 
-# Python Virtual Environment (auto-activation)
-.bashrc
-venv/
-.env.backup.*
+# Python Virtual Environment & direnv (auto-activation)
+.bashrc                # Old approach - being migrated to direnv
+venv/                  # Virtual environment directory
+.env.backup.*          # Environment backups
+
+# direnv - Auto-load project environments
+.direnv/               # direnv cache (do NOT commit)
+!.envrc                # Allow .envrc (project config - MUST be committed)
