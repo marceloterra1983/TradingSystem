@@ -3,7 +3,6 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
-  Activity,
   Database,
   Wifi,
   ShieldCheck,

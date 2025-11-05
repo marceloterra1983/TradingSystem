@@ -443,21 +443,6 @@ export function TelegramGatewayFinal() {
     });
   }, [updateChannel]);
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '—';
-    try {
-      return new Date(dateStr).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
   const formatTime = (dateStr?: string) => {
     if (!dateStr) return '—';
     try {
