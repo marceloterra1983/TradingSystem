@@ -1,0 +1,63 @@
+{
+  "statusbar.command.commands": [
+    {
+      "text": "$(copy) Copy Cmd+Output",
+      "tooltip": "Copiar último comando e saída do terminal",
+      "command": "workbench.action.terminal.copyLastCommandAndOutput",
+      "alignment": "right",
+      "priority": 100,
+      "color": "#ffffff",
+      "backgroundColor": "#007ACC",
+      "show": "always"
+    }
+  ],
+  "statusbar.command.alwaysShowOnStartup": true,
+  "workbench.panel.terminal.rightClickBehavior": "selectWord",
+  "statusbar.command.background": "#007ACC",
+  "statusbar.command.hoverBackground": "#005a9e",
+  "terminal.integrated.enableVisualBell": true,
+  "terminal.integrated.rightClickBehavior": "copyPaste",
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.terminal.copyLastCommandAndOutput"
+  ],
+  "terminal.integrated.tabs.enabled": true,
+  "terminal.integrated.tabs.showActions": "always",
+  "terminal.integrated.tabs.hideCondition": "never",
+  "accessibility.signals.terminalBell": {
+    "sound": "on"
+  },
+  "php.validate.enable": false,
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+  "python.terminal.activateEnvironment": false,
+  "python.terminal.activateEnvInCurrentTerminal": false,
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.profiles.linux": {
+    "bash": {
+      "path": "bash",
+      "icon": "terminal",
+      "env": {
+        "AUTO_ACTIVATE_VENV": "1"
+      }
+    },
+    "bash-clean": {
+      "path": "bash",
+      "icon": "terminal-bash"
+    }
+  },
+  "terminal.integrated.tabs.showActiveTerminal": "always",
+  "terminal.integrated.tabs.title": "${process} ${separator} ${cwdFolder}",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.shellIntegration.decorationsEnabled": "both",
+  "terminal.integrated.shellIntegration.history": 100,
+  "terminal.integrated.env.linux": {
+    "VIRTUAL_ENV": "${workspaceFolder}/venv",
+    "PATH": "${workspaceFolder}/venv/bin:${env:PATH}"
+  },
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/venv/lib/python3.12/site-packages"
+  ],
+  "chatgpt.openOnStartup": true
+}

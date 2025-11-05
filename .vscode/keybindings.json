@@ -1,0 +1,11 @@
+[
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.terminal.copyLastCommandAndOutput",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+c",
+    "command": "workbench.action.terminal.copyLastCommandAndOutput"
+  }
+]
