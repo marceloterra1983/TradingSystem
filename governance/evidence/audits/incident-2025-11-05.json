@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-11-05T18:13:00Z",
+  "severity": "CRITICAL",
+  "type": "secret_exposure",
+  "secrets_exposed": [
+    {
+      "type": "telegram_bot_tokens",
+      "count": 5,
+      "files": ["docs/archive/2025-10-27/*.md"],
+      "action": "Tokens revogados e rotacionados"
+    },
+    {
+      "type": "database_passwords",
+      "count": 4,
+      "files": ["config/docker.env"],
+      "action": "Senhas alteradas em todos os ambientes"
+    }
+  ],
+  "detection_method": "TruffleHog automated scan",
+  "remediation_completed_at": "2025-11-05T18:13:00Z",
+  "policy": "POL-0002",
+  "sop_followed": "SOP-SEC-001",
+  "root_cause": "Arquivos de documentação commitados com tokens reais durante desenvolvimento",
+  "prevention": "Implementado governance:scan-secrets em CI/CD"
+}
