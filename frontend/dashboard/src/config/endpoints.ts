@@ -39,8 +39,8 @@ export const ENDPOINTS = {
   /** Documentation API - Port 3405 (Docker container) */
   documentation: import.meta.env.VITE_DOCUMENTATION_API_URL || 'http://localhost:3405',
   
-  /** Telegram Gateway API - Port 4006 (Node.js service) - Corrected */
-  telegramGateway: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4006',
+  /** Telegram Gateway API - Port 4010 (Node.js service) */
+  telegramGateway: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || 'http://localhost:4010',
   
   /**
    * Database UI Tools

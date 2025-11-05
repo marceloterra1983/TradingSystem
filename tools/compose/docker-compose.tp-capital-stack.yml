@@ -320,8 +320,8 @@ services:
       - GATEWAY_BATCH_SIZE=${GATEWAY_BATCH_SIZE:-100}
       
       # Telegram Gateway Connection (host service)
-      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4006
-      - TELEGRAM_GATEWAY_PORT=4006
+      - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+      - TELEGRAM_GATEWAY_PORT=4010
       
       # CORS
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
