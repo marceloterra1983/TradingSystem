@@ -315,7 +315,7 @@ curl -X POST http://localhost:8001/consumers/dashboard/jwt \
 **Performance Impact:**
 - Use Redis for rate limiting (fast, distributed)
 - Enable response caching where appropriate
-- Monitor latency metrics (target: `<10ms` overhead)
+- Monitor latency metrics (target: `under 10ms` overhead)
 
 **Operational Overhead:**
 - Automate Kong configuration with declarative config files
@@ -333,7 +333,7 @@ curl -X POST http://localhost:8001/consumers/dashboard/jwt \
 - [ ] **Week 3:** Set up inter-service authentication (API keys)
 - [ ] **Week 3:** Configure API versioning strategy
 - [ ] **Week 3:** Implement monitoring (Prometheus + Grafana dashboards)
-- [ ] **Week 4:** Load testing (target: 1000 req/s with `<100ms` latency)
+- [ ] **Week 4:** Load testing (target: 1000 req/s with `under 100ms` latency)
 - [ ] **Week 4:** Configure circuit breakers for external services
 - [ ] **Week 5:** Security audit and penetration testing
 - [ ] **Week 5:** Create operational runbooks
@@ -344,10 +344,10 @@ curl -X POST http://localhost:8001/consumers/dashboard/jwt \
 
 | Metric | Before | After (Target) | Measurement |
 |--------|--------|----------------|-------------|
-| API Response Time (P95) | 200ms | `<210ms` | Prometheus |
+| API Response Time (P95) | 200ms | `under 210ms` | Prometheus |
 | Security Score | B+ | A | Manual audit |
 | MTTR (Mean Time to Repair) | 30min | 15min | Incident logs |
-| API Error Rate | 2% | `<1%` | Kong Analytics |
+| API Error Rate | 2% | `under 1%` | Kong Analytics |
 | Developer Onboarding Time | 2 days | 4 hours | Survey |
 
 ## References

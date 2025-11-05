@@ -223,7 +223,7 @@ npm run docs:build
 | `installation` | Installation guides across tools |
 
 **Success Criteria**:
-- ✅ Results appear instantly (`<200ms`)
+- ✅ Results appear instantly (`under 200ms`)
 - ✅ Results are relevant to query
 - ✅ Click result navigates to correct page
 - ✅ Recent searches shown

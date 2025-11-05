@@ -161,14 +161,14 @@ docker logs telegram-timescale --tail 100
 #### 3.4 Verify Performance Improvements
 
 ```bash
-# Check polling latency (target: <15ms p95)
+# Check polling latency (target: under 15ms p95)
 curl -s http://localhost:4005/metrics | grep tp_capital_processing_duration_seconds
 
 # Check cache hit rate (target: >70%)
 curl -s http://localhost:9121/metrics | grep redis_keyspace_hits_total
 curl -s http://localhost:9121/metrics | grep redis_keyspace_misses_total
 
-# Check connection pool utilization (target: <80%)
+# Check connection pool utilization (target: under 80%)
 docker exec telegram-pgbouncer psql -U telegram -d pgbouncer -c "SHOW POOLS"
 ```
 

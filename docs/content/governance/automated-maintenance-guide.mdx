@@ -62,7 +62,7 @@ Reports are generated in `docs/reports/` with timestamps:
 - `maintenance-audit-YYYY-MM-DD_HH-MM-SS.md` - Main audit report
 - `stale-files-YYYY-MM-DD_HH-MM-SS.txt` - Files not updated in 90+ days
 - `missing-frontmatter-YYYY-MM-DD_HH-MM-SS.txt` - Files with incomplete metadata
-- `short-files-YYYY-MM-DD_HH-MM-SS.txt` - Files with <50 words
+- `short-files-YYYY-MM-DD_HH-MM-SS.txt` - Files with under 50 words
 - `broken-links-YYYY-MM-DD_HH-MM-SS.txt` - Broken internal links
 
 ---
@@ -76,7 +76,7 @@ Reports are generated in `docs/reports/` with timestamps:
 **Components**:
 - **File Discovery**: Recursive scanning of `docs/content/` and `governance/`
 - **Freshness Analysis**: Detects files not modified in 90+ days
-- **Size Analysis**: Identifies files with insufficient content (<50 words)
+- **Size Analysis**: Identifies files with insufficient content (under 50 words)
 - **Structure Validation**: Checks heading hierarchy and document organization
 
 **Thresholds** (configurable in script):
@@ -350,10 +350,10 @@ main() {
 
 | Task | Frequency | Timeline | Owner |
 |------|-----------|----------|-------|
-| Fix P1 Issues | As needed | <3 days | DocsOps |
-| Fix P2 Issues | As needed | <2 weeks | Content Owners |
-| Content Refresh | Quarterly | <1 month | Guild Leads |
-| Governance Update | Semi-annual | <2 weeks | DocsOps Lead |
+| Fix P1 Issues | As needed | under 3 days | DocsOps |
+| Fix P2 Issues | As needed | under 2 weeks | Content Owners |
+| Content Refresh | Quarterly | under 1 month | Guild Leads |
+| Governance Update | Semi-annual | under 2 weeks | DocsOps Lead |
 
 ---
 
@@ -373,8 +373,8 @@ P2: 80% within 2 weeks
 P3: 60% within 1 month
 
 Content Freshness:
-Stale files: <5% of total
-Average age: <60 days
+Stale files: under 5% of total
+Average age: under 60 days
 ```
 
 ### Dashboard Visualization (Future)

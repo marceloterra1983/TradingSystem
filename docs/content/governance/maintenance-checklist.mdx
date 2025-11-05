@@ -39,7 +39,7 @@ sidebar_position: 20
 
 **Command**:
 ```bash
-# Scan docs for outdated content (>90 days)
+# Scan docs for outdated content (above 90 days)
 python scripts/docs/validate-frontmatter.py \
   --schema v2 \
   --docs-dir ./docs/content \
@@ -51,7 +51,7 @@ python scripts/docs/validate-frontmatter.py \
 **Expected Output**: JSON report with outdated documents list
 
 **Actions**:
-- [ ] Review outdated documents list (>90 days since lastReviewed)
+- [ ] Review outdated documents list (above 90 days since lastReviewed)
 - [ ] Prioritize by domain (Critical: apps, api, database; High: frontend, tools; Medium: reference, prompts)
 - [ ] Assign owners for content review
 - [ ] Schedule review sessions (1 week)
@@ -173,7 +173,7 @@ python3 scripts/docs/validate-frontmatter.py \
 **Volume Metrics**:
 - Total files by category (apps, api, frontend, tools, etc.)
 - Files by owner (DocsOps, ProductOps, etc.)
-- Files by review window (<30, 31-90, >90 days)
+- Files by review window (under 30, 31-90, above 90 days)
 - Average file size (lines, words)
 
 **Quality Metrics**:
@@ -343,7 +343,7 @@ python scripts/docs/validate-frontmatter.py \
 - [ ] Verify docs:auto runs before lint
 - [ ] Test pre-push hook (push to test branch)
 - [ ] Verify docs:check runs successfully
-- [ ] Check hook performance (should complete in <30 seconds)
+- [ ] Check hook performance (should complete in under 30 seconds)
 - [ ] Validate SKIP_DOCS_HOOKS bypass works
 
 #### Step 3: Update Automation Scripts
@@ -397,10 +397,10 @@ python scripts/docs/validate-frontmatter.py \
 | Metric | Target | Q4 2025 | Q1 2026 | Q2 2026 | Q3 2026 |
 |--------|--------|---------|---------|---------|----------|
 | Frontmatter compliance | 100% | - | - | - | - |
-| Content freshness (<90 days) | >80% | - | - | - | - |
+| Content freshness (under 90 days) | above 80% | - | - | - | - |
 | Link validity | >95% | - | - | - | - |
-| Placeholder rate | <5% | - | - | - | - |
-| Files with TODO markers | <10 | - | - | - | - |
+| Placeholder rate | under 5% | - | - | - | - |
+| Files with TODO markers | under 10 | - | - | - | - |
 
 ### Automation Health
 
@@ -408,16 +408,16 @@ python scripts/docs/validate-frontmatter.py \
 |--------|--------|---------|---------|---------|----------|
 | docs:auto success rate | 100% | - | - | - | - |
 | docs:check pass rate | 100% | - | - | - | - |
-| Build time (seconds) | <120 | - | - | - | - |
-| Test coverage | >80% | - | - | - | - |
+| Build time (seconds) | under 120 | - | - | - | - |
+| Test coverage | above 80% | - | - | - | - |
 
 ### Version Health
 
 | Metric | Target | Q4 2025 | Q1 2026 | Q2 2026 | Q3 2026 |
 |--------|--------|---------|---------|---------|----------|
 | Active versions count | ≤3 | - | - | - | - |
-| Storage per version (MB) | <10 | - | - | - | - |
-| Build time with versions (s) | <120 | - | - | - | - |
+| Storage per version (MB) | under 10 | - | - | - | - |
+| Build time with versions (s) | under 120 | - | - | - | - |
 | Broken links per version | <5 | - | - | - | - |
 
 ### Usage Metrics (if analytics available)

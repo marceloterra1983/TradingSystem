@@ -851,8 +851,8 @@ flags:
 | **Frontend Coverage** | 1% | 10% | 25% | 30% | 35% | 70% |
 | **Integration Tests** | 0 | 15 | 35 | 50 | 50 | 100+ |
 | **E2E Tests** | 0 | 0 | 0 | 10 | 20 | 50+ |
-| **Test Execution Time** | 0s | `<2min` | `<3min` | `<4min` | `<5min` | `<10min` |
-| **Flaky Test Rate** | N/A | `<5%` | `<3%` | `<2%` | `<2%` | `<1%` |
+| **Test Execution Time** | 0s | `under 2min` | `under 3min` | `under 4min` | `under 5min` | `under 10min` |
+| **Flaky Test Rate** | N/A | `under 5%` | `under 3%` | `under 2%` | `under 2%` | `under 1%` |
 | **Production Incidents** | Baseline | -20% | -30% | -40% | -50% | -60% |
 
 ## Alternatives Considered
