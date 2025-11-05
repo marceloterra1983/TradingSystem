@@ -228,7 +228,7 @@ docker compose -f tools/compose/docker-compose.workspace-simple.yml up -d
 docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master telegram-rabbitmq
 
 curl http://localhost:4005/health  # Verify TP Capital API
-curl http://localhost:3210/health  # Verify Workspace API
+curl http://localhost:3200/health  # Verify Workspace API
 ```
 
 **See**: [DOCKER-QUICK-START.md](DOCKER-QUICK-START.md) for comprehensive Docker setup guide

@@ -218,7 +218,7 @@ export function TelegramGatewayFinal() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'X-Gateway-Token': token } : {}),
+          ...(token ? { 'X-API-Key': token } : {}),
         },
       });
 

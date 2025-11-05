@@ -1,0 +1,383 @@
+---
+title: "Incident Report: TP-Capital Connectivity Failure"
+date: 2025-11-05
+severity: high
+status: resolved
+affected_services:
+  - TP-Capital API
+  - Telegram Gateway API
+  - Dashboard Frontend
+root_cause: "Multiple configuration issues in Docker networking and environment variables"
+resolution_time: "~2 hours"
+owner: DevOps Team
+tags: [incident, docker, networking, environment-variables, api]
+---
+
+# Incident Report: TP-Capital Connectivity Failure
+
+**Date**: November 5, 2025
+**Duration**: ~2 hours  
+**Severity**: High  
+**Status**: ✅ Resolved  
+
+## Executive Summary
+
+The TP-Capital API became unavailable due to a **chain of configuration errors** in Docker networking, environment variables, and API routing. This incident affected:
+
+- **TP-Capital API**: Circuit breaker opened due to Gateway API unavailability
+- **Telegram Gateway API**: Failed to start due to PgBouncer authentication failure
+- **Dashboard Frontend**: Unable to fetch signals (404 errors, wrong URLs)
+
+**Impact**: Users could not view trading signals for ~2 hours until all services were restored.
+
+---
+
+## Timeline
+
+| Time | Event |
+|------|-------|
+| 15:00 | User reports "TP-Capital indisponível" error in Dashboard |
+| 15:05 | Investigation started - Circuit breaker OPEN on TP-Capital |
+| 15:10 | Root cause #1: Telegram Gateway API in restart loop |
+| 15:15 | Root cause #2: PgBouncer missing TELEGRAM_DB_PASSWORD |
+| 15:20 | Fix #1: Recreated PgBouncer with correct password |
+| 15:25 | Root cause #3: TP-Capital using wrong Gateway URL (host.docker.internal) |
+| 15:30 | Fix #2: Updated TELEGRAM_GATEWAY_URL to container hostname |
+| 15:35 | Root cause #4: Dashboard using wrong port (4008 vs 4005) |
+| 15:40 | Fix #3: Updated Dashboard to use Vite proxy |
+| 15:45 | Root cause #5: VITE_TP_CAPITAL_API_URL forcing direct URL |
+| 15:50 | Fix #4: Removed VITE_TP_CAPITAL_API_URL from .env |
+| 16:00 | Services restored - Circuit breaker closed |
+| 16:30 | Root cause #6: Checkpoints blocking signal display |
+| 16:35 | Fix #5: Filtered checkpoints in SQL query |
+| 16:40 | Root cause #7: Messages with status='queued' not processed |
+| 16:45 | Fix #6: Updated filter to include 'queued' status |
+| 17:00 | ✅ All services healthy - 185 signals visible |
+
+---
+
+## Root Causes (7 Issues)
+
+### 1. PgBouncer Missing Password ❌
+
+**Issue**: PgBouncer container had `DATABASES_PASSWORD=""` (empty string)
+
+**Cause**: Docker Compose not loading `${TELEGRAM_DB_PASSWORD}` from `.env`
+
+**Symptom**:
+```
+ERROR: password authentication failed for user "telegram"
+```
+
+**Fix**:
+```bash
+# Use wrapper script to export .env variables
+cd tools/compose
+set -a && source ../../.env && set +a
+docker compose -f docker-compose.telegram.yml up -d telegram-pgbouncer
+```
+
+**Prevention**: Create validation script to check environment variables before container start
+
+---
+
+### 2. Wrong Gateway URL (host.docker.internal) ❌
+
+**Issue**: TP-Capital configured to access Gateway API via `http://host.docker.internal:4010`
+
+**Cause**: Outdated configuration assuming Gateway ran on host
+
+**Symptom**:
+```
+Connection refused (172.18.0.1:4010)
+Circuit breaker OPEN
+```
+
+**Fix**:
+```yaml
+# docker-compose.tp-capital-stack.yml
+- TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010  # Container hostname
+```
+
+**Prevention**: Always use **container hostnames** for inter-container communication
+
+---
+
+### 3. Dashboard Using Wrong Port (4008 vs 4005) ❌
+
+**Issue**: Dashboard trying to access `tp-capital-api:4008` (host port instead of internal port)
+
+**Cause**: Confusion between **host-mapped ports** (4008) and **internal container ports** (4005)
+
+**Symptom**:
+```
+Connection refused inside dashboard-ui container
+```
+
+**Fix**:
+```yaml
+# docker-compose.dashboard.yml
+# Use Vite proxy targets (internal ports)
+- VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+```
+
+**Prevention**: Document port mapping strategy clearly
+
+---
+
+### 4. VITE_TP_CAPITAL_API_URL Forcing Direct URL ❌
+
+**Issue**: `.env` had `VITE_TP_CAPITAL_API_URL=http://localhost:4008`, forcing browser to access directly
+
+**Cause**: Obsolete configuration from pre-Docker era
+
+**Symptom**:
+```
+Failed to fetch (browser can't resolve container hostnames)
+```
+
+**Fix**:
+```bash
+# Comment out in .env
+#VITE_TP_CAPITAL_API_URL=http://localhost:4008
+```
+
+**Prevention**: Use **proxy targets** for containerized frontends, not direct URLs
+
+---
+
+### 5. Checkpoints Blocking Signal Display ❌
+
+**Issue**: `__checkpoint__` records had most recent timestamps, appearing first in results
+
+**Cause**: No filter to exclude internal checkpoint records
+
+**Symptom**:
+```
+API returns 10 results, all showing "__checkpoint__"
+```
+
+**Fix**:
+```javascript
+// timescaleClient.js
+WHERE asset != '__checkpoint__'
+```
+
+**Prevention**: Always filter internal/system records in production queries
+
+---
+
+### 6. Messages with status='queued' Not Processed ❌
+
+**Issue**: New messages had `status='queued'` but TP-Capital only fetched `status='received'`
+
+**Cause**: Gateway API sets initial status to 'queued', but client expected 'received'
+
+**Symptom**:
+```
+Messages 5832 (CMIGX129) and 5834 (BOVAW24) not processed
+```
+
+**Fix**:
+```javascript
+// gatewayHttpClient.js
+url.searchParams.set('status', 'received,queued');  // Include both
+```
+
+**Prevention**: Document message status lifecycle and align client filters
+
+---
+
+### 7. Empty Photos Blocking Queue ❌
+
+**Issue**: 103 photos without text/caption were stuck in queue with `status='received'`
+
+**Cause**: Polling worker tried to parse empty messages, failed, but didn't mark as processed
+
+**Symptom**:
+```
+[GatewayPollingWorker] Message processing failed: Empty message
+```
+
+**Fix**:
+```javascript
+// gatewayPollingWorker.js
+if (!messageContent || messageContent.trim().length === 0) {
+  logger.debug('Empty message (photo without text), skipping');
+  await this.markMessageAsFailed(msg.message_id, new Error('Empty message (photo without text)'));
+  return;
+}
+```
+
+**Prevention**: Always validate message content before parsing
+
+---
+
+## Impact Analysis
+
+### Business Impact
+- **User Impact**: Trading signals unavailable for 2 hours
+- **Data Loss**: None (all messages preserved in database)
+- **Revenue Impact**: None (system not yet in production)
+
+### Technical Impact
+- **Circuit Breaker**: Opened on TP-Capital (protected downstream services)
+- **Retry Attempts**: ~240 failed requests (2 hours × 2 requests/min)
+- **Database Load**: Normal (no degradation)
+
+---
+
+## Files Changed
+
+### 1. Docker Compose Configuration
+- `tools/compose/docker-compose.tp-capital-stack.yml`
+  - Fixed `TELEGRAM_GATEWAY_URL` to use container hostname
+  
+- `tools/compose/docker-compose.dashboard.yml`
+  - Changed to use `VITE_*_PROXY_TARGET` instead of `VITE_*_API_URL`
+
+### 2. Application Code
+- `apps/tp-capital/src/timescaleClient.js`
+  - Added `WHERE asset != '__checkpoint__'` filter
+  
+- `apps/tp-capital/src/gatewayPollingWorker.js`
+  - Added validation for empty messages (photos without text)
+  
+- `apps/tp-capital/src/clients/gatewayHttpClient.js`
+  - Added `status=received,queued` to API call
+
+### 3. Environment Variables
+- `.env`
+  - Commented out `VITE_TP_CAPITAL_API_URL` (use proxy fallback)
+
+---
+
+## Lessons Learned
+
+### ✅ What Worked Well
+1. **Circuit Breaker Pattern**: Prevented cascading failures (TP-Capital degraded gracefully)
+2. **Health Checks**: Quickly identified which services were unhealthy
+3. **Structured Logging**: Easy to trace errors through log aggregation
+4. **Idempotency**: No duplicate signals created during retries
+
+### ⚠️ What Needs Improvement
+
+#### 1. **Environment Variable Validation** (CRITICAL)
+```bash
+# MISSING: Pre-startup validation script
+validate-env.sh --check-required --check-empty-values
+```
+
+**Action**: Create governance policy requiring environment validation before container start
+
+#### 2. **Container Networking Documentation** (HIGH)
+```
+# MISSING: Clear documentation of port mapping strategy
+Host Port 4008 → Container Port 4005 (tp-capital-api)
+```
+
+**Action**: Create "Container Communication Best Practices" policy
+
+#### 3. **Frontend Proxy Configuration** (HIGH)
+```javascript
+// WRONG: Direct URL in containerized environment
+VITE_TP_CAPITAL_API_URL=http://tp-capital-api:4005
+
+// CORRECT: Use proxy target
+VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+```
+
+**Action**: Create "Frontend-Backend Communication" policy
+
+#### 4. **Message Status Lifecycle** (MEDIUM)
+```
+# UNDOCUMENTED: Message statuses and transitions
+queued → received → published
+```
+
+**Action**: Create state machine diagram and policy
+
+#### 5. **Queue Management** (MEDIUM)
+```
+# MISSING: Automatic cleanup of failed/empty messages
+103 photos blocking queue for 2 hours
+```
+
+**Action**: Create automated cleanup job and policy
+
+---
+
+## Action Items
+
+### Immediate (P0)
+- [x] All services restored and healthy
+- [x] Circuit breakers closed
+- [x] Signals visible in Dashboard (185 total, 3 from today)
+
+### Short-term (P1 - This week)
+- [ ] Create environment variable validation script (`scripts/validation/validate-env.sh`)
+- [ ] Create pre-deploy checklist (`governance/controls/PRE-DEPLOY-CHECKLIST.md`)
+- [ ] Document port mapping strategy (`governance/policies/docker-networking-policy.md`)
+- [ ] Create message status lifecycle diagram (`docs/content/diagrams/message-status-lifecycle.puml`)
+
+### Medium-term (P2 - Next sprint)
+- [ ] Implement automated cleanup job for failed messages
+- [ ] Add alerting for circuit breaker open state (> 5 minutes)
+- [ ] Create integration test suite for container networking
+- [ ] Add Prometheus metrics for message processing failures
+
+---
+
+## Prevention Measures
+
+### 1. **Pre-Deployment Validation**
+```bash
+#!/bin/bash
+# scripts/validation/validate-deployment.sh
+
+# Check environment variables
+validate-env.sh --strict
+
+# Check container network connectivity
+validate-network.sh --test-all-endpoints
+
+# Check database schemas
+validate-schema.sh --verify-tables
+
+# Check API routes
+validate-routes.sh --test-all-services
+```
+
+### 2. **Continuous Monitoring**
+```yaml
+# prometheus-alerts.yml
+- alert: CircuitBreakerOpen
+  expr: circuit_breaker_open{service="tp-capital"} > 0
+  for: 5m
+  labels:
+    severity: critical
+  annotations:
+    summary: "TP-Capital circuit breaker open for 5+ minutes"
+```
+
+### 3. **Documentation Requirements**
+- All services MUST document internal vs external ports
+- All environment variables MUST have validation checks
+- All API endpoints MUST have integration tests
+
+---
+
+## References
+
+- Container Infrastructure Policy: `governance/policies/container-infrastructure-policy.md`
+- Secrets & Environment Policy: `governance/policies/secrets-env-policy.md`
+- Deployment Checklist: `governance/controls/PRE-DEPLOY-CHECKLIST.md` (to be created)
+- Network Validation Script: `scripts/validation/validate-network.sh` (to be created)
+
+---
+
+**Status**: ✅ Incident Resolved  
+**Next Review**: November 12, 2025 (weekly)  
+**Owner**: DevOps Team  
+**Last Updated**: November 5, 2025 16:45 BRT
+

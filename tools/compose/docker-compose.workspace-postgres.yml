@@ -106,12 +106,13 @@ services:
       - NODE_ENV=${NODE_ENV:-development}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       
-      # Database Strategy (POSTGRESQL instead of NEON)
-      - LIBRARY_DB_STRATEGY=postgresql
+      # Database Strategy (LOWDB - temporary workaround for WSL2 networking issues)
+      - LIBRARY_DB_STRATEGY=lowdb
+      - DB_PATH=/app/data/workspace-library.json
       
-      # PostgreSQL Connection (internal network)
-      - POSTGRES_HOST=workspace-db
-      - POSTGRES_PORT=5432
+      # PostgreSQL Connection (disabled - WSL2 docker-proxy incompatibility)
+      # - POSTGRES_HOST=host.docker.internal
+      # - POSTGRES_PORT=5450
       - POSTGRES_DATABASE=workspace
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${WORKSPACE_DB_PASSWORD:-workspace_secure_pass}
@@ -137,6 +138,9 @@ services:
       
       # Mount shared modules
       - ../../backend/shared:/app/backend/shared:ro
+      
+      # LowDB data persistence
+      - workspace-lowdb-data:/app/data
       
       # Anonymous volume prevents overwrite
       - /app/node_modules
@@ -206,6 +210,13 @@ volumes:
     labels:
       - "com.tradingsystem.stack=workspace"
       - "com.tradingsystem.component=database"
+  
+  workspace-lowdb-data:
+    name: workspace-lowdb-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=lowdb"
 
 # ==============================================================================
 # USAGE EXAMPLES

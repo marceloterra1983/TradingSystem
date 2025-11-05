@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "messaging"
-x-tradingsystem-generated-at: "2025-11-05T16:22:22.956Z"
+x-tradingsystem-generated-at: "2025-11-05T19:44:35.949Z"
 
 x-tradingsystem-ports:
   telegram-rabbitmq:
