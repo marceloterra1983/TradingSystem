@@ -6,8 +6,11 @@ const AgentsCatalogView = lazy(() => import('../catalog/AgentsCatalogView'));
 const CommandsCatalogView = lazy(
   () => import('../catalog/CommandsCatalogView'),
 );
+const AgentsCommandsCatalogView = lazy(
+  () => import('../catalog/AgentsCommandsCatalogView'),
+);
 
-type CatalogSection = 'agents' | 'commands';
+type CatalogSection = 'agents' | 'commands' | 'unified';
 
 const CATALOG_SECTIONS: Array<{
   id: CatalogSection;
@@ -20,6 +23,10 @@ const CATALOG_SECTIONS: Array<{
   {
     id: 'commands',
     label: 'Commands',
+  },
+  {
+    id: 'unified',
+    label: 'Agents/Commands',
   },
 ];
 
@@ -35,6 +42,8 @@ export default function CatalogPage(): JSX.Element {
           variant="outline"
           size="sm"
           onClick={() => setActiveSection(section.id)}
+          aria-pressed={isActive}
+          data-testid={`catalog-section-${section.id}`}
           className={cn(
             'rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 disabled:opacity-100',
             isActive
@@ -57,13 +66,17 @@ export default function CatalogPage(): JSX.Element {
             message={
               activeSection === 'commands'
                 ? 'Carregando commands...'
-                : 'Carregando agents...'
+                : activeSection === 'unified'
+                  ? 'Carregando catálogo unificado...'
+                  : 'Carregando agents...'
             }
           />
         }
       >
         {activeSection === 'commands' ? (
           <CommandsCatalogView headerActions={headerActions} />
+        ) : activeSection === 'unified' ? (
+          <AgentsCommandsCatalogView headerActions={headerActions} />
         ) : (
           <AgentsCatalogView headerActions={headerActions} />
         )}

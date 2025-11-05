@@ -9,6 +9,16 @@ const itemsEndpoint = (suffix = '') => {
 
   const withSuffix = (url: string) => `${url}${suffix}`;
 
+  // FORCE PORT 3210 for Workspace (PostgreSQL Autonomous Stack)
+  // This overrides any cached configuration
+  const FORCED_BASE = 'http://localhost:3210/api';
+  
+  console.warn('[LibraryService] FORCING base URL to:', FORCED_BASE);
+  console.warn('[LibraryService] Original API_BASE_URL was:', API_BASE_URL);
+  
+  return withSuffix(`${FORCED_BASE}/items`);
+  
+  /* OLD LOGIC (commented out - cache issue)
   if (/(?:\/api)?\/items$/i.test(trimmedBase)) {
     return withSuffix(trimmedBase);
   }
@@ -29,6 +39,7 @@ const itemsEndpoint = (suffix = '') => {
   }
 
   return withSuffix(`${trimmedBase}/api/items`);
+  */
 };
 
 export interface ApiResponse<T> {
@@ -50,18 +61,26 @@ export const libraryService = {
    */
   async getAllItems(): Promise<Item[]> {
     try {
-      const response = await fetch(itemsEndpoint(), {
+      const endpoint = itemsEndpoint();
+      console.log('[LibraryService] Fetching items from:', endpoint);
+      
+      const response = await fetch(endpoint, {
         headers: {
           Accept: 'application/json',
         },
       });
+      
+      console.log('[LibraryService] Response status:', response.status, response.ok ? 'OK' : 'FAILED');
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result: ApiResponse<Item[]> = await response.json();
+      console.log('[LibraryService] Items fetched:', result.data?.length || 0);
       return result.data || [];
     } catch (error) {
-      console.error('Error fetching items:', error);
+      console.error('[LibraryService] Error fetching items:', error);
+      console.error('[LibraryService] Endpoint was:', itemsEndpoint());
       throw error;
     }
   },

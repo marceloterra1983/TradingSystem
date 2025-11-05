@@ -58,6 +58,7 @@ import { GatewayLogsCard } from '../telegram/GatewayLogsCard';
 import { TwitterPreview } from '../telegram/TwitterPreview';
 import { YouTubePreview } from '../telegram/YouTubePreview';
 import { InstagramPreview } from '../telegram/InstagramPreview';
+import { GenericLinkPreview } from '../telegram/GenericLinkPreview';
 
 // interface GatewayData {
 //   health?: {
@@ -503,7 +504,9 @@ export function TelegramGatewayFinal() {
             <CollapsibleCardHeader>
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-cyan-400" />
-                <CollapsibleCardTitle>Status do Sistema</CollapsibleCardTitle>
+                <CollapsibleCardTitle level={2}>
+                  Status do Sistema
+                </CollapsibleCardTitle>
               </div>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -667,7 +670,7 @@ export function TelegramGatewayFinal() {
             <CollapsibleCardHeader>
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-cyan-400" />
-                <CollapsibleCardTitle>
+                <CollapsibleCardTitle level={2}>
                   Mensagens ({filteredMessages.length} de{' '}
                   {messages.length > 0
                     ? messages.length
@@ -728,7 +731,11 @@ export function TelegramGatewayFinal() {
                     value={filterChannel}
                     onValueChange={setFilterChannel}
                   >
-                    <SelectTrigger data-collapsible-ignore="true">
+                    <SelectTrigger
+                      data-collapsible-ignore="true"
+                      data-testid="channel-filter"
+                      aria-label="Filtrar por canal"
+                    >
                       <SelectValue placeholder="Todos os canais" />
                     </SelectTrigger>
                     <SelectContent>
@@ -743,7 +750,11 @@ export function TelegramGatewayFinal() {
 
                   {/* Limit Filter */}
                   <Select value={filterLimit} onValueChange={setFilterLimit}>
-                    <SelectTrigger data-collapsible-ignore="true">
+                    <SelectTrigger
+                      data-collapsible-ignore="true"
+                      data-testid="limit-filter"
+                      aria-label="Definir quantidade de mensagens"
+                    >
                       <SelectValue placeholder="Quantidade" />
                     </SelectTrigger>
                     <SelectContent>
@@ -753,6 +764,8 @@ export function TelegramGatewayFinal() {
                       <SelectItem value="100">100 registros</SelectItem>
                       <SelectItem value="200">200 registros</SelectItem>
                       <SelectItem value="500">500 registros</SelectItem>
+                      <SelectItem value="1000">1000 registros</SelectItem>
+                      <SelectItem value="all">Todos os registros</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -761,6 +774,7 @@ export function TelegramGatewayFinal() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
                       placeholder="Buscar no texto..."
+                      aria-label="Buscar mensagens por texto"
                       value={filterText}
                       onChange={(e) => setFilterText(e.target.value)}
                       className="pl-10"
@@ -772,6 +786,7 @@ export function TelegramGatewayFinal() {
                   <Input
                     type="date"
                     placeholder="Data inicial"
+                    aria-label="Selecionar data inicial"
                     value={filterDateFrom}
                     onChange={(e) => setFilterDateFrom(e.target.value)}
                     data-collapsible-ignore="true"
@@ -781,6 +796,7 @@ export function TelegramGatewayFinal() {
                   <Input
                     type="date"
                     placeholder="Data final"
+                    aria-label="Selecionar data final"
                     value={filterDateTo}
                     onChange={(e) => setFilterDateTo(e.target.value)}
                     data-collapsible-ignore="true"
@@ -819,7 +835,7 @@ export function TelegramGatewayFinal() {
                         variant="outline"
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
-                        Limite: {filterLimit} registros
+                        Limite: {filterLimit === 'all' ? 'Todos' : `${filterLimit} registros`}
                       </Badge>
                     )}
                     {filterText && (
@@ -1022,7 +1038,9 @@ export function TelegramGatewayFinal() {
             <CollapsibleCardHeader>
               <div className="flex items-center gap-2">
                 <Radio className="h-5 w-5 text-purple-400" />
-                <CollapsibleCardTitle>Canais Monitorados</CollapsibleCardTitle>
+                <CollapsibleCardTitle level={2}>
+                  Canais Monitorados
+                </CollapsibleCardTitle>
                 <Badge
                   variant="outline"
                   className="ml-2 border-slate-300 text-slate-700 dark:border-slate-700 dark:text-slate-200"
@@ -1164,8 +1182,10 @@ export function TelegramGatewayFinal() {
                                   handleEditChannel(channel.id, channel)
                                 }
                                 data-collapsible-ignore="true"
+                                aria-label={`Editar canal ${channel.label || channel.channelId}`}
+                                title={`Editar canal ${channel.label || channel.channelId}`}
                               >
-                                <Edit2 className="h-4 w-4" />
+                                <Edit2 className="h-4 w-4" aria-hidden="true" />
                               </Button>
                               <Button
                                 variant="outline"
@@ -1178,8 +1198,10 @@ export function TelegramGatewayFinal() {
                                 }
                                 className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950/50"
                                 data-collapsible-ignore="true"
+                                aria-label={`Remover canal ${channel.label || channel.channelId}`}
+                                title={`Remover canal ${channel.label || channel.channelId}`}
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                               </Button>
                             </div>
                           </td>
@@ -1384,6 +1406,16 @@ export function TelegramGatewayFinal() {
                     {selectedMessage.metadata.linkPreview.postType === 'reel' ? 'Reel do Instagram' : 'Post do Instagram'}
                   </p>
                   <InstagramPreview preview={selectedMessage.metadata.linkPreview} />
+                </div>
+              )}
+
+              {/* Generic Link Preview */}
+              {selectedMessage.metadata?.linkPreview?.type === 'generic' && (
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Link Externo
+                  </p>
+                  <GenericLinkPreview preview={selectedMessage.metadata.linkPreview} />
                 </div>
               )}
 

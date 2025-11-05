@@ -11,7 +11,7 @@ export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.WORKSPACE_PORT ?? process.env.PORT ?? 3200),
   logLevel: process.env.LOG_LEVEL ?? 'info',
-  // Database strategy: neon, timescaledb, or lowdb
+  // Database strategy: neon, postgresql, timescaledb, or lowdb
   dbStrategy:
     (process.env.LIBRARY_DB_STRATEGY ?? 'timescaledb').toLowerCase(),
   lowdbPath:
@@ -89,4 +89,22 @@ export const neonConfig = {
   queryTimeout: Number(process.env.NEON_QUERY_TIMEOUT ?? 30000),
   schema: process.env.NEON_SCHEMA ?? 'workspace',
   table: process.env.NEON_TABLE_NAME ?? 'workspace_items',
+};
+
+export const postgresqlConfig = {
+  connectionString: process.env.POSTGRES_DATABASE_URL,
+  host: process.env.POSTGRES_HOST ?? 'localhost',
+  port: Number(process.env.POSTGRES_PORT ?? 5432),
+  database: process.env.POSTGRES_DATABASE ?? 'workspace',
+  user: process.env.POSTGRES_USER ?? 'postgres',
+  password: process.env.POSTGRES_PASSWORD ?? 'workspace_secure_pass',
+  ssl: resolveBoolean(process.env.POSTGRES_SSL ?? 'false')
+    ? { rejectUnauthorized: false }
+    : false,
+  max: Number(process.env.POSTGRES_POOL_MAX ?? 50),
+  min: Number(process.env.POSTGRES_POOL_MIN ?? 2),
+  idleTimeoutMillis: Number(process.env.POSTGRES_IDLE_TIMEOUT ?? 30000),
+  connectionTimeoutMillis: Number(process.env.POSTGRES_CONNECTION_TIMEOUT ?? 5000),
+  schema: process.env.POSTGRES_SCHEMA ?? 'workspace',
+  table: process.env.POSTGRES_TABLE_NAME ?? 'workspace_items',
 };

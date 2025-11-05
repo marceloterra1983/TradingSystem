@@ -73,10 +73,12 @@ COMMENT ON COLUMN telegram_gateway.messages.metadata IS
     },
     basic: boolean (true if no API token configured),
     
-    -- Generic fields (for other link types):
+    -- Generic link fields (Open Graph metadata):
+    title: string,
     description: string,
     image: string,
-    siteName: string
+    siteName: string,
+    domain: string (extracted from URL)
   }
 ';
 
@@ -258,13 +260,48 @@ ORDER BY created_at DESC
 LIMIT 20;
 */
 
+-- Query 9: Get all generic link previews from the last 7 days
+/*
+SELECT 
+  channel_id,
+  message_id,
+  text,
+  metadata->'linkPreview'->>'url' AS link_url,
+  metadata->'linkPreview'->>'title' AS link_title,
+  metadata->'linkPreview'->>'domain' AS domain,
+  metadata->'linkPreview'->>'siteName' AS site_name,
+  metadata->'linkPreview'->>'image' AS image_url,
+  created_at
+FROM telegram_gateway.messages
+WHERE metadata->'linkPreview'->>'type' = 'generic'
+  AND created_at >= NOW() - INTERVAL '7 days'
+ORDER BY created_at DESC;
+*/
+
+-- Query 10: Get all link previews with images
+/*
+SELECT 
+  channel_id,
+  message_id,
+  metadata->'linkPreview'->>'type' AS link_type,
+  metadata->'linkPreview'->>'url' AS url,
+  metadata->'linkPreview'->>'title' AS title,
+  metadata->'linkPreview'->>'image' AS image_url,
+  created_at
+FROM telegram_gateway.messages
+WHERE metadata->'linkPreview'->'image' IS NOT NULL
+  AND metadata->'linkPreview'->>'image' != ''
+ORDER BY created_at DESC
+LIMIT 50;
+*/
+
 -- ==============================================================================
 -- FUTURE EXTENSIONS
 -- ==============================================================================
 
 -- Future support for additional link types:
 -- - TikTok: videoId, author, music, likes, views
--- - Generic links: Open Graph metadata (title, description, image)
+-- - LinkedIn: postId, author, engagement
 
 -- ==============================================================================
 -- END OF MIGRATION

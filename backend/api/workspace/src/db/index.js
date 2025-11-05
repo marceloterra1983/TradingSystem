@@ -2,6 +2,7 @@ import { config } from '../config.js';
 import { LowdbClient } from './lowdb.js';
 import { TimescaleDBClient } from './timescaledb.js';
 import { NeonClient } from './neon.js';
+import { PostgreSQLClient } from './postgresql.js';
 
 let clientInstance;
 
@@ -10,6 +11,10 @@ export const getDbClient = () => {
     switch (config.dbStrategy) {
       case 'neon':
         clientInstance = new NeonClient();
+        break;
+      case 'postgresql':
+      case 'postgres':
+        clientInstance = new PostgreSQLClient();
         break;
       case 'timescaledb':
         clientInstance = new TimescaleDBClient();

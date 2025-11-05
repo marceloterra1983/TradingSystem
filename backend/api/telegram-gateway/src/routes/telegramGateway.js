@@ -329,7 +329,7 @@ telegramGatewayRouter.post('/sync-messages', async (req, res, next) => {
       body: JSON.stringify({
         limit  // MTProto service only uses limit, fetches channels internally
       }),
-      signal: AbortSignal.timeout(60000) // 60s timeout
+      signal: AbortSignal.timeout(180000) // 180s timeout (3 minutes) for large syncs
     });
     
     if (!response.ok) {

@@ -127,7 +127,9 @@ export const GatewayLogsCard: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <Terminal className="h-5 w-5 text-cyan-400" />
-            <CollapsibleCardTitle>Gateway MTProto Logs</CollapsibleCardTitle>
+            <CollapsibleCardTitle level={2}>
+              Gateway MTProto Logs
+            </CollapsibleCardTitle>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <Clock className="h-4 w-4" />
@@ -162,7 +164,12 @@ export const GatewayLogsCard: React.FC = () => {
       </div>
 
       {/* Logs List */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div
+        className="space-y-2 max-h-96 overflow-y-auto"
+        role="region"
+        aria-label="Logs recentes do gateway MTProto"
+        tabIndex={0}
+      >
         {logs.length === 0 ? (
           <div className="text-center py-8 text-slate-500 dark:text-slate-400">
             <Clock className="h-12 w-12 mx-auto mb-2 text-slate-400 dark:text-slate-500" />
@@ -228,4 +235,3 @@ export const GatewayLogsCard: React.FC = () => {
     </CollapsibleCard>
   );
 };
-

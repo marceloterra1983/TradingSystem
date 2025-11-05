@@ -39,7 +39,7 @@ export function useGatewayData(
       };
 
       // Build messages URL with filters
-      const limit = filterLimit || '50';
+      const limit = filterLimit === 'all' ? '10000' : (filterLimit || '50');
       let messagesUrl = `/api/messages?limit=${limit}&sort=desc`;
       if (filterChannel !== 'all') {
         messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc`;

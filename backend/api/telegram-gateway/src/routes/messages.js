@@ -23,7 +23,7 @@ const parseBoolean = (value, fallback = false) => {
  * Query Parameters:
  * - channel: Channel ID (required)
  * - excludeProcessedBy: Consumer name to exclude (optional, e.g., 'tp-capital')
- * - limit: Max messages to return (default: 100, max: 200)
+ * - limit: Max messages to return (default: 1000, max: 10000)
  * 
  * Used by TP-Capital and other services to poll for new messages
  * IMPORTANT: This route MUST come BEFORE /:id to avoid matching "unprocessed" as an ID

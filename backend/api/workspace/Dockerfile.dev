@@ -10,10 +10,10 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 # Copy workspace package files
-COPY api/workspace/package*.json ./
+COPY backend/api/workspace/package*.json ./
 
 # Copy backend/shared modules (for logger, middleware, config)
-COPY shared /shared
+COPY backend/shared /shared
 
 # Install workspace dependencies
 RUN npm ci
@@ -24,7 +24,7 @@ RUN cd /shared/logger && npm ci && \
     cd /shared/config && npm install dotenv
 
 # Copy source code (will be overridden by volume mount in docker-compose)
-COPY api/workspace .
+COPY backend/api/workspace .
 
 # Expose port
 EXPOSE 3200

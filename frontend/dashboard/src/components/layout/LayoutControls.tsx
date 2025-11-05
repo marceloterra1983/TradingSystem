@@ -64,6 +64,9 @@ export function LayoutControls({
           title={
             allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'
           }
+          aria-label={
+            allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'
+          }
           aria-pressed={allCollapsed}
         >
           {allCollapsed ? (
@@ -96,6 +99,7 @@ export function LayoutControls({
                   : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
               )}
               title={option.label}
+              aria-label={option.label}
               aria-pressed={isActive}
             >
               <Icon className="h-4 w-4" />
@@ -116,6 +120,7 @@ export function LayoutControls({
             'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
           )}
           title="Resetar layout"
+          aria-label="Resetar layout"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>

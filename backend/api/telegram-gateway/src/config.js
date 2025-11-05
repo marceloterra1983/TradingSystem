@@ -122,7 +122,7 @@ export const config = {
   },
   pagination: {
     defaultLimit: toInt(process.env.TELEGRAM_GATEWAY_DEFAULT_PAGE_SIZE, 50),
-    maxLimit: toInt(process.env.TELEGRAM_GATEWAY_MAX_PAGE_SIZE, 200),
+    maxLimit: toInt(process.env.TELEGRAM_GATEWAY_MAX_PAGE_SIZE, 10000),
   },
   assets: {
     sqlMigrationsDir: path.join(projectRoot, 'backend', 'data', 'timescaledb', 'telegram-gateway'),

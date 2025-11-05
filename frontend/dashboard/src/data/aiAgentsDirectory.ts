@@ -17,6 +17,7 @@ export interface AgentDirectoryEntry {
   capabilities: string;
   usage: string;
   example: string;
+  shortExample?: string;
   outputType: string;
   tags: string[];
   filePath: string;
@@ -41,6 +42,7 @@ export const AI_AGENTS_DIRECTORY: AgentDirectoryEntry[] = [
     capabilities: "revisa aderência a SOLID, camadas limpas e padrões arquiteturais",
     usage: "ativar em PRs estruturais, novos serviços ou refatorações que precisem manter a Clean Architecture.",
     example: "Ativar em PRs estruturais, novos serviços ou refatorações que precisem manter a Clean Architecture.",
+    shortExample: "@architect-reviewer revise backend/api/workspace",
     outputType: "Relatório técnico com recomendações arquiteturais.",
     tags: ["arquitetura", "plataforma", "architect-reviewer", "revisa-aderencia", "camadas-limpas"],
     filePath: "/.claude/agents/architect-reviewer.md",
@@ -53,6 +55,7 @@ export const AI_AGENTS_DIRECTORY: AgentDirectoryEntry[] = [
     capabilities: "conduz modernização arquitetural, migra monólitos, desenha microservices e eventos",
     usage: "quando avaliarmos evolução de bounded contexts ou escalabilidade dos domínios de trading.",
     example: "Quando avaliarmos evolução de bounded contexts ou escalabilidade dos domínios de trading.",
+    shortExample: "@architecture-modernizer analise migração para microservices",
     outputType: "Relatório técnico com recomendações arquiteturais.",
     tags: ["arquitetura", "plataforma", "architecture-modernizer", "conduz-modernizacao", "migra-monolitos"],
     filePath: "/.claude/agents/architecture-modernizer.md",

@@ -404,14 +404,60 @@ export const saveMessages = async (messages, logger) => {
   try {
     await client.query('BEGIN');
     
+    // STEP 1: Filter out messages that already exist in database
+    // Build array of (channel_id, message_id) pairs to check
+    const messageKeys = messages.map(msg => [msg.channelId, msg.messageId]);
+    
+    // Query to find existing message_ids
+    const existingQuery = `
+      SELECT DISTINCT channel_id, message_id
+      FROM messages
+      WHERE (channel_id, message_id) IN (
+        SELECT * FROM unnest($1::text[], $2::bigint[])
+      )
+    `;
+    
+    const channelIds = messageKeys.map(([channelId]) => channelId);
+    const messageIds = messageKeys.map(([, messageId]) => messageId);
+    
+    const existingResult = await client.query(existingQuery, [channelIds, messageIds]);
+    
+    // Create set of existing (channel_id, message_id) for fast lookup
+    const existingKeys = new Set(
+      existingResult.rows.map(row => `${row.channel_id}:${row.message_id}`)
+    );
+    
+    // Filter to only new messages
+    const newMessages = messages.filter(msg => {
+      const key = `${msg.channelId}:${msg.messageId}`;
+      return !existingKeys.has(key);
+    });
+    
+    logger?.info?.(
+      { 
+        total: messages.length, 
+        existing: existingKeys.size, 
+        new: newMessages.length 
+      },
+      '[BulkInsert] Dedup check complete'
+    );
+    
+    // If all messages already exist, return early
+    if (newMessages.length === 0) {
+      await client.query('COMMIT');
+      logger?.info?.('[BulkInsert] All messages already exist, nothing to insert');
+      return 0;
+    }
+    
+    // STEP 2: Bulk insert only new messages
     // PostgreSQL parameter limit: ~65,000
     // With 9 params per message: max batch = 7000 messages
     // Use conservative chunk size of 500
     const CHUNK_SIZE = 500;
     let totalSaved = 0;
     
-    for (let i = 0; i < messages.length; i += CHUNK_SIZE) {
-      const chunk = messages.slice(i, i + CHUNK_SIZE);
+    for (let i = 0; i < newMessages.length; i += CHUNK_SIZE) {
+      const chunk = newMessages.slice(i, i + CHUNK_SIZE);
       
       // Build VALUES clause: ($1,$2,...), ($10,$11,...), ...
       const values = chunk.map((msg, idx) => {
@@ -437,7 +483,7 @@ export const saveMessages = async (messages, logger) => {
         })
       ]);
       
-      // Bulk INSERT with ON CONFLICT (idempotent)
+      // Bulk INSERT (no ON CONFLICT needed - already filtered)
       const result = await client.query(`
         INSERT INTO messages (
           channel_id,
@@ -451,7 +497,6 @@ export const saveMessages = async (messages, logger) => {
           metadata
         )
         VALUES ${values}
-        ON CONFLICT (channel_id, message_id) DO NOTHING
         RETURNING id
       `, flatParams);
       
@@ -529,7 +574,7 @@ export const findUnprocessed = async (filters = {}, logger) => {
   conditions.push('deleted_at IS NULL');
 
   const limit = Math.min(
-    Math.max(Number.parseInt(filters.limit, 10) || 100, 1),
+    Math.max(Number.parseInt(filters.limit, 10) || 1000, 1),
     config.pagination.maxLimit,
   );
   params.push(limit);

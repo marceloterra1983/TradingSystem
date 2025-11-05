@@ -290,11 +290,12 @@ export async function recordMessageReceived(
     JSON.stringify(buildMetadata(message, extraMetadata)),
   ];
 
-  // Check if message already exists (simple duplicate prevention)
+  // Check if message already exists (duplicate prevention)
+  // FIXED: Remove time constraint - check ALL messages, not just last 1 hour
   const checkQuery = `
     SELECT id FROM ${tableIdentifier} 
     WHERE channel_id = $1 AND message_id = $2 
-    AND created_at >= NOW() - INTERVAL '1 hour'
+    AND deleted_at IS NULL
     LIMIT 1
   `;
   const existingCheck = await db.query(checkQuery, [String(message.channelId), normalizeMessageId(message.messageId)]);

@@ -18,6 +18,7 @@ import {
   closeMessageStore,
 } from './messageStore.js';
 import apiRoutes from './routes.js';
+import { extractLinkPreviews } from './utils/linkPreview.js';
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -393,6 +394,25 @@ if (config.telegram.phoneNumber) {
               }
             }
 
+            // Extract link previews (Twitter, YouTube, Instagram, Generic)
+            let linkPreview = null;
+            if (text && text.length > 0) {
+              try {
+                linkPreview = await extractLinkPreviews(text);
+                if (linkPreview) {
+                  logger.info(
+                    { channelId, messageId, previewType: linkPreview.type },
+                    '[EventHandler] Link preview extracted successfully'
+                  );
+                }
+              } catch (linkError) {
+                logger.warn(
+                  { err: linkError, channelId, messageId },
+                  '[EventHandler] Failed to extract link preview'
+                );
+              }
+            }
+
             const messageData = {
               channelId,
               messageId,
@@ -418,6 +438,7 @@ if (config.telegram.phoneNumber) {
                   post: message.post,
                   fromScheduled: message.fromScheduled,
                 },
+                linkPreview: linkPreview,  // Add link preview to metadata
               },
             };
 

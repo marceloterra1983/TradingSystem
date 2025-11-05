@@ -82,7 +82,7 @@ declare -A TARGET_SERVICES_MAP=()
 # max_retries = number of restart attempts (default: 3)
 # NOTE: Workspace and TP Capital now run as Docker containers only
 declare -A SERVICES=(
-    ["telegram-gateway"]="apps/telegram-gateway:4006:npm run dev:::3"
+    ["telegram-gateway"]="apps/telegram-gateway:4007:npm start:::3"
     ["telegram-gateway-api"]="backend/api/telegram-gateway:4010:npm run dev::telegram-gateway:3"
     # NOTE: docs-api runs as Docker container (docs-api) on port 3401
     # NOTE: docusaurus runs as Docker container (docs-hub) on port 3400
@@ -146,12 +146,13 @@ Options:
 
 Services:
   🐳 Docker Containers:
-     - tp-capital-api (4005) - Telegram ingestion & API
-     - workspace-service (3200) - Workspace & Ideas management
-     - TimescaleDB, QuestDB, and other infrastructure
+     - TP Capital stack → API 4008 + dedicated Timescale/PgBouncer/Redis
+     - Workspace stack → API 3210 + PostgreSQL 5450
+     - Telegram data stack → Timescale 5434 + Redis 6379 + RabbitMQ 5672
+     - TimescaleDB, QuestDB, Qdrant, and other shared infrastructure
 
   🖥️  Local Dev Services:
-     - Telegram Gateway (4006) - Telegram MTProto gateway service
+     - Telegram Gateway (4007) - Native MTProto bridge + metrics
      - Telegram Gateway API (4010) - REST API for gateway messages
      - DocsAPI (3401) - Documentation API (hybrid search)
      - Docusaurus (3400) - Documentation site
@@ -325,13 +326,6 @@ kill_port() {
 start_containers() {
     section "Starting Docker Containers"
 
-    # Check if docker-compose.apps.yml exists
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.apps.yml"
-    if [ ! -f "$COMPOSE_FILE" ]; then
-        log_warning "No docker-compose.apps.yml found - skipping containers"
-        return 0
-    fi
-
     # Ensure external networks exist (some stacks expect them)
     for net in tradingsystem_backend tradingsystem_infra tradingsystem_data Database_default; do
         if ! docker network ls --format '{{.Name}}' | grep -qx "$net"; then
@@ -457,84 +451,110 @@ start_containers() {
         log_warning "Database compose file not found; skipping DATABASE stack"
     fi
 
-    # APPS stack - Build contexts CORRIGIDOS!
-    # Now builds successfully with correct paths
-    local SKIP_APPS_STACK=false  # HABILITADO!
-    
-    if [ "$SKIP_APPS_STACK" = true ]; then
-        log_info "Skipping APPS stack (tp-capital, workspace) - disabled to avoid port conflicts"
-        log_info "  Conflicts: tp-capital (4005), workspace (3200)"
-        log_info "  These are optional services not needed for RAG functionality"
+    # Dedicated product stacks
+    start_tp_capital_stack
+    start_workspace_stack
+    start_telegram_data_stack
+}
+
+start_tp_capital_stack() {
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tp-capital-stack.yml"
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        log_warning "TP Capital compose file not found; skipping TP Capital stack"
         return 0
     fi
-    
-    # If ports are busy by host processes and --force-kill, free them
+
+    log_info "Ensuring TP Capital autonomous stack (TimescaleDB + PgBouncer + Redis + API) is running..."
+
     if [ "$FORCE_KILL" = true ]; then
-        for p in 4005 3200; do
-            if port_in_use "$p"; then
-                log_warning "Killing host process on port $p (--force-kill)"
-                kill_port "$p"
+        for port in 4008 5440 6435 6381 6382; do
+            if port_in_use "$port"; then
+                log_warning "Killing host process on port $port (--force-kill)"
+                kill_port "$port"
             fi
         done
     fi
 
-    # If --force-kill is set, always restart containers (consistent behavior)
+    local -a up_args=(up -d --remove-orphans)
     if [ "$FORCE_KILL" = true ]; then
-        if docker ps -a --format '{{.Names}}' | grep -qE '^(apps-tpcapital|apps-workspace)$'; then
-            log_warning "--force-kill: Forcing restart of all application containers (healthy or not)"
-            docker compose -p apps -f "$COMPOSE_FILE" down || true
-            sleep 2
-        fi
-    # If not forcing and containers already running, check health and skip if healthy
-    elif docker ps --format '{{.Names}}' | grep -qE '^(apps-tpcapital|apps-workspace)$'; then
-        ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo none)
-        tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tpcapital 2>/dev/null || echo none)
-
-        if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
-            log_info "Application containers already healthy; skipping restart"
-            return 0
-        else
-            log_warning "Containers exist but not healthy (ws=$ws_health, tp=$tp_health); restarting..."
-            docker compose -p apps -f "$COMPOSE_FILE" down || true
-            sleep 2
-        fi
+        up_args+=(--force-recreate)
     fi
 
-    # Start containers
-    log_info "Starting apps stack (tp-capital, workspace)..."
-    docker compose -p apps -f "$COMPOSE_FILE" up -d --force-recreate
+    docker compose -p tp-capital -f "$COMPOSE_FILE" "${up_args[@]}"
 
-    # Wait for containers to be healthy
-    log_info "Waiting for containers to be healthy..."
-    local max_wait=120
-    local waited=0
+    local containers=("tp-capital-timescale" "tp-capital-pgbouncer" "tp-capital-redis-master" "tp-capital-redis-replica" "tp-capital-api")
+    if wait_for_containers_health 180 "${containers[@]}"; then
+        log_success "✓ TP Capital stack healthy (API http://localhost:4008)"
+    else
+        log_warning "⚠ TP Capital stack health checks timed out; inspect logs with: docker compose -p tp-capital -f $COMPOSE_FILE logs -f"
+    fi
+}
 
-    while [ $waited -lt $max_wait ]; do
-        local ws_health tp_health
-        ws_health=$(docker inspect --format='{{.State.Health.Status}}' apps-workspace 2>/dev/null || echo starting)
-        tp_health=$(docker inspect --format='{{.State.Health.Status}}' apps-tpcapital 2>/dev/null || echo starting)
-
-        if [ "$ws_health" = "healthy" ] && [ "$tp_health" = "healthy" ]; then
-            log_success "✓ App containers are healthy"
-            break
-        fi
-
-        sleep 2
-        waited=$((waited + 2))
-
-        if [ $((waited % 10)) -eq 0 ]; then
-            log_info "Still waiting... (${waited}s/${max_wait}s) [workspace: $ws_health, tpcapital: $tp_health]"
-        fi
-    done
-
-    if [ $waited -ge $max_wait ]; then
-        log_warning "⚠ Containers may not be fully healthy yet"
-        log_info "Check status with: docker ps"
+start_workspace_stack() {
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.workspace-simple.yml"
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        log_warning "Workspace compose file not found; skipping workspace stack"
+        return 0
     fi
 
-    log_success "✓ Containers started"
-    log_info "  - tp-capital-api:    http://localhost:4005"
-    log_info "  - workspace-service: http://localhost:3200"
+    log_info "Ensuring Workspace stack (API + PostgreSQL 17) is running..."
+
+    if [ "$FORCE_KILL" = true ]; then
+        for port in 3210 5450; do
+            if port_in_use "$port"; then
+                log_warning "Killing host process on port $port (--force-kill)"
+                kill_port "$port"
+            fi
+        done
+    fi
+
+    local -a up_args=(up -d --remove-orphans)
+    if [ "$FORCE_KILL" = true ]; then
+        up_args+=(--force-recreate)
+    fi
+
+    docker compose -p workspace -f "$COMPOSE_FILE" "${up_args[@]}"
+
+    local containers=("workspace-db" "workspace-api")
+    if wait_for_containers_health 120 "${containers[@]}"; then
+        log_success "✓ Workspace stack healthy (API http://localhost:3210)"
+    else
+        log_warning "⚠ Workspace stack health checks timed out; inspect logs with: docker compose -p workspace -f $COMPOSE_FILE logs -f"
+    fi
+}
+
+start_telegram_data_stack() {
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.telegram.yml"
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        log_warning "Telegram compose file not found; skipping Telegram data stack"
+        return 0
+    fi
+
+    log_info "Ensuring Telegram data stack (TimescaleDB + Redis + RabbitMQ) is running..."
+
+    if [ "$FORCE_KILL" = true ]; then
+        for port in 5434 6379 5672 15672; do
+            if port_in_use "$port"; then
+                log_warning "Killing host process on port $port (--force-kill)"
+                kill_port "$port"
+            fi
+        done
+    fi
+
+    local -a up_args=(up -d --remove-orphans)
+    if [ "$FORCE_KILL" = true ]; then
+        up_args+=(--force-recreate)
+    fi
+    local -a services=(telegram-timescaledb telegram-redis-master telegram-rabbitmq)
+
+    docker compose -p telegram -f "$COMPOSE_FILE" "${up_args[@]}" "${services[@]}"
+
+    local containers=("telegram-timescale" "telegram-redis-master" "telegram-rabbitmq")
+    if wait_for_containers_health 150 "${containers[@]}"; then
+        log_success "✓ Telegram data stack ready (Timescale 5434 · Redis 6379 · RabbitMQ 5672)"
+    else
+        log_warning "⚠ Telegram data stack health checks timed out; inspect logs with: docker compose -p telegram -f $COMPOSE_FILE logs -f"
+    fi
 }
 
 # Function to start DOCS stack
@@ -794,6 +814,44 @@ check_service_health() {
         log_info "  ✓ $name is listening on port $port (health endpoint not available)"
         return 0
     fi
+
+    return 1
+}
+
+wait_for_containers_health() {
+    local max_wait=$1
+    shift
+    local -a containers=("$@")
+
+    if [ ${#containers[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    local waited=0
+    local interval=5
+
+    while [ $waited -lt $max_wait ]; do
+        local all_healthy=true
+        local -a pending=()
+
+        for container in "${containers[@]}"; do
+            local status
+            status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container" 2>/dev/null || echo "creating")
+            if [ "$status" = "healthy" ] || [ "$status" = "running" ]; then
+                continue
+            fi
+            all_healthy=false
+            pending+=("$container:$status")
+        done
+
+        if [ "$all_healthy" = true ]; then
+            return 0
+        fi
+
+        log_info "  ↻ Waiting for containers: ${pending[*]}"
+        sleep $interval
+        waited=$((waited + interval))
+    done
 
     return 1
 }
@@ -1233,14 +1291,17 @@ main() {
     local RED='\033[0;31m'
 
     echo -e "${CYAN}🐳 Docker Containers:${NC}"
-    echo -e "  💹 TP Capital API:    http://localhost:4005"
-    echo -e "  📚 Workspace API:     http://localhost:3200"
-    echo -e "  💾 TimescaleDB:       postgresql://timescale:pass_timescale@localhost:5433/${TIMESCALEDB_DB:-tradingsystem}"
+    echo -e "  💹 TP Capital Stack:  http://localhost:4008"
+    echo -e "     └─ TimescaleDB:    postgresql://${TP_CAPITAL_DB_USER:-tp_capital}:***@localhost:5440/tp_capital_db (PgBouncer 6435)"
+    echo -e "  📚 Workspace Stack:   http://localhost:3210"
+    echo -e "     └─ PostgreSQL:     postgresql://postgres:***@localhost:5450/workspace"
+    echo -e "  📨 Telegram Data:     Timescale 5434 · Redis 6379 · RabbitMQ 5672"
+    echo -e "  💾 Shared Timescale:  postgresql://${TIMESCALEDB_USER:-timescale}:***@localhost:5433/${TIMESCALEDB_DB:-tradingsystem}"
     echo -e "     ├─ pgAdmin:        http://localhost:${PGADMIN_HOST_PORT:-5050}"
     echo -e "     └─ pgWeb:          http://localhost:${PGWEB_PORT:-8081}"
     echo ""
     echo -e "${CYAN}🖥️  Local Dev Services:${NC}"
-    echo -e "  📨 Telegram Gateway:      http://localhost:4006  (health: /health)"
+    echo -e "  📨 Telegram Gateway:      http://localhost:4007  (health: /health)"
     echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
     echo -e "  📚 DocsAPI:               http://localhost:3401  (docs-api container)"
     echo -e "  📖 Documentation Hub:     http://localhost:3400  (docs-hub container)"

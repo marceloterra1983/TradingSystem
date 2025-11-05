@@ -163,7 +163,7 @@ class TelegramClientService {
    * @param {number} offsetId - ID da última mensagem (para paginação)
    * @returns {Array} Array de mensagens
    */
-  async getMessages(channelId, { limit = 100, offsetId = 0 } = {}) {
+  async getMessages(channelId, { limit = 1000, offsetId = 0 } = {}) {
     if (!this.isConnected) {
       await this.connect();
     }

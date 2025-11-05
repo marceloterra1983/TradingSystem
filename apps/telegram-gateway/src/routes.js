@@ -85,8 +85,8 @@ router.get('/photo/:channelId/:messageId', async (req, res) => {
  */
 router.post('/sync-messages', async (req, res) => {
   try {
-    // Aceitar limite de mensagens no body (padrão: 100)
-    const telegramLimit = Number(req.body?.limit) || 100;
+    // Aceitar limite de mensagens no body (padrão: 1000)
+    const telegramLimit = Number(req.body?.limit) || 1000;
     logger.info({ telegramLimit }, '[SyncMessages] Iniciando verificação de sincronização...');
     
     // Obter o cliente Telegram do contexto global (será injetado pelo index.js)
@@ -205,7 +205,7 @@ router.post('/sync-messages', async (req, res) => {
 /**
  * Sincroniza um canal específico
  */
-async function syncChannel(channelId, telegramClient, { logger, telegramLimit = 100 } = {}) {
+async function syncChannel(channelId, telegramClient, { logger, telegramLimit = 1000 } = {}) {
   try {
     // 1. Buscar últimas N mensagens do banco (mesmo número que vamos buscar do Telegram)
     // Isso garante que a comparação seja precisa
@@ -363,18 +363,32 @@ async function syncChannel(channelId, telegramClient, { logger, telegramLimit = 
         // Detectar e buscar previews de links (Twitter, YouTube, etc.)
         let linkPreview = null;
         const messageText = msg.message || msg.text || '';
+        
+        // DEBUG: Log para verificar extração
+        if (messageText && (messageText.includes('twitter.com') || messageText.includes('x.com'))) {
+          logger.info(
+            { channelId, messageId: msg.id, hasTwitterLink: true },
+            '[SyncChannel] DEBUG: Message has Twitter link, attempting extraction'
+          );
+        }
+        
         if (messageText && messageText.length > 0) {
           try {
             linkPreview = await extractLinkPreviews(messageText);
             if (linkPreview) {
               logger.info(
                 { channelId, messageId: msg.id, previewType: linkPreview.type },
-                '[SyncChannel] Link preview extracted'
+                '[SyncChannel] Link preview extracted successfully'
+              );
+            } else if (messageText.includes('twitter.com') || messageText.includes('x.com')) {
+              logger.warn(
+                { channelId, messageId: msg.id, messageText: messageText.substring(0, 100) },
+                '[SyncChannel] DEBUG: extractLinkPreviews returned null for Twitter link'
               );
             }
           } catch (linkError) {
             logger.warn(
-              { err: linkError, channelId, messageId: msg.id },
+              { err: linkError, channelId, messageId: msg.id, messageText: messageText.substring(0, 100) },
               '[SyncChannel] Failed to extract link preview'
             );
           }

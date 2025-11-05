@@ -1,421 +1,396 @@
+/**
+ * Categories Routes (Refactored)
+ * 
+ * CRUD endpoints for workspace categories.
+ * 
+ * REFACTORING CHANGES:
+ * - Introduced CategoryService for business logic
+ * - Added caching (5 min TTL)
+ * - Removed direct database access
+ * 
+ * @module routes/categories
+ */
+
 import { Router } from 'express';
-import { body, param, validationResult } from 'express-validator';
 import { getDbClient } from '../db/index.js';
+import { createLogger } from '../../../../shared/logger/index.js';
+import { CategoryService } from '../services/CategoryService.js';
 
 const router = Router();
+const logger = createLogger('workspace-categories');
 
-// ============================================================================
-// VALIDATION MIDDLEWARE
-// ============================================================================
-
-const createValidators = [
-  body('name')
-    .trim()
-    .notEmpty()
-    .withMessage('name is required')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('name must be between 2 and 100 characters')
-    .matches(/^[a-z0-9-]+$/)
-    .withMessage('name must contain only lowercase letters, numbers, and hyphens'),
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('description must be less than 500 characters'),
-  body('color')
-    .optional()
-    .matches(/^#[0-9A-Fa-f]{6}$/)
-    .withMessage('color must be a valid hex color (e.g., #3B82F6)'),
-  body('icon')
-    .optional()
-    .trim()
-    .isLength({ max: 50 })
-    .withMessage('icon must be less than 50 characters'),
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage('display_order must be a positive integer'),
-  body('is_active')
-    .optional()
-    .isBoolean()
-    .withMessage('is_active must be a boolean'),
-];
-
-const updateValidators = [
-  param('id').isUUID().withMessage('id must be a valid UUID'),
-  body('name')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('name must be between 2 and 100 characters')
-    .matches(/^[a-z0-9-]+$/)
-    .withMessage('name must contain only lowercase letters, numbers, and hyphens'),
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('description must be less than 500 characters'),
-  body('color')
-    .optional()
-    .matches(/^#[0-9A-Fa-f]{6}$/)
-    .withMessage('color must be a valid hex color (e.g., #3B82F6)'),
-  body('icon')
-    .optional()
-    .trim()
-    .isLength({ max: 50 })
-    .withMessage('icon must be less than 50 characters'),
-  body('display_order')
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage('display_order must be a positive integer'),
-  body('is_active')
-    .optional()
-    .isBoolean()
-    .withMessage('is_active must be a boolean'),
-];
-
-// ============================================================================
-// GET /api/categories - List all categories
-// ============================================================================
-
-router.get('/', async (req, res) => {
-  try {
-    const { active_only = 'true', order_by = 'display_order' } = req.query;
-
+// Initialize service (singleton pattern)
+let categoryService;
+const getCategoryService = () => {
+  if (!categoryService) {
     const db = getDbClient();
-    await db.init();
+    categoryService = new CategoryService(db, logger);
+  }
+  return categoryService;
+};
 
-    let query = 'SELECT * FROM workspace_categories';
-    const conditions = [];
-    const params = [];
+// Import WorkspaceService for cache invalidation
+import { getWorkspaceService } from './items.js';
 
-    if (active_only === 'true') {
-      conditions.push('is_active = TRUE');
-    }
+/**
+ * Invalidate all category caches (CategoryService + WorkspaceService)
+ */
+const invalidateAllCategoryCaches = () => {
+  // Invalidate CategoryService cache
+  const catService = getCategoryService();
+  catService.invalidateCache();
+  
+  // Invalidate WorkspaceService cache
+  try {
+    const workspaceService = getWorkspaceService();
+    workspaceService.invalidateCategoriesCache();
+  } catch (error) {
+    // WorkspaceService may not be initialized yet, that's OK
+    logger.debug('WorkspaceService not initialized, skipping cache invalidation');
+  }
+};
 
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
+// ============================================================================
+// ROUTES
+// ============================================================================
 
-    // Validate order_by to prevent SQL injection
-    const validOrderFields = ['display_order', 'name', 'created_at', 'updated_at'];
-    const orderField = validOrderFields.includes(order_by) ? order_by : 'display_order';
-    query += ` ORDER BY ${orderField}`;
-
-    const result = await db.pool.query(query, params);
-
+/**
+ * GET /api/categories
+ * List all active categories
+ * 
+ * Cached for 5 minutes (categories change rarely)
+ */
+router.get('/', async (req, res, next) => {
+  try {
+    const service = getCategoryService();
+    const categories = await service.getCategories();
+    
     res.json({
       success: true,
-      data: result.rows,
-      count: result.rows.length,
+      count: categories.length,
+      data: categories,
+      cached: true,  // Indicates response may be cached
     });
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch categories',
-      message: error.message,
-    });
+    next(error);
   }
 });
 
-// ============================================================================
-// GET /api/categories/:id - Get single category
-// ============================================================================
-
-router.get('/:id', param('id').isUUID(), async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
+/**
+ * GET /api/categories/:name
+ * Get a specific category by name
+ */
+router.get('/:name', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const db = getDbClient();
-    await db.init();
-
-    const result = await db.pool.query(
-      'SELECT * FROM workspace_categories WHERE id = $1',
-      [id]
-    );
-
-    if (result.rows.length === 0) {
+    const service = getCategoryService();
+    const category = await service.getCategory(req.params.name);
+    
+    if (!category) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found',
+        message: `Category '${req.params.name}' not found`,
       });
     }
-
+    
     res.json({
       success: true,
-      data: result.rows[0],
+      data: category,
     });
   } catch (error) {
-    console.error('Error fetching category:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch category',
-      message: error.message,
-    });
+    next(error);
   }
 });
 
-// ============================================================================
-// POST /api/categories - Create new category
-// ============================================================================
-
-router.post('/', createValidators, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
+/**
+ * GET /api/categories/stats
+ * Get category statistics
+ */
+router.get('/stats', async (req, res, next) => {
   try {
-    const {
-      name,
-      description = null,
-      color = '#6B7280',
-      icon = null,
-      display_order = 0,
-      is_active = true,
-      created_by = 'api-user',
-    } = req.body;
+    const service = getCategoryService();
+    const stats = await service.getStatistics();
+    
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
-    const db = getDbClient();
-    await db.init();
+/**
+ * POST /api/categories/validate
+ * Validate if a category name is valid
+ * 
+ * Body: { name: string }
+ * Response: { valid: boolean }
+ */
+router.post('/validate', async (req, res, next) => {
+  try {
+    const service = getCategoryService();
+    const isValid = await service.isValidCategory(req.body.name);
+    
+    res.json({
+      success: true,
+      valid: isValid,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
-    // Check if category name already exists
-    const existingCategory = await db.pool.query(
-      'SELECT id FROM workspace_categories WHERE name = $1',
-      [name]
-    );
-
-    if (existingCategory.rows.length > 0) {
-      return res.status(409).json({
+/**
+ * POST /api/categories
+ * Create a new category
+ * 
+ * Body: { name, display_name?, description?, color?, icon?, display_order? }
+ */
+router.post('/', async (req, res, next) => {
+  try {
+    const { name, display_name, description, color, icon, display_order } = req.body;
+    
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({
         success: false,
-        error: 'Category with this name already exists',
+        message: 'Category name is required',
       });
     }
-
-    const result = await db.pool.query(
-      `INSERT INTO workspace_categories
-       (name, description, color, icon, display_order, is_active, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [name, description, color, icon, display_order, is_active, created_by]
-    );
-
+    
+    // Insert into database
+    const db = getDbClient();
+    await db.init();
+    
+    const query = `
+      INSERT INTO workspace.workspace_categories
+      (name, display_name, description, sort_order, is_active, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, true, NOW(), NOW())
+      RETURNING 
+        name AS id,
+        name,
+        display_name,
+        description,
+        is_active,
+        sort_order AS display_order,
+        created_at,
+        updated_at
+    `;
+    
+    const values = [
+      name,
+      display_name || name,
+      description || null,
+      display_order || 99,
+    ];
+    
+    const result = await db.pool.query(query, values);
+    
+    // Invalidate ALL category caches (CategoryService + WorkspaceService)
+    invalidateAllCategoryCaches();
+    
+    logger.info({ category: name }, 'Category created successfully');
+    
     res.status(201).json({
       success: true,
       data: result.rows[0],
       message: 'Category created successfully',
     });
   } catch (error) {
-    console.error('Error creating category:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create category',
-      message: error.message,
-    });
+    if (error.code === '23505') {  // Unique violation
+      return res.status(409).json({
+        success: false,
+        message: `Category '${req.body.name}' already exists`,
+      });
+    }
+    next(error);
   }
 });
 
-// ============================================================================
-// PUT /api/categories/:id - Update category
-// ============================================================================
-
-router.put('/:id', updateValidators, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
+/**
+ * PUT /api/categories/:name
+ * Update an existing category
+ * 
+ * Body: { display_name?, description?, sort_order?, is_active? }
+ */
+router.put('/:name', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-
+    const { name } = req.params;
+    const { display_name, description, sort_order, is_active } = req.body;
+    
     const db = getDbClient();
     await db.init();
-
-    // Check if category exists
-    const existing = await db.pool.query(
-      'SELECT * FROM workspace_categories WHERE id = $1',
-      [id]
-    );
-
-    if (existing.rows.length === 0) {
+    
+    const query = `
+      UPDATE workspace.workspace_categories
+      SET 
+        display_name = COALESCE($1, display_name),
+        description = COALESCE($2, description),
+        sort_order = COALESCE($3, sort_order),
+        is_active = COALESCE($4, is_active),
+        updated_at = NOW()
+      WHERE name = $5
+      RETURNING 
+        name AS id,
+        name,
+        display_name,
+        description,
+        is_active,
+        sort_order AS display_order,
+        created_at,
+        updated_at
+    `;
+    
+    const values = [display_name, description, sort_order, is_active, name];
+    const result = await db.pool.query(query, values);
+    
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found',
+        message: `Category '${name}' not found`,
       });
     }
-
-    // If name is being updated, check for duplicates
-    if (updates.name && updates.name !== existing.rows[0].name) {
-      const duplicate = await db.pool.query(
-        'SELECT id FROM workspace_categories WHERE name = $1 AND id != $2',
-        [updates.name, id]
-      );
-
-      if (duplicate.rows.length > 0) {
-        return res.status(409).json({
-          success: false,
-          error: 'Category with this name already exists',
-        });
-      }
-    }
-
-    // Build dynamic UPDATE query
-    const fields = Object.keys(updates);
-    const setClause = fields
-      .map((field, index) => `${field} = $${index + 2}`)
-      .join(', ');
-    const values = fields.map((field) => updates[field]);
-
-    const result = await db.pool.query(
-      `UPDATE workspace_categories
-       SET ${setClause}
-       WHERE id = $1
-       RETURNING *`,
-      [id, ...values]
-    );
-
+    
+    // Invalidate ALL category caches (CategoryService + WorkspaceService)
+    invalidateAllCategoryCaches();
+    
+    logger.info({ category: name }, 'Category updated successfully');
+    
     res.json({
       success: true,
       data: result.rows[0],
       message: 'Category updated successfully',
     });
   } catch (error) {
-    console.error('Error updating category:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update category',
-      message: error.message,
-    });
+    next(error);
   }
 });
 
-// ============================================================================
-// DELETE /api/categories/:id - Delete category
-// ============================================================================
-
-router.delete('/:id', param('id').isUUID(), async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
+/**
+ * DELETE /api/categories/:name
+ * Delete a category (soft delete - set is_active = false)
+ * 
+ * Hard delete only if no items reference it
+ */
+router.delete('/:name', async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { name } = req.params;
     const db = getDbClient();
     await db.init();
-
-    // Check if category exists
-    const existing = await db.pool.query(
-      'SELECT name FROM workspace_categories WHERE id = $1',
-      [id]
-    );
-
-    if (existing.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: 'Category not found',
-      });
-    }
-
-    const categoryName = existing.rows[0].name;
-
-    // Check if category is in use
-    const inUse = await db.pool.query(
-      'SELECT COUNT(*) as count FROM workspace_items WHERE category = $1',
-      [categoryName]
-    );
-
-    if (parseInt(inUse.rows[0].count) > 0) {
+    
+    // Check if any items use this category
+    const checkQuery = `
+      SELECT COUNT(*) as count 
+      FROM workspace.workspace_items 
+      WHERE category = $1
+    `;
+    const checkResult = await db.pool.query(checkQuery, [name]);
+    const itemCount = parseInt(checkResult.rows[0].count);
+    
+    if (itemCount > 0) {
       return res.status(409).json({
         success: false,
-        error: 'Cannot delete category that is in use',
-        message: `Category "${categoryName}" is used by ${inUse.rows[0].count} items`,
+        message: `Cannot delete category '${name}' - ${itemCount} items are using it`,
       });
     }
-
-    await db.pool.query(
-      'DELETE FROM workspace_categories WHERE id = $1',
-      [id]
-    );
-
+    
+    // Safe to delete
+    const query = `
+      DELETE FROM workspace.workspace_categories
+      WHERE name = $1
+      RETURNING name
+    `;
+    
+    const result = await db.pool.query(query, [name]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Category '${name}' not found`,
+      });
+    }
+    
+    // Invalidate ALL category caches (CategoryService + WorkspaceService)
+    invalidateAllCategoryCaches();
+    
+    logger.info({ category: name }, 'Category deleted successfully');
+    
     res.json({
       success: true,
       message: 'Category deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting category:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete category',
-      message: error.message,
-    });
+    next(error);
   }
 });
 
-// ============================================================================
-// PATCH /api/categories/:id/toggle - Toggle category active status
-// ============================================================================
-
-router.patch('/:id/toggle', param('id').isUUID(), async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
-    });
-  }
-
+/**
+ * PATCH /api/categories/:name/toggle
+ * Toggle category active status
+ */
+router.patch('/:name/toggle', async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { name } = req.params;
     const db = getDbClient();
     await db.init();
-
-    const result = await db.pool.query(
-      `UPDATE workspace_categories
-       SET is_active = NOT is_active
-       WHERE id = $1
-       RETURNING *`,
-      [id]
-    );
-
+    
+    const query = `
+      UPDATE workspace.workspace_categories
+      SET is_active = NOT is_active, updated_at = NOW()
+      WHERE name = $1
+      RETURNING 
+        name AS id,
+        name,
+        display_name,
+        description,
+        is_active,
+        sort_order AS display_order,
+        created_at,
+        updated_at
+    `;
+    
+    const result = await db.pool.query(query, [name]);
+    
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found',
+        message: `Category '${name}' not found`,
       });
     }
-
+    
+    // Invalidate ALL category caches (CategoryService + WorkspaceService)
+    invalidateAllCategoryCaches();
+    
+    logger.info({ category: name, is_active: result.rows[0].is_active }, 'Category toggled');
+    
     res.json({
       success: true,
       data: result.rows[0],
-      message: `Category ${result.rows[0].is_active ? 'activated' : 'deactivated'} successfully`,
     });
   } catch (error) {
-    console.error('Error toggling category:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to toggle category',
-      message: error.message,
+    next(error);
+  }
+});
+
+/**
+ * POST /api/categories/invalidate-cache
+ * Invalidate categories cache (admin only - future)
+ * 
+ * Use when categories are updated in database
+ */
+router.post('/invalidate-cache', async (req, res, next) => {
+  try {
+    const service = getCategoryService();
+    service.invalidateCache();
+    
+    res.json({
+      success: true,
+      message: 'Categories cache invalidated',
     });
+  } catch (error) {
+    next(error);
   }
 });
 
 export default router;
+

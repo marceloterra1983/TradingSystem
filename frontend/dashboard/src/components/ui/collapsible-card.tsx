@@ -187,23 +187,26 @@ export const CollapsibleCardHeader = Object.assign(
 export interface CollapsibleCardTitleProps
   extends React.HTMLAttributes<HTMLHeadingElement> {
   children: React.ReactNode;
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 export const CollapsibleCardTitle = React.forwardRef<
   HTMLHeadingElement,
   CollapsibleCardTitleProps
->(({ className, children, ...props }, ref) => {
-  return (
-    <h3
-      ref={ref}
-      className={cn(
+>(({ className, children, level = 3, ...props }, ref) => {
+  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+
+  return React.createElement(
+    HeadingTag,
+    {
+      ref,
+      className: cn(
         'text-lg font-semibold text-[color:var(--ts-text-primary)]',
         className,
-      )}
-      {...props}
-    >
-      {children}
-    </h3>
+      ),
+      ...props,
+    },
+    children,
   );
 });
 

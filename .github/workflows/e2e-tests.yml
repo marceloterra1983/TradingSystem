@@ -1,0 +1,171 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/dashboard/**'
+      - 'backend/api/telegram-gateway/**'
+      - 'apps/telegram-gateway/**'
+      - '.github/workflows/e2e-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/dashboard/**'
+      - 'backend/api/telegram-gateway/**'
+      - 'apps/telegram-gateway/**'
+
+jobs:
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/dashboard/package-lock.json
+
+      - name: Install dependencies (Dashboard)
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend/dashboard
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Setup Docker services
+        run: |
+          docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master telegram-rabbitmq
+          docker compose -f tools/compose/docker-compose.telegram.yml ps
+
+      - name: Wait for database to be ready
+        run: |
+          timeout 60 bash -c 'until docker exec telegram-timescale pg_isready -U telegram; do sleep 2; done'
+
+      - name: Install backend dependencies (Gateway API)
+        working-directory: backend/api/telegram-gateway
+        run: npm ci
+
+      - name: Start Gateway API
+        working-directory: backend/api/telegram-gateway
+        run: |
+          npm start &
+          echo $! > gateway-api.pid
+          sleep 5
+
+      - name: Install MTProto Gateway dependencies
+        working-directory: apps/telegram-gateway
+        run: npm ci
+
+      - name: Start MTProto Gateway
+        working-directory: apps/telegram-gateway
+        run: |
+          # Check if session exists
+          if [ -d ".session" ]; then
+            npm start &
+            echo $! > mtproto.pid
+            sleep 10
+          else
+            echo "No Telegram session found, skipping MTProto Gateway"
+          fi
+
+      - name: Wait for services to be ready
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:4010/health; do sleep 2; done' || true
+          curl -f http://localhost:3103 || echo "Dashboard not ready yet"
+
+      - name: Run E2E tests
+        working-directory: frontend/dashboard
+        run: npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+        env:
+          CI: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results-${{ matrix.browser }}-${{ matrix.shard }}
+          path: frontend/dashboard/playwright-report
+          retention-days: 30
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots-${{ matrix.browser }}-${{ matrix.shard }}
+          path: frontend/dashboard/test-results
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Stop services
+          [ -f backend/api/telegram-gateway/gateway-api.pid ] && kill $(cat backend/api/telegram-gateway/gateway-api.pid) || true
+          [ -f apps/telegram-gateway/mtproto.pid ] && kill $(cat apps/telegram-gateway/mtproto.pid) || true
+          
+          # Stop Docker
+          docker compose -f tools/compose/docker-compose.telegram.yml down
+
+  merge-reports:
+    name: Merge Test Reports
+    if: always()
+    needs: e2e-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports
+          pattern: playwright-results-*
+
+      - name: Merge reports
+        working-directory: frontend/dashboard
+        run: |
+          npx playwright merge-reports --reporter html ../../all-reports/*
+
+      - name: Upload merged report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-merged
+          path: frontend/dashboard/playwright-report
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'frontend/dashboard/playwright-report/index.html';
+            
+            if (fs.existsSync(reportPath)) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '✅ E2E tests completed! [View Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+              });
+            }
+

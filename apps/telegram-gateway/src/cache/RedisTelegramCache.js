@@ -172,7 +172,7 @@ export class RedisTelegramCache {
    * @param {number} limit - Maximum messages to return
    * @returns {Promise<Array>} Array of message objects
    */
-  async getUnprocessedMessages(channelId, limit = 100) {
+  async getUnprocessedMessages(channelId, limit = 1000) {
     try {
       const channelKey = `${this.CHANNEL_RECENT_PREFIX}:${channelId}:recent`;
       

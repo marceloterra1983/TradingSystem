@@ -28,6 +28,7 @@ import {
   Clipboard,
   Copy,
   Download,
+  Eye,
   FileText,
   FileWarning,
   Filter,
@@ -336,15 +337,16 @@ export default function CommandsCatalogView({
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
                         placeholder="Buscar por comando, capacidade, exemplo ou tag"
+                        data-testid="commands-search-input"
                         className="pl-9"
                       />
                     </div>
                   </div>
-                  <Select
-                    value={categoryFilter}
-                    onValueChange={setCategoryFilter}
-                  >
-                    <SelectTrigger className="w-full">
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger
+                      className="w-full"
+                      data-testid="commands-category-filter"
+                    >
                       <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
@@ -358,7 +360,10 @@ export default function CommandsCatalogView({
                     </SelectContent>
                   </Select>
                   <Select value={tagFilter} onValueChange={setTagFilter}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger
+                      className="w-full"
+                      data-testid="commands-tag-filter"
+                    >
                       <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
                       <SelectValue placeholder="Tag" />
                     </SelectTrigger>
@@ -408,12 +413,19 @@ export default function CommandsCatalogView({
                     busca.
                   </div>
                 ) : (
-                  <div className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 md:grid-cols-2 2xl:grid-cols-3">
-                    {filteredCommands.map((command) => (
-                      <div
-                        key={command.command}
-                        className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
-                      >
+                <div
+                  className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 md:grid-cols-2 2xl:grid-cols-3"
+                  data-testid="commands-card-grid"
+                >
+                  {filteredCommands.map((command) => (
+                    <div
+                      key={command.command}
+                      className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
+                      data-testid="command-card"
+                      data-command-id={command.command}
+                      data-command-category={command.category ?? ''}
+                      data-command-tags={(command.tags ?? []).join(',')}
+                    >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
@@ -429,13 +441,13 @@ export default function CommandsCatalogView({
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
                           </div>
-                          <Badge
-                            variant="outline"
-                            className={`text-xs font-medium ${filterBadgeClass}`}
-                          >
-                            {command.category}
-                          </Badge>
                         </div>
+                        {command.category && (
+                          <div className="text-sm text-[color:var(--ts-text-secondary)]">
+                            <span className="font-semibold">Categoria:</span>{' '}
+                            {command.category}
+                          </div>
+                        )}
                         {command.capacidades && (
                           <div className="text-sm text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">Capacidades:</span>{' '}
@@ -550,6 +562,7 @@ export default function CommandsCatalogView({
             <CollapsibleCardContent>
               {filteredCommands.length === 0 ? (
                 <div
+                  data-testid="commands-table-empty-state"
                   className={`flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] p-10 text-center text-sm ${mutedTextClass}`}
                 >
                   <FileWarning className="h-6 w-6" />
@@ -566,15 +579,19 @@ export default function CommandsCatalogView({
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
                             placeholder="Filtrar comandos por texto, categoria ou tag"
+                            data-testid="commands-table-search-input"
                             className="pl-9"
                           />
                         </div>
                       </div>
-                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
-                          <SelectValue placeholder="Categoria" />
-                        </SelectTrigger>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger
+                      className="w-full"
+                      data-testid="commands-table-category-filter"
+                    >
+                      <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
+                      <SelectValue placeholder="Categoria" />
+                    </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todas as categorias</SelectItem>
                           {categories.map((category) => (
@@ -584,11 +601,14 @@ export default function CommandsCatalogView({
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select value={tagFilter} onValueChange={setTagFilter}>
-                        <SelectTrigger className="w-full">
-                          <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
-                          <SelectValue placeholder="Tag" />
-                        </SelectTrigger>
+                  <Select value={tagFilter} onValueChange={setTagFilter}>
+                    <SelectTrigger
+                      className="w-full"
+                      data-testid="commands-table-tag-filter"
+                    >
+                      <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
+                      <SelectValue placeholder="Tag" />
+                    </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todas as tags</SelectItem>
                           {tagOptions.map((tag) => (
@@ -626,7 +646,10 @@ export default function CommandsCatalogView({
                     </div>
                   </div>
                   <div className="max-h-[420px] overflow-y-auto">
-                    <table className="min-w-full divide-y divide-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-sm">
+                    <table
+                      className="min-w-full divide-y divide-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-sm"
+                      data-testid="commands-table"
+                    >
                       <thead className="bg-[color:var(--ts-surface-1)] text-xs font-semibold uppercase tracking-wider text-[color:var(--ts-text-muted)]">
                         <tr>
                         <th scope="col" className="px-4 py-3 text-left">
@@ -713,39 +736,45 @@ export default function CommandsCatalogView({
                     </thead>
                     <tbody className="divide-y divide-[color:var(--ts-surface-border)] text-[color:var(--ts-text-secondary)]">
                       {filteredCommands.map((command) => (
-                        <tr key={`table-${command.command}`} className="hover:bg-[color:var(--ts-surface-hover)]">
+                        <tr
+                          key={`table-${command.command}`}
+                          className="hover:bg-[color:var(--ts-surface-hover)]"
+                          data-command-row
+                          data-command-id={command.command}
+                          data-command-category={command.category ?? ''}
+                          data-command-tags={(command.tags ?? []).join(',')}
+                        >
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col gap-1">
                               <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
                                 {command.command}
                               </code>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                onClick={() => handleOpenCommand(command)}
-                                aria-label={`Visualizar ${command.command}`}
-                              >
-                                <FileText className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                onClick={() => handleCopyCommand(command)}
-                                aria-label={`Copiar ${command.command}`}
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                  onClick={() => handleCopyCommand(command)}
+                                  aria-label={`Copiar ${command.command}`}
+                                >
+                                  <Copy className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                  onClick={() => handleOpenCommand(command)}
+                                  aria-label={`Visualizar ${command.command}`}
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </div>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            <Badge
-                              variant="outline"
-                              className={`text-xs font-medium ${filterBadgeClass}`}
-                            >
-                              {command.category}
-                            </Badge>
+                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                              {command.category ?? '—'}
+                            </span>
                           </td>
                           <td className="px-4 py-3 align-top">
                             <span className="block text-xs text-[color:var(--ts-text-secondary)]">
