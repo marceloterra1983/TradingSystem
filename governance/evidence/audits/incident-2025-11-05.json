@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-11-05T18:13:00Z",
+  "timestamp": "2025-11-05T18:13:09Z",
   "severity": "CRITICAL",
   "type": "secret_exposure",
   "secrets_exposed": [
@@ -17,7 +17,7 @@
     }
   ],
   "detection_method": "TruffleHog automated scan",
-  "remediation_completed_at": "2025-11-05T18:13:00Z",
+  "remediation_completed_at": "2025-11-05T18:13:09Z",
   "policy": "POL-0002",
   "sop_followed": "SOP-SEC-001",
   "root_cause": "Arquivos de documentação commitados com tokens reais durante desenvolvimento",
