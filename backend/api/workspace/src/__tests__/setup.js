@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 /**
  * Jest Test Setup for Workspace API
  * Global configuration and mocks for all tests

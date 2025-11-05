@@ -43,14 +43,17 @@ export class CategoryService {
     
     try {
       const categories = await this.db.getCategories();
-      
-      // Update cache
-      this.categoriesCache = categories;
+      const normalized = categories.map((category, index) =>
+        this.normalizeCategoryRecord(category, index),
+      );
+
+      // Update cache with normalized data
+      this.categoriesCache = normalized;
       this.cacheExpiry = Date.now() + this.CACHE_TTL;
       
-      this.logger.info({ count: categories.length }, 'Categories fetched and cached');
+      this.logger.info({ count: normalized.length }, 'Categories fetched and cached');
       
-      return categories;
+      return normalized;
     } catch (error) {
       this.logger.error({ err: error }, 'Failed to fetch categories');
       throw error;
@@ -90,6 +93,48 @@ export class CategoryService {
   }
 
   /**
+   * Normalize category records coming from different database strategies.
+   * Ensures the HTTP layer always exposes the same contract (is_active, display_order, etc).
+   * 
+   * @param {Object} record - Raw category record
+   * @param {number} index - Position in the array (used as fallback for ordering)
+   * @returns {Object} Normalized category
+   */
+  normalizeCategoryRecord(record, index = 0) {
+    const id = record.id ?? record.name ?? record.display_name ?? `category-${index}`;
+    const name = record.name ?? record.id ?? record.display_name ?? id;
+    const fallbackOrder =
+      typeof record.display_order === 'number'
+        ? record.display_order
+        : typeof record.sort_order === 'number'
+          ? record.sort_order
+          : typeof record.order === 'number'
+            ? record.order
+            : index + 1;
+    const isActive =
+      typeof record.is_active === 'boolean'
+        ? record.is_active
+        : typeof record.active === 'boolean'
+          ? record.active
+          : true;
+
+    return {
+      ...record,
+      id,
+      name,
+      display_name: record.display_name ?? record.displayName ?? name,
+      description: record.description ?? record.display_name ?? null,
+      color: record.color ?? '#6B7280',
+      icon: record.icon ?? null,
+      display_order: fallbackOrder,
+      is_active: isActive,
+      created_at: record.created_at ?? record.createdAt ?? null,
+      updated_at: record.updated_at ?? record.updatedAt ?? null,
+      created_by: record.created_by ?? record.createdBy ?? null,
+    };
+  }
+
+  /**
    * Invalidate categories cache
    * Call this when categories are updated
    */
@@ -119,4 +164,3 @@ export class CategoryService {
     }
   }
 }
-

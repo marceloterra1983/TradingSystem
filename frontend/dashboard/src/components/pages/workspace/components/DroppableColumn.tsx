@@ -54,10 +54,10 @@ export function DroppableColumn({ status, items }: DroppableColumnProps) {
       >
         <SortableContext
           id={status}
-          items={items.map((item) => item.id)}
+          items={items.filter(item => item.id).map((item) => item.id)}
           strategy={verticalListSortingStrategy}
         >
-          {items.map((item) => (
+          {items.filter(item => item.id).map((item) => (
             <DraggableItemCard key={item.id} item={item} />
           ))}
         </SortableContext>

@@ -1,44 +1,8 @@
 import type { Item } from '../components/pages/workspace/types/workspace.types';
-import { getApiUrl } from '../config/api';
+import { workspaceItemsEndpoint } from './workspaceApiBase';
 
-const API_BASE_URL = getApiUrl('library');
-
-// Resolve workspace API endpoint ensuring it targets /api/items (or proxy-prefixed variant)
-const itemsEndpoint = (suffix = '') => {
-  const withSuffix = (url: string) => `${url}${suffix}`;
-
-  // FORCE PORT 3210 for Workspace (PostgreSQL Autonomous Stack)
-  // This overrides any cached configuration
-  const FORCED_BASE = 'http://localhost:3210/api';
-  
-  console.warn('[LibraryService] FORCING base URL to:', FORCED_BASE);
-  console.warn('[LibraryService] Original API_BASE_URL was:', API_BASE_URL);
-  
-  return withSuffix(`${FORCED_BASE}/items`);
-  
-  /* OLD LOGIC (commented out - cache issue)
-  if (/(?:\/api)?\/items$/i.test(trimmedBase)) {
-    return withSuffix(trimmedBase);
-  }
-
-  if (/\/ideas$/i.test(trimmedBase)) {
-    return withSuffix(trimmedBase.replace(/\/ideas$/i, '/items'));
-  }
-
-  if (
-    /\/api\/workspace$/i.test(trimmedBase) ||
-    /\/workspace$/i.test(trimmedBase)
-  ) {
-    return withSuffix(`${trimmedBase}/items`);
-  }
-
-  if (/\/api$/i.test(trimmedBase)) {
-    return withSuffix(`${trimmedBase}/items`);
-  }
-
-  return withSuffix(`${trimmedBase}/api/items`);
-  */
-};
+// Resolve workspace API endpoint ensuring it targets /items
+const itemsEndpoint = (suffix = '') => workspaceItemsEndpoint(suffix);
 
 export interface ApiResponse<T> {
   success: boolean;

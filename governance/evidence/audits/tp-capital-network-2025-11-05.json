@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-11-05T20:44:57.251Z",
+  "stack": "tp-capital",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "Senha PgBouncer (TELEGRAM_DB_PASSWORD)",
+      "status": "pass",
+      "detail": "Valor presente e válido."
+    },
+    {
+      "name": "URL Gateway (TELEGRAM_GATEWAY_URL)",
+      "status": "pass",
+      "detail": "Valor presente e válido."
+    },
+    {
+      "name": "Proxy TP-Capital (VITE_TP_CAPITAL_PROXY_TARGET)",
+      "status": "pass",
+      "detail": "Valor presente e válido."
+    },
+    {
+      "name": "Remoção de VITE_TP_CAPITAL_API_URL",
+      "status": "pass",
+      "detail": "Variável ausente ou comentada (proxy é responsável pelo roteamento)."
+    },
+    {
+      "name": "Gateway com duas redes",
+      "status": "pass",
+      "detail": "Redes detectadas: telegram_backend, tradingsystem_backend."
+    },
+    {
+      "name": "Dashboard isolado em redes corretas",
+      "status": "pass",
+      "detail": "Redes detectadas: tradingsystem_frontend, tradingsystem_backend."
+    },
+    {
+      "name": "PgBouncer isolado na rede correta",
+      "status": "pass",
+      "detail": "Redes detectadas: telegram_backend."
+    },
+    {
+      "name": "Rede telegram_backend",
+      "status": "pass",
+      "detail": "Rede encontrada no host Docker."
+    },
+    {
+      "name": "Rede tp_capital_backend",
+      "status": "pass",
+      "detail": "Rede encontrada no host Docker."
+    },
+    {
+      "name": "Rede tradingsystem_backend",
+      "status": "pass",
+      "detail": "Rede encontrada no host Docker."
+    },
+    {
+      "name": "Rede tradingsystem_frontend",
+      "status": "pass",
+      "detail": "Rede encontrada no host Docker."
+    }
+  ]
+}

@@ -514,10 +514,10 @@ You can access the system in two ways:
 
 2. **Direct Port Access (Legacy)**
     - Frontend: `http://localhost:3103`
-    - Workspace: `http://localhost:3102`
-    - TP Capital API: `http://localhost:3200`
+    - Workspace API: `http://localhost:3200`
+    - TP Capital API: `http://localhost:4005`
     - DocsAPI: `http://localhost:3400`
-    - Laucher: `http://localhost:3500`
+    - Launcher: `http://localhost:3500`
     - Documentation Hub: `http://localhost:3400`
 
 ## 📊 Architecture & Quality Status

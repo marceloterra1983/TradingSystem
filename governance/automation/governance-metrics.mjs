@@ -126,6 +126,54 @@ function summarizeArtifacts(artifacts) {
   };
 }
 
+function mapToSortedArray(map) {
+  return Array.from(map.entries())
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+}
+
+function deriveCoverageStats(artifacts) {
+  if (!artifacts.length) {
+    return {
+      healthyPercentage: 100,
+      meetsHealthyTarget: true,
+      owners: [],
+      policiesByOwner: [],
+    };
+  }
+
+  const ownerMap = new Map();
+  const policiesOwnerMap = new Map();
+  let onTrackCount = 0;
+
+  for (const artifact of artifacts) {
+    const status = computeStatus(artifact);
+    if (status.code === 'healthy') {
+      onTrackCount += 1;
+    }
+    if (artifact.owner) {
+      ownerMap.set(artifact.owner, (ownerMap.get(artifact.owner) || 0) + 1);
+    }
+    if (artifact.category === 'policies' && artifact.owner) {
+      policiesOwnerMap.set(
+        artifact.owner,
+        (policiesOwnerMap.get(artifact.owner) || 0) + 1,
+      );
+    }
+  }
+
+  const healthyPercentage = Number(
+    ((onTrackCount / artifacts.length) * 100).toFixed(2),
+  );
+
+  return {
+    healthyPercentage,
+    meetsHealthyTarget: healthyPercentage >= 95,
+    owners: mapToSortedArray(ownerMap),
+    policiesByOwner: mapToSortedArray(policiesOwnerMap),
+  };
+}
+
 function summarizeReviews(records) {
   const statusCounts = new Map();
   const governanceStatusCounts = new Map();
@@ -193,6 +241,8 @@ function mapArtifactsForSnapshot(artifacts) {
 
 async function writeDocsReport(payload) {
   const { distribution, upcoming } = payload.freshness;
+  const { healthyPercentage, meetsHealthyTarget, policiesByOwner } =
+    payload.coverage;
   const frontmatter = [
     '---',
     'title: Governance Status Dashboard',
@@ -216,6 +266,20 @@ async function writeDocsReport(payload) {
     '',
     '## Upcoming Reviews',
     formatUpcoming(upcoming),
+    '',
+    '## Freshness SLA',
+    `Overall cadence on-track: **${healthyPercentage}%** (${meetsHealthyTarget ? '✅ meets' : '⚠️ misses'} 95% target)`,
+    '',
+    '## Policy Coverage by Owner',
+    policiesByOwner.length
+      ? [
+          '| Owner | Policies |',
+          '|-------|----------|',
+          policiesByOwner
+            .map((item) => `| ${item.key} | ${item.count} |`)
+            .join('\n'),
+        ].join('\n')
+      : '_No policies registered in the hub._',
   ].join('\n');
 
   await ensureDir(path.dirname(docsReportPath));
@@ -227,6 +291,7 @@ async function main() {
   const artifacts = registry.artifacts || [];
   const reviewRecords = await readCsvRecords();
   const freshness = summarizeArtifacts(artifacts);
+  const coverage = deriveCoverageStats(artifacts);
   const reviewTracking = summarizeReviews(reviewRecords);
   const artifactSummaries = mapArtifactsForSnapshot(artifacts);
 
@@ -241,6 +306,7 @@ async function main() {
       published: artifacts.filter((item) => item.publish).length,
       evidence: artifacts.filter((item) => item.category === 'evidence').length,
     },
+    coverage,
     freshness,
     reviewTracking,
     artifacts: artifactSummaries,

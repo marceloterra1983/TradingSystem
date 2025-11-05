@@ -29,6 +29,35 @@
       }
     },
     {
+      "id": "policies.container-infrastructure-policy",
+      "title": "Política de Infraestrutura de Containers, Redes e Comunicação",
+      "description": "Diretrizes obrigatórias para arquitetura de containers, redes Docker, gerenciamento de portas e comunicação inter-serviços no TradingSystem.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "PlatformEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-05",
+      "policyId": "POL-0003",
+      "status": "active",
+      "tags": [
+        "infrastructure",
+        "containers",
+        "networking",
+        "docker",
+        "ports",
+        "security",
+        "architecture"
+      ],
+      "path": "policies/container-infrastructure-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/container-infrastructure-policy.mdx",
+        "slug": "/governance/policies/container-infrastructure-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0003 - Infraestrutura de Containers",
+        "sidebarPosition": 6
+      }
+    },
+    {
       "id": "standards.secrets-standard",
       "title": "Padrão Técnico de Segredos e Variáveis de Ambiente",
       "description": "Requisitos técnicos testáveis e verificáveis para implementação da POL-0002 - Política de Gerenciamento de Segredos.",
@@ -81,6 +110,39 @@
         "sidebar": "governance",
         "sidebarLabel": "SOP-SEC-001 - Secrets Rotation",
         "sidebarPosition": 20
+      }
+    },
+    {
+      "id": "controls.tp-capital-network-validation",
+      "title": "Checklist de Validação de Networking e Variáveis do TP-Capital",
+      "description": "Checklist e automação para validar redes Docker, variáveis e portas do stack TP-Capital antes de liberar serviços.",
+      "category": "controls",
+      "type": "sop",
+      "owner": "DevOps",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-05",
+      "sopId": "SOP-NET-002",
+      "status": "active",
+      "relatedPolicies": [
+        "POL-0003"
+      ],
+      "relatedStandards": [
+        "STD-010"
+      ],
+      "tags": [
+        "sop",
+        "networking",
+        "docker",
+        "environment-variables",
+        "incident-prevention"
+      ],
+      "path": "controls/TP-CAPITAL-NETWORK-VALIDATION.md",
+      "publish": {
+        "docsPath": "governance/controls/tp-capital-network-validation.mdx",
+        "slug": "/governance/controls/tp-capital-network-validation",
+        "sidebar": "governance",
+        "sidebarLabel": "SOP-NET-002 - TP Capital Networking",
+        "sidebarPosition": 21
       }
     },
     {

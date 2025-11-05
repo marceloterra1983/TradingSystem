@@ -100,7 +100,7 @@ const unifiedConfig: ApiConfig = {
 const directConfig: ApiConfig = {
   baseUrl: '',
   libraryApi:
-    resolveEnv('VITE_WORKSPACE_API_URL') || 'http://localhost:3210/api',  // Updated: PostgreSQL Autonomous Stack (PORT 3210!)
+    resolveEnv('VITE_WORKSPACE_API_URL') || 'http://localhost:3200/api',  // Updated: LowDB Stack - WSL2 workaround (PORT 3200)
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || '/api/tp-capital',
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || '/api/docs',
   serviceLauncherApi:

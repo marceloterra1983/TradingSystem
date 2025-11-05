@@ -45,7 +45,7 @@ const API_SPECS: ApiSpec[] = [
     id: 'workspace-api',
     name: 'Workspace',
     description: 'CRUD operations for workspace items with Kanban workflow',
-    port: '3210',  // Updated: PostgreSQL Autonomous Stack
+    port: '3200',  // Updated: LowDB Stack (WSL2 workaround)
     specFile: 'workspace.openapi.yaml',
     docusaurusRoute: '/api/workspace',
   },

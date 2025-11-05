@@ -59,10 +59,10 @@ TradingSystem possui documentação e artefatos de governança distribuídos pri
 
 ## Aprovações Necessárias
 
--   [ ] DocsOps Lead
--   [ ] Platform Architect
--   [ ] Backend Guild (impacto em scripts)
--   [ ] DevOps Lead (pipelines)
+-   [x] DocsOps Lead
+-   [x] Platform Architect
+-   [x] Backend Guild (impacto em scripts)
+-   [x] DevOps Lead (pipelines)
 
 ---
 
@@ -72,4 +72,3 @@ TradingSystem possui documentação e artefatos de governança distribuídos pri
 2. Validar decisões técnicas em [design.md](./design.md).
 3. Estimar e agendar as atividades de [tasks.md](./tasks.md).
 4. Coletar feedback e promover para **Ready for Implementation**.
-

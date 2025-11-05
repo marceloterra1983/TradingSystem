@@ -30,8 +30,8 @@ export const ENDPOINTS = {
    * @description HTTP REST APIs for application services
    */
   
-  /** Workspace API - Port 3210 (PostgreSQL Autonomous Stack) */
-  workspace: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3210',
+  /** Workspace API - Port 3200 (LowDB Stack - WSL2 workaround) */
+  workspace: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3200',
   
   /** TP Capital Signals API - Port 4008 (Autonomous Stack) */
   tpCapital: import.meta.env.VITE_TP_CAPITAL_API_URL || 'http://localhost:4008',

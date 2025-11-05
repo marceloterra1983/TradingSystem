@@ -95,10 +95,18 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const request = (async () => {
       try {
         const data = await libraryService.getAllItems();
+        
+        // Filter out items without valid IDs (safety check for React keys)
+        const validItems = data.filter(item => item.id && item.id !== null);
+        
+        if (validItems.length < data.length) {
+          console.warn(`[WorkspaceStore] Filtered ${data.length - validItems.length} items without IDs`);
+        }
+        
         set((state) => {
-          const itemsChanged = !areItemsEqual(state.items, data);
+          const itemsChanged = !areItemsEqual(state.items, validItems);
           return {
-            items: itemsChanged ? data : state.items,
+            items: itemsChanged ? validItems : state.items,
             loading: false,
             syncing: false,
             error: null,

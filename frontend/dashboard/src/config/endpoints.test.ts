@@ -70,7 +70,7 @@ describe('Endpoints Configuration', () => {
     it('should have correct default backend API endpoints', () => {
       const { ENDPOINTS } = endpointsModule;
 
-      expect(ENDPOINTS.workspace).toBe('http://localhost:3210');
+      expect(ENDPOINTS.workspace).toBe('http://localhost:3200');
       expect(ENDPOINTS.tpCapital).toBe('http://localhost:4008');
       expect(ENDPOINTS.documentation).toBe('http://localhost:3405');
       expect(ENDPOINTS.telegramGateway).toBe('http://localhost:4010');
@@ -126,11 +126,11 @@ describe('Endpoints Configuration', () => {
         status: 200,
       } as Response);
 
-      const result = await validateEndpoint('http://localhost:3210');
+      const result = await validateEndpoint('http://localhost:3200');
 
       expect(result).toBe(true);
       expect(globalThis.fetch).toHaveBeenCalledWith(
-        'http://localhost:3210/health',
+        'http://localhost:3200/health',
         expect.objectContaining({
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -158,7 +158,7 @@ describe('Endpoints Configuration', () => {
         });
       });
 
-      const result = await validateEndpoint('http://localhost:3210', 5);
+      const result = await validateEndpoint('http://localhost:3200', 5);
 
       expect(result).toBe(false);
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
@@ -172,7 +172,7 @@ describe('Endpoints Configuration', () => {
         status: 500,
       } as Response);
 
-      const result = await validateEndpoint('http://localhost:3210');
+      const result = await validateEndpoint('http://localhost:3200');
 
       expect(result).toBe(false);
     });

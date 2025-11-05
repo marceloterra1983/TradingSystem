@@ -66,7 +66,7 @@ const SERVICES_ENDPOINTS: ServiceEndpoints[] = [
   // Workspace API
   {
     name: 'Workspace API',
-    baseUrl: 'http://localhost:3210',  // Updated: PostgreSQL Autonomous Stack
+    baseUrl: 'http://localhost:3200',  // Updated: LowDB Stack (WSL2 workaround)
     icon: Server,
     color: 'text-cyan-600 dark:text-cyan-400',
     endpoints: [

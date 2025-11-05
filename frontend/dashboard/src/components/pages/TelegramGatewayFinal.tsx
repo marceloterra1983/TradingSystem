@@ -208,6 +208,7 @@ export function TelegramGatewayFinal() {
 
     try {
       const token =
+        (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
         (
           import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined
         )?.trim() ||

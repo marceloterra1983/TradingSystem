@@ -7,7 +7,7 @@
 // Extract base URL from VITE_WORKSPACE_API_URL (remove /items if present)
 const getBaseApiUrl = () => {
   const workspaceUrl =
-    import.meta.env.VITE_WORKSPACE_API_URL || 'http://localhost:3210/api';  // FIXED: 3200 → 3210 (PostgreSQL Autonomous Stack)
+    import.meta.env.VITE_WORKSPACE_API_URL || 'http://localhost:3200/api';  // FIXED: LowDB Stack (WSL2 networking workaround)
   // Remove /items from the end if present
   return workspaceUrl.replace(/\/items$/, '');
 };
@@ -61,8 +61,8 @@ class CategoriesService {
   private baseUrl: string;
 
   constructor() {
-    // FORCE PORT 3210 - Override any cached config (same as LibraryService fix)
-    const FORCED_BASE = 'http://localhost:3210/api/categories';
+    // FORCE PORT 3200 - Override any cached config (same as LibraryService fix)
+    const FORCED_BASE = 'http://localhost:3200/api/categories';
     this.baseUrl = FORCED_BASE;
     
     console.warn('[CategoriesService] FORCING base URL to:', FORCED_BASE);
