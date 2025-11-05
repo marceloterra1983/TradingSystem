@@ -29,14 +29,17 @@ Autonomous microservice stack that ingests TP Capital trading signals from Teleg
 - 🔌 HTTP API with Telegram Gateway (decoupled from database)
 - 🔄 Automatic historical sync (backfill on startup)
 - ⚡ Circuit breaker for resilience
-- 🎯 Polling worker with exponential backoff
+- 🎯 HYBRID Architecture: Push (Redis Pub/Sub) + Pull (Polling 60s fallback)
+- 📅 Date range filtering support
 
 ## Features
 - ✅ **Autonomous stack** with dedicated database (isolated from Gateway)
 - ✅ **HTTP API integration** (no direct database access to Gateway)
 - ✅ **Automatic historical sync** on startup (one-time backfill)
-- ✅ **Real-time polling** (5s interval with circuit breaker)
+- ✅ **HYBRID Architecture** - Push (Redis < 100ms) + Pull (Polling 60s fallback)
+- ✅ **Real-time signal ingestion** with dual-path reliability
 - ✅ **Signal parsing** (extracts asset, buy range, targets, stop)
+- ✅ **Date range filtering** (frontend and backend support)
 - ✅ **Cache layer** (Redis master-replica for performance)
 - ✅ **Connection pooling** (PgBouncer for database efficiency)
 - ✅ **Health monitoring** (comprehensive health checks)
