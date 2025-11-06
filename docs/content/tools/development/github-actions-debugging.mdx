@@ -1,0 +1,386 @@
+---
+title: Debugging GitHub Actions Localmente
+sidebar_position: 5
+tags: [github-actions, ci-cd, debugging, devops]
+domain: tools
+type: guide
+summary: Guia completo para acessar logs, artefatos e debugar workflows do GitHub Actions localmente
+status: active
+last_review: "2025-11-06"
+---
+
+# Debugging GitHub Actions Localmente
+
+Este guia mostra como acessar e debugar workflows do GitHub Actions sem sair do seu ambiente local.
+
+## 🚀 Quick Start
+
+### 1. Instalar GitHub CLI
+
+```bash
+# Ubuntu/Debian
+sudo apt install gh
+
+# macOS
+brew install gh
+
+# Windows (via scoop)
+scoop install gh
+```
+
+### 2. Autenticar
+
+```bash
+gh auth login
+# Siga as instruções interativas para autenticar
+```
+
+### 3. Usar o Script Helper
+
+```bash
+# Ver workflows recentes
+bash scripts/maintenance/check-github-actions.sh list
+
+# Ver apenas workflows que falharam
+bash scripts/maintenance/check-github-actions.sh failed
+
+# Baixar logs de um workflow específico
+bash scripts/maintenance/check-github-actions.sh logs <run-id>
+
+# Baixar artefatos (test results, coverage, etc)
+bash scripts/maintenance/check-github-actions.sh download <run-id>
+```
+
+## 📋 Comandos Úteis
+
+### Listar Workflows Recentes
+
+```bash
+# Via script
+bash scripts/maintenance/check-github-actions.sh list
+
+# Via gh CLI direto
+gh run list --repo marceloterra1983/TradingSystem --limit 10
+```
+
+**Output esperado:**
+```
+STATUS  TITLE                        WORKFLOW  BRANCH  EVENT  ID          ELAPSED  AGE
+✓       feat: add hybrid search      CI/CD     main    push   12345678    2m 30s   5m ago
+X       fix: vitest config           Tests     main    push   12345677    1m 15s   10m ago
+✓       chore: update deps           Deps      main    push   12345676    3m 45s   1h ago
+```
+
+### Ver Apenas Workflows que Falharam
+
+```bash
+# Via script
+bash scripts/maintenance/check-github-actions.sh failed
+
+# Via gh CLI direto
+gh run list --repo marceloterra1983/TradingSystem --status failure --limit 20
+```
+
+### Baixar Logs Completos
+
+```bash
+# Via script (salva em outputs/github-actions/<run-id>/full.log)
+bash scripts/maintenance/check-github-actions.sh logs 12345678
+
+# Via gh CLI direto
+gh run view 12345678 --repo marceloterra1983/TradingSystem --log > workflow-logs.txt
+```
+
+**Localização dos logs:**
+- `outputs/github-actions/<run-id>/full.log`
+
+### Ver Detalhes de um Workflow
+
+```bash
+# Via script
+bash scripts/maintenance/check-github-actions.sh view 12345678
+
+# Via gh CLI direto
+gh run view 12345678 --repo marceloterra1983/TradingSystem
+```
+
+**Output inclui:**
+- Status geral (success, failure, cancelled)
+- Tempo de execução
+- Branch/commit
+- Jobs executados
+- Steps de cada job
+- Artefatos disponíveis
+
+### Baixar Artefatos (Test Results, Coverage, etc)
+
+```bash
+# Via script (salva em outputs/github-actions/<run-id>/artifacts/)
+bash scripts/maintenance/check-github-actions.sh download 12345678
+
+# Via gh CLI direto
+gh run download 12345678 --repo marceloterra1983/TradingSystem
+```
+
+**Artefatos comuns:**
+- Test results (Vitest HTML reports)
+- Coverage reports
+- Build artifacts
+- Screenshots de testes E2E
+- Logs estruturados
+
+### Monitorar Workflow em Tempo Real
+
+```bash
+# Via script
+bash scripts/maintenance/check-github-actions.sh watch
+
+# Via gh CLI direto
+gh run watch --repo marceloterra1983/TradingSystem
+```
+
+## 🔍 Analisando Falhas
+
+### 1. Identificar o Workflow que Falhou
+
+```bash
+bash scripts/maintenance/check-github-actions.sh failed
+```
+
+Pegue o **RUN ID** do workflow que falhou (ex: `12345678`).
+
+### 2. Baixar Logs Completos
+
+```bash
+bash scripts/maintenance/check-github-actions.sh logs 12345678
+```
+
+Logs ficam salvos em:
+```
+outputs/github-actions/12345678/full.log
+```
+
+### 3. Abrir os Logs no Editor
+
+```bash
+# VSCode
+code outputs/github-actions/12345678/full.log
+
+# Vim
+vim outputs/github-actions/12345678/full.log
+
+# Less (paginado)
+less outputs/github-actions/12345678/full.log
+```
+
+### 4. Procurar por Erros
+
+Use grep ou busca no editor:
+
+```bash
+# Buscar linhas com "error" ou "failed"
+grep -i "error\|failed" outputs/github-actions/12345678/full.log
+
+# Buscar por contexto (10 linhas antes e depois)
+grep -i -C 10 "error" outputs/github-actions/12345678/full.log
+```
+
+### 5. Baixar Artefatos de Teste
+
+Se o workflow gerou artefatos (test results, coverage):
+
+```bash
+bash scripts/maintenance/check-github-actions.sh download 12345678
+
+# Artefatos ficam em:
+# outputs/github-actions/12345678/artifacts/
+```
+
+### 6. Reproduzir Localmente
+
+Baseado nos logs, reproduza o erro localmente:
+
+```bash
+# Se foi erro de teste
+cd frontend/dashboard
+npm run test
+
+# Se foi erro de lint
+npm run lint
+
+# Se foi erro de build
+npm run build
+```
+
+## 🐛 Cenários Comuns
+
+### Teste Falhando apenas no CI
+
+**Causa comum:** Diferenças de ambiente (timezone, locale, NODE_ENV)
+
+**Solução:**
+```bash
+# Simular ambiente do CI localmente
+NODE_ENV=test TZ=UTC npm run test
+```
+
+### Erro de Timeout
+
+**Logs mostram:**
+```
+Error: Test timed out after 5000ms
+```
+
+**Solução:**
+```typescript
+// Aumentar timeout no teste específico
+it('should load data', async () => {
+  // ...
+}, { timeout: 10000 }); // 10 seconds
+```
+
+### Erro de Snapshot
+
+**Logs mostram:**
+```
+Snapshot mismatch
+```
+
+**Solução:**
+```bash
+# Atualizar snapshots localmente
+npm run test -- -u
+
+# Commitar snapshots atualizados
+git add src/**/__snapshots__
+git commit -m "test: update snapshots"
+```
+
+### Erro de Lint
+
+**Logs mostram:**
+```
+ESLint errors found
+```
+
+**Solução:**
+```bash
+# Rodar lint com auto-fix
+npm run lint:fix
+
+# Verificar o que foi corrigido
+git diff
+
+# Commitar correções
+git add .
+git commit -m "chore: fix lint errors"
+```
+
+### Erro de Build
+
+**Logs mostram:**
+```
+Build failed with errors
+```
+
+**Solução:**
+```bash
+# Limpar cache e node_modules
+rm -rf node_modules package-lock.json
+npm install
+
+# Tentar build novamente
+npm run build
+```
+
+## 📊 Visualizar Test Coverage
+
+Se o workflow gera coverage reports:
+
+```bash
+# 1. Baixar artefatos
+bash scripts/maintenance/check-github-actions.sh download 12345678
+
+# 2. Abrir HTML coverage report no navegador
+open outputs/github-actions/12345678/artifacts/coverage/index.html
+
+# Ou usar python
+python3 -m http.server 8000 --directory outputs/github-actions/12345678/artifacts/coverage/
+# Abrir: http://localhost:8000
+```
+
+## 🔄 Re-executar Workflow que Falhou
+
+```bash
+# Via gh CLI
+gh run rerun 12345678 --repo marceloterra1983/TradingSystem
+
+# Re-executar apenas jobs que falharam
+gh run rerun 12345678 --failed --repo marceloterra1983/TradingSystem
+```
+
+## 📝 Criar Issue a partir de Falha
+
+```bash
+# Ver detalhes do workflow
+gh run view 12345678 --repo marceloterra1983/TradingSystem
+
+# Criar issue manualmente com link para o workflow
+gh issue create --repo marceloterra1983/TradingSystem \
+  --title "fix: CI failing on test suite" \
+  --body "Workflow: https://github.com/marceloterra1983/TradingSystem/actions/runs/12345678"
+```
+
+## 🛠️ Ferramentas Adicionais
+
+### act - Rodar GitHub Actions Localmente
+
+```bash
+# Instalar act
+curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Rodar workflow localmente
+act -W .github/workflows/code-quality.yml
+
+# Rodar apenas um job específico
+act -W .github/workflows/code-quality.yml -j test
+```
+
+**Limitações:**
+- Nem todos os recursos são suportados
+- Alguns secrets podem não funcionar
+- Útil para debugging rápido
+
+### GitHub Actions Extension (VSCode)
+
+```bash
+# Instalar extensão
+code --install-extension github.vscode-github-actions
+```
+
+**Features:**
+- Ver workflows diretamente no VSCode
+- Trigger manual de workflows
+- Ver logs inline
+- Gerenciar secrets
+
+## 📚 Referências
+
+- [GitHub CLI Documentation](https://cli.github.com/manual/)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [act - Local Actions Runner](https://github.com/nektos/act)
+- [VSCode GitHub Actions Extension](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
+
+## 🎯 Próximos Passos
+
+Após corrigir o erro localmente:
+
+1. **Testar localmente:** `npm run test` + `npm run lint` + `npm run build`
+2. **Commitar correção:** `git commit -m "fix: <descrição>"`
+3. **Push:** `git push`
+4. **Monitorar:** `bash scripts/maintenance/check-github-actions.sh watch`
+
+---
+
+**Última atualização:** 2025-11-06
+**Mantido por:** TradingSystem DevOps Team
