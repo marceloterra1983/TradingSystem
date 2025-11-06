@@ -335,10 +335,10 @@ main() {
 
 | Task | Frequency | Timeline | Owner |
 |------|-----------|----------|-------|
-| Fix P1 Issues | As needed | under 3 days | DocsOps |
-| Fix P2 Issues | As needed | under 2 weeks | Content Owners |
-| Content Refresh | Quarterly | under 1 month | Guild Leads |
-| Governance Update | Semi-annual | under 2 weeks | DocsOps Lead |
+| Fix P1 Issues | As needed | <3 days | DocsOps |
+| Fix P2 Issues | As needed | <2 weeks | Content Owners |
+| Content Refresh | Quarterly | <1 month | Guild Leads |
+| Governance Update | Semi-annual | <2 weeks | DocsOps Lead |
 
 ---
 

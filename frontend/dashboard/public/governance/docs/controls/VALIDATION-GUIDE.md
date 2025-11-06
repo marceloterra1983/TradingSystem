@@ -388,7 +388,7 @@ Result: PASSED with warnings
   run: EXPECTED_DOCS_V2_MIN=75 EXPECTED_DOCS_PORT_MIN=30 EXPECTED_DOCS_API_PORT_MIN=20 bash docs/scripts/validate-technical-references.sh --strict
 ```
 
-**Expected Duration**: under 1 minute
+**Expected Duration**: <1 minute
 
 ---
 
