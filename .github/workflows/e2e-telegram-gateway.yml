@@ -140,11 +140,12 @@ jobs:
           # CRITICAL: Test connection from HOST via port mapping (this is what Node.js will use)
           echo "Testing external connection via localhost:5434..."
           for i in {1..30}; do
-            if PGPASSWORD=test_password psql -h localhost -p 5434 -U telegram -d telegram_gateway -c "SELECT 1;" > /dev/null 2>&1; then
+            if PGPASSWORD=test_password psql -h localhost -p 5434 -U telegram -d telegram_gateway -c "SELECT 1;" 2>&1 | tee psql_output.log | grep -q "1 row"; then
               echo "✅ External connection successful!"
               break
             fi
             echo "Attempt $i/30 - External connection not ready..."
+            cat psql_output.log || true
             sleep 2
           done
       
