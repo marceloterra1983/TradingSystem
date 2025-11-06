@@ -1,19 +1,28 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
+import fs from 'node:fs';
 
-// Load .env from project root FIRST (before any process.env usage)
+// Load .env from project root ONLY if not running in Docker container
+// In Docker, environment variables come from docker-compose.yml
 const __configFilename = fileURLToPath(import.meta.url);
 const __configDirname = path.dirname(__configFilename);
 const __projectRoot = path.resolve(__configDirname, '..', '..', '..', '..');
 const envPath = path.join(__projectRoot, '.env');
 
-console.log(`[Gateway API Config] Loading .env from: ${envPath}`);
-const dotenvResult = dotenv.config({ path: envPath });
-if (dotenvResult.error) {
-  console.warn(`[Gateway API Config] Warning: ${dotenvResult.error.message}`);
+// Check if we're in a container (no .env file at expected location)
+const isDocker = !fs.existsSync(envPath) || process.env.RUNNING_IN_DOCKER === 'true';
+
+if (!isDocker) {
+  console.log(`[Gateway API Config] Loading .env from: ${envPath}`);
+  const dotenvResult = dotenv.config({ path: envPath });
+  if (dotenvResult.error) {
+    console.warn(`[Gateway API Config] Warning: ${dotenvResult.error.message}`);
+  } else {
+    console.log('[Gateway API Config] .env loaded successfully');
+  }
 } else {
-  console.log('[Gateway API Config] .env loaded successfully');
+  console.log('[Gateway API Config] Running in Docker - using environment variables from container');
 }
 
 const __filename = fileURLToPath(import.meta.url);
