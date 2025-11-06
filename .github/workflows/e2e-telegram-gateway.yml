@@ -119,7 +119,7 @@ jobs:
       - name: Start Dashboard (background)
         working-directory: frontend/dashboard
         run: |
-          npm run dev > ../../logs/dashboard-ci.log 2>&1 &
+          npm run dev:ci > ../../logs/dashboard-ci.log 2>&1 &
           echo $! > ../../logs/dashboard.pid
       
       # ==============================================================================

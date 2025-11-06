@@ -7,6 +7,7 @@
     "copy:docs": "node scripts/copy-docs.js",
     "watch:docs": "node scripts/watch-docs.js",
     "dev": "npm-run-all --parallel watch:docs dev:docusaurus dev:vite",
+    "dev:ci": "vite --host 0.0.0.0 --port 3103 --strictPort",
     "dev:docusaurus": "npm --prefix ../../docs run docs:dev",
     "dev:vite": "vite --host 0.0.0.0 --port 3103 --strictPort",
     "prebuild": "if [ \"$SKIP_DASHBOARD_PREBUILD\" = \"1\" ]; then echo \"⚠️  Skipping agents:generate prebuild\"; else npm --prefix ../.. run agents:generate; fi",
