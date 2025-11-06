@@ -121,7 +121,7 @@ jobs:
           set +e  # Don't exit on error - we want to capture logs
           docker compose \
             -f tools/compose/docker-compose.telegram.yml \
-            -f .github/workflows/docker-compose.e2e-override.yml \
+            -f tools/compose/docker-compose.e2e-override.yml \
             up -d --wait \
             telegram-timescaledb \
             telegram-redis-master \
