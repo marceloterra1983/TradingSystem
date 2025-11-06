@@ -50,6 +50,47 @@ vi.mock('../../utils/docusaurus', () => ({
 
 import documentationService from '../../services/documentationService';
 
+const STORAGE_KEY_RESULTS = 'docsHybridSearch_results';
+const STORAGE_KEY_QUERY = 'docsHybridSearch_lastQuery';
+const DEFAULT_COLLECTION_SCOPE = 'default';
+
+const buildScopedKey = (base: string, collection?: string): string => {
+  const sanitized = (collection ?? '').trim();
+  const scope = sanitized || DEFAULT_COLLECTION_SCOPE;
+  return `${base}:${encodeURIComponent(scope)}`;
+};
+
+const createLocalStorageMock = () => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) =>
+      Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null,
+    ),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = String(value);
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
+    get length() {
+      return Object.keys(store).length;
+    },
+  };
+};
+
+const localStorageMock = createLocalStorageMock();
+
+beforeAll(() => {
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  });
+});
+
 const mockedHybridSearch =
   documentationService.docsHybridSearch as unknown as vi.Mock;
 const mockedLexicalSearch =
@@ -77,7 +118,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
     // Default mock implementations
     mockedHybridSearch.mockResolvedValue({
       total: 2,
-      hits: [
+      results: [
         {
           title: 'Docker Compose Setup',
           url: '/docs/tools/docker/overview',
@@ -109,7 +150,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
     mockedLexicalSearch.mockResolvedValue({
       total: 0,
-      hits: [],
+      results: [],
     });
 
     mockedGetFacets.mockResolvedValue({
@@ -128,7 +169,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         screen.getByPlaceholderText(/Ex.: docker, workspace api, docusaurus/i),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /limpar/i }),
+        screen.getByRole('button', { name: /buscar/i }),
       ).toBeInTheDocument();
     });
 
@@ -156,7 +197,6 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
           expect(mockedHybridSearch).toHaveBeenCalledWith(
             'docker',
             expect.objectContaining({
-              collection: 'default',
               alpha: 0.65,
               limit: 50,
             }),
@@ -188,7 +228,7 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
       );
       mockedLexicalSearch.mockResolvedValue({
         total: 1,
-        hits: [
+        results: [
           {
             title: 'Docker Guide',
             url: '/docs/tools/docker/guide',
@@ -259,7 +299,9 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         { timeout: 5000 },
       );
 
-      const clearButton = screen.getByRole('button', { name: /limpar/i });
+      const clearButton = await screen.findByRole('button', {
+        name: /limpar/i,
+      });
       await userEvent.click(clearButton);
 
       await waitFor(() => {
@@ -271,19 +313,35 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
     it('should clear localStorage when clear button is clicked', async () => {
       // Set some localStorage data
-      localStorage.setItem('docsearch_query_default', 'docker');
+      localStorage.setItem(buildScopedKey(STORAGE_KEY_QUERY), 'docker');
       localStorage.setItem(
-        'docsearch_results_default',
-        JSON.stringify([{ title: 'Test' }]),
+        buildScopedKey(STORAGE_KEY_RESULTS),
+        JSON.stringify([
+          {
+            title: 'Test',
+            url: '/docs/test/path',
+            path: 'test/path',
+            snippet: 'cached',
+            score: 0.9,
+            source: 'hybrid',
+            components: { semantic: true, lexical: true },
+          },
+        ]),
       );
 
       render(<DocsHybridSearchPage />, { wrapper: TestWrapper });
 
-      const clearButton = screen.getByRole('button', { name: /limpar/i });
+      const clearButton = await screen.findByRole('button', {
+        name: /limpar/i,
+      });
       await userEvent.click(clearButton);
 
-      expect(localStorage.getItem('docsearch_query_default')).toBeNull();
-      expect(localStorage.getItem('docsearch_results_default')).toBeNull();
+      expect(
+        localStorage.getItem(buildScopedKey(STORAGE_KEY_QUERY)),
+      ).toBeNull();
+      expect(
+        localStorage.getItem(buildScopedKey(STORAGE_KEY_RESULTS)),
+      ).toBeNull();
     });
   });
 
@@ -305,9 +363,12 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
         },
       ];
 
-      localStorage.setItem('docsearch_query_default', 'cached query');
       localStorage.setItem(
-        'docsearch_results_default',
+        buildScopedKey(STORAGE_KEY_QUERY),
+        'cached query',
+      );
+      localStorage.setItem(
+        buildScopedKey(STORAGE_KEY_RESULTS),
         JSON.stringify(mockResults),
       );
 
@@ -335,9 +396,9 @@ describe('DocsHybridSearchPage - Essential Tests', () => {
 
       await waitFor(
         () => {
-          expect(localStorage.getItem('docsearch_query_default')).toBe(
-            'docker',
-          );
+          expect(
+            localStorage.getItem(buildScopedKey(STORAGE_KEY_QUERY)),
+          ).toBe('docker');
         },
         { timeout: 5000 },
       );

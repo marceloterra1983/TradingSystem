@@ -82,6 +82,28 @@ beforeAll(() => {
   });
 });
 
+const originalCreateObjectURL = (globalThis.URL as any)?.createObjectURL;
+const originalRevokeObjectURL = (globalThis.URL as any)?.revokeObjectURL;
+
+beforeAll(() => {
+  (globalThis.URL as any).createObjectURL = vi.fn(() => 'blob:mock-url');
+  (globalThis.URL as any).revokeObjectURL = vi.fn();
+});
+
+afterAll(() => {
+  if (originalCreateObjectURL) {
+    (globalThis.URL as any).createObjectURL = originalCreateObjectURL;
+  } else {
+    delete (globalThis.URL as any).createObjectURL;
+  }
+
+  if (originalRevokeObjectURL) {
+    (globalThis.URL as any).revokeObjectURL = originalRevokeObjectURL;
+  } else {
+    delete (globalThis.URL as any).revokeObjectURL;
+  }
+});
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

@@ -1,20 +1,32 @@
-import { describe, it, before, after } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { TelegramClientService, getTelegramClient } from '../TelegramClientService.js';
+
+const MOCK_KEY = '0123456789abcdef0123456789abcdef';
+const originalKey = process.env.TELEGRAM_SESSION_ENCRYPTION_KEY;
+
+beforeAll(() => {
+  process.env.TELEGRAM_SESSION_ENCRYPTION_KEY = MOCK_KEY;
+});
+
+afterAll(() => {
+  if (originalKey) {
+    process.env.TELEGRAM_SESSION_ENCRYPTION_KEY = originalKey;
+  } else {
+    delete process.env.TELEGRAM_SESSION_ENCRYPTION_KEY;
+  }
+});
 
 describe('TelegramClientService', () => {
   describe('Constructor', () => {
     it('should throw error if API_ID is missing', () => {
-      assert.throws(
-        () => new TelegramClientService({ apiHash: 'test' }),
-        /TELEGRAM_API_ID and TELEGRAM_API_HASH are required/
+      expect(() => new TelegramClientService({ apiHash: 'test' })).toThrow(
+        /TELEGRAM_API_ID and TELEGRAM_API_HASH are required/,
       );
     });
 
     it('should throw error if API_HASH is missing', () => {
-      assert.throws(
-        () => new TelegramClientService({ apiId: 12345 }),
-        /TELEGRAM_API_ID and TELEGRAM_API_HASH are required/
+      expect(() => new TelegramClientService({ apiId: 12345 })).toThrow(
+        /TELEGRAM_API_ID and TELEGRAM_API_HASH are required/,
       );
     });
 
@@ -25,10 +37,10 @@ describe('TelegramClientService', () => {
         phoneNumber: '+5511999999999',
       });
 
-      assert.strictEqual(service.apiId, 12345);
-      assert.strictEqual(service.apiHash, 'test_hash');
-      assert.strictEqual(service.phoneNumber, '+5511999999999');
-      assert.strictEqual(service.isConnected, false);
+      expect(service.apiId).toBe(12345);
+      expect(service.apiHash).toBe('test_hash');
+      expect(service.phoneNumber).toBe('+5511999999999');
+      expect(service.isConnected).toBe(false);
     });
   });
 
@@ -42,11 +54,11 @@ describe('TelegramClientService', () => {
 
       const health = service.getHealthStatus();
 
-      assert.strictEqual(health.isConnected, false);
-      assert.strictEqual(health.hasClient, false);
-      assert.strictEqual(health.apiId, true);
-      assert.strictEqual(health.apiHash, true);
-      assert.strictEqual(health.phoneNumber, true);
+      expect(health.isConnected).toBe(false);
+      expect(health.hasClient).toBe(false);
+      expect(health.apiId).toBe(true);
+      expect(health.apiHash).toBe(true);
+      expect(health.phoneNumber).toBe(true);
     });
   });
 
@@ -71,16 +83,16 @@ describe('TelegramClientService', () => {
 
       const transformed = service.transformMessage(mockMessage);
 
-      assert.strictEqual(transformed.id, 123);
-      assert.strictEqual(transformed.channelId, '456');
-      assert.strictEqual(transformed.text, 'Test message');
-      assert.strictEqual(transformed.date, 1699000000);
-      assert.strictEqual(transformed.fromId, '789');
-      assert.strictEqual(transformed.mediaType, 'MessageMediaPhoto');
-      assert.strictEqual(transformed.isForwarded, true);
-      assert.strictEqual(transformed.replyTo, 100);
-      assert.strictEqual(transformed.views, 50);
-      assert.ok(transformed.raw);
+      expect(transformed.id).toBe(123);
+      expect(transformed.channelId).toBe('456');
+      expect(transformed.text).toBe('Test message');
+      expect(transformed.date).toBe(1699000000);
+      expect(transformed.fromId).toBe('789');
+      expect(transformed.mediaType).toBe('MessageMediaPhoto');
+      expect(transformed.isForwarded).toBe(true);
+      expect(transformed.replyTo).toBe(100);
+      expect(transformed.views).toBe(50);
+      expect(transformed.raw).toBeDefined();
     });
 
     it('should handle messages without optional fields', () => {
@@ -97,14 +109,14 @@ describe('TelegramClientService', () => {
 
       const transformed = service.transformMessage(mockMessage);
 
-      assert.strictEqual(transformed.id, 456);
-      assert.strictEqual(transformed.channelId, null);
-      assert.strictEqual(transformed.text, '');
-      assert.strictEqual(transformed.fromId, null);
-      assert.strictEqual(transformed.mediaType, null);
-      assert.strictEqual(transformed.isForwarded, false);
-      assert.strictEqual(transformed.replyTo, null);
-      assert.strictEqual(transformed.views, 0);
+      expect(transformed.id).toBe(456);
+      expect(transformed.channelId).toBeNull();
+      expect(transformed.text).toBe('');
+      expect(transformed.fromId).toBeNull();
+      expect(transformed.mediaType).toBeNull();
+      expect(transformed.isForwarded).toBe(false);
+      expect(transformed.replyTo).toBeNull();
+      expect(transformed.views).toBe(0);
     });
   });
 
@@ -117,11 +129,10 @@ describe('TelegramClientService', () => {
 
       const instance2 = getTelegramClient();
 
-      assert.strictEqual(instance1, instance2);
+      expect(instance1).toBe(instance2);
     });
   });
 });
 
 // Note: Testes de integração (connect, getMessages, authenticate) requerem
 // credenciais reais do Telegram e devem ser executados manualmente em ambiente de teste
-
