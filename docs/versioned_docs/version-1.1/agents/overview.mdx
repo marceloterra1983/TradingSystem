@@ -1,0 +1,216 @@
+---
+title: Agent Catalog
+description: Governance, capabilities, and integration points for TradingSystem autonomous
+  agents.
+tags:
+  - agents
+owner: MCPGuild
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+TradingSystem uses autonomous agents to automate market analysis, risk management, and signal orchestration. The current implementation is the **Agno Agents system**, a Python 3.12 microservice using the Agno framework.
+
+**Agent Systems**:
+
+1. **Agno Agents** (Active) - Multi-agent trading system with 3 specialized agents
+   - MarketAnalysisAgent: Generate trading signals from market data
+   - RiskManagementAgent: Validate signals against risk policies
+   - SignalOrchestratorAgent: Coordinate agent workflows
+
+**Future Agent Systems** (Planned):
+
+- Order Execution Agents: Automate order placement and management
+- Portfolio Optimization Agents: Multi-asset portfolio balancing
+- Backtesting Agents: Historical strategy validation
+
+## Agent Catalog
+
+### Agno Agents System
+
+**Technology**: Python 3.12 + FastAPI + Agno framework + OpenAI
+
+**Port**: 8200
+
+**Status**: Active (MVP)
+
+**Agents**:
+
+1. **MarketAnalysisAgent**
+   - Responsibility: Analyze TP Capital signals and Workspace ideas
+   - Output: BUY/SELL/HOLD recommendations with confidence scores
+   - Integration: TP Capital API (3200), Workspace API (3100)
+
+2. **RiskManagementAgent**
+   - Responsibility: Validate signals against risk limits
+   - Checks: Daily loss limit, position size limit, trading hours
+   - Output: RiskAssessment with approval decision
+
+3. **SignalOrchestratorAgent**
+   - Responsibility: Coordinate MarketAnalysisAgent and RiskManagementAgent
+   - Actions: ANALYZE, VALIDATE, ORCHESTRATE
+   - Output: Aggregated signals and assessments
+
+**Documentation**:
+
+- [Agno Agents Overview](/agents/agno-agents) - Detailed agent descriptions
+- [Agent Flows](./agno-agents/flows) - Execution flows and state transitions
+- [Agent Prompts](./agno-agents/prompts) - Prompt templates and patterns
+- [MCP Integration](./agno-agents/mcp) - MCP capabilities and permissions
+- [Agent Tests](./agno-agents/tests) - Test suite and coverage
+
+**API Reference**:
+
+- `POST /api/v1/agents/analyze` - Market analysis
+- `POST /api/v1/agents/signals` - Signal orchestration
+- `GET /api/v1/agents/status` - Agent status
+- `GET /health` - Service health
+- `GET /metrics` - Prometheus metrics
+
+**Source Code**: `tools/agno-agents/`
+
+**Guide**: Agno Agents Implementation Guide (migration pending)
+
+## Agent Manifests
+
+### MarketAnalysisAgent Manifest
+
+```yaml
+name: MarketAnalysisAgent
+version: 1.0.0
+framework: Agno
+model: OpenAI GPT-4o (optional)
+responsibilities:
+  - Analyze TP Capital signals
+  - Analyze Workspace ideas
+  - Generate BUY/SELL/HOLD recommendations
+tools:
+  - analyze_tp_signals
+  - _extract_size_value
+inputs:
+  - symbols: List[str]
+  - include_tp_capital: bool
+outputs:
+  - signals: List[MarketSignal]
+dependencies:
+  - TP Capital API (port 3200)
+  - Workspace API (port 3100)
+performance:
+  - latency_target: &lt;1s p95
+  - throughput: 100+ req/min
+resilience:
+  - retry: exponential backoff (4 attempts)
+  - circuit_breaker: 5 failures → open
+```
+
+### RiskManagementAgent Manifest
+
+```yaml
+name: RiskManagementAgent
+version: 1.0.0
+framework: Agno
+model: OpenAI GPT-4o (optional)
+responsibilities:
+  - Validate signals against risk policies
+  - Check daily loss limits
+  - Check position size limits
+  - Check trading hours
+tools:
+  - check_daily_loss_limit
+  - check_position_size
+  - check_trading_hours
+inputs:
+  - signal: MarketSignal
+outputs:
+  - assessment: RiskAssessment
+dependencies:
+  - Risk Engine (planned)
+performance:
+  - latency_target: &lt;500ms p95
+  - throughput: 200+ req/min
+resilience:
+  - retry: exponential backoff (4 attempts)
+  - circuit_breaker: 5 failures → open
+```
+
+### SignalOrchestratorAgent Manifest
+
+```yaml
+name: SignalOrchestratorAgent
+version: 1.0.0
+framework: Agno
+model: OpenAI GPT-4o
+responsibilities:
+  - Coordinate agent workflows
+  - Aggregate agent responses
+  - Expose REST endpoints
+tools:
+  - orchestrate_analysis
+inputs:
+  - request: OrchestrationRequest
+outputs:
+  - response: OrchestrationResponse
+dependencies:
+  - MarketAnalysisAgent
+  - RiskManagementAgent
+performance:
+  - latency_target: &lt;2s p95
+  - throughput: 50+ req/min
+```
+
+## Permission Graphs
+
+```
+SignalOrchestratorAgent
+├─> MarketAnalysisAgent
+│   ├─> TPCapitalClient (TP Capital API)
+│   └─> WorkspaceClient (Workspace API)
+└─> RiskManagementAgent
+    └─> RiskEngineClient (Risk Engine - planned)
+```
+
+**Permission Requirements**:
+
+- SignalOrchestratorAgent: `agents:orchestrate`
+- MarketAnalysisAgent: `market-data:read`, `signals:generate`
+- RiskManagementAgent: `risk:read`, `risk:validate`
+
+## Integration Guides
+
+### Dashboard Integration
+
+**Proxy Configuration**: Dashboard proxies `/api/agents` to `http://localhost:8200`
+
+**Usage Example**:
+
+```typescript
+const response = await fetch('/api/agents/analyze', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    symbols: ['PETR4', 'VALE3'],
+    include_tp_capital: true
+  })
+});
+const data = await response.json();
+```
+
+### CLI Integration (Planned)
+
+**Custom Command**: `/agents analyze PETR4`
+
+```bash
+curl -X POST http://localhost:8200/api/v1/agents/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"symbols": ["$1"], "include_tp_capital": true}' \
+  | jq '.signals'
+```
+
+## Troubleshooting
+
+| Symptom | Possible Cause | Recommended Action |
+|---------|----------------|--------------------|
+| 503 on `/api/v1/agents/analyze` | TP Capital API indisponível | Check logs, wait for circuit HALF_OPEN, verify `/health?detailed=true` |
+| Metrics zeroed | Prometheus not configured | Ensure scrape job `agno-agents` in Prometheus config |
+| LLM not responding | `OPENAI_API_KEY` invalid | Validate credentials, check quota, review error logs |
+| High latency | External APIs slow | Monitor `dependency_status`, adjust timeout, implement caching |

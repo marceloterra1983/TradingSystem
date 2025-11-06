@@ -1,0 +1,369 @@
+---
+title: Troubleshooting Guide
+sidebar_position: 14
+description: Common issues and solutions for Telegram hybrid stack
+tags:
+  - telegram-gateway
+  - troubleshooting
+  - debugging
+  - operations
+owner: DevOps
+lastReviewed: '2025-11-03'
+---
+
+# Telegram Stack Troubleshooting
+
+## Common Issues
+
+### 🔴 MTProto Gateway Won't Start
+
+**Symptoms:**
+```bash
+sudo systemctl status telegram-gateway
+# Output: failed (code=exited, status=1)
+```
+
+**Diagnosis:**
+```bash
+# Check logs
+sudo journalctl -u telegram-gateway -n 100
+
+# Common errors:
+# - "Session file not found"
+# - "Cannot connect to Redis"
+# - "Database connection failed"
+```
+
+**Solutions:**
+
+#### Missing Session File
+```bash
+# Verify session exists
+ls -la /opt/telegram-gateway/.session/
+
+# If missing, re-authenticate
+cd /opt/telegram-gateway
+node src/index.js  # Will prompt for phone + code
+
+# Move session to correct location
+mkdir -p .session
+mv telegram.session .session/
+chmod 600 .session/*
+```
+
+#### Redis Connection Failed
+```bash
+# Check Redis is running
+docker ps | grep telegram-redis-master
+
+# Test connection
+docker exec telegram-redis-master redis-cli ping
+
+# If down, restart
+docker restart telegram-redis-master
+```
+
+#### Database Connection Failed
+```bash
+# Check PgBouncer
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway -c "SELECT 1"
+
+# Check TimescaleDB
+docker exec telegram-timescale pg_isready -U telegram
+
+# If down, restart stack
+bash scripts/telegram/start-telegram-stack.sh
+```
+
+---
+
+### 🟡 High Polling Lag
+
+**Symptoms:**
+```
+tp_capital_polling_lag_seconds > 30
+Messages delayed 30+ seconds
+```
+
+**Diagnosis:**
+```bash
+# Check TP Capital health
+curl http://localhost:4005/health | jq
+
+# Check queue depth
+curl http://localhost:4005/metrics | grep messages_waiting
+
+# Check database performance
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -c "SELECT * FROM telegram_gateway.performance_metrics_realtime"
+```
+
+**Solutions:**
+
+#### Queue Backlog
+```bash
+# Increase batch size
+# Edit: apps/tp-capital/src/gatewayPollingWorker.js
+this.batchSize = 200;  # Was 100
+
+# Reduce polling interval
+this.interval = 3000;  # Was 5000 (3s instead of 5s)
+```
+
+#### Database Slow
+```bash
+# Check for locks
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "SELECT * FROM pg_locks WHERE NOT granted"
+
+# Check slow queries
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "SELECT query, mean_exec_time FROM pg_stat_statements 
+      ORDER BY mean_exec_time DESC LIMIT 5"
+```
+
+---
+
+### 🟡 Low Cache Hit Rate
+
+**Symptoms:**
+- Cache hit rate &lt;50%
+- Database CPU high
+- Polling latency >20ms
+
+**Solutions:**
+
+#### Increase TTL
+```javascript
+// RedisTelegramCache.js
+this.HOT_CACHE_TTL = 7200;  // 2 hours (was 1 hour)
+```
+
+#### Warm Cache on Startup
+```javascript
+// Add to Gateway initialization
+await cache.warmCache(channelId);
+```
+
+#### Check Eviction Rate
+```bash
+docker exec telegram-redis-master redis-cli INFO stats | grep evicted_keys
+# If high, increase maxmemory
+```
+
+---
+
+### 🟡 Session Expired
+
+**Symptoms:**
+```
+Telegram connection failed: SESSION_REVOKED
+```
+
+**Solutions:**
+```bash
+# 1. Stop service
+sudo systemctl stop telegram-gateway
+
+# 2. Delete old session
+rm /opt/telegram-gateway/.session/*
+
+# 3. Re-authenticate
+cd /opt/telegram-gateway
+node src/index.js
+# Follow prompts: phone number → SMS code → 2FA password
+
+# 4. Restart service
+sudo systemctl start telegram-gateway
+```
+
+---
+
+### 🟡 Container Won't Start
+
+**Symptoms:**
+```bash
+docker ps | grep telegram-timescale
+# Container status: Restarting or Unhealthy
+```
+
+**Diagnosis:**
+```bash
+# Check logs
+docker logs telegram-timescale --tail 100
+
+# Check health check
+docker inspect telegram-timescale | jq '.[0].State.Health'
+
+# Common issues:
+# - Port already in use
+# - Volume permissions
+# - Insufficient resources
+```
+
+**Solutions:**
+
+#### Port Conflict
+```bash
+# Find process using port
+lsof -i :5434
+
+# Kill process or change port in docker-compose.yml
+```
+
+#### Volume Permissions
+```bash
+# Fix volume permissions
+docker exec -u root telegram-timescale chown -R postgres:postgres /var/lib/postgresql/data
+```
+
+#### Resource Limits
+```bash
+# Check available resources
+docker info | grep -E "CPUs|Total Memory"
+
+# If insufficient, reduce limits in docker-compose.yml
+```
+
+---
+
+## Performance Debugging
+
+### Slow Queries
+
+```bash
+# Enable query logging temporarily
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "ALTER SYSTEM SET log_min_duration_statement = 100"  # Log queries >100ms
+
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "SELECT pg_reload_conf()"
+
+# View slow queries
+docker logs telegram-timescale | grep "duration:"
+
+# Disable when done
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "ALTER SYSTEM RESET log_min_duration_statement"
+```
+
+### Query Plan Analysis
+
+```sql
+-- Explain polling query
+EXPLAIN (ANALYZE, BUFFERS) 
+SELECT * FROM telegram_gateway.messages
+WHERE channel_id = '-1001649127710'
+  AND status = 'received'
+ORDER BY received_at ASC
+LIMIT 100;
+
+-- Check if index used
+-- Expected: Index Scan using idx_telegram_messages_polling_cover
+```
+
+---
+
+## Resource Monitoring
+
+### Docker Container Stats
+
+```bash
+# Real-time stats
+docker stats telegram-timescale telegram-redis-master telegram-rabbitmq
+
+# Expected:
+# - TimescaleDB: CPU 5-20%, MEM 1-1.5GB
+# - Redis: CPU 2-10%, MEM 200-500MB
+# - RabbitMQ: CPU 1-5%, MEM 300-600MB
+```
+
+### System Resources
+
+```bash
+# Overall host usage
+htop
+
+# Disk I/O
+iostat -x 1
+
+# Network
+iftop
+```
+
+---
+
+## Benchmarking
+
+### Before Optimization
+
+```bash
+# Run baseline benchmark
+bash scripts/telegram/benchmark.sh --iterations 1000 > baseline.json
+
+# Results:
+# - Polling: 50ms avg
+# - Dedup: 20ms avg
+# - Updates: 200ms avg
+```
+
+### After Optimization
+
+```bash
+# Apply optimizations
+# 1. SQL indexes
+# 2. Redis cache
+# 3. PgBouncer pooling
+
+# Run benchmark again
+bash scripts/telegram/benchmark.sh --iterations 1000 > optimized.json
+
+# Compare
+python scripts/telegram/compare-benchmarks.py baseline.json optimized.json
+
+# Expected improvements:
+# - Polling: ↓ 80% (50ms → 10ms)
+# - Dedup: ↓ 90% (20ms → 2ms)
+# - Updates: ↓ 97% (200ms → 5ms)
+```
+
+---
+
+## Emergency Procedures
+
+### Kill Switch (Stop All Processing)
+
+```bash
+# Stop TP Capital Worker (stops processing)
+curl -X POST http://localhost:4005/admin/stop-worker
+
+# Stop Gateway (stops ingestion)
+sudo systemctl stop telegram-gateway
+
+# Verify stopped
+bash scripts/telegram/health-check-telegram.sh
+```
+
+### Data Recovery
+
+```bash
+# Restore from latest backup
+LATEST_BACKUP=$(ls -t backups/ | grep telegram-stack | head -1)
+
+# Restore database
+docker cp backups/$LATEST_BACKUP/telegram_gateway_backup.dump telegram-timescale:/tmp/
+docker exec telegram-timescale pg_restore -U telegram -d telegram_gateway --clean /tmp/telegram_gateway_backup.dump
+
+# Restore sessions
+tar -xzf backups/$LATEST_BACKUP/telegram-sessions.tar.gz -C apps/telegram-gateway/
+
+# Restart
+bash scripts/telegram/start-telegram-stack.sh
+```
+
+---
+
+**Related:**
+- [Monitoring Guide](./monitoring-guide.mdx)
+- [Performance Tuning](./performance-tuning.mdx)
+- [Migration Runbook](./migration-runbook.mdx)

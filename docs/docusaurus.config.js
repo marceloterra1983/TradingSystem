@@ -36,13 +36,13 @@ const config = {
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           // Versioning configuration
-          lastVersion: process.env.NODE_ENV === 'development' ? 'current' : '1.0.0',
+          lastVersion: process.env.NODE_ENV === 'development' ? 'current' : '1.1',
           // Version configuration
           // NOTE: Version labels are automatically updated by scripts/docs/auto-version.sh
           // when creating new versions via GitHub Actions workflow (docs-versioning.yml)
           //
           // Label format:
-          // - Latest stable: "X.X.X (Stable) ✅" with path: '' (root)
+          // - Latest stable: "X.X (Stable) ✅" with path: '' (root)
           // - Previous versions: "X.X.X" with path: 'vX.X.X'
           // - Current (unreleased): "Next (Unreleased) 🚧" with path: 'next'
           //
@@ -53,9 +53,14 @@ const config = {
               path: 'next',
               banner: 'unreleased',
             },
-            '1.0.0': {
-              label: '1.0.0 (Stable) ✅',
+            '1.1': {
+              label: '1.1 (Stable) ✅',
               path: '',
+              banner: 'none',
+            },
+            '1.0.0': {
+              label: '1.0.0',
+              path: 'v1.0.0',
               banner: 'none',
             },
             // Example when multiple versions exist:

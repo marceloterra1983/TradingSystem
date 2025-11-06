@@ -1,0 +1,199 @@
+---
+title: "Feature Brief \u2013 Idea Bank"
+description: Product requirements for the Idea Bank/Workspace feature within the Trading
+  App.
+tags:
+  - prd
+  - trading-app
+  - idea-bank
+  - workspace
+owner: ProductOps
+lastReviewed: '2025-10-26'
+language: en
+translated_from: ./feature-idea-bank.pt.mdx
+translation_source_language: pt
+translation_source_hash: a76243efa1870153c6a887d146f61b09a7aad6bf
+---
+## 1. Summary
+
+**Idea Bank** (also known as Workspace) is an idea management system integrated with the TradingSystem Dashboard. It allows users to capture, organize, prioritize, and track ideas for improvements, features, and corrections across all 6 systems of the trading platform. The feature provides CRUD operations, Kanban board visualization, categorization by system, 4 priority levels, 5 status states, tagging, search/filters, and automatic timestamps.
+
+**User Impact**: Centralizes scattered ideas, enables systematic prioritization, tracks implementation status, and provides complete product decision history.
+
+## 2. Goals
+
+**Primary Goal**: Create an idea management system integrated with the Dashboard that allows capturing, organizing, and tracking suggestions for improvements to the TradingSystem.
+
+**Secondary Goals**
+
+1. **Organization**: Categorize ideas across the platform's 6 systems
+2. **Prioritization**: Implement 4 priority levels (low, medium, high, critical)
+3. **Tracking**: Track 5 progress states (new, review, in-progress, completed, rejected)
+4. **Transparency**: Make the roadmap visible through the status of ideas
+5. **Agility**: Allow quick creation of ideas (&lt;30 seconds)
+
+## 3. Non-Goals
+
+- Not a complete project management system (does not replace Jira/Linear)
+- Not a robust bug tracking system (no complex workflows)
+- Not a team collaboration tool (no comments/discussions in v1.0)
+- Not a public voting system (no upvote/downvote in v1.0)
+- Not a multi-tenant platform (single-user for MVP)
+
+## 4. Background
+
+**Before Idea Bank**
+
+- Ideas scattered in notes, emails, and messages
+- Lack of systematic prioritization
+- Difficulty tracking implementation status
+- Lack of product decision history
+- Fragmented communication about new features
+
+**Opportunity**
+
+- Centralized and structured repository
+- Clear prioritization (4 levels)
+- Real-time status tracking
+- Categorization by system (6 categories)
+- Complete history of ideas and decisions
+- Base for product roadmap
+
+**Evidence**: During development, ~20 improvement ideas identified without centralized location; feature requests arise during system use without formal registration.
+
+## 5. User Stories
+
+**Epic 1: Idea Management**
+
+- As a developer, I want to add new ideas quickly so I can capture insights during development
+- As a product manager, I want to view all ideas in one place so I can prioritize the roadmap
+- As a user, I want to filter ideas by category so I can focus on specific systems
+- As a developer, I want to update idea status so I can track implementation progress
+- As a product manager, I want to delete duplicate ideas so the backlog stays clean
+
+**Epic 2: Prioritization**
+
+- As a product manager, I want to set priority levels so the team knows what to work on first
+- As a developer, I want to see high-priority ideas highlighted so I can focus on important work
+
+**Epic 3: Roadmap Visualization**
+
+- As a stakeholder, I want to see a Kanban board so I can visualize progress across states
+- As a developer, I want to drag ideas between columns so I can update status quickly
+
+## 6. Acceptance Criteria
+
+**Quantitative**
+
+- ✅ 100% of ideas registered in centralized system
+- ✅ &lt;30 seconds to add new idea
+- ✅ 95% API service uptime
+- ✅ Support 10,000+ ideas without performance degradation
+
+**Qualitative**
+
+- ✅ Intuitive interface (no training required)
+- ✅ Seamless integration with Dashboard
+- ✅ Clear roadmap visibility through status board
+- ✅ User satisfaction: "Easy to use and useful"
+
+**Functional**
+
+- ✅ CRUD operations for ideas (create, read, update, delete)
+- ✅ 6 categories (documentation, data-collection, database, data-analysis, risk-management, dashboard)
+- ✅ 4 priority levels (low, medium, high, critical) with color-coded badges
+- ✅ 5 status states (new, review, in-progress, completed, rejected)
+- ✅ Kanban board with drag-and-drop between columns
+- ✅ Tagging system with multiple tags per idea
+- ✅ Search in title and description
+- ✅ Filters by category, priority, status, tags
+- ✅ Automatic timestamps (createdAt, updatedAt)
+
+## 7. Dependencies
+
+**Backend**
+
+- Workspace API (port 3102) - Express + LowDB (MVP) or TimescaleDB (future)
+- Database migration from LowDB to PostgreSQL (planned Q1 2026)
+
+**Frontend**
+
+- React 18 + TypeScript
+- Zustand (state management)
+- TanStack Query (server state)
+- @dnd-kit (drag-and-drop)
+- shadcn/ui (components)
+
+**Documentation**
+
+- [Workspace App Overview](../../../apps/workspace/overview)
+- [Database Schema](../../../database/schema) - Idea Bank tables
+- [Frontend Architecture](../../../frontend/engineering/architecture)
+
+## 8. UX/UI References
+
+**Main Page Layout**: Table view with search, filters, and action buttons  
+**Add/Edit Modal**: Form with title, description, category, priority, tags fields  
+**Status Board**: Kanban with 5 columns (New, Review, In Progress, Completed, Rejected)
+
+**Design System**
+
+- **Category Colors**
+  - Documentation: Blue #3B82F6
+  - Data Collection: Green #10B981
+  - Database: Purple #8B5CF6
+  - Data Analysis: Orange #F59E0B
+  - Risk Management: Red #EF4444
+  - Dashboard: Cyan #06B6D4
+- **Priority Colors**
+  - Critical: Red #DC2626
+  - High: Orange #EA580C
+  - Medium: Yellow #CA8A04
+  - Low: Green #16A34A
+
+**Figma/Design Files**: TBD (link once created)
+
+## 9. Metrics
+
+**Product KPIs**
+
+- Total ideas created (cumulative)
+- Ideas by category (distribution)
+- Ideas by priority (distribution)
+- Ideas by status (distribution)
+- Average time to completion (days)
+- Idea creation rate (ideas/week)
+
+**Performance Metrics**
+
+- API response time: &lt;200ms p95
+- Dashboard load time: &lt;2 seconds
+- Search latency: &lt;500ms
+- Drag-and-drop latency: &lt;100ms
+
+**Quality Metrics**
+
+- Duplicate idea rate: &lt;5%
+- Idea completion rate: &gt;60%
+- User satisfaction: "Easy to use and useful"
+
+**Tracking Requirements**
+
+- Log all CRUD operations to audit trail
+- Track idea lifecycle transitions (status changes)
+- Export metrics to Prometheus for Grafana dashboards
+
+## 10. Open Questions
+
+1. **Multi-User Support**: When should we add collaboration features (comments, assignments)? **Decision**: v2.0 (after PostgreSQL migration)
+2. **Voting System**: Should we add upvote/downvote for community prioritization? **Decision**: v2.0 (after multi-user support)
+3. **Export**: Should we support CSV/Excel export? **Decision**: v1.1 (simple feature)
+4. **Notifications**: Should we notify users of status changes? **Decision**: v1.2 (after WebSocket support)
+5. **Integration**: Should ideas link to PRDs, ADRs, or code commits? **Decision**: v1.1 (simple cross-references)
+
+## Related Documentation
+
+- [Trading App Overview](./prd-overview)
+- [Workspace App](../../../apps/workspace/overview)
+- [Workspace API](../../../../api/workspace-api) (when migrated)
+- [Database Schema](../../../../database/schema)

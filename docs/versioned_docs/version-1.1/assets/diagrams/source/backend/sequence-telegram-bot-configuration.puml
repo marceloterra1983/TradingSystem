@@ -1,0 +1,134 @@
+@startuml Telegram Bot Configuration Flow
+!theme plain
+title Telegram Bot Configuration - User Journey
+autonumber
+
+actor User
+participant "Dashboard\n(React)" as Dashboard
+participant "ConnectionsPage\nComponent" as Page
+participant "TelegramBotTableCard\nComponent" as BotTable
+participant "Dialog\nComponent" as Dialog
+participant "localStorage\nAPI" as LocalStorage
+
+' Initial Load
+User -> Dashboard : Navigate to /connections
+activate Dashboard
+Dashboard -> Page : Render ConnectionsPage
+activate Page
+Page -> BotTable : Render TelegramBotTableCard
+activate BotTable
+
+BotTable -> LocalStorage : loadJSON('telegram.bots', [])
+activate LocalStorage
+LocalStorage --> BotTable : BotRecord[] (existing bots)
+deactivate LocalStorage
+
+BotTable -> BotTable : Initialize state\n(bots, botStatuses)
+BotTable --> Page : Render bot table
+Page --> Dashboard : Display page
+Dashboard --> User : Show connections page\nwith existing bots
+
+' Add New Bot
+User -> BotTable : Click "Adicionar Bot" button
+BotTable -> BotTable : Set dialogOpen = true
+BotTable -> Dialog : Open dialog
+activate Dialog
+Dialog --> User : Show bot form
+
+User -> Dialog : Fill form\n- Username: @TPCapitalBot\n- Type: Forwarder\n- Token: 123456:ABC...\n- Description: "Main bot"
+
+User -> Dialog : Click "Salvar" button
+Dialog -> BotTable : handleSubmit()
+deactivate Dialog
+
+BotTable -> BotTable : Validate form\n- username.trim() not empty\n- token.trim() not empty
+alt Validation Passes
+    BotTable -> BotTable : Create BotRecord\n{localId: UUID,\nusername, token,\ntype, description}
+
+    BotTable -> LocalStorage : saveJSON('telegram.bots',\n[...bots, newBot])
+    activate LocalStorage
+    LocalStorage --> BotTable : Success
+    deactivate LocalStorage
+
+    BotTable -> BotTable : Update state\nsetBots([...bots, newBot])
+    BotTable -> BotTable : Initialize status\nstatus: 'disconnected'
+
+    BotTable --> User : Close dialog\nShow success (bot added)
+
+else Validation Fails
+    BotTable --> User : Show error message\n"Informe o username do bot."
+end
+
+' Verify Connection
+User -> BotTable : Click "Verificar" button
+BotTable -> BotTable : handleCheck(botId)
+
+note right
+    **Current: Mock Implementation**
+    Randomly selects status:
+    - connected (green)
+    - degraded (amber)
+    - disconnected (red)
+
+    **Future: Real Implementation**
+    POST /api/telegram/bots/{id}/status
+    Returns actual connection status
+end note
+
+BotTable -> BotTable : Generate random status\nlatencyMs: 150-350ms
+BotTable -> BotTable : Update botStatuses[botId]\n{status, checkedAt, latencyMs}
+BotTable --> User : Update table\n- Status badge (color-coded)\n- Latency displayed\n- Timestamp updated
+
+' Edit Bot
+User -> BotTable : Click "Editar" button
+BotTable -> Dialog : Open dialog with\npre-filled data
+activate Dialog
+Dialog --> User : Show form with\nexisting values
+
+User -> Dialog : Modify token\n(e.g., token expired)
+User -> Dialog : Click "Salvar"
+Dialog -> BotTable : handleSubmit()
+deactivate Dialog
+
+BotTable -> BotTable : Validate form
+BotTable -> BotTable : Update bot in array\nbots.map(b => b.localId === editingBotId\n? {...b, ...changes} : b)
+
+BotTable -> LocalStorage : saveJSON('telegram.bots',\nupdatedBots)
+activate LocalStorage
+LocalStorage --> BotTable : Success
+deactivate LocalStorage
+
+BotTable -> BotTable : Update state
+BotTable --> User : Close dialog\nShow updated bot
+
+' Delete Bot
+User -> BotTable : Click "Excluir" button
+BotTable -> BotTable : handleDelete(botId)
+
+BotTable -> BotTable : Filter bot from array\nbots.filter(b => b.localId !== botId)
+
+BotTable -> LocalStorage : saveJSON('telegram.bots',\nfilteredBots)
+activate LocalStorage
+LocalStorage --> BotTable : Success
+deactivate LocalStorage
+
+BotTable -> BotTable : Remove from botStatuses\ndelete botStatuses[botId]
+
+BotTable -> BotTable : Update state
+BotTable --> User : Bot removed from table
+
+' View Description
+User -> BotTable : Click eye icon\n(description column)
+BotTable -> Dialog : Open description\npreview modal
+activate Dialog
+Dialog --> User : Show full description\n(read-only)
+deactivate Dialog
+
+User -> Dialog : Click "Fechar"
+Dialog --> User : Close modal
+
+deactivate BotTable
+deactivate Page
+deactivate Dashboard
+
+@enduml

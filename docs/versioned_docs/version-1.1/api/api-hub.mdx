@@ -1,0 +1,517 @@
+---
+title: API Documentation Hub
+sidebar_position: 1
+tags: [api, documentation, swagger, openapi]
+domain: api
+type: guide
+summary: Central hub for all TradingSystem APIs with interactive documentation
+status: active
+last_review: "2025-11-04"
+---
+
+# 🚀 API Documentation Hub
+
+Welcome to the TradingSystem API Documentation Hub! This is your central access point for all REST APIs in the TradingSystem ecosystem.
+
+---
+
+## 📚 Available APIs
+
+### 1. Telegram Gateway API
+**Port:** 4010 | **Status:** ✅ Production Ready
+
+Access Telegram messages, channels, and gateway status with TimescaleDB persistence.
+
+**Features:**
+- Message retrieval with advanced filtering
+- Channel CRUD operations
+- Telegram authentication management
+- Gateway metrics and monitoring
+- Message synchronization
+
+**Quick Links:**
+- 🔗 [Interactive Docs (Swagger UI)](/api/telegram-gateway)
+- 📖 [OpenAPI Spec](/specs/telegram-gateway-api.openapi.yaml)
+- 🧪 [Test in Dashboard](http://localhost:3103/#/telegram-gateway)
+- ❤️ [Health Check](http://localhost:4010/health)
+
+**Key Endpoints:**
+```bash
+# Get recent messages
+GET http://localhost:4010/api/messages?limit=20
+
+# Sync messages
+POST http://localhost:4010/api/telegram-gateway/sync-messages
+```
+
+---
+
+### 2. Workspace API  
+**Port:** 3200 | **Status:** ✅ Production Ready (Docker only)
+
+Manage workspace items with TimescaleDB backend.
+
+**Features:**
+- Item CRUD operations
+- Category management
+- Time-series data support
+- Health monitoring
+
+**Quick Links:**
+- 🔗 [Interactive Docs (Swagger UI)](/api/workspace)
+- 📖 [OpenAPI Spec](/specs/workspace.openapi.yaml)
+- ❤️ [Health Check](http://localhost:3200/health)
+
+**Key Endpoints:**
+```bash
+# List all items
+GET http://localhost:3200/api/items
+
+# Create new item
+POST http://localhost:3200/api/items
+```
+
+---
+
+### 3. TP Capital API
+**Port:** 4005 | **Status:** ✅ Production Ready (Docker only)
+
+Telegram message ingestion for TP Capital trading signals.
+
+**Features:**
+- Telegram webhook ingestion
+- Message processing
+- Telegraf metrics export
+- Health monitoring
+
+**Quick Links:**
+- 🔗 [Interactive Docs (Swagger UI)](/api/tp-capital)
+- 📖 [OpenAPI Spec](/specs/tp-capital.openapi.yaml)
+- ❤️ [Health Check](http://localhost:4005/health)
+
+**Key Endpoints:**
+```bash
+# Telegram webhook
+POST http://localhost:4005/webhook/telegram
+
+# Get metrics
+GET http://localhost:4005/metrics
+```
+
+---
+
+### 4. Documentation API
+**Port:** 3401 | **Status:** ✅ Production Ready
+
+Search and manage Docusaurus documentation with FlexSearch and RAG capabilities.
+
+**Features:**
+- Full-text search (FlexSearch)
+- Semantic search (RAG via proxy)
+- Content management
+- Statistics and metrics
+- Version management
+
+**Quick Links:**
+- 🔗 [Interactive Docs (Swagger UI)](/api/documentation-api)
+- 📖 [OpenAPI Spec](/specs/documentation-api.openapi.yaml)
+- ❤️ [Health Check](http://localhost:3401/api/health)
+
+**Key Endpoints:**
+```bash
+# Search documentation
+GET http://localhost:3401/api/search?q=telegram
+
+# RAG semantic search
+GET http://localhost:3401/api/v1/rag/search?query=hybrid+stack
+```
+
+---
+
+### 5. Service Launcher API
+**Port:** 3500 | **Status:** ✅ Production Ready
+
+Orchestrate and monitor TradingSystem services.
+
+**Features:**
+- Service start/stop/restart
+- Health checks (services + containers + databases)
+- Status monitoring
+- Dependency management
+
+**Quick Links:**
+- 📖 [Service Launcher Guide](../apps/service-launcher/overview)
+- ❤️ [Full Health Check](http://localhost:3500/api/health/full)
+
+**Key Endpoints:**
+```bash
+# Get all services status
+GET http://localhost:3500/api/services
+
+# Full health check (services + containers + DBs)
+GET http://localhost:3500/api/health/full
+```
+
+---
+
+### 6. Firecrawl Proxy API
+**Port:** 3600 | **Status:** ✅ Production Ready
+
+Web scraping via Firecrawl with caching and rate limiting.
+
+**Features:**
+- Web scraping and crawling
+- Response caching
+- Rate limiting
+- Health monitoring
+
+**Quick Links:**
+- 🔗 [Interactive Docs (Swagger UI)](/api/firecrawl-proxy)
+- 📖 [OpenAPI Spec](/specs/firecrawl-proxy.openapi.yaml)
+- ❤️ [Health Check](http://localhost:3600/health)
+
+**Key Endpoints:**
+```bash
+# Scrape a URL
+POST http://localhost:3600/api/scrape
+```
+
+---
+
+## 🔧 API Development Tools
+
+### Swagger UI (Interactive Docs)
+
+All APIs have interactive Swagger UI documentation available in Docusaurus:
+
+- **Telegram Gateway:** http://localhost:3400/api/telegram-gateway
+- **Workspace:** http://localhost:3400/api/workspace  
+- **TP Capital:** http://localhost:3400/api/tp-capital
+- **Documentation API:** http://localhost:3400/api/documentation-api
+- **Firecrawl Proxy:** http://localhost:3400/api/firecrawl-proxy
+
+### Postman/Insomnia Collections
+
+Coming soon! Collections will be available for:
+- Quick API testing
+- Environment configurations
+- Example requests
+
+### cURL Examples
+
+See individual API documentation for comprehensive cURL examples.
+
+---
+
+## 🔐 Authentication
+
+### API Keys
+
+Most APIs support optional token-based authentication:
+
+**Headers:**
+- `X-API-Key: <token>`
+- `X-Gateway-Token: <token>` (legacy, for compatibility)
+- `Authorization: Bearer <token>`
+
+**Environment Variables:**
+```bash
+# Telegram Gateway
+TELEGRAM_GATEWAY_API_KEY=your_key_here
+
+# Workspace
+WORKSPACE_API_TOKEN=your_token_here
+
+# TP Capital
+TP_CAPITAL_API_KEY=your_key_here
+```
+
+**Current Keys (from `.env`):**
+```bash
+# Telegram Gateway
+TELEGRAM_GATEWAY_API_KEY=f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85
+
+# See .env file for other API keys
+```
+
+---
+
+## 📊 Rate Limiting
+
+All APIs implement rate limiting to prevent abuse:
+
+| API | Rate Limit | Burst |
+|-----|------------|-------|
+| Telegram Gateway | 300 req/min | 50 req/10s |
+| Workspace | 100 req/min | 20 req/10s |
+| TP Capital | 60 req/min | 10 req/10s |
+| Documentation | 120 req/min | 30 req/10s |
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 300
+X-RateLimit-Remaining: 299
+X-RateLimit-Reset: 1699372800
+```
+
+---
+
+## 🧪 Testing APIs
+
+### Quick Health Check (All Services)
+
+```bash
+# Comprehensive health check
+curl http://localhost:3500/api/health/full | jq '.'
+
+# Individual services
+curl http://localhost:4010/health  # Telegram Gateway
+curl http://localhost:3200/health  # Workspace
+curl http://localhost:4005/health  # TP Capital
+```
+
+### Test Telegram Gateway Sync
+
+```bash
+# Sync messages (requires API key)
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85" \
+  -d '{"limit": 10}' | jq '.'
+```
+
+### Test Documentation Search
+
+```bash
+# Full-text search
+curl "http://localhost:3401/api/search?q=telegram" | jq '.'
+
+# Semantic RAG search
+curl "http://localhost:3401/api/v1/rag/search?query=hybrid+architecture" | jq '.'
+```
+
+---
+
+## 📖 API Guides
+
+### Quick Start Guides
+
+1. **[Telegram Gateway Quick Start](/api/telegram-gateway-quickstart)**
+   - Setup authentication
+   - Sync messages
+   - Query and filter
+
+2. **[Workspace API Guide](/api/workspace-api)**
+   - Create items
+   - Manage categories
+   - Query data
+
+3. **[Documentation Search Guide](/api/documentation-api)**
+   - Full-text search
+   - Semantic search (RAG)
+   - Advanced filtering
+
+### Integration Guides
+
+1. **[Frontend Integration](../frontend/overview)**
+   - React hooks
+   - API clients
+   - Error handling
+
+2. **[Backend Integration](../apps/workspace/overview)**
+   - Service-to-service communication
+   - Authentication
+   - Circuit breakers
+
+---
+
+## 🔍 Common Patterns
+
+### Pagination
+
+All list endpoints support pagination:
+
+```bash
+GET /api/messages?page=1&limit=20&offset=0
+```
+
+### Filtering
+
+Use query parameters for filtering:
+
+```bash
+# Filter by channel
+GET /api/messages?channelId=-1001649127710
+
+# Filter by date range
+GET /api/messages?startDate=2025-11-01&endDate=2025-11-04
+
+# Combine filters
+GET /api/messages?channelId=-1001649127710&startDate=2025-11-04&limit=50
+```
+
+### Sorting
+
+Use `sortBy` and `sortOrder` parameters:
+
+```bash
+GET /api/messages?sortBy=created_at&sortOrder=desc
+```
+
+### Error Handling
+
+All APIs return consistent error responses:
+
+```json
+{
+  "success": false,
+  "error": "ValidationError",
+  "message": "Invalid channel ID format",
+  "code": "INVALID_CHANNEL_ID",
+  "timestamp": "2025-11-04T18:00:00.000Z"
+}
+```
+
+---
+
+## 🚀 Performance Tips
+
+### 1. Use Pagination
+Always use `limit` parameter to avoid large responses:
+```bash
+GET /api/messages?limit=20  # ✅ Good
+GET /api/messages            # ❌ May return 1000+ messages
+```
+
+### 2. Cache Responses
+APIs include cache headers:
+```
+Cache-Control: public, max-age=60
+ETag: "abc123"
+```
+
+Use `If-None-Match` header to leverage caching.
+
+### 3. Batch Operations
+When possible, use batch endpoints:
+```bash
+POST /api/messages/batch  # Process multiple messages
+```
+
+### 4. Use Specific Queries
+Filter on the server side instead of client side:
+```bash
+# ✅ Good: Filter server-side
+GET /api/messages?channelId=123&status=unread
+
+# ❌ Bad: Fetch all and filter client-side
+GET /api/messages
+```
+
+---
+
+## 📊 Monitoring
+
+### Metrics Endpoints
+
+Most APIs export Prometheus-compatible metrics:
+
+```bash
+# Telegram Gateway
+curl http://localhost:4010/metrics
+
+# TP Capital
+curl http://localhost:4005/metrics
+
+# Documentation API
+curl http://localhost:3401/api/metrics
+```
+
+### Grafana Dashboards
+
+Access Grafana for real-time monitoring:
+
+**URL:** http://localhost:3100  
+**Credentials:** admin/admin
+
+**Available Dashboards:**
+- Telegram Gateway Metrics
+- Redis Cache Performance
+- API Response Times
+- Error Rates
+
+---
+
+## 🐛 Troubleshooting
+
+### API Not Responding
+
+```bash
+# 1. Check if service is running
+lsof -i :<port>
+
+# 2. Check health endpoint
+curl http://localhost:<port>/health
+
+# 3. Check logs
+tail -f logs/<service>.log
+
+# 4. Use Service Launcher health check
+curl http://localhost:3500/api/health/full
+```
+
+### Authentication Errors
+
+```bash
+# Verify API key in .env
+grep "API_KEY\|API_TOKEN" .env
+
+# Test with correct key
+curl -H "X-API-Key: your_key" http://localhost:4010/api/messages
+```
+
+### Rate Limit Exceeded
+
+```bash
+# Check rate limit headers
+curl -I http://localhost:4010/api/messages
+
+# Wait for reset time (X-RateLimit-Reset header)
+# Or request rate limit increase
+```
+
+---
+
+## 📚 Additional Resources
+
+### Documentation
+- [Architecture Overview](../apps/overview)
+- [Database Schemas](../database/schema)
+- [Deployment Guide](../tools/overview)
+- [Security Configuration](../tools/security-config/overview)
+
+### Support
+- [Health Check Script](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/maintenance/health-check-all.sh)
+- [Service Launcher](https://github.com/marceloterra1983/TradingSystem/tree/main/backend/api/service-launcher)
+- [Docker Compose Files](https://github.com/marceloterra1983/TradingSystem/tree/main/tools/compose)
+
+### External APIs
+- [Telegram MTProto API](https://core.telegram.org/methods)
+- [FlexSearch Documentation](https://github.com/nextapps-de/flexsearch)
+- [Firecrawl API](https://firecrawl.dev/)
+
+---
+
+## 🎯 Next Steps
+
+1. **Explore Interactive Docs**: Visit Swagger UI for each API
+2. **Try Examples**: Use the cURL examples above
+3. **Read Quick Start Guides**: Follow step-by-step tutorials
+4. **Monitor Performance**: Set up Grafana dashboards
+5. **Report Issues**: Use GitHub Issues for API bugs/suggestions
+
+---
+
+**Last Updated:** 2025-11-04  
+**Maintained By:** TradingSystem Development Team  
+**API Version:** v1.0.0

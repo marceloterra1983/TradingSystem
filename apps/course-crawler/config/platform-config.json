@@ -1,0 +1,29 @@
+{
+  "login": {
+    "url": "https://dqlabs.memberkit.com.br/",
+    "usernameSelector": "#user_email",
+    "passwordSelector": "#user_password",
+    "submitSelector": "input[type=\"submit\"][value=\"Login\"]",
+    "postLoginWaitSelector": "a.navbar__link.nav-item-course.active"
+  },
+  "courses": {
+    "url": "https://dqlabs.memberkit.com.br/",
+    "courseItemSelector": "div.muuri .card",
+    "titleSelector": ".pt-3 a",
+    "linkSelector": ".pt-3 a"
+  },
+  "modules": {
+    "moduleListSelector": "div.section",
+    "titleSelector": "h4 span.ml-2\\.5",
+    "linkSelector": "ul.section__items li a.lesson__title"
+  },
+  "classes": {
+    "classListSelector": "ul.section__items li",
+    "titleSelector": "a.lesson__title",
+    "linkSelector": "a.lesson__title",
+    "contentSelector": "div[data-controller=\"panda\"], main .prose",
+    "attachmentSelector": ".lesson__attachments a, a[data-controller=\"download\"], .lesson__links a",
+    "videoSelector": "video, iframe, div[data-panda-player-url-value]",
+    "durationSelector": "small.lesson__muted"
+  }
+}

@@ -1,0 +1,228 @@
+---
+title: Migrations
+description: Database migration workflows and tooling for TradingSystem.
+tags:
+  - database
+  - migrations
+owner: DataOps
+lastReviewed: '2025-10-27'
+---
+## Overview
+
+TradingSystem successfully migrated from legacy database organization toward an app-based architecture with dedicated databases and schemas. QuestDB remains the time-series backbone while TimescaleDB/PostgreSQL now powers core applications with ACID transactions and concurrency support.
+
+**Current State**:
+
+- ✅ QuestDB stores TP Capital signals and Telegram metadata (append-only, day-partitioned).  
+- ✅ TimescaleDB powers TP Capital API and Workspace services with relational workloads.  
+- ✅ Database structure organized by application domain (`APPS-TPCAPITAL`, `APPS-WORKSPACE`).  
+- ✅ Prisma migrations for Documentation API with automated schema management.  
+- ⚠️ LowDB still active for legacy Idea Bank (migration to PostgreSQL pending).
+
+**Database Organization**:
+
+- **APPS-TPCAPITAL**: TimescaleDB database with `tp-capital` schema for TP Capital trading signals and metadata.  
+- **APPS-WORKSPACE**: TimescaleDB database with `workspace` schema for workspace items and audit logging.  
+- **documentation-api**: PostgreSQL database managed by Prisma for documentation systems, ideas, and files.  
+- **QuestDB**: Time-series data for TP Capital signals, Telegram metadata, and LangGraph events.
+
+## Completed Migrations
+
+### Database Structure Migration (Oct 2025)
+
+**Objective**: Migrate from monolithic database structure to app-based organization.  
+**Status**: ✅ **Completed**  
+**Date**: October 2025
+
+**Migration Details**:
+
+- Migrated `tradingsystem` database → `APPS-TPCAPITAL` with `tp-capital` schema
+- Migrated `frontend_apps` database → `APPS-WORKSPACE` with `workspace` schema  
+- All data preserved with integrity validation
+- Automatic backups created before migration
+
+**Scripts Used**:
+
+- `scripts/database/migrate-database-structure.sh` - Main migration script
+- `scripts/database/migrate-database-structure.sql` - SQL migration logic
+- Backups stored in `backups/database-migration-YYYYMMDD-HHMMSS/`
+
+### Documentation API Prisma Migration (Oct 2025)
+
+**Objective**: Migrate Documentation API to Prisma ORM with PostgreSQL.  
+**Status**: ✅ **Completed**  
+**Location**: `backend/api/documentation-api/prisma/`
+
+**Schema**: Documentation systems, ideas, files, and audit logging tables with proper foreign keys and indexes.
+
+## Migration Tooling
+
+### Current Migration Scripts
+
+**Location**: `scripts/database/`
+
+| Script | Purpose | Status |
+|--------|---------|--------|
+| `migrate-database-structure.sh` | Main migration script for APPS reorganization | ✅ Active |
+| `migrate-database-structure.sql` | SQL logic for database migration | ✅ Active |
+| `backup-timescaledb.sh` | Automated TimescaleDB backups | ✅ Active |
+| `restore-questdb.sh` | QuestDB table restoration | ✅ Active |
+| `setup-timescaledb-stack.sh` | TimescaleDB infrastructure setup | ✅ Active |
+
+### Prisma Migrations
+
+**Documentation API** uses Prisma for schema management:
+
+```bash
+cd backend/api/documentation-api
+
+# Apply pending migrations
+npx prisma migrate deploy
+
+# Create new migration
+npx prisma migrate dev --name migration_name
+
+# Check migration status
+npx prisma migrate status
+```
+
+## Pending Migrations
+
+### Idea Bank to PostgreSQL (Q1 2026)
+
+**Objective**: Replace LowDB JSON storage with TimescaleDB for Idea Bank feature.  
+**Status**: ⏳ **Planned**  
+**Current State**: Using LowDB file storage  
+**Target**: PostgreSQL/TimescaleDB with proper relational schema
+
+**Prerequisites**:
+
+- Define relational schema for ideas, categories, and metadata
+- Build ETL script for LowDB → PostgreSQL migration
+- Implement backup and validation procedures
+- Schedule maintenance window
+
+**Migration Script**:
+
+```bash
+# Backup LowDB JSON
+cp db/ideas.json db/ideas.json.backup.$(date +%Y%m%d)
+
+# Run ETL migration
+node scripts/migrate-ideas-to-postgres.js
+
+# Validate migration
+psql -h localhost -p 5433 -U timescale -d "APPS-WORKSPACE" -c "SELECT count(*) FROM ideas;"
+```
+
+## Migration History
+
+| Date | Migration | Status | Details |
+|------|-----------|--------|---------|
+| Oct 2025 | Database Structure Reorganization | ✅ Completed | Migrated tradingsystem → APPS-TPCAPITAL, frontend_apps → APPS-WORKSPACE |
+| Oct 2025 | Documentation API Prisma Migration | ✅ Completed | Migrated to Prisma ORM with PostgreSQL |
+| Q1 2026 | Idea Bank to PostgreSQL | ⏳ Planned | Replace LowDB with TimescaleDB |
+
+## Specific Migration Plans
+
+### Idea Bank to PostgreSQL
+
+- **Objective**: Replace LowDB with TimescaleDB for Idea Bank.  
+- **Status**: ⏳ Planned (Q1 2026).  
+- **Target Database**: `APPS-WORKSPACE`  
+- **Target Schema**: New `ideas` schema with proper relationships
+- **Prerequisites**: Complete schema design, ETL scripts, backup automation
+
+## Best Practices
+
+**Before Migration**:
+
+1. Backup data stores (LowDB, QuestDB, configs).  
+2. Test ETL end-to-end with validation.  
+3. Document rollback steps.  
+4. Notify stakeholders 48 hours in advance.  
+5. Schedule during low-traffic windows.
+
+**During Migration**:
+
+1. Tail logs for errors and warnings.  
+2. Validate incrementally after each batch.  
+3. Keep backups accessible until verification completes.  
+4. Smoke test APIs after each phase.  
+5. Document anomalies.
+
+**After Migration**:
+
+1. Monitor latency, throughput, and error rates.  
+2. Confirm data integrity with checksums and spot checks.  
+3. Update diagrams, runbooks, and support docs.  
+4. Archive legacy files for 90 days.  
+5. Capture lessons learned in post-mortem.
+
+## Rollback Procedures
+
+### For Database Structure Migrations
+
+If a migration to APPS-TPCAPITAL or APPS-WORKSPACE fails:
+
+1. **Stop impacted services**:
+
+   ```bash
+   docker-compose -f tools/compose/docker-compose.timescale.yml stop
+   ```
+
+2. **Restore from backup**:
+
+   ```bash
+   # Locate backup directory
+   cd backups/database-migration-YYYYMMDD-HHMMSS/
+   
+   # Restore tradingsystem database
+   docker exec -i data-timescaledb pg_restore -U timescale -d tradingsystem -c tradingsystem_backup.dump
+   
+   # Restore frontend_apps database
+   docker exec -i data-timescaledb pg_restore -U timescale -d frontend_apps -c frontend_apps_backup.dump
+   ```
+
+3. **Restart services**:
+
+   ```bash
+   docker-compose -f tools/compose/docker-compose.timescale.yml start
+   ```
+
+4. **Validate data integrity**:
+
+   ```bash
+   # Check record counts
+   docker exec data-timescaledb psql -U timescale -d tradingsystem -c "SELECT COUNT(*) FROM tp_capital_signals;"
+   docker exec data-timescaledb psql -U timescale -d frontend_apps -c "SELECT COUNT(*) FROM workspace_items;"
+   ```
+
+5. **Review logs** and notify stakeholders
+
+### For LowDB to PostgreSQL Migrations
+
+If Idea Bank migration fails:
+
+1. **Restore LowDB files**:
+
+   ```bash
+   cp db/ideas.json.backup.YYYYMMDD db/ideas.json
+   cp db/db.json.backup.YYYYMMDD db/db.json
+   ```
+
+2. **Revert application changes**:
+
+   ```bash
+   git revert <migration-commit-sha>
+   npm install
+   ```
+
+3. **Restart services** and validate functionality
+
+## Related Documentation
+
+- [Database Overview](./overview) – Architecture and data stores.  
+- [Schema Reference](./schema) – Detailed table definitions.  
+- [Retention & Backup](./retention-backup) – Retention schedules and backup runbooks.  
+- Migration strategy ADR, PostgreSQL operations guides, and related runbooks migrate separately.

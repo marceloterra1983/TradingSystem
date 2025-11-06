@@ -1,0 +1,206 @@
+---
+title: Port Registry & Services Matrix
+description: Fonte única de verdade para portas, protocolos e owners do TradingSystem.
+tags:
+  - tools
+  - networking
+  - governance
+slug: /tools/ports-services/overview
+---
+
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
+<!-- Last generated: 2025-11-06T22:44:26.260Z -->
+<!-- Source: docs/context/ops/service-port-map.md -->
+> **⚠️ Arquivo gerado automaticamente. Não editar manualmente.**
+> Última geração: 2025-11-06T15:05:33.408Z
+
+## Port Ranges
+
+| Stack | Range |
+|-------|-------|
+| Admin Ui High | 15000-15999 |
+| Automation | 3500-3699 |
+| Automation Platforms | 8180-8899 |
+| Cache | 6300-6399 |
+| Dashboard Ui | 3100-3199 |
+| Db Core | 5000-5499 |
+| Devtools | 8000-8299 |
+| Documentation | 3400-3499 |
+| External Integrations | 4000-4099 |
+| Frontend Ui | 3000-3099 |
+| Integrations | 3200-3299 |
+| Messaging | 5600-5699 |
+| Monitoring | 9000-9299 |
+| Pgbouncer | 6400-6499 |
+| Sentinel | 26000-26999 |
+
+## Services by Stack
+
+### Admin Ui High (15000-15999)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| telegram-rabbitmq-admin | 15672 | http | Telegram Squad | ✅ Active | Console de gerenciamento do RabbitMQ |
+
+### Automation (3500-3699)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| service-launcher | 3500 | http | Platform Ops | ✅ Active | Service Launcher / Status UI para orquestração local |
+| firecrawl-proxy | 3600 | http | Pesquisa | ✅ Active | Proxy Express que protege o Firecrawl upstream |
+
+### Automation Platforms (8180-8899)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| kestra-orchestrator | 8180 | http | ToolingGuild | ✅ Active | Kestra orchestrator UI |
+| kestra-management | 8685 | http | ToolingGuild | ✅ Active | Kestra management/worker endpoint |
+
+### Cache (6300-6399)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| qdrant | 6333 | http | AI Guild | ✅ Active | Vector DB (Qdrant) para embeddings |
+| telegram-redis-master | 6379 | redis | Telegram Squad | ✅ Active | Redis master para cache quente do Telegram |
+| infra-redis-dev | 6380 | redis | AI Guild | ✅ Active | Redis dev usado nos fluxos LangGraph |
+| telegram-redis-replica | 6385 | redis | Telegram Squad | ✅ Active | Replica Redis dedicada a leituras do gateway |
+
+### Dashboard Ui (3100-3199)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| api-viewer | 3101 | http | Documentacao | ✅ Active | Visualização de especificações OpenAPI/AsyncAPI |
+| documentation-api-viewer | 3102 | http | Documentacao | ⚠️ Deprecated | Viewer secundário usado em validações internas |
+| dashboard | 3103 | http | Frontend Guild | ✅ Active | Frontend principal do TradingSystem |
+
+### Db Core (5000-5499)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| timescaledb-pgadmin | 5050 | http | Data Platform | ✅ Active | pgAdmin para administração do Timescale |
+| postgres-langgraph | 5432 | postgres | AI Guild | ✅ Active | PostgreSQL usado pelos fluxos LangGraph |
+| timescaledb | 5433 | postgres | Data Platform | ✅ Active | TimescaleDB principal da stack Workspace |
+| telegram-timescale | 5434 | postgres | Telegram Squad | ✅ Active | TimescaleDB dedicado para ingestão do Telegram |
+
+### Devtools (8000-8299)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| timescaledb-pgweb | 8081 | http | Data Platform | ✅ Active | pgWeb leve para consultas PostgreSQL |
+| langgraph | 8111 | http | AI Guild | ✅ Active | Ambiente LangGraph produção local |
+| langgraph-dev | 8112 | http | AI Guild | ✅ Active | Ambiente LangGraph dev/sandbox |
+
+### Documentation (3400-3499)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| documentation-hub | 3400 | http | Documentacao | ✅ Active | Hub de documentação (Docusaurus v3) |
+| documentation-api | 3401 | http | Documentacao | ✅ Active | API de documentação (Express + FlexSearch) |
+
+### External Integrations (4000-4099)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| telegram-mtproto | 4007 | http | Telegram Squad | ✅ Active | Gateway MTProto principal (HTTP + metrics) |
+| tp-capital-api | 4008 | http | TP Capital Squad | ✅ Active | API ingestora de sinais do TP Capital |
+| telegram-gateway-api | 4010 | http | Telegram Squad | ✅ Active | API REST do Telegram Gateway (consulta e sync) |
+
+### Frontend Ui (3000-3099)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| grafana | 3000 | http | Observabilidade | ✅ Active | Dashboards pré-provisionados para métricas internas |
+| firecrawl-api | 3002 | http | Pesquisa | ✅ Active | Instância self-hosted da API do Firecrawl |
+| documentation-legacy | 3004 | http | Documentacao | ⚠️ Deprecated | Hub de documentação Docusaurus v2 (legado) |
+
+### Integrations (3200-3299)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| workspace-api | 3200 | http | Workspace Team | ✅ Active | API Workspace/Library para automações locais |
+
+### Messaging (5600-5699)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| telegram-rabbitmq | 5672 | rabbitmq | Telegram Squad | ✅ Active | Fila AMQP usada para pub/sub interno |
+
+### Monitoring (9000-9299)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| questdb | 9002 | http | Observabilidade | ✅ Active | QuestDB usado para telemetria de workflows |
+| prometheus | 9090 | http | Observabilidade | ✅ Active | Servidor Prometheus central |
+| alertmanager | 9093 | http | Observabilidade | ✅ Active | Alertmanager para roteamento de alertas |
+| timescaledb-exporter | 9187 | http | Observabilidade | ✅ Active | Exporter Prometheus para o Timescale |
+
+### Pgbouncer (6400-6499)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| telegram-pgbouncer | 6434 | postgres | Telegram Squad | ✅ Active | PgBouncer conectado ao Timescale do Telegram |
+
+### Sentinel (26000-26999)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| telegram-redis-sentinel | 26379 | redis | Telegram Squad | ✅ Active | Sentinel acompanha failover do cluster Redis |

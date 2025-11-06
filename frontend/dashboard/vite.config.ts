@@ -97,12 +97,11 @@ export default defineConfig(({ mode }) => {
   const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
 
   const libraryProxy = resolveProxy(
-    env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL,
-    'http://localhost:3210',  // Updated from 3201 → 3210 (PostgreSQL stack)
-    '/api',
+    env.WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL,
+    'http://localhost:3210/api',  // Updated from 3201 → 3210 (PostgreSQL stack)
   );
   const tpCapitalProxy = resolveProxy(
-    env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
+    env.TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
     'http://localhost:4008',
   );
   // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX
@@ -120,8 +119,8 @@ export default defineConfig(({ mode }) => {
     'http://localhost:3500',
   );
   const docsProxy = resolveProxy(
-    env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3400',
+    env.DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
+    'http://localhost:3404',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,

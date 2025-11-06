@@ -1,0 +1,186 @@
+@startuml workspace-neon-data-flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+skinparam ArrowColor #666666
+skinparam ActorBorderColor #333333
+skinparam ParticipantBorderColor #333333
+
+title Workspace Data Flow - Create Item (POST /api/items)
+
+actor Developer as dev
+participant "Dashboard\n(React)" as dash
+box "Workspace API (Port 3200)" #E8F4F8
+    participant "Express Router" as router
+    participant "Validators" as validator
+    participant "Middleware Stack" as middleware
+    participant "NeonClient" as client
+end box
+
+box "Neon PostgreSQL Cluster" #E6FFFA
+    participant "Compute\n(Port 5433)" as compute
+    participant "Pageserver\n(Port 6400)" as pageserver
+    participant "Safekeeper\n(Port 5454)" as safekeeper
+end box
+
+database "Persistent\nStorage" as storage
+
+' ==============================================================================
+' REQUEST FLOW
+' ==============================================================================
+dev -> dash: Create new item\n(title, description, category)
+activate dash
+
+dash -> router: POST /api/items\n{\n  "title": "Feature X",\n  "description": "...",\n  "category": "dashboard",\n  "priority": "high"\n}
+activate router
+
+router -> middleware: Apply middleware stack
+activate middleware
+note right
+  1. Correlation ID
+  2. Compression
+  3. Helmet (security)
+  4. CORS validation
+  5. Rate limiting (120 req/min)
+  6. Request metrics
+end note
+middleware --> router: Request validated
+deactivate middleware
+
+router -> validator: Validate input fields
+activate validator
+note right
+  **Validations:**
+  • title: required, non-empty
+  • description: required, non-empty
+  • category: must exist in workspace_categories
+  • priority: must be in [low, medium, high, critical]
+  • tags: optional array of strings
+end note
+validator -> client: Check category exists
+activate client
+client -> compute: SELECT * FROM workspace_categories\nWHERE name = $1 AND is_active = true
+activate compute
+compute -> pageserver: Read page with category data
+activate pageserver
+pageserver -> storage: Fetch pages
+activate storage
+storage --> pageserver: Page data
+deactivate storage
+pageserver --> compute: Category row
+deactivate pageserver
+compute --> client: { name: "dashboard", display_name: "Dashboard" }
+deactivate compute
+client --> validator: Category valid ✓
+deactivate client
+validator --> router: Validation passed ✓
+deactivate validator
+
+' ==============================================================================
+' DATABASE WRITE
+' ==============================================================================
+router -> client: createItem(itemData)
+activate client
+
+client -> client: Map fields\n(camelCase → snake_case)
+note right
+  **Field Mapping:**
+  createdAt → created_at
+  updatedAt → updated_at
+  tags → tags (array)
+  metadata → metadata (JSONB)
+end note
+
+client -> compute: INSERT INTO workspace_items\n(title, description, category, priority,\n status, tags, created_at, updated_at)\nVALUES ($1, $2, $3, $4, 'new', $5, NOW(), NOW())\nRETURNING *
+activate compute
+
+compute -> safekeeper: Write WAL record
+activate safekeeper
+note right
+  **Write-Ahead Log**
+  Ensures durability
+  before acknowledging
+end note
+safekeeper -> storage: Persist WAL
+activate storage
+storage --> safekeeper: WAL written ✓
+deactivate storage
+safekeeper --> compute: WAL acknowledged
+deactivate safekeeper
+
+compute -> pageserver: Store new page
+activate pageserver
+pageserver -> storage: Write page to disk
+activate storage
+storage --> pageserver: Page written ✓
+deactivate storage
+pageserver --> compute: Page stored
+deactivate pageserver
+
+compute --> client: {\n  id: 42,\n  title: "Feature X",\n  description: "...",\n  category: "dashboard",\n  priority: "high",\n  status: "new",\n  tags: [],\n  created_at: "2025-11-03T10:00:00Z",\n  updated_at: "2025-11-03T10:00:00Z"\n}
+deactivate compute
+
+client -> client: Map row\n(snake_case → camelCase)
+note right
+  **Row Mapping:**
+  id: String(id)  // Convert to string
+  tags: [] if null
+  metadata: {} if null
+  updatedAt: updatedAt ?? createdAt
+end note
+
+client --> router: Created item (mapped)
+deactivate client
+
+' ==============================================================================
+' RESPONSE FLOW
+' ==============================================================================
+router -> middleware: Log request & metrics
+activate middleware
+note right
+  **Metrics Recorded:**
+  • workspace_api_requests_total++
+  • workspace_api_request_duration_seconds
+  • Response time: 85ms
+  • Status: 201 Created
+end note
+middleware --> router: Metrics recorded
+deactivate middleware
+
+router --> dash: HTTP 201 Created\n{\n  "success": true,\n  "message": "Item created successfully",\n  "data": {\n    "id": "42",\n    "title": "Feature X",\n    "category": "dashboard",\n    "priority": "high",\n    "status": "new",\n    "createdAt": "2025-11-03T10:00:00Z"\n  }\n}
+deactivate router
+
+dash -> dash: Update UI\n• Add to table\n• Add to Kanban (New column)\n• Show success toast
+dash --> dev: Item created ✓
+deactivate dash
+
+' ==============================================================================
+' AUTOMATIC TRIGGER
+' ==============================================================================
+note over compute
+  **Automatic Trigger Fired:**
+  trigger_items_updated_at
+  → update_updated_at_column()
+  → Sets updated_at = NOW()
+end note
+
+' ==============================================================================
+' TIMING
+' ==============================================================================
+note left of dev
+  **Performance Target:**
+  Total time: < 100ms
+  
+  **Breakdown:**
+  • Network: 10ms
+  • Validation: 15ms
+  • Category check: 20ms
+  • Insert: 40ms
+  • Response: 15ms
+  
+  **Total: ~85ms** ✓
+end note
+
+@enduml
+
+

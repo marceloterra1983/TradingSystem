@@ -1,0 +1,11 @@
+{
+  "label": "Design System",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Design System",
+    "slug": "/frontend/design-system",
+    "description": "Tokens, components, and design patterns for the dashboard."
+  }
+}

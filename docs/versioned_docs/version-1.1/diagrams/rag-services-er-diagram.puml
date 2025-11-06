@@ -1,0 +1,270 @@
+@startuml RAG Services - Entity Relationship Diagram
+!theme plain
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+title RAG Services - Complete Entity Relationship Diagram
+
+' ============================================================================
+' ENTITIES
+' ============================================================================
+
+entity "rag.collections" as collections {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR(100) <<UK>>
+    display_name : VARCHAR(200)
+    description : TEXT
+    * directory : TEXT
+    * embedding_model : VARCHAR(100)
+    * chunk_size : INTEGER
+    * chunk_overlap : INTEGER
+    * file_types : TEXT[]
+    * recursive : BOOLEAN
+    * enabled : BOOLEAN
+    * auto_update : BOOLEAN
+    * status : VARCHAR(50)
+    qdrant_collection_name : VARCHAR(100)
+    vector_dimensions : INTEGER
+    total_documents : INTEGER
+    indexed_documents : INTEGER
+    total_chunks : INTEGER
+    total_size_bytes : BIGINT
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+    last_indexed_at : TIMESTAMPTZ
+    last_sync_at : TIMESTAMPTZ
+    metadata : JSONB
+    created_by : VARCHAR(100)
+    updated_by : VARCHAR(100)
+}
+
+entity "rag.documents" as documents {
+    * id : UUID <<PK>>
+    --
+    * collection_id : UUID <<FK>>
+    * file_path : TEXT
+    * absolute_path : TEXT
+    * filename : VARCHAR(255)
+    file_extension : VARCHAR(50)
+    title : TEXT
+    description : TEXT
+    language : VARCHAR(10)
+    * file_size_bytes : BIGINT
+    file_hash : VARCHAR(64)
+    last_modified_at : TIMESTAMPTZ
+    * indexed : BOOLEAN
+    * index_status : VARCHAR(50)
+    chunks_count : INTEGER
+    vectors_count : INTEGER
+    last_error : TEXT
+    error_count : INTEGER
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+    indexed_at : TIMESTAMPTZ
+    frontmatter : JSONB
+    metadata : JSONB
+}
+
+entity "rag.chunks" as chunks {
+    * id : UUID <<PK>>
+    --
+    * document_id : UUID <<FK>>
+    * collection_id : UUID <<FK>>
+    * qdrant_point_id : UUID <<UK>>
+    * qdrant_collection : VARCHAR(100)
+    * content : TEXT
+    content_hash : VARCHAR(64)
+    * chunk_index : INTEGER
+    * chunk_size : INTEGER
+    chunk_overlap : INTEGER
+    start_position : INTEGER
+    end_position : INTEGER
+    * embedding_model : VARCHAR(100)
+    * vector_dimensions : INTEGER
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+    metadata : JSONB
+}
+
+entity "rag.ingestion_jobs\n<<HYPERTABLE>>" as ingestion_jobs {
+    * id : UUID <<PK>>
+    --
+    * collection_id : UUID <<FK>>
+    * job_type : VARCHAR(50)
+    * trigger_type : VARCHAR(50)
+    * status : VARCHAR(50)
+    * started_at : TIMESTAMPTZ <<PARTITION KEY>>
+    completed_at : TIMESTAMPTZ
+    duration_ms : INTEGER
+    triggered_by : VARCHAR(100)
+    trigger_metadata : JSONB
+    documents_total : INTEGER
+    documents_processed : INTEGER
+    documents_failed : INTEGER
+    documents_skipped : INTEGER
+    chunks_generated : INTEGER
+    vectors_generated : INTEGER
+    bytes_processed : BIGINT
+    avg_processing_time_ms : INTEGER
+    throughput_docs_per_sec : NUMERIC(10,2)
+    error_message : TEXT
+    error_count : INTEGER
+    failed_documents : JSONB
+    config_snapshot : JSONB
+    metadata : JSONB
+}
+
+entity "rag.query_logs\n<<HYPERTABLE>>" as query_logs {
+    * id : UUID <<PK>>
+    --
+    collection_id : UUID <<FK>>
+    * query_text : TEXT
+    * query_type : VARCHAR(50)
+    query_hash : VARCHAR(64)
+    * executed_at : TIMESTAMPTZ <<PARTITION KEY>>
+    user_id : VARCHAR(100)
+    session_id : VARCHAR(100)
+    ip_address : INET
+    user_agent : TEXT
+    max_results : INTEGER
+    filters : JSONB
+    results_count : INTEGER
+    results_summary : JSONB
+    * duration_ms : INTEGER
+    embedding_time_ms : INTEGER
+    vector_search_time_ms : INTEGER
+    llm_generation_time_ms : INTEGER
+    cache_hit : BOOLEAN
+    gpu_wait_time_ms : INTEGER
+    gpu_processing_time_ms : INTEGER
+    top_relevance_score : NUMERIC(5,4)
+    avg_relevance_score : NUMERIC(5,4)
+    * success : BOOLEAN
+    error_message : TEXT
+    error_type : VARCHAR(100)
+    metadata : JSONB
+}
+
+entity "rag.embedding_models" as embedding_models {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR(100) <<UK>>
+    * display_name : VARCHAR(200)
+    description : TEXT
+    * provider : VARCHAR(100)
+    * dimensions : INTEGER
+    max_tokens : INTEGER
+    model_size_mb : INTEGER
+    avg_inference_time_ms : INTEGER
+    tokens_per_second : INTEGER
+    * available : BOOLEAN
+    requires_gpu : BOOLEAN
+    optimized_for : TEXT[]
+    language_support : TEXT[]
+    * created_at : TIMESTAMPTZ
+    * updated_at : TIMESTAMPTZ
+    last_used_at : TIMESTAMPTZ
+    usage_count : BIGINT
+    error_count : BIGINT
+    config : JSONB
+    metadata : JSONB
+}
+
+' ============================================================================
+' RELATIONSHIPS
+' ============================================================================
+
+collections ||--o{ documents : "contains"
+collections ||--o{ chunks : "contains"
+collections ||--o{ ingestion_jobs : "tracks"
+collections ||--o{ query_logs : "logs queries for"
+
+documents ||--o{ chunks : "split into"
+documents }o--|| collections : "belongs to"
+
+chunks }o--|| documents : "part of"
+chunks }o--|| collections : "stored in"
+
+ingestion_jobs }o--|| collections : "processes"
+
+query_logs }o--o| collections : "queries"
+
+' ============================================================================
+' NOTES
+' ============================================================================
+
+note right of collections
+  **Main collection configuration**
+  - Stores collection metadata
+  - Links to Qdrant collections
+  - Tracks statistics (documents, chunks)
+  - Supports multiple embedding models
+end note
+
+note right of documents
+  **Individual document metadata**
+  - Tracks source files
+  - Stores file hash (change detection)
+  - Links to parent collection
+  - Trigger updates collection stats
+end note
+
+note right of chunks
+  **Text chunks and vector mappings**
+  - Maps PostgreSQL ↔ Qdrant
+  - Stores chunk content (preview)
+  - Enables orphan detection
+  - One-to-one with Qdrant points
+end note
+
+note right of ingestion_jobs
+  **Ingestion job history (HYPERTABLE)**
+  - Partitioned by started_at (daily)
+  - Tracks job lifecycle
+  - Performance metrics
+  - Continuous aggregates available
+end note
+
+note right of query_logs
+  **User query logs (HYPERTABLE)**
+  - Partitioned by executed_at (hourly)
+  - Performance metrics (GPU, cache)
+  - Relevance scoring
+  - Continuous aggregates available
+end note
+
+note right of embedding_models
+  **Available embedding models**
+  - Model catalog
+  - Characteristics (dimensions, size)
+  - Usage tracking
+  - Independent table
+end note
+
+' ============================================================================
+' LEGEND
+' ============================================================================
+
+legend bottom right
+  **Legend**
+  <<PK>> = Primary Key
+  <<FK>> = Foreign Key
+  <<UK>> = Unique Key
+  <<PARTITION KEY>> = TimescaleDB Partitioning Key
+  <<HYPERTABLE>> = TimescaleDB Hypertable (time-series optimized)
+  
+  **Relationships:**
+  ||--o{ = One-to-Many
+  }o--|| = Many-to-One
+  }o--o| = Many-to-Zero-or-One
+  
+  **Database:** TimescaleDB (PostgreSQL + time-series)
+  **Schema:** rag
+  **Version:** 1.0.0
+  **Last Updated:** 2025-11-02
+end legend
+
+@enduml
+

@@ -1,0 +1,209 @@
+@startuml
+title Customizable Layout - User Interaction Flow
+
+actor User
+participant "Page Component" as Page
+participant "CustomizablePageLayout" as CustomLayout
+participant "LayoutControls" as Controls
+participant "DraggableGridLayout" as GridLayout
+participant "DragHandle" as DragHandle
+participant "CollapsibleCard" as Card
+participant "useCustomLayout Hook" as Hook
+database "localStorage" as LocalStorage
+
+== Scenario 1: Initial Page Load ==
+User -> Page : Navigate to page
+activate Page
+
+Page -> CustomLayout : Render with\npageId="my-page"\ndefaultColumns=2
+activate CustomLayout
+
+CustomLayout -> Hook : Initialize(\npageId="my-page",\ncomponentIds=["section1", "section2", "section3"],\ndefaultColumns=2)
+activate Hook
+
+Hook -> LocalStorage : getItem('tradingSystem_layout_my-page')
+activate LocalStorage
+
+alt Layout exists in localStorage
+  LocalStorage --> Hook : {columns: 2, componentLayout: {...}}
+  Hook -> Hook : Validate layout structure
+  Hook -> Hook : Apply saved layout
+else No saved layout
+  LocalStorage --> Hook : null
+  Hook -> Hook : Use defaultColumns=2
+  Hook -> Hook : Distribute components sequentially\n(section1→col0, section2→col1, section3→col0)
+end
+
+deactivate LocalStorage
+
+Hook --> CustomLayout : {columns: 2, componentLayout, moveComponent, resetLayout}
+deactivate Hook
+
+CustomLayout -> GridLayout : Render with columns=2, sections=[...]
+activate GridLayout
+
+GridLayout -> Card : Render each section
+activate Card
+Card --> User : Display content
+deactivate Card
+
+deactivate GridLayout
+deactivate CustomLayout
+deactivate Page
+
+== Scenario 2: Drag and Drop ==
+User -> DragHandle : Mouse down on vertical bar
+activate DragHandle
+
+DragHandle -> GridLayout : onDragStart(event)\n{active: {id: "section1"}}
+activate GridLayout
+
+GridLayout -> GridLayout : Set dragging state\nShow visual feedback:\n- Dragged card: opacity 0.5\n- Drop zones: highlighted borders
+
+User -> DragHandle : Drag to new position\n(move mouse 50px)
+note right of DragHandle
+  **Activation Constraint**
+  8px movement required before
+  drag starts (prevents accidental
+  drags on click)
+end note
+
+DragHandle -> GridLayout : onDragOver(event)\n{over: {id: "section2-dropzone"}}
+GridLayout -> GridLayout : Highlight target drop zone\n(blue border)
+
+User -> DragHandle : Release mouse
+deactivate DragHandle
+
+DragHandle -> GridLayout : onDragEnd(event)\n{active: "section1", over: "section2-dropzone"}
+
+GridLayout -> GridLayout : Parse drop zone ID\n(extract column index)
+GridLayout -> Hook : moveComponent("section1", newColumnIndex=1)
+activate Hook
+
+Hook -> Hook : Update componentLayout state:\ncomponentLayout["section1"] = 1
+
+Hook -> LocalStorage : setItem(\n'tradingSystem_layout_my-page',\nJSON.stringify({columns: 2, componentLayout})
+)
+activate LocalStorage
+LocalStorage --> Hook : Saved
+deactivate LocalStorage
+
+Hook --> GridLayout : State updated
+deactivate Hook
+
+GridLayout -> GridLayout : Re-render grid with new positions
+GridLayout -> Card : Re-render cards in new layout
+activate Card
+Card --> User : Show card in new position
+deactivate Card
+
+deactivate GridLayout
+
+note over User, GridLayout
+  **Drag Response Time**
+  Target: <100ms from drop to re-render
+  Achieved via React state updates
+  and optimized re-render logic
+end note
+
+== Scenario 3: Collapse/Expand Card ==
+User -> Card : Click card header
+activate Card
+
+Card -> Card : Toggle collapsed state\n(internal useState)
+
+Card -> LocalStorage : Save collapse state\n(separate from layout state)
+activate LocalStorage
+LocalStorage --> Card : Saved
+deactivate LocalStorage
+
+Card -> Card : Animate collapse/expand\n(CSS transition: height 200ms)
+Card --> User : Show collapsed/expanded card
+deactivate Card
+
+note right of Card
+  **Isolated Interaction**
+  Collapse state is separate
+  from drag-and-drop layout.
+  No conflict between clicking
+  header and dragging handle.
+end note
+
+== Scenario 4: Change Column Count ==
+User -> Controls : Click "3" button
+activate Controls
+
+Controls -> Hook : setColumns(3)
+activate Hook
+
+Hook -> Hook : Update columns state: 3
+Hook -> Hook : Redistribute components:\n- Auto-balance across 3 columns
+Hook -> Hook : Update componentLayout
+
+Hook -> LocalStorage : setItem(\n'tradingSystem_layout_my-page',\nJSON.stringify({columns: 3, componentLayout})\n)
+activate LocalStorage
+LocalStorage --> Hook : Saved
+deactivate LocalStorage
+
+Hook --> GridLayout : Trigger re-render
+deactivate Hook
+
+GridLayout -> GridLayout : Re-render with 3 columns
+GridLayout -> Card : Distribute cards across 3 columns
+activate Card
+Card --> User : Display 3-column grid
+deactivate Card
+
+deactivate Controls
+
+== Scenario 5: Reset Layout ==
+User -> Controls : Click "Resetar" button
+activate Controls
+
+Controls -> Hook : resetLayout()
+activate Hook
+
+Hook -> LocalStorage : removeItem('tradingSystem_layout_my-page')
+activate LocalStorage
+LocalStorage --> Hook : Removed
+deactivate LocalStorage
+
+Hook -> Hook : Apply defaultColumns=2
+Hook -> Hook : Redistribute components sequentially\n(section1→col0, section2→col1, section3→col0)
+
+Hook --> GridLayout : Trigger re-render with defaults
+deactivate Hook
+
+GridLayout -> GridLayout : Re-render with default layout
+GridLayout -> Card : Render cards in default positions
+activate Card
+Card --> User : Display reset layout
+deactivate Card
+
+deactivate Controls
+
+note over User, LocalStorage
+  **Persistence Behavior**
+  - All layout changes saved immediately
+  - Debouncing applied to reduce writes
+  - Survives page refresh and browser restart
+  - Per-page isolation (pageId as key)
+end note
+
+note as N1
+  **Performance Targets**
+  - Drag response: <100ms
+  - Column change: <200ms
+  - localStorage write: <10ms
+  - No janky animations (60fps)
+end note
+
+note as N2
+  **Accessibility (Future)**
+  - Keyboard navigation (Tab, Enter, Arrow keys)
+  - Screen reader announcements
+  - Focus management during drag
+  - ARIA labels for controls
+end note
+
+@enduml

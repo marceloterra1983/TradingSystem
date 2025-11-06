@@ -1,0 +1,117 @@
+@startuml Deployment Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title TradingSystem - Deployment Architecture (Hybrid: Native Windows + Docker)
+
+Deployment_Node(dev_workstation, "Developer Workstation", "Windows 11 / WSL2") {
+    Deployment_Node(wsl2, "WSL2 (Ubuntu 22.04)", "Linux Kernel") {
+        Deployment_Node(docker_engine, "Docker Engine", "v24+") {
+
+            Deployment_Node(frontend_stack, "Frontend Stack") {
+                Container(dashboard, "Dashboard", "React 18 + Vite", "Port 3103")
+                Container(docs_hub, "Docs Hub", "Docusaurus v3 + NGINX", "Port 3400")
+            }
+
+            Deployment_Node(backend_stack, "Backend Services Stack") {
+                Container(workspace_api, "Workspace API", "Node.js 20", "Port 3200")
+                Container(tp_capital, "TP Capital", "Node.js 20", "Port 4005")
+                Container(docs_api, "Documentation API", "Node.js 20", "Port 3401")
+                Container(service_launcher, "Service Launcher", "Node.js 20", "Port 3500")
+            }
+
+            Deployment_Node(data_stack, "Data Stack") {
+                ContainerDb(timescaledb, "TimescaleDB", "PostgreSQL 15 + TimescaleDB", "Port 5432")
+                ContainerDb(qdrant, "Qdrant", "Rust-based Vector DB", "Port 6333")
+                ContainerDb(redis, "Redis", "Alpine", "Port 6379")
+            }
+
+            Deployment_Node(rag_stack, "RAG Stack (GPU Required)") {
+                Container(ollama, "Ollama", "LLM Runtime + CUDA", "Port 11434")
+                Container(llamaindex_query, "LlamaIndex Query", "FastAPI + Python 3.11", "Port 8202")
+                Container(llamaindex_ingest, "LlamaIndex Ingestion", "FastAPI + Python 3.11", "Port 8201")
+                Container(rag_collections, "RAG Collections", "Node.js 20", "Port 3403")
+            }
+
+            Deployment_Node(monitoring_stack, "Monitoring Stack (Planned)") {
+                Container(prometheus, "Prometheus", "Time-series DB", "Port 9090")
+                Container(grafana, "Grafana", "Dashboards", "Port 3000")
+            }
+        }
+    }
+
+    Deployment_Node(windows_native, "Windows Native", ".NET Runtime") {
+        Deployment_Node(trading_services, "Core Trading Services (Planned)") {
+            Container(data_capture, "Data Capture", "C# + ProfitDLL", "Native Windows Service")
+            Container(order_manager, "Order Manager", "C# + Risk Engine", "Native Windows Service")
+            Container(analytics_pipeline, "Analytics Pipeline", "Python 3.11", "Windows Process")
+        }
+    }
+}
+
+Deployment_Node(external, "External Services") {
+    System_Ext(telegram, "Telegram", "MTProto API")
+    System_Ext(nelogica, "Nelogica Profit", "Market Data Provider")
+}
+
+' Network relationships
+Rel(dashboard, backend_stack, "HTTP REST", "TCP/IP")
+Rel(backend_stack, data_stack, "PostgreSQL/Redis", "TCP/IP")
+Rel(backend_stack, rag_stack, "HTTP REST + JWT", "TCP/IP")
+Rel(rag_stack, ollama, "HTTP", "TCP/IP (GPU)")
+Rel(monitoring_stack, backend_stack, "Scrape metrics", "TCP/IP")
+Rel(monitoring_stack, data_stack, "Scrape metrics", "TCP/IP")
+
+' Windows native services
+Rel(data_capture, nelogica, "ProfitDLL", "64-bit Windows DLL")
+Rel(data_capture, order_manager, "WebSocket", "TCP/IP")
+Rel(order_manager, backend_stack, "HTTP REST", "TCP/IP")
+Rel(backend_stack, telegram, "MTProto", "TCP/IP")
+
+note right of docker_engine
+  **Docker Compose Stacks:**
+  • docker-compose.apps.yml
+  • docker-compose.rag.yml
+  • docker-compose.database.yml
+  • docker-compose.monitoring.yml
+  • docker-compose.docs.yml
+
+  **Total: 15 compose files**
+end note
+
+note right of windows_native
+  **Why Native Windows?**
+  • ProfitDLL is 64-bit Windows DLL
+  • Cannot run in Docker containers
+  • Requires direct hardware access
+  • Latency < 500ms requirement
+  • Direct NVMe/SSD access
+end note
+
+note right of rag_stack
+  **GPU Requirements:**
+  • NVIDIA GPU with 8GB+ VRAM
+  • CUDA 12.0+ drivers
+  • nvidia-container-toolkit
+  • Ollama runtime with GPU support
+end note
+
+note bottom
+  **Deployment Patterns:**
+  ✅ Hybrid: Native Windows (trading) + Docker (auxiliary)
+  ✅ Docker Compose orchestration
+  ✅ WSL2 for Linux containers on Windows
+  ⚠️ No Kubernetes (future consideration)
+  ⚠️ No cloud deployment (100% on-premise requirement)
+
+  **Port Allocation:**
+  • 3000-3999: Frontend & APIs
+  • 4000-4999: Trading services
+  • 5000-5999: Databases
+  • 6000-6999: Caches & queues
+  • 8000-8999: AI/ML services
+  • 9000-9999: Monitoring
+end note
+
+@enduml

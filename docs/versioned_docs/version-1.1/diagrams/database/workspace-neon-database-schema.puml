@@ -1,0 +1,256 @@
+@startuml workspace-neon-database-schema
+!theme plain
+skinparam linetype ortho
+skinparam shadowing false
+skinparam backgroundColor #FEFEFE
+skinparam class {
+    BackgroundColor #F7FAFC
+    BorderColor #CBD5E0
+    ArrowColor #4A5568
+}
+
+title Workspace Database Schema - Neon PostgreSQL
+
+' ==============================================================================
+' MAIN ENTITIES
+' ==============================================================================
+entity "workspace.workspace_items" as items {
+  **Primary Key**
+  --
+  * id : SERIAL <<PK>>
+  --
+  **Core Fields**
+  --
+  * title : TEXT
+  * description : TEXT
+  * category : VARCHAR(50) <<FK>>
+  * priority : VARCHAR(20)
+  * status : VARCHAR(20)
+  --
+  **Flexible Data**
+  --
+  tags : TEXT[]
+  metadata : JSONB
+  --
+  **Timestamps**
+  --
+  * created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+  --
+  **Audit Fields**
+  --
+  created_by : VARCHAR(100)
+  updated_by : VARCHAR(100)
+  --
+  **Constraints**
+  --
+  CHECK (priority IN ('low', 'medium', 'high', 'critical'))
+  CHECK (status IN ('new', 'review', 'in-progress', 'completed', 'rejected'))
+}
+
+entity "workspace.workspace_categories" as categories {
+  **Primary Key**
+  --
+  * name : VARCHAR(50) <<PK>>
+  --
+  **Display Information**
+  --
+  * display_name : VARCHAR(100) <<UNIQUE>>
+  description : TEXT
+  --
+  **Status**
+  --
+  * is_active : BOOLEAN
+  sort_order : INTEGER
+  --
+  **Timestamps**
+  --
+  * created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+  --
+  **Default Values**
+  --
+  is_active = true
+  sort_order = 0
+}
+
+' ==============================================================================
+' RELATIONSHIPS
+' ==============================================================================
+categories ||--o{ items : "categorizes\n(category)"
+
+note right of items::category
+  **Foreign Key**
+  REFERENCES workspace_categories(name)
+  ON UPDATE CASCADE
+  ON DELETE RESTRICT
+  
+  **Validation**
+  Category must be active
+  (is_active = true)
+end note
+
+' ==============================================================================
+' INDEXES
+' ==============================================================================
+note top of items
+  **Indexes (B-tree)**
+  • idx_items_category ON (category)
+  • idx_items_status ON (status)
+  • idx_items_priority ON (priority)
+  • idx_items_created_at ON (created_at DESC)
+  
+  **Indexes (GIN - Advanced)**
+  • idx_items_tags ON USING GIN(tags)
+  • idx_items_metadata ON USING GIN(metadata)
+  
+  **Partial Index**
+  • idx_categories_active ON (is_active)
+    WHERE is_active = true
+  
+  **Performance**
+  • B-tree for equality/range queries
+  • GIN for array/JSONB searches
+  • DESC for recent-first ordering
+end note
+
+' ==============================================================================
+' TRIGGERS
+' ==============================================================================
+note bottom of items
+  **Triggers**
+  • trigger_items_updated_at
+    BEFORE UPDATE
+    → update_updated_at_column()
+    Sets updated_at = NOW()
+    
+  **Same trigger on categories table**
+end note
+
+' ==============================================================================
+' VIEWS
+' ==============================================================================
+entity "workspace.v_active_items_by_category" as view_items_category <<VIEW>> {
+  category_name : VARCHAR(50)
+  category_display_name : VARCHAR(100)
+  item_count : INTEGER
+  new_count : INTEGER
+  in_progress_count : INTEGER
+  completed_count : INTEGER
+}
+
+entity "workspace.v_high_priority_items" as view_high_priority <<VIEW>> {
+  id : SERIAL
+  title : TEXT
+  category : VARCHAR(50)
+  priority : VARCHAR(20)
+  status : VARCHAR(20)
+  created_at : TIMESTAMPTZ
+  days_old : INTEGER
+}
+
+categories ||--o{ view_items_category : "aggregates"
+items ||--o{ view_items_category : "counts"
+items ||--o{ view_high_priority : "filters\n(priority IN ('high', 'critical'))"
+
+' ==============================================================================
+' SAMPLE DATA
+' ==============================================================================
+note right of categories
+  **Seeded Categories (6 rows)**
+  
+  | name | display_name | sort_order |
+  |------|--------------|------------|
+  | documentacao | Documentação | 1 |
+  | coleta-dados | Coleta de Dados | 2 |
+  | banco-dados | Banco de Dados | 3 |
+  | analise-dados | Análise de Dados | 4 |
+  | gestao-riscos | Gestão de Riscos | 5 |
+  | dashboard | Dashboard | 6 |
+  
+  **All categories have:**
+  • is_active = true
+  • created_at = NOW()
+end note
+
+' ==============================================================================
+' STATISTICS
+' ==============================================================================
+note bottom of categories
+  **Expected Data Volume**
+  
+  **Categories:**
+  • 6 active categories (fixed)
+  • Rarely changes
+  • Very fast queries (cached)
+  
+  **Items:**
+  • ~10,000 rows expected
+  • Growth: ~50 items/month
+  • 80% reads, 20% writes
+  • Average item size: ~2KB
+  
+  **Total Database Size:**
+  • Current: ~50MB
+  • Projected (1 year): ~200MB
+  • With indexes: ~300MB
+end note
+
+' ==============================================================================
+' METADATA EXAMPLES
+' ==============================================================================
+note left of items::metadata
+  **JSONB Examples**
+  
+  {
+    "github_issue": "#123",
+    "estimated_hours": 8,
+    "assigned_to": ["user1", "user2"],
+    "labels": ["bug", "urgent"],
+    "related_items": [41, 42, 43]
+  }
+  
+  **Queryable with:**
+  WHERE metadata @> '{"github_issue": "#123"}'
+  WHERE metadata->>'assigned_to' ? 'user1'
+  WHERE (metadata->>'estimated_hours')::int > 5
+end note
+
+note left of items::tags
+  **Array Examples**
+  
+  ['urgent', 'frontend', 'bug']
+  ['migration', 'database']
+  ['documentation', 'api']
+  
+  **Queryable with:**
+  WHERE 'urgent' = ANY(tags)
+  WHERE tags @> ARRAY['urgent', 'frontend']
+  WHERE array_length(tags, 1) > 2
+end note
+
+' ==============================================================================
+' CONNECTION INFO
+' ==============================================================================
+legend bottom
+  |= Configuration |= Value |
+  | **Host** | localhost |
+  | **Port** | 5433 (external) → 55432 (internal) |
+  | **Database** | workspace |
+  | **Schema** | workspace |
+  | **User** | postgres |
+  | **Connection String** | postgresql://postgres:PASSWORD@localhost:5433/workspace |
+  | **Pool Size** | min: 2, max: 20 |
+  | **Idle Timeout** | 30s |
+  | **Connection Timeout** | 5s |
+  
+  **Access from Application:**
+  NeonClient → PostgreSQL Wire Protocol → Neon Compute
+  
+  **Separated Storage:**
+  Neon Compute (stateless) → Neon Pageserver (persistent)
+endlegend
+
+@enduml
+
+

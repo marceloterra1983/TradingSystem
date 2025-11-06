@@ -1,0 +1,743 @@
+---
+title: "API Documentation Guide - TradingSystem"
+description: "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices"
+tags: [api, documentation, openapi, rest, guide]
+owner: BackendGuild
+lastReviewed: "2025-11-01"
+---
+
+# API Documentation Guide
+
+**TradingSystem API Documentation** provides comprehensive coverage of all REST APIs with interactive documentation powered by Redocusaurus.
+
+---
+
+## 📖 Quick Navigation
+
+### Interactive API Documentation
+- **[Workspace API](http://localhost:3400/api/workspace)** - Ideas & documentation management
+- **[Documentation API](http://localhost:3400/api/documentation-api)** - Full documentation platform API
+- **[TP Capital API](http://localhost:3400/api/tp-capital)** - Trading signals ingestion
+- **[Status API](http://localhost:3400/api/status)** - Health monitoring and service orchestration
+
+### OpenAPI Specifications
+- **Location:** `/docs/static/specs/*.openapi.yaml`
+- **Format:** OpenAPI 3.1.0
+- **Renderer:** Redocusaurus (Redoc theme for Docusaurus)
+
+---
+
+## 🎯 API Architecture
+
+### Service Catalog
+
+| Service | Port | Base URL | Container | Purpose |
+|---------|------|----------|-----------|---------|
+| **Workspace API** | 3200 | `/api/workspace` | ✅ Docker | Ideas & docs management |
+| **TP Capital** | 4005 | `/api/tp-capital` | ✅ Docker | Trading signals ingestion |
+| **Documentation API** | 3401 | `/api/documentation` | ✅ Docker | Docs platform + RAG proxy |
+| **Service Launcher** | 3500 | `/api/status` | ❌ Host | Health orchestration |
+| **Dashboard** | 3103 | `/` | ❌ Host | React frontend |
+| **Docs Hub** | 3400 | `/docs` | ✅ Docker | Docusaurus portal |
+
+### API Design Principles
+
+1. **RESTful Design:** Resource-oriented endpoints with standard HTTP methods
+2. **JSON Responses:** All responses in JSON format with consistent structure
+3. **Rate Limiting:** Express-rate-limit with configurable windows
+4. **CORS Support:** Configurable origins via `.env`
+5. **Error Handling:** Standardized error responses with status codes
+6. **Validation:** express-validator for request validation
+7. **Health Checks:** `/health` endpoint on all services
+8. **Metrics:** Prometheus metrics at `/metrics`
+
+---
+
+## 🔐 Authentication & Authorization
+
+### Current State (v1.0)
+
+**Authentication:** Currently, most APIs are **unauthenticated** for development.
+
+**Exceptions:**
+- **RAG API Proxy** (`/api/v1/rag/*`) - JWT tokens minted server-side in Documentation API
+- **Inter-Service Calls** - No authentication (services trust each other)
+
+### Planned Improvements (Architecture Review 2025-11-01)
+
+From [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md):
+
+**Priority 1 (Critical):**
+1. **API Gateway** - Kong Gateway for centralized authentication/routing
+2. **Inter-Service Auth** - Shared secrets for service-to-service calls
+3. **JWT Authentication** - Token-based auth for all public APIs
+
+**Timeline:** 2026-Q1 (6 weeks implementation)
+
+### RAG API Authentication (Current)
+
+The RAG API uses **server-side JWT minting** for security:
+
+```javascript
+// Documentation API mints JWT tokens internally
+const jwt = require('jsonwebtoken');
+
+const ragToken = jwt.sign(
+  { service: 'documentation-api' },
+  process.env.JWT_SECRET_KEY,
+  { algorithm: 'HS256', expiresIn: '1h' }
+);
+
+// Token passed to LlamaIndex services
+const response = await axios.get('http://llamaindex-query:8000/query', {
+  headers: { 'Authorization': `Bearer ${ragToken}` }
+});
+```
+
+**Why Server-Side?**
+- ✅ JWT secret never exposed to browser
+- ✅ Automatic token refresh
+- ✅ Centralized revocation control
+
+### Future Authentication Flow (Kong Gateway)
+
+```
+┌─────────┐      1. Request      ┌──────────────┐
+│ Client  │─────────────────────>│ Kong Gateway │
+└─────────┘                       └──────┬───────┘
+                                        │
+                                  2. JWT Validation
+                                        │
+                                        ▼
+                         ┌──────────────────────────┐
+                         │ JWT Plugin               │
+                         │ - Validate signature     │
+                         │ - Check expiration       │
+                         │ - Extract claims         │
+                         └──────────┬───────────────┘
+                                    │
+                              3. Forward with claims
+                                    │
+                                    ▼
+                         ┌──────────────────────────┐
+                         │ Backend Service          │
+                         │ - Trust Kong validation  │
+                         │ - Use claims for authz   │
+                         └──────────────────────────┘
+```
+
+---
+
+## 📡 API Versioning Strategy
+
+### Current State (v1.0)
+
+**No versioning** - Breaking changes would affect all clients
+
+### Recommended Strategy (From Architecture Review)
+
+**URL-Based Versioning** (Planned):
+
+```
+GET /api/v1/items          # Current version
+GET /api/v2/items          # New version with breaking changes
+```
+
+**Benefits:**
+- ✅ Clear, explicit versioning
+- ✅ Multiple versions can coexist
+- ✅ Easy to deprecate old versions
+- ✅ No ambiguity in client code
+
+**Implementation Plan:**
+
+```javascript
+// Server-side routing (Express)
+app.use('/api/v1/orders', ordersRouterV1);
+app.use('/api/v2/orders', ordersRouterV2);
+
+// Deprecation notice in v1 responses
+app.use('/api/v1/*', (req, res, next) => {
+  res.set('X-API-Version', 'v1');
+  res.set('X-API-Deprecated', 'This version will be deprecated on 2026-06-01');
+  res.set('X-API-Sunset', '2026-06-01');
+  next();
+});
+```
+
+**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md) - Proposes API versioning strategy
+
+---
+
+## 🛡️ Error Handling
+
+### Standard Error Response Format
+
+All APIs use a consistent error response structure:
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "title",
+      "message": "title is required"
+    },
+    {
+      "field": "category",
+      "message": "category must be one of: documentacao, coleta-dados, ..."
+    }
+  ]
+}
+```
+
+### HTTP Status Codes
+
+| Code | Meaning | When Used |
+|------|---------|-----------|
+| `200` | OK | Successful GET, PUT, DELETE |
+| `201` | Created | Successful POST (resource created) |
+| `400` | Bad Request | Validation errors, malformed JSON |
+| `401` | Unauthorized | Missing or invalid JWT token (future) |
+| `403` | Forbidden | Insufficient permissions (future) |
+| `404` | Not Found | Resource doesn't exist |
+| `429` | Too Many Requests | Rate limit exceeded |
+| `500` | Internal Server Error | Server-side errors |
+| `503` | Service Unavailable | Service down/unhealthy |
+
+### Rate Limiting Errors
+
+When rate limit is exceeded, clients receive:
+
+```json
+HTTP/1.1 429 Too Many Requests
+RateLimit-Limit: 300
+RateLimit-Remaining: 0
+RateLimit-Reset: 1699999999
+Content-Type: application/json
+
+{
+  "success": false,
+  "message": "Too many requests, please try again later"
+}
+```
+
+**Headers:**
+- `RateLimit-Limit` - Max requests per window
+- `RateLimit-Remaining` - Requests left in current window
+- `RateLimit-Reset` - Unix timestamp when limit resets
+
+---
+
+## 📊 Request/Response Examples
+
+### Workspace API
+
+#### Create Item
+
+**Request:**
+```bash
+curl -X POST http://localhost:3200/api/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Implementar filtro avançado",
+    "description": "Adicionar filtros por categoria e prioridade na dashboard",
+    "category": "dashboard",
+    "priority": "high",
+    "tags": ["ui", "filtering", "enhancement"]
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Item created successfully",
+  "data": {
+    "id": "abc123",
+    "title": "Implementar filtro avançado",
+    "description": "Adicionar filtros por categoria e prioridade na dashboard",
+    "category": "dashboard",
+    "priority": "high",
+    "status": "new",
+    "tags": ["ui", "filtering", "enhancement"],
+    "createdAt": "2025-11-01T12:00:00.000Z",
+    "updatedAt": null
+  }
+}
+```
+
+#### List Items
+
+**Request:**
+```bash
+curl http://localhost:3200/api/items
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "id": "abc123",
+      "title": "Implementar filtro avançado",
+      "category": "dashboard",
+      "priority": "high",
+      "status": "new",
+      "tags": ["ui", "filtering"],
+      "createdAt": "2025-11-01T12:00:00.000Z"
+    },
+    {
+      "id": "def456",
+      "title": "Documentar RAG API",
+      "category": "documentacao",
+      "priority": "medium",
+      "status": "in-progress",
+      "tags": ["docs", "api"],
+      "createdAt": "2025-11-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Update Item
+
+**Request:**
+```bash
+curl -X PUT http://localhost:3200/api/items/abc123 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "in-progress",
+    "tags": ["ui", "filtering", "enhancement", "priority-high"]
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Item updated successfully",
+  "data": {
+    "id": "abc123",
+    "title": "Implementar filtro avançado",
+    "status": "in-progress",
+    "tags": ["ui", "filtering", "enhancement", "priority-high"],
+    "updatedAt": "2025-11-01T12:30:00.000Z"
+  }
+}
+```
+
+#### Delete Item
+
+**Request:**
+```bash
+curl -X DELETE http://localhost:3200/api/items/abc123
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Item deleted successfully"
+}
+```
+
+---
+
+### Documentation API (RAG Search)
+
+#### Semantic Search
+
+**Request:**
+```bash
+curl "http://localhost:3401/api/v1/rag/search?query=how%20to%20configure%20JWT%20authentication&limit=5"
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "content": "JWT authentication is configured in backend/shared/auth/...",
+      "metadata": {
+        "file_path": "docs/content/tools/security-config/env.mdx",
+        "title": "Environment Variables Reference"
+      },
+      "score": 0.89
+    },
+    {
+      "content": "To set up JWT secrets, use openssl rand -hex 32...",
+      "metadata": {
+        "file_path": "README.md",
+        "title": "TradingSystem - Quick Start"
+      },
+      "score": 0.82
+    }
+  ],
+  "query": "how to configure JWT authentication",
+  "limit": 5
+}
+```
+
+#### RAG Query (Q&A)
+
+**Request:**
+```bash
+curl -X POST http://localhost:3401/api/v1/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "How do I deploy the API Gateway?",
+    "context_limit": 3
+  }'
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "answer": "To deploy the API Gateway, follow ADR-003 implementation plan: 1) Deploy Kong + PostgreSQL via Docker Compose, 2) Configure Kong Admin API, 3) Migrate service routes to Kong, 4) Implement JWT authentication plugin. Timeline: 6 weeks starting 2026-01-15.",
+  "sources": [
+    {
+      "file_path": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "title": "ADR-003: API Gateway Implementation",
+      "relevance": 0.95
+    },
+    {
+      "file_path": "governance/planning/TECHNICAL-DEBT-TRACKER.md",
+      "title": "Technical Debt Tracker - TradingSystem",
+      "relevance": 0.78
+    }
+  ],
+  "model": "llama3.2:3b",
+  "response_time_ms": 2341
+}
+```
+
+---
+
+## ⚡ Rate Limiting
+
+### Global Configuration
+
+**Default Limits** (from `.env`):
+```
+RATE_LIMIT_WINDOW_MS=60000      # 1 minute window
+RATE_LIMIT_MAX_REQUESTS=300     # 300 requests per window
+```
+
+**Per-Service Overrides:**
+
+| Service | Window | Max Requests |
+|---------|--------|--------------|
+| Workspace API | 60s | 300 |
+| TP Capital | 60s | 100 |
+| Documentation API | 60s | 300 |
+| RAG Query | 60s | 20 |
+
+### Best Practices for Clients
+
+1. **Monitor Headers:** Check `RateLimit-Remaining` header
+2. **Exponential Backoff:** Retry with increasing delays (1s, 2s, 4s, 8s)
+3. **Cache Responses:** Reduce API calls for unchanged data
+4. **Batch Requests:** Group multiple operations when possible
+
+**Example (JavaScript):**
+```javascript
+async function fetchWithRateLimit(url) {
+  const response = await fetch(url);
+
+  if (response.status === 429) {
+    const resetTime = parseInt(response.headers.get('RateLimit-Reset'));
+    const waitTime = resetTime - Math.floor(Date.now() / 1000);
+
+    console.log(`Rate limited. Waiting ${waitTime}s...`);
+    await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+
+    return fetchWithRateLimit(url); // Retry
+  }
+
+  return response.json();
+}
+```
+
+---
+
+## 🔍 Testing APIs
+
+### Manual Testing with cURL
+
+**Health Check:**
+```bash
+curl http://localhost:3200/health | jq
+```
+
+**Create Item:**
+```bash
+curl -X POST http://localhost:3200/api/items \
+  -H "Content-Type: application/json" \
+  -d @- <<EOF
+{
+  "title": "Test item",
+  "description": "Testing API",
+  "category": "dashboard",
+  "priority": "low",
+  "tags": ["test"]
+}
+EOF
+```
+
+**Update Item:**
+```bash
+ITEM_ID="abc123"
+curl -X PUT "http://localhost:3200/api/items/${ITEM_ID}" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "completed"}'
+```
+
+### Automated Testing
+
+**Example with Supertest (Node.js):**
+```javascript
+const request = require('supertest');
+const app = require('../src/server');
+
+describe('POST /api/items', () => {
+  it('should create a new item', async () => {
+    const response = await request(app)
+      .post('/api/items')
+      .send({
+        title: 'Test item',
+        description: 'Testing',
+        category: 'dashboard',
+        priority: 'low'
+      })
+      .expect(201);
+
+    expect(response.body.success).toBe(true);
+    expect(response.body.data).toHaveProperty('id');
+  });
+
+  it('should return 400 for missing title', async () => {
+    const response = await request(app)
+      .post('/api/items')
+      .send({
+        description: 'Missing title',
+        category: 'dashboard',
+        priority: 'low'
+      })
+      .expect(400);
+
+    expect(response.body.success).toBe(false);
+    expect(response.body.errors).toContainEqual({
+      field: 'title',
+      message: 'title is required'
+    });
+  });
+});
+```
+
+**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md) - Comprehensive testing roadmap
+
+---
+
+## 📚 SDK & Client Libraries
+
+### JavaScript/TypeScript Client
+
+**Example TypeScript Client:**
+```typescript
+// workspaceClient.ts
+import axios, { AxiosInstance } from 'axios';
+
+export interface Item {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export class WorkspaceClient {
+  private client: AxiosInstance;
+
+  constructor(baseURL: string = 'http://localhost:3200') {
+    this.client = axios.create({ baseURL });
+  }
+
+  async getItems(): Promise<Item[]> {
+    const response = await this.client.get<{ data: Item[] }>('/api/items');
+    return response.data.data;
+  }
+
+  async createItem(item: Omit<Item, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Item> {
+    const response = await this.client.post<{ data: Item }>('/api/items', item);
+    return response.data.data;
+  }
+
+  async updateItem(id: string, updates: Partial<Item>): Promise<Item> {
+    const response = await this.client.put<{ data: Item }>(`/api/items/${id}`, updates);
+    return response.data.data;
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    await this.client.delete(`/api/items/${id}`);
+  }
+}
+
+// Usage
+const client = new WorkspaceClient();
+const items = await client.getItems();
+const newItem = await client.createItem({
+  title: 'New feature',
+  description: 'Implement feature X',
+  category: 'dashboard',
+  priority: 'high',
+  tags: ['feature']
+});
+```
+
+### Python Client
+
+**Example Python Client:**
+```python
+# workspace_client.py
+import requests
+from typing import List, Dict, Optional
+from dataclasses import dataclass
+
+@dataclass
+class Item:
+    id: str
+    title: str
+    description: str
+    category: str
+    priority: str
+    status: str
+    tags: List[str]
+    created_at: str
+    updated_at: Optional[str] = None
+
+class WorkspaceClient:
+    def __init__(self, base_url: str = "http://localhost:3200"):
+        self.base_url = base_url
+        self.session = requests.Session()
+
+    def get_items(self) -> List[Item]:
+        response = self.session.get(f"{self.base_url}/api/items")
+        response.raise_for_status()
+        data = response.json()
+        return [Item(**item) for item in data['data']]
+
+    def create_item(self, title: str, description: str, category: str,
+                   priority: str, tags: List[str] = None) -> Item:
+        payload = {
+            'title': title,
+            'description': description,
+            'category': category,
+            'priority': priority,
+            'tags': tags or []
+        }
+        response = self.session.post(f"{self.base_url}/api/items", json=payload)
+        response.raise_for_status()
+        return Item(**response.json()['data'])
+
+    def update_item(self, item_id: str, **updates) -> Item:
+        response = self.session.put(f"{self.base_url}/api/items/{item_id}", json=updates)
+        response.raise_for_status()
+        return Item(**response.json()['data'])
+
+    def delete_item(self, item_id: str) -> None:
+        response = self.session.delete(f"{self.base_url}/api/items/{item_id}")
+        response.raise_for_status()
+
+# Usage
+client = WorkspaceClient()
+items = client.get_items()
+new_item = client.create_item(
+    title="New feature",
+    description="Implement feature X",
+    category="dashboard",
+    priority="high",
+    tags=["feature"]
+)
+```
+
+---
+
+## 🚀 Best Practices
+
+### API Design
+
+1. **Use Resource Nouns:** `/api/items` not `/api/getItems`
+2. **HTTP Methods:** GET (read), POST (create), PUT (update), DELETE (remove)
+3. **Idempotency:** PUT and DELETE should be idempotent
+4. **Pagination:** Use `?page=1&limit=20` for large datasets
+5. **Filtering:** Use query params: `?category=dashboard&status=new`
+6. **Sorting:** Use `?sort=createdAt&order=desc`
+
+### Security
+
+1. **HTTPS Only:** Enforce TLS in production
+2. **Validate Input:** Use express-validator for all endpoints
+3. **Sanitize Output:** Prevent XSS with DOMPurify
+4. **Rate Limiting:** Prevent abuse with express-rate-limit
+5. **CORS:** Strict origin whitelist in production
+
+### Performance
+
+1. **Cache Responses:** Use HTTP cache headers (ETag, Cache-Control)
+2. **Compress Payloads:** Enable gzip compression
+3. **Batch Operations:** Support bulk create/update/delete
+4. **Pagination:** Limit result sets to prevent large responses
+5. **Database Indexes:** Index frequently queried fields
+
+### Documentation
+
+1. **OpenAPI Specs:** Keep specs in sync with code
+2. **Examples:** Provide realistic request/response examples
+3. **Errors:** Document all possible error scenarios
+4. **Changelog:** Maintain API changelog for version history
+
+---
+
+## 📖 Related Documentation
+
+- [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md)
+- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md)
+- [Environment Variables Reference](../tools/security-config/env.mdx)
+- [Testing Strategy](../reference/testing-strategy.mdx)
+- [API Guidelines](../reference/api-guidelines.mdx)
+
+---
+
+## 🔄 Changelog
+
+### 2025-11-01 - Initial Release
+- Created comprehensive API documentation guide
+- Documented authentication flows (current + planned)
+- Added API versioning strategy (planned)
+- Provided request/response examples for all major endpoints
+- Created TypeScript and Python client SDK examples
+- Documented rate limiting and error handling
+- Added testing examples (cURL + Supertest)
+- Linked to architecture review findings
+
+### Upcoming (2026-Q1)
+- API Gateway deployment (Kong)
+- JWT authentication implementation
+- Inter-service authentication
+- API versioning (v1 → v2 migration)
+
+---
+
+**Document Version:** 1.0
+**Last Updated:** 2025-11-01
+**Next Review:** 2026-02-01

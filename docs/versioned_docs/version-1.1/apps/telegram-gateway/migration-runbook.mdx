@@ -1,0 +1,399 @@
+---
+title: Migration Runbook - Hybrid Stack
+sidebar_position: 10
+description: Step-by-step guide for migrating Telegram Gateway to hybrid architecture
+tags:
+  - telegram-gateway
+  - migration
+  - runbook
+  - operations
+owner: DevOps
+lastReviewed: '2025-11-03'
+---
+
+# Telegram Gateway Migration to Hybrid Stack
+
+## Executive Summary
+
+This runbook guides the migration of Telegram Gateway from current architecture (containerized MTProto + shared TimescaleDB) to **hybrid stack** (native MTProto + 11 dedicated containers).
+
+**Timeline:** 4 hours (Saturday 2am-6am)  
+**Downtime:** ~4 hours total  
+**Risk Level:** Medium (comprehensive rollback available)  
+**Performance Gain:** 80-95% latency reduction
+
+---
+
+## Prerequisites
+
+### Required Access
+- [ ] sudo access for systemd service installation
+- [ ] Docker permissions (create containers, networks, volumes)
+- [ ] Database access (TimescaleDB shared instance)
+- [ ] Telegram session files backup
+
+### Required Software
+- [ ] Docker Compose v2.0+
+- [ ] Node.js 18+ (for native service)
+- [ ] systemd (Linux/WSL)
+- [ ] PostgreSQL client tools (pg_dump, pg_restore, psql)
+
+### Pre-Migration Checklist
+- [ ] Schedule deployment window (4h maintenance)
+- [ ] Notify stakeholders (trading ops, DevOps, product)
+- [ ] Backup session files (`.session/` directory)
+- [ ] Verify rollback script tested
+- [ ] Ensure adequate disk space (10GB free minimum)
+
+---
+
+## Architecture Comparison
+
+```plantuml
+@startuml
+!include /home/marce/Projetos/TradingSystem/docs/content/diagrams/telegram-deployment-layers.puml
+@enduml
+```
+
+---
+
+## Migration Steps
+
+### Step 1: Pre-Migration Validation (30 min)
+
+```bash
+# 1.1 Verify current stack health
+curl http://localhost:4007/health
+docker ps | grep telegram
+
+# 1.2 Check database connectivity
+docker exec data-timescale psql -U timescale -d tradingsystem -c "\dt telegram_gateway.*"
+
+# 1.3 Count current messages
+docker exec data-timescale psql -U timescale -d tradingsystem \
+  -c "SELECT COUNT(*) FROM telegram_gateway.messages"
+# Record this number for later validation
+
+# 1.4 Verify ports available
+bash scripts/telegram/check-ports.sh
+
+# 1.5 Test rollback script (dry-run)
+bash scripts/telegram/rollback-migration.sh --dry-run
+```
+
+---
+
+### Step 2: Execute Migration Script (2 hours)
+
+```bash
+# Run automated migration
+cd /home/marce/Projetos/TradingSystem
+bash scripts/telegram/migrate-to-hybrid.sh
+```
+
+**Script performs:**
+1. Pre-flight checks (dependencies, ports, permissions)
+2. Backup session files → `backups/telegram-migration-YYYYMMDD-HHMMSS/`
+3. Dump `telegram_gateway` schema → `.dump` file
+4. Start new Docker stack (11 containers)
+5. Wait for health checks (all services healthy)
+6. Restore schema to dedicated TimescaleDB
+7. Verify data integrity (row count comparison)
+8. Prompt for systemd service installation (manual sudo step)
+
+**Manual Step (requires sudo):**
+```bash
+# Copy and execute these commands when prompted:
+sudo cp /home/marce/Projetos/TradingSystem/tools/systemd/telegram-gateway.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable telegram-gateway
+sudo systemctl start telegram-gateway
+```
+
+---
+
+### Step 3: Post-Migration Validation (1 hour)
+
+#### 3.1 Verify All Services Healthy
+
+```bash
+# Run comprehensive health check
+bash scripts/telegram/health-check-telegram.sh
+
+# Expected output: All ✅
+# - MTProto service: healthy
+# - TimescaleDB: healthy
+# - PgBouncer: healthy
+# - Redis Master: healthy
+# - Redis Replica: healthy
+# - RabbitMQ: healthy
+# - Gateway API: healthy
+# - Prometheus: healthy
+# - Grafana: healthy
+```
+
+#### 3.2 Verify Data Integrity
+
+```bash
+# Count messages in new database (via PgBouncer)
+docker exec telegram-pgbouncer psql -U telegram -d telegram_gateway \
+  -c "SELECT COUNT(*) FROM telegram_gateway.messages"
+
+# Should match count from Step 1.3
+```
+
+#### 3.3 Test End-to-End Flow
+
+```bash
+# 1. Send test message to monitored Telegram channel
+# 2. Wait 5 seconds (polling interval)
+# 3. Verify message received by Gateway:
+curl http://localhost:4007/metrics | grep telegram_messages_received_total
+
+# 4. Verify message processed by TP Capital:
+curl http://localhost:4005/signals?limit=1 | jq '.[0]'
+
+# 5. Check logs for errors:
+sudo journalctl -u telegram-gateway -n 100 --no-pager
+docker logs telegram-timescale --tail 100
+```
+
+#### 3.4 Verify Performance Improvements
+
+```bash
+# Check polling latency (target: under 15ms p95)
+curl -s http://localhost:4005/metrics | grep tp_capital_processing_duration_seconds
+
+# Check cache hit rate (target: >70%)
+curl -s http://localhost:9121/metrics | grep redis_keyspace_hits_total
+curl -s http://localhost:9121/metrics | grep redis_keyspace_misses_total
+
+# Check connection pool utilization (target: under 80%)
+docker exec telegram-pgbouncer psql -U telegram -d pgbouncer -c "SHOW POOLS"
+```
+
+#### 3.5 Verify Monitoring Stack
+
+```bash
+# Access Grafana
+open http://localhost:3100
+# Login: admin / <password from .env>
+# Verify all 6 dashboards visible
+
+# Check Prometheus targets
+open http://localhost:9090/targets
+# Verify all 6 targets UP
+
+# Test alert rules
+open http://localhost:9090/alerts
+# Verify 8 rules loaded
+```
+
+---
+
+### Step 4: Decommission Old Stack (30 min)
+
+:::warning
+Only proceed if Step 3 validation passed 100%
+:::
+
+```bash
+# 1. Stop old Gateway container (if still running)
+docker stop telegram-gateway 2>/dev/null || true
+
+# 2. Archive old volumes (optional, for 30-day retention)
+docker run --rm -v data-timescale:/source -v /home/marce/backups:/backup \
+  alpine tar -czf /backup/old-timescale-telegram-$(date +%Y%m%d).tar.gz -C /source .
+
+# 3. Remove telegram_gateway schema from shared DB (OPTIONAL)
+# Only do this if confident migration is permanent
+# docker exec data-timescale psql -U timescale -d tradingsystem \
+#   -c "DROP SCHEMA telegram_gateway CASCADE"
+```
+
+---
+
+## Rollback Procedure
+
+:::danger
+Use rollback if ANY validation fails or performance degrades >20%
+:::
+
+### Quick Rollback (&lt;30 min)
+
+```bash
+# Automated rollback script
+cd /home/marce/Projetos/TradingSystem
+bash scripts/telegram/rollback-migration.sh
+
+# Script will:
+# 1. Stop new stack (containers + native service)
+# 2. Restore sessions from backup
+# 3. Revert connection strings to shared TimescaleDB
+# 4. Provide instructions to restart old container
+```
+
+### Manual Rollback Steps
+
+```bash
+# 1. Stop new stack
+sudo systemctl stop telegram-gateway
+cd /home/marce/Projetos/TradingSystem/tools/compose
+docker compose -f docker-compose.telegram.yml down
+docker compose -f docker-compose.telegram-monitoring.yml down
+
+# 2. Restore sessions
+tar -xzf backups/telegram-migration-<timestamp>/telegram-sessions.tar.gz \
+  -C apps/telegram-gateway/
+
+# 3. Revert .env (use backup)
+cp .env.hybrid-backup .env
+
+# 4. Restart old Gateway container
+docker start telegram-gateway
+
+# 5. Verify
+curl http://localhost:4007/health
+```
+
+---
+
+## Post-Migration Monitoring
+
+### First 24 Hours
+
+Monitor these metrics hourly:
+
+```bash
+# 1. Polling lag (target: &lt;30s)
+curl -s http://localhost:4005/metrics | grep tp_capital_polling_lag_seconds
+
+# 2. Cache hit rate (target: >70%)
+echo "scale=2; $(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_hits_total \K\d+') / ($(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_hits_total \K\d+') + $(curl -s http://localhost:9121/metrics | grep -oP 'redis_keyspace_misses_total \K\d+')) * 100" | bc
+
+# 3. Error rate (target: &lt;1%)
+curl -s http://localhost:4005/metrics | grep tp_capital_messages_processed_total
+
+# 4. System health
+bash scripts/telegram/health-check-telegram.sh --format json | jq '.overallHealth'
+```
+
+### First Week
+
+- [ ] Review Grafana dashboards daily
+- [ ] Check for Prometheus alerts
+- [ ] Analyze performance trends
+- [ ] Optimize based on metrics
+
+---
+
+## Troubleshooting
+
+### Issue: MTProto Service Won't Start
+
+**Symptoms:**
+```bash
+sudo systemctl status telegram-gateway
+# Output: failed (code=exited, status=1)
+```
+
+**Solutions:**
+```bash
+# Check logs
+sudo journalctl -u telegram-gateway -n 100
+
+# Common issues:
+# 1. Session file missing
+ls -la /opt/telegram-gateway/.session/
+
+# 2. Wrong permissions
+chmod 600 /opt/telegram-gateway/.session/*
+
+# 3. Node.js not found
+which node
+
+# 4. Dependencies not installed
+cd /opt/telegram-gateway && npm install
+```
+
+---
+
+### Issue: Data Integrity Check Failed
+
+**Symptoms:**
+```
+✗ Row count mismatch: OLD=1000, NEW=950
+```
+
+**Solutions:**
+```bash
+# 1. Re-run restore
+docker cp backups/telegram-migration-<timestamp>/telegram_gateway.dump telegram-timescale:/tmp/
+docker exec telegram-timescale pg_restore -U telegram -d telegram_gateway --clean /tmp/telegram_gateway.dump
+
+# 2. Check for schema differences
+docker exec telegram-timescale psql -U telegram -d telegram_gateway -c "\dt+ telegram_gateway.*"
+
+# 3. Manual row count verification
+docker exec telegram-timescale psql -U telegram -d telegram_gateway \
+  -c "SELECT 'messages:', COUNT(*) FROM telegram_gateway.messages UNION ALL
+      SELECT 'channels:', COUNT(*) FROM telegram_gateway.channels"
+```
+
+---
+
+### Issue: Redis Cache Not Working
+
+**Symptoms:**
+- Cache hit rate = 0%
+- Errors in logs: "Redis connection refused"
+
+**Solutions:**
+```bash
+# 1. Verify Redis is running
+docker ps | grep telegram-redis
+
+# 2. Test Redis connectivity
+docker exec telegram-redis-master redis-cli ping
+# Expected: PONG
+
+# 3. Check Gateway logs for Redis errors
+sudo journalctl -u telegram-gateway | grep -i redis
+
+# 4. Verify Redis configuration in Gateway
+cat apps/telegram-gateway/src/config.js | grep -A 5 "redis"
+```
+
+---
+
+## Success Criteria
+
+Migration is considered successful if ALL criteria met:
+
+- ✅ Zero data loss (row counts match)
+- ✅ All 12 components healthy
+- ✅ Polling latency &lt;15ms (p95)
+- ✅ Cache hit rate >70%
+- ✅ No critical errors in logs (first hour)
+- ✅ End-to-end message flow working
+- ✅ Monitoring dashboards operational
+
+---
+
+## Contacts
+
+**Escalation Path:**
+- L1: DevOps Team - Slack #devops
+- L2: Architecture Team - Slack #architecture
+- L3: On-Call Engineer - PagerDuty
+
+**Documentation:**
+- Architecture Review: `/governance/reviews/telegram-architecture-2025-11-03.md`
+- Database Analysis: `/governance/reviews/telegram-database-architecture-2025-11-03.md`
+
+---
+
+**Last Updated:** 2025-11-03  
+**Version:** 1.0.0  
+**Next Review:** After migration completion
+

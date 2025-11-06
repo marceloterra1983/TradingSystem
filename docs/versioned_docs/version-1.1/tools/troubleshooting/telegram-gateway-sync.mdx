@@ -1,0 +1,229 @@
+---
+title: 'Telegram Gateway - Botão Checar Mensagens'
+sidebar_position: 5
+tags: ['troubleshooting', 'telegram', 'sync']
+---
+
+# Troubleshooting: Botão "Checar Mensagens" Não Funciona
+
+## 🔍 Problema
+
+O botão "Checar Mensagens" no dashboard do Telegram Gateway não sincroniza as mensagens dos canais monitorados.
+
+## 🎯 Causa Raiz
+
+**API Key não configurada** - O endpoint `/api/telegram-gateway/sync-messages` requer autenticação via header `X-API-Key`, mas a variável de ambiente não estava configurada.
+
+## ✅ Solução Rápida
+
+Execute o script de configuração:
+
+```bash
+bash scripts/setup/configure-telegram-gateway-api-key.sh
+```
+
+O script irá:
+1. Gerar uma API key segura (64 caracteres hex)
+2. Adicionar `TELEGRAM_GATEWAY_API_KEY` ao `.env` raiz
+3. Adicionar `VITE_TELEGRAM_GATEWAY_API_TOKEN` ao `frontend/dashboard/.env`
+4. Mostrar instruções para reiniciar os serviços
+
+## 🛠️ Solução Manual
+
+### 1. Gerar API Key
+
+```bash
+openssl rand -hex 32
+```
+
+Exemplo de saída:
+```
+a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2
+```
+
+### 2. Adicionar ao .env raiz
+
+Adicione ao arquivo `.env` na raiz do projeto:
+
+```bash
+# Telegram Gateway API Authentication
+TELEGRAM_GATEWAY_API_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2
+```
+
+### 3. Adicionar ao frontend
+
+Adicione ao arquivo `frontend/dashboard/.env`:
+
+```bash
+# Telegram Gateway API Token
+VITE_TELEGRAM_GATEWAY_API_TOKEN=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2
+```
+
+⚠️ **IMPORTANTE**: Use a **mesma key** em ambos os arquivos!
+
+### 4. Reiniciar Serviços
+
+```bash
+# 1. Telegram Gateway
+bash START-GATEWAY-MTPROTO.sh
+
+# 2. Dashboard (em outro terminal)
+cd frontend/dashboard
+npm run dev
+```
+
+## 🧪 Testar a Configuração
+
+### Teste via cURL
+
+```bash
+# Obter a API key do .env
+API_KEY=$(grep "TELEGRAM_GATEWAY_API_KEY" .env | cut -d'=' -f2)
+
+# Testar endpoint
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY"
+```
+
+**Resposta esperada** (sucesso):
+```json
+{
+  "success": true,
+  "message": "5 mensagem(ns) sincronizada(s) de 1 canal(is). 5 salvas no banco.",
+  "data": {
+    "totalMessagesSynced": 5,
+    "totalMessagesSaved": 5,
+    "channelsSynced": ["@meu_canal"],
+    "timestamp": "2025-11-04T13:00:00.000Z"
+  }
+}
+```
+
+**Resposta de erro** (API key incorreta):
+```json
+{
+  "success": false,
+  "error": "Unauthorized",
+  "message": "Missing X-API-Key or X-Gateway-Token header"
+}
+```
+
+### Teste via Dashboard
+
+1. Acesse: http://localhost:3103/#/telegram-gateway
+2. Role até o card "Mensagens"
+3. Clique no botão **"Checar Mensagens"**
+4. Aguarde o feedback visual:
+   - ✅ Verde: Mensagens sincronizadas com sucesso
+   - ❌ Vermelho: Erro na sincronização
+
+## 📋 Checklist de Diagnóstico
+
+- [ ] Serviço rodando na porta 4010
+  ```bash
+  curl http://localhost:4010/health
+  ```
+
+- [ ] API key configurada no backend
+  ```bash
+  grep "TELEGRAM_GATEWAY_API_KEY" .env
+  ```
+
+- [ ] API key configurada no frontend
+  ```bash
+  grep "VITE_TELEGRAM_GATEWAY_API_TOKEN" frontend/dashboard/.env
+  ```
+
+- [ ] Keys são idênticas em ambos os arquivos
+  ```bash
+  diff <(grep "TELEGRAM_GATEWAY_API_KEY" .env | cut -d'=' -f2) \
+       <(grep "VITE_TELEGRAM_GATEWAY_API_TOKEN" frontend/dashboard/.env | cut -d'=' -f2)
+  ```
+
+- [ ] Sessão MTProto ativa
+  ```bash
+  ls -lh apps/telegram-gateway/.session/telegram-gateway.session
+  ```
+
+- [ ] Canal monitorado configurado
+  ```bash
+  curl http://localhost:4010/api/channels | jq '.data[] | select(.isActive == true)'
+  ```
+
+## 🔧 Problemas Comuns
+
+### Erro: "Missing X-API-Key header"
+
+**Causa**: Frontend não está enviando o header
+**Solução**: Verificar `VITE_TELEGRAM_GATEWAY_API_TOKEN` no `.env` do frontend
+
+### Erro: "Invalid API key"
+
+**Causa**: Keys diferentes entre backend e frontend
+**Solução**: Sincronizar as keys (use o script de configuração)
+
+### Erro: "TELEGRAM_GATEWAY_API_KEY not configured"
+
+**Causa**: Variável não existe no `.env` raiz
+**Solução**: Adicionar `TELEGRAM_GATEWAY_API_KEY` ao `.env` raiz
+
+### Erro: "Session not found"
+
+**Causa**: Arquivo de sessão MTProto não existe
+**Solução**: Executar autenticação
+```bash
+cd apps/telegram-gateway
+bash authenticate-interactive.sh
+```
+
+### Erro: "No active channels configured"
+
+**Causa**: Nenhum canal monitorado ativo
+**Solução**: Adicionar canal via dashboard ou API
+```bash
+curl -X POST http://localhost:4010/api/channels \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY" \
+  -d '{
+    "channelId": "@seu_canal",
+    "label": "Meu Canal",
+    "isActive": true
+  }'
+```
+
+## 📚 Referências
+
+- [Telegram Gateway API](/api/telegram-gateway)
+- [Authentication Middleware](../security-config/overview)
+- [Environment Variables](/tools/security-config/env)
+
+## 🐛 Ainda com Problemas?
+
+Se após seguir todos os passos o botão ainda não funcionar:
+
+1. **Capture logs do backend**:
+   ```bash
+   tail -f logs/telegram-gateway-mtproto.log
+   ```
+
+2. **Capture logs do frontend** (Console do navegador):
+   - Abra DevTools (F12)
+   - Aba "Console"
+   - Clique no botão "Checar Mensagens"
+   - Copie todos os logs
+
+3. **Verifique a requisição no Network**:
+   - DevTools → Aba "Network"
+   - Clique no botão
+   - Encontre a requisição `/api/telegram-gateway/sync-messages`
+   - Verifique:
+     - Status Code
+     - Request Headers (presença de `X-API-Key`)
+     - Response Body
+
+4. **Reporte o issue** com:
+   - Logs do backend
+   - Logs do frontend
+   - Screenshot do erro
+   - Configuração do `.env` (sem expor a key completa)

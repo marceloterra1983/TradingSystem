@@ -1,0 +1,514 @@
+---
+title: Telegram Gateway API - Quick Start
+sidebar_position: 2
+tags: [api, telegram, quickstart, guide]
+domain: api
+type: guide
+summary: Get started with Telegram Gateway API in 5 minutes
+status: active
+last_review: "2025-11-04"
+---
+
+# 🚀 Telegram Gateway API - Quick Start
+
+Get up and running with the Telegram Gateway API in 5 minutes!
+
+---
+
+## ✅ Prerequisites
+
+- Telegram Gateway MTProto running (Port 4007)
+- Telegram Gateway API running (Port 4010)
+- TimescaleDB running (Port 5434)
+- API Key from `.env` file
+
+**Check if services are running:**
+```bash
+# Check all services
+curl http://localhost:3500/api/health/full | jq '.services[] | select(.name | contains("telegram"))'
+
+# Or check individually
+curl http://localhost:4007/health  # MTProto Gateway
+curl http://localhost:4010/health  # Gateway API
+```
+
+---
+
+## 🔑 Step 1: Get Your API Key
+
+The API key is stored in the root `.env` file:
+
+```bash
+# View your API key
+grep "TELEGRAM_GATEWAY_API_KEY" .env
+
+# Output:
+# TELEGRAM_GATEWAY_API_KEY=f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85
+```
+
+**Save this key** - you'll need it for all API requests!
+
+---
+
+## 📥 Step 2: Sync Messages
+
+Synchronize messages from Telegram to the database:
+
+```bash
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85" \
+  -d '{
+    "limit": 50
+  }' | jq '.'
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "message": "50 mensagem(ns) sincronizada(s) de 7 canal(is). 50 salvas no banco.",
+  "data": {
+    "totalMessagesSynced": 50,
+    "totalMessagesSaved": 50,
+    "channelsSynced": [
+      {
+        "channelId": "-1001649127710",
+        "label": "TP",
+        "messagesSynced": 35
+      },
+      {
+        "channelId": "-1001744113331",
+        "label": "jonas",
+        "messagesSynced": 15
+      }
+    ],
+    "timestamp": "2025-11-04T18:00:00.000Z"
+  }
+}
+```
+
+---
+
+## 📊 Step 3: Query Messages
+
+### Get Recent Messages
+
+```bash
+curl http://localhost:4010/api/messages?limit=10 | jq '.'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "messageId": 12345,
+      "channelId": "-1001649127710",
+      "channelTitle": "TP Capital",
+      "text": "COMPRA: PETR4 @ R$ 38.50",
+      "date": "2025-11-04T15:30:00.000Z",
+      "sender": "Admin",
+      "hasMedia": false,
+      "metadata": {
+        "views": 150,
+        "forwards": 5
+      }
+    }
+  ],
+  "pagination": {
+    "total": 1234,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 124
+  }
+}
+```
+
+### Filter by Channel
+
+```bash
+curl "http://localhost:4010/api/messages?channelId=-1001649127710&limit=20" | jq '.'
+```
+
+### Filter by Date Range
+
+```bash
+curl "http://localhost:4010/api/messages?startDate=2025-11-01&endDate=2025-11-04&limit=50" | jq '.'
+```
+
+### Search Messages
+
+```bash
+curl "http://localhost:4010/api/messages?search=COMPRA&limit=20" | jq '.'
+```
+
+### Combine Filters
+
+```bash
+curl "http://localhost:4010/api/messages?channelId=-1001649127710&startDate=2025-11-04&search=PETR4&limit=20" | jq '.'
+```
+
+---
+
+## 📁 Step 4: Manage Channels
+
+### List All Channels
+
+```bash
+curl http://localhost:4010/api/channels | jq '.'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "channelId": "-1001649127710",
+      "title": "TP Capital",
+      "label": "TP",
+      "active": true,
+      "totalMessages": 1234,
+      "lastMessageDate": "2025-11-04T15:30:00.000Z",
+      "createdAt": "2025-10-01T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "channelId": "-1001744113331",
+      "title": "Jonas Trading",
+      "label": "jonas",
+      "active": true,
+      "totalMessages": 567,
+      "lastMessageDate": "2025-11-04T14:20:00.000Z",
+      "createdAt": "2025-10-15T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Get Single Channel
+
+```bash
+curl "http://localhost:4010/api/channels/-1001649127710" | jq '.'
+```
+
+### Get Channel Statistics
+
+```bash
+curl "http://localhost:4010/api/channels/-1001649127710/stats" | jq '.'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "channelId": "-1001649127710",
+    "title": "TP Capital",
+    "statistics": {
+      "totalMessages": 1234,
+      "messagesLast24h": 45,
+      "messagesLast7d": 312,
+      "messagesLast30d": 1234,
+      "averagePerDay": 41,
+      "messagesWithMedia": 234,
+      "mediaPercentage": 18.96
+    },
+    "topSenders": [
+      { "sender": "Admin", "count": 800 },
+      { "sender": "Bot", "count": 434 }
+    ],
+    "messagesByDate": [
+      { "date": "2025-11-04", "count": 45 },
+      { "date": "2025-11-03", "count": 38 }
+    ]
+  }
+}
+```
+
+---
+
+## 🔍 Step 5: Advanced Queries
+
+### Get Messages with Media
+
+```bash
+curl "http://localhost:4010/api/messages?hasMedia=true&limit=20" | jq '.'
+```
+
+### Get Messages by Specific Sender
+
+```bash
+curl "http://localhost:4010/api/messages?sender=Admin&limit=20" | jq '.'
+```
+
+### Get Messages with Pagination
+
+```bash
+# Page 1
+curl "http://localhost:4010/api/messages?page=1&limit=20" | jq '.'
+
+# Page 2
+curl "http://localhost:4010/api/messages?page=2&limit=20" | jq '.'
+```
+
+### Sort Messages
+
+```bash
+# Sort by date descending (newest first) - default
+curl "http://localhost:4010/api/messages?sortBy=date&sortOrder=desc" | jq '.'
+
+# Sort by date ascending (oldest first)
+curl "http://localhost:4010/api/messages?sortBy=date&sortOrder=asc" | jq '.'
+```
+
+---
+
+## 📸 Step 6: Download Photos
+
+### Get Photo URL
+
+```bash
+curl "http://localhost:4010/api/telegram-gateway/photos/{channelId}/{messageId}" \
+  -H "X-API-Key: f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85" \
+  --output photo.jpg
+```
+
+**Example:**
+```bash
+curl "http://localhost:4010/api/telegram-gateway/photos/-1001649127710/12345" \
+  -H "X-API-Key: f7b22c498bd7527a7d114481015326736f0a94a58ec7c4e6e7157d6d2b36bd85" \
+  --output trading-signal.jpg
+```
+
+**Features:**
+- ✅ Automatic caching (24h TTL)
+- ✅ Cache headers for browser caching
+- ✅ Proxies to MTProto Gateway (Port 4007)
+- ✅ Returns JPEG with proper Content-Type
+
+---
+
+## 🔄 Step 7: Monitor Gateway
+
+### Get Gateway Status
+
+```bash
+curl http://localhost:4010/api/telegram-gateway/status | jq '.'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "mtproto": {
+      "status": "connected",
+      "uptime": 3600,
+      "lastSync": "2025-11-04T18:00:00.000Z"
+    },
+    "database": {
+      "status": "connected",
+      "totalMessages": 1234,
+      "totalChannels": 7
+    },
+    "cache": {
+      "status": "connected",
+      "hitRate": 0.85
+    }
+  }
+}
+```
+
+### Get Gateway Metrics
+
+```bash
+curl http://localhost:4010/api/telegram-gateway/metrics | jq '.'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "messages": {
+      "total": 1234,
+      "last24h": 45,
+      "last7d": 312
+    },
+    "channels": {
+      "total": 7,
+      "active": 7
+    },
+    "sync": {
+      "lastSyncTime": "2025-11-04T18:00:00.000Z",
+      "averageSyncTime": 2.5,
+      "successRate": 0.99
+    },
+    "storage": {
+      "databaseSize": "125MB",
+      "cacheSize": "15MB"
+    }
+  }
+}
+```
+
+---
+
+## ⚡ Step 8: Real-time Updates
+
+### Use Dashboard
+
+The easiest way to interact with the API is through the Dashboard:
+
+**URL:** http://localhost:3103/#/telegram-gateway
+
+**Features:**
+- ✅ One-click sync
+- ✅ Filter by channel/date/search
+- ✅ View message details
+- ✅ Download photos
+- ✅ Real-time Gateway logs
+- ✅ Link previews (Twitter, YouTube, Instagram, Generic)
+
+---
+
+## 🧪 Step 9: Test Authentication
+
+### Check Authentication Status
+
+```bash
+curl http://localhost:4010/api/telegram-gateway/auth/status | jq '.'
+```
+
+### Start Authentication (if needed)
+
+```bash
+curl -X POST http://localhost:4010/api/telegram-gateway/auth/start | jq '.'
+```
+
+---
+
+## 📊 Step 10: Export Data
+
+### Export Messages to JSON
+
+```bash
+curl "http://localhost:4010/api/messages?channelId=-1001649127710&limit=1000" | jq '.' > messages.json
+```
+
+### Export Channel Statistics
+
+```bash
+curl "http://localhost:4010/api/channels/-1001649127710/stats" | jq '.' > channel-stats.json
+```
+
+---
+
+## 🎯 Common Use Cases
+
+### Use Case 1: Get Latest Trading Signals
+
+```bash
+# Get last 20 messages from TP Capital channel
+curl "http://localhost:4010/api/messages?channelId=-1001649127710&limit=20&sortBy=date&sortOrder=desc" | jq '.data[] | {date, text}'
+```
+
+### Use Case 2: Search for Specific Stock
+
+```bash
+# Search for PETR4 mentions
+curl "http://localhost:4010/api/messages?search=PETR4" | jq '.data[] | {date, channelTitle, text}'
+```
+
+### Use Case 3: Daily Message Report
+
+```bash
+# Get today's messages
+TODAY=$(date +%Y-%m-%d)
+curl "http://localhost:4010/api/messages?startDate=$TODAY&endDate=$TODAY" | jq '.pagination.total'
+```
+
+### Use Case 4: Monitor Active Channels
+
+```bash
+# Get channels with messages in last 24h
+curl "http://localhost:4010/api/channels" | jq '.data[] | select(.lastMessageDate >= (now - 86400 | todate))'
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: "Invalid API key"
+
+**Solution:**
+```bash
+# 1. Verify key in .env
+grep "TELEGRAM_GATEWAY_API_KEY" .env
+
+# 2. Make sure you're using X-API-Key header (not X-Gateway-Token)
+curl -H "X-API-Key: your_key" http://localhost:4010/api/messages
+
+# 3. Restart Gateway API to reload .env
+kill $(lsof -ti :4010)
+cd backend/api/telegram-gateway && npm start
+```
+
+### Issue: "MTProto Gateway not responding"
+
+**Solution:**
+```bash
+# 1. Check if Gateway is running
+curl http://localhost:4007/health
+
+# 2. If not running, restart it
+bash START-GATEWAY-MTPROTO.sh
+
+# 3. Verify it's connected to Telegram
+curl http://localhost:4007/health | jq '.telegram'
+```
+
+### Issue: "No messages found"
+
+**Solution:**
+```bash
+# 1. Sync messages first
+curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
+  -H "X-API-Key: your_key" -d '{"limit": 50}'
+
+# 2. Check if channels are configured
+curl http://localhost:4010/api/channels
+
+# 3. Verify MTProto Gateway is collecting messages
+curl http://localhost:4007/health
+```
+
+---
+
+## 📚 Next Steps
+
+1. **[Explore Interactive Docs](/api/telegram-gateway)** - Try API in Swagger UI
+2. **[Read Full API Reference](/specs/telegram-gateway-api.openapi.yaml)** - Complete OpenAPI spec
+3. **[Integrate with Frontend](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/frontend/overview.mdx)** - Use in React/Vue/Angular
+4. **[Setup Monitoring](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/tools/monitoring/overview.mdx)** - Grafana dashboards
+5. **[Performance Tuning](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/performance-tuning.mdx)** - Optimize queries
+
+---
+
+## 🔗 Related Documentation
+
+- [Telegram Hybrid Stack Architecture](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/hybrid-deployment.mdx)
+- [Database Schema](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/database/schema.mdx)
+- [Operations Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/operations.mdx)
+- [Troubleshooting](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/troubleshooting.mdx)
+
+---
+
+**Happy coding! 🚀**
+
+Need help? Check the [API Hub](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/api/api-hub.mdx) or [Troubleshooting Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/tools/troubleshooting/telegram-gateway-sync.mdx)

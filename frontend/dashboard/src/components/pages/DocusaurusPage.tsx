@@ -5,7 +5,6 @@ import EscopoPageNew from './EscopoPageNew';
 import APIViewerPage from './APIViewerPage';
 import DocsHybridSearchPage from './DocsHybridSearchPage';
 import { apiConfig } from '../../config/api';
-import { resolveDocsVersionRoot } from '../../utils/docusaurus';
 
 export function DocusaurusPageNew() {
   const [activeView, setActiveView] = useState<
@@ -16,16 +15,7 @@ export function DocusaurusPageNew() {
   const isDocsApiView = activeView === 'docsApi';
   const isDocsHybridView = activeView === 'docsHybrid';
 
-  const docsVersionRoot = resolveDocsVersionRoot('next', {
-    absolute: true,
-    trailingSlash: true,
-  });
-  const iframeSrc = isDocsView ? docsVersionRoot : undefined;
-  const iframeTitle =
-    activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
-
   console.log('[DocusaurusPage] activeView:', activeView);
-  console.log('[DocusaurusPage] iframeSrc:', iframeSrc);
   console.log('[DocusaurusPage] DEV mode:', import.meta.env.DEV);
 
   const handleOpenInNewTab = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -48,8 +38,8 @@ export function DocusaurusPageNew() {
       );
     } else if (isDocsApiView) {
       window.open(apiConfig.docsApiUrl, '_blank', 'noopener,noreferrer');
-    } else if (iframeSrc) {
-      window.open(iframeSrc, '_blank', 'noopener,noreferrer');
+    } else if (isDocsView) {
+      window.open('http://localhost:3404/next/', '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -61,7 +51,7 @@ export function DocusaurusPageNew() {
   };
 
   const canOpenInNewTab =
-    isOverview || isDocsApiView || isDocsHybridView || Boolean(iframeSrc);
+    isOverview || isDocsApiView || isDocsHybridView || isDocsView;
 
   return (
     <div className="min-h-[calc(100vh-160px)] w-full">
@@ -137,25 +127,61 @@ export function DocusaurusPageNew() {
       ) : isDocsHybridView ? (
         <DocsHybridSearchPage />
       ) : (
-        <div className="h-[calc(100vh-200px)] w-full flex flex-col">
-          {iframeSrc ? (
-            <iframe
-              key={iframeSrc}
-              src={iframeSrc}
-              title={iframeTitle}
-              className="flex-1 w-full rounded-lg border-2 border-blue-500 shadow-sm"
-              onLoad={() =>
-                console.log('[DocusaurusPage] Iframe carregado com sucesso')
-              }
-              onError={() =>
-                console.error('[DocusaurusPage] Erro ao carregar iframe')
-              }
-            />
-          ) : (
-            <div className="flex flex-1 items-center justify-center text-gray-500">
-              No URL configured
+        <div className="h-[calc(100vh-200px)] w-full flex flex-col items-center justify-center p-8">
+          <div className="max-w-2xl w-full bg-white dark:bg-slate-800 rounded-lg shadow-lg border-2 border-blue-500 p-8">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-4">
+                <svg className="h-10 w-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                📖 Documentação Completa
+              </h3>
+              
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                A documentação do TradingSystem está disponível no Docusaurus standalone para melhor experiência de navegação.
+              </p>
+              
+              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>URL:</strong>{' '}
+                  <code className="bg-white dark:bg-slate-700 px-2 py-1 rounded text-blue-600 dark:text-blue-400">
+                    http://localhost:3404/next/
+                  </code>
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="lg"
+                  onClick={() => window.open('http://localhost:3404/next/', '_blank', 'noopener,noreferrer')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <ExternalLink className="mr-2 h-5 w-5" />
+                  Abrir Documentação
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => {
+                    navigator.clipboard.writeText('http://localhost:3404/next/');
+                    alert('URL copiada para área de transferência!');
+                  }}
+                >
+                  Copiar URL
+                </Button>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  💡 <strong>Dica:</strong> Adicione aos favoritos para acesso rápido
+                </p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

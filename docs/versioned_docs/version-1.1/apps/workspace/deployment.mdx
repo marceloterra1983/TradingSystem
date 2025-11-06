@@ -1,0 +1,73 @@
+---
+title: Deployment Guide
+sidebar_position: 6
+description: Deploying the Workspace application across environments.
+tags:
+  - apps
+  - workspace
+  - deployment
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Local Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Workspace API running on port 3200 (`backend/api/workspace`)
+
+### Setup
+
+```bash
+cd frontend/apps/workspace
+npm install
+npm run dev   # http://localhost:3900
+```
+
+Workspace is available at `http://localhost:3900`. Use `npm run build` for optimized bundles and `npm run preview` to inspect the production build locally.
+
+## Standalone Deployment
+
+1. Build assets:
+
+   ```bash
+   npm run build
+   ```
+
+2. Serve `dist/` via static host (Nginx, Netlify, Vercel).
+3. Configure reverse proxy to route API calls (`/api/workspace`) to backend service (`http://<api-host>:3200/api`).
+4. Set environment variables during build (`VITE_WORKSPACE_API_URL=https://api.tradingsystem.local`).
+
+## Dashboard Embed
+
+- Dashboard proxies `/workspace` traffic through iframe pointing to standalone deployment.
+- Ensure CORS headers on API allow dashboard origin (default `http://localhost:3103` in development).
+- Keep Workspace build version pinned within dashboard deployment manifests.
+
+## Production Pipeline
+
+1. Install dependencies (`npm ci`).
+2. Run quality gates: `npm run lint`, `npm run type-check`, `npm run test`.
+3. Build assets: `npm run build`.
+4. Upload `dist/` to CDN or static bucket.
+5. Invalidate CDN cache to propagate new release.
+
+## Automation
+
+- Integrate with CI (GitHub Actions) to run lint/type-check/test/build.
+- Artifacts attached to pipeline are deployed to hosting provider.
+- Monitor build output size to maintain fast page loads (&lt;300 KB initial JS).
+
+## Rollback
+
+1. Restore previous `dist/` artifact from build cache.
+2. Redeploy static assets to hosting provider.
+3. If API changes deployed simultaneously, revert API to prior build to maintain contract.
+
+## Post-Deployment Validation
+
+- Load `https://<workspace-host>` and confirm login-free access.
+- Verify `/api/items` requests succeed via browser dev tools (200 OK).
+- Drag-and-drop between Kanban columns and ensure status persists on reload.
+- Confirm dashboard iframe loads updated version without CSP violations.

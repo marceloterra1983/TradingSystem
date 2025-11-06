@@ -1,0 +1,72 @@
+---
+title: Incident Runbook
+sidebar_position: 8
+description: Recovery steps for Telegram Gateway outages and degradations.
+tags:
+  - apps
+  - telegram-gateway
+  - runbook
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Common Alerts
+
+| Alert | Trigger | Severity |
+|-------|---------|----------|
+| `TelegramGatewayDisconnected` | `telegram_connection_status == 0` for 60s | Critical |
+| `TelegramGatewayQueueBacklog` | Messages queued > 50 for 10m | Warning |
+| `TelegramGatewayApiAuthFailures` | Auth failures detected in REST API | Warning |
+| `TelegramGatewayFailureQueue` | `telegram_failure_queue_size > 0` | Info |
+
+## Incident Playbooks
+
+### 1. Gateway Disconnected
+
+**Symptoms**: `/health` returns `telegram: disconnected`, systemd restarts, messages not flowing.
+
+1. Check logs: `journalctl -u telegram-gateway -n 200`.
+2. Confirm internet access and Telegram availability.
+3. Restart service: `sudo systemctl restart telegram-gateway`.
+4. If session corrupted, delete `.session/*`, restart, and re-authenticate with SMS/2FA.
+5. Validate `curl http://localhost:4007/health`.
+
+### 2. Queue Backlog
+
+**Symptoms**: TP Capital ingestion lags, queue count increasing.
+
+1. Fetch metrics: `curl http://localhost:4005/health | jq '.messagesWaiting'`.
+2. Trigger sync: `curl -X POST http://localhost:4005/sync-messages -H "Content-Type: application/json" -d '{"limit":200}'`.
+3. Inspect REST API: `curl -H "X-Gateway-Token: $TOKEN" http://localhost:4010/api/messages?status=received`.
+4. Restart Gateway if polling worker stalled (`sudo systemctl restart telegram-gateway`).
+
+### 3. Publish Failures
+
+**Symptoms**: `telegram_publish_failures_total` increments, JSONL queue grows.
+
+1. Inspect failure queue: `tail -n 20 data/failure-queue.jsonl`.
+2. Validate API endpoint availability (TP Capital `/ingest`).
+3. Once downstream restored, run recovery script (TODO: `node scripts/recover-queue.js`).
+4. Remove JSONL entries only after successful replay.
+
+### 4. REST API Auth Failures
+
+**Symptoms**: Operators receive 401, metrics show auth errors.
+
+1. Confirm header usage: `curl -H "X-Gateway-Token: $TOKEN" http://localhost:4010/`.
+2. Ensure token matches `TELEGRAM_GATEWAY_API_TOKEN`.
+3. Rotate token if compromised and redistribute to consumers.
+
+## Post-Incident Checklist
+
+1. Document root cause, timeline, and remediation in incident tracker.
+2. Backup updated `.session/` files (`tar -czf ...`).
+3. Notify TP Capital operators if signal loss occurred.
+4. Update this runbook with new lessons learned.
+
+## Escalation
+
+- **Primary**: On-call platform engineer.
+- **Secondary**: TP Capital service owner.
+- **External**: Telegram account owner (for credential or SIM issues).
+
+Ensure contact list stored in secure shared vault with phone numbers for SMS verification.

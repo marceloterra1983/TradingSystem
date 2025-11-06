@@ -1,0 +1,135 @@
+@startuml
+title Idea Bank - Component Architecture
+
+!define RECTANGLE class
+
+skinparam component {
+  BackgroundColor<<Interface>> LightBlue
+  BackgroundColor<<Application>> LightGreen
+  BackgroundColor<<Infrastructure>> LightGray
+  BackgroundColor<<External>> LightYellow
+}
+
+package "Idea Bank API :3200" {
+  package "Interfaces Layer" <<Interface>> {
+    component "Express Routes" as Routes {
+      [GET /api/items]
+      [POST /api/items]
+      [PUT /api/items/:id]
+      [DELETE /api/items/:id]
+      [GET /health]
+    }
+  }
+
+  package "Application Layer" <<Application>> {
+    component "Validation Middleware" as Validation {
+      [express-validator]
+      [Category enum check]
+      [Priority enum check]
+      [Status enum check]
+      [Required fields]
+    }
+
+    component "DTOs" as DTOs {
+      [IdeaCreateDTO]
+      [IdeaUpdateDTO]
+      [IdeaResponseDTO]
+    }
+  }
+
+  package "Domain Layer" {
+    component "Idea Entity" as IdeaEntity {
+      [id: string]
+      [title: string]
+      [description: string]
+      [category: Category]
+      [priority: Priority]
+      [status: Status]
+      [tags: string[]]
+      [createdAt: Date]
+      [updatedAt: Date]
+    }
+
+    component "Value Objects" as ValueObjects {
+      [Category enum]
+      [Priority enum]
+      [Status enum]
+    }
+  }
+
+  package "Infrastructure Layer" <<Infrastructure>> {
+    component "LowDB Adapter" as LowDBAdapter {
+      [db.data.ideas]
+      [Atomic read/write]
+      [Auto-create file]
+    }
+
+    component "Pino Logger" as Logger {
+      [Structured logging]
+      [JSON format]
+      [Request middleware]
+    }
+
+    component "Prometheus Metrics" as Metrics {
+      [ideas_created_total]
+      [ideas_updated_total]
+      [ideas_deleted_total]
+      [/metrics endpoint]
+    }
+  }
+}
+
+package "External Services" <<External>> {
+  component "Dashboard UI\n:3103" as Dashboard
+  database "LowDB File\nideas.json" as LowDBFile
+  component "Prometheus\n:9090" as Prometheus
+  component "Future: PostgreSQL\n:5432" as PostgreSQL [dotted]
+}
+
+' Connections
+Dashboard --> Routes : HTTP REST (GET/POST/PUT/DELETE)
+Routes ..> Validation : validates
+Routes ..> DTOs : uses
+Routes ..> IdeaEntity : creates/updates
+Validation ..> ValueObjects : enforces enums
+IdeaEntity ..> ValueObjects : uses
+
+Routes --> LowDBAdapter : Read/Write
+LowDBAdapter --> LowDBFile : Atomic operations
+Routes --> Logger : Log events
+Routes --> Metrics : Export metrics
+Metrics --> Prometheus : Scrape /metrics
+
+' Future migration
+LowDBAdapter .right.> PostgreSQL : Migration planned
+
+note right of LowDBAdapter
+  **MVP Solution**
+  LowDB provides file-based persistence.
+  Migration to PostgreSQL/TimescaleDB
+  planned for production.
+end note
+
+note right of Validation
+  **Validation Rules**
+  - Category: feature|bugfix|improvement|refactor
+  - Priority: low|medium|high|critical
+  - Status: new|review|in-progress|completed|rejected
+  - Title: required, max 200 chars
+end note
+
+note bottom of Routes
+  **Performance Target**
+  < 200ms p95 for CRUD operations
+  Measured via Prometheus metrics
+end note
+
+note right of Dashboard
+  **Features**
+  - Kanban board (@dnd-kit)
+  - Filter by category/priority/status
+  - Search by title/tags
+  - React Query caching
+end note
+
+@enduml

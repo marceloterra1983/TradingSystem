@@ -1,0 +1,11 @@
+{
+  "label": "Linting",
+  "position": 7,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Linting Standards",
+    "slug": "/tools/linting",
+    "description": "Documentation for linting workflows and tooling."
+  }
+}

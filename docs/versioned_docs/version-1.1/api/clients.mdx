@@ -1,0 +1,394 @@
+---
+title: API Clients
+sidebar_position: 2
+tags: [api, clients, typescript, python, openapi]
+domain: api
+type: guide
+summary: Auto-generated type-safe API clients for TypeScript and Python
+status: active
+last_review: "2025-11-06"
+---
+
+# API Clients
+
+Auto-generated type-safe API clients for TradingSystem APIs, generated from OpenAPI specifications.
+
+## 📦 Available Clients
+
+### TypeScript Clients
+
+Type-safe clients with full TypeScript support:
+
+- **Workspace API** ([`workspace-api`](../../clients/typescript/workspace-api/)) - Port 3200
+- **Documentation API** ([`documentation-api`](../../clients/typescript/documentation-api/)) - Port 3405
+- **TP Capital API** ([`tp-capital-api`](../../clients/typescript/tp-capital-api/)) - Port 4005
+
+### Python Clients
+
+Python clients with sync/async support and type hints:
+
+- **Workspace API** ([`workspace-api-client`](../../clients/python/workspace-api-client/)) - Port 3200
+- **Documentation API** ([`documentation-api-client`](../../clients/python/documentation-api-client/)) - Port 3405
+- **TP Capital API** ([`tp-capital-api-client`](../../clients/python/tp-capital-api-client/)) - Port 4005
+
+## 🚀 Quick Start
+
+### TypeScript
+
+```typescript
+import { WorkspaceApiClient } from '@tradingsystem/api-clients/workspace-api';
+
+// Create client
+const client = new WorkspaceApiClient({
+  BASE: 'http://localhost:3200',
+});
+
+// Get all workspace items
+const items = await client.items.getAllItems({
+  category: 'Documentation',
+  limit: 10,
+});
+
+// Create a new item
+const newItem = await client.items.createItem({
+  requestBody: {
+    title: 'New Task',
+    category: 'Documentation',
+    priority: 'alta',
+    status: 'pendente',
+  },
+});
+```
+
+### Python
+
+```python
+from workspace_api_client import Client
+from workspace_api_client.api.items import get_all_items, create_item
+from workspace_api_client.models import CreateWorkspaceItemPayload, WorkspaceCategory
+
+# Create client
+client = Client(base_url="http://localhost:3200")
+
+# Get all workspace items
+items = get_all_items.sync(client=client, category=WorkspaceCategory.DOCUMENTATION, limit=10)
+
+# Create a new item
+new_item_payload = CreateWorkspaceItemPayload(
+    title="New Task",
+    category=WorkspaceCategory.DOCUMENTATION,
+    priority="alta",
+    status="pendente",
+)
+
+new_item = create_item.sync(client=client, body=new_item_payload)
+```
+
+## 🎯 Key Features
+
+### Type Safety
+
+**TypeScript:**
+- Full TypeScript interfaces for all models
+- Type-checked request/response parameters
+- IDE autocomplete for all API endpoints
+- Compile-time error detection
+
+**Python:**
+- Type-annotated dataclasses
+- Type hints for all functions
+- IDE autocomplete with type information
+- Runtime type validation
+
+### Multiple HTTP Clients
+
+**TypeScript:** Axios-based HTTP client with request cancellation
+**Python:** HTTPX-based client with sync and async support
+
+### Error Handling
+
+Both clients provide structured error handling:
+
+```typescript
+// TypeScript
+import { ApiError } from './workspace-api';
+
+try {
+  const item = await client.items.getItem({ id: '123' });
+} catch (error) {
+  if (error instanceof ApiError) {
+    console.error(`API Error: ${error.status} - ${error.message}`);
+  }
+}
+```
+
+```python
+# Python
+from workspace_api_client.errors import UnexpectedStatus
+
+try:
+    item = get_item.sync(client=client, id="123")
+except UnexpectedStatus as e:
+    print(f"API Error: {e.status_code}")
+```
+
+## 🔨 Client Generation
+
+### Prerequisites
+
+**TypeScript:**
+```bash
+cd clients/typescript
+npm install
+```
+
+**Python:**
+```bash
+cd clients/python
+python3 -m venv .venv
+source .venv/bin/activate
+pip install openapi-python-client
+```
+
+### Generate Clients
+
+From project root:
+
+```bash
+# Generate all clients
+npm run clients:generate
+
+# Generate only TypeScript
+npm run clients:generate:typescript
+
+# Generate only Python
+npm run clients:generate:python
+
+# Clean generated clients
+npm run clients:clean
+```
+
+### Source of Truth
+
+All clients are generated from **OpenAPI specifications** located at:
+- `docs/static/specs/workspace.openapi.yaml`
+- `docs/static/specs/documentation-api.openapi.yaml`
+- `docs/static/specs/tp-capital.openapi.yaml`
+
+When OpenAPI specs are updated, regenerate clients to get the latest changes.
+
+## 📚 Advanced Usage
+
+### Configuration
+
+**TypeScript:**
+```typescript
+import { OpenAPI } from '@tradingsystem/api-clients/workspace-api';
+
+// Global configuration
+OpenAPI.BASE = 'http://localhost:3200';
+OpenAPI.TOKEN = 'your-jwt-token';
+OpenAPI.HEADERS = {
+  'X-Custom-Header': 'value',
+};
+```
+
+**Python:**
+```python
+from workspace_api_client import Client, AuthenticatedClient
+
+# Basic client
+client = Client(
+    base_url="http://localhost:3200",
+    timeout=30.0,
+    verify_ssl=True,
+)
+
+# Authenticated client
+auth_client = AuthenticatedClient(
+    base_url="http://localhost:3200",
+    token="your-jwt-token",
+)
+```
+
+### Async Support (Python)
+
+```python
+import asyncio
+from workspace_api_client import AsyncClient
+from workspace_api_client.api.items import get_all_items
+
+async def fetch_items():
+    async_client = AsyncClient(base_url="http://localhost:3200")
+    items = await get_all_items.asyncio(client=async_client, limit=10)
+    return items
+
+asyncio.run(fetch_items())
+```
+
+### Request Cancellation (TypeScript)
+
+```typescript
+const promise = client.items.getAllItems({ limit: 100 });
+
+// Cancel if needed
+promise.cancel();
+
+try {
+  const items = await promise;
+} catch (error) {
+  if (error instanceof CancelError) {
+    console.log('Request was cancelled');
+  }
+}
+```
+
+## 🧪 Testing
+
+### TypeScript Example
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { WorkspaceApiClient } from './workspace-api';
+
+describe('Workspace API Client', () => {
+  const client = new WorkspaceApiClient({
+    BASE: 'http://localhost:3200',
+  });
+
+  it('should fetch all items', async () => {
+    const items = await client.items.getAllItems({ limit: 10 });
+    expect(Array.isArray(items)).toBe(true);
+  });
+});
+```
+
+### Python Example
+
+```python
+import pytest
+from workspace_api_client import Client
+from workspace_api_client.api.items import get_all_items
+
+@pytest.fixture
+def client():
+    return Client(base_url="http://localhost:3200")
+
+def test_get_all_items(client):
+    items = get_all_items.sync(client=client, limit=10)
+    assert isinstance(items, list)
+```
+
+## 📖 API Documentation
+
+For detailed API documentation, see:
+
+- [Workspace API](/api/workspace) - OpenAPI spec with Redocusaurus
+- [Documentation API](/api/documentation-api) - OpenAPI spec with Redocusaurus
+- [TP Capital API](/api/tp-capital) - OpenAPI spec with Redocusaurus
+
+## 🔗 Related Documentation
+
+- **Client Source Code:** Located in `clients/` directory (TypeScript and Python)
+- **OpenAPI Specifications:** Located in `docs/static/specs/` directory
+- **Contract Testing:** Automated via GitHub Actions workflow
+
+## 📊 Client Structure
+
+### TypeScript
+
+```
+workspace-api/
+├── WorkspaceApiClient.ts    # Main client class
+├── index.ts                   # Barrel exports
+├── core/                      # HTTP infrastructure
+│   ├── ApiError.ts           # Error handling
+│   ├── BaseHttpRequest.ts    # Base HTTP client
+│   ├── CancelablePromise.ts  # Request cancellation
+│   └── OpenAPI.ts            # Configuration
+├── models/                    # TypeScript types
+│   ├── WorkspaceItem.ts
+│   ├── WorkspaceCategory.ts
+│   └── ...
+└── services/                  # API endpoints
+    ├── HealthService.ts
+    └── ItemsService.ts
+```
+
+### Python
+
+```
+workspace-api-client/
+├── __init__.py               # Package exports
+├── client.py                 # Client classes
+├── errors.py                 # Exception types
+├── types.py                  # Type aliases
+├── api/                      # Endpoint modules
+│   ├── health/
+│   │   └── get_health.py
+│   └── items/
+│       ├── get_all_items.py
+│       ├── create_item.py
+│       └── ...
+└── models/                   # Dataclasses
+    ├── workspace_item.py
+    ├── workspace_category.py
+    └── ...
+```
+
+## 🎯 Benefits
+
+1. **Type Safety** - Catch errors at compile time, not runtime
+2. **Consistency** - Same API across TypeScript and Python
+3. **Auto-complete** - Full IDE support with IntelliSense
+4. **Documentation** - JSDoc/docstrings from OpenAPI specs
+5. **Maintainability** - Single source of truth (OpenAPI specs)
+6. **Automation** - Regenerate with one command
+
+## 🔧 Troubleshooting
+
+### TypeScript Issues
+
+**Module not found:**
+```bash
+cd clients/typescript
+npm install
+```
+
+**Outdated client:**
+```bash
+npm run clients:generate:typescript
+```
+
+### Python Issues
+
+**Import errors:**
+```bash
+cd clients/python
+source .venv/bin/activate
+pip install openapi-python-client
+```
+
+**Outdated client:**
+```bash
+cd clients/python
+bash generate-clients.sh
+```
+
+## 📝 Contributing
+
+To add a new API client:
+
+1. Create OpenAPI spec at `docs/static/specs/your-api.openapi.yaml`
+2. Validate spec: `npx @stoplight/spectral-cli lint docs/static/specs/your-api.openapi.yaml`
+3. Add to TypeScript generator (`clients/typescript/generate-clients.js`)
+4. Add to Python generator (`clients/python/generate-clients.sh`)
+5. Generate clients: `npm run clients:generate`
+6. Commit generated clients to repository
+
+---
+
+**Generated from:** OpenAPI 3.0/3.1 specifications
+**Tools:** openapi-typescript-codegen (TS), openapi-python-client (Python)
+**Last Updated:** 2025-11-06
+**Status:** ✅ Production Ready

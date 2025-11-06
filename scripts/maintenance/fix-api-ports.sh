@@ -55,8 +55,8 @@ echo "  - VITE_WORKSPACE_API_URL: http://localhost:3200 → http://localhost:320
 echo "  - VITE_DOCUSAURUS_URL: http://localhost:3404 (adicionado)"
 echo ""
 echo "Próximos passos:"
-echo "  1. Reiniciar o dashboard: cd frontend/dashboard && npm run dev"
-echo "  2. Ou usar: stop && start"
+echo "  1. Reiniciar o dashboard: docker compose -f tools/compose/docker-compose.dashboard.yml restart"
+echo "  2. Ou usar: bash scripts/start.sh"
 echo ""
 
 

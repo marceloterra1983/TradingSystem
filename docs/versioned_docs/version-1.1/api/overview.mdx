@@ -1,0 +1,572 @@
+---
+title: API Catalog
+sidebar_position: 1
+description: Complete catalog of TradingSystem REST APIs with OpenAPI specs, endpoint behavior, and integration guidelines
+tags:
+  - api
+  - integration
+  - catalog
+owner: BackendGuild
+lastReviewed: '2025-10-27'
+---
+
+## Overview
+
+The TradingSystem platform exposes **11 REST APIs** organized into infrastructure, data management, business logic, and monitoring categories. All production APIs are documented using **OpenAPI 3.1** and integrated with **Redocusaurus** for interactive documentation.
+
+### 🚀 Type-Safe API Clients
+
+Auto-generated type-safe clients are available for all production APIs:
+
+- **TypeScript Clients** - Full type safety with Axios
+- **Python Clients** - Sync/async support with type hints
+
+**[View Client Documentation →](./clients.mdx)**
+
+```bash
+# Generate all clients
+npm run clients:generate
+```
+
+## 📊 API Summary
+
+| Category | APIs | Status | Ports |
+|----------|------|--------|-------|
+| **Infrastructure** | 3 | ✅ Active | 3500, 3600, 8080 |
+| **Data Management** | 2 | ✅ Active | 3200, 3400 |
+| **Business Logic** | 2 | ✅ Active | 4005, 4010 |
+| **Planned (Trading)** | 2 | 🚧 Planned | TBD |
+| **Meta** | 2 | ✅ Active | - |
+| **TOTAL** | **11** | **7 Active** | **6 Ports** |
+
+---
+
+## Infrastructure APIs
+
+### 🔧 [Status API (Service Launcher)](./status-api.mdx)
+
+**Port:** 3500 | **Status:** ✅ Active
+
+Central orchestration and health monitoring service for all TradingSystem components.
+
+- **Key Features:** Service health aggregation, Circuit breaker pattern, Auto-start services, Prometheus metrics
+- **Monitors:** 11+ services, databases, and infrastructure components
+- **Cache:** 60-second TTL for comprehensive health checks
+- **Repository:** `apps/status/`
+
+**Quick Links:**
+
+- [Full Documentation](./status-api.mdx)
+- Health: `http://localhost:3500/health`
+- Status: `http://localhost:3500/api/status`
+
+---
+
+### 🌐 [Firecrawl Proxy](./firecrawl-proxy.mdx)
+
+**Port:** 3600 | **Status:** ✅ Active
+
+Web scraping proxy service with Firecrawl integration for content extraction.
+
+- **Key Features:** Single URL scraping, Multi-page crawling, Job status tracking, 30s timeout handling
+- **Upstream:** Firecrawl API (`https://api.firecrawl.dev`)
+- **Security:** Centralized API key management, Helmet protection
+- **Repository:** `backend/api/firecrawl-proxy/`
+
+**Quick Links:**
+
+- [Full Documentation](./firecrawl-proxy.mdx)
+- Health: `http://localhost:3600/health`
+- Scrape: `POST http://localhost:3600/api/scrape`
+
+---
+
+### 🚨 [Alert Router](./alert-router.mdx)
+
+**Port:** 8080 | **Status:** ✅ Active
+
+Prometheus alert routing service that creates and manages GitHub issues.
+
+- **Key Features:** Automated issue creation/closing, Fingerprint deduplication, Severity labeling
+- **Integration:** Prometheus Alertmanager, GitHub Issues API
+- **Optional:** Can run without GitHub (logs only)
+- **Repository:** `tools/monitoring/alert-router/`
+
+**Quick Links:**
+
+- [Full Documentation](/api/alert-router/guide)
+- Health: `http://localhost:8080/health`
+- Webhook: `POST http://localhost:8080/github`
+
+---
+
+## Data Management APIs
+
+### 📚 [Documentation API](./documentation-api.mdx)
+
+**Port:** 3400 | **Status:** ✅ Active
+
+Comprehensive documentation management with ideas, specs, search, and file attachments.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/documentation-api)
+- **Key Features:** Multi-tenancy, FlexSearch full-text search, File uploads, Statistics dashboard
+- **Storage:** QuestDB (time-series) + PostgreSQL (relational)
+- **Repository:** `backend/api/documentation-api/`
+
+**Quick Links:**
+
+- [Full Documentation](./documentation-api.mdx)
+- Health: `http://localhost:3400/health`
+- Metrics: `http://localhost:3400/metrics`
+
+---
+
+### 💡 [Workspace API (Idea Bank)](./workspace-api.mdx)
+
+**Port:** 3200 | **Status:** ✅ Active
+
+Simple CRUD operations for workspace items with Kanban-style status management.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/workspace)
+- **Key Features:** QuestDB/LowDB dual-strategy, Kanban integration, Prometheus metrics
+- **Storage:** LowDB (development), QuestDB (production)
+- **Repository:** `backend/api/workspace/`
+
+**Quick Links:**
+
+- [Full Documentation](./workspace-api.mdx)
+- Health: `http://localhost:3200/health`
+- Items: `GET http://localhost:3200/api/items`
+
+---
+
+## Business Logic APIs
+
+### 📈 [TP Capital API](./tp-capital-api.mdx)
+
+**Port:** 4005 | **Status:** ✅ Active
+
+Trading signals ingestion from Telegram channels with comprehensive bot and channel management.
+
+- **Interactive Docs:** [View OpenAPI Spec](/api/tp-capital)
+- **Key Features:** Signal parsing, Telegram bot/channel CRUD, Real-time ingestion, TimescaleDB storage
+- **Integration:** Telegram Gateway (Port 4007), TimescaleDB (Port 5433)
+- **Repository:** `apps/tp-capital/`
+
+**Quick Links:**
+
+- [Full Documentation](./tp-capital-api.mdx)
+- Health: `http://localhost:4005/health`
+- Signals: `GET http://localhost:4005/signals`
+
+---
+
+### 💬 [Telegram Gateway API](./telegram-gateway-api.mdx)
+
+**Port:** 4010 | **Status:** ✅ Active
+
+REST API for accessing Telegram messages captured by the MTProto Gateway.
+
+- **Key Features:** Message retrieval with filters, Channel management, Sync status tracking
+- **Storage:** TimescaleDB (telegram_gateway schema)
+- **Rate Limit:** 300 requests/minute
+- **Repository:** `backend/api/telegram-gateway/`
+
+**Quick Links:**
+
+- [Full Documentation](./telegram-gateway-api.mdx)
+- Health: `http://localhost:4010/health`
+- Messages: `GET http://localhost:4010/api/messages`
+
+---
+
+## Planned Trading APIs
+
+### 📊 [Data Capture API](./data-capture.mdx)
+
+**Port:** TBD | **Status:** 🚧 Planned
+
+High-performance market data ingestion from ProfitDLL with WebSocket streaming.
+
+- **Key Features:** Real-time data capture, Order book updates, Trade events
+- **Performance Target:** &lt;50ms p95 latency
+- **Technology:** C# .NET 8.0, ProfitDLL (64-bit)
+- **Repository:** `backend/services/data-capture/` (planned)
+
+**Quick Links:**
+
+- [Full Documentation](./data-capture.mdx)
+
+---
+
+### ⚡ [Order Manager API](./order-manager.mdx)
+
+**Port:** TBD | **Status:** 🚧 Planned
+
+Order execution engine with comprehensive risk management and validation.
+
+- **Key Features:** Risk checks, Kill switch, Position tracking, Order routing
+- **Performance Target:** &lt;500ms p95 execution latency
+- **Technology:** C# .NET 8.0, ProfitDLL integration
+- **Repository:** `backend/services/order-manager/` (planned)
+
+**Quick Links:**
+
+- [Full Documentation](./order-manager.mdx)
+
+---
+
+## Meta Documentation
+
+### 📋 [Integration Status](./integration-status.mdx)
+
+Current integration status of all APIs with the Dashboard and infrastructure.
+
+### 📖 API Catalog
+
+This page - Complete catalog of all TradingSystem APIs.
+
+---
+
+## Technology Stack
+
+### Backend Technologies
+
+| Technology | APIs Using | Purpose |
+|------------|-----------|---------|
+| **Express.js** | 7 APIs | REST API framework |
+| **TimescaleDB** | TP Capital, Telegram Gateway | Time-series data storage |
+| **QuestDB** | Documentation, Workspace | High-performance analytics |
+| **LowDB** | Workspace (dev) | Lightweight development database |
+| **Pino** | All APIs | Structured JSON logging |
+| **Prometheus Client** | All APIs | Metrics export |
+
+### API Patterns
+
+- **Rate Limiting**: express-rate-limit (60s windows)
+- **CORS**: cors middleware with origin whitelisting
+- **Security**: Helmet.js for HTTP headers
+- **Validation**: JSON Schema, Joi, or custom validators
+- **Error Handling**: Centralized error middleware
+
+---
+
+## API Standards
+
+All TradingSystem APIs follow these standards:
+
+### Documentation
+
+- ✅ OpenAPI 3.1 specification (where applicable)
+- ✅ Interactive Redocusaurus documentation
+- ✅ Comprehensive MDX documentation
+- ✅ Code examples in multiple languages
+- ✅ Complete error documentation
+
+### Rate Limiting
+
+- **Default:** 120-300 requests per 60-second window (varies by API)
+- **Headers:** `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`
+- **Response:** `429 Too Many Requests` when exceeded
+- **Bypass:** Health checks and metrics endpoints excluded
+
+### Authentication
+
+- **Current:** Optional API key (development mode)
+- **Production:** Token-based auth (X-API-Token, X-Gateway-Token, Authorization headers)
+- **Planned:** JWT tokens, OAuth2, mTLS for trading APIs
+
+### Observability
+
+- ✅ Prometheus metrics at `/metrics`
+- ✅ Health checks at `/health`
+- ✅ Structured logging (JSON via Pino)
+- ✅ Request correlation IDs (where applicable)
+
+### Versioning
+
+- **Strategy:** URL-based versioning (`/api/v1/...`) for stable APIs
+- **Deprecation:** 6-month notice period (planned)
+- **Support:** N and N-1 versions maintained
+
+---
+
+## Quick Start
+
+### Health Check All Services
+
+```bash
+# Infrastructure APIs
+curl http://localhost:3500/health  # Status API
+curl http://localhost:3600/health  # Firecrawl Proxy
+curl http://localhost:8080/health  # Alert Router
+
+# Data APIs
+curl http://localhost:3400/health  # Documentation API
+curl http://localhost:3200/health  # Workspace API
+
+# Business APIs
+curl http://localhost:4005/health  # TP Capital API
+curl http://localhost:4010/health  # Telegram Gateway API
+```
+
+### View Metrics (Prometheus Format)
+
+```bash
+# Infrastructure
+curl http://localhost:3500/metrics  # Status API
+
+# Data
+curl http://localhost:3400/metrics  # Documentation API
+curl http://localhost:3200/metrics  # Workspace API
+
+# Business
+curl http://localhost:4005/metrics  # TP Capital API
+curl http://localhost:4010/metrics  # Telegram Gateway API
+```
+
+### Interactive API Testing
+
+Visit the Redocusaurus pages to test APIs interactively:
+
+- [Documentation API](/api/documentation-api)
+- [Workspace API](/api/workspace)
+- [TP Capital API](/api/tp-capital)
+
+---
+
+## Development Guide
+
+### Running APIs Locally
+
+```bash
+# Infrastructure APIs
+cd apps/status && npm run dev                        # Port 3500
+cd backend/api/firecrawl-proxy && npm run dev        # Port 3600
+cd tools/monitoring/alert-router && npm start        # Port 8080
+
+# Data APIs
+cd backend/api/documentation-api && npm run dev      # Port 3400
+cd backend/api/workspace && npm run dev              # Port 3200
+
+# Business APIs
+cd apps/tp-capital && npm run dev                    # Port 4005
+cd backend/api/telegram-gateway && npm run dev       # Port 4010
+```
+
+### Environment Setup
+
+Each API requires specific environment variables. See individual API documentation:
+
+- [Status API Environment](./status-api.mdx#configuration)
+- [Firecrawl Proxy Environment](./firecrawl-proxy.mdx#configuration)
+- [Alert Router Environment](/api/alert-router/guide)
+- [Documentation API Environment](./documentation-api.mdx#environment-variables)
+- [Workspace API Environment](./workspace-api.mdx#environment-variables)
+- [TP Capital API Environment](./tp-capital-api.mdx#configuration)
+- [Telegram Gateway API Environment](./telegram-gateway-api.mdx#configuration)
+
+### Testing APIs
+
+```bash
+# Run all API tests (when available)
+npm test
+
+# Run specific API tests
+cd backend/api/documentation-api && npm test
+cd backend/api/workspace && npm test
+cd apps/tp-capital && npm test
+```
+
+---
+
+## Integration Examples
+
+### JavaScript/TypeScript
+
+```typescript
+import axios from 'axios';
+
+// Create API clients
+const statusApi = axios.create({ baseURL: 'http://localhost:3500' });
+const docsApi = axios.create({ baseURL: 'http://localhost:3400' });
+const workspaceApi = axios.create({ baseURL: 'http://localhost:3200' });
+const tpCapitalApi = axios.create({ baseURL: 'http://localhost:4005' });
+const telegramApi = axios.create({ baseURL: 'http://localhost:4010' });
+const firecrawlApi = axios.create({ baseURL: 'http://localhost:3600' });
+
+// Check system health
+const status = await statusApi.get('/api/status');
+console.log(`System: ${status.data.overallStatus}`);
+
+// Get workspace items
+const items = await workspaceApi.get('/api/items');
+console.log(`Items: ${items.data.items.length}`);
+
+// Get trading signals
+const signals = await tpCapitalApi.get('/signals?limit=10');
+console.log(`Signals: ${signals.data.data.length}`);
+
+// Get Telegram messages
+const messages = await telegramApi.get('/api/messages?synced=false');
+console.log(`Unsynced messages: ${messages.data.messages.length}`);
+
+// Scrape a webpage
+const scrape = await firecrawlApi.post('/api/scrape', {
+  url: 'https://example.com'
+});
+console.log(`Content: ${scrape.data.data.markdown}`);
+```
+
+### Python
+
+```python
+import requests
+
+# API base URLs
+STATUS_API = 'http://localhost:3500'
+DOCS_API = 'http://localhost:3400'
+WORKSPACE_API = 'http://localhost:3200'
+TP_CAPITAL_API = 'http://localhost:4005'
+TELEGRAM_API = 'http://localhost:4010'
+
+# Check system health
+status = requests.get(f'{STATUS_API}/api/status').json()
+print(f"System status: {status['overallStatus']}")
+
+# Get workspace items
+items = requests.get(f'{WORKSPACE_API}/api/items').json()
+print(f"Total items: {len(items['items'])}")
+
+# Get trading signals
+signals = requests.get(f'{TP_CAPITAL_API}/signals?limit=10').json()
+print(f"Signals: {len(signals['data'])}")
+
+# Get unsynced Telegram messages
+messages = requests.get(f'{TELEGRAM_API}/api/messages?synced=false').json()
+print(f"Unsynced messages: {len(messages['messages'])}")
+```
+
+### curl Scripts
+
+```bash
+#!/bin/bash
+
+# Health check all APIs
+echo "=== Health Checks ==="
+curl -s http://localhost:3500/health | jq '.status'  # Status API
+curl -s http://localhost:3600/health | jq '.status'  # Firecrawl
+curl -s http://localhost:8080/health | jq '.status'  # Alert Router
+curl -s http://localhost:3400/health | jq '.status'  # Docs API
+curl -s http://localhost:3200/health | jq '.status'  # Workspace API
+curl -s http://localhost:4005/health | jq '.status'  # TP Capital
+curl -s http://localhost:4010/health | jq '.status'  # Telegram Gateway
+
+# Get aggregated system status
+echo "=== System Status ==="
+curl -s http://localhost:3500/api/status | jq '{
+  overall: .overallStatus,
+  down: .downCount,
+  degraded: .degradedCount
+}'
+
+# Get latest trading signals
+echo "=== Latest Signals ==="
+curl -s http://localhost:4005/signals?limit=5 | jq '.data[] | {
+  asset,
+  signal_type,
+  entry_price
+}'
+```
+
+---
+
+## Service Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│            TradingSystem Dashboard (Port 3103)          │
+│                  React + Vite + Zustand                 │
+└──────┬──────────────────────────────────────────┬───────┘
+       │                                          │
+       ▼                                          ▼
+┌──────────────────┐                    ┌──────────────────┐
+│  Infrastructure  │                    │   Data & Business│
+│      APIs        │                    │       APIs       │
+├──────────────────┤                    ├──────────────────┤
+│ Status (3500)    │                    │ Docs (3400)      │
+│ Firecrawl (3600) │                    │ Workspace (3200) │
+│ Alert (8080)     │                    │ TP Capital (4005)│
+└──────┬───────────┘                    │ Telegram (4010)  │
+       │                                └──────┬───────────┘
+       ▼                                       │
+┌──────────────────────────────────────────────▼───────────┐
+│               Databases & Storage                        │
+│   TimescaleDB • QuestDB • LowDB • PostgreSQL            │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## API Governance
+
+### Adding New APIs
+
+1. **Create OpenAPI Spec** (if applicable):
+
+   ```bash
+   touch docs/static/specs/new-api.openapi.yaml
+   ```
+
+2. **Configure Redocusaurus**:
+   Edit `docs/docusaurus.config.js`:
+
+   ```javascript
+   specs: [
+     // ... existing specs
+     {
+       id: 'new-api',
+       spec: 'static/specs/new-api.openapi.yaml',
+       route: '/api/new-api',
+     },
+   ]
+   ```
+
+3. **Create Documentation**:
+
+   ```bash
+   touch docs/content/api/new-api.mdx
+   ```
+
+4. **Update This Catalog**:
+   Add entry to appropriate category in `overview.mdx`
+
+5. **Add to Services Manifest**:
+   Edit `config/services-manifest.json`
+
+See `docs/static/specs/README.md` for detailed instructions.
+
+---
+
+## Port Reference
+
+| Port | Service | Category | Status |
+|------|---------|----------|--------|
+| 3200 | Workspace API | Data | ✅ Active |
+| 3400 | Documentation API | Data | ✅ Active |
+| 3500 | Status API | Infrastructure | ✅ Active |
+| 3600 | Firecrawl Proxy | Infrastructure | ✅ Active |
+| 4005 | TP Capital API | Business | ✅ Active |
+| 4010 | Telegram Gateway API | Business | ✅ Active |
+| 8080 | Alert Router | Infrastructure | ✅ Active |
+
+---
+
+## Resources
+
+- [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- [Redocusaurus Documentation](https://github.com/rohit-gohri/redocusaurus)
+- Services manifest path: `config/services-manifest.json`
+- [Port Reference](/reference/ports)
+- [API Design Guidelines](../reference/api-guidelines.mdx) (planned)
+- [Testing Strategy](../reference/testing-strategy.mdx) (planned)

@@ -1,0 +1,168 @@
+---
+title: PlantUML Overview
+description: Usage guidelines and diagram standards for PlantUML.
+tags:
+  - tools
+  - plantuml
+  - diagrams
+  - visualization
+  - shared
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+This guide demonstrates how to render PlantUML diagrams directly in Docusaurus documentation. PlantUML is used across TradingSystem docs to visualise architecture, sequences, components, states, and class relationships.
+
+## How It Works
+
+PlantUML diagrams are automatically rendered using the `@akebifiky/remark-simple-plantuml` plugin. Wrap diagrams in fenced code blocks with the `plantuml` language tag and Docusaurus handles the rendering.
+
+## Diagram Standards
+
+- **Naming Conventions**: Use kebab-case filenames such as `order-placement-sequence.puml`; prefix with the domain (`frontend-component-architecture.puml`, `backend-service-map.puml`); version diagrams when architecture changes (e.g., `order-placement-sequence-v2.puml`).
+- **Storage Locations**: Store source `.puml` files under `docs/content/assets/diagrams/source/`; embed diagrams by inlining their contents in MDX; export static images to `docs/static/media/diagrams/` when external sharing is required.
+- **Review Practices**: Include diagrams in ADRs or architecture updates; refresh diagrams whenever implementation changes; review diagrams in PRs; keep each diagram focused on a single concept.
+
+## Example: Sequence Diagram
+
+```plantuml
+@startuml
+participant User
+participant "Data Capture" as DC
+participant "API Gateway" as GW
+participant "Order Manager" as OM
+
+User -> DC: Subscribe WINZ25
+DC -> DC: Connect ProfitDLL
+DC --> User: Subscription OK
+
+DC -> GW: Publish Tick (WebSocket)
+GW -> GW: Validate Signal Request
+GW -> OM: Forward Command
+
+OM -> OM: Risk Validation
+OM -> DC: Execute Order via ProfitDLL
+DC --> OM: Order Confirmation
+OM --> User: Position Update
+@enduml
+```
+
+## Example: Component Diagram
+
+```plantuml
+@startuml
+package "TradingSystem" {
+  [Data Capture\n(.NET + ProfitDLL)] as DC
+  [Order Manager\n(.NET + Risk)] as OM
+  [API Gateway\n(FastAPI)] as GW
+  [Dashboard\n(React)] as UI
+
+  DC --> GW : WebSocket\n(Market Data)
+  GW --> OM : HTTP\n(Orders)
+  OM --> DC : DLL Calls\n(Execution)
+  UI --> GW : REST API
+}
+
+database "PostgreSQL" as DB
+database "Parquet Files" as PQ
+
+DC --> PQ : Write Ticks
+OM --> DB : Store Orders
+@enduml
+```
+
+## Example: State Diagram
+
+```plantuml
+@startuml
+[*] --> Disconnected
+
+Disconnected --> Connecting : Initialize ProfitDLL
+Connecting --> Connected : Connection OK
+Connecting --> Disconnected : Connection Failed
+
+Connected --> Subscribed : Subscribe Assets
+Subscribed --> Streaming : Receiving Data
+
+Streaming --> Processing : New Tick
+Processing --> Streaming : Analysis Complete
+Processing --> OrderPlaced : Risk OK
+Processing --> Streaming : Risk Rejected
+
+OrderPlaced --> PositionOpen : Order Filled
+PositionOpen --> PositionClosed : Exit Signal
+
+PositionClosed --> Streaming : Ready for Next Trade
+@enduml
+```
+
+## Example: Class Diagram
+
+```plantuml
+@startuml
+class OrderAggregate {
+  +orderId: string
+  +symbol: string
+  +side: BUY | SELL
+  +quantity: number
+  +price: number
+  +status: OrderStatus
+  --
+  +place()
+  +cancel()
+  +update()
+}
+
+class TradeAggregate {
+  +tradeId: string
+  +timestamp: Date
+  +symbol: string
+  +price: number
+  +volume: number
+  +aggressor: BUY | SELL
+  --
+  +validate()
+}
+
+class PositionAggregate {
+  +positionId: string
+  +symbol: string
+  +quantity: number
+  +avgPrice: number
+  +unrealizedPnL: number
+  --
+  +update()
+  +close()
+}
+
+OrderAggregate "1" --> "0..*" TradeAggregate : executes
+PositionAggregate "1" --> "0..*" OrderAggregate : manages
+@enduml
+```
+
+## Using Existing .puml Files
+
+You can embed existing `.puml` sources by copying their contents into a ` ```plantuml ` code block within the MDX file. The renderer will produce the diagram automatically during the Docusaurus build.
+
+## Advantages
+
+- ✅ **Automatic Rendering** — no manual SVG generation required.
+- ✅ **Version Control** — `.puml` sources live in Git alongside code.
+- ✅ **Easy Updates** — edit text and rebuild to refresh diagrams.
+- ✅ **Consistent Style** — shared PlantUML standards across teams.
+- ✅ **Documentation as Code** — diagrams ship with the documentation.
+
+## Tips
+
+1. Keep diagrams simple to maintain readability.
+2. Use colour sparingly; rely on layout for emphasis.
+3. Add notes to explain complex flows.
+4. Test diagrams locally with the Docusaurus dev server.
+5. Apply `skinparam` for targeted visual adjustments.
+
+## Related Resources
+
+- [PlantUML Official Documentation](https://plantuml.com/)
+- [PlantUML Cheat Sheet](https://plantuml.com/guide)
+- [All TradingSystem Diagrams](/diagrams)

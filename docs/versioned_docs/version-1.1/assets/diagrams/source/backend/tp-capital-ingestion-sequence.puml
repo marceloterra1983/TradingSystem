@@ -1,0 +1,153 @@
+@startuml
+title TP Capital - Telegram Signal Ingestion Flow
+
+actor "Telegram Channel" as Channel
+participant "Telegram Bot API\n(external)" as BotAPI
+participant "TP Capital API\n(Express :3200)" as API
+participant "Message Parser" as Parser
+participant "Validation" as Validation
+participant "QuestDB ILP Client\n:9009" as ILPClient
+database "QuestDB" as QuestDB
+participant "Pino Logger" as Logger
+participant "Telegraf Metrics" as Metrics
+
+== Signal Posted ==
+Channel -> BotAPI : Post signal message (text)\n"PETR4 COMPRA entre 28.50-28.80 alvos 29.20, 29.50, 29.80 stop 27.80"
+activate BotAPI
+
+BotAPI -> API : Webhook POST /webhook/telegram\n{message, channel_id, message_id, timestamp}
+activate API
+
+API -> API : Extract message text and metadata
+note right of API
+  Metadata includes:
+  - channel_id
+  - message_id
+  - timestamp
+  - sender info
+end note
+
+== Message Parsing ==
+API -> Parser : parse_signal(message_text)
+activate Parser
+
+Parser -> Parser : Apply regex patterns\n- Asset: ([A-Z]{4,6})\n- Signal type: (COMPRA|VENDA)\n- Price ranges: entre (\\d+\\.\\d+)-(\\d+\\.\\d+)\n- Targets: alvos ([\\d., ]+)\n- Stop: stop (\\d+\\.\\d+)
+
+Parser -> Parser : Extract fields:\n- asset: "PETR4"\n- signal_type: "COMPRA"\n- buy_min: 28.50\n- buy_max: 28.80\n- targets: [29.20, 29.50, 29.80]\n- stop: 27.80
+
+Parser --> API : Parsed signal data
+deactivate Parser
+
+== Validation ==
+API -> Validation : validate(parsed_signal)
+activate Validation
+
+Validation -> Validation : Check required fields present
+Validation -> Validation : Validate asset format (4-6 chars)
+Validation -> Validation : Validate numeric ranges\n(buy_min < buy_max, targets > buy_max)
+Validation -> Validation : Validate stop loss\n(stop < buy_min for COMPRA)
+
+alt Validation passes
+  Validation --> API : Valid signal
+  deactivate Validation
+  
+  == QuestDB Write (ILP Protocol) ==
+  API -> ILPClient : Write signal via ILP\ntable: tp_capital_signals\nfields: {asset, signal_type, buy_min, buy_max, targets, stop, channel_id, ts}
+  activate ILPClient
+  
+  ILPClient -> ILPClient : Format ILP message\n(binary protocol)
+  ILPClient -> QuestDB : TCP write (port 9009)
+  activate QuestDB
+  
+  QuestDB -> QuestDB : Append to tp_capital_signals table\n(partitioned by day)
+  QuestDB --> ILPClient : Write acknowledgment
+  deactivate QuestDB
+  
+  ILPClient --> API : Success
+  deactivate ILPClient
+  
+  == Observability ==
+  API -> Logger : Log "Signal ingested"\n{channel: "TP_Capital", asset: "PETR4", signal_type: "COMPRA"}
+  activate Logger
+  Logger -> Logger : Write structured JSON to stdout
+  deactivate Logger
+  
+  API -> Metrics : Increment tp_capital_signals_ingested_total\nlabels: {channel: "TP_Capital", signal_type: "COMPRA"}
+  activate Metrics
+  Metrics -> Metrics : Update Prometheus counter
+  deactivate Metrics
+  
+  API --> BotAPI : 200 OK {status: "ingested", signal_id: "..."}
+  deactivate API
+  
+  BotAPI --> Channel : Delivery confirmation
+  deactivate BotAPI
+
+else Validation fails
+  Validation --> API : 400 Bad Request\n{error: "Invalid signal format", details: [...]}
+  deactivate Validation
+  
+  API -> Logger : Log "Parse error"\n{message: "...", error: "Invalid asset format"}
+  API -> Metrics : Increment tp_capital_parse_errors_total\nlabels: {channel: "TP_Capital", error_type: "validation_failed"}
+  
+  API --> BotAPI : 200 OK {status: "skipped", reason: "Invalid format"}
+  deactivate API
+  
+  note right of API
+    **Acknowledge webhook but don't retry**
+    Returning 200 prevents Telegram from
+    retrying failed messages repeatedly
+  end note
+  
+  BotAPI --> Channel : Delivery confirmation
+  deactivate BotAPI
+end
+
+== Alternative Flow: QuestDB Unavailable ==
+alt QuestDB connection error
+  ILPClient -> QuestDB : TCP write (port 9009)
+  QuestDB --> ILPClient : Connection refused / Timeout
+  
+  ILPClient -> ILPClient : Retry with exponential backoff\n- Attempt 1: 500ms delay\n- Attempt 2: 1500ms delay\n- Attempt 3: 3000ms delay
+  
+  alt Retry succeeds
+    ILPClient -> QuestDB : Successful write
+    QuestDB --> ILPClient : Success
+    ILPClient --> API : Success (after retry)
+  else Circuit breaker opens
+    ILPClient --> API : Error "QuestDB unavailable"
+    
+    API -> Logger : Log error with full context
+    API -> Metrics : Increment tp_capital_questdb_errors_total
+    API -> Metrics : Set tp_capital_questdb_health = 0
+    
+    API --> BotAPI : 503 Service Unavailable\n{error: "Storage temporarily unavailable"}
+    
+    note right of API
+      **Circuit Breaker Pattern**
+      After 5 consecutive failures:
+      - Circuit opens for 60 seconds
+      - Fast-fail without retrying
+      - Automatic recovery attempt after timeout
+    end note
+  end
+end
+
+note over Channel, Metrics
+  **Performance Targets**
+  - Ingestion latency: <500ms p95
+  - Parse success rate: >95%
+  - ILP write latency: <10ms
+  - QuestDB uptime: >99.9%
+end note
+
+note over ILPClient, QuestDB
+  **ILP Protocol Advantages**
+  - High throughput: >100k messages/sec
+  - Low latency: <10ms write time
+  - TCP connection pooling
+  - Binary protocol efficiency
+  - Automatic partitioning by timestamp
+end note
+
+@enduml

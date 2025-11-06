@@ -1,0 +1,116 @@
+@startuml database-ui-tools-architecture
+!theme cerulean-outline
+
+title TimescaleDB Database UI Tools - Architecture
+
+skinparam actor {
+  BackgroundColor LightBlue
+  BorderColor Black
+  FontSize 12
+}
+
+skinparam component {
+  BackgroundColor<<Default>> LightGreen
+  BackgroundColor<<Optional>> LightYellow
+  BorderColor Black
+  FontSize 11
+}
+
+skinparam database {
+  BackgroundColor LightCyan
+  BorderColor Black
+  FontSize 12
+}
+
+skinparam cloud {
+  BackgroundColor WhiteSmoke
+  BorderColor Gray
+}
+
+' Actors and External Access
+actor "Developer/DBA" as User
+
+cloud "Localhost Access\n(127.0.0.1)" as Localhost {
+
+  component "pgAdmin 4\nPort: 5050\n(Full Admin)" as PgAdmin <<Default>>
+
+  component "pgweb\nPort: 8081\n(Quick Queries)" as PgWeb <<Default>>
+
+  component "Adminer\nPort: 8082\n(Lightweight)" as Adminer <<Optional>>
+
+  component "Azimutt\nPort: 8084\n(ERD Viewer)" as Azimutt <<Optional>>
+}
+
+package "Docker Network\n(compose_default)" {
+
+  database "TimescaleDB\nPostgreSQL 15\nPort: 5432 (internal)\nPort: 5433 (external)" as TimescaleDB
+}
+
+' User to UI Tools (localhost)
+User -down-> Localhost : "Browser\nhttp://localhost:XXXX"
+
+' UI Tools to TimescaleDB (internal Docker network)
+PgAdmin -down-> TimescaleDB : "timescaledb:5432\n(internal)"
+PgWeb -down-> TimescaleDB : "timescaledb:5432\n(internal)"
+Adminer -down-> TimescaleDB : "timescaledb:5432\n(internal)"
+Azimutt -down-> TimescaleDB : "timescaledb:5432\n(internal)"
+
+note right of PgAdmin
+  **Always Running**
+  - Full-featured admin UI
+  - Query editor with autocomplete
+  - Backup/restore tools
+  - User management
+  - Performance monitoring
+end note
+
+note right of PgWeb
+  **Always Running**
+  - Lightweight query tool
+  - Auto-connected via DATABASE_URL
+  - CSV/JSON export
+  - Session history
+end note
+
+note right of Adminer
+  **Optional (--profile optional)**
+  - Single PHP file
+  - Quick CRUD operations
+  - Import/export
+  - No session persistence
+end note
+
+note right of Azimutt
+  **Optional (--profile optional)**
+  - Interactive ERD visualization
+  - Schema exploration
+  - Relationship discovery
+  - Export diagrams
+end note
+
+note bottom of Localhost
+  **Security:**
+  - All tools bound to 127.0.0.1
+  - Not accessible from external networks
+  - Use SSH tunneling for remote access
+  
+  **Optional Tools:**
+  - Start with: docker compose --profile optional up -d
+  - Stop with: docker compose --profile optional down
+end note
+
+legend right
+  |<#LightGreen>| Default Profile (Always Running) |
+  |<#LightYellow>| Optional Profile (Start When Needed) |
+  
+  **Connection Methods:**
+  • From UI tools: timescaledb:5432 (internal)
+  • From host: localhost:5433 (external)
+  
+  **Credentials:**
+  • Defined in root .env file
+  • TIMESCALEDB_USER, TIMESCALEDB_PASSWORD
+  • PGADMIN_DEFAULT_EMAIL, PGADMIN_DEFAULT_PASSWORD
+end legend
+
+@enduml

@@ -1,0 +1,23 @@
+# Docker Compose Override for E2E Tests
+# Simplifies Telegram Gateway API to connect directly to TimescaleDB
+# Removes PgBouncer dependency which adds unnecessary complexity in CI
+
+services:
+  telegram-gateway-api:
+    environment:
+      # Override: Connect directly to TimescaleDB (skip PgBouncer)
+      TELEGRAM_GATEWAY_DB_HOST: telegram-timescaledb
+      TELEGRAM_GATEWAY_DB_PORT: 5432  # Internal port, not 5434
+      TELEGRAM_GATEWAY_DB_NAME: telegram_gateway
+      TELEGRAM_GATEWAY_DB_USER: ${TELEGRAM_DB_USER:-telegram}
+      TELEGRAM_GATEWAY_DB_PASSWORD: ${TELEGRAM_DB_PASSWORD}
+      TELEGRAM_GATEWAY_DB_SSL: "false"
+      TELEGRAM_GATEWAY_DB_URL: postgresql://${TELEGRAM_DB_USER:-telegram}:${TELEGRAM_DB_PASSWORD}@telegram-timescaledb:5432/telegram_gateway?sslmode=disable
+    
+    depends_on:
+      # Remove PgBouncer dependency, depend only on TimescaleDB
+      telegram-timescaledb:
+        condition: service_healthy
+      telegram-redis-master:
+        condition: service_healthy
+

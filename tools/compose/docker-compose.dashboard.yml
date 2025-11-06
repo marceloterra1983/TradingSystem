@@ -14,11 +14,16 @@ services:
       - SKIP_DASHBOARD_PREBUILD=1
       # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
       # TP Capital: Uses /api/tp-capital → proxied to tp-capital-api:4005
-      - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+      # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target, not exposed to browser)
+      - TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
       # Telegram Gateway: Direct access (same network)
       - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=http://telegram-gateway-api:4010
-      # Workspace: Uses /api → proxied to workspace-api:3200
-      - VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+      # Workspace: Uses /api/workspace → proxied to workspace-api:3200/api (basePath /api added by vite.config.ts)
+      # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target, not exposed to browser)
+      - WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
+      # Docusaurus: Direct access to /next/ → proxied to docs-hub:80/next/ (NGINX serving Docusaurus static site)
+      - DOCUSAURUS_PROXY_TARGET=http://docs-hub:80  # Vite proxy target (container-to-container, NOT exposed to browser)
+      - VITE_DOCUSAURUS_URL=/  # Browser-facing base URL (empty base, versioned paths like /next/ are used directly)
       # Telegram Gateway API Keys (for frontend authentication)
       - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       - VITE_TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}

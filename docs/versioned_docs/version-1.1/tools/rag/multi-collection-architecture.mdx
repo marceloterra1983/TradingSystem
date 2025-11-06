@@ -1,0 +1,376 @@
+---
+title: Multi-Collection Architecture
+sidebar_position: 5
+description: Architecture for managing multiple Qdrant collections with different embedding models
+tags: [rag, llamaindex, qdrant, embedding]
+domain: tools
+type: technical-spec
+summary: Architecture for managing multiple Qdrant collections with different embedding models
+status: active
+owner: ArchitectureGuild
+lastReviewed: "2025-10-31"
+last_review: "2025-10-31"
+---
+
+# Multi-Collection RAG Architecture
+
+## Overview
+
+O TradingSystem agora suporta **múltiplas coleções** no Qdrant, cada uma indexada com um **modelo de embedding diferente**. Isso permite comparar a qualidade de resultados entre modelos e escolher o melhor para cada caso de uso.
+
+## Modelos de Embedding Disponíveis
+
+### 1. Nomic Embed Text (768d)
+- **Modelo**: `nomic-embed-text:latest`
+- **Dimensões**: 768
+- **Tamanho**: 274 MB
+- **Uso**: Propósito geral, busca semântica, retrieval
+- **Performance**: Rápido, alta qualidade
+- **Coleção**: `documentation__nomic`
+
+### 2. MXBAI Embed Large (384d)
+- **Modelo**: `mxbai-embed-large:latest`
+- **Dimensões**: 384
+- **Tamanho**: 669 MB
+- **Uso**: Retrieval rápido, baixa latência
+- **Performance**: Muito rápido, qualidade média-alta
+- **Coleção**: `documentation__mxbai`
+
+### 3. Embedding Gemma (768d)
+- **Modelo**: `embeddinggemma:latest`
+- **Dimensões**: 768
+- **Tamanho**: 621 MB
+- **Uso**: Compreensão contextual, busca multilíngue
+- **Performance**: Média, qualidade muito alta
+- **Coleção**: `documentation__gemma`
+
+## Estrutura de Coleções
+
+### Convenção de Nomenclatura
+
+```
+{source}__{model_short}
+
+Examples:
+  - documentation__nomic
+  - documentation__mxbai
+  - documentation__gemma
+  - repository__nomic
+```
+
+### Configuração (collection-config.json)
+
+```json
+{
+  "defaultCollection": "documentation__nomic",
+  "collections": [
+    {
+      "name": "documentation__nomic",
+      "displayName": "Documentation (Nomic Embed)",
+      "embeddingModel": "nomic-embed-text",
+      "dimensions": 768,
+      "source": "docs/content",
+      "enabled": true
+    }
+  ]
+}
+```
+
+## Arquitetura
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Dashboard Frontend                        │
+│                   (Collection Selector)                      │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ↓
+┌─────────────────────────────────────────────────────────────┐
+│            Documentation API (Port 3401)                     │
+│                                                              │
+│  /api/v1/rag/collections     ← List collections             │
+│  /api/v1/rag/collections/models ← List embedding models     │
+│  /api/v1/rag/search?collection=X ← Query specific collection│
+│  /api/v1/rag/query            ← Query with LLM              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ↓
+┌─────────────────────────────────────────────────────────────┐
+│             Qdrant Vector Database (Port 6333)              │
+│                                                              │
+│  • documentation__nomic    (nomic-embed-text, 768d)         │
+│  • documentation__mxbai    (mxbai-embed-large, 384d)        │
+│  • documentation__gemma    (embeddinggemma, 768d)           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Endpoints da API
+
+### GET /api/v1/rag/collections
+
+Lista todas as coleções configuradas e seu status no Qdrant.
+
+**Response**:
+```json
+{
+  "success": true,
+  "defaultCollection": "documentation__nomic",
+  "collections": [
+    {
+      "name": "documentation__nomic",
+      "displayName": "Documentation (Nomic Embed)",
+      "embeddingModel": "nomic-embed-text",
+      "dimensions": 768,
+      "exists": true,
+      "count": 1250,
+      "status": "ready"
+    }
+  ],
+  "totalConfigured": 3,
+  "totalExisting": 2
+}
+```
+
+### GET /api/v1/rag/collections/models
+
+Lista modelos de embedding disponíveis no Ollama.
+
+**Response**:
+```json
+{
+  "success": true,
+  "models": [
+    {
+      "name": "nomic-embed-text:latest",
+      "size": 274302450,
+      "configured": true,
+      "dimensions": 768
+    }
+  ],
+  "totalAvailable": 3
+}
+```
+
+### POST /api/v1/rag/collections/:collectionName/create
+
+Cria uma nova coleção no Qdrant.
+
+**Request**:
+```json
+{
+  "embeddingModel": "nomic-embed-text",
+  "dimensions": 768
+}
+```
+
+## Scripts de Ingestão
+
+### Ingestão Multi-Coleção
+
+Cria e popula múltiplas coleções de uma vez:
+
+```bash
+# Ingerir em todas as coleções configuradas
+bash scripts/rag/ingest-multi-collections.sh
+
+# Ingerir em coleções específicas
+bash scripts/rag/ingest-multi-collections.sh documentation__nomic,documentation__mxbai
+```
+
+**Processo**:
+1. Verifica se coleção existe no Qdrant
+2. Cria coleção se não existir (com dimensões corretas)
+3. Aciona ingestão via LlamaIndex Ingestion Service
+4. Monitora progresso e reporta resultados
+
+### Ingestão Manual (via API)
+
+```bash
+# Criar coleção
+curl -X POST http://localhost:3401/api/v1/rag/collections/documentation__gemma/create \
+  -H "Content-Type: application/json" \
+  -d '{"embeddingModel": "embeddinggemma", "dimensions": 768}'
+
+# Ingerir documentos (via ingestion service)
+curl -X POST http://localhost:8201/ingest/directory \
+  -H "Content-Type: application/json" \
+  -d '{
+    "directory_path": "/data/docs",
+    "collection_name": "documentation__gemma",
+    "embedding_model": "embeddinggemma"
+  }'
+```
+
+## Queries com Coleção Específica
+
+### Busca Semântica
+
+```bash
+# Query padrão (usa defaultCollection)
+curl "http://localhost:3401/api/v1/rag/search?query=Docker&max_results=5"
+
+# Query em coleção específica
+curl "http://localhost:3401/api/v1/rag/search?query=Docker&collection=documentation__mxbai"
+```
+
+### Query com LLM
+
+```bash
+# Query padrão
+curl -X POST http://localhost:3401/api/v1/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is Docker?", "max_results": 5}'
+
+# Query em coleção específica
+curl -X POST http://localhost:3401/api/v1/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is Docker?",
+    "max_results": 5,
+    "collection": "documentation__gemma"
+  }'
+```
+
+## Comparação de Modelos
+
+### Benchmark de Qualidade
+
+Para comparar a qualidade de resultados entre modelos:
+
+```bash
+# Query na mesma pergunta em todas as coleções
+for collection in documentation__nomic documentation__mxbai documentation__gemma; do
+  echo "Testing $collection..."
+  curl -s "http://localhost:3401/api/v1/rag/search?query=Docker&collection=$collection" | jq '.'
+  echo "---"
+done
+```
+
+### Métricas de Performance
+
+| Modelo | Dimensões | Tamanho | Velocidade | Qualidade | Memória |
+|--------|-----------|---------|------------|-----------|---------|
+| **nomic-embed-text** | 768 | 274 MB | ⚡⚡⚡ | ⭐⭐⭐⭐ | 💾 |
+| **mxbai-embed-large** | 384 | 669 MB | ⚡⚡⚡⚡ | ⭐⭐⭐ | 💾 |
+| **embeddinggemma** | 768 | 621 MB | ⚡⚡ | ⭐⭐⭐⭐⭐ | 💾💾 |
+
+## Gestão de Coleções
+
+### Verificar Status
+
+```bash
+# Via API Documentation
+curl http://localhost:3401/api/v1/rag/collections | jq '.'
+
+# Via Qdrant direto
+curl http://localhost:6333/collections | jq '.result.collections'
+```
+
+### Deletar Coleção
+
+```bash
+# Via API Documentation
+curl -X POST http://localhost:3401/api/v1/rag/status/delete-collection \
+  -H "Content-Type: application/json" \
+  -d '{"collection": "documentation__mxbai"}'
+
+# Via Qdrant direto
+curl -X DELETE http://localhost:6333/collections/documentation__mxbai
+```
+
+### Re-indexar Coleção
+
+```bash
+# 1. Deletar coleção existente
+curl -X POST http://localhost:3401/api/v1/rag/status/delete-collection \
+  -d '{"collection": "documentation__nomic"}'
+
+# 2. Recriar e ingerir
+bash scripts/rag/ingest-multi-collections.sh documentation__nomic
+```
+
+## Frontend Integration
+
+### Collection Selector (Future)
+
+O Dashboard terá um seletor de coleção que permite:
+
+1. Ver todas as coleções disponíveis
+2. Ver status (ready/empty/not_created)
+3. Alternar entre coleções para queries
+4. Comparar resultados lado-a-lado
+
+## Migração
+
+### De Coleção Única para Multi-Coleção
+
+1. **Atualizar variáveis de ambiente**:
+```bash
+# .env
+QDRANT_COLLECTION=documentation__nomic
+OLLAMA_EMBED_MODEL=nomic-embed-text
+```
+
+2. **Reiniciar serviços**:
+```bash
+docker compose -f tools/compose/docker-compose.rag.yml restart
+docker compose -f tools/compose/docker-compose.docs.yml restart documentation-api
+```
+
+3. **Criar coleções adicionais**:
+```bash
+bash scripts/rag/ingest-multi-collections.sh
+```
+
+## Troubleshooting
+
+### Coleção não reconhecida
+
+**Problema**: Query retorna "Collection not found"
+
+**Solução**:
+```bash
+# 1. Verificar se coleção existe
+curl http://localhost:6333/collections | jq '.result.collections[].name'
+
+# 2. Se não existe, criar
+bash scripts/rag/ingest-multi-collections.sh documentation__nomic
+```
+
+### Dimensões incompatíveis
+
+**Problema**: "Vector dimension mismatch"
+
+**Solução**: Certifique-se de que:
+- Coleção foi criada com dimensões corretas do modelo
+- Ingestion service está usando o modelo correto
+- Não há conflito entre modelos diferentes
+
+### Performance lenta
+
+**Solução**:
+- Use `documentation__mxbai` (384d) para queries mais rápidas
+- Use `documentation__nomic` (768d) para equilíbrio qualidade/velocidade
+- Use `documentation__gemma` (768d) para máxima qualidade
+
+## Roadmap
+
+- [ ] Dashboard UI para seleção de coleção
+- [ ] Comparação lado-a-lado de resultados
+- [ ] Métricas de qualidade por coleção
+- [ ] Auto-seleção de melhor coleção por tipo de query
+- [ ] Suporte para coleções de código (repository__)
+- [ ] Hybrid search (sparse + dense) multi-coleção
+
+## Referências
+
+- [Qdrant Collections API](https://qdrant.tech/documentation/concepts/collections/)
+- [LlamaIndex Embeddings](https://docs.llamaindex.ai/en/stable/module_guides/models/embeddings/)
+- [Ollama Embedding Models](https://ollama.com/blog/embedding-models)
+
+---
+
+**Last Updated**: 2025-10-31  
+**Author**: TradingSystem Team  
+**Status**: Active
+

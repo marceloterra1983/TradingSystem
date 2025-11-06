@@ -1,0 +1,11 @@
+{
+  "label": "Agno Agents",
+  "position": 1,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Agno Agents System",
+    "slug": "/agents/agno-agents",
+    "description": "Multi-agent trading system using the Agno framework for market analysis, risk management, and signal orchestration."
+  }
+}

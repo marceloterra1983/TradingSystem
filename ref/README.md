@@ -99,7 +99,7 @@ TradingSystem/
 
 | Service | Port | Protocol | Status |
 |---------|------|----------|--------|
-| Dashboard | 3103 | HTTP | ✅ Active |
+| Dashboard | 3103 | HTTP | ✅ Active (container) |
 | Workspace API | 3200 | HTTP | ✅ Active (container) |
 | Documentation Hub | 3404 | HTTP | ✅ Active (container) |
 | Documentation API | 3405 | HTTP | ✅ Active (container) |

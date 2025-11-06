@@ -1,0 +1,55 @@
+services:
+  course-crawler-db:
+    image: postgres:15
+    container_name: course-crawler-db
+    environment:
+      POSTGRES_PASSWORD: ${COURSE_CRAWLER_DB_PASSWORD:-coursecrawler}
+      POSTGRES_DB: ${COURSE_CRAWLER_DB_NAME:-coursecrawler}
+      POSTGRES_USER: ${COURSE_CRAWLER_DB_USER:-postgres}
+    ports:
+      - "${COURSE_CRAWLER_DB_PORT:-55433}:5432"
+    volumes:
+      - course_crawler_db_data:/var/lib/postgresql/data
+
+  course-crawler-api:
+    build:
+      context: ../../backend/api/course-crawler
+    container_name: course-crawler-api
+    depends_on:
+      - course-crawler-db
+    environment:
+      COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
+      COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
+      COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
+      COURSE_CRAWLER_API_PORT: ${COURSE_CRAWLER_API_PORT:-3601}
+      NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler_cli}
+      COURSE_CRAWLER_BROWSER_USE_ENABLED: "false"
+    volumes:
+      - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
+      - course_crawler_outputs:/app/outputs
+    ports:
+      - "${COURSE_CRAWLER_API_PORT:-3601}:3601"
+    command: ["npm", "run", "start"]
+
+  course-crawler-worker:
+    build:
+      context: ../../backend/api/course-crawler
+    container_name: course-crawler-worker
+    depends_on:
+      - course-crawler-db
+    environment:
+      COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
+      COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
+      COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
+      NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler_cli}
+      COURSE_CRAWLER_BROWSER_USE_ENABLED: "false"
+    volumes:
+      - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
+      - course_crawler_outputs:/app/outputs
+    command: ["npm", "run", "worker:start"]
+
+volumes:
+  course_crawler_db_data:
+  course_crawler_outputs:

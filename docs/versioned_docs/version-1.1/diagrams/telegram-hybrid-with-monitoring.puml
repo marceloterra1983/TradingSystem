@@ -1,0 +1,110 @@
+@startuml Telegram Hybrid Architecture with Monitoring Stack
+!theme plain
+
+title Telegram Hybrid Stack - Complete Monitoring Integration
+
+left to right direction
+
+' ==============================================================================
+' Application Layer
+' ==============================================================================
+package "Application Layer" {
+    rectangle "MTProto\nGateway\n(Native)" as Gateway #90EE90
+    rectangle "Gateway\nREST API" as API #ADD8E6
+    rectangle "TP Capital\nWorker" as Worker #ADD8E6
+}
+
+' ==============================================================================
+' Data Layer
+' ==============================================================================
+package "Data Layer" {
+    database "TimescaleDB" as DB #FFFACD
+    rectangle "PgBouncer" as Pool #ADD8E6
+    rectangle "Redis\nMaster" as RedisMaster #ADD8E6
+    rectangle "Redis\nReplica" as RedisReplica #ADD8E6
+    rectangle "Redis\nSentinel" as Sentinel #ADD8E6
+    queue "RabbitMQ" as Queue #ADD8E6
+}
+
+' ==============================================================================
+' Monitoring Layer
+' ==============================================================================
+package "Monitoring Layer" {
+    rectangle "Prometheus" as Prom #FFE4B5
+    rectangle "Grafana" as Graf #FFE4B5
+    rectangle "Postgres\nExporter" as PgExp #FFE4B5
+    rectangle "Redis\nExporter" as RedisExp #FFE4B5
+}
+
+' ==============================================================================
+' Data Flow
+' ==============================================================================
+Gateway --> RedisMaster : "Cache write (5ms)"
+Gateway --> Queue : "Publish (5ms)"
+Gateway --> Pool : "DB write (async)"
+
+Pool --> DB : "Pooled\nconnection"
+
+Worker --> RedisMaster : "Polling (10ms)"
+Worker --> Pool : "Fallback (50ms)"
+
+API --> Pool : "Query"
+API --> RedisMaster : "API cache"
+
+RedisMaster ..> RedisReplica : "Replication"
+Sentinel ..> RedisMaster : "Monitor"
+Sentinel ..> RedisReplica : "Monitor"
+
+' ==============================================================================
+' Metrics Flow
+' ==============================================================================
+Gateway -[#orange,dotted]-> Prom : "/metrics\n(4007)"
+API -[#orange,dotted]-> Prom : "/metrics\n(4010)"
+Worker -[#orange,dotted]-> Prom : "/metrics\n(4005)"
+
+PgExp -[#orange]-> Pool : "SHOW POOLS"
+PgExp -[#orange]-> DB : "pg_stat_*"
+PgExp -[#orange,dotted]-> Prom : "Export\n(9187)"
+
+RedisExp -[#orange]-> RedisMaster : "INFO stats"
+RedisExp -[#orange,dotted]-> Prom : "Export\n(9121)"
+
+Queue -[#orange,dotted]-> Prom : "/metrics\n(15692)"
+
+Prom -[#orange]-> Graf : "Data source"
+
+' ==============================================================================
+' Legend
+' ==============================================================================
+legend bottom
+    **Metrics Exported:**
+    
+    |= Component |= Key Metrics |
+    | MTProto Gateway | messages_received, connection_status |
+    | Gateway API | api_requests, cache_hits |
+    | TP Capital | polling_lag, messages_processed |
+    | TimescaleDB | query_latency, connections, cache_hit_rate |
+    | Redis | memory_used, keyspace_hits, replication_lag |
+    | RabbitMQ | queue_depth, publish_rate, consumer_count |
+    
+    **Grafana Dashboards:**
+    1. Telegram Overview (system-wide metrics)
+    2. TimescaleDB Performance (queries, locks, cache)
+    3. Redis Cluster (hit rate, memory, replication)
+    4. RabbitMQ Queue (depth, throughput, consumers)
+    5. MTProto Service (CPU, RAM, connections)
+    6. SLO Tracking (availability, latency, error budget)
+    
+    **Alert Rules (8 total):**
+    • Gateway down >2min (critical)
+    • Polling lag >30s (critical)
+    • Redis down (critical)
+    • Pool exhausted (critical)
+    • Queue building (warning)
+    • Low cache hit rate (warning)
+    • Disk space low (warning)
+    • High memory usage (warning)
+end legend
+
+@enduml
+

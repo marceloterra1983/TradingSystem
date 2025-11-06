@@ -1568,7 +1568,7 @@ main() {
     echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
     echo -e "  📚 DocsAPI:               http://localhost:3401  (docs-api container)"
     echo -e "  📖 Documentation Hub:     http://localhost:3400  (docs-hub container)"
-    echo -e "  🎨 Dashboard:             http://localhost:3103"
+    echo -e "  🎨 Dashboard:             http://localhost:3103  (dashboard container)"
     echo -e "  📊 Status API:            http://localhost:3500"
     if [ "$WITH_VECTORS" = true ]; then
       echo -e "  🔍 LlamaIndex Query:      http://localhost:8202  (health: /health)"

@@ -1,0 +1,597 @@
+---
+title: RAG Services Database Schema
+description: Complete database schema documentation for RAG Services including tables, relationships, indexes, and performance optimization
+tags:
+  - database
+  - schema
+  - rag
+  - timescaledb
+domain: rag-services
+type: technical-reference
+summary: Complete database schema for RAG Services with TimescaleDB hypertables, continuous aggregates, and performance optimization
+status: active
+owner: DataOps
+lastReviewed: '2025-11-02'
+last_review: '2025-11-02'
+---
+
+# RAG Services Database Schema
+
+## Overview
+
+The RAG (Retrieval-Augmented Generation) Services database schema is designed to support multi-collection document management, vector embeddings, ingestion tracking, and comprehensive query analytics.
+
+**Database**: TimescaleDB (PostgreSQL + time-series extensions)  
+**Schema**: `rag`  
+**Version**: 1.0.0  
+**Last Updated**: 2025-11-02
+
+### Key Features
+
+- ✅ **Multi-collection support** - Multiple embedding models per collection
+- ✅ **Time-series optimization** - Hypertables for logs and jobs (hourly/daily partitioning)
+- ✅ **Full audit trail** - Track every document, chunk, ingestion, and query
+- ✅ **Performance analytics** - Continuous aggregates for real-time insights
+- ✅ **Orphan detection** - Identify chunks without source documents
+- ✅ **Change tracking** - File hashes for incremental indexing
+
+---
+
+## Architecture
+
+### Schema Components
+
+```
+rag/
+├── collections           # Collection configurations
+├── documents            # Document metadata
+├── chunks               # Text chunks → Qdrant mappings
+├── ingestion_jobs       # Job history (HYPERTABLE)
+├── query_logs           # Query analytics (HYPERTABLE)
+└── embedding_models     # Model catalog
+```
+
+### Entity Relationship Diagram
+
+```plantuml
+@startuml
+!include ../../diagrams/rag-services-er-diagram.puml
+@enduml
+```
+
+**[View full ER diagram →](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/diagrams/rag-services-er-diagram.puml)**
+
+---
+
+## Tables Reference
+
+### 1. rag.collections
+
+**Purpose**: Store RAG collection configurations and metadata
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `name` (VARCHAR, UK) - Collection name (e.g., "documentation__nomic")
+- `directory` (TEXT) - Source directory path
+- `embedding_model` (VARCHAR) - Model name (nomic-embed-text, mxbai-embed-large)
+- `chunk_size` (INTEGER) - Chunk size for text splitting (default: 512)
+- `status` (VARCHAR) - Collection status (pending, indexing, ready, error)
+
+**Relationships**:
+- Parent to: `documents`, `chunks`, `ingestion_jobs`, `query_logs`
+
+**Constraints**:
+- `chunk_size_range`: Between 128-2048
+- `valid_status`: Must be one of (pending, indexing, ready, error, disabled)
+- `valid_embedding_model`: Must be registered model
+
+**Sample Query**:
+```sql
+-- Get all active collections
+SELECT * FROM rag.collections 
+WHERE enabled = TRUE 
+ORDER BY name;
+```
+
+---
+
+### 2. rag.documents
+
+**Purpose**: Track individual documents within collections
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `collection_id` (UUID, FK) - Parent collection
+- `file_path` (TEXT) - Relative path from collection directory
+- `file_hash` (VARCHAR) - SHA-256 hash for change detection
+- `indexed` (BOOLEAN) - Document successfully indexed
+- `index_status` (VARCHAR) - Status (pending, processing, indexed, error)
+
+**Relationships**:
+- Parent: `collections` (many-to-one)
+- Children: `chunks` (one-to-many)
+
+**Triggers**:
+- `update_collection_stats_on_document_change` - Updates parent collection statistics
+
+**Sample Query**:
+```sql
+-- Find documents needing re-indexing (file changed)
+SELECT d.* 
+FROM rag.documents d
+WHERE d.indexed = TRUE
+AND d.file_hash != (SELECT file_hash FROM check_file_hash(d.absolute_path));
+```
+
+---
+
+### 3. rag.chunks
+
+**Purpose**: Map text chunks to Qdrant vector points
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `document_id` (UUID, FK) - Parent document
+- `collection_id` (UUID, FK) - Parent collection
+- `qdrant_point_id` (UUID, UK) - Corresponding Qdrant point ID
+- `chunk_index` (INTEGER) - Position within document (0-based)
+- `content` (TEXT) - Chunk text (for preview/debugging)
+
+**Relationships**:
+- Parent: `documents` (many-to-one)
+- Parent: `collections` (many-to-one)
+
+**Constraints**:
+- `UNIQUE (document_id, chunk_index)` - One chunk per position
+- `UNIQUE (qdrant_point_id, qdrant_collection)` - One-to-one Qdrant mapping
+
+**Sample Query**:
+```sql
+-- Find orphaned chunks (no parent document)
+SELECT * FROM rag.find_orphaned_chunks();
+```
+
+---
+
+### 4. rag.ingestion_jobs *(Hypertable)*
+
+**Purpose**: Track document ingestion jobs with performance metrics
+
+**Partitioning**: By `started_at` (daily chunks)
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `started_at` (TIMESTAMPTZ, PARTITION KEY) - Job start time
+- `job_type` (VARCHAR) - Type (full_index, incremental, single_document)
+- `status` (VARCHAR) - Status (queued, running, completed, failed)
+- `duration_ms` (INTEGER) - Job duration
+- `throughput_docs_per_sec` (NUMERIC) - Documents per second
+
+**TimescaleDB Features**:
+- **Compression**: Chunks older than 7 days
+- **Retention**: 90 days (optional)
+- **Continuous Aggregates**: `ingestion_jobs_daily_stats`
+
+**Sample Query**:
+```sql
+-- Get daily statistics (last 30 days)
+SELECT * FROM rag.ingestion_jobs_daily_stats
+WHERE day > NOW() - INTERVAL '30 days'
+ORDER BY day DESC;
+```
+
+---
+
+### 5. rag.query_logs *(Hypertable)*
+
+**Purpose**: Track user queries with detailed performance metrics
+
+**Partitioning**: By `executed_at` (hourly chunks)
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `executed_at` (TIMESTAMPTZ, PARTITION KEY) - Query execution time
+- `query_text` (TEXT) - User's search/question
+- `duration_ms` (INTEGER) - Total query duration
+- `cache_hit` (BOOLEAN) - Query served from cache
+- `top_relevance_score` (NUMERIC) - Highest relevance score (0-1)
+
+**TimescaleDB Features**:
+- **Compression**: Chunks older than 7 days
+- **Retention**: 90 days
+- **Continuous Aggregates**: `query_logs_hourly_stats`, `popular_queries_daily`
+
+**Sample Query**:
+```sql
+-- Find slow queries (> 1000ms, last 7 days)
+SELECT * FROM rag.v_slow_queries LIMIT 10;
+
+-- Analyze cache effectiveness
+SELECT 
+    query_type,
+    COUNT(*) AS total_queries,
+    SUM(CASE WHEN cache_hit THEN 1 ELSE 0 END) AS cache_hits,
+    (SUM(CASE WHEN cache_hit THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100) AS hit_rate_pct
+FROM rag.query_logs
+WHERE executed_at > NOW() - INTERVAL '24 hours'
+GROUP BY query_type;
+```
+
+---
+
+### 6. rag.embedding_models
+
+**Purpose**: Catalog of available embedding models
+
+**Key Fields**:
+- `id` (UUID, PK) - Unique identifier
+- `name` (VARCHAR, UK) - Model name (e.g., "nomic-embed-text")
+- `dimensions` (INTEGER) - Vector dimensions (768, 384)
+- `provider` (VARCHAR) - Provider (Ollama, OpenAI, etc.)
+- `usage_count` (BIGINT) - Number of times used
+
+**Sample Data**:
+- **nomic-embed-text**: 768d, 274MB, general-purpose
+- **mxbai-embed-large**: 384d, 669MB, fast retrieval
+- **embeddinggemma**: 768d, 621MB, high quality
+
+**Sample Query**:
+```sql
+-- Get available models sorted by usage
+SELECT * FROM rag.v_available_embedding_models;
+```
+
+---
+
+## Installation
+
+### Prerequisites
+
+```bash
+# PostgreSQL 14+ or TimescaleDB 2.x
+# Extensions: timescaledb, uuid-ossp, pgcrypto
+```
+
+### Quick Start
+
+```bash
+# Navigate to schema directory
+cd backend/data/timescaledb/rag/
+
+# Connect to database
+psql -h localhost -p 5432 -U postgres -d tradingsystem
+
+# Run master script
+\i 00_rag_schema_master.sql
+```
+
+### Verification
+
+```sql
+-- Check installed tables
+SELECT tablename FROM pg_tables WHERE schemaname = 'rag';
+-- Expected: 6 tables
+
+-- Check hypertables
+SELECT hypertable_name FROM timescaledb_information.hypertables 
+WHERE hypertable_schema = 'rag';
+-- Expected: ingestion_jobs, query_logs
+
+-- Check sample data
+SELECT name, enabled, status FROM rag.collections;
+-- Expected: documentation__nomic, documentation__mxbai, tradingsystem_v2
+```
+
+---
+
+## Performance Optimization
+
+### Indexes
+
+All tables include optimized indexes:
+
+| Table | Index Type | Purpose |
+|-------|------------|---------|
+| `collections` | B-tree | Status, embedding_model filtering |
+| `collections` | GIN | JSONB metadata searches |
+| `documents` | B-tree | Collection_id, index_status filtering |
+| `documents` | GIN | Full-text search (title, description) |
+| `chunks` | B-tree | Document_id, qdrant_point_id lookups |
+| `ingestion_jobs` | B-tree | Collection_id, status, job_type |
+| `query_logs` | B-tree | Collection_id, user_id, cache_hit |
+| `query_logs` | GIN | Full-text search on query_text |
+
+### Hypertable Benefits
+
+**Partitioning**:
+- **ingestion_jobs**: Daily chunks (24 hours)
+- **query_logs**: Hourly chunks (1 hour)
+
+**Compression**:
+- **Columnar storage**: 10x compression ratio
+- **Automatic**: Chunks older than 7 days
+- **Savings**: 90% storage reduction
+
+**Retention**:
+- **Auto-drop**: Chunks older than 90 days
+- **Configurable**: Adjust per environment
+
+### Continuous Aggregates
+
+Pre-computed analytics updated automatically:
+
+```sql
+-- Daily ingestion statistics
+SELECT * FROM rag.ingestion_jobs_daily_stats
+WHERE day > NOW() - INTERVAL '30 days';
+
+-- Hourly query statistics
+SELECT * FROM rag.query_logs_hourly_stats
+WHERE hour > NOW() - INTERVAL '24 hours';
+
+-- Popular queries (by hash)
+SELECT * FROM rag.popular_queries_daily
+WHERE day > NOW() - INTERVAL '7 days'
+ORDER BY query_count DESC
+LIMIT 20;
+```
+
+---
+
+## Common Operations
+
+### Collection Management
+
+```sql
+-- Create new collection
+INSERT INTO rag.collections (
+    name, display_name, description, directory,
+    embedding_model, enabled, auto_update
+) VALUES (
+    'api_docs__nomic',
+    'API Documentation',
+    'API reference documentation',
+    '/data/docs/content/api',
+    'nomic-embed-text',
+    TRUE,
+    TRUE
+);
+
+-- Update collection status
+UPDATE rag.collections
+SET status = 'ready', last_indexed_at = NOW()
+WHERE name = 'documentation__nomic';
+
+-- Get collection statistics
+SELECT 
+    name,
+    total_documents,
+    indexed_documents,
+    total_chunks,
+    pg_size_pretty(total_size_bytes) AS total_size
+FROM rag.collections
+ORDER BY total_chunks DESC;
+```
+
+### Document Operations
+
+```sql
+-- Register new document
+INSERT INTO rag.documents (
+    collection_id, file_path, absolute_path, filename,
+    file_size_bytes, file_hash, index_status
+) VALUES (
+    (SELECT id FROM rag.collections WHERE name = 'documentation__nomic'),
+    'api/workspace.mdx',
+    '/data/docs/content/api/workspace.mdx',
+    'workspace.mdx',
+    15420,
+    'abc123...',
+    'pending'
+);
+
+-- Mark document as indexed
+UPDATE rag.documents
+SET 
+    indexed = TRUE,
+    index_status = 'indexed',
+    indexed_at = NOW(),
+    chunks_count = 42,
+    vectors_count = 42
+WHERE id = 'document-uuid-here';
+```
+
+### Analytics Queries
+
+```sql
+-- Query performance summary (last 24 hours)
+SELECT 
+    COUNT(*) AS total_queries,
+    AVG(duration_ms)::INTEGER AS avg_ms,
+    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms)::INTEGER AS p95_ms,
+    SUM(CASE WHEN cache_hit THEN 1 ELSE 0 END) AS cache_hits,
+    (SUM(CASE WHEN cache_hit THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100)::NUMERIC(5,2) AS hit_rate_pct
+FROM rag.query_logs
+WHERE executed_at > NOW() - INTERVAL '24 hours';
+
+-- Top queries by frequency
+SELECT 
+    query_text,
+    COUNT(*) AS frequency,
+    AVG(duration_ms)::INTEGER AS avg_duration_ms,
+    AVG(top_relevance_score) AS avg_relevance
+FROM rag.query_logs
+WHERE executed_at > NOW() - INTERVAL '7 days'
+GROUP BY query_text
+ORDER BY frequency DESC
+LIMIT 20;
+```
+
+---
+
+## Maintenance
+
+### Regular Maintenance
+
+```sql
+-- Vacuum and analyze (after bulk operations)
+VACUUM ANALYZE rag.collections;
+VACUUM ANALYZE rag.documents;
+VACUUM ANALYZE rag.chunks;
+
+-- Manual compression (if needed)
+SELECT compress_chunk(chunk)
+FROM show_chunks('rag.ingestion_jobs', older_than => INTERVAL '7 days');
+
+-- Refresh continuous aggregates
+CALL refresh_continuous_aggregate('rag.query_logs_hourly_stats', NULL, NULL);
+```
+
+### Cleanup Operations
+
+```sql
+-- Delete orphaned chunks
+DELETE FROM rag.chunks c
+WHERE NOT EXISTS (
+    SELECT 1 FROM rag.documents d WHERE d.id = c.document_id
+);
+
+-- Clean up failed ingestion jobs (older than 30 days)
+DELETE FROM rag.ingestion_jobs
+WHERE status = 'failed'
+AND started_at < NOW() - INTERVAL '30 days';
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Hypertable creation fails  
+**Solution**: Install TimescaleDB extension:
+```sql
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+```
+
+**Issue**: Foreign key constraints fail  
+**Solution**: Run schema files in correct order (use `00_rag_schema_master.sql`)
+
+**Issue**: Slow queries on hypertables  
+**Solution**: Check compression status:
+```sql
+SELECT * FROM timescaledb_information.compressed_chunk_stats
+WHERE hypertable_schema = 'rag';
+```
+
+**Issue**: Continuous aggregates not updating  
+**Solution**: Check refresh policies:
+```sql
+SELECT * FROM timescaledb_information.continuous_aggregate_stats
+WHERE view_schema = 'rag';
+```
+
+---
+
+## Migration Guide
+
+### From JSON Config to Database
+
+If migrating from `collections-config.json`:
+
+```javascript
+// backend/api/documentation-api/src/services/CollectionService.js
+
+async syncCollectionsFromDatabase() {
+    const collections = await db.query('SELECT * FROM rag.collections WHERE enabled = TRUE');
+    return collections.rows.map(row => ({
+        name: row.name,
+        directory: row.directory,
+        embeddingModel: row.embedding_model,
+        chunkSize: row.chunk_size,
+        chunkOverlap: row.chunk_overlap,
+        fileTypes: row.file_types,
+        enabled: row.enabled,
+        autoUpdate: row.auto_update,
+    }));
+}
+```
+
+### Backfill Existing Data
+
+```sql
+-- Backfill documents from filesystem scan
+INSERT INTO rag.documents (collection_id, file_path, absolute_path, filename, file_size_bytes, index_status)
+SELECT 
+    c.id,
+    relative_path,
+    absolute_path,
+    filename,
+    file_size,
+    'pending'
+FROM rag.collections c
+CROSS JOIN LATERAL scan_directory(c.directory) AS files
+ON CONFLICT (collection_id, file_path) DO NOTHING;
+```
+
+---
+
+## API Integration
+
+### TypeScript Types
+
+```typescript
+// Sync types with database schema
+export interface Collection {
+    id: string;
+    name: string;
+    display_name: string;
+    directory: string;
+    embedding_model: 'nomic-embed-text' | 'mxbai-embed-large' | 'embeddinggemma';
+    chunk_size: number;
+    chunk_overlap: number;
+    file_types: string[];
+    enabled: boolean;
+    auto_update: boolean;
+    status: 'pending' | 'indexing' | 'ready' | 'error' | 'disabled';
+    total_documents: number;
+    indexed_documents: number;
+    total_chunks: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Document {
+    id: string;
+    collection_id: string;
+    file_path: string;
+    filename: string;
+    file_size_bytes: number;
+    file_hash: string;
+    indexed: boolean;
+    index_status: 'pending' | 'processing' | 'indexed' | 'error';
+    chunks_count: number;
+    indexed_at?: string;
+}
+```
+
+---
+
+## Related Documentation
+
+- **[RAG Services Architecture](../tools/rag/architecture.mdx)** - Overall system design
+- **[ER Diagram (PlantUML)](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/diagrams/rag-services-er-diagram.puml)** - Visual schema
+- **[API Documentation](../api/rag-services.mdx)** - REST API reference
+- **[Multi-Collection Architecture](../tools/rag/multi-collection-architecture.mdx)** - Multiple models setup
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2025-11-02 | Initial schema design |
+
+---
+
+**Questions or feedback?** Contact the Data Engineering team or open an issue in the repository.

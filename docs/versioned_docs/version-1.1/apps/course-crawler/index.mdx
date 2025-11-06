@@ -1,0 +1,156 @@
+---
+title: Course Crawler
+sidebar_position: 4
+description: Stack dedicada para orquestrar e monitorar raspagens de cursos.
+tags:
+  - apps
+  - course-crawler
+  - automation
+  - observability
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Visão Geral
+
+O **Course Crawler** executa o fluxo descrito em `apps/course-crawler/course-platform-scanning-agent_en.md`, encapsulando:
+
+1. **Captura** via Browser-Use + Playwright
+2. **Normalização** (HTML → Markdown + mapas de vídeo)
+3. **Persistência** em Postgres (stack Neon local)
+4. **Exports** governados (`outputs/course-crawler/<run>/<timestamp>`)
+5. **Observabilidade** (relatórios, métricas e incidentes)
+
+A stack roda de forma independente do dashboard principal e oferece:
+
+- API (`tradingsystem-course-crawler-api`)
+- Worker de execuções
+- Banco Postgres dedicado
+- Frontend React (`@tradingsystem/course-crawler-frontend`)
+
+## Arquitetura
+
+```
++------------------+       +---------------------------+
+| Course Crawler UI| <---> | Course Crawler API (Express) |
++------------------+       +---------------------------+
+           |                          |
+           |                          v
+           |                 +------------------+
+           |                 | Postgres (schema course_crawler) |
+           |                 +------------------+
+           |                          ^
+           v                          |
++------------------+       +---------------------------+
+| Course Crawler   | ----> | Course Crawler Worker     |
+| CLI (apps/...)   |       | (spawn do CLI + parse)    |
++------------------+       +---------------------------+
+                               |
+                               v
+                     outputs/course-crawler/<runId>/<timestamp>
+```
+
+### Tabelas Principais
+
+- `course_crawler.courses`: nome, base_url, username, senha criptografada, URLs segmentadas
+- `course_crawler.crawl_runs`: status (`queued`, `running`, `success`, `failed`), métricas, diretório de artefatos
+
+### Frontend (Stack dedicada)
+
+- Formulário para cadastrar credenciais e URLs alvo
+- Botão para agendar execuções
+- Painel de execuções e detalhes (Markdown renderizado)
+- Disponível em: `${VITE_COURSE_CRAWLER_APP_URL}` (padrão `http://localhost:4201`)
+
+O dashboard principal apresenta o Course Crawler via iframe (Menu **Apps → Course Crawler**), mantendo a stack original intacta.
+
+## Executando a Stack
+
+<Tabs>
+  <TabItem value="compose" label="Docker Compose">
+
+```bash
+export COURSE_CRAWLER_DB_PASSWORD=coursecrawler
+docker compose -f tools/compose/docker-compose.course-crawler.yml up -d --build
+```
+
+Serviços:
+
+- `course-crawler-db` – Postgres 15 com `pgcrypto`
+- `course-crawler-api` – API (porta 3601)
+- `course-crawler-worker` – Worker que dispara o CLI
+
+Frontends:
+
+- API: `http://localhost:3601/health`
+- UI: `http://localhost:4201/`
+- Dashboard (iframe): `http://localhost:3103/#/course-crawler`
+
+</TabItem>
+  <TabItem value="local" label="Desenvolvimento local">
+
+```bash
+# API
+cd backend/api/course-crawler
+npm install
+npm run init-db
+npm run dev
+
+# Worker (segundo terminal)
+cd backend/api/course-crawler
+npm run worker
+
+# Frontend
+cd frontend/course-crawler
+npm install
+npm run dev -- --port 4201
+```
+
+Garanta que `apps/course-crawler` foi compilado (`npm run build`) antes de iniciar o worker.
+  </TabItem>
+</Tabs>
+
+## Configuração
+
+### API/Worker (`backend/api/course-crawler`)
+
+| Variável | Descrição |
+|----------|-----------|
+| `COURSE_CRAWLER_DATABASE_URL` | Conexão Postgres |
+| `COURSE_CRAWLER_ENCRYPTION_KEY` | Chave ≥ 32 chars para criptografar senhas |
+| `COURSE_CRAWLER_OUTPUT_BASE` | Diretório base dos artefatos (default `./outputs`) |
+| `COURSE_CRAWLER_CLI_PATH` | Path para `apps/course-crawler/dist/index.js` |
+| `COURSE_CRAWLER_API_PORT` | Porta do serviço HTTP (default `3601`) |
+
+### CLI (`apps/course-crawler`)
+
+| Variável | Função |
+|----------|--------|
+| `COURSE_CRAWLER_BASE_URL` | URL de login |
+| `COURSE_CRAWLER_LOGIN_USERNAME` / `PASSWORD` | Credenciais |
+| `COURSE_CRAWLER_TARGET_URLS` | CSV de URLs de cursos (opcional – filtra) |
+| `COURSE_CRAWLER_OUTPUTS_DIR` | Diretório base para exports |
+| `COURSE_CRAWLER_CONFIDENCE_THRESHOLD` | Limiar de confiança |
+| `COURSE_CRAWLER_SELECTOR_FAILURE_THRESHOLD` | Falhas consecutivas antes de incidentes |
+
+## Fluxo de Uso
+
+1. **Cadastrar curso** no frontend (nome, base URL, usuário, senha, URLs específicas)
+2. **Agendar execução** (`POST /courses/:id/runs`)
+3. Worker submete CLI com env deduzido
+4. Artefatos disponíveis em `/runs/:id/artifacts`
+5. Markdown/JSON renderizados no frontend (React Markdown)
+
+## Testes
+
+- API: `npm run test` (Vitest)
+- CLI: `npm run build && node dist/index.js` (usar `.env` / variáveis)
+
+## Referências
+
+- Configuração base: `tools/openspec/changes/add-course-crawler-app`
+- CLI: `apps/course-crawler`
+- API/Worker: `backend/api/course-crawler`
+- Frontend: `frontend/course-crawler`
+- Compose stack: `tools/compose/docker-compose.course-crawler.yml`

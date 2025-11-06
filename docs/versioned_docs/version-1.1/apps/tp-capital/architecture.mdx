@@ -1,0 +1,118 @@
+---
+title: Architecture
+sidebar_position: 2
+description: Architecture diagrams and component responsibilities for the TP Capital
+  application.
+tags:
+  - apps
+  - tp-capital
+  - architecture
+owner: DocsOps
+lastReviewed: '2025-10-26'
+---
+## Diagrams
+
+### Component Architecture
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-component-architecture.puml`
+
+Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints), Dashboard consumption (React Query with 15s polling), and Agno Agents integration (parallel signal consumption).
+
+**Key Components**:
+
+1. **Telegram Gateway**: Local service (port 4007/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
+2. **Gateway Polling Worker**: TP Capital component that fetches queued messages, validates content, and applies parsing rules.
+3. **Timescale Writer**: Persists normalized signals into `tp_capital.tp_capital_signals` with idempotency checks.
+4. **REST API**: Express server exposing `/signals`, `/forwarded-messages`, `/telegram-*`, `/sync-messages`, `/health`, and `/metrics`.
+5. **Prometheus Exporter**: Exposes metrics (`tpcapital_gateway_*`, `http_request_duration_seconds`).
+
+### Telegram Ingestion Flow
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-ingestion-sequence.puml`
+
+Sequence diagram documenting:
+
+1. Telegram Gateway receives message via MTProto and persists to PostgreSQL table (`status = 'received'`).
+2. TP Capital polling worker fetches batch of messages (limit configurable), applies regex parsing, and enforces business rules.
+3. Valid payloads are inserted into TimescaleDB (`tp_capital_signals`) with conflict handling.
+4. Gateway records are transitioned to `processed`; metrics incremented.
+5. Optional forwarding step copies enriched payload to destination channel or logs.
+
+**Target SLA**: &lt;500ms p95 end-to-end latency.
+
+### Signal Consumption Flow
+
+**Source**: `../../../assets/diagrams/source/backend/tp-capital-signal-consumption-sequence.puml`
+
+Shows parallel consumption patterns:
+
+- **Dashboard**: Polls `/signals` every 15 seconds with React Query caching.
+- **Agno Agents**: Query `/signals` on-demand, correlating with Workspace context.
+- Both consumers apply filters (channel, signal_type, date range).
+
+## Components
+
+### Service Layer
+
+- **Technology**: Node.js 20 + Express.
+- **Port**: 4005 (configurable via `PORT`).
+- **Entry point**: `src/server.js` registers health, metrics, signals, forwarded messages, logs, and admin routes.
+- **Middleware**: Shared logger, error handler, CORS configuration.
+
+### Data Layer
+
+- **Database**: TimescaleDB (`APPS-TPCAPITAL`, schema `tp_capital`).
+- **Tables**: `tp_capital_signals`, `forwarded_messages`, plus Telegram metadata tables.
+- **Partitioning**: Hypertables with 1-month chunks, automatic retention job.
+- **Interfaces**: PostgreSQL connection via `pg` pool (`TIMESCALEDB_*` env vars).
+- **Persistence**: Docker volume `tp-capital-timescaledb-data`.
+
+### Integration Layer
+
+- **Telegram Gateway**: Primary ingestion path (database queue + HTTP sync).
+- **Telegram SDK**: Optional Telegraf fallback (legacy bot ingestion).
+- **Timescale Client**: Custom wrapper for PostgreSQL/Timescale features.
+- **Prometheus Client**: Metrics collection and export.
+
+### External Dependencies
+
+- **Telegram Bot API**: Message ingestion source.
+- **TimescaleDB**: Signal storage (must be running before service starts).
+- **Telegram Gateway API**: `/sync-messages` endpoint used for manual backfill.
+- **Dashboard**: Primary consumer at `http://localhost:3103`.
+- **Agno Agents**: Secondary consumer for trading automation.
+
+## Data Flow
+
+### Write Path (Ingestion)
+
+1. Telegram Gateway captures and stores message (`received`).
+2. Polling worker fetches message batch, normalizes text, validates regex matches.
+3. Idempotency check verifies `(channel_id, message_id)` not already ingested.
+4. Timescale writer inserts row and updates metrics.
+5. Gateway record updated to `processed`; failures logged with `status = 'parse_failed'` or `failed`.
+
+### Read Path (Consumption)
+
+1. Client requests `GET /signals?channel=TP_CAPITAL&limit=100`.
+2. Express handler queries TimescaleDB via pooled connection.
+3. Results formatted as JSON array.
+4. Response cached by React Query (dashboard) or consumed directly (agents).
+
+## Deployment Architecture
+
+### Local Development
+
+- Docker Compose stack in `apps/tp-capital/infrastructure/`.
+- Services: TP Capital API (port 4005) + TimescaleDB (5432 container / 5433 host).
+- Optional: run `tools/scripts/start-local-telegram-gateway.sh` to bootstrap Gateway, API, and DB.
+- Networking: Shared Docker network for API ↔ Timescale ↔ Gateway.
+
+### Production
+
+- GitHub Actions builds Docker image on push to `main`.
+- Image pushed to GHCR: `ghcr.io/<owner>/tp-capital-signals`.
+- Deployed via `docker-compose.prod.yml` with production env file and mounted secrets.
+- Health check: `curl http://<host>:4005/health`.
+- TimescaleDB connectivity: `psql postgresql://timescale:***@<host>:5433/APPS-TPCAPITAL`.
+- Telegram Gateway runs as systemd unit on same host (4007/4010) with session files stored locally.

@@ -1,0 +1,543 @@
+---
+title: TP Capital API
+sidebar_position: 8
+description: Trading signals ingestion, Telegram bot/channel management, and monitoring API with TimescaleDB persistence.
+tags:
+  - api
+  - tp-capital
+  - trading
+  - telegram
+  - signals
+owner: BackendGuild
+lastReviewed: '2025-10-26'
+---
+
+## Overview
+
+The **TP Capital API** provides comprehensive endpoints for managing trading signals ingested from Telegram channels, configuring Telegram bots and channels, and monitoring the signal ingestion pipeline. It's a critical component of the TradingSystem that bridges Telegram signal providers with the trading platform.
+
+### Key Features
+
+- **Trading Signals**: Retrieve signals with advanced filtering (channel, type, time range, search)
+- **Telegram Bots**: Full CRUD operations for bot configuration
+- **Telegram Channels**: Manage source and destination channels
+- **Forwarded Messages**: Track message forwarding between channels
+- **Real-time Monitoring**: Health checks, logs, and Prometheus metrics
+- **Dynamic Configuration**: Reload channels without service restart
+- **TimescaleDB Storage**: Efficient time-series data storage
+
+## Service Details
+
+| Property | Value |
+|----------|-------|
+| **Port** | 4005 |
+| **Base URL** | `http://localhost:4005` |
+| **Reverse Proxy Route** | `http://tradingsystem.local/api/tp-capital` |
+| **Repository** | `apps/tp-capital/` |
+| **Database** | TimescaleDB (PostgreSQL) |
+| **Status** | ✅ Active |
+
+## Architecture
+
+```
+Telegram Channels → Telegram Gateway → TP Capital API → TimescaleDB
+                                              ↓
+                                        Dashboard (React)
+```
+
+**Flow:**
+
+1. Telegram bots listen to configured channels
+2. Messages are forwarded to Telegram Gateway
+3. Gateway sends validated payloads to TP Capital via POST /ingest
+4. TP Capital parses signals and stores in TimescaleDB
+5. Dashboard fetches signals via GET /signals
+
+## Quick Start
+
+### Health Check
+
+```bash
+curl http://localhost:4005/health
+```
+
+Response:
+
+```json
+{
+  "status": "ok",
+  "timescale": true
+}
+```
+
+### Get Recent Signals
+
+```bash
+# Get last 50 signals
+curl "http://localhost:4005/signals?limit=50"
+
+# Filter by channel
+curl "http://localhost:4005/signals?channel=-1001234567890&limit=20"
+
+# Search signals
+curl "http://localhost:4005/signals?search=WINZ25"
+
+# Time range filter
+curl "http://localhost:4005/signals?from=2025-10-26T00:00:00Z&to=2025-10-26T23:59:59Z"
+```
+
+### List Telegram Channels
+
+```bash
+curl http://localhost:4005/telegram/channels
+```
+
+Response:
+
+```json
+{
+  "data": [
+    {
+      "id": "channel-1730000000000-abc123",
+      "label": "TP Capital Sinais Premium",
+      "channel_id": "-1001234567890",
+      "channel_type": "source",
+      "status": "active",
+      "signal_count": 1250,
+      "last_signal": "2025-10-26T12:00:00.000Z"
+    }
+  ],
+  "timestamp": "2025-10-26T12:05:00.000Z"
+}
+```
+
+### Create New Channel
+
+```bash
+curl -X POST http://localhost:4005/telegram/channels \
+  -H "Content-Type: application/json" \
+  -d '{
+    "label": "TP Capital Day Trade",
+    "channel_id": "-1009876543210",
+    "channel_type": "source",
+    "description": "Sinais de day trade"
+  }'
+```
+
+## API Reference
+
+The complete OpenAPI specification is available at:
+
+<a href="/api/tp-capital" className="button button--primary">View Full API Documentation</a>
+
+### Main Endpoints
+
+#### Health & Monitoring
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Service information |
+| `/health` | GET | Health check (TimescaleDB status) |
+| `/metrics` | GET | Prometheus metrics |
+| `/logs` | GET | Application logs (with filtering) |
+
+#### Trading Signals
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/signals` | GET | Fetch signals with filters |
+| `/signals` | DELETE | Delete signal by timestamp |
+| `/forwarded-messages` | GET | Fetch forwarded messages |
+
+#### Telegram Bots
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/telegram/bots` | GET | List all bots |
+| `/telegram/bots` | POST | Create new bot |
+| `/telegram/bots/:id` | PUT | Update bot |
+| `/telegram/bots/:id` | DELETE | Soft delete bot |
+
+#### Telegram Channels
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/telegram/channels` | GET | List all channels |
+| `/telegram/channels` | POST | Create new channel |
+| `/telegram/channels/:id` | PUT | Update channel |
+| `/telegram/channels/:id` | DELETE | Soft delete channel |
+
+#### Configuration
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/bots` | GET | Bot configuration info |
+| `/channels` | GET | Channels with stats |
+| `/config/channels` | GET | Configured channels from env |
+| `/reload-channels` | POST | Reload channels dynamically |
+
+## Data Models
+
+### Signal Schema
+
+```typescript
+interface Signal {
+  id: string;                    // Auto-generated
+  asset: string;                 // Asset symbol (e.g., "WINZ25")
+  signal_type: string;           // "buy", "sell", etc.
+  entry_price: number;           // Entry price
+  stop_loss: number;             // Stop loss price
+  targets: number[];             // Target prices array
+  channel_id: string;            // Telegram channel ID
+  raw_message: string;           // Original Telegram message
+  ingested_at: string;           // System ingestion timestamp (ISO 8601)
+  timestamp: string;             // Original message timestamp (ISO 8601)
+  photos: string[];              // Photo URLs
+}
+```
+
+### Example Signal
+
+```json
+{
+  "id": "sig-20251026-001",
+  "asset": "WINZ25",
+  "signal_type": "buy",
+  "entry_price": 120500,
+  "stop_loss": 120300,
+  "targets": [120700, 120900, 121100],
+  "channel_id": "-1001234567890",
+  "raw_message": "COMPRA WINZ25 @ 120500 SL 120300 Alvos: 120700, 120900, 121100",
+  "ingested_at": "2025-10-26T12:00:00.000Z",
+  "timestamp": "2025-10-26T11:59:30.000Z",
+  "photos": []
+}
+```
+
+### TelegramChannel Schema
+
+```typescript
+interface TelegramChannel {
+  id: string;                    // Auto-generated (channel-{timestamp}-{random})
+  label: string;                 // Human-readable name
+  channel_id: string;            // Telegram channel ID (starts with -100)
+  channel_type: 'source' | 'destination';
+  description?: string;          // Optional description
+  status: 'active' | 'inactive' | 'deleted';
+  signal_count?: number;         // Total signals received
+  last_signal?: string;          // Last signal timestamp
+  created_at: string;            // ISO 8601
+  updated_at: string;            // ISO 8601
+}
+```
+
+### TelegramBot Schema
+
+```typescript
+interface TelegramBot {
+  id: string;                    // Auto-generated (bot-{timestamp}-{random})
+  username: string;              // Bot username (without @)
+  token: string;                 // Bot token from @BotFather (sensitive)
+  bot_type: 'ingestion' | 'forwarder' | 'monitoring';
+  description?: string;          // Optional description
+  status: 'active' | 'inactive' | 'deleted';
+  created_at: string;            // ISO 8601
+  updated_at: string;            // ISO 8601
+}
+```
+
+## Rate Limiting
+
+Global rate limit: **120 requests per 60-second window** (via express-rate-limit)
+
+Rate limit headers included in all responses:
+
+- `RateLimit-Limit`: Maximum requests per window
+- `RateLimit-Remaining`: Remaining requests
+- `RateLimit-Reset`: Window reset time (Unix timestamp)
+
+When rate limit is exceeded, the API returns **429 Too Many Requests**:
+
+```json
+{
+  "error": "Too many requests, please try again later."
+}
+```
+
+## Authentication
+
+**Current State**: No authentication required (internal service)
+
+**Security Recommendations**:
+
+- Production deployments should add API key or JWT authentication
+- The POST /ingest endpoint (Telegram Gateway → TP Capital) uses X-Gateway-Secret header
+- Public-facing deployments should implement rate limiting per user/API key
+
+## Integration Examples
+
+### TypeScript/JavaScript (Fetch)
+
+```typescript
+// Fetch recent signals
+async function fetchSignals(channelId?: string, limit = 50) {
+  const params = new URLSearchParams();
+  params.append('limit', limit.toString());
+  if (channelId) params.append('channel', channelId);
+
+  const response = await fetch(
+    `http://localhost:4005/signals?${params.toString()}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+  }
+
+  const data = await response.json();
+  return data.data as Signal[];
+}
+
+// Create Telegram channel
+async function createChannel(
+  label: string,
+  channelId: string,
+  channelType: 'source' | 'destination'
+) {
+  const response = await fetch('http://localhost:4005/telegram/channels', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ label, channel_id: channelId, channel_type: channelType })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create channel');
+  }
+
+  return response.json();
+}
+```
+
+### React Hook
+
+```typescript
+import { useState, useEffect } from 'react';
+
+function useSignals(channelId?: string) {
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.append('limit', '100');
+    if (channelId) params.append('channel', channelId);
+
+    fetch(`http://localhost:4005/signals?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        setSignals(data.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [channelId]);
+
+  return { signals, loading, error };
+}
+
+// Usage in component
+function SignalsTable() {
+  const { signals, loading, error } = useSignals();
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <table>
+      {signals.map(signal => (
+        <tr key={signal.id}>
+          <td>{signal.asset}</td>
+          <td>{signal.entry_price}</td>
+          <td>{signal.signal_type}</td>
+        </tr>
+      ))}
+    </table>
+  );
+}
+```
+
+### curl Examples
+
+```bash
+# Get signals from last 24 hours
+FROM=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+TO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+curl "http://localhost:4005/signals?from=$FROM&to=$TO"
+
+# Search for PETR4 signals
+curl "http://localhost:4005/signals?search=PETR4"
+
+# Get channels with stats
+curl http://localhost:4005/channels
+
+# Reload channels after updating database
+curl -X POST http://localhost:4005/reload-channels
+```
+
+## Error Handling
+
+### HTTP Status Codes
+
+| Code | Meaning | When It Occurs |
+|------|---------|----------------|
+| 200 | OK | Request successful |
+| 201 | Created | Resource created (legacy endpoints) |
+| 400 | Bad Request | Validation failed (missing required fields) |
+| 404 | Not Found | Resource doesn't exist (rare, most endpoints return empty arrays) |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Database error or unexpected failure |
+| 503 | Service Unavailable | Database connection failed or forwarder not running |
+
+### Error Response Format
+
+```json
+{
+  "error": "Error description",
+  "details": ["Additional error details (for validation errors)"]
+}
+```
+
+### Common Errors
+
+**400 Bad Request - Missing Required Fields**:
+
+```json
+{
+  "error": "Validation failed",
+  "details": ["label is required", "channel_id is required"]
+}
+```
+
+**500 Internal Server Error - Database Failure**:
+
+```json
+{
+  "error": "Failed to fetch signals"
+}
+```
+
+**503 Service Unavailable - Forwarder Not Running**:
+
+```json
+{
+  "error": "Forwarder not running"
+}
+```
+
+### Retry Strategy
+
+For **503 errors** (database connection failures):
+
+- Implement exponential backoff: 1s, 2s, 4s, 8s
+- Max retries: 3
+- Check `/health` endpoint to verify service recovery
+
+For **429 errors** (rate limiting):
+
+- Use `RateLimit-Reset` header to determine when to retry
+- Implement client-side rate limiting
+
+## Migration Guide
+
+### Legacy Endpoints (Deprecated)
+
+The following endpoints are **deprecated** and will be removed in a future version:
+
+| Legacy Endpoint | New Endpoint | Status |
+|----------------|--------------|--------|
+| `GET /telegram-channels` | `GET /telegram/channels` | ⚠️ Deprecated |
+| `POST /telegram-channels` | `POST /telegram/channels` | ⚠️ Deprecated |
+| `PUT /telegram-channels/:id` | `PUT /telegram/channels/:id` | ⚠️ Deprecated |
+
+**Migration Steps:**
+
+1. Update all API calls to use `/telegram/channels` instead of `/telegram-channels`
+2. No request/response format changes - endpoints are functionally identical
+3. Test updated integrations in development
+4. Deploy changes (both endpoints work during transition period)
+
+**Timeline**: Legacy endpoints will be supported for backward compatibility until v2.0.0 (no removal date set).
+
+## Monitoring
+
+### Health Check
+
+Monitor service health with:
+
+```bash
+curl http://localhost:4005/health
+```
+
+**Healthy Response**:
+
+```json
+{ "status": "ok", "timescale": true }
+```
+
+**Degraded Response** (TimescaleDB down):
+
+```json
+{ "status": "ok", "timescale": false }
+```
+
+Service continues to operate even if TimescaleDB is down, but signals cannot be stored.
+
+### Prometheus Metrics
+
+Available at `GET /metrics`:
+
+```bash
+curl http://localhost:4005/metrics
+```
+
+**Key Metrics**:
+
+- `process_cpu_user_seconds_total` - CPU usage
+- `process_resident_memory_bytes` - Memory usage
+- `http_request_duration_ms` - Request latency
+- `nodejs_eventloop_lag_seconds` - Event loop lag
+
+### Application Logs
+
+Fetch structured logs with filtering:
+
+```bash
+# Get last 100 logs
+curl http://localhost:4005/logs?limit=100
+
+# Filter by level
+curl http://localhost:4005/logs?level=error
+
+# Combine filters
+curl "http://localhost:4005/logs?level=warn&limit=50"
+```
+
+Log levels: `info`, `warn`, `error`, `debug`
+
+## Related Documentation
+
+- **[TP Capital Service Guide](/apps/tp-capital/overview)** - Full service documentation
+- **[Telegram Gateway](/apps/telegram-gateway/overview)** - Bot setup and configuration
+- **[Database Schema](/database/schema)** - TimescaleDB table definitions
+- **[Dashboard Integration](/frontend/architecture/dashboard)** - Frontend integration guide
+
+## Support
+
+For issues, questions, or feature requests:
+
+- **GitHub Issues**: [TradingSystem Issues](https://github.com/yourusername/tradingsystem/issues)
+- **Documentation**: This page + OpenAPI spec at `/api/tp-capital`
+- **Source Code**: `apps/tp-capital/src/server.js`

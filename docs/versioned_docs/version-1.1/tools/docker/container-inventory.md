@@ -1,0 +1,130 @@
+---
+title: "Docker Container Inventory"
+description: "Snapshot of core TradingSystem containers with status and roles."
+tags:
+  - tools
+  - docker
+  - ops
+owner: OpsGuild
+lastReviewed: '2025-11-02'
+---
+# 📊 Inventário de Containers - Trading System
+
+## 📱 APPS (Aplicações)
+
+| Container | Imagem | Status | Health |
+|-----------|--------|--------|--------|
+| `apps-tp-capital` | `img-apps-tp-capital:latest` | ⏱️ 7 minutos | ✅ Healthy |
+| `apps-workspace` | `img-apps-workspace:latest` | ⏱️ 11 horas | ✅ Healthy |
+
+---
+
+## 🗄️ DATABASE (Bancos de Dados Compartilhados)
+
+> Desde novembro/2025 o TimescaleDB compartilhado foi desativado. Cada produto possui o próprio stack (`tp-capital-*`, `workspace-*`, `telegram-*`). Esta seção lista apenas os serviços realmente compartilhados entre stacks.
+
+| Container | Imagem | Status | Tipo |
+|-----------|--------|--------|------|
+| `data-postgres-langgraph` | `postgres:15` | ⏱️ 22 horas | PostgreSQL (LangGraph memory store) |
+| `data-questdb` | `questdb/questdb:latest` | ⏱️ 22 horas | QuestDB (market data) |
+| `data-qdrant` | `qdrant/qdrant` | ⏱️ 13 horas | Qdrant (Vector DB) |
+
+---
+
+## 📚 DOCUMENTATION (Documentação)
+
+| Container | Imagem | Status | Health |
+|-----------|--------|--------|--------|
+| `docs-api` | `docs-api:latest` | ⏱️ 6 minutos | ✅ Healthy |
+| `documentation` | `sha256:46d16bc...` | ⏱️ 12 horas | ✅ Healthy |
+
+---
+
+## 🕷️ FIRECRAWL (Web Scraping)
+
+| Container | Imagem | Status | Health |
+|-----------|--------|--------|--------|
+| `firecrawl-proxy` | `img-firecrawl-proxy:latest` | ⏱️ 22 horas | ✅ Healthy |
+| `firecrawl-api` | `nginx:alpine` | ⏱️ 22 horas | - |
+| `firecrawl-playwright` | `nginx:alpine` | ⏱️ 22 horas | - |
+| `firecrawl-postgres` | `postgres:15` | ⏱️ 22 horas | - |
+| `firecrawl-redis` | `redis:latest` | ⏱️ 22 horas | - |
+
+---
+
+## 📊 MONITORING (Monitoramento)
+
+| Container | Imagem | Status | Função |
+|-----------|--------|--------|--------|
+| `mon-prometheus` | `prom/prometheus:latest` | ⏱️ 22 horas | Coleta de Métricas |
+| `mon-grafana` | `grafana/grafana:latest` | ⏱️ 22 horas | Visualização |
+| `mon-alertmanager` | `prom/alertmanager:latest` | ⏱️ 22 horas | Gerenciamento de Alertas |
+| `mon-alert-router` | `nginx:alpine` | ⏱️ 22 horas | Roteamento de Alertas |
+
+---
+
+## 🛠️ TOOLS (Ferramentas)
+
+| Container | Imagem | Status | Função |
+|-----------|--------|--------|--------|
+| `tools-llamaindex-ingestion` | `sha256:59392dd...` | ⏱️ 7 minutos | Ingestão de Dados |
+| `tools-llamaindex-query` | `sha256:5f10ba8...` | ⏱️ 12 horas | Consultas RAG |
+| `ollama` | `ollama/ollama:latest` | ⏱️ 13 horas | LLM Local |
+
+---
+
+## 📈 Resumo Executivo
+
+### Status Geral
+- **Total de Containers:** 30
+- **Containers Saudáveis:** 8 (com health check)
+- **Containers em Execução:** 30 (100%)
+
+### Análise de Uptime
+| Uptime | Quantidade | Containers |
+|--------|-----------|-----------|
+| < 1 hora | 3 | `apps-tp-capital`, `docs-api`, `tools-llamaindex-ingestion` |
+| 11-13 horas | 5 | `apps-workspace`, `documentation`, `data-qdrant`, `ollama`, `tools-llamaindex-query` |
+| 22 horas | 21 | Infraestrutura principal (QuestDB, LangGraph Postgres, monitoring, firecrawl) |
+
+### Serviços por Categoria
+```
+📱 Apps:          2 containers (8%)
+🗄️ Databases:     3 containers (12%)
+📚 Documentation: 2 containers (8%)
+🕷️ Firecrawl:     5 containers (20%)
+📊 Monitoring:    4 containers (16%)
+🛠️ Tools:         3 containers (12%)
+📈 TradingSystem: 6 containers (24%)
+```
+
+### 🔴 Containers Recém-Reiniciados (< 1h)
+Estes containers foram reiniciados recentemente e merecem atenção:
+1. **apps-tp-capital** (7 min)
+2. **docs-api** (6 min)
+3. **tools-llamaindex-ingestion** (7 min)
+
+### 💚 Saúde do Sistema
+**Containers com Health Check Ativo:**
+- ✅ apps-tp-capital
+- ✅ apps-workspace
+- ✅ data-questdb
+- ✅ data-qdrant
+- ✅ data-postgres-langgraph
+- ✅ docs-api
+- ✅ documentation
+- ✅ firecrawl-proxy
+
+---
+
+**Última atualização:** 30 de outubro de 2025
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,167 @@
+@startuml Security Architecture
+!theme plain
+
+title TradingSystem - Security Architecture & Trust Boundaries
+
+package "Untrusted Zone (Public Internet)" {
+    [Browser/Client] as client
+}
+
+package "DMZ (Perimeter)" {
+    [Firewall/WAF] as firewall
+    note right of firewall
+        • IP whitelisting
+        • DDoS protection
+        • Rate limiting (Layer 4)
+    end note
+}
+
+package "Trusted Zone (Application Layer)" {
+    [Kong API Gateway] as kong
+    note right of kong
+        **Security Controls:**
+        • JWT validation
+        • Rate limiting (Layer 7)
+        • CORS policies
+        • Request logging
+        • IP restrictions
+        • Circuit breakers
+    end note
+
+    package "Frontend Services (Public)" {
+        [Dashboard] as dashboard
+        [Docs Hub] as docs
+    }
+
+    package "Backend Services (Internal)" {
+        [Workspace API] as workspace
+        [TP Capital API] as tpcapital
+        [Documentation API] as docsapi
+        [Service Launcher] as launcher
+    }
+
+    package "RAG Stack (Internal)" {
+        [Ollama] as ollama
+        [LlamaIndex Query] as llamaquery
+        [LlamaIndex Ingestion] as llamaingest
+        [RAG Collections] as ragcollections
+    }
+}
+
+package "Data Layer (Restricted)" {
+    database "TimescaleDB\n(Encrypted at Rest)" as timescale
+    database "Qdrant\n(No Auth)" as qdrant
+    database "Redis\n(No Auth)" as redis
+    note right of timescale
+        **Access Controls:**
+        • Password authentication
+        • SSL/TLS connections
+        • Database-level permissions
+        • Row-level security (planned)
+    end note
+}
+
+package "External Services" {
+    cloud "Telegram API" as telegram
+    cloud "Nelogica Profit" as nelogica
+}
+
+' Trust boundaries
+rectangle "Trust Boundary 1: Perimeter" #line:red {
+    client --> firewall
+}
+
+rectangle "Trust Boundary 2: API Gateway" #line:orange {
+    firewall --> kong
+}
+
+rectangle "Trust Boundary 3: Internal Services" #line:yellow {
+    kong --> dashboard
+    kong --> docs
+    kong --> workspace
+    kong --> tpcapital
+    kong --> docsapi
+    kong --> launcher
+}
+
+rectangle "Trust Boundary 4: Data Access" #line:green {
+    workspace --> timescale
+    tpcapital --> timescale
+    docsapi --> timescale
+    ragcollections --> qdrant
+    llamaquery --> qdrant
+    llamaingest --> qdrant
+    docsapi --> redis
+    ragcollections --> redis
+}
+
+' Inter-service communication
+docsapi --> llamaquery : JWT + X-Service-Token
+docsapi --> ragcollections : X-Service-Token
+ragcollections --> llamaingest : JWT + X-Service-Token
+tpcapital --> launcher : X-Service-Token
+
+' External communication
+tpcapital --> telegram : MTProto (encrypted)
+launcher --> nelogica : ProfitDLL (native)
+
+' Security Annotations
+note as N1
+    **Security Layers:**
+    1. Firewall/WAF (Perimeter)
+    2. Kong Gateway (Authentication)
+    3. Inter-Service Auth (Authorization)
+    4. Database ACLs (Data Protection)
+
+    **Authentication Methods:**
+    • External: JWT (RS256/HS256)
+    • Internal: X-Service-Token (HMAC)
+    • Database: SCRAM-SHA-256
+
+    **Encryption:**
+    • TLS 1.3 for all HTTPS traffic
+    • Database encryption at rest (AES-256)
+    • Secrets in Docker Secrets (not .env)
+end note
+
+note as N2
+    **Current Security Gaps:**
+    ⚠️ No inter-service authentication
+    ⚠️ Qdrant has no authentication
+    ⚠️ Redis has no password
+    ⚠️ Secrets in plain-text .env
+    ⚠️ No API gateway (direct service access)
+    ⚠️ No WAF/DDoS protection
+    ⚠️ No rate limiting at edge
+end note
+
+note as N3
+    **Proposed Improvements:**
+    ✅ Add Kong API Gateway
+    ✅ Implement X-Service-Token auth
+    ✅ Enable Qdrant API key
+    ✅ Enable Redis password (ACL)
+    ✅ Use Docker Secrets for sensitive data
+    ✅ Add WAF (ModSecurity)
+    ✅ Implement rate limiting at edge
+    ✅ Add audit logging for all access
+end note
+
+' Security Incident Response
+note as N4
+    **Incident Response:**
+    1. Detection (Prometheus alerts)
+    2. Containment (Kill switch API)
+    3. Eradication (Patch/update)
+    4. Recovery (Restore from backup)
+    5. Lessons Learned (Post-mortem)
+
+    **Kill Switch:**
+    POST /api/v1/kill-switch
+    • Disables all trading operations
+    • Closes open positions
+    • Stops order execution
+    • Logs incident details
+end note
+
+@enduml

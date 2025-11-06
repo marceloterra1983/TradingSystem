@@ -1,0 +1,64 @@
+@startuml
+title LangSmith Tracing Flow - LangGraph Workflows
+
+actor Developer
+participant "LangGraph Service\n(Port 8111/8112)" as LangGraph
+participant "Workflow Node\n(@traceable)" as Node
+participant "LangSmith SDK" as SDK
+participant "LangSmith API\n(api.smith.langchain.com)" as API
+participant "LangSmith Studio\n(smith.langchain.com)" as Studio
+
+Developer -> LangGraph: POST /workflows/trading/execute
+activate LangGraph
+
+LangGraph -> LangGraph: Check LANGCHAIN_TRACING_V2=true
+
+LangGraph -> Node: Call analyze_market_node()
+activate Node
+
+Node -> SDK: Start trace\n(name="trading.analyze_market", run_type="llm")
+activate SDK
+
+SDK -> API: POST /runs (async, non-blocking)
+activate API
+API --> SDK: 202 Accepted
+deactivate API
+
+Node -> Node: Execute market analysis\n(call Agno agents)
+
+Node -> SDK: End trace\n(outputs, duration, status)
+SDK -> API: PATCH /runs/{run_id} (async)
+activate API
+API --> SDK: 200 OK
+deactivate API
+
+deactivate SDK
+Node --> LangGraph: Return analysis results
+deactivate Node
+
+LangGraph -> Node: Call validate_risk_node()
+activate Node
+Note over Node,SDK: Same tracing pattern\nfor each workflow node
+deactivate Node
+
+LangGraph --> Developer: 200 OK {run_id, status}
+deactivate LangGraph
+
+Developer -> Studio: Open Studio UI
+activate Studio
+
+Studio -> API: GET /runs?project=langgraph-dev
+activate API
+API --> Studio: Return traces with metadata
+deactivate API
+
+Studio --> Developer: Display trace visualization\n(nodes, timing, inputs/outputs)
+deactivate Studio
+
+note right of SDK
+  Tracing is async and non-blocking.
+  Adds ~10-50ms overhead.
+  Failures don't affect workflow execution.
+end note
+
+@enduml

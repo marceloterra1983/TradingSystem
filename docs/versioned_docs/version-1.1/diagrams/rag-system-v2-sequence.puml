@@ -1,0 +1,177 @@
+@startuml RAG Query Flow - Complete Stack
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title RAG Query Flow (End-to-End) - v2.0\nNeon + Qdrant Cluster + Kong Gateway
+
+actor User
+participant "Dashboard\n:3103" as Dashboard
+participant "Kong Gateway\n:8000" as Kong
+participant "Documentation API\n:3401" as DocAPI
+participant "LlamaIndex Query\n:8202" as LlamaQuery
+participant "Ollama\n:11434" as Ollama
+participant "NGINX LB\n:6333" as QdrantLB
+participant "Qdrant Node 1\n(Leader)" as Q1
+participant "Qdrant Node 2" as Q2
+participant "Qdrant Node 3" as Q3
+participant "Redis\n:6380" as Redis
+participant "Neon Compute\n:5435" as Neon
+
+== Phase 1: User Query ==
+
+User -> Dashboard: Enter query:\n"How to configure RAG?"
+activate Dashboard
+
+Dashboard -> Dashboard: Check localStorage cache\n(5min TTL)
+
+alt Cache HIT (L0 - Browser)
+    Dashboard -> User: Return cached results\n(0ms - instant)
+    note right: Best case scenario
+else Cache MISS
+    Dashboard -> Kong: GET /api/v1/rag/search\n?query=How+to+configure+RAG\n&limit=5
+    activate Kong
+    
+    == Phase 2: API Gateway Processing ==
+    
+    Kong -> Kong: Validate JWT token\n(Authorization: Bearer)
+    
+    alt JWT Invalid
+        Kong --> Dashboard: 401 Unauthorized
+        Dashboard -> User: Show login prompt
+    end
+    
+    Kong -> Kong: Check rate limit\n(100 req/min per IP)
+    
+    alt Rate Limit Exceeded
+        Kong --> Dashboard: 429 Too Many Requests
+        Dashboard -> User: "Please wait" message
+    end
+    
+    Kong -> Kong: Apply CORS headers\n(localhost:3103)
+    Kong -> Kong: Add X-Service-Token header
+    Kong -> Kong: Add X-Correlation-ID header
+    Kong -> Kong: Log request (audit trail)
+    
+    Kong -> DocAPI: Forward request\n+ X-Service-Token\n+ X-Correlation-ID
+    activate DocAPI
+    
+    == Phase 3: RAG Proxy Service ==
+    
+    DocAPI -> DocAPI: Verify X-Service-Token
+    DocAPI -> DocAPI: Validate query params\n(sanitize input)
+    DocAPI -> DocAPI: Mint JWT for upstream\n(5min cache)
+    
+    DocAPI -> Redis: GET cache:search:{query_hash}
+    activate Redis
+    
+    alt Cache HIT (L2 - Redis)
+        Redis --> DocAPI: Cached result (JSON)
+        DocAPI --> Kong: 200 OK {results}
+        Kong --> Dashboard: 200 OK {results}
+        Dashboard -> User: Display results
+        note right: 4-6ms response time
+    else Cache MISS (L2)
+        Redis --> DocAPI: null
+        
+        DocAPI -> LlamaQuery: POST /search\n+ Authorization: Bearer {JWT}\n+ X-Service-Token
+        activate LlamaQuery
+        
+        == Phase 4: LlamaIndex Query Service ==
+        
+        LlamaQuery -> LlamaQuery: Verify JWT token
+        LlamaQuery -> LlamaQuery: Verify X-Service-Token
+        LlamaQuery -> LlamaQuery: Parse query params
+        
+        LlamaQuery -> Redis: GET embedding:{query_hash}
+        
+        alt Embedding Cached (L2.5)
+            Redis --> LlamaQuery: Cached embedding\n(384 dimensions)
+            note right: Cache hit - skip Ollama call
+        else Embedding NOT Cached
+            LlamaQuery -> Ollama: POST /api/embeddings\n{"model": "mxbai-embed-large",\n "prompt": "How to configure RAG?"}
+            activate Ollama
+            Ollama -> Ollama: Generate embedding\n(GPU-accelerated)
+            Ollama --> LlamaQuery: embedding vector\n[0.1, 0.2, ..., 0.9]\n384 dimensions
+            deactivate Ollama
+            note right: 50-80ms (GPU)\n150-200ms (CPU)
+            
+            LlamaQuery -> Redis: SET embedding:{hash}\nTTL=3600s (1 hour)
+            Redis --> LlamaQuery: OK
+        end
+        
+        == Phase 5: Vector Search (Qdrant Cluster) ==
+        
+        LlamaQuery -> QdrantLB: POST /collections/docs_index_mxbai/points/search\n{"vector": [0.1, 0.2, ...],\n "limit": 5,\n "with_payload": true}
+        activate QdrantLB
+        
+        QdrantLB -> QdrantLB: Select node\n(least_conn algorithm)
+        
+        alt Leader Node Available
+            QdrantLB -> Q1: Forward search request
+            activate Q1
+            Q1 -> Q1: HNSW search\n(cosine similarity)
+            Q1 --> QdrantLB: Top-5 results + payloads
+            deactivate Q1
+            note right: 5-8ms search time\n(HNSW index)
+        else Leader Busy - Route to Follower
+            QdrantLB -> Q2: Forward search request
+            activate Q2
+            Q2 -> Q2: HNSW search\n(replicated data)
+            Q2 --> QdrantLB: Top-5 results + payloads
+            deactivate Q2
+            note right: Automatic load balancing
+        end
+        
+        QdrantLB --> LlamaQuery: Search results\n[{id, score, payload}, ...]
+        deactivate QdrantLB
+        
+        LlamaQuery -> LlamaQuery: Format response\n(extract sources, metadata)
+        LlamaQuery --> DocAPI: 200 OK\n{results, sources, metadata}
+        deactivate LlamaQuery
+        note right: Total: 60-100ms (cold)\n8-15ms (warm)
+        
+        == Phase 6: Cache & Log ==
+        
+        DocAPI -> Redis: SET cache:search:{hash}\nTTL=600s (10 min)
+        Redis --> DocAPI: OK
+        
+        DocAPI -> Neon: INSERT INTO rag.query_logs\n(query_text, duration_ms,\n results_count, cache_hit)
+        activate Neon
+        Neon -> Neon: Append to hypertable\n(time-series optimized)
+        Neon --> DocAPI: Log inserted
+        deactivate Neon
+        
+        DocAPI --> Kong: 200 OK {results}
+    end
+    
+    deactivate Redis
+    deactivate DocAPI
+    
+    == Phase 7: Response & Client Cache ==
+    
+    Kong -> Kong: Log metrics to Prometheus
+    Kong -> Kong: Record in audit log
+    Kong --> Dashboard: 200 OK {results}
+    deactivate Kong
+    
+    Dashboard -> Dashboard: Cache in localStorage\n(5min TTL)
+    Dashboard -> User: Display results with sources
+end
+
+deactivate Dashboard
+
+== Monitoring & Analytics ==
+
+Neon -> Neon: Continuous aggregates\n(hourly/daily stats)
+note right of Neon
+  Analytics Queries:
+  - Top queries by frequency
+  - Average response time
+  - Cache hit rates
+  - Error rates by collection
+end note
+
+@enduml
+
+

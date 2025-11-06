@@ -1,0 +1,139 @@
+---
+title: Infrastructure & Orchestration
+description: Docker Compose orchestration, Nginx proxy, service registry, and systemd services
+tags:
+  - infrastructure
+  - docker
+  - nginx
+  - systemd
+  - orchestration
+owner: ToolingGuild
+lastReviewed: '2025-10-27'
+---
+
+# Infrastructure & Orchestration
+
+Infrastructure tools for service orchestration, reverse proxy, container registry, and system service management.
+
+## 📚 Components
+
+### Docker Compose (`tools/compose/`)
+
+Docker Compose orchestration files for all platform services organized by concern:
+
+- **`docker-compose.database.yml`** - Database services (TimescaleDB, QuestDB, PostgreSQL, Adminer)
+- **`docker-compose.apps.yml`** - Application services (Workspace, TP Capital, Documentation API, Firecrawl Proxy)
+- **`docker-compose.apps.prod.yml`** - Production application configuration
+- **`docker-compose.docs.yml`** - Documentation services (Docusaurus)
+- **`docker-compose.firecrawl.yml`** - Firecrawl web scraping service
+- **`docker-compose.infrastructure.yml`** - Core infrastructure components
+- **`docker-compose.monitoring.yml`** - Monitoring stack (moved to `tools/monitoring/`)
+- **`docker-compose.timescale.yml`** - TimescaleDB standalone configuration
+- **`docker-compose.individual.yml`** - Individual service testing
+
+**Quick Start:**
+
+```bash
+# Start all databases
+docker compose -f tools/compose/docker-compose.database.yml up -d
+
+# Start all application services
+docker compose -f tools/compose/docker-compose.apps.yml up -d
+
+# Start documentation
+docker compose -f tools/compose/docker-compose.docs.yml up -d
+
+# Stop all
+docker compose -f tools/compose/docker-compose.database.yml down
+docker compose -f tools/compose/docker-compose.apps.yml down
+```
+
+### Nginx Reverse Proxy (`tools/nginx-proxy/`)
+
+Nginx reverse proxy configurations for routing HTTP requests to backend services.
+
+**Features:**
+- Path-based routing (`/api/workspace`, `/api/tp-capital`, etc.)
+- Load balancing for high-availability services
+- SSL/TLS termination (when configured)
+- WebSocket proxy support
+
+**Configuration Files:**
+- `nginx.conf` - Main Nginx configuration
+- `api-proxy.conf` - API routing rules
+- `tradingsystem.conf` - TradingSystem-specific settings
+- `VPS-MIGRATION-GUIDE.md` - Production deployment guide
+
+### Docker Registry (`tools/registry/`)
+
+Private Docker registry for hosting custom container images.
+
+**Purpose:**
+- Store custom-built images locally
+- Avoid Docker Hub rate limits
+- Faster image pulls in local network
+- Version control for internal images
+
+**Configuration:**
+- `config.yml` - Registry configuration
+
+### Systemd Services (`tools/systemd/`)
+
+Linux systemd service definitions for native services (non-containerized).
+
+**Services:**
+- `telegram-gateway.service` - Telegram Gateway service definition
+- `install-telegram-gateway.sh` - Installation script
+
+**Purpose:**
+- Run services natively on Linux hosts
+- Auto-start on boot
+- Service management via `systemctl`
+- Logging via `journalctl`
+
+---
+
+## 🚀 Quick Operations
+
+### Start All Infrastructure
+
+```bash
+# Full stack startup
+bash scripts/docker/start-stacks.sh
+
+# Or manually
+docker compose -f tools/compose/docker-compose.database.yml up -d
+docker compose -f tools/compose/docker-compose.apps.yml up -d
+docker compose -f tools/monitoring/docker-compose.yml up -d
+```
+
+### Health Check
+
+```bash
+# Comprehensive health check (services + containers + databases)
+bash scripts/maintenance/health-check-all.sh
+
+# Via Service Launcher API
+curl http://localhost:3500/api/health/full | jq '.overallHealth'
+```
+
+### Stop All Infrastructure
+
+```bash
+# Graceful shutdown
+bash scripts/docker/stop-stacks.sh
+
+# Or manually
+docker compose -f tools/compose/docker-compose.apps.yml down
+docker compose -f tools/compose/docker-compose.database.yml down
+docker compose -f tools/monitoring/docker-compose.yml down
+```
+
+---
+
+## 📖 Related Documentation
+
+- **[Monitoring Stack](/tools/monitoring/overview)** - Prometheus, Grafana, Alertmanager
+- **[Docker & WSL](/tools/runtime/docker-wsl/overview)** - Docker setup and configuration
+- **[Ports & Services](/tools/ports-services/overview)** - Service port mapping
+- **[Health Monitoring](/tools/ports-services/overview)** - Service health checks

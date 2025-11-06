@@ -1,0 +1,229 @@
+---
+title: Prompt Style Guide
+description: Tone, formatting, and policy guidelines for authoring prompts.
+tags:
+  - prompts
+  - style
+owner: PromptOps
+lastReviewed: '2025-10-26'
+---
+## Overview
+
+This guide establishes tone, formatting, and policy guidelines for authoring prompts in TradingSystem. Follow these conventions to ensure consistent LLM behavior, maintainable prompts, and safe AI operations.
+
+**Scope**: Applies to all LLM-powered features (Agno Agents, LangGraph workflows, LlamaIndex queries)
+
+## Tone and Language
+
+### Voice and Persona
+
+**System Instructions**:
+
+- Use second person ("You are a...")
+- Define role explicitly ("market analysis agent", "risk management agent")
+- State primary responsibility clearly
+- Emphasize constraints and safety (especially for risk-related agents)
+
+**Example**:
+
+```
+You are a risk management agent responsible for validating trading signals 
+against risk limits. Safety is your top priority.
+```
+
+**User Messages**:
+
+- Use imperative tone ("Analyze this market data", "Validate this signal")
+- Be specific and concise
+- Provide structured context (JSON preferred)
+- Avoid ambiguity
+
+### Language Conventions
+
+**Preferred**:
+
+- Clear, direct language
+- Technical terminology when appropriate ("BUY/SELL", "confidence score", "risk level")
+- Structured formats (JSON, tables, lists)
+- Explicit instructions ("Check daily loss limit", "Provide clear justification")
+
+**Avoid**:
+
+- Vague instructions ("Do your best", "Try to analyze")
+- Conversational filler ("Please", "Thank you")
+- Ambiguous terms ("soon", "many", "some")
+- Overly complex sentences
+
+### Safety and Constraints
+
+**Always Include**:
+
+- Safety constraints in system instructions ("Safety is your top priority")
+- Output format requirements ("Respond in JSON format")
+- Error handling guidance ("If data unavailable, return safe default")
+- Validation requirements ("Validate inputs before processing")
+
+**Risk-Related Prompts**:
+
+- Emphasize conservative behavior
+- Require explicit justification for approvals
+- Default to rejection when uncertain
+- Log all decisions for audit
+
+## Formatting
+
+### Markdown Usage
+
+**Code Blocks**:
+
+- Use triple backticks with language identifier
+- Prefer JSON for structured data
+- Use bash for commands
+- Use typescript for type definitions
+
+**Lists**:
+
+- Use numbered lists for sequential steps
+- Use bullet lists for unordered items
+- Keep items concise (1-2 sentences)
+
+**Headings**:
+
+- Use ATX style (`#`, `##`, `###`)
+- Follow hierarchy (do not skip levels)
+- Use sentence case
+
+### Code Fences
+
+**JSON Examples**:
+
+```json
+{
+  "task": "analyze_market",
+  "payload": {
+    "symbols": ["PETR4"],
+    "include_tp_capital": true
+  }
+}
+```
+
+**System Prompts**:
+
+```
+You are a [role] agent specialized in [domain]. 
+Your role is to [responsibility]. 
+Provide [output format] with [requirements].
+```
+
+### Variable Interpolation
+
+**Template Variables**:
+
+- Use curly braces: `{variable_name}`
+- Document all variables in template
+- Provide example values
+- Specify data types
+
+**Example**:
+
+```
+Task: {task_name}
+Payload:
+- Symbols: {symbols}
+- Include TP Capital: {include_tp_capital}
+- Market Data: {market_data}
+```
+
+**Variables**:
+
+- `{task_name}`: String (e.g., "analyze_market")
+- `{symbols}`: Array of strings (e.g., ["PETR4", "VALE3"])
+- `{include_tp_capital}`: Boolean
+- `{market_data}`: Object (market data dictionary)
+
+## Policy Checks
+
+### Red Teaming
+
+**Required for Production Prompts**:
+
+- Test with adversarial inputs (malformed JSON, extreme values)
+- Verify safety constraints enforced (reject unsafe signals)
+- Check for prompt injection vulnerabilities
+- Validate output format consistency
+
+**Test Cases**:
+
+- Invalid symbols (non-existent assets)
+- Extreme confidence scores (&gt;1.0, &lt;0.0)
+- Missing required fields
+- Malformed timestamps
+- Out-of-range prices
+
+### Safety Validation
+
+**Error Handling**:
+
+- Catch LLM exceptions gracefully
+- Log errors with context (symbol, action, error type)
+- Track metrics (`agent_errors_total`)
+- Return safe defaults (HOLD signal, reject risk assessment)
+- Retry with exponential backoff (max 3 attempts)
+
+**Fallback Behavior**:
+
+- Always provide deterministic fallback when LLM unavailable
+- Use confidence thresholds for heuristic decisions
+- Log when fallback is used (for monitoring)
+
+### Approval Process
+
+**New Prompts**:
+
+1. Draft prompt with clear role and constraints
+2. Test with sample inputs (at least 5 examples)
+3. Review with domain expert (trading, risk, ops)
+4. Red team for safety and edge cases
+5. Document in this guide (add to patterns)
+6. Deploy with feature flag (gradual rollout)
+7. Monitor metrics and user feedback
+
+**Prompt Changes**:
+
+1. Document reason for change
+2. Test with existing examples (regression)
+3. Review with stakeholders
+4. Update related PRD/SDD entries
+5. Deploy with A/B testing if possible
+6. Monitor for behavior changes
+
+## Governance
+
+**Ownership**:
+
+- **PromptOps**: Overall prompt quality and standards
+- **MCPGuild**: Agent-specific prompts (Agno Agents)
+- **Backend Guild**: LangGraph workflows
+- **Product**: Business requirements and success criteria
+
+**Review Cadence**:
+
+- Quarterly review of all production prompts
+- Update when LLM models change (GPT-4 → GPT-4o)
+- Revise when business requirements change
+- Deprecate unused prompts
+
+**Versioning**:
+
+- Track prompt versions in Git
+- Document breaking changes in changelog
+- Maintain backward compatibility when possible
+- Archive deprecated prompts
+
+## Related Documentation
+
+- [Prompt Patterns](./patterns) - Reusable templates
+- [Prompt Variables](./variables) - Environment configuration
+- [Agno Agents](/agents/agno-agents) - Agent implementation
+- LangGraph service guide (migration pending)
+- LlamaIndex integration guide (migration pending)

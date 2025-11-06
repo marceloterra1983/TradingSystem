@@ -217,8 +217,8 @@ Telegram Gateway (Local)  →  TP Capital Stack (Container)  →  TP Capital DB 
 
 **What Runs Locally**:
 - 🐳 **Telegram Gateway** - Shared message ingestion service (Docker, Port 4007)
-- 🖥️ **Frontend Dashboard** - React UI (Port 3103)
-- 🖥️ **Other APIs** - Documentation, Status, etc.
+- 🐳 **Frontend Dashboard** - React UI (Docker container, Port 3103)
+- 🐳 **Other APIs** - Documentation, Status, etc. (Docker containers)
 
 **Quick Start with Docker**:
 ```bash
@@ -413,7 +413,7 @@ health
     ```
     In a second terminal start the **dashboard container** (mandatory from now on):
     ```bash
-    # Dashboard (Port 3103)
+    # Dashboard (Port 3103) - runs in Docker container
     docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build
     # or run `docker compose ... up -d` to daemonize (stop with the same command + down)
     ```
@@ -512,9 +512,9 @@ You can access the system in two ways:
     - Production-ready architecture
     - Single domain for all APIs
 
-2. **Direct Port Access (Legacy)**
-    - Frontend: `http://localhost:3103`
-    - Workspace API: `http://localhost:3200`
+2. **Direct Port Access (Docker Containers)**
+    - Frontend (Dashboard): `http://localhost:3103` (Docker container)
+    - Workspace API: `http://localhost:3200` (Docker container)
     - TP Capital API: `http://localhost:4005`
     - DocsAPI: `http://localhost:3400`
     - Launcher: `http://localhost:3500`

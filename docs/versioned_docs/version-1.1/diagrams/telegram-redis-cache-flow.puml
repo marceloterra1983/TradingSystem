@@ -1,0 +1,145 @@
+@startuml Telegram Redis Cache - Sequence Flow
+!theme plain
+
+title Redis Cache Layer - Message Processing Flow
+
+actor "Telegram\nUser" as User
+participant "Telegram\nServers" as TG
+participant "MTProto\nGateway\n(Native)" as Gateway
+participant "Redis\nMaster" as Redis
+database "TimescaleDB\n(via PgBouncer)" as DB
+participant "TP Capital\nWorker" as Worker
+
+== Message Reception (Write Path) ==
+
+User -> TG : Post message\n"BUY PETR4 8.50-8.55"
+activate TG
+
+TG -> Gateway : MTProto event\nchannel_post
+activate Gateway
+note right: Latency: < 500ms
+
+Gateway -> Gateway : Validate\nchannel ID
+note right: Check if channel\nin monitored list
+
+alt Cache Available
+    Gateway -> Redis : Pipeline (atomic):\n1. SETEX telegram:msg:{id}\n2. ZADD telegram:channel:recent\n3. SETEX telegram:dedup:{id}
+    activate Redis
+    Redis --> Gateway : OK (5ms)
+    deactivate Redis
+    note right: **Hot path:** 5ms\nAll 3 operations atomic
+else Cache Unavailable
+    Gateway -> Gateway : Log warning\n"Redis unavailable"
+    note right: **Degraded mode:**\nSkip cache, DB only
+end
+
+Gateway -> DB : INSERT INTO messages\n(async, non-blocking)
+activate DB
+note right: **Cold path:** 100ms\nDoes not block Gateway
+DB --> Gateway : OK
+deactivate DB
+
+Gateway --> TG : ACK
+deactivate Gateway
+deactivate TG
+
+== Message Polling (Read Path) ==
+
+Worker -> Worker : Sleep 5000ms
+note right: Polling interval\n(configurable)
+
+activate Worker
+
+Worker -> Redis : ZRANGE channel:recent\n0 99 (get 100 IDs)
+activate Redis
+Redis --> Worker : [123456, 123457, ...]
+note right: **10ms** vs 50ms SQL
+deactivate Redis
+
+alt Cache Hit (70%+ cases)
+    Worker -> Redis : Pipeline:\nGET msg:123456\nGET msg:123457\n...
+    activate Redis
+    Redis --> Worker : [msg1, msg2, ...]
+    deactivate Redis
+    note right: **Total: 10ms**\n80% faster than DB
+    
+    Worker -> Worker : Filter status='received'
+    
+else Cache Miss (30% cases)
+    Worker -> DB : SELECT * FROM messages\nWHERE status='received'
+    activate DB
+    DB --> Worker : [messages]
+    deactivate DB
+    note right: **Fallback: 50ms**\nStill acceptable
+    
+    Worker -> Redis : Warm cache\nwith results
+    activate Redis
+    Redis --> Worker : OK
+    deactivate Redis
+end
+
+== Signal Processing ==
+
+Worker -> Worker : parseSignal(text)
+note right: Extract:\n• Asset: PETR4\n• Buy: 8.50-8.55\n• Targets, Stop
+
+== Deduplication Check ==
+
+Worker -> Redis : EXISTS\ndedup:{channel}:{msg}
+activate Redis
+
+alt Already Processed
+    Redis --> Worker : 1 (exists)
+    deactivate Redis
+    note right: **2ms check**\nvs 20ms SQL
+    
+    Worker -> Worker : Skip (duplicate)
+    note right: Prevents\nreprocessing
+    
+else New Signal
+    Redis --> Worker : 0 (not exists)
+    deactivate Redis
+    
+    Worker -> DB : INSERT INTO\ntp_capital_signals
+    activate DB
+    DB --> Worker : OK (signal_id)
+    deactivate DB
+    
+    Worker -> Redis : SETEX dedup:{id}\n"1" EX 7200
+    activate Redis
+    Redis --> Worker : OK
+    deactivate Redis
+    note right: Mark as processed\n(2h TTL)
+    
+    Worker -> Redis : Update msg status\n"published"
+    activate Redis
+    Redis --> Worker : OK (5ms)
+    deactivate Redis
+    
+    Worker -> DB : UPDATE messages\nSET status='published'\n(async)
+    activate DB
+    DB --> Worker : OK
+    deactivate DB
+    note right: **Perceived: 5ms**\nDB update async
+end
+
+deactivate Worker
+
+== Performance Summary ==
+
+note over User, Worker
+    **Latency Comparison:**
+    
+    |= Operation |= Without Cache |= With Cache |= Improvement |
+    | Message fetch | 50ms | 10ms | ↓ 80% |
+    | Dedup check | 20ms | 2ms | ↓ 90% |
+    | Status update | 200ms | 5ms | ↓ 97% |
+    | **End-to-End** | **5.9s** | **530ms** | **↓ 91%** |
+    
+    **Cache Hit Rate:** 70%+ (target)
+    **Fallback Path:** Always available (DB)
+    **Degraded Mode:** Redis unavailable = DB-only (acceptable)
+end note
+
+@enduml
+

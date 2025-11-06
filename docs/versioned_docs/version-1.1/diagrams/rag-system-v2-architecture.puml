@@ -1,0 +1,300 @@
+@startuml RAG System Architecture - Neon + Qdrant Cluster + Kong Gateway
+!theme plain
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam shadowing false
+
+title TradingSystem - RAG Architecture (v2.0)\nNeon + Qdrant Cluster + Kong Gateway
+
+' ============================================================
+' FRONTEND LAYER
+' ============================================================
+
+package "Frontend Layer" as frontend #LightBlue {
+  component "Dashboard\n(React + Vite)" as dashboard {
+    [llamaIndexService.ts]
+    [useRagQuery.ts]
+    [useRagManager.ts]
+  }
+  note right of dashboard
+    Port: 3103
+    Tech: React 18, TypeScript
+    State: Zustand + TanStack Query
+    Cache: localStorage (5min TTL)
+  end note
+}
+
+' ============================================================
+' API GATEWAY LAYER
+' ============================================================
+
+package "API Gateway Layer" as gateway #LightGreen {
+  component "Kong Gateway" as kong {
+    [JWT Plugin]
+    [Rate Limiting]
+    [CORS Plugin]
+    [Logging Plugin]
+    [Prometheus Plugin]
+  }
+  
+  database "Kong DB\n(PostgreSQL)" as kongdb {
+  }
+  
+  component "Konga UI\n(Admin)" as konga
+}
+
+note right of kong
+  Port 8000: HTTP Proxy
+  Port 8443: HTTPS Proxy
+  Port 8001: Admin API
+  
+  Routes Configured:
+  - /api/v1/rag/search
+  - /api/v1/rag/query
+  - /api/v1/rag/collections
+  - /api/v1/rag/status/*
+end note
+
+' ============================================================
+' PROXY & ORCHESTRATION LAYER
+' ============================================================
+
+package "Proxy & Orchestration Layer" as proxy #LightYellow {
+  component "Documentation API\n(RAG Proxy)" as docapi {
+    [RagProxyService.js]
+    [Circuit Breakers]
+    [3-Tier Cache]
+  }
+  
+  component "Collections Service\n(TypeScript)" as collections {
+    [CollectionManager]
+    [FileWatcher]
+    [IngestionService]
+    [CacheService]
+  }
+}
+
+note right of docapi
+  Port: 3401/3402
+  Tech: Node.js, Express
+  Features:
+  - Server-side JWT minting
+  - Circuit breakers (opossum)
+  - Memory + Redis + Qdrant cache
+end note
+
+note right of collections
+  Port: 3403
+  Tech: Node.js, TypeScript
+  Features:
+  - Chokidar file watcher
+  - Auto-ingestion (5s debounce)
+  - Redis caching (10min TTL)
+end note
+
+' ============================================================
+' CORE RAG SERVICES LAYER
+' ============================================================
+
+package "Core RAG Services" as core #LightCoral {
+  component "LlamaIndex Query\n(FastAPI)" as llamaquery {
+    [VectorStoreIndex]
+    [Circuit Breakers]
+    [GPU Manager]
+    [Embedding Cache]
+  }
+  
+  component "LlamaIndex Ingestion\n(FastAPI)" as llamaingest {
+    [Document Processor]
+    [Chunking Engine]
+    [Batch Embedder]
+  }
+  
+  component "Ollama\n(LLM Runtime)" as ollama {
+    [mxbai-embed-large]
+    [llama3.2:3b]
+  }
+}
+
+note right of llamaquery
+  Port: 8202
+  Tech: Python 3.11, FastAPI
+  Features:
+  - Semantic search
+  - Q&A with LLM
+  - GPU slot management
+  - Redis embedding cache
+end note
+
+note right of llamaingest
+  Port: 8201
+  Tech: Python 3.11, FastAPI
+  Features:
+  - Markdown parsing
+  - Text chunking (512 chars)
+  - Batch embedding (10 chunks)
+  - Qdrant upload
+end note
+
+' ============================================================
+' DATABASE LAYER
+' ============================================================
+
+package "Database Layer" as database #Lavender {
+  ' Neon Components
+  frame "Neon Self-Hosted" as neon {
+    component "Neon Compute\n(PostgreSQL)" as neoncompute {
+      [PostgreSQL 15]
+      [pgvector extension]
+      [TimescaleDB ext]
+    }
+    
+    component "Neon Pageserver\n(Storage)" as pageserver {
+      [WAL Processing]
+      [Page Storage]
+    }
+    
+    component "Neon Safekeeper\n(Durability)" as safekeeper {
+      [WAL Archiving]
+      [PITR Support]
+    }
+  }
+  
+  ' Qdrant Cluster
+  frame "Qdrant Cluster (3 nodes)" as qdrantcluster {
+    component "Qdrant Node 1\n(Leader)" as qdrant1 {
+      [HNSW Index]
+      [Raft Consensus]
+    }
+    
+    component "Qdrant Node 2\n(Follower)" as qdrant2 {
+      [HNSW Index]
+      [Replication]
+    }
+    
+    component "Qdrant Node 3\n(Follower)" as qdrant3 {
+      [HNSW Index]
+      [Replication]
+    }
+    
+    component "NGINX\n(Load Balancer)" as qdrantlb
+  }
+  
+  ' Redis Cache
+  database "Redis Cache" as redis {
+    [Stats Cache]
+    [Query Cache]
+    [Embedding Cache]
+  }
+}
+
+note right of neon
+  Port: 5435 (Compute)
+  Port: 6400 (Pageserver)
+  Port: 7676 (Safekeeper)
+  
+  Schema: rag
+  Tables: 6
+  - collections
+  - documents
+  - chunks
+  - ingestion_jobs (hypertable)
+  - query_logs (hypertable)
+  - embedding_models
+  
+  Storage: ~5GB
+  Connections: 20 (pooled)
+end note
+
+note right of qdrantcluster
+  Ports: 6333-6338
+  Collections: 3
+  - docs_index_mxbai (384d)
+  - documentation (768d)
+  - documentation_gemma (768d)
+  
+  Vectors: 3,087 chunks
+  Topology: Raft (leader + 2 followers)
+  Replication Factor: 3
+  Quorum: 2/3 nodes
+  
+  Performance:
+  - Search: 5-8ms (P95)
+  - Throughput: 1,000 qps
+end note
+
+' ============================================================
+' RELATIONSHIPS
+' ============================================================
+
+' Frontend → Gateway
+dashboard -down-> kong : "HTTPS\nGET/POST /api/v1/rag/*"
+
+' Gateway → Services
+kong -down-> docapi : "HTTP + X-Service-Token\nProxy requests"
+kong -down-> collections : "HTTP + X-Service-Token\nCollection mgmt"
+
+' Proxy → Core Services
+docapi -down-> llamaquery : "HTTP + JWT\nSemantic search"
+docapi -right-> collections : "HTTP\nStats, collections"
+
+' Collections → Services
+collections -down-> llamaingest : "HTTP + X-Service-Token\nTrigger ingestion"
+collections -down-> redis : "Redis Protocol\nCache stats"
+
+' Core Services → Infrastructure
+llamaquery -down-> qdrantlb : "gRPC\nVector search"
+llamaquery -down-> ollama : "HTTP\nEmbeddings"
+llamaquery -down-> redis : "Redis Protocol\nCache embeddings"
+
+llamaingest -down-> qdrantlb : "gRPC\nUpload vectors"
+llamaingest -down-> ollama : "HTTP\nGenerate embeddings"
+
+' Qdrant Load Balancer → Nodes
+qdrantlb -down-> qdrant1 : "Round-robin"
+qdrantlb -down-> qdrant2 : "Round-robin"
+qdrantlb -down-> qdrant3 : "Round-robin"
+
+' Qdrant Replication
+qdrant1 -right-> qdrant2 : "Raft\nReplication"
+qdrant1 -right-> qdrant3 : "Raft\nReplication"
+
+' Neon Internal Architecture
+neoncompute -down-> pageserver : "Page Requests"
+neoncompute -down-> safekeeper : "WAL Writes"
+pageserver -right-> safekeeper : "WAL Recovery"
+
+' Services → Neon
+collections -.down.> neoncompute : "PostgreSQL\n(metadata)"
+docapi -.down.> neoncompute : "PostgreSQL\n(query logs)"
+
+' Kong → Kong DB
+kong -down-> kongdb : "Config Storage"
+konga -down-> kongdb : "Admin UI"
+
+' ============================================================
+' LEGEND
+' ============================================================
+
+legend right
+  **Connection Types**
+  —— Synchronous (blocking)
+  ·· Asynchronous (optional)
+  
+  **Protocols**
+  HTTP: REST API
+  gRPC: High-performance RPC
+  Redis: Cache protocol
+  PostgreSQL: SQL wire protocol
+  
+  **Color Code**
+  <color:LightBlue>Frontend Layer</color>
+  <color:LightGreen>API Gateway</color>
+  <color:LightYellow>Proxy/Orchestration</color>
+  <color:LightCoral>Core RAG Services</color>
+  <color:Lavender>Database Layer</color>
+endlegend
+
+@enduml
+
+

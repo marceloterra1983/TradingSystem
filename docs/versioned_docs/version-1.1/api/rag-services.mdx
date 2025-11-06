@@ -1,0 +1,744 @@
+---
+title: RAG Services API
+description: Complete REST API documentation for RAG Services including authentication, collections management, semantic search, and analytics
+tags: [api, rag, rest, openapi]
+domain: api
+type: api-reference
+summary: REST API documentation for RAG (Retrieval-Augmented Generation) Services
+status: active
+owner: Backend Team
+lastReviewed: '2025-11-02'
+last_review: '2025-11-02'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# RAG Services API v1
+
+Complete REST API for RAG (Retrieval-Augmented Generation) Services, providing semantic search, question answering, and collection management capabilities.
+
+---
+
+## Base URL
+
+<Tabs groupId="environment">
+  <TabItem value="development" label="Development" default>
+
+```
+http://localhost:3402/api/v1
+```
+
+  </TabItem>
+  <TabItem value="production" label="Production">
+
+```
+https://api.tradingsystem.com/api/v1
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Authentication
+
+All API endpoints require JWT authentication via the `Authorization` header.
+
+```bash
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Obtain Token
+
+```bash
+curl -X POST http://localhost:3402/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "your_password"
+  }'
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expires_at": "2025-11-03T10:00:00Z"
+  }
+}
+```
+
+---
+
+## Rate Limiting
+
+| Tier | Limit | Window |
+|------|-------|--------|
+| Free | 100 requests | 1 minute |
+| Pro | 1000 requests | 1 minute |
+
+**Headers** (returned on all requests):
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1699012345
+```
+
+---
+
+## Collections
+
+### List Collections
+
+Get a list of all RAG collections.
+
+**Endpoint**: `GET /rag/collections`
+
+**Query Parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `enabled` | boolean | - | Filter by enabled status |
+| `status` | string | - | Filter by status (pending, ready, error) |
+| `embedding_model` | string | - | Filter by embedding model |
+| `page` | integer | 1 | Page number |
+| `limit` | integer | 10 | Items per page (max 100) |
+
+<Tabs groupId="language">
+  <TabItem value="curl" label="cURL" default>
+
+```bash
+curl -X GET "http://localhost:3402/api/v1/rag/collections?enabled=true" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+  <TabItem value="javascript" label="JavaScript">
+
+```javascript
+const response = await fetch(
+  'http://localhost:3402/api/v1/rag/collections?enabled=true',
+  {
+    headers: {
+      'Authorization': `Bearer ${YOUR_JWT_TOKEN}`,
+    },
+  }
+);
+
+const data = await response.json();
+const collections = data.data.collections;
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+import requests
+
+response = requests.get(
+    'http://localhost:3402/api/v1/rag/collections',
+    headers={'Authorization': f'Bearer {YOUR_JWT_TOKEN}'},
+    params={'enabled': True}
+)
+
+collections = response.json()['data']['collections']
+```
+
+  </TabItem>
+</Tabs>
+
+**Response** (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "collections": [
+      {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "name": "documentation__nomic",
+        "display_name": "Documentation (Nomic Embed)",
+        "description": "Complete TradingSystem documentation",
+        "directory": "/data/docs/content",
+        "embedding_model": "nomic-embed-text",
+        "chunk_size": 512,
+        "chunk_overlap": 50,
+        "file_types": ["md", "mdx"],
+        "enabled": true,
+        "auto_update": true,
+        "status": "ready",
+        "total_documents": 220,
+        "indexed_documents": 220,
+        "total_chunks": 3087,
+        "created_at": "2025-11-01T10:00:00Z",
+        "updated_at": "2025-11-01T15:30:00Z"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "limit": 10
+  },
+  "meta": {
+    "timestamp": "2025-11-02T10:00:00Z",
+    "request_id": "req_abc123"
+  }
+}
+```
+
+---
+
+### Create Collection
+
+Create a new RAG collection.
+
+**Endpoint**: `POST /rag/collections`
+
+**Request Body**:
+```json
+{
+  "name": "api_docs__nomic",
+  "display_name": "API Documentation",
+  "description": "API reference documentation",
+  "directory": "/data/docs/content/api",
+  "embedding_model": "nomic-embed-text",
+  "chunk_size": 512,
+  "chunk_overlap": 50,
+  "file_types": ["md", "mdx"],
+  "recursive": true,
+  "enabled": true,
+  "auto_update": true
+}
+```
+
+<Tabs groupId="language">
+  <TabItem value="curl" label="cURL" default>
+
+```bash
+curl -X POST http://localhost:3402/api/v1/rag/collections \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "api_docs__nomic",
+    "display_name": "API Documentation",
+    "directory": "/data/docs/content/api",
+    "embedding_model": "nomic-embed-text"
+  }'
+```
+
+  </TabItem>
+  <TabItem value="typescript" label="TypeScript">
+
+```typescript
+const createCollection = async (config: {
+  name: string;
+  display_name: string;
+  directory: string;
+  embedding_model: string;
+}) => {
+  const response = await fetch('http://localhost:3402/api/v1/rag/collections', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${YOUR_JWT_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      chunk_size: 512,
+      chunk_overlap: 50,
+      file_types: ['md', 'mdx'],
+      recursive: true,
+      enabled: true,
+      auto_update: true,
+      ...config,
+    }),
+  });
+  
+  return await response.json();
+};
+```
+
+  </TabItem>
+</Tabs>
+
+**Response** (201 Created):
+```json
+{
+  "success": true,
+  "data": {
+    "id": "123e4567-e89b-12d3-a456-426614174001",
+    "name": "api_docs__nomic",
+    "status": "pending",
+    "created_at": "2025-11-02T10:00:00Z"
+  },
+  "meta": {
+    "timestamp": "2025-11-02T10:00:00Z"
+  }
+}
+```
+
+---
+
+## Semantic Search
+
+### Search Endpoint
+
+Perform semantic search across document collections.
+
+**Endpoint**: `GET /rag/search`
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | ✅ | Search query (3-1000 chars) |
+| `collection` | string | ❌ | Collection name (default: all) |
+| `max_results` | integer | ❌ | Max results (default: 5, max: 100) |
+| `score_threshold` | float | ❌ | Min relevance (default: 0.7, range: 0-1) |
+
+<Tabs groupId="language">
+  <TabItem value="curl" label="cURL" default>
+
+```bash
+curl -X GET "http://localhost:3402/api/v1/rag/search?query=How%20to%20configure%20RAG&max_results=5" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+  <TabItem value="typescript" label="TypeScript">
+
+```typescript
+const search = async (query: string, options?: {
+  collection?: string;
+  maxResults?: number;
+  scoreThreshold?: number;
+}) => {
+  const params = new URLSearchParams({
+    query,
+    max_results: String(options?.maxResults || 5),
+  });
+  
+  if (options?.collection) params.set('collection', options.collection);
+  if (options?.scoreThreshold) params.set('score_threshold', String(options.scoreThreshold));
+  
+  const response = await fetch(
+    `http://localhost:3402/api/v1/rag/search?${params}`,
+    { headers: { 'Authorization': `Bearer ${YOUR_JWT_TOKEN}` } }
+  );
+  
+  const data = await response.json();
+  return data.data.results;
+};
+
+// Usage
+const results = await search('How to configure RAG', {
+  collection: 'documentation__nomic',
+  maxResults: 5,
+  scoreThreshold: 0.7,
+});
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+def search(token, query, collection=None, max_results=5, score_threshold=0.7):
+    url = 'http://localhost:3402/api/v1/rag/search'
+    headers = {'Authorization': f'Bearer {token}'}
+    params = {
+        'query': query,
+        'max_results': max_results,
+        'score_threshold': score_threshold,
+    }
+    if collection:
+        params['collection'] = collection
+    
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()['data']['results']
+```
+
+  </TabItem>
+</Tabs>
+
+**Response** (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "results": [
+      {
+        "content": "The RAG system requires Qdrant for vector storage...",
+        "relevance": 0.92,
+        "metadata": {
+          "source": "docs/content/tools/rag/architecture.mdx",
+          "title": "RAG Services Architecture",
+          "chunk_index": 5,
+          "collection": "documentation__nomic"
+        }
+      }
+    ],
+    "query": "How to configure RAG",
+    "total_results": 5,
+    "performance": {
+      "duration_ms": 8,
+      "cache_hit": false
+    }
+  }
+}
+```
+
+---
+
+## Question Answering
+
+### Query Endpoint
+
+Ask a question and get an AI-generated answer with source citations.
+
+**Endpoint**: `POST /rag/query`
+
+**Request Body**:
+```json
+{
+  "query": "How does the RAG system work?",
+  "collection": "documentation__nomic",
+  "max_results": 5
+}
+```
+
+<Tabs groupId="language">
+  <TabItem value="typescript" label="TypeScript" default>
+
+```typescript
+const askQuestion = async (query: string, collection?: string) => {
+  const response = await fetch('http://localhost:3402/api/v1/rag/query', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${YOUR_JWT_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, collection, max_results: 5 }),
+  });
+  
+  const data = await response.json();
+  return data.data;
+};
+
+// Usage
+const response = await askQuestion('How does RAG work?', 'documentation__nomic');
+
+console.log(`Answer:\n${response.answer}`);
+console.log(`\nConfidence: ${response.confidence}`);
+console.log(`Sources: ${response.sources.length}`);
+console.log(`Time: ${response.performance.duration_ms}ms`);
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+def ask_question(token, query, collection=None):
+    url = 'http://localhost:3402/api/v1/rag/query'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
+    payload = {'query': query, 'max_results': 5}
+    if collection:
+        payload['collection'] = collection
+    
+    response = requests.post(url, headers=headers, json=payload)
+    return response.json()['data']
+
+# Usage
+response = ask_question(YOUR_JWT_TOKEN, 'How does RAG work?', 'documentation__nomic')
+print(f"Answer:\n{response['answer']}")
+print(f"\nConfidence: {response['confidence']}")
+```
+
+  </TabItem>
+</Tabs>
+
+**Response** (200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "answer": "The RAG system combines retrieval and generation...",
+    "confidence": 0.95,
+    "sources": [
+      {
+        "content": "RAG combines retrieval and generation...",
+        "relevance": 0.94,
+        "metadata": {
+          "source": "docs/content/tools/rag/architecture.mdx"
+        }
+      }
+    ],
+    "performance": {
+      "duration_ms": 5420,
+      "llm_generation_time_ms": 5412
+    }
+  }
+}
+```
+
+---
+
+## Error Handling
+
+### Error Response Format
+
+All errors follow a consistent format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": {
+      "field": "additional_context"
+    }
+  },
+  "meta": {
+    "timestamp": "2025-11-02T10:00:00Z",
+    "request_id": "req_abc123"
+  }
+}
+```
+
+### Error Codes Reference
+
+| HTTP Status | Error Code | Description | Solution |
+|-------------|------------|-------------|----------|
+| 400 | `VALIDATION_ERROR` | Invalid request parameters | Check request body/params |
+| 401 | `UNAUTHORIZED` | Missing/invalid token | Login and obtain new token |
+| 404 | `NOT_FOUND` | Resource not found | Verify resource ID/name |
+| 409 | `COLLECTION_EXISTS` | Collection name conflict | Use different name |
+| 409 | `INGESTION_IN_PROGRESS` | Job already running | Wait for completion |
+| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests | Wait and retry after delay |
+| 500 | `INTERNAL_ERROR` | Server error | Contact support |
+| 503 | `LLM_UNAVAILABLE` | Ollama service down | Check service health |
+
+### Error Handling Example
+
+<Tabs groupId="language">
+  <TabItem value="typescript" label="TypeScript" default>
+
+```typescript
+class RAGAPIError extends Error {
+  constructor(
+    public code: string,
+    message: string,
+    public statusCode: number,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'RAGAPIError';
+  }
+}
+
+try {
+  const results = await search('test query');
+} catch (error) {
+  if (error instanceof RAGAPIError) {
+    switch (error.code) {
+      case 'RATE_LIMIT_EXCEEDED':
+        const retryAfter = error.details.retry_after;
+        console.error(`Rate limit hit. Retry after ${retryAfter}s`);
+        break;
+      case 'UNAUTHORIZED':
+        console.error('Please login again');
+        // Redirect to login
+        break;
+      case 'COLLECTION_NOT_FOUND':
+        console.error(`Collection not found: ${error.details.id}`);
+        break;
+      default:
+        console.error(`API error: ${error.message}`);
+    }
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+try:
+    results = search(token, 'test query')
+except requests.HTTPError as e:
+    error_data = e.response.json()
+    error = error_data.get('error', {})
+    code = error.get('code')
+    
+    if code == 'RATE_LIMIT_EXCEEDED':
+        retry_after = error['details']['retry_after']
+        print(f"Rate limit hit. Retry after {retry_after}s")
+    elif code == 'UNAUTHORIZED':
+        print('Authentication failed. Please login.')
+    else:
+        print(f"API error ({code}): {error['message']}")
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Interactive Documentation
+
+### OpenAPI Spec
+
+View the complete OpenAPI 3.0 specification:
+
+**[OpenAPI Spec (YAML) →](pathname:///specs/rag-services-v1.yaml)**
+
+### Redocusaurus
+
+Interactive API documentation powered by Redocusaurus:
+
+**[Interactive API Docs →](http://localhost:3402/api-docs)**
+
+### Postman Collection
+
+Import the Postman collection for testing:
+
+**[Download Postman Collection →](pathname:///postman/RAG-Services-API.postman_collection.json)**
+
+---
+
+## SDK Libraries
+
+### Official SDKs
+
+| Language | Package | Installation |
+|----------|---------|--------------|
+| TypeScript | `@tradingsystem/rag-sdk` | `npm install @tradingsystem/rag-sdk` |
+| Python | `tradingsystem-rag` | `pip install tradingsystem-rag` |
+
+### TypeScript SDK
+
+```typescript
+import { RAGClient } from '@tradingsystem/rag-sdk';
+
+const client = new RAGClient({
+  baseURL: 'http://localhost:3402/api/v1',
+  token: YOUR_JWT_TOKEN,
+});
+
+// Collections
+const collections = await client.collections.list({ enabled: true });
+const stats = await client.collections.getStats('documentation__nomic');
+
+// Search
+const results = await client.search('How to configure RAG?');
+
+// Q&A
+const answer = await client.query('How does RAG work?');
+
+// Ingestion
+const job = await client.ingestion.trigger('documentation__nomic');
+const status = await client.ingestion.getStatus(job.job_id);
+```
+
+### Python SDK
+
+```python
+from tradingsystem_rag import RAGClient
+
+client = RAGClient(
+    base_url='http://localhost:3402/api/v1',
+    token=YOUR_JWT_TOKEN
+)
+
+# Collections
+collections = client.collections.list(enabled=True)
+stats = client.collections.get_stats('documentation__nomic')
+
+# Search
+results = client.search('How to configure RAG?')
+
+# Q&A
+answer = client.query('How does RAG work?')
+
+# Ingestion
+job = client.ingestion.trigger('documentation__nomic')
+status = client.ingestion.get_status(job.job_id)
+```
+
+---
+
+## Versioning
+
+### Current Version
+
+**Version**: `v1`  
+**Status**: Stable  
+**Base Path**: `/api/v1`
+
+### Migration Guide
+
+When a new version is released, we'll provide:
+- ✅ **Changelog** with breaking changes
+- ✅ **Migration guide** with examples
+- ✅ **Deprecation timeline** (minimum 6 months)
+- ✅ **Parallel support** (v1 and v2 run simultaneously)
+
+### Version History
+
+| Version | Release Date | Status | Support Until |
+|---------|--------------|--------|---------------|
+| v1 | 2025-11-02 | ✅ Stable | Active |
+
+---
+
+## Performance Tips
+
+### 1. Use Caching
+
+```typescript
+// ✅ GOOD: Use cached stats (4ms response)
+const stats = await getCollectionStats('documentation__nomic', true);
+
+// ⚠️ SLOWER: Fresh stats (6ms response)
+const stats = await getCollectionStats('documentation__nomic', false);
+```
+
+### 2. Batch Requests
+
+```typescript
+// ✅ GOOD: Parallel requests
+const [collections, models, stats] = await Promise.all([
+  client.collections.list(),
+  client.models.list(),
+  client.collections.getStats('documentation__nomic'),
+]);
+
+// ❌ BAD: Sequential requests
+const collections = await client.collections.list();
+const models = await client.models.list();
+const stats = await client.collections.getStats('documentation__nomic');
+```
+
+### 3. Set Reasonable Limits
+
+```typescript
+// ✅ GOOD: Reasonable limit
+const results = await search('query', { max_results: 10 });
+
+// ⚠️ SLOWER: Too many results
+const results = await search('query', { max_results: 100 });
+```
+
+---
+
+## Related Documentation
+
+- **[Database Schema](../database/rag-schema.mdx)** - Schema reference
+- **[Architecture](../tools/rag/architecture.mdx)** - System design
+- **[Code Examples](pathname:///specs/rag-api-examples.md)** - More examples
+- **[Postman Collection](pathname:///postman/RAG-Services-API.postman_collection.json)** - Import to Postman
+
+---
+
+**Questions or feedback?** Contact the API team or open an issue in the repository.

@@ -1,0 +1,629 @@
+---
+title: "Troubleshooting: TP-Capital Connectivity Issues"
+sidebar_label: "Troubleshooting Connectivity"
+sidebar_position: 10
+tags: [runbook, troubleshooting, tp-capital, connectivity, networking]
+domain: backend
+type: runbook
+summary: "Comprehensive troubleshooting guide for TP-Capital API connectivity issues, based on incident 2025-11-05"
+status: active
+last_review: "2025-11-05"
+---
+
+# Troubleshooting: TP-Capital Connectivity Issues
+
+**Type**: Operational Runbook  
+**Audience**: DevOps Engineers, Developers  
+**Incident**: Based on 2025-11-05 TP-Capital Service Outage  
+**Last Updated**: November 5, 2025
+
+---
+
+## Quick Diagnosis
+
+### Symptom 1: "Serviço TP-Capital indisponível" ❌
+
+**Dashboard shows**:
+```
+⚠️ Serviço TP-Capital indisponível
+Exibindo dados de exemplo enquanto o serviço não está acessível.
+Erro original: Failed to fetch
+```
+
+**Quick checks**:
+```bash
+# 1. Check if TP-Capital container is running
+docker ps | grep tp-capital-api
+
+# 2. Check health status
+curl http://localhost:4008/health
+
+# 3. Check logs for errors
+docker logs tp-capital-api --tail 50 | grep ERROR
+```
+
+**Jump to**: [Circuit Breaker Open](#circuit-breaker-open)
+
+---
+
+### Symptom 2: Circuit Breaker Open 🔴
+
+**Logs show**:
+```
+[GatewayHttpClient] Circuit breaker opened (too many failures)
+[GatewayHttpClient] Circuit breaker OPEN, returning empty array
+```
+
+**Meaning**: TP-Capital cannot connect to Telegram Gateway API
+
+**Quick fix**:
+```bash
+# Check Gateway API health
+curl http://localhost:4010/health
+
+# If unhealthy, check Gateway logs
+docker logs telegram-gateway-api --tail 50
+```
+
+**Jump to**: [Gateway API Unreachable](#gateway-api-unreachable)
+
+---
+
+### Symptom 3: No Signals Showing (Only Checkpoints) 📊
+
+**Dashboard shows**:
+```
+Exibindo 0 de 10 sinais
+```
+
+**But logs show**:
+```
+14 mensagem(ns) sincronizada(s)
+```
+
+**Quick check**:
+```bash
+# Check how many signals in database
+docker exec tp-capital-timescale psql -U tp_capital -d tp_capital_db -c \
+  "SELECT COUNT(*) FROM signals.tp_capital_signals WHERE asset != '__checkpoint__';"
+```
+
+**Jump to**: [Checkpoints Blocking Display](#checkpoints-blocking-display)
+
+---
+
+## Detailed Troubleshooting
+
+### Problem 1: Gateway API Unreachable
+
+#### Diagnosis
+
+**Check Gateway API status**:
+```bash
+curl http://localhost:4010/health
+
+# Expected:
+# {"status":"healthy","service":"telegram-gateway-api"}
+
+# If connection refused:
+docker ps | grep telegram-gateway-api
+
+# If restarting loop:
+docker logs telegram-gateway-api --tail 30
+```
+
+#### Common Causes
+
+##### Cause 1.1: PgBouncer Password Empty
+
+**Symptom**:
+```
+ERROR: password authentication failed for user "telegram"
+```
+
+**Check**:
+```bash
+docker inspect telegram-pgbouncer | grep "DATABASES_PASSWORD"
+
+# Expected: "DATABASES_PASSWORD=NYMBgrENUZP8FqUHN1Yo8sdzSfs3kLhp"
+# WRONG:    "DATABASES_PASSWORD="  (empty!)
+```
+
+**Root Cause**: `${TELEGRAM_DB_PASSWORD}` not exported when running docker compose
+
+**Fix**:
+```bash
+# Method 1: Use wrapper script
+cd tools/compose
+bash run-telegram-compose.sh down
+bash run-telegram-compose.sh up -d telegram-pgbouncer
+
+# Method 2: Export manually
+cd /home/marce/Projetos/TradingSystem
+set -a && source .env && set +a
+cd tools/compose
+docker compose -f docker-compose.telegram.yml up -d telegram-pgbouncer --force-recreate
+```
+
+**Verify fix**:
+```bash
+docker inspect telegram-pgbouncer | grep "DATABASES_PASSWORD"
+# Should show actual password (not empty)
+
+docker logs telegram-gateway-api --tail 10
+# Should show successful startup
+```
+
+---
+
+##### Cause 1.2: Wrong Database Hostname
+
+**Symptom**:
+```
+getaddrinfo ENOTFOUND localhost
+```
+
+**Check**:
+```bash
+docker inspect telegram-gateway-api | grep "TELEGRAM_GATEWAY_DB_HOST"
+
+# Expected: "TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer"
+# WRONG:    "TELEGRAM_GATEWAY_DB_HOST=localhost"
+```
+
+**Fix**: Update `docker-compose.telegram.yml`:
+```yaml
+environment:
+  - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer  # NOT localhost
+  - TELEGRAM_GATEWAY_DB_PORT=6432
+```
+
+---
+
+### Problem 2: TP-Capital Cannot Reach Gateway
+
+#### Diagnosis
+
+**Check from inside TP-Capital container**:
+```bash
+docker exec tp-capital-api wget -qO- http://telegram-gateway-api:4010/health
+
+# Expected: {"status":"healthy"}
+# Error: Connection refused → Gateway not reachable
+```
+
+#### Common Causes
+
+##### Cause 2.1: Using host.docker.internal in Production
+
+**Check configuration**:
+```bash
+docker inspect tp-capital-api | grep "TELEGRAM_GATEWAY_URL"
+
+# WRONG:  "TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010"
+# CORRECT: "TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010"
+```
+
+**Fix**: Update `docker-compose.tp-capital-stack.yml`:
+```yaml
+environment:
+  # ❌ WRONG
+  - TELEGRAM_GATEWAY_URL=http://host.docker.internal:4010
+
+  # ✅ CORRECT
+  - TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010
+```
+
+**Why**: `host.docker.internal` resolves to Docker host (172.18.0.1), but Gateway API runs in **another container**, not on the host!
+
+---
+
+##### Cause 2.2: Wrong Port (External vs Internal)
+
+**Check**:
+```bash
+docker inspect tp-capital-api | grep "TELEGRAM_GATEWAY"
+
+# WRONG:  Port 4010 mapped externally but different internally
+# CORRECT: Use internal port that Gateway listens on
+```
+
+**Port Mapping Explained**:
+```yaml
+telegram-gateway-api:
+  ports:
+    - "4010:4010"  # External:Internal (same in this case)
+```
+
+**For TP-Capital to reach Gateway**:
+```
+Use: http://telegram-gateway-api:4010
+      ^                          ^
+      |                          |
+   Container hostname      Internal port
+```
+
+---
+
+##### Cause 2.3: Containers Not on Same Network
+
+**Check network membership**:
+```bash
+docker network inspect telegram_backend | grep -E "(tp-capital-api|telegram-gateway-api)"
+
+# Both containers MUST appear in the output
+```
+
+**Fix**: Update `docker-compose.tp-capital-stack.yml`:
+```yaml
+tp-capital-api:
+  networks:
+    - tp_capital_backend   # Internal network
+    - telegram_backend      # ✅ REQUIRED to reach telegram-gateway-api
+```
+
+---
+
+### Problem 3: Dashboard Cannot Fetch Signals
+
+#### Diagnosis
+
+**Browser console shows**:
+```
+Failed to fetch
+GET http://tp-capital-api:4005/signals net::ERR_NAME_NOT_RESOLVED
+```
+
+**Meaning**: Browser trying to access container hostname directly (impossible!)
+
+#### Common Causes
+
+##### Cause 3.1: Wrong Environment Variable (VITE_*_API_URL vs PROXY_TARGET)
+
+**Check Dashboard container**:
+```bash
+docker exec dashboard-ui printenv | grep "VITE_TP_CAPITAL"
+
+# WRONG:  VITE_TP_CAPITAL_API_URL=http://tp-capital-api:4005  (browser can't resolve!)
+# CORRECT: VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005  (Vite proxies)
+```
+
+**Fix**: Update `docker-compose.dashboard.yml`:
+```yaml
+environment:
+  # ❌ REMOVE this (causes browser to try direct access)
+  # - VITE_TP_CAPITAL_API_URL=http://tp-capital-api:4005
+
+  # ✅ USE this (Vite server proxies the request)
+  - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+```
+
+**Also remove from `.env`**:
+```bash
+# .env
+#VITE_TP_CAPITAL_API_URL=http://localhost:4008  # ❌ Comment this out
+```
+
+**How proxy works**:
+```
+Browser → GET /api/tp-capital/signals
+         ↓
+Vite Proxy → GET http://tp-capital-api:4005/signals
+         ↓
+TP-Capital API responds
+         ↓
+Browser receives response
+```
+
+---
+
+##### Cause 3.2: Using External Port for Internal Communication
+
+**Check**:
+```bash
+docker inspect dashboard-ui | grep "TP_CAPITAL"
+
+# WRONG:  http://tp-capital-api:4008  (host-mapped port)
+# CORRECT: http://tp-capital-api:4005  (internal port)
+```
+
+**Port Mapping**:
+```yaml
+tp-capital-api:
+  ports:
+    - "4008:4005"
+      #  ^     ^
+      #  |     └─ Internal port (use for inter-container calls)
+      #  └─ External port (use only from host/browser)
+```
+
+---
+
+### Problem 4: Checkpoints Blocking Display
+
+#### Diagnosis
+
+**Dashboard shows "0 de 10 sinais"** but database has many signals
+
+**Check**:
+```bash
+# Count all signals
+docker exec tp-capital-timescale psql -U tp_capital -d tp_capital_db -c \
+  "SELECT COUNT(*) FROM signals.tp_capital_signals;"
+
+# Count excluding checkpoints
+docker exec tp-capital-timescale psql -U tp_capital -d tp_capital_db -c \
+  "SELECT COUNT(*) FROM signals.tp_capital_signals WHERE asset != '__checkpoint__';"
+```
+
+**If first count >> second count**: Checkpoints are blocking real signals
+
+**Fix**: Update query in `apps/tp-capital/src/timescaleClient.js`:
+```javascript
+let query = `
+  SELECT ...
+  FROM "${this.schema}".tp_capital_signals
+  WHERE asset != '__checkpoint__'  // ✅ Filter internal records
+`;
+```
+
+**Restart service**:
+```bash
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+```
+
+---
+
+### Problem 5: Messages Not Processing (Status='queued')
+
+#### Diagnosis
+
+**Logs show**:
+```
+14 mensagem(ns) sincronizada(s)
+```
+
+**But signals not created**
+
+**Check message statuses**:
+```bash
+docker exec telegram-timescale psql -U telegram -d telegram_gateway -c \
+  "SELECT message_id, status FROM telegram_gateway.messages 
+   WHERE channel_id = '-1001649127710' 
+   ORDER BY created_at DESC LIMIT 10;"
+```
+
+**If many messages have `status='queued'`**: TP-Capital is not fetching them
+
+**Fix**: Update `apps/tp-capital/src/clients/gatewayHttpClient.js`:
+```javascript
+url.searchParams.set('status', 'received,queued');  // Include both statuses
+```
+
+---
+
+### Problem 6: Empty Photos Blocking Queue
+
+#### Diagnosis
+
+**Logs show hundreds of**:
+```
+[GatewayPollingWorker] Message processing failed: Empty message
+```
+
+**Check**:
+```bash
+# Count empty messages
+docker exec telegram-timescale psql -U telegram -d telegram_gateway -c \
+  "SELECT COUNT(*) FROM telegram_gateway.messages 
+   WHERE status = 'received' AND (text IS NULL OR LENGTH(TRIM(text)) = 0);"
+```
+
+**If count > 50**: Queue is blocked by empty photos
+
+**Quick fix** (mark as processed):
+```bash
+docker exec telegram-timescale psql -U telegram -d telegram_gateway -c \
+  "UPDATE telegram_gateway.messages 
+   SET status = 'published',
+       metadata = COALESCE(metadata, '{}'::jsonb) || '{\"processed_by\": \"cleanup\", \"reason\": \"empty_photo\"}'::jsonb
+   WHERE status = 'received' AND (text IS NULL OR LENGTH(TRIM(text)) = 0);"
+```
+
+**Permanent fix**: Update `apps/tp-capital/src/gatewayPollingWorker.js`:
+```javascript
+const messageContent = msg.text || msg.caption || '';
+
+// Skip empty messages
+if (!messageContent || messageContent.trim().length === 0) {
+  logger.debug('Empty message (photo without text), skipping');
+  await this.markMessageAsFailed(msg.message_id, new Error('Empty message'));
+  return;
+}
+```
+
+---
+
+## Validation Commands
+
+### Pre-Deployment Validation
+
+```bash
+# Run complete validation suite
+bash scripts/validation/pre-deploy-validation-suite.sh
+
+# Individual validations
+bash scripts/validation/validate-env.sh
+bash scripts/validation/validate-network.sh --test-all
+```
+
+### Post-Deployment Validation
+
+```bash
+# 1. Check all containers are healthy
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep tp-capital
+
+# 2. Test endpoints
+curl http://localhost:4008/health
+curl http://localhost:4010/health
+
+# 3. Test proxy
+curl http://localhost:3103/api/tp-capital/health
+
+# 4. Count signals
+curl -s "http://localhost:4008/signals?limit=5" \
+  -H "X-API-Key: $TP_CAPITAL_API_KEY" | jq '.data | length'
+```
+
+---
+
+## Emergency Recovery Procedures
+
+### Scenario 1: Complete Stack Restart
+
+```bash
+# 1. Stop all stacks
+cd tools/compose
+bash run-telegram-compose.sh down
+docker compose -f docker-compose.tp-capital-stack.yml down
+docker compose -f docker-compose.dashboard.yml down
+
+# 2. Validate environment
+bash ../../scripts/validation/validate-env.sh
+
+# 3. Start in correct order
+bash run-telegram-compose.sh up -d
+sleep 30  # Wait for databases to initialize
+
+docker compose -f docker-compose.tp-capital-stack.yml up -d
+sleep 20  # Wait for TP-Capital to connect
+
+docker compose -f docker-compose.dashboard.yml up -d
+
+# 4. Validate
+bash ../../scripts/validation/validate-network.sh --test-all
+```
+
+### Scenario 2: Reset Circuit Breaker
+
+**If circuit breaker stuck open**:
+```bash
+# Restart TP-Capital API
+docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+
+# Wait 30 seconds for reset timeout
+sleep 30
+
+# Verify circuit closed
+docker logs tp-capital-api | grep "Circuit breaker closed"
+```
+
+### Scenario 3: Clear Message Queue
+
+**If messages stuck**:
+```bash
+# Mark all empty photos as processed
+docker exec telegram-timescale psql -U telegram -d telegram_gateway -c \
+  "UPDATE telegram_gateway.messages 
+   SET status = 'published'
+   WHERE (text IS NULL OR LENGTH(TRIM(text)) = 0) AND status = 'received';"
+
+# Force sync
+curl -X POST "http://localhost:4008/sync-messages" \
+  -H "X-API-Key: $TP_CAPITAL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"forceRefresh": true}'
+```
+
+---
+
+## Common Errors & Solutions
+
+### Error: "password authentication failed for user"
+
+**Full error**:
+```
+WARNING server login failed: FATAL password authentication failed for user "telegram"
+```
+
+**Solution**: [PgBouncer Password Empty](#cause-11-pgbouncer-password-empty)
+
+---
+
+### Error: "Connection refused (172.18.0.1:4010)"
+
+**Solution**: [Using host.docker.internal](#cause-21-using-hostdockerinternal-in-production)
+
+---
+
+### Error: "net::ERR_NAME_NOT_RESOLVED"
+
+**Solution**: [Wrong Environment Variable](#cause-31-wrong-environment-variable-vite_api_url-vs-proxy_target)
+
+---
+
+### Error: "Circuit breaker OPEN"
+
+**Solution**: [Gateway API Unreachable](#problem-1-gateway-api-unreachable)
+
+---
+
+## Monitoring & Alerts
+
+### Key Metrics to Watch
+
+```promql
+# Circuit breaker status
+circuit_breaker_open{service="tp-capital"} > 0
+
+# Message processing failures
+tp_capital_messages_failed_total > 100
+
+# Gateway API errors
+http_requests_total{service="telegram-gateway-api",status=~"5.."}
+```
+
+### Log Patterns to Alert On
+
+```bash
+# Critical errors (alert immediately)
+grep -E "(Circuit breaker opened|password authentication failed|Connection refused)" logs/
+
+# Warnings (alert if sustained > 5 minutes)
+grep -E "(Message processing failed|Empty message)" logs/ | wc -l
+```
+
+---
+
+## Prevention Checklist
+
+**Before deploying ANY changes**:
+
+- [ ] Run `bash scripts/validation/validate-env.sh`
+- [ ] Run `bash scripts/validation/validate-network.sh --test-all`
+- [ ] Verify all `VITE_*` variables use `PROXY_TARGET` (not `API_URL`)
+- [ ] Verify all inter-container URLs use **container hostnames** (not `localhost`)
+- [ ] Verify all inter-container URLs use **internal ports** (not external)
+- [ ] Verify SQL queries filter `__checkpoint__` records
+- [ ] Verify message status filter includes `received,queued`
+
+---
+
+## References
+
+- **Incident Report**: [2025-11-05 TP-Capital Connectivity Failure](/governance/evidence/incidents/2025-11-05-tp-capital-connectivity-failure.md)
+- **Policies**: 
+  - [POL-0003 Addendum 001: Port Mapping Rules](/governance/policies/addendums/POL-0003-ADDENDUM-001-port-mapping-rules.md)
+  - [POL-0002 Addendum 001: Empty Value Validation](/governance/policies/addendums/POL-0002-ADDENDUM-001-empty-value-validation.md)
+- **Checklists**: [Pre-Deployment Checklist](/governance/controls/PRE-DEPLOY-CHECKLIST.md)
+- **Scripts**: 
+  - `scripts/validation/validate-env.sh`
+  - `scripts/validation/validate-network.sh`
+  - `scripts/validation/pre-deploy-validation-suite.sh`
+
+---
+
+**Version**: 1.0  
+**Last Validated**: November 5, 2025  
+**Next Review**: November 12, 2025 (weekly for first month)
+

@@ -1,0 +1,43 @@
+@startuml RAG Services - C4 Context Diagram
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title RAG Services System - Context Diagram (C4 Level 1)
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "Developer/User", "Uses documentation and RAG features")
+Person(admin, "System Administrator", "Manages collections, monitors system health")
+
+System(rag_system, "RAG Services", "Provides semantic search, Q&A, and document management for TradingSystem documentation")
+
+System_Ext(dashboard, "Dashboard (Frontend)", "React-based UI for accessing documentation and RAG features")
+System_Ext(docs_hub, "Documentation Hub", "Docusaurus v3 documentation portal")
+
+System_Boundary(rag_backend, "RAG Backend Services") {
+    System(collections_api, "Collections Service", "Manages document collections, ingestion, and queries")
+    SystemDb(vector_db, "Vector Database (Qdrant)", "Stores document embeddings and metadata")
+    System(ingestion_api, "Ingestion Service", "Processes and indexes documents")
+    System(query_api, "Query Service", "Handles semantic search and Q&A")
+    SystemDb(cache, "Redis Cache", "Caches collection stats and queries")
+}
+
+System_Ext(ollama, "Ollama", "Provides embedding models (mxbai-embed-large, nomic-embed-text)")
+
+Rel(user, dashboard, "Views documentation, performs searches", "HTTPS")
+Rel(user, docs_hub, "Reads documentation", "HTTPS")
+Rel(admin, collections_api, "Manages collections, monitors health", "HTTPS/REST API")
+
+Rel(dashboard, collections_api, "Queries collections, searches documents", "HTTPS/REST API")
+Rel(docs_hub, collections_api, "Integrates RAG features", "HTTPS/REST API")
+
+Rel(collections_api, vector_db, "Reads/writes vectors", "HTTP/gRPC")
+Rel(collections_api, cache, "Caches stats and queries", "Redis Protocol")
+Rel(collections_api, ingestion_api, "Triggers document ingestion", "HTTP/REST")
+Rel(dashboard, query_api, "Performs semantic search/Q&A", "HTTPS/REST API")
+
+Rel(ingestion_api, ollama, "Generates embeddings", "HTTP/REST")
+Rel(ingestion_api, vector_db, "Stores document vectors", "HTTP/gRPC")
+Rel(query_api, ollama, "Generates query embeddings", "HTTP/REST")
+Rel(query_api, vector_db, "Retrieves relevant vectors", "HTTP/gRPC")
+
+@enduml
