@@ -388,7 +388,7 @@ Result: PASSED with warnings
   run: EXPECTED_DOCS_V2_MIN=75 EXPECTED_DOCS_PORT_MIN=30 EXPECTED_DOCS_API_PORT_MIN=20 bash docs/scripts/validate-technical-references.sh --strict
 ```
 
-**Expected Duration**: <1 minute
+**Expected Duration**: &lt;1 minute
 
 ---
 
@@ -428,7 +428,7 @@ Outdated documents (> 90 days): 0
 - [ ] All files have frontmatter (135/135)
 - [ ] All required fields present (title, description, tags, owner, lastReviewed)
 - [ ] All owner values valid (in ALLOWED_OWNERS)
-- [ ] All lastReviewed dates current (<90 days) or intentionally accepted
+- [ ] All lastReviewed dates current (&lt;90 days) or intentionally accepted
 - [ ] No invalid date formats
 
 **If Fails**:
@@ -454,7 +454,7 @@ Outdated documents (> 90 days): 0
 cd docs
 
 # Validate version snapshot creation
-bash ../scripts/validation/validate-version-snapshot.sh <VERSION>
+bash ../scripts/validation/validate-version-snapshot.sh &lt;VERSION&gt;
 
 # Example: Validate version 1.0.0
 bash ../scripts/validation/validate-version-snapshot.sh 1.0.0
@@ -466,22 +466,22 @@ bash ../scripts/validation/validate-version-snapshot.sh 1.0.0
 
 ```bash
 # Check versions.json exists and contains version
-cat versions.json | grep "<VERSION>"
+cat versions.json | grep "&lt;VERSION&gt;"
 
 # Expected: Version appears in array (e.g., "1.0.0")
 
 # Verify versioned docs directory exists
-ls -la versioned_docs/version-<VERSION>/
+ls -la versioned_docs/version-&lt;VERSION&gt;/
 
 # Expected: Directory exists with all content subdirectories
 
 # Count versioned MDX files
-find versioned_docs/version-<VERSION>/ -name "*.mdx" | wc -l
+find versioned_docs/version-&lt;VERSION&gt;/ -name "*.mdx" | wc -l
 
 # Expected: ~135-200 files (matches current content count)
 
 # Verify sidebar snapshot exists
-ls -lh versioned_sidebars/version-<VERSION>-sidebars.json
+ls -lh versioned_sidebars/version-&lt;VERSION&gt;-sidebars.json
 
 # Expected: File exists and is non-empty (> 1KB)
 ```
@@ -491,16 +491,16 @@ ls -lh versioned_sidebars/version-<VERSION>-sidebars.json
 ```bash
 # Compare file counts between versions
 CURRENT_COUNT=$(find content/ -name "*.mdx" | wc -l)
-VERSION_COUNT=$(find versioned_docs/version-<VERSION>/ -name "*.mdx" | wc -l)
+VERSION_COUNT=$(find versioned_docs/version-&lt;VERSION&gt;/ -name "*.mdx" | wc -l)
 
-echo "Current: $CURRENT_COUNT, Version <VERSION>: $VERSION_COUNT"
+echo "Current: $CURRENT_COUNT, Version &lt;VERSION&gt;: $VERSION_COUNT"
 
 # Expected: Counts should match (or version count slightly higher if files were added)
 
 # Spot check key files exist in version
-test -f versioned_docs/version-<VERSION>/index.mdx && echo "✅ index.mdx present"
-test -d versioned_docs/version-<VERSION>/apps/ && echo "✅ apps/ directory present"
-test -d versioned_docs/version-<VERSION>/api/ && echo "✅ api/ directory present"
+test -f versioned_docs/version-&lt;VERSION&gt;/index.mdx && echo "✅ index.mdx present"
+test -d versioned_docs/version-&lt;VERSION&gt;/apps/ && echo "✅ apps/ directory present"
+test -d versioned_docs/version-&lt;VERSION&gt;/api/ && echo "✅ api/ directory present"
 ```
 
 #### 10.3: Version Build Test
@@ -510,7 +510,7 @@ test -d versioned_docs/version-<VERSION>/api/ && echo "✅ api/ directory presen
 npm run docs:build
 
 # Expected: Build completes successfully
-# Expected: Build time < 120s (with up to 3 versions)
+# Expected: Build time &lt; 120s (with up to 3 versions)
 
 # Verify version directories in build output
 ls -la build/
@@ -523,7 +523,7 @@ ls -la build/
 #   - build/next/
 
 # Check sitemap includes version URLs
-grep "version-<VERSION>" build/sitemap.xml || grep "<VERSION>" build/sitemap.xml
+grep "version-&lt;VERSION&gt;" build/sitemap.xml || grep "&lt;VERSION&gt;" build/sitemap.xml
 
 # Expected: Version URLs present in sitemap
 ```
@@ -554,9 +554,9 @@ npm run docs:dev
 npm run docs:links 2>&1 | tee version-links-report.txt
 
 # Check for version-specific broken links
-grep "version-<VERSION>" version-links-report.txt | grep "Broken"
+grep "version-&lt;VERSION&gt;" version-links-report.txt | grep "Broken"
 
-# Expected: < 5 broken links per version
+# Expected: &lt; 5 broken links per version
 # Expected: All internal links valid within version
 ```
 
@@ -567,13 +567,13 @@ grep "version-<VERSION>" version-links-report.txt | grep "Broken"
 - [ ] File count matches current content (~135-200 files)
 - [ ] versioned_sidebars/version-X.X.X-sidebars.json exists
 - [ ] Build completes successfully with new version
-- [ ] Build time < 120s (with up to 3 versions)
+- [ ] Build time &lt; 120s (with up to 3 versions)
 - [ ] Version dropdown shows new version with correct label
 - [ ] Navigation to version works (correct path)
 - [ ] Internal links work within version
 - [ ] Banner displays correctly (unreleased/stable/deprecated)
 - [ ] Sitemap includes version URLs
-- [ ] Link validation passes (< 5 broken per version)
+- [ ] Link validation passes (&lt; 5 broken per version)
 
 **If Fails**:
 - **Missing version files**: Re-run `npx docusaurus docs:version X.X.X`
@@ -590,7 +590,7 @@ grep "version-<VERSION>" version-links-report.txt | grep "Broken"
 
 VERSION=$1
 if [ -z "$VERSION" ]; then
-  echo "Usage: ./validate-version.sh <VERSION>"
+  echo "Usage: ./validate-version.sh &lt;VERSION&gt;"
   exit 1
 fi
 
@@ -661,8 +661,8 @@ python scripts/docs/validate-frontmatter.py \
 - [ ] Technical references validation passed (no legacy `docs/docusaurus` or port `3004` references)
 - [ ] Version 1.0.0 created and validated (if launching versioned docs)
 - [ ] Version dropdown functional in navbar
-- [ ] All active versions build successfully (< 120s total)
-- [ ] Link validation passed for all versions (< 5 broken per version)
+- [ ] All active versions build successfully (&lt; 120s total)
+- [ ] Link validation passed for all versions (&lt; 5 broken per version)
 
 ---
 

@@ -9,7 +9,7 @@
 
 ## Metrics & Evidence
 
-- **KPI**: `%Freshness = arquivos com lastReviewed < 90 dias / total de arquivos monitorados` (meta 100% ou plano de ação registrado).
+- **KPI**: `%Freshness = arquivos com lastReviewed &lt; 90 dias / total de arquivos monitorados` (meta 100% ou plano de ação registrado).
 - **Registro**: Salvar o relatório gerado em `docs/reports/frontmatter-validation-YYYYMMDD.json` e registrar no `review-tracking.csv` (`LastAuditDate`, `EvidenceLink`).
 - **Evidência adicional**: Para itens que entraram em ação corretiva, abrir issue ou checklist e apontar o link no campo `EvidenceLink`.
 - **Follow-up**: Indicar no final deste arquivo os percentuais obtidos e principais ajustes planejados.
@@ -49,7 +49,7 @@ python scripts/docs/validate-frontmatter.py \
 - [ ] Fix broken links (internal and external)
 - [ ] Update screenshots/diagrams if UI changed
 - [ ] Update frontmatter `lastReviewed` to current date
-- [ ] Commit changes with message: `docs: quarterly review - <file-name>`
+- [ ] Commit changes with message: `docs: quarterly review - &lt;file-name&gt;`
 
 **Bulk Update Command** (for files with no content changes):
 ```bash
@@ -243,13 +243,13 @@ npm run docs:metrics
 - [ ] Measure build performance:
   ```bash
   time npm run docs:build
-  # Target: < 120s with 3 versions
+  # Target: &lt; 120s with 3 versions
   ```
 
 - [ ] Check storage usage per version:
   ```bash
   du -sh versioned_docs/version-*/
-  # Target: < 10MB per version
+  # Target: &lt; 10MB per version
   ```
 
 - [ ] Review version deprecation candidates (> 2 releases old):
@@ -300,7 +300,7 @@ npm run docs:check
 ```
 - [ ] Verify all steps complete successfully (auto, validate, lint, typecheck, test, build)
 - [ ] Check build output for warnings/errors
-- [ ] Validate build time is acceptable (< 120s with versions)
+- [ ] Validate build time is acceptable (&lt; 120s with versions)
 
 **docs:links** (link validation):
 ```bash
@@ -308,7 +308,7 @@ cd docs
 npm run docs:links
 ```
 - [ ] Verify linkinator runs successfully
-- [ ] Check for broken links (< 5 per version)
+- [ ] Check for broken links (&lt; 5 per version)
 - [ ] Validate external links (if any)
 
 **validate-frontmatter.py** (frontmatter validation):
@@ -393,7 +393,7 @@ python scripts/docs/validate-frontmatter.py \
 |--------|--------|---------|---------|---------|----------|
 | docs:auto success rate | 100% | - | - | - | - |
 | docs:check pass rate | 100% | - | - | - | - |
-| Build time (seconds) | <120 | - | - | - | - |
+| Build time (seconds) | &lt;120 | - | - | - | - |
 | Test coverage | >80% | - | - | - | - |
 
 ### Version Health
