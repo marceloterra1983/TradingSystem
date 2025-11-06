@@ -109,19 +109,22 @@ jobs:
           TELEGRAM_PHONE_NUMBER: "+5511999999999"
           TELEGRAM_SESSION_ENCRYPTION_KEY: test_encryption_key_32_chars_minimum_length_required
         run: |
-          echo "🚀 Starting Telegram stack (5 containers)..."
+          echo "🚀 Starting Telegram stack (3 containers: TimescaleDB, Redis, Gateway API)..."
           
           # Create external network required by docker-compose.telegram.yml
           docker network create tradingsystem_backend || echo "Network already exists (OK)"
           
           # Start only essential containers with healthcheck
-          # MTProto COMPLETELY EXCLUDED - requires valid Telegram credentials
-          # Gateway API doesn't need MTProto running for basic API tests
+          # MTProto COMPLETELY EXCLUDED - requires valid Telegram credentials  
+          # PgBouncer EXCLUDED - using override to connect Gateway API directly to TimescaleDB
+          # Simpler architecture for E2E: TimescaleDB → Gateway API (no pooler needed)
           set +e  # Don't exit on error - we want to capture logs
-          docker compose -f tools/compose/docker-compose.telegram.yml up -d --wait \
+          docker compose \
+            -f tools/compose/docker-compose.telegram.yml \
+            -f .github/workflows/docker-compose.e2e-override.yml \
+            up -d --wait \
             telegram-timescaledb \
             telegram-redis-master \
-            telegram-pgbouncer \
             telegram-gateway-api
           
           COMPOSE_EXIT_CODE=$?
@@ -132,7 +135,6 @@ jobs:
             mkdir -p logs/containers
             docker logs telegram-timescale --tail 50 > logs/containers/timescaledb-startup.log 2>&1 || true
             docker logs telegram-gateway-api --tail 100 > logs/containers/gateway-api-startup.log 2>&1 || true
-            docker logs telegram-pgbouncer --tail 50 > logs/containers/pgbouncer-startup.log 2>&1 || true
             docker logs telegram-redis-master --tail 30 > logs/containers/redis-startup.log 2>&1 || true
             
             echo -e "\n📋 Gateway API startup logs:"
@@ -150,12 +152,13 @@ jobs:
           echo -e "\n📊 Container Status:"
           docker compose -f tools/compose/docker-compose.telegram.yml ps
           
-          echo -e "\n🔍 Service Endpoints:"
+          echo -e "\n🔍 Service Endpoints (containers):"
           echo "  - Gateway API: http://localhost:4010/health"
-          echo "  - Gateway MTProto: http://localhost:4007/health"
           echo "  - TimescaleDB: postgresql://telegram:***@localhost:5434/telegram_gateway"
-          echo "  - PgBouncer: localhost:6434"
           echo "  - Redis: localhost:6379"
+          echo -e "\n📝 Excluded from E2E:"
+          echo "  - MTProto (requires valid Telegram credentials)"
+          echo "  - PgBouncer (using direct connection for simplicity)"
       
       - name: Create logs directory
         run: mkdir -p logs
@@ -204,14 +207,12 @@ jobs:
           echo "✅ Gateway API (container → host:4010): http://localhost:4010/health"
           curl -f http://localhost:4010/health > /dev/null || { echo "❌ Gateway API not accessible"; exit 1; }
           
-          # Gateway MTProto (runs in container, exposed on localhost:4007)
-          echo "✅ Gateway MTProto (container → host:4007): http://localhost:4007/health"
-          curl -f http://localhost:4007/health > /dev/null || { echo "❌ Gateway MTProto not accessible"; exit 1; }
-          
           echo -e "\n🎉 All services healthy and ready for E2E tests!"
-          echo "  - Frontend: Dashboard (Vite)"
-          echo "  - Backend: Gateway API + MTProto (Docker)"
-          echo "  - Data: TimescaleDB + Redis + PgBouncer (Docker)"
+          echo "  - Frontend: Dashboard (Vite on host)"
+          echo "  - Backend: Gateway API (Docker container)"
+          echo "  - Data: TimescaleDB + Redis (Docker containers)"
+          echo -e "\n📝 Note: MTProto excluded (requires real Telegram credentials)"
+          echo "📝 Note: PgBouncer excluded (direct connection simpler for E2E)"
       
       # ==============================================================================
       # Run E2E Tests
