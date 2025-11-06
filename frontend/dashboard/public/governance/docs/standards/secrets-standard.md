@@ -443,7 +443,7 @@ describe('Secrets Governance', () => {
 | Secrets escaneados por commit | 100% | GitHub Actions logs |
 | Rotações dentro do prazo | ≥95% | `secrets-rotation-*.json` |
 | Incidentes de exposição | 0 | `governance/evidence/audits/exceptions/` |
-| Tempo de rotação (emergency) | <2h | Post-mortem reports |
+| Tempo de rotação (emergency) | under 2h | Post-mortem reports |
 | Cobertura de mascaramento em logs | 100% | Auditoria de logs |
 
 ## 6. Ferramentas Recomendadas

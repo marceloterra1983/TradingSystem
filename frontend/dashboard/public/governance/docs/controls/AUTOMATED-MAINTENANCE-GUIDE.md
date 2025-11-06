@@ -47,7 +47,7 @@ Reports are generated in `docs/reports/` with timestamps:
 - `maintenance-audit-YYYY-MM-DD_HH-MM-SS.md` - Main audit report
 - `stale-files-YYYY-MM-DD_HH-MM-SS.txt` - Files not updated in 90+ days
 - `missing-frontmatter-YYYY-MM-DD_HH-MM-SS.txt` - Files with incomplete metadata
-- `short-files-YYYY-MM-DD_HH-MM-SS.txt` - Files with <50 words
+- `short-files-YYYY-MM-DD_HH-MM-SS.txt` - Files with less than 50 words
 - `broken-links-YYYY-MM-DD_HH-MM-SS.txt` - Broken internal links
 
 ---
