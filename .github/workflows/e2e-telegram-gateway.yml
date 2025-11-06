@@ -117,11 +117,32 @@ jobs:
           # Start only essential containers with healthcheck
           # MTProto COMPLETELY EXCLUDED - requires valid Telegram credentials
           # Gateway API doesn't need MTProto running for basic API tests
+          set +e  # Don't exit on error - we want to capture logs
           docker compose -f tools/compose/docker-compose.telegram.yml up -d --wait \
             telegram-timescaledb \
             telegram-redis-master \
             telegram-pgbouncer \
             telegram-gateway-api
+          
+          COMPOSE_EXIT_CODE=$?
+          set -e
+          
+          if [ $COMPOSE_EXIT_CODE -ne 0 ]; then
+            echo "❌ Some containers unhealthy! Capturing logs before they're removed..."
+            mkdir -p logs/containers
+            docker logs telegram-timescale --tail 50 > logs/containers/timescaledb-startup.log 2>&1 || true
+            docker logs telegram-gateway-api --tail 100 > logs/containers/gateway-api-startup.log 2>&1 || true
+            docker logs telegram-pgbouncer --tail 50 > logs/containers/pgbouncer-startup.log 2>&1 || true
+            docker logs telegram-redis-master --tail 30 > logs/containers/redis-startup.log 2>&1 || true
+            
+            echo -e "\n📋 Gateway API startup logs:"
+            cat logs/containers/gateway-api-startup.log
+            
+            echo -e "\n📊 Container status:"
+            docker compose -f tools/compose/docker-compose.telegram.yml ps
+            
+            exit 1
+          fi
           
           echo "✅ All Telegram containers started and healthy!"
           
