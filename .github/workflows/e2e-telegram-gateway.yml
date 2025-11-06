@@ -86,6 +86,7 @@ jobs:
           cat > .env << 'EOF'
           TELEGRAM_DB_USER=telegram
           TELEGRAM_DB_PASSWORD=test_password
+          TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:test_password@localhost:5434/telegram
           TELEGRAM_GATEWAY_API_KEY=test_api_key_for_ci
           TELEGRAM_GATEWAY_API_TOKEN=test_api_token_for_ci
           API_SECRET_TOKEN=test_secret_token_for_ci
@@ -95,7 +96,20 @@ jobs:
       - name: Start Docker services
         run: |
           docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master
-          sleep 10
+          
+          # Wait for TimescaleDB to be ready
+          echo "Waiting for TimescaleDB to be ready..."
+          for i in {1..30}; do
+            if docker exec telegram-timescaledb pg_isready -U telegram > /dev/null 2>&1; then
+              echo "✅ TimescaleDB is ready!"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+          
+          # Verify database is accessible
+          docker ps | grep telegram
       
       - name: Create logs directory
         run: mkdir -p logs
