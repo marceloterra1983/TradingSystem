@@ -1,6 +1,6 @@
 # Auto-generated port dictionary for Compose overrides
 # Do not edit manually. Run: npm run ports:sync
-# Generated: 2025-11-06T14:09:52.984Z
+# Generated: 2025-11-06T14:19:59.197Z
 
 x-tradingsystem-ports:
   grafana:
