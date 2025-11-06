@@ -9,7 +9,7 @@ import {
   verifyServiceToken,
   getServiceToken,
   createServiceAuthHeader,
-} from '../../../../shared/middleware/serviceAuth.js';
+} from '../../../../../shared/middleware/serviceAuth.js';
 
 describe('Service Authentication Middleware', () => {
   const VALID_SECRET = 'test-inter-service-secret';
