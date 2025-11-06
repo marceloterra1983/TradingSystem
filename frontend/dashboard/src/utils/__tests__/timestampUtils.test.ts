@@ -80,13 +80,14 @@ describe('timestampUtils', () => {
       expect(result).not.toBeNull();
 
       // Verify the timestamp represents midnight in São Paulo
+      // Note: Midnight can be represented as either "00:00:00" or "24:00:00"
       const date = new Date(result!);
       const formatted = date.toLocaleString('en-US', {
         timeZone: 'America/Sao_Paulo',
         hour12: false,
       });
 
-      expect(formatted).toContain('00:00:00');
+      expect(formatted).toMatch(/00:00:00|24:00:00/);
     });
 
     it('should convert date string to end of day in São Paulo time', () => {
@@ -289,13 +290,14 @@ describe('timestampUtils', () => {
     it('should return midnight of today in São Paulo timezone', () => {
       const result = getTodayInSaoPaulo();
 
+      // Note: Midnight can be represented as either "00:00:00" or "24:00:00"
       const date = new Date(result);
       const formatted = date.toLocaleString('en-US', {
         timeZone: 'America/Sao_Paulo',
         hour12: false,
       });
 
-      expect(formatted).toContain('00:00:00');
+      expect(formatted).toMatch(/00:00:00|24:00:00/);
     });
   });
 

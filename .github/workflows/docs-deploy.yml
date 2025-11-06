@@ -104,11 +104,12 @@ jobs:
         with:
           artifact_name: docs-build
 
-  docs-validation:
-    name: Docs Validation Suite
-    needs: freeze_guard
-    if: github.event_name == 'pull_request' && needs.freeze_guard.outputs.active != 'true'
-    uses: ./.github/workflows/docs-validation.yml
-    with:
-      skip_freeze_guard: true
-    secrets: inherit
+  # TEMPORARILY DISABLED - Testing startup_failure fix
+  # docs-validation:
+  #   name: Docs Validation Suite
+  #   needs: freeze_guard
+  #   if: github.event_name == 'pull_request' && needs.freeze_guard.outputs.active != 'true'
+  #   uses: ./.github/workflows/docs-validation.yml
+  #   with:
+  #     skip_freeze_guard: true
+  #   secrets: inherit
