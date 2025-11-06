@@ -37,7 +37,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
 import { buildDocsUrl } from '../../lib/docsUrl';
 import {
   getGovernanceSnapshot,
@@ -301,10 +300,18 @@ export default function GovernancePage() {
     setDialogOpen(true);
     setDocContent('');
     setDocError(null);
+    setDocLoading(true);
   }, []);
 
   useEffect(() => {
     if (!dialogOpen || !selectedDoc) {
+      return;
+    }
+    const inlineContent = selectedDoc.previewContent?.trim();
+    if (inlineContent) {
+      setDocContent(inlineContent);
+      setDocError(null);
+      setDocLoading(false);
       return;
     }
     const previewPath = selectedDoc.previewPath;
@@ -346,6 +353,7 @@ export default function GovernancePage() {
     setSelectedDoc(null);
     setDocContent('');
     setDocError(null);
+    setDocLoading(false);
   };
 
   const docsUrlFor = (artifact: GovernanceArtifact) =>
@@ -803,7 +811,7 @@ export default function GovernancePage() {
                   <span>Revisado em: {selectedDoc.lastReviewed}</span>
                 </div>
               )}
-              <ScrollArea className="max-h-[60vh] rounded-md border">
+              <div className="max-h-[60vh] overflow-y-auto rounded-md border">
                 <div className="p-4 text-left">
                   {docLoading && (
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -817,7 +825,7 @@ export default function GovernancePage() {
                     </pre>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </div>
             <DialogFooter className="flex flex-col gap-2 sm:flex-row">
               {selectedDoc && docsUrlFor(selectedDoc) && (

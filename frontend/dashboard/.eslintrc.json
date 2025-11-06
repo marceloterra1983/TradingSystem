@@ -73,6 +73,8 @@
     "vite.config.ts",
     "vitest.config.ts",
     "cypress/",
+    "playwright-report/",
+    "test-results/",
     "src/examples/",
     "src/__tests__/"
   ]}

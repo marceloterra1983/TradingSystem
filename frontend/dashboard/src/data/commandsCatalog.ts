@@ -1,4 +1,4 @@
-import commandsDatabase from './commands-db.json';
+import commandsDatabase from './commands-db.json' with { type: 'json' };
 
 const SUPPORTED_COMMAND_SCHEMA_VERSION = '1.1.0';
 

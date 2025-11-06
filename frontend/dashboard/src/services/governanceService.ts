@@ -53,6 +53,7 @@ export interface GovernanceArtifact {
   reviewCycleDays: number;
   publishSlug?: string | null;
   previewPath?: string | null;
+  previewContent?: string | null;
 }
 
 async function fetchJson<T>(url: string): Promise<T> {

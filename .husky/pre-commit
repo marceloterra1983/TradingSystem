@@ -30,15 +30,19 @@ else
   echo "🔄 docs auto-generate"
   npm --prefix docs run docs:auto
   
-  # Adicionar automaticamente arquivos gerados pelo docs:auto
+  # Adicionar automaticamente arquivos gerados pelo docs:auto (se não estiverem no .gitignore)
   if [ -f "docs/content/frontend/design-system/tokens.mdx" ]; then
-    git add docs/content/frontend/design-system/tokens.mdx
+    if ! git check-ignore -q "docs/content/frontend/design-system/tokens.mdx"; then
+      git add docs/content/frontend/design-system/tokens.mdx
+    fi
   fi
   if [ -f "docs/content/reference/ports.mdx" ]; then
-    git add docs/content/reference/ports.mdx
+    if ! git check-ignore -q "docs/content/reference/ports.mdx"; then
+      git add docs/content/reference/ports.mdx
+    fi
   fi
   
-  echo "✓ Auto-generated files added to staging"
+  echo "✓ Auto-generated files checked (ignored files skipped)"
 fi
 
 echo "🔍 docs lint"

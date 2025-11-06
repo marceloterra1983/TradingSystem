@@ -223,20 +223,39 @@ function formatUpcoming(upcoming) {
   ].join('\n');
 }
 
-function mapArtifactsForSnapshot(artifacts) {
-  return artifacts.map((artifact) => ({
-    id: artifact.id,
-    title: artifact.title,
-    description: artifact.description,
-    owner: artifact.owner,
-    category: artifact.category,
-    type: artifact.type,
-    tags: artifact.tags || [],
-    lastReviewed: artifact.lastReviewed,
-    reviewCycleDays: artifact.reviewCycleDays,
-    publishSlug: artifact.publish?.slug || null,
-    previewPath: toPreviewPath(artifact.path),
-  }));
+async function readArtifactSource(relPath) {
+  if (!relPath) return null;
+  const absolutePath = path.join(governanceDir, relPath);
+  try {
+    return await fs.readFile(absolutePath, 'utf-8');
+  } catch (error) {
+    console.warn(
+      `[governance:metrics] Preview unavailable for ${relPath}: ${error.message}`,
+    );
+    return null;
+  }
+}
+
+async function mapArtifactsForSnapshot(artifacts) {
+  return Promise.all(
+    artifacts.map(async (artifact) => {
+      const previewContent = await readArtifactSource(artifact.path);
+      return {
+        id: artifact.id,
+        title: artifact.title,
+        description: artifact.description,
+        owner: artifact.owner,
+        category: artifact.category,
+        type: artifact.type,
+        tags: artifact.tags || [],
+        lastReviewed: artifact.lastReviewed,
+        reviewCycleDays: artifact.reviewCycleDays,
+        publishSlug: artifact.publish?.slug || null,
+        previewPath: toPreviewPath(artifact.path),
+        previewContent,
+      };
+    }),
+  );
 }
 
 async function writeDocsReport(payload) {
@@ -293,7 +312,7 @@ async function main() {
   const freshness = summarizeArtifacts(artifacts);
   const coverage = deriveCoverageStats(artifacts);
   const reviewTracking = summarizeReviews(reviewRecords);
-  const artifactSummaries = mapArtifactsForSnapshot(artifacts);
+  const artifactSummaries = await mapArtifactsForSnapshot(artifacts);
 
   const payload = {
     metadata: {

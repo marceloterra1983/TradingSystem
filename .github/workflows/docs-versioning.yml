@@ -255,26 +255,7 @@ jobs:
             exit 1
           fi
 
-          VERSION_ROUTE=$(node - <<'NODE'
-const path = require('path');
-const configPath = path.resolve(process.cwd(), 'docusaurus.config.js');
-let config;
-try {
-  config = require(configPath);
-} catch (error) {
-  console.error('Unable to require docusaurus.config.js:', error);
-  process.exit(2);
-}
-const classicPreset = Array.isArray(config.presets)
-  ? config.presets.find((preset) => Array.isArray(preset) && preset[0] === 'classic')
-  : null;
-const docsConfig = classicPreset && classicPreset[1] && classicPreset[1].docs ? classicPreset[1].docs : {};
-const versions = docsConfig.versions || {};
-const entry = versions['${VERSION}'] || {};
-const route = typeof entry.path === 'string' ? entry.path.trim() : '';
-process.stdout.write(route);
-NODE
-          )
+          VERSION_ROUTE=$(node -e "const path = require('path'); const configPath = path.resolve(process.cwd(), 'docusaurus.config.js'); let config; try { config = require(configPath); } catch (error) { console.error('Unable to require docusaurus.config.js:', error); process.exit(2); } const classicPreset = Array.isArray(config.presets) ? config.presets.find((preset) => Array.isArray(preset) && preset[0] === 'classic') : null; const docsConfig = classicPreset && classicPreset[1] && classicPreset[1].docs ? classicPreset[1].docs : {}; const versions = docsConfig.versions || {}; const entry = versions['${VERSION}'] || {}; const route = typeof entry.path === 'string' ? entry.path.trim() : ''; process.stdout.write(route);")
 
           ROOT_HAS_VERSION=0
           if grep -q "\"${VERSION}\"" /tmp/root.html || grep -q "$VERSION" /tmp/root.html; then

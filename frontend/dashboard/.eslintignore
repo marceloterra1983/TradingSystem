@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
+
+# Config files
+*.config.js
+*.config.ts
+vite.config.ts
+vitest.config.ts
+
+# Test directories
+cypress/
+src/examples/
+src/__tests__/
+
