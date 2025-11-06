@@ -61,7 +61,7 @@ Reports are generated in `docs/reports/` with timestamps:
 **Components**:
 - **File Discovery**: Recursive scanning of `docs/content/` and `governance/`
 - **Freshness Analysis**: Detects files not modified in 90+ days
-- **Size Analysis**: Identifies files with insufficient content (<50 words)
+- **Size Analysis**: Identifies files with insufficient content (less than 50 words)
 - **Structure Validation**: Checks heading hierarchy and document organization
 
 **Thresholds** (configurable in script):
@@ -358,8 +358,8 @@ P2: 80% within 2 weeks
 P3: 60% within 1 month
 
 Content Freshness:
-Stale files: <5% of total
-Average age: <60 days
+Stale files: under 5% of total
+Average age: under 60 days
 ```
 
 ### Dashboard Visualization (Future)
