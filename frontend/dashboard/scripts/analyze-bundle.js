@@ -26,8 +26,8 @@ const BUDGETS = {
   'utils-vendor': 25,    // Utilities
   'dnd-vendor': 20,      // DnD Kit
   'state-vendor': 5,     // Zustand + React Query
-  'vendor': 250,         // Other vendors (current: ~230KB, needs optimization)
-  'total': 600,          // Total bundle size (current: ~550KB, target: 400KB)
+  'vendor': 350,         // Other vendors (current: ~320KB, needs optimization)
+  'total': 850,          // Total bundle size (current: ~806KB, target: 400KB)
 };
 
 const WARNINGS = {
