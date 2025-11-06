@@ -2,9 +2,6 @@
 
 set -eu
 
-# shellcheck source=/dev/null
-. "$(dirname "$0")/_/husky.sh"
-
 if [ "${SKIP_DOCS_HOOKS:-0}" = "1" ]; then
   echo "⚠️  Skipping docs check (SKIP_DOCS_HOOKS=1)"
   exit 0
