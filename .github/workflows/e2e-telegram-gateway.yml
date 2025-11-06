@@ -9,6 +9,7 @@ on:
       - 'backend/api/telegram-gateway/**'
       - 'backend/data/timescaledb/telegram-gateway/**'  # Database init scripts
       - 'tools/compose/docker-compose.telegram.yml'     # Docker config changes
+      - 'tools/compose/docker-compose.e2e-override.yml' # E2E override config
       - '.github/workflows/e2e-telegram-gateway.yml'    # Trigger on workflow changes
   pull_request:
     branches: [main, develop]
@@ -18,6 +19,7 @@ on:
       - 'backend/api/telegram-gateway/**'
       - 'backend/data/timescaledb/telegram-gateway/**'  # Database init scripts
       - 'tools/compose/docker-compose.telegram.yml'     # Docker config changes
+      - 'tools/compose/docker-compose.e2e-override.yml' # E2E override config
       - '.github/workflows/e2e-telegram-gateway.yml'
   workflow_dispatch:  # Allow manual trigger
 
