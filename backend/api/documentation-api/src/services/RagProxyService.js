@@ -5,6 +5,7 @@
  * @module backend/api/documentation-api/src/services/RagProxyService
  */
 
+import { randomUUID } from 'crypto';
 import fetch from 'node-fetch';
 import { createBearer } from '../../../../shared/auth/jwt.js';
 import {
@@ -162,7 +163,10 @@ export class RagProxyService {
     }
 
     // Generate new token
-    const token = createBearer({ sub: 'dashboard' }, this.jwtSecret);
+    const token = createBearer(
+      { sub: 'dashboard', jti: randomUUID() },
+      this.jwtSecret
+    );
 
     // Cache token with expiration
     this._tokenCache.token = token;
@@ -248,7 +252,7 @@ export class RagProxyService {
    * @private
    */
   _validateQuery(query) {
-    if (!query || typeof query !== 'string') {
+    if (typeof query !== 'string') {
       throw new ValidationError('Query must be a non-empty string');
     }
 
