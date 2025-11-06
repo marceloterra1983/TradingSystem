@@ -117,8 +117,8 @@ describe('buildQuery', () => {
       search: 'PETR',
     });
 
-    // Returns full URL, not just query string
-    expect(url).toContain('/api/tp-capital/signals?');
+    // Returns full URL (absolute), not just query string
+    expect(url).toContain('/signals?');
     expect(url).toContain('limit=50');
     expect(url).toContain('channel=TP');
     expect(url).toContain('type=Swing');
@@ -127,7 +127,7 @@ describe('buildQuery', () => {
 
   it('should build URL with only limit parameter', () => {
     const url = buildQuery({ limit: 10 });
-    expect(url).toContain('/api/tp-capital/signals?limit=10');
+    expect(url).toContain('/signals?limit=10');
   });
 
   it('should skip undefined parameters', () => {

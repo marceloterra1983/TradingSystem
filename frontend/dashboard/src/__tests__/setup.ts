@@ -54,6 +54,17 @@ Object.defineProperty(navigator, 'clipboard', {
 // Mock scroll behavior
 if (typeof Element !== 'undefined') {
   Element.prototype.scrollIntoView = vi.fn();
+  
+  // Polyfill for hasPointerCapture (required by Radix UI Select)
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false);
+  }
+  if (!Element.prototype.setPointerCapture) {
+    Element.prototype.setPointerCapture = vi.fn();
+  }
+  if (!Element.prototype.releasePointerCapture) {
+    Element.prototype.releasePointerCapture = vi.fn();
+  }
 }
 if (typeof window !== 'undefined') {
   window.scrollTo = vi.fn();
