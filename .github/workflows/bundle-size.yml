@@ -29,7 +29,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'frontend/dashboard/package-lock.json'
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm ci
+      
+      - name: Install dashboard dependencies
         working-directory: frontend/dashboard
         run: npm ci
 
