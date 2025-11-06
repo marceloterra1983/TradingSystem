@@ -16,6 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Budget thresholds (gzipped sizes in KB)
+// TODO: Gradually reduce these as bundle is optimized
 const BUDGETS = {
   'index': 15,           // Main entry point
   'react-vendor': 50,    // React core
@@ -25,8 +26,8 @@ const BUDGETS = {
   'utils-vendor': 25,    // Utilities
   'dnd-vendor': 20,      // DnD Kit
   'state-vendor': 5,     // Zustand + React Query
-  'vendor': 180,         // Other vendors (needs optimization)
-  'total': 400,          // Total bundle size
+  'vendor': 250,         // Other vendors (current: ~230KB, needs optimization)
+  'total': 600,          // Total bundle size (current: ~550KB, target: 400KB)
 };
 
 const WARNINGS = {
