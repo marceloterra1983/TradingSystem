@@ -1,361 +1,638 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
-  title: TradingSystem Library API
+  title: Workspace API
+  description: |
+    **Workspace API** manages workspace items for the TradingSystem project.
+
+    ## Features
+    - CRUD operations for workspace items
+    - Category-based organization (Documentation, Data Collection, Database, Analytics, Risk Management, Dashboard)
+    - Priority and status tracking
+    - Tagging system
+    - Health monitoring
+
+    ## Technology Stack
+    - **Runtime**: Node.js 20+
+    - **Framework**: Express.js
+    - **Database**: TimescaleDB (PostgreSQL with time-series extensions)
+    - **Cache**: Redis (optional)
+    - **Port**: 3200
+
+    ## Authentication
+    API endpoints are currently **open** (no authentication required). Future versions will implement JWT-based authentication.
+
   version: 1.0.0
+  contact:
+    name: TradingSystem Team
+    url: http://localhost:3103
   license:
     name: MIT
-    url: https://opensource.org/licenses/MIT
-  description: |
-    OpenAPI specification for the Library (Idea Bank) API.
-    The service provides CRUD operations for idea items stored in QuestDB and LowDB,
-    health checks, and Prometheus-compatible metrics. Supports dual-strategy persistence
-    with automatic fallback and migration capabilities.
 
-    Global rate limiting: 300 requests per 60s window (express-rate-limit). Endpoints may return 429 Too Many Requests and include standard rate limit headers (RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset). See x-rate-limit vendor extensions where provided.
-  contact:
-    name: TradingSystem Docs & Ops Guild
 servers:
   - url: http://localhost:3200
-    description: Port 3200 - Library API (Ideas & Docs) - Local development
-  - url: http://tradingsystem.local/api/workspace
-    description: Routed through reverse proxy
+    description: Local development server (Docker container)
+  - url: http://localhost:3103/api/workspace
+    description: Production proxy via Dashboard (future)
+
+tags:
+  - name: Items
+    description: Workspace item management
+  - name: Health
+    description: Service health monitoring
+
 paths:
-  /health:
-    get:
-      summary: Health check
-      description: Returns service and QuestDB connectivity status.
-      tags: [Health]
-      x-rate-limit:
-        window: 15m
-        max: 300
-      responses:
-        '200':
-          description: Service is running
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-        '429':
-          description: Rate limit exceeded
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /metrics:
-    get:
-      summary: Prometheus metrics
-      description: Exposes process, HTTP, and QuestDB metrics in Prometheus text format.
-      tags: [Observability]
-      responses:
-        '200':
-          description: Metrics payload
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: |
-                  # HELP tradingsystem_http_requests_total Total HTTP requests
-                  # TYPE tradingsystem_http_requests_total counter
-                  tradingsystem_http_requests_total{method="GET",status="200"} 42
   /api/items:
     get:
-      summary: List items
-      description: Returns all idea items ordered by creation date (descending).
-      tags: [Items]
+      tags:
+        - Items
+      summary: List all workspace items
+      description: |
+        Retrieves all workspace items with optional filtering by category, status, and priority.
+
+        Results are ordered by creation date (newest first).
+      operationId: getAllItems
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category
+          required: false
+          schema:
+            $ref: '#/components/schemas/WorkspaceCategory'
+        - name: status
+          in: query
+          description: Filter by status
+          required: false
+          schema:
+            $ref: '#/components/schemas/WorkspaceStatus'
+        - name: priority
+          in: query
+          description: Filter by priority
+          required: false
+          schema:
+            $ref: '#/components/schemas/WorkspacePriority'
+        - name: limit
+          in: query
+          description: Maximum number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
       responses:
         '200':
-          description: List of items
+          description: List of workspace items
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListItemsResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceItem'
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    - id: "550e8400-e29b-41d4-a716-446655440000"
+                      title: "Setup TimescaleDB Schema"
+                      description: "Create initial schema for market data storage"
+                      category: "banco-dados"
+                      priority: "alta"
+                      status: "em-progresso"
+                      tags: ["database", "timescaledb", "schema"]
+                      createdAt: "2025-11-05T10:30:00Z"
+                      updatedAt: "2025-11-05T14:20:00Z"
+                    - id: "660e8400-e29b-41d4-a716-446655440001"
+                      title: "Document Workspace API"
+                      description: "Generate OpenAPI specification"
+                      category: "documentacao"
+                      priority: "media"
+                      status: "pendente"
+                      tags: ["api", "documentation", "openapi"]
+                      createdAt: "2025-11-05T09:15:00Z"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     post:
-      summary: Create item
-      description: Creates a new idea item in QuestDB (or LowDB fallback).
-      tags: [Items]
+      tags:
+        - Items
+      summary: Create a new workspace item
+      description: |
+        Creates a new workspace item with auto-generated ID and timestamps.
+
+        **Validation Rules:**
+        - `title` is required (max 200 chars)
+        - `category` must be a valid WorkspaceCategory
+        - `priority` defaults to "media" if not provided
+        - `status` defaults to "pendente" if not provided
+      operationId: createItem
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateItemRequest'
+              $ref: '#/components/schemas/CreateWorkspaceItemPayload'
+            examples:
+              minimal:
+                summary: Minimal required fields
+                value:
+                  title: "Implement Circuit Breaker"
+                  category: "gestao-riscos"
+              full:
+                summary: All fields provided
+                value:
+                  title: "Build Dashboard Layout"
+                  description: "Create responsive grid layout with sidebar navigation"
+                  category: "dashboard"
+                  priority: "alta"
+                  status: "em-progresso"
+                  tags: ["frontend", "react", "ui"]
       responses:
         '201':
           description: Item created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MutateItemResponse'
+                $ref: '#/components/schemas/WorkspaceItem'
+              example:
+                id: "770e8400-e29b-41d4-a716-446655440002"
+                title: "Build Dashboard Layout"
+                description: "Create responsive grid layout with sidebar navigation"
+                category: "dashboard"
+                priority: "alta"
+                status: "em-progresso"
+                tags: ["frontend", "react", "ui"]
+                createdAt: "2025-11-05T15:45:00Z"
         '400':
-          description: Validation error
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/items/{id}:
+    get:
+      tags:
+        - Items
+      summary: Get workspace item by ID
+      description: Retrieves a single workspace item by its UUID.
+      operationId: getItemById
+      parameters:
+        - name: id
+          in: path
+          description: Workspace item UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Workspace item found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /api/items/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Item identifier
-        schema:
-          type: string
+                $ref: '#/components/schemas/WorkspaceItem'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                title: "Setup TimescaleDB Schema"
+                description: "Create initial schema for market data storage"
+                category: "banco-dados"
+                priority: "alta"
+                status: "concluido"
+                tags: ["database", "timescaledb", "schema"]
+                createdAt: "2025-11-05T10:30:00Z"
+                updatedAt: "2025-11-05T16:00:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     put:
-      summary: Update item
-      description: Updates title, description, category, priority, status or tags for an existing item.
-      tags: [Items]
+      tags:
+        - Items
+      summary: Update workspace item
+      description: |
+        Updates an existing workspace item. Only provided fields are updated.
+
+        The `updatedAt` timestamp is automatically set to the current time.
+      operationId: updateItem
+      parameters:
+        - name: id
+          in: path
+          description: Workspace item UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateItemRequest'
+              $ref: '#/components/schemas/UpdateWorkspaceItemPayload'
+            examples:
+              statusUpdate:
+                summary: Update status only
+                value:
+                  status: "concluido"
+              fullUpdate:
+                summary: Update multiple fields
+                value:
+                  title: "Setup TimescaleDB Schema (Updated)"
+                  description: "Create initial schema with hypertables and retention policies"
+                  status: "concluido"
+                  priority: "alta"
+                  tags: ["database", "timescaledb", "schema", "hypertables"]
       responses:
         '200':
           description: Item updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MutateItemResponse'
+                $ref: '#/components/schemas/WorkspaceItem'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                title: "Setup TimescaleDB Schema (Updated)"
+                description: "Create initial schema with hypertables and retention policies"
+                category: "banco-dados"
+                priority: "alta"
+                status: "concluido"
+                tags: ["database", "timescaledb", "schema", "hypertables"]
+                createdAt: "2025-11-05T10:30:00Z"
+                updatedAt: "2025-11-05T16:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
-          description: Item not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     delete:
-      summary: Delete item
-      description: Permanently removes an item from the catalog.
-      tags: [Items]
+      tags:
+        - Items
+      summary: Delete workspace item
+      description: |
+        Permanently deletes a workspace item.
+
+        **Warning:** This operation cannot be undone.
+      operationId: deleteItem
+      parameters:
+        - name: id
+          in: path
+          description: Workspace item UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '204':
+          description: Item deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: |
+        Returns the health status of the Workspace API service.
+
+        **Health indicators:**
+        - Service uptime
+        - Database connection status
+        - Redis connection status (if enabled)
+        - Memory usage
+        - Response time
+      operationId: healthCheck
       responses:
         '200':
-          description: Item deleted successfully
+          description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeleteItemResponse'
-        '404':
-          description: Item not found
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "ok"
+                timestamp: "2025-11-05T17:00:00Z"
+                uptime: 86400
+                database:
+                  status: "connected"
+                  responseTime: 5
+                redis:
+                  status: "connected"
+                  responseTime: 2
+                memory:
+                  used: 125829120
+                  total: 536870912
+                  percentage: 23.4
+        '503':
+          description: Service is unhealthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "error"
+                timestamp: "2025-11-05T17:00:00Z"
+                uptime: 86400
+                database:
+                  status: "disconnected"
+                  error: "Connection refused"
+                redis:
+                  status: "connected"
+                  responseTime: 2
+
 components:
   schemas:
-    HealthResponse:
+    WorkspaceItem:
       type: object
-      properties:
-        status:
-          type: string
-          example: healthy
-        service:
-          type: string
-          example: workspace-api
-        questdb:
-          type: object
-          properties:
-            status:
-              type: string
-              example: connected
-            latencyMs:
-              type: number
-        dbStrategy:
-          type: string
-          enum: [questdb, lowdb]
-          example: questdb
-          description: Current database strategy being used
-        timestamp:
-          type: string
-          format: date-time
-      required:
-        - status
-        - service
-        - dbStrategy
-        - timestamp
-    ListItemsResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        count:
-          type: integer
-          example: 2
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Item'
-      required:
-        - success
-        - count
-        - data
-    MutateItemResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: Item created successfully
-        data:
-          $ref: '#/components/schemas/Item'
-      required:
-        - success
-        - message
-        - data
-    DeleteItemResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        message:
-          type: string
-          example: Item deleted successfully
-      required:
-        - success
-        - message
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: Validation failed
-        errors:
-          type: array
-          items:
-            type: string
-      required:
-        - success
-        - message
-    Item:
-      type: object
-      properties:
-        id:
-          type: string
-          example: "1"
-        title:
-          type: string
-          example: Implementar filtro avançado
-        description:
-          type: string
-        category:
-          type: string
-          enum:
-            - documentacao
-            - coleta-dados
-            - banco-dados
-            - analise-dados
-            - gestao-riscos
-            - dashboard
-        priority:
-          type: string
-          enum:
-            - low
-            - medium
-            - high
-            - critical
-        status:
-          type: string
-          enum:
-            - new
-            - review
-            - in-progress
-            - completed
-            - rejected
-        tags:
-          type: array
-          items:
-            type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
       required:
         - id
         - title
-        - description
         - category
         - priority
         - status
         - tags
         - createdAt
-    CreateItemRequest:
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier (auto-generated)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        title:
+          type: string
+          maxLength: 200
+          description: Item title
+          example: "Setup TimescaleDB Schema"
+        description:
+          type: string
+          description: Detailed description (optional)
+          example: "Create initial schema for market data storage with hypertables"
+        category:
+          $ref: '#/components/schemas/WorkspaceCategory'
+        priority:
+          $ref: '#/components/schemas/WorkspacePriority'
+        status:
+          $ref: '#/components/schemas/WorkspaceStatus'
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags for categorization and search
+          example: ["database", "timescaledb", "schema"]
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp (ISO 8601)
+          example: "2025-11-05T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601, optional)
+          example: "2025-11-05T14:20:00Z"
+
+    CreateWorkspaceItemPayload:
       type: object
       required:
         - title
-        - description
         - category
-        - priority
       properties:
         title:
           type: string
+          maxLength: 200
+          description: Item title
+          example: "Build Dashboard Layout"
         description:
           type: string
+          description: Detailed description (optional)
+          example: "Create responsive grid layout with sidebar navigation"
         category:
-          type: string
-          enum:
-            - documentacao
-            - coleta-dados
-            - banco-dados
-            - analise-dados
-            - gestao-riscos
-            - dashboard
+          $ref: '#/components/schemas/WorkspaceCategory'
         priority:
-          type: string
-          enum:
-            - low
-            - medium
-            - high
-            - critical
+          $ref: '#/components/schemas/WorkspacePriority'
+        status:
+          $ref: '#/components/schemas/WorkspaceStatus'
         tags:
           type: array
           items:
             type: string
-    UpdateItemRequest:
+          description: Tags for categorization and search
+          example: ["frontend", "react", "ui"]
+
+    UpdateWorkspaceItemPayload:
       type: object
       properties:
         title:
           type: string
+          maxLength: 200
+          description: Item title
+          example: "Setup TimescaleDB Schema (Updated)"
         description:
           type: string
+          description: Detailed description
+          example: "Create initial schema with hypertables and retention policies"
         category:
-          type: string
-          enum:
-            - documentacao
-            - coleta-dados
-            - banco-dados
-            - analise-dados
-            - gestao-riscos
-            - dashboard
+          $ref: '#/components/schemas/WorkspaceCategory'
         priority:
-          type: string
-          enum:
-            - low
-            - medium
-            - high
-            - critical
+          $ref: '#/components/schemas/WorkspacePriority'
         status:
-          type: string
-          enum:
-            - new
-            - review
-            - in-progress
-            - completed
-            - rejected
+          $ref: '#/components/schemas/WorkspaceStatus'
         tags:
           type: array
           items:
             type: string
+          description: Tags for categorization and search
+          example: ["database", "timescaledb", "schema", "hypertables"]
+
+    WorkspaceCategory:
+      type: string
+      enum:
+        - documentacao
+        - coleta-dados
+        - banco-dados
+        - analise-dados
+        - gestao-riscos
+        - dashboard
+      description: |
+        Workspace item category:
+        - `documentacao` - Documentation tasks
+        - `coleta-dados` - Data collection tasks
+        - `banco-dados` - Database tasks
+        - `analise-dados` - Data analysis tasks
+        - `gestao-riscos` - Risk management tasks
+        - `dashboard` - Dashboard/UI tasks
+      example: "banco-dados"
+
+    WorkspacePriority:
+      type: string
+      enum:
+        - baixa
+        - media
+        - alta
+        - critica
+      description: |
+        Priority level:
+        - `baixa` - Low priority
+        - `media` - Medium priority (default)
+        - `alta` - High priority
+        - `critica` - Critical priority
+      example: "alta"
+
+    WorkspaceStatus:
+      type: string
+      enum:
+        - pendente
+        - em-progresso
+        - bloqueado
+        - concluido
+        - cancelado
+      description: |
+        Item status:
+        - `pendente` - Pending (default)
+        - `em-progresso` - In progress
+        - `bloqueado` - Blocked
+        - `concluido` - Completed
+        - `cancelado` - Cancelled
+      example: "em-progresso"
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+          description: Overall health status
+          example: "ok"
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+          example: "2025-11-05T17:00:00Z"
+        uptime:
+          type: integer
+          description: Service uptime in seconds
+          example: 86400
+        database:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+            responseTime:
+              type: integer
+              description: Database response time in milliseconds
+              example: 5
+            error:
+              type: string
+              description: Error message if disconnected
+              example: "Connection refused"
+        redis:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+            responseTime:
+              type: integer
+              description: Redis response time in milliseconds
+              example: 2
+        memory:
+          type: object
+          properties:
+            used:
+              type: integer
+              description: Used memory in bytes
+              example: 125829120
+            total:
+              type: integer
+              description: Total memory in bytes
+              example: 536870912
+            percentage:
+              type: number
+              format: float
+              description: Memory usage percentage
+              example: 23.4
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Item not found"
+        details:
+          type: string
+          description: Additional error details
+          example: "No item found with ID: 550e8400-e29b-41d4-a716-446655440000"
+        code:
+          type: string
+          description: Error code
+          example: "NOT_FOUND"
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            missingField:
+              summary: Missing required field
+              value:
+                error: "Validation error"
+                details: "Field 'title' is required"
+                code: "VALIDATION_ERROR"
+            invalidEnum:
+              summary: Invalid enum value
+              value:
+                error: "Validation error"
+                details: "Invalid category. Must be one of: documentacao, coleta-dados, banco-dados, analise-dados, gestao-riscos, dashboard"
+                code: "INVALID_ENUM"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Item not found"
+            details: "No item found with ID: 550e8400-e29b-41d4-a716-446655440000"
+            code: "NOT_FOUND"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal server error"
+            details: "Database connection failed"
+            code: "INTERNAL_ERROR"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT authentication (planned for future versions).
+
+        **Not currently implemented** - all endpoints are open.
+
+# Future security requirement (not yet implemented)
+# security:
+#   - BearerAuth: []

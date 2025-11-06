@@ -12,6 +12,11 @@
 **Database:** TimescaleDB (port 7032)
 **Technology:** Express.js + TypeScript + React (UI)
 
+**📚 Interactive API Documentation:**
+- **OpenAPI 3.0 Spec:** [docs/static/specs/workspace.openapi.yaml](../../docs/static/specs/workspace.openapi.yaml)
+- **Redocusaurus UI:** http://localhost:3404/api/workspace (when docs are running)
+- **Try it out:** Interactive request builder with examples
+
 ## Architecture
 
 ### System Architecture Diagram

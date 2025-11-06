@@ -10,11 +10,13 @@
 
 | API | Port | Status | Documentação | Testes | Monitoramento |
 |-----|------|--------|--------------|--------|---------------|
-| Workspace API | 3200 | ✅ Ativo | ⚠️ Parcial | ⚠️ Básico | ✅ Prometheus |
+| Workspace API | 3200 | ✅ Ativo | ✅ **OpenAPI 3.0** | ⚠️ Básico | ✅ Prometheus |
 | TP Capital | 4005 | ✅ Ativo | ⚠️ Parcial | ⚠️ Básico | ✅ Prometheus |
 | Documentation API | 3405 | ✅ Ativo | ❌ Mínima | ❌ Nenhum | ⚠️ Parcial |
 | Service Launcher | 3500 | ✅ Ativo | ⚠️ Parcial | ❌ Nenhum | ⚠️ Parcial |
 | Firecrawl Proxy | 3600 | ✅ Ativo | ❌ Mínima | ❌ Nenhum | ❌ Nenhum |
+
+**Latest:** ✅ Workspace API OpenAPI 3.0 spec completed (2025-11-05) - View at http://localhost:3404/api/workspace
 
 ### Pontos Fortes
 

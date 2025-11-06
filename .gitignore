@@ -232,6 +232,9 @@ frontend/apps/dashboard/public/docs/
 docs/content/governance/index.mdx
 governance/index.md
 
+# Auto-generated design tokens (from tailwind.config.js)
+docs/content/frontend/design-system/tokens.mdx
+
 # ============================================
 # Temporary & Status Files
 # ============================================
