@@ -1,10 +1,20 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-await import('../../../shared/config/load-env.js').catch((error) => {
-  if (error?.code !== 'ERR_MODULE_NOT_FOUND') {
-    throw error;
-  }
-});
+import dotenv from 'dotenv';
+
+// Load .env from project root FIRST (before any process.env usage)
+const __configFilename = fileURLToPath(import.meta.url);
+const __configDirname = path.dirname(__configFilename);
+const __projectRoot = path.resolve(__configDirname, '..', '..', '..', '..');
+const envPath = path.join(__projectRoot, '.env');
+
+console.log(`[Gateway API Config] Loading .env from: ${envPath}`);
+const dotenvResult = dotenv.config({ path: envPath });
+if (dotenvResult.error) {
+  console.warn(`[Gateway API Config] Warning: ${dotenvResult.error.message}`);
+} else {
+  console.log('[Gateway API Config] .env loaded successfully');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
