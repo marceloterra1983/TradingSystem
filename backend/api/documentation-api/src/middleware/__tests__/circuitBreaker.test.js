@@ -69,11 +69,14 @@ describe('Circuit Breaker Middleware', () => {
       });
       const breaker = createCircuitBreaker(mockFn, 'Test Service');
       
+      // Disable fallback to avoid unhandled rejection in tests
+      breaker.fallback(() => null);
+      
       // Trigger a single failure
       try {
         await breaker.fire();
       } catch (error) {
-        // Expected failure
+        // Expected failure - either from mockFn or fallback
       }
       
       const stats = getCircuitBreakerStats(breaker);
