@@ -99,40 +99,112 @@ jobs:
           docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master
           sleep 10
       
+      - name: Create logs directory
+        run: mkdir -p logs
+      
       - name: Start Gateway MTProto (background)
         working-directory: apps/telegram-gateway
         run: |
           npm start > ../../logs/gateway-mtproto-ci.log 2>&1 &
-          sleep 5
+          echo $! > ../../logs/gateway-mtproto.pid
       
       - name: Start Gateway API (background)
         working-directory: backend/api/telegram-gateway
         run: |
           npm start > ../../../logs/gateway-api-ci.log 2>&1 &
-          sleep 5
+          echo $! > ../../../logs/gateway-api.pid
       
       - name: Start Dashboard (background)
         working-directory: frontend/dashboard
         run: |
           npm run dev > ../../logs/dashboard-ci.log 2>&1 &
-          sleep 10
+          echo $! > ../../logs/dashboard.pid
       
       # ==============================================================================
       # Health Checks
       # ==============================================================================
       
-      - name: Verify services are running
+      - name: Wait for Dashboard to be ready
         run: |
-          echo "Checking Dashboard..."
-          curl -f http://localhost:3103 || exit 1
+          echo "Waiting for Dashboard to start..."
+          max_attempts=30
+          attempt=0
           
-          echo "Checking Gateway API..."
-          curl -f http://localhost:4010/health || exit 1
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:3103 > /dev/null 2>&1; then
+              echo "✅ Dashboard is ready!"
+              exit 0
+            fi
+            
+            echo "Attempt $((attempt + 1))/$max_attempts - Dashboard not ready yet..."
+            sleep 2
+            attempt=$((attempt + 1))
+          done
           
-          echo "Checking Gateway MTProto..."
-          curl -f http://localhost:4007/health || exit 1
+          echo "❌ Dashboard failed to start after 60 seconds"
+          echo "--- Dashboard logs ---"
+          cat logs/dashboard-ci.log 2>/dev/null || echo "No logs found"
+          exit 1
+      
+      - name: Wait for Gateway API to be ready
+        run: |
+          echo "Waiting for Gateway API to start..."
+          max_attempts=20
+          attempt=0
           
-          echo "✅ All services healthy"
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:4010/health > /dev/null 2>&1; then
+              echo "✅ Gateway API is ready!"
+              break
+            fi
+            
+            echo "Attempt $((attempt + 1))/$max_attempts - Gateway API not ready yet..."
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Gateway API failed to start"
+            cat logs/gateway-api-ci.log 2>/dev/null || echo "No logs found"
+            exit 1
+          fi
+      
+      - name: Wait for Gateway MTProto to be ready
+        run: |
+          echo "Waiting for Gateway MTProto to start..."
+          max_attempts=20
+          attempt=0
+          
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f http://localhost:4007/health > /dev/null 2>&1; then
+              echo "✅ Gateway MTProto is ready!"
+              break
+            fi
+            
+            echo "Attempt $((attempt + 1))/$max_attempts - Gateway MTProto not ready yet..."
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Gateway MTProto failed to start"
+            cat logs/gateway-mtproto-ci.log 2>/dev/null || echo "No logs found"
+            exit 1
+          fi
+      
+      - name: Verify all services are running
+        run: |
+          echo "Final health check..."
+          echo "✅ Dashboard: http://localhost:3103"
+          curl -f http://localhost:3103 > /dev/null || exit 1
+          
+          echo "✅ Gateway API: http://localhost:4010/health"
+          curl -f http://localhost:4010/health > /dev/null || exit 1
+          
+          echo "✅ Gateway MTProto: http://localhost:4007/health"
+          curl -f http://localhost:4007/health > /dev/null || exit 1
+          
+          echo "🎉 All services healthy and ready for E2E tests!"
       
       # ==============================================================================
       # Run E2E Tests
