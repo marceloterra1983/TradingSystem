@@ -95,7 +95,7 @@ jobs:
           cat > .env << 'EOF'
           TELEGRAM_DB_USER=telegram
           TELEGRAM_DB_PASSWORD=test_password
-          TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:test_password@localhost:5434/telegram_gateway?sslmode=disable
+          TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:test_password@127.0.0.1:5434/telegram_gateway?sslmode=disable
           TELEGRAM_GATEWAY_API_KEY=test_api_key_for_ci
           TELEGRAM_GATEWAY_API_TOKEN=test_api_token_for_ci
           API_SECRET_TOKEN=test_secret_token_for_ci
@@ -138,9 +138,9 @@ jobs:
           docker exec telegram-timescale psql -U telegram -d telegram_gateway -c "SELECT version();" || echo "Warning: Could not connect to database (inside container)"
           
           # CRITICAL: Test connection from HOST via port mapping (this is what Node.js will use)
-          echo "Testing external connection via localhost:5434..."
+          echo "Testing external connection via 127.0.0.1:5434 (IPv4 forced)..."
           for i in {1..30}; do
-            if PGPASSWORD=test_password psql -h localhost -p 5434 -U telegram -d telegram_gateway -c "SELECT 1;" 2>&1 | tee psql_output.log | grep -q "1 row"; then
+            if PGPASSWORD=test_password psql -h 127.0.0.1 -p 5434 -U telegram -d telegram_gateway -c "SELECT 1;" 2>&1 | tee psql_output.log | grep -q "1 row"; then
               echo "✅ External connection successful!"
               break
             fi
