@@ -7,12 +7,14 @@ on:
       - 'frontend/dashboard/**'
       - 'apps/telegram-gateway/**'
       - 'backend/api/telegram-gateway/**'
+      - '.github/workflows/e2e-telegram-gateway.yml'  # Trigger on workflow changes
   pull_request:
     branches: [main, develop]
     paths:
       - 'frontend/dashboard/**'
       - 'apps/telegram-gateway/**'
       - 'backend/api/telegram-gateway/**'
+      - '.github/workflows/e2e-telegram-gateway.yml'
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
