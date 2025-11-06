@@ -69,11 +69,11 @@ services:
           memory: 1G
     
     healthcheck:
-      test: ['CMD', 'pg_isready', '-U', '${TELEGRAM_DB_USER:-telegram}', '-d', 'telegram_gateway']
+      test: ['CMD-SHELL', 'pg_isready -U telegram -d telegram_gateway && psql -U telegram -d telegram_gateway -c "SELECT 1" > /dev/null 2>&1']
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
     
     networks:
       - telegram_backend
