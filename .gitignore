@@ -228,6 +228,10 @@ backups/rename-containers-*/env-backup/
 # ============================================
 frontend/apps/dashboard/public/docs/
 
+# Auto-generated governance index files (regenerated automatically)
+docs/content/governance/index.mdx
+governance/index.md
+
 # ============================================
 # Temporary & Status Files
 # ============================================
