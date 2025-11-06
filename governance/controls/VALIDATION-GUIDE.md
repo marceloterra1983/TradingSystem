@@ -224,7 +224,7 @@ npm run docs:test
 **Validation**:
 - [ ] All tests pass (10/10 or more)
 - [ ] No test failures or errors
-- [ ] Test execution time acceptable (<10 seconds)
+- [ ] Test execution time acceptable (under 10 seconds)
 
 **If Fails**:
 - Review test output for specific failures
