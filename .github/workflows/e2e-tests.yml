@@ -143,7 +143,13 @@ jobs:
       - name: Merge reports
         working-directory: frontend/dashboard
         run: |
-          npx playwright merge-reports --reporter html ../../all-reports/*
+          if [ -d "../../all-reports" ] && [ "$(ls -A ../../all-reports)" ]; then
+            npx playwright merge-reports --reporter html,json ../../all-reports
+          else
+            echo "⚠️  No test results to merge (skipping)"
+            mkdir -p playwright-report
+            echo "<html><body><h1>No tests executed</h1></body></html>" > playwright-report/index.html
+          fi
 
       - name: Upload merged report
         uses: actions/upload-artifact@v4
