@@ -115,16 +115,34 @@ jobs:
         run: |
           docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master
           
-          # Wait for TimescaleDB to be ready
+          # Wait for TimescaleDB to be ready (using postgres user first)
           echo "Waiting for TimescaleDB to be ready..."
           for i in {1..30}; do
-            if docker exec telegram-timescale pg_isready -U telegram > /dev/null 2>&1; then
+            if docker exec telegram-timescale pg_isready -U postgres > /dev/null 2>&1; then
               echo "✅ TimescaleDB is ready!"
               break
             fi
             echo "Attempt $i/30..."
             sleep 2
           done
+          
+          # Create user and database (idempotent)
+          echo "Setting up telegram user and database..."
+          docker exec telegram-timescale psql -U postgres -c "
+            DO \$\$
+            BEGIN
+               IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'telegram') THEN
+                  CREATE ROLE telegram WITH LOGIN PASSWORD 'test_password';
+               END IF;
+            END
+            \$\$;
+            
+            ALTER DATABASE telegram_gateway OWNER TO telegram;
+            GRANT ALL PRIVILEGES ON DATABASE telegram_gateway TO telegram;
+            GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO telegram;
+            GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO telegram;
+            GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO telegram;
+          " || echo "Warning: Some permissions might have failed (expected if objects don't exist yet)"
           
           # Verify database is accessible
           docker ps | grep telegram
