@@ -42,22 +42,27 @@ jobs:
       - name: Verify generated artifacts are in sync
         run: |
           npm run ports:sync
-          # Ignore timestamp-only changes and mode changes in generated files
-          git diff --ignore-matching-lines='^# Generated:' \
-                   --ignore-matching-lines='^x-tradingsystem-generated-at:' \
-                   --ignore-matching-lines='generatedAt:' \
-                   --ignore-matching-lines='"generatedAt"' \
-                   --ignore-matching-lines='Última geração:' \
-                   --ignore-matching-lines='Last generated:' \
-                   --ignore-matching-lines='^old mode' \
-                   --ignore-matching-lines='^new mode' > /tmp/filtered-diff.txt
-          if [ -s /tmp/filtered-diff.txt ]; then
-            echo "❌ Generated files out of sync (excluding timestamps). Run: npm run ports:sync"
-            cat /tmp/filtered-diff.txt
+          # Check for real content changes (ignore timestamps and mode)
+          git diff --numstat | while read additions deletions file; do
+            # Ignore if only mode changed (0 additions, 0 deletions)
+            if [ "$additions" != "0" ] || [ "$deletions" != "0" ]; then
+              # Check if changes are only timestamps
+              if git diff "$file" | grep -v "^[+-].*Generated\|^[+-].*generatedAt\|^[+-].*Última geração\|^[+-].*Last generated" | grep -q "^[+-]"; then
+                echo "Real content change detected in: $file"
+                echo "$additions insertions, $deletions deletions"
+                exit 1
+              fi
+            fi
+          done
+          
+          if [ $? -eq 1 ]; then
+            echo "❌ Generated files out of sync (real content changes). Run: npm run ports:sync"
+            git diff --stat
             git status -sb
             exit 1
           fi
-          echo "✅ Generated files are in sync (timestamps updated)"
+          
+          echo "✅ Generated files are in sync (only timestamps/mode updated)"
 
       - name: Scan for hardcoded ports
         run: npm run ports:scan-hardcoded
