@@ -87,6 +87,8 @@ jobs:
           TELEGRAM_DB_USER=telegram
           TELEGRAM_DB_PASSWORD=test_password
           TELEGRAM_GATEWAY_API_KEY=test_api_key_for_ci
+          TELEGRAM_GATEWAY_API_TOKEN=test_api_token_for_ci
+          API_SECRET_TOKEN=test_secret_token_for_ci
           TELEGRAM_RABBITMQ_PASSWORD=test_rabbitmq_password
           EOF
       
