@@ -249,6 +249,7 @@ docs/content/frontend/design-system/tokens.mdx
 /STATUS-*.md
 /VALIDATION-*.md
 /FREEZE-*.md
+!FREEZE-NOTICE.md
 /QUICK-START-*.md
 !CHANGELOG.md
 !README.md
