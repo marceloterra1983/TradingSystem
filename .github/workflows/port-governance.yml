@@ -46,10 +46,11 @@ jobs:
           git diff --numstat | while read additions deletions file; do
             # Ignore if only mode changed (0 additions, 0 deletions)
             if [ "$additions" != "0" ] || [ "$deletions" != "0" ]; then
-              # Check if changes are only timestamps
-              if git diff "$file" | grep -v "^[+-].*Generated\|^[+-].*generatedAt\|^[+-].*Última geração\|^[+-].*Last generated" | grep -q "^[+-]"; then
+              # Check if changes are only timestamps (filter out diff headers too)
+              if git diff "$file" | grep "^[+-]" | grep -v "^---\|^+++\|^[+-].*Generated\|^[+-].*generatedAt\|^[+-].*Última geração\|^[+-].*Last generated" | grep -q .; then
                 echo "Real content change detected in: $file"
                 echo "$additions insertions, $deletions deletions"
+                git diff "$file"
                 exit 1
               fi
             fi
