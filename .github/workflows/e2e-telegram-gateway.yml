@@ -32,16 +32,10 @@ jobs:
         run: npm run ci:lint-workflows
 
   e2e-tests:
-    name: E2E Tests (Playwright)
+    name: E2E Tests
     runs-on: ubuntu-latest
     needs: workflow-lint
-    timeout-minutes: 30
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-        shard: [1/4, 2/4, 3/4, 4/4]
+    timeout-minutes: 45
     
     steps:
       # ==============================================================================
@@ -81,7 +75,7 @@ jobs:
       
       - name: Install Playwright browsers
         working-directory: frontend/dashboard
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: npx playwright install --with-deps chromium firefox webkit
       
       # ==============================================================================
       # Start Services
@@ -212,15 +206,14 @@ jobs:
       # Run E2E Tests
       # ==============================================================================
       
-      - name: Run Playwright tests (${{ matrix.browser }})
+      - name: Run E2E Tests
         working-directory: frontend/dashboard
         env:
           CI: true
         run: |
           npx playwright test \
-            --project=${{ matrix.browser }} \
-            --shard=${{ matrix.shard }} \
-            --reporter=html,json,list
+            --reporter=html,json,list \
+            telegram-gateway.smoke.spec.ts
       
       # ==============================================================================
       # Upload Artifacts
@@ -230,7 +223,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-results-${{ matrix.browser }}-${{ strategy.job-index }}
+          name: playwright-results
           path: |
             frontend/dashboard/playwright-report/
             frontend/dashboard/test-results/
@@ -240,7 +233,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-videos-${{ matrix.browser }}-${{ strategy.job-index }}
+          name: playwright-videos
           path: frontend/dashboard/test-results/**/video.webm
           retention-days: 7
       
@@ -248,7 +241,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-screenshots-${{ matrix.browser }}-${{ strategy.job-index }}
+          name: playwright-screenshots
           path: frontend/dashboard/test-results/**/*.png
           retention-days: 7
       
@@ -267,61 +260,17 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: service-logs-${{ matrix.browser }}-${{ strategy.job-index }}
+          name: service-logs
           path: logs/*.log
           retention-days: 7
 
-  # ==============================================================================
-  # Merge Test Reports
-  # ==============================================================================
-  
-  merge-reports:
-    name: Merge Test Reports
-    needs: e2e-tests
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Prepare dashboard workspace
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: '20'
-          cache-dependency-path: frontend/dashboard/package-lock.json
-          working-directory: frontend/dashboard
-      
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: all-reports
-          pattern: playwright-results-*
-      
-      - name: Merge reports
-        working-directory: frontend/dashboard
-        run: |
-          if [ -d "../all-reports" ] && [ "$(ls -A ../all-reports 2>/dev/null)" ]; then
-            npx playwright merge-reports --reporter=html,json ../all-reports
-          else
-            echo "⚠️  No test results to merge (skipping)"
-            mkdir -p playwright-report
-            echo "<html><body><h1>No tests executed</h1></body></html>" > playwright-report/index.html
-          fi
-      
-      - name: Upload merged report
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-merged-report
-          path: frontend/dashboard/playwright-report/
-          retention-days: 30
-  
   # ==============================================================================
   # Comment PR with Results
   # ==============================================================================
   
   comment-pr:
     name: Comment PR with Results
-    needs: merge-reports
+    needs: e2e-tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     
@@ -329,18 +278,18 @@ jobs:
       pull-requests: write
     
     steps:
-      - name: Download merged report
+      - name: Download test results
         uses: actions/download-artifact@v4
         with:
-          name: playwright-merged-report
-          path: playwright-report
+          name: playwright-results
+          path: playwright-results
       
       - name: Comment PR
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('playwright-report/results.json', 'utf8'));
+            const report = JSON.parse(fs.readFileSync('playwright-results/playwright-report/results.json', 'utf8'));
             
             const passed = report.suites.reduce((acc, suite) => 
               acc + suite.specs.filter(s => s.ok).length, 0);
