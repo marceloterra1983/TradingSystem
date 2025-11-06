@@ -89,7 +89,7 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 -   **Documentation Hub**: http://localhost:${DOCS_PORT:-3404? can't use variable}. We'll just set 3404.
 -   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
 -   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
--   **Documentation API**: http://localhost:3401 (Express + FlexSearch + RAG Proxy)
+-   **Documentation API**: http://localhost:3405 (Express + FlexSearch + RAG Proxy)
 -   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
 -   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system)
