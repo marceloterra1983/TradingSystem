@@ -59,6 +59,11 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
       
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+      
       # ==============================================================================
       # Install Dependencies
       # ==============================================================================
@@ -129,8 +134,19 @@ jobs:
           # Verify database is accessible
           docker ps | grep telegram
           
-          # Test connection with telegram user
-          docker exec telegram-timescale psql -U telegram -d telegram_gateway -c "SELECT version();" || echo "Warning: Could not connect to database"
+          # Test connection with telegram user (inside container)
+          docker exec telegram-timescale psql -U telegram -d telegram_gateway -c "SELECT version();" || echo "Warning: Could not connect to database (inside container)"
+          
+          # CRITICAL: Test connection from HOST via port mapping (this is what Node.js will use)
+          echo "Testing external connection via localhost:5434..."
+          for i in {1..30}; do
+            if PGPASSWORD=test_password psql -h localhost -p 5434 -U telegram -d telegram_gateway -c "SELECT 1;" > /dev/null 2>&1; then
+              echo "✅ External connection successful!"
+              break
+            fi
+            echo "Attempt $i/30 - External connection not ready..."
+            sleep 2
+          done
       
       - name: Create logs directory
         run: mkdir -p logs
