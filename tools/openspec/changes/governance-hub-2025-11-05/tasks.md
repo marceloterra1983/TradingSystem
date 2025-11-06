@@ -27,6 +27,7 @@
 - [ ] 4.3 Atualizar `docs/sidebars.js` para usar dados gerados (script).
 - [ ] 4.4 Adicionar checagem de freshness na CI (falha se >10% dos itens acima de 90 dias sem action plan).
 - [ ] 4.5 Publicar dashboard JSON em `reports/governance/latest.json` para consumo de agentes/CLI.
+- [ ] 4.6 Monitorar os próximos PRs de docs para medir o tempo total após a reutilização do `docs-validation` (registrar duração e gargalos em `reports/governance/latest.json`) e, se ficar redundante com `docs-validation` standalone, propor remoção do trigger de PR em `docs-deploy`.
 
 ## Phase 5 – Knowledge Frontend (3 dias)
 - [ ] 5.1 Criar endpoint/recurso compartilhado (`reports/governance/latest.json`) acessível pelo dashboard e versionado em build.

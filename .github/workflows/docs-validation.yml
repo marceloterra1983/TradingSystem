@@ -18,6 +18,12 @@ on:
       - 'scripts/docs/**'
       - '.github/workflows/docs-validation.yml'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      skip_freeze_guard:
+        description: 'Set to true to skip the freeze guard when reusing this workflow.'
+        required: false
+        type: boolean
 
 permissions:
   contents: read
@@ -35,7 +41,14 @@ jobs:
       - id: detect
         name: Detect freeze status
         shell: bash
+        env:
+          SKIP_FREEZE_GUARD: ${{ github.event_name == 'workflow_call' && inputs.skip_freeze_guard || 'false' }}
         run: |
+          if [ "$SKIP_FREEZE_GUARD" = "true" ]; then
+            echo "active=false" >> "$GITHUB_OUTPUT"
+            echo "Freeze guard skipped via reusable workflow input"
+            exit 0
+          fi
           if [ ! -f FREEZE-NOTICE.md ]; then
             echo "active=false" >> "$GITHUB_OUTPUT"
             echo "No FREEZE-NOTICE.md file found - proceeding normally"

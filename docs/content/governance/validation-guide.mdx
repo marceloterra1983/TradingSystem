@@ -862,12 +862,15 @@ python scripts/docs/validate-frontmatter.py \
 - **docs-audit-scheduled.yml** - Daily health monitoring and metrics
 
 **Status Checks**: Required status checks configured in branch protection:
+- `workflow-lint` - Global actionlint gate (`Workflow Lint / lint` job)
 - `validate-frontmatter` - Frontmatter validation must pass
 - `maintenance-audit` - Audit must pass (threshold: 10 issues)
 - `docs-check` - Full build pipeline must pass
 - `docs-links` - Link validation must pass
 - `build-docs` - Deployment build must pass
 - `validate-links` - Comprehensive link validation must pass
+
+> **How to add**: Settings → Branches → `main` protection rule → *Edit* → under **Status checks that are required**, enable “Workflow Lint / lint” (and leave the existing docs checks). Repeat for `develop` once the rule is duplicated.
 
 **Slack Notifications**: Failures automatically notify team via Slack webhook.
 

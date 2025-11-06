@@ -26,9 +26,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  workflow-lint:
+    name: Workflow Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node workspace
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: '20'
+          cache-dependency-path: package-lock.json
+      - name: Run workflow lint
+        run: npm run ci:lint-workflows
+
   validate-env-structure:
     name: Validate .env Structure
     runs-on: ubuntu-latest
+    needs: workflow-lint
     
     steps:
       - name: Checkout code
@@ -96,6 +111,7 @@ jobs:
   check-env-examples:
     name: Check .env.example Files
     runs-on: ubuntu-latest
+    needs: workflow-lint
     
     steps:
       - name: Checkout code
@@ -143,6 +159,7 @@ jobs:
   validate-env-consistency:
     name: Validate Environment Consistency
     runs-on: ubuntu-latest
+    needs: workflow-lint
     
     steps:
       - name: Checkout code
@@ -220,4 +237,3 @@ jobs:
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📖 [Configuration Rules](config/ENV-CONFIGURATION-RULES.md)" >> $GITHUB_STEP_SUMMARY
-

@@ -104,59 +104,11 @@ jobs:
         with:
           artifact_name: docs-build
 
-  link-check:
-    name: Check for Broken Links
-    runs-on: ubuntu-latest
+  docs-validation:
+    name: Docs Validation Suite
     needs: freeze_guard
     if: github.event_name == 'pull_request' && needs.freeze_guard.outputs.active != 'true'
-    defaults:
-      run:
-        working-directory: docs
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Prepare docs workspace
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: '18'
-          cache-dependency-path: docs/package-lock.json
-          working-directory: docs
-
-      - name: Build documentation site
-        run: npm run docs:build
-
-      - name: Check for broken links
-        uses: lycheeverse/lychee-action@v1
-        with:
-          args: --verbose --no-progress './docs/build/**/*.html'
-          fail: true
-
-  validate-frontmatter:
-    name: Validate Front Matter
-    runs-on: ubuntu-latest
-    needs: freeze_guard
-    if: github.event_name == 'pull_request' && needs.freeze_guard.outputs.active != 'true'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Prepare Python environment
-        uses: ./.github/actions/setup-python
-        with:
-          python-version: '3.11'
-          cache-dependency-path: requirements-docs.txt
-          install-command: pip install -r requirements-docs.txt
-
-      - name: Prepare reports directory
-        run: mkdir -p docs/reports
-
-      - name: Validate frontmatter with Python script
-        run: |
-          python scripts/docs/validate-frontmatter.py \
-            --schema v2 \
-            --docs-dir ./docs/content \
-            --output ./docs/reports/frontmatter-validation-deploy.json \
-            --verbose
+    uses: ./.github/workflows/docs-validation.yml
+    with:
+      skip_freeze_guard: true
+    secrets: inherit

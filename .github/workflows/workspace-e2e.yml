@@ -39,6 +39,19 @@ env:
   DASHBOARD_PORT: 3103
 
 jobs:
+  workflow-lint:
+    name: Workflow Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node workspace
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: package-lock.json
+      - name: Run workflow lint
+        run: npm run ci:lint-workflows
+
   # ===========================================================================
   # JOB 1: Smoke Tests (Fast validation)
   # ===========================================================================
@@ -46,21 +59,18 @@ jobs:
     name: Smoke Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: workflow-lint
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare dashboard dependencies
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
           cache-dependency-path: frontend/dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend/dashboard
-        run: npm ci
+          working-directory: frontend/dashboard
 
       - name: Install Playwright browsers
         working-directory: frontend/dashboard
@@ -105,16 +115,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare dashboard dependencies
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
           cache-dependency-path: frontend/dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend/dashboard
-        run: npm ci
+          working-directory: frontend/dashboard
 
       - name: Install Playwright browsers
         working-directory: frontend/dashboard
@@ -158,16 +164,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare dashboard dependencies
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
           cache-dependency-path: frontend/dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend/dashboard
-        run: npm ci
+          working-directory: frontend/dashboard
 
       - name: Install Playwright browsers
         working-directory: frontend/dashboard
@@ -211,16 +213,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Prepare dashboard dependencies
+        uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
           cache-dependency-path: frontend/dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend/dashboard
-        run: npm ci
+          working-directory: frontend/dashboard
 
       - name: Install Playwright browsers
         working-directory: frontend/dashboard
@@ -276,4 +274,3 @@ jobs:
           echo "| Functional Tests | ${{ needs.functional-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Visual Tests | ${{ needs.visual-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Accessibility Tests | ${{ needs.accessibility-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-

@@ -1,0 +1,29 @@
+name: Workflow Lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Workflow Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node workspace
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: '20'
+          cache-dependency-path: package-lock.json
+
+      - name: Run actionlint wrapper
+        run: npm run ci:lint-workflows

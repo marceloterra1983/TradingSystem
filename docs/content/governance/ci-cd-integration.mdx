@@ -80,7 +80,7 @@ docs-code-sync-validation.yml (PRs touching code)
   5. **Docs Links** – reuses the build artifact to execute `npm run docs:links`.
   6. **Notify Slack** – posts failures to the DocsOps Slack channel via webhook.
   7. **Validation Summary** – emits a GitHub Step Summary with per-job status and artifact pointers.
-- **Status checks** (branch protection): `validate-frontmatter`, `maintenance-audit`, `docs-check`, `docs-links`.
+- **Status checks** (branch protection): `workflow-lint`, `validate-frontmatter`, `maintenance-audit`, `docs-check`, `docs-links`.
 - **Artifacts** (7 days retention): frontmatter validation JSON, maintenance audit report, docs build, docs link log.
 - **Runtime**: ~10–15 minutes depending on link validation scope.
 
@@ -95,7 +95,7 @@ docs-code-sync-validation.yml (PRs touching code)
   3. **Deploy Docs** – publishes to GitHub Pages (`main` branch pushes only).
   4. **Link Check** – executes Lychee for HTML link validation on PRs.
   5. **Validate Frontmatter** – uses the Python validator for PRs (shared with validation workflow).
-- **Status checks**: `build-docs`, `validate-frontmatter`.
+- **Status checks**: `workflow-lint`, `build-docs`, `validate-frontmatter`.
 - **Artifacts**: `docs-build` uploaded for deployment; retained per GitHub Pages defaults.
 - **Runtime**: ~5–8 minutes.
 
@@ -393,7 +393,14 @@ npm run docs:links
 
 ---
 
-## 11. Related Documentation
+## 11. Branch Protection Upkeep
+
+1. Navigate to **Settings → Branches → Branch protection rules** and edit the `main` rule.
+2. In **Status checks that are required**, add “Workflow Lint / lint” alongside the docs jobs listed above.
+3. Mirror the same configuration for `develop` (or any other protected branches).
+4. After saving, rerun any open PR to confirm the `workflow-lint` check appears before downstream jobs start.
+
+## 12. Related Documentation
 
 - [VALIDATION-GUIDE](./VALIDATION-GUIDE.md) – Manual validation playbook.
 - [MAINTENANCE-CHECKLIST](./MAINTENANCE-CHECKLIST.md) – Quarterly maintenance SOP.
