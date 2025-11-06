@@ -428,7 +428,7 @@ Outdated documents (> 90 days): 0
 - [ ] All files have frontmatter (135/135)
 - [ ] All required fields present (title, description, tags, owner, lastReviewed)
 - [ ] All owner values valid (in ALLOWED_OWNERS)
-- [ ] All lastReviewed dates current (<90 days) or intentionally accepted
+- [ ] All lastReviewed dates current (under 90 days) or intentionally accepted
 - [ ] No invalid date formats
 
 **If Fails**:
