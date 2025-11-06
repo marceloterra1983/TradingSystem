@@ -114,7 +114,7 @@ jobs:
           # Wait for TimescaleDB to be ready
           echo "Waiting for TimescaleDB to be ready..."
           for i in {1..30}; do
-            if docker exec telegram-timescaledb pg_isready -U telegram > /dev/null 2>&1; then
+            if docker exec telegram-timescale pg_isready -U telegram > /dev/null 2>&1; then
               echo "✅ TimescaleDB is ready!"
               break
             fi
