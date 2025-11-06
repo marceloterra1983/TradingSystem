@@ -78,18 +78,21 @@ jobs:
       - name: Compare with Base
         if: github.event_name == 'pull_request'
         working-directory: frontend/dashboard
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           # Checkout base branch
-          git fetch origin ${{ github.base_ref }}
-          git checkout origin/${{ github.base_ref }}
-          
+          git fetch origin "$BASE_REF"
+          git checkout "origin/$BASE_REF"
+
           # Build base
           npm ci
           npm run build
           BASE_SIZE=$(du -sb dist | cut -f1)
-          
+
           # Checkout PR branch
-          git checkout ${{ github.head_ref }}
+          git checkout "$HEAD_REF"
           npm ci
           npm run build
           PR_SIZE=$(du -sb dist | cut -f1)
@@ -112,4 +115,3 @@ jobs:
         run: |
           echo "❌ Bundle size exceeds budget!"
           exit 1
-

@@ -5,6 +5,11 @@ import { jest } from '@jest/globals';
  * Global configuration and mocks for all tests
  */
 
+// Ensure Jest globals exist when running in pure ESM mode
+if (!globalThis.jest) {
+  globalThis.jest = jest;
+}
+
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 process.env.LIBRARY_DB_STRATEGY = 'lowdb';

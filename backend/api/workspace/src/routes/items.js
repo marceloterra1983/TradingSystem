@@ -43,6 +43,10 @@ export const getWorkspaceService = () => {
   return workspaceService;
 };
 
+export const resetWorkspaceService = () => {
+  workspaceService = null;
+};
+
 // ============================================================================
 // ROUTES
 // ============================================================================
@@ -203,5 +207,4 @@ router.get('/stats', async (req, res, next) => {
 });
 
 export const itemsRouter = router;
-
 

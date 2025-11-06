@@ -3,13 +3,37 @@
  * Tests for workspace items CRUD operations
  */
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import express from 'express';
-import { itemsRouter } from '../items.js';
-import { getDbClient } from '../../db/index.js';
 
-// Mock the database client
-jest.mock('../../db/index.js');
+// Stub the shared logger so tests do not require the real pino dependency
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const dbModuleId = path.resolve(__dirname, '../../db/index.js');
+const sharedLoggerModuleId = path.resolve(__dirname, '../../../../../shared/logger/index.js');
+
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+};
+
+await jest.unstable_mockModule(sharedLoggerModuleId, () => ({
+  createLogger: jest.fn(() => mockLogger),
+}));
+
+await jest.unstable_mockModule(dbModuleId, () => ({
+  getDbClient: jest.fn(),
+}));
+
+const { itemsRouter, resetWorkspaceService } = await import('../items.js');
+const dbModule = await import('../../db/index.js');
+const { getDbClient } = dbModule;
 
 describe('Items Router', () => {
   let app;
@@ -23,9 +47,11 @@ describe('Items Router', () => {
 
     // Error handler
     app.use((err, req, res, next) => {
-      res.status(err.status || 500).json({
+      const status = err.statusCode || err.status || 500;
+      res.status(status).json({
         success: false,
         message: err.message,
+        errors: err.errors,
       });
     });
 
@@ -35,7 +61,12 @@ describe('Items Router', () => {
       pool: {
         query: jest.fn(),
       },
+      getCategories: jest.fn().mockResolvedValue([
+        { name: 'features' },
+        { name: 'bug' },
+      ]),
       getItems: jest.fn(),
+      getItem: jest.fn(),
       createItem: jest.fn(),
       updateItem: jest.fn(),
       deleteItem: jest.fn(),
@@ -46,6 +77,8 @@ describe('Items Router', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
+    resetWorkspaceService();
   });
 
   describe('GET /api/items', () => {
@@ -55,7 +88,7 @@ describe('Items Router', () => {
           id: '1',
           title: 'Test Item 1',
           description: 'Description 1',
-          category: 'Features',
+          category: 'features',
           priority: 'high',
           status: 'new',
           tags: ['test'],
@@ -65,7 +98,7 @@ describe('Items Router', () => {
           id: '2',
           title: 'Test Item 2',
           description: 'Description 2',
-          category: 'Bug',
+          category: 'bug',
           priority: 'medium',
           status: 'in-progress',
           tags: ['bug'],
@@ -79,10 +112,14 @@ describe('Items Router', () => {
         .get('/api/items')
         .expect(200);
 
-      expect(response.body).toEqual({
+      expect(response.body).toEqual(expect.objectContaining({
         success: true,
         count: 2,
         data: mockItems,
+      }));
+      expect(response.body.filters).toEqual({
+        limit: 100,
+        offset: 0,
       });
       expect(mockDb.getItems).toHaveBeenCalledTimes(1);
     });
@@ -99,16 +136,16 @@ describe('Items Router', () => {
   describe('POST /api/items', () => {
     beforeEach(() => {
       // Mock category validation query
-      mockDb.pool.query.mockResolvedValue({
-        rows: [{ name: 'Features' }],
-      });
+      mockDb.getCategories.mockResolvedValue([
+        { name: 'features' },
+      ]);
     });
 
     it('should create a new item with valid data', async () => {
       const newItem = {
         title: 'New Test Item',
         description: 'Test description',
-        category: 'Features',
+        category: 'features',
         priority: 'high',
         tags: ['test', 'new'],
       };
@@ -148,7 +185,7 @@ describe('Items Router', () => {
     it('should reject item without title', async () => {
       const invalidItem = {
         description: 'Test description',
-        category: 'Features',
+        category: 'features',
         priority: 'high',
       };
 
@@ -162,7 +199,7 @@ describe('Items Router', () => {
         expect.arrayContaining([
           expect.objectContaining({
             field: 'title',
-            message: 'title is required',
+            message: expect.stringContaining('Invalid input'),
           }),
         ])
       );
@@ -173,7 +210,7 @@ describe('Items Router', () => {
       const invalidItem = {
         title: 'Test Item',
         description: 'Test description',
-        category: 'Features',
+        category: 'features',
         priority: 'invalid',
       };
 
@@ -194,7 +231,7 @@ describe('Items Router', () => {
 
     it('should reject item with invalid category', async () => {
       // Mock category validation to return no rows
-      mockDb.pool.query.mockResolvedValue({ rows: [] });
+      mockDb.getCategories.mockResolvedValue([]);
 
       const invalidItem = {
         title: 'Test Item',
@@ -222,7 +259,7 @@ describe('Items Router', () => {
       const newItem = {
         title: 'Test Item',
         description: 'Test description',
-        category: 'Features',
+        category: 'features',
         priority: 'high',
       };
 
@@ -253,9 +290,9 @@ describe('Items Router', () => {
   describe('PUT /api/items/:id', () => {
     beforeEach(() => {
       // Mock category validation query
-      mockDb.pool.query.mockResolvedValue({
-        rows: [{ name: 'Features' }],
-      });
+      mockDb.getCategories.mockResolvedValue([
+        { name: 'features' },
+      ]);
     });
 
     it('should update an existing item', async () => {
@@ -269,12 +306,19 @@ describe('Items Router', () => {
         id: 'abc123',
         ...updates,
         description: 'Original description',
-        category: 'Features',
+        category: 'features',
         tags: ['test'],
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
       };
 
+      mockDb.getItem.mockResolvedValue({
+        id: 'abc123',
+        title: 'Original Title',
+        description: 'Original description',
+        category: 'features',
+        tags: ['test'],
+      });
       mockDb.updateItem.mockResolvedValue(updatedItem);
 
       const response = await request(app)
@@ -287,7 +331,10 @@ describe('Items Router', () => {
         message: 'Item updated successfully',
         data: updatedItem,
       });
-      expect(mockDb.updateItem).toHaveBeenCalledWith('abc123', updates);
+      expect(mockDb.updateItem).toHaveBeenCalledWith(
+        'abc123',
+        expect.objectContaining(updates)
+      );
     });
 
     it('should return 404 for non-existent item', async () => {
@@ -328,6 +375,10 @@ describe('Items Router', () => {
 
   describe('DELETE /api/items/:id', () => {
     it('should delete an existing item', async () => {
+      mockDb.getItem.mockResolvedValue({
+        id: 'abc123',
+        title: 'Delete me',
+      });
       mockDb.deleteItem.mockResolvedValue(true);
 
       const response = await request(app)

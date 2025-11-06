@@ -1,0 +1,53 @@
+name: Setup Node project
+description: Configure Node.js with caching and optional dependency installation.
+inputs:
+  node-version:
+    description: Node.js version to install
+    required: false
+    default: '20'
+  cache:
+    description: Package manager cache to enable (npm | yarn | pnpm)
+    required: false
+    default: npm
+  cache-dependency-path:
+    description: Path(s) to lockfiles used for cache key generation
+    required: false
+  registry-url:
+    description: Optional private registry URL
+    required: false
+  always-auth:
+    description: Whether to always auth to the registry
+    required: false
+    default: 'false'
+  run-install:
+    description: Whether to run the install command automatically
+    required: false
+    default: 'true'
+  install-command:
+    description: Command used to install dependencies
+    required: false
+    default: npm ci
+  working-directory:
+    description: Directory where install command should run
+    required: false
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs['node-version'] }}
+        cache: ${{ inputs.cache }}
+        cache-dependency-path: ${{ inputs['cache-dependency-path'] }}
+        registry-url: ${{ inputs['registry-url'] }}
+        always-auth: ${{ inputs['always-auth'] }}
+
+    - name: Install dependencies
+      if: ${{ inputs['run-install'] == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs['working-directory'] }}
+      run: |
+        set -euo pipefail
+        ${{ inputs['install-command'] }}

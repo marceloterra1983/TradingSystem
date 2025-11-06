@@ -157,7 +157,8 @@ export const validateRequest = (schema, data) => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Transform Zod errors to user-friendly format
-      const formattedErrors = (error.errors || []).map((err) => ({
+      const issueList = error.issues || error.errors || [];
+      const formattedErrors = issueList.map((err) => ({
         field: err.path?.join('.') || 'unknown',
         message: err.message || 'Validation error',
         code: err.code || 'invalid',
@@ -235,4 +236,3 @@ export const validateQuery = (schema) => (req, res, next) => {
     next(error);
   }
 };
-
