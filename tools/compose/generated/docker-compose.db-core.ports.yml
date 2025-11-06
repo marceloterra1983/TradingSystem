@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "db-core"
-x-tradingsystem-generated-at: "2025-11-06T14:19:59.197Z"
+x-tradingsystem-generated-at: "2025-11-06T14:36:09.455Z"
 
 x-tradingsystem-ports:
   telegram-timescale:
