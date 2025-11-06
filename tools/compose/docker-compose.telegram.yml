@@ -425,6 +425,9 @@ services:
       - TELEGRAM_GATEWAY_DB_URL=
       - NODE_ENV=production
       - TELEGRAM_GATEWAY_API_PORT=4010
+      # API Authentication (CRITICAL - required by validateConfig)
+      - TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN}
+      - API_SECRET_TOKEN=${API_SECRET_TOKEN:-${TELEGRAM_GATEWAY_API_TOKEN}}
       # Database (via PgBouncer - CRITICAL)
       - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer
       - TELEGRAM_GATEWAY_DB_PORT=6432
