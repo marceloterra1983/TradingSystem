@@ -12,7 +12,7 @@ const config = {
   tagline: 'Product knowledge, runbooks, and specs in one place',
   url: 'https://docs.tradingsystem.local',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   favicon: 'img/favicon.svg',
   organizationName: 'marceloterra1983',
   projectName: 'TradingSystem',

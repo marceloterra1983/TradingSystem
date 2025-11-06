@@ -358,7 +358,7 @@ export async function runDocsAuto({repoRoot = resolve(__dirname, '..', '..'), lo
       name: 'Generate ports table from service-port-map.md',
       run: async () => {
         const sourcePath = join(repoRoot, 'docs', 'context', 'ops', 'service-port-map.md');
-        const targetPath = join(docsDir, 'content', 'tools', 'ports-services', 'overview.mdx');
+        const targetPath = join(docsDir, 'content', 'tools', 'ports-services.mdx');
         const timestamp = new Date().toISOString();
         const sourceContent = await readFileIfExists(sourcePath);
         if (!sourceContent) {
