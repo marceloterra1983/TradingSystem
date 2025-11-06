@@ -1,3 +1,0 @@
-docs/content/archive/2025-Q4/README.md: missing frontmatter
-docs/content/archive/README.md: missing frontmatter
-docs/content/tools/rag/qdrant-ha-architecture.mdx: missing description, owner, lastReviewed

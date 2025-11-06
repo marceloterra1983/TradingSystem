@@ -36,7 +36,7 @@ const config = {
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           // Versioning configuration
-          lastVersion: '1.0.0',
+          lastVersion: process.env.NODE_ENV === 'development' ? 'current' : '1.0.0',
           // Version configuration
           // NOTE: Version labels are automatically updated by scripts/docs/auto-version.sh
           // when creating new versions via GitHub Actions workflow (docs-versioning.yml)

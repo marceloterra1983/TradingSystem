@@ -2,8 +2,8 @@
 # TradingSystem - Documentation Services (2 Containers)
 # ============================================================================
 # Services:
-#   - Documentation (Port 3400) - NGINX serving Docusaurus + specs (static)
-#   - DocsAPI (Port 3401) - Express + FlexSearch + CRUD (dynamic API)
+#   - Documentation (Port 3404) - NGINX serving Docusaurus + specs (static)
+#   - DocsAPI (Port 3405) - Express + FlexSearch + CRUD (dynamic API)
 #
 # Usage:
 #   docker compose -f tools/compose/docker-compose.docs.yml up -d
@@ -31,12 +31,12 @@ services:
       context: ./documentation
       dockerfile: Dockerfile
     ports:
-      - "${DOCUMENTATION_HUB_PORT:-3400}:80"
+      - "${DOCS_PORT:-3404}:80"
     volumes:
       # Docusaurus build (static site)
       - ../../docs/build:/usr/share/nginx/html:ro
-      # OpenAPI/AsyncAPI specifications
-      - ../../frontend/dashboard/public/specs:/usr/share/nginx/html/specs:ro
+      # OpenAPI/AsyncAPI specifications (shared with dashboard)
+      - ../../frontend/dashboard/public/specs:/data/specs:ro
     restart: unless-stopped
     networks:
       - tradingsystem_frontend
@@ -50,7 +50,7 @@ services:
       - "com.tradingsystem.stack=documentation"
       - "com.tradingsystem.service=docs-static"
       - "com.tradingsystem.type=frontend"
-      - "com.tradingsystem.port=3400"
+      - "com.tradingsystem.port=3404"
 
   # ============================================================================
   # DocsAPI - Documentation Management API
@@ -68,7 +68,7 @@ services:
       dockerfile: backend/api/documentation-api/Dockerfile
       target: development
     ports:
-      - "${DOCUMENTATION_API_PORT:-3401}:3000"
+      - "${DOCS_API_PORT:-3405}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -104,7 +104,7 @@ services:
       - "com.tradingsystem.stack=documentation"
       - "com.tradingsystem.service=docs-api"
       - "com.tradingsystem.type=backend"
-      - "com.tradingsystem.port=3401"
+      - "com.tradingsystem.port=3405"
 
 # ============================================================================
 # Volumes

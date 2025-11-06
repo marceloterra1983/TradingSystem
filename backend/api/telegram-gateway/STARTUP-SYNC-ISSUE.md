@@ -164,7 +164,7 @@ TELEGRAM_GATEWAY_SYNC_ON_STARTUP=true
 
 ```bash
 # Reiniciar API
-bash scripts/restart-telegram-api.sh
+bash scripts/telegram/restart-telegram-api.sh
 
 # Verificar logs
 tail -f logs/telegram-gateway-api.log | grep StartupSync

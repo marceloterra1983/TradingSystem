@@ -410,6 +410,13 @@ TradingSystem/
 └── claude/                        # Claude Code configuration
 ```
 
+### Política para Geração de Arquivos por IA
+
+- Nenhum agente, script ou automação pode criar arquivos diretamente na raiz do repositório; qualquer saída deve ser redirecionada para `outputs/`.
+- A pasta `outputs/` é o único hub autorizado para artefatos produzidos por IA e deve ser organizada por assuntos (ex.: `outputs/reports`, `outputs/logs`); crie a subpasta antes de gravar novos arquivos.
+- Use apenas nomes ASCII em `kebab-case` para subpastas e arquivos, evitando espaços ou acentos para manter pipelines determinísticos.
+- Ferramentas existentes precisam validar o caminho de destino e falhar caso detectem gravações fora de `outputs/`, evitando lixo na raiz e facilitando a limpeza dos artefatos temporários.
+
 ### Coding Style
 
 **TypeScript/JavaScript**:

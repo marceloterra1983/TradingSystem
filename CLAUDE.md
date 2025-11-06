@@ -42,11 +42,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **IMPORTANT:** Before working on any task, understand the project structure and documentation organization:
 
+### Reference Documentation (Implementation Details)
+
+**NEW:** Comprehensive reference documentation for implementation details:
+
+- **[ref/README.md](ref/README.md)** - **START HERE** - Complete project overview, architecture, and quick links
+- **[ref/backend/README.md](ref/backend/README.md)** - Backend services, APIs, patterns, and testing
+- **[ref/frontend/README.md](ref/frontend/README.md)** - Frontend apps, React components, state management
+- **[ref/infrastructure/README.md](ref/infrastructure/README.md)** - Docker, databases, monitoring, DevOps
+- **[ref/scripts/README.md](ref/scripts/README.md)** - Automation scripts and tooling
+- **[ref/docs/README.md](ref/docs/README.md)** - Documentation system and governance
+
 ### Core Documentation Structure
 
 The project uses **Docusaurus v3** for comprehensive documentation under `/docs/`:
 
-1. **[docs/README.md](docs/README.md)** - Documentation hub overview (START HERE)
+1. **[docs/README.md](docs/README.md)** - Documentation hub overview
 2. **[docs/content/](docs/content/)** - All documentation content organized by domain:
     - **[apps/](docs/content/apps/)** - Application documentation (Workspace, TP Capital, Order Manager)
     - **[api/](docs/content/api/)** - API specifications and guides
@@ -62,6 +73,7 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 
 ### Key Documentation Locations
 
+-   **Implementation Reference**: `ref/` (code patterns, APIs, infrastructure)
 -   **Architecture Decisions**: `docs/content/reference/adrs/` (ADRs)
 -   **Product Requirements**: `docs/content/prd/products/` (organized by product)
 -   **Implementation Guides**: `docs/content/frontend/guides/` & `docs/content/apps/*/`
@@ -74,7 +86,7 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 ### Active Services & Ports
 
 -   **Dashboard**: http://localhost:3103 (React + Vite)
--   **Documentation Hub**: http://localhost:3400 (Docusaurus v3 via NGINX)
+-   **Documentation Hub**: http://localhost:${DOCS_PORT:-3404? can't use variable}. We'll just set 3404.
 -   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
 -   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
 -   **Documentation API**: http://localhost:3401 (Express + FlexSearch + RAG Proxy)
@@ -381,10 +393,10 @@ if (bMarketConnected && bAtivo) {
 ### HTTP REST (Current Services)
 
 -   **Dashboard**: `http://localhost:3103` (React + Vite)
--   **Documentation Hub**: `http://localhost:3400` (Docusaurus v3 via NGINX)
+-   **Documentation Hub**: `http://localhost:3404` (Docusaurus v3 via NGINX)
 -   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB - Docker container)
 -   **TP Capital**: `http://localhost:4005` (Express + Telegraf - Docker container)
--   **Documentation API**: `http://localhost:3401` (Express + FlexSearch)
+-   **Documentation API**: `http://localhost:3405` (Express + FlexSearch)
 -   **Service Launcher**: `http://localhost:3500` (Express)
 -   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
 
@@ -433,10 +445,10 @@ if (bMarketConnected && bAtivo) {
 ## 💾 Data Storage
 
 -   **Format**: Parquet (columnar, compressed)
--   **Structure**: `/data/parquet/{asset}/{date}/trades.parquet`
--   **Logs**: JSONL structured (`/data/logs/{service}/{date}.jsonl`)
--   **Models**: `/data/models/{model_name}/{version}.pkl`
--   **Backups**: Incremental daily (`/data/backups/{date}/`)
+-   **Structure**: `/backend/data/parquet/{asset}/{date}/trades.parquet`
+-   **Logs**: JSONL structured (`/backend/data/logs/{service}/{date}.jsonl`)
+-   **Models**: `/backend/data/models/{model_name}/{version}.pkl`
+-   **Backups**: Incremental daily (`/backend/data/backups/{date}/`)
 
 ## 🚀 Development Commands
 

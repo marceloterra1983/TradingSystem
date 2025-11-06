@@ -35,7 +35,7 @@ services:
     
     volumes:
       # Persistent storage for documents, embeddings, and database
-      - ../../data/anythingllm:/app/server/storage
+      - ../../backend/data/anythingllm:/app/server/storage
       
       # Project documentation (read-only, auto-sync)
       - ../../docs/content:/workspace/docs:ro
@@ -65,4 +65,3 @@ networks:
   
   tradingsystem_backend:
     external: true
-

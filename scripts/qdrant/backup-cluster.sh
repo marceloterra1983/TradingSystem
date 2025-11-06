@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-BACKUP_DIR="/home/marce/Projetos/TradingSystem/data/backups/qdrant"
+BACKUP_DIR="/home/marce/Projetos/TradingSystem/backend/data/backups/qdrant"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_PATH="$BACKUP_DIR/qdrant_backup_$TIMESTAMP"
 
@@ -165,4 +165,3 @@ echo "  3. Or restore Docker volume from tar.gz"
 echo ""
 echo -e "${GREEN}✅ Qdrant cluster backup complete!${NC}"
 echo ""
-

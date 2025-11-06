@@ -32,8 +32,8 @@ npm run dev
 ### Opção 2: Usar Script Automático
 
 ```bash
-cd /home/marce/Projetos/TradingSystem/frontend/dashboard
-bash restart-dashboard.sh
+cd /home/marce/Projetos/TradingSystem
+bash scripts/maintenance/restart-dashboard.sh
 ```
 
 ---

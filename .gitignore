@@ -97,7 +97,10 @@ yarn-error.log*
 # Data & Runtime Files
 # ============================================
 backend/data/runtime/**
+backend/data/neon/runtime/**
 backend/data/backups/**
+backend/data/logs/**
+backend/data/qdrant/**
 /data/
 /data/**
 !/data/.gitkeep
@@ -184,8 +187,8 @@ governance/evidence/audits/rotation.log
 *.rotation.log
 
 # AnythingLLM data (may contain uploaded .env files)
-data/anythingllm/**
-!data/anythingllm/.gitkeep
+backend/data/anythingllm/**
+!backend/data/anythingllm/.gitkeep
 
 # ============================================
 # ML Models & Training Data

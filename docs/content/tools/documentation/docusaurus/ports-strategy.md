@@ -122,7 +122,7 @@ const docsProxy = resolveProxy(
 services:
   documentation:
     ports:
-      - "${DOCS_PORT:-3400}:80"  # Porta 3400 → NGINX porta 80
+      - "${DOCS_PORT:-3404}:80"  # Porta 3404 → NGINX porta 80
 ```
 
 ### 4. Service Manifest
@@ -226,4 +226,3 @@ O Dashboard automaticamente usa `/docs` (via Vite proxy) que redireciona para `h
 - **Frontend Config**: `frontend/dashboard/src/config/api.ts`
 - **Vite Proxy**: `frontend/dashboard/vite.config.ts`
 - **Package Scripts**: `docs/package.json`
-

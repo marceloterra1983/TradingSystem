@@ -132,8 +132,8 @@ DATACAPTURE__PROFITDLL__USERNAME=<YOUR_USERNAME_MARKET>
 DATACAPTURE__PROFITDLL__PASSWORD=<YOUR_PASSWORD_MARKET>
 
 # Data Storage
-DATACAPTURE__STORAGE__PARQUET__PATH=./data/parquet
-DATACAPTURE__STORAGE__LOGS__PATH=./data/logs
+DATACAPTURE__STORAGE__PARQUET__PATH=./backend/data/parquet
+DATACAPTURE__STORAGE__LOGS__PATH=./backend/data/logs
 
 # Subscription Symbols (comma-separated)
 DATACAPTURE__SYMBOLS__FUTURES=WINZ25,WDOZ25
@@ -347,7 +347,7 @@ LOG__FORMAT=json
 LOG__RETENTION_DAYS=30
 
 # Log file path
-LOG__FILE_PATH=./data/logs
+LOG__FILE_PATH=./backend/data/logs
 
 # Console output enabled
 LOG__CONSOLE__ENABLED=true
@@ -362,4 +362,3 @@ LOG__MASK_SECRETS=true
 # END OF CONFIGURATION
 # =============================================================================
 ```
-

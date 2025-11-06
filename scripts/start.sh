@@ -369,7 +369,7 @@ start_containers() {
     local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database.yml"
     if [ "$SKIP_DATABASE_STACK" = true ]; then
         log_info "Skipping DATABASE stack (disabled via flag)"
-        log_info "  Use 'bash scripts/start-clean.sh' for essential services only"
+        log_info "  Use 'bash scripts/presets/start-clean.sh' for essential services only"
     elif [ -f "$DB_COMPOSE_FILE" ]; then
         # Provide sane defaults for image variables when not set in .env
         export IMG_VERSION="${IMG_VERSION:-latest}"
@@ -782,7 +782,7 @@ start_docs_stack() {
     local -a services_to_start=()
 
     if [ "$FORCE_KILL" = true ]; then
-        for port in "${DOCS_PORT:-3400}" "${DOCS_API_PORT:-3401}"; do
+        for port in "${DOCS_PORT:-3404}" "${DOCS_API_PORT:-3405}"; do
             if port_in_use "$port"; then
                 log_warning "Killing host process on port $port (--force-kill)"
                 kill_port "$port"
@@ -850,7 +850,7 @@ start_docs_stack() {
     compose_status=$?
     set -e
     if [ $compose_status -ne 0 ]; then
-        log_warning "⚠ DOCS stack failed to start (docker compose exit $compose_status). Check for port conflicts on ${DOCS_PORT:-3400}/${DOCS_API_PORT:-3401} or rerun with --force-kill."
+        log_warning "⚠ DOCS stack failed to start (docker compose exit $compose_status). Check for port conflicts on ${DOCS_PORT:-3404}/${DOCS_API_PORT:-3405} or rerun with --force-kill."
         return 0
     fi
 

@@ -204,7 +204,7 @@ services:
       - REDIS_ENABLED=true
     volumes:
       - ../rag-services/collections-config.json:/app/collections-config.json
-      - ../../data/logs/rag-ingestion:/app/data/logs
+      - ../../backend/data/logs/rag-ingestion:/app/data/logs
       - ../../docs:/data/docs:ro
       - ../../:/data/tradingsystem:ro
     networks:

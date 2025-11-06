@@ -219,8 +219,8 @@ check_ports() {
     fi
     
     local ports_to_check=(
-        "${DOCUSAURUS_PORT:-3400}"
-        "${DOCS_API_PORT:-3400}"
+        "${DOCUSAURUS_PORT:-3404}"
+        "${DOCS_API_PORT:-3405}"
     )
     
     for port in "${ports_to_check[@]}"; do

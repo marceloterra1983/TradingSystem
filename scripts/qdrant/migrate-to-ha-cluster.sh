@@ -39,11 +39,12 @@ if curl -s "$OLD_QDRANT_URL/health" > /dev/null 2>&1; then
         echo "$COLLECTIONS" | sed 's/^/    - /'
         
         # Export collections metadata
-        mkdir -p "$PROJECT_ROOT/data/qdrant-backup"
+        BACKUP_DIR="$PROJECT_ROOT/backend/data/backups/qdrant"
+        mkdir -p "$BACKUP_DIR"
         
         for COLLECTION in $COLLECTIONS; do
             echo "  Exporting metadata for: $COLLECTION"
-            curl -s "$OLD_QDRANT_URL/collections/$COLLECTION" > "$PROJECT_ROOT/data/qdrant-backup/${COLLECTION}_metadata.json"
+            curl -s "$OLD_QDRANT_URL/collections/$COLLECTION" > "$BACKUP_DIR/${COLLECTION}_metadata.json"
         done
         
         echo -e "${GREEN}  ✅ Backup complete${NC}"
@@ -193,4 +194,3 @@ echo "  4. Test failover: docker stop qdrant-node1"
 echo ""
 echo -e "${GREEN}✅ Qdrant is now running in High Availability mode!${NC}"
 echo ""
-

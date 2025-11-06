@@ -1218,7 +1218,7 @@ app.get('/api/start-metrics', (req, res) => {
     if (!fs.existsSync(metricsPath)) {
       return res.status(404).json({
         error: 'Metrics not found',
-        message: 'No start metrics available. Run scripts/universal/start.sh to generate metrics.',
+        message: 'No start metrics available. Run scripts/start.sh (or scripts/universal/start.sh) to generate metrics.',
       });
     }
     

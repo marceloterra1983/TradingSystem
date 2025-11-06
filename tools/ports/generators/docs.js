@@ -16,7 +16,6 @@ function formatRange(ranges, stack) {
 export async function generateDocs(registry, { targetPath = DEFAULTS.docsPath, now = new Date() } = {}) {
   const lines = [
     '---',
-    'id: tools/ports-services/overview',
     'title: Port Registry & Services Matrix',
     'description: Fonte única de verdade para portas, protocolos e owners do TradingSystem.',
     'tags:',

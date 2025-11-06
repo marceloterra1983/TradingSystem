@@ -1,7 +1,0 @@
-docs/content/api/rag-services.mdx: owner 'Backend Team' not in allowed list
-docs/content/development/npm-run-dev-pattern.md: owner 'DevOps' not in allowed list
-docs/content/reference/ports.mdx: owner 'OpsGuild' not in allowed list
-docs/content/tools/automation/system-quick-start.md: owner 'OpsGuild' not in allowed list
-docs/content/tools/automation/universal-commands.md: owner 'OpsGuild' not in allowed list
-docs/content/tools/automation/workflow-auditoria-completa.md: owner 'OpsGuild' not in allowed list
-docs/content/tools/docker/container-inventory.md: owner 'OpsGuild' not in allowed list

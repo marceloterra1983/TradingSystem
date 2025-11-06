@@ -19,7 +19,8 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Create directory structure
 RUN mkdir -p /usr/share/nginx/html/docs \
-    && mkdir -p /usr/share/nginx/html/specs
+    && mkdir -p /usr/share/nginx/html/specs \
+    && mkdir -p /data/specs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

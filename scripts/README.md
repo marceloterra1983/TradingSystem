@@ -7,7 +7,7 @@ domain: shared
 type: index
 summary: Visão objetiva dos scripts de automação do TradingSystem
 status: active
-last_review: '2025-10-30'
+last_review: '2025-11-05'
 ---
 
 # Scripts do TradingSystem
@@ -28,17 +28,23 @@ bash scripts/stop.sh [--force]
 ```
 
 > Dica: exporte aliases com `install-shortcuts.sh` para usar `start`, `status`, `stop` direto no shell.
+> Compatibilidade: os scripts históricos em `scripts/universal/*.sh` continuam disponíveis como wrappers, mas o caminho oficial agora é `scripts/start.sh`, `scripts/status.sh` e `scripts/stop.sh`.
 
 ## 🗂️ Estrutura Atual
 
 | Caminho | Conteúdo |
 | ------- | -------- |
-| `scripts/start.sh` / `status.sh` / `stop.sh` | entrada única para subir, inspecionar e derrubar o stack |
+| `scripts/start.sh` / `status.sh` / `stop.sh` | entrada oficial para subir, inspecionar e derrubar o stack (com wrappers legacy em `scripts/universal/`) |
+| `scripts/maintenance/` | health checks, restarts e utilitários; inclui `ports/` (liberação de portas) e `dangerous/` (limpezas destrutivas com README próprio) |
+| `scripts/presets/` | startups alternativas (`start-minimal`, `start-clean`, `ultimate-startup`, etc.) agrupadas em um só lugar |
+| `scripts/docker/`  | wrappers para Docker Compose, build, limpeza e novos helpers como `ligar-todos-containers.sh` e `fix-unhealthy-containers.sh` |
+| `scripts/docs/`    | ferramentas Docusaurus + `start-dashboard-with-docs.sh` para subir a stack de documentação isolada |
 | `scripts/agents/`  | automações MCP/agents (Node.js) |
-| `scripts/database/`| migrações, backups e provisionamento Timescale/QuestDB/Firecrawl |
-| `scripts/docker/`  | wrappers para Docker Compose, build e limpeza |
-| `scripts/docs/`    | ferramentas Docusaurus (lint, build, scaffolding, health checks) |
-| `scripts/env/`     | verificação e ajuste de `.env` compartilhado |
+| `scripts/qdrant/`  | manutenção do cluster vetorial (`fix-qdrant-and-retest`, `quick-populate-qdrant`, backups HA) |
+| `scripts/rag/`     | ingestão e testes do pipeline RAG (ex.: `ingest-documents.py`) |
+| `scripts/telegram/`| utilitários para o gateway/MTProto (`fix-checar-mensagens`, `restart-telegram-api`) |
+| `scripts/env/`     | verificação e ajuste do `.env` compartilhado |
+| `scripts/testing/` / `validation/` | smoke tests (`test-ports-endpoint.sh`), validação de manifests, portas e READMEs |
 | `scripts/temp/`    | zona de staging para novos scripts aguardarem categorização |
 
 ## 📦 Pastas em Detalhe
@@ -48,36 +54,51 @@ bash scripts/stop.sh [--force]
 - `new-agent.mjs` – scaffolder para agentes MCP auxiliares.
 - `docusaurus-daily.mjs` – agenda tarefas diárias ligadas à documentação.
 
-### `database/`
-- `backup-timescaledb.sh` / `restore-questdb.sh` – rotinas de backup e restauração.
-- `migrate-database-structure.sh` + `.sql` – migra base legada para a nova topologia.
-- `setup-timescaledb-stack.sh`, `firecrawl-start.sh` / `firecrawl-stop.sh` – controle de serviços auxiliares.
-- `langgraph-*.sh` – proxies e start/stop do ambiente LangGraph local.
+### `maintenance/`
+- `health-check-all.sh`, `code-quality-check.sh`, `restart-dashboard.sh`, `restart-service-launcher.sh` e afins.
+- `ports/` concentra liberações rápidas (kill docker-proxy, Postgres nativo, porta 5050).
+- `dangerous/` ganhou README próprio com checklists para `cleanup-and-restart.sh`, `nuclear-reset.sh` e `limpar-portas-e-iniciar-tudo.sh`.
 
 ### `docker/`
-- `start-stacks.sh` / `stop-stacks.sh` – liga/desliga todos os stacks Compose suportados.
-- `docker-manager.sh` – CLI unificada (`start|stop|status|logs|clean` por grupo).
-- `build-images.sh` – build+tag das imagens internas `img-*`.
-- `cleanup-orphans.sh`, `migrate-container-names.sh`, `verify-docker.sh` – utilidades de manutenção.
-- `start-llamaindex-local.sh` / `validate-llamaindex-local.sh` – pipelines dedicadas ao LlamaIndex.
+- `start-stacks.sh` / `stop-stacks.sh` + `docker-manager.sh` continuam como wrappers principais.
+- Novos residentes: `fix-unhealthy-containers.sh` e `ligar-todos-containers.sh`.
+- Scripts de build/teste (`build-images.sh`, `verify-docker.sh`, `start-llamaindex-local.sh`) seguem no mesmo lugar.
 
 ### `docs/`
-- `build.sh`, `serve.sh`, `lint.sh`, `check-links.sh`, `new.sh` – wrappers bash para os comandos do workspace `docs/`.
-- `docs-auto.mjs`, `prd-index.js`, `frontend-sync-tokens.js` – geração de conteúdo automático (tabelas de portas, tokens, índices).
-- `validate-*.sh` / `.py` – health checks (frontmatter, integridade, produção) usados em CI.
-- `common.sh` – resolve paths e exporta variáveis para os demais scripts.
+- `build.sh`, `serve.sh`, `lint.sh`, `check-links.sh`, `new.sh` e os validadores Python.
+- `start-dashboard-with-docs.sh` agora mora aqui junto com os geradores `docs-auto.mjs`, `prd-index.js`, etc.
+
+### `presets/`
+- Guarda todos os startups alternativos (`start-minimal`, `start-clean`, `start-with-gateway`, `ultimate-startup`, …).
+- README local descreve cada preset e avisa que o desenvolvimento continua em `scripts/start.sh`.
+
+### `qdrant/`
+- `fix-qdrant-and-retest.sh`, `quick-populate-qdrant.sh`, `backup-cluster.sh`, `setup-automated-backups.sh`.
+- Use esta pasta para tudo que envolve HA, migrações ou seed do cluster vetorial.
+
+### `rag/`
+- `ingest-documents.py` + demais utilitários de ingestão/teste para o stack RAG.
+
+### `telegram/`
+- Scripts operacionais do gateway (ex.: `fix-checar-mensagens.sh`, `restart-telegram-api.sh`).
 
 ### `env/`
-- `validate-env.sh` – garante que variáveis obrigatórias estejam presentes e sem conflitos.
-- `set-ro-password.sh` – rotaciona o usuário read-only e atualiza `MCP_POSTGRES_URL`.
+- `validate-env.sh` garante variáveis obrigatórias.
+- `set-ro-password.sh` rotaciona o usuário read-only e reflete em `MCP_POSTGRES_URL`.
+
+### `testing/` e `validation/`
+- `testing/test-ports-endpoint.sh` – smoke do Service Launcher.
+- `validation/` cobre manifests, portas duplicadas e READMEs (usado em CI).
 
 ## ✅ Checklist Rápido
 
 - **Precisou subir o stack?** `bash scripts/start.sh --force-kill`
 - **Algo fora do ar?** `bash scripts/status.sh --detailed`
 - **Fim do dia?** `bash scripts/stop.sh`
-- **Migrar ou fazer backup de banco?** veja `scripts/database/README.md`
+- **Migrar ou fazer backup de banco?** confira `scripts/migration/` (Timescale/Neon) e `scripts/qdrant/`
 - **Trabalhando na docs?** use os wrappers em `scripts/docs/`
+- **Precisa de startup minimalista?** consulte `scripts/presets/README.md`
+- **Vai rodar algum reset agressivo?** leia `scripts/maintenance/dangerous/README.md` antes
 
 Mantemos este arquivo enxuto de propósito: qualquer script ausente ou renomeado deve ser refletido aqui imediatamente.
 

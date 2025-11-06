@@ -76,10 +76,10 @@ create_directories() {
     log_info "Creating necessary directories..."
     
     mkdir -p "$PROJECT_ROOT/tools/neon"
-    mkdir -p "$PROJECT_ROOT/backend/data/neon/init"
-    mkdir -p "$PROJECT_ROOT/data/neon/compute"
-    mkdir -p "$PROJECT_ROOT/data/neon/pageserver"
-    mkdir -p "$PROJECT_ROOT/data/neon/safekeeper"
+mkdir -p "$PROJECT_ROOT/backend/data/neon/init"
+mkdir -p "$PROJECT_ROOT/backend/data/neon/runtime/compute"
+mkdir -p "$PROJECT_ROOT/backend/data/neon/runtime/pageserver"
+mkdir -p "$PROJECT_ROOT/backend/data/neon/runtime/safekeeper"
     
     log_success "Directories created"
 }
@@ -246,5 +246,4 @@ main() {
 
 # Run main function
 main "$@"
-
 

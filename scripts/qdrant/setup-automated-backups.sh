@@ -53,7 +53,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 0 2 * * * root bash $BACKUP_SCRIPT >> /var/log/qdrant-backup.log 2>&1
 
 # Weekly cleanup (keep last 30 days)
-0 3 * * 0 root find $PROJECT_ROOT/data/backups/qdrant -type d -mtime +30 -exec rm -rf {} + >> /var/log/qdrant-backup.log 2>&1
+0 3 * * 0 root find $PROJECT_ROOT/backend/data/backups/qdrant -type d -mtime +30 -exec rm -rf {} + >> /var/log/qdrant-backup.log 2>&1
 EOF
 
 # Install cron job
@@ -109,4 +109,3 @@ echo "  bash $BACKUP_SCRIPT"
 echo ""
 echo -e "${GREEN}✅ Automated backups are active!${NC}"
 echo ""
-

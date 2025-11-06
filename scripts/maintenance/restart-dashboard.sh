@@ -1,60 +1,113 @@
 #!/bin/bash
+# ==============================================================================
+# TradingSystem - Restart Dashboard
+# ==============================================================================
+# Reinicia o Dashboard para carregar novas variáveis de ambiente
+# ==============================================================================
 
-#################################################################
-# Script: restart-dashboard.sh
-# Purpose: Reiniciar o dashboard com cache limpo
-# Author: TradingSystem Maintenance
-# Date: 2025-11-03
-#################################################################
+set -euo pipefail
 
-set -e
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
-DASHBOARD_DIR="$PROJECT_ROOT/frontend/dashboard"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
+PID_FILE="$SERVICES_DIR/dashboard.pid"
 
-echo "=================================================="
-echo "  Restart Dashboard - Clean Cache"
-echo "=================================================="
+cd "$PROJECT_ROOT"
+
+echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║${NC}  🔄 ${BLUE}Restart Dashboard${NC}                                    ${CYAN}║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-echo "[INFO] Parando o dashboard..."
-# Encontrar e matar processo na porta 3103
-PIDS=$(lsof -t -i:3103 2>/dev/null || true)
-if [ -n "$PIDS" ]; then
-  echo "  Matando processo(s): $PIDS"
-  kill -15 $PIDS 2>/dev/null || true
-  sleep 2
-  
-  # Force kill se necessário
-  PIDS=$(lsof -t -i:3103 2>/dev/null || true)
-  if [ -n "$PIDS" ]; then
-    echo "  Force killing processo(s): $PIDS"
-    kill -9 $PIDS 2>/dev/null || true
-  fi
+# Check if Dashboard is running
+if [ -f "$PID_FILE" ]; then
+    OLD_PID=$(cat "$PID_FILE")
+    
+    if kill -0 "$OLD_PID" 2>/dev/null; then
+        echo -e "${YELLOW}Stopping Dashboard (PID: $OLD_PID)...${NC}"
+        kill "$OLD_PID" 2>/dev/null || true
+        sleep 2
+        
+        # Force kill if still running
+        if kill -0 "$OLD_PID" 2>/dev/null; then
+            echo -e "${YELLOW}Force killing Dashboard...${NC}"
+            kill -9 "$OLD_PID" 2>/dev/null || true
+            sleep 1
+        fi
+        
+        echo -e "${GREEN}✓ Dashboard stopped${NC}"
+    fi
+    
+    rm -f "$PID_FILE"
 fi
 
-echo "[INFO] Limpando cache do Vite..."
-rm -rf "$DASHBOARD_DIR/node_modules/.vite" 2>/dev/null || true
-rm -rf "$DASHBOARD_DIR/.vite" 2>/dev/null || true
-
-echo "[INFO] Aguardando porta liberar..."
-sleep 2
+# Check port 3103
+PORT_PID=$(lsof -ti :3103 2>/dev/null || echo "")
+if [ -n "$PORT_PID" ]; then
+    echo -e "${YELLOW}Port 3103 is occupied by PID: $PORT_PID${NC}"
+    echo -e "${YELLOW}Killing process on port 3103...${NC}"
+    kill -9 "$PORT_PID" 2>/dev/null || true
+    sleep 1
+    echo -e "${GREEN}✓ Port 3103 freed${NC}"
+fi
 
 echo ""
-echo "=================================================="
-echo "  ✅ Dashboard parado e cache limpo"
-echo "=================================================="
+echo -e "${CYAN}Starting Dashboard with updated environment...${NC}"
+
+# Navigate to dashboard directory
+cd "$PROJECT_ROOT/frontend/dashboard"
+
+# Install dependencies if needed
+if [ ! -d "node_modules" ]; then
+    echo -e "${CYAN}Installing dependencies...${NC}"
+    npm install --silent
+fi
+
+# Start Dashboard in background
+LOG_FILE="$SERVICES_DIR/dashboard-$(date +%Y%m%d).log"
+nohup npm run dev > "$LOG_FILE" 2>&1 &
+NEW_PID=$!
+
+# Save PID
+echo "$NEW_PID" > "$PID_FILE"
+
+echo -e "${GREEN}✓ Dashboard started (PID: $NEW_PID)${NC}"
 echo ""
-echo "Para reiniciar o dashboard, execute:"
-echo "  cd $DASHBOARD_DIR"
-echo "  npm run dev"
+
+# Wait for dashboard to be available
+echo -e "${CYAN}Waiting for Dashboard to be available (max 30s)...${NC}"
+waited=0
+while [ $waited -lt 30 ]; do
+    if curl -sf --max-time 2 "http://localhost:3103" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ Dashboard is responding!${NC}"
+        echo ""
+        echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║${NC}  ✅ ${GREEN}Dashboard Restarted Successfully!${NC}                  ${CYAN}║${NC}"
+        echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "  🌐 Dashboard: ${BLUE}http://localhost:3103${NC}"
+        echo -e "  📄 Logs:      ${BLUE}$LOG_FILE${NC}"
+        echo ""
+        echo -e "${CYAN}The 'Checar Mensagens' button should now work!${NC}"
+        echo -e "${CYAN}The X-API-Key header is now being sent with requests.${NC}"
+        echo ""
+        exit 0
+    fi
+    
+    sleep 2
+    waited=$((waited + 2))
+    echo -n "."
+done
+
 echo ""
-echo "Ou use o comando universal:"
-echo "  start"
+echo -e "${YELLOW}⚠ Dashboard may still be starting${NC}"
+echo -e "${CYAN}Check logs: tail -f $LOG_FILE${NC}"
 echo ""
-
-
-
-
-
 
