@@ -90,7 +90,7 @@ jobs:
           cat > .env << 'EOF'
           TELEGRAM_DB_USER=telegram
           TELEGRAM_DB_PASSWORD=test_password
-          TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:test_password@localhost:5434/telegram_gateway
+          TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:test_password@localhost:5434/telegram_gateway?sslmode=disable
           TELEGRAM_GATEWAY_API_KEY=test_api_key_for_ci
           TELEGRAM_GATEWAY_API_TOKEN=test_api_token_for_ci
           API_SECRET_TOKEN=test_secret_token_for_ci
