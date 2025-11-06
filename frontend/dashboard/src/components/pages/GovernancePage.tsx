@@ -47,7 +47,6 @@ import {
   Activity,
   AlertCircle,
   ArrowDownUp,
-  BarChart3,
   ExternalLink,
   FileText,
   Filter,
@@ -56,8 +55,6 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  ShieldAlert,
-  ShieldCheck,
   Sparkles,
   TimerReset,
 } from 'lucide-react';
@@ -292,7 +289,6 @@ export default function GovernancePage() {
   ]);
 
   const upcoming = snapshot?.freshness.upcoming ?? [];
-  const overdue = snapshot?.freshness.overdue ?? [];
   const totalArtifacts = snapshot?.totals.artifacts ?? 0;
 
   const handleOpenDocument = useCallback((artifact: GovernanceArtifact) => {

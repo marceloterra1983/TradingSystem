@@ -7,7 +7,6 @@
 
 import {
   normalizeTimestamp,
-  formatTimestamp as formatTsRobust,
   formatRelativeTime as formatRelTsRobust,
   APP_TIMEZONE,
 } from '../../../../utils/timestampUtils';

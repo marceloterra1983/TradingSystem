@@ -9,13 +9,11 @@
 import {
   normalizeTimestamp,
   formatTimestamp as formatTsRobust,
-  formatISO,
   APP_TIMEZONE,
 } from './timestampUtils';
 import { formatInTimeZone } from 'date-fns-tz';
 
 const TIMEZONE = APP_TIMEZONE;
-const LOCALE = 'pt-BR';
 
 /**
  * Format a timestamp string to Brazilian format with São Paulo timezone
