@@ -42,11 +42,20 @@ jobs:
       - name: Verify generated artifacts are in sync
         run: |
           npm run ports:sync
-          if ! git diff --exit-code; then
-            echo "❌ Generated files out of sync. Run: npm run ports:sync"
+          # Ignore timestamp-only changes in generated files
+          git diff --ignore-matching-lines='^# Generated:' \
+                   --ignore-matching-lines='^x-tradingsystem-generated-at:' \
+                   --ignore-matching-lines='generatedAt:' \
+                   --ignore-matching-lines='"generatedAt"' \
+                   --ignore-matching-lines='Última geração:' \
+                   --ignore-matching-lines='Last generated:' > /tmp/filtered-diff.txt
+          if [ -s /tmp/filtered-diff.txt ]; then
+            echo "❌ Generated files out of sync (excluding timestamps). Run: npm run ports:sync"
+            cat /tmp/filtered-diff.txt
             git status -sb
             exit 1
           fi
+          echo "✅ Generated files are in sync (timestamps updated)"
 
       - name: Scan for hardcoded ports
         run: npm run ports:scan-hardcoded
