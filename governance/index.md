@@ -1,6 +1,6 @@
 # Governance Hub Index
 
-_Last generated: 2025-11-06T01:12:44.659Z_
+_Last generated: 2025-11-06T01:14:05.945Z_
 
 
 ## Controls
