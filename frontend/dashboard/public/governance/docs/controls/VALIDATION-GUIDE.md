@@ -162,7 +162,7 @@ remark content --ext mdx
 - Unclosed code blocks (missing closing ```)
 - Broken tables (misaligned pipes)
 - Invalid frontmatter YAML (indentation, quotes)
-- Long lines (over 120 characters, if rule enabled)
+- Long lines (>120 characters, if rule enabled)
 
 ---
 
@@ -306,7 +306,7 @@ External links: 50 (100% valid)
 - [ ] Linkinator completes successfully
 - [ ] 0 broken links (or all broken links documented as acceptable)
 - [ ] Internal links 100% valid
-- [ ] External links over 95% valid (some may be temporarily down)
+- [ ] External links >95% valid (some may be temporarily down)
 
 **If Fails**:
 - Review broken links report (file, link, status code)
@@ -388,7 +388,7 @@ Result: PASSED with warnings
   run: EXPECTED_DOCS_V2_MIN=75 EXPECTED_DOCS_PORT_MIN=30 EXPECTED_DOCS_API_PORT_MIN=20 bash docs/scripts/validate-technical-references.sh --strict
 ```
 
-**Expected Duration**: under 1 minute
+**Expected Duration**: <1 minute
 
 ---
 
@@ -428,7 +428,7 @@ Outdated documents (> 90 days): 0
 - [ ] All files have frontmatter (135/135)
 - [ ] All required fields present (title, description, tags, owner, lastReviewed)
 - [ ] All owner values valid (in ALLOWED_OWNERS)
-- [ ] All lastReviewed dates current (under 90 days) or intentionally accepted
+- [ ] All lastReviewed dates current (<90 days) or intentionally accepted
 - [ ] No invalid date formats
 
 **If Fails**:
@@ -754,7 +754,7 @@ python scripts/docs/validate-frontmatter.py \
 - Files scanned: 135
 - Files with frontmatter: 135 (100%)
 - Files with issues: 0
-- Outdated documents (over 90 days): 0
+- Outdated documents (>90 days): 0
 - Duration: 2.1s
 
 ## Recommendations

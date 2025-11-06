@@ -247,7 +247,7 @@ fi
 
 ### High Number of Stale Files
 
-**Symptom**: Many files flagged as over 90 days old
+**Symptom**: Many files flagged as >90 days old
 
 **Solutions**:
 1. Review stale files list: `cat docs/reports/stale-files-*.txt`
@@ -335,10 +335,10 @@ main() {
 
 | Task | Frequency | Timeline | Owner |
 |------|-----------|----------|-------|
-| Fix P1 Issues | As needed | under 3 days | DocsOps |
-| Fix P2 Issues | As needed | under 2 weeks | Content Owners |
-| Content Refresh | Quarterly | under 1 month | Guild Leads |
-| Governance Update | Semi-annual | under 2 weeks | DocsOps Lead |
+| Fix P1 Issues | As needed | <3 days | DocsOps |
+| Fix P2 Issues | As needed | <2 weeks | Content Owners |
+| Content Refresh | Quarterly | <1 month | Guild Leads |
+| Governance Update | Semi-annual | <2 weeks | DocsOps Lead |
 
 ---
 
@@ -350,7 +350,7 @@ main() {
 Health Score Trend:
 Month 1: 85 (Good)
 Month 2: 88 (Good)
-Month 3: 92 (Excellent) ← Target: Maintain over 90
+Month 3: 92 (Excellent) ← Target: Maintain >90
 
 Issue Resolution Rate:
 P1: 95% within 3 days
@@ -389,7 +389,7 @@ Average age: under 60 days
 1. **Update `lastReviewed` regularly** - Even if no changes, mark reviewed
 2. **Complete frontmatter fully** - Don't skip required fields
 3. **Use relative links correctly** - Test links before committing
-4. **Write meaningful content** - Aim for over 100 words for main docs
+4. **Write meaningful content** - Aim for >100 words for main docs
 5. **Follow style guide** - Consistent formatting aids readability
 
 ### For Reviewers
