@@ -1,11 +1,19 @@
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Load environment variables from project root .env
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '../../..');
+dotenv.config({ path: path.join(projectRoot, '.env') });
+
 import express from 'express';
 import promClient from 'prom-client';
 import { Telegraf } from 'telegraf';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/index.js';
 import input from 'input';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { config, validateConfig } from './config.js';
 import { logger } from './logger.js';
