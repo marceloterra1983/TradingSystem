@@ -81,7 +81,7 @@ jobs:
       # Start Services
       # ==============================================================================
       
-      - name: Create .env file
+      - name: Create .env file and export variables
         run: |
           cat > .env << 'EOF'
           TELEGRAM_DB_USER=telegram
@@ -92,8 +92,22 @@ jobs:
           API_SECRET_TOKEN=test_secret_token_for_ci
           TELEGRAM_RABBITMQ_PASSWORD=test_rabbitmq_password
           EOF
+          
+          # Export variables for Docker Compose
+          export TELEGRAM_DB_USER=telegram
+          export TELEGRAM_DB_PASSWORD=test_password
+          export TELEGRAM_RABBITMQ_PASSWORD=test_rabbitmq_password
+          
+          # Save to GITHUB_ENV for subsequent steps
+          echo "TELEGRAM_DB_USER=telegram" >> $GITHUB_ENV
+          echo "TELEGRAM_DB_PASSWORD=test_password" >> $GITHUB_ENV
+          echo "TELEGRAM_RABBITMQ_PASSWORD=test_rabbitmq_password" >> $GITHUB_ENV
       
       - name: Start Docker services
+        env:
+          TELEGRAM_DB_USER: telegram
+          TELEGRAM_DB_PASSWORD: test_password
+          TELEGRAM_RABBITMQ_PASSWORD: test_rabbitmq_password
         run: |
           docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master
           
