@@ -24,7 +24,7 @@
 
 **Command**:
 ```bash
-# Scan docs for outdated content (>90 days)
+# Scan docs for outdated content (over 90 days)
 python scripts/docs/validate-frontmatter.py \
   --schema v2 \
   --docs-dir ./docs/content \
@@ -36,7 +36,7 @@ python scripts/docs/validate-frontmatter.py \
 **Expected Output**: JSON report with outdated documents list
 
 **Actions**:
-- [ ] Review outdated documents list (>90 days since lastReviewed)
+- [ ] Review outdated documents list (over 90 days since lastReviewed)
 - [ ] Prioritize by domain (Critical: apps, api, database; High: frontend, tools; Medium: reference, prompts)
 - [ ] Assign owners for content review
 - [ ] Schedule review sessions (1 week)
@@ -351,7 +351,7 @@ python scripts/docs/validate-frontmatter.py \
 ### Content Audit
 
 - [ ] Review all 135+ files for accuracy
-- [ ] Archive deprecated content (>1 year old)
+- [ ] Archive deprecated content (over 1 year old)
 - [ ] Identify documentation gaps (new features, tools)
 - [ ] Plan documentation roadmap for year
 - [ ] Update documentation standards if needed
@@ -410,9 +410,9 @@ python scripts/docs/validate-frontmatter.py \
 | Metric | Target | Q4 2025 | Q1 2026 | Q2 2026 | Q3 2026 |
 |--------|--------|---------|---------|---------|----------|
 | Monthly page views | - | - | - | - | - |
-| Avg. session duration | >2 min | - | - | - | - |
-| Search success rate | >70% | - | - | - | - |
-| User satisfaction | >4/5 | - | - | - | - |
+| Avg. session duration | over 2 min | - | - | - | - |
+| Search success rate | over 70% | - | - | - | - |
+| User satisfaction | over 4/5 | - | - | - | - |
 
 ---
 

@@ -162,7 +162,7 @@ remark content --ext mdx
 - Unclosed code blocks (missing closing ```)
 - Broken tables (misaligned pipes)
 - Invalid frontmatter YAML (indentation, quotes)
-- Long lines (>120 characters, if rule enabled)
+- Long lines (over 120 characters, if rule enabled)
 
 ---
 
@@ -306,7 +306,7 @@ External links: 50 (100% valid)
 - [ ] Linkinator completes successfully
 - [ ] 0 broken links (or all broken links documented as acceptable)
 - [ ] Internal links 100% valid
-- [ ] External links >95% valid (some may be temporarily down)
+- [ ] External links over 95% valid (some may be temporarily down)
 
 **If Fails**:
 - Review broken links report (file, link, status code)
@@ -754,7 +754,7 @@ python scripts/docs/validate-frontmatter.py \
 - Files scanned: 135
 - Files with frontmatter: 135 (100%)
 - Files with issues: 0
-- Outdated documents (>90 days): 0
+- Outdated documents (over 90 days): 0
 - Duration: 2.1s
 
 ## Recommendations
