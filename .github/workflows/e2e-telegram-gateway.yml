@@ -111,6 +111,9 @@ jobs:
         run: |
           echo "🚀 Starting Telegram stack (5 containers)..."
           
+          # Create external network required by docker-compose.telegram.yml
+          docker network create tradingsystem_backend || echo "Network already exists (OK)"
+          
           # Start all containers and wait for healthy status
           # Docker Compose --wait waits for healthchecks to pass automatically
           docker compose -f tools/compose/docker-compose.telegram.yml up -d --wait \
