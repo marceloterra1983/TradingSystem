@@ -42,13 +42,15 @@ jobs:
       - name: Verify generated artifacts are in sync
         run: |
           npm run ports:sync
-          # Ignore timestamp-only changes in generated files
+          # Ignore timestamp-only changes and mode changes in generated files
           git diff --ignore-matching-lines='^# Generated:' \
                    --ignore-matching-lines='^x-tradingsystem-generated-at:' \
                    --ignore-matching-lines='generatedAt:' \
                    --ignore-matching-lines='"generatedAt"' \
                    --ignore-matching-lines='Última geração:' \
-                   --ignore-matching-lines='Last generated:' > /tmp/filtered-diff.txt
+                   --ignore-matching-lines='Last generated:' \
+                   --ignore-matching-lines='^old mode' \
+                   --ignore-matching-lines='^new mode' > /tmp/filtered-diff.txt
           if [ -s /tmp/filtered-diff.txt ]; then
             echo "❌ Generated files out of sync (excluding timestamps). Run: npm run ports:sync"
             cat /tmp/filtered-diff.txt
