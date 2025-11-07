@@ -12,6 +12,8 @@ interface RunRow {
   created_at: string;
   started_at: string | null;
   finished_at: string | null;
+  course_name?: string; // Added for JOIN queries
+  course_base_url?: string; // Added for JOIN queries
 }
 
 function mapRow(row: RunRow): CrawlRunRecord {
@@ -25,6 +27,8 @@ function mapRow(row: RunRow): CrawlRunRecord {
     createdAt: row.created_at,
     startedAt: row.started_at,
     finishedAt: row.finished_at,
+    courseName: row.course_name,
+    courseBaseUrl: row.course_base_url,
   };
 }
 
@@ -42,14 +46,31 @@ export async function enqueueRun(courseId: string) {
 
 export async function listRuns() {
   const result = await pool.query<RunRow>(
-    'SELECT * FROM course_crawler.crawl_runs ORDER BY created_at DESC LIMIT 200',
+    `
+      SELECT
+        r.*,
+        c.name as course_name,
+        c.base_url as course_base_url
+      FROM course_crawler.crawl_runs r
+      LEFT JOIN course_crawler.courses c ON r.course_id = c.id
+      ORDER BY r.created_at DESC
+      LIMIT 200
+    `,
   );
   return result.rows.map(mapRow);
 }
 
 export async function getRun(id: string) {
   const result = await pool.query<RunRow>(
-    'SELECT * FROM course_crawler.crawl_runs WHERE id = $1',
+    `
+      SELECT
+        r.*,
+        c.name as course_name,
+        c.base_url as course_base_url
+      FROM course_crawler.crawl_runs r
+      LEFT JOIN course_crawler.courses c ON r.course_id = c.id
+      WHERE r.id = $1
+    `,
     [id],
   );
   if (result.rowCount === 0) {

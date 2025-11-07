@@ -71,11 +71,11 @@ const unifiedConfig: ApiConfig = {
       `${
         import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
       }/questdb-console`,
-      '/db-ui/questdb',
+      ENDPOINTS.questdb,
       'http://localhost:9000',
       'http://localhost:8813',
       'http://localhost:9002',
-    ) || '/db-ui/questdb',
+    ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -87,9 +87,9 @@ const unifiedConfig: ApiConfig = {
       'http://localhost:8813',
       'http://localhost:9009',
     ) || 'http://localhost:9010',
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || '/db-ui/pgadmin',
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || '/db-ui/pgweb',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || '/db-ui/adminer',
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
 };
 
 // Direct port configuration (legacy)
@@ -111,12 +111,11 @@ const directConfig: ApiConfig = {
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
-      '/db-ui/questdb',
       ENDPOINTS.questdb,
       'http://localhost:9000',
       'http://localhost:8813',
       'http://localhost:9002',
-    ) || '/db-ui/questdb',
+    ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -125,9 +124,9 @@ const directConfig: ApiConfig = {
       'http://localhost:8813',
       'http://localhost:9009',
     ) || ENDPOINTS.questdb,
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || '/db-ui/pgadmin',
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || '/db-ui/pgweb',
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || '/db-ui/adminer',
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
 };
 
 // Get current configuration based on environment

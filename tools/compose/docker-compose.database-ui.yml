@@ -33,9 +33,9 @@ services:
     env_file:
       - ../../.env
       - ../../.env.shared
+    # Remove environment section - let env_file handle all variables
+    # This ensures .env values are used instead of defaults
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
       PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT:-5050}
     ports:
       - "${PGADMIN_HOST_PORT:-5050}:${PGADMIN_LISTEN_PORT:-5050}"

@@ -68,12 +68,13 @@ export async function getCourseWithSecret(id: string) {
   const record = mapRow(result.rows[0]);
   return {
     ...record,
-    password: decryptSecret(record.password),
+    password: record.password ? decryptSecret(record.password) : '',
   };
 }
 
 export async function createCourse(input: CourseInput) {
-  const encrypted = encryptSecret(input.password);
+  // Only encrypt if password is provided (not empty string)
+  const encrypted = input.password ? encryptSecret(input.password) : '';
   const targetUrls = input.targetUrls ?? [];
   const result = await pool.query<CourseRow>(
     `
@@ -101,7 +102,7 @@ export async function updateCourse(
   const current = existing.rows[0];
   const encrypted =
     input.password !== undefined
-      ? encryptSecret(input.password)
+      ? (input.password ? encryptSecret(input.password) : '') // Empty string if password is empty
       : current.password_encrypted;
   const targetUrls =
     input.targetUrls !== undefined ? input.targetUrls : current.target_urls ?? [];

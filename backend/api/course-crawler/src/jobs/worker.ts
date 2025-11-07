@@ -27,23 +27,30 @@ async function delay(ms: number) {
 
 async function processRun() {
   workerState.lastPollTime = Date.now();
+  console.log('[Worker] 🔄 Polling for queued runs...');
 
   const run = await fetchNextQueuedRun();
+  console.log('[Worker] 📊 fetchNextQueuedRun() returned:', run ? `run ${run.id}` : 'null');
+
   if (!run) {
+    console.log(`[Worker] ⏸️  No queued runs, waiting ${POLL_INTERVAL_MS}ms...`);
     await delay(POLL_INTERVAL_MS);
     return;
   }
 
-  console.log(`[Worker] Processing run ${run.id} for course ${run.courseId}`);
+  console.log(`[Worker] ✅ Processing run ${run.id} for course ${run.courseId}`);
 
+  console.log(`[Worker] 🔍 Fetching course details for ${run.courseId}...`);
   const course = await getCourseWithSecret(run.courseId);
   if (!course) {
-    console.error(`[Worker] Course ${run.courseId} not found for run ${run.id}`);
+    console.error(`[Worker] ❌ Course ${run.courseId} not found for run ${run.id}`);
     await markRunFailure(run.id, new Error('Course not found'));
     return;
   }
+  console.log(`[Worker] ✅ Course found: ${course.name} (${course.baseUrl})`);
 
   const runBaseDir = path.join(apiEnv.COURSE_CRAWLER_OUTPUT_BASE, run.id);
+  console.log(`[Worker] 📁 Creating output directory: ${runBaseDir}`);
   await fs.mkdir(runBaseDir, { recursive: true });
 
   const childEnv = {
@@ -58,19 +65,31 @@ async function processRun() {
       '/workspace/apps/course-crawler/config/platform-config.json',
   };
 
+  console.log(`[Worker] 🔍 Checking CLI path: ${apiEnv.COURSE_CRAWLER_CLI_PATH}`);
   await fs.access(apiEnv.COURSE_CRAWLER_CLI_PATH);
+  console.log('[Worker] ✅ CLI path accessible');
 
-  console.log(`[Worker] Spawning CLI process for run ${run.id}`);
+  console.log(`[Worker] 🚀 Spawning CLI process for run ${run.id}...`);
+  console.log('[Worker] 📋 Environment variables set:', {
+    COURSE_CRAWLER_BASE_URL: course.baseUrl,
+    COURSE_CRAWLER_LOGIN_USERNAME: course.username,
+    COURSE_CRAWLER_LOGIN_PASSWORD: '***',
+    COURSE_CRAWLER_OUTPUTS_DIR: runBaseDir,
+    COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(','),
+  });
   const child = spawn('node', [apiEnv.COURSE_CRAWLER_CLI_PATH], {
     env: childEnv,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+
+  console.log(`[Worker] ✅ CLI process spawned with PID: ${child.pid}`);
 
   // Track active run
   workerState.activeRuns.set(run.id, {
     startTime: Date.now(),
     pid: child.pid,
   });
+  console.log(`[Worker] 📊 Active runs tracked: ${workerState.activeRuns.size} total`);
 
   let stdout = '';
   let stderr = '';
@@ -110,13 +129,17 @@ async function processRun() {
     });
   });
 
+  console.log(`[Worker] ⏳ Waiting for CLI process to complete (timeout: ${timeoutMs}ms)...`);
   const exitCode = await Promise.race([exitPromise, timeoutPromise]);
+
+  console.log(`[Worker] 🏁 CLI process exited with code: ${exitCode}`);
 
   // Remove from active runs
   workerState.activeRuns.delete(run.id);
+  console.log(`[Worker] 📊 Active runs remaining: ${workerState.activeRuns.size}`);
 
   if (exitCode === -1) {
-    console.error(`[Worker] Run ${run.id} failed due to timeout`);
+    console.error(`[Worker] ❌ Run ${run.id} failed due to timeout`);
     await markRunFailure(
       run.id,
       new Error(
@@ -127,7 +150,9 @@ async function processRun() {
   }
 
   if (exitCode !== 0) {
-    console.error(`[Worker] Run ${run.id} failed with exit code ${exitCode}`);
+    console.error(`[Worker] ❌ Run ${run.id} failed with exit code ${exitCode}`);
+    console.error(`[Worker] 📋 Last stderr: ${stderr.slice(-500) || '(empty)'}`);
+    console.error(`[Worker] 📋 Last stdout: ${stdout.slice(-500) || '(empty)'}`);
     await markRunFailure(
       run.id,
       new Error(`Crawler exited with code ${exitCode}: ${stderr || stdout}`),
@@ -135,7 +160,7 @@ async function processRun() {
     return;
   }
 
-  console.log(`[Worker] Run ${run.id} completed successfully`);
+  console.log(`[Worker] ✅ Run ${run.id} completed successfully`);
 
   const artifacts = await fs.readdir(runBaseDir, { withFileTypes: true });
   let timestampedDirs = artifacts.filter(

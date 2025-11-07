@@ -7,7 +7,7 @@ import {
   CollapsibleCardContent,
 } from './ui/collapsible-card';
 import { Button } from './ui/button';
-import { Plus, BookOpen, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, BookOpen, Edit2, Trash2, Eye, EyeOff, Play } from 'lucide-react';
 import { api, Course } from '../services/api';
 
 export function CoursesSection() {
@@ -16,6 +16,9 @@ export function CoursesSection() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<{ [key: string]: boolean }>({});
+  const [passwords, setPasswords] = useState<{ [key: string]: string }>({}); // Store fetched passwords
+  const [showFormPassword, setShowFormPassword] = useState(false); // Toggle for form password visibility
+  const [schedulingIds, setSchedulingIds] = useState<Set<string>>(new Set()); // Track scheduling runs
   const [formData, setFormData] = useState({
     name: '',
     baseUrl: '',
@@ -79,10 +82,44 @@ export function CoursesSection() {
     setFormData({ name: '', baseUrl: '', username: '', password: '' });
     setEditingId(null);
     setShowForm(false);
+    setShowFormPassword(false); // Reset password visibility
   };
 
-  const togglePasswordVisibility = (courseId: string) => {
+  const togglePasswordVisibility = async (courseId: string) => {
+    // If showing password and not yet fetched, fetch it first
+    if (!showPassword[courseId] && !passwords[courseId]) {
+      try {
+        const password = await api.getCoursePassword(courseId);
+        setPasswords((prev) => ({ ...prev, [courseId]: password }));
+      } catch (error) {
+        console.error('Failed to fetch password:', error);
+        return;
+      }
+    }
     setShowPassword((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
+  };
+
+  const handleScheduleRun = async (courseId: string) => {
+    try {
+      setSchedulingIds(prev => new Set(prev).add(courseId));
+      await api.scheduleRun(courseId);
+      alert('Run scheduled successfully! Check the Runs section below.');
+
+      // Scroll to runs section
+      const runsCard = document.getElementById('course-crawler-runs');
+      if (runsCard) {
+        runsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (error) {
+      console.error('Failed to schedule run:', error);
+      alert('Failed to schedule run. See console for details.');
+    } finally {
+      setSchedulingIds(prev => {
+        const next = new Set(prev);
+        next.delete(courseId);
+        return next;
+      });
+    }
   };
 
   return (
@@ -159,15 +196,28 @@ export function CoursesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Password
+                  Password <span className="text-xs text-gray-500">(optional)</span>
                 </label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showFormPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    placeholder="Leave empty if not required"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowFormPassword(!showFormPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    {showFormPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             <div className="mt-4 flex justify-end gap-2">
@@ -208,23 +258,36 @@ export function CoursesSection() {
                     </p>
                     <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                       <span>Username: {course.username}</span>
-                      <span className="flex items-center gap-1">
-                        Password:{' '}
-                        {showPassword[course.id] ? (course.password || '••••••••••') : '••••••••••'}
-                        <button
-                          onClick={() => togglePasswordVisibility(course.id)}
-                          className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400"
-                        >
-                          {showPassword[course.id] ? (
-                            <EyeOff className="h-3 w-3" />
-                          ) : (
-                            <Eye className="h-3 w-3" />
-                          )}
-                        </button>
-                      </span>
+                      {course.hasPassword ? (
+                        <span className="flex items-center gap-1">
+                          Password:{' '}
+                          {showPassword[course.id] ? (passwords[course.id] || 'Loading...') : '••••••••••'}
+                          <button
+                            onClick={() => togglePasswordVisibility(course.id)}
+                            className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400"
+                          >
+                            {showPassword[course.id] ? (
+                              <EyeOff className="h-3 w-3" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
+                          </button>
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500 italic">No password required</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleScheduleRun(course.id)}
+                      size="sm"
+                      disabled={schedulingIds.has(course.id)}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Play className="h-3 w-3 mr-1" />
+                      {schedulingIds.has(course.id) ? 'Scheduling...' : 'Run'}
+                    </Button>
                     <Button
                       onClick={() => handleEdit(course)}
                       size="sm"

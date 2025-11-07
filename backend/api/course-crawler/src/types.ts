@@ -27,4 +27,6 @@ export interface CrawlRunRecord {
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
+  courseName?: string;
+  courseBaseUrl?: string;
 }

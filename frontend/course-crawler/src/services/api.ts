@@ -89,6 +89,14 @@ class CourseCrawlerAPI {
     return response.data;
   }
 
+  /**
+   * Get course password (decrypted)
+   */
+  async getCoursePassword(courseId: string) {
+    const response = await this.client.get(`/courses/${courseId}/password`);
+    return response.data.password;
+  }
+
   // ============================================================================
   // RUNS & EXECUTIONS
   // ============================================================================
@@ -194,6 +202,8 @@ export interface Run {
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
+  courseName?: string;
+  courseBaseUrl?: string;
 }
 
 export interface Artifact {

@@ -35,6 +35,11 @@ services:
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
       # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
       - VITE_COURSE_CRAWLER_APP_URL=http://localhost:4201
+      # Database UI proxies (container-to-container)
+      - DB_UI_PGADMIN_PROXY_TARGET=http://dbui-pgadmin:5050
+      - DB_UI_PGWEB_PROXY_TARGET=http://dbui-pgweb:8081
+      - DB_UI_ADMINER_PROXY_TARGET=http://dbui-adminer:8080
+      - DB_UI_QUESTDB_PROXY_TARGET=http://dbui-questdb:9000
     ports:
       - "${DASHBOARD_PORT:-3103}:${DASHBOARD_PORT:-3103}"
     networks:

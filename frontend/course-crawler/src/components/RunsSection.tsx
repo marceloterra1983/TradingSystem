@@ -9,6 +9,7 @@ import {
 import { Button } from './ui/button';
 import { Play, Eye, X, Clock } from 'lucide-react';
 import { api, Run } from '../services/api';
+import { LogViewer } from './LogViewer';
 
 type FilterStatus = 'all' | Run['status'];
 
@@ -160,12 +161,17 @@ export function RunsSection() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium text-gray-900 dark:text-white">
-                        Run {run.id.substring(0, 8)}
+                        {run.courseName || `Course ${run.courseId.substring(0, 8)}`}
                       </h3>
                       {getStatusBadge(run.status)}
                     </div>
+                    {run.courseBaseUrl && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        {run.courseBaseUrl}
+                      </p>
+                    )}
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Created: {new Date(run.createdAt).toLocaleString()}
+                      Run ID: {run.id.substring(0, 8)} • Created: {new Date(run.createdAt).toLocaleString()}
                     </p>
                     {run.startedAt && (
                       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -195,6 +201,9 @@ export function RunsSection() {
                         </span>
                       </div>
                     )}
+
+                    {/* Log Viewer */}
+                    <LogViewer runId={run.id} status={run.status} />
                   </div>
                   <div className="flex gap-2">
                     {(run.status === 'queued' || run.status === 'running') && (

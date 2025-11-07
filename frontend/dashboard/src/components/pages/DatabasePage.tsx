@@ -14,11 +14,11 @@ type EndpointOption = {
   url: string;
 };
 
-const DATABASE_UI_PROXY_URLS: Record<ToolId, string> = {
-  pgadmin: '/db-ui/pgadmin',
-  pgweb: '/db-ui/pgweb',
-  adminer: '/db-ui/adminer',
-  questdb: '/db-ui/questdb',
+const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
+  pgadmin: { url: '/db-ui/pgadmin', label: 'Proxy (/db-ui/pgadmin)' },
+  pgweb: { url: 'http://localhost:8081', label: 'Porta 8081' },
+  adminer: { url: 'http://localhost:8082', label: 'Porta 8082' },
+  questdb: { url: 'http://localhost:9002', label: 'Porta 9002' },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
@@ -28,18 +28,18 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: 'Legacy 7100', url: 'http://localhost:7100' },
   ],
   pgweb: [
+    { label: 'Proxy (/db-ui/pgweb)', url: '/db-ui/pgweb' },
     { label: 'Direto (.env)', url: ENDPOINTS.pgWeb },
-    { label: 'Porta 8081', url: 'http://localhost:8081' },
     { label: 'Legacy 7102', url: 'http://localhost:7102' },
   ],
   adminer: [
+    { label: 'Proxy (/db-ui/adminer)', url: '/db-ui/adminer' },
     { label: 'Direto (.env)', url: ENDPOINTS.adminer },
-    { label: 'Porta 8082', url: 'http://localhost:8082' },
     { label: 'Legacy 7101', url: 'http://localhost:7101' },
   ],
   questdb: [
+    { label: 'Proxy (/db-ui/questdb)', url: '/db-ui/questdb' },
     { label: 'Direto (.env)', url: ENDPOINTS.questdb },
-    { label: 'HTTP Console (9002)', url: 'http://localhost:9002' },
     { label: 'Legacy 7010', url: 'http://localhost:7010' },
   ],
 };
@@ -60,6 +60,7 @@ type DatabaseTool = {
   name: string;
   description: string;
   defaultUrl: string;
+  defaultLabel?: string;
   fallbackUrls?: EndpointOption[];
   docsLink?: string;
   startHints: string[];
@@ -73,7 +74,8 @@ const TOOLS: DatabaseTool[] = [
     name: 'pgAdmin',
     description:
       'Console completo para administrar Postgres/TimescaleDB, criar schemas e gerenciar usuários.',
-    defaultUrl: DATABASE_UI_PROXY_URLS.pgadmin,
+    defaultUrl: DATABASE_UI_DEFAULTS.pgadmin.url,
+    defaultLabel: DATABASE_UI_DEFAULTS.pgadmin.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.pgadmin,
     docsLink: '/docs/ops/database-ui#pgadmin',
     startHints: [
@@ -86,7 +88,8 @@ const TOOLS: DatabaseTool[] = [
     name: 'pgweb',
     description:
       'Cliente web leve para consultas rápidas em Postgres/Timescale, ideal para inspeções e testes.',
-    defaultUrl: DATABASE_UI_PROXY_URLS.pgweb,
+    defaultUrl: DATABASE_UI_DEFAULTS.pgweb.url,
+    defaultLabel: DATABASE_UI_DEFAULTS.pgweb.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.pgweb,
     docsLink: '/docs/ops/database-ui#pgweb',
     startHints: [
@@ -99,7 +102,8 @@ const TOOLS: DatabaseTool[] = [
     name: 'Adminer',
     description:
       'Interface minimalista para manipular bancos SQL (Postgres, MySQL, etc.) em tarefas pontuais.',
-    defaultUrl: DATABASE_UI_PROXY_URLS.adminer,
+    defaultUrl: DATABASE_UI_DEFAULTS.adminer.url,
+    defaultLabel: DATABASE_UI_DEFAULTS.adminer.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.adminer,
     docsLink: '/docs/ops/database-ui#adminer',
     startHints: [
@@ -112,7 +116,8 @@ const TOOLS: DatabaseTool[] = [
     name: 'QuestDB Console',
     description:
       'Console SQL para séries temporais e análises de mercado (dados do TP Capital / ingestão histórica).',
-    defaultUrl: DATABASE_UI_PROXY_URLS.questdb,
+    defaultUrl: DATABASE_UI_DEFAULTS.questdb.url,
+    defaultLabel: DATABASE_UI_DEFAULTS.questdb.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.questdb,
     docsLink: '/docs/tools/rag/architecture#questdb',
     startHints: [
@@ -248,7 +253,7 @@ function ToolCard({
   const status = useEndpointStatus(selectedUrl);
 
   const endpointOptions = uniqueEndpointOptions([
-    { label: 'Stack Proxy', url: tool.defaultUrl },
+    { label: tool.defaultLabel ?? 'Stack Proxy', url: tool.defaultUrl },
     ...(tool.fallbackUrls ?? []),
   ]);
 
@@ -350,6 +355,35 @@ export default function DatabasePageNew() {
   const activeToolData = TOOLS.find((tool) => tool.id === activeTool);
   const activeUrl = activeToolData ? selectedUrls[activeToolData.id] : '';
 
+  const handleEndpointError = React.useCallback(
+    (tool: DatabaseTool) => {
+      const currentUrl = selectedUrls[tool.id];
+      const fallbackOption = tool.fallbackUrls?.find(
+        (option) => option.url !== currentUrl,
+      );
+
+      if (fallbackOption) {
+        setSelectedUrls((prev) => ({
+          ...prev,
+          [tool.id]: fallbackOption.url,
+        }));
+        setIframeError(false);
+        toast.info(
+          `${tool.name}: alternando automaticamente para ${fallbackOption.label}`,
+        );
+        return;
+      }
+
+      setIframeError(true);
+      toast.error(`Não foi possível carregar ${tool.name}.`);
+    },
+    [selectedUrls, toast],
+  );
+
+  if (!activeToolData) {
+    return null;
+  }
+
   const handleToolChange = (toolId: ToolId) => {
     setActiveTool(toolId);
     setIframeError(false);
@@ -395,14 +429,12 @@ export default function DatabasePageNew() {
 
       {/* Content Frame - Separated from buttons */}
       <div className="h-[calc(100vh-200px)] w-full flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-slate-900">
-        {activeToolData && (
-          <ToolContentFrame
-            tool={activeToolData}
-            activeUrl={activeUrl}
-            iframeError={iframeError}
-            onError={() => setIframeError(true)}
-          />
-        )}
+        <ToolContentFrame
+          tool={activeToolData}
+          activeUrl={activeUrl}
+          iframeError={iframeError}
+          onError={() => handleEndpointError(activeToolData)}
+        />
       </div>
 
       {apiAvailable ? (

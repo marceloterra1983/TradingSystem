@@ -122,6 +122,22 @@ export default defineConfig(({ mode }) => {
     env.DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
     'http://localhost:3404',
   );
+  const dbUiPgAdminProxy = resolveProxy(
+    env.DB_UI_PGADMIN_PROXY_TARGET || env.VITE_DB_UI_PGADMIN_PROXY_TARGET,
+    'http://localhost:5050',
+  );
+  const dbUiPgWebProxy = resolveProxy(
+    env.DB_UI_PGWEB_PROXY_TARGET || env.VITE_DB_UI_PGWEB_PROXY_TARGET,
+    'http://localhost:8081',
+  );
+  const dbUiAdminerProxy = resolveProxy(
+    env.DB_UI_ADMINER_PROXY_TARGET || env.VITE_DB_UI_ADMINER_PROXY_TARGET,
+    'http://localhost:8082',
+  );
+  const dbUiQuestDbProxy = resolveProxy(
+    env.DB_UI_QUESTDB_PROXY_TARGET || env.VITE_DB_UI_QUESTDB_PROXY_TARGET,
+    'http://localhost:9002',
+  );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
     'http://localhost:3600',
@@ -190,6 +206,28 @@ export default defineConfig(({ mode }) => {
       } else {
         delete proxyRes.headers['content-security-policy'];
       }
+    });
+  };
+
+  const preserveProxyLocation = (proxy: any, mountPath: string) => {
+    const normalizedMount =
+      !mountPath || mountPath === '/'
+        ? ''
+        : mountPath.endsWith('/')
+          ? mountPath.slice(0, -1)
+          : mountPath;
+
+    proxy.on('proxyRes', (proxyRes: any) => {
+      const location = proxyRes.headers['location'];
+      if (!location || Array.isArray(location)) {
+        return;
+      }
+      if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//.test(location)) {
+        return;
+      }
+      const ensured = location.startsWith('/') ? location : `/${location}`;
+      proxyRes.headers['location'] =
+        normalizedMount ? `${normalizedMount}${ensured}`.replace(/\/{2,}/g, '/') : ensured;
     });
   };
 
@@ -407,35 +445,39 @@ export default defineConfig(({ mode }) => {
         },
         // Database UI Tools - Proxy to avoid CORS and X-Frame-Options issues
         '/db-ui/pgadmin': {
-          target: 'http://localhost:5050',
+          target: dbUiPgAdminProxy.target,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/db-ui\/pgadmin/, ''),
+          rewrite: createRewrite(/^\/db-ui\/pgadmin/, dbUiPgAdminProxy.basePath),
           configure: (proxy, _options) => {
             stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/pgadmin');
           },
         },
         '/db-ui/pgweb': {
-          target: 'http://localhost:8081',
+          target: dbUiPgWebProxy.target,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/db-ui\/pgweb/, ''),
+          rewrite: createRewrite(/^\/db-ui\/pgweb/, dbUiPgWebProxy.basePath),
           configure: (proxy, _options) => {
             stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/pgweb');
           },
         },
         '/db-ui/adminer': {
-          target: 'http://localhost:8082',
+          target: dbUiAdminerProxy.target,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/db-ui\/adminer/, ''),
+          rewrite: createRewrite(/^\/db-ui\/adminer/, dbUiAdminerProxy.basePath),
           configure: (proxy, _options) => {
             stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/adminer');
           },
         },
         '/db-ui/questdb': {
-          target: 'http://localhost:9002',
+          target: dbUiQuestDbProxy.target,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/db-ui\/questdb/, ''),
+          rewrite: createRewrite(/^\/db-ui\/questdb/, dbUiQuestDbProxy.basePath),
           configure: (proxy, _options) => {
             stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/questdb');
           },
         },
         // Note: /specs/ files are served directly from public/specs/ by Vite
