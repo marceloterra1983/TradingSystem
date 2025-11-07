@@ -309,11 +309,6 @@ git commit -m "feat: implement my-new-feature (openspec/my-new-feature)"
 # Full health check
 bash scripts/maintenance/health-check-all.sh
 
-# Check specific service
-curl http://localhost:3500/api/status/dashboard
-
-# Check all via Service Launcher API
-curl http://localhost:3500/api/health/full | jq '.overallHealth'
 ```
 
 ### Scrape Documentation
@@ -335,5 +330,4 @@ curl -X POST http://localhost:3600/api/scrape \
 - **Scripts** - See `tools/scripts/` directory for automation scripts
 - **OpenSpec** - See `tools/openspec/` directory for change proposals
 - **Firecrawl** - See `tools/firecrawl/` directory for web scraping tools
-- **[Service Launcher](/apps/service-launcher/overview)** - Service orchestration
 - **[AI Tools](/tools/ai/overview)** - LlamaIndex RAG integration

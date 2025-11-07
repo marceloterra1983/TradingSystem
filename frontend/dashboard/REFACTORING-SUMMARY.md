@@ -119,7 +119,7 @@ Your `vite.config.ts` is **already excellent** with:
 
 ```typescript
 // src/data/navigation.tsx - Already has lazy loading!
-const LauncherPage = React.lazy(() => import('../components/pages/LauncherPage'));
+const WorkspacePage = React.lazy(() => import('../components/pages/WorkspacePageNew'));
 const WorkspacePageNew = React.lazy(() => import('../components/pages/WorkspacePageNew'));
 const TPCapitalOpcoesPage = React.lazy(() => import('../components/pages/TPCapitalOpcoesPage'));
 // ... 15 pages total

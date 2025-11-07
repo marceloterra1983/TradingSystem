@@ -16,11 +16,11 @@ lastReviewed: '2025-10-26'
 
 **Source**: `../../../assets/diagrams/source/backend/tp-capital-component-architecture.puml`
 
-Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints), Dashboard consumption (React Query with 15s polling), and Agno Agents integration (parallel signal consumption).
+Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints) e consumo pelo Dashboard (React Query com pooling a cada 15s).
 
 **Key Components**:
 
-1. **Telegram Gateway**: Local service (port 4006/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
+1. **Telegram Gateway**: Local service (port 4007/4010) that authenticates with MTProto, stores messages in `telegram_gateway.messages`, and exposes sync endpoints.
 2. **Gateway Polling Worker**: TP Capital component that fetches queued messages, validates content, and applies parsing rules.
 3. **Timescale Writer**: Persists normalized signals into `tp_capital.tp_capital_signals` with idempotency checks.
 4. **REST API**: Express server exposing `/signals`, `/forwarded-messages`, `/telegram-*`, `/sync-messages`, `/health`, and `/metrics`.
@@ -47,7 +47,6 @@ Sequence diagram documenting:
 Shows parallel consumption patterns:
 
 - **Dashboard**: Polls `/signals` every 15 seconds with React Query caching.
-- **Agno Agents**: Query `/signals` on-demand, correlating with Workspace context.
 - Both consumers apply filters (channel, signal_type, date range).
 
 ## Components
@@ -80,7 +79,6 @@ Shows parallel consumption patterns:
 - **TimescaleDB**: Signal storage (must be running before service starts).
 - **Telegram Gateway API**: `/sync-messages` endpoint used for manual backfill.
 - **Dashboard**: Primary consumer at `http://localhost:3103`.
-- **Agno Agents**: Secondary consumer for trading automation.
 
 ## Data Flow
 
@@ -115,4 +113,4 @@ Shows parallel consumption patterns:
 - Deployed via `docker-compose.prod.yml` with production env file and mounted secrets.
 - Health check: `curl http://<host>:4005/health`.
 - TimescaleDB connectivity: `psql postgresql://timescale:***@<host>:5433/APPS-TPCAPITAL`.
-- Telegram Gateway runs as systemd unit on same host (4006/4010) with session files stored locally.
+- Telegram Gateway runs as systemd unit on same host (4007/4010) with session files stored locally.

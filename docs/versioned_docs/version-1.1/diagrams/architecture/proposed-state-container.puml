@@ -21,7 +21,6 @@ System_Boundary(tradingsystem, "TradingSystem") {
         Container(workspace_api, "Workspace API", "Node.js + Express", "Manages workspace items and categories")
         Container(tp_capital_api, "TP Capital API", "Node.js + Express", "Telegram signal ingestion and processing")
         Container(docs_api, "Documentation API", "Node.js + Express", "Documentation search, FlexSearch, RAG proxy")
-        Container(service_launcher, "Service Launcher", "Node.js + Express", "Service orchestration and health checks")
         Container(telegram_gateway, "Telegram Gateway", "Node.js + Express", "MTProto client for Telegram")
     }
 
@@ -48,7 +47,6 @@ System_Ext(telegram, "Telegram", "External messaging platform")
 ' User interactions
 Rel(user, dashboard, "Uses", "HTTPS")
 Rel(user, docs_hub, "Views docs", "HTTPS")
-Rel(admin, service_launcher, "Manages services", "HTTPS")
 
 ' Dashboard → API Gateway
 Rel(dashboard, kong_gateway, "All API calls", "HTTPS + JWT")
@@ -58,7 +56,6 @@ Rel(kong_gateway, workspace_api, "Route /api/workspace", "HTTP + X-Service-Token
 Rel(kong_gateway, tp_capital_api, "Route /api/tp-capital", "HTTP + X-Service-Token")
 Rel(kong_gateway, docs_api, "Route /api/docs", "HTTP + X-Service-Token")
 Rel(kong_gateway, rag_collections, "Route /api/rag/collections", "HTTP + X-Service-Token")
-Rel(kong_gateway, service_launcher, "Route /api/services", "HTTP + X-Service-Token")
 
 ' Kong Gateway dependencies
 Rel(kong_gateway, kong_db, "Read/Write config", "PostgreSQL")

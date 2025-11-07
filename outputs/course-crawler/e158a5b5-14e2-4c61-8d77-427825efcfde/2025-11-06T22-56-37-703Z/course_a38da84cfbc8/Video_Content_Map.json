@@ -1,0 +1,75 @@
+{
+  "courseId": "course_a38da84cfbc8",
+  "title": "Trading e Carreira",
+  "modules": [
+    {
+      "id": "module_edef8cb5dca4",
+      "title": "Trading e Carreira",
+      "order": 1,
+      "videos": [
+        {
+          "id": "video_01cc861b3795",
+          "title": "Video 2",
+          "classId": "class_45f49e47f408",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2785bbed-093f-4f38-b526-9ce181651b67&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_5426ec16dbbe",
+          "title": "Video 2",
+          "classId": "class_2351e47a17e0",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=52d8835e-ed25-4ef8-a217-0f6abbb3d8ff&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_8422b3b6d3dc",
+          "title": "Video 2",
+          "classId": "class_de7bc9c1ee1b",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0ccef567-e859-42b1-a28b-4d0498df482a&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_3956f2180be7",
+          "title": "Video 2",
+          "classId": "class_b23fcb0d2583",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1bd3ecf5-1e00-4763-991e-c217cdd37424&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_d8d086922b48",
+      "title": "Palestras",
+      "order": 2,
+      "videos": [
+        {
+          "id": "video_e62e7add7de2",
+          "title": "Video 2",
+          "classId": "class_7cc251b300cb",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=31f46bee-f1de-46d6-8ca5-065390000886&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_5796ef426e43",
+      "title": "Lives",
+      "order": 3,
+      "videos": [
+        {
+          "id": "video_58c4ec0d7119",
+          "title": "Video 2",
+          "classId": "class_c22091e87888",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a24cfd11-0988-4d6f-831a-0eafc3358494&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    }
+  ]
+}

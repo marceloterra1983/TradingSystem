@@ -1,70 +1,21 @@
 name: database
 
 # ==============================================================================
-# TradingSystem - Shared Data Stack (QuestDB + Auxiliary Postgres)
+# TradingSystem - Shared Data Stack
 # ==============================================================================
-# The monolithic TimescaleDB instance has been removed. Each application now
-# owns its dedicated database stack (see tools/compose/docker-compose.tp-capital-*.yml,
-# tools/compose/docker-compose.workspace-simple.yml, tools/compose/docker-compose.telegram.yml, etc.).
-# This compose file now keeps only the data services that remain shared across
-# the platform (QuestDB for market-data time series and LangGraph's Postgres).
+# This stack is currently empty. All data services have been moved to their
+# respective application stacks or to the database-ui stack (for UI tools).
+#
+# QuestDB was moved to database-ui stack as it includes the web console UI.
+#
+# Each application now owns its dedicated database stack:
+# - tools/compose/docker-compose.tp-capital-*.yml
+# - tools/compose/docker-compose.workspace-simple.yml
+# - tools/compose/docker-compose.telegram.yml
 # ==============================================================================
 
 services:
-  postgress-langgraph:
-    image: "${IMG_DATA_POSTGRESS_LANGGRAPH:-postgres:15}"
-    container_name: data-postgres-langgraph
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '1'
-    ports:
-      - "${POSTGRES_LANGGRAPH_PORT:-5432}:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-tradingsystem}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-      - ../../.env.shared
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tradingsystem}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - tradingsystem_backend
-
-  questdb:
-    image: "${IMG_DATA_QUESTDB:-questdb/questdb:latest}"
-    container_name: data-questdb
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-          cpus: '2'
-    ports:
-      - "${QUESTDB_PORT:-9002}:9000"
-      - "${QUESTDB_ILP_PORT:-9009}:9009"
-      - "${QUESTDB_INFLUX_PORT:-8812}:8812"
-    environment:
-      QDB_TELEMETRY_ENABLED: false
-      QDB_LOG_LEVEL: INFO
-    restart: unless-stopped
-    env_file:
-      - ../../.env
-      - ../../.env.shared
-    healthcheck:
-      test: ["CMD-SHELL", "grep -q '2328' /proc/net/tcp"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    networks:
-      - tradingsystem_backend
+  # No services currently in this stack
 
 # ========================================
 # Networks

@@ -8,70 +8,8 @@ tags:
 slug: /tools/ports-services/overview
 ---
 
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- Last generated: 2025-11-06T22:44:26.260Z -->
-<!-- Source: docs/context/ops/service-port-map.md -->
 > **⚠️ Arquivo gerado automaticamente. Não editar manualmente.**
-> Última geração: 2025-11-06T15:05:33.408Z
+> Última geração: 2025-11-07T13:54:13.632Z
 
 ## Port Ranges
 
@@ -105,8 +43,8 @@ slug: /tools/ports-services/overview
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
-| service-launcher | 3500 | http | Platform Ops | ✅ Active | Service Launcher / Status UI para orquestração local |
 | firecrawl-proxy | 3600 | http | Pesquisa | ✅ Active | Proxy Express que protege o Firecrawl upstream |
+| n8n | 3680 | http | ToolingGuild | ✅ Active | Editor n8n para orquestrações low-code |
 
 ### Automation Platforms (8180-8899)
 
@@ -121,8 +59,8 @@ slug: /tools/ports-services/overview
 |---------|------|----------|-------|--------|-------------|
 | qdrant | 6333 | http | AI Guild | ✅ Active | Vector DB (Qdrant) para embeddings |
 | telegram-redis-master | 6379 | redis | Telegram Squad | ✅ Active | Redis master para cache quente do Telegram |
-| infra-redis-dev | 6380 | redis | AI Guild | ✅ Active | Redis dev usado nos fluxos LangGraph |
 | telegram-redis-replica | 6385 | redis | Telegram Squad | ✅ Active | Replica Redis dedicada a leituras do gateway |
+| n8n-redis | 6390 | redis | ToolingGuild | ✅ Active | Redis Bull queue/event bus da stack n8n |
 
 ### Dashboard Ui (3100-3199)
 
@@ -137,17 +75,15 @@ slug: /tools/ports-services/overview
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
 | timescaledb-pgadmin | 5050 | http | Data Platform | ✅ Active | pgAdmin para administração do Timescale |
-| postgres-langgraph | 5432 | postgres | AI Guild | ✅ Active | PostgreSQL usado pelos fluxos LangGraph |
 | timescaledb | 5433 | postgres | Data Platform | ✅ Active | TimescaleDB principal da stack Workspace |
 | telegram-timescale | 5434 | postgres | Telegram Squad | ✅ Active | TimescaleDB dedicado para ingestão do Telegram |
+| n8n-postgres | 5442 | postgres | ToolingGuild | ✅ Active | PostgreSQL dedicado à stack n8n |
 
 ### Devtools (8000-8299)
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
 | timescaledb-pgweb | 8081 | http | Data Platform | ✅ Active | pgWeb leve para consultas PostgreSQL |
-| langgraph | 8111 | http | AI Guild | ✅ Active | Ambiente LangGraph produção local |
-| langgraph-dev | 8112 | http | AI Guild | ✅ Active | Ambiente LangGraph dev/sandbox |
 
 ### Documentation (3400-3499)
 

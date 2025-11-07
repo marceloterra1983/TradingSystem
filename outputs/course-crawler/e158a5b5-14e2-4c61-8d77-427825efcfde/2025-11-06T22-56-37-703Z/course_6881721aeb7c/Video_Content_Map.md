@@ -1,0 +1,283 @@
+# Video Content Map — MQL5 do Zero
+
+## Module 1: Comece por aqui
+
+_No videos detected._
+## Module 2: Ecossistema do Metatrader 5
+- 1. Video 2 (playable)
+  - Class: class_ef2d57b65fe3
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5fbdd44c-5caf-49e6-b286-ec6f98ce1101&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ed0f5dcb8220
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5bb8d2b-7915-4357-8e4b-ec71fd146f6a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_07b8768cc28a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ae24f205-c847-4d77-a48c-c8db0395b1ea&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_3cd9c75a5111
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=058be9f9-0960-465f-b1a4-7e3e77575bb9&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_4d916027c879
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d92cff65-c82f-4aba-b1de-9be24e5994cc&saveProgress=false&color=f57a00
+
+## Module 3: Fundamentos: Variáveis e Tipos de Dados
+- 1. Video 2 (playable)
+  - Class: class_ac725af68a92
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aca3b41f-1cc6-4eec-b5ed-c2a2d64bcdcc&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_cd7a7d7ba420
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e15ed515-37fb-4759-b9fc-638f4e7b88ef&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7bc0ea4b97f9
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=696a9a38-cbfb-4560-bd1d-f870002c75c9&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_f8b9d20e4c07
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a3b8631-0823-4d00-ac0c-d06275784be2&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_cd2a15871491
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=64174d7f-f2fc-491e-a64f-1e911831e8f4&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_a88822ac5afe
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=04465f84-6ed5-4e58-b8a9-7fc21238b988&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ec6cc835932e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fbe99460-ef3e-40d2-8fa8-6b2f99bc3b41&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_65f1054b1ef3
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=873c0945-28c9-4336-a3f2-bf988a5352e3&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_e66695b84371
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a09120c-af94-4ce6-af6f-4cdf26c14ee9&saveProgress=false&color=f57a00
+
+## Module 4: Fundamentos: Operações, Condicionais e Loops
+- 1. Video 2 (playable)
+  - Class: class_4010ac14d21d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=874fb7c8-9c95-4f89-a27c-0337e445876c&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_80eb9fa6c378
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e8164dab-3fec-4c2d-ac9d-72c44241489e&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_c97121efe8f0
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1fc80a65-03c2-472a-b1d3-49161a64ef70&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_d2a13dc98914
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=54e20df0-9c67-478f-84c2-957d1a619099&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_812045803bd2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c78f575e-5d20-44d9-87ac-334b75ca06b7&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_888ba47b81a5
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=786e0c79-2c3e-499e-a57a-154ce4ee8969&saveProgress=false&color=f57a00
+
+## Module 5: Funções
+- 1. Video 2 (playable)
+  - Class: class_b8a9417f661b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ffcbf2c-6fc9-407d-8039-b262c7c66944&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_84b635e47696
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2cd6e174-6f6e-4bc5-8b75-c3c800ba4ec4&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6fd6bf614c54
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fe13398f-3b2d-463f-a36e-1ee6333a1276&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_8ae2ccd4a81b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2c7e5270-947f-4501-968e-493d2ccec80a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1a74ab073cd4
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e6fdde12-b189-4918-a331-bb5c28d1ec0a&saveProgress=false&color=f57a00
+
+## Module 6: Criando um Robô do Zero
+- 1. Video 2 (playable)
+  - Class: class_095f18670c1a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95f5beee-1ff5-41c9-ae3d-76eec69ae58f&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_9705e16dccd1
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=088e6918-089c-4414-bee7-e2a03334be48&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_aff4d22e0b44
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f387be5b-2be9-4e6c-9c51-f93731fe76cd&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_0b3bf8eb49d2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d2c5b8eb-0d80-459d-afef-e770672c8e0a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_23db9f9d8798
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1e9b23b6-f053-478e-896a-00b68c16d393&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7362e7657dd7
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ea8237a0-417b-42a0-af2f-7b73475e7e41&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_512d60b316d9
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a1e8f9db-2607-4b43-b71f-80b1d31678cf&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_3506336edbd1
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7467c343-0e82-4073-8382-9243a13a6b4c&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_b8d1067623dd
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9b5aec79-f258-4c36-b2b1-87e3377bbd24&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_e79148c672be
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f053c406-3995-45d7-bca7-fbd7d64fdb3b&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_cacb7b57f305
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2de27ecc-9a3a-4760-9c27-110a04b58c31&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_dbe84f28165a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=65133e29-3bf6-492c-9bdf-a98c6c7a3caa&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_01abb4d18d52
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9080009-0e40-4976-b56e-eae890a42905&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_83d7f7d779ef
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a016dcc-7613-43a8-bcc3-b5f90ecc1802&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1dfe8708f4ee
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f0be1d24-9228-4318-a572-e89551780955&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_8c0d4079b394
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=797219de-2cc6-46e1-a2df-d1b46d9d9a74&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_9bee61a8eb3e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f446dbe4-8767-4e89-b9a3-baba8fdf7dbc&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_bd39a46a6c79
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=cde76adc-c873-4ce0-9cf4-9c207542b740&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_4fa4b33454bf
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a06c7bb-11da-4366-a1a0-964f9071fc22&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_10858ea9cd01
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2698ec62-72f9-409c-bec4-8bdf7113dd8a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7e189101ddab
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a17988c-5016-4f35-81ec-d90c34070abd&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_781be5f200fa
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3a35e497-479a-4aea-9b41-9a5d6cb925c8&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6d2a887220ad
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=39ae3782-0f3a-4e9e-8b0d-81ce448c05f9&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_0694af193364
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ee787466-5012-4313-9893-e027d10f6b88&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_2d51899758d1
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=92e297df-1328-4f95-b1ae-bf7e67357088&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_831ea855ef51
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7c5367c2-0a62-493f-be5f-9d92742927a6&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6da18c1782c6
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aef54e98-e2c2-40cc-bd76-ebc8ee1e2c6b&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_c695935c6142
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a0298b30-b376-49ff-8ea3-1473478e9999&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1d77b9efb74d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5df1d93d-46f7-44b1-acff-511ed3df3f6a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_4f5e5c3b8dbf
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f76b106a-ba53-4037-bf9b-329b18a7bcb4&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_3c94fd71c48d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95cc844b-ba04-433f-91c4-1fcec630996f&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_a7e6c106ae50
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=840701d5-7ae4-40cc-b1c8-f6257ab15003&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_b73abee272d2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ebdc042d-b2b2-4cf6-aff6-d59d0b850b97&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_f8d72f6f6877
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=13c0fcc7-373e-4d50-aaf1-b9c1d92d9599&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_2ff65594918f
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=af17f1d3-0f1a-4235-a13c-35ac00fe4c60&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_867b39555081
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3c091120-0fbe-4281-91da-b3dd2abf60b6&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_3c0b4db6a198
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b2e17f11-e469-4582-825f-93d42ffb040d&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_322295037c8c
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=493e72d4-7c11-4462-a980-bf20e4bd6bd0&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_de1d3d127b64
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d4aefd2a-6f33-4ef4-8ba3-b64f6204fb28&saveProgress=false&color=f57a00
+
+## Module 7: Manejo de Posição
+- 1. Video 2 (playable)
+  - Class: class_f7a436a85100
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ad7ba7d-ae3e-4bc4-b240-e51ff5adcb46&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_81aa786bcb7a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=34d7ca98-43f8-468a-8747-eabbfa67a3b1&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_30f1ed09db3e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7bde08ed-41f9-42a1-8cfd-825c533c4464&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_67f6b81155c4
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5aac2e8a-f40c-4919-968c-c983eac1375f&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_9c1080c37727
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e339abea-e1ff-48b0-89eb-64890b1c3b37&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_d3de69b1fb94
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=867d1c5e-c7fd-49da-ad53-d92fe343bbbe&saveProgress=false&color=f57a00
+
+## Module 8: Orientação a Objetos
+- 1. Video 2 (playable)
+  - Class: class_2846c69c6c1d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=91021985-382c-4bec-a276-cb765a7e3313&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_3eddae90dcf8
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=62678f13-b229-4aa4-b400-10511ba0b0ed&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_2b8b83d1b508
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=dcbe6539-14d2-42c4-a6b1-295753af0322&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7d6c0ed17c8f
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1256576e-fe04-4c43-b48c-fae3fdc44964&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_89b14ca7a073
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6256b7b1-b093-449b-bfcd-0fe4ebb0ca62&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6b2591aa7b06
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ae4e93ab-d0f2-47ca-814b-45fec7d88905&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_0b164287565a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=046a1331-42c8-434b-8961-7e0901ffa8f8&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_f48e6b6d0b80
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=98d45af3-daa3-4327-a203-fde48b45ac19&saveProgress=false&color=f57a00
+
+## Module 9: Robô Multi Estratégias/Ativos
+- 1. Video 2 (playable)
+  - Class: class_f712f6ddff5e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90d70d5f-4ab3-460c-9250-4b03385cb820&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_175f31b2d3f9
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=114fba5a-ea56-4021-87a4-8f6d97f07cb7&saveProgress=false&color=f57a00
+
+## Module 10: Manipulação de Arquivos
+- 1. Video 2 (playable)
+  - Class: class_40eb1a3303fe
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=85b0c150-dd1c-4158-b99e-e7488ad84c7e&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_d9a0bd2f6158
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=29088b89-8efb-4954-943d-15b78e2a3676&saveProgress=false&color=f57a00
+
+## Module 11: Integração com Telegram
+- 1. Video 2 (playable)
+  - Class: class_a2435efc818c
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e5022cc0-5b14-4b49-aef6-328a2b47b8b0&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_8b7822790f43
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=82c833fd-8357-4b38-a000-fbfdd04dbc67&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_f26ff9e3160d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0c8739f3-836a-44d1-8248-21954a3754f0&saveProgress=false&color=f57a00
+
+## Module 12: Código Fonte
+
+_No videos detected._

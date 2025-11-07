@@ -18,7 +18,6 @@ Deployment_Node(dev_workstation, "Developer Workstation", "Windows 11 / WSL2") {
                 Container(workspace_api, "Workspace API", "Node.js 20", "Port 3200")
                 Container(tp_capital, "TP Capital", "Node.js 20", "Port 4005")
                 Container(docs_api, "Documentation API", "Node.js 20", "Port 3401")
-                Container(service_launcher, "Service Launcher", "Node.js 20", "Port 3500")
             }
 
             Deployment_Node(data_stack, "Data Stack") {

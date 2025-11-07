@@ -13,7 +13,6 @@
 | Workspace API | 3200 | ✅ Ativo | ✅ **OpenAPI 3.0** | ⚠️ Básico | ✅ Prometheus |
 | TP Capital | 4005 | ✅ Ativo | ⚠️ Parcial | ⚠️ Básico | ✅ Prometheus |
 | Documentation API | 3405 | ✅ Ativo | ❌ Mínima | ❌ Nenhum | ⚠️ Parcial |
-| Service Launcher | 3500 | ✅ Ativo | ⚠️ Parcial | ❌ Nenhum | ⚠️ Parcial |
 | Firecrawl Proxy | 3600 | ✅ Ativo | ❌ Mínima | ❌ Nenhum | ❌ Nenhum |
 
 **Latest:** ✅ Workspace API OpenAPI 3.0 spec completed (2025-11-05) - View at http://localhost:3404/api/workspace
@@ -239,109 +238,7 @@
 # Documentation API
 /doc-api --service documentation-api --format openapi --output docs/static/specs/docs-api.yaml
 
-# Service Launcher
-/doc-api --service service-launcher --format openapi --output docs/static/specs/service-launcher-api.yaml
-```
 
-**Resultado esperado:**
-- ✅ 4 specs OpenAPI 3.0 completas
-- ✅ Integração com Redocusaurus
-- ✅ Exemplos de requisição/resposta
-- ✅ Schemas validados
-
----
-
-#### 1.2 Health Checks Padronizados
-
-**Criar:** `backend/shared/health/standardHealthCheck.js`
-
-```javascript
-/**
- * Standard health check format for all APIs
- */
-export function createStandardHealthCheck(serviceName, dependencies = {}) {
-  return async (req, res) => {
-    const checks = {
-      status: 'healthy',
-      service: serviceName,
-      version: process.env.npm_package_version || '1.0.0',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      dependencies: {}
-    };
-
-    // Check each dependency
-    for (const [name, checkFn] of Object.entries(dependencies)) {
-      try {
-        const result = await checkFn();
-        checks.dependencies[name] = {
-          status: 'healthy',
-          ...result
-        };
-      } catch (error) {
-        checks.dependencies[name] = {
-          status: 'unhealthy',
-          error: error.message
-        };
-        checks.status = 'degraded';
-      }
-    }
-
-    const statusCode = checks.status === 'healthy' ? 200 : 503;
-    res.status(statusCode).json(checks);
-  };
-}
-```
-
-**Implementar em todas as APIs:**
-```javascript
-import { createStandardHealthCheck } from '../../../backend/shared/health/index.js';
-
-app.get('/health', createStandardHealthCheck('workspace-api', {
-  timescaledb: async () => {
-    await timescaleClient.query('SELECT 1');
-    return { latency: '5ms' };
-  },
-  redis: async () => {
-    await redis.ping();
-    return { latency: '2ms' };
-  }
-}));
-```
-
----
-
-#### 1.3 Logging Estruturado (Pino)
-
-**Padronizar em todas as APIs:**
-
-```javascript
-import { createLogger } from '../../../backend/shared/logger/index.js';
-
-const logger = createLogger('service-name', {
-  version: '1.0.0',
-  base: {
-    environment: process.env.NODE_ENV
-  }
-});
-
-// Usage
-logger.info({ userId: 123, action: 'create_item' }, 'Item created');
-logger.error({ error: err, userId: 123 }, 'Failed to create item');
-```
-
----
-
-### Fase 2: Qualidade (2-3 semanas)
-
-#### 2.1 Suite de Testes Completa
-
-**Comando:** `/setup-comprehensive-testing --full-stack`
-
-**Implementar:**
-
-**A. Unit Tests (Meta: 80% coverage)**
-```bash
 # Workspace API
 npm run test apps/workspace/src/**/*.test.js
 

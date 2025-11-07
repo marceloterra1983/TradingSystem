@@ -254,7 +254,7 @@ export function AuthenticationCard() {
       return 'Processo cancelado. Reinicie a autenticação para gerar novos logs.';
     }
     if (status === 'error') {
-      return 'Processo falhou antes de emitir logs. Verifique o launcher e tente novamente.';
+      return 'Processo falhou antes de emitir logs. Verifique os scripts de inicialização e tente novamente.';
     }
     return 'Processo não iniciado. Clique em Iniciar para executar o script.';
   }, [isStarting, running, status]);

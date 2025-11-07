@@ -62,19 +62,6 @@ fi
 cd "$PROJECT_ROOT"
 echo ""
 
-# Service Launcher (Port 3500)
-echo "   🔧 Starting Service Launcher (3500)..."
-if ! lsof -ti:3500 > /dev/null 2>&1; then
-    cd "$PROJECT_ROOT/backend/api/service-launcher"
-    npm run dev > /tmp/service-launcher.log 2>&1 &
-    echo $! > /tmp/service-launcher.pid
-    echo "   ✅ Service Launcher starting (PID: $(cat /tmp/service-launcher.pid))"
-else
-    echo "   ⚠️  Port 3500 already in use"
-fi
-cd "$PROJECT_ROOT"
-echo ""
-
 # Step 5: Wait for Node services
 echo "5️⃣ Waiting for Node.js services (15s)..."
 sleep 15
@@ -97,9 +84,6 @@ curl -s http://localhost:3402/health > /dev/null 2>&1 && echo "      ✅ Healthy
 echo "   📊 LlamaIndex Query (8202):"
 curl -s http://localhost:8202/health > /dev/null 2>&1 && echo "      ✅ Healthy ($(curl -s http://localhost:8202/health | jq -r '.vectors') vectors)" || echo "      ⚠️  Not ready"
 
-echo "   📊 Service Launcher (3500):"
-curl -s http://localhost:3500/api/status > /dev/null 2>&1 && echo "      ✅ Healthy" || echo "      ⚠️  Not ready yet"
-
 echo "   📊 Qdrant (6333):"
 curl -s http://localhost:6333 > /dev/null 2>&1 && echo "      ✅ Healthy ($(curl -s http://localhost:6333/collections/documentation | jq -r '.result.vectors_count') vectors)" || echo "      ⚠️  Not ready"
 
@@ -117,7 +101,6 @@ echo "🌐 Access Points:"
 echo "   Dashboard:        http://localhost:3103"
 echo "   Documentation:    http://localhost:3400"
 echo "   RAG Service:      http://localhost:3402"
-echo "   Service Launcher: http://localhost:3500"
 echo "   LlamaIndex:       http://localhost:8202"
 echo "   Qdrant:           http://localhost:6333"
 echo "   Prometheus:       http://localhost:9090"
@@ -128,8 +111,6 @@ echo "   bash scripts/maintenance/health-check-all.sh"
 echo ""
 echo "📋 View logs:"
 echo "   Dashboard:   tail -f /tmp/dashboard.log"
-echo "   Launcher:    tail -f /tmp/service-launcher.log"
 echo "   RAG Service: docker logs -f rag-service"
 echo ""
 echo "=========================================="
-

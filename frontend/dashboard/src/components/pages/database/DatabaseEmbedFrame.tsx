@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '../../ui/button';
+import { IframeWithUrl } from '../../common/IframeWithUrl';
 
 interface AlternateUrl {
   label: string;
@@ -81,12 +82,13 @@ export function DatabaseEmbedFrame({
           {openLabel}
         </Button>
       </div>
-      <iframe
+      <IframeWithUrl
         src={activeOption?.url}
         title={iframeTitle}
         className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
         sandbox={sandbox}
         allow={allow}
+        wrapperClassName="h-[calc(100%-40px)]"
       />
     </div>
   );

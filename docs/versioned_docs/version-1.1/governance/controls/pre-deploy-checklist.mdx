@@ -1,0 +1,370 @@
+---
+title: "Pre-Deployment Validation Checklist"
+tags: [checklist, deployment, validation, quality-gate]
+owner: DevOps
+lastReviewed: "2025-11-05"
+slug: /governance/controls/pre-deploy-checklist
+---
+
+# Pre-Deployment Validation Checklist
+
+**Type**: Mandatory Quality Gate  
+**Owner**: DevOps Team  
+**Last Updated**: November 5, 2025  
+**Review Frequency**: Monthly
+
+---
+
+## Purpose
+
+This checklist MUST be completed **before deploying** any Docker Compose stack, service update, or configuration change. Failure to complete this checklist may result in:
+
+- ❌ Pull request rejection
+- ❌ Deployment rollback
+- ❌ Service outages (as occurred on 2025-11-05)
+
+---
+
+## Checklist
+
+### Phase 1: Environment Validation ✅
+
+#### 1.1 Environment File Exists
+```bash
+[ ] Check that .env file exists in project root
+    Command: ls -la /home/marce/Projetos/TradingSystem/.env
+```
+
+#### 1.2 Critical Variables Defined
+```bash
+[ ] Verify all CRITICAL variables are defined and non-empty
+    Command: bash scripts/validation/validate-env.sh
+    
+    Expected CRITICAL variables:
+    - TELEGRAM_DB_PASSWORD
+    - TP_CAPITAL_DB_PASSWORD
+    - TELEGRAM_GATEWAY_API_KEY
+    - TP_CAPITAL_API_KEY
+```
+
+#### 1.3 Variable Export Test
+```bash
+[ ] Test that variables can be exported correctly
+    Command: set -a && source .env && set +a && echo $TELEGRAM_DB_PASSWORD
+    
+    Expected: Non-empty string (e.g., "NYMBgrENUZP8FqUHN1Yo8sdzSfs3kLhp")
+    WRONG:    Empty string or "TELEGRAM_DB_PASSWORD"
+```
+
+#### 1.4 No Hardcoded Secrets
+```bash
+[ ] Verify no secrets in docker-compose files
+    Command: grep -r "password.*:" tools/compose/*.yml | grep -v "PASSWORD}"
+    
+    Expected: No matches (all use ${VAR} syntax)
+```
+
+---
+
+### Phase 2: Docker Compose Validation ✅
+
+#### 2.1 Syntax Check
+```bash
+[ ] Validate YAML syntax
+    Command: docker compose -f tools/compose/docker-compose.telegram.yml config > /dev/null
+    
+    Expected: No syntax errors
+```
+
+#### 2.2 Port Conflicts
+```bash
+[ ] Check for port conflicts with running services
+    Command: bash scripts/validation/check-port-conflicts.sh
+    
+    Ports to check:
+    - 4005 (TP-Capital internal)
+    - 4008 (TP-Capital external)
+    - 4010 (Telegram Gateway)
+    - 5432, 5434, 5440 (TimescaleDB)
+    - 6432, 6434, 6435 (PgBouncer)
+```
+
+#### 2.3 Network Configuration
+```bash
+[ ] Verify Docker networks exist or will be created
+    Command: docker network ls | grep -E "(telegram_backend|tp_capital_backend|tradingsystem_backend)"
+    
+    Expected: All required networks exist or are defined in compose file
+```
+
+#### 2.4 Volume Permissions
+```bash
+[ ] Check that volume mount paths exist and are readable
+    Command: ls -la backend/data/timescaledb/telegram-gateway/
+    
+    Expected: Directory exists with SQL init scripts
+```
+
+---
+
+### Phase 3: Inter-Container Communication ✅
+
+#### 3.1 Container Hostname Resolution
+```bash
+[ ] Verify services use correct container hostnames (NOT localhost)
+    Command: grep -r "localhost:" tools/compose/docker-compose*.yml | grep -v "VITE"
+    
+    Expected: Only frontend/development configs use localhost
+    WRONG:    Backend services using localhost for inter-container calls
+```
+
+#### 3.2 Port Mapping Correctness
+```bash
+[ ] Verify internal vs external ports are documented
+    Command: Check all `ports:` mappings have comments
+    
+    Example:
+    ports:
+      - "4008:4005"  # External:Internal
+      #    ^     ^
+      #    |     └─ Internal (container) - use for inter-container communication
+      #    └─ External (host) - use for browser/host access
+```
+
+#### 3.3 Proxy Target Validation (Frontend)
+```bash
+[ ] Verify frontend uses PROXY_TARGET (not API_URL) for containerized setups
+    Command: grep "VITE_.*_PROXY_TARGET" tools/compose/docker-compose.dashboard.yml
+    
+    Expected:
+    - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+    
+    WRONG:
+    - VITE_TP_CAPITAL_API_URL=http://tp-capital-api:4005  # Browser can't resolve!
+```
+
+---
+
+### Phase 4: Database Validation ✅
+
+#### 4.1 Schema Initialization Scripts
+```bash
+[ ] Verify SQL init scripts exist
+    Locations:
+    - backend/data/timescaledb/telegram-gateway/01-init-schema.sql
+    - backend/data/timescaledb/tp-capital/01-init-schema.sql
+```
+
+#### 4.2 Connection String Format
+```bash
+[ ] Verify database URLs are correctly formatted
+    Format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+    
+    Example: 
+    TELEGRAM_GATEWAY_DB_URL=postgresql://telegram:${TELEGRAM_DB_PASSWORD}@telegram-pgbouncer:6432/telegram_gateway
+```
+
+#### 4.3 PgBouncer Configuration
+```bash
+[ ] Verify PgBouncer has correct upstream database
+    Command: docker inspect telegram-pgbouncer | grep "DATABASES_HOST"
+    
+    Expected: "DATABASES_HOST=telegram-timescaledb"
+    WRONG:    "DATABASES_HOST=localhost"
+```
+
+---
+
+### Phase 5: Application Code Validation ✅
+
+#### 5.1 Checkpoint Filtering
+```bash
+[ ] Verify SQL queries filter __checkpoint__ records
+    Command: grep -r "WHERE.*asset.*checkpoint" apps/tp-capital/src/
+    
+    Expected: WHERE asset != '__checkpoint__'
+```
+
+#### 5.2 Empty Message Handling
+```bash
+[ ] Verify message processing validates content before parsing
+    Location: apps/tp-capital/src/gatewayPollingWorker.js
+    
+    Required check:
+    if (!messageContent || messageContent.trim().length === 0) {
+      // Skip or mark as failed
+    }
+```
+
+#### 5.3 Message Status Lifecycle
+```bash
+[ ] Verify API supports all valid statuses: received, queued, published
+    Location: apps/tp-capital/src/clients/gatewayHttpClient.js
+    
+    Required:
+    url.searchParams.set('status', 'received,queued');
+```
+
+---
+
+### Phase 6: Startup & Health Validation ✅
+
+#### 6.1 Start Services in Correct Order
+```bash
+[ ] Follow dependency order:
+    1. Databases (TimescaleDB, Redis)
+    2. Connection Poolers (PgBouncer)
+    3. Application Services (TP-Capital, Gateway API)
+    4. Frontend (Dashboard)
+```
+
+#### 6.2 Wait for Health Checks
+```bash
+[ ] Verify all containers report healthy before proceeding
+    Command: docker ps --filter "health=unhealthy"
+    
+    Expected: 0 unhealthy containers
+    
+    Wait time: Up to 60 seconds for start_period
+```
+
+#### 6.3 Test Inter-Service Communication
+```bash
+[ ] Test connectivity between dependent services
+    Commands:
+    # TP-Capital → Gateway API
+    docker exec tp-capital-api wget -qO- http://telegram-gateway-api:4010/health
+    
+    # TP-Capital → TimescaleDB
+    docker exec tp-capital-api node -e "const pg = require('pg'); const client = new pg.Client({host: 'tp-capital-pgbouncer', port: 6432, user: 'tp_capital', password: process.env.TP_CAPITAL_DB_PASSWORD, database: 'tp_capital_db'}); client.connect().then(() => console.log('Connected')).catch(e => console.error(e));"
+```
+
+#### 6.4 Test API Endpoints
+```bash
+[ ] Verify all public endpoints respond correctly
+    Commands:
+    curl http://localhost:4008/health  # TP-Capital
+    curl http://localhost:4010/health  # Telegram Gateway
+    curl http://localhost:3103/        # Dashboard
+```
+
+#### 6.5 Test Proxies (Frontend)
+```bash
+[ ] Verify Vite proxies work correctly
+    Command: curl http://localhost:3103/api/tp-capital/health
+    
+    Expected: {"status":"healthy", ...}
+```
+
+---
+
+### Phase 7: Data Validation ✅
+
+#### 7.1 Query Returns Real Data
+```bash
+[ ] Verify API returns signals (not just checkpoints)
+    Command: curl -s "http://localhost:4008/signals?limit=5" -H "X-API-Key: $TP_CAPITAL_API_KEY" | jq '.data[0].asset'
+    
+    Expected: Real asset (e.g., "PETR4", "BOVAW24")
+    WRONG:    "__checkpoint__"
+```
+
+#### 7.2 Message Processing Working
+```bash
+[ ] Verify polling worker is processing messages
+    Command: docker logs tp-capital-api --tail 50 | grep -E "(messages synced|Signal created)"
+    
+    Expected: Recent log entries showing message processing
+```
+
+#### 7.3 No Stuck Messages
+```bash
+[ ] Verify no messages stuck in queue with errors
+    Command: docker logs tp-capital-api --tail 100 | grep "Message processing failed" | wc -l
+    
+    Expected: 0 (or very low number)
+    WRONG:    > 50 (indicates blocked queue)
+```
+
+---
+
+## Automated Validation
+
+### Run All Checks
+```bash
+bash scripts/validation/pre-deploy-validation-suite.sh
+```
+
+**This script MUST**:
+1. Execute all Phase 1-7 validations
+2. Exit with code `1` if ANY check fails
+3. Generate detailed report in `reports/deployment/pre-deploy-validation-{timestamp}.md`
+4. Log all results to `logs/validation/pre-deploy-{date}.jsonl`
+
+---
+
+## Sign-Off
+
+**Deployment MUST NOT proceed** unless:
+
+- ✅ All Phase 1-5 checks pass (CRITICAL)
+- ✅ All Phase 6-7 checks pass (required for production)
+- ✅ Automated validation script exits with code `0`
+- ✅ Manual review by DevOps engineer (production only)
+
+**Sign-Off Template**:
+```
+Date: 2025-11-05
+Stack: telegram-stack
+Validated By: [Engineer Name]
+Validation Script: PASSED ✅
+Manual Review: PASSED ✅
+Approved: YES
+```
+
+---
+
+## Appendix: Common Failure Scenarios
+
+### Scenario 1: PgBouncer Won't Connect
+```
+Symptom: ERROR: password authentication failed
+Check:   docker inspect pgbouncer | grep "DATABASES_PASSWORD"
+Fix:     Ensure TELEGRAM_DB_PASSWORD is exported before docker compose
+```
+
+### Scenario 2: Container Can't Reach Other Container
+```
+Symptom: Connection refused
+Check:   docker network inspect | grep "container-name"
+Fix:     Ensure both containers on same network, use container hostname (not localhost)
+```
+
+### Scenario 3: Frontend Shows "Failed to fetch"
+```
+Symptom: Browser network error
+Check:   Browser console for URL being called
+Fix:     Use VITE_*_PROXY_TARGET (not VITE_*_API_URL) for containerized frontend
+```
+
+### Scenario 4: No Signals Showing (Checkpoints Only)
+```
+Symptom: API returns __checkpoint__ records
+Check:   SQL query filters
+Fix:     Add WHERE asset != '__checkpoint__'
+```
+
+### Scenario 5: Messages Not Processing
+```
+Symptom: [GatewayPollingWorker] Message processing failed
+Check:   Message status in database (received vs queued)
+Fix:     Update API filter to include both statuses: received,queued
+```
+
+---
+
+**Version**: 1.0  
+**Effective**: November 5, 2025  
+**Mandatory**: YES  
+**Next Review**: December 5, 2025 (monthly for first 3 months)
+

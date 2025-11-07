@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "metrics": {
+    "coursesProcessed": 0,
+    "modulesProcessed": 0,
+    "classesProcessed": 0,
+    "videosDetected": 0,
+    "selectorFailures": 0,
+    "averageClassDurationMs": 0,
+    "startedAt": "2025-11-06T23:21:00.189Z",
+    "finishedAt": "2025-11-06T23:21:04.042Z"
+  },
+  "incidents": [],
+  "notes": [],
+  "classMetrics": [],
+  "error": {
+    "name": "Error",
+    "message": "page.$$eval: SyntaxError: Failed to execute 'querySelector' on 'Element': 'h4 span.ml-2.5' is not a valid selector.\n    at eval (eval at evaluate (:290:30), <anonymous>:2:27)\n    at Array.map (<anonymous>)\n    at eval (eval at evaluate (:290:30), <anonymous>:1:29)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+    "stack": "page.$$eval: SyntaxError: Failed to execute 'querySelector' on 'Element': 'h4 span.ml-2.5' is not a valid selector.\n    at eval (eval at evaluate (:290:30), <anonymous>:2:27)\n    at Array.map (<anonymous>)\n    at eval (eval at evaluate (:290:30), <anonymous>:1:29)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at discoverModules (/workspace/apps/course-crawler/dist/index.js:455:36)\n    at async discoverCourses (/workspace/apps/course-crawler/dist/index.js:436:21)\n    at async Object.discoverCourses (/workspace/apps/course-crawler/dist/index.js:386:25)\n    at async main (/workspace/apps/course-crawler/dist/index.js:1394:24)"
+  }
+}

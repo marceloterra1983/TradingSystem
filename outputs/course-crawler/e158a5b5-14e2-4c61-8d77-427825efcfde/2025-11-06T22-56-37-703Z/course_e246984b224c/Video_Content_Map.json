@@ -1,0 +1,43 @@
+{
+  "courseId": "course_e246984b224c",
+  "title": "Analisando Estratégias",
+  "modules": [
+    {
+      "id": "module_e0336a2af2e4",
+      "title": "Links Importantes",
+      "order": 1,
+      "videos": []
+    },
+    {
+      "id": "module_ba7e03c073e2",
+      "title": "Analisando Estratégias",
+      "order": 2,
+      "videos": [
+        {
+          "id": "video_47fdac48783d",
+          "title": "Video 2",
+          "classId": "class_aa7852db468c",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6edc6342-4b74-42ea-b796-7eb298b597e8&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_95fa11bcf92f",
+          "title": "Video 2",
+          "classId": "class_3a591ad09567",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0d74954f-cbc5-476e-bc7b-8f0a620358ba&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_530ae6a61da8",
+          "title": "Video 2",
+          "classId": "class_72376e640136",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=bd292880-d5b2-40b9-872b-fc95af308891&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    }
+  ]
+}

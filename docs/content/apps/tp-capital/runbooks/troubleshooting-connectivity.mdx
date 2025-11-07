@@ -42,7 +42,7 @@ curl http://localhost:4008/health
 docker logs tp-capital-api --tail 50 | grep ERROR
 ```
 
-**Jump to**: [Circuit Breaker Open](#circuit-breaker-open)
+**Jump to**: [Circuit Breaker Open](#symptom-2-circuit-breaker-open-)
 
 ---
 
@@ -65,7 +65,7 @@ curl http://localhost:4010/health
 docker logs telegram-gateway-api --tail 50
 ```
 
-**Jump to**: [Gateway API Unreachable](#gateway-api-unreachable)
+**Jump to**: [Gateway API Unreachable](#problem-1-gateway-api-unreachable)
 
 ---
 
@@ -88,7 +88,7 @@ docker exec tp-capital-timescale psql -U tp_capital -d tp_capital_db -c \
   "SELECT COUNT(*) FROM signals.tp_capital_signals WHERE asset != '__checkpoint__';"
 ```
 
-**Jump to**: [Checkpoints Blocking Display](#checkpoints-blocking-display)
+**Jump to**: [Checkpoints Blocking Display](#problem-4-checkpoints-blocking-display)
 
 ---
 
@@ -278,7 +278,7 @@ GET http://tp-capital-api:4005/signals net::ERR_NAME_NOT_RESOLVED
 
 #### Common Causes
 
-##### Cause 3.1: Wrong Environment Variable (VITE_*_API_URL vs PROXY_TARGET)
+##### Cause 3.1: Wrong Environment Variable VITE_API_URL vs PROXY_TARGET
 
 **Check Dashboard container**:
 ```bash
@@ -611,11 +611,11 @@ grep -E "(Message processing failed|Empty message)" logs/ | wc -l
 
 ## References
 
-- **Incident Report**: [2025-11-05 TP-Capital Connectivity Failure](/governance/evidence/incidents/2025-11-05-tp-capital-connectivity-failure.md)
+- **Incident Report**: [2025-11-05 TP-Capital Connectivity Failure](/governance/evidence/incidents/2025-11-05-tp-capital-connectivity-failure)
 - **Policies**: 
-  - [POL-0003 Addendum 001: Port Mapping Rules](/governance/policies/addendums/POL-0003-ADDENDUM-001-port-mapping-rules.md)
-  - [POL-0002 Addendum 001: Empty Value Validation](/governance/policies/addendums/POL-0002-ADDENDUM-001-empty-value-validation.md)
-- **Checklists**: [Pre-Deployment Checklist](/governance/controls/PRE-DEPLOY-CHECKLIST.md)
+  - [POL-0003 Addendum 001: Port Mapping Rules](/governance/policies/addendums/pol-0003-addendum-001-port-mapping-rules)
+  - [POL-0002 Addendum 001: Empty Value Validation](/governance/policies/addendums/pol-0002-addendum-001-empty-value-validation)
+- **Checklists**: [Pre-Deployment Checklist](/governance/controls/pre-deploy-checklist)
 - **Scripts**: 
   - `scripts/validation/validate-env.sh`
   - `scripts/validation/validate-network.sh`

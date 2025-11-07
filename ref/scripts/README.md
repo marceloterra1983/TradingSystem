@@ -70,7 +70,6 @@ bash scripts/start.sh --help
 ✓ Docker stacks started
 ✓ Dashboard started (PID: 12345) - http://localhost:3103
 ✓ Documentation Hub started - http://localhost:3404
-✓ Service Launcher started (PID: 12346) - http://localhost:3500
 
 All services running! 🎉
 ```

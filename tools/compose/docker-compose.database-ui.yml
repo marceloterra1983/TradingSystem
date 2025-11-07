@@ -1,0 +1,137 @@
+name: database-ui
+
+services:
+  dbui-launcher-api:
+    container_name: dbui-launcher-api
+    build:
+      context: ../../backend/api/launcher-api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      LAUNCHER_API_PORT: ${LAUNCHER_API_PORT:-3909}
+      LAUNCHER_API_TOKEN: ${LAUNCHER_API_TOKEN:-devlocal-launcher-token}
+    ports:
+      - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3909/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  dbui-pgadmin:
+    container_name: dbui-pgadmin
+    image: dpage/pgadmin4:${PGADMIN_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT:-5050}
+    ports:
+      - "${PGADMIN_HOST_PORT:-5050}:${PGADMIN_LISTEN_PORT:-5050}"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      # pgAdmin has Python but not wget/curl, use python to check HTTP endpoint
+      test: ['CMD-SHELL', 'python3 -c "import urllib.request; urllib.request.urlopen(\"http://localhost:5050/misc/ping\")" || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      com.tradingsystem.category: database-ui
+      com.tradingsystem.description: pgAdmin console
+
+  dbui-pgweb:
+    container_name: dbui-pgweb
+    image: sosedoff/pgweb:${PGWEB_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - ../../.env.shared
+    environment:
+      # Use service name instead of host.docker.internal (doesn't work on Linux/WSL2)
+      # Default connects to workspace-db, can be overridden via PGWEB_DATABASE_URL
+      # Note: DATABASE_URL from .env is ignored - only PGWEB_DATABASE_URL is used
+      PGWEB_DATABASE_URL: ${PGWEB_DATABASE_URL:-postgresql://postgres:${WORKSPACE_DB_PASSWORD:-workspace_secure_pass}@workspace-db:5432/workspace?sslmode=disable}
+      PGWEB_LOCK_SESSION: 'false'
+    ports:
+      - "${PGWEB_HOST_PORT:-8081}:8081"
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    labels:
+      com.tradingsystem.category: database-ui
+      com.tradingsystem.description: pgweb lightweight console
+
+  dbui-adminer:
+    container_name: dbui-adminer
+    image: ${ADMINER_IMAGE:-adminer:latest}
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_HOST_PORT:-8082}:8080"
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    labels:
+      com.tradingsystem.category: database-ui
+      com.tradingsystem.description: Adminer utility
+
+  dbui-questdb:
+    container_name: dbui-questdb
+    image: "${IMG_DATA_QUESTDB:-questdb/questdb:latest}"
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
+    ports:
+      - "${QUESTDB_PORT:-9002}:9000"
+      - "${QUESTDB_ILP_PORT:-9009}:9009"
+      - "${QUESTDB_INFLUX_PORT:-8812}:8812"
+    environment:
+      QDB_TELEMETRY_ENABLED: false
+      QDB_LOG_LEVEL: INFO
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '2328' /proc/net/tcp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - tradingsystem_backend
+    labels:
+      com.tradingsystem.category: database-ui
+      com.tradingsystem.description: QuestDB time-series database with web console
+
+networks:
+  tradingsystem_backend:
+    external: true
+
+volumes:
+  pgadmin-data:

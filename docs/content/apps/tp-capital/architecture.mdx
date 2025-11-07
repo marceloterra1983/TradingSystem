@@ -16,7 +16,7 @@ lastReviewed: '2025-10-26'
 
 **Source**: `../../../assets/diagrams/source/backend/tp-capital-component-architecture.puml`
 
-Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints), Dashboard consumption (React Query with 15s polling), and Agno Agents integration (parallel signal consumption).
+Shows the high-level architecture: Telegram ingestion layer (Telegram Gateway MTProto + database queue), TP Capital API workers (polling + normalization), TimescaleDB storage, REST API layer (Express endpoints) e consumo pelo Dashboard (React Query com pooling a cada 15s).
 
 **Key Components**:
 
@@ -47,7 +47,6 @@ Sequence diagram documenting:
 Shows parallel consumption patterns:
 
 - **Dashboard**: Polls `/signals` every 15 seconds with React Query caching.
-- **Agno Agents**: Query `/signals` on-demand, correlating with Workspace context.
 - Both consumers apply filters (channel, signal_type, date range).
 
 ## Components
@@ -80,7 +79,6 @@ Shows parallel consumption patterns:
 - **TimescaleDB**: Signal storage (must be running before service starts).
 - **Telegram Gateway API**: `/sync-messages` endpoint used for manual backfill.
 - **Dashboard**: Primary consumer at `http://localhost:3103`.
-- **Agno Agents**: Secondary consumer for trading automation.
 
 ## Data Flow
 

@@ -24,9 +24,4 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "✅ FUSE2 instalado com sucesso!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Você agora pode executar o AnythingLLMDesktop:"
-echo ""
-echo "  ~/AnythingLLMDesktop.AppImage"
-echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-

@@ -235,7 +235,7 @@ real    0m0.008s  # 8ms (60% faster)
 ---
 
 **Related ADRs**:
-- [ADR-002: File Watcher Auto-Ingestion](./ADR-002-file-watcher-auto-ingestion.md)
+- [ADR-002: File Watcher Auto-Ingestion](./ADR-002-file-watcher-auto-ingestion)
 - ADR-003: Collection Stats Performance Optimization (planned)
 
 **Change Log**:

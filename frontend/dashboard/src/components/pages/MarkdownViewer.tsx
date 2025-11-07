@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { buildDocsUrl } from '@/lib/docsUrl';
+import { IframeWithUrl } from '../common/IframeWithUrl';
 
 /**
  * Simple Markdown Viewer - Displays markdown content without Docusaurus shell
@@ -123,7 +124,7 @@ export default function MarkdownViewer(): JSX.Element {
       {/* Content area - render as iframe for now (will show rendered Docusaurus page) */}
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
-          <iframe
+          <IframeWithUrl
             src={buildDocsUrl(path)}
             className="w-full border-0"
             style={{ height: 'calc(100vh - 120px)', minHeight: '600px' }}

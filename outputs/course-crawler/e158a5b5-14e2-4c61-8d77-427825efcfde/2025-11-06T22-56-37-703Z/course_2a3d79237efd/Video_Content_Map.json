@@ -1,0 +1,69 @@
+{
+  "courseId": "course_2a3d79237efd",
+  "title": "Desquantificando",
+  "modules": [
+    {
+      "id": "module_c9319964c615",
+      "title": "Desquantificando",
+      "order": 1,
+      "videos": [
+        {
+          "id": "video_bda5cb26ba16",
+          "title": "Video 2",
+          "classId": "class_b03436215e6a",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=08bd4fb5-d737-4e29-b809-fbe7d2b47797&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ee26a08c7ea7",
+          "title": "Video 2",
+          "classId": "class_444a52fe80c8",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f28060ba-650f-405a-b012-2d3dfb1fe5c4&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_558b03073bd5",
+          "title": "Video 2",
+          "classId": "class_896068ccbf00",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e67f66ff-72b4-4ebf-9119-1453b7feb8fb&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_7f4ed39e64d7",
+          "title": "Video 2",
+          "classId": "class_94ecc48b3b96",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5624e87a-c028-4157-8724-d6ec831ea485&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_5eb809c0752c",
+          "title": "Video 2",
+          "classId": "class_94ebef11cd64",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ec48b7ec-bf7e-4e70-ac57-7da41bb94ed8&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_3746571f2c9e",
+          "title": "Video 2",
+          "classId": "class_b6f13388ec86",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e709ab07-d222-4f70-9bd5-d388cbcce4a5&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_6e0de4a13dde",
+          "title": "Video 2",
+          "classId": "class_92f2d830d204",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b673b5bc-f8b2-4f77-b814-a3de36b07284&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import {
   Server,
 } from 'lucide-react';
 import { Button } from '../ui/button';
+import { IframeWithUrl } from '../common/IframeWithUrl';
 
 /**
  * API Viewer Page - Dedicated API documentation viewer
@@ -56,14 +57,6 @@ const API_SPECS: ApiSpec[] = [
     port: '3200',
     specFile: 'tp-capital.openapi.yaml',
     docusaurusRoute: '/api/tp-capital',
-  },
-  {
-    id: 'status-api',
-    name: 'Status API',
-    description: 'Service launcher and aggregated health/status endpoints',
-    port: '3500',
-    specFile: 'status-api.openapi.yaml',
-    docusaurusRoute: '/api/status',
   },
   {
     id: 'firecrawl-proxy',
@@ -398,13 +391,14 @@ export function APIViewerPage() {
           </div>
         ) : (
           // Iframe viewer
-          <iframe
+          <IframeWithUrl
             key={viewerUrl}
             src={viewerUrl}
             title={`${selectedApi.name} - ${viewerType}`}
             className="h-full w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
             allow="clipboard-read; clipboard-write"
             sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"
+            wrapperClassName="h-full"
           />
         )}
       </div>

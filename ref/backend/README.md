@@ -16,7 +16,6 @@ The TradingSystem backend follows a **microservices architecture** with clear se
 | [Workspace API](#workspace-api) | 3200 | Express + TimescaleDB | ✅ Active | Yes |
 | [TP Capital](#tp-capital) | 4005 | Express + QuestDB + Telegraf | ✅ Active | Yes |
 | [Documentation API](#documentation-api) | 3405 | Express + FlexSearch | ✅ Active | Yes |
-| [Service Launcher](#service-launcher) | 3500 | Express | ✅ Active | No |
 | [Firecrawl Proxy](#firecrawl-proxy) | 3600 | Express + Firecrawl | ✅ Active | Yes |
 
 ### Planned Services
@@ -270,73 +269,6 @@ QDRANT_URL=http://qdrant:7050
 - Main server: `backend/api/documentation-api/server.js`
 - RAG proxy: `backend/api/documentation-api/routes/rag.js`
 - FlexSearch index: `backend/api/documentation-api/lib/search.js`
-
----
-
-### Service Launcher
-
-**Purpose:** Service orchestration and health monitoring
-
-**Location:** `apps/service-launcher/`
-
-**Port:** 3500
-
-**Technology Stack:**
-- Express.js 4.x
-- Child process management
-- Health check aggregation
-
-**Key Features:**
-- ✅ Start/stop local services
-- ✅ Aggregate health checks
-- ✅ Service status monitoring
-- ✅ Container health checks
-- ✅ Database connectivity checks
-
-**API Endpoints:**
-```
-GET    /api/status          - All services status
-GET    /api/health          - Basic health
-GET    /api/health/full     - Comprehensive health (cached 30s)
-POST   /api/services/:name/start   - Start service
-POST   /api/services/:name/stop    - Stop service
-POST   /api/services/:name/restart - Restart service
-```
-
-**Health Check Response:**
-```json
-{
-  "overallHealth": "healthy",
-  "timestamp": "2025-11-05T10:00:00Z",
-  "services": {
-    "dashboard": { "status": "running", "port": 3103 },
-    "workspace": { "status": "running", "port": 3200 }
-  },
-  "containers": {
-    "timescaledb": { "status": "healthy", "uptime": "2h" },
-    "redis": { "status": "healthy", "uptime": "2h" }
-  },
-  "databases": {
-    "timescaledb": { "status": "connected", "latency": "5ms" },
-    "redis": { "status": "connected", "latency": "2ms" }
-  }
-}
-```
-
-**Caching:**
-- `/api/health/full` is cached for 30 seconds
-- Check `X-Cache-Status` header (`HIT` or `MISS`)
-
-**Environment Variables:**
-```bash
-SERVICE_LAUNCHER_PORT=3500
-HEALTH_CHECK_TIMEOUT=5000
-CACHE_TTL=30
-```
-
-**Reference Files:**
-- Main server: `apps/service-launcher/server.js`
-- Health checks: `apps/service-launcher/lib/health.js`
 
 ---
 

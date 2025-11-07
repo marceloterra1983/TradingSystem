@@ -74,34 +74,6 @@ Critical applications for market data capture and order execution.
 
 Supporting infrastructure for communication, data ingestion, and orchestration.
 
-#### Service Launcher
-
-**Purpose:** Service orchestration and comprehensive health monitoring
-
-**Status:** 🟢 Production
-
-**Technology:** Node.js, Express, Bash scripts
-
-**Key Features:**
-
-- Multi-service health monitoring (11+ services)
-- Comprehensive health checks (services + containers + databases)
-- Terminal service launcher (Windows/Linux)
-- Smart caching (60s TTL)
-- Real-time metrics aggregation
-- Rate limiting and CORS protection
-
-**Quick Links:**
-
-- [Overview](./service-launcher/overview) - Architecture and design
-- [API Documentation](./service-launcher/api) - REST endpoints
-- [Configuration](./service-launcher/config) - Environment variables
-- [Deployment](./service-launcher/deployment) - Setup procedures
-- [Operations](./service-launcher/operations) - Day-to-day management
-- [Runbook](./service-launcher/runbook) - Troubleshooting
-
----
-
 #### Telegram Gateway
 
 **Purpose:** Telegram message ingestion via MTProto protocol
@@ -203,7 +175,6 @@ Productivity and workspace management tools.
 |-----|----------|----------|----------------|
 | Data Capture | C# (.NET 8.0) | Parquet Files | Native Windows Service |
 | Order Manager | C# (.NET 8.0) | TimescaleDB | Native Windows Service |
-| Service Launcher | Node.js | None (stateless) | Docker Compose |
 | Telegram Gateway | Node.js | TimescaleDB | Docker Compose |
 | TP Capital | Node.js | TimescaleDB, Telegraf | Docker Compose |
 | Workspace | React + Node.js | TimescaleDB | Docker Compose |

@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "metrics": {
+    "coursesProcessed": 0,
+    "modulesProcessed": 0,
+    "classesProcessed": 0,
+    "videosDetected": 0,
+    "selectorFailures": 0,
+    "averageClassDurationMs": 0,
+    "startedAt": "2025-11-06T22:33:32.801Z",
+    "finishedAt": "2025-11-06T22:33:32.820Z"
+  },
+  "incidents": [],
+  "notes": [],
+  "classMetrics": [],
+  "error": {
+    "name": "Error",
+    "message": "browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.56.1. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.48.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.56.1-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝",
+    "stack": "browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.56.1. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.48.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.56.1-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝\n    at createAuthenticatedSession (/workspace/apps/course-crawler/dist/index.js:256:34)\n    at Object.discoverCourses (/workspace/apps/course-crawler/dist/index.js:380:48)\n    at async main (/workspace/apps/course-crawler/dist/index.js:1394:24)"
+  }
+}

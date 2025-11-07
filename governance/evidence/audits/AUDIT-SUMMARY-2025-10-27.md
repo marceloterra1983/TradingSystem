@@ -30,7 +30,6 @@ Realizei uma auditoria completa da organização do projeto TradingSystem, anali
 2. **Caminho Incorreto no Manifest**
    - Documentation API aponta para `backend/api/docs-api`
    - **Caminho correto:** `backend/api/documentation-api`
-   - **Impacto:** Service Launcher não encontra o serviço
 
 3. **Serviços Ausentes no Manifest**
    - `backend/api/telegram-gateway/` não está registrado

@@ -55,7 +55,7 @@ show_help() {
     echo "  database      - Banco de dados (TimescaleDB, PostgreSQL, etc.)"
     echo "  documentation - Documentação (DocsAPI, DocsViewer)"
     echo "  firecrawl     - Firecrawl (API, PostgreSQL, Redis, Playwright)"
-    echo "  infrastructure- Infraestrutura (LangGraph, LlamaIndex, Agno)"
+    echo "  infrastructure- Infraestrutura (Kestra, LlamaIndex)"
     echo "  monitoring    - Monitoramento (Prometheus, Grafana, AlertManager)"
     echo "  individual    - Serviços individuais (Ollama, Registry)"
     echo ""
@@ -198,6 +198,5 @@ else
 fi
 
 echo -e "${GREEN}Operação concluída!${NC}"
-
 
 

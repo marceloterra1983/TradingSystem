@@ -1,0 +1,497 @@
+---
+title: AI Agent Troubleshooting Guide - Docusaurus
+sidebar_position: 10
+tags: [docusaurus, ai, troubleshooting, automation]
+domain: tools
+type: guide
+summary: Automated troubleshooting procedures for AI agents to detect and fix Docusaurus 500 errors without human intervention.
+status: active
+last_review: "2025-11-07"
+---
+
+# AI Agent Troubleshooting Guide - Docusaurus
+
+**Audience:** AI Assistants (Claude, ChatGPT, Copilot, etc.)
+**Purpose:** Automated detection and recovery from Docusaurus deployment issues
+**Priority:** P0 - Critical (Service availability)
+
+---
+
+## 🚨 Red Flags (Immediate Action Required)
+
+If you detect **ANY** of these patterns in user messages or system logs, **IMMEDIATELY execute the recovery workflow**:
+
+### User Messages
+
+```text
+❌ "Docusaurus showing 500 error"
+❌ "Documentation not loading"
+❌ "Getting Internal Server Error on docs"
+❌ "Docs page is broken"
+❌ "Can't access http://localhost:3404"
+❌ "NGINX error on documentation"
+```
+
+### System Logs
+
+```text
+❌ [error] rewrite or internal redirection cycle
+❌ ERR_CONNECTION_REFUSED on port 3404
+❌ docker logs docs-hub shows "404 Not Found"
+❌ curl http://localhost:3404/health fails
+```
+
+### Container Status
+
+```bash
+# Container unhealthy
+docker ps | grep docs-hub | grep "unhealthy"
+
+# Volume empty
+docker exec docs-hub ls /usr/share/nginx/html/ | wc -l
+# Output: 0 or 1 (only .gitkeep)
+```
+
+---
+
+## 🔄 Automated Recovery Workflow
+
+### Step-by-Step Recovery
+
+```markdown
+## Workflow: Docusaurus 500 Error Recovery
+
+### Detection Phase
+
+1. **Identify the issue:**
+   - User reports 500 error OR
+   - Health check fails OR
+   - NGINX logs show redirect loop
+
+2. **Confirm diagnosis:**
+   ```bash
+   # Check if build exists
+   [ -f "docs/build/index.html" ] || echo "❌ Build missing"
+
+   # Check container logs
+   docker logs docs-hub --tail 20 | grep -i error
+
+   # Check volume mount
+   docker exec docs-hub ls -la /usr/share/nginx/html/ | head -5
+   ```
+
+### Recovery Phase
+
+3. **Execute emergency recovery:**
+   ```bash
+   # Use automated recovery script
+   bash scripts/docs/emergency-recovery.sh
+   ```
+
+   **What this script does:**
+   - Diagnoses the problem (missing build, outdated files, redirect loop)
+   - Rebuilds Docusaurus if needed
+   - Restarts container with --force-recreate
+   - Verifies health checks pass
+   - Checks for redirect loops in logs
+
+4. **Verify recovery:**
+   ```bash
+   # Health check should return 200
+   curl -f http://localhost:3404/health
+
+   # Homepage should load
+   curl -I http://localhost:3404/ | grep "200 OK"
+
+   # No errors in logs
+   docker logs docs-hub --tail 20 | grep -i error
+   ```
+
+### Documentation Phase
+
+5. **Document the incident:**
+   - Create incident report in `outputs/`
+   - Follow template: `outputs/DOCUSAURUS-500-INCIDENT-TEMPLATE.md`
+   - Include root cause, resolution, and prevention steps
+
+6. **Update governance if needed:**
+   - If new pattern discovered, update `governance/controls/docusaurus-deployment-sop.md`
+   - Add new detection rule to this guide
+```
+
+---
+
+## 🤖 One-Command Recovery
+
+For experienced AI agents, use this single command:
+
+```bash
+bash scripts/docs/emergency-recovery.sh && echo "✅ Recovery complete" || echo "❌ Recovery failed - check logs"
+```
+
+**Expected output:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚨 Docusaurus Emergency Recovery
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ℹ️  Step 1/5: Diagnosing issue...
+✅ Build exists and is recent
+ℹ️  Step 2/5: Skipping build (not needed)
+ℹ️  Step 3/5: Stopping docs-hub container...
+ℹ️  Step 4/5: Rebuilding container...
+ℹ️  Step 5/5: Verifying recovery...
+✅ Health check passed!
+✅ Homepage responding correctly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Recovery completed successfully!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 Service URL: http://localhost:3404
+🏥 Health check: http://localhost:3404/health
+```
+
+---
+
+## 🔍 Diagnostic Commands
+
+### Quick Diagnostics (30 seconds)
+
+```bash
+# 1. Check if build exists
+ls -lh docs/build/index.html
+
+# 2. Check build age
+find docs/build/index.html -mmin +60 -ls
+
+# 3. Check container health
+docker ps --filter "name=docs-hub" --format "table {{.Names}}\t{{.Status}}"
+
+# 4. Check NGINX errors
+docker logs docs-hub --tail 20 | grep -i "error"
+
+# 5. Test health endpoint
+curl -v http://localhost:3404/health 2>&1 | grep -E "(HTTP|healthy)"
+
+# 6. Test homepage
+curl -I http://localhost:3404/ 2>&1 | head -1
+```
+
+### Deep Diagnostics (2 minutes)
+
+```bash
+# 1. Full container inspection
+docker inspect docs-hub | jq '.[0] | {
+  State: .State,
+  Mounts: .Mounts,
+  Networks: .NetworkSettings.Networks
+}'
+
+# 2. Volume mount verification
+docker exec docs-hub sh -c 'ls -laR /usr/share/nginx/html/ | head -50'
+
+# 3. NGINX config test
+docker exec docs-hub nginx -t
+
+# 4. Full error logs
+docker logs docs-hub --tail 100 | grep -E "(error|warn|fail)"
+
+# 5. Compare build with container
+diff <(ls docs/build/) <(docker exec docs-hub ls /usr/share/nginx/html/)
+```
+
+---
+
+## 🛡️ Prevention Rules
+
+### Before Restarting Containers
+
+**ALWAYS run this checklist:**
+
+```bash
+# Checklist script
+cat > /tmp/docs-pre-restart-check.sh <<'EOF'
+#!/bin/bash
+FAIL=0
+
+echo "📋 Pre-restart Checklist"
+
+# 1. Build exists
+if [ -f "docs/build/index.html" ]; then
+  echo "✅ Build exists"
+else
+  echo "❌ Build missing - run: cd docs && npm run docs:build"
+  FAIL=1
+fi
+
+# 2. Build is recent (< 1 hour old)
+if [ $(find docs/build/index.html -mmin +60 2>/dev/null | wc -l) -eq 0 ]; then
+  echo "✅ Build is recent"
+else
+  echo "⚠️  Build is old (> 1 hour) - consider rebuilding"
+fi
+
+# 3. Service is accessible
+if curl -sf http://localhost:3404/health > /dev/null 2>&1; then
+  echo "✅ Current service is healthy"
+else
+  echo "⚠️  Current service unhealthy or not running"
+fi
+
+if [ $FAIL -eq 1 ]; then
+  echo ""
+  echo "❌ Pre-flight checks FAILED - do not restart container"
+  exit 1
+fi
+
+echo ""
+echo "✅ All checks passed - safe to restart"
+EOF
+
+bash /tmp/docs-pre-restart-check.sh
+```
+
+### After Content Changes
+
+**ALWAYS rebuild before restarting:**
+
+```bash
+# Wrong ❌
+docker compose -f tools/compose/docker-compose.docs.yml restart
+
+# Correct ✅
+cd docs && \
+npm run docs:build && \
+cd .. && \
+docker compose -f tools/compose/docker-compose.docs.yml up -d --build
+```
+
+### Scheduled Rebuilds
+
+**Set up cron job for automatic rebuilds:**
+
+```bash
+# Add to crontab: rebuild docs every 6 hours
+0 */6 * * * cd /path/to/TradingSystem/docs && npm run docs:build >> /tmp/docs-build.log 2>&1
+```
+
+---
+
+## 📊 Monitoring Integration
+
+### Prometheus Alerts
+
+```yaml
+# File: tools/monitoring/prometheus/rules/docs.yml
+groups:
+  - name: docusaurus
+    interval: 30s
+    rules:
+      - alert: DocusaurusDown
+        expr: up{job="docs-hub"} == 0
+        for: 2m
+        annotations:
+          summary: "Docusaurus service is down"
+          description: "Execute: bash scripts/docs/emergency-recovery.sh"
+
+      - alert: DocusaurusHighErrorRate
+        expr: rate(nginx_http_requests_total{status="500",job="docs-hub"}[5m]) > 0.1
+        for: 1m
+        annotations:
+          summary: "High 500 error rate on Docusaurus"
+          description: "Possible redirect loop - check NGINX logs"
+```
+
+### Grafana Dashboard
+
+```json
+{
+  "title": "Docusaurus Health",
+  "panels": [
+    {
+      "title": "Service Uptime",
+      "targets": [
+        {
+          "expr": "up{job=\"docs-hub\"}"
+        }
+      ]
+    },
+    {
+      "title": "HTTP 500 Errors",
+      "targets": [
+        {
+          "expr": "rate(nginx_http_requests_total{status=\"500\",job=\"docs-hub\"}[5m])"
+        }
+      ]
+    },
+    {
+      "title": "Response Time",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m]))"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 🎓 Training Examples
+
+### Example 1: User Reports 500 Error
+
+**User Message:**
+```
+"Hey, I'm getting a 500 error when trying to access the documentation at http://localhost:3404/next/"
+```
+
+**AI Response:**
+```markdown
+I'll fix the Docusaurus 500 error immediately.
+
+**Diagnosis:**
+The error is caused by NGINX redirect loop, typically from an empty/outdated build directory.
+
+**Executing recovery:**
+```bash
+bash scripts/docs/emergency-recovery.sh
+```
+
+**Recovery output:**
+[Script output showing successful recovery]
+
+**Verification:**
+- ✅ Health check: http://localhost:3404/health
+- ✅ Homepage loads: http://localhost:3404/
+- ✅ No errors in logs
+
+**Root Cause:**
+Docusaurus build was missing/outdated when container started.
+
+**Prevention:**
+Created incident report: outputs/DOCUSAURUS-500-INCIDENT-2025-11-07.md
+
+The documentation is now accessible. Please try again!
+```
+
+### Example 2: Proactive Detection
+
+**AI detects issue during routine check:**
+
+```markdown
+**Alert:** Docusaurus health check failed during scheduled monitoring.
+
+**Automatic actions taken:**
+1. Detected 500 errors in NGINX logs
+2. Executed emergency recovery script
+3. Verified service restoration
+4. Created incident report
+
+**Status:** ✅ Resolved automatically
+**Duration:** 45 seconds
+**No user action required.**
+```
+
+---
+
+## 🔗 Related Documentation
+
+- **[Docusaurus Deployment SOP](../../../../governance/controls/docusaurus-deployment-sop.md)** - Complete standard operating procedures
+- **[Docker Compose Configuration](../../../compose/docker-compose.docs.yml)** - Container setup
+- **[NGINX Configuration](../../../compose/documentation/nginx.conf)** - Web server config
+- **[Emergency Recovery Script](../../../../../scripts/docs/emergency-recovery.sh)** - Automated fix
+
+---
+
+## 📝 Incident Report Template
+
+When documenting incidents, use this template:
+
+```markdown
+# Docusaurus 500 Error - Incident Report
+
+**Date:** 2025-11-07 12:30
+**Detected By:** AI Agent (automated monitoring)
+**Severity:** P1 (Service Down)
+**Duration:** 45 seconds
+
+## Symptoms
+- ✅ HTTP 500 on all documentation routes
+- ✅ NGINX redirect loop in logs
+- ✅ Empty volume mount detected
+
+## Root Cause
+Container started before Docusaurus build completed.
+
+## Resolution
+1. Ran emergency recovery script
+2. Rebuilt Docusaurus (3m 22s)
+3. Restarted container with --force-recreate
+4. Verified health checks passed
+
+## Prevention
+- Updated pre-commit hook to validate build
+- Added CI check for build verification
+- Documented in: governance/controls/docusaurus-deployment-sop.md
+
+## Timeline
+- 12:30:00 - Issue detected (automated health check)
+- 12:30:05 - Recovery script started
+- 12:33:27 - Docusaurus build completed
+- 12:33:35 - Container restarted
+- 12:33:45 - Service healthy
+
+**Total Resolution Time:** 45 seconds (automated)
+```
+
+---
+
+## ⚡ Quick Reference
+
+### Command Cheat Sheet
+
+```bash
+# Emergency recovery (one-liner)
+bash scripts/docs/emergency-recovery.sh
+
+# Manual rebuild
+cd docs && npm run docs:build && cd .. && docker compose -f tools/compose/docker-compose.docs.yml up -d --build
+
+# Health check
+curl -f http://localhost:3404/health
+
+# Check logs for errors
+docker logs docs-hub --tail 20 | grep -i error
+
+# Verify volume mount
+docker exec docs-hub ls -la /usr/share/nginx/html/ | head -5
+
+# Force clean rebuild
+docker compose -f tools/compose/docker-compose.docs.yml down && \
+cd docs && rm -rf build && npm run docs:build && cd .. && \
+docker compose -f tools/compose/docker-compose.docs.yml up -d --build --force-recreate
+```
+
+### Decision Tree
+
+```
+User reports 500 error?
+├─ YES → Run emergency-recovery.sh
+│        ├─ Success? → Document in outputs/
+│        └─ Failed? → Check Docker logs, escalate
+└─ NO → Routine maintenance
+         └─ Content changed?
+             ├─ YES → Rebuild before restart
+             └─ NO → Safe to restart
+```
+
+---
+
+**Version:** 1.0.0
+**Last Updated:** 2025-11-07
+**Maintained By:** AI Agents + DevOps Team
+**Next Review:** 2025-12-07
+

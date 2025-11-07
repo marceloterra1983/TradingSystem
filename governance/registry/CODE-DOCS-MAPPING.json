@@ -110,33 +110,6 @@
       "autoUpdate": false
     },
     {
-      "id": "status-api-openapi-spec",
-      "source": {
-        "type": "openapi-spec",
-        "paths": [
-          "docs/static/specs/status-api*.openapi.yaml"
-        ],
-        "triggers": [
-          "paths:",
-          "components:",
-          "info:",
-          "info.version"
-        ]
-      },
-      "targets": [
-        {
-          "path": "docs/content/api/status-api.mdx",
-          "sections": [
-            "API Reference",
-            "OpenAPI Specification"
-          ]
-        }
-      ],
-      "severity": "critical",
-      "owner": "DocsOps",
-      "autoUpdate": false
-    },
-    {
       "id": "alert-router-openapi-spec",
       "source": {
         "type": "openapi-spec",

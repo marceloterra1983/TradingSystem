@@ -1,0 +1,39 @@
+# Video Content Map — Destravando o poder do Strategy Quant X
+
+## Module 1: Strategy Quant X
+- 1. Video 2 (playable)
+  - Class: class_c54f5517438f
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f1a4e8db-8552-4f59-baaf-ffecd069ec49&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ecc09f08239b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=edd46a2b-bb18-4eb1-b221-b56bbabf7464&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_c5b542efaf1b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=72d99e5e-a8b2-4aa7-aa6b-cfe5b1d0115e&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_71b71305c86c
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d9a68b21-6c54-41e8-8600-44d2f3af83d5&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_401822369ffc
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6084fcd5-1de0-42c8-854b-e0689c699d21&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6a6f5819bd40
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0235e3b9-575c-48ee-9b40-1473440fe7d1&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_78653f65b47a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=35e5a151-3232-478b-bd2e-16d9249e52b0&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_db2261c67200
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=389510b1-b27d-41be-87a6-b2c627f494c5&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_c8ab670e671c
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3a26b401-e79a-42d2-86ed-8ced11d2dbfc&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_b74cb0c124bb
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e13b82f3-9aa2-42d8-8a2c-32ca442a38e7&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_9c847a3c9745
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9975e5a5-e6d5-4892-8fb8-598f4dac964d&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_2e27e9ce3bb8
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6787d9fd-933f-4c61-bf25-236ed88116f3&saveProgress=false&color=f57a00

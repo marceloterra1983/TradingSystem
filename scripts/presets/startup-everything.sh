@@ -85,18 +85,6 @@ else
 fi
 cd "$PROJECT_ROOT"
 
-# Service Launcher (Port 3500)
-echo "   🔧 Service Launcher (3500)..."
-if ! lsof -ti:3500 > /dev/null 2>&1; then
-    cd "$PROJECT_ROOT/backend/api/service-launcher"
-    npm run dev > /tmp/service-launcher.log 2>&1 &
-    echo $! > /tmp/service-launcher.pid
-    echo "      ✅ Started (PID: $(cat /tmp/service-launcher.pid))"
-else
-    echo "      ⚠️  Already running"
-fi
-cd "$PROJECT_ROOT"
-
 # Firecrawl Proxy (Port 3600)
 echo "   🕷️  Firecrawl Proxy (3600)..."
 if ! lsof -ti:3600 > /dev/null 2>&1; then
@@ -130,7 +118,7 @@ docker ps --format "   {{.Names}}: {{.Status}}" | grep -E "(rag-|data-|prometheu
 echo ""
 
 echo "🌐 WEB SERVICES:"
-for SERVICE in "Dashboard:3103" "Docs Hub:3400" "RAG Service:3402" "Service Launcher:3500" "LlamaIndex:8202" "Qdrant:6333" "Ollama:11434"; do
+for SERVICE in "Dashboard:3103" "Docs Hub:3400" "RAG Service:3402" "LlamaIndex:8202" "Qdrant:6333" "Ollama:11434"; do
     NAME=$(echo $SERVICE | cut -d: -f1)
     PORT=$(echo $SERVICE | cut -d: -f2)
     if curl -s -m 2 http://localhost:$PORT > /dev/null 2>&1; then

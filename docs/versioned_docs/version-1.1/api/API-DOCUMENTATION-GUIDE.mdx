@@ -18,7 +18,7 @@ lastReviewed: "2025-11-01"
 - **[Workspace API](http://localhost:3400/api/workspace)** - Ideas & documentation management
 - **[Documentation API](http://localhost:3400/api/documentation-api)** - Full documentation platform API
 - **[TP Capital API](http://localhost:3400/api/tp-capital)** - Trading signals ingestion
-- **[Status API](http://localhost:3400/api/status)** - Health monitoring and service orchestration
+- **Status API (descontinuado)** - Health monitoring and service orchestration (removido do stack)
 
 ### OpenAPI Specifications
 - **Location:** `/docs/static/specs/*.openapi.yaml`
@@ -36,7 +36,6 @@ lastReviewed: "2025-11-01"
 | **Workspace API** | 3200 | `/api/workspace` | ✅ Docker | Ideas & docs management |
 | **TP Capital** | 4005 | `/api/tp-capital` | ✅ Docker | Trading signals ingestion |
 | **Documentation API** | 3401 | `/api/documentation` | ✅ Docker | Docs platform + RAG proxy |
-| **Service Launcher** | 3500 | `/api/status` | ❌ Host | Health orchestration |
 | **Dashboard** | 3103 | `/` | ❌ Host | React frontend |
 | **Docs Hub** | 3400 | `/docs` | ✅ Docker | Docusaurus portal |
 
@@ -65,7 +64,7 @@ lastReviewed: "2025-11-01"
 
 ### Planned Improvements (Architecture Review 2025-11-01)
 
-From [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md):
+From [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation):
 
 **Priority 1 (Critical):**
 1. **API Gateway** - Kong Gateway for centralized authentication/routing
@@ -165,7 +164,7 @@ app.use('/api/v1/*', (req, res, next) => {
 });
 ```
 
-**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md) - Proposes API versioning strategy
+**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation) - Proposes API versioning strategy
 
 ---
 
@@ -540,7 +539,7 @@ describe('POST /api/items', () => {
 });
 ```
 
-**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md) - Comprehensive testing roadmap
+**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy) - Comprehensive testing roadmap
 
 ---
 
@@ -710,8 +709,8 @@ new_item = client.create_item(
 
 ## 📖 Related Documentation
 
-- [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md)
-- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md)
+- [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation)
+- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy)
 - [Environment Variables Reference](../tools/security-config/env.mdx)
 - [Testing Strategy](../reference/testing-strategy.mdx)
 - [API Guidelines](../reference/api-guidelines.mdx)

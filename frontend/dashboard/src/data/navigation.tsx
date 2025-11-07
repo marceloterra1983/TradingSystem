@@ -3,18 +3,24 @@ import {
   BookOpen,
   BarChart3,
   BrainCircuit,
-  Gauge,
   Server,
   ShieldCheck,
   Workflow,
+  TrendingUp,
+  MessageSquare,
+  Briefcase,
+  GraduationCap,
+  List,
+  FileText,
+  Database,
+  Layout,
+  GitBranch,
+  MessageCircle,
 } from 'lucide-react';
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
 // This ensures only the current page's code is loaded, reducing initial bundle size by 40-60%
 
-const LauncherPage = React.lazy(
-  () => import('../components/pages/LauncherPage'),
-);
 const WorkspacePageNew = React.lazy(
   () => import('../components/pages/WorkspacePageNew'),
 );
@@ -28,12 +34,6 @@ const DatabasePageNew = React.lazy(
   () => import('../components/pages/DatabasePage'),
 );
 const MiroPage = React.lazy(() => import('../components/pages/MiroPage'));
-const AgnoAgentsPage = React.lazy(
-  () => import('../components/pages/AgnoAgentsPage'),
-);
-const LangGraphPage = React.lazy(
-  () => import('../components/pages/LangGraphPage'),
-);
 const LlamaIndexPage = React.lazy(
   () => import('../components/pages/LlamaIndexPage'),
 );
@@ -41,8 +41,8 @@ const KestraPage = React.lazy(() => import('../components/pages/KestraPage'));
 const CatalogPage = React.lazy(
   () => import('../components/pages/CatalogPage'),
 );
-const DocumentationMetricsPage = React.lazy(
-  () => import('../components/pages/DocumentationMetricsPage'),
+const CourseCrawlerPage = React.lazy(
+  () => import('../components/pages/CourseCrawlerPage'),
 );
 const GovernancePage = React.lazy(
   () => import('../components/pages/GovernancePage'),
@@ -50,12 +50,8 @@ const GovernancePage = React.lazy(
 const TelegramGatewayFinal = React.lazy(
   () => import('../components/pages/TelegramGatewayFinal'),
 );
-const AnythingLLMPage = React.lazy(
-  () => import('../components/pages/AnythingLLMPage'),
-);
-const PortsPage = React.lazy(
-  () => import('../components/pages/PortsPage'),
-);
+const N8nPage = React.lazy(() => import('../components/pages/N8nPage'));
+const WahaPage = React.lazy(() => import('../components/pages/WahaPage'));
 
 // ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
 // Use functions instead of eager instantiation to enable true code splitting
@@ -66,16 +62,13 @@ const workspaceContent = () => <WorkspacePageNew />;
 const docusaurusContent = () => <DocusaurusPageNew />;
 const databaseContent = () => <DatabasePageNew />;
 const miroContent = () => <MiroPage />;
-const langGraphContent = () => <LangGraphPage />;
 const llamaIndexContent = () => <LlamaIndexPage />;
-const anythingLLMContent = () => <AnythingLLMPage />;
-const agnoAgentsContent = () => <AgnoAgentsPage />;
 const kestraContent = () => <KestraPage />;
 const claudeCatalogContent = () => <CatalogPage />;
-const launcherContent = () => <LauncherPage />;
-const documentationMetricsContent = () => <DocumentationMetricsPage />;
+const courseCrawlerContent = () => <CourseCrawlerPage />;
 const governanceContent = () => <GovernancePage />;
-const portsContent = () => <PortsPage />;
+const n8nContent = () => <N8nPage />;
+const wahaContent = () => <WahaPage />;
 
 /**
  * Page Part - Collapsible section within a page
@@ -127,8 +120,8 @@ export interface Section {
  *
  * Navigation Sections (current):
  * 0. Apps (Cyan) - TP Capital, Telegram Gateway, Workspace
- * 1. Knowledge (Indigo) - Docusaurus knowledge hub + documentation
- * 2. Toolbox (Gray) - LangGraph, LlamaIndex, Launchers
+ * 1. Toolbox (Gray) - LlamaIndex, Launchers
+ * 2. Knowledge (Indigo) - Docusaurus knowledge hub + documentation
  *
  * ===========================================================================
  * IMPORTANT: PAGE LAYOUT PATTERNS
@@ -197,6 +190,7 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [],
         customContent: tpCapitalContent,
+        icon: <TrendingUp className="h-4 w-4" />,
       },
       {
         id: 'telegram-gateway',
@@ -208,6 +202,7 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [],
         customContent: telegramGatewayContent,
+        icon: <MessageSquare className="h-4 w-4" />,
       },
       {
         id: 'workspace',
@@ -219,106 +214,19 @@ export const NAVIGATION_DATA: Section[] = [
         parts: [], // Empty - uses customContent
         // ✅ CustomizablePageLayout - 3 sections: Categories + CRUD table + Kanban board
         customContent: workspaceContent,
+        icon: <Briefcase className="h-4 w-4" />,
       },
-    ],
-  },
-
-  // ========================================
-  // 1. KNOWLEDGE (Indigo)
-  // ========================================
-  {
-    id: 'knowledge',
-    icon: <BookOpen className="w-5 h-5" />,
-    label: 'Knowledge',
-    pages: [
       {
-        id: 'catalog',
-        title: 'Catalog',
+        id: 'course-crawler',
+        title: 'Course Crawler',
         header: {
-          title: 'Catalog',
+          title: 'Course Crawler',
           subtitle:
-            'Catálogo unificado dos agentes Claude e comandos personalizados, comutável diretamente no cabeçalho.',
+            'Formulário de credenciais, agendamentos e visualização dos artefatos da stack dedicada',
         },
         parts: [],
-        customContent: claudeCatalogContent,
-      },
-      {
-        id: 'docs',
-        title: 'Docs',
-        header: {
-          title: 'TradingSystem Docs',
-          subtitle:
-            'Docs portal, context hub e referências operacionais atualizadas',
-        },
-        parts: [], // Empty - uses customContent
-        customContent: docusaurusContent,
-      },
-      {
-        id: 'governance',
-        title: 'Governance',
-        header: {
-          title: 'Governance Hub',
-          subtitle: 'Strategy, controls, evidence and review cadences em tempo real',
-        },
-        parts: [],
-        customContent: governanceContent,
-        icon: <ShieldCheck className="h-4 w-4" />,
-      },
-      {
-        id: 'documentation-metrics',
-        title: 'Documentation Metrics',
-        header: {
-          title: 'Documentation Metrics',
-          subtitle: 'Health scores, trends and quality metrics for the docs platform',
-        },
-        parts: [],
-        customContent: documentationMetricsContent,
-        icon: <BarChart3 className="h-4 w-4" />,
-      },
-      {
-        id: 'knowledge-database',
-        title: 'Database',
-        header: {
-          title: 'Database Tools',
-          subtitle:
-            'QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel',
-        },
-        parts: [],
-        customContent: databaseContent,
-      },
-      {
-        id: 'miro',
-        title: 'Miro',
-        header: {
-          title: 'Miro Board',
-          subtitle:
-            'Quadro colaborativo para planejamento visual e brainstorming',
-        },
-        parts: [],
-        customContent: miroContent,
-      },
-    ],
-  },
-
-  // ========================================
-  // 2. TOOLBOX (Gray)
-  // ========================================
-  {
-    id: 'configuracoes',
-    icon: <Server className="h-5 w-5" />,
-    label: 'Toolbox',
-    pages: [
-      {
-        id: 'langgraph-orchestrator',
-        title: 'LangGraph',
-        header: {
-          title: 'LangGraph Orchestrator',
-          subtitle:
-            'State machine determinística para workflows multi-agente do LangChain.',
-        },
-        parts: [],
-        customContent: langGraphContent,
-        icon: <Workflow className="h-4 w-4" />,
+        customContent: courseCrawlerContent,
+        icon: <GraduationCap className="h-4 w-4" />,
       },
       {
         id: 'rag-services',
@@ -332,17 +240,40 @@ export const NAVIGATION_DATA: Section[] = [
         customContent: llamaIndexContent,
         icon: <BrainCircuit className="h-4 w-4" />,
       },
+    ],
+  },
+
+  // ========================================
+  // 1. TOOLBOX (Gray)
+  // ========================================
+  {
+    id: 'configuracoes',
+    icon: <Server className="w-5 h-5" />,
+    label: 'Toolbox',
+    pages: [
       {
-        id: 'anythingllm',
-        title: 'AnythingLLM',
+        id: 'miro',
+        title: 'Miro',
         header: {
-          title: 'AnythingLLM',
+          title: 'Miro Board',
           subtitle:
-            'Interface visual para RAG com múltiplos LLMs e gestão de documentos.',
+            'Quadro colaborativo para planejamento visual e brainstorming',
         },
         parts: [],
-        customContent: anythingLLMContent,
-        icon: <BrainCircuit className="h-4 w-4" />,
+        customContent: miroContent,
+        icon: <Layout className="h-4 w-4" />,
+      },
+      {
+        id: 'knowledge-database',
+        title: 'Database',
+        header: {
+          title: 'Database Tools',
+          subtitle:
+            'QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel',
+        },
+        parts: [],
+        customContent: databaseContent,
+        icon: <Database className="h-4 w-4" />,
       },
       {
         id: 'kestra-orchestrator',
@@ -354,41 +285,76 @@ export const NAVIGATION_DATA: Section[] = [
         },
         parts: [],
         customContent: kestraContent,
-        icon: <Server className="h-4 w-4" />,
+        icon: <GitBranch className="h-4 w-4" />,
       },
       {
-        id: 'agno-agents',
-        title: 'Agno Agents',
+        id: 'n8n-automation',
+        title: 'n8n',
         header: {
-          title: 'Agno Multi-Agent Framework',
-          subtitle:
-            'Links operacionais, métricas e documentação do serviço Python',
+          title: 'n8n Automations',
+          subtitle: 'Workflows low-code com queues dedicadas e webhooks internos.',
         },
         parts: [],
-        customContent: agnoAgentsContent,
+        customContent: n8nContent,
+        icon: <Workflow className="h-4 w-4" />,
       },
       {
-        id: 'status',
-        title: 'Status',
+        id: 'waha-dashboard',
+        title: 'WAHA',
         header: {
-          title: 'Service Status',
-          subtitle: 'Start, stop e monitoramento dos serviços locais',
+          title: 'WAHA Dashboard',
+          subtitle:
+            'Interface oficial do WAHA rodando localmente (engine NOWEB).',
         },
-        parts: [], // Empty - uses customContent
-        // ✅ CustomizablePageLayout - Drag-and-drop grid with collapsible cards
-        customContent: launcherContent,
-        icon: <Gauge className="h-4 w-4" />,
+        parts: [],
+        customContent: wahaContent,
+        icon: <MessageCircle className="h-4 w-4" />,
+      },
+    ],
+  },
+
+  // ========================================
+  // 2. KNOWLEDGE (Indigo)
+  // ========================================
+  {
+    id: 'knowledge',
+    icon: <BookOpen className="w-5 h-5" />,
+    label: 'Knowledge',
+    pages: [
+      {
+        id: 'governance',
+        title: 'Governance',
+        header: {
+          title: 'Governance Hub',
+          subtitle: 'Strategy, controls, evidence and review cadences em tempo real',
+        },
+        parts: [],
+        customContent: governanceContent,
+        icon: <ShieldCheck className="h-4 w-4" />,
       },
       {
-        id: 'ports',
-        title: 'Ports',
+        id: 'catalog',
+        title: 'Catalog',
         header: {
-          title: 'Ports Overview',
-          subtitle: 'Monitoramento em tempo real de todas as portas dos serviços',
+          title: 'Catalog',
+          subtitle:
+            'Catálogo unificado dos agentes Claude e comandos personalizados, comutável diretamente no cabeçalho.',
+        },
+        parts: [],
+        customContent: claudeCatalogContent,
+        icon: <List className="h-4 w-4" />,
+      },
+      {
+        id: 'docs',
+        title: 'Docs',
+        header: {
+          title: 'TradingSystem Docs',
+          subtitle:
+            'Docs portal, context hub e referências operacionais atualizadas',
         },
         parts: [], // Empty - uses customContent
-        customContent: portsContent,
-        icon: <Server className="h-4 w-4" />,
+        customContent: docusaurusContent,
+        icon: <FileText className="h-4 w-4" />,
       },
     ],
   },
@@ -397,6 +363,7 @@ export const NAVIGATION_DATA: Section[] = [
 const LEGACY_PAGE_ALIASES: Record<string, string> = {
   'ai-agents-directory': 'catalog',
   'claude-commands': 'catalog',
+  waha: 'waha-dashboard',
 };
 
 const resolvePageId = (pageId: string) =>

@@ -535,7 +535,7 @@ done
 **Effort:** 1 day  
 **Priority:** P1  
 **Dependencies:** None  
-**Status:** 🟡 Em progresso (workspace, docs, firecrawl e TP Capital migrados; Service Launcher pendente)
+**Status:** 🟡 Em progresso (workspace, docs, firecrawl e TP Capital migrados)
 
 **Objective:** Detect hardcoded ports in codebase
 
@@ -702,7 +702,6 @@ CMD ["node", "src/index.js"]
 -   Workspace API (3200)
 -   TP Capital (4005)
 -   Documentation API (3401)
--   Service Launcher (3500)
 -   Firecrawl Proxy (3600)
 
 **Steps:** (same as TASK-016 for each service)
@@ -713,7 +712,6 @@ CMD ["node", "src/index.js"]
 -   [x] Docs Hub + Documentation API usam `.env.shared` (ports 3400/3401)
 -   [x] Firecrawl proxy e dependências usam `.env.shared`
 -   [x] TP Capital stack expõe `${TP_CAPITAL_API_PORT:-4008}`
--   [ ] Service Launcher migrado (bloqueado: depende de scripts host-only)
 
 ---
 
@@ -735,7 +733,7 @@ CMD ["node", "src/index.js"]
 
 **Acceptance Criteria:**
 
--   [x] Databases acessíveis via `${POSTGRES_LANGGRAPH_PORT:-5432}` e `${TELEGRAM_DB_PORT:-5434}`
+-   [x] Databases acessíveis via `${TELEGRAM_DB_PORT:-5434}`
 -   [x] PgBouncer exposto conforme registry (6434)
 -   [x] Dados persistem em volumes (`telegram-timescaledb-data`, `workspace-db-*`)
 
@@ -805,20 +803,20 @@ CMD ["node", "src/index.js"]
 -   `scripts/docker/stop-stacks.sh`
 -   `scripts/docker/check-docs-services.sh`
 
-**Script pendentes:** `START-ALL-TELEGRAM.sh`, `install-shortcuts.sh` (dependem de decisões sobre Service Launcher/dashboard).
+**Script pendentes:** `START-ALL-TELEGRAM.sh`, `install-shortcuts.sh`.
 
 **Updates em andamento:**
 
 1. Source `.env.shared`
 2. Usar `${PORT_VAR}` no lugar de literais
 3. Atualizar health checks para novas URLs
-4. Ajustar Service Launcher/dashboard para containers ou abstrações equivalentes
+4. Ajustar dashboard para containers ou abstrações equivalentes
 
 **Acceptance Criteria:**
 
 -   [x] Scripts docker/start-stacks.sh e stop-stacks.sh leem `.env.shared`
 -   [x] `scripts/start.sh` carrega `.env.shared` e usa variáveis `${*_PORT}` para serviços locais
--   [ ] Remover ou adaptar Service Launcher/dashboard locais (dependência em host scripts)
+-   [ ] Revisar dependências locais do dashboard em scripts host-only
 -   [ ] Error handling revisto para novos fluxos
 
 ---

@@ -1,0 +1,115 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🐳 Docker: Restart Docs Hub",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "docs-hub"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart Docs API",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "docs-api"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart Course Crawler API",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "course-crawler-api"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart Course Crawler Worker",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "course-crawler-worker"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart Workspace API",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "workspace-api"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart Documentation API",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "documentation-api"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: List All Containers",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["list"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: Restart TimescaleDB",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["restart", "data-timescaledb"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: View Dashboard Logs",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["logs", "dashboard"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "🐳 Docker: View Docs Logs",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/docker-control-cli.sh",
+      "args": ["logs", "docs-hub"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

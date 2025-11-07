@@ -76,7 +76,6 @@ O script `scripts/maintenance/health-check-all.sh` inclui a verificação do Kes
 
 ## Integrações
 
-- **Service Launcher**: exibe status `kestra-orchestrator` e link para a UI.
 - **services-manifest.json**: entrada `kestra-orchestrator` (`managed: "docker-compose"`, `stack: "tools"`).
 - **scripts/docker/start-stacks.sh**: tenta subir Kestra automaticamente, mas se detectar conflito de porta (`KESTRA_HTTP_PORT` ou `KESTRA_MANAGEMENT_PORT`), inicia apenas os demais serviços e orienta ajustar o ambiente antes de uma nova tentativa.
 - **Port map**: documentado em `docs/context/ops/service-port-map.md`.

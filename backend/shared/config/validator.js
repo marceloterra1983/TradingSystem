@@ -369,19 +369,6 @@ export const commonSchemas = {
     ],
   },
 
-  /**
-   * Service Launcher API schema
-   */
-  serviceLauncherApi: {
-    required: [
-      'PORT',
-      'SERVICE_LAUNCHER_LOG_LEVEL',
-    ],
-    optional: [
-      'CORS_ORIGIN',
-      'SERVICE_LAUNCHER_PRETTY_LOGS',
-    ],
-  },
 };
 
 /**

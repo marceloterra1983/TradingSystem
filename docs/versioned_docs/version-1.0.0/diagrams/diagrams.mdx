@@ -31,23 +31,14 @@ TradingSystem uses PlantUML diagrams to visualize architecture, sequences, compo
 | Idea Bank - Component | assets/diagrams/source/backend/idea-bank-component-architecture.puml | Backend | Component | API architecture | Backend & Frontend | On API changes |
 | Idea Bank - Create Sequence | assets/diagrams/source/backend/idea-bank-create-sequence.puml | Backend | Sequence | Idea creation flow | Frontend & Backend | On workflow changes |
 | Idea Bank - Kanban State | assets/diagrams/source/backend/idea-bank-kanban-state.puml | Backend | State | Kanban workflow states | Frontend & Product | On status logic changes |
-| TP Capital - Component | assets/diagrams/source/backend/tp-capital-component-architecture.puml | Backend | Component | Ingestion pipeline architecture | Backend & DevOps | On pipeline changes |
 | TP Capital - Ingestion | assets/diagrams/source/backend/tp-capital-ingestion-sequence.puml | Backend | Sequence | Telegram to QuestDB flow | Backend & DevOps | On ingestion changes |
-| TP Capital - Consumption | assets/diagrams/source/backend/tp-capital-signal-consumption-sequence.puml | Backend | Sequence | Signal consumption by dashboard/agents | Frontend & Agents | On consumer changes |
 | Customizable Layout - Component | assets/diagrams/source/frontend/customizable-layout-component-architecture.puml | Frontend | Component | Layout system architecture | Frontend Guild | On layout changes |
 | Customizable Layout - Interaction | assets/diagrams/source/frontend/customizable-layout-interaction-sequence.puml | Frontend | Sequence | User interaction flows | Frontend & UX | On interaction changes |
 | Customizable Layout - State | assets/diagrams/source/frontend/customizable-layout-state-diagram.puml | Frontend | State | State management | Frontend Guild | On state logic changes |
-| Agno Agents - Component | assets/diagrams/source/agents/agno-agents-component-architecture.puml | Agents | Component | Agent architecture | Backend & Agents | On architecture changes |
-| Agno Agents - Orchestration | assets/diagrams/source/agents/agno-agents-signal-orchestration-sequence.puml | Agents | Sequence | Signal orchestration flow | Agents & Backend | On orchestration changes |
-| LangGraph - Hybrid Architecture | assets/diagrams/source/agents/langgraph-hybrid-architecture.puml | Agents | Component | LangGraph integration | Agents & ML | On architecture changes |
-| LangGraph - Tracing Flow | assets/diagrams/source/agents/langgraph-langsmith-tracing-flow.puml | Agents | Sequence | LangSmith tracing | Agents & Observability | On tracing changes |
-| LangGraph - Development Workflow | assets/diagrams/source/agents/langgraph-development-workflow.puml | Agents | Workflow | Development process | Agents & Developers | On process changes |
 | Firecrawl Proxy - Architecture | assets/diagrams/source/ops/firecrawl-proxy-architecture.puml | Ops | Component | Proxy architecture | DevOps & Backend | On integration changes |
 | Firecrawl Proxy - Sequence | assets/diagrams/source/ops/firecrawl-proxy-sequence.puml | Ops | Sequence | Proxy interaction flow | DevOps & Backend | On integration changes |
 | Database UI Tools | assets/diagrams/source/ops/database-ui-tools-architecture.puml | Ops | Component | Database UI tools architecture | Backend & DBAs | On tool changes |
 | Docker Container Architecture | assets/diagrams/source/ops/docker-container-architecture.puml | Ops | Component | Container architecture | DevOps | On container changes |
-| ADR-0002 Before | assets/diagrams/source/adr/adr-0002-before-architecture.puml | ADR | Component | Architecture before Agno | Architects | ADR lifecycle |
-| ADR-0002 After | assets/diagrams/source/adr/adr-0002-after-architecture.puml | ADR | Component | Architecture after Agno | Architects | ADR lifecycle |
 
 ## Diagram Types
 
@@ -61,7 +52,7 @@ TradingSystem uses PlantUML diagrams to visualize architecture, sequences, compo
 
 - Show system structure and relationships
 - Use for architecture overviews, service dependencies
-- Examples: System architecture, TP Capital pipeline, Agno Agents
+- Examples: System architecture, TP Capital ingestion pipeline
 
 **State Machines** (4):
 

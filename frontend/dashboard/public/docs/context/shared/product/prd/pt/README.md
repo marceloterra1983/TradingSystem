@@ -23,7 +23,6 @@ Esta seção contém os Product Requirements Documents (PRDs) escritos originalm
 | [TP Capital Signal Table PRD](tp-capital-signal-table-prd.md)                 | Interface para visualização de sinais do TP Capital       | Aprovado |
 | [TP Capital Telegram Connections PRD](tp-capital-telegram-connections-prd.md) | Integração com Telegram para sinais do TP Capital         | Aprovado |
 | [Monitoramento Prometheus PRD](monitoramento-prometheus-prd.md)               | Sistema de monitoramento e observabilidade com Prometheus | Aprovado |
-| [Agno Integration PRD](agno-integration-prd.md)                               | Sistema multi-agente para análise automatizada de trading | Aprovado |
 
 ## Padrão de Documentação
 

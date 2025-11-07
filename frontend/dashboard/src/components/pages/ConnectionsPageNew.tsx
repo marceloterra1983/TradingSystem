@@ -67,14 +67,9 @@ function WebSocketStatusSection() {
             Checklist rápido
           </p>
           <ul className="space-y-1">
-            <li>
-              • Serviço `apps-status` inicializado (`docker compose up
-              apps-status`).
-            </li>
-            <li>• Porta 3500 disponível para o Service Launcher.</li>
-            <li>
-              • Sem proxies intermediários (independente do container launcher).
-            </li>
+            <li>• Workspace API (`backend/api/workspace`) em execução.</li>
+            <li>• Porta 3200 disponível direto no host.</li>
+            <li>• Sem proxies intermediários ou túneis externos.</li>
           </ul>
         </div>
         <Alert>
@@ -83,13 +78,13 @@ function WebSocketStatusSection() {
             <p>
               <span className="font-medium">Status:</span>{' '}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
-                curl http://localhost:3500/health
+                curl http://localhost:3200/api/health
               </code>
             </p>
             <p>
               <span className="font-medium">Logs:</span>{' '}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
-                docker compose logs apps-status -f
+                docker compose logs backend-workspace -f
               </code>
             </p>
           </AlertDescription>
@@ -126,9 +121,6 @@ function ProfitDLLStatusSection() {
               • Serviço Windows rodando como `TradingSystem.ProfitBridge`.
             </li>
             <li>• Named pipe `\\\\.\\pipe\\TradingSystem.Profit` ativo.</li>
-            <li>
-              • Heartbeat enviado a cada 5 segundos para o Service Launcher.
-            </li>
           </ul>
         </div>
         <Alert>
@@ -162,11 +154,11 @@ function ServiceHealthSection() {
       check: 'curl http://localhost:4010/api/telegram-gateway/overview',
     },
     {
-      name: 'Launcher API',
-      description: 'Orquestra serviços legados e monitora heartbeat',
-      port: '3500',
+      name: 'Workspace API',
+      description: 'Comandos REST e eventos WebSocket do domínio Workspace',
+      port: '3200',
       scope: 'Local',
-      check: 'curl http://localhost:3500/health',
+      check: 'curl http://localhost:3200/api/health',
     },
     {
       name: 'RAG Service',

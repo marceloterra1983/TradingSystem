@@ -1,0 +1,8 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { ChevronsUpDown } from 'lucide-react';
+function classNames(...values) {
+    return values.filter(Boolean).join(' ');
+}
+export function CollapsibleCard({ title, icon, description, actions, collapsed, onToggle, children, draggable, isDragging, isDragOver, onDragStart, onDragEnd, onDragOver, onDrop, onDragLeave, }) {
+    return (_jsxs("section", { className: classNames('ts-card', isDragging && 'ts-card--dragging', isDragOver && 'ts-card--drop-target'), onDragOver: onDragOver, onDrop: onDrop, onDragLeave: onDragLeave, children: [_jsxs("div", { className: "ts-card__header", children: [_jsx("button", { type: "button", className: "ts-card__handle", draggable: draggable, onDragStart: onDragStart, onDragEnd: onDragEnd, "aria-label": "Mover se\u00E7\u00E3o", children: _jsx("span", { "aria-hidden": "true" }) }), _jsxs("div", { className: "ts-card__header-main", children: [_jsxs("div", { className: "ts-card__title-group", children: [icon, _jsxs("div", { children: [_jsx("h2", { children: title }), description && _jsx("p", { className: "muted", children: description })] })] }), _jsxs("div", { className: "header-actions", children: [actions, _jsx("button", { type: "button", className: "ghost ts-card__collapse", onClick: onToggle, "aria-expanded": !collapsed, "aria-label": collapsed ? 'Expandir seção' : 'Recolher seção', children: _jsx(ChevronsUpDown, { size: 18, className: collapsed ? 'chevron rotated' : 'chevron' }) })] })] })] }), _jsx("div", { className: classNames('ts-card__body', collapsed && 'collapsed'), "aria-hidden": collapsed, children: children })] }));
+}

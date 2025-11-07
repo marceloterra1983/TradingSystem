@@ -1,4 +1,5 @@
 import { ExternalLink, Maximize2 } from 'lucide-react';
+import { IframeWithUrl } from '../common/IframeWithUrl';
 
 /**
  * MiroPage Component
@@ -60,7 +61,7 @@ export function MiroPage() {
 
       {/* Miro Board iframe - Maximum Size */}
       <div className="flex-1 w-full overflow-hidden">
-        <iframe
+        <IframeWithUrl
           src={miroEmbedUrl}
           className="w-full h-full"
           style={{
@@ -71,6 +72,7 @@ export function MiroPage() {
           allow="fullscreen; clipboard-read; clipboard-write"
           sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
           title="Miro Board - TradingSystem"
+          wrapperClassName="h-full"
         />
       </div>
     </div>

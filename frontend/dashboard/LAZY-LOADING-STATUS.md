@@ -42,21 +42,17 @@
 // ✅ LAZY LOADING - Pages loaded on-demand
 // Reduces initial bundle size by 40-60%
 
-const LauncherPage = React.lazy(() => import('../components/pages/LauncherPage'));
+const WorkspacePage = React.lazy(() => import('../components/pages/WorkspacePageNew'));
 const WorkspacePageNew = React.lazy(() => import('../components/pages/WorkspacePageNew'));
 const TPCapitalOpcoesPage = React.lazy(() => import('../components/pages/TPCapitalOpcoesPage'));
 const DocusaurusPageNew = React.lazy(() => import('../components/pages/DocusaurusPage'));
 const DatabasePageNew = React.lazy(() => import('../components/pages/DatabasePage'));
 const MiroPage = React.lazy(() => import('../components/pages/MiroPage'));
-const AgnoAgentsPage = React.lazy(() => import('../components/pages/AgnoAgentsPage'));
-const LangGraphPage = React.lazy(() => import('../components/pages/LangGraphPage'));
 const LlamaIndexPage = React.lazy(() => import('../components/pages/LlamaIndexPage'));
 const KestraPage = React.lazy(() => import('../components/pages/KestraPage'));
 const CatalogPage = React.lazy(() => import('../components/pages/CatalogPage'));
 const DocumentationMetricsPage = React.lazy(() => import('../components/pages/DocumentationMetricsPage'));
 const TelegramGatewayFinal = React.lazy(() => import('../components/pages/TelegramGatewayFinal'));
-const AnythingLLMPage = React.lazy(() => import('../components/pages/AnythingLLMPage'));
-const PortsPage = React.lazy(() => import('../components/pages/PortsPage'));
 ```
 
 #### Functional Component Pattern
@@ -145,14 +141,12 @@ class ErrorBoundary extends React.Component {
 4. ✅ **Database** - Multiple iframe embeds
 5. ✅ **Miro** - External board embed
 
-#### 🔧 Toolbox Section (7 pages)
-1. ✅ **LangGraph** - Orchestrator UI
-2. ✅ **RAG Services** (LlamaIndex) - Query interface
-3. ✅ **AnythingLLM** - Document management
-4. ✅ **Kestra** - Pipeline orchestration
-5. ✅ **Agno Agents** - Multi-agent framework
-6. ✅ **Status** (Launcher) - Service management
-7. ✅ **Ports** - Port monitoring
+#### 🔧 Toolbox Section (5 pages)
+1. ✅ **RAG Services** (LlamaIndex) - Query interface
+2. ✅ **AnythingLLM** - External RAG UI
+3. ✅ **Kestra** - Pipeline orchestration
+4. ✅ **n8n Automations** - Low-code workflows
+5. ✅ **Ports** - Port monitoring
 
 **Total: 15/18 pages (83%)**
 

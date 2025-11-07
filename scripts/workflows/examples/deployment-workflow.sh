@@ -55,7 +55,6 @@ SERVICES=(
     "dashboard:3103"
     "docs-hub:3400"
     "documentation-api:3401"
-    "service-launcher:3500"
     "workspace:3200"
     "tp-capital:4005"
     "telegram-gateway:3201"
@@ -63,7 +62,6 @@ SERVICES=(
 
 # Critical API endpoints
 declare -A API_ENDPOINTS=(
-    ["Service Launcher"]="http://localhost:3500/api/status"
     ["Documentation API"]="http://localhost:3401/api/health"
     ["RAG Service"]="http://localhost:8201/health"
     ["Workspace API"]="http://localhost:3200/api/health"

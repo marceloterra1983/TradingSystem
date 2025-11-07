@@ -10,16 +10,46 @@
 
 **ALL proxy configuration issues have been fixed!**
 
-Following the comprehensive review and optimization analysis, both critical VITE_ prefix issues have been resolved:
+Following the comprehensive review and optimization analysis, all critical VITE_ prefix issues and hardcoded URL problems have been resolved:
 
-1. ✅ **Workspace API** - Fixed earlier
-2. ✅ **TP Capital API** - Fixed now
+1. ✅ **Workspace API Items** - Fixed with relative path
+2. ✅ **Workspace API Categories** - Fixed with relative path (NEW)
+3. ✅ **TP Capital API** - Fixed proxy configuration
+4. ✅ **Docusaurus** - Fixed proxy configuration
 
 ---
 
 ## What Was Fixed
 
-### TP Capital Proxy Configuration ✅
+### 1. Workspace API Categories ✅ (NEW - Just Fixed)
+
+**Problem:** Categories section showing "API Indisponível" while Items section worked correctly.
+
+**Root Cause:** `CategoriesService` was hardcoded to use `http://localhost:3200/api/categories` instead of relative path.
+
+**File Modified:** `frontend/dashboard/src/services/categoriesService.ts` (lines 63-69)
+
+```typescript
+// BEFORE ❌
+constructor() {
+  const FORCED_BASE = 'http://localhost:3200/api/categories';
+  this.baseUrl = FORCED_BASE;
+}
+
+// AFTER ✅
+constructor() {
+  // Browser → /api/workspace/categories → Vite Proxy → workspace-api:3200/api/categories
+  this.baseUrl = '/api/workspace/categories';
+}
+```
+
+**Result:** ✅ Categories API now loads correctly, all CRUD operations working!
+
+**Full Details:** [CATEGORIES-API-FIX-2025-11-06.md](./CATEGORIES-API-FIX-2025-11-06.md)
+
+---
+
+### 2. TP Capital Proxy Configuration ✅
 
 **Files Modified:**
 
@@ -54,6 +84,16 @@ Following the comprehensive review and optimization analysis, both critical VITE
 
 ## Verification Results
 
+### Categories API via Proxy ✅ (NEW)
+
+```bash
+$ curl -s http://localhost:3103/api/workspace/categories | jq '.success, .count'
+true
+5
+```
+
+**Result:** ✅ Returns 5 categories successfully!
+
 ### Environment Variables in Container ✅
 
 ```bash
@@ -87,19 +127,22 @@ $ bash scripts/env/validate-env.sh
 
 ### All Fixed Services
 
-| Service | Before | After | Status |
-|---------|--------|-------|--------|
-| **Workspace API** | `VITE_WORKSPACE_PROXY_TARGET` | `WORKSPACE_PROXY_TARGET` | ✅ Fixed |
-| **TP Capital API** | `VITE_TP_CAPITAL_PROXY_TARGET` | `TP_CAPITAL_PROXY_TARGET` | ✅ Fixed |
-| **Docusaurus** | `VITE_DOCUSAURUS_PROXY_TARGET` | `DOCUSAURUS_PROXY_TARGET` | ✅ Already correct |
+| Service | Type | Before | After | Status |
+|---------|------|--------|-------|--------|
+| **Workspace Items** | Browser Service | `http://localhost:3201/api/items` | `/api/workspace/items` | ✅ Fixed |
+| **Workspace Categories** | Browser Service | `http://localhost:3200/api/categories` | `/api/workspace/categories` | ✅ Fixed (NEW) |
+| **Workspace API** | Vite Proxy | `VITE_WORKSPACE_PROXY_TARGET` | `WORKSPACE_PROXY_TARGET` | ✅ Fixed |
+| **TP Capital API** | Vite Proxy | `VITE_TP_CAPITAL_PROXY_TARGET` | `TP_CAPITAL_PROXY_TARGET` | ✅ Fixed |
+| **Docusaurus** | Vite Proxy | `VITE_DOCUSAURUS_PROXY_TARGET` | `DOCUSAURUS_PROXY_TARGET` | ✅ Already correct |
 
 ### Browser-Facing URLs (All Relative Paths)
 
-| Service | URL | Status |
-|---------|-----|--------|
-| **Workspace API** | `/api/workspace` | ✅ Correct |
-| **TP Capital API** | `/api/tp-capital` | ✅ Correct |
-| **Docusaurus** | `/` | ✅ Correct |
+| Service | URL | Type | Status |
+|---------|-----|------|--------|
+| **Workspace Items** | `/api/workspace/items` | Proxied | ✅ Correct |
+| **Workspace Categories** | `/api/workspace/categories` | Proxied | ✅ Correct (NEW) |
+| **TP Capital API** | `/api/tp-capital` | Proxied | ✅ Correct |
+| **Docusaurus** | `/` (with `/next/` paths) | Proxied | ✅ Correct |
 
 ---
 
@@ -171,6 +214,7 @@ bash scripts/env/validate-env.sh
 - [API-OPTIMIZATION-REPORT-2025-11-06.md](./API-OPTIMIZATION-REPORT-2025-11-06.md)
 - [API-PERFORMANCE-OPTIMIZATION-SUMMARY-2025-11-06.md](./API-PERFORMANCE-OPTIMIZATION-SUMMARY-2025-11-06.md)
 - [WORKSPACE-API-FIX-2025-11-06.md](./WORKSPACE-API-FIX-2025-11-06.md)
+- [CATEGORIES-API-FIX-2025-11-06.md](./CATEGORIES-API-FIX-2025-11-06.md) (NEW)
 - [frontend/dashboard/docs/PROXY-CONFIGURATION-GUIDE.md](../frontend/dashboard/docs/PROXY-CONFIGURATION-GUIDE.md)
 - [CLAUDE.md](../CLAUDE.md) - Updated with golden rules
 

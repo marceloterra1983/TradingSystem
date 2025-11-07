@@ -25,7 +25,6 @@ lastReviewed: '2025-11-02'
 
 | Container | Imagem | Status | Tipo |
 |-----------|--------|--------|------|
-| `data-postgres-langgraph` | `postgres:15` | ⏱️ 22 horas | PostgreSQL (LangGraph memory store) |
 | `data-questdb` | `questdb/questdb:latest` | ⏱️ 22 horas | QuestDB (market data) |
 | `data-qdrant` | `qdrant/qdrant` | ⏱️ 13 horas | Qdrant (Vector DB) |
 
@@ -85,7 +84,7 @@ lastReviewed: '2025-11-02'
 |--------|-----------|-----------|
 | < 1 hora | 3 | `apps-tp-capital`, `docs-api`, `tools-llamaindex-ingestion` |
 | 11-13 horas | 5 | `apps-workspace`, `documentation`, `data-qdrant`, `ollama`, `tools-llamaindex-query` |
-| 22 horas | 21 | Infraestrutura principal (QuestDB, LangGraph Postgres, monitoring, firecrawl) |
+| 22 horas | 21 | Infraestrutura principal (QuestDB, monitoring, firecrawl) |
 
 ### Serviços por Categoria
 ```
@@ -110,7 +109,6 @@ Estes containers foram reiniciados recentemente e merecem atenção:
 - ✅ apps-workspace
 - ✅ data-questdb
 - ✅ data-qdrant
-- ✅ data-postgres-langgraph
 - ✅ docs-api
 - ✅ documentation
 - ✅ firecrawl-proxy
@@ -118,8 +116,6 @@ Estes containers foram reiniciados recentemente e merecem atenção:
 ---
 
 **Última atualização:** 30 de outubro de 2025
-
-
 
 
 

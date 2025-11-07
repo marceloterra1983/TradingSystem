@@ -1,0 +1,275 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    color-scheme: light;
+    --ts-base-bg: #f8fafc;
+    --ts-surface-0: #ffffff;
+    --ts-surface-1: #f1f5f9;
+    --ts-surface-2: #e2e8f0;
+    --ts-surface-muted: #f8fafc;
+    --ts-surface-hover: rgba(148, 163, 184, 0.18);
+    --ts-surface-border: rgba(15, 23, 42, 0.08);
+    --ts-surface-border-strong: rgba(15, 23, 42, 0.14);
+    --ts-backdrop-blur: rgba(255, 255, 255, 0.78);
+    --ts-shadow-sm: 0 12px 25px -20px rgba(15, 23, 42, 0.25);
+    --ts-shadow-lg: 0 32px 60px -28px rgba(15, 23, 42, 0.35);
+    --ts-text-primary: #0f172a;
+    --ts-text-secondary: #475569;
+    --ts-text-muted: #64748b;
+    --ts-overlay: rgba(15, 23, 42, 0.65);
+    --ts-accent: #06b6d4;
+    --ts-accent-strong: #0e7490;
+    --ts-accent-soft: rgba(6, 182, 212, 0.12);
+    --ts-control-bg: #ffffff;
+    --ts-control-border: rgba(15, 23, 42, 0.14);
+    --ts-control-placeholder: rgba(100, 116, 139, 0.7);
+    --ts-scroll-track: #e2e8f0;
+    --ts-scroll-thumb: rgba(148, 163, 184, 0.55);
+    --ts-scroll-thumb-hover: rgba(100, 116, 139, 0.75);
+    --ts-background-image: none;
+}
+
+.dark {
+    color-scheme: dark;
+    --ts-base-bg: #101a30;
+    --ts-surface-0: #19253d;
+    --ts-surface-1: #202f4b;
+    --ts-surface-2: #283757;
+    --ts-surface-muted: #172742;
+    --ts-surface-hover: rgba(92, 172, 255, 0.15);
+    --ts-surface-border: rgba(120, 146, 201, 0.34);
+    --ts-surface-border-strong: rgba(168, 194, 241, 0.52);
+    --ts-backdrop-blur: rgba(18, 30, 53, 0.72);
+    --ts-shadow-sm: 0 20px 54px -28px rgba(5, 10, 24, 0.76);
+    --ts-shadow-lg: 0 40px 78px -30px rgba(3, 8, 20, 0.82);
+    --ts-text-primary: #f6f8ff;
+    --ts-text-secondary: #d8e3ff;
+    --ts-text-muted: #aebee0;
+    --ts-overlay: rgba(8, 15, 30, 0.8);
+    --ts-accent: #53c7ff;
+    --ts-accent-strong: #2eaef0;
+    --ts-accent-soft: rgba(83, 199, 255, 0.18);
+    --ts-control-bg: rgba(24, 36, 62, 0.9);
+    --ts-control-border: rgba(164, 194, 240, 0.34);
+    --ts-control-placeholder: rgba(176, 204, 244, 0.64);
+    --ts-scroll-track: rgba(22, 33, 56, 0.86);
+    --ts-scroll-thumb: rgba(94, 168, 243, 0.36);
+    --ts-scroll-thumb-hover: rgba(94, 168, 243, 0.56);
+    --ts-background-image:
+        radial-gradient(circle at 18% 18%, rgba(94, 168, 243, 0.12), transparent 58%),
+        radial-gradient(circle at 78% 12%, rgba(46, 174, 240, 0.08), transparent 52%);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base typography and backgrounds */
+@layer base {
+    body {
+        background-color: var(--ts-base-bg);
+        background-image: var(--ts-background-image);
+        background-attachment: fixed;
+        color: var(--ts-text-primary);
+        font-family:
+            -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+            "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        transition: background-color 200ms ease, color 200ms ease;
+        min-height: 100vh;
+    }
+
+    a {
+        color: var(--ts-accent-strong);
+        text-decoration: none;
+        transition: color 150ms ease;
+    }
+
+    a:hover {
+        color: var(--ts-accent);
+        text-decoration: underline;
+    }
+}
+
+code {
+    font-family:
+        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ts-scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ts-scroll-thumb);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ts-scroll-thumb-hover);
+}
+
+/* Animations */
+@keyframes pulse-slow {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Real-time data animations */
+@keyframes flash-green {
+    0% {
+        background-color: rgba(16, 185, 129, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes flash-red {
+    0% {
+        background-color: rgba(239, 68, 68, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.flash-up {
+    animation: flash-green 0.5s ease-out;
+}
+
+.flash-down {
+    animation: flash-red 0.5s ease-out;
+}
+
+/* Utility remaps for consistent theming */
+@layer utilities {
+    /* Surface backgrounds */
+    .bg-white,
+    .bg-slate-50 {
+        background-color: var(--ts-surface-0) !important;
+    }
+
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-100,
+    .bg-slate-200 {
+        background-color: var(--ts-surface-1) !important;
+    }
+
+    .bg-gray-900,
+    .bg-gray-950,
+    .bg-slate-900 {
+        background-color: var(--ts-base-bg) !important;
+    }
+
+    .hover\:bg-gray-50:hover,
+    .hover\:bg-gray-100:hover,
+    .hover\:bg-slate-100:hover,
+    .hover\:bg-slate-200:hover {
+        background-color: var(--ts-surface-hover) !important;
+    }
+
+    /* Border colors */
+    .border-gray-200,
+    .border-slate-200 {
+        border-color: var(--ts-surface-border) !important;
+    }
+
+    .border-gray-300,
+    .border-slate-300,
+    .border-gray-400 {
+        border-color: var(--ts-surface-border-strong) !important;
+    }
+
+    /* Text colors */
+    .text-gray-900,
+    .text-slate-900,
+    .text-gray-800,
+    .text-slate-800 {
+        color: var(--ts-text-primary) !important;
+    }
+
+    .text-gray-700,
+    .text-slate-700,
+    .text-gray-600,
+    .text-slate-600 {
+        color: var(--ts-text-secondary) !important;
+    }
+
+    .text-gray-500,
+    .text-slate-500,
+    .text-gray-400,
+    .text-slate-400 {
+        color: var(--ts-text-muted) !important;
+    }
+
+    .hover\:text-gray-900:hover,
+    .hover\:text-slate-900:hover {
+        color: var(--ts-text-primary) !important;
+    }
+
+    /* Dark mode overrides */
+    .dark .dark\:bg-gray-900,
+    .dark .dark\:bg-gray-950,
+    .dark .dark\:bg-slate-900 {
+        background-color: var(--ts-surface-0) !important;
+    }
+
+    .dark .dark\:bg-gray-800,
+    .dark .dark\:bg-slate-800 {
+        background-color: var(--ts-surface-1) !important;
+    }
+
+    .dark .dark\:border-gray-700,
+    .dark .dark\:border-slate-700 {
+        border-color: var(--ts-surface-border) !important;
+    }
+
+    .dark .dark\:text-gray-100,
+    .dark .dark\:text-slate-100,
+    .dark .dark\:text-gray-200,
+    .dark .dark\:text-slate-200 {
+        color: var(--ts-text-primary) !important;
+    }
+
+    .dark .dark\:text-gray-300,
+    .dark .dark\:text-slate-300,
+    .dark .dark\:text-gray-400,
+    .dark .dark\:text-slate-400 {
+        color: var(--ts-text-secondary) !important;
+    }
+
+    .dark .dark\:hover\:bg-gray-800:hover,
+    .dark .dark\:hover\:bg-slate-800:hover,
+    .dark .dark\:hover\:bg-gray-900:hover,
+    .dark .dark\:hover\:bg-slate-900:hover {
+        background-color: var(--ts-surface-hover) !important;
+    }
+
+    .dark .dark\:hover\:text-gray-100:hover,
+    .dark .dark\:hover\:text-slate-100:hover {
+        color: var(--ts-text-primary) !important;
+    }
+}

@@ -78,6 +78,9 @@ services:
       - LLAMAINDEX_REPOSITORY_DIR=/data/tradingsystem
       - DOCUMENTATION_DB_STRATEGY=none
       - LOG_LEVEL=info
+      # RAG Features (Optional - Graceful Degradation)
+      - ENABLE_RAG_FEATURES=false
+      - REDIS_ENABLED=false
       - QDRANT_URL=http://data-qdrant:6333
       - OLLAMA_BASE_URL=http://rag-ollama:11434
       - REDIS_URL=redis://rag-redis:6379

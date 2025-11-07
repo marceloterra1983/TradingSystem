@@ -158,7 +158,6 @@ dashboard/
 │   │   ├── pages/           - 46 páginas refatoradas
 │   │   │   ├── TPCapitalOpcoesPage.tsx
 │   │   │   ├── tp-capital/  - Componentes do TP Capital
-│   │   │   ├── launcher/    - Seção de launcher
 │   │   │   ├── database/    - Páginas de database
 │   │   │   └── workspace/   - Kanban board
 │   │   ├── ui/              - 21 componentes UI (shadcn/ui)
@@ -318,7 +317,6 @@ proxy: {
   '/api/library':     → http://localhost:3200  // Workspace API
   '/api/tp-capital':  → http://localhost:4005  // TP Capital API
   '/api/docs':        → http://localhost:3400  // Documentation API
-  '/api/launcher':    → http://localhost:3500  // Launcher/Status API
   '/api/firecrawl':   → http://localhost:3600  // Firecrawl Proxy
   '/mcp':             → http://localhost:3847  // MCP Server
   '/docs':            → http://localhost:3400  // Docusaurus (v3 via NGINX)
@@ -425,11 +423,11 @@ tp-capital/
 - SubscriptionsPage - Assinaturas
 
 ### 🤖 Infrastructure & AI
-- LauncherPage - Status e launcher de serviços
-- LangGraphPage - LangGraph orchestrator
-- LlamaIndexPage - LlamaIndex RAG services
+- LlamaIndexPage - RAG services (ingest/query)
 - LangChainVectorPage - Vector store (Qdrant)
-- AgnoAgentsPage - Agno multi-agent framework
+- KestraPage - Kestra orchestrator
+- N8nPage - Low-code automations
+- PortsPage - Port governance dashboard
 
 ### 🗄️ Database & Tools
 - DatabasePage - Ferramentas de database (pgAdmin, pgWeb, QuestDB)
@@ -565,7 +563,6 @@ npm run test:coverage
 
 **Testes Implementados**:
 - ✅ `documentation-page.spec.tsx` - Testes de documentação
-- ✅ `connections-page.fetch-service-launcher-status.test.ts` - Testes de API
 - ✅ `setup.ts` - Setup global de testes
 
 **Target de Cobertura**: 80% (branches, functions, lines, statements)

@@ -581,43 +581,6 @@ crontab -l | { cat; echo "0 2 * * * /home/marce/Projetos/TradingSystem/scripts/b
 
 **Esforço:** 1 dia
 
-### Fase 3: Monitoramento (Semana 1)
-
-```bash
-# Adicionar health checks ao Service Launcher
-# backend/api/service-launcher/src/routes/health.js
-
-router.get('/health/qdrant-cluster', asyncHandler(async (req, res) => {
-  const nodes = ['6333', '6334', '6337'];
-  const health = await Promise.all(
-    nodes.map(async (port) => {
-      try {
-        const response = await fetch(`http://localhost:${port}/cluster`);
-        const data = await response.json();
-        return {
-          port,
-          status: 'healthy',
-          peers: data.peers.length,
-          role: data.raft_info.role
-        };
-      } catch (error) {
-        return { port, status: 'unhealthy', error: error.message };
-      }
-    })
-  );
-  
-  res.json({
-    success: true,
-    cluster: health,
-    overallHealth: health.every(n => n.status === 'healthy') ? 'healthy' : 'degraded'
-  });
-}));
-```
-
-**Esforço:** 1 dia
-
----
-
 ## 📊 ROI Revisado: Self-Hosted
 
 ### Opção 1: TimescaleDB + Qdrant Cluster
@@ -704,5 +667,4 @@ DevOps Required:    Sim (0.2 FTE)   Não
 **Data:** 2025-11-03 (Revisado)  
 **Status:** Aguardando Decisão  
 **Versão:** 2.0 (Self-Hosted Focus)
-
 

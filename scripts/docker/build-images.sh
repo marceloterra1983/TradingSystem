@@ -35,9 +35,7 @@ main() {
   # Base images retagged from upstream registries
   local base_images=(
     "data-frontend-apps=timescale/timescaledb:2.16.1-pg16"
-    "data-postgress-langgraph=postgres:16-alpine"
     "infra-postgres-dev=postgres:16-alpine"
-    "infra-redis-dev=redis:7-alpine"
     "data-qdrant=qdrant/qdrant:v1.15.1"
     "data-questdb=questdb/questdb:8.2.1"
     "mon-prometheus=prom/prometheus:v2.54.1"
@@ -57,10 +55,8 @@ main() {
   # Custom builds (Node/Python services)
   build_image "docs-api" "backend/api/documentation-api" "Dockerfile.simple"
   build_image "docs-api-viewer" "tools/docs-api"
-  build_image "infra-langgraph" "tools/langgraph"
   build_image "infra-llamaindex-ingestion" "tools/llamaindex" "Dockerfile.ingestion"
   build_image "infra-llamaindex-query" "tools/llamaindex" "Dockerfile.query"
-  build_image "infra-agno-agents" "tools/agno-agents"
   build_image "mon-alert-router" "tools/monitoring/alert-router"
   build_image "firecrawl-api" "tools/firecrawl/firecrawl-source/apps/api"
   build_image "firecrawl-playwright" "tools/firecrawl/firecrawl-source/apps/playwright-service-ts"

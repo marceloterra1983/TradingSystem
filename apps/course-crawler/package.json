@@ -1,0 +1,33 @@
+{
+  "name": "@tradingsystem/course-crawler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "browser-use": "^0.0.1",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.1",
+    "playwright": "1.56.1",
+    "pino": "^9.6.0",
+    "turndown": "^7.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.7",
+    "@types/pg": "^8.6.6",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^8.57.1",
+    "pino-pretty": "^11.2.1",
+    "tslib": "^2.8.1",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

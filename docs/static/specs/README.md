@@ -12,20 +12,6 @@ Este diretório contém as especificações OpenAPI das APIs do TradingSystem, i
 
 ## Arquivos Disponíveis
 
-### status-api.openapi.yaml
-Especificação da **Status API (Service Launcher)** (Port 3500)
-
-**Endpoints principais:**
-- `/health` - Health check
-- `/api/status` - Status de todos os serviços
-- `/api/health/full` - Health check completo (cached)
-- `/circuit-breaker` - Estado do circuit breaker
-- `/launch` - Lançar serviço em terminal
-- `/api/auto-start/:serviceId` - Auto-start de serviços
-- `/metrics` - Métricas Prometheus
-
-**Ver documentação completa:** http://localhost:3400/api/status
-
 ### alert-router.openapi.yaml
 Especificação do **Alert Router** (Port 8080)
 

@@ -42,7 +42,6 @@ System_Boundary(backend, "Backend Services") {
   Container(workspace, "Workspace API", "Node.js", "Ideas and documentation management")
   Container(tpcapital, "TP Capital", "Node.js", "Telegram signal ingestion")
   Container(docsapi, "Documentation API", "Node.js", "RAG proxy + search")
-  Container(servicelauncher, "Service Launcher", "Node.js", "Health orchestration")
 }
 
 System_Boundary(rag, "RAG Stack") {

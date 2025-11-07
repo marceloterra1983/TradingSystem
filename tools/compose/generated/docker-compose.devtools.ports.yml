@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "devtools"
-x-tradingsystem-generated-at: "2025-11-06T15:05:33.408Z"
+x-tradingsystem-generated-at: "2025-11-07T13:54:13.632Z"
 
 x-tradingsystem-ports:
   timescaledb-pgweb:
@@ -12,15 +12,3 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Data Platform"
     description: "pgWeb leve para consultas PostgreSQL"
-  langgraph:
-    env: LANGGRAPH_PORT
-    port: 8111
-    protocol: http
-    owner: "AI Guild"
-    description: "Ambiente LangGraph produção local"
-  langgraph-dev:
-    env: LANGGRAPH_DEV_PORT
-    port: 8112
-    protocol: http
-    owner: "AI Guild"
-    description: "Ambiente LangGraph dev/sandbox"

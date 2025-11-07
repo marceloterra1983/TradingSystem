@@ -37,4 +37,4 @@ All PRDs follow the standard defined in [`docs/DOCUMENTATION-STANDARD.md`](../..
 
 For the original Portuguese versions, refer to the corresponding [`../pt/`](../pt/) section.
 
-**Note**: Some PRDs may only exist in Portuguese (such as the Agno Integration PRD) and are not yet translated.
+**Note**: Some PRDs may only exist in Portuguese and are not yet translated.

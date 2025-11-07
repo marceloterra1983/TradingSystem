@@ -64,7 +64,24 @@
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "no-unused-vars": "off",
     "prefer-const": "warn",
-    "no-var": "error"  },
+    "no-var": "error",
+
+    // Proxy Configuration Rules (CRITICAL - Prevents "API Indisponível" errors)
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Literal[value=/^https?:\\/\\/localhost:[0-9]{4}/]",
+        "message": "❌ Use relative paths instead of localhost URLs in browser code (e.g., '/api/workspace/items'). See docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md"
+      },
+      {
+        "selector": "Literal[value=/^https?:\\/\\/[a-z0-9-]+-api:/]",
+        "message": "❌ Container hostnames like 'workspace-api' only work within Docker networks. Use relative paths (e.g., '/api/workspace'). See docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md"
+      },
+      {
+        "selector": "Literal[value=/^https?:\\/\\/[a-z0-9-]+-service:/]",
+        "message": "❌ Container hostnames like 'my-service' only work within Docker networks. Use relative paths. See docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md"
+      }
+    ]  },
   "ignorePatterns": [
     "node_modules/",
     "dist/",

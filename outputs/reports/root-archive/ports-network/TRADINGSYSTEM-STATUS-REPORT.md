@@ -28,7 +28,7 @@
   - Circuit breakers active
   - **Access**: http://localhost:3402
 
-- **Service Launcher** (Port 3500): ✅ Running
+- **** (Port 3500): ✅ Running
   - Service orchestration
   - Health checks
   - **Access**: http://localhost:3500
@@ -91,7 +91,7 @@ frontend/dashboard/          - React app (Port 3103) ✅
 backend/api/
 ├── documentation-api/     - RAG Service (3402) ✅
 │   └── src/middleware/    - 3-tier cache ✅
-├── service-launcher/      - Orchestration (3500) ✅
+├── /      - Orchestration (3500) ✅
 └── shared/               - Shared libs
 ```
 
@@ -128,7 +128,7 @@ bash scripts/maintenance/health-check-all.sh
 # Docker services
 docker ps --format "table {{.Names}}\t{{.Status}}"
 
-# Service Launcher API
+#  API
 curl http://localhost:3500/api/health/full | jq '.overallHealth'
 ```
 
@@ -137,8 +137,8 @@ curl http://localhost:3500/api/health/full | jq '.overallHealth'
 # Dashboard
 tail -f /tmp/dashboard.log
 
-# Service Launcher
-tail -f /tmp/service-launcher.log
+# 
+tail -f /tmp/.log
 
 # RAG Service  
 docker logs -f rag-service
@@ -155,7 +155,7 @@ bash scripts/stop-all-services.sh
 # Or individual
 docker compose -f tools/compose/docker-compose.rag.yml down
 kill $(cat /tmp/dashboard.pid)
-kill $(cat /tmp/service-launcher.pid)
+kill $(cat /tmp/.pid)
 ```
 
 ---

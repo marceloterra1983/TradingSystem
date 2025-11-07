@@ -80,6 +80,7 @@ Serviços:
 - `course-crawler-db` – Postgres 15 com `pgcrypto`
 - `course-crawler-api` – API (porta 3601)
 - `course-crawler-worker` – Worker que dispara o CLI
+- `course-crawler-ui` – Frontend React/Vite servido via Nginx (porta 4201)
 
 Frontends:
 
@@ -133,6 +134,38 @@ Garanta que `apps/course-crawler` foi compilado (`npm run build`) antes de inici
 | `COURSE_CRAWLER_OUTPUTS_DIR` | Diretório base para exports |
 | `COURSE_CRAWLER_CONFIDENCE_THRESHOLD` | Limiar de confiança |
 | `COURSE_CRAWLER_SELECTOR_FAILURE_THRESHOLD` | Falhas consecutivas antes de incidentes |
+| `COURSE_CRAWLER_MAX_CLASSES_PER_MODULE` | Limite opcional por módulo (deixe vazio para profundidade total) |
+
+> ✅ **Profundidade total**: quando estiver pronto para capturar todos os conteúdos, defina `COURSE_CRAWLER_MAX_CLASSES_PER_MODULE=` (valor vazio) no `.env` e reprovisione o compose.  
+> ⚙️ **Safeguard durante tuning**: use um número baixo (ex.: `5`) enquanto ajusta seletores para evitar execuções longas.
+
+### Validação do backend
+
+1. **Rebuild** da stack: `docker compose -f tools/compose/docker-compose.course-crawler.yml up -d --build`
+2. **Health check**: `curl http://localhost:3601/health`
+3. **Agendar run**:
+   ```bash
+   COURSE_ID=<uuid>
+   curl -X POST http://localhost:3601/courses/$COURSE_ID/runs
+   ```
+4. **Acompanhar status**: `curl http://localhost:3601/runs/<runId>`
+5. **Ver artefatos**:
+   ```bash
+   curl http://localhost:3601/runs/<runId>/artifacts
+   curl http://localhost:3601/runs/<runId>/artifacts/raw?path=run-report.json
+   ```
+6. **Confirmar Neon/Postgres** (opcional): `docker exec course-crawler-db psql -U postgres -d coursecrawler_cli -c "SELECT COUNT(*) FROM course_crawler.classes;"`.
+
+Executando esse checklist com `COURSE_CRAWLER_MAX_CLASSES_PER_MODULE` vazio garantimos crawls completos (ex.: `run d8d9fcaa...` gerou 54 aulas, `run bb13fceb...` cobre a grade completa do Memberkit).
+
+### Frontend (`frontend/course-crawler`)
+
+| Variável | Função |
+|----------|--------|
+| `VITE_COURSE_CRAWLER_API_URL` | Endpoint usado pelo frontend para listar cursos/runs e baixar artefatos |
+| `COURSE_CRAWLER_APP_PORT` | Porta exposta pelo serviço `course-crawler-ui` (default `4201`) |
+
+O frontend lista cursos, agenda execuções (`POST /courses/:id/runs`) e consome os artefatos Markdown via `GET /runs/:id/artifacts` + `.../raw`. Cada clique já renderiza o Markdown no navegador, sem precisar baixar manualmente do volume `outputs/`.
 
 ## Fluxo de Uso
 

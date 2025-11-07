@@ -15,7 +15,6 @@ System_Boundary(tradingsystem, "TradingSystem") {
     Container(workspace_api, "Workspace API", "Node.js + Express", "Manages workspace items and categories")
     Container(tp_capital_api, "TP Capital API", "Node.js + Express", "Telegram signal ingestion and processing")
     Container(docs_api, "Documentation API", "Node.js + Express", "Documentation search, FlexSearch, RAG proxy")
-    Container(service_launcher, "Service Launcher", "Node.js + Express", "Service orchestration and health checks")
     Container(telegram_gateway, "Telegram Gateway", "Node.js + Express", "MTProto client for Telegram")
 
     Container(rag_ollama, "Ollama", "LLM Runtime", "Hosts llama3.2:3b for RAG")
@@ -32,13 +31,11 @@ System_Ext(telegram, "Telegram", "External messaging platform")
 
 Rel(user, dashboard, "Uses", "HTTPS")
 Rel(user, docs_hub, "Views docs", "HTTPS")
-Rel(admin, service_launcher, "Manages services", "HTTPS")
 
 Rel(dashboard, workspace_api, "CRUD operations", "HTTP/REST")
 Rel(dashboard, tp_capital_api, "View signals", "HTTP/REST")
 Rel(dashboard, docs_api, "Search docs", "HTTP/REST")
 Rel(dashboard, rag_collections, "Manage collections", "HTTP/REST")
-Rel(dashboard, service_launcher, "Health checks", "HTTP/REST")
 
 Rel(docs_api, rag_llamaindex_query, "Proxy RAG queries", "HTTP + JWT")
 Rel(docs_api, rag_collections, "Collection ops", "HTTP")

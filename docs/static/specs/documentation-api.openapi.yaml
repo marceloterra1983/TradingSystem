@@ -1058,7 +1058,7 @@ components:
       example:
         systems:
           - id: "a1b2c3"
-            name: "Service Launcher"
+            name: "Docs Hub"
             status: "online"
         ideas:
           - id: "i1"

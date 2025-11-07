@@ -1,0 +1,21 @@
+# Build outputs
+dist/
+build/
+*.min.js
+
+# Compiled JavaScript (ignore transpiled .js files, lint only .ts/.tsx)
+src/**/*.js
+src/**/*.jsx
+!src/**/*.config.js
+
+# Dependencies
+node_modules/
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
+
+# Config files (linted separately)
+*.config.js
+*.config.ts

@@ -71,18 +71,6 @@ Os seguintes MCPs já estão prontos para uso (não precisam de configuração a
 }
 ```
 
-**Se preferir usar o PostgreSQL do LangGraph:**
-
-```json
-"postgres": {
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-postgres"],
-  "env": {
-    "POSTGRES_CONNECTION_STRING": "postgresql://postgres:postgres@localhost:5435/tradingsystem"
-  }
-}
-```
-
 ## 🔄 Como Aplicar as Mudanças
 
 Após editar o arquivo `~/.cursor/mcp.json`:

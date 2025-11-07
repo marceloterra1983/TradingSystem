@@ -74,7 +74,7 @@ B3_API_QUESTDB_HTTP_URL=http://localhost:9002
 - 🔥 **Firecrawl Stack** - Integração Firecrawl
 - 🎨 **Frontend** - Dashboard e apps Vite
 - 📡 **Telegram** - Bots de ingestão
-- 🤖 **AI/ML Tools** - OpenAI, LangGraph, Qdrant
+- 🤖 **AI/ML Tools** - OpenAI, LlamaIndex, Qdrant
 - 📊 **Monitoring** - Prometheus, Grafana
 - 🔒 **Security** - CORS, JWT, rate limiting
 
@@ -112,8 +112,8 @@ IMG_DATA_QDRANT=qdrant/qdrant
 IMG_DOCS_API=nginx
 
 # ---- Tools ----
-IMG_TOOLS_LANGGRAPH=nginx
-IMG_TOOLS_AGNO_AGENTS=nginx
+IMG_TOOLS_LLAMAINDEX_INGESTION=img-tools-llamaindex-ingestion
+IMG_TOOLS_LLAMAINDEX_QUERY=img-tools-llamaindex-query
 
 # ---- Monitoring ----
 IMG_MON_PROMETHEUS=prom/prometheus
@@ -238,7 +238,6 @@ node scripts/lib/service-manifest.js get tp-capital-signals --field port
 - Scripts de automação (`scripts/services/`)
 - Dashboards de status
 - Health checkers
-- Service launcher
 
 ---
 
@@ -443,11 +442,6 @@ GitHub Actions valida automaticamente em cada PR:
 
 ### Workflows
 - ⚙️ [env-validation.yml](../.github/workflows/env-validation.yml) - Validação CI/CD
-
-### READMEs dos Serviços
-- 📖 [Service Launcher](../apps/status/README.md) - Exemplo de configuração
-
----
 
 ## 🎯 Exemplos Práticos
 

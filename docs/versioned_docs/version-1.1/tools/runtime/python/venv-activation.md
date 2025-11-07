@@ -41,8 +41,6 @@ O ambiente virtual já vem com os pacotes básicos:
 # Para o serviço timescaledb-sync:
 pip install -r backend/services/timescaledb-sync/requirements.txt
 
-# Para agno-agents:
-pip install -r tools/agno-agents/requirements.txt
 
 # Ou instalar tudo de uma vez:
 find . -name "requirements.txt" -not -path "*/node_modules/*" -exec pip install -r {} \;
@@ -88,7 +86,6 @@ TradingSystem/
 │           └── requirements.txt
 │
 ├── tools/
-│   └── agno-agents/                ← Ferramenta Python/AI
 │       ├── requirements.txt
 │       └── pyproject.toml
 │
@@ -159,7 +156,6 @@ Ambos os ambientes são independentes e podem ser usados simultaneamente no mesm
 
    ```bash
    pip install -r backend/services/timescaledb-sync/requirements.txt
-   pip install -r tools/agno-agents/requirements.txt
    ```
 
 2. **Configurar variáveis de ambiente:**

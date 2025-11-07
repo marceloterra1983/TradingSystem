@@ -82,21 +82,6 @@
 
 **Prioridade MÉDIA - Completude da Documentação**
 
-#### 2.1 Criar Documentação - Status API
-```
-Arquivo: content/api/status-api.mdx
-Port: 3500
-Path: apps/status
-Status: ✅ Active
-```
-
-**Conteúdo:**
-- Propósito: Monitoramento de saúde de serviços
-- Endpoints principais
-- Response schemas
-- Exemplos de uso
-- Health check patterns
-
 #### 2.2 Criar Documentação - Firecrawl Proxy API
 ```
 Arquivo: content/api/firecrawl-proxy.mdx
@@ -197,7 +182,6 @@ Status: ✅ Active
 2. integration-status.mdx (Status de integração)
 
 Production - Infrastructure (3-5):
-3. status-api.mdx
 4. alert-router.mdx
 5. firecrawl-proxy.mdx
 
@@ -311,7 +295,6 @@ docs/content/api/
 ├── integration-status.mdx          (Status - Position 2)
 │
 ├── Infrastructure APIs (3-5)
-│   ├── status-api.mdx             (Position 3)
 │   ├── alert-router.mdx           (Position 4)
 │   └── firecrawl-proxy.mdx        (Position 5)
 │

@@ -61,7 +61,7 @@ Duration:   ~35 seconds
 **Passing Suites**:
 - ✅ docsHybridSearchUtils.spec.ts (43 tests)
 - ✅ docs-url.spec.ts (5 tests)
-- ✅ connections-page.fetch-service-launcher-status.test.ts (2 tests)
+- ✅ connections-page.fetch--status.test.ts (2 tests)
 - ✅ pathNormalizer.test.ts (34 tests)
 - ✅ useLlamaIndexStatus.test.ts (14 tests)
 - ✅ documentation-page.spec.tsx (2 tests)
@@ -226,7 +226,7 @@ npm test -- src/__tests__/integration
 
 ### Integration Test Suite
 
-- ✅ Service Launcher status parsing
+- ✅  status parsing
 - ✅ Documentation API health check
 - ✅ Documentation metrics contract validation
 - ✅ Workspace API health validation

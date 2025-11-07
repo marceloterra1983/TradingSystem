@@ -53,13 +53,11 @@ Comprehensive monitoring with Prometheus, Grafana, Alertmanager, and Alert Route
 
 ### 🤖 [AI & LLM Tools](/tools/ai/overview)
 
-**Location:** `tools/agno-agents/`, `tools/langgraph/`, `tools/llamaindex/`, `tools/ollama/`
+**Location:** `tools/llamaindex/`, `tools/ollama/`
 
-AI agents, LangGraph workflows, LlamaIndex RAG, and local LLM runtime.
+RAG pipelines, document ingest, and local LLM runtimes.
 
 **Key Components:**
-- **Agno Agents** - Clean Architecture AI agents
-- **LangGraph** - Stateful multi-agent workflows
 - **LlamaIndex** - RAG for document Q&A
 - **Ollama** - Local LLM inference
 
@@ -180,7 +178,7 @@ Service port map and health monitoring.
 |----------|----------|-----------|---------|
 | **Infrastructure** | `tools/compose/`, `tools/nginx-proxy/` | Docker Compose, Nginx, Registry, Systemd | Service orchestration and deployment |
 | **Monitoring** | `tools/monitoring/` | Prometheus, Grafana, Alertmanager, Alert Router | Observability and alerting |
-| **AI/LLM** | `tools/agno-agents/`, `tools/langgraph/`, etc. | Agno Agents, LangGraph, LlamaIndex, Ollama | AI workflows and local LLM inference |
+| **AI/LLM** | `tools/llamaindex/`, `tools/ollama/` | LlamaIndex, Ollama | AI workflows and local LLM inference |
 | **Trading** | `tools/ProfitDLL/` | ProfitDLL | Market data and order execution |
 | **Development** | `tools/openspec/`, `tools/scripts/` | OpenSpec, Scripts, Firecrawl | Change management and automation |
 | **Runtime** | Development environments | Node.js, Python, .NET, Docker | Runtime environments |
@@ -215,7 +213,7 @@ bash scripts/maintenance/health-check-all.sh
 - **Prometheus**: `http://localhost:9090`
 - **Adminer** (DB UI): `http://localhost:8080`
 - **Alert Router**: `http://localhost:8080`
-- **Documentation**: `http://localhost:3205`
+- **Documentation**: `http://localhost:3400`
 
 ---
 
@@ -225,6 +223,6 @@ Use the sidebar to explore detailed documentation for each tool category:
 
 - 🔧 **Development Tools** → Node, Python, .NET, Docker
 - 📊 **Monitoring** → Prometheus, Grafana setup guides
-- 🤖 **AI Tools** → Agno Agents, LangGraph, LlamaIndex
+- 🤖 **AI Tools** → LlamaIndex, Ollama
 - 🔐 **Security & Config** → Environment variables, risk limits, audit
 - 🚢 **Ports & Services** → Service port map and health checks

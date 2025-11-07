@@ -11,7 +11,6 @@ high-value workflows that previously lived only as Claude slash commands under
 | `/quality-check`   | `npm run codex:quality-check -- [options]`             | `scripts/maintenance/code-quality-check.sh`             |
 | `/health-check`    | `npm run codex:health-check -- [--format json]`        | `scripts/maintenance/health-check-all.sh`               |
 | `/docker-compose`* | `npm run codex:docker -- <action> [stack [service]]`   | `scripts/codex/docker-stacks.sh` + compose helpers      |
-| `/service-launcher`| `npm run codex:service-launcher -- <start|stop|...>`   | `scripts/codex/service-launcher.sh`                     |
 | `/scripts`         | `npm run codex:scripts -- <list|search|run...>`        | `scripts/codex/scripts-tool.sh`                         |
 
 \*Supports the documented actions `start`, `stop`, `restart`, `ps`, `logs`.
@@ -30,10 +29,6 @@ npm run codex:docker -- start infra docs
 
 # Tail logs for the RAG stack (single service)
 npm run codex:docker -- logs rag rag-service
-
-# Restart Service Launcher
-npm run codex:service-launcher -- restart
-
 # List all scripts + run a maintenance task
 npm run codex:scripts -- list
 npm run codex:scripts -- run maintenance/health-check-all.sh --format json

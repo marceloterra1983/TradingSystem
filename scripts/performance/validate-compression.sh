@@ -7,7 +7,6 @@
 # - Workspace API (port 3200)
 # - Documentation API (port 3401)
 # - TP Capital API (port 4005)
-# - Service Launcher (port 3500)
 #
 # Expected Results:
 # - Responses > 1KB should be gzip compressed
@@ -164,13 +163,8 @@ print_header "Test 3: TP Capital API (Port 4005)"
 test_compression "TP Capital API" "http://localhost:4005/health" "GET /health"
 test_compression_disable "TP Capital API" "http://localhost:4005/health"
 
-# Test Service Launcher
-print_header "Test 4: Service Launcher (Port 3500)"
-test_compression "Service Launcher" "http://localhost:3500/api/status" "GET /api/status"
-test_compression_disable "Service Launcher" "http://localhost:3500/api/status"
-
 # Test health endpoints
-print_header "Test 5: Health Endpoints"
+print_header "Test 4: Health Endpoints"
 test_compression "Workspace Health" "http://localhost:3200/health" "GET /health"
 test_compression "Documentation Health" "http://localhost:3401/health" "GET /health"
 

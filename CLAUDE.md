@@ -90,7 +90,6 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 -   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
 -   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
 -   **Documentation API**: http://localhost:3405 (Express + FlexSearch + RAG Proxy)
--   **Service Launcher**: http://localhost:3500 (Express)
 -   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
 -   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system)
 
@@ -140,7 +139,6 @@ claude
 
 # Or use custom commands
 /health-check all
-/service-launcher start dashboard
 /docker-compose start-all
 ```
 
@@ -160,7 +158,6 @@ claude
 -   `/git-workflows` - Git operations with Conventional Commits
 -   `/docker-compose` - Docker stack management
 -   `/health-check` - System health monitoring
--   `/service-launcher` - Service orchestration
 -   `/scripts` - Direct access to project scripts
 
 **Configuration files**:
@@ -240,7 +237,6 @@ TradingSystem/
 │   │   ├── workspace/            # Port 3200 - Workspace API (Docker container only)
 │   │   ├── tp-capital/           # Port 4005 - TP Capital ingestion (Docker container only)
 │   │   ├── documentation-api/    # Port 3400 - Documentation management (container only)
-│   │   ├── service-launcher/     # Port 3500 - Service orchestration
 │   │   └── telegram-gateway/     # Port 3201 - Telegram Gateway API (reference code)
 │   ├── data/                      # Data layer
 │   │   ├── questdb/              # QuestDB schemas & migrations
@@ -397,7 +393,6 @@ if (bMarketConnected && bAtivo) {
 -   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB - Docker container)
 -   **TP Capital**: `http://localhost:4005` (Express + Telegraf - Docker container)
 -   **Documentation API**: `http://localhost:3405` (Express + FlexSearch)
--   **Service Launcher**: `http://localhost:3500` (Express)
 -   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
 
 ### Current API Endpoints
@@ -405,7 +400,6 @@ if (bMarketConnected && bAtivo) {
 -   **Workspace**: `GET/POST /api/items` - Manage workspace items (runs as Docker container)
 -   **TP Capital**: `POST /webhook/telegram` - Telegram message ingestion
 -   **Documentation**: `GET/POST /api/docs` - Documentation management
--   **Service Launcher**: `GET /api/status` - Service health checks, `GET /api/health/full` - Comprehensive health status (services + containers + databases)
 -   **Firecrawl Proxy**: `POST /api/scrape` - Web scraping via Firecrawl
 -   **RAG System** (via Documentation API proxy):
     -   `GET /api/v1/rag/search` - Semantic search across documentation (JWT minted server-side)
@@ -520,10 +514,6 @@ npm install && npm run dev
 # For manual start: docker compose -f tools/compose/docker-compose.docs.yml up -d
 
 # API Services (Ports 3200-3600)
-# Run each in a separate terminal
-
-cd apps/service-launcher && npm install && npm run dev
-
 # Workspace API, TP Capital, Documentation API, and Firecrawl Proxy run as Docker containers:
 docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
 docker compose -f tools/compose/docker-compose.docs.yml up -d documentation-api
@@ -600,11 +590,6 @@ bash scripts/maintenance/health-check-all.sh --services-only
 # Check only Docker containers
 bash scripts/maintenance/health-check-all.sh --containers-only
 
-# Via Service Launcher API (with caching)
-curl http://localhost:3500/api/health/full | jq '.overallHealth'
-
-# Check cache status
-curl -I http://localhost:3500/api/health/full | grep X-Cache-Status
 ```
 
 ## 📝 Development Guidelines
@@ -701,6 +686,23 @@ bash scripts/env/validate-env.sh
 
 ---
 
+### When working with Docusaurus (CRITICAL):
+
+-   **NEVER restart docs-hub container without checking build first**
+-   **ALWAYS rebuild Docusaurus after content changes**: `cd docs && npm run docs:build`
+-   **Use emergency recovery for 500 errors**: `bash scripts/docs/emergency-recovery.sh`
+-   **Follow SOP**: See `governance/controls/docusaurus-deployment-sop.md`
+-   **AI Agent Guide**: See `docs/content/tools/documentation/docusaurus/ai-agent-troubleshooting-guide.mdx`
+
+### When working with Governance JSON (CRITICAL):
+
+-   **ALWAYS sanitize file content before embedding in JSON payloads**
+-   **NEVER directly include raw file content in JSON.stringify()**
+-   **Use `sanitizeForJson()` function to remove control characters**
+-   **Validate after regeneration**: `bash scripts/governance/validate-governance-json.sh`
+-   **Regenerate snapshot**: `node governance/automation/governance-metrics.mjs`
+-   **Follow SOP**: See `governance/controls/governance-json-sanitization-sop.md`
+
 ### When working with ProfitDLL callbacks:
 
 -   Store delegates as **static fields** to prevent GC
@@ -732,6 +734,53 @@ bash scripts/env/validate-env.sh
 -   **NEVER edit** files in `frontend/dashboard/public/docs/` (copied from `docs/content/` by build scripts)
 -   PRDs are organized by product within `docs/content/prd/`
 -   Follow governance checklists: `governance/controls/REVIEW-CHECKLIST.md`
+
+### When working with Vite Proxy Configuration (CRITICAL):
+
+⚠️ **READ THIS FIRST:** `docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md`
+
+**The #1 cause of "API Indisponível" errors** is incorrect proxy configuration. Follow these rules religiously:
+
+1. **NEVER use `VITE_` prefix for container hostnames**
+   ```bash
+   # ❌ WRONG - Exposes to browser
+   VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+   # ✅ CORRECT - Server-side only
+   WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+   ```
+
+2. **ALWAYS use relative paths in browser code**
+   ```typescript
+   // ❌ WRONG - Hardcoded localhost URL
+   const url = 'http://localhost:3200/api/items';
+
+   // ✅ CORRECT - Relative path (Vite proxy)
+   const url = '/api/workspace/items';
+   ```
+
+3. **ALWAYS validate after changes**
+   ```bash
+   bash scripts/env/validate-env.sh
+   ```
+
+4. **ALWAYS rebuild container after config changes**
+   ```bash
+   docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
+   ```
+
+5. **ESLint will catch hardcoded URLs** - Fix immediately if you see:
+   > ❌ Use relative paths instead of localhost URLs
+
+**Pattern:**
+- Browser → Relative path `/api/workspace/*`
+- Vite Proxy → Forwards to `workspace-api:3200/api/*`
+- Container → Returns data
+
+**If you see "API Indisponível":**
+1. Check for `VITE_` prefix on proxy targets → Remove it
+2. Check for hardcoded localhost URLs → Change to relative paths
+3. Rebuild container → Test with curl → Verify in browser
 
 ### When working with RAG/LlamaIndex system:
 

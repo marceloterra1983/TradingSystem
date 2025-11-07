@@ -58,5 +58,5 @@ sidebar_position: 20
 
 ## Pós-ação
 
-- Atualizar dashboards/Service Launcher verificando se o status voltou para `healthy`.
+- Atualizar dashboards verificando se o status voltou para `healthy`.
 - Registrar problemas ou anomalias em `docs/context/ops/orchestration/kestra.md` na seção de troubleshooting.

@@ -47,8 +47,8 @@ const sections = [
 ];
 
 <CustomizablePageLayout
-  pageId="launcher"
-  title="Service Launcher"
+  pageId="workspace"
+  title="Workspace"
   sections={sections}
   defaultColumns={2}
 />
@@ -83,43 +83,7 @@ interface Props {
 
 ---
 
-### ServiceStatusBanner
-
-**Purpose:** Global service health indicator
-
-**Location:** `frontend/dashboard/src/components/ServiceStatusBanner.tsx`
-
-**Features:**
-
-- Real-time health polling (30s interval)
-- Color-coded status display
-- Expandable details view
-- Auto-recovery integration
-
-**API:** Status API (Port 3500) - `/api/status`
-
----
-
 ## Page Components
-
-### LauncherPage
-
-**Purpose:** Service orchestration dashboard
-
-**Sections:**
-
-- **StartMetricsSection**: System start statistics
-- **LocalServicesSection**: Node.js APIs health monitoring
-- **DockerContainersSection**: Container status & management
-- **EndpointsSection**: API endpoint inventory
-- **ContainerEndpointsSection**: Docker service UIs
-
-**APIs Used:**
-
-- Status API (3500): `/api/status`, `/api/health/full`
-- Docker socket: Container introspection
-
----
 
 ### WorkspacePageNew
 
@@ -276,8 +240,6 @@ components/
 
 ### Naming Conventions
 
-- **Components**: PascalCase (`ServiceStatusBanner`)
-- **Files**: PascalCase (`ServiceStatusBanner.tsx`)
 - **Props**: camelCase (`onRetry`, `isOpen`)
 - **Hooks**: camelCase with `use` prefix (`useServiceHealth`)
 

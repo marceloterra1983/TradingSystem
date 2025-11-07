@@ -41,27 +41,6 @@ npm run clients:generate
 
 ---
 
-## Infrastructure APIs
-
-### 🔧 [Status API (Service Launcher)](./status-api.mdx)
-
-**Port:** 3500 | **Status:** ✅ Active
-
-Central orchestration and health monitoring service for all TradingSystem components.
-
-- **Key Features:** Service health aggregation, Circuit breaker pattern, Auto-start services, Prometheus metrics
-- **Monitors:** 11+ services, databases, and infrastructure components
-- **Cache:** 60-second TTL for comprehensive health checks
-- **Repository:** `apps/status/`
-
-**Quick Links:**
-
-- [Full Documentation](./status-api.mdx)
-- Health: `http://localhost:3500/health`
-- Status: `http://localhost:3500/api/status`
-
----
-
 ### 🌐 [Firecrawl Proxy](./firecrawl-proxy.mdx)
 
 **Port:** 3600 | **Status:** ✅ Active
@@ -358,7 +337,7 @@ cd backend/api/telegram-gateway && npm run dev       # Port 4010
 
 Each API requires specific environment variables. See individual API documentation:
 
-- [Status API Environment](./status-api.mdx#configuration)
+- Status API Environment (legado)
 - [Firecrawl Proxy Environment](./firecrawl-proxy.mdx#configuration)
 - [Alert Router Environment](/api/alert-router/guide)
 - [Documentation API Environment](./documentation-api.mdx#environment-variables)

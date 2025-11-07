@@ -68,7 +68,6 @@ validateServiceConfig('workspaceApi', { logger });
 // - workspaceApi
 // - tpCapitalApi
 // - documentationApi
-// - serviceLauncherApi
 ```
 
 ### Type-Safe Parsing

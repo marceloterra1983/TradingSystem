@@ -125,17 +125,6 @@ services:
       endpoint: /health
       expected: 200
 
-  - name: service-launcher
-    stack: automation
-    port: 3500
-    protocol: http
-    owner: Platform Ops
-    description: "Service Launcher / Status UI para orquestração local"
-    container: false
-    healthcheck:
-      endpoint: /health
-      expected: 200
-
   - name: firecrawl-proxy
     stack: automation
     port: 3600
@@ -145,6 +134,21 @@ services:
     container: false
     healthcheck:
       endpoint: /
+      expected: 200
+
+  - name: n8n
+    stack: automation
+    port: 3680
+    protocol: http
+    owner: ToolingGuild
+    description: "Editor n8n para orquestrações low-code"
+    container: true
+    network: n8n_backend
+    depends_on:
+      - n8n-postgres
+      - n8n-redis
+    healthcheck:
+      endpoint: /healthz
       expected: 200
 
   - name: telegram-mtproto
@@ -273,15 +277,15 @@ services:
     container: true
     network: data_backend
 
-  - name: postgres-langgraph
+  - name: n8n-postgres
     stack: db-core
-    port: 5432
+    port: 5442
     protocol: postgres
-    owner: AI Guild
-    description: "PostgreSQL usado pelos fluxos LangGraph"
+    owner: ToolingGuild
+    description: "PostgreSQL dedicado à stack n8n"
     container: true
-    network: langgraph_net
-    notes: "Exposto somente quando LangGraph está ativo"
+    network: n8n_backend
+    notes: "Mapeado host 5442 → container 5432"
 
   - name: timescaledb-pgadmin
     stack: db-core
@@ -367,38 +371,14 @@ services:
       endpoint: /healthz
       expected: 200
 
-  - name: infra-redis-dev
+  - name: n8n-redis
     stack: cache
-    port: 6380
+    port: 6390
     protocol: redis
-    owner: AI Guild
-    description: "Redis dev usado nos fluxos LangGraph"
+    owner: ToolingGuild
+    description: "Redis Bull queue/event bus da stack n8n"
     container: true
-    network: ai_backend
-
-  - name: langgraph
-    stack: devtools
-    port: 8111
-    protocol: http
-    owner: AI Guild
-    description: "Ambiente LangGraph produção local"
-    container: true
-    network: langgraph_net
-    healthcheck:
-      endpoint: /health
-      expected: 200
-
-  - name: langgraph-dev
-    stack: devtools
-    port: 8112
-    protocol: http
-    owner: AI Guild
-    description: "Ambiente LangGraph dev/sandbox"
-    container: true
-    network: langgraph_net
-    healthcheck:
-      endpoint: /health
-      expected: 200
+    network: n8n_backend
 
   - name: kestra-orchestrator
     stack: automation-platforms

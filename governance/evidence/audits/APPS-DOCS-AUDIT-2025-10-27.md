@@ -14,7 +14,6 @@
 - **Apps Documentados mas não implementados**: 2 (Data Capture, Order Manager - planejados)
 - **Apps Implementados mas sem docs estruturados**: 0
 - **Discrepâncias de Porta**: 1 (TP Capital)
-- **Issues Críticos**: 1 (Service Launcher sem estrutura de docs)
 
 ---
 
@@ -24,7 +23,6 @@
 
 ```
 apps/
-├── status/              ✅ Service Launcher (Port 3500)
 ├── telegram-gateway/    ✅ Telegram Gateway (Port 4007 MTProto + 4010 API)
 ├── tp-capital/          ⚠️  TP Capital (Port 4005 ou 4007?)
 └── workspace/           ✅ Workspace (Port 3200 + 3900 standalone)
@@ -155,12 +153,10 @@ docs/content/apps/
 
 ---
 
-### 4. ❌ Service Launcher / Status API
 
 **Status**: **CRÍTICO** - Implementado mas sem estrutura de documentação
 
 **Localização Real**: `apps/status/` ✅
-**Documentação**: ❌ **NÃO EXISTE** `docs/content/apps/service-launcher/`
 
 **Porta**: 3500 ✅ (consistente)
 
@@ -169,10 +165,8 @@ docs/content/apps/
 **README Existente**: ✅ `apps/status/README.md` (muito completo - 514 linhas!)
 
 **Problema**:
-- Service Launcher é uma aplicação **crítica** para o sistema (orchestration + health monitoring)
 - README excelente em `apps/status/README.md`
 - **Mas não tem estrutura de docs em `docs/content/apps/`**
-- Apenas mencionado brevemente em `docs/content/apps/overview.mdx` como "Tools > Service Launcher"
 
 **Conteúdo do README Existente** (`apps/status/README.md`):
 ```markdown
@@ -190,7 +184,6 @@ docs/content/apps/
 ```
 
 **Recomendação URGENTE**:
-1. **Criar estrutura**: `docs/content/apps/service-launcher/`
 2. **Migrar conteúdo** do excelente README para estrutura padronizada:
    - `overview.mdx` - Purpose, architecture, stakeholders
    - `api.mdx` - REST endpoints com exemplos
@@ -201,7 +194,6 @@ docs/content/apps/
    - `requirements.mdx` - Dependencies
    - `runbook.mdx` - Troubleshooting guide
    - `changelog.mdx` - Version history
-3. **Atualizar** `docs/content/apps/overview.mdx` para incluir Service Launcher na categoria adequada
 
 ---
 
@@ -274,7 +266,6 @@ docs/content/apps/
 
 **Problemas Identificados**:
 
-1. **Service Launcher categorizado incorretamente**:
    - Atual: Listado em "Workspace" como Tools
    - Deveria ser: Categoria "Infrastructure" ou categoria própria "Orchestration"
    - É um serviço **crítico** de infraestrutura, não uma ferramenta de produtividade
@@ -290,25 +281,21 @@ docs/content/apps/
    - ✅ Telegram Gateway: Node.js, TimescaleDB, Docker Compose
    - ✅ TP Capital: Node.js, TimescaleDB + Telegraf, Docker Compose
    - ✅ Workspace: React + Node.js, TimescaleDB, Docker Compose
-   - ❌ **Faltando**: Service Launcher (Node.js, Docker Compose)
 
 ---
 
 ## 🚨 Issues Críticos
 
-### Issue #1: Service Launcher sem estrutura de docs
 
 **Severidade**: 🔴 Alta
 **Impacto**: Aplicação crítica de infraestrutura sem documentação padronizada
 
 **Detalhes**:
-- Service Launcher é fundamental para orchestration e health monitoring
 - Tem README excelente em `apps/status/README.md` (514 linhas)
 - Mas não segue estrutura padronizada de `docs/content/apps/`
 - Dificulta descoberta e navegação no Docusaurus
 
 **Ação Requerida**:
-1. Criar `docs/content/apps/service-launcher/` com estrutura completa
 2. Migrar conteúdo do README para arquivos .mdx
 3. Adicionar à overview.mdx na categoria correta
 4. Manter README em `apps/status/` como quick reference
@@ -357,8 +344,6 @@ docs/content/apps/
 
 ### Prioridade Alta
 
-1. **Criar estrutura de docs para Service Launcher**
-   - Local: `docs/content/apps/service-launcher/`
    - Migrar conteúdo do excelente README existente
    - Adicionar à overview.mdx
 
@@ -370,11 +355,9 @@ docs/content/apps/
 ### Prioridade Média
 
 3. **Reorganizar categorias em overview.mdx**
-   - Mover Service Launcher para "Infrastructure" ou criar "Orchestration"
    - Adicionar Firecrawl (se aplicável)
 
 4. **Completar Technology Stack Table**
-   - Adicionar Service Launcher
    - Adicionar Firecrawl (se aplicável)
 
 5. **Clarificar Firecrawl**
@@ -404,7 +387,6 @@ docs/content/apps/
 | Workspace | ✅ | ✅ | 100% | 🟢 Excelente |
 | Telegram Gateway | ✅ | ✅ | 100% | 🟢 Excelente |
 | TP Capital | ✅ | ✅ | 95% (porta) | 🟡 Bom |
-| Service Launcher | ✅ | ❌ | 40% (só README) | 🔴 Requer ação |
 | Data Capture | ❌ | ✅ (templates) | N/A | 🟡 Planejado |
 | Order Manager | ❌ | ✅ (templates) | N/A | 🟡 Planejado |
 | Firecrawl | ⚠️ | ❌ | 20% | 🟡 Indefinido |
@@ -418,7 +400,6 @@ docs/content/apps/
 | Workspace | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Telegram Gateway | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | TP Capital | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Service Launcher | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Data Capture | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 |
 | Order Manager | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 | 🟡 |
 
@@ -455,13 +436,10 @@ Se porta TP Capital for confirmada como 4005:
 - ✅ Overview.mdx é bem organizado e informativo
 
 ### Áreas de Melhoria
-- ❌ Service Launcher (app crítico) sem estrutura formal de docs
 - ⚠️ Inconsistência de porta em documentos de referência
 - ⚠️ Firecrawl com status indefinido (app ou apenas API?)
-- ⚠️ Categorização de Service Launcher como "Tool" em vez de "Infrastructure"
 
 ### Próximos Passos Imediatos
-1. Criar `docs/content/apps/service-launcher/` (Prioridade Alta)
 2. Corrigir porta TP Capital em CLAUDE.md e README.md (Prioridade Alta)
 3. Clarificar status do Firecrawl (Prioridade Média)
 4. Reorganizar categorias em overview.mdx (Prioridade Média)

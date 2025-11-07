@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENV_SHARED="${REPO_ROOT}/.env.shared"
 
-AVAILABLE_PHASES=("infra-core" "data" "timescale" "frontend-apps" "monitoring" "docs" "infra" "tools" "langgraph-dev" "firecrawl")
+AVAILABLE_PHASES=("infra-core" "data" "timescale" "frontend-apps" "monitoring" "docs" "infra" "tools" "database-ui" "firecrawl")
 PHASES_TO_START=()
 
 usage() {
@@ -79,7 +79,7 @@ phase_label() {
     docs) echo "Documentation";;
     infra) echo "Infrastructure Services";;
     tools) echo "Tools Stack";;
-    langgraph-dev) echo "LangGraph Development (Port 8112)";;
+    database-ui) echo "Database UI Tools";;
     firecrawl) echo "Firecrawl";;
     *) echo "${phase}";;
   esac
@@ -240,18 +240,6 @@ start_phase() {
         fi
       else
         echo -e "${YELLOW}↳ No tools services defined (skipping).${NC}"
-      fi
-      ;;
-    langgraph-dev)
-      echo -e "${BLUE}🔬 Starting LangGraph Development Environment${NC}"
-      local compose="tools/compose/docker-compose.langgraph-dev.yml"
-      if has_compose_services "${compose}"; then
-        compose_cmd -f "${REPO_ROOT}/${compose}" up -d --build
-        echo -e "${GREEN}✓ LangGraph dev started on port 8112${NC}"
-        echo -e "${YELLOW}  Access: http://localhost:8112${NC}"
-        echo -e "${YELLOW}  Studio: https://smith.langchain.com/studio (requires LANGSMITH_API_KEY)${NC}"
-      else
-        echo -e "${YELLOW}↳ No LangGraph dev services defined (skipping).${NC}"
       fi
       ;;
     firecrawl)
@@ -416,8 +404,6 @@ echo "  Docs API:               http://localhost:3401"
 echo "  Docusaurus:             http://localhost:3400"
 echo ""
 echo -e "${GREEN}Infrastructure Services:${NC}"
-echo "  LangGraph (Production): http://localhost:8111"
-echo "  LangGraph (Dev):        http://localhost:8112"
 echo "  Qdrant:                 http://localhost:6333"
 echo ""
 echo -e "${GREEN}Firecrawl:${NC}"
@@ -431,3 +417,7 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${GREEN}✅ Stack startup complete${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
 echo ""
+    database-ui)
+      ensure_network "tradingsystem_backend"
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.database-ui.yml" up -d
+      ;;

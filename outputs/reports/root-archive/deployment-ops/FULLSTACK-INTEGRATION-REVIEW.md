@@ -62,7 +62,7 @@ The TradingSystem project demonstrates **solid full-stack architecture** with mo
 - documentation-api (Port 3401)
 - workspace (Port 3200)
 - telegram-gateway (Port 3201)
-- service-launcher (Port 3500)
+-  (Port 3500)
 - firecrawl-proxy (Port 3600)
 
 ✅ **Single Responsibility:** Each service has clear purpose

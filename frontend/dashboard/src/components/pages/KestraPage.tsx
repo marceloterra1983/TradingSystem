@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { IframeWithUrl } from '../common/IframeWithUrl';
 
 const DEFAULT_KESTRA_HTTP_URL = 'http://localhost:8180';
 
@@ -31,7 +32,7 @@ export function KestraPage(): JSX.Element {
 
   return (
     <div className="h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
-      <iframe
+      <IframeWithUrl
         src={uiUrl}
         className="w-full h-full"
         style={{
@@ -39,6 +40,7 @@ export function KestraPage(): JSX.Element {
         }}
         title="Kestra Orchestrator UI"
         allow="clipboard-read; clipboard-write; fullscreen"
+        wrapperClassName="h-full"
       />
     </div>
   );

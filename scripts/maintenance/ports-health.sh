@@ -87,8 +87,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "service-launcher (3500) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3500/health" || true)
+echo -n "firecrawl-proxy (3600) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3600/" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -96,8 +96,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "firecrawl-proxy (3600) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3600/" || true)
+echo -n "n8n (3680) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3680/healthz" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -197,24 +197,6 @@ fi
 
 echo -n "qdrant (6333) ... "
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:6333/healthz" || true)
-if [ "$STATUS" = "200" ]; then
-  echo "✅ healthy"
-else
-  echo "❌ unhealthy (expected 200, got ${STATUS:-n/a})"
-  FAILURES=$((FAILURES + 1))
-fi
-
-echo -n "langgraph (8111) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8111/health" || true)
-if [ "$STATUS" = "200" ]; then
-  echo "✅ healthy"
-else
-  echo "❌ unhealthy (expected 200, got ${STATUS:-n/a})"
-  FAILURES=$((FAILURES + 1))
-fi
-
-echo -n "langgraph-dev (8112) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8112/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else

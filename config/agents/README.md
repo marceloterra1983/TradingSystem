@@ -25,7 +25,4 @@ Use scripts:
 - npm run agent:describe -- <id> – show details
 - npm run agent:run -- <id> [--args '{"k":"v"}'] – run with args
 
-Agno Agents service:
-- Reads these manifests and exposes them via API:
-  - GET /api/v1/agents/registry – list all
-  - GET /api/v1/agents/docs/daily/manifest – single manifest example
+Legacy HTTP APIs were removed; the manifests now serve only the local CLI runners (Node.js or Python scripts).

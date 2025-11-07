@@ -1,5 +1,6 @@
 import React from 'react';
 import { apiConfig } from '@/config/api';
+import { IframeWithUrl } from '../common/IframeWithUrl';
 
 export const DocsApiPage: React.FC = () => {
   return (
@@ -27,12 +28,13 @@ export const DocsApiPage: React.FC = () => {
           Open in new tab
         </a>
       </div>
-      <iframe
+      <IframeWithUrl
         src={apiConfig.docsApiUrl}
         title="TradingSystem API Documentation Portal"
         className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
         allow="clipboard-read; clipboard-write"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"
+        wrapperClassName="h-[calc(100%-40px)]"
       />
     </div>
   );

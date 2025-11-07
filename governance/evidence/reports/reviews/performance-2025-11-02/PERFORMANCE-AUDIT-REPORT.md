@@ -93,7 +93,7 @@ Breakdown:
 **Current Implementation:**
 ```typescript
 // ✅ GOOD: 13 pages already lazy-loaded
-const LauncherPage = React.lazy(() => import('../components/pages/LauncherPage'));
+const WorkspacePage = React.lazy(() => import('../components/pages/WorkspacePage'));
 const WorkspacePageNew = React.lazy(() => import('../components/pages/WorkspacePageNew'));
 const TPCapitalOpcoesPage = React.lazy(() => import('../components/pages/TPCapitalOpcoesPage'));
 // ... 10 more lazy-loaded pages
@@ -166,7 +166,6 @@ manualChunks: {
 
 ### API Response Times (Measured)
 
-**Service Launcher API** (`http://localhost:3500/api/status`):
 ```
 Response Time: 0.000163s (0.16ms) ⚡ EXCELLENT
 Payload Size: N/A (empty response)
@@ -189,7 +188,6 @@ Bottlenecks:
 ```
 
 **Performance Grades:**
-- ✅ Service Launcher: A+ (sub-millisecond)
 - ✅ Workspace API: A (3.64ms for CRUD operation)
 - ⚠️ RAG System: C (5-12s, needs optimization)
 
@@ -599,7 +597,6 @@ rag-llamaindex-ingest: Up 5 hours (unhealthy) ⚠️
 
 ### Current Monitoring
 
-**Service Launcher API:** Provides health checks
 - Endpoint: `http://localhost:3500/api/health/full`
 - Cache TTL: 30 seconds (inferred from cache headers)
 - ✅ Comprehensive health status (services + containers + databases)
@@ -868,18 +865,13 @@ manualChunks: {
   'markdown-vendor': [/* existing */],
   'utils-vendor': [/* existing */],
   // ✅ NEW: Separate heavy libraries
-  'langchain-vendor': [
-    '@langchain/core',
-    '@langchain/langgraph-sdk',
-    '@langchain/langgraph-ui'
-  ],
   'charts-vendor': ['recharts'],
 }
 ```
 
 **Impact:**
 - 📉 Main bundle: 152KB → 50-60KB (60% reduction)
-- 📈 Cache efficiency: LangChain/Recharts cached separately (stable versions)
+- 📈 Cache efficiency: Recharts cached separadamente (versões estáveis)
 - 📉 Time to Interactive: 5-6s → 3-4s (30% improvement)
 
 **Effort:** 15 minutes
@@ -1115,7 +1107,6 @@ Components:
 ### Backend (Before Optimization)
 
 ```
-Service Launcher API: 0.16ms ⚡
 Workspace API: 3.64ms ✅
 RAG Query Service: 5-12 seconds (P50-P95)
 

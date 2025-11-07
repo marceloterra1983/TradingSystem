@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { apiConfig, getApiUrl } from '../config/api';
+import bundledMetricsSnapshotJson from '../data/documentation-metrics-fallback.json';
 
 export interface System {
   id: string;
@@ -126,6 +127,8 @@ export interface DocumentationMetrics {
   }>;
 }
 
+const BUNDLED_METRICS_SNAPSHOT = bundledMetricsSnapshotJson as DocumentationMetrics;
+
 export interface SystemHealth {
   id: string;
   name: string;
@@ -207,10 +210,76 @@ const STATIC_METRICS_PATHS = [
   '/metrics/index.json',
 ];
 
+const DOCUMENTATION_METRICS_PATH = '/api/v1/docs/health/dashboard-metrics';
+const ABSOLUTE_URL_REGEX = /^https?:\/\//i;
+const FALLBACK_DOCS_API_BASES = [
+  'http://localhost:3405',
+  'http://127.0.0.1:3405',
+  'http://localhost:3401',
+  'http://127.0.0.1:3401',
+];
+const FALLBACK_DOCS_STATIC_BASES = [
+  'http://localhost:3404',
+  'http://127.0.0.1:3404',
+];
+
+type MetricsEndpointAttempt = {
+  type: 'client' | 'absolute';
+  url: string;
+  label: string;
+};
+
 const joinUrl = (base: string, path: string) => {
   const sanitizedBase = base.replace(/\/+$/, '');
   const sanitizedPath = path.replace(/^\/+/, '');
   return `${sanitizedBase}/${sanitizedPath}`;
+};
+
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+
+const resolveAbsoluteBase = (value?: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+  if (ABSOLUTE_URL_REGEX.test(value)) {
+    return trimTrailingSlash(value);
+  }
+  if (value.startsWith('/') && typeof window !== 'undefined' && window.location?.origin) {
+    return trimTrailingSlash(`${window.location.origin}${value}`);
+  }
+  return null;
+};
+
+const buildDocumentationApiBases = (primaryBase?: string | null): string[] => {
+  const bases = new Set<string>();
+  const resolvedPrimary = resolveAbsoluteBase(primaryBase);
+  if (resolvedPrimary) {
+    bases.add(resolvedPrimary);
+  }
+
+  const configuredBase = resolveAbsoluteBase(getApiUrl('documentation'));
+  if (configuredBase) {
+    bases.add(configuredBase);
+  }
+
+  const docsApiUrl = resolveAbsoluteBase(apiConfig.documentationApi);
+  if (docsApiUrl) {
+    bases.add(docsApiUrl);
+  }
+
+  const docsPortalApi = resolveAbsoluteBase(apiConfig.docsApiUrl);
+  if (docsPortalApi) {
+    bases.add(docsPortalApi);
+  }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    bases.add(trimTrailingSlash(`${window.location.origin}/api/docs`));
+    bases.add(trimTrailingSlash(`${window.location.origin}/docs/api/documentation-api`));
+  }
+
+  FALLBACK_DOCS_API_BASES.forEach((fallback) => bases.add(trimTrailingSlash(fallback)));
+
+  return Array.from(bases);
 };
 
 const buildStaticMetricsUrls = (): string[] => {
@@ -231,6 +300,7 @@ const buildStaticMetricsUrls = (): string[] => {
   }
 
   maybeAddAbsolute(normalizedDocsUrl);
+  FALLBACK_DOCS_STATIC_BASES.forEach((base) => maybeAddAbsolute(base));
 
   STATIC_METRICS_PATHS.forEach((path) => candidates.add(path));
 
@@ -671,10 +741,43 @@ class DocumentationService {
     success: boolean;
     data: DocumentationMetrics;
   }> {
-    const response = await this.client.get(
-      '/api/v1/docs/health/dashboard-metrics',
+    const attempts = this.buildDocumentationMetricsAttempts(DOCUMENTATION_METRICS_PATH);
+    const attemptErrors: string[] = [];
+    const requestTimeout =
+      typeof this.client.defaults.timeout === 'number' ? this.client.defaults.timeout : 30000;
+
+    for (const attempt of attempts) {
+      try {
+        const response =
+          attempt.type === 'client'
+            ? await this.client.get(DOCUMENTATION_METRICS_PATH)
+            : await axios.get(attempt.url, {
+                timeout: requestTimeout,
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                withCredentials: false,
+              });
+
+        if (response?.data?.success && response.data.data) {
+          if (attempt.type === 'absolute') {
+            console.warn(
+              `[DocumentationService] Primary metrics endpoint unavailable, using fallback ${attempt.label}`,
+            );
+          }
+          return response.data;
+        }
+
+        attemptErrors.push(`${attempt.label}: invalid payload`);
+      } catch (error) {
+        attemptErrors.push(`${attempt.label}: ${this.formatAxiosError(error)}`);
+      }
+    }
+
+    throw new Error(
+      `All documentation metrics endpoints failed (${attemptErrors.join(' | ')})`,
     );
-    return response.data;
   }
 
   async getStaticDocumentationMetrics(): Promise<DocumentationMetrics> {
@@ -719,9 +822,62 @@ class DocumentationService {
       lastError = error instanceof Error ? error : new Error(String(error));
     }
 
+    if (BUNDLED_METRICS_SNAPSHOT) {
+      console.warn(
+        '[DocumentationService] Remote metrics snapshots unavailable, using bundled fallback snapshot',
+        lastError?.message || '',
+      );
+      return BUNDLED_METRICS_SNAPSHOT;
+    }
+
     throw new Error(
       `Fallback metrics request failed${lastError ? `: ${lastError.message}` : ''}`,
     );
+  }
+
+  private buildDocumentationMetricsAttempts(path: string): MetricsEndpointAttempt[] {
+    const attempts: MetricsEndpointAttempt[] = [
+      {
+        type: 'client',
+        url: path,
+        label: 'configured documentation API',
+      },
+    ];
+
+    const seen = new Set<string>();
+    const resolvedPrimary = resolveAbsoluteBase(this.client.defaults.baseURL);
+    if (resolvedPrimary) {
+      seen.add(joinUrl(resolvedPrimary, path));
+    }
+
+    const bases = buildDocumentationApiBases(this.client.defaults.baseURL);
+    bases.forEach((base) => {
+      const endpoint = joinUrl(base, path);
+      if (seen.has(endpoint)) {
+        return;
+      }
+      seen.add(endpoint);
+      attempts.push({
+        type: 'absolute',
+        url: endpoint,
+        label: base,
+      });
+    });
+
+    return attempts;
+  }
+
+  private formatAxiosError(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        return `HTTP ${error.response.status}`;
+      }
+      if (error.code) {
+        return error.code;
+      }
+      return error.message;
+    }
+    return error instanceof Error ? error.message : String(error);
   }
 
   // ====================

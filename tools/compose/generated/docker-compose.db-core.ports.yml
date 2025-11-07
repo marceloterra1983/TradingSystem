@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "db-core"
-x-tradingsystem-generated-at: "2025-11-06T15:05:33.408Z"
+x-tradingsystem-generated-at: "2025-11-07T13:54:13.632Z"
 
 x-tradingsystem-ports:
   telegram-timescale:
@@ -18,12 +18,12 @@ x-tradingsystem-ports:
     protocol: postgres
     owner: "Data Platform"
     description: "TimescaleDB principal da stack Workspace"
-  postgres-langgraph:
-    env: POSTGRES_LANGGRAPH_PORT
-    port: 5432
+  n8n-postgres:
+    env: N8N_POSTGRES_PORT
+    port: 5442
     protocol: postgres
-    owner: "AI Guild"
-    description: "PostgreSQL usado pelos fluxos LangGraph"
+    owner: "ToolingGuild"
+    description: "PostgreSQL dedicado à stack n8n"
   timescaledb-pgadmin:
     env: TIMESCALEDB_PGADMIN_PORT
     port: 5050

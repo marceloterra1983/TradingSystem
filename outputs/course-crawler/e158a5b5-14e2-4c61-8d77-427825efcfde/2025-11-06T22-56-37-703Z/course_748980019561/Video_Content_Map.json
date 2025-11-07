@@ -1,0 +1,242 @@
+{
+  "courseId": "course_748980019561",
+  "title": "Gestão de Risco e Portfólios",
+  "modules": [
+    {
+      "id": "module_06150b15ee5a",
+      "title": "Capítulo 01 — Gestão de Risco e Portfólios",
+      "order": 1,
+      "videos": [
+        {
+          "id": "video_627076c61dc5",
+          "title": "Video 2",
+          "classId": "class_eac63a41870c",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=65230aea-01df-43aa-a969-fbcd7b4c1e65&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_cefb07925107",
+          "title": "Video 2",
+          "classId": "class_1c7f15976a6e",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=28b5cbe1-be23-46d5-85f9-e68c16b97206&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_407c193756f4",
+          "title": "Video 2",
+          "classId": "class_83745d0735aa",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fd51087c-365d-4b2a-9067-b16f14367030&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_bf6c265e8578",
+          "title": "Video 2",
+          "classId": "class_6389a6bcb607",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5ffd75b9-d8b6-4146-98c8-e749e9f8a4a2&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ab4c18c5560e",
+          "title": "Video 2",
+          "classId": "class_d734fff6cc61",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a8804477-8ed1-498d-8589-36c1da8e34f2&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ff711bdf89e0",
+          "title": "Video 2",
+          "classId": "class_daaf7b6200f9",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=17e476db-ed59-40ca-a76e-dcf3200e9fed&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_76707156caaf",
+          "title": "Video 2",
+          "classId": "class_e8787f9602fc",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4bb84643-484d-4da0-8052-2943abb48f5c&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_d8a2044f4325",
+          "title": "Video 2",
+          "classId": "class_b4df0c477ff3",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d3a4a1d9-52eb-48c5-b22c-43b4bb9fc376&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_1503925ae37b",
+          "title": "Video 2",
+          "classId": "class_f1949b3832b1",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d6770c60-dad0-4988-9252-2b7c42dcd71e&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_8dab8d1bb7a9",
+          "title": "Video 2",
+          "classId": "class_a1f888f5d5ba",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5fe8796-a9d2-445e-ba4c-d4d8f74b4f2b&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_b525c395094d",
+          "title": "Video 2",
+          "classId": "class_ce41ded2663a",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5fcd17b0-901c-4066-908d-9b1164fe6e46&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ce701403fd3d",
+          "title": "Video 2",
+          "classId": "class_200687fbf213",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2394fd62-a58d-4ce8-8eb1-35c847a43ab1&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_a6a3372f5f9e",
+          "title": "Video 2",
+          "classId": "class_96a91b1d7b58",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c86ca134-5840-46b3-a114-809f3acb8f74&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_8e0dbbdba716",
+          "title": "Video 2",
+          "classId": "class_b062efdb27a9",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=610d54de-44ed-4e1e-8d20-bb511a8c92fe&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_e267751a3744",
+          "title": "Video 2",
+          "classId": "class_f09bc4e1f076",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1f736ed5-3157-4ea9-8e3f-e4e67452e466&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_edee65affa74",
+          "title": "Video 2",
+          "classId": "class_5aa1da2d0684",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7b2ac98f-3733-478f-846e-651529cc4933&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_01f0f7e78086",
+          "title": "Video 2",
+          "classId": "class_f5b1a48c6de5",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=09681c03-9487-4f80-acbd-7f00cefcfabd&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_626e28fbeda1",
+          "title": "Video 2",
+          "classId": "class_e1049b43b193",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=39df8019-9510-4b02-813d-14c6a1e64429&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_d3e19b11329a",
+          "title": "Video 2",
+          "classId": "class_2bdc3ba1ef0d",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=cb5e1609-1efa-43c4-86b4-8bc256a17248&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_ec2a41192c89",
+      "title": "Capítulo 02 — Tópicos Avançados em Gestão de Risco e Portfólios",
+      "order": 2,
+      "videos": [
+        {
+          "id": "video_4d60fa9df79d",
+          "title": "Video 2",
+          "classId": "class_f8691ebd8aed",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e321873d-e54f-4f88-8649-6c58fb7bbda3&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_0aca851288da",
+          "title": "Video 2",
+          "classId": "class_0711b3d46b3d",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b8ffb19f-b70e-4dff-be8c-a3bb90eb9d9e&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_93771d353b1f",
+          "title": "Video 2",
+          "classId": "class_1c00245f9373",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e414f04-83d4-43dc-a617-20c8b0536ed7&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_fa288219a877",
+          "title": "Video 2",
+          "classId": "class_b14b7ab41286",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ccbcdd62-df8d-4b5d-aed3-4f7aa281973d&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_1bcc6c6bc6ad",
+          "title": "Video 2",
+          "classId": "class_febcaf790381",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=99fcb536-fca7-4b7c-a137-c5e714326a39&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_5cb304aeafde",
+          "title": "Video 2",
+          "classId": "class_fee0f25f7c9b",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=208695d4-2e32-439f-b1c6-f0820b8d5b9f&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ea98866fccf5",
+          "title": "Video 2",
+          "classId": "class_f5834c6b462b",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9856ac02-3f1a-4f3b-8778-468474c013e6&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_68e63a638780",
+          "title": "Video 2",
+          "classId": "class_b2b770def54b",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5b8a4aac-1ac4-4749-aebe-56663bfb2c60&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_2d6931c6ad85",
+      "title": "Material de Apoio",
+      "order": 3,
+      "videos": []
+    }
+  ]
+}

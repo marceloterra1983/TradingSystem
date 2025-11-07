@@ -32,6 +32,7 @@ The TradingSystem Dashboard is the primary user interface for interacting with a
 ### Key Metrics
 
 - **Port:** 3103
+- **Deployment:** Docker container (for consistency across all environments)
 - **Base URL:** `http://localhost:3103`
 - **Bundle Size:** ~2.5 MB (optimized with code splitting)
 - **Performance:** Lazy loading reduces initial load by 40-60%
@@ -57,10 +58,10 @@ Dashboard (Port 3103)
 │   └── Database → DatabasePageNew
 │
 ├── 3. Infrastructure (Gray)
-│   ├── Launcher → LauncherPage
-│   ├── LangGraph → LangGraphPage
-│   ├── LlamaIndex → LlamaIndexPage
-│   └── Agno Agents → AgnoAgentsPage
+│   ├── RAG Services → LlamaIndexPage
+│   ├── Kestra → KestraPage
+│   ├── n8n Automations → N8nPage
+│   └── Ports → PortsPage
 │
 ├── 4. Connections
 │   └── Miro Integration → MiroPage
@@ -84,9 +85,6 @@ All pages are loaded on-demand using React's `lazy()` API, reducing initial bund
 
 ```typescript
 // frontend/dashboard/src/data/navigation.tsx
-const LauncherPage = React.lazy(
-  () => import('../components/pages/LauncherPage')
-);
 const WorkspacePageNew = React.lazy(
   () => import('../components/pages/WorkspacePageNew')
 );
@@ -166,8 +164,8 @@ A drag-and-drop, multi-column layout system used by most pages:
 
 ```typescript
 <CustomizablePageLayout
-  pageId="launcher"
-  title="Service Launcher"
+  pageId="workspace"
+  title="Workspace"
   sections={sections}
   defaultColumns={2}
 />
@@ -183,7 +181,6 @@ A drag-and-drop, multi-column layout system used by most pages:
 
 **Pages Using This Pattern:**
 
-- Launcher Page
 - Workspace Page
 - TP Capital Page
 - Telegram Gateway Page
@@ -192,27 +189,6 @@ A drag-and-drop, multi-column layout system used by most pages:
 ---
 
 ## Page Architectures
-
-### Launcher Page
-
-**Purpose:** Service orchestration and health monitoring
-
-**File:** `frontend/dashboard/src/components/pages/LauncherPage.tsx`
-
-**Sections:**
-
-1. **Start Metrics** - Last system start statistics
-2. **Local Services** - Node.js/Express APIs status
-3. **Docker Containers** - Container health and management
-4. **API Endpoints** - REST endpoints from local services
-5. **Container Endpoints** - Web UIs from Docker containers
-
-**API Integration:**
-
-- Status API (Port 3500) - `/api/status`, `/api/health/full`
-- Docker API - Container status and metrics
-
----
 
 ### Workspace Page
 
@@ -298,26 +274,6 @@ Reusable card component with expand/collapse functionality:
 - Smooth animations (Framer Motion)
 - Header actions support
 - Custom icons
-
----
-
-### 2. ServiceStatusBanner
-
-Global service health indicator:
-
-```typescript
-<ServiceStatusBanner
-  services={healthData.services}
-  overallStatus={healthData.overallStatus}
-/>
-```
-
-**Features:**
-
-- Real-time health monitoring
-- Auto-refresh every 30s
-- Color-coded status (green/yellow/red)
-- Click to expand details
 
 ---
 
@@ -433,7 +389,6 @@ const virtualizer = useVirtualizer({
     <Route index element={<Navigate to="/workspace" />} />
     <Route path="/workspace" element={<WorkspacePageNew />} />
     <Route path="/tp-capital" element={<TPCapitalOpcoesPage />} />
-    <Route path="/launcher" element={<LauncherPage />} />
     <Route path="/telegram-gateway" element={<TelegramGatewayFinal />} />
     {/* ... more routes */}
   </Route>
@@ -467,12 +422,14 @@ const virtualizer = useVirtualizer({
 ### Development
 
 ```bash
-cd frontend/dashboard
-npm install
-npm run dev
+# Start Dashboard container (recommended)
+docker compose -f tools/compose/docker-compose.dashboard.yml up -d
+
+# Or use universal startup script
+bash scripts/start.sh
 ```
 
-**Dev Server:** `http://localhost:3103`
+**Dev Server:** `http://localhost:3103` (Docker container)
 
 **Features:**
 
@@ -524,9 +481,9 @@ npm run test:coverage # Coverage report
 ```typescript
 import { render, screen } from '@testing-library/react';
 
-test('renders service launcher', () => {
-  render(<LauncherPage />);
-  expect(screen.getByText('Service Launcher')).toBeInTheDocument();
+test('renders workspace dashboard', () => {
+  render(<WorkspacePageNew />);
+  expect(screen.getByText('Workspace')).toBeInTheDocument();
 });
 ```
 
@@ -538,7 +495,6 @@ test('renders service launcher', () => {
 
 ```env
 # API Endpoints
-VITE_STATUS_API_URL=http://localhost:3500
 VITE_WORKSPACE_API_URL=http://localhost:3200
 VITE_DOCS_API_URL=http://localhost:3400
 VITE_TP_CAPITAL_API_URL=http://localhost:4005
@@ -548,7 +504,7 @@ VITE_TELEGRAM_API_URL=http://localhost:4010
 **Access in Code:**
 
 ```typescript
-const statusApiUrl = import.meta.env.VITE_STATUS_API_URL;
+const workspaceApiUrl = import.meta.env.VITE_WORKSPACE_API_URL;
 ```
 
 ---
@@ -589,4 +545,4 @@ const statusApiUrl = import.meta.env.VITE_STATUS_API_URL;
 - [Design System](/frontend/design-system/tokens)
 - [Component Guidelines](/frontend/guidelines/style-guide)
 - [API Overview](/api/overview)
-- [Status API](/api/status-api)
+- Status API (legado)

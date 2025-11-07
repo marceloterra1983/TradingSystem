@@ -240,7 +240,6 @@ scrape_configs:
 **Metrics endpoints:**
 - Workspace API: http://localhost:3200/metrics
 - TP Capital: http://localhost:4005/metrics
-- Service Launcher: http://localhost:3500/metrics
 
 **Query examples:**
 ```promql

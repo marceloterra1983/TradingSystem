@@ -15,15 +15,15 @@ Node.js 20 service that ingests TP Capital Telegram messages received by the **T
 
 ## Stakeholders
 
-- **Primary users**: Dashboard UI consumers, Agno Agents (market analysis)
+- **Primary users**: Dashboard UI consumers e automações internas
 - **Operators**: Platform/DevOps team managing TimescaleDB, Telegram credentials, and Gateway configuration
-- **Downstream systems**: Dashboard (port 3103), Agno Agents framework, data export jobs
+- **Downstream systems**: Dashboard (port 3103) e jobs de exportação
 
 ## User Journeys
 
 ### Journey 1: Signal Ingestion
 
-1. Telegram Gateway (port 4006) authenticates with MTProto and stores messages in `telegram_gateway.messages`.
+1. Telegram Gateway (port 4007) authenticates with MTProto and stores messages in `telegram_gateway.messages`.
 2. TP Capital API polling worker fetches new rows, validates structure, and applies parsing rules (asset, buy range, targets, stop).
 3. Service writes normalized payload to TimescaleDB (`tp_capital_signals`) and tracks processing metrics.
 4. Gateway queue is marked as processed; API metrics reflect ingestion.
@@ -37,7 +37,7 @@ Node.js 20 service that ingests TP Capital Telegram messages received by the **T
 
 ### Journey 3: Agent Integration
 
-1. Agno Agents query `/signals` (or `/forwarded-messages`) for latest events.
+1. Consumidores (dashboard, automações internas) consultam `/signals` (ou `/forwarded-messages`) para obter os últimos eventos.
 2. Combine signals with Workspace initiatives for enriched context.
 3. Apply risk controls, alerting thresholds, and compliance checks.
 4. Generate trading recommendations or trigger automation flows.

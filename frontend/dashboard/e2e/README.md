@@ -6,6 +6,7 @@ Comprehensive Playwright-based coverage for the Telegram Gateway and the new **C
 |-------|-------------|-------------|
 | Telegram Gateway | `telegram-gateway.*.spec.ts` | `npm run test:e2e:*` (existing commands) |
 | Catalog Agents/Commands | `catalog.*.spec.ts` | `npm run test:e2e:catalog*` |
+| n8n Embedded UI | `n8n-session.spec.ts` | `N8N_E2E_EMAIL=... N8N_E2E_PASSWORD=... npx playwright test e2e/n8n-session.spec.ts` |
 
 ---
 
@@ -52,6 +53,25 @@ npm run test:e2e:headed
 
 # Run with debugger
 npm run test:e2e:debug
+
+### Optional: n8n session regression
+
+The embedded n8n UI has its own login flow. The `e2e/n8n-session.spec.ts` test verifies that once a user signs in, the session cookie survives page reloads (preventing the repeated password prompts we debugged).
+
+1. Provide valid n8n credentials via environment variables (you can also add them to the root `.env` file):
+
+```bash
+export N8N_E2E_EMAIL="owner@example.com"
+export N8N_E2E_PASSWORD="super-secret"
+```
+
+2. Run the spec against the Chromium project (you can add `--project=firefox` etc. if desired):
+
+```bash
+npm run test:e2e -- e2e/n8n-session.spec.ts --project=chromium
+```
+
+If the credentials are not provided, the spec is automatically skipped so the default CI matrix remains unchanged.
 ```
 
 ---

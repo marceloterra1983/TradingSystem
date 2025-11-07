@@ -11,7 +11,7 @@ lastReviewed: '2025-10-26'
 
 This guide establishes tone, formatting, and policy guidelines for authoring prompts in TradingSystem. Follow these conventions to ensure consistent LLM behavior, maintainable prompts, and safe AI operations.
 
-**Scope**: Applies to all LLM-powered features (Agno Agents, LangGraph workflows, LlamaIndex queries)
+**Scope**: Applies to all LLM-powered features (LlamaIndex pipelines, Ollama prompts)
 
 ## Tone and Language
 
@@ -202,8 +202,8 @@ Payload:
 **Ownership**:
 
 - **PromptOps**: Overall prompt quality and standards
-- **MCPGuild**: Agent-specific prompts (Agno Agents)
-- **Backend Guild**: LangGraph workflows
+- **MCPGuild**: Prompt templates for ingestion/query automations
+- **Backend Guild**: API contracts & RAG integrations
 - **Product**: Business requirements and success criteria
 
 **Review Cadence**:
@@ -224,6 +224,4 @@ Payload:
 
 - [Prompt Patterns](./patterns) - Reusable templates
 - [Prompt Variables](./variables) - Environment configuration
-- [Agno Agents](/agents/agno-agents) - Agent implementation
-- LangGraph service guide (migration pending)
 - LlamaIndex integration guide (migration pending)

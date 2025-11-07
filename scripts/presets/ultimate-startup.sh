@@ -132,7 +132,6 @@ SERVICES=(
     "Dashboard:3103:/"
     "Documentation Hub:3400:/"
     "RAG Service:3402:/health"
-    "Service Launcher:3500:/api/status"
     "LlamaIndex Query:8202:/health"
     "Qdrant:6333:/"
     "Ollama:11434:/"

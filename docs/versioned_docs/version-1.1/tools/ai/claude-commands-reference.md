@@ -153,20 +153,6 @@ Verificação de saúde dos serviços.
 
 ---
 
-## 🔧 Comandos de Desenvolvimento
-
-### `/service-launcher`
-Gerenciamento do service launcher.
-
-```bash
-/service-launcher start             # Iniciar
-/service-launcher stop              # Parar
-/service-launcher restart           # Reiniciar
-/service-launcher status            # Ver status
-```
-
----
-
 ### `/start`
 Iniciar servidor de desenvolvimento.
 
@@ -346,7 +332,6 @@ Ou manual:
 ```bash
 /health-check all
 /docker-compose logs rag
-/service-launcher status
 /type-check
 ```
 

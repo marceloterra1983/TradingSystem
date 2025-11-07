@@ -24,9 +24,6 @@ tags:
 | TP Capital API | (npm dev server) | http://localhost:3200 | Ingestão de sinais via Telegram. |
 | Firecrawl Proxy | (npm dev server) | http://localhost:3600 | Proxy Express para Firecrawl. |
 | Firecrawl API | firecrawl-api | http://localhost:3002 | Instância auto-hospedada do Firecrawl. |
-| LangGraph | infra-langgraph | http://localhost:8111 | Orquestração de agentes LangGraph. |
-| LangGraph Dev | infra-langgraph-dev | http://localhost:8112 | Ambiente de desenvolvimento do LangGraph. |
-| Service Launcher | service-launcher | http://localhost:3500 | API para subir/parar serviços locais. |
 
 ## Dados e Monitoramento
 
@@ -39,8 +36,6 @@ tags:
 | QuestDB HTTP/UI | data-questdb | http://localhost:9002 | Console HTTP do QuestDB (telemetria). |
 | QuestDB ILP | data-questdb | localhost:9009 | Ingestion Line Protocol. |
 | Qdrant | data-qdrant | http://localhost:6333 | Banco vetorial para embeddings. |
-| Infra PostgreSQL (LangGraph) | data-postgress-langgraph | postgres://localhost:5432 | Checkpoints de fluxos LangGraph. |
-| Infra Redis Dev | infra-redis-dev | redis://localhost:6380 | Cache usado por workloads LangGraph dev. |
 | Prometheus | mon-prometheus | http://localhost:9090 | Coleta e exposição de métricas. |
 | Alertmanager | mon-alertmanager | http://localhost:9093 | Roteamento de alertas. |
 | Grafana | mon-grafana | http://localhost:3000 | Dashboards pré-provisionados. |

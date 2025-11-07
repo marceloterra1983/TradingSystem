@@ -17,7 +17,7 @@ Local trading platform that ingests market data via Nelogica ProfitDLL, executa 
 ## Tech Stack
 - Core trading services: C# (.NET 8, x64) with direct ProfitDLL bindings.
 - ML tooling (opcional): Python 3.11+ para scripts offline, experimentos e integrações futuras.
-- Auxiliary APIs: Node.js/Express (Idea Bank, TP Capital ingestion, Documentation hub, Service launcher).
+- Auxiliary APIs: Node.js/Express (Idea Bank, TP Capital ingestion, Documentation hub).
 - Frontend: React + Vite dashboard (Zustand, Tailwind).
 - Data persistence: QuestDB, Parquet on local NVMe/SSD, JSONL logs.
 - Tooling/Docs: Docusaurus v2, Docker Compose stacks for non-core services.

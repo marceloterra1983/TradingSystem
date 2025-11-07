@@ -1,3 +1,18 @@
+---
+title: Diagram Migration Guide
+description: Diagram Migration Guide document for TradingSystem governance.
+slug: /governance/diagram-migration-guide
+tags:
+  - governance
+  - strategy
+owner: DocsOps
+lastReviewed: 2025-10-29
+sidebar_label: Diagram Migration Guide
+sidebar_position: 10
+---
+
+<!-- AUTO-GENERATED from governance source. Do not edit in docs/content. -->
+
 # PlantUML Diagram Migration Guide
 
 **Purpose**: Copy 26 PlantUML diagrams from `docs/context/shared/diagrams/` to `docs/content/assets/diagrams/source/` with domain-based organization.
@@ -12,7 +27,7 @@ Create domain-based subdirectories:
 - `backend/` - 9 diagrams (TP Capital, Idea Bank, Order lifecycle, Trading pipeline)
 - `frontend/` - 4 diagrams (Customizable layout)
 - `ops/` - 5 diagrams (Deployment, Connection states, Firecrawl, Database UI, Docker)
-- `agents/` - 5 diagrams (Agno Agents, LangGraph)
+- `agents/` - 0 diagrams (legado removido)
 - `adr/` - 2 diagrams (ADR-0002 before/after)
 - `shared/` - 1 diagram (System architecture)
 
@@ -56,8 +71,6 @@ cp docs/context/shared/diagrams/docker-container-architecture.puml docs/content/
 **Agent Diagrams**:
 
 ```bash
-cp docs/context/shared/diagrams/agno-agents-*.puml docs/content/assets/diagrams/source/agents/
-cp docs/context/shared/diagrams/langgraph-*.puml docs/content/assets/diagrams/source/agents/
 ```
 
 **ADR Diagrams**:
@@ -110,6 +123,6 @@ npm run docs:dev
 
 ## Related Documentation
 
-- [Diagram Catalogue](../content/diagrams/diagrams.mdx) - Complete diagram index
-- [PlantUML Guide](../content/tools/plantuml/overview) - Rendering and syntax
-- [Migration Mapping](../migration/MIGRATION-MAPPING.md) - Diagram migration rules
+- [Diagram Catalogue](../diagrams) - Complete diagram index
+- [PlantUML Guide](../tools/documentation/plantuml/overview) - Rendering and syntax
+- Referência `governance/migration/MIGRATION-MAPPING.md` - regras de migração de diagramas

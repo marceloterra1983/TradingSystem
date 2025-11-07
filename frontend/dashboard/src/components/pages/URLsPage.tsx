@@ -64,7 +64,6 @@ export function URLsPage() {
         { name: 'TP Capital Signals API', url: 'http://localhost:3201' },
         { name: 'Documentation API', url: 'http://localhost:3400' },
         { name: 'Documentation Hub (docs)', url: 'http://localhost:3400' },
-        { name: 'Service Launcher', url: 'http://localhost:3500' },
         { name: 'Firecrawl', url: 'http://localhost:3002' },
         { name: 'Firecrawl Proxy', url: 'http://localhost:3600' },
         { name: 'Agent MCP Dashboard', url: 'http://localhost:8080' },

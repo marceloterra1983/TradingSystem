@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "cache"
-x-tradingsystem-generated-at: "2025-11-06T15:05:33.408Z"
+x-tradingsystem-generated-at: "2025-11-07T13:54:13.632Z"
 
 x-tradingsystem-ports:
   telegram-redis-master:
@@ -24,9 +24,9 @@ x-tradingsystem-ports:
     protocol: http
     owner: "AI Guild"
     description: "Vector DB (Qdrant) para embeddings"
-  infra-redis-dev:
-    env: INFRA_REDIS_DEV_PORT
-    port: 6380
+  n8n-redis:
+    env: N8N_REDIS_PORT
+    port: 6390
     protocol: redis
-    owner: "AI Guild"
-    description: "Redis dev usado nos fluxos LangGraph"
+    owner: "ToolingGuild"
+    description: "Redis Bull queue/event bus da stack n8n"

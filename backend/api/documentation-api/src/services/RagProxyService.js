@@ -35,11 +35,15 @@ export class RagProxyService {
       expiresAt: 0,
     };
     this._tokenTTL = config.tokenTTL || 5 * 60 * 1000; // 5 minutes default
-    
-    // Initialize Redis client for L2 cache
-    this._initRedisClient();
-    
+
+    // Initialize Redis client for L2 cache (async, handles errors internally)
+    this.redisClient = null; // Start with null, will be set if Redis is enabled
+    this._initRedisClient().catch(err => {
+      console.warn('⚠️  Failed to initialize Redis client:', err.message);
+    });
+
     // Initialize 3-tier cache (Memory + Redis + Qdrant)
+    // Note: Redis client may be null (memory-only mode)
     this.cache = new ThreeTierCache({
       redisClient: this.redisClient,
       maxMemorySize: parseInt(process.env.CACHE_MEMORY_MAX) || 1000,
@@ -56,24 +60,40 @@ export class RagProxyService {
    * @private
    */
   async _initRedisClient() {
-    if (process.env.REDIS_ENABLED !== 'true') {
+    const redisEnabled = process.env.REDIS_ENABLED === 'true';
+
+    if (!redisEnabled) {
+      console.log('ℹ️  Redis disabled (REDIS_ENABLED=false) - using memory-only cache');
       this.redisClient = null;
       return;
     }
-    
+
     try {
       this.redisClient = createRedisClient({
         url: process.env.REDIS_URL || 'redis://localhost:6379',
         socket: {
           connectTimeout: 5000,
-          reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+          reconnectStrategy: (retries) => {
+            // Max 3 retries before giving up
+            if (retries > 3) return new Error('Redis connection failed after 3 retries');
+            return Math.min(retries * 50, 500);
+          },
         },
       });
-      
+
       this.redisClient.on('error', (err) => {
-        console.error('Redis client error:', err.message);
+        // Suppress noisy connection errors when Redis is not available
+        if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+          // Only log once
+          if (!this._redisErrorLogged) {
+            console.warn('⚠️  Redis connection failed:', err.message);
+            this._redisErrorLogged = true;
+          }
+        } else {
+          console.error('Redis client error:', err.message);
+        }
       });
-      
+
       await this.redisClient.connect();
       console.log('✅ Redis client connected for 3-tier cache');
     } catch (error) {

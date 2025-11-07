@@ -2,8 +2,8 @@
 # ==============================================================================
 # TradingSystem - Health Check Aggregator
 # ==============================================================================
-# Emite um payload JSON compatível com o Service Launcher e permite checagens
-# específicas (ex.: Kestra) usando docker + HTTP probes simples.
+# Emite um payload JSON unificado e permite checagens específicas
+# (ex.: Kestra) usando docker + HTTP probes simples.
 # ==============================================================================
 
 set -euo pipefail

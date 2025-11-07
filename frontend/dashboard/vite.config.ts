@@ -131,12 +131,66 @@ export default defineConfig(({ mode }) => {
     'http://localhost:4010',
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
+  const n8nProxy = resolveProxy(
+    env.N8N_PROXY_TARGET || env.VITE_N8N_PROXY_TARGET || env.VITE_N8N_URL,
+    'http://localhost:3680',
+  );
+  const n8nBasePath = (() => {
+    const configured = normalizePath(env.N8N_PATH || '/n8n');
+    if (!configured || configured === '/') {
+      return '/n8n';
+    }
+    return configured.startsWith('/') ? configured : `/${configured}`;
+  })();
 
   const docsProxyConfig = {
     target: docsProxy.target,
     changeOrigin: true,
     // Always strip the "/docs" prefix and apply optional basePath
     rewrite: createRewrite(/^\/docs/, docsProxy.basePath),
+  };
+
+  const resolveHeaderValue = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] ?? '' : value ?? '';
+
+  const n8nBasicAuthHeader = (() => {
+    const n8nUser =
+      env.N8N_BASIC_AUTH_USER || env.VITE_N8N_BASIC_AUTH_USER || 'automation';
+    const n8nPass =
+      env.N8N_BASIC_AUTH_PASSWORD || env.VITE_N8N_BASIC_AUTH_PASSWORD || 'changeme';
+    if (!n8nUser || !n8nPass) {
+      return null;
+    }
+    return `Basic ${Buffer.from(`${n8nUser}:${n8nPass}`).toString('base64')}`;
+  })();
+
+  const attachN8nBasicAuth = (proxy: any) => {
+    if (!n8nBasicAuthHeader) {
+      return;
+    }
+    proxy.on('proxyReq', (proxyReq: any) => {
+      proxyReq.setHeader('Authorization', n8nBasicAuthHeader);
+    });
+  };
+
+  const stripFrameBlockingHeaders = (proxy: any) => {
+    proxy.on('proxyRes', (proxyRes: any) => {
+      delete proxyRes.headers['x-frame-options'];
+      const cspHeader = resolveHeaderValue(proxyRes.headers['content-security-policy']);
+      if (!cspHeader) {
+        return;
+      }
+      const sanitized = cspHeader
+        .split(';')
+        .map((directive) => directive.trim())
+        .filter((directive) => directive.length > 0 && !/frame-ancestors/i.test(directive))
+        .join('; ');
+      if (sanitized) {
+        proxyRes.headers['content-security-policy'] = sanitized;
+      } else {
+        delete proxyRes.headers['content-security-policy'];
+      }
+    });
   };
 
   return {
@@ -185,7 +239,7 @@ export default defineConfig(({ mode }) => {
         allow: [repoRoot],
       },
       proxy: {
-        // Docusaurus asset bundles (CSS/JS/Images/Fonts)
+        // Docusaurus asset bundles (CSS/JS/Images/Fonts) - MUST come FIRST (more specific)
         '^/assets/css/.*': {
           target: docsProxy.target,
           changeOrigin: true,
@@ -305,6 +359,85 @@ export default defineConfig(({ mode }) => {
         },
         '/docs': docsProxyConfig,
         '^/next/.*': docsProxyConfig,
+        // n8n API routes - must come before /n8n proxy
+        // These are absolute paths used by n8n HTML (e.g., /rest/sentry.js)
+        '^/rest/.*': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+          },
+        },
+        // n8n assets - catch-all for /assets/* that aren't docs-specific
+        // This handles n8n's absolute asset paths (e.g., /assets/polyfills-*.js, /assets/index-*.js)
+        // Must come AFTER docs-specific paths (css/, js/, images/, fonts/) to avoid conflicts
+        // The regex matches any /assets/* path that doesn't start with docs-specific subdirectories
+        '^/assets/(?!css/|js/|images/|fonts/|branding/).*': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            proxy.on('error', (err, req, res) => {
+              console.warn('[n8n assets proxy]', req.url, err.message);
+            });
+          },
+        },
+        // n8n favicon
+        '^/favicon.ico$': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+          },
+        },
+        // n8n proxy - routes /n8n/* to n8n service (captures all paths including assets)
+        // Basic Auth disabled - using n8n native authentication with cookies for session persistence
+        // N8N_DISABLE_UI_SECURITY=true allows iframe embedding (removes X-Frame-Options)
+        '^/n8n': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/n8n/, n8nProxy.basePath),
+          cookieDomainRewrite: '', // Preserve cookies from n8n
+          cookiePathRewrite: '/', // Keep cookies available for both /n8n and /rest routes
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            stripFrameBlockingHeaders(proxy);
+          },
+          ws: true, // Enable WebSocket support for n8n real-time features
+        },
+        // Database UI Tools - Proxy to avoid CORS and X-Frame-Options issues
+        '/db-ui/pgadmin': {
+          target: 'http://localhost:5050',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/db-ui\/pgadmin/, ''),
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
+        '/db-ui/pgweb': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/db-ui\/pgweb/, ''),
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
+        '/db-ui/adminer': {
+          target: 'http://localhost:8082',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/db-ui\/adminer/, ''),
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
+        '/db-ui/questdb': {
+          target: 'http://localhost:9002',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/db-ui\/questdb/, ''),
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
         // Note: /specs/ files are served directly from public/specs/ by Vite
         // No proxy needed - files are static assets served from same origin
         // This avoids CORS issues in API viewers (redoc, swagger, rapidoc)

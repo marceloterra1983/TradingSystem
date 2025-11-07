@@ -1,0 +1,64 @@
+---
+slug: /governance/documentation-index
+title: Documentation Index
+sidebar_position: 1
+tags: [governance, documentation, index]
+owner: DocsOps
+lastReviewed: "2025-11-07"
+description: Índice canônico de onde cada artefato de governança pode ser encontrado.
+id: governance-documentation-index
+aliases:
+  - /governance-documentation-index
+  - /governance/governance-documentation-index
+---
+
+# Documentation Index
+
+**Última atualização**: 2025-11-06  
+**Objetivo**: Centralizar os principais artefatos de documentação e apontar os locais canônicos dentro do repositório.
+
+## Documentos essenciais na raiz
+
+| Arquivo | Descrição |
+|---------|-----------|
+| [`README.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/README.md) | Visão geral do projeto |
+| [`CLAUDE.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/CLAUDE.md) | Instruções oficiais para agentes de IA |
+| [`CHANGELOG.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/CHANGELOG.md) | Histórico de releases |
+| [`QUICK-START.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/QUICK-START.md) | Guia rápido para novos contribuidores |
+
+## Diretório `governance/`
+
+- **Audits**: [`/governance/audits/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/audits)
+- **Incidents**: [`/governance/evidence/incidents/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/evidence/incidents)
+- **Policies**: [`/governance/policies/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/policies)
+- **Standards**: [`/governance/standards/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/standards)
+- **Controls**: [`/governance/controls/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/controls)
+- **Registry**: [`/governance/registry/`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/registry)
+
+> ℹ️ A maior parte desses artefatos ainda reside fora do build do Docusaurus. Sempre verifique se há equivalente publicado em `/governance/*` dentro desta documentação.
+
+## Entradas rápidas nesta documentação
+
+- `/governance/validation-guide`
+- `/governance/review-checklist`
+- `/governance/maintenance-checklist`
+- `/governance/technical-debt-tracker`
+- `/governance/policies/secrets-env-policy`
+- `/governance/port-governance/port-ranges`
+- `/apps/course-crawler` (stack dedicada + variáveis críticas)
+
+## Referências adicionais
+
+- Documentação Docusaurus: [`docs/README.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/README.md)
+- Estrutura de diretórios: [`ref/README.md`](https://github.com/marceloterra1983/TradingSystem/blob/main/ref/README.md)
+- Inventário de arquivos gerados automaticamente: [`governance/registry`](https://github.com/marceloterra1983/TradingSystem/tree/main/governance/registry)
+
+## Stacks containerizadas recentes
+
+| Stack | Compose File | Porta padrão | Observações |
+|-------|--------------|--------------|-------------|
+| WAHA (WhatsApp HTTP API) | `tools/compose/docker-compose.waha.yml` | 3310 | Oferece API + dashboard com persistência (PostgreSQL) e mídia em MinIO; segue política `.env` única e usa volumes nomeados. |
+
+---
+
+**Manutenção**: Atualizar sempre que novos artefatos de governança forem promovidos para o Docusaurus ou quando diretórios mudarem.

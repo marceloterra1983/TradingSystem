@@ -157,7 +157,7 @@ function EscopoTechStack() {
               'Vite',
               'TailwindCSS',
               'Prisma',
-              'LangGraph',
+              'LlamaIndex',
             ].map((tech) => (
               <span
                 key={tech}

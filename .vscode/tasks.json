@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🔄 Restart Dashboard",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/docker-launcher/restart-dashboard-clean.sh",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

@@ -28,6 +28,13 @@ services:
       - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       - VITE_TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       - VITE_API_SECRET_TOKEN=${API_SECRET_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
+      # n8n proxy configuration (server-side only, NOT exposed to browser)
+      # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
+      - N8N_PROXY_TARGET=http://n8n-app:5678
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-automation}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
+      # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
+      - VITE_COURSE_CRAWLER_APP_URL=http://localhost:4201
     ports:
       - "${DASHBOARD_PORT:-3103}:${DASHBOARD_PORT:-3103}"
     networks:

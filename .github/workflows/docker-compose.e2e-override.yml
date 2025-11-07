@@ -21,3 +21,5 @@ services:
       telegram-redis-master:
         condition: service_healthy
 
+
+

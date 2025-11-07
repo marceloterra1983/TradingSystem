@@ -35,7 +35,6 @@ The `docs/context/` directory is the single source of truth for all documentatio
 | [TP Capital Signal Table](./pt/tp-capital-signal-table-prd.md)                 | Draft       | Frontend Team | 2025-10-11   |
 | [TP Capital Telegram Connections](./pt/tp-capital-telegram-connections-prd.md) | Draft       | Frontend Team | 2025-10-11   |
 | [Monitoramento Prometheus](./pt/monitoramento-prometheus-prd.md)               | Draft       | Ops/SRE       | 2025-10-10   |
-| [Agno Integration](./pt/agno-integration-prd.md)                               | Approved    | Backend Guild | 2025-10-18   |
 
 ### English PRDs (en/)
 

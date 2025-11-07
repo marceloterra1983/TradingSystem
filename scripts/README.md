@@ -44,7 +44,7 @@ bash scripts/stop.sh [--force]
 | `scripts/rag/`     | ingestão e testes do pipeline RAG (ex.: `ingest-documents.py`) |
 | `scripts/telegram/`| utilitários para o gateway/MTProto (`fix-checar-mensagens`, `restart-telegram-api`) |
 | `scripts/env/`     | verificação e ajuste do `.env` compartilhado |
-| `scripts/testing/` / `validation/` | smoke tests (`test-ports-endpoint.sh`), validação de manifests, portas e READMEs |
+| `scripts/testing/` / `validation/` | smoke tests, validação de manifests, portas e READMEs |
 | `scripts/temp/`    | zona de staging para novos scripts aguardarem categorização |
 
 ## 📦 Pastas em Detalhe
@@ -55,7 +55,7 @@ bash scripts/stop.sh [--force]
 - `docusaurus-daily.mjs` – agenda tarefas diárias ligadas à documentação.
 
 ### `maintenance/`
-- `health-check-all.sh`, `code-quality-check.sh`, `restart-dashboard.sh`, `restart-service-launcher.sh` e afins.
+- `health-check-all.sh`, `code-quality-check.sh`, `restart-dashboard.sh` e afins.
 - `ports/` concentra liberações rápidas (kill docker-proxy, Postgres nativo, porta 5050).
 - `dangerous/` ganhou README próprio com checklists para `cleanup-and-restart.sh`, `nuclear-reset.sh` e `limpar-portas-e-iniciar-tudo.sh`.
 
@@ -87,7 +87,6 @@ bash scripts/stop.sh [--force]
 - `set-ro-password.sh` rotaciona o usuário read-only e reflete em `MCP_POSTGRES_URL`.
 
 ### `testing/` e `validation/`
-- `testing/test-ports-endpoint.sh` – smoke do Service Launcher.
 - `validation/` cobre manifests, portas duplicadas e READMEs (usado em CI).
 
 ## ✅ Checklist Rápido

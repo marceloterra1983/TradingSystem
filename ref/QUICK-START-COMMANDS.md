@@ -264,7 +264,6 @@ df -h
 curl http://localhost:3103/  # Dashboard
 curl http://localhost:3200/api/health  # Workspace
 curl http://localhost:4005/health  # TP Capital
-curl http://localhost:3500/api/health/full  # Service Launcher
 ```
 
 ### Fix Common Issues
@@ -461,7 +460,6 @@ bash scripts/restore-from-backup.sh
 - **Dashboard:** http://localhost:3103
 - **Docs Hub:** http://localhost:3404
 - **Workspace API:** http://localhost:3200
-- **Service Launcher:** http://localhost:3500
 - **Prometheus:** http://localhost:9090
 - **Grafana:** http://localhost:3000
 

@@ -26,11 +26,15 @@ const buildFallbackCandidates = (): Array<string | null> => {
     : null;
 
   return [
-    baseFromEnv ?? null,
-    proxyTarget ?? null,
+    // Prefer relative paths (use Vite proxy) over absolute URLs
+    baseFromEnv && baseFromEnv.startsWith('/') ? baseFromEnv : null,
+    proxyTarget && proxyTarget.startsWith('/') ? proxyTarget : null,
+    '/api/workspace', // Default: use Vite proxy
     getApiUrl('library'),
     apiBase,
-    '/api/workspace',
+    // Only use absolute URLs as last resort
+    baseFromEnv && !baseFromEnv.startsWith('/') ? baseFromEnv : null,
+    proxyTarget && !proxyTarget.startsWith('/') ? proxyTarget : null,
   ];
 };
 

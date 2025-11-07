@@ -223,9 +223,7 @@ Custom theme applied with TradingSystem colors:
    /doc-api --service documentation
    ```
 
-3. **Service Launcher** - Generate OpenAPI spec
    ```bash
-   /doc-api --service service-launcher
    ```
 
 4. **Firecrawl Proxy** - Generate OpenAPI spec

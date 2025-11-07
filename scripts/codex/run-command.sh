@@ -14,7 +14,6 @@
 #   quality-check   -> scripts/maintenance/code-quality-check.sh
 #   health-check    -> scripts/maintenance/health-check-all.sh
 #   docker          -> scripts/codex/docker-stacks.sh (start/stop/ps/logs)
-#   service-launcher-> scripts/codex/service-launcher.sh
 #   scripts         -> scripts/codex/scripts-tool.sh (list/search/run helpers)
 #
 # When invoked via npm, remember to pass arguments after `--`, e.g.
@@ -33,7 +32,6 @@ Commands:
   quality-check   Run scripts/maintenance/code-quality-check.sh
   health-check    Run scripts/maintenance/health-check-all.sh
   docker          Manage compose stacks via docker-stacks bridge
-  service-launcher Manage the Service Launcher API
   scripts         List/search/run entries in scripts/
   help            Show this message
 
@@ -65,9 +63,6 @@ case "${COMMAND}" in
     ;;
   docker)
     exec bash "${SCRIPT_DIR}/docker-stacks.sh" "$@"
-    ;;
-  service-launcher)
-    exec bash "${SCRIPT_DIR}/service-launcher.sh" "$@"
     ;;
   scripts)
     exec bash "${SCRIPT_DIR}/scripts-tool.sh" "$@"

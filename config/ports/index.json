@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "lastUpdated": "2025-11-05",
-  "generatedAt": "2025-11-06T15:05:33.408Z",
+  "generatedAt": "2025-11-07T20:54:54.116Z",
   "ranges": {
     "frontend-ui": "3000-3099",
     "dashboard-ui": "3100-3199",
@@ -146,19 +146,6 @@
       }
     },
     {
-      "name": "service-launcher",
-      "stack": "automation",
-      "port": 3500,
-      "protocol": "http",
-      "owner": "Platform Ops",
-      "description": "Service Launcher / Status UI para orquestração local",
-      "container": false,
-      "healthcheck": {
-        "endpoint": "/health",
-        "expected": 200
-      }
-    },
-    {
       "name": "firecrawl-proxy",
       "stack": "automation",
       "port": 3600,
@@ -168,6 +155,24 @@
       "container": false,
       "healthcheck": {
         "endpoint": "/",
+        "expected": 200
+      }
+    },
+    {
+      "name": "n8n",
+      "stack": "automation",
+      "port": 3680,
+      "protocol": "http",
+      "owner": "ToolingGuild",
+      "description": "Editor n8n para orquestrações low-code",
+      "container": true,
+      "network": "n8n_backend",
+      "depends_on": [
+        "n8n-postgres",
+        "n8n-redis"
+      ],
+      "healthcheck": {
+        "endpoint": "/healthz",
         "expected": 200
       }
     },
@@ -233,17 +238,6 @@
       }
     },
     {
-      "name": "postgres-langgraph",
-      "stack": "db-core",
-      "port": 5432,
-      "protocol": "postgres",
-      "owner": "AI Guild",
-      "description": "PostgreSQL usado pelos fluxos LangGraph",
-      "container": true,
-      "network": "langgraph_net",
-      "notes": "Exposto somente quando LangGraph está ativo"
-    },
-    {
       "name": "timescaledb",
       "stack": "db-core",
       "port": 5433,
@@ -263,6 +257,17 @@
       "container": true,
       "network": "telegram_backend",
       "notes": "Host → container mapeado 5434:5432"
+    },
+    {
+      "name": "n8n-postgres",
+      "stack": "db-core",
+      "port": 5442,
+      "protocol": "postgres",
+      "owner": "ToolingGuild",
+      "description": "PostgreSQL dedicado à stack n8n",
+      "container": true,
+      "network": "n8n_backend",
+      "notes": "Mapeado host 5442 → container 5432"
     },
     {
       "name": "telegram-rabbitmq",
@@ -299,16 +304,6 @@
       "network": "telegram_backend"
     },
     {
-      "name": "infra-redis-dev",
-      "stack": "cache",
-      "port": 6380,
-      "protocol": "redis",
-      "owner": "AI Guild",
-      "description": "Redis dev usado nos fluxos LangGraph",
-      "container": true,
-      "network": "ai_backend"
-    },
-    {
       "name": "telegram-redis-replica",
       "stack": "cache",
       "port": 6385,
@@ -321,6 +316,16 @@
         "telegram-redis-master"
       ],
       "notes": "Host port movido para 6385 para evitar conflito com redis-dev"
+    },
+    {
+      "name": "n8n-redis",
+      "stack": "cache",
+      "port": 6390,
+      "protocol": "redis",
+      "owner": "ToolingGuild",
+      "description": "Redis Bull queue/event bus da stack n8n",
+      "container": true,
+      "network": "n8n_backend"
     },
     {
       "name": "telegram-pgbouncer",
@@ -346,34 +351,6 @@
       "network": "data_backend",
       "healthcheck": {
         "endpoint": "/",
-        "expected": 200
-      }
-    },
-    {
-      "name": "langgraph",
-      "stack": "devtools",
-      "port": 8111,
-      "protocol": "http",
-      "owner": "AI Guild",
-      "description": "Ambiente LangGraph produção local",
-      "container": true,
-      "network": "langgraph_net",
-      "healthcheck": {
-        "endpoint": "/health",
-        "expected": 200
-      }
-    },
-    {
-      "name": "langgraph-dev",
-      "stack": "devtools",
-      "port": 8112,
-      "protocol": "http",
-      "owner": "AI Guild",
-      "description": "Ambiente LangGraph dev/sandbox",
-      "container": true,
-      "network": "langgraph_net",
-      "healthcheck": {
-        "endpoint": "/health",
         "expected": 200
       }
     },

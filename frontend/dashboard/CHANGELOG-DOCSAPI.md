@@ -201,7 +201,7 @@ docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3101',
 
 ### Future Improvements
 
-- [ ] Add more API specs to Redocusaurus (TP Capital, Service Launcher)
+- [ ] Add more API specs to Redocusaurus (TP Capital)
 - [ ] Configure reverse proxy for unified domain access
 - [ ] Add authentication for API documentation access
 - [ ] Integrate API testing tools (Postman, Insomnia collections)

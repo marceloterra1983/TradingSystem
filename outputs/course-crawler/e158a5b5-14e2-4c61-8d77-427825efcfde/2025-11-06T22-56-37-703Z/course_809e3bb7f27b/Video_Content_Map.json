@@ -1,0 +1,256 @@
+{
+  "courseId": "course_809e3bb7f27b",
+  "title": "Python Traders",
+  "modules": [
+    {
+      "id": "module_3b8de795be41",
+      "title": "Capítulo 1 — Python",
+      "order": 1,
+      "videos": [
+        {
+          "id": "video_69771254d002",
+          "title": "Video 2",
+          "classId": "class_3552277c9c9e",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e183060-1016-4cbc-9ef8-754cfce3e79b&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_6e99daa43889",
+          "title": "Video 2",
+          "classId": "class_10ebd96af7df",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=76afe44d-c6d3-4afc-a22e-4df4f023a489&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_0a6c6b716471",
+          "title": "Video 2",
+          "classId": "class_ce32ed8feec2",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d4b4fa44-fd84-4ae5-b0e0-a709726eb4cd&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_ecde2332b9eb",
+          "title": "Video 2",
+          "classId": "class_efd6de41290e",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c555f5f2-c3e4-4f75-af95-386a19f35aff&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_26f42631e2d6",
+          "title": "Video 2",
+          "classId": "class_6874e0a5d83d",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1fadb4a7-df41-4d71-ac9a-b8141c0965a8&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_8e1244dd1603",
+          "title": "Video 2",
+          "classId": "class_8b22e5acafe5",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d8837f44-f9d7-4569-9b8e-772f66f00bd7&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_4a101560210e",
+          "title": "Video 2",
+          "classId": "class_b963b7e3c4c2",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=62b83135-64a1-4892-b212-decef1ec3fc0&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_c73a3925c46e",
+      "title": "Capítulo 2 — Ciência de Dados",
+      "order": 2,
+      "videos": [
+        {
+          "id": "video_fba968708987",
+          "title": "Video 2",
+          "classId": "class_d2475179eef8",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90fbd530-b421-4eb3-bb4f-2f3edc78ac60&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_8533f5912ef7",
+          "title": "Video 2",
+          "classId": "class_1b19a61924c2",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=06982d1f-efd1-44df-b0a6-03df7529ec94&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_23f0f098ffa5",
+          "title": "Video 2",
+          "classId": "class_17cd4fd13d54",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=de0b3b4c-e1f4-42ae-8442-64b05ec231f5&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_b33204031444",
+          "title": "Video 2",
+          "classId": "class_abcb3135ebf4",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4ce00697-7edc-4c24-bdba-6b89c302b676&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_b3887672f671",
+          "title": "Video 2",
+          "classId": "class_9098268970d2",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=85bf0d08-1afd-4f02-84df-854ecf31ccac&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_bbba695eef1c",
+          "title": "Video 2",
+          "classId": "class_17548466d0d9",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=92b1ca83-af0d-4957-831b-cee1acd22304&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_972d20e43598",
+          "title": "Video 2",
+          "classId": "class_d230900c6246",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=54de996b-7ac0-4b21-8ad7-e9323f0f6a93&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_00811fc8b4e6",
+          "title": "Video 2",
+          "classId": "class_2f567a7e8eb8",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0be35f31-cafe-4067-9c2b-78a6f00565f1&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_331e8c60798d",
+      "title": "Capítulo 3 — Machine Learning",
+      "order": 3,
+      "videos": [
+        {
+          "id": "video_cccefb0c9c53",
+          "title": "Video 2",
+          "classId": "class_fa2700ca7d1a",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1cd334a8-b9ba-41ff-ad90-a4f1378d9dd3&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_7427c4052212",
+          "title": "Video 2",
+          "classId": "class_3a0f6625f663",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=46d93f82-7a8d-4e9d-b627-1f65b0615576&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_330d274e384d",
+          "title": "Video 2",
+          "classId": "class_3b8f12993cde",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7f67e7d3-1a73-4d89-b1ba-865b4203f520&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_e2b7ccf7c07f",
+          "title": "Video 2",
+          "classId": "class_a0a94ce55748",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4471d1bd-59da-464e-95dd-4573ec95d1f7&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_71a639b17e02",
+          "title": "Video 2",
+          "classId": "class_6dd6d2094355",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=270aaa25-836e-429b-8230-0c274620cff2&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_d573b6b1b4d0",
+          "title": "Video 2",
+          "classId": "class_cefb379ba6e3",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fa3ad2c1-8201-43f4-92d8-07e871611e2d&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_d56cc023d482",
+          "title": "Video 2",
+          "classId": "class_4c183913c637",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5463eb20-f356-4caf-a397-a356f0047b9c&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_fea646a3fa1e",
+      "title": "Capítulo 4 — Integrando o Modelo com o MetaTrader 5",
+      "order": 4,
+      "videos": [
+        {
+          "id": "video_5f491f4b3081",
+          "title": "Video 2",
+          "classId": "class_6764a31f68d4",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7e7e6104-2a5c-4e71-9692-bde4e6a0e06b&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_74f2160ab519",
+          "title": "Video 2",
+          "classId": "class_caef737ece91",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aa4d62cd-1002-4747-af8e-34b48da346cf&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_b7c2b92125d5",
+          "title": "Video 2",
+          "classId": "class_34efa5979b29",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=18d40574-65e1-4379-804e-62fd60101ba6&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_4771e3d7e94b",
+          "title": "Video 2",
+          "classId": "class_384edb2d045c",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5e0e4f78-6557-466d-9eef-86f6d3880e33&saveProgress=false&color=f57a00",
+          "playable": true
+        },
+        {
+          "id": "video_675cb7825ddb",
+          "title": "Video 2",
+          "classId": "class_72a2498a4cf3",
+          "order": 1,
+          "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=80b1ccb4-8198-4127-90fd-c022b023b4f2&saveProgress=false&color=f57a00",
+          "playable": true
+        }
+      ]
+    },
+    {
+      "id": "module_8079f1eba720",
+      "title": "Capítulo 5 — Materiais de Apoio",
+      "order": 5,
+      "videos": []
+    }
+  ]
+}

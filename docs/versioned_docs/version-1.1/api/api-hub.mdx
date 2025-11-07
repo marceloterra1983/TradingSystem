@@ -128,33 +128,7 @@ GET http://localhost:3401/api/v1/rag/search?query=hybrid+stack
 
 ---
 
-### 5. Service Launcher API
-**Port:** 3500 | **Status:** ✅ Production Ready
-
-Orchestrate and monitor TradingSystem services.
-
-**Features:**
-- Service start/stop/restart
-- Health checks (services + containers + databases)
-- Status monitoring
-- Dependency management
-
-**Quick Links:**
-- 📖 [Service Launcher Guide](../apps/service-launcher/overview)
-- ❤️ [Full Health Check](http://localhost:3500/api/health/full)
-
-**Key Endpoints:**
-```bash
-# Get all services status
-GET http://localhost:3500/api/services
-
-# Full health check (services + containers + DBs)
-GET http://localhost:3500/api/health/full
-```
-
----
-
-### 6. Firecrawl Proxy API
+### 5. Firecrawl Proxy API
 **Port:** 3600 | **Status:** ✅ Production Ready
 
 Web scraping via Firecrawl with caching and rate limiting.
@@ -456,11 +430,7 @@ curl http://localhost:<port>/health
 # 3. Check logs
 tail -f logs/<service>.log
 
-# 4. Use Service Launcher health check
-curl http://localhost:3500/api/health/full
-```
-
-### Authentication Errors
+# 4. Authentication Errors
 
 ```bash
 # Verify API key in .env
@@ -492,7 +462,6 @@ curl -I http://localhost:4010/api/messages
 
 ### Support
 - [Health Check Script](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/maintenance/health-check-all.sh)
-- [Service Launcher](https://github.com/marceloterra1983/TradingSystem/tree/main/backend/api/service-launcher)
 - [Docker Compose Files](https://github.com/marceloterra1983/TradingSystem/tree/main/tools/compose)
 
 ### External APIs

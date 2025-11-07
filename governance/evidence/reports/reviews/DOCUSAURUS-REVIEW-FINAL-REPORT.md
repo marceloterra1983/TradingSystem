@@ -42,7 +42,6 @@ Revisão completa e profunda da documentação Docusaurus integrada com OpenSpec
 
 | Spec | Status | Correções |
 |------|--------|-----------|
-| status-api.openapi.yaml | ✅ 0 erros | nullable → anyOf, license MIT |
 | firecrawl-proxy.openapi.yaml | ✅ 0 erros | nullable → anyOf, license MIT |
 | telegram-gateway-api.openapi.yaml | ✅ 0 erros | nullable → anyOf, default ajustado, license MIT |
 | alert-router.openapi.yaml | ✅ 0 erros | license MIT |
@@ -90,8 +89,8 @@ Revisão completa e profunda da documentação Docusaurus integrada com OpenSpec
 
 #### 2. Dashboard Components (components.mdx)
 - CustomizablePageLayout pattern completo
-- CollapsibleCard, ServiceStatusBanner, ConnectionStatus
-- Documentação de page components (LauncherPage, WorkspacePageNew, etc.)
+- CollapsibleCard, ConnectionStatus, ConnectionStatus
+- Documentação de page components (WorkspacePage, WorkspacePageNew, etc.)
 - UI components (Radix UI integration)
 - Component patterns (lazy loading, hooks, Zustand stores)
 - Best practices e naming conventions
@@ -131,8 +130,7 @@ Revisão completa e profunda da documentação Docusaurus integrada com OpenSpec
 - ✅ `database/retention-backup.mdx`: Políticas de retenção
 
 **Agents:**
-- ✅ `agents/overview.mdx`: Agno Agents documentado
-- ✅ `agents/agno-agents/`: Flows, prompts, MCP, tests
+- ✅ `agents/overview.mdx`: Estado atualizado dos agentes
 
 **Prompts:**
 - ✅ `prompts/overview.mdx`, `patterns.mdx`, `style-guide.mdx`: Completos
@@ -177,7 +175,7 @@ npm run docs:build && npm run docs:typecheck
 - ✅ Build: Compiled successfully (Server 5.20s, Client 7.09s)
 - ✅ TypeScript: No errors
 - ✅ MDX compilation: Todos os arquivos válidos
-- ✅ Corrigido 6 arquivos com caracteres `<` sem escape (service-launcher/)
+- ✅ Corrigido 6 arquivos com caracteres `<` sem escape
 
 #### 4. Testes
 ```bash
@@ -300,7 +298,6 @@ npm run docs:test
    - License MIT adicionado
    - Parameters com default ajustados
 
-2. **docs/content/apps/service-launcher/** (6 arquivos)
    - Caracteres `<` e `>` escapados para MDX
    - Frontmatter lastReviewed atualizado
 

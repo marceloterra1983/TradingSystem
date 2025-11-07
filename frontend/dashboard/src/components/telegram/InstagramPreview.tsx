@@ -51,6 +51,18 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
           </button>
         </div>
         
+        <div className="px-3 pt-3">
+          <a
+            href={preview.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block max-w-full truncate text-xs font-medium text-slate-300 hover:text-white hover:underline"
+            title={preview.url}
+            data-testid="iframe-source-url"
+          >
+            {preview.url}
+          </a>
+        </div>
         {/* Instagram iframe embed */}
         <div className="relative bg-white" style={{ height: '600px' }}>
           <iframe

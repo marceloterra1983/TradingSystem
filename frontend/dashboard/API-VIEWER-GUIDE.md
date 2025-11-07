@@ -345,7 +345,7 @@ npm run sync-specs
 
 ## 🚀 Próximas Melhorias
 
-- [ ] Adicionar mais APIs (TP Capital, Service Launcher)
+- [ ] Adicionar mais APIs (TP Capital)
 - [ ] Implementar visualizador offline (não depender de CDNs)
 - [ ] Adicionar histórico de APIs visualizadas
 - [ ] Sincronização automática de specs

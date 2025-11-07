@@ -119,7 +119,7 @@ test.describe('Workspace - Smoke Tests', () => {
       const lower = err.toLowerCase();
       return (
         !lower.includes('econnrefused') &&
-        !lower.includes('service launcher') &&
+        !lower.includes('launcher') &&
         !lower.includes('proxy error') &&
         !lower.includes('500') &&
         !lower.includes('internal server error') &&
@@ -219,4 +219,3 @@ test.describe('Workspace - Smoke Tests', () => {
     await expect(anyTable).toBeVisible();
   });
 });
-

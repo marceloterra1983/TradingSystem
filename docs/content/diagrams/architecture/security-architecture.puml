@@ -37,7 +37,6 @@ package "Trusted Zone (Application Layer)" {
         [Workspace API] as workspace
         [TP Capital API] as tpcapital
         [Documentation API] as docsapi
-        [Service Launcher] as launcher
     }
 
     package "RAG Stack (Internal)" {
@@ -81,7 +80,6 @@ rectangle "Trust Boundary 3: Internal Services" #line:yellow {
     kong --> workspace
     kong --> tpcapital
     kong --> docsapi
-    kong --> launcher
 }
 
 rectangle "Trust Boundary 4: Data Access" #line:green {
@@ -99,11 +97,9 @@ rectangle "Trust Boundary 4: Data Access" #line:green {
 docsapi --> llamaquery : JWT + X-Service-Token
 docsapi --> ragcollections : X-Service-Token
 ragcollections --> llamaingest : JWT + X-Service-Token
-tpcapital --> launcher : X-Service-Token
 
 ' External communication
 tpcapital --> telegram : MTProto (encrypted)
-launcher --> nelogica : ProfitDLL (native)
 
 ' Security Annotations
 note as N1

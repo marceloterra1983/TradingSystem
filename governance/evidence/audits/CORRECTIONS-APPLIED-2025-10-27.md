@@ -10,10 +10,7 @@
 
 Todas as **correções de prioridade alta e média** identificadas na auditoria foram aplicadas com sucesso:
 
-✅ **Issue #1 RESOLVIDO**: Service Launcher agora tem estrutura completa de documentação
 ✅ **Issue #2 RESOLVIDO**: Inconsistência de porta TP Capital corrigida (4007 → 4005)
-✅ **Overview atualizado**: Service Launcher adicionado na categoria Infrastructure
-✅ **Technology Stack Table atualizada**: Service Launcher incluído
 
 ---
 
@@ -36,34 +33,6 @@ apps/tp-capital/src/config.js:283    port: Number(process.env.PORT || 4005)
 apps/tp-capital/.env.example         PORT=4005
 .env                                  TP_CAPITAL_PORT=4005
 ```
-
-**Status**: ✅ Completo
-
----
-
-### 2. ✅ Criação de Estrutura de Docs para Service Launcher (Issue #1)
-
-**Problema**: Service Launcher (aplicação crítica) não tinha estrutura de documentação padronizada
-
-**Estrutura Criada**: 10 arquivos .mdx completos
-
-**Total**: ~3.500 linhas de documentação estruturada
-
-**Status**: ✅ Completo
-
----
-
-### 3. ✅ Atualização de overview.mdx
-
-Service Launcher adicionado à seção Infrastructure com features completas
-
-**Status**: ✅ Completo
-
----
-
-### 4. ✅ Technology Stack Table Atualizada
-
-Service Launcher incluído na tabela
 
 **Status**: ✅ Completo
 

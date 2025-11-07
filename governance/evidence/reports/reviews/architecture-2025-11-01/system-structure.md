@@ -17,7 +17,6 @@ TradingSystem/
 │   ├── workspace-api (3200) → TimescaleDB
 │   ├── tp-capital (4005) → TimescaleDB + Telegram
 │   ├── documentation-api (3401) → FlexSearch + RAG Proxy
-│   ├── service-launcher (3500) → Health orchestration
 │   └── firecrawl-proxy (3600) → Firecrawl API
 │
 ├── Frontend (React + Vite)

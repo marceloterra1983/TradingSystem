@@ -49,7 +49,6 @@ Comprehensive monitoring solution with metrics collection, visualization, alerti
 - **Rules:** `tools/monitoring/prometheus/rules/*.yml`
 - **Scrape Targets:**
   - Node Exporter (system metrics)
-  - Service Launcher API (`/api/metrics`)
   - Dashboard API (`/api/metrics`)
   - Container cAdvisor metrics
 
@@ -279,6 +278,5 @@ docker compose -f tools/monitoring/docker-compose.yml logs alert-router
 ## 📖 Related Documentation
 
 - **[API Documentation - Alert Router](/api/alert-router)** - OpenAPI specification
-- **[Service Launcher](/apps/service-launcher/overview)** - Service health monitoring
 - **[Infrastructure Overview](/tools/infrastructure/overview)** - Infrastructure components
 - **[Ports & Services](/tools/ports-services/overview)** - Service port mapping

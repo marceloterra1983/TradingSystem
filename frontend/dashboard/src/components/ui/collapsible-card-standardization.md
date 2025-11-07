@@ -225,7 +225,6 @@ Before submitting a new page, verify:
 
 ✅ **Correct implementations to reference:**
 
-- [PortsPage.tsx](../pages/PortsPage.tsx) - Shows all patterns (quick access, tables, stats)
 - [EscopoPageNew.tsx](../pages/EscopoPageNew.tsx) - Reference implementation
 - [ConnectionsPageNew.tsx](../pages/ConnectionsPageNew.tsx) - Complex forms and tables
 

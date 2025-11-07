@@ -149,7 +149,7 @@ Services:
      - TP Capital stack → API 4008 + dedicated Timescale/PgBouncer/Redis
      - Workspace stack → API 3210 + PostgreSQL 5450
      - Telegram data stack → Timescale 5434 + Redis 6379 + RabbitMQ 5672
-     - QuestDB, LangGraph Postgres, and other shared infrastructure
+     - QuestDB and other shared infrastructure
 
   🖥️  Local Dev Services:
      - Telegram Gateway (4007) - Native MTProto bridge + metrics
@@ -157,7 +157,6 @@ Services:
      - DocsAPI (3401) - Documentation API (hybrid search)
      - Docusaurus (3400) - Documentation site
      - Dashboard (3103) - React dashboard
-     - Status API (3500) - Service health & launcher
 
 Features:
   ✓ Advanced health checks with retry logic
@@ -361,7 +360,7 @@ start_containers() {
         fi
     done
 
-    # DATABASE stack - now only QuestDB + auxiliary LangGraph Postgres
+    # DATABASE stack - QuestDB (shared telemetry store)
     # Each product stack owns its own database (Timescale/Postgres) containers.
     local SKIP_DATABASE_STACK=false  # HABILITADO!
     
@@ -383,22 +382,19 @@ start_containers() {
         if [ "$db_running" -gt 0 ]; then
             local db_health=$(docker inspect --format='{{.State.Health.Status}}' data-questdb 2>/dev/null || echo "unknown")
             if [ "$db_health" = "healthy" ] || [ "$db_health" = "running" ]; then
-                log_success "✓ DATABASE stack already running and healthy (QuestDB + LangGraph Postgres)"
+                log_success "✓ DATABASE stack already running and healthy (QuestDB)"
             else
                 log_warning "DATABASE stack running but not healthy (QuestDB health: $db_health)"
                 log_info "To restart manually: docker compose -p data -f $DB_COMPOSE_FILE restart"
             fi
         else
-            log_info "Starting DATABASE stack (QuestDB + LangGraph Postgres)..."
+            log_info "Starting DATABASE stack (QuestDB)..."
 
             # Track which services to start (exclude running standalone containers)
             local exclude_services=""
             
             # List ALL possible database stack containers (complete list)
-            local all_db_containers=(
-                "data-questdb"
-                "data-postgres-langgraph"
-            )
+            local all_db_containers=("data-questdb")
             
             # Check and handle standalone containers
             for container in "${all_db_containers[@]}"; do
@@ -408,7 +404,6 @@ start_containers() {
                     # Map container name to compose service name
                     case "$container" in
                         data-questdb) exclude_services="$exclude_services questdb";;
-                        data-postgres-langgraph) exclude_services="$exclude_services postgres-langgraph";;
                     esac
                 elif docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
                     # Container exists but is stopped
@@ -980,19 +975,17 @@ start_tools_stack() {
         return 0
     fi
 
-    export IMG_TOOLS_LANGGRAPH="${IMG_TOOLS_LANGGRAPH:-img-tools-langgraph}"
-    export IMG_TOOLS_AGNO_AGENTS="${IMG_TOOLS_AGNO_AGENTS:-img-tools-agno-agents}"
     export IMG_VERSION="${IMG_VERSION:-latest}"
 
-    # Check if TOOLS stack is already running (LangGraph and Agno only, not Firecrawl)
-    local tools_running=$(docker ps --filter "name=tools-langgraph" --format "{{.Names}}" 2>/dev/null | wc -l)
-    tools_running=$((tools_running + $(docker ps --filter "name=tools-agno" --format "{{.Names}}" 2>/dev/null | wc -l)))
+    # Check if TOOLS stack is already running (Kestra + Postgres)
+    local tools_running=$(docker ps --filter "name=tools-kestra" --format "{{.Names}}" 2>/dev/null | wc -l)
+    tools_running=$((tools_running + $(docker ps --filter "name=tools-kestra-postgres" --format "{{.Names}}" 2>/dev/null | wc -l)))
     if [ "$tools_running" -ge 2 ]; then
-        log_success "✓ TOOLS stack already running (2 services)"
+        log_success "✓ TOOLS stack already running (Kestra services)"
         return 0
     fi
 
-    log_info "Starting TOOLS stack (LangGraph, Agno Agents)..."
+    log_info "Starting TOOLS stack (Kestra orchestrator)..."
 
     # Start or restart containers (smart mode - only recreates if needed)
     local compose_status=0

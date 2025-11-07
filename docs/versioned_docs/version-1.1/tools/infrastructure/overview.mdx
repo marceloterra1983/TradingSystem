@@ -113,8 +113,6 @@ docker compose -f tools/monitoring/docker-compose.yml up -d
 # Comprehensive health check (services + containers + databases)
 bash scripts/maintenance/health-check-all.sh
 
-# Via Service Launcher API
-curl http://localhost:3500/api/health/full | jq '.overallHealth'
 ```
 
 ### Stop All Infrastructure

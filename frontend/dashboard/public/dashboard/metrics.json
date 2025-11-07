@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "generatedAt": "2025-11-05T03:09:10.627Z",
+    "version": "1.0.0",
+    "source": "docs/static/dashboard/metrics.json"
+  },
+  "healthScore": {
+    "current": 0,
+    "grade": "F",
+    "status": "generated",
+    "trend": "stable"
+  },
+  "freshness": {
+    "distribution": [
+      { "label": "<30 days", "count": 209, "percentage": 100 },
+      { "label": "30-60 days", "count": 0, "percentage": 0 },
+      { "label": "60-90 days", "count": 0, "percentage": 0 },
+      { "label": ">90 days", "count": 0, "percentage": 0 }
+    ],
+    "outdatedCount": 0,
+    "averageAge": 10
+  },
+  "issues": {
+    "breakdown": {
+      "frontmatter": 16,
+      "links": 0,
+      "content": 0
+    },
+    "bySeverity": {
+      "critical": 2,
+      "high": 14,
+      "medium": 0,
+      "low": 0
+    },
+    "total": 16
+  },
+  "coverage": {
+    "byOwner": [
+      { "owner": "DocsOps", "count": 85, "percentage": 38 },
+      { "owner": "ToolingGuild", "count": 35, "percentage": 16 },
+      { "owner": "ArchitectureGuild", "count": 21, "percentage": 9 },
+      { "owner": "FrontendGuild", "count": 15, "percentage": 7 },
+      { "owner": "MCPGuild", "count": 12, "percentage": 5 },
+      { "owner": "ProductOps", "count": 12, "percentage": 5 },
+      { "owner": "unknown", "count": 11, "percentage": 5 },
+      { "owner": "BackendGuild", "count": 11, "percentage": 5 },
+      { "owner": "DataOps", "count": 4, "percentage": 2 },
+      { "owner": "SupportOps", "count": 4, "percentage": 2 },
+      { "owner": "PromptOps", "count": 4, "percentage": 2 },
+      { "owner": "SecurityOps", "count": 4, "percentage": 2 },
+      { "owner": "ReleaseOps", "count": 1, "percentage": 0 },
+      { "owner": "DevOps", "count": 1, "percentage": 0 },
+      { "owner": "OpsGuild", "count": 1, "percentage": 0 }
+    ],
+    "byCategory": [
+      { "category": "Tools", "count": 61, "percentage": 27 },
+      { "category": "Apps", "count": 53, "percentage": 24 },
+      { "category": "content", "count": 52, "percentage": 23 },
+      { "category": "Reference", "count": 26, "percentage": 12 },
+      { "category": "API", "count": 16, "percentage": 7 },
+      { "category": "Frontend", "count": 15, "percentage": 7 }
+    ],
+    "totalFiles": 223
+  },
+  "historical": [
+    {
+      "date": "2025-11-05T03:09:10.627Z",
+      "healthScore": 0,
+      "issueCount": 16,
+      "freshnessRate": 100,
+      "totalFiles": 223
+    }
+  ]
+}

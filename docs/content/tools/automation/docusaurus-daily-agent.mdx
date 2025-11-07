@@ -31,29 +31,7 @@ npm run agent:docs:daily
 
 Logs indicam o caminho do arquivo gerado. Se o ambiente Python tiver PyYAML instalado, a validação de frontmatter também é executada.
 
-Via Agno Agents API (rodando localmente):
-
-```
-POST http://localhost:8201/api/v1/agents/docs/daily/run
-{
-  "since": "2025-10-27 00:00", // opcional
-  "dry": false,
-  "model": "llama3.1:8b",     // opcional (override)
-  "maxContext": 20000,         // opcional (override)
-  "noValidate": false,
-  "outDir": "docs/content/reports/daily"
-}
-```
-
-Listar manifestos de agentes (carregados de `config/agents/*.json`):
-
-```
-GET http://localhost:8201/api/v1/agents/registry
-GET http://localhost:8201/api/v1/agents/docs/daily/manifest
-GET http://localhost:8201/api/v1/agents/docusaurus-daily/args
-```
-
-O endpoint `/{agentId}/args` retorna o schema de argumentos com defaults resolvidos (incluindo valores vindos de variáveis de ambiente como `DOCS_AGENT_MODEL`, `DOCS_AGENT_MAX_CONTEXT` e `OLLAMA_BASE_URL`).
+> API HTTP legacy removida. Utilize apenas o comando `npm run agent:docs:daily` ou invoque o script via Node.js.
 
 ## Variáveis de Ambiente
 

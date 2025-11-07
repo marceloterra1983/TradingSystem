@@ -543,8 +543,6 @@ for port in 4008 4010 3103; do
   curl -s http://localhost:$port/health | jq '.status' || echo "FAIL"
 done
 
-# Detailed health (via Service Launcher)
-curl http://localhost:3500/api/health/full | jq '.overallHealth'
 ```
 
 ---
@@ -577,4 +575,3 @@ This governance enhancement is considered **successful** if:
 **Status**: Active  
 **Next Review**: February 3, 2026  
 **Feedback**: Send to #governance channel
-

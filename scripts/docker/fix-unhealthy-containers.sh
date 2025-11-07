@@ -32,7 +32,6 @@ echo ""
 echo -e "${CYAN}Affected services:${NC}"
 echo -e "  • rag-llamaindex-ingest (tries to connect to data-qdrant:6333)"
 echo -e "  • rag-service (tries to connect to data-qdrant:6333)"
-echo -e "  • tools-langgraph (depends on services above)"
 echo ""
 
 if docker ps -a --format '{{.Names}}' | grep -qx "data-qdrant"; then
@@ -137,7 +136,7 @@ if docker ps --format '{{.Names}}' | grep -qx "data-qdrant"; then
     sleep 5
     
     echo -e "${CYAN}Restarting RAG services...${NC}"
-    for service in rag-llamaindex-ingest rag-service tools-langgraph; do
+    for service in rag-llamaindex-ingest rag-service; do
         if docker ps -a --format '{{.Names}}' | grep -qx "$service"; then
             echo -e "  Restarting ${BLUE}$service${NC}..."
             docker restart "$service" >/dev/null 2>&1

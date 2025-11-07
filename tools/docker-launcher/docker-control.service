@@ -1,0 +1,22 @@
+[Unit]
+Description=Docker Control Server for TradingSystem
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=marce
+Group=marce
+WorkingDirectory=/home/marce/Projetos/TradingSystem
+ExecStart=/usr/bin/node /home/marce/Projetos/TradingSystem/tools/docker-launcher/docker-control-server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

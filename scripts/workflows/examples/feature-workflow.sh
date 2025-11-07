@@ -52,13 +52,11 @@ SERVICES=(
     "dashboard:3103"
     "docs-hub:3400"
     "documentation-api:3401"
-    "service-launcher:3500"
     # Add new service ports here
 )
 
 # API endpoints (include new ones)
 declare -A API_ENDPOINTS=(
-    ["Service Launcher"]="http://localhost:3500/api/status"
     ["Documentation API"]="http://localhost:3401/api/health"
     # Add new endpoints here
 )

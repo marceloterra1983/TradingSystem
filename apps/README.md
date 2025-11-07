@@ -48,7 +48,6 @@ apps/
 
 **Características:**
 - 📊 **Health Monitoring** - Status de todos os serviços
-- 🚀 **Service Launcher** - Inicialização de serviços
 - 📈 **Metrics Aggregation** - Métricas consolidadas
 - 🔄 **Auto-recovery** - Recuperação automática
 

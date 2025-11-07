@@ -121,9 +121,9 @@ bash scripts/api/test-telegram-gateway.sh
 
 ---
 
-### 5. Service Launcher API ✅
+### 5.  API ✅
 - **Port:** 3500
-- **Documentation:** `docs/content/tools/service-launcher.mdx`
+- **Documentation:** `docs/content/tools/.mdx`
 - **Status:** Production Ready
 
 **Endpoints:**
@@ -229,7 +229,6 @@ docs/static/specs/
 ├── tp-capital.openapi.yaml            # OpenAPI 3.1 spec
 ├── documentation-api.openapi.yaml     # OpenAPI 3.1 spec
 ├── firecrawl-proxy.openapi.yaml       # OpenAPI 3.1 spec
-└── status-api.openapi.yaml            # OpenAPI 3.1 spec
 
 scripts/api/
 └── test-telegram-gateway.sh         # Automated test suite
@@ -367,7 +366,7 @@ scripts/api/
 - ✅ Workspace (OpenAPI only)
 - ✅ TP Capital (OpenAPI only)
 - ✅ Documentation API (OpenAPI only)
-- ✅ Service Launcher (Basic)
+- ✅  (Basic)
 - ✅ Firecrawl Proxy (OpenAPI only)
 
 ### Features
@@ -443,4 +442,3 @@ scripts/api/
 **Last Updated:** 2025-11-04  
 **Maintained By:** TradingSystem Development Team  
 **Documentation Version:** 1.0.0
-

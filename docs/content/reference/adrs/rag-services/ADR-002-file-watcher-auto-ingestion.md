@@ -305,7 +305,7 @@ curl -X POST http://localhost:3403/api/v1/admin/file-watcher/flush
 ---
 
 **Related ADRs**:
-- [ADR-001: Redis Caching Strategy](./ADR-001-redis-caching-strategy.md)
+- [ADR-001: Redis Caching Strategy](./ADR-001-redis-caching-strategy)
 - ADR-003: Collection Stats Performance Optimization (planned)
 
 **Change Log**:

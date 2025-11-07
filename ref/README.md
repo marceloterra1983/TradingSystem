@@ -103,7 +103,6 @@ TradingSystem/
 | Workspace API | 3200 | HTTP | ✅ Active (container) |
 | Documentation Hub | 3404 | HTTP | ✅ Active (container) |
 | Documentation API | 3405 | HTTP | ✅ Active (container) |
-| Service Launcher | 3500 | HTTP | ✅ Active |
 | Firecrawl Proxy | 3600 | HTTP | ✅ Active (container) |
 | TP Capital | 4005 | HTTP | ✅ Active (container) |
 | TimescaleDB | 7032 | TCP | ✅ Active (container) |

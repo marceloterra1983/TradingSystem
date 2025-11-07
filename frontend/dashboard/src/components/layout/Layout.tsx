@@ -2,7 +2,6 @@ import * as React from 'react';
 import { LayoutSidebar } from './LayoutSidebar';
 import { LayoutHeader } from './LayoutHeader';
 import { PageContent } from './PageContent';
-import { ServiceStatusBanner } from '../ServiceStatusBanner';
 import { getPageById, getDefaultPage } from '../../data/navigation';
 import {
   isBrowser,
@@ -14,6 +13,31 @@ export interface LayoutProps {
   children?: React.ReactNode;
   defaultPageId?: string;
 }
+
+const extractPageIdFromHash = (hash: string): string | null => {
+  if (!hash) {
+    return null;
+  }
+  let normalized = hash.trim();
+  if (normalized.startsWith('#/')) {
+    normalized = normalized.slice(2);
+  } else if (normalized.startsWith('#')) {
+    normalized = normalized.slice(1);
+  }
+  if (!normalized) {
+    return null;
+  }
+  const [rawId] = normalized.split('?');
+  if (!rawId) {
+    return null;
+  }
+  try {
+    const decoded = decodeURIComponent(rawId);
+    return decoded || null;
+  } catch {
+    return rawId;
+  }
+};
 
 /**
  * Main Layout Component
@@ -57,11 +81,10 @@ export function Layout({ defaultPageId }: LayoutProps) {
 
   // Get initial page from hash or default
   const getInitialPage = React.useCallback(() => {
-    const hash = isBrowser ? window.location.hash : ''; // e.g., '#/agents'
-    const id = hash.startsWith('#/')
-      ? hash.slice(2)
-      : defaultPageId || getDefaultPage().id;
-    return getPageById(id)?.id || getDefaultPage().id;
+    const fallbackId = defaultPageId || getDefaultPage().id;
+    const hashPageId = isBrowser ? extractPageIdFromHash(window.location.hash) : null;
+    const targetId = hashPageId || fallbackId;
+    return getPageById(targetId)?.id || getDefaultPage().id;
   }, [defaultPageId]);
 
   // Current page state - initialize from hash
@@ -73,9 +96,9 @@ export function Layout({ defaultPageId }: LayoutProps) {
       return;
     }
     const onHashChange = () => {
-      const h = window.location.hash;
-      const id = h.startsWith('#/') ? h.slice(2) : getDefaultPage().id;
-      setCurrentPageId(getPageById(id)?.id || getDefaultPage().id);
+      const fallbackId = getDefaultPage().id;
+      const pageId = extractPageIdFromHash(window.location.hash) || fallbackId;
+      setCurrentPageId(getPageById(pageId)?.id || fallbackId);
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
@@ -127,9 +150,6 @@ export function Layout({ defaultPageId }: LayoutProps) {
           currentPage={currentPage}
           onToggleSidebar={handleToggleCollapse}
         />
-
-        {/* Service Status Banner */}
-        <ServiceStatusBanner />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-4">

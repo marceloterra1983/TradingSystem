@@ -1,3 +1,18 @@
+---
+title: Review Checklist
+description: Review Checklist document for TradingSystem governance.
+slug: /governance/review-checklist
+tags:
+  - governance
+  - controls
+owner: DocsOps
+lastReviewed: 2025-10-29
+sidebar_label: Review Checklist
+sidebar_position: 20
+---
+
+<!-- AUTO-GENERATED from governance source. Do not edit in docs/content. -->
+
 # Documentation Review Checklist - Phase 5
 
 **Review Period**: 2025-10-24 to 2025-11-15 (3 weeks)
@@ -306,7 +321,6 @@
 - [ ] `prompts/overview.mdx` - Prompts overview
 
 **Agents** (6 files):
-- [ ] `agents/agno-agents/overview.mdx`, flows.mdx, prompts.mdx, mcp.mdx, tests.mdx, index.mdx
 
 **MCP** (3 files):
 - [ ] `mcp/registry.mdx` - MCP server registry (manual, automation blocked)
@@ -345,7 +359,6 @@
 
 **ADRs** (if migrated):
 - [ ] `reference/adrs/ADR-0001.md` - LowDB decision
-- [ ] `reference/adrs/ADR-0002.md` - Agno Framework decision
 - [ ] `reference/adrs/index.mdx` - ADR catalogue
 
 **Review Focus**:

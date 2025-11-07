@@ -22,16 +22,10 @@ describeIntegration('Dashboard ↔ API integration', () => {
     process.env.DASHBOARD_DOCUMENTATION_API_URL ||
     process.env.VITE_DOCUMENTATION_API_URL ||
     'http://localhost:3402';
-  const serviceLauncherBase =
-    process.env.DASHBOARD_SERVICE_LAUNCHER_API_URL ||
-    process.env.VITE_SERVICE_LAUNCHER_API_URL ||
-    'http://localhost:3500/api/launcher';
   const workspaceBase =
     process.env.DASHBOARD_WORKSPACE_API_URL ||
     process.env.VITE_API_BASE_URL ||
     'http://localhost:3201';
-  const serviceLauncherStatusOverride =
-    process.env.DASHBOARD_SERVICE_LAUNCHER_STATUS_URL;
   const workspaceHealthOverride =
     process.env.DASHBOARD_WORKSPACE_HEALTH_URL;
 
@@ -39,10 +33,6 @@ describeIntegration('Dashboard ↔ API integration', () => {
     vi.resetModules();
     vi.stubEnv('VITE_USE_UNIFIED_DOMAIN', 'false');
     vi.stubEnv('VITE_DOCUMENTATION_API_URL', trimTrailingSlash(documentationBase));
-    vi.stubEnv(
-      'VITE_SERVICE_LAUNCHER_API_URL',
-      trimTrailingSlash(serviceLauncherBase),
-    );
     // Provide explicit workspace endpoints to avoid relying on proxy paths.
     const normalizedWorkspace = trimTrailingSlash(workspaceBase);
     vi.stubEnv('VITE_API_BASE_URL', normalizedWorkspace);
@@ -52,41 +42,6 @@ describeIntegration('Dashboard ↔ API integration', () => {
   afterAll(() => {
     vi.unstubAllEnvs();
   });
-
-  it(
-    'parses live Service Launcher status payload',
-    async () => {
-      const { fetchServiceLauncherStatus } = await import(
-        '../../components/pages/ConnectionsPage'
-      );
-
-      let summary;
-      if (serviceLauncherStatusOverride) {
-        const response = await fetch(serviceLauncherStatusOverride, {
-          headers: { Accept: 'application/json' },
-        });
-        if (!response.ok) {
-          const body = await response.text();
-          throw new Error(
-            `Service launcher override ${response.status}: ${body || response.statusText}`,
-          );
-        }
-        const payload = await response.json();
-        summary =
-          payload.data ?? payload.result ?? payload ?? { services: [], totalServices: 0 };
-      } else {
-        summary = await fetchServiceLauncherStatus();
-      }
-
-      expect(summary.totalServices).toBeGreaterThan(0);
-      expect(summary.services.length).toBe(summary.totalServices);
-      expect(typeof summary.overallStatus).toBe('string');
-      expect(summary.services.every((svc) => typeof svc.status === 'string')).toBe(
-        true,
-      );
-    },
-    25_000,
-  );
 
   it(
     'reports healthy documentation API',

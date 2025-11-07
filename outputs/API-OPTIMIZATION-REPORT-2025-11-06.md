@@ -232,7 +232,7 @@ DOCS_HUB_PORT=3404
 | **TP Capital API** | 4005 | `/webhook/telegram` | TimescaleDB (Dedicated) | ✅ Good |
 | **Documentation API** | 3401 | `/api/docs`, `/api/v1/rag/*` | FlexSearch + Qdrant | ✅ Good |
 | **Telegram Gateway API** | 4010 | `/api/messages`, `/api/channels` | TimescaleDB (Dedicated) | ⚠️ Needs review |
-| **Service Launcher** | 3500 | `/api/status`, `/api/health/*` | None (orchestrator) | ✅ Good |
+| **** | 3500 | `/api/status`, `/api/health/*` | None (orchestrator) | ✅ Good |
 | **Firecrawl Proxy** | 3600 | `/api/scrape` | PostgreSQL (internal) | ✅ Good |
 
 ### 2.2 Architectural Strengths ✅

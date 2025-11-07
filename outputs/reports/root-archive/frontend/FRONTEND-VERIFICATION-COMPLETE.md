@@ -73,7 +73,7 @@ O frontend está **compatível com as novas portas** após a migração para fai
   - `charts-vendor`: 267K
   - `animation-vendor`: 74K
   - `dnd-vendor`: 47K
-  - `LauncherPage`: 44K
+  - `WorkspacePage`: 44K
 - **Grade**: A (95/100)
 
 ### ⚠️ 7. Fullstack Integration Review

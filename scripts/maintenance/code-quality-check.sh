@@ -305,7 +305,6 @@ check_backend_lint() {
 
     local api_dirs=(
         "backend/api/workspace"
-        "backend/api/service-launcher"
         "tools/rag-services"
     )
 
@@ -339,7 +338,6 @@ check_backend_tests() {
 
     local api_dirs=(
         "backend/api/workspace"
-        "backend/api/service-launcher"
     )
 
     local all_passed=true

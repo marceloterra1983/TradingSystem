@@ -1,0 +1,1477 @@
+{
+  "startedAt": "2025-11-07T13:13:19.896Z",
+  "finishedAt": "2025-11-07T13:15:11.864Z",
+  "courses": [
+    {
+      "id": "course_024420c40a53",
+      "title": "Grid Experts",
+      "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+      "modules": [
+        {
+          "id": "module_58ab3926286b",
+          "title": "Módulo 0 - Comece por aqui!",
+          "order": 1,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_324b6b6c846c",
+              "title": "Bem-vindo ao Grid Experts, Sua Jornada Começa Agora",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161490-bem-vindo-ao-grid-experts-sua-jornada-comeca-agora",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_ca9feaf89fe2",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5c87645f-73f0-4e80-ad7f-cf343cf19b11",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_ea23ef756739",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5c87645f-73f0-4e80-ad7f-cf343cf19b11&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 752,
+              "rawHtml": "<iframe id=\"panda-3dd42106-aae8-4dbe-a01f-ad30aca9e59d\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5c87645f-73f0-4e80-ad7f-cf343cf19b11&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:28.369Z"
+            },
+            {
+              "id": "class_a181fd71efcd",
+              "title": "Nivelando as Expectativas: O Que Ninguém Te Conta Sobre o Mercado Financeiro",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5053035-nivelando-as-expectativas-o-que-ninguem-te-conta-sobre-o-mercado-finance",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_a22ce4d7cb82",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=481b4be8-a43a-420d-a615-e64fd97cc5ef",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_45fede9a6b4f",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=481b4be8-a43a-420d-a615-e64fd97cc5ef&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 2397,
+              "rawHtml": "<iframe id=\"panda-43255156-5b48-416b-bb1e-546756fb152c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=481b4be8-a43a-420d-a615-e64fd97cc5ef&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:30.437Z"
+            },
+            {
+              "id": "class_00066563fa82",
+              "title": "Medindo o Sucesso no Mercado Financeiro, Como Correr Apenas os Riscos Que Valem a Pena",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5053037-medindo-o-sucesso-no-mercado-financeiro-como-correr-apenas-os-riscos-que",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_f01987aa57e6",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=61b424bb-651e-4f1a-98ae-352d5d4b2d37",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_9eddb4c399ab",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=61b424bb-651e-4f1a-98ae-352d5d4b2d37&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1305,
+              "rawHtml": "<iframe id=\"panda-26b8da11-844e-4c82-8362-65c888ec28cb\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=61b424bb-651e-4f1a-98ae-352d5d4b2d37&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:32.224Z"
+            },
+            {
+              "id": "class_3184a28f47f9",
+              "title": "Acesso a comunidade no Discord",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5026470-acesso-a-comunidade-no-discord",
+              "order": 4,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 60.8,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6Mzk1ODcyNSwicHVyIjoiYmxvYl9pZCJ9fQ==--a469c65a576b189978162fa837d8732ac3cd1417/WhatsApp%20Image%202025-02-12%20at%2011.19.07%20AM.jpeg\" id=\"5007519\" alt=\"WhatsApp Image 2025-02-12 at 11.19.07 AM\" width=\"null\" height=\"null\" data-image=\"5007519\"></figure>\n<p><span style=\"background-color: initial;\">Depois que entrar no servidor você irá se deparar com um canal chamado \"👋︱bem-vindo</span><span style=\"background-color: initial;\">\"; para se autenticar, basta inserir o e-mail cadastrado aqui na Data n' Quant Labs e em alguns instantes você terá todos os canais do servidor liberado.</span></p>\n<p><strong>Obs. 1</strong>: É necessário que você tenha uma conta criada no Discord.<br></p>\n<p><strong>Obs. 2</strong>: Para evitar o spam, o modo lento está ativo no canal \"👋︱bem-vindo\", ou seja, se você inserir o e-mail errado, só poderá mandar outra mensagem em 6 horas. Caso isso aconteça, edite e corrija a mensagem já enviada.&nbsp;</p>\n<p>Para acessar a comunidade da Data n' Quant Labs, basta <a href=\"https://discord.gg/UPJ9waFEtj\" target=\"_blank\">clicar aqui!</a></p>\n<p></p>\n      ",
+              "markdown": "![WhatsApp Image 2025-02-12 at 11.19.07 AM](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6Mzk1ODcyNSwicHVyIjoiYmxvYl9pZCJ9fQ==--a469c65a576b189978162fa837d8732ac3cd1417/WhatsApp%20Image%202025-02-12%20at%2011.19.07%20AM.jpeg)\n\nDepois que entrar no servidor você irá se deparar com um canal chamado \"👋︱bem-vindo\"; para se autenticar, basta inserir o e-mail cadastrado aqui na Data n' Quant Labs e em alguns instantes você terá todos os canais do servidor liberado.\n\n**Obs. 1**: É necessário que você tenha uma conta criada no Discord.  \n\n**Obs. 2**: Para evitar o spam, o modo lento está ativo no canal \"👋︱bem-vindo\", ou seja, se você inserir o e-mail errado, só poderá mandar outra mensagem em 6 horas. Caso isso aconteça, edite e corrija a mensagem já enviada. \n\nPara acessar a comunidade da Data n' Quant Labs, basta [clicar aqui!](https://discord.gg/UPJ9waFEtj)",
+              "lastUpdatedAt": "2025-11-07T13:13:33.489Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        },
+        {
+          "id": "module_9ad85df4f815",
+          "title": "Módulo 1 - Fundamentos do Grid: Construindo a Base",
+          "order": 2,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_6649d9c620ad",
+              "title": "Desvendando o Segredo dos Profissionais: O que é Grid Trading?",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161491-desvendando-o-segredo-dos-profissionais-o-que-e-grid-trading",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_b2f7fb53195e",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=127f5d9d-dbb6-45f3-88a0-bc4d9ce785fd",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_30979fdb888b",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=127f5d9d-dbb6-45f3-88a0-bc4d9ce785fd&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 826,
+              "rawHtml": "<iframe id=\"panda-4409a883-03a8-4030-a329-3213b319a37d\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=127f5d9d-dbb6-45f3-88a0-bc4d9ce785fd&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:35.202Z"
+            },
+            {
+              "id": "class_09f7e778ad32",
+              "title": "Mapeando o Território, Uma Viagem Pelos Diferentes Tipos de Grid",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161492-mapeando-o-territorio-uma-viagem-pelos-diferentes-tipos-de-grid",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_1d4492c79c84",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=96a285eb-ae37-4323-8dd9-1d497f390c56",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_44a1539f761d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=96a285eb-ae37-4323-8dd9-1d497f390c56&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 585,
+              "rawHtml": "<iframe id=\"panda-1194c9e5-7b1c-436a-ae74-6ff0a65cec03\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=96a285eb-ae37-4323-8dd9-1d497f390c56&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:37.015Z"
+            },
+            {
+              "id": "class_d5232e28dee2",
+              "title": "Tudo que você precisa saber sobre o Metatrader 5",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161494-tudo-que-voce-precisa-saber-sobre-o-metatrader-5",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_1390a87fe50b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8abacc28-e330-4d78-be2e-c6dcbd8e5a25",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_ca0eaa897246",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8abacc28-e330-4d78-be2e-c6dcbd8e5a25&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1008,
+              "rawHtml": "<iframe id=\"panda-c6b1b921-2d67-4c32-b8ef-f25cc562568d\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8abacc28-e330-4d78-be2e-c6dcbd8e5a25&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:38.815Z"
+            },
+            {
+              "id": "class_407618eca83e",
+              "title": "Download e Instalação do Orbit: Seu robô de Grid Trading",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161493-download-e-instalacao-do-orbit-seu-robo-de-grid-trading",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_d46c28b247dc",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9d3135b-76c5-48b4-ad0f-6c209979ee23",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_f36f6c0acb91",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9d3135b-76c5-48b4-ad0f-6c209979ee23&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 418,
+              "rawHtml": "<iframe id=\"panda-0c12050a-fc6e-4db8-bc9a-d927f1816ace\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9d3135b-76c5-48b4-ad0f-6c209979ee23&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:44.207Z"
+            },
+            {
+              "id": "class_e82db844e8fb",
+              "title": "Dominando Modelagem de Testes: OHLC x Cada Tick",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161495-dominando-modelagem-de-testes-ohlc-x-cada-tick",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_6460d1ee0c01",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ad32cd2-3a53-4783-98b5-4a2ab046fd91",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_328dc66bb1a5",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ad32cd2-3a53-4783-98b5-4a2ab046fd91&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1265,
+              "rawHtml": "<iframe id=\"panda-1cf16cfe-0419-4e5b-83e5-116586714fbd\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ad32cd2-3a53-4783-98b5-4a2ab046fd91&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:45.923Z"
+            },
+            {
+              "id": "class_bb62dcfd7fb2",
+              "title": "Testando Estratégias no Passado: Analisando Backtests",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161496-testando-estrategias-no-passado-analisando-backtests",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_5db0ee2f4e31",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266c3e2d-7e67-49f6-8393-8500d4ef8f4e",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_bf8471f5bbb8",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266c3e2d-7e67-49f6-8393-8500d4ef8f4e&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1474,
+              "rawHtml": "<iframe id=\"panda-179eb63c-e069-407b-94d6-9d0af7b22e07\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266c3e2d-7e67-49f6-8393-8500d4ef8f4e&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:47.741Z"
+            },
+            {
+              "id": "class_5960c49c224b",
+              "title": "Descobrindo as Melhores Configurações para a Estratégia: Analisando Otimizações",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161497-descobrindo-as-melhores-configuracoes-para-a-estrategia-analisando-otimi",
+              "order": 7,
+              "videos": [
+                {
+                  "id": "video_e268cac326ad",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=505752b0-9c24-4e60-ab70-82dc26b70677",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_a2375b5d745f",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=505752b0-9c24-4e60-ab70-82dc26b70677&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1277,
+              "rawHtml": "<iframe id=\"panda-b73ac449-c2f4-4390-9c7a-777728b2d6dd\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=505752b0-9c24-4e60-ab70-82dc26b70677&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:49.542Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        },
+        {
+          "id": "module_3b2e7d8d3de1",
+          "title": "Módulo 2 - O Poder da Automação no Grid Trading",
+          "order": 3,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_dd50d8f64c21",
+              "title": "Orbit, O Futuro da Automação no Grid Trading: Um Tour Pelo Robô + 8 Features Essenciais de Robôs Profissionais",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161498-orbit-o-futuro-da-automacao-no-grid-trading-um-tour-pelo-robo-8-features",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_5be836d51907",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9e0252ce-2be0-4e06-ba90-59e7da91d8be",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_8d56ca796dc6",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9e0252ce-2be0-4e06-ba90-59e7da91d8be&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 3413,
+              "rawHtml": "<iframe id=\"panda-ba904466-3b2b-4360-8b5e-50c551c07367\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9e0252ce-2be0-4e06-ba90-59e7da91d8be&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:51.473Z"
+            },
+            {
+              "id": "class_f2fddf84ba70",
+              "title": "Fine Tunning na sua Otimização: Métricas de Performance",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161518-fine-tunning-na-sua-otimizacao-metricas-de-performance",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_e49708a88a4a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=dd795a32-ce8b-4d11-a874-e413fcb66d2f",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_c55ed8d18a8c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=dd795a32-ce8b-4d11-a874-e413fcb66d2f&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1038,
+              "rawHtml": "<iframe id=\"panda-051921d8-33d6-48f5-a62f-4528b778ed4f\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=dd795a32-ce8b-4d11-a874-e413fcb66d2f&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:53.290Z"
+            },
+            {
+              "id": "class_e5a290461daf",
+              "title": "Filtrando só o que Importa: Melhorando suas Otimizações",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161519-filtrando-so-o-que-importa-melhorando-suas-otimizacoes",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_5de08806ea7f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9fe70579-f2bc-4cac-b202-f75cbeefd706",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_472e3c3d9904",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9fe70579-f2bc-4cac-b202-f75cbeefd706&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 954,
+              "rawHtml": "<iframe id=\"panda-e485d243-3adc-4d7f-b3ff-8e4650bf743e\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9fe70579-f2bc-4cac-b202-f75cbeefd706&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:55.110Z"
+            },
+            {
+              "id": "class_62d034c0d52b",
+              "title": "Ajustando o Relógio: Como Controlar Sessões e Horários",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161503-ajustando-o-relogio-como-controlar-sessoes-e-horarios",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_0a2f635d704e",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ddc885d0-e3ca-4124-aa6d-c4de1232b66a",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_1e8a75265260",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ddc885d0-e3ca-4124-aa6d-c4de1232b66a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1281,
+              "rawHtml": "<iframe id=\"panda-17294846-6c99-43a5-bab3-39d8da77b88e\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ddc885d0-e3ca-4124-aa6d-c4de1232b66a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:56.929Z"
+            },
+            {
+              "id": "class_1d3ae501f72e",
+              "title": "Estratégia #0 - Controle e Flexibilidade: Grids Semi Automatizados",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161499-estrategia-0-controle-e-flexibilidade-grids-semi-automatizados",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_0f6524d24094",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c1f598a8-6524-483f-ab79-51aa29a99cf1",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_7ffbe76c993d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c1f598a8-6524-483f-ab79-51aa29a99cf1&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 310,
+              "rawHtml": "<iframe id=\"panda-db7eeac8-223b-4bae-83fc-7b98be6e38d3\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c1f598a8-6524-483f-ab79-51aa29a99cf1&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:13:58.665Z"
+            },
+            {
+              "id": "class_72218e2b3729",
+              "title": "Estratégia #1 - Deslocamento Percentual: Lucrando com as Oscilações do Preço",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161500-estrategia-1-deslocamento-percentual-lucrando-com-as-oscilacoes-do-preco",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_098fbd295a2b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a94ea41e-977c-4052-a750-6c720dbc2929",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_ffc9d8a95127",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a94ea41e-977c-4052-a750-6c720dbc2929&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 477,
+              "rawHtml": "<iframe id=\"panda-9b8e886a-47ad-4753-a570-565240e33dff\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a94ea41e-977c-4052-a750-6c720dbc2929&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:00.508Z"
+            },
+            {
+              "id": "class_595804595b31",
+              "title": "Estratégia #2 - Slope: A Importância de Avaliar a Inclinação (Ângulo) da Média",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161501-estrategia-2-slope-a-importancia-de-avaliar-a-inclinacao-angulo-da-media",
+              "order": 7,
+              "videos": [
+                {
+                  "id": "video_723f95155d1d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a7c16e0-0a23-4648-b798-f20a765b139b",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_089813e622d8",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a7c16e0-0a23-4648-b798-f20a765b139b&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 891,
+              "rawHtml": "<iframe id=\"panda-ea650764-1dc3-49a0-9aae-de96e7cdfd56\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a7c16e0-0a23-4648-b798-f20a765b139b&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:02.497Z"
+            },
+            {
+              "id": "class_84ba0e7109a2",
+              "title": "Estratégia #3 - The Williams %R: Como Larry Williams Pode nos Ajudar no Grid Trading",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161502-estrategia-3-the-williams-r-como-larry-williams-pode-nos-ajudar-no-grid-",
+              "order": 8,
+              "videos": [
+                {
+                  "id": "video_dc5b7b580f05",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b87e97d9-e3bb-4e35-b8e9-6166273e0864",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_4355fb900885",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b87e97d9-e3bb-4e35-b8e9-6166273e0864&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 650,
+              "rawHtml": "<iframe id=\"panda-c8f22529-33ef-4af9-865b-3e3130a22767\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b87e97d9-e3bb-4e35-b8e9-6166273e0864&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:04.126Z"
+            },
+            {
+              "id": "class_34f599526e50",
+              "title": "Estratégia #4 - TWAP Bands",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5022408-estrategia-4-twap-bands",
+              "order": 9,
+              "videos": [
+                {
+                  "id": "video_1b187f258cc3",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6da2646f-bec4-41e1-8bbb-79dfeea88fee",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_2ea967478b09",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6da2646f-bec4-41e1-8bbb-79dfeea88fee&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 991,
+              "rawHtml": "<iframe id=\"panda-3c7f1516-698d-4732-ac40-d8e2349b82ac\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6da2646f-bec4-41e1-8bbb-79dfeea88fee&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:06.093Z"
+            },
+            {
+              "id": "class_451075ba1161",
+              "title": "Estratégia #5 - Fade The Opening Gap [FOG]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5022415-estrategia-5-fade-the-opening-gap-fog",
+              "order": 10,
+              "videos": [
+                {
+                  "id": "video_3d72f1f3d477",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0b321d18-85fb-4703-82df-373ae843b6af",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_744e1c79ee10",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0b321d18-85fb-4703-82df-373ae843b6af&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 597,
+              "rawHtml": "<iframe id=\"panda-5654b744-5720-4c3d-b887-a61dff5b57d1\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0b321d18-85fb-4703-82df-373ae843b6af&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:07.978Z"
+            },
+            {
+              "id": "class_cbc117db29fd",
+              "title": "Estratégia #6 - Micro Flash Crash Rebound [MFCR]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/5022420-estrategia-6-micro-flash-crash-rebound-mfcr",
+              "order": 11,
+              "videos": [
+                {
+                  "id": "video_b1fbf798d6f6",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a9dbbf80-1337-4568-9bbb-5c800f14e527",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_f0f9cb2fc740",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a9dbbf80-1337-4568-9bbb-5c800f14e527&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 450,
+              "rawHtml": "<iframe id=\"panda-62f037d6-15d7-4935-ba29-5294973c5d11\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a9dbbf80-1337-4568-9bbb-5c800f14e527&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:09.746Z"
+            },
+            {
+              "id": "class_1b382e10b321",
+              "title": "Grids de Preço Médio Inteligente: Como Construir Estruturas pro Curto, Médio e Longo prazo",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161504-grids-de-preco-medio-inteligente-como-construir-estruturas-pro-curto-med",
+              "order": 12,
+              "videos": [
+                {
+                  "id": "video_f26889f626f6",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90548391-2f55-47a1-b0bb-57a826a4ceeb",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_3ce54cc5b72a",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90548391-2f55-47a1-b0bb-57a826a4ceeb&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1112,
+              "rawHtml": "<iframe id=\"panda-528a4969-97ae-49a2-813f-3577819d0e82\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90548391-2f55-47a1-b0bb-57a826a4ceeb&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:11.520Z"
+            },
+            {
+              "id": "class_95650aa5d73f",
+              "title": "Grids de Ordens Independentes: Capturando a Volatilidade do Mercado",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161505-grids-de-ordens-independentes-capturando-a-volatilidade-do-mercado",
+              "order": 13,
+              "videos": [
+                {
+                  "id": "video_56e522a4a54a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5f4ef70d-b8e4-4c6c-8bbd-c2d5a6a2abfe",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_23d14ea0ccfc",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5f4ef70d-b8e4-4c6c-8bbd-c2d5a6a2abfe&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 782,
+              "rawHtml": "<iframe id=\"panda-eaa0b439-0948-48c7-bb43-1312b26819dd\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5f4ef70d-b8e4-4c6c-8bbd-c2d5a6a2abfe&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:13.353Z"
+            },
+            {
+              "id": "class_44b185125679",
+              "title": "Entradas em Fechamentos: Como Montar o seu Gradiente Levando Tempo e Preço em Consideração",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161506-entradas-em-fechamentos-como-montar-o-seu-gradiente-levando-tempo-e-prec",
+              "order": 14,
+              "videos": [
+                {
+                  "id": "video_746608e97aa8",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9928f0e4-82a0-432d-b703-b119bb4583ac",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_f76b419ee9da",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9928f0e4-82a0-432d-b703-b119bb4583ac&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 667,
+              "rawHtml": "<iframe id=\"panda-2cb76193-1fc9-4664-bda3-27993587a4fe\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9928f0e4-82a0-432d-b703-b119bb4583ac&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:15.166Z"
+            },
+            {
+              "id": "class_677f944c6b96",
+              "title": "Entradas com Ordens Pendentes: Como Aproveitar Rápidas Oscilações de Preço para Montar sua Grade",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161507-entradas-com-ordens-pendentes-como-aproveitar-rapidas-oscilacoes-de-prec",
+              "order": 15,
+              "videos": [
+                {
+                  "id": "video_13a8baf81193",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=849ecec5-f7f3-4b68-ac57-be55e4e59c2c",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_6f198e72ea87",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=849ecec5-f7f3-4b68-ac57-be55e4e59c2c&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 481,
+              "rawHtml": "<iframe id=\"panda-ecaa1ca7-35bb-4f97-a2f3-944c22a0a1d4\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=849ecec5-f7f3-4b68-ac57-be55e4e59c2c&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:20.575Z"
+            },
+            {
+              "id": "class_ff0127eb073a",
+              "title": "Calibrando a Distância, como Configurar a Distância Entre as Ordens do seu Grid",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161508-calibrando-a-distancia-como-configurar-a-distancia-entre-as-ordens-do-se",
+              "order": 16,
+              "videos": [
+                {
+                  "id": "video_93f002c478b0",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=76872274-0323-4825-985e-b237325dfb07",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_fa3ac945b0d6",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=76872274-0323-4825-985e-b237325dfb07&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1053,
+              "rawHtml": "<iframe id=\"panda-a1f3810b-0855-4b88-8d49-bcf620433152\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=76872274-0323-4825-985e-b237325dfb07&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:22.302Z"
+            },
+            {
+              "id": "class_bff8f2b1d4ab",
+              "title": "Escalonando Ordens: Ajustando a Evolução dos Lotes na sua Estrutura",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161509-escalonando-ordens-ajustando-a-evolucao-dos-lotes-na-sua-estrutura",
+              "order": 17,
+              "videos": [
+                {
+                  "id": "video_c7800dc45133",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7b371f9f-731b-479a-a377-cf46002bdade",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_1cd81b772021",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7b371f9f-731b-479a-a377-cf46002bdade&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 474,
+              "rawHtml": "<iframe id=\"panda-1d3f48d2-3727-46ea-a7f6-9d492e5b25d1\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7b371f9f-731b-479a-a377-cf46002bdade&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:24.120Z"
+            },
+            {
+              "id": "class_7399be181230",
+              "title": "Ordem a Ordem, Como Definir Stop Gains Para Cada Nivel do Gradiente ou Para o Preço Médio da Estrutura",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161510-ordem-a-ordem-como-definir-stop-gains-para-cada-nivel-do-gradiente-ou-pa",
+              "order": 18,
+              "videos": [
+                {
+                  "id": "video_27e6d5ef5381",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e1cd2a6-ef57-4087-be5b-8c5abff5cca4",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_0eae8ee1217c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e1cd2a6-ef57-4087-be5b-8c5abff5cca4&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 703,
+              "rawHtml": "<iframe id=\"panda-ec28b481-3552-4c44-ba4b-acd810e81350\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e1cd2a6-ef57-4087-be5b-8c5abff5cca4&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:25.962Z"
+            },
+            {
+              "id": "class_7726a62d5f70",
+              "title": "Definindo Alvos, o Porquê de Setar uma Meta para a Estrutura Total",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161512-definindo-alvos-o-porque-de-setar-uma-meta-para-a-estrutura-total",
+              "order": 19,
+              "videos": [
+                {
+                  "id": "video_09c1eb5ff6b1",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=68281464-4728-4053-b808-742ed22ae9b6",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_31c309dc3cce",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=68281464-4728-4053-b808-742ed22ae9b6&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1346,
+              "rawHtml": "<iframe id=\"panda-7d2fd5cb-74fc-4832-bae2-5c6804b40f08\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=68281464-4728-4053-b808-742ed22ae9b6&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:27.695Z"
+            },
+            {
+              "id": "class_bff1525dbba9",
+              "title": "Limitando Prejuízos, a Importância de Controlar as Pedas da Estrutura Total",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161513-limitando-prejuizos-a-importancia-de-controlar-as-pedas-da-estrutura-tot",
+              "order": 20,
+              "videos": [
+                {
+                  "id": "video_432ed02b3104",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=880367ad-3424-4e40-bc4e-7b83e1810a35",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_859175936a40",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=880367ad-3424-4e40-bc4e-7b83e1810a35&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 410,
+              "rawHtml": "<iframe id=\"panda-7c138526-d195-4f58-9912-24d314290b7c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=880367ad-3424-4e40-bc4e-7b83e1810a35&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:29.639Z"
+            },
+            {
+              "id": "class_e18a92185f3e",
+              "title": "Traçando Metas: Garanta seu Lucro e saia do jogo",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161514-tracando-metas-garanta-seu-lucro-e-saia-do-jogo",
+              "order": 21,
+              "videos": [
+                {
+                  "id": "video_80afb7b0649f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4b53374d-f7e8-4611-b884-acfa14a35acd",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_a37592d54146",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4b53374d-f7e8-4611-b884-acfa14a35acd&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1026,
+              "rawHtml": "<iframe id=\"panda-da257169-f38b-440d-a81b-04844497319c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4b53374d-f7e8-4611-b884-acfa14a35acd&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:31.458Z"
+            },
+            {
+              "id": "class_c718bc75fcd2",
+              "title": "Conheça seus Limites: Aceitando as Perdas e Recomeçando",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161515-conheca-seus-limites-aceitando-as-perdas-e-recomecando",
+              "order": 22,
+              "videos": [
+                {
+                  "id": "video_b31f18598882",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8b7f8c4a-94bf-4fbc-a47d-dbcd1c390d0b",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_7945f8ff9770",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8b7f8c4a-94bf-4fbc-a47d-dbcd1c390d0b&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 413,
+              "rawHtml": "<iframe id=\"panda-6da1416c-dee5-48b1-8498-d158ece7b3bd\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8b7f8c4a-94bf-4fbc-a47d-dbcd1c390d0b&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:33.286Z"
+            },
+            {
+              "id": "class_ea08d6fce383",
+              "title": "Proteções Dinâmicas: Limitando sua Estratégia de Acordo com a Volatilidade",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161516-protecoes-dinamicas-limitando-sua-estrategia-de-acordo-com-a-volatilidad",
+              "order": 23,
+              "videos": [
+                {
+                  "id": "video_0854f2af609b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=20307224-d9b2-49c0-ace2-9b523e9480d6",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_501020c4569d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=20307224-d9b2-49c0-ace2-9b523e9480d6&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 988,
+              "rawHtml": "<iframe id=\"panda-3ba88160-7bcf-4ba7-a921-9feeb264f734\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=20307224-d9b2-49c0-ace2-9b523e9480d6&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:35.216Z"
+            },
+            {
+              "id": "class_58aedba27716",
+              "title": "Indo Além do Óbvio: Analisando Relatório Detalhado do Orbit",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161520-indo-alem-do-obvio-analisando-relatorio-detalhado-do-orbit",
+              "order": 24,
+              "videos": [
+                {
+                  "id": "video_f8b32dd5162b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=220837be-25c7-4fa1-b399-eeb56e7d0bea",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_f0f60f4b52e5",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=220837be-25c7-4fa1-b399-eeb56e7d0bea&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1300,
+              "rawHtml": "<iframe id=\"panda-f342cdc8-090e-4a15-adf8-dc4d71243b33\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=220837be-25c7-4fa1-b399-eeb56e7d0bea&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:37.046Z"
+            },
+            {
+              "id": "class_18c6a6e31b34",
+              "title": "Documentação Sempre na Palma da Mão: Manual do Orbit",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161521-documentacao-sempre-na-palma-da-mao-manual-do-orbit",
+              "order": 25,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 19.066666666666666,
+              "rawHtml": "\n        <p>O acesso ao Manual do Orbit está disponível no menu superior direito no BotSpot &gt; Manual Orbit</p>\n<figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzkzODg1MywicHVyIjoiYmxvYl9pZCJ9fQ==--4b5b29ac93f86d4b181b9a4e7762757c4bd5e9d6/image.png\" id=\"4984718\" alt=\"image\" width=\"null\" height=\"null\" data-image=\"4984718\"></figure>\n      ",
+              "markdown": "O acesso ao Manual do Orbit está disponível no menu superior direito no BotSpot > Manual Orbit\n\n![image](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzkzODg1MywicHVyIjoiYmxvYl9pZCJ9fQ==--4b5b29ac93f86d4b181b9a4e7762757c4bd5e9d6/image.png)",
+              "lastUpdatedAt": "2025-11-07T13:14:38.311Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        },
+        {
+          "id": "module_f999f98bd005",
+          "title": "Módulo 3 - Da Validação ao Portfólio: Colocando Estratégias de Grid Trading pra Rodar",
+          "order": 4,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_55002614ade8",
+              "title": "Explorando um Novo Mundo: A Importância de Criar Ativos Sintéticos",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161522-explorando-um-novo-mundo-a-importancia-de-criar-ativos-sinteticos",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_ba9fb3b161b7",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=21d504d3-98c7-45d7-95a2-7bf366603f6c",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_3f0a7147f27a",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=21d504d3-98c7-45d7-95a2-7bf366603f6c&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1176,
+              "rawHtml": "<iframe id=\"panda-00bd58e0-be20-4df2-a1cd-fc6723c60ca9\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=21d504d3-98c7-45d7-95a2-7bf366603f6c&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:40.119Z"
+            },
+            {
+              "id": "class_671cde4dcf9a",
+              "title": "Dominando os Custos: Configurando Spreads e Comissões no Metatrader 5",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161523-dominando-os-custos-configurando-spreads-e-comissoes-no-metatrader-5",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_a61ff4281d3c",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266dbfe4-463e-4f99-b228-e7e1ae6917fa",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_5c8f912174a3",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266dbfe4-463e-4f99-b228-e7e1ae6917fa&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1411,
+              "rawHtml": "<iframe id=\"panda-2f637916-77bb-4af9-8694-2a97889a9e63\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266dbfe4-463e-4f99-b228-e7e1ae6917fa&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:41.933Z"
+            },
+            {
+              "id": "class_970e368a5f68",
+              "title": "Explorando Dados, Como Criar um Book de Data Mining para Estratégias de Grid",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161524-explorando-dados-como-criar-um-book-de-data-mining-para-estrategias-de-g",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_8f375dbd318d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=33c8f638-401d-4c18-a357-63146091bfa3",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_593fc9df7223",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=33c8f638-401d-4c18-a357-63146091bfa3&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 2862,
+              "rawHtml": "<iframe id=\"panda-7e71b414-1f46-4352-a7f2-af501d6042a1\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=33c8f638-401d-4c18-a357-63146091bfa3&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:43.749Z"
+            },
+            {
+              "id": "class_1effe74df99d",
+              "title": "Preparando a decolagem: Testes de Robustez com Distribuição de Resultados",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161525-preparando-a-decolagem-testes-de-robustez-com-distribuicao-de-resultados",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_f825fbde3a37",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6a3adf7f-c712-43ff-ab54-4cac4cd576ff",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_a51ff30e5b82",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6a3adf7f-c712-43ff-ab54-4cac4cd576ff&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 940,
+              "rawHtml": "<iframe id=\"panda-1567fdc6-340a-4abb-9c78-272557f847f6\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6a3adf7f-c712-43ff-ab54-4cac4cd576ff&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:45.576Z"
+            },
+            {
+              "id": "class_d9d61ad86181",
+              "title": "Ligando os Motores: Testes de Robustez com Distribuição de Parâmetros",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161526-ligando-os-motores-testes-de-robustez-com-distribuicao-de-parametros",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_1870fc78d36d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a3270080-39f0-4136-a76e-99b72288f276",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_8c6cb92d011d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a3270080-39f0-4136-a76e-99b72288f276&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1318,
+              "rawHtml": "<iframe id=\"panda-2c977ae3-a679-45b4-9fb6-2fcfd906c385\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a3270080-39f0-4136-a76e-99b72288f276&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:47.450Z"
+            },
+            {
+              "id": "class_08a41d08faf1",
+              "title": "Caçando Overfitting: Aplicando Walk Forward Analysis em Estratégias de Grid",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161527-cacando-overfitting-aplicando-walk-forward-analysis-em-estrategias-de-gr",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_2af3b3ad9ea8",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ed0910eb-9da2-49b3-80bf-8ac77eb5b263",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_08ebbbf05795",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ed0910eb-9da2-49b3-80bf-8ac77eb5b263&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1943,
+              "rawHtml": "<iframe id=\"panda-e000e66a-a710-4ac3-bba6-bf38eb4417df\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ed0910eb-9da2-49b3-80bf-8ac77eb5b263&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:49.269Z"
+            },
+            {
+              "id": "class_db5a4526db0d",
+              "title": "Pronto pra decolar: Executando WFA Automático",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161528-pronto-pra-decolar-executando-wfa-automatico",
+              "order": 7,
+              "videos": [
+                {
+                  "id": "video_8e229a52fcfa",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7430e661-3613-4d52-9434-8d8e107eb516",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_b02960dbf8c5",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7430e661-3613-4d52-9434-8d8e107eb516&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1102,
+              "rawHtml": "<iframe id=\"panda-126883f4-3699-4eae-92fa-360ab816b328\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7430e661-3613-4d52-9434-8d8e107eb516&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:51.155Z"
+            },
+            {
+              "id": "class_60aa76898bde",
+              "title": "Mapa do Explorador: Analisando Backtests no BotSpot",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161529-mapa-do-explorador-analisando-backtests-no-botspot",
+              "order": 8,
+              "videos": [
+                {
+                  "id": "video_5ac0cc883ad5",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5ea3399-a797-4365-8ccf-8b9fa22a8a45",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_e3f1c9d5a53c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5ea3399-a797-4365-8ccf-8b9fa22a8a45&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1590,
+              "rawHtml": "<iframe id=\"panda-004d174c-1ea7-4c96-9851-a021a3867ff9\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5ea3399-a797-4365-8ccf-8b9fa22a8a45&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:56.560Z"
+            },
+            {
+              "id": "class_ca5a287928db",
+              "title": "Subindo de Nível: Gerenciando Portfólios no BotSpot",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161530-subindo-de-nivel-gerenciando-portfolios-no-botspot",
+              "order": 9,
+              "videos": [
+                {
+                  "id": "video_b3d246ae2bf6",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=379234d7-a05e-4c52-ae67-8f44cd78eb58",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_b06c1d374705",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=379234d7-a05e-4c52-ae67-8f44cd78eb58&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 809,
+              "rawHtml": "<iframe id=\"panda-b3235f74-6c9d-4154-833f-c7eca6dab2ad\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=379234d7-a05e-4c52-ae67-8f44cd78eb58&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:14:58.365Z"
+            },
+            {
+              "id": "class_6f57d7ac7fa0",
+              "title": "Radar Sempre Ligado: Acompanhando Estratégias em Tempo Real no BotSpot",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161531-radar-sempre-ligado-acompanhando-estrategias-em-tempo-real-no-botspot",
+              "order": 10,
+              "videos": [
+                {
+                  "id": "video_83328b3af111",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90dc6a17-2292-4536-b2c0-37c2c0cf36a7",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_412f4145e68e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90dc6a17-2292-4536-b2c0-37c2c0cf36a7&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1027,
+              "rawHtml": "<iframe id=\"panda-83a5eea0-9d39-43f6-b707-b1101762d53b\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90dc6a17-2292-4536-b2c0-37c2c0cf36a7&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:15:00.167Z"
+            },
+            {
+              "id": "class_16ec98e0e3c6",
+              "title": "Segurança em Primeiro Lugar: De Olho em Pontos Críticos na Execução de Estratégias de Grid",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161532-seguranca-em-primeiro-lugar-de-olho-em-pontos-criticos-na-execucao-de-es",
+              "order": 11,
+              "videos": [
+                {
+                  "id": "video_de68665be606",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=555055fc-fb81-4d61-a6a9-195f861b6b87",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_814124cc1847",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=555055fc-fb81-4d61-a6a9-195f861b6b87&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 607,
+              "rawHtml": "<iframe id=\"panda-d004d2b9-83d0-4dc0-8ab6-06f73438a4d9\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=555055fc-fb81-4d61-a6a9-195f861b6b87&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:15:01.883Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        },
+        {
+          "id": "module_ef4e8d01c35d",
+          "title": "Módulo 4 - Aplicando o Conhecimento: 5 Setups de Grid Trading para Você Começar no Mercado",
+          "order": 5,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_c438300fbe64",
+              "title": "O Poder das Estruturas: Como Desenvolver Teses de Investimento Sólidas com Grid Trading",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4195397-o-poder-das-estruturas-como-desenvolver-teses-de-investimento-solidas-co",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_5b8b6b8f33e1",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f8e02508-6e1a-4564-a7b6-0f2e87fd253f",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_31ad6ccb4456",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f8e02508-6e1a-4564-a7b6-0f2e87fd253f&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1264,
+              "rawHtml": "<iframe id=\"panda-3e200a2a-b9f9-4a2b-9f9a-34bd6b8e14e7\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f8e02508-6e1a-4564-a7b6-0f2e87fd253f&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:15:03.692Z"
+            },
+            {
+              "id": "class_fee4f2340b01",
+              "title": "[Setup 1] Day Grid: Uma Estratégia Intradiária que Requer Pouca Margem para Operar [ABEV3]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161534-setup-1-day-grid-uma-estrategia-intradiaria-que-requer-pouca-margem-para",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 72,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIwNCwicHVyIjoiYmxvYl9pZCJ9fQ==--4e299f1e479889b4f769577ca2c743cae8c3a9b3/%5BSetup%201%5D%20Day%20Grid%20-%20Uma%20Estrat%C3%A9gia%20Intradi%C3%A1ria%20que%20Requer%20Pouca%20Margem%20para%20Operar%20%5BABEV3%5D.png\" id=\"4615533\" alt=\"[Setup 1] Day Grid - Uma Estratégia Intradiária que Requer Pouca Margem para Operar [ABEV3]\" width=\"null\" height=\"null\" data-image=\"4615533\"></figure><p>O Day Grid se destaca pela agilidade e eficiência no aproveitamento dos movimentos intradiários da ABEV3, um ativo que historicamente apresenta volatilidade durante a abertura do mercado, após um gap. Utilizando um grid configurado para capturar o fechamento dos gaps de preço, a estratégia busca lucrar com a tendência de reversão do ativo ao longo do dia. Essa abordagem é perfeita para traders que querem otimizar o uso de margem e preferem fechar suas posições até o final do pregão, minimizando a exposição ao risco de overnight. Além disso, como a margem exigida para operar intradiariamente é reduzida, os alunos podem maximizar a alavancagem de forma controlada.</p>\n      ",
+              "markdown": "![[Setup 1] Day Grid - Uma Estratégia Intradiária que Requer Pouca Margem para Operar [ABEV3]](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIwNCwicHVyIjoiYmxvYl9pZCJ9fQ==--4e299f1e479889b4f769577ca2c743cae8c3a9b3/%5BSetup%201%5D%20Day%20Grid%20-%20Uma%20Estrat%C3%A9gia%20Intradi%C3%A1ria%20que%20Requer%20Pouca%20Margem%20para%20Operar%20%5BABEV3%5D.png)\n\nO Day Grid se destaca pela agilidade e eficiência no aproveitamento dos movimentos intradiários da ABEV3, um ativo que historicamente apresenta volatilidade durante a abertura do mercado, após um gap. Utilizando um grid configurado para capturar o fechamento dos gaps de preço, a estratégia busca lucrar com a tendência de reversão do ativo ao longo do dia. Essa abordagem é perfeita para traders que querem otimizar o uso de margem e preferem fechar suas posições até o final do pregão, minimizando a exposição ao risco de overnight. Além disso, como a margem exigida para operar intradiariamente é reduzida, os alunos podem maximizar a alavancagem de forma controlada.",
+              "lastUpdatedAt": "2025-11-07T13:15:04.957Z"
+            },
+            {
+              "id": "class_a718bf33686f",
+              "title": "[Setup 2] Carry Boost Swap Grid: Montando Estruturas Para Aproveitar os Swaps do Mercado [USD/JPY]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161535-setup-2-carry-boost-swap-grid-montando-estruturas-para-aproveitar-os-swa",
+              "order": 3,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 74.73333333333333,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyMCwicHVyIjoiYmxvYl9pZCJ9fQ==--bb32292da4c7c96a18f9255e62c2f72e50dea4f7/%5BSetup%202%5D%20Carry%20Boost%20Swap%20Grid%20-%20Montando%20Estruturas%20Para%20Aproveitar%20os%20Swaps%20do%20Mercado%20%5BUSD-JPY%5D.png\" id=\"4615549\" alt=\"[Setup 2] Carry Boost Swap Grid - Montando Estruturas Para Aproveitar os Swaps do Mercado [USD-JPY]\" width=\"null\" height=\"null\" data-image=\"4615549\"></figure><p>Esta estratégia combina a arte de montar grids com uma compreensão profunda das dinâmicas de swaps no mercado de câmbio. No par USD/JPY, é possível alavancar os swaps positivos ao manter posições compradas. Com a característica da economia japonesa de possuir juros baixos, esta estratégia oferece uma vantagem dupla: além de capitalizar sobre o movimento de preços, os traders ainda recebem swaps diários por estarem posicionados a favor dos fatores macroeconômicos que regem o ativo no longo prazo. Para traders que desejam capturar retornos a médio e longo prazo, enquanto acumulam swaps, o Carry Boost Swap Grid apresenta uma excelente oportunidade de construir uma posição forte no mercado cambial.</p>\n      ",
+              "markdown": "![[Setup 2] Carry Boost Swap Grid - Montando Estruturas Para Aproveitar os Swaps do Mercado [USD-JPY]](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyMCwicHVyIjoiYmxvYl9pZCJ9fQ==--bb32292da4c7c96a18f9255e62c2f72e50dea4f7/%5BSetup%202%5D%20Carry%20Boost%20Swap%20Grid%20-%20Montando%20Estruturas%20Para%20Aproveitar%20os%20Swaps%20do%20Mercado%20%5BUSD-JPY%5D.png)\n\nEsta estratégia combina a arte de montar grids com uma compreensão profunda das dinâmicas de swaps no mercado de câmbio. No par USD/JPY, é possível alavancar os swaps positivos ao manter posições compradas. Com a característica da economia japonesa de possuir juros baixos, esta estratégia oferece uma vantagem dupla: além de capitalizar sobre o movimento de preços, os traders ainda recebem swaps diários por estarem posicionados a favor dos fatores macroeconômicos que regem o ativo no longo prazo. Para traders que desejam capturar retornos a médio e longo prazo, enquanto acumulam swaps, o Carry Boost Swap Grid apresenta uma excelente oportunidade de construir uma posição forte no mercado cambial.",
+              "lastUpdatedAt": "2025-11-07T13:15:06.219Z"
+            },
+            {
+              "id": "class_4b35fdc31762",
+              "title": "[Setup 3] Long Trend Grid: Estruturando Posições Inteligentes de Longo Prazo [PETR4]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161536-setup-3-long-trend-grid-estruturando-posicoes-inteligentes-de-longo-praz",
+              "order": 4,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 81.26666666666667,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyMiwicHVyIjoiYmxvYl9pZCJ9fQ==--c72f4d4f1c7edf92e582b307f6c05e4933c6e9cf/%5BSetup%203%5D%20Long%20Trend%20Grid%20-%20Estruturando%20Posi%C3%A7%C3%B5es%20Inteligentes%20de%20Longo%20Prazo%20%5BPETR4%5D.png\" id=\"4615551\" alt=\"[Setup 3] Long Trend Grid - Estruturando Posições Inteligentes de Longo Prazo [PETR4]\" width=\"null\" height=\"null\" data-image=\"4615551\"></figure><p>A estratégia Long Trend Grid é ideal para investidores que acreditam no potencial de crescimento de longo prazo de ações robustas, como a Petrobras (PETR4). Esta abordagem permite que o trader crie uma série de ordens estruturadas que aproveitam quedas temporárias no preço do ativo, garantindo um preço médio cada vez mais vantajoso. Ao manter as posições por longos períodos, o investidor não apenas se posiciona para capturar o crescimento da empresa, mas também mitiga riscos ao diversificar os pontos de entrada. Além disso, a estratégia é eficaz para quem busca uma abordagem mais passiva, pois o grid trabalha a favor do trader ao longo do tempo, ajustando-se automaticamente ao comportamento do ativo. É a estratégia perfeita para construir um portfólio com visão de futuro e potencializar os retornos de longo prazo.</p>\n      ",
+              "markdown": "![[Setup 3] Long Trend Grid - Estruturando Posições Inteligentes de Longo Prazo [PETR4]](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyMiwicHVyIjoiYmxvYl9pZCJ9fQ==--c72f4d4f1c7edf92e582b307f6c05e4933c6e9cf/%5BSetup%203%5D%20Long%20Trend%20Grid%20-%20Estruturando%20Posi%C3%A7%C3%B5es%20Inteligentes%20de%20Longo%20Prazo%20%5BPETR4%5D.png)\n\nA estratégia Long Trend Grid é ideal para investidores que acreditam no potencial de crescimento de longo prazo de ações robustas, como a Petrobras (PETR4). Esta abordagem permite que o trader crie uma série de ordens estruturadas que aproveitam quedas temporárias no preço do ativo, garantindo um preço médio cada vez mais vantajoso. Ao manter as posições por longos períodos, o investidor não apenas se posiciona para capturar o crescimento da empresa, mas também mitiga riscos ao diversificar os pontos de entrada. Além disso, a estratégia é eficaz para quem busca uma abordagem mais passiva, pois o grid trabalha a favor do trader ao longo do tempo, ajustando-se automaticamente ao comportamento do ativo. É a estratégia perfeita para construir um portfólio com visão de futuro e potencializar os retornos de longo prazo.",
+              "lastUpdatedAt": "2025-11-07T13:15:07.490Z"
+            },
+            {
+              "id": "class_de1b1daba42a",
+              "title": "[Setup 4] Short Pure Risk Grid: Criando Estruturas de Risco Puro, sem Trigger [WIN]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161537-setup-4-short-pure-risk-grid-criando-estruturas-de-risco-puro-sem-trigge",
+              "order": 5,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 85,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyNCwicHVyIjoiYmxvYl9pZCJ9fQ==--9f1e3ab490db4b2bf71be8eaf8a6ce0dee88e117/%5BSetup%204%5D%20Short%20Pure%20Risk%20Grid%20-%20Criando%20Estruturas%20de%20Risco%20Puro,%20sem%20Trigger%20%5BWIN%5D.png\" id=\"4615553\" alt=\"[Setup 4] Short Pure Risk Grid - Criando Estruturas de Risco Puro, sem Trigger [WIN]\" width=\"null\" height=\"null\" data-image=\"4615553\"></figure><p>Essa é uma estratégia para os mais ousados, que buscam explorar o potencial de movimentos de queda intradiários no Mini Índice Bovespa Futuro (WIN). Ao contrário de outras abordagens que dependem de gatilhos de entrada específicos, o Short Pure Risk Grid é baseado na premissa de que o risco é a variável mais importante no grid trading, e não necessariamente o momento de entrada. Todos os dias, num horário específico, o robô inicia suas estruturas de posições vendidas, montando o grid sem um trigger exato, com a expectativa de capturar o viés baixista intradiário do ativo. O foco está em controlar o risco ao longo do dia e fechar as posições antes do final do pregão. Para traders que buscam uma abordagem não convencional e têm apetite por riscos controlados, esta estratégia oferece uma chance de lucrar com movimentos voláteis sem a necessidade de sinais de entrada tradicionais.</p>\n      ",
+              "markdown": "![[Setup 4] Short Pure Risk Grid - Criando Estruturas de Risco Puro, sem Trigger [WIN]](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY1NjIyNCwicHVyIjoiYmxvYl9pZCJ9fQ==--9f1e3ab490db4b2bf71be8eaf8a6ce0dee88e117/%5BSetup%204%5D%20Short%20Pure%20Risk%20Grid%20-%20Criando%20Estruturas%20de%20Risco%20Puro,%20sem%20Trigger%20%5BWIN%5D.png)\n\nEssa é uma estratégia para os mais ousados, que buscam explorar o potencial de movimentos de queda intradiários no Mini Índice Bovespa Futuro (WIN). Ao contrário de outras abordagens que dependem de gatilhos de entrada específicos, o Short Pure Risk Grid é baseado na premissa de que o risco é a variável mais importante no grid trading, e não necessariamente o momento de entrada. Todos os dias, num horário específico, o robô inicia suas estruturas de posições vendidas, montando o grid sem um trigger exato, com a expectativa de capturar o viés baixista intradiário do ativo. O foco está em controlar o risco ao longo do dia e fechar as posições antes do final do pregão. Para traders que buscam uma abordagem não convencional e têm apetite por riscos controlados, esta estratégia oferece uma chance de lucrar com movimentos voláteis sem a necessidade de sinais de entrada tradicionais.",
+              "lastUpdatedAt": "2025-11-07T13:15:08.749Z"
+            },
+            {
+              "id": "class_ffdee433b9fa",
+              "title": "[Setup 5] Smart Average Grid: Montando Posições Compradas com Preço Médio Inteligente para o Médio Prazo [S&P500]",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4161538-setup-5-smart-average-grid-montando-posicoes-compradas-com-preco-medio-i",
+              "order": 6,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 100,
+              "rawHtml": "\n        <figure><img src=\"https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY2OTMwNSwicHVyIjoiYmxvYl9pZCJ9fQ==--0d74a449817b1e823e4c67e2514366b1ac716fce/%5BSetup%205%5D%20Smart%20Average%20Grid%20-%20Montando%20Posi%C3%A7%C3%B5es%20Compradas%20com%20Pre%C3%A7o%20M%C3%A9dio%20Inteligente%20para%20o%20M%C3%A9dio%20Prazo%20%5BS&amp;P500%5D.png\" id=\"4635977\" alt=\"[Setup 5] Smart Average Grid - Montando Posições Compradas com Preço Médio Inteligente para o Médio Prazo [S&amp;P500]\" width=\"null\" height=\"null\" data-image=\"4635977\"></figure><p>O Smart Average Grid é uma estratégia sofisticada que combina a sofisticação do grid trading com uma abordagem inteligente para montar posições compradas em um dos índices mais importantes do mundo, o S&amp;P500. Ao focar em momentos em que o preço do índice cai, de forma exagerada, abaixo das suas mínimas recentes, o trader pode construir uma posição de forma escalonada, garantindo um preço médio atraente ao longo do tempo. A estratégia é projetada para operar com um stop-loss bem definido, limitando o risco de grandes perdas enquanto aproveita oportunidades de alavancagem controlada. O Smart Average Grid é ideal para investidores que querem capturar a recuperação do mercado após períodos de correção e têm uma visão de curto-médio prazo. Além disso, a gestão de risco bem estruturada permite que os traders se sintam confiantes ao operar com alavancagem, maximizando os retornos de forma responsável.<br><br>* O arquivo de configuração da estratégia tem como base o CFD do S&amp;P500, o Usa500, fornecido pela ActivTrades. Dessa forma, garantimos flexibilidade e acessibilidade ao mercado americano.<br><br>* Na aba configuração do Testador de Estratégia, setar o depósito em 2500 e o currency em USD.&nbsp;</p>\n      ",
+              "markdown": "![[Setup 5] Smart Average Grid - Montando Posições Compradas com Preço Médio Inteligente para o Médio Prazo [S&P500]](https://static.getmemberkit.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MzY2OTMwNSwicHVyIjoiYmxvYl9pZCJ9fQ==--0d74a449817b1e823e4c67e2514366b1ac716fce/%5BSetup%205%5D%20Smart%20Average%20Grid%20-%20Montando%20Posi%C3%A7%C3%B5es%20Compradas%20com%20Pre%C3%A7o%20M%C3%A9dio%20Inteligente%20para%20o%20M%C3%A9dio%20Prazo%20%5BS&P500%5D.png)\n\nO Smart Average Grid é uma estratégia sofisticada que combina a sofisticação do grid trading com uma abordagem inteligente para montar posições compradas em um dos índices mais importantes do mundo, o S&P500. Ao focar em momentos em que o preço do índice cai, de forma exagerada, abaixo das suas mínimas recentes, o trader pode construir uma posição de forma escalonada, garantindo um preço médio atraente ao longo do tempo. A estratégia é projetada para operar com um stop-loss bem definido, limitando o risco de grandes perdas enquanto aproveita oportunidades de alavancagem controlada. O Smart Average Grid é ideal para investidores que querem capturar a recuperação do mercado após períodos de correção e têm uma visão de curto-médio prazo. Além disso, a gestão de risco bem estruturada permite que os traders se sintam confiantes ao operar com alavancagem, maximizando os retornos de forma responsável.  \n  \n\\* O arquivo de configuração da estratégia tem como base o CFD do S&P500, o Usa500, fornecido pela ActivTrades. Dessa forma, garantimos flexibilidade e acessibilidade ao mercado americano.  \n  \n\\* Na aba configuração do Testador de Estratégia, setar o depósito em 2500 e o currency em USD.",
+              "lastUpdatedAt": "2025-11-07T13:15:10.011Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        },
+        {
+          "id": "module_a8b22e126a5d",
+          "title": "Módulo 5 — Mentorias e Encontros",
+          "order": 6,
+          "url": "https://dqlabs.memberkit.com.br/197885-grid-experts",
+          "classes": [
+            {
+              "id": "class_ceceb16cd289",
+              "title": "Sessão de Mentoria em Grupo",
+              "url": "https://dqlabs.memberkit.com.br/197885-grid-experts/4423004-sessao-de-mentoria-em-grupo",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_1ff25e7689c2",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=35a4747a-797c-49fe-a1ed-83ea916e05ec",
+                  "order": 1,
+                  "playable": true
+                },
+                {
+                  "id": "video_52d86fdba551",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=35a4747a-797c-49fe-a1ed-83ea916e05ec&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "rawHtml": "<iframe id=\"panda-e9057e74-5a6c-43a2-999f-3d40c2076f02\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=35a4747a-797c-49fe-a1ed-83ea916e05ec&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-07T13:15:11.828Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-07T13:13:23.783Z"
+        }
+      ],
+      "lastUpdatedAt": "2025-11-07T13:13:23.784Z"
+    }
+  ],
+  "metrics": {
+    "totalCourses": 1,
+    "totalModules": 6,
+    "totalClasses": 54,
+    "successRate": 0.12962962962962962,
+    "minConfidence": 10,
+    "avgConfidence": 17.830864197530865,
+    "selectorFailures": 0
+  },
+  "incidents": []
+}

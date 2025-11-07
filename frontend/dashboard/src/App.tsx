@@ -4,7 +4,6 @@ import { Layout } from './components/layout/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastContainer } from './components/ui/toast';
 import { TooltipProvider } from './components/ui/tooltip';
-import { useServiceAutoRecovery } from './hooks/useServiceAutoRecovery';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,8 +20,6 @@ interface AppContentProps {
 }
 
 function AppContent({ defaultPageId = 'workspace' }: AppContentProps) {
-  useServiceAutoRecovery();
-
   return (
     <TooltipProvider>
       <Layout defaultPageId={defaultPageId} />
@@ -40,10 +37,6 @@ function App() {
             <Route path="/" element={<AppContent defaultPageId="workspace" />} />
             <Route
               path="/documentation/metrics"
-              element={<AppContent defaultPageId="documentation-metrics" />}
-            />
-            <Route
-              path="/documentation-metrics"
               element={<AppContent defaultPageId="documentation-metrics" />}
             />
             <Route path="*" element={<Navigate to="/" replace />} />

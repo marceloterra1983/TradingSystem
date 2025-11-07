@@ -39,7 +39,6 @@ date: 2025-10-28
 | `config/.env.defaults` | ✅ Clean | Versioned defaults | 213 | None |
 | `.env` (root) | ✅ Clean | Environment secrets | 25 | None |
 | `.env.example` | ✅ Enhanced | Developer template | 89 → 96 | 7 missing vars added |
-| `apps/status/.env` | ✅ Simplified | Service Launcher override | 1 | Removed duplicates |
 | `backend/api/telegram-gateway/.env` | ✅ Documented | Gateway local config | 2 | Removed duplicates |
 | `frontend/dashboard/.env` | ✅ Removed | Vite config | 0 | Deleted (duplicated) |
 
@@ -68,27 +67,6 @@ TELEGRAM_BOT_TOKEN=CHANGE_ME_TELEGRAM_BOT_TOKEN
 **Rationale**: These variables were present in `.env` but not documented in `.env.example`, preventing new developers from understanding Telegram Gateway requirements.
 
 ### 2. Simplified Service-Specific `.env` Files
-
-#### `apps/status/.env` (Service Launcher)
-
-**Before**: 30+ lines with duplicated variables
-**After**: 12 lines with only intentional override
-
-```bash
-# ==============================================================================
-# Service Launcher - Service-Specific Overrides
-# ==============================================================================
-# Este arquivo sobrescreve defaults de config/.env.defaults
-# Apenas variáveis com valores DIFERENTES dos defaults devem estar aqui
-# ==============================================================================
-
-# Rate Limit Override (mais permissivo que default de 120)
-RATE_LIMIT_MAX=200
-```
-
-**Changes**:
-- ❌ Removed: PORT, CORS_ORIGIN, JWT_SECRET_KEY (duplicated from `.env.defaults` or `.env`)
-- ✅ Kept: RATE_LIMIT_MAX (intentional override: 200 vs default 120)
 
 #### `backend/api/telegram-gateway/.env`
 
@@ -174,7 +152,6 @@ The project uses a sophisticated cascade system implemented in [`backend/shared/
 ✅ API_SECRET_TOKEN             # Valid
 ✅ VITE_TELEGRAM_GATEWAY_API_TOKEN # Valid (same as API_SECRET_TOKEN)
 ✅ APP_DOCUMENTATION_DB_PASSWORD # Valid
-✅ LANGGRAPH_POSTGRES_PASSWORD  # Valid
 ✅ FIRECRAWL_DB_PASSWORD        # Valid
 ✅ REDIS_PASSWORD               # Valid
 ✅ PGADMIN_DEFAULT_PASSWORD     # Valid
@@ -333,7 +310,6 @@ The TradingSystem project demonstrates **excellent environment configuration man
 config/.env.defaults                    # Versioned defaults (213 vars)
 .env.example                            # Developer template (96 vars)
 .env.local                              # Local overrides (user-specific)
-apps/status/.env                        # Service Launcher override (1 var)
 backend/api/telegram-gateway/.env       # Gateway local config (2 vars)
 ```
 
@@ -347,7 +323,6 @@ backend/api/documentation-api/.env.example
 backend/api/telegram-gateway/.env.example
 backend/services/timescaledb-sync/.env.example
 frontend/dashboard/.env.example
-tools/agno-agents/.env.example
 tools/compose/.env.timescaledb.example
 tools/firecrawl/.env.example
 tools/llamaindex/.env.example
@@ -383,7 +358,6 @@ TELEGRAM_SESSION                    # Session string (auto-generated)
 TIMESCALE_POSTGRES_PASSWORD         # Database password
 TIMESCALEDB_PASSWORD                # Database password (duplicate)
 APP_DOCUMENTATION_DB_PASSWORD       # Database password
-LANGGRAPH_POSTGRES_PASSWORD         # Database password
 FIRECRAWL_DB_PASSWORD               # Database password
 REDIS_PASSWORD                      # Redis password
 GATEWAY_SECRET_TOKEN                # Shared secret

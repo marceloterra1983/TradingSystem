@@ -49,16 +49,28 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
           </button>
         </div>
         
-        {/* YouTube iframe */}
-        <div className="relative pb-[56.25%]"> {/* 16:9 aspect ratio */}
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={`https://www.youtube.com/embed/${preview.videoId}?autoplay=1`}
-            title={preview.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+        <div className="px-3 pb-3">
+          <a
+            href={preview.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block max-w-full truncate text-xs font-medium text-slate-300 hover:text-white hover:underline"
+            title={preview.url}
+            data-testid="iframe-source-url"
+          >
+            {preview.url}
+          </a>
+          {/* YouTube iframe */}
+          <div className="relative mt-2 pb-[56.25%]"> {/* 16:9 aspect ratio */}
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${preview.videoId}?autoplay=1`}
+              title={preview.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
         </div>
       </div>
     );

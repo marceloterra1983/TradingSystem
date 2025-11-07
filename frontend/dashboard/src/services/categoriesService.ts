@@ -61,12 +61,11 @@ class CategoriesService {
   private baseUrl: string;
 
   constructor() {
-    // FORCE PORT 3200 - Override any cached config (same as LibraryService fix)
-    const FORCED_BASE = 'http://localhost:3200/api/categories';
-    this.baseUrl = FORCED_BASE;
-    
-    console.warn('[CategoriesService] FORCING base URL to:', FORCED_BASE);
-    console.warn('[CategoriesService] Original would be:', `${WORKSPACE_API_URL}/categories`);
+    // Use relative path to leverage Vite proxy (same fix as LibraryService)
+    // Browser → /api/workspace/categories → Vite Proxy → workspace-api:3200/api/categories
+    this.baseUrl = '/api/workspace/categories';
+
+    console.warn('[CategoriesService] Using relative path (Vite proxy):', this.baseUrl);
   }
 
   /**

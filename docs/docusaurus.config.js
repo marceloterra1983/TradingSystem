@@ -75,8 +75,8 @@ const config = {
             //   banner: 'none',
             // },
           },
-          // Only build current version in development for fast iteration
-          onlyIncludeVersions: process.env.NODE_ENV === 'development' ? ['current'] : undefined,
+          // Build all versions including 'current' (next) for iframe embedding
+          onlyIncludeVersions: process.env.NODE_ENV === 'development' ? ['current'] : ['current', '1.1', '1.0.0'],
         },
         blog: false,
         pages: {
@@ -105,11 +105,6 @@ const config = {
             id: 'tp-capital-api',
             spec: 'static/specs/tp-capital.openapi.yaml',
             route: '/api/tp-capital',
-          },
-          {
-            id: 'status-api',
-            spec: 'static/specs/status-api.openapi.yaml',
-            route: '/api/status',
           },
           {
             id: 'firecrawl-proxy',
@@ -196,10 +191,6 @@ const config = {
             label: 'APIs',
             position: 'left',
             items: [
-              {
-                label: 'Status API',
-                to: '/api/status',
-              },
               {
                 label: 'Alert Router',
                 to: '/api/alert-router',

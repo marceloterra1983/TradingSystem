@@ -62,7 +62,7 @@ O template possui **8 seções modulares** que podem ser ativadas/desativadas:
 - **O que verifica**:
   - Dashboard (3103)
   - Documentation Hub (3400)
-  - APIs (3401, 3500, etc.)
+  - APIs (3401, 4005, etc.)
 - **Configuração**:
   ```bash
   SERVICES=(
@@ -88,7 +88,6 @@ O template possui **8 seções modulares** que podem ser ativadas/desativadas:
 - **Configuração**:
   ```bash
   declare -A API_ENDPOINTS=(
-      ["Service Launcher"]="http://localhost:3500/api/status"
       ["Documentation API"]="http://localhost:3401/api/health"
   )
   ```

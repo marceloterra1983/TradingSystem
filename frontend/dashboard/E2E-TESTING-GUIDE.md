@@ -370,3 +370,20 @@ npm run test:e2e:ui
 ---
 
 **Quer que eu execute a instalação agora?** 🧪
+
+## 📸 Visual Regression Suite
+
+- **Purpose**: garante que todas as páginas com iframe exibam o link de origem no canto superior esquerdo.
+- **Escopo atual**: Kestra, Miro, Database (QuestDB), Docusaurus (Docs) e Docs API.
+- **Servidor de teste**: o `playwright.config.ts` sobe o dashboard via `npm run dev:ci -- --port 5175` para evitar conflitos com instâncias antigas na porta 3103.
+
+```bash
+# Executar somente os testes visuais (Chromium)
+cd frontend/dashboard
+npx playwright test e2e/visual/iframe-links.spec.ts --project=chromium
+
+# Atualizar snapshots após mudanças legítimas no layout
+npx playwright test e2e/visual/iframe-links.spec.ts --project=chromium --update-snapshots
+```
+
+> Dica: use `DEBUG_IFRAME_TESTS=true` antes do comando para registrar os mocks aplicados durante o teste.

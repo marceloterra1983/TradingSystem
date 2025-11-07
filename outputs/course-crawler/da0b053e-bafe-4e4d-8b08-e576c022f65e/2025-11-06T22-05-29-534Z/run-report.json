@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "metrics": {
+    "coursesProcessed": 0,
+    "modulesProcessed": 0,
+    "classesProcessed": 0,
+    "videosDetected": 0,
+    "selectorFailures": 0,
+    "averageClassDurationMs": 0,
+    "startedAt": "2025-11-06T22:05:29.532Z",
+    "finishedAt": "2025-11-06T22:05:29.534Z"
+  },
+  "incidents": [],
+  "notes": [],
+  "classMetrics": [],
+  "error": {
+    "name": "Error",
+    "message": "ENOENT: no such file or directory, open '/app/apps/course-crawler/config/platform-config.json'",
+    "stack": "Error: ENOENT: no such file or directory, open '/app/apps/course-crawler/config/platform-config.json'\n    at async open (node:internal/fs/promises:639:25)\n    at async readFile (node:internal/fs/promises:1246:14)\n    at async loadPlatformConfig (file:///workspace/apps/course-crawler/dist/index.js:236:16)\n    at async Object.discoverCourses (file:///workspace/apps/course-crawler/dist/index.js:377:30)\n    at async main (file:///workspace/apps/course-crawler/dist/index.js:1394:24)"
+  }
+}

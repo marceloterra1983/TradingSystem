@@ -356,8 +356,8 @@ curl -X POST http://localhost:8001/consumers/dashboard/jwt \
 - [Kong Gateway Documentation](https://docs.konghq.com/gateway/latest/)
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [API Gateway Pattern (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/gateway)
-- [ADR-002: File Watcher Auto-Ingestion](./rag-services/ADR-002-file-watcher-auto-ingestion.md)
-- [ADR-001: Redis Caching Strategy](./rag-services/ADR-001-redis-caching-strategy.md)
+- [ADR-002: File Watcher Auto-Ingestion](./rag-services/ADR-002-file-watcher-auto-ingestion)
+- [ADR-001: Redis Caching Strategy](./rag-services/ADR-001-redis-caching-strategy)
 
 ## Alternatives Considered
 

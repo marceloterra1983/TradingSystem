@@ -201,12 +201,12 @@ Review `migration/INVENTORY-REPORT.md` for executive summary and launch timeline
 **Path**: `content/prompts/`
 **Owner**: PromptOps / MCPGuild
 **Content**: Patterns, style-guide, variables, overview
-**Coverage**: Agno Agents, LangGraph, LlamaIndex
+**Coverage**: LlamaIndex, Ollama
 
 ### 9. Agents (6 files)
 **Path**: `content/agents/`
 **Owner**: MCPGuild / BackendGuild
-**Content**: Agno Agents (overview, flows, prompts, mcp, tests, index)
+**Content**: Legacy agents removed (new automation TBD)
 
 ### 10. MCP (3 files)
 **Path**: `content/mcp/`

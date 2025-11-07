@@ -223,11 +223,34 @@ function formatUpcoming(upcoming) {
   ].join('\n');
 }
 
+/**
+ * Sanitizes text content for safe JSON embedding.
+ * Removes control characters and limits length to prevent JSON parsing errors.
+ *
+ * @param {string} content - Raw file content
+ * @returns {string} - Sanitized content safe for JSON
+ */
+function sanitizeForJson(content) {
+  if (!content) return null;
+
+  // Remove or replace control characters that break JSON parsing
+  // Keep only: newlines (\n), tabs (\t), carriage returns (\r)
+  let sanitized = content.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  // Limit length to prevent massive JSON files (keep first 10,000 chars)
+  if (sanitized.length > 10000) {
+    sanitized = sanitized.substring(0, 10000) + '\n\n[... content truncated ...]';
+  }
+
+  return sanitized;
+}
+
 async function readArtifactSource(relPath) {
   if (!relPath) return null;
   const absolutePath = path.join(governanceDir, relPath);
   try {
-    return await fs.readFile(absolutePath, 'utf-8');
+    const content = await fs.readFile(absolutePath, 'utf-8');
+    return sanitizeForJson(content);
   } catch (error) {
     console.warn(
       `[governance:metrics] Preview unavailable for ${relPath}: ${error.message}`,

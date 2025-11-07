@@ -48,6 +48,6 @@
 
 ## 📚 Referências
 
-- [OpenSpec change](../../../../tools/openspec/changes/port-governance-2025-11-05/README.md)
-- [Port ranges doc](../../governance/port-governance/port-ranges.mdx)
-- [Registry](../../../../config/ports/registry.yaml)
+- Diretório `tools/openspec/changes/port-governance-2025-11-05`
+- [Port ranges doc](../../governance/port-governance/port-ranges)
+- Arquivo `config/ports/registry.yaml`

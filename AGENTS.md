@@ -51,7 +51,7 @@
   - MCP servers (importa de `claude/mcp-servers.json`)
   - File tree navigation
   - Inline code suggestions
-  - Codex bridges para os comandos críticos `/quality-check`, `/health-check`, `/docker-compose`, `/service-launcher` e `/scripts` via `npm run codex:<cmd>` (ver `scripts/codex/README.md`)
+  - Codex bridges para os comandos críticos `/quality-check`, `/health-check`, `/docker-compose` e `/scripts` via `npm run codex:<cmd>` (ver `scripts/codex/README.md`)
 
 ### OpenSpec Framework
 - **Status**: ✅ Configurado
@@ -90,7 +90,6 @@ claude
 # Custom commands available:
 /health-check all              # System health monitoring
 /docker-compose start-all      # Start all Docker services
-/service-launcher start <svc>  # Start specific service
 /git-workflows                 # Git operations with Conventional Commits
 /scripts                       # Access project scripts
 ```
@@ -582,8 +581,6 @@ bash scripts/maintenance/health-check-all.sh
 # JSON output for automation
 bash scripts/maintenance/health-check-all.sh --format json
 
-# Via Service Launcher API
-curl http://localhost:3500/api/health/full | jq '.overallHealth'
 ```
 
 ---

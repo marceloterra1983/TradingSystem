@@ -1,0 +1,154 @@
+# Video Content Map — Grid Experts
+
+## Module 1: Módulo 0 - Comece por aqui!
+- 1. Video 2 (playable)
+  - Class: class_324b6b6c846c
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5c87645f-73f0-4e80-ad7f-cf343cf19b11&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_a181fd71efcd
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=481b4be8-a43a-420d-a615-e64fd97cc5ef&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_00066563fa82
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=61b424bb-651e-4f1a-98ae-352d5d4b2d37&saveProgress=false&color=f57a00
+
+## Module 2: Módulo 1 - Fundamentos do Grid: Construindo a Base
+- 1. Video 2 (playable)
+  - Class: class_6649d9c620ad
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=127f5d9d-dbb6-45f3-88a0-bc4d9ce785fd&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_09f7e778ad32
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=96a285eb-ae37-4323-8dd9-1d497f390c56&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_d5232e28dee2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8abacc28-e330-4d78-be2e-c6dcbd8e5a25&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_407618eca83e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9d3135b-76c5-48b4-ad0f-6c209979ee23&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_e82db844e8fb
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ad32cd2-3a53-4783-98b5-4a2ab046fd91&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_bb62dcfd7fb2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266c3e2d-7e67-49f6-8393-8500d4ef8f4e&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_5960c49c224b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=505752b0-9c24-4e60-ab70-82dc26b70677&saveProgress=false&color=f57a00
+
+## Module 3: Módulo 2 - O Poder da Automação no Grid Trading
+- 1. Video 2 (playable)
+  - Class: class_dd50d8f64c21
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9e0252ce-2be0-4e06-ba90-59e7da91d8be&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_f2fddf84ba70
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=dd795a32-ce8b-4d11-a874-e413fcb66d2f&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_e5a290461daf
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9fe70579-f2bc-4cac-b202-f75cbeefd706&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_62d034c0d52b
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ddc885d0-e3ca-4124-aa6d-c4de1232b66a&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1d3ae501f72e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c1f598a8-6524-483f-ab79-51aa29a99cf1&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_72218e2b3729
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a94ea41e-977c-4052-a750-6c720dbc2929&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_595804595b31
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a7c16e0-0a23-4648-b798-f20a765b139b&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_84ba0e7109a2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b87e97d9-e3bb-4e35-b8e9-6166273e0864&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_34f599526e50
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6da2646f-bec4-41e1-8bbb-79dfeea88fee&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_451075ba1161
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=0b321d18-85fb-4703-82df-373ae843b6af&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_cbc117db29fd
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a9dbbf80-1337-4568-9bbb-5c800f14e527&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1b382e10b321
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90548391-2f55-47a1-b0bb-57a826a4ceeb&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_95650aa5d73f
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5f4ef70d-b8e4-4c6c-8bbd-c2d5a6a2abfe&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_44b185125679
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9928f0e4-82a0-432d-b703-b119bb4583ac&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_677f944c6b96
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=849ecec5-f7f3-4b68-ac57-be55e4e59c2c&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ff0127eb073a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=76872274-0323-4825-985e-b237325dfb07&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_bff8f2b1d4ab
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7b371f9f-731b-479a-a377-cf46002bdade&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7399be181230
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4e1cd2a6-ef57-4087-be5b-8c5abff5cca4&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_7726a62d5f70
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=68281464-4728-4053-b808-742ed22ae9b6&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_bff1525dbba9
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=880367ad-3424-4e40-bc4e-7b83e1810a35&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_e18a92185f3e
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4b53374d-f7e8-4611-b884-acfa14a35acd&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_c718bc75fcd2
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=8b7f8c4a-94bf-4fbc-a47d-dbcd1c390d0b&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ea08d6fce383
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=20307224-d9b2-49c0-ace2-9b523e9480d6&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_58aedba27716
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=220837be-25c7-4fa1-b399-eeb56e7d0bea&saveProgress=false&color=f57a00
+
+## Module 4: Módulo 3 - Da Validação ao Portfólio: Colocando Estratégias de Grid Trading pra Rodar
+- 1. Video 2 (playable)
+  - Class: class_55002614ade8
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=21d504d3-98c7-45d7-95a2-7bf366603f6c&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_671cde4dcf9a
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=266dbfe4-463e-4f99-b228-e7e1ae6917fa&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_970e368a5f68
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=33c8f638-401d-4c18-a357-63146091bfa3&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_1effe74df99d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6a3adf7f-c712-43ff-ab54-4cac4cd576ff&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_d9d61ad86181
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a3270080-39f0-4136-a76e-99b72288f276&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_08a41d08faf1
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ed0910eb-9da2-49b3-80bf-8ac77eb5b263&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_db5a4526db0d
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7430e661-3613-4d52-9434-8d8e107eb516&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_60aa76898bde
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5ea3399-a797-4365-8ccf-8b9fa22a8a45&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_ca5a287928db
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=379234d7-a05e-4c52-ae67-8f44cd78eb58&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_6f57d7ac7fa0
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=90dc6a17-2292-4536-b2c0-37c2c0cf36a7&saveProgress=false&color=f57a00
+- 1. Video 2 (playable)
+  - Class: class_16ec98e0e3c6
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=555055fc-fb81-4d61-a6a9-195f861b6b87&saveProgress=false&color=f57a00
+
+## Module 5: Módulo 4 - Aplicando o Conhecimento: 5 Setups de Grid Trading para Você Começar no Mercado
+- 1. Video 2 (playable)
+  - Class: class_c438300fbe64
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f8e02508-6e1a-4564-a7b6-0f2e87fd253f&saveProgress=false&color=f57a00
+
+## Module 6: Módulo 5 — Mentorias e Encontros
+- 1. Video 2 (playable)
+  - Class: class_ceceb16cd289
+  - URL: https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=35a4747a-797c-49fe-a1ed-83ea916e05ec&saveProgress=false&color=f57a00

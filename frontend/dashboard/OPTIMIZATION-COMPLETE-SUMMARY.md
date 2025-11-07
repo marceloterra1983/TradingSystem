@@ -51,11 +51,10 @@ After comprehensive analysis of the TradingSystem dashboard, we discovered **exc
 5. ✅ Miro - Collaborative board
 
 #### Toolbox Section
-1. ✅ LangGraph - State machine orchestrator
+1. ✅ RAG Services (LlamaIndex) - Query dashboard
 2. ✅ RAG Services - LlamaIndex query interface
-3. ✅ AnythingLLM - Document management
 4. ✅ Kestra - Pipeline orchestration
-5. ✅ Agno Agents - Multi-agent framework
+5. ✅ Ports - Port monitoring dashboard
 6. ✅ Status (Launcher) - Service management
 7. ✅ Ports - Port monitoring
 

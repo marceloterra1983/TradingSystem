@@ -32,9 +32,7 @@ backend/
 │   ├── timescaledb/             # PostgreSQL/TimescaleDB schemas
 │   │   ├── workspace/           # Workspace schemas
 │   │   ├── documentation/       # Documentation schemas
-│   │   └── langgraph/           # LangGraph checkpoints
 │   └── questdb/                 # QuestDB time-series schemas
-│       └── schemas/langgraph/   # LangGraph events
 │
 ├── services/                     # Background services
 │   └── timescaledb-sync/       # QuestDB → TimescaleDB sync
@@ -273,8 +271,6 @@ backend/data/
 │   │   ├── 02_documentation_ideas.sql
 │   │   ├── 03_documentation_files.sql
 │   │   └── 04_documentation_audit_log.sql
-│   ├── langgraph/               # LangGraph PostgreSQL schemas
-│   │   └── langgraph_checkpoints.sql
 │   ├── workspace-schema.sql     # Workspace core (legacy)
 │   ├── workspace-seed.sql       # Workspace seed data
 │   ├── schema.sql               # Core schema
@@ -282,8 +278,6 @@ backend/data/
 │   └── maintenance.sql          # Políticas de retenção/compressão
 │
 └── questdb/                      # QuestDB time-series schemas
-    └── schemas/langgraph/
-        └── langgraph_events.sql
 ```
 
 ### TimescaleDB - Workspace Schema
@@ -371,21 +365,6 @@ for f in *.sql; do
   psql postgresql://app_documentation:password@localhost:5444/frontend_apps?schema=documentation -f "$f"
 done
 ```
-
----
-
-### TimescaleDB - LangGraph Schema
-
-**Database:** Específico do LangGraph  
-**Schemas:** PostgreSQL checkpoints + QuestDB events
-
-**PostgreSQL:**
-- `langgraph_checkpoints.sql` - Checkpoints de workflows
-
-**QuestDB:**
-- `langgraph_events.sql` - Eventos time-series
-
----
 
 ### Políticas de Retenção
 

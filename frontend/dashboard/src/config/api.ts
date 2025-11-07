@@ -10,7 +10,6 @@ export interface ApiConfig {
   libraryApi: string;
   tpCapitalApi: string;
   documentationApi: string;
-  serviceLauncherApi: string;
   telegramGatewayApi: string;
   firecrawlProxyApi: string;
   docsUrl: string;
@@ -27,7 +26,6 @@ export type ApiService =
   | 'tpCapital'
   | 'documentation'
   | 'telegramGateway'
-  | 'serviceLauncher'
   | 'firecrawlProxy';
 
 // Unified domain configuration
@@ -57,9 +55,6 @@ const unifiedConfig: ApiConfig = {
   documentationApi: `${
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
   }/api/docs`,
-  serviceLauncherApi: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
-  }/api/launcher`,
   telegramGatewayApi:
     import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local',
   firecrawlProxyApi: `${
@@ -76,10 +71,11 @@ const unifiedConfig: ApiConfig = {
       `${
         import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
       }/questdb-console`,
+      '/db-ui/questdb',
       'http://localhost:9000',
       'http://localhost:8813',
       'http://localhost:9002',
-    ) || 'http://localhost:9000',
+    ) || '/db-ui/questdb',
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -91,9 +87,9 @@ const unifiedConfig: ApiConfig = {
       'http://localhost:8813',
       'http://localhost:9009',
     ) || 'http://localhost:9010',
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || '/db-ui/pgadmin',
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || '/db-ui/pgweb',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || '/db-ui/adminer',
 };
 
 // Direct port configuration (legacy)
@@ -103,8 +99,6 @@ const directConfig: ApiConfig = {
     resolveEnv('VITE_WORKSPACE_API_URL') || 'http://localhost:3200/api',  // Updated: LowDB Stack - WSL2 workaround (PORT 3200)
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || '/api/tp-capital',
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || '/api/docs',
-  serviceLauncherApi:
-    import.meta.env.VITE_SERVICE_LAUNCHER_API_URL || '/api/launcher',
   telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || '',
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || 'http://localhost:3600',
@@ -117,11 +111,12 @@ const directConfig: ApiConfig = {
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
+      '/db-ui/questdb',
       ENDPOINTS.questdb,
       'http://localhost:9000',
       'http://localhost:8813',
       'http://localhost:9002',
-    ) || ENDPOINTS.questdb,
+    ) || '/db-ui/questdb',
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
@@ -130,9 +125,9 @@ const directConfig: ApiConfig = {
       'http://localhost:8813',
       'http://localhost:9009',
     ) || ENDPOINTS.questdb,
-  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
-  pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
-  adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
+  pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || '/db-ui/pgadmin',
+  pgWebUrl: import.meta.env.VITE_PGWEB_URL || '/db-ui/pgweb',
+  adminerUrl: import.meta.env.VITE_ADMINER_URL || '/db-ui/adminer',
 };
 
 // Get current configuration based on environment
@@ -164,8 +159,6 @@ export function getApiUrl(service: ApiService): string {
     }
     case 'documentation':
       return apiConfig.documentationApi;
-    case 'serviceLauncher':
-      return apiConfig.serviceLauncherApi;
     case 'telegramGateway':
       return apiConfig.telegramGatewayApi;
     case 'firecrawlProxy':

@@ -63,11 +63,11 @@ echo ""
 echo -e "${CYAN}Step 4: Starting stacks in dependency order...${NC}"
 echo ""
 
-# 4.1 DATABASE Stack (QuestDB + LangGraph Postgres)
+# 4.1 DATABASE Stack (QuestDB shared telemetry)
 echo -e "${CYAN}📊 Starting DATABASE Stack...${NC}"
 if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" ]; then
     if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" up -d; then
-        echo -e "${GREEN}✓ Shared analytics stack started (QuestDB + LangGraph Postgres)${NC}"
+        echo -e "${GREEN}✓ Shared analytics stack started (QuestDB)${NC}"
     else
         echo -e "${RED}✗ Failed to start database stack${NC}"
     fi

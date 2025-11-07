@@ -1,0 +1,34 @@
+---
+title: Deployment Checklist Overview
+description: Guia de referência rápida com os principais itens obrigatórios antes de implantar qualquer serviço do TradingSystem.
+slug: /reference/deployment/checklist
+tags: [deployment, checklist, governance]
+owner: DevOps
+lastReviewed: "2025-11-06"
+sidebar_position: 30
+---
+
+# Deployment Checklist Overview
+
+Esta página resume os pontos obrigatórios antes de disparar um deploy. Para a lista detalhada, consulte o controle completo em [`/governance/controls/pre-deploy-checklist`](/governance/controls/pre-deploy-checklist).
+
+## Itens essenciais
+
+- ✅ Variáveis de ambiente críticas validadas (`bash scripts/validation/validate-env.sh`)
+- ✅ Docker Compose validado (`docker compose ... config`)
+- ✅ Portas e redes conferidas (`bash scripts/validation/check-port-conflicts.sh`)
+- ✅ Targets de proxy revisados nas stacks frontend (`VITE_*_PROXY_TARGET`)
+- ✅ Consultas SQL filtrando `__checkpoint__`
+- ✅ Status `received,queued` considerados nos consumidores
+
+## Artefatos relacionados
+
+- [Pre-Deployment Checklist (controle)](/governance/controls/pre-deploy-checklist)
+- [POL-0003 Addendum 001 - Port Mapping](/governance/policies/addendums/pol-0003-addendum-001-port-mapping-rules)
+- [POL-0002 Addendum 001 - Variáveis vazias](/governance/policies/addendums/pol-0002-addendum-001-empty-value-validation)
+- [Incident Report 2025-11-05](/governance/evidence/incidents/2025-11-05-tp-capital-connectivity-failure)
+
+---
+
+**Dica**: Execute `bash scripts/validation/pre-deploy-validation-suite.sh` para automatizar a checagem completa.
+
