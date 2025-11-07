@@ -80,7 +80,9 @@ export async function getRun(id: string) {
 }
 
 export async function fetchNextQueuedRun() {
+  console.log('[RunService] 🔍 Fetching next queued run...');
   return withTransaction(async (client) => {
+    console.log('[RunService] 📊 Querying for queued runs...');
     const run = await client.query<RunRow>(
       `
         SELECT *
@@ -91,10 +93,17 @@ export async function fetchNextQueuedRun() {
          LIMIT 1
       `,
     );
+    console.log(`[RunService] 📋 Query returned ${run.rowCount} row(s)`);
+
     if (run.rowCount === 0) {
+      console.log('[RunService] ⏸️  No queued runs found');
       return null;
     }
+
     const record = run.rows[0];
+    console.log(`[RunService] ✅ Found queued run: ${record.id}`);
+    console.log('[RunService] 🔄 Updating run status to "running"...');
+
     await client.query(
       `
         UPDATE course_crawler.crawl_runs
@@ -104,6 +113,8 @@ export async function fetchNextQueuedRun() {
       `,
       [record.id],
     );
+
+    console.log(`[RunService] ✅ Run ${record.id} marked as running`);
     return mapRow({ ...record, status: 'running', started_at: new Date().toISOString() } as RunRow);
   });
 }

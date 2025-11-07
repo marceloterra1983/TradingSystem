@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   # ============================================================================
@@ -16,7 +16,7 @@ jobs:
   benchmark:
     name: ⚡ Performance Benchmark
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     services:
       timescaledb:
@@ -59,12 +59,16 @@ jobs:
         working-directory: apps/tp-capital
         run: |
           npm start &
-          sleep 10
+          sleep 5
         env:
           PORT: 4005
           TIMESCALEDB_HOST: localhost
           TIMESCALEDB_PORT: 5432
           LOG_LEVEL: error
+
+      - name: Wait for TP Capital server
+        run: |
+          timeout 90 bash -c 'until curl -sf http://localhost:4005/health > /dev/null; do echo "Waiting for TP Capital server..."; sleep 3; done'
 
       - name: Install wrk (HTTP benchmarking tool)
         run: |

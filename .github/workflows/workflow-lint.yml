@@ -1,6 +1,33 @@
 name: Workflow Lint
 
 on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version'
+        required: false
+        default: '20'
+        type: string
+
+jobs:
+  lint:
+    name: Workflow Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node workspace
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache-dependency-path: package-lock.json
+
+      - name: Run workflow lint
+        run: npm run ci:lint-workflows
+name: Workflow Lint
+
+on:
   pull_request:
   push:
     branches:

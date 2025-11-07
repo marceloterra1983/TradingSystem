@@ -14,9 +14,10 @@ on:
       - 'backend/shared/**'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/tp-capital
+  SERVICE_DIR: apps/tp-capital
 
 jobs:
   # ============================================================================
@@ -36,19 +37,19 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/tp-capital/package-lock.json
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm ci
 
       - name: Run ESLint
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm run lint
         continue-on-error: false
 
       - name: Check code formatting
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: |
           npx prettier --check "src/**/*.js"
 
@@ -69,24 +70,24 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/tp-capital/package-lock.json
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm ci
 
       - name: Run unit tests
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm run test:unit
 
       - name: Generate coverage report
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./apps/tp-capital/coverage/coverage-final.json
+          files: ./${{ env.SERVICE_DIR }}/coverage/coverage-final.json
           flags: unit-tests
           name: tp-capital-unit
           fail_ci_if_error: false
@@ -123,10 +124,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/tp-capital/package-lock.json
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm ci
 
       - name: Wait for TimescaleDB
@@ -141,7 +142,7 @@ jobs:
           "
 
       - name: Run integration tests
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm run test:integration
         env:
           TIMESCALEDB_HOST: localhost
@@ -185,10 +186,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/tp-capital/package-lock.json
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm ci
 
       - name: Setup test database
@@ -199,7 +200,7 @@ jobs:
           "
 
       - name: Start TP Capital server
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: |
           npm start &
           sleep 10
@@ -218,7 +219,7 @@ jobs:
           timeout 30 bash -c 'until curl -f http://localhost:4005/healthz; do sleep 2; done'
 
       - name: Run E2E tests
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm run test:e2e
 
       - name: Stop server
@@ -242,24 +243,25 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: apps/tp-capital/package-lock.json
+          cache-dependency-path: ${{ env.SERVICE_DIR }}/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm ci
 
       - name: Run npm audit
-        working-directory: apps/tp-capital
+        working-directory: ${{ env.SERVICE_DIR }}
         run: npm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Run Snyk security scan
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --file=apps/tp-capital/package.json
+          args: --severity-threshold=high --file=${{ env.SERVICE_DIR }}/package.json
 
   # ============================================================================
   # JOB 6: Build Docker Image
@@ -299,8 +301,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: apps/tp-capital
-          file: apps/tp-capital/Dockerfile.dev
+          context: ${{ env.SERVICE_DIR }}
+          file: ${{ env.SERVICE_DIR }}/Dockerfile.dev
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -346,7 +348,7 @@ jobs:
     name: 📢 Notify on Failure
     runs-on: ubuntu-latest
     needs: [code-quality, unit-tests, integration-tests, e2e-tests]
-    if: failure()
+    if: ${{ failure() && secrets.SLACK_WEBHOOK != '' }}
 
     steps:
       - name: Send Slack notification

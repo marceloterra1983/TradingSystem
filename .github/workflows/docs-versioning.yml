@@ -21,30 +21,8 @@ env:
 
 jobs:
   freeze_guard:
-    name: Freeze Guard
-    runs-on: ubuntu-latest
-    outputs:
-      active: ${{ steps.freeze.outputs.active }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - id: freeze
-        name: Detect deployment freeze
-        run: |
-          if [ ! -f FREEZE-NOTICE.md ]; then
-            echo "No freeze notice file found. Continuing."
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if grep -Eiq '(\*\*)?status(\*\*)?[^\n]*:\s*active' FREEZE-NOTICE.md; then
-            echo "Deployment freeze is ACTIVE. Skipping downstream jobs."
-            echo "active=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Deployment freeze not active."
-            echo "active=false" >> "$GITHUB_OUTPUT"
-          fi
+    uses: ./.github/workflows/freeze-guard.yml
+    secrets: inherit
 
   validate-prerequisites:
     name: Validate Prerequisites
@@ -65,7 +43,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
@@ -141,7 +119,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
@@ -201,7 +179,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: npm
           cache-dependency-path: docs/package-lock.json
 

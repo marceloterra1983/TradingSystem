@@ -1,0 +1,246 @@
+=============================================================================
+TradingSystem Docker Compose - Port Map Visualization
+=============================================================================
+Generated: 2025-11-07
+Legend: ✅ Active  ⚠️ Conflict  🔴 Missing from docs  🔒 Internal only
+=============================================================================
+
+PORT RANGES (Host Ports)
+
+3000-3999: Frontend & APIs
+│
+├─ 3000-3099: Frontend UI
+│  ├─ 3000 ⚠️  Grafana (monitoring)
+│  ├─ 3000 ⚠️  Firecrawl API (upstream)
+│  ├─ 3002 ✅  Firecrawl API (alternate)
+│  └─ 3003 ✅  Playwright Service
+│
+├─ 3100-3199: Dashboard UI
+│  ├─ 3100 ✅  Grafana (telegram-monitoring)
+│  └─ 3103 ✅  Dashboard (main frontend)
+│
+├─ 3200-3299: Integrations
+│  └─ 3210 ✅  Workspace API
+│
+├─ 3300-3399: Automation Apps
+│  └─ 3310 ✅  WAHA WhatsApp Gateway
+│
+├─ 3400-3499: Documentation
+│  ├─ 3400 🔴  Documentation Hub (NGINX)
+│  ├─ 3401 🔴  Documentation API (alternate)
+│  ├─ 3402 ✅  RAG Service
+│  ├─ 3403 ✅  RAG Collections Service
+│  ├─ 3404 ✅  Documentation Hub (primary)
+│  └─ 3405 ✅  Documentation API (primary)
+│
+├─ 3500-3699: Automation Tools
+│  ├─ 3600 ✅  Firecrawl Proxy
+│  └─ 3601 ✅  Course Crawler API
+│
+└─ 3900-3999: Launcher APIs
+   └─ 3909 ✅  DB UI Launcher API
+
+4000-4999: External Integrations & Databases
+│
+├─ 4000-4099: External Integrations
+│  ├─ 4007 ✅  Telegram MTProto Gateway
+│  ├─ 4008 ✅  TP Capital API
+│  └─ 4010 ✅  Telegram Gateway API
+│
+├─ 4200-4299: Application UIs
+│  └─ 4201 ✅  Course Crawler UI
+│
+└─ 5000-5499: Databases (NOT 7000 RANGE!)
+   ├─ 5050 ✅  pgAdmin
+   ├─ 5432 🔒  PostgreSQL (internal only)
+   ├─ 5433 🔴  TimescaleDB (workspace shared)
+   ├─ 5434 ✅  TimescaleDB (telegram)
+   ├─ 5435 ✅  Neon Compute
+   ├─ 5436 ✅  Firecrawl PostgreSQL
+   ├─ 5438 ✅  WAHA PostgreSQL
+   ├─ 5440 ✅  TimescaleDB (TP Capital)
+   ├─ 5442 ✅  n8n PostgreSQL
+   ├─ 5450 ✅  Workspace PostgreSQL
+   └─ 55433 ✅ Course Crawler PostgreSQL
+
+5600-5699: Messaging
+│
+└─ 5672 ✅  RabbitMQ AMQP
+
+6000-6999: Cache, Queue, Connection Poolers
+│
+├─ 6300-6399: Cache & Vector DB
+│  ├─ 6333 ✅  Qdrant Vector DB
+│  ├─ 6334 ✅  Qdrant Node 2
+│  ├─ 6335 ✅  Qdrant Node 1 P2P
+│  ├─ 6336 ✅  Qdrant Node 2 P2P
+│  ├─ 6337 ✅  Qdrant Node 3
+│  ├─ 6338 ✅  Qdrant Node 3 P2P
+│  ├─ 6340 ✅  Qdrant Load Balancer
+│  ├─ 6379 ⚠️  Redis (general cache)
+│  ├─ 6379 ⚠️  Redis (telegram master) - different network!
+│  ├─ 6379 ⚠️  Redis (firecrawl) - different network!
+│  ├─ 6380 ✅  Redis (RAG)
+│  ├─ 6381 ✅  Redis (TP Capital master)
+│  ├─ 6382 ✅  Redis (TP Capital replica)
+│  ├─ 6385 ✅  Redis (telegram replica)
+│  └─ 6390 ✅  Redis (n8n)
+│
+└─ 6400-6499: Connection Poolers
+   ├─ 6400 ✅  Neon Pageserver
+   ├─ 6432 ✅  PgBouncer (general)
+   ├─ 6434 ✅  PgBouncer (telegram)
+   └─ 6435 ✅  PgBouncer (TP Capital)
+
+7000-7999: Reserved (Currently Unused)
+│
+└─ 7600-7699: Neon Storage
+   ├─ 7676 ✅  Neon Safekeeper
+   └─ 7677 ✅  Neon Safekeeper HTTP
+
+8000-8999: DevTools & Management
+│
+├─ 8000-8099: API Gateways
+│  ├─ 8000 ✅  Kong Proxy HTTP
+│  ├─ 8001 ✅  Kong Admin API
+│  ├─ 8081 ⚠️  pgWeb
+│  ├─ 8081 ⚠️  Redis Commander (CONFLICT!)
+│  ├─ 8082 ✅  Adminer
+│  └─ 8082 ✅  Redis Commander (proposed)
+│
+├─ 8100-8199: Orchestration
+│  ├─ 8100 ✅  Kestra HTTP
+│  └─ 8101 ✅  Kestra Management
+│
+├─ 8200-8299: LlamaIndex
+│  ├─ 8201 ✅  LlamaIndex Ingestion
+│  └─ 8202 ✅  LlamaIndex Query
+│
+├─ 8400-8499: Stats & Monitoring
+│  ├─ 8404 ✅  HAProxy Stats
+│  ├─ 8443 ✅  Kong Proxy HTTPS
+│  └─ 8444 ✅  Kong Admin HTTPS
+│
+└─ 8800-8899: Protocol Bridges
+   └─ 8812 ✅  QuestDB InfluxDB Port
+
+9000-9999: Monitoring & Storage
+│
+├─ 9000-9099: Time-Series & Metrics
+│  ├─ 9000 🔴  QuestDB (internal)
+│  ├─ 9002 ✅  QuestDB (HTTP)
+│  └─ 9009 ✅  QuestDB ILP
+│
+├─ 9090-9199: Prometheus & Exporters
+│  ├─ 9090 ⚠️  Prometheus (main)
+│  ├─ 9090 ⚠️  Prometheus (telegram) - same port!
+│  ├─ 9091 ✅  Prometheus (telegram - proposed)
+│  ├─ 9093 ✅  Alertmanager
+│  ├─ 9121 ✅  Redis Exporter
+│  └─ 9187 ✅  PostgreSQL Exporter
+│
+└─ 9300-9399: Object Storage
+   ├─ 9300 ✅  MinIO API
+   └─ 9301 ✅  MinIO Console
+
+10000-11999: Reserved for Future Use
+
+11000-11999: AI Services
+│
+└─ 11434 ✅ Ollama
+
+12000-14999: Reserved for Future Use
+
+15000-15999: Admin UIs
+│
+└─ 15672 ✅ RabbitMQ Management UI
+
+16000-25999: Reserved for Future Use
+
+26000-26999: High-Availability Services
+│
+└─ 26379 ✅ Redis Sentinel
+
+=============================================================================
+CONFLICTS SUMMARY
+=============================================================================
+
+⚠️  Port 3000: Grafana (monitoring) vs Firecrawl API (upstream)
+    Resolution: Use GRAFANA_PORT=3000, Firecrawl uses alternate 3002
+
+⚠️  Port 6379: Multiple Redis instances (5 services)
+    Resolution: ACCEPTABLE - Different internal networks prevent collision
+    - redis-cache (general)
+    - telegram-redis-master (telegram_backend network)
+    - firecrawl-redis (firecrawl_backend network)
+    - Each isolated, no actual conflict
+
+⚠️  Port 8081: pgWeb vs Redis Commander
+    Resolution: Keep pgWeb at 8081, move Redis Commander to 8082
+
+⚠️  Port 9090: Prometheus (main) vs Prometheus (telegram)
+    Resolution: Main=9090, Telegram=9091 (via TELEGRAM_PROMETHEUS_PORT)
+
+=============================================================================
+MISSING FROM DOCUMENTATION
+=============================================================================
+
+🔴  Port 3400: Documentation Hub (primary NGINX server)
+🔴  Port 3401: Documentation API (alternate port)
+🔴  Port 5433: TimescaleDB (workspace shared database)
+🔴  Port 9000: QuestDB (internal container port exposed)
+
+Action: Update docs/content/tools/ports-services.mdx
+
+=============================================================================
+NETWORK ISOLATION (Why Redis "Conflicts" Are OK)
+=============================================================================
+
+Redis instances on port 6379 use DIFFERENT NETWORKS:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Host Machine (Port 6379 CAN'T bind multiple times)         │
+├─────────────────────────────────────────────────────────────┤
+│ ✅ redis-cache         → 6379:6379 (tradingsystem-network) │
+│ ✅ telegram-redis      → 6379:6379 (telegram_backend)      │
+│ ✅ firecrawl-redis     → 6379:6379 (firecrawl_backend)     │
+│ ✅ rag-redis           → 6380:6379 (tradingsystem_backend) │
+│ ✅ tp-capital-redis    → 6381:6379 (tp_capital_backend)    │
+│ ✅ n8n-redis           → 6390:6379 (n8n_backend)           │
+└─────────────────────────────────────────────────────────────┘
+
+KEY INSIGHT: They WOULD conflict if all tried to bind to host 6379,
+but most services DON'T expose Redis externally! They use internal
+Docker networks only.
+
+EXTERNAL BINDINGS (actual host ports used):
+- 6379 → redis-cache (general)
+- 6380 → rag-redis
+- 6381 → tp-capital-redis-master
+- 6382 → tp-capital-redis-replica
+- 6385 → telegram-redis-replica
+- 6390 → n8n-redis
+
+No actual conflict! ✅
+
+=============================================================================
+RECOMMENDED VARIABLE NAMING CONVENTION
+=============================================================================
+
+Pattern: <SERVICE>_<COMPONENT>_PORT
+
+Examples:
+  WORKSPACE_API_PORT=3210
+  TP_CAPITAL_API_PORT=4008
+  TP_CAPITAL_DB_PORT=5440
+  TP_CAPITAL_REDIS_MASTER_PORT=6381
+  TP_CAPITAL_REDIS_REPLICA_PORT=6382
+  TELEGRAM_API_PORT=4010
+  TELEGRAM_MTPROTO_PORT=4007
+  TELEGRAM_DB_PORT=5434
+  DOCS_PORT=3404
+  DOCS_API_PORT=3405
+
+=============================================================================
+END OF VISUALIZATION
+=============================================================================

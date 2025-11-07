@@ -17,20 +17,8 @@ on:
 
 jobs:
   workflow-lint:
-    name: Workflow Quality Gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node workspace
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: '20'
-          cache-dependency-path: package-lock.json
-
-      - name: Run workflow lint
-        run: npm run ci:lint-workflows
+    uses: ./.github/workflows/workflow-lint.yml
+    secrets: inherit
 
   e2e-tests:
     name: E2E Tests (Playwright)

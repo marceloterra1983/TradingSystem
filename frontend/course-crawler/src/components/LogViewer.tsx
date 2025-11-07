@@ -15,51 +15,47 @@ interface LogViewerProps {
 
 export function LogViewer({ runId, status }: LogViewerProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isExpanded, setIsExpanded] = useState(status === 'running' || status === 'queued');
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // ❌ Disabled auto-expand
   const logsEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Simulate log streaming (replace with WebSocket later)
+  // ❌ Removed auto-scroll - user controls scroll manually
+  // ❌ Removed mock logs - showing static message instead
   useEffect(() => {
-    if (status !== 'running' && status !== 'queued') {
+    if (status === 'queued') {
+      setLogs([{
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: 'Run queued. Logs will appear when execution starts.'
+      }]);
       return;
     }
 
-    // Mock logs for demonstration
-    const mockLogs: LogEntry[] = [
-      { timestamp: new Date().toISOString(), level: 'info', message: 'Initializing crawler...' },
-      { timestamp: new Date().toISOString(), level: 'info', message: 'Loading course credentials...' },
-      { timestamp: new Date().toISOString(), level: 'info', message: 'Authenticating with MemberKit...' },
-      { timestamp: new Date().toISOString(), level: 'info', message: 'Authentication successful' },
-      { timestamp: new Date().toISOString(), level: 'info', message: 'Fetching course structure...' },
-    ];
-
-    setLogs(mockLogs);
-
-    // Simulate streaming logs
-    let logIndex = mockLogs.length;
-    const interval = setInterval(() => {
-      if (status === 'running') {
-        const newLog: LogEntry = {
+    if (status === 'running' || status === 'success' || status === 'failed') {
+      setLogs([
+        {
           timestamp: new Date().toISOString(),
-          level: logIndex % 10 === 0 ? 'warning' : 'info',
-          message: `Processing module ${Math.floor(logIndex / 5)} - class ${logIndex % 5}...`,
-        };
-        setLogs((prev) => [...prev, newLog]);
-        logIndex++;
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [status, runId]);
-
-  // Auto-scroll to bottom when new logs arrive
-  useEffect(() => {
-    if (autoScroll && logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+          level: 'info',
+          message: '📋 View complete logs in Docker:'
+        },
+        {
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: `   docker logs -f course-crawler-worker | grep "${runId.substring(0, 8)}"`
+        },
+        {
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: ''
+        },
+        {
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: '💡 Real-time log streaming via WebSocket will be implemented in Phase 3'
+        }
+      ]);
     }
-  }, [logs, autoScroll]);
+  }, [status, runId]);
 
   const handleCopyLogs = () => {
     const logsText = logs
@@ -126,11 +122,11 @@ export function LogViewer({ runId, status }: LogViewerProps) {
         <div className="flex items-center gap-2">
           <Terminal className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           <span className="text-sm font-medium text-gray-900 dark:text-white">
-            Live Logs ({logs.length} entries)
+            Logs ({logs.length} entries)
           </span>
           {status === 'running' && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse">
-              STREAMING
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              RUNNING
             </span>
           )}
         </div>
@@ -193,17 +189,11 @@ export function LogViewer({ runId, status }: LogViewerProps) {
             <div ref={logsEndRef} />
           </div>
 
-          {/* Footer Controls */}
+          {/* Footer - Removed auto-scroll controls */}
           <div className="flex items-center justify-between p-2 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-            <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={autoScroll}
-                onChange={(e) => setAutoScroll(e.target.checked)}
-                className="rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-              />
-              Auto-scroll to bottom
-            </label>
+            <span className="text-xs text-gray-500 dark:text-gray-500">
+              Use Docker logs command above to view complete execution logs
+            </span>
             <span className="text-xs text-gray-500 dark:text-gray-500">
               {logs.filter((l) => l.level === 'error').length} errors •{' '}
               {logs.filter((l) => l.level === 'warning').length} warnings

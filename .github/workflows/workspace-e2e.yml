@@ -40,17 +40,10 @@ env:
 
 jobs:
   workflow-lint:
-    name: Workflow Quality Gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node workspace
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache-dependency-path: package-lock.json
-      - name: Run workflow lint
-        run: npm run ci:lint-workflows
+    uses: ./.github/workflows/workflow-lint.yml
+    with:
+      node-version: ${{ env.NODE_VERSION }}
+    secrets: inherit
 
   # ===========================================================================
   # JOB 1: Smoke Tests (Fast validation)

@@ -1,0 +1,352 @@
+# =============================================================================
+# Docker Compose Template - Best Practices
+# =============================================================================
+# Purpose: Reference template for creating new service stacks
+# Version: 1.0.0
+# Last Updated: 2025-11-07
+# =============================================================================
+
+name: service-stack-name
+
+# =============================================================================
+# SERVICES
+# =============================================================================
+services:
+  # ---------------------------------------------------------------------------
+  # Service Name (Use descriptive, kebab-case names)
+  # ---------------------------------------------------------------------------
+  service-name:
+    container_name: service-container-name  # ✅ ALWAYS set explicit container name
+    image: "${IMG_SERVICE_NAME:-img-service-name}:${IMG_VERSION:-latest}"
+    platform: linux/amd64  # Optional: Specify if multi-platform
+
+    # -------------------------------------------------------------------------
+    # Build Configuration (if custom image)
+    # -------------------------------------------------------------------------
+    build:
+      context: ../..  # Use project root for consistent paths
+      dockerfile: path/to/Dockerfile
+      target: development  # Optional: multi-stage build target
+
+    # -------------------------------------------------------------------------
+    # Environment Files (CRITICAL: ALWAYS use root .env)
+    # -------------------------------------------------------------------------
+    env_file:
+      - ../../.env        # ✅ Primary config (REQUIRED)
+      - ../../.env.shared # ✅ Shared config (if exists)
+
+    # -------------------------------------------------------------------------
+    # Port Mapping (ALWAYS use variables with defaults)
+    # -------------------------------------------------------------------------
+    ports:
+      # Format: "${SERVICE_COMPONENT_PORT:-default_port}:container_internal_port"
+      - "${SERVICE_API_PORT:-3000}:3000"
+      # Example: WORKSPACE_API_PORT=3210 in .env → host:3210, container:3200
+      # Example: TP_CAPITAL_API_PORT=4008 in .env → host:4008, container:4005
+
+    # -------------------------------------------------------------------------
+    # Environment Variables (container-specific, NOT in .env)
+    # -------------------------------------------------------------------------
+    environment:
+      # Runtime config (doesn't need to be in .env)
+      - NODE_ENV=production
+      - PORT=3000  # Internal container port
+
+      # Database connection (use container names for service discovery)
+      - DB_HOST=service-database  # ✅ Container name
+      - DB_PORT=5432              # ✅ Internal container port
+      - DB_NAME=${SERVICE_DB_NAME:-service_db}
+      - DB_USER=${SERVICE_DB_USER:-service_user}
+      - DB_PASSWORD=${SERVICE_DB_PASSWORD}
+
+      # Service URLs (container-to-container communication)
+      - UPSTREAM_SERVICE_URL=http://other-service:8000  # ✅ Container name + internal port
+
+      # CORS (load from .env)
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
+
+      # Rate limiting
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=120
+
+    # -------------------------------------------------------------------------
+    # Volume Mounts
+    # -------------------------------------------------------------------------
+    volumes:
+      # Source code (read-only for hot-reload)
+      - ../../path/to/source:/app/src:ro  # ✅ :ro = read-only
+
+      # Config files (read-only)
+      - ../../config/file.yml:/app/config.yml:ro
+
+      # Persistent data (named volume)
+      - service-data:/app/data
+
+      # Anonymous volume (prevents overwrite of node_modules)
+      - /app/node_modules
+
+    # -------------------------------------------------------------------------
+    # Networks (join hub for cross-stack communication)
+    # -------------------------------------------------------------------------
+    networks:
+      - tradingsystem_backend  # ✅ Hub network (required for cross-stack)
+      - service_backend        # ✅ Stack-specific internal network
+
+    # -------------------------------------------------------------------------
+    # Dependencies (wait for health checks)
+    # -------------------------------------------------------------------------
+    depends_on:
+      service-database:
+        condition: service_healthy  # ✅ Wait for health check
+      service-cache:
+        condition: service_started  # ⚠️ Only if no health check
+
+    # -------------------------------------------------------------------------
+    # Health Check (REQUIRED for production services)
+    # -------------------------------------------------------------------------
+    healthcheck:
+      # Test actual service functionality
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      # Alternative for Node.js:
+      # test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"]
+
+      interval: 30s     # How often to run check
+      timeout: 10s      # Max time to wait for response
+      retries: 3        # Failures before marking unhealthy
+      start_period: 30s # Grace period after container start
+
+    # -------------------------------------------------------------------------
+    # Restart Policy
+    # -------------------------------------------------------------------------
+    restart: unless-stopped  # ✅ Recommended for production
+    # restart: "no"          # ❌ Only for testing
+    # restart: always        # ⚠️ Restarts even if manually stopped
+
+    # -------------------------------------------------------------------------
+    # Resource Limits (optional, recommended for production)
+    # -------------------------------------------------------------------------
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'      # Max CPU cores
+          memory: 1G       # Max RAM
+        reservations:
+          cpus: '0.5'      # Guaranteed CPU
+          memory: 512M     # Guaranteed RAM
+
+    # -------------------------------------------------------------------------
+    # Logging Configuration (optional)
+    # -------------------------------------------------------------------------
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"  # Max log file size
+        max-file: "3"    # Keep 3 rotated files
+
+    # -------------------------------------------------------------------------
+    # Labels (for organization and automation)
+    # -------------------------------------------------------------------------
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.tier=application"  # application|data|cache|queue
+      - "com.tradingsystem.service=service-name"
+      - "com.tradingsystem.component=api"     # api|worker|cron|gateway
+      - "com.tradingsystem.description=Brief description of service purpose"
+
+  # ---------------------------------------------------------------------------
+  # Database Service Example
+  # ---------------------------------------------------------------------------
+  service-database:
+    container_name: service-database
+    image: postgres:16-alpine
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    environment:
+      POSTGRES_DB: ${SERVICE_DB_NAME:-service_db}
+      POSTGRES_USER: ${SERVICE_DB_USER:-service_user}
+      POSTGRES_PASSWORD: ${SERVICE_DB_PASSWORD}
+      POSTGRES_MAX_CONNECTIONS: 100
+      POSTGRES_SHARED_BUFFERS: 256MB
+
+    ports:
+      - "${SERVICE_DB_PORT:-5432}:5432"
+
+    volumes:
+      - service-db-data:/var/lib/postgresql/data
+      - ../../path/to/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+    networks:
+      - service_backend  # Internal network only
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SERVICE_DB_USER:-service_user} -d ${SERVICE_DB_NAME:-service_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=database"
+
+  # ---------------------------------------------------------------------------
+  # Cache Service Example (Redis)
+  # ---------------------------------------------------------------------------
+  service-cache:
+    container_name: service-cache
+    image: redis:7-alpine
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+
+    ports:
+      - "${SERVICE_REDIS_PORT:-6379}:6379"
+
+    volumes:
+      - service-cache-data:/data
+
+    networks:
+      - service_backend
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  # External hub network (for cross-stack communication)
+  tradingsystem_backend:
+    external: true
+    name: tradingsystem_backend
+
+  # Stack-specific internal network
+  service_backend:
+    name: service_backend
+    driver: bridge
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  # Application data
+  service-data:
+    name: service-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.component=application"
+
+  # Database data
+  service-db-data:
+    name: service-db-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.component=database"
+
+  # Cache data
+  service-cache-data:
+    name: service-cache-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=service-stack"
+      - "com.tradingsystem.component=cache"
+
+# =============================================================================
+# USAGE EXAMPLES
+# =============================================================================
+#
+# Start entire stack:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml up -d
+#
+# View logs (all services):
+#   docker compose -f tools/compose/docker-compose.service-stack.yml logs -f
+#
+# View logs (specific service):
+#   docker compose -f tools/compose/docker-compose.service-stack.yml logs -f service-name
+#
+# Check status:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml ps
+#
+# Restart specific service:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml restart service-name
+#
+# Stop entire stack:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml down
+#
+# Stop and remove volumes (CAUTION - deletes data):
+#   docker compose -f tools/compose/docker-compose.service-stack.yml down -v
+#
+# Shell into container:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml exec service-name sh
+#
+# Connect to database:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml exec service-database \
+#     psql -U service_user -d service_db
+#
+# Check Redis:
+#   docker compose -f tools/compose/docker-compose.service-stack.yml exec service-cache redis-cli INFO
+#
+# =============================================================================
+
+# =============================================================================
+# CHECKLIST BEFORE DEPLOYMENT
+# =============================================================================
+# ✅ All services have explicit container_name
+# ✅ All services load from root .env (env_file: ../../.env)
+# ✅ All port variables use ${VAR:-default} format
+# ✅ All services have health checks defined
+# ✅ All dependencies use condition: service_healthy
+# ✅ All volume mounts use :ro where appropriate
+# ✅ All networks properly configured (hub + internal)
+# ✅ All resource limits defined for production services
+# ✅ All labels set for organization
+# ✅ No hardcoded credentials (use .env variables)
+# ✅ No .env file mounted as volume
+# ✅ No localhost references (use container names)
+# ✅ Port conflicts checked with: bash scripts/tools/validate-ports.sh
+# =============================================================================

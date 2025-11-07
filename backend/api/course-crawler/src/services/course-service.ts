@@ -100,9 +100,11 @@ export async function updateCourse(
     return null;
   }
   const current = existing.rows[0];
+  // Only update password if a new non-empty password is provided
+  // Empty string means "don't change password"
   const encrypted =
-    input.password !== undefined
-      ? (input.password ? encryptSecret(input.password) : '') // Empty string if password is empty
+    input.password !== undefined && input.password !== ''
+      ? encryptSecret(input.password)
       : current.password_encrypted;
   const targetUrls =
     input.targetUrls !== undefined ? input.targetUrls : current.target_urls ?? [];

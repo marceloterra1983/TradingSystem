@@ -10,7 +10,7 @@ import {
 import { getCourseWithSecret } from '../services/course-service.js';
 
 const POLL_INTERVAL_MS = 5000;
-const DEFAULT_TIMEOUT_MS = 300000; // 5 minutes
+const DEFAULT_TIMEOUT_MS = 1800000; // 30 minutes (increased from 5 min for large courses)
 
 // Worker state for health checks
 export const workerState = {

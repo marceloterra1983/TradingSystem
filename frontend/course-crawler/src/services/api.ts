@@ -9,7 +9,8 @@ import axios, { AxiosInstance } from 'axios';
  * - Artifact retrieval (Markdown/JSON outputs)
  */
 
-const API_BASE_URL = import.meta.env.VITE_COURSE_CRAWLER_API_URL || 'http://localhost:3601';
+// Use relative path for nginx proxy, or explicit URL if provided
+const API_BASE_URL = import.meta.env.VITE_COURSE_CRAWLER_API_URL || '';
 
 class CourseCrawlerAPI {
   private client: AxiosInstance;

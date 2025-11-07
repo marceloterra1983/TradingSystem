@@ -23,30 +23,8 @@ permissions:
 
 jobs:
   freeze_guard:
-    name: Freeze Guard
-    runs-on: ubuntu-latest
-    outputs:
-      active: ${{ steps.detect.outputs.active }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - id: detect
-        name: Detect freeze status
-        shell: bash
-        run: |
-          if [ ! -f FREEZE-NOTICE.md ]; then
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "No FREEZE-NOTICE.md file found - proceeding normally"
-            exit 0
-          fi
-          status_line=$(grep -i '^\*\*Status' FREEZE-NOTICE.md 2>/dev/null | head -n1 | tr -d '\r' || echo "")
-          if echo "$status_line" | grep -qiE 'ACTIVE|IN PROGRESS|ONGOING|PHASE'; then
-            echo "active=true" >> "$GITHUB_OUTPUT"
-            echo "🔒 Freeze active: $status_line"
-          else
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "✅ No active freeze detected"
-          fi
+    uses: ./.github/workflows/freeze-guard.yml
+    secrets: inherit
 
   validate-sync:
     name: Validate Code-Docs Sync
@@ -66,7 +44,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Setup Python

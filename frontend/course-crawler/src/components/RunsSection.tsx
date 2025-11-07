@@ -7,7 +7,7 @@ import {
   CollapsibleCardContent,
 } from './ui/collapsible-card';
 import { Button } from './ui/button';
-import { Play, Eye, X, Clock } from 'lucide-react';
+import { Play, Eye, X } from 'lucide-react';
 import { api, Run } from '../services/api';
 import { LogViewer } from './LogViewer';
 
@@ -23,14 +23,14 @@ export function RunsSection() {
     loadRuns();
   }, [filter]);
 
-  // Separate effect for auto-refresh to avoid infinite loop
+  // ✅ Reduced polling frequency to 30s for better UX
   useEffect(() => {
     const interval = setInterval(() => {
       // Only refresh if we have active runs
       if (runs.some((r) => r.status === 'queued' || r.status === 'running')) {
         loadRuns();
       }
-    }, 5000);
+    }, 30000); // 30 seconds instead of 5
     return () => clearInterval(interval);
   }, [runs]);
 
@@ -193,14 +193,8 @@ export function RunsSection() {
                         Error: {run.error}
                       </p>
                     )}
-                    {(run.status === 'running' || run.status === 'queued') && run.startedAt && (
-                      <div className="mt-2 flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
-                        <Clock className="h-3 w-3" />
-                        <span>
-                          Duration: {Math.floor((Date.now() - new Date(run.startedAt).getTime()) / 1000)}s
-                        </span>
-                      </div>
-                    )}
+                    {/* ❌ Removed live duration timer to prevent constant re-renders */}
+                    {/* Duration can be calculated manually: finishedAt - startedAt */}
 
                     {/* Log Viewer */}
                     <LogViewer runId={run.id} status={run.status} />

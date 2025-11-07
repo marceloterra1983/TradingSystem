@@ -31,37 +31,10 @@ permissions:
 
 jobs:
   freeze_guard:
-    name: Freeze Guard
-    runs-on: ubuntu-latest
-    outputs:
-      active: ${{ steps.detect.outputs.active }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - id: detect
-        name: Detect freeze status
-        shell: bash
-        env:
-          SKIP_FREEZE_GUARD: ${{ github.event_name == 'workflow_call' && inputs.skip_freeze_guard || 'false' }}
-        run: |
-          if [ "$SKIP_FREEZE_GUARD" = "true" ]; then
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "Freeze guard skipped via reusable workflow input"
-            exit 0
-          fi
-          if [ ! -f FREEZE-NOTICE.md ]; then
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "No FREEZE-NOTICE.md file found - proceeding normally"
-            exit 0
-          fi
-          status_line=$(grep -i '^\*\*Status' FREEZE-NOTICE.md 2>/dev/null | head -n1 | tr -d '\r' || echo "")
-          if echo "$status_line" | grep -qiE 'ACTIVE|IN PROGRESS|ONGOING|PHASE'; then
-            echo "active=true" >> "$GITHUB_OUTPUT"
-            echo "🔒 Freeze active: $status_line"
-          else
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "✅ No active freeze detected"
-          fi
+    uses: ./.github/workflows/freeze-guard.yml
+    with:
+      skip: ${{ github.event_name == 'workflow_call' && inputs.skip_freeze_guard }}
+    secrets: inherit
 
   validate-frontmatter:
     name: Validate Frontmatter
@@ -191,7 +164,7 @@ jobs:
       - name: Prepare docs workspace
         uses: ./.github/actions/setup-node
         with:
-          node-version: '18'
+          node-version: '20'
           cache-dependency-path: docs/package-lock.json
           working-directory: docs
 
@@ -247,7 +220,7 @@ jobs:
       - name: Prepare docs workspace
         uses: ./.github/actions/setup-node
         with:
-          node-version: '18'
+          node-version: '20'
           cache-dependency-path: docs/package-lock.json
           working-directory: docs
 
@@ -299,7 +272,7 @@ jobs:
       - maintenance-audit
       - docs-check
       - docs-links
-    if: ${{ always() && needs.freeze_guard.outputs.active != 'true' && (
+    if: ${{ always() && needs.freeze_guard.outputs.active != 'true' && secrets.SLACK_WEBHOOK_URL != '' && (
           needs.validate-frontmatter.result == 'failure' ||
           needs.maintenance-audit.result == 'failure' ||
           needs.docs-check.result == 'failure' ||

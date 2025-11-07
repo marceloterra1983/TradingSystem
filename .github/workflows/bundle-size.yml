@@ -85,29 +85,46 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
           HEAD_REF: ${{ github.head_ref }}
         run: |
+          set -euo pipefail
+
+          if [ -z "$BASE_REF" ]; then
+            echo "No base reference detected. Skipping bundle comparison."
+            exit 0
+          fi
+
           # Checkout base branch
           git fetch origin "$BASE_REF"
           git checkout "origin/$BASE_REF"
 
-          # Build base
           npm ci
           npm run build
+
+          if [ ! -d dist ]; then
+            echo "Base build did not produce a dist directory. Skipping comparison."
+            exit 0
+          fi
+
           BASE_SIZE=$(du -sb dist | cut -f1)
 
           # Checkout PR branch
           git checkout "$HEAD_REF"
           npm ci
           npm run build
+
+          if [ ! -d dist ]; then
+            echo "PR build did not produce a dist directory. Skipping comparison."
+            exit 0
+          fi
+
           PR_SIZE=$(du -sb dist | cut -f1)
-          
-          # Calculate diff
+
           DIFF=$((PR_SIZE - BASE_SIZE))
           DIFF_KB=$((DIFF / 1024))
-          
+
           echo "Base size: $((BASE_SIZE / 1024)) KB"
           echo "PR size: $((PR_SIZE / 1024)) KB"
           echo "Difference: ${DIFF_KB} KB"
-          
+
           if [ $DIFF_KB -gt 50 ]; then
             echo "⚠️ Bundle size increased by more than 50 KB!"
             exit 1

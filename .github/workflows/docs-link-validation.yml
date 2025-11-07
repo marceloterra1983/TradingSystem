@@ -25,30 +25,8 @@ on:
 
 jobs:
   freeze_guard:
-    name: Freeze Guard
-    runs-on: ubuntu-latest
-    outputs:
-      active: ${{ steps.detect.outputs.active }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - id: detect
-        name: Detect freeze status
-        shell: bash
-        run: |
-          if [ ! -f FREEZE-NOTICE.md ]; then
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "No FREEZE-NOTICE.md file found - proceeding normally"
-            exit 0
-          fi
-          status_line=$(grep -i '^\*\*Status' FREEZE-NOTICE.md 2>/dev/null | head -n1 | tr -d '\r' || echo "")
-          if echo "$status_line" | grep -qiE 'ACTIVE|IN PROGRESS|ONGOING|PHASE'; then
-            echo "active=true" >> "$GITHUB_OUTPUT"
-            echo "🔒 Freeze active: $status_line"
-          else
-            echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "✅ No active freeze detected"
-          fi
+    uses: ./.github/workflows/freeze-guard.yml
+    secrets: inherit
 
   validate-links:
     name: Validate Documentation Links
@@ -262,9 +240,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: link-validation-report-${{ github.run_number }}
-          path: |
-            docs/reports/link-validation-*.json
-            docs/reports/link-validation-*.json  # Legacy during transition
+          path: docs/reports/link-validation-*.json
           retention-days: 30
 
       - name: Create GitHub Step Summary
@@ -273,10 +249,6 @@ jobs:
         run: |
           REPORT_FILE=""
           if [ -f "./docs/reports/link-validation-pr.json" ]; then
-            REPORT_FILE="./docs/reports/link-validation-pr.json"
-          elif [ -f "./docs/reports/link-validation-full.json" ]; then
-            REPORT_FILE="./docs/reports/link-validation-full.json"
-          elif [ -f "./docs/reports/link-validation-pr.json" ]; then
             REPORT_FILE="./docs/reports/link-validation-pr.json"
           elif [ -f "./docs/reports/link-validation-full.json" ]; then
             REPORT_FILE="./docs/reports/link-validation-full.json"

@@ -72,7 +72,7 @@ export function CoursesSection() {
       name: course.name,
       baseUrl: course.baseUrl,
       username: course.username,
-      password: course.password || '',
+      password: '', // Leave empty - only update if user enters new password
     });
     setEditingId(course.id);
     setShowForm(true);
@@ -204,7 +204,7 @@ export function CoursesSection() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                    placeholder="Leave empty if not required"
+                    placeholder={editingId ? "Leave empty to keep current password" : "Leave empty if not required"}
                   />
                   <button
                     type="button"

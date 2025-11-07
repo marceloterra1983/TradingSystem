@@ -25,17 +25,8 @@ on:
 
 jobs:
   workflow-lint:
-    name: Workflow Quality Gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node workspace
-        uses: ./.github/actions/setup-node
-        with:
-          node-version: '20'
-          cache-dependency-path: package-lock.json
-      - name: Run workflow lint
-        run: npm run ci:lint-workflows
+    uses: ./.github/workflows/workflow-lint.yml
+    secrets: inherit
 
   e2e-tests:
     name: E2E Tests
@@ -199,23 +190,46 @@ jobs:
       
       - name: Verify all services are accessible
         run: |
-          echo "🔍 Final health check (Dashboard on host + Telegram in containers)..."
-          
-          # Dashboard (runs on host)
-          echo "✅ Dashboard (host): http://localhost:3103"
-          curl -f http://localhost:3103 > /dev/null || { echo "❌ Dashboard not accessible"; exit 1; }
-          
-          # Gateway API (runs in container, exposed on localhost:4010)
-          echo "✅ Gateway API (container → host:4010): http://localhost:4010/health"
-          curl -f http://localhost:4010/health > /dev/null || { echo "❌ Gateway API not accessible"; exit 1; }
-          
-          echo -e "\n🎉 All services healthy and ready for E2E tests!"
+          set -euo pipefail
+          echo "🔍 Final health check (Dashboard on host + Telegram containers)..."
+
+          check_http() {
+            local name=$1
+            local url=$2
+            local expect_json=$3
+            local response
+
+            for attempt in $(seq 1 30); do
+              if response=$(curl -sf "$url" 2>/dev/null); then
+                if [ "$expect_json" = "json" ]; then
+                  if echo "$response" | grep -qi '"status"'; then
+                    echo "✅ $name healthy (attempt $attempt)"
+                    return 0
+                  fi
+                else
+                  echo "✅ $name healthy (attempt $attempt)"
+                  return 0
+                fi
+              fi
+              echo "⏳ $name not ready (attempt $attempt/30)"
+              sleep 2
+            done
+
+            echo "❌ $name failed readiness check"
+            echo "Last response:"
+            echo "$response"
+            return 1
+          }
+
+          check_http "Dashboard" "http://localhost:3103" plain
+          check_http "Gateway API" "http://localhost:4010/health" json
+
+          echo "🎉 All services healthy and ready for E2E tests!"
           echo "  - Frontend: Dashboard (Vite on host)"
           echo "  - Backend: Gateway API (Docker container)"
           echo "  - Data: TimescaleDB + Redis (Docker containers)"
-          echo -e "\n📝 Note: MTProto excluded (requires real Telegram credentials)"
-          echo "📝 Note: PgBouncer excluded (direct connection simpler for E2E)"
-      
+          echo "📝 MTProto e PgBouncer permanecem desativados neste cenário"
+
       # ==============================================================================
       # Run E2E Tests
       # ==============================================================================

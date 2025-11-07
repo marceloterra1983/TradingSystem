@@ -325,3 +325,5 @@ venv/                  # Virtual environment directory
 # direnv - Auto-load project environments
 .direnv/               # direnv cache (do NOT commit)
 !.envrc                # Allow .envrc (project config - MUST be committed)
+.env.backup-*
+config/.env.local

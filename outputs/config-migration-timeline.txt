@@ -1,0 +1,164 @@
+┌──────────────────────────────────────────────────────────────────────────────┐
+│          TRADINGSYSTEM CONFIGURATION MIGRATION TIMELINE                      │
+│                      6-Week Phased Rollout                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 1: FOUNDATION (CRITICAL PATH)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Separate secrets from defaults, establish loading hierarchy          │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Create backend/shared/config/load-env.js (3-layer loader)             │
+│    ✓ Split .env → .env (secrets) + config/.env.defaults                    │
+│    ✓ Update all services to use shared loader                              │
+│    ✓ Add validation script (validate-layers.sh)                            │
+│    ✓ Test .env.local overrides work                                        │
+│                                                                              │
+│  Owner: Backend Lead                                                        │
+│  Effort: 3 days                                                             │
+│  Risk: Low (backwards compatible)                                           │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • All secrets in .env (no defaults)                                      │
+│    • All services use shared loader                                         │
+│    • Validation script passes                                               │
+│    • Developer overrides work (.env.local)                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 2-3: PORT REGISTRY (HIGH IMPACT)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Centralize port mappings, eliminate conflicts                        │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Extract all ports from docker-compose → ports-registry.json           │
+│    ✓ Implement validation pipeline (check-conflicts.js)                    │
+│    ✓ Add CLI tool (assign, list, validate)                                 │
+│    ✓ Migrate one service (workspace-api proof of concept)                  │
+│    ✓ Auto-generate documentation from registry                             │
+│                                                                              │
+│  Owner: DevOps Lead                                                         │
+│  Effort: 1 week                                                             │
+│  Risk: Medium (requires template generation)                                │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • Registry contains all 61 services                                      │
+│    • Validation catches port conflicts                                      │
+│    • One service uses generated compose file                                │
+│    • Documentation auto-updates                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 3: VITE_ SCOPE LEAKAGE FIX (SECURITY)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Remove container hostnames from browser environment                  │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Audit all VITE_ variables (grep search)                               │
+│    ✓ Remove VITE_*_PROXY_TARGET from docker-compose                        │
+│    ✓ Update vite.config.ts (remove fallback)                               │
+│    ✓ Add ESLint rule (prevent future misuse)                               │
+│    ✓ Rebuild all affected containers                                       │
+│                                                                              │
+│  Owner: Frontend Lead                                                       │
+│  Effort: 2 days                                                             │
+│  Risk: Low (easy to revert)                                                 │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • Zero VITE_*_PROXY_TARGET in codebase                                  │
+│    • ESLint catches violations                                              │
+│    • Browser shows no container hostnames                                   │
+│    • All APIs still work                                                    │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 4: SERVICE REGISTRY (MAINTAINABILITY)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Centralize service URLs for easier management                        │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Create services-registry.json (extract from vite.config)              │
+│    ✓ Add TypeScript types (ServiceDefinition interface)                    │
+│    ✓ Implement getServiceUrl() helper                                      │
+│    ✓ Migrate one service (proof of concept)                                │
+│    ✓ Add health monitoring dashboard                                       │
+│                                                                              │
+│  Owner: Full-Stack Team                                                     │
+│  Effort: 3 days                                                             │
+│  Risk: Low (additive feature)                                               │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • Registry contains all services                                         │
+│    • Helper function works with real API                                    │
+│    • Health checks detect offline services                                  │
+│    • Dashboard shows service status                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 5: VALIDATION PIPELINE (QUALITY)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Catch config errors before runtime                                   │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Implement Joi schema (config/schema.js)                               │
+│    ✓ Add validation script (validate-config.sh)                            │
+│    ✓ Integrate into CI/CD (GitHub workflow)                                │
+│    ✓ Add pre-commit hook (husky)                                           │
+│    ✓ Generate config docs from schema                                      │
+│                                                                              │
+│  Owner: QA + Backend                                                        │
+│  Effort: 4 days                                                             │
+│  Risk: Low (validation only, non-breaking)                                  │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • Schema validates all variables                                         │
+│    • CI fails on invalid config                                             │
+│    • Pre-commit prevents bad commits                                        │
+│    • Documentation auto-generated                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+WEEK 6: CLEANUP & DOCUMENTATION (FINALIZATION)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Goal: Remove obsolete patterns, update guides                              │
+│                                                                              │
+│  Tasks:                                                                      │
+│    ✓ Delete deprecated files (.env.shared, old scripts)                    │
+│    ✓ Update CLAUDE.md (remove Policy 7000)                                 │
+│    ✓ Create developer migration guide                                      │
+│    ✓ Record training video                                                 │
+│    ✓ Retrospective & ADR updates                                           │
+│                                                                              │
+│  Owner: All Team                                                            │
+│  Effort: 2 days                                                             │
+│  Risk: None (documentation only)                                            │
+│                                                                              │
+│  Success Criteria:                                                          │
+│    • All deprecated files removed                                           │
+│    • Documentation reflects new system                                      │
+│    • Team trained on new patterns                                           │
+│    • No outstanding migration tasks                                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          EXPECTED OUTCOMES                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  • 90% reduction in config-related incidents (18/week → 2/week)             │
+│  • 95% reduction in debugging time (5 hours/week → 30 min/week)             │
+│  • Zero port conflicts at runtime (caught by CI/CD)                         │
+│  • 75% faster developer onboarding (4 hours → 1 hour)                       │
+│  • 100% documentation accuracy (auto-generated from registry)               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          RISK MITIGATION                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  • Backwards compatible (old configs still work)                            │
+│  • Feature flags (enable per service)                                       │
+│  • Automated backups (before each phase)                                    │
+│  • Incremental rollout (one service at a time)                              │
+│  • Easy rollback (revert commits + flip flags)                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+CRITICAL PATH:
+  Week 1 (Foundation) → Week 2-3 (Port Registry) → Week 5 (Validation)
+
+PARALLEL WORK:
+  Week 3 (VITE_ Fix) & Week 4 (Service Registry) can run concurrently
+
+TOTAL EFFORT: 4-6 weeks (depending on team capacity)
