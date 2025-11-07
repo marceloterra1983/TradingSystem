@@ -8,6 +8,8 @@ import {
   markRunSuccess,
 } from '../services/run-service.js';
 import { getCourseWithSecret } from '../services/course-service.js';
+import { withTransaction } from '../db/pool.js';
+import type { PoolClient } from 'pg';
 
 const POLL_INTERVAL_MS = 5000;
 const DEFAULT_TIMEOUT_MS = 1800000; // 30 minutes (increased from 5 min for large courses)
@@ -196,9 +198,61 @@ async function processRun() {
   await markRunSuccess(run.id, latestDir, metrics ?? {});
 }
 
+/**
+ * Recover orphaned runs (stuck as "running" after container restart)
+ * Marks them as failed with appropriate error message
+ */
+async function recoverOrphanedRuns() {
+  console.log('[Worker] 🔍 Checking for orphaned runs...');
+  try {
+    const orphanedRuns = await withTransaction(async (client: PoolClient) => {
+      const result = await client.query(
+        `SELECT id, course_id, started_at
+         FROM course_crawler.crawl_runs
+         WHERE status = 'running'
+         ORDER BY started_at ASC`,
+      );
+      return result.rows;
+    });
+
+    if (orphanedRuns.length === 0) {
+      console.log('[Worker] ✅ No orphaned runs found');
+      return;
+    }
+
+    console.log(`[Worker] ⚠️  Found ${orphanedRuns.length} orphaned run(s)`);
+
+    for (const run of orphanedRuns) {
+      const duration = Date.now() - new Date(run.started_at).getTime();
+      console.log(`[Worker] 🔧 Recovering run ${run.id} (running for ${Math.floor(duration / 1000)}s)`);
+
+      await withTransaction(async (client: PoolClient) => {
+        await client.query(
+          `UPDATE course_crawler.crawl_runs
+           SET status = 'failed',
+               error = 'Process terminated unexpectedly (container restart or SIGTERM). Run was interrupted during execution.',
+               finished_at = NOW()
+           WHERE id = $1`,
+          [run.id],
+        );
+      });
+
+      console.log(`[Worker] ✅ Run ${run.id} marked as failed`);
+    }
+
+    console.log(`[Worker] 🎉 Recovered ${orphanedRuns.length} orphaned run(s)`);
+  } catch (error) {
+    console.error('[Worker] ❌ Failed to recover orphaned runs:', error);
+  }
+}
+
 async function main() {
   // eslint-disable-next-line no-console
   console.log('Course Crawler worker started');
+
+  // Recover orphaned runs on startup
+  await recoverOrphanedRuns();
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
