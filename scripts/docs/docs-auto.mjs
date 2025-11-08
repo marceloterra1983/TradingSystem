@@ -301,16 +301,18 @@ function upsertComment(content, label, value) {
 }
 
 function ensureFrontmatter(content) {
-  const fmMatch = content.match(/^---[\s\S]*?---/);
-  if (fmMatch) {
+  const regex = /---[\s\S]*?---/;
+  const match = regex.exec(content);
+  if (match) {
+    const restStart = match.index + match[0].length;
     return {
-      frontmatter: fmMatch[0],
-      rest: content.slice(fmMatch[0].length).replace(/^\s*/, ''),
+      frontmatter: match[0],
+      rest: content.slice(restStart).replace(/^\s*/, ''),
     };
   }
   return {
     frontmatter: '',
-    rest: content,
+    rest: content.trimStart(),
   };
 }
 
