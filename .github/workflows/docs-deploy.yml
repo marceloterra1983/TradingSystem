@@ -44,6 +44,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install root tooling
+        run: npm ci
+        working-directory: .
+
       - name: Prepare docs workspace
         uses: ./.github/actions/setup-node
         with:

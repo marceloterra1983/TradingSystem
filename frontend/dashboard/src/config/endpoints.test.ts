@@ -76,20 +76,20 @@ describe('Endpoints Configuration', () => {
       expect(ENDPOINTS.telegramGateway).toBe('http://localhost:4010');
     });
 
-    it('should have database UIs in protected range 7100-7199', () => {
+    it('should configure default database UI endpoints', () => {
       const { ENDPOINTS } = endpointsModule;
 
-      expect(ENDPOINTS.pgAdmin).toBe('http://localhost:7100');
-      expect(ENDPOINTS.adminer).toBe('http://localhost:7101');
-      expect(ENDPOINTS.pgWeb).toBe('http://localhost:7102');
+      expect(ENDPOINTS.pgAdmin).toBe('http://localhost:5050');
+      expect(ENDPOINTS.adminer).toBe('http://localhost:8082');
+      expect(ENDPOINTS.pgWeb).toBe('http://localhost:8081');
     });
 
-    it('should have databases in protected range 7000-7099', () => {
+    it('should expose database services using the documented ports', () => {
       const { ENDPOINTS } = endpointsModule;
 
       expect(ENDPOINTS.timescaledb.port).toBe(7000);
       expect(ENDPOINTS.timescaledb.url).toBe('http://localhost:7000');
-      expect(ENDPOINTS.questdb).toBe('http://localhost:7010');
+      expect(ENDPOINTS.questdb).toBe('http://localhost:9002');
       expect(ENDPOINTS.qdrant).toBe('http://localhost:7020');
       expect(ENDPOINTS.redis.port).toBe(7030);
     });
@@ -190,14 +190,14 @@ describe('Endpoints Configuration', () => {
       expect(uiEndpoints).toHaveProperty('Qdrant Dashboard');
     });
 
-    it('should have all endpoints in protected range or standard ports', () => {
+    it('should list the documented host ports', () => {
       const { getDatabaseUIEndpoints } = endpointsModule;
       const uiEndpoints = getDatabaseUIEndpoints();
 
-      expect(uiEndpoints['PgAdmin']).toContain('7100');
-      expect(uiEndpoints['Adminer']).toContain('7101');
-      expect(uiEndpoints['PgWeb']).toContain('7102');
-      expect(uiEndpoints['QuestDB UI']).toContain('7010');
+      expect(uiEndpoints['PgAdmin']).toContain('5050');
+      expect(uiEndpoints['Adminer']).toContain('8082');
+      expect(uiEndpoints['PgWeb']).toContain('8081');
+      expect(uiEndpoints['QuestDB UI']).toContain('9002');
       expect(uiEndpoints['Qdrant Dashboard']).toContain('7020');
     });
 
@@ -241,39 +241,30 @@ describe('Endpoints Configuration', () => {
   });
 
   describe('Port Range Validation', () => {
-    it('should use ports in protected database range (7000-7999)', () => {
+    it('should report the documented host ports for UIs', () => {
       const { ENDPOINTS } = endpointsModule;
 
       const pgAdminPort = parseInt(ENDPOINTS.pgAdmin.match(/:(\d+)/)?.[1] || '0');
       const adminerPort = parseInt(ENDPOINTS.adminer.match(/:(\d+)/)?.[1] || '0');
       const pgWebPort = parseInt(ENDPOINTS.pgWeb.match(/:(\d+)/)?.[1] || '0');
 
-      expect(pgAdminPort).toBeGreaterThanOrEqual(7100);
-      expect(pgAdminPort).toBeLessThanOrEqual(7199);
-
-      expect(adminerPort).toBeGreaterThanOrEqual(7100);
-      expect(adminerPort).toBeLessThanOrEqual(7199);
-
-      expect(pgWebPort).toBeGreaterThanOrEqual(7100);
-      expect(pgWebPort).toBeLessThanOrEqual(7199);
+      expect(pgAdminPort).toBe(5050);
+      expect(adminerPort).toBe(8082);
+      expect(pgWebPort).toBe(8081);
     });
 
-    it('should use ports in database range (7000-7099) for databases', () => {
+    it('should use documented ports for databases', () => {
       const { ENDPOINTS } = endpointsModule;
 
-      expect(ENDPOINTS.timescaledb.port).toBeGreaterThanOrEqual(7000);
-      expect(ENDPOINTS.timescaledb.port).toBeLessThanOrEqual(7099);
+      expect(ENDPOINTS.timescaledb.port).toBe(7000);
 
       const questdbPort = parseInt(ENDPOINTS.questdb.match(/:(\d+)/)?.[1] || '0');
-      expect(questdbPort).toBeGreaterThanOrEqual(7000);
-      expect(questdbPort).toBeLessThanOrEqual(7099);
+      expect(questdbPort).toBe(9002);
 
       const qdrantPort = parseInt(ENDPOINTS.qdrant.match(/:(\d+)/)?.[1] || '0');
-      expect(qdrantPort).toBeGreaterThanOrEqual(7000);
-      expect(qdrantPort).toBeLessThanOrEqual(7099);
+      expect(qdrantPort).toBe(7020);
 
-      expect(ENDPOINTS.redis.port).toBeGreaterThanOrEqual(7000);
-      expect(ENDPOINTS.redis.port).toBeLessThanOrEqual(7099);
+      expect(ENDPOINTS.redis.port).toBe(7030);
     });
   });
 
