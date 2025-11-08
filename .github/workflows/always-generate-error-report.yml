@@ -82,36 +82,9 @@ jobs:
             echo "error_count=0" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit Error Report to Repository
-        if: steps.generate_report.outputs.report_generated == 'true'
-        run: |
-          # Configurar git
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-          # Adicionar apenas os arquivos de relatório
-          git add workflow-errors/ERROR-REPORT-*.md
-          git add workflow-errors/LATEST.md
-
-          # Commit (apenas se houver mudanças)
-          if git diff --staged --quiet; then
-            echo "Nenhuma mudança para commitar"
-          else
-            git commit -m "chore: add error report - $(date '+%Y-%m-%d %H:%M:%S')"
-
-            # Pull com rebase antes de push (evita conflitos)
-            echo "📥 Sincronizando com repositório remoto..."
-            git pull --rebase origin main || {
-              echo "⚠️ Conflito detectado durante rebase, tentando merge..."
-              git rebase --abort
-              git pull --no-rebase origin main
-            }
-
-            # Push
-            echo "📤 Enviando relatório para repositório..."
-            git push
-            echo "✅ Relatório commitado no repositório"
-          fi
+      # REMOVED: Commit automático causa conflitos de git push
+      # Relatórios ficam disponíveis via Artifacts (90 dias retenção)
+      # Para ver relatórios: GitHub Actions → Workflow → Artifacts → Download
 
       - name: Upload Error Report as Artifact (Backup)
         if: steps.generate_report.outputs.report_generated == 'true'
