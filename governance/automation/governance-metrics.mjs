@@ -26,6 +26,10 @@ const dashboardSnapshotPath = path.join(
   dashboardDataDir,
   'latest.json',
 );
+const legacySnapshotPath = path.join(
+  repoRoot,
+  'governance/snapshots/governance-snapshot.json',
+);
 
 function toPreviewPath(artifactPath) {
   if (!artifactPath) return null;
@@ -356,10 +360,16 @@ async function main() {
 
   await ensureDir(reportsDir);
   await ensureDir(path.dirname(dashboardSnapshotPath));
+  await ensureDir(path.dirname(legacySnapshotPath));
 
   await fs.writeFile(snapshotPath, JSON.stringify(payload, null, 2), 'utf-8');
   await fs.writeFile(
     dashboardSnapshotPath,
+    JSON.stringify(payload, null, 2),
+    'utf-8',
+  );
+  await fs.writeFile(
+    legacySnapshotPath,
     JSON.stringify(payload, null, 2),
     'utf-8',
   );

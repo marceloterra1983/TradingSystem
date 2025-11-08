@@ -6,6 +6,7 @@
     "node": ">=18.17.0"
   },
   "scripts": {
+    "build": "npm run docs:build",
     "start": "npm run docs:dev",
     "docs:dev": "docusaurus start --host 0.0.0.0 --port 3400",
     "docs:build": "docusaurus build",
