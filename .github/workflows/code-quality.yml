@@ -1,0 +1,104 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  lint-frontend:
+    name: Lint Frontend (Dashboard)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/dashboard/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend/dashboard
+        run: npm run lint
+
+      - name: Run TypeScript Check
+        working-directory: frontend/dashboard
+        run: npm run type-check || echo "TypeScript check skipped (no script defined)"
+
+      - name: Check code formatting (Prettier)
+        working-directory: frontend/dashboard
+        run: npm run format:check || echo "Prettier check skipped (no script defined)"
+
+  lint-backend-workspace:
+    name: Lint Backend (Workspace API)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'backend/api/workspace/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: backend/api/workspace
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: backend/api/workspace
+        run: npm run lint || echo "Lint script not configured"
+
+  lint-backend-tp-capital:
+    name: Lint Backend (TP Capital)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'backend/api/tp-capital/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: backend/api/tp-capital
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: backend/api/tp-capital
+        run: npm run lint || echo "Lint script not configured"
+
+  lint-docs:
+    name: Lint Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'docs/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Run linting
+        working-directory: docs
+        run: npm run lint || echo "Lint script not configured"

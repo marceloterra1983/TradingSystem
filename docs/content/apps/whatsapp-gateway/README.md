@@ -348,9 +348,9 @@ VACUUM ANALYZE whatsapp_gateway.messages;
 
 ## 📚 Related Documentation
 
-- [Telegram Stack](../telegram-gateway/README.md) - Similar architecture for Telegram
-- [TimescaleDB Documentation](../../database/timescaledb.md)
-- [MinIO Documentation](../../tools/storage/minio.md)
+- [Telegram Stack](/apps/telegram-gateway/overview) - Similar architecture for Telegram
+- [TimescaleDB Documentation](/database/overview)
+- [MinIO Documentation](https://min.io/docs/minio/container/index.html)
 - [WAHA Documentation](https://waha.devlike.pro/)
 
 ## 🔐 Security
@@ -365,4 +365,3 @@ VACUUM ANALYZE whatsapp_gateway.messages;
 ## 📝 License
 
 Internal project - TradingSystem Team
-
