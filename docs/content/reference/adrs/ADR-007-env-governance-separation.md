@@ -50,7 +50,7 @@ O TradingSystem vem enfrentando conflitos recorrentes relacionados ao gerenciame
 - 18 incidentes/semana relacionados a portas/APIs
 - 0% de cobertura de testes validando portas reais vs. declaradas
 
-**Análise completa:** [`outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md`](../../../../outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md)
+**Análise completa:** arquivo interno `outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md`
 
 ## Decision
 
@@ -362,12 +362,12 @@ git revert <commit-hash-da-migração>
 
 ## References
 
-- **Analysis Report:** [outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md](../../../../outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md)
+- **Analysis Report:** arquivo interno `outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md`
 - **Migration Script:** [scripts/governance/migrate-env-governance.sh](../../../../scripts/governance/migrate-env-governance.sh)
-- **Governance Policy:** [governance/controls/ENVIRONMENT-VARIABLES-POLICY.md](../../../../governance/controls/ENVIRONMENT-VARIABLES-POLICY.md)
-- **Secrets Policy:** [governance/policies/secrets-env-policy.md](../../../../governance/policies/secrets-env-policy.md)
+- **Governance Policy:** [governance/controls/ENVIRONMENT-VARIABLES-POLICY.md](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/controls/ENVIRONMENT-VARIABLES-POLICY.md)
+- **Secrets Policy:** [governance/policies/secrets-env-policy.md](/governance/policies/secrets-env-policy)
 - **Port Registry:** [docs/content/tools/ports-services.mdx](../../tools/ports-services.mdx)
-- **Related ADR:** [ADR-003: Port Allocation Strategy](./ADR-003-port-allocation-strategy.md) (if exists)
+- **Related ADR:** ADR-003: Port Allocation Strategy (rascunho não publicado)
 
 ## Decision Log
 

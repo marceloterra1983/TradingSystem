@@ -1,0 +1,207 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'docs/**'
+      - 'governance/**'
+      - 'ref/**'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'governance/**'
+
+jobs:
+  validate-docusaurus-build:
+    name: Validate Docusaurus Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'docs/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build Docusaurus
+        working-directory: docs
+        run: |
+          echo "🏗️ Building Docusaurus..."
+          npm run build
+
+      - name: Check for broken links
+        working-directory: docs
+        continue-on-error: true
+        run: |
+          echo "🔗 Checking for broken links..."
+          npm run check-links || echo "⚠️ Broken links detected (non-blocking)"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: docusaurus-build
+          path: docs/build/
+          retention-days: 7
+
+  validate-frontmatter:
+    name: Validate Documentation Frontmatter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate frontmatter
+        run: |
+          echo "📋 Validating documentation frontmatter..."
+          bash scripts/governance/validate-frontmatter.sh || {
+            echo "❌ Frontmatter validation failed!"
+            echo "Missing required fields: title, tags, domain, type, summary, status, last_review"
+            exit 1
+          }
+
+  validate-governance:
+    name: Validate Governance Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate governance JSON
+        run: |
+          echo "🔍 Validating governance JSON..."
+          bash scripts/governance/validate-governance-json.sh
+
+      - name: Regenerate governance snapshot
+        run: |
+          echo "📊 Regenerating governance snapshot..."
+          node governance/automation/governance-metrics.mjs
+
+      - name: Check for uncommitted changes
+        run: |
+          if git diff --exit-code governance/snapshots/governance-snapshot.json; then
+            echo "✅ Governance snapshot is up to date"
+          else
+            echo "❌ Governance snapshot is out of sync!"
+            echo "Please run: node governance/automation/governance-metrics.mjs"
+            echo "And commit the updated snapshot"
+            exit 1
+          fi
+
+  validate-plantuml:
+    name: Validate PlantUML Diagrams
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java (for PlantUML)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install PlantUML
+        run: |
+          wget https://github.com/plantuml/plantuml/releases/download/v1.2024.0/plantuml-1.2024.0.jar
+          sudo mv plantuml-1.2024.0.jar /usr/local/bin/plantuml.jar
+          echo '#!/bin/bash' | sudo tee /usr/local/bin/plantuml
+          echo 'java -jar /usr/local/bin/plantuml.jar "$@"' | sudo tee -a /usr/local/bin/plantuml
+          sudo chmod +x /usr/local/bin/plantuml
+
+      - name: Validate PlantUML diagrams
+        run: |
+          echo "🎨 Validating PlantUML diagrams..."
+
+          DIAGRAM_COUNT=0
+          ERROR_COUNT=0
+
+          find docs/content -name "*.puml" | while read file; do
+            DIAGRAM_COUNT=$((DIAGRAM_COUNT + 1))
+            echo "Validating: $file"
+
+            if plantuml -checkonly "$file"; then
+              echo "✅ Valid: $file"
+            else
+              echo "❌ Error: $file"
+              ERROR_COUNT=$((ERROR_COUNT + 1))
+            fi
+          done
+
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo "❌ $ERROR_COUNT/$DIAGRAM_COUNT diagrams have syntax errors"
+            exit 1
+          else
+            echo "✅ All $DIAGRAM_COUNT diagrams are valid"
+          fi
+
+  validate-markdown-links:
+    name: Validate Markdown Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check markdown links
+        run: |
+          echo "🔗 Checking markdown links..."
+
+          find docs/content -name "*.md" -o -name "*.mdx" | while read file; do
+            echo "Checking: $file"
+            markdown-link-check "$file" --config .github/markdown-link-check.json || true
+          done
+
+  validate-api-specs:
+    name: Validate OpenAPI Specifications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Redocly CLI
+        run: npm install -g @redocly/cli
+
+      - name: Validate OpenAPI specs
+        run: |
+          echo "📋 Validating OpenAPI specifications..."
+
+          find docs/static/specs -name "*.yaml" -o -name "*.yml" | while read spec; do
+            echo "Validating: $spec"
+            redocly lint "$spec" || {
+              echo "❌ Validation failed: $spec"
+              exit 1
+            }
+            echo "✅ Valid: $spec"
+          done

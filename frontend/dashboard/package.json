@@ -19,6 +19,8 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 50",
     "lint:fix": "eslint . --fix",
     "lint:report": "eslint . --format json --output-file eslint-report.json",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,md,mdx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md,mdx,json}\"",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -128,6 +130,7 @@
     "vite": "^7.1.10",
     "vite-plugin-compression": "^0.5.1",
     "vitest": "^3.2.4",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.1",
+    "prettier": "^3.3.3"
   }
 }

@@ -25,7 +25,8 @@
     "docs:version:auto": "bash ../scripts/docs/auto-version.sh",
     "docs:version:list": "cat versions.json 2>/dev/null || echo 'No versions created yet'",
     "docs:metrics": "node ../scripts/docs/generate-metrics-dashboard.mjs",
-    "docs:metrics:verbose": "node ../scripts/docs/generate-metrics-dashboard.mjs --verbose"
+    "docs:metrics:verbose": "node ../scripts/docs/generate-metrics-dashboard.mjs --verbose",
+    "lint": "npm run docs:lint"
   },
   "dependencies": {
     "@docusaurus/core": "^3.9.2",

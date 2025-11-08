@@ -26,7 +26,7 @@ tags:
 
 ## 1. Objetivo
 
-Definir requisitos técnicos **testáveis e verificáveis** para implementação da [POL-0002 - Política de Gerenciamento de Segredos](../policies/secrets-env-policy.md).
+Definir requisitos técnicos **testáveis e verificáveis** para implementação da [POL-0002 - Política de Gerenciamento de Segredos](/governance/policies/secrets-env-policy).
 
 ## 2. Requisitos Testáveis
 
@@ -469,9 +469,9 @@ describe('Secrets Governance', () => {
 
 ## 8. Referências
 
-- **Política:** [POL-0002 - Secrets & Env Policy](../policies/secrets-env-policy.md)
-- **SOP:** [Secrets Rotation SOP](../controls/secrets-rotation-sop.md)
-- **Templates:** [.env.example](../registry/templates/.env.example)
+- **Política:** [POL-0002 - Secrets & Env Policy](/governance/policies/secrets-env-policy)
+- **SOP:** [Secrets Rotation SOP](/governance/controls/secrets-rotation-sop)
+- **Templates:** [.env.example](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/registry/templates/.env.example)
 - **Automação:** `governance/automation/validate-envs.mjs`, `scan-secrets.mjs`
 
 ## 9. Histórico de Revisões

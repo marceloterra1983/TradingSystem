@@ -15,7 +15,17 @@ last_review: "2025-10-23"
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Docs Links](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml/badge.svg)](https://github.com/marceloterra/TradingSystem/actions/workflows/docs-link-validation.yml)
+
+## 🔄 CI/CD Status
+
+[![Code Quality](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Code%20Quality/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/code-quality.yml)
+[![Tests](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Automated%20Tests/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/test.yml)
+[![Bundle Size](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Bundle%20Size%20Check/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/bundle-size-check.yml)
+[![Docker](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Docker%20Build%20%26%20Security/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/docker-build.yml)
+[![Security](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Security%20Audit/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/security-audit.yml)
+[![Docs](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Documentation%20Validation/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/docs-validation.yml)
+[![Health Check](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Infrastructure%20Health%20Check/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/health-check.yml)
+[![Environment](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Environment%20Validation/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/env-validation.yml)
 
 > **Local trading system** with Clean Architecture + DDD, integrating Nelogica's ProfitDLL for real-time market data capture, ML-based cause-and-effect analysis, and automated order execution. 100% on-premise, no cloud dependencies.
 

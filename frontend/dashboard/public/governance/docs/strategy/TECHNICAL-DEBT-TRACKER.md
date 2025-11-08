@@ -12,7 +12,7 @@ last_review: 2025-11-01
 # Technical Debt Tracker - TradingSystem
 
 **Last Updated:** 2025-11-01
-**Source:** [Architecture Review 2025-11-01](../reviews/architecture-2025-11-01/index.md)
+**Source:** [Architecture Review 2025-11-01](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/evidence/reports/reviews/architecture-2025-11-01/index.md)
 
 ---
 
@@ -572,9 +572,9 @@ Priority 3 (Medium):     5 weeks  █████░░░░░░░░░░�
 
 ## Related Documents
 
-- [Architecture Review 2025-11-01](../reviews/architecture-2025-11-01/index.md)
+- [Architecture Review 2025-11-01](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/evidence/reports/reviews/architecture-2025-11-01/index.md)
 - [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md)
-- [CLAUDE.md - Architecture Guidelines](../../../CLAUDE.md#architecture--quality-guidelines)
+- [CLAUDE.md - Architecture Guidelines](https://github.com/marceloterra1983/TradingSystem/blob/main/CLAUDE.md#architecture--quality-guidelines)
 
 ---
 

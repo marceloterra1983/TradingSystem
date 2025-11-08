@@ -1,1 +1,0 @@
-Set-Cookie: n8n-auth=…; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax

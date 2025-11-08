@@ -17,7 +17,7 @@ The TradingSystem documentation uses **Docusaurus native versioning** to maintai
 🤖 **NEW**: Documentation versioning can now be automated via GitHub Actions!
 
 For automated versioning triggered by Git tags, see:
-- [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) - Automated workflow documentation
+- [VERSIONING-AUTOMATION.md](/governance/versioning-automation) - Automated workflow documentation
 - Workflow: `.github/workflows/docs-versioning.yml`
 - Script: `scripts/docs/auto-version.sh`
 
@@ -91,7 +91,7 @@ Before creating a version, ensure:
 ### Version Creation Procedure
 
 > **Note**: This procedure can be automated using `scripts/docs/auto-version.sh`.
-> See [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) for automated workflow.
+> See [VERSIONING-AUTOMATION.md](/governance/versioning-automation) for automated workflow.
 > The steps below document the manual process for reference.
 
 #### Step 1: Pre-Version Validation
@@ -553,11 +553,11 @@ Run this checklist every quarter:
 
 ## Related Documentation
 
-- [README.md](../README.md) - Quick versioning commands
-- [VALIDATION-GUIDE.md](./VALIDATION-GUIDE.md) - Validation procedures (includes version validation)
-- [VERSIONING-AUTOMATION.md](./VERSIONING-AUTOMATION.md) - Automated versioning workflow
-- [MAINTENANCE-CHECKLIST.md](./MAINTENANCE-CHECKLIST.md) - Quarterly maintenance tasks
-- [COMMUNICATION-PLAN.md](./COMMUNICATION-PLAN.md) - Announcement templates
+- [README.md](/governance) - Quick versioning commands
+- [VALIDATION-GUIDE.md](/governance/validation-guide) - Validation procedures (includes version validation)
+- [VERSIONING-AUTOMATION.md](/governance/versioning-automation) - Automated versioning workflow
+- [MAINTENANCE-CHECKLIST.md](/governance/maintenance-checklist) - Quarterly maintenance tasks
+- [COMMUNICATION-PLAN.md](/governance/communication-plan) - Announcement templates
 
 ---
 

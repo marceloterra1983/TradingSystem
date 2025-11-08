@@ -3,10 +3,20 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 import AgentsCatalogView from "../AgentsCatalogView";
-import { useAgentsData, type AgentsData } from "@/hooks/useAgentsData";
+import {
+  useAgentsDataOptimized,
+  useAgentContent,
+  type AgentsData,
+} from "@/hooks/useAgentsDataOptimized";
 
-vi.mock("@/hooks/useAgentsData", () => ({
-  useAgentsData: vi.fn(),
+vi.mock("@/hooks/useAgentsDataOptimized", () => ({
+  useAgentsDataOptimized: vi.fn(),
+  useAgentContent: vi.fn(() => ({
+    data: null,
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  })),
 }));
 
 vi.mock("@/components/layout/CustomizablePageLayout", () => ({
@@ -28,7 +38,8 @@ vi.mock("@/components/layout/CustomizablePageLayout", () => ({
   ),
 }));
 
-const mockedUseAgentsData = vi.mocked(useAgentsData);
+const mockedUseAgentsData = vi.mocked(useAgentsDataOptimized);
+const mockedUseAgentContent = vi.mocked(useAgentContent);
 
 beforeAll(() => {
   Object.defineProperty(window, "localStorage", {
@@ -46,6 +57,13 @@ beforeAll(() => {
 
 beforeEach(() => {
   mockedUseAgentsData.mockReset();
+  mockedUseAgentContent.mockClear();
+  mockedUseAgentContent.mockReturnValue({
+    data: null,
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  } as any);
 });
 
 describe("AgentsCatalogView", () => {

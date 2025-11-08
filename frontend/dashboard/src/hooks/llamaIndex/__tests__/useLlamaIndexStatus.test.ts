@@ -13,6 +13,10 @@ import type { LlamaIndexStatusResponse } from "../useLlamaIndexStatus";
 const mockFetch = vi.fn();
 global.fetch = mockFetch as any;
 
+const flushAsyncOperations = async () => {
+  await act(async () => {});
+};
+
 describe("useLlamaIndexStatus", () => {
   beforeEach(() => {
     mockFetch.mockClear();
@@ -311,26 +315,21 @@ describe("useLlamaIndexStatus", () => {
         }),
       );
 
-      // Wait for initial auto-fetch inside React act wrapper
-      await act(async () => {
-        await waitFor(() => {
-          expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
+      await flushAsyncOperations();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        vi.advanceTimersByTime(5000);
       });
 
-      // Advance timer and flush promises
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(5000);
-      });
-
-      // Polling should have triggered
+      await flushAsyncOperations();
       expect(mockFetch).toHaveBeenCalledTimes(2);
 
-      // Advance again
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(5000);
+      act(() => {
+        vi.advanceTimersByTime(5000);
       });
 
+      await flushAsyncOperations();
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
@@ -399,7 +398,9 @@ describe("useLlamaIndexStatus", () => {
         useLlamaIndexStatus({ autoFetch: false }),
       );
 
-      await waitFor(() => result.current.fetchStatus("docs_index_mxbai"));
+      await act(async () => {
+        await result.current.fetchStatus("docs_index_mxbai");
+      });
 
       await waitFor(() => {
         expect(result.current.statusLoading).toBe(false);
@@ -435,7 +436,9 @@ describe("useLlamaIndexStatus", () => {
         useLlamaIndexStatus({ autoFetch: false }),
       );
 
-      await waitFor(() => result.current.fetchStatus());
+      await act(async () => {
+        await result.current.fetchStatus();
+      });
 
       await waitFor(() => {
         expect(result.current.statusLoading).toBe(false);

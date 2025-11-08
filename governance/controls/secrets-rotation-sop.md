@@ -568,10 +568,10 @@ for (const [secretKey, config] of Object.entries(ROTATION_SCHEDULE)) {
 
 ## 11. Referências
 
-- **Política:** [POL-0002 - Secrets & Env Policy](../policies/secrets-env-policy.md)
-- **Padrão:** [STD-010 - Secrets Standard](../standards/secrets-standard.md)
-- **Templates:** [.env.example](../registry/templates/.env.example)
-- **Evidências:** [Audits Directory](../evidence/audits/)
+- **Política:** [POL-0002 - Secrets & Env Policy](/governance/policies/secrets-env-policy)
+- **Padrão:** [STD-010 - Secrets Standard](/governance/standards/secrets-standard)
+- **Templates:** [.env.example](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/registry/templates/.env.example)
+- **Evidências:** diretório `governance/evidence/audits/`
 
 ## 12. Histórico de Revisões
 
@@ -583,4 +583,3 @@ for (const [secretKey, config] of Object.entries(ROTATION_SCHEDULE)) {
 
 **Emergência 24/7:** security-oncall@tradingsystem.local  
 **Próxima Revisão:** 2026-05-04 (180 dias)
-

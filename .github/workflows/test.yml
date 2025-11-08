@@ -100,14 +100,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'backend/api/tp-capital/package-lock.json'
+          cache-dependency-path: 'apps/tp-capital/package-lock.json'
 
       - name: Install dependencies
-        working-directory: backend/api/tp-capital
+        working-directory: apps/tp-capital
         run: npm ci
 
       - name: Run tests
-        working-directory: backend/api/tp-capital
+        working-directory: apps/tp-capital
         env:
           NODE_ENV: test
         run: npm run test -- --coverage || echo "⚠️ Tests not configured yet"
@@ -116,7 +116,7 @@ jobs:
         uses: codecov/codecov-action@v4
         if: success()
         with:
-          files: ./backend/api/tp-capital/coverage/coverage-final.json
+          files: ./apps/tp-capital/coverage/coverage-final.json
           flags: backend-tp-capital
           fail_ci_if_error: false
         env:
@@ -134,23 +134,23 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: 'ai/llamaindex-query/requirements.txt'
+          cache-dependency-path: 'tools/llamaindex/requirements.txt'
 
       - name: Install dependencies
-        working-directory: ai/llamaindex-query
+        working-directory: tools/llamaindex
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
       - name: Run Python tests
-        working-directory: ai/llamaindex-query
+        working-directory: tools/llamaindex
         run: pytest --cov=. --cov-report=xml || echo "⚠️ Tests not configured yet"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         if: success()
         with:
-          files: ./ai/llamaindex-query/coverage.xml
+          files: ./tools/llamaindex/coverage.xml
           flags: python-rag
           fail_ci_if_error: false
         env:

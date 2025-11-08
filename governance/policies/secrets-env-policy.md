@@ -245,10 +245,10 @@ Exceções devem ser:
 
 ## 8. Referências
 
-- **Padrão Relacionado:** [STD-010 - Secrets Standard](../standards/secrets-standard.md)
-- **SOP/Runbook:** [Secrets Rotation SOP](../controls/secrets-rotation-sop.md)
-- **Templates:** [.env.example](../registry/templates/.env.example)
-- **Evidências:** [Audits Directory](../evidence/audits/)
+- **Padrão Relacionado:** [STD-010 - Secrets Standard](/governance/standards/secrets-standard)
+- **SOP/Runbook:** [Secrets Rotation SOP](/governance/controls/secrets-rotation-sop)
+- **Templates:** [.env.example](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/registry/templates/.env.example)
+- **Evidências:** diretório `governance/evidence/audits/`
 
 ## 9. Histórico de Revisões
 
@@ -260,4 +260,3 @@ Exceções devem ser:
 
 **Próxima Revisão:** 2026-02-03  
 **Contato:** security-engineering@tradingsystem.local
-

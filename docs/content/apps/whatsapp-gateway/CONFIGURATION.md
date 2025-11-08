@@ -313,6 +313,5 @@ curl http://localhost:9302/minio/health/live
 ## See Also
 
 - [README](./README.md) - Main documentation
-- [API Reference](./API.md) - API endpoints
-- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues
-
+- [API Reference](https://github.com/marceloterra1983/TradingSystem/tree/main/backend/api/whatsapp-gateway) - API endpoints
+- [Troubleshooting](https://github.com/marceloterra1983/TradingSystem/blob/main/WHATSAPP-GATEWAY-SETUP.md#-troubleshooting) - Common issues

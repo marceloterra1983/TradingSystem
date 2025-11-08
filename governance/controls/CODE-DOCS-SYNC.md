@@ -218,10 +218,10 @@ Next steps: update docs, commit changes, re-run validation.
 - GitHub Insights using `documentation`, `sync` labels and workflow stats
 
 ## 10. Related Documentation
-- [CODE-DOCS-MAPPING.json](./CODE-DOCS-MAPPING.json)
-- [CI-CD-INTEGRATION.md](./CI-CD-INTEGRATION.md)
-- [VALIDATION-GUIDE.md](./VALIDATION-GUIDE.md)
-- [MAINTENANCE-CHECKLIST.md](./MAINTENANCE-CHECKLIST.md)
+- [CODE-DOCS-MAPPING.json](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/registry/CODE-DOCS-MAPPING.json)
+- [CI-CD-INTEGRATION.md](/governance/ci-cd-integration)
+- [VALIDATION-GUIDE.md](/governance/validation-guide)
+- [MAINTENANCE-CHECKLIST.md](/governance/maintenance-checklist)
 - `scripts/agents/docusaurus-daily.mjs`
 - `scripts/docs/create-sync-pr.sh`
 - `.github/workflows/docs-code-sync-validation.yml`

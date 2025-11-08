@@ -127,7 +127,7 @@ docs-code-sync-validation.yml (PRs touching code)
 - **Status checks**: none (informational workflow).
 - **Artifacts**: version report (90 days retention), docs build (7 days retention).
 - **Runtime**: ~15–20 minutes end-to-end.
-- **See also**: [`VERSIONING-AUTOMATION.md`](./VERSIONING-AUTOMATION.md).
+- **See also**: [`VERSIONING-AUTOMATION.md`](/governance/versioning-automation).
 
 ### 2.6 Code-Docs Synchronization Validation (`.github/workflows/docs-code-sync-validation.yml`)
 
@@ -155,7 +155,7 @@ docs-code-sync-validation.yml (PRs touching code)
   - Critical (API routes, OpenAPI specs): blocks merge.
   - High (schemas, env vars, configs): posts blocking comment, warns in summary.
   - Medium/Low (versions, non-breaking features): informational checklist.
-- **Reference**: [`CODE-DOCS-SYNC.md`](./CODE-DOCS-SYNC.md) for system details.
+- **Reference**: [`CODE-DOCS-SYNC.md`](/governance/code-docs-sync) for system details.
 
 ---
 
@@ -380,11 +380,11 @@ npm run docs:links
 
 ## 11. Related Documentation
 
-- [VALIDATION-GUIDE](./VALIDATION-GUIDE.md) – Manual validation playbook.
-- [MAINTENANCE-CHECKLIST](./MAINTENANCE-CHECKLIST.md) – Quarterly maintenance SOP.
-- [AUTOMATED-MAINTENANCE-GUIDE](./AUTOMATED-MAINTENANCE-GUIDE.md) – Automation reference.
-- [VERSIONING-AUTOMATION](./VERSIONING-AUTOMATION.md) – Automated documentation versioning workflow.
-- [CODE-DOCS-SYNC](./CODE-DOCS-SYNC.md) – Code↔docs synchronization system.
+- [VALIDATION-GUIDE](/governance/validation-guide) – Manual validation playbook.
+- [MAINTENANCE-CHECKLIST](/governance/maintenance-checklist) – Quarterly maintenance SOP.
+- [AUTOMATED-MAINTENANCE-GUIDE](/governance/automated-maintenance-guide) – Automation reference.
+- [VERSIONING-AUTOMATION](/governance/versioning-automation) – Automated documentation versioning workflow.
+- [CODE-DOCS-SYNC](/governance/code-docs-sync) – Code↔docs synchronization system.
 - `.github/workflows/` – Workflow source files.
 - `scripts/docs/` – Validation scripts and utilities.
 

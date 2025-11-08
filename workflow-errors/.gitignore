@@ -1,0 +1,10 @@
+# Permitir todos os relatórios (commitados automaticamente pelo workflow)
+# Os relatórios são versionados para histórico e auditoria
+
+# Manter arquivos do diretório
+!.gitkeep
+!.gitignore
+!ERROR-REPORT-*.md
+!CONSOLIDATED-REPORT-*.md
+!LATEST.md
+!CONSOLIDATED-LATEST.md

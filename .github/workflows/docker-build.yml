@@ -6,7 +6,8 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
-      - 'ai/**'
+      - 'apps/**'
+      - 'tools/llamaindex/**'
       - 'tools/compose/**'
       - '**/Dockerfile'
   push:
@@ -14,7 +15,8 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
-      - 'ai/**'
+      - 'apps/**'
+      - 'tools/llamaindex/**'
       - '**/Dockerfile'
 
 jobs:
@@ -29,14 +31,14 @@ jobs:
             context: backend/api/workspace
             dockerfile: backend/api/workspace/Dockerfile
           - name: tp-capital
-            context: backend/api/tp-capital
-            dockerfile: backend/api/tp-capital/Dockerfile
+            context: apps/tp-capital/api
+            dockerfile: apps/tp-capital/api/Dockerfile
           - name: dashboard
             context: frontend/dashboard
             dockerfile: frontend/dashboard/Dockerfile
           - name: llamaindex-query
-            context: ai/llamaindex-query
-            dockerfile: ai/llamaindex-query/Dockerfile
+            context: tools/llamaindex
+            dockerfile: tools/llamaindex/Dockerfile.query
 
     steps:
       - name: Checkout code

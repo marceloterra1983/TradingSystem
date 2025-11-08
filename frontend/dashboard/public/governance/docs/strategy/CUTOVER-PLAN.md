@@ -474,21 +474,21 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 ## Related Cutover Documents
 
 **Pre-Cutover**:
-- [Pre-Cutover Validation Report](../migration/PRE-CUTOVER-VALIDATION-REPORT.md)
-- [Complete Reference Inventory](../migration/COMPLETE-REFERENCE-INVENTORY.md)
-- [Reference Update Tracking](../migration/REFERENCE-UPDATE-TRACKING.md)
+- Pre-Cutover Validation Report (`governance/migration/PRE-CUTOVER-VALIDATION-REPORT.md`)
+- Complete Reference Inventory (`governance/migration/COMPLETE-REFERENCE-INVENTORY.md`)
+- Reference Update Tracking (`governance/migration/REFERENCE-UPDATE-TRACKING.md`)
 
 **Cutover Execution**:
-- [Cutover Execution Checklist](../migration/CUTOVER-EXECUTION-CHECKLIST.md)
-- [Cutover Automation Script](../migration/CUTOVER-AUTOMATION-SCRIPT.sh)
-- [CORS Update Validation](../migration/CORS-UPDATE-VALIDATION.md)
+- Cutover Execution Checklist (`governance/migration/CUTOVER-EXECUTION-CHECKLIST.md`)
+- Cutover Automation Script (`governance/migration/CUTOVER-AUTOMATION-SCRIPT.sh`)
+- CORS Update Validation (`governance/migration/CORS-UPDATE-VALIDATION.md`)
 
 **Post-Cutover**:
-- [Post-Cutover Validation](../migration/POST-CUTOVER-VALIDATION.md)
-- [Rollback Procedure](../migration/ROLLBACK-PROCEDURE.md)
+- Post-Cutover Validation (`governance/migration/POST-CUTOVER-VALIDATION.md`)
+- Rollback Procedure (`governance/migration/ROLLBACK-PROCEDURE.md`)
 
 **Governance**:
-- [Review Checklist](./REVIEW-CHECKLIST.md)
-- [Validation Guide](./VALIDATION-GUIDE.md)
-- [Communication Plan](./COMMUNICATION-PLAN.md)
-- [Maintenance Checklist](./MAINTENANCE-CHECKLIST.md)
+- [Review Checklist](/governance/review-checklist)
+- [Validation Guide](/governance/validation-guide)
+- [Communication Plan](/governance/communication-plan)
+- [Maintenance Checklist](/governance/maintenance-checklist)

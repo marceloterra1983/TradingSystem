@@ -1,0 +1,195 @@
+name: Error Report Generator
+
+on:
+  # Executa após qualquer workflow terminar com falha
+  workflow_run:
+    workflows:
+      - "Code Quality"
+      - "Automated Tests"
+      - "Bundle Size Check"
+      - "Docker Build & Security"
+      - "Security Audit"
+      - "Documentation Validation"
+      - "Environment Validation"
+      - "Infrastructure Health Check"
+    types:
+      - completed
+
+  # Também permite execução manual
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Número de falhas para analisar'
+        required: false
+        default: '10'
+
+jobs:
+  generate-error-report:
+    runs-on: ubuntu-latest
+    # Só executa se houve falha OU se foi manual
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+        run: |
+          type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Generate Error Report
+        run: |
+          chmod +x scripts/github/collect-workflow-errors.sh
+
+          LIMIT="${{ github.event.inputs.limit || '10' }}"
+          bash scripts/github/collect-workflow-errors.sh "$LIMIT"
+
+      - name: Upload Error Report as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-error-report-${{ github.run_number }}
+          path: workflow-errors/*.md
+          retention-days: 90
+
+      - name: Comment on PR (if applicable)
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Encontrar o PR associado
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.payload.workflow_run.head_branch}`
+            });
+
+            if (prs.length === 0) {
+              console.log('No PR found for this branch');
+              return;
+            }
+
+            const prNumber = prs[0].number;
+
+            // Ler o relatório mais recente
+            const errorsDir = './workflow-errors';
+            const files = fs.readdirSync(errorsDir)
+              .filter(f => f.startsWith('ERROR-REPORT-'))
+              .sort()
+              .reverse();
+
+            if (files.length === 0) {
+              console.log('No error report found');
+              return;
+            }
+
+            const reportPath = path.join(errorsDir, files[0]);
+            let reportContent = fs.readFileSync(reportPath, 'utf8');
+
+            // Limitar tamanho do comentário (GitHub tem limite)
+            if (reportContent.length > 60000) {
+              reportContent = reportContent.substring(0, 60000) + '\n\n... (truncado - baixe o artifact completo)';
+            }
+
+            // Postar comentário
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🚨 Relatório Automático de Erros
+
+Workflows com falhas foram detectados. Veja o relatório consolidado abaixo:
+
+<details>
+<summary>📄 Clique para expandir o relatório completo</summary>
+
+${reportContent}
+
+</details>
+
+### 📦 Download do Relatório Completo
+
+O relatório completo está disponível nos **Artifacts** desta execução:
+- [Download Error Report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+---
+🤖 *Gerado automaticamente por [Error Report Generator](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/error-report-generator.yml)*`
+            });
+
+      - name: Create Issue (if too many failures)
+        if: github.event_name == 'workflow_run'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Contar falhas recentes
+            const { execSync } = require('child_process');
+            const failureCount = parseInt(execSync('gh run list --status failure --limit 20 --json databaseId | jq ". | length"').toString().trim());
+
+            // Se houver mais de 5 falhas recentes, criar issue
+            if (failureCount > 5) {
+              const errorsDir = './workflow-errors';
+              const files = fs.readdirSync(errorsDir)
+                .filter(f => f.startsWith('ERROR-REPORT-'))
+                .sort()
+                .reverse();
+
+              const reportPath = `workflow-errors/${files[0]}`;
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Alert: ${failureCount} workflow failures detected`,
+                body: `## ⚠️ Multiple Workflow Failures Detected
+
+**Total Recent Failures:** ${failureCount}
+**Threshold:** 5
+**Generated:** ${new Date().toISOString()}
+
+### 📊 Immediate Actions Required
+
+1. Review the error report artifact
+2. Identify common failure patterns
+3. Fix critical issues blocking CI/CD
+4. Re-run failed workflows after fixes
+
+### 📄 Error Report
+
+Download the complete error report from the latest workflow run:
+- [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+### 🛠️ Quick Diagnostics
+
+\`\`\`bash
+# View recent failures
+bash scripts/github/check-workflows.sh failures
+
+# Generate fresh report
+bash scripts/github/collect-workflow-errors.sh 20
+
+# Monitor in real-time
+bash scripts/github/monitor-workflows.sh 30
+\`\`\`
+
+---
+🤖 *Auto-generated alert by Error Report Generator*`,
+                labels: ['ci/cd', 'bug', 'high-priority']
+              });
+
+              console.log('Issue created due to excessive failures');
+            } else {
+              console.log(`Only ${failureCount} failures - below threshold`);
+            }

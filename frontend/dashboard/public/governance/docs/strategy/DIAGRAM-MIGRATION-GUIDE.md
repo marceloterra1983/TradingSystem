@@ -108,6 +108,6 @@ npm run docs:dev
 
 ## Related Documentation
 
-- [Diagram Catalogue](../content/diagrams/diagrams.mdx) - Complete diagram index
-- [PlantUML Guide](../content/tools/plantuml/overview) - Rendering and syntax
-- [Migration Mapping](../migration/MIGRATION-MAPPING.md) - Diagram migration rules
+- [Diagram Catalogue](/diagrams) - Complete diagram index
+- [PlantUML Guide](/tools/documentation/plantuml/overview) - Rendering and syntax
+- Migration Mapping (`governance/migration/MIGRATION-MAPPING.md`) - Diagram migration rules

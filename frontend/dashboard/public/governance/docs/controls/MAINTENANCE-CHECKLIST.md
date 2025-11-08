@@ -452,8 +452,8 @@ python scripts/docs/validate-frontmatter.py \
 
 ## Related Documentation
 
-- [Review Checklist](./REVIEW-CHECKLIST.md) - Chapter-by-chapter review
-- [Versioning Guide](./VERSIONING-GUIDE.md) - Version management procedures
-- [Validation Guide](./VALIDATION-GUIDE.md) - How to run validation suite (includes version validation)
-- [Metrics Dashboard Guide](./METRICS-DASHBOARD.md) - Dashboard usage and metrics explanation
-- [Communication Plan](./COMMUNICATION-PLAN.md) - Internal announcements
+- [Review Checklist](/governance/review-checklist) - Chapter-by-chapter review
+- [Versioning Guide](/governance/versioning-guide) - Version management procedures
+- [Validation Guide](/governance/validation-guide) - How to run validation suite (includes version validation)
+- Metrics Dashboard Guide (`governance/metrics/METRICS-DASHBOARD.md`) - Dashboard usage and metrics explanation
+- [Communication Plan](/governance/communication-plan) - Internal announcements
