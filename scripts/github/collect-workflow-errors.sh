@@ -271,9 +271,6 @@ echo -e "${BLUE}🌐 Abrir no editor:${NC}"
 echo "   code $OUTPUT_FILE"
 echo ""
 
-# Criar link simbólico para último relatório
-# Use caminho relativo para evitar "File name too long"
-cd "$OUTPUT_DIR"
-ln -sf "$(basename "$OUTPUT_FILE")" LATEST.md
-cd - > /dev/null
-echo -e "${GREEN}📌 Última versão disponível em: $OUTPUT_DIR/LATEST.md${NC}"
+# REMOVED: Symlink creation causes "File name too long" errors in workflows
+# Reports are accessible directly via timestamped files or GitHub Artifacts
+echo -e "${GREEN}📌 Relatório disponível em: $OUTPUT_FILE${NC}"

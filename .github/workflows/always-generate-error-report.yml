@@ -87,12 +87,18 @@ jobs:
         with:
           script: |
             const fs = require('fs');
+            const { execSync } = require('child_process');
             const errorCount = ${{ steps.generate_report.outputs.error_count }};
 
-            // Ler resumo do relatório
-            const reportContent = fs.readFileSync('workflow-errors/LATEST.md', 'utf8');
-            const summaryMatch = reportContent.match(/## 📊 Resumo Executivo([\s\S]*?)(?=\n---|\n##|$)/);
-            const summary = summaryMatch ? summaryMatch[0] : '';
+            // Find most recent error report (no symlink)
+            const latestReport = execSync('ls -t workflow-errors/ERROR-REPORT-*.md 2>/dev/null | head -1').toString().trim();
+
+            let summary = '';
+            if (latestReport && fs.existsSync(latestReport)) {
+              const reportContent = fs.readFileSync(latestReport, 'utf8');
+              const summaryMatch = reportContent.match(/## 📊 Resumo Executivo([\s\S]*?)(?=\n---|\n##|$)/);
+              summary = summaryMatch ? summaryMatch[0] : '';
+            }
 
             // Criar issue
             await github.rest.issues.create({
@@ -113,14 +119,16 @@ jobs:
 
             [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
+            Download the error report from the Artifacts section of the workflow run above.
+
             ### 🛠️ Quick Actions
 
             \`\`\`bash
             # Generate fresh report locally
             bash scripts/github/collect-workflow-errors.sh
 
-            # View latest
-            cat workflow-errors/LATEST.md
+            # View most recent report
+            ls -t workflow-errors/ERROR-REPORT-*.md | head -1 | xargs cat
 
             # Monitor in real-time
             bash scripts/github/monitor-workflows.sh 30
@@ -137,12 +145,16 @@ jobs:
           echo "### 📊 Error Report Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ -f workflow-errors/LATEST.md ]; then
-            ERROR_COUNT=$(grep -c "### 🔴" workflow-errors/LATEST.md || echo "0")
+          # Find most recent error report (no symlink, use actual files)
+          LATEST_REPORT=$(ls -t workflow-errors/ERROR-REPORT-*.md 2>/dev/null | head -1)
+
+          if [ -n "$LATEST_REPORT" ] && [ -f "$LATEST_REPORT" ]; then
+            ERROR_COUNT=$(grep -c "### 🔴" "$LATEST_REPORT" || echo "0")
+            REPORT_NAME=$(basename "$LATEST_REPORT")
 
             echo "- **Report Generated:** ✅ Yes" >> $GITHUB_STEP_SUMMARY
             echo "- **Total Errors:** $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
-            echo "- **Report File:** \`workflow-errors/LATEST.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Report File:** \`workflow-errors/$REPORT_NAME\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "📦 Download the full report from the Artifacts section above." >> $GITHUB_STEP_SUMMARY
           else
