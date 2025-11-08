@@ -550,7 +550,7 @@ TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
 1. **Revogar GitHub tokens** (15 min)
    ```bash
    # https://github.com/settings/tokens
-   # DELETE: ghp_3mFVUXFd... e ghp_Sx3ndxeTy...
+   # DELETE: REDACTED_GITHUB_PAT... e REDACTED_GITHUB_PAT...
    ```
 
 2. **Rotacionar secrets expostos** (1 hora)
