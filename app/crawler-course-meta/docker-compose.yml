@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: ./backend
+    env_file:
+      - ../../.env
+    environment:
+      - NODE_ENV=development
+      - CCM_OUTPUT_ROOT=/app/outputs
+    volumes:
+      - ../../outputs/crawler-course-meta:/app/outputs
+    ports:
+      - "8080:8080"
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
