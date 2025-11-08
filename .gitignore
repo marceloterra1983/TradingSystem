@@ -334,3 +334,7 @@ config/.env.local
 
 # Build optimization cache
 .agents-cache.json
+
+# Allow committed build helper scripts
+!scripts/build/
+!scripts/build/**
