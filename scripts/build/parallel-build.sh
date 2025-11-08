@@ -109,6 +109,7 @@ start_timer
 (
   echo -e "${YELLOW}📚 Building documentation...${NC}" | tee -a "$DOCS_LOG"
   cd "$PROJECT_ROOT/docs"
+  rm -rf "$PROJECT_ROOT/docs/build"
 
   if npm run docs:build >> "$DOCS_LOG" 2>&1; then
     echo -e "${GREEN}✅ Documentation build completed${NC}" | tee -a "$DOCS_LOG"

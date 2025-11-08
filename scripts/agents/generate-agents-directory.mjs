@@ -12,10 +12,8 @@
 
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { promises as fs } from 'fs';
-import { parseDocument } from 'yaml';
-import MarkdownIt from 'markdown-it';
-import markdownItMultimdTable from 'markdown-it-multimd-table';
+import { promises as fs, existsSync } from 'fs';
+import { createRequire } from 'module';
 
 const { dirname, join, resolve, relative, sep } = path;
 const pathPosix = path.posix;
@@ -23,6 +21,36 @@ const pathPosix = path.posix;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const repoRoot = resolve(__dirname, '..', '..');
+
+const moduleResolvers = [
+  createRequire(import.meta.url),
+  ...[
+    join(repoRoot, 'package.json'),
+    join(repoRoot, 'frontend', 'dashboard', 'package.json'),
+  ]
+    .filter(packageJsonPath => existsSync(packageJsonPath))
+    .map(packageJsonPath => createRequire(packageJsonPath)),
+];
+
+function loadModule(specifier) {
+  let lastError;
+  for (const resolver of moduleResolvers) {
+    try {
+      return resolver(specifier);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError ?? new Error(`Unable to load dependency "${specifier}"`);
+}
+
+const { parseDocument } = loadModule('yaml');
+const MarkdownItModule = loadModule('markdown-it');
+const MarkdownIt =
+  MarkdownItModule?.default ?? MarkdownItModule;
+const markdownItMultimdTableModule = loadModule('markdown-it-multimd-table');
+const markdownItMultimdTable =
+  markdownItMultimdTableModule?.default ?? markdownItMultimdTableModule;
 
 const SUMMARY_PATH = join(repoRoot, '.claude/agents/agents-raiox.md');
 const AGENTS_DIR = join(repoRoot, '.claude/agents');

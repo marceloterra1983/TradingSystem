@@ -29,6 +29,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'frontend/dashboard/package-lock.json'
 
+      - name: Install root dependencies (agents tooling)
+        run: npm ci
+
       - name: Install dependencies
         working-directory: frontend/dashboard
         run: npm ci
