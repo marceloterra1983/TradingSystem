@@ -1,26 +1,21 @@
 name: Always Generate Error Report
 
 on:
-  # Executa após QUALQUER workflow completar
-  workflow_run:
-    workflows:
-      - "Code Quality"
-      - "Automated Tests"
-      - "Bundle Size Check"
-      - "Docker Build & Security"
-      - "Security Audit"
-      - "Documentation Validation"
-      - "Environment Validation"
-      - "Infrastructure Health Check"
-    types:
-      - completed
+  # REMOVED: workflow_run trigger causa execuções duplicadas
+  # Cada workflow completando trigga uma execução separada
+  # Resultado: 8+ execuções simultâneas para 1 push
 
-  # Também permite execução manual
+  # Execução manual (recomendado)
   workflow_dispatch:
 
   # Executa em schedule (diário às 9h UTC)
   schedule:
     - cron: '0 9 * * *'
+
+  # Executa em push para main (agregado - 1 execução por push)
+  push:
+    branches:
+      - main
 
 # Permissões necessárias para commit e push
 permissions:
@@ -29,22 +24,14 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: error-report-generation
-  cancel-in-progress: true  # Cancelar execuções anteriores (debouncing)
+  group: error-report-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   generate-error-report:
     runs-on: ubuntu-latest
-    # Executa SEMPRE, independente de sucesso ou falha
 
     steps:
-      - name: Wait for other workflows (debouncing)
-        if: github.event_name == 'workflow_run'
-        run: |
-          echo "⏳ Aguardando 2 minutos para agregar múltiplos triggers..."
-          echo "Isso evita execuções duplicadas quando vários workflows completam ao mesmo tempo."
-          sleep 120
-
       - name: Checkout code
         uses: actions/checkout@v4
 
