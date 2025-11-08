@@ -54,7 +54,10 @@ jobs:
       - name: Run comprehensive maintenance
         id: maintenance
         run: |
-          MODE="${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'quick' }}"
+          MODE="quick"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            MODE=$(jq -r '.inputs.mode // "quick"' "$GITHUB_EVENT_PATH")
+          fi
           echo "Running maintenance in $MODE mode..."
           bash scripts/docs/comprehensive-maintenance.sh "$MODE"
         continue-on-error: true
@@ -164,22 +167,41 @@ ${score < 75 ? '⚠️ **Action needed**: Health score is below target (75). Ple
   validate-external-links:
     name: External Link Validation
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'full')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
+      - name: Determine execution mode
+        id: mode
+        run: |
+          SHOULD_RUN="false"
+          if [ "${GITHUB_EVENT_NAME}" = "schedule" ]; then
+            SHOULD_RUN="true"
+          elif [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            MODE=$(jq -r '.inputs.mode // "quick"' "$GITHUB_EVENT_PATH")
+            if [ "$MODE" = "full" ]; then
+              SHOULD_RUN="true"
+            fi
+          fi
+          echo "run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "Detected mode: ${MODE:-quick} (run=${SHOULD_RUN})"
+
       - name: Checkout repository
+        if: steps.mode.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: steps.mode.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
+        if: steps.mode.outputs.run == 'true'
         run: |
           pip install requests
 
       - name: Validate external links
+        if: steps.mode.outputs.run == 'true'
         id: links
         run: |
           python3 scripts/docs/validate-external-links.py docs/content \
@@ -189,7 +211,7 @@ ${score < 75 ? '⚠️ **Action needed**: Health score is below target (75). Ple
         continue-on-error: true
 
       - name: Upload link validation report
-        if: always()
+        if: steps.mode.outputs.run == 'true' && always()
         uses: actions/upload-artifact@v4
         with:
           name: external-links-report
@@ -199,7 +221,7 @@ ${score < 75 ? '⚠️ **Action needed**: Health score is below target (75). Ple
           retention-days: 30
 
       - name: Check link health
-        if: always()
+        if: steps.mode.outputs.run == 'true' && always()
         run: |
           if [ -f docs/reports/external-links-validation.md ]; then
             INVALID=$(grep -c "❌ Invalid" docs/reports/external-links-validation.md || echo "0")
@@ -210,6 +232,9 @@ ${score < 75 ? '⚠️ **Action needed**: Health score is below target (75). Ple
               exit 0
             fi
           fi
+        env:
+          # Explicit no-op; keeps step defined even when skipped
+          FORCE_RUN: ${{ steps.mode.outputs.run }}
 
   notify-on-failure:
     name: Notify on Quality Failure
