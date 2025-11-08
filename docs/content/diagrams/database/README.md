@@ -1,3 +1,17 @@
+---
+title: "Workspace - Neon PostgreSQL Architecture Diagrams"
+description: "PlantUML diagrams documenting the Workspace stack after the Neon PostgreSQL migration."
+tags: [database, documentation, diagrams, plantuml]
+domain: database
+type: guide
+summary: "PlantUML architecture diagrams for Workspace application after Neon PostgreSQL migration"
+status: active
+owner: ArchitectureGuild
+last_review: "2025-11-08"
+lastReviewed: '2025-11-08'
+---
+---
+
 # Workspace - Neon PostgreSQL Architecture Diagrams
 
 **Status**: ✅ Complete  
@@ -250,7 +264,7 @@ title: Workspace Architecture
 
 The Workspace application uses Neon PostgreSQL for data persistence.
 
-![Architecture Diagram](./diagrams/database/workspace-neon-architecture.png)
+See the [architecture diagram source](./workspace-neon-architecture.puml) for the complete system design.
 
 ### Key Components
 
@@ -297,5 +311,3 @@ When updating diagrams:
 
 **Maintained By**: TradingSystem Architecture Team  
 **Review Frequency**: Quarterly or on major changes
-
-

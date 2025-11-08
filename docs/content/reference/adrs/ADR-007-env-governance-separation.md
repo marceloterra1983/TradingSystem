@@ -1,5 +1,6 @@
 ---
 title: "ADR-007: Separação de Secrets e Defaults em Variáveis de Ambiente"
+description: "Architecture decision record for environment variable governance and separation"
 status: proposed
 date: 2025-11-07
 deciders: [SecurityEngineering, DevOps, Frontend Guild]
@@ -10,6 +11,8 @@ tags:
   - security
   - governance
   - configuration
+owner: SecurityEngineering
+lastReviewed: "2025-11-08"
 ---
 
 # ADR-007: Separação de Secrets e Defaults em Variáveis de Ambiente
@@ -386,6 +389,7 @@ git revert <commit-hash-da-migração>
 - [ ] Monitor for 1 week
 - [ ] Execute migration in production
 
+lastReviewed: "2025-11-08"
 ---
 
 **Status:** 🟡 PROPOSED - Awaiting stakeholder review

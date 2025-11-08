@@ -1,3 +1,17 @@
+---
+title: "ADR-015: Port Governance Policy"
+description: "Decision record defining TradingSystem's port governance process and automation."
+tags: [adr, architecture, governance, ports, infrastructure]
+domain: architecture
+type: guide
+summary: "Architecture decision record for port allocation governance policy to prevent conflicts"
+status: active
+owner: ArchitectureGuild
+last_review: "2025-11-08"
+lastReviewed: '2025-11-08'
+---
+---
+
 # ADR-015: Port Governance Policy
 
 **Status:** 🟢 Aprovação em andamento  

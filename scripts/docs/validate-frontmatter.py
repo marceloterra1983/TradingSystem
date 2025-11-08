@@ -71,6 +71,12 @@ ALLOWED_OWNERS = {
     'MCPGuild',
     'SupportOps',
     'ReleaseOps',
+    'OpsGuild',
+    'DevOps',
+    'PlatformEngineering',
+    'SecurityEngineering',
+    'Performance Team',
+    'Backend Team',
 }
 
 # Exclude patterns

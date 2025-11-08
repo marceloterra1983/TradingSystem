@@ -1,12 +1,16 @@
 ---
 title: AI Agent Troubleshooting Guide - Docusaurus
+description: Playbook for AI assistants to diagnose and recover Docusaurus outages automatically.
 sidebar_position: 10
 tags: [docusaurus, ai, troubleshooting, automation]
 domain: tools
+owner: DocsOps
 type: guide
 summary: Automated troubleshooting procedures for AI agents to detect and fix Docusaurus 500 errors without human intervention.
 status: active
 last_review: "2025-11-07"
+lastReviewed: "2025-11-08"
+---
 ---
 
 # AI Agent Troubleshooting Guide - Docusaurus
@@ -15,6 +19,7 @@ last_review: "2025-11-07"
 **Purpose:** Automated detection and recovery from Docusaurus deployment issues
 **Priority:** P0 - Critical (Service availability)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🚨 Red Flags (Immediate Action Required)
@@ -52,6 +57,7 @@ docker exec docs-hub ls /usr/share/nginx/html/ | wc -l
 # Output: 0 or 1 (only .gitkeep)
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔄 Automated Recovery Workflow
@@ -119,6 +125,7 @@ docker exec docs-hub ls /usr/share/nginx/html/ | wc -l
    - Add new detection rule to this guide
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🤖 One-Command Recovery
@@ -152,6 +159,7 @@ bash scripts/docs/emergency-recovery.sh && echo "✅ Recovery complete" || echo 
 🏥 Health check: http://localhost:3404/health
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔍 Diagnostic Commands
@@ -201,6 +209,7 @@ docker logs docs-hub --tail 100 | grep -E "(error|warn|fail)"
 diff <(ls docs/build/) <(docker exec docs-hub ls /usr/share/nginx/html/)
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🛡️ Prevention Rules
@@ -276,6 +285,7 @@ docker compose -f tools/compose/docker-compose.docs.yml up -d --build
 0 */6 * * * cd /path/to/TradingSystem/docs && npm run docs:build >> /tmp/docs-build.log 2>&1
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📊 Monitoring Integration
@@ -337,6 +347,7 @@ groups:
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎓 Training Examples
@@ -395,6 +406,7 @@ The documentation is now accessible. Please try again!
 **No user action required.**
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔗 Related Documentation
@@ -404,6 +416,7 @@ The documentation is now accessible. Please try again!
 - **[NGINX Configuration](../../../compose/documentation/nginx.conf)** - Web server config
 - **[Emergency Recovery Script](../../../../../scripts/docs/emergency-recovery.sh)** - Automated fix
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📝 Incident Report Template
@@ -447,6 +460,7 @@ Container started before Docusaurus build completed.
 **Total Resolution Time:** 45 seconds (automated)
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## ⚡ Quick Reference
@@ -488,10 +502,10 @@ User reports 500 error?
              └─ NO → Safe to restart
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 **Version:** 1.0.0
 **Last Updated:** 2025-11-07
 **Maintained By:** AI Agents + DevOps Team
 **Next Review:** 2025-12-07
-

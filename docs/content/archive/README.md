@@ -1,3 +1,17 @@
+---
+title: "Archive Workspace"
+description: "Root workspace for archiving retired TradingSystem documentation."
+tags: [documentation, archive, governance]
+domain: governance
+type: guide
+summary: "Documentation archive workspace for retired content with historical context"
+status: active
+owner: DocsOps
+last_review: "2025-11-08"
+lastReviewed: '2025-11-08'
+---
+---
+
 # Archive Workspace
 
 This directory collects documentation that has moved out of the active TradingSystem knowledge base but must remain available for governance, audits, or historical context.
