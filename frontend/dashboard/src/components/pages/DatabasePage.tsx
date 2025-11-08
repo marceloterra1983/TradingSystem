@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { ExternalLink, Loader2, Play, RefreshCw } from 'lucide-react';
+import { ExternalLink, Loader2, Play } from 'lucide-react';
 import { Button } from '../ui/button';
-import { ButtonWithDropdown } from '../ui/button-with-dropdown';
 import { ENDPOINTS } from '../../config/endpoints';
 import { IframeWithUrl } from '../common/IframeWithUrl';
 import { useToast } from '../../hooks/useToast';
@@ -45,17 +44,6 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: 'Direto (.env)', url: ENDPOINTS.questdb },
     { label: 'Legacy 7010', url: 'http://localhost:7010' },
   ],
-};
-
-const uniqueEndpointOptions = (options: EndpointOption[]): EndpointOption[] => {
-  const seen = new Set<string>();
-  return options.filter((option) => {
-    if (!option.url || seen.has(option.url)) {
-      return false;
-    }
-    seen.add(option.url);
-    return true;
-  });
 };
 
 type DatabaseOverviewEntry = {
@@ -238,8 +226,6 @@ type DatabaseTool = {
   startHints: string[];
 };
 
-type EndpointStatus = 'idle' | 'checking' | 'online' | 'offline';
-
 const TOOLS: DatabaseTool[] = [
   {
     id: 'pgadmin',
@@ -326,61 +312,6 @@ const MAINTENANCE_ACTIONS: {
   },
 ];
 
-function useEndpointStatus(url: string | null): EndpointStatus {
-  const [status, setStatus] = React.useState<EndpointStatus>('idle');
-
-  const checkStatus = React.useCallback(async () => {
-    if (!url) {
-      setStatus('offline');
-      return;
-    }
-
-    setStatus('checking');
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3500);
-
-      try {
-        await fetch(url, {
-          method: 'GET',
-          mode: 'no-cors',
-          cache: 'no-cache',
-          signal: controller.signal,
-        });
-        setStatus('online');
-      } finally {
-        clearTimeout(timeout);
-      }
-    } catch {
-      setStatus('offline');
-    }
-  }, [url]);
-
-  React.useEffect(() => {
-    checkStatus();
-    const interval = setInterval(checkStatus, 15000);
-    return () => clearInterval(interval);
-  }, [checkStatus]);
-
-  return status;
-}
-
-function StatusBadge({ status }: { status: EndpointStatus }) {
-  const map: Record<EndpointStatus, { label: string; color: string }> = {
-    idle: { label: 'Sem verificação', color: 'bg-gray-300 dark:bg-gray-600' },
-    checking: { label: 'Verificando', color: 'bg-amber-400' },
-    online: { label: 'Online', color: 'bg-emerald-500' },
-    offline: { label: 'Offline', color: 'bg-red-500' },
-  };
-  const info = map[status];
-  return (
-    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-      <span className={`inline-block h-2.5 w-2.5 rounded-full ${info.color}`} />
-      {info.label}
-    </div>
-  );
-}
-
 interface ToolContentFrameProps {
   tool: DatabaseTool;
   activeUrl: string;
@@ -395,6 +326,14 @@ function ToolContentFrame({ tool, activeUrl, iframeError, onError }: ToolContent
         <div className="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400">
           Nenhum endpoint configurado para visualização.
         </div>
+      ) : iframeError ? (
+        <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-red-600 dark:text-red-400">
+          <p>Não foi possível carregar o painel <strong>{tool.name}</strong>.</p>
+          <p>Tente selecionar outro endpoint ou abrir em uma nova aba.</p>
+          <Button size="sm" variant="outline" onClick={onError}>
+            Tentar novamente
+          </Button>
+        </div>
       ) : (
         <IframeWithUrl
           key={`${tool.id}-${activeUrl}`}
@@ -408,103 +347,6 @@ function ToolContentFrame({ tool, activeUrl, iframeError, onError }: ToolContent
           onError={onError}
         />
       )}
-    </div>
-  );
-}
-
-interface ToolCardProps {
-  tool: DatabaseTool;
-  selectedUrl: string;
-  onSelectUrl: (url: string) => void;
-  onPreview: () => void;
-  isActive: boolean;
-}
-
-function ToolCard({
-  tool,
-  selectedUrl,
-  onSelectUrl,
-  onPreview,
-  isActive,
-}: ToolCardProps) {
-  const status = useEndpointStatus(selectedUrl);
-
-  const endpointOptions = uniqueEndpointOptions([
-    { label: tool.defaultLabel ?? 'Stack Proxy', url: tool.defaultUrl },
-    ...(tool.fallbackUrls ?? []),
-  ]);
-
-  const handleOpen = () => {
-    if (!selectedUrl) return;
-    window.open(selectedUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  return (
-    <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex items-start justify-between gap-4">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-          {tool.name}
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          {tool.description}
-        </p>
-      </div>
-        <StatusBadge status={status} />
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <ButtonWithDropdown
-          label="Endpoint"
-          options={endpointOptions.map((option) => ({
-            label: option.label,
-            value: option.url,
-          }))}
-          selectedValue={selectedUrl}
-          onSelect={onSelectUrl}
-          variant="outline"
-          size="sm"
-        />
-        <Button
-          size="sm"
-          variant={isActive ? 'default' : 'outline'}
-          onClick={onPreview}
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Pré-visualizar
-        </Button>
-        <Button size="sm" variant="ghost" onClick={handleOpen} disabled={!selectedUrl}>
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Abrir em nova aba
-        </Button>
-      </div>
-
-      {tool.docsLink && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          Documentação interna:{' '}
-          <a
-            href={tool.docsLink}
-            target="_blank"
-            rel="noreferrer"
-            className="text-cyan-600 underline dark:text-cyan-400"
-          >
-            {tool.docsLink}
-          </a>
-        </p>
-      )}
-
-      <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-        <p className="mb-2 font-medium">Como iniciar rapidamente:</p>
-        <ul className="space-y-1">
-          {tool.startHints.map((hint, index) => (
-            <li key={index}>
-              <code className="rounded bg-gray-200 px-1 py-0.5 text-xs text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-                {hint}
-              </code>
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }

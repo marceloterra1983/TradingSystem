@@ -272,12 +272,14 @@ jobs:
       - maintenance-audit
       - docs-check
       - docs-links
-    if: ${{ always() && needs.freeze_guard.outputs.active != 'true' && secrets.SLACK_WEBHOOK_URL != '' && (
+    if: ${{ always() && needs.freeze_guard.outputs.active != 'true' && (
           needs.validate-frontmatter.result == 'failure' ||
           needs.maintenance-audit.result == 'failure' ||
           needs.docs-check.result == 'failure' ||
           needs.docs-links.result == 'failure'
         ) }}
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Collect failure details
         id: failure_meta
@@ -304,6 +306,7 @@ jobs:
           fi
 
       - name: Send Slack notification
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         continue-on-error: true
         uses: 8398a7/action-slack@v3
         env:
