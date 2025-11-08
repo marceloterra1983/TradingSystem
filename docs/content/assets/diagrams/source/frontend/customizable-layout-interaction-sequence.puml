@@ -62,7 +62,7 @@ GridLayout -> GridLayout : Set dragging state\nShow visual feedback:\n- Dragged 
 
 User -> DragHandle : Drag to new position\n(move mouse 50px)
 note right of DragHandle
-  **Activation Constraint**
+  Activation Constraint:
   8px movement required before
   drag starts (prevents accidental
   drags on click)
@@ -100,7 +100,7 @@ deactivate Card
 deactivate GridLayout
 
 note over User, GridLayout
-  **Drag Response Time**
+  Drag Response Time:
   Target: <100ms from drop to re-render
   Achieved via React state updates
   and optimized re-render logic
@@ -122,7 +122,7 @@ Card --> User : Show collapsed/expanded card
 deactivate Card
 
 note right of Card
-  **Isolated Interaction**
+  Isolated Interaction:
   Collapse state is separate
   from drag-and-drop layout.
   No conflict between clicking
@@ -183,7 +183,7 @@ deactivate Card
 deactivate Controls
 
 note over User, LocalStorage
-  **Persistence Behavior**
+  Persistence Behavior:
   - All layout changes saved immediately
   - Debouncing applied to reduce writes
   - Survives page refresh and browser restart
@@ -191,7 +191,7 @@ note over User, LocalStorage
 end note
 
 note as N1
-  **Performance Targets**
+  Performance Targets:
   - Drag response: <100ms
   - Column change: <200ms
   - localStorage write: <10ms
@@ -199,7 +199,7 @@ note as N1
 end note
 
 note as N2
-  **Accessibility (Future)**
+  Accessibility (Future):
   - Keyboard navigation (Tab, Enter, Arrow keys)
   - Screen reader announcements
   - Focus management during drag

@@ -35,46 +35,46 @@ package "Page Components" <<Page>> {
 
 package "Layout System" <<Layout>> {
   component "CustomizablePageLayout" as CustomLayout {
-    **Props:**
+    -- Props --
     - pageId: string
     - title: string
     - subtitle?: string
     - sections: Section[]
     - defaultColumns: 1|2|3|4
     
-    **Responsibilities:**
+    -- Responsibilities --
     - Coordinate layout, controls, grid
     - Manage useCustomLayout hook
     - Handle responsive breakpoints
   }
   
   component "DraggableGridLayout" as GridLayout {
-    **Responsibilities:**
+    -- Responsibilities --
     - Implement drag-and-drop
     - Manage drop zones
     - Visual feedback during drag
     - Distribute cards across columns
     
-    **Uses:**
+    -- Uses --
     - @dnd-kit/core (DndContext)
     - @dnd-kit/sortable
     - PointerSensor with 8px threshold
   }
   
   component "LayoutControls" as Controls {
-    **Responsibilities:**
+    -- Responsibilities --
     - Column selector (1-4 buttons)
     - Reset button
     - Future: Collapse all/Expand all
     
-    **Props:**
+    -- Props --
     - columns: number
     - setColumns: (n) => void
     - resetLayout: () => void
   }
   
   component "DragHandle" as DragHandle {
-    **Responsibilities:**
+    -- Responsibilities --
     - Isolated vertical bar (6px wide)
     - Visual hover feedback
     - Cursor: grab/grabbing
@@ -84,28 +84,28 @@ package "Layout System" <<Layout>> {
 
 package "UI Components" <<UI>> {
   component "CollapsibleCard" as Card {
-    **Props:**
+    -- Props --
     - cardId: string (unique)
     - defaultCollapsed?: boolean
     
-    **Sub-components:**
+    -- Sub-components --
     - CollapsibleCardHeader
     - CollapsibleCardTitle
     - CollapsibleCardContent
     
-    **State:**
+    -- State --
     - Internal collapse state
     - Persisted to localStorage
   }
   
   component "PlaceholderSection" as Placeholder {
-    **Props:**
+    -- Props --
     - cardId: string
     - title: string
     - description: string
     - icon?: ReactNode
     
-    **Purpose:**
+    -- Purpose --
     - WIP features placeholder
     - Consistent styling
     - User-friendly messaging
@@ -114,26 +114,26 @@ package "UI Components" <<UI>> {
 
 package "State Management" <<State>> {
   component "useCustomLayout Hook" as Hook {
-    **State:**
+    -- State --
     - columns: number
     - componentLayout: Record<id, columnIndex>
     
-    **Methods:**
+    -- Methods --
     - setColumns(n: number)
     - moveComponent(id, newColumnIndex)
     - resetLayout()
     - getComponentColumn(id): number
     
-    **Initialization:**
+    -- Initialization --
     - Check localStorage for saved layout
     - Apply defaults if no saved layout
   }
   
   database "localStorage" as LocalStorage {
-    **Key Format:**
+    -- Key Format --
     tradingSystem_layout_{pageId}
     
-    **Schema:**
+    -- Schema --
     {
       columns: number,
       componentLayout: {
@@ -141,7 +141,7 @@ package "State Management" <<State>> {
       }
     }
     
-    **Operations:**
+    -- Operations --
     - getItem() on mount
     - setItem() on every change
     - removeItem() on reset
@@ -201,21 +201,21 @@ Controls --> Icons : Use layout icons
 DragHandle --> Icons : Use drag indicators
 
 note right of DragHandle
-  **Activation Constraint**
+  Activation Constraint:
   8px movement threshold prevents
   accidental drags when clicking
   to collapse/expand
 end note
 
 note right of Card
-  **Isolated Interactions**
+  Isolated Interactions:
   - Drag handle: Vertical bar (drag)
   - Card header: Click (collapse/expand)
   - No conflict between interactions
 end note
 
 note bottom of Hook
-  **Persistence Strategy**
+  Persistence Strategy:
   - Debounced writes to localStorage
   - Validates componentLayout on load
   - Resets to default on corruption
@@ -223,14 +223,14 @@ note bottom of Hook
 end note
 
 note bottom of GridLayout
-  **Responsive Breakpoints**
+  Responsive Breakpoints:
   - Mobile (<768px): Always 1 column
   - Tablet (768-1024px): Max 2 columns
   - Desktop (>1024px): User choice (1-4)
 end note
 
 note right of LocalStorage
-  **Storage Examples**
+  Storage Examples:
   tradingSystem_layout_escopo:
   {
     "columns": 2,
@@ -244,7 +244,7 @@ note right of LocalStorage
 end note
 
 note as N1
-  **Performance Optimizations**
+  Performance Optimizations:
   - React.memo on section components
   - useMemo for expensive computations
   - Minimal re-renders on drag

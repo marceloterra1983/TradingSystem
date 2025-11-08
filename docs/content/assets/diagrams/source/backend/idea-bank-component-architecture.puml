@@ -83,7 +83,7 @@ package "External Services" <<External>> {
   component "Dashboard UI\n:3103" as Dashboard
   database "LowDB File\nideas.json" as LowDBFile
   component "Prometheus\n:9090" as Prometheus
-  component "Future: PostgreSQL\n:5432" as PostgreSQL [dotted]
+  component "Future: PostgreSQL\n:5432" as PostgreSQL
 }
 
 ' Connections
@@ -104,14 +104,14 @@ Metrics --> Prometheus : Scrape /metrics
 LowDBAdapter .right.> PostgreSQL : Migration planned
 
 note right of LowDBAdapter
-  **MVP Solution**
+  MVP Solution:
   LowDB provides file-based persistence.
   Migration to PostgreSQL/TimescaleDB
   planned for production.
 end note
 
 note right of Validation
-  **Validation Rules**
+  Validation Rules:
   - Category: feature|bugfix|improvement|refactor
   - Priority: low|medium|high|critical
   - Status: new|review|in-progress|completed|rejected
@@ -119,13 +119,13 @@ note right of Validation
 end note
 
 note bottom of Routes
-  **Performance Target**
+  Performance Target:
   < 200ms p95 for CRUD operations
   Measured via Prometheus metrics
 end note
 
 note right of Dashboard
-  **Features**
+  Features:
   - Kanban board (@dnd-kit)
   - Filter by category/priority/status
   - Search by title/tags

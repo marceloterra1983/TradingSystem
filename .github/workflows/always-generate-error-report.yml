@@ -30,7 +30,7 @@ permissions:
 
 concurrency:
   group: error-report-generation
-  cancel-in-progress: false  # Permitir completar
+  cancel-in-progress: true  # Cancelar execuções anteriores (debouncing)
 
 jobs:
   generate-error-report:
@@ -38,6 +38,13 @@ jobs:
     # Executa SEMPRE, independente de sucesso ou falha
 
     steps:
+      - name: Wait for other workflows (debouncing)
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "⏳ Aguardando 2 minutos para agregar múltiplos triggers..."
+          echo "Isso evita execuções duplicadas quando vários workflows completam ao mesmo tempo."
+          sleep 120
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -91,6 +98,17 @@ jobs:
             echo "Nenhuma mudança para commitar"
           else
             git commit -m "chore: add error report - $(date '+%Y-%m-%d %H:%M:%S')"
+
+            # Pull com rebase antes de push (evita conflitos)
+            echo "📥 Sincronizando com repositório remoto..."
+            git pull --rebase origin main || {
+              echo "⚠️ Conflito detectado durante rebase, tentando merge..."
+              git rebase --abort
+              git pull --no-rebase origin main
+            }
+
+            # Push
+            echo "📤 Enviando relatório para repositório..."
             git push
             echo "✅ Relatório commitado no repositório"
           fi

@@ -68,7 +68,7 @@ pageserver -down-> storage : "Read/Write pages\n(layer-based storage)"
 safekeeper -down-> storage : "Archive WAL segments\n(PITR support)"
 
 note right of compute
-  **Neon Compute Node**
+  Neon Compute Node:
   
   Role: PostgreSQL instance
   - Handles all SQL queries
@@ -94,7 +94,7 @@ note right of compute
 end note
 
 note right of pageserver
-  **Neon Pageserver (Storage Layer)**
+  Neon Pageserver (Storage Layer):
   
   Role: Distributed storage backend
   - Stores database pages
@@ -120,7 +120,7 @@ note right of pageserver
 end note
 
 note right of safekeeper
-  **Neon Safekeeper (WAL Service)**
+  Neon Safekeeper (WAL Service):
   
   Role: WAL durability and PITR
   - Receives WAL from compute
@@ -145,7 +145,7 @@ note right of safekeeper
 end note
 
 note bottom of storage
-  **Storage Layout**
+  Storage Layout:
   
   Compute Data (~2GB):
   - pg_wal: Write-ahead logs
@@ -166,8 +166,8 @@ note bottom of storage
 end note
 
 ' Data flow annotations
-note on link #compute to #pageserver
-  **Page Request Flow**
+note on link
+  Page Request Flow:
   
   1. Query needs page not in buffer
   2. Compute requests from Pageserver
@@ -178,8 +178,8 @@ note on link #compute to #pageserver
   (90% buffer cache hit rate)
 end note
 
-note on link #compute to #safekeeper
-  **WAL Write Flow**
+note on link
+  WAL Write Flow:
   
   1. Transaction commits
   2. WAL record generated
@@ -191,8 +191,8 @@ note on link #compute to #safekeeper
   Latency: < 2ms (local network)
 end note
 
-note on link #pageserver to #safekeeper
-  **WAL Recovery Flow**
+note on link
+  WAL Recovery Flow:
   
   1. Pageserver needs WAL
   2. Request from Safekeeper

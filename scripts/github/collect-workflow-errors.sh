@@ -113,29 +113,32 @@ echo "$FAILURES" | jq -c '.[]' | while IFS= read -r workflow; do
 \`\`\`
 EOF
 
-    # Obter logs do workflow
     echo -e "${YELLOW}   Baixando logs...${NC}"
+    LOG_CONTENT=$(gh run view "$RUN_ID" --log 2>/dev/null || true)
 
-    # Extrair apenas linhas com erros
-    gh run view "$RUN_ID" --log 2>/dev/null | \
-        grep -iE "(error|failed|failure|exception|fatal|✗|❌)" | \
-        head -n 100 >> "$OUTPUT_FILE" 2>/dev/null || echo "Não foi possível extrair logs de erro" >> "$OUTPUT_FILE"
+    if [ -z "$LOG_CONTENT" ]; then
+        echo "Não foi possível extrair logs de erro" >> "$OUTPUT_FILE"
+    else
+        printf "%s\n" "$LOG_CONTENT" | \
+            grep -iE "(error|failed|failure|exception|fatal|✗|❌)" | \
+            head -n 100 >> "$OUTPUT_FILE"
+    fi
 
-    cat >> "$OUTPUT_FILE" << 'EOF'
-```
+    cat >> "$OUTPUT_FILE" << EOF
+\`\`\`
 
 #### 🔧 Comandos para Reproduzir Localmente:
 
-```bash
+\`\`\`bash
 # Ver logs completos
-gh run view RUN_ID --log
+gh run view $RUN_ID --log
 
 # Re-executar workflow
-gh run rerun RUN_ID
+gh run rerun $RUN_ID
 
 # Abrir no browser
-gh run view RUN_ID --web
-```
+gh run view $RUN_ID --web
+\`\`\`
 
 #### 💡 Possíveis Soluções:
 
@@ -200,9 +203,6 @@ EOF
 EOF
             ;;
     esac
-
-    # Substituir RUN_ID nos comandos
-    sed -i "s/RUN_ID/$RUN_ID/g" "$OUTPUT_FILE"
 
     cat >> "$OUTPUT_FILE" << 'EOF'
 

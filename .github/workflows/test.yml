@@ -14,6 +14,8 @@ jobs:
   test-frontend:
     name: Test Frontend (Dashboard)
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,19 +35,32 @@ jobs:
         working-directory: frontend/dashboard
         run: npm run test -- --coverage || echo "⚠️ Tests not configured yet"
 
+      - name: Check coverage report
+        id: frontend_coverage
+        working-directory: frontend/dashboard
+        run: |
+          if [ -f coverage/coverage-final.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Coverage file not found, skipping Codecov upload."
+          fi
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: success()
+        if: success() && env.CODECOV_TOKEN != '' && steps.frontend_coverage.outputs.exists == 'true'
         with:
           files: ./frontend/dashboard/coverage/coverage-final.json
           flags: frontend
           fail_ci_if_error: false
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ env.CODECOV_TOKEN }}
 
   test-backend-workspace:
     name: Test Backend (Workspace API)
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     services:
       timescaledb:
         image: timescale/timescaledb:latest-pg16
@@ -82,19 +97,32 @@ jobs:
           NODE_ENV: test
         run: npm run test -- --coverage || echo "⚠️ Tests not configured yet"
 
+      - name: Check coverage report
+        id: workspace_coverage
+        working-directory: backend/api/workspace
+        run: |
+          if [ -f coverage/coverage-final.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Coverage file not found, skipping Codecov upload."
+          fi
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: success()
+        if: success() && env.CODECOV_TOKEN != '' && steps.workspace_coverage.outputs.exists == 'true'
         with:
           files: ./backend/api/workspace/coverage/coverage-final.json
           flags: backend-workspace
           fail_ci_if_error: false
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ env.CODECOV_TOKEN }}
 
   test-backend-tp-capital:
     name: Test Backend (TP Capital)
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -116,19 +144,32 @@ jobs:
           NODE_ENV: test
         run: npm run test -- --coverage || echo "⚠️ Tests not configured yet"
 
+      - name: Check coverage report
+        id: tp_capital_coverage
+        working-directory: apps/tp-capital
+        run: |
+          if [ -f coverage/coverage-final.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Coverage file not found, skipping Codecov upload."
+          fi
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: success()
+        if: success() && env.CODECOV_TOKEN != '' && steps.tp_capital_coverage.outputs.exists == 'true'
         with:
           files: ./apps/tp-capital/coverage/coverage-final.json
           flags: backend-tp-capital
           fail_ci_if_error: false
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ env.CODECOV_TOKEN }}
 
   test-python-rag:
     name: Test Python (RAG System)
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -150,12 +191,23 @@ jobs:
         working-directory: tools/llamaindex
         run: pytest --cov=. --cov-report=xml || echo "⚠️ Tests not configured yet"
 
+      - name: Check coverage report
+        id: python_coverage
+        working-directory: tools/llamaindex
+        run: |
+          if [ -f coverage.xml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Coverage file not found, skipping Codecov upload."
+          fi
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
-        if: success()
+        if: success() && env.CODECOV_TOKEN != '' && steps.python_coverage.outputs.exists == 'true'
         with:
           files: ./tools/llamaindex/coverage.xml
           flags: python-rag
           fail_ci_if_error: false
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ env.CODECOV_TOKEN }}
