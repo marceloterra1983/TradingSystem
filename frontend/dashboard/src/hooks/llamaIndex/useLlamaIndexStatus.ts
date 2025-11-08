@@ -11,7 +11,7 @@
  * @module useLlamaIndexStatus
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 /**
  * LlamaIndex service health status
@@ -205,7 +205,7 @@ export function useLlamaIndexStatus(
       try {
         const querySuffix = targetCollection
           ? `?collection=${encodeURIComponent(targetCollection)}`
-          : '';
+          : "";
 
         const resp = await fetch(`/api/v1/rag/status${querySuffix}`);
         const raw = await resp.text();
@@ -228,14 +228,14 @@ export function useLlamaIndexStatus(
         const rawMessage =
           err instanceof Error
             ? err.message
-            : 'Falha ao carregar status do LlamaIndex';
+            : "Falha ao carregar status do LlamaIndex";
 
         // Provide user-friendly error messages
         const is401Error =
-          rawMessage.includes('401') ||
-          rawMessage.toLowerCase().includes('unauthorized');
+          rawMessage.includes("401") ||
+          rawMessage.toLowerCase().includes("unauthorized");
         const friendly = is401Error
-          ? 'A requisição foi rejeitada (401). Certifique-se de que o RAG Service (porta 3402) esteja em execução via docker-compose.rag.yml ou configure um VITE_LLAMAINDEX_JWT para acesso direto.'
+          ? "A requisição foi rejeitada (401). Certifique-se de que o RAG Service (porta 3402) esteja em execução via docker-compose.rag.yml ou configure um VITE_LLAMAINDEX_JWT para acesso direto."
           : rawMessage;
 
         const scopedMessage =

@@ -1,8 +1,8 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { promises as fs } from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 class SchemaValidator {
   constructor(schemasDir) {
@@ -19,11 +19,18 @@ class SchemaValidator {
   async loadSchemas() {
     try {
       const files = await fs.readdir(this.schemasDir);
-      const schemaFiles = files.filter((file) => file.endsWith('.json') || file.endsWith('.yaml'));
+      const schemaFiles = files.filter(
+        (file) => file.endsWith(".json") || file.endsWith(".yaml"),
+      );
 
       for (const file of schemaFiles) {
-        const content = await fs.readFile(path.join(this.schemasDir, file), 'utf8');
-        const schema = file.endsWith('.yaml') ? yaml.load(content) : JSON.parse(content);
+        const content = await fs.readFile(
+          path.join(this.schemasDir, file),
+          "utf8",
+        );
+        const schema = file.endsWith(".yaml")
+          ? yaml.load(content)
+          : JSON.parse(content);
 
         if (schema.$id) {
           this.ajv.addSchema(schema, schema.$id);
@@ -48,12 +55,14 @@ class SchemaValidator {
 
   async loadExamples() {
     try {
-      const examplesDir = path.join(this.schemasDir, '../examples');
+      const examplesDir = path.join(this.schemasDir, "../examples");
       const files = await fs.readdir(examplesDir);
 
       for (const file of files) {
-        const content = await fs.readFile(path.join(examplesDir, file), 'utf8');
-        const example = file.endsWith('.yaml') ? yaml.load(content) : JSON.parse(content);
+        const content = await fs.readFile(path.join(examplesDir, file), "utf8");
+        const example = file.endsWith(".yaml")
+          ? yaml.load(content)
+          : JSON.parse(content);
 
         if (example.$schema) {
           const schemaInfo = this.schemas.get(example.$schema);
@@ -66,7 +75,7 @@ class SchemaValidator {
         }
       }
     } catch (error) {
-      console.warn('Failed to load examples:', error.message);
+      console.warn("Failed to load examples:", error.message);
     }
   }
 
@@ -87,8 +96,10 @@ class SchemaValidator {
   }
 
   async validateExample(exampleFile) {
-    const content = await fs.readFile(exampleFile, 'utf8');
-    const example = exampleFile.endsWith('.yaml') ? yaml.load(content) : JSON.parse(content);
+    const content = await fs.readFile(exampleFile, "utf8");
+    const example = exampleFile.endsWith(".yaml")
+      ? yaml.load(content)
+      : JSON.parse(content);
 
     if (!example.$schema) {
       throw new Error(`Example missing $schema: ${exampleFile}`);
@@ -110,7 +121,9 @@ class SchemaValidator {
         results.total += 1;
 
         try {
-          const validation = await this.validateExample(path.join(this.schemasDir, '../examples', example.file));
+          const validation = await this.validateExample(
+            path.join(this.schemasDir, "../examples", example.file),
+          );
 
           if (validation.valid) {
             results.valid += 1;

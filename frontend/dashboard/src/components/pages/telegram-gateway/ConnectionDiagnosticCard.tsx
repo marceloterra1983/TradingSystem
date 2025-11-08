@@ -4,20 +4,20 @@ import {
   XCircle,
   Info,
   ExternalLink,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Button } from '../../ui/button';
+} from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
 import {
   TelegramGatewayOverview,
   useTelegramGatewayChannels,
-} from '../../../hooks/useTelegramGateway';
+} from "../../../hooks/useTelegramGateway";
 
 interface ConnectionDiagnosticCardProps {
   overview?: TelegramGatewayOverview;
@@ -27,7 +27,7 @@ interface ConnectionDiagnosticCardProps {
 interface DiagnosticItem {
   id: string;
   label: string;
-  status: 'ok' | 'warning' | 'error' | 'info';
+  status: "ok" | "warning" | "error" | "info";
   message: string;
   suggestion?: string;
   action?: {
@@ -44,8 +44,8 @@ export function ConnectionDiagnosticCard({
   const diagnostics: DiagnosticItem[] = [];
 
   // 1. Verificar se o gateway MTProto está rodando
-  const gatewayHealthy = overview?.health?.status === 'healthy';
-  const telegramConnected = overview?.health?.telegram === 'connected';
+  const gatewayHealthy = overview?.health?.status === "healthy";
+  const telegramConnected = overview?.health?.telegram === "connected";
   const hasMessages = (overview?.messages?.total ?? 0) > 0;
   const queueSize = overview?.queue?.totalMessages ?? 0;
   const activeChannelsCount = channels.filter((c) => c.isActive).length;
@@ -54,37 +54,37 @@ export function ConnectionDiagnosticCard({
   // Gateway Status
   if (gatewayHealthy) {
     diagnostics.push({
-      id: 'gateway',
-      label: 'Gateway MTProto (porta 4010)',
-      status: 'ok',
-      message: 'Gateway está online e respondendo',
+      id: "gateway",
+      label: "Gateway MTProto (porta 4010)",
+      status: "ok",
+      message: "Gateway está online e respondendo",
     });
   } else {
     diagnostics.push({
-      id: 'gateway',
-      label: 'Gateway MTProto (porta 4010)',
-      status: 'error',
-      message: 'Gateway não está respondendo',
-      suggestion: 'Execute: cd backend/api/telegram-gateway && npm run dev',
+      id: "gateway",
+      label: "Gateway MTProto (porta 4010)",
+      status: "error",
+      message: "Gateway não está respondendo",
+      suggestion: "Execute: cd backend/api/telegram-gateway && npm run dev",
     });
   }
 
   // Telegram Connection
   if (telegramConnected) {
     diagnostics.push({
-      id: 'telegram',
-      label: 'Conexão Telegram',
-      status: 'ok',
-      message: 'Conectado aos servidores do Telegram',
+      id: "telegram",
+      label: "Conexão Telegram",
+      status: "ok",
+      message: "Conectado aos servidores do Telegram",
     });
   } else {
     diagnostics.push({
-      id: 'telegram',
-      label: 'Conexão Telegram',
-      status: 'warning',
-      message: 'Telegram desconectado ou sessão inválida',
+      id: "telegram",
+      label: "Conexão Telegram",
+      status: "warning",
+      message: "Telegram desconectado ou sessão inválida",
       suggestion:
-        'Execute o script de autenticação: ./authenticate-interactive.sh',
+        "Execute o script de autenticação: ./authenticate-interactive.sh",
     });
   }
 
@@ -92,45 +92,45 @@ export function ConnectionDiagnosticCard({
   const hasSession = overview?.session?.exists;
   if (hasSession) {
     diagnostics.push({
-      id: 'session',
-      label: 'Arquivo de Sessão',
-      status: 'ok',
+      id: "session",
+      label: "Arquivo de Sessão",
+      status: "ok",
       message: `Sessão encontrada (${overview?.session?.sizeBytes} bytes)`,
     });
   } else {
     diagnostics.push({
-      id: 'session',
-      label: 'Arquivo de Sessão',
-      status: 'error',
-      message: 'Arquivo de sessão não encontrado',
-      suggestion: 'Faça a autenticação inicial para criar a sessão',
+      id: "session",
+      label: "Arquivo de Sessão",
+      status: "error",
+      message: "Arquivo de sessão não encontrado",
+      suggestion: "Faça a autenticação inicial para criar a sessão",
     });
   }
 
   // Channels Configuration
   if (channels.length === 0) {
     diagnostics.push({
-      id: 'channels',
-      label: 'Canais Configurados',
-      status: 'info',
-      message: 'Modo permissivo: todos os canais serão processados',
+      id: "channels",
+      label: "Canais Configurados",
+      status: "info",
+      message: "Modo permissivo: todos os canais serão processados",
       suggestion:
         'Para maior segurança, registre apenas os canais autorizados na aba "Canais"',
     });
   } else if (activeChannelsCount === 0) {
     diagnostics.push({
-      id: 'channels',
-      label: 'Canais Configurados',
-      status: 'warning',
+      id: "channels",
+      label: "Canais Configurados",
+      status: "warning",
       message: `${channels.length} canal(is) registrado(s), mas nenhum ativo`,
       suggestion:
         'Ative pelo menos um canal na aba "Canais" para receber mensagens',
     });
   } else {
     diagnostics.push({
-      id: 'channels',
-      label: 'Canais Configurados',
-      status: 'ok',
+      id: "channels",
+      label: "Canais Configurados",
+      status: "ok",
       message: `${activeChannelsCount} canal(is) ativo(s) de ${channels.length} registrado(s)`,
     });
   }
@@ -138,12 +138,12 @@ export function ConnectionDiagnosticCard({
   // Messages in Database
   if (hasMessages) {
     const lastMessageTime = recentMessages[0]?.receivedAt
-      ? new Date(recentMessages[0].receivedAt).toLocaleString('pt-BR')
+      ? new Date(recentMessages[0].receivedAt).toLocaleString("pt-BR")
       : null;
     diagnostics.push({
-      id: 'messages',
-      label: 'Mensagens no Banco',
-      status: 'ok',
+      id: "messages",
+      label: "Mensagens no Banco",
+      status: "ok",
       message: `${overview?.messages?.total} mensagens armazenadas`,
       suggestion: lastMessageTime
         ? `Última mensagem: ${lastMessageTime}`
@@ -151,40 +151,40 @@ export function ConnectionDiagnosticCard({
     });
   } else {
     diagnostics.push({
-      id: 'messages',
-      label: 'Mensagens no Banco',
-      status: 'warning',
-      message: 'Nenhuma mensagem foi salva ainda',
+      id: "messages",
+      label: "Mensagens no Banco",
+      status: "warning",
+      message: "Nenhuma mensagem foi salva ainda",
       suggestion:
         gatewayHealthy && telegramConnected
           ? activeChannelsCount === 0 && channels.length > 0
-            ? 'Ative pelo menos um canal para começar a receber mensagens'
-            : 'Verifique se o bot/usuário tem acesso aos canais ou envie uma mensagem de teste'
-          : 'Aguardando conexão com o Telegram',
+            ? "Ative pelo menos um canal para começar a receber mensagens"
+            : "Verifique se o bot/usuário tem acesso aos canais ou envie uma mensagem de teste"
+          : "Aguardando conexão com o Telegram",
     });
   }
 
   // Queue Status
   if (queueSize > 0) {
     diagnostics.push({
-      id: 'queue',
-      label: 'Fila de Falhas',
-      status: queueSize > 100 ? 'error' : 'warning',
+      id: "queue",
+      label: "Fila de Falhas",
+      status: queueSize > 100 ? "error" : "warning",
       message: `${queueSize} mensagens na fila de falhas`,
-      suggestion: 'Verifique a conectividade com as APIs de destino',
+      suggestion: "Verifique a conectividade com as APIs de destino",
     });
   } else {
     diagnostics.push({
-      id: 'queue',
-      label: 'Fila de Falhas',
-      status: 'ok',
-      message: 'Sem mensagens pendentes',
+      id: "queue",
+      label: "Fila de Falhas",
+      status: "ok",
+      message: "Sem mensagens pendentes",
     });
   }
 
   // Overall System Status
-  const allOk = diagnostics.every((d) => d.status === 'ok');
-  const hasErrors = diagnostics.some((d) => d.status === 'error');
+  const allOk = diagnostics.every((d) => d.status === "ok");
+  const hasErrors = diagnostics.some((d) => d.status === "error");
 
   return (
     <Card className="border-slate-200 dark:border-slate-800">
@@ -224,16 +224,16 @@ export function ConnectionDiagnosticCard({
                 className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/40"
               >
                 <div className="mt-0.5">
-                  {item.status === 'ok' && (
+                  {item.status === "ok" && (
                     <CheckCircle className="h-4 w-4 text-emerald-500" />
                   )}
-                  {item.status === 'warning' && (
+                  {item.status === "warning" && (
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                   )}
-                  {item.status === 'error' && (
+                  {item.status === "error" && (
                     <XCircle className="h-4 w-4 text-red-500" />
                   )}
-                  {item.status === 'info' && (
+                  {item.status === "info" && (
                     <Info className="h-4 w-4 text-blue-500" />
                   )}
                 </div>
@@ -250,7 +250,7 @@ export function ConnectionDiagnosticCard({
                     <div className="mt-2 rounded border border-slate-200 bg-white p-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
                       <strong className="text-slate-700 dark:text-slate-300">
                         Sugestão:
-                      </strong>{' '}
+                      </strong>{" "}
                       {item.suggestion}
                     </div>
                   )}
@@ -298,7 +298,7 @@ export function ConnectionDiagnosticCard({
                       size="sm"
                       className="mt-2"
                       onClick={() =>
-                        window.open('http://localhost:4008/metrics', '_blank')
+                        window.open("http://localhost:4008/metrics", "_blank")
                       }
                     >
                       <ExternalLink className="mr-2 h-3.5 w-3.5" />

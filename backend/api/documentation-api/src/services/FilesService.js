@@ -1,10 +1,10 @@
-import FilesRepository from '../repositories/FilesRepository.js';
-import SystemsRepository from '../repositories/SystemsRepository.js';
-import IdeasRepository from '../repositories/IdeasRepository.js';
-import { logger } from '../config/logger.js';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import FilesRepository from "../repositories/FilesRepository.js";
+import SystemsRepository from "../repositories/SystemsRepository.js";
+import IdeasRepository from "../repositories/IdeasRepository.js";
+import { logger } from "../config/logger.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +14,7 @@ class FilesService {
     this.repository = FilesRepository;
     this.systemsRepository = SystemsRepository;
     this.ideasRepository = IdeasRepository;
-    this.uploadDir = path.join(__dirname, '../../../uploads');
+    this.uploadDir = path.join(__dirname, "../../../uploads");
   }
 
   /**
@@ -23,11 +23,11 @@ class FilesService {
   async initializeUploadDir() {
     try {
       await fs.mkdir(this.uploadDir, { recursive: true });
-      logger.info('Upload directory initialized', { path: this.uploadDir });
+      logger.info("Upload directory initialized", { path: this.uploadDir });
     } catch (error) {
-      logger.error('Failed to create upload directory', {
+      logger.error("Failed to create upload directory", {
         error: error.message,
-        path: this.uploadDir
+        path: this.uploadDir,
       });
       throw error;
     }
@@ -65,12 +65,14 @@ class FilesService {
         idea_id: fileData.idea_id || null,
         description: fileData.description || null,
         uploaded_by: userId,
-        is_public: fileData.is_public || false
+        is_public: fileData.is_public || false,
       };
 
       // Validate related entities if provided
       if (recordData.system_id) {
-        const system = await this.systemsRepository.findById(recordData.system_id);
+        const system = await this.systemsRepository.findById(
+          recordData.system_id,
+        );
         if (!system) {
           // Clean up uploaded file if system doesn't exist
           await fs.unlink(filePath);
@@ -90,19 +92,19 @@ class FilesService {
       // Create database record
       const fileRecord = await this.repository.create(recordData);
 
-      logger.info('File uploaded successfully', {
+      logger.info("File uploaded successfully", {
         id: fileRecord.id,
         filename: originalname,
         size: size,
-        uploaded_by: userId
+        uploaded_by: userId,
       });
 
       return fileRecord;
     } catch (error) {
-      logger.error('Failed to upload file', {
+      logger.error("Failed to upload file", {
         error: error.message,
         filename: fileData?.originalname,
-        uploaded_by: userId
+        uploaded_by: userId,
       });
       throw error;
     }
@@ -116,26 +118,26 @@ class FilesService {
       const fileRecord = await this.repository.findById(id);
 
       if (!fileRecord) {
-        throw new Error('File not found');
+        throw new Error("File not found");
       }
 
       // Check if file exists on disk
       try {
         await fs.access(fileRecord.file_path);
       } catch (_error) {
-        logger.warn('File not found on disk', {
+        logger.warn("File not found on disk", {
           id,
           filename: fileRecord.filename,
-          expected_path: fileRecord.file_path
+          expected_path: fileRecord.file_path,
         });
-        throw new Error('File not found on disk');
+        throw new Error("File not found on disk");
       }
 
       return fileRecord;
     } catch (error) {
-      logger.error('Failed to get file', {
+      logger.error("Failed to get file", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -154,21 +156,21 @@ class FilesService {
       // Increment download count
       await this.repository.incrementDownloadCount(id);
 
-      logger.info('File downloaded', {
+      logger.info("File downloaded", {
         id,
         filename: fileRecord.original_name,
-        size: fileContent.length
+        size: fileContent.length,
       });
 
       return {
         content: fileContent,
         filename: fileRecord.original_name,
-        mime_type: fileRecord.mime_type
+        mime_type: fileRecord.mime_type,
       };
     } catch (error) {
-      logger.error('Failed to download file', {
+      logger.error("Failed to download file", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -181,9 +183,9 @@ class FilesService {
     try {
       return await this.repository.findAll(filters);
     } catch (error) {
-      logger.error('Failed to list files', {
+      logger.error("Failed to list files", {
         error: error.message,
-        filters
+        filters,
       });
       throw error;
     }
@@ -196,12 +198,14 @@ class FilesService {
     try {
       const existingFile = await this.repository.findById(id);
       if (!existingFile) {
-        throw new Error('File not found');
+        throw new Error("File not found");
       }
 
       // Validate related entities if provided
       if (updateData.system_id) {
-        const system = await this.systemsRepository.findById(updateData.system_id);
+        const system = await this.systemsRepository.findById(
+          updateData.system_id,
+        );
         if (!system) {
           throw new Error(`System with ID ${updateData.system_id} not found`);
         }
@@ -216,18 +220,18 @@ class FilesService {
 
       const updatedFile = await this.repository.update(id, updateData);
 
-      logger.info('File metadata updated', {
+      logger.info("File metadata updated", {
         id,
         fields: Object.keys(updateData),
-        updated_by: userId
+        updated_by: userId,
       });
 
       return updatedFile;
     } catch (error) {
-      logger.error('Failed to update file', {
+      logger.error("Failed to update file", {
         error: error.message,
         id,
-        updateData
+        updateData,
       });
       throw error;
     }
@@ -240,34 +244,34 @@ class FilesService {
     try {
       const fileRecord = await this.repository.findById(id);
       if (!fileRecord) {
-        throw new Error('File not found');
+        throw new Error("File not found");
       }
 
       // Delete file from disk
       try {
         await fs.unlink(fileRecord.file_path);
       } catch (error) {
-        logger.warn('Failed to delete file from disk', {
+        logger.warn("Failed to delete file from disk", {
           error: error.message,
           id,
-          path: fileRecord.file_path
+          path: fileRecord.file_path,
         });
       }
 
       // Delete database record
       await this.repository.delete(id);
 
-      logger.info('File deleted', {
+      logger.info("File deleted", {
         id,
         filename: fileRecord.original_name,
-        deleted_by: userId
+        deleted_by: userId,
       });
 
       return true;
     } catch (error) {
-      logger.error('Failed to delete file', {
+      logger.error("Failed to delete file", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -286,9 +290,9 @@ class FilesService {
 
       return await this.repository.findByIdea(ideaId);
     } catch (error) {
-      logger.error('Failed to get files for idea', {
+      logger.error("Failed to get files for idea", {
         error: error.message,
-        ideaId
+        ideaId,
       });
       throw error;
     }
@@ -307,9 +311,9 @@ class FilesService {
 
       return await this.repository.findBySystem(systemId);
     } catch (error) {
-      logger.error('Failed to get files for system', {
+      logger.error("Failed to get files for system", {
         error: error.message,
-        systemId
+        systemId,
       });
       throw error;
     }
@@ -322,9 +326,9 @@ class FilesService {
     try {
       return await this.repository.search(query);
     } catch (error) {
-      logger.error('Failed to search files', {
+      logger.error("Failed to search files", {
         error: error.message,
-        query
+        query,
       });
       throw error;
     }
@@ -337,8 +341,8 @@ class FilesService {
     try {
       return await this.repository.getStatistics();
     } catch (error) {
-      logger.error('Failed to get file statistics', {
-        error: error.message
+      logger.error("Failed to get file statistics", {
+        error: error.message,
       });
       throw error;
     }
@@ -353,35 +357,56 @@ class FilesService {
     // Check file size (default 50MB limit)
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (size > maxSize) {
-      throw new Error(`File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`);
+      throw new Error(
+        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`,
+      );
     }
 
     // Check file extension
-    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.md', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.json', '.yaml', '.yml', '.xml', '.csv', '.zip'];
+    const allowedExtensions = [
+      ".pdf",
+      ".doc",
+      ".docx",
+      ".txt",
+      ".md",
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".svg",
+      ".json",
+      ".yaml",
+      ".yml",
+      ".xml",
+      ".csv",
+      ".zip",
+    ];
     const fileExtension = path.extname(originalname).toLowerCase();
 
     if (!allowedExtensions.includes(fileExtension)) {
-      throw new Error(`File type ${fileExtension} not allowed. Allowed types: ${allowedExtensions.join(', ')}`);
+      throw new Error(
+        `File type ${fileExtension} not allowed. Allowed types: ${allowedExtensions.join(", ")}`,
+      );
     }
 
     // Check MIME type
     const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain',
-      'text/markdown',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/svg+xml',
-      'application/json',
-      'application/x-yaml',
-      'text/yaml',
-      'application/xml',
-      'text/xml',
-      'text/csv',
-      'application/zip'
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "text/markdown",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/svg+xml",
+      "application/json",
+      "application/x-yaml",
+      "text/yaml",
+      "application/xml",
+      "text/xml",
+      "text/csv",
+      "application/zip",
     ];
 
     if (!allowedMimeTypes.includes(mimetype)) {
@@ -401,13 +426,13 @@ class FilesService {
         directory: this.uploadDir,
         exists: true,
         created: stats.birthtime,
-        modified: stats.mtime
+        modified: stats.mtime,
       };
     } catch (error) {
       return {
         directory: this.uploadDir,
         exists: false,
-        error: error.message
+        error: error.message,
       };
     }
   }

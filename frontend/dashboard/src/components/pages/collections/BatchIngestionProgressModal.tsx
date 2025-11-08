@@ -4,7 +4,7 @@
  * Shows real-time progress of batch ingestion with ability to cancel
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from "react";
 import {
   X,
   Loader2,
@@ -12,13 +12,13 @@ import {
   AlertCircle,
   XCircle,
   Pause,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
+} from "lucide-react";
+import { Button } from "../../ui/button";
 
 interface BatchIngestionJob {
   jobId: string;
   collectionName: string;
-  status: 'running' | 'completed' | 'cancelled' | 'failed';
+  status: "running" | "completed" | "cancelled" | "failed";
   totalFiles: number;
   processedFiles: number;
   failedFiles: number;
@@ -38,7 +38,7 @@ interface Props {
 }
 
 const RAG_SERVICE_URL =
-  import.meta.env.VITE_RAG_SERVICE_URL || 'http://localhost:3403';
+  import.meta.env.VITE_RAG_SERVICE_URL || "http://localhost:3403";
 
 export function BatchIngestionProgressModal({
   isOpen,
@@ -67,8 +67,8 @@ export function BatchIngestionProgressModal({
         setError(null);
       }
     } catch (err) {
-      console.error('[BatchIngestion] Failed to fetch status:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch status');
+      console.error("[BatchIngestion] Failed to fetch status:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch status");
     }
   }, [jobId]);
 
@@ -80,7 +80,7 @@ export function BatchIngestionProgressModal({
 
     // Poll every 2 seconds while running
     const interval = setInterval(() => {
-      if (job?.status === 'running') {
+      if (job?.status === "running") {
         fetchStatus();
       }
     }, 2000);
@@ -95,27 +95,27 @@ export function BatchIngestionProgressModal({
     try {
       const response = await fetch(
         `${RAG_SERVICE_URL}/api/v1/rag/ingestion/batch/${jobId}/cancel`,
-        { method: 'POST' },
+        { method: "POST" },
       );
 
       if (!response.ok) {
-        throw new Error('Failed to cancel job');
+        throw new Error("Failed to cancel job");
       }
 
       // Refresh status
       await fetchStatus();
     } catch (err) {
-      console.error('[BatchIngestion] Failed to cancel:', err);
-      setError(err instanceof Error ? err.message : 'Failed to cancel job');
+      console.error("[BatchIngestion] Failed to cancel:", err);
+      setError(err instanceof Error ? err.message : "Failed to cancel job");
     } finally {
       setCancelling(false);
     }
   };
 
   const handleClose = async () => {
-    if (job?.status === 'running') {
+    if (job?.status === "running") {
       const confirmed = window.confirm(
-        'A ingestão ainda está em andamento. Tem certeza que deseja fechar? (O processo continuará em background)',
+        "A ingestão ainda está em andamento. Tem certeza que deseja fechar? (O processo continuará em background)",
       );
       if (!confirmed) return;
     }
@@ -141,29 +141,29 @@ export function BatchIngestionProgressModal({
     if (!job) return <Loader2 className="h-5 w-5 animate-spin" />;
 
     switch (job.status) {
-      case 'running':
+      case "running":
         return <Loader2 className="h-5 w-5 animate-spin text-blue-500" />;
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'cancelled':
+      case "cancelled":
         return <XCircle className="h-5 w-5 text-yellow-500" />;
-      case 'failed':
+      case "failed":
         return <AlertCircle className="h-5 w-5 text-red-500" />;
     }
   };
 
   const getStatusText = () => {
-    if (!job) return 'Carregando...';
+    if (!job) return "Carregando...";
 
     switch (job.status) {
-      case 'running':
-        return 'Em andamento';
-      case 'completed':
-        return 'Concluído';
-      case 'cancelled':
-        return 'Cancelado';
-      case 'failed':
-        return 'Falhou';
+      case "running":
+        return "Em andamento";
+      case "completed":
+        return "Concluído";
+      case "cancelled":
+        return "Cancelado";
+      case "failed":
+        return "Falhou";
     }
   };
 
@@ -255,7 +255,7 @@ export function BatchIngestionProgressModal({
               </div>
             </div>
 
-            {job.status === 'running' && job.estimatedRemainingTimeMs > 0 && (
+            {job.status === "running" && job.estimatedRemainingTimeMs > 0 && (
               <div className="text-sm">
                 <span className="text-slate-600 dark:text-slate-400">
                   Tempo Estimado Restante:
@@ -299,7 +299,7 @@ export function BatchIngestionProgressModal({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">
-          {job?.status === 'running' && (
+          {job?.status === "running" && (
             <Button
               onClick={handleCancel}
               disabled={cancelling}
@@ -316,9 +316,9 @@ export function BatchIngestionProgressModal({
           )}
           <Button
             onClick={handleClose}
-            variant={job?.status === 'running' ? 'outline' : 'default'}
+            variant={job?.status === "running" ? "outline" : "default"}
           >
-            {job?.status === 'running' ? 'Minimizar' : 'Fechar'}
+            {job?.status === "running" ? "Minimizar" : "Fechar"}
           </Button>
         </div>
       </div>

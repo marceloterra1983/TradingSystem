@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./docs" },
+    { "path": "./frontend/dashboard" }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "skipLibCheck": true
+  }
+}

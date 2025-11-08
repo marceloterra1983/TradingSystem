@@ -1,6 +1,6 @@
-import commandsDatabase from './commands-db.json' with { type: 'json' };
+import commandsDatabase from "./commands-db.json" with { type: "json" };
 
-const SUPPORTED_COMMAND_SCHEMA_VERSION = '1.1.0';
+const SUPPORTED_COMMAND_SCHEMA_VERSION = "1.1.0";
 
 type CommandsDatabase = typeof commandsDatabase;
 
@@ -12,7 +12,7 @@ function validateCommandsDatabase(db: CommandsDatabase) {
   }
 
   if (!Array.isArray(db.commands) || db.commands.length === 0) {
-    throw new Error('commands-db.json está vazio ou inválido.');
+    throw new Error("commands-db.json está vazio ou inválido.");
   }
 }
 

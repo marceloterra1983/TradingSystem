@@ -1,5 +1,5 @@
-import type { JobStatistics, JobStatus, JobType } from '../types/jobs';
-import { formatShortDate } from './dateUtils';
+import type { JobStatistics, JobStatus, JobType } from "../types/jobs";
+import { formatShortDate } from "./dateUtils";
 
 interface ChartPoint {
   name: string;
@@ -9,10 +9,10 @@ interface ChartPoint {
 }
 
 const ensureNumber = (value: unknown): number => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
   }
@@ -60,7 +60,7 @@ export function buildJobsPerDayData(
 
 export function formatSuccessRate(value?: number): string {
   if (value === undefined || value === null || Number.isNaN(value)) {
-    return '0%';
+    return "0%";
   }
   return `${Math.round(value * 100)}%`;
 }

@@ -4,9 +4,9 @@ import {
   FileText,
   CheckCircle2,
   Sparkles,
-} from 'lucide-react';
-import { Button } from '../ui/button';
-import { apiConfig } from '../../config/api';
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { apiConfig } from "../../config/api";
 
 /**
  * Documentation portal link (Docusaurus)
@@ -15,7 +15,7 @@ import { apiConfig } from '../../config/api';
  */
 export function DocsLinkSection() {
   const handleOpenDocs = () => {
-    window.open(apiConfig.docsUrl, '_blank', 'noopener,noreferrer');
+    window.open(apiConfig.docsUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -108,7 +108,7 @@ export function DocsLinkSection() {
 
           <div className="pt-4 border-t border-slate-200 dark:border-slate-700 mt-6">
             <p className="text-sm text-slate-500 dark:text-slate-500">
-              URL:{' '}
+              URL:{" "}
               <code className="px-2 py-1 bg-slate-100 dark:bg-slate-900 rounded text-blue-600 dark:text-blue-400 font-mono text-xs">
                 {apiConfig.docsUrl}
               </code>

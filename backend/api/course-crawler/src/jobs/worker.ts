@@ -1,15 +1,15 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { env as apiEnv } from '../config/environment.js';
+import { spawn } from "node:child_process";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { env as apiEnv } from "../config/environment.js";
 import {
   fetchNextQueuedRun,
   markRunFailure,
   markRunSuccess,
-} from '../services/run-service.js';
-import { getCourseWithSecret } from '../services/course-service.js';
-import { withTransaction } from '../db/pool.js';
-import type { PoolClient } from 'pg';
+} from "../services/run-service.js";
+import { getCourseWithSecret } from "../services/course-service.js";
+import { withTransaction } from "../db/pool.js";
+import type { PoolClient } from "pg";
 
 const POLL_INTERVAL_MS = 5000;
 const DEFAULT_TIMEOUT_MS = 1800000; // 30 minutes (increased from 5 min for large courses)
@@ -29,24 +29,33 @@ async function delay(ms: number) {
 
 async function processRun() {
   workerState.lastPollTime = Date.now();
-  console.log('[Worker] 🔄 Polling for queued runs...');
+  console.log("[Worker] 🔄 Polling for queued runs...");
 
   const run = await fetchNextQueuedRun();
-  console.log('[Worker] 📊 fetchNextQueuedRun() returned:', run ? `run ${run.id}` : 'null');
+  console.log(
+    "[Worker] 📊 fetchNextQueuedRun() returned:",
+    run ? `run ${run.id}` : "null",
+  );
 
   if (!run) {
-    console.log(`[Worker] ⏸️  No queued runs, waiting ${POLL_INTERVAL_MS}ms...`);
+    console.log(
+      `[Worker] ⏸️  No queued runs, waiting ${POLL_INTERVAL_MS}ms...`,
+    );
     await delay(POLL_INTERVAL_MS);
     return;
   }
 
-  console.log(`[Worker] ✅ Processing run ${run.id} for course ${run.courseId}`);
+  console.log(
+    `[Worker] ✅ Processing run ${run.id} for course ${run.courseId}`,
+  );
 
   console.log(`[Worker] 🔍 Fetching course details for ${run.courseId}...`);
   const course = await getCourseWithSecret(run.courseId);
   if (!course) {
-    console.error(`[Worker] ❌ Course ${run.courseId} not found for run ${run.id}`);
-    await markRunFailure(run.id, new Error('Course not found'));
+    console.error(
+      `[Worker] ❌ Course ${run.courseId} not found for run ${run.id}`,
+    );
+    await markRunFailure(run.id, new Error("Course not found"));
     return;
   }
   console.log(`[Worker] ✅ Course found: ${course.name} (${course.baseUrl})`);
@@ -61,27 +70,29 @@ async function processRun() {
     COURSE_CRAWLER_LOGIN_USERNAME: course.username,
     COURSE_CRAWLER_LOGIN_PASSWORD: course.password,
     COURSE_CRAWLER_OUTPUTS_DIR: runBaseDir,
-    COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(','),
+    COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(","),
     COURSE_CRAWLER_SELECTORS_CONFIG:
       process.env.COURSE_CRAWLER_SELECTORS_CONFIG ??
-      '/workspace/apps/course-crawler/config/platform-config.json',
+      "/workspace/apps/course-crawler/config/platform-config.json",
   };
 
-  console.log(`[Worker] 🔍 Checking CLI path: ${apiEnv.COURSE_CRAWLER_CLI_PATH}`);
+  console.log(
+    `[Worker] 🔍 Checking CLI path: ${apiEnv.COURSE_CRAWLER_CLI_PATH}`,
+  );
   await fs.access(apiEnv.COURSE_CRAWLER_CLI_PATH);
-  console.log('[Worker] ✅ CLI path accessible');
+  console.log("[Worker] ✅ CLI path accessible");
 
   console.log(`[Worker] 🚀 Spawning CLI process for run ${run.id}...`);
-  console.log('[Worker] 📋 Environment variables set:', {
+  console.log("[Worker] 📋 Environment variables set:", {
     COURSE_CRAWLER_BASE_URL: course.baseUrl,
     COURSE_CRAWLER_LOGIN_USERNAME: course.username,
-    COURSE_CRAWLER_LOGIN_PASSWORD: '***',
+    COURSE_CRAWLER_LOGIN_PASSWORD: "***",
     COURSE_CRAWLER_OUTPUTS_DIR: runBaseDir,
-    COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(','),
+    COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(","),
   });
-  const child = spawn('node', [apiEnv.COURSE_CRAWLER_CLI_PATH], {
+  const child = spawn("node", [apiEnv.COURSE_CRAWLER_CLI_PATH], {
     env: childEnv,
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ["ignore", "pipe", "pipe"],
   });
 
   console.log(`[Worker] ✅ CLI process spawned with PID: ${child.pid}`);
@@ -91,16 +102,18 @@ async function processRun() {
     startTime: Date.now(),
     pid: child.pid,
   });
-  console.log(`[Worker] 📊 Active runs tracked: ${workerState.activeRuns.size} total`);
+  console.log(
+    `[Worker] 📊 Active runs tracked: ${workerState.activeRuns.size} total`,
+  );
 
-  let stdout = '';
-  let stderr = '';
-  child.stdout?.on('data', (data) => {
+  let stdout = "";
+  let stderr = "";
+  child.stdout?.on("data", (data) => {
     const chunk = data.toString();
     stdout += chunk;
     console.log(`[Worker][${run.id}][stdout]`, chunk.trim());
   });
-  child.stderr?.on('data', (data) => {
+  child.stderr?.on("data", (data) => {
     const chunk = data.toString();
     stderr += chunk;
     console.error(`[Worker][${run.id}][stderr]`, chunk.trim());
@@ -113,12 +126,14 @@ async function processRun() {
 
   const timeoutPromise = new Promise<number>((resolve) => {
     setTimeout(() => {
-      console.warn(`[Worker] Run ${run.id} timed out after ${timeoutMs}ms, killing process`);
-      child.kill('SIGTERM');
+      console.warn(
+        `[Worker] Run ${run.id} timed out after ${timeoutMs}ms, killing process`,
+      );
+      child.kill("SIGTERM");
       setTimeout(() => {
         if (!child.killed) {
           console.warn(`[Worker] Force killing run ${run.id} process`);
-          child.kill('SIGKILL');
+          child.kill("SIGKILL");
         }
       }, 5000);
       resolve(-1); // Timeout exit code
@@ -126,19 +141,23 @@ async function processRun() {
   });
 
   const exitPromise = new Promise<number>((resolve) => {
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       resolve(code ?? -1);
     });
   });
 
-  console.log(`[Worker] ⏳ Waiting for CLI process to complete (timeout: ${timeoutMs}ms)...`);
+  console.log(
+    `[Worker] ⏳ Waiting for CLI process to complete (timeout: ${timeoutMs}ms)...`,
+  );
   const exitCode = await Promise.race([exitPromise, timeoutPromise]);
 
   console.log(`[Worker] 🏁 CLI process exited with code: ${exitCode}`);
 
   // Remove from active runs
   workerState.activeRuns.delete(run.id);
-  console.log(`[Worker] 📊 Active runs remaining: ${workerState.activeRuns.size}`);
+  console.log(
+    `[Worker] 📊 Active runs remaining: ${workerState.activeRuns.size}`,
+  );
 
   if (exitCode === -1) {
     console.error(`[Worker] ❌ Run ${run.id} failed due to timeout`);
@@ -152,9 +171,15 @@ async function processRun() {
   }
 
   if (exitCode !== 0) {
-    console.error(`[Worker] ❌ Run ${run.id} failed with exit code ${exitCode}`);
-    console.error(`[Worker] 📋 Last stderr: ${stderr.slice(-500) || '(empty)'}`);
-    console.error(`[Worker] 📋 Last stdout: ${stdout.slice(-500) || '(empty)'}`);
+    console.error(
+      `[Worker] ❌ Run ${run.id} failed with exit code ${exitCode}`,
+    );
+    console.error(
+      `[Worker] 📋 Last stderr: ${stderr.slice(-500) || "(empty)"}`,
+    );
+    console.error(
+      `[Worker] 📋 Last stdout: ${stdout.slice(-500) || "(empty)"}`,
+    );
     await markRunFailure(
       run.id,
       new Error(`Crawler exited with code ${exitCode}: ${stderr || stdout}`),
@@ -174,13 +199,13 @@ async function processRun() {
     timestampedDirs = artifacts.filter((entry) => entry.isDirectory());
   }
   if (timestampedDirs.length === 0) {
-    await markRunFailure(run.id, new Error('No output generated'));
+    await markRunFailure(run.id, new Error("No output generated"));
     return;
   }
 
   timestampedDirs.sort((a, b) => (a.name < b.name ? 1 : -1));
   const latestDir = path.join(runBaseDir, timestampedDirs[0].name);
-  const reportPath = path.join(latestDir, 'run-report.json');
+  const reportPath = path.join(latestDir, "run-report.json");
   const reportExists = await fs
     .access(reportPath)
     .then(() => true)
@@ -188,9 +213,9 @@ async function processRun() {
 
   let metrics: Record<string, unknown> | undefined;
   if (reportExists) {
-    const content = await fs.readFile(reportPath, 'utf-8');
+    const content = await fs.readFile(reportPath, "utf-8");
     const json = JSON.parse(content) as Record<string, unknown>;
-    if (json.metrics && typeof json.metrics === 'object') {
+    if (json.metrics && typeof json.metrics === "object") {
       metrics = json.metrics as Record<string, unknown>;
     }
   }
@@ -203,7 +228,7 @@ async function processRun() {
  * Marks them as failed with appropriate error message
  */
 async function recoverOrphanedRuns() {
-  console.log('[Worker] 🔍 Checking for orphaned runs...');
+  console.log("[Worker] 🔍 Checking for orphaned runs...");
   try {
     const orphanedRuns = await withTransaction(async (client: PoolClient) => {
       const result = await client.query(
@@ -216,7 +241,7 @@ async function recoverOrphanedRuns() {
     });
 
     if (orphanedRuns.length === 0) {
-      console.log('[Worker] ✅ No orphaned runs found');
+      console.log("[Worker] ✅ No orphaned runs found");
       return;
     }
 
@@ -224,7 +249,9 @@ async function recoverOrphanedRuns() {
 
     for (const run of orphanedRuns) {
       const duration = Date.now() - new Date(run.started_at).getTime();
-      console.log(`[Worker] 🔧 Recovering run ${run.id} (running for ${Math.floor(duration / 1000)}s)`);
+      console.log(
+        `[Worker] 🔧 Recovering run ${run.id} (running for ${Math.floor(duration / 1000)}s)`,
+      );
 
       await withTransaction(async (client: PoolClient) => {
         await client.query(
@@ -242,13 +269,13 @@ async function recoverOrphanedRuns() {
 
     console.log(`[Worker] 🎉 Recovered ${orphanedRuns.length} orphaned run(s)`);
   } catch (error) {
-    console.error('[Worker] ❌ Failed to recover orphaned runs:', error);
+    console.error("[Worker] ❌ Failed to recover orphaned runs:", error);
   }
 }
 
 async function main() {
   // eslint-disable-next-line no-console
-  console.log('Course Crawler worker started');
+  console.log("Course Crawler worker started");
 
   // Recover orphaned runs on startup
   await recoverOrphanedRuns();
@@ -259,7 +286,7 @@ async function main() {
       await processRun();
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Worker loop error', error);
+      console.error("Worker loop error", error);
       await delay(POLL_INTERVAL_MS);
     }
   }
@@ -267,6 +294,6 @@ async function main() {
 
 main().catch((error) => {
   // eslint-disable-next-line no-console
-  console.error('Worker failed', error);
+  console.error("Worker failed", error);
   process.exitCode = 1;
 });

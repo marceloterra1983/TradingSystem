@@ -1,17 +1,18 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import dotenv from 'dotenv';
-import fs from 'node:fs';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
+import fs from "node:fs";
 
 // Load .env from project root ONLY if not running in Docker container
 // In Docker, environment variables come from docker-compose.yml
 const __configFilename = fileURLToPath(import.meta.url);
 const __configDirname = path.dirname(__configFilename);
-const __projectRoot = path.resolve(__configDirname, '..', '..', '..', '..');
-const envPath = path.join(__projectRoot, '.env');
+const __projectRoot = path.resolve(__configDirname, "..", "..", "..", "..");
+const envPath = path.join(__projectRoot, ".env");
 
 // Check if we're in a container (no .env file at expected location)
-const isDocker = !fs.existsSync(envPath) || process.env.RUNNING_IN_DOCKER === 'true';
+const isDocker =
+  !fs.existsSync(envPath) || process.env.RUNNING_IN_DOCKER === "true";
 
 if (!isDocker) {
   console.log(`[Gateway API Config] Loading .env from: ${envPath}`);
@@ -19,19 +20,21 @@ if (!isDocker) {
   if (dotenvResult.error) {
     console.warn(`[Gateway API Config] Warning: ${dotenvResult.error.message}`);
   } else {
-    console.log('[Gateway API Config] .env loaded successfully');
+    console.log("[Gateway API Config] .env loaded successfully");
   }
 } else {
-  console.log('[Gateway API Config] Running in Docker - using environment variables from container');
+  console.log(
+    "[Gateway API Config] Running in Docker - using environment variables from container",
+  );
 }
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '..', '..', '..', '..');
+const projectRoot = path.resolve(__dirname, "..", "..", "..", "..");
 
 const parseBoolean = (value, fallback = false) => {
-  if (typeof value !== 'string') return fallback;
-  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase().trim());
+  if (typeof value !== "string") return fallback;
+  return ["1", "true", "yes", "on"].includes(value.toLowerCase().trim());
 };
 
 const toInt = (value, fallback) => {
@@ -46,11 +49,13 @@ const parseDbUrl = (url) => {
     return {
       host: parsed.hostname || undefined,
       port: parsed.port ? Number(parsed.port) : undefined,
-      database: parsed.pathname ? parsed.pathname.replace(/^\//, '') : undefined,
+      database: parsed.pathname
+        ? parsed.pathname.replace(/^\//, "")
+        : undefined,
       user: parsed.username || undefined,
       password: parsed.password || undefined,
-      schema: parsed.searchParams.get('schema') || undefined,
-      ssl: parsed.searchParams.get('ssl') || undefined,
+      schema: parsed.searchParams.get("schema") || undefined,
+      ssl: parsed.searchParams.get("ssl") || undefined,
     };
   } catch {
     return null;
@@ -70,7 +75,7 @@ const dbHost =
   process.env.TELEGRAM_GATEWAY_DB_HOST ||
   process.env.TIMESCALEDB_HOST ||
   parsedUrl?.host ||
-  'localhost';
+  "localhost";
 
 const dbPort = toInt(
   process.env.TELEGRAM_GATEWAY_DB_PORT ||
@@ -81,26 +86,26 @@ const dbPort = toInt(
 
 const dbName =
   process.env.TELEGRAM_GATEWAY_DB_NAME ||
-    process.env.TIMESCALEDB_DATABASE ||
-    parsedUrl?.database ||
-  'telegram_gateway';
+  process.env.TIMESCALEDB_DATABASE ||
+  parsedUrl?.database ||
+  "telegram_gateway";
 
 const dbUser =
   process.env.TELEGRAM_GATEWAY_DB_USER ||
-    process.env.TIMESCALEDB_USER ||
-    parsedUrl?.user ||
-  'telegram';
+  process.env.TIMESCALEDB_USER ||
+  parsedUrl?.user ||
+  "telegram";
 
 const dbPassword =
   process.env.TELEGRAM_GATEWAY_DB_PASSWORD ||
-    process.env.TIMESCALEDB_PASSWORD ||
-    parsedUrl?.password ||
-  'telegram_secure_pass';
+  process.env.TIMESCALEDB_PASSWORD ||
+  parsedUrl?.password ||
+  "telegram_secure_pass";
 
 const dbSchema =
   process.env.TELEGRAM_GATEWAY_DB_SCHEMA ||
   parsedUrl?.schema ||
-  'telegram_gateway';
+  "telegram_gateway";
 
 const fallbackDbUrl =
   defaultDbUrl ||
@@ -109,16 +114,16 @@ const fallbackDbUrl =
   )}@${dbHost}:${dbPort}/${dbName}?schema=${dbSchema}`;
 
 export const config = {
-  env: process.env.NODE_ENV ?? 'development',
+  env: process.env.NODE_ENV ?? "development",
   // Do NOT fall back to generic PORT to avoid collisions with other services.
   // Use explicit TELEGRAM_GATEWAY_API_PORT only.
   port: toInt(process.env.TELEGRAM_GATEWAY_API_PORT, 4010),
-  logLevel: process.env.LOG_LEVEL ?? 'info',
+  logLevel: process.env.LOG_LEVEL ?? "info",
   apiToken:
     process.env.TELEGRAM_GATEWAY_API_TOKEN ||
     process.env.API_SECRET_TOKEN ||
     process.env.GATEWAY_API_TOKEN ||
-    '',
+    "",
   database: {
     url: fallbackDbUrl,
     host: dbHost,
@@ -127,11 +132,14 @@ export const config = {
     user: dbUser,
     password: dbPassword,
     schema: dbSchema,
-    table: process.env.TELEGRAM_GATEWAY_DB_TABLE || 'messages',
+    table: process.env.TELEGRAM_GATEWAY_DB_TABLE || "messages",
     ssl: parseBoolean(process.env.TELEGRAM_GATEWAY_DB_SSL ?? parsedUrl?.ssl),
     pool: {
       max: toInt(process.env.TELEGRAM_GATEWAY_DB_POOL_MAX, 10),
-      idleTimeoutMs: toInt(process.env.TELEGRAM_GATEWAY_DB_IDLE_TIMEOUT_MS, 30000),
+      idleTimeoutMs: toInt(
+        process.env.TELEGRAM_GATEWAY_DB_IDLE_TIMEOUT_MS,
+        30000,
+      ),
       connectionTimeoutMs: toInt(
         process.env.TELEGRAM_GATEWAY_DB_CONNECTION_TIMEOUT_MS,
         5000,
@@ -143,7 +151,13 @@ export const config = {
     maxLimit: toInt(process.env.TELEGRAM_GATEWAY_MAX_PAGE_SIZE, 10000),
   },
   assets: {
-    sqlMigrationsDir: path.join(projectRoot, 'backend', 'data', 'timescaledb', 'telegram-gateway'),
+    sqlMigrationsDir: path.join(
+      projectRoot,
+      "backend",
+      "data",
+      "timescaledb",
+      "telegram-gateway",
+    ),
   },
 };
 
@@ -151,16 +165,16 @@ export const validateConfig = (logger) => {
   const errors = [];
 
   if (!config.database.url) {
-    errors.push('TELEGRAM_GATEWAY_DB_URL (or TIMESCALEDB_URL) is required');
+    errors.push("TELEGRAM_GATEWAY_DB_URL (or TIMESCALEDB_URL) is required");
   }
 
   if (!config.apiToken) {
-    errors.push('TELEGRAM_GATEWAY_API_TOKEN or API_SECRET_TOKEN is required');
+    errors.push("TELEGRAM_GATEWAY_API_TOKEN or API_SECRET_TOKEN is required");
   }
 
   if (errors.length > 0) {
-    logger.error({ errors }, 'Telegram Gateway API configuration invalid');
-    throw new Error('Configuration validation failed');
+    logger.error({ errors }, "Telegram Gateway API configuration invalid");
+    throw new Error("Configuration validation failed");
   }
 
   logger.info(
@@ -173,6 +187,6 @@ export const validateConfig = (logger) => {
       dbPoolMax: config.database.pool.max,
       pagination: config.pagination,
     },
-    'Telegram Gateway API configuration loaded',
+    "Telegram Gateway API configuration loaded",
   );
 };

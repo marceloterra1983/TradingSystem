@@ -1,7 +1,7 @@
-import { existsSync, mkdirSync } from 'node:fs';
-import path from 'node:path';
-import { config } from 'dotenv';
-import { z } from 'zod';
+import { existsSync, mkdirSync } from "node:fs";
+import path from "node:path";
+import { config } from "dotenv";
+import { z } from "zod";
 
 config();
 
@@ -10,19 +10,25 @@ const schema = z.object({
   COURSE_CRAWLER_DATABASE_URL: z.string().url(),
   COURSE_CRAWLER_ENCRYPTION_KEY: z
     .string()
-    .min(32, 'COURSE_CRAWLER_ENCRYPTION_KEY must be at least 32 characters'),
+    .min(32, "COURSE_CRAWLER_ENCRYPTION_KEY must be at least 32 characters"),
+  COURSE_CRAWLER_JWT_SECRET: z
+    .string()
+    .min(32, "COURSE_CRAWLER_JWT_SECRET must be at least 32 characters")
+    .default("change-me-in-production-min-32-chars"),
+  COURSE_CRAWLER_ADMIN_USERNAME: z.string().default("admin"),
+  COURSE_CRAWLER_ADMIN_PASSWORD: z.string().default("changeme"),
   COURSE_CRAWLER_OUTPUT_BASE: z
     .string()
-    .default(path.resolve(process.cwd(), 'outputs')),
+    .default(path.resolve(process.cwd(), "outputs")),
   COURSE_CRAWLER_CLI_PATH: z
     .string()
     .default(
-      path.resolve(
-        process.cwd(),
-        '../../apps/course-crawler/dist/index.js',
-      ),
+      path.resolve(process.cwd(), "../../apps/course-crawler/dist/index.js"),
     ),
   COURSE_CRAWLER_MAX_CONCURRENCY: z.coerce.number().int().min(1).default(1),
+  COURSE_CRAWLER_CORS_ORIGINS: z
+    .string()
+    .transform((str) => str.split(",")),
 });
 
 const parsed = schema.safeParse(process.env);

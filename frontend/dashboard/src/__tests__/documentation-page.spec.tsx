@@ -1,15 +1,15 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { describe, expect, it, beforeEach, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
 
-import DocumentationPage from '@/components/pages/DocumentationPage';
+import DocumentationPage from "@/components/pages/DocumentationPage";
 
 // Wrapper component for tests
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>{children}</BrowserRouter>
 );
 
-vi.mock('@/services/documentationService', () => ({
+vi.mock("@/services/documentationService", () => ({
   __esModule: true,
   default: {
     search: vi.fn(),
@@ -17,65 +17,65 @@ vi.mock('@/services/documentationService', () => ({
   },
 }));
 
-import documentationService from '@/services/documentationService';
+import documentationService from "@/services/documentationService";
 
 const mockedSearch = documentationService.search as unknown as vi.Mock;
 const mockedSuggestions =
   documentationService.getSuggestions as unknown as vi.Mock;
 
-describe('DocumentationPage', () => {
+describe("DocumentationPage", () => {
   beforeEach(() => {
     mockedSearch.mockReset();
     mockedSuggestions.mockReset();
     mockedSearch.mockResolvedValue({
       results: [
         {
-          id: 'openapi-endpoint',
-          title: 'Execute Order endpoint',
-          description: 'Executa uma ordem no TradingSystem',
-          source: 'openapi',
-          version: '1.0.0',
-          path: 'docs/apis/execute-order',
+          id: "openapi-endpoint",
+          title: "Execute Order endpoint",
+          description: "Executa uma ordem no TradingSystem",
+          source: "openapi",
+          version: "1.0.0",
+          path: "docs/apis/execute-order",
           score: 0.92,
         },
       ],
       total: 1,
     });
     mockedSuggestions.mockResolvedValue([
-      { text: 'execute order', source: 'openapi' },
-      { text: 'asyncapi order events', source: 'asyncapi' },
+      { text: "execute order", source: "openapi" },
+      { text: "asyncapi order events", source: "asyncapi" },
     ]);
   });
 
-  it('performs a search and displays results', async () => {
+  it("performs a search and displays results", async () => {
     render(<DocumentationPage />, { wrapper: TestWrapper });
 
     const input = screen.getByPlaceholderText(/websocket health/i);
-    fireEvent.input(input, { target: { value: 'order' } });
+    fireEvent.input(input, { target: { value: "order" } });
 
     await waitFor(() => {
-      expect(mockedSearch).toHaveBeenCalledWith('order', {
+      expect(mockedSearch).toHaveBeenCalledWith("order", {
         limit: 30,
         source: undefined,
       });
     });
 
     expect(
-      await screen.findByRole('button', { name: /execute order endpoint/i }),
+      await screen.findByRole("button", { name: /execute order endpoint/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Fonte:\s*openapi/i)).toBeInTheDocument();
   });
 
-  it('allows selecting results and opening documentation', async () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+  it("allows selecting results and opening documentation", async () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
     render(<DocumentationPage />, { wrapper: TestWrapper });
     const input = screen.getByPlaceholderText(/websocket health/i);
-    fireEvent.input(input, { target: { value: 'execute order' } });
+    fireEvent.input(input, { target: { value: "execute order" } });
     await waitFor(() => expect(mockedSearch).toHaveBeenCalled());
 
-    await screen.findByRole('button', { name: /execute order endpoint/i });
-    const openButton = screen.getByRole('button', { name: /abrir/i });
+    await screen.findByRole("button", { name: /execute order endpoint/i });
+    const openButton = screen.getByRole("button", { name: /abrir/i });
     fireEvent.click(openButton);
 
     expect(openSpy).toHaveBeenCalled();

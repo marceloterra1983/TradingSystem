@@ -1,9 +1,9 @@
-import * as React from 'react';
-import { IframeWithUrl } from '../common/IframeWithUrl';
-import { useToast } from '../../hooks/useToast';
+import * as React from "react";
+import { IframeWithUrl } from "../common/IframeWithUrl";
+import { useToast } from "../../hooks/useToast";
 
 const WAHA_URL =
-  import.meta.env.VITE_WAHA_DASHBOARD_URL || 'http://localhost:3310/dashboard/';
+  import.meta.env.VITE_WAHA_DASHBOARD_URL || "http://localhost:3310/dashboard/";
 
 export default function WahaPage() {
   const toast = useToast();
@@ -16,7 +16,10 @@ export default function WahaPage() {
   };
 
   return (
-    <div className="flex flex-col h-full" style={{ minHeight: 'calc(100vh - 200px)' }}>
+    <div
+      className="flex flex-col h-full"
+      style={{ minHeight: "calc(100vh - 200px)" }}
+    >
       {hasError ? (
         <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-red-300 text-sm text-red-600 dark:border-red-900 dark:text-red-200">
           <p>Não foi possível carregar o dashboard do WAHA.</p>
@@ -39,7 +42,9 @@ export default function WahaPage() {
           allow="clipboard-read; clipboard-write"
           onError={() => {
             setHasError(true);
-            toast.error('WAHA dashboard indisponível. Verifique se o stack está rodando.');
+            toast.error(
+              "WAHA dashboard indisponível. Verifique se o stack está rodando.",
+            );
           }}
         />
       )}

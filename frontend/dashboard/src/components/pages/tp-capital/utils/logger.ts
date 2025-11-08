@@ -1,12 +1,12 @@
 /**
  * Centralized Logger - TP-Capital
- * 
+ *
  * Standardized logging with context and severity levels
- * 
+ *
  * @module tp-capital/utils/logger
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
   [key: string]: unknown;
@@ -20,24 +20,24 @@ class TPCapitalLogger {
   }
 
   private emit(level: LogLevel, message: string, context?: LogContext): void {
-    if (level === 'debug' && process.env.NODE_ENV !== 'development') {
+    if (level === "debug" && process.env.NODE_ENV !== "development") {
       return;
     }
 
     const prefix = `[TP-Capital:${this.context}]`;
-    const payload = context && Object.keys(context).length > 0 ? context : '';
+    const payload = context && Object.keys(context).length > 0 ? context : "";
 
     switch (level) {
-      case 'debug':
+      case "debug":
         console.debug(prefix, message, payload);
         break;
-      case 'info':
+      case "info":
         console.info(prefix, message, payload);
         break;
-      case 'warn':
+      case "warn":
         console.warn(prefix, message, payload);
         break;
-      case 'error':
+      case "error":
         console.error(prefix, message, payload);
         break;
       default:
@@ -49,34 +49,37 @@ class TPCapitalLogger {
    * Log debug message (development only)
    */
   debug(message: string, context?: LogContext): void {
-    this.emit('debug', message, context);
+    this.emit("debug", message, context);
   }
 
   /**
    * Log info message
    */
   info(message: string, context?: LogContext): void {
-    this.emit('info', message, context);
+    this.emit("info", message, context);
   }
 
   /**
    * Log warning message
    */
   warn(message: string, context?: LogContext): void {
-    this.emit('warn', message, context);
+    this.emit("warn", message, context);
   }
 
   /**
    * Log error message with optional error object
    */
   error(message: string, error?: Error | unknown, context?: LogContext): void {
-    const errorInfo = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : error;
+    const errorInfo =
+      error instanceof Error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : error;
 
-    this.emit('error', message, {
+    this.emit("error", message, {
       error: errorInfo,
       ...context,
     });
@@ -89,7 +92,7 @@ class TPCapitalLogger {
     endpoint: string,
     status: number,
     statusText: string,
-    context?: LogContext
+    context?: LogContext,
   ): void {
     this.error(`API Error: ${endpoint}`, undefined, {
       status,
@@ -101,10 +104,10 @@ class TPCapitalLogger {
 
 /**
  * Create a logger instance for a specific context
- * 
+ *
  * @param context - Context identifier (e.g., 'SignalsTable', 'API', 'FilterBar')
  * @returns Logger instance
- * 
+ *
  * @example
  * ```ts
  * const logger = createLogger('SignalsTable');
@@ -119,4 +122,4 @@ export function createLogger(context: string): TPCapitalLogger {
 /**
  * Default logger for general use
  */
-export const logger = createLogger('Module');
+export const logger = createLogger("Module");

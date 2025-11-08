@@ -3,9 +3,9 @@
  * Handles all HTTP requests to the TP-Capital API
  */
 
-import { getApiUrl } from '../config/api';
+import { getApiUrl } from "../config/api";
 
-const API_BASE_URL = getApiUrl('tpCapital');
+const API_BASE_URL = getApiUrl("tpCapital");
 
 export interface TPSignal {
   ts: string;
@@ -60,13 +60,13 @@ export const tpCapitalService = {
   }): Promise<TPSignal[]> {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.channel) queryParams.append('channel', params.channel);
-      if (params?.signalType) queryParams.append('type', params.signalType);
-      if (params?.fromTs) queryParams.append('from', params.fromTs.toString());
-      if (params?.toTs) queryParams.append('to', params.toTs.toString());
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.channel) queryParams.append("channel", params.channel);
+      if (params?.signalType) queryParams.append("type", params.signalType);
+      if (params?.fromTs) queryParams.append("from", params.fromTs.toString());
+      if (params?.toTs) queryParams.append("to", params.toTs.toString());
 
-      const url = `${API_BASE_URL}/signals${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const url = `${API_BASE_URL}/signals${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -74,7 +74,7 @@ export const tpCapitalService = {
       const json = await response.json();
       return json.data || [];
     } catch (error) {
-      console.error('Error fetching TP Capital signals:', error);
+      console.error("Error fetching TP Capital signals:", error);
       return [];
     }
   },
@@ -91,7 +91,7 @@ export const tpCapitalService = {
       const json = await response.json();
       return json.data || [];
     } catch (error) {
-      console.error('Error fetching telegram bots:', error);
+      console.error("Error fetching telegram bots:", error);
       return [];
     }
   },
@@ -108,7 +108,7 @@ export const tpCapitalService = {
       const json = await response.json();
       return json.data || [];
     } catch (error) {
-      console.error('Error fetching telegram channels:', error);
+      console.error("Error fetching telegram channels:", error);
       return [];
     }
   },
@@ -124,8 +124,8 @@ export const tpCapitalService = {
       }
       return await response.json();
     } catch (error) {
-      console.error('Error checking TP Capital API health:', error);
-      return { status: 'error', questdb: false };
+      console.error("Error checking TP Capital API health:", error);
+      return { status: "error", questdb: false };
     }
   },
 };

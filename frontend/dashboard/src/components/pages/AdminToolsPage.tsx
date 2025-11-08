@@ -1,5 +1,5 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
 import {
   ServerCog,
   Activity,
@@ -7,7 +7,7 @@ import {
   Workflow,
   GaugeCircle,
   LifeBuoy,
-} from 'lucide-react';
+} from "lucide-react";
 
 /**
  * Admin Tools Page - Operational tooling and observability shortcuts
@@ -15,7 +15,7 @@ import {
 export function AdminToolsPage() {
   const sections = [
     {
-      id: 'service-health',
+      id: "service-health",
       content: (
         <PlaceholderSection
           cardId="admin-tools-service-health"
@@ -26,7 +26,7 @@ export function AdminToolsPage() {
       ),
     },
     {
-      id: 'observability',
+      id: "observability",
       content: (
         <PlaceholderSection
           cardId="admin-tools-observability"
@@ -37,7 +37,7 @@ export function AdminToolsPage() {
       ),
     },
     {
-      id: 'runbooks',
+      id: "runbooks",
       content: (
         <PlaceholderSection
           cardId="admin-tools-runbooks"
@@ -48,7 +48,7 @@ export function AdminToolsPage() {
       ),
     },
     {
-      id: 'automation',
+      id: "automation",
       content: (
         <PlaceholderSection
           cardId="admin-tools-automation"
@@ -59,7 +59,7 @@ export function AdminToolsPage() {
       ),
     },
     {
-      id: 'incidents',
+      id: "incidents",
       content: (
         <PlaceholderSection
           cardId="admin-tools-incidents"
@@ -70,7 +70,7 @@ export function AdminToolsPage() {
       ),
     },
     {
-      id: 'activity-log',
+      id: "activity-log",
       content: (
         <PlaceholderSection
           cardId="admin-tools-activity-log"

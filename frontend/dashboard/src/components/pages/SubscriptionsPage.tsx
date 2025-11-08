@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { List, Plus } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { List, Plus } from "lucide-react";
 
 /**
  * Market Data Subscriptions Page
@@ -8,7 +8,7 @@ import { List, Plus } from 'lucide-react';
 export function SubscriptionsPage() {
   const sections = [
     {
-      id: 'active-subscriptions',
+      id: "active-subscriptions",
       content: (
         <PlaceholderSection
           cardId="subscriptions-active"
@@ -19,7 +19,7 @@ export function SubscriptionsPage() {
       ),
     },
     {
-      id: 'add-subscription',
+      id: "add-subscription",
       content: (
         <PlaceholderSection
           cardId="subscriptions-add"

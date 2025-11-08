@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-11-08T10:26:59-03:00",
+  "auditMode": "--quick",
+  "healthScore": 98,
+  "healthStatus": "",
+  "metrics": {
+    "totalFiles": 287,
+    "validFrontmatter": 287,
+    "missingFrontmatter": 0,
+    "outdatedDocs": 0,
+    "todoCount": 150,
+    "fixmeCount": 4,
+    "brokenInternalLinks": 0,
+    "warnings": 1,
+    "errors": 0
+  },
+  "categories": {
+    "apps": 57,
+    "api": 14,
+    "frontend": 19,
+    "tools": 85,
+    "database": 6,
+    "prd": 10,
+    "sdd": 15,
+    "reference": 27
+  }
+}

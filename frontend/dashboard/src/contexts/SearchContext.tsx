@@ -3,7 +3,7 @@ import React, {
   useContext,
   useReducer,
   useCallback,
-} from 'react';
+} from "react";
 
 interface SearchResult {
   content: string;
@@ -25,14 +25,14 @@ interface SearchState {
 }
 
 type SearchAction =
-  | { type: 'SET_QUERY'; payload: string }
-  | { type: 'SET_RESULTS'; payload: SearchResult[] }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SELECT_RESULT'; payload: SearchResult | null };
+  | { type: "SET_QUERY"; payload: string }
+  | { type: "SET_RESULTS"; payload: SearchResult[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SELECT_RESULT"; payload: SearchResult | null };
 
 const initialState: SearchState = {
-  query: '',
+  query: "",
   results: [],
   isLoading: false,
   error: null,
@@ -52,15 +52,15 @@ const searchReducer = (
   action: SearchAction,
 ): SearchState => {
   switch (action.type) {
-    case 'SET_QUERY':
+    case "SET_QUERY":
       return { ...state, query: action.payload };
-    case 'SET_RESULTS':
+    case "SET_RESULTS":
       return { ...state, results: action.payload };
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return { ...state, error: action.payload };
-    case 'SELECT_RESULT':
+    case "SELECT_RESULT":
       return { ...state, selectedResult: action.payload };
     default:
       return state;
@@ -74,43 +74,43 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const search = useCallback(async (query: string) => {
     try {
-      dispatch({ type: 'SET_QUERY', payload: query });
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
+      dispatch({ type: "SET_QUERY", payload: query });
+      dispatch({ type: "SET_LOADING", payload: true });
+      dispatch({ type: "SET_ERROR", payload: null });
 
-      const response = await fetch('/api/v1/search', {
-        method: 'GET',
+      const response = await fetch("/api/v1/search", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ query }),
       });
 
       if (!response.ok) {
-        throw new Error('Search failed');
+        throw new Error("Search failed");
       }
 
       const results = await response.json();
-      dispatch({ type: 'SET_RESULTS', payload: results });
+      dispatch({ type: "SET_RESULTS", payload: results });
     } catch (error) {
       dispatch({
-        type: 'SET_ERROR',
-        payload: error instanceof Error ? error.message : 'Search failed',
+        type: "SET_ERROR",
+        payload: error instanceof Error ? error.message : "Search failed",
       });
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   }, []);
 
   const clearSearch = useCallback(() => {
-    dispatch({ type: 'SET_QUERY', payload: '' });
-    dispatch({ type: 'SET_RESULTS', payload: [] });
-    dispatch({ type: 'SET_ERROR', payload: null });
-    dispatch({ type: 'SELECT_RESULT', payload: null });
+    dispatch({ type: "SET_QUERY", payload: "" });
+    dispatch({ type: "SET_RESULTS", payload: [] });
+    dispatch({ type: "SET_ERROR", payload: null });
+    dispatch({ type: "SELECT_RESULT", payload: null });
   }, []);
 
   const selectResult = useCallback((result: SearchResult | null) => {
-    dispatch({ type: 'SELECT_RESULT', payload: result });
+    dispatch({ type: "SELECT_RESULT", payload: result });
   }, []);
 
   return (
@@ -125,7 +125,7 @@ export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useSearch = () => {
   const context = useContext(SearchContext);
   if (!context) {
-    throw new Error('useSearch must be used within a SearchProvider');
+    throw new Error("useSearch must be used within a SearchProvider");
   }
   return context;
 };

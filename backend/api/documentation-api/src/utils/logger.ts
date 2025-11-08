@@ -7,9 +7,9 @@
  * @module utils/logger
  */
 
-import winston from 'winston';
-import { Request, Response, NextFunction } from 'express';
-import path from 'path';
+import winston from "winston";
+import { Request, Response, NextFunction } from "express";
+import path from "path";
 
 /**
  * Log levels
@@ -26,20 +26,20 @@ const logLevels = {
  * Determine log level based on environment
  */
 const level = (): string => {
-  const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : process.env.LOG_LEVEL || 'info';
+  const env = process.env.NODE_ENV || "development";
+  const isDevelopment = env === "development";
+  return isDevelopment ? "debug" : process.env.LOG_LEVEL || "info";
 };
 
 /**
  * Define log colors
  */
 const colors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  debug: 'blue',
+  error: "red",
+  warn: "yellow",
+  info: "green",
+  http: "magenta",
+  debug: "blue",
 };
 
 winston.addColors(colors);
@@ -48,13 +48,15 @@ winston.addColors(colors);
  * Custom format for console output in development
  */
 const consoleFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
   winston.format.colorize({ all: true }),
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info;
-    const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+    const metaStr = Object.keys(meta).length
+      ? JSON.stringify(meta, null, 2)
+      : "";
     return `${timestamp} [${level}]: ${message} ${metaStr}`;
-  })
+  }),
 );
 
 /**
@@ -63,7 +65,7 @@ const consoleFormat = winston.format.combine(
 const fileFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 /**
@@ -77,12 +79,12 @@ const transports: winston.transport[] = [
 ];
 
 // File transports (production and development)
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   transports.push(
     // Error log file
     new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs', 'error.log'),
-      level: 'error',
+      filename: path.join(process.cwd(), "logs", "error.log"),
+      level: "error",
       format: fileFormat,
       maxsize: 10 * 1024 * 1024, // 10MB
       maxFiles: 5,
@@ -90,11 +92,11 @@ if (process.env.NODE_ENV !== 'test') {
 
     // Combined log file
     new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs', 'combined.log'),
+      filename: path.join(process.cwd(), "logs", "combined.log"),
       format: fileFormat,
       maxsize: 10 * 1024 * 1024, // 10MB
       maxFiles: 10,
-    })
+    }),
   );
 }
 
@@ -105,9 +107,9 @@ export const logger = winston.createLogger({
   level: level(),
   levels: logLevels,
   defaultMeta: {
-    service: 'rag-service',
-    version: process.env.npm_package_version || '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
+    service: "rag-service",
+    version: process.env.npm_package_version || "1.0.0",
+    environment: process.env.NODE_ENV || "development",
   },
   transports,
   // Don't exit on uncaught exceptions
@@ -122,29 +124,34 @@ export const logger = winston.createLogger({
  * @example
  * app.use(requestLogger);
  */
-export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
+export const requestLogger = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const start = Date.now();
 
   // Generate or retrieve request ID
-  const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
-  req.headers['x-request-id'] = requestId;
+  const requestId =
+    (req.headers["x-request-id"] as string) || crypto.randomUUID();
+  req.headers["x-request-id"] = requestId;
 
   // Log request
-  logger.http('Incoming request', {
+  logger.http("Incoming request", {
     requestId,
     method: req.method,
     path: req.path,
     query: req.query,
     ip: req.ip || req.socket.remoteAddress,
-    userAgent: req.get('User-Agent'),
+    userAgent: req.get("User-Agent"),
   });
 
   // Log response when finished
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = Date.now() - start;
-    const logLevel = res.statusCode >= 400 ? 'warn' : 'http';
+    const logLevel = res.statusCode >= 400 ? "warn" : "http";
 
-    logger.log(logLevel, 'Request completed', {
+    logger.log(logLevel, "Request completed", {
       requestId,
       method: req.method,
       path: req.path,
@@ -164,7 +171,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
  * @param context - Additional context
  */
 export const logError = (error: Error, context?: Record<string, any>): void => {
-  logger.error('Error occurred', {
+  logger.error("Error occurred", {
     message: error.message,
     stack: error.stack,
     name: error.name,
@@ -182,9 +189,9 @@ export const logError = (error: Error, context?: Record<string, any>): void => {
 export const logPerformance = (
   operation: string,
   duration: number,
-  metadata?: Record<string, any>
+  metadata?: Record<string, any>,
 ): void => {
-  logger.info('Performance metric', {
+  logger.info("Performance metric", {
     operation,
     duration: `${duration}ms`,
     ...metadata,
@@ -197,8 +204,11 @@ export const logPerformance = (
  * @param event - Security event type
  * @param details - Event details
  */
-export const logSecurity = (event: string, details: Record<string, any>): void => {
-  logger.warn('Security event', {
+export const logSecurity = (
+  event: string,
+  details: Record<string, any>,
+): void => {
+  logger.warn("Security event", {
     event,
     ...details,
     timestamp: new Date().toISOString(),
@@ -211,8 +221,11 @@ export const logSecurity = (event: string, details: Record<string, any>): void =
  * @param action - Business action
  * @param details - Action details
  */
-export const logBusiness = (action: string, details: Record<string, any>): void => {
-  logger.info('Business action', {
+export const logBusiness = (
+  action: string,
+  details: Record<string, any>,
+): void => {
+  logger.info("Business action", {
     action,
     ...details,
   });
@@ -225,8 +238,11 @@ export const logBusiness = (action: string, details: Record<string, any>): void 
 /**
  * Log RAG query
  */
-export const logRagQuery = (query: string, metadata: Record<string, any>): void => {
-  logger.info('RAG query', {
+export const logRagQuery = (
+  query: string,
+  metadata: Record<string, any>,
+): void => {
+  logger.info("RAG query", {
     query: query.substring(0, 100), // Truncate for logging
     queryLength: query.length,
     ...metadata,
@@ -239,9 +255,9 @@ export const logRagQuery = (query: string, metadata: Record<string, any>): void 
 export const logIngestion = (
   jobId: string,
   status: string,
-  metadata: Record<string, any>
+  metadata: Record<string, any>,
 ): void => {
-  logger.info('Ingestion job', {
+  logger.info("Ingestion job", {
     jobId,
     status,
     ...metadata,
@@ -253,10 +269,10 @@ export const logIngestion = (
  */
 export const logCircuitBreaker = (
   service: string,
-  state: 'open' | 'half-open' | 'closed',
-  details?: Record<string, any>
+  state: "open" | "half-open" | "closed",
+  details?: Record<string, any>,
 ): void => {
-  logger.warn('Circuit breaker state change', {
+  logger.warn("Circuit breaker state change", {
     service,
     state,
     ...details,
@@ -266,7 +282,7 @@ export const logCircuitBreaker = (
 /**
  * Stream logs (for debugging)
  */
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   logger.stream = {
     write: (message: string) => {
       logger.http(message.trim());

@@ -7,7 +7,7 @@
  * @module hooks/useIngestionProgress
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
  * Progress Data
@@ -26,7 +26,7 @@ export interface IngestionProgress {
 export interface IngestionLogEntry {
   id?: number;
   timestamp: string;
-  level: 'debug' | 'info' | 'warn' | 'error' | 'success';
+  level: "debug" | "info" | "warn" | "error" | "success";
   message: string;
   files_processed?: number;
   chunks_created?: number;
@@ -38,11 +38,11 @@ export interface IngestionLogEntry {
  * Job Status
  */
 export type IngestionJobStatus =
-  | 'PENDING'
-  | 'PROCESSING'
-  | 'COMPLETED'
-  | 'FAILED'
-  | 'CANCELLED';
+  | "PENDING"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
 
 /**
  * Hook State
@@ -103,26 +103,26 @@ export function useIngestionProgress(
 
     // Connection opened
     eventSource.onopen = () => {
-      console.log('[SSE] Connected to ingestion stream', { jobId });
+      console.log("[SSE] Connected to ingestion stream", { jobId });
       setIsConnected(true);
       setError(null);
       reconnectAttemptsRef.current = 0;
     };
 
     // Connected event
-    eventSource.addEventListener('connected', (event) => {
+    eventSource.addEventListener("connected", (event) => {
       const data = JSON.parse(event.data);
-      console.log('[SSE] Connection confirmed', data);
+      console.log("[SSE] Connection confirmed", data);
     });
 
     // History event (existing logs)
-    eventSource.addEventListener('history', (event) => {
+    eventSource.addEventListener("history", (event) => {
       const data = JSON.parse(event.data);
       setLogs(data.logs || []);
     });
 
     // Job status event
-    eventSource.addEventListener('job-status', (event) => {
+    eventSource.addEventListener("job-status", (event) => {
       const job = JSON.parse(event.data);
       setStatus(job.status);
       setProgress({
@@ -137,9 +137,9 @@ export function useIngestionProgress(
     });
 
     // Start event
-    eventSource.addEventListener('start', (event) => {
+    eventSource.addEventListener("start", (event) => {
       const data = JSON.parse(event.data);
-      setStatus('PROCESSING');
+      setStatus("PROCESSING");
       setProgress({
         filesProcessed: 0,
         filesTotal: data.filesTotal || 0,
@@ -149,7 +149,7 @@ export function useIngestionProgress(
     });
 
     // Progress event
-    eventSource.addEventListener('progress', (event) => {
+    eventSource.addEventListener("progress", (event) => {
       const data = JSON.parse(event.data);
       setProgress({
         filesProcessed: data.filesProcessed || 0,
@@ -161,15 +161,15 @@ export function useIngestionProgress(
     });
 
     // Log event
-    eventSource.addEventListener('log', (event) => {
+    eventSource.addEventListener("log", (event) => {
       const logEntry = JSON.parse(event.data);
       setLogs((prev) => [logEntry, ...prev].slice(0, 500)); // Keep last 500 logs
     });
 
     // Complete event
-    eventSource.addEventListener('complete', (event) => {
+    eventSource.addEventListener("complete", (event) => {
       const data = JSON.parse(event.data);
-      setStatus('COMPLETED');
+      setStatus("COMPLETED");
       setProgress({
         filesProcessed: data.filesProcessed || 0,
         filesTotal: data.filesTotal || 0,
@@ -185,12 +185,12 @@ export function useIngestionProgress(
     });
 
     // Error event
-    eventSource.addEventListener('error', (event: any) => {
+    eventSource.addEventListener("error", (event: any) => {
       if (event.data) {
         try {
           const data = JSON.parse(event.data);
-          setError(data.error || 'Unknown error');
-          setStatus('FAILED');
+          setError(data.error || "Unknown error");
+          setStatus("FAILED");
         } catch {
           // Ignore parse errors
         }
@@ -198,10 +198,10 @@ export function useIngestionProgress(
     });
 
     // Cancelled event
-    eventSource.addEventListener('cancelled', (event) => {
+    eventSource.addEventListener("cancelled", (event) => {
       const data = JSON.parse(event.data);
-      setStatus('CANCELLED');
-      setError(data.reason || 'Job cancelled');
+      setStatus("CANCELLED");
+      setError(data.reason || "Job cancelled");
 
       setTimeout(() => {
         eventSource.close();
@@ -211,7 +211,7 @@ export function useIngestionProgress(
 
     // Connection error (network issues)
     eventSource.onerror = (event) => {
-      console.error('[SSE] Connection error', { jobId, event });
+      console.error("[SSE] Connection error", { jobId, event });
       setIsConnected(false);
 
       // Auto-reconnect with exponential backoff
@@ -230,7 +230,7 @@ export function useIngestionProgress(
           connect();
         }, delay);
       } else {
-        setError('Falha na conexão após múltiplas tentativas');
+        setError("Falha na conexão após múltiplas tentativas");
         eventSource.close();
       }
     };
@@ -244,18 +244,18 @@ export function useIngestionProgress(
 
     try {
       const response = await fetch(`/api/v1/rag/ingestion/cancel/${jobId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: 'Cancelled by user' }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "Cancelled by user" }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to cancel job');
+        throw new Error("Failed to cancel job");
       }
 
-      setError('Job cancelado pelo usuário');
+      setError("Job cancelado pelo usuário");
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to cancel');
+      setError(error instanceof Error ? error.message : "Failed to cancel");
     }
   }, [jobId]);
 
@@ -295,7 +295,7 @@ export function useIngestionProgress(
   }, [jobId, connect]);
 
   const isComplete =
-    status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED';
+    status === "COMPLETED" || status === "FAILED" || status === "CANCELLED";
 
   return {
     progress,

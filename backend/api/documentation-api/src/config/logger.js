@@ -1,17 +1,17 @@
-import pino from 'pino';
-import { hostname } from 'node:os';
+import pino from "pino";
+import { hostname } from "node:os";
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isTest = process.env.NODE_ENV === 'test';
+const isDevelopment = process.env.NODE_ENV === "development";
+const isTest = process.env.NODE_ENV === "test";
 
 // Create logger instance with conditional pretty printing
 export const logger = pino({
-  level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
+  level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
   base: {
     pid: process.pid,
     hostname: hostname(),
-    service: 'documentation-api',
-    environment: process.env.NODE_ENV || 'development',
+    service: "documentation-api",
+    environment: process.env.NODE_ENV || "development",
   },
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {
@@ -21,12 +21,12 @@ export const logger = pino({
   // Pretty print only in development (production uses JSON for log aggregation)
   transport: isDevelopment
     ? {
-        target: 'pino-pretty',
+        target: "pino-pretty",
         options: {
           colorize: true,
-          translateTime: 'SYS:HH:MM:ss',
-          ignore: 'pid,hostname',
-          messageFormat: '{service} [{level}] {msg}',
+          translateTime: "SYS:HH:MM:ss",
+          ignore: "pid,hostname",
+          messageFormat: "{service} [{level}] {msg}",
         },
       }
     : undefined,
@@ -37,15 +37,15 @@ export const logger = pino({
   // Redact sensitive fields for security
   redact: {
     paths: [
-      'req.headers.authorization',
-      'req.headers.cookie',
+      "req.headers.authorization",
+      "req.headers.cookie",
       'req.headers["x-api-key"]',
-      'password',
-      'token',
-      'secret',
-      'apiKey',
+      "password",
+      "token",
+      "secret",
+      "apiKey",
     ],
-    censor: '[REDACTED]',
+    censor: "[REDACTED]",
   },
 });
 
@@ -70,16 +70,16 @@ logger.logRequest = (req, res, responseTime) => {
     url: req.url,
     statusCode: res.statusCode,
     responseTime: `${responseTime}ms`,
-    userAgent: req.get('user-agent'),
+    userAgent: req.get("user-agent"),
     ip: req.ip || req.connection?.remoteAddress,
   };
 
   if (res.statusCode >= 500) {
-    logger.error(log, 'HTTP request - server error');
+    logger.error(log, "HTTP request - server error");
   } else if (res.statusCode >= 400) {
-    logger.warn(log, 'HTTP request - client error');
+    logger.warn(log, "HTTP request - client error");
   } else {
-    logger.info(log, 'HTTP request');
+    logger.info(log, "HTTP request");
   }
 };
 
@@ -91,7 +91,13 @@ logger.logRequest = (req, res, responseTime) => {
  * @param {boolean} success - Call succeeded
  * @param {Object} metadata - Additional data
  */
-logger.logServiceCall = (service, operation, duration, success, metadata = {}) => {
+logger.logServiceCall = (
+  service,
+  operation,
+  duration,
+  success,
+  metadata = {},
+) => {
   const log = {
     service,
     operation,

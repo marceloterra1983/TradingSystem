@@ -1,14 +1,14 @@
-import questDBClient from '../utils/questDBClient.js';
-import { logger } from '../config/logger.js';
-import { config } from '../config/appConfig.js';
-import { createPostgresFilesRepository } from './postgres/FilesRepository.js';
+import questDBClient from "../utils/questDBClient.js";
+import { logger } from "../config/logger.js";
+import { config } from "../config/appConfig.js";
+import { createPostgresFilesRepository } from "./postgres/FilesRepository.js";
 
 /**
  * Repository for managing documentation files in QuestDB
  */
 export class FilesRepository {
   constructor() {
-    this.tableName = 'documentation_files';
+    this.tableName = "documentation_files";
   }
 
   /**
@@ -48,22 +48,22 @@ export class FilesRepository {
         download_count: fileData.download_count || 0,
         created_at: now,
         updated_at: now,
-        designated_timestamp: now
+        designated_timestamp: now,
       };
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation file created', {
+      logger.info("Documentation file created", {
         id,
         filename: fileData.filename,
-        size: fileData.size_bytes
+        size: fileData.size_bytes,
       });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to create documentation file', {
+      logger.error("Failed to create documentation file", {
         error: error.message,
-        data: fileData
+        data: fileData,
       });
       throw error;
     }
@@ -83,9 +83,9 @@ export class FilesRepository {
 
       return this.transformRow(rows[0]);
     } catch (error) {
-      logger.error('Failed to find file by ID', {
+      logger.error("Failed to find file by ID", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -151,8 +151,8 @@ export class FilesRepository {
       }
 
       // Add ordering
-      const orderBy = filters.order_by || 'created_at';
-      const orderDirection = filters.order_direction || 'DESC';
+      const orderBy = filters.order_by || "created_at";
+      const orderDirection = filters.order_direction || "DESC";
       sql += ` ORDER BY ${orderBy} ${orderDirection}`;
 
       // Add pagination
@@ -165,11 +165,11 @@ export class FilesRepository {
       }
 
       const rows = await questDBClient.executeSelect(sql, params);
-      return rows.map(row => this.transformRow(row));
+      return rows.map((row) => this.transformRow(row));
     } catch (error) {
-      logger.error('Failed to find files', {
+      logger.error("Failed to find files", {
         error: error.message,
-        filters
+        filters,
       });
       throw error;
     }
@@ -187,7 +187,10 @@ export class FilesRepository {
 
       // Build dynamic update query
       const allowedFields = [
-        'description', 'idea_id', 'system_id', 'is_public'
+        "description",
+        "idea_id",
+        "system_id",
+        "is_public",
       ];
 
       for (const field of allowedFields) {
@@ -198,27 +201,30 @@ export class FilesRepository {
       }
 
       if (fields.length === 0) {
-        throw new Error('No valid fields to update');
+        throw new Error("No valid fields to update");
       }
 
-      fields.push('updated_at = :updated_at');
+      fields.push("updated_at = :updated_at");
 
       const sql = `
         UPDATE ${this.tableName}
-        SET ${fields.join(', ')}
+        SET ${fields.join(", ")}
         WHERE id = :id
       `;
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation file updated', { id, fields: fields.join(', ') });
+      logger.info("Documentation file updated", {
+        id,
+        fields: fields.join(", "),
+      });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to update documentation file', {
+      logger.error("Failed to update documentation file", {
         error: error.message,
         id,
-        updateData
+        updateData,
       });
       throw error;
     }
@@ -232,22 +238,22 @@ export class FilesRepository {
       // First check if file exists
       const existing = await this.findById(id);
       if (!existing) {
-        throw new Error('File not found');
+        throw new Error("File not found");
       }
 
       const sql = `DELETE FROM ${this.tableName} WHERE id = :id`;
       await questDBClient.executeWrite(sql, { id });
 
-      logger.info('Documentation file deleted', {
+      logger.info("Documentation file deleted", {
         id,
-        filename: existing.original_name
+        filename: existing.original_name,
       });
 
       return true;
     } catch (error) {
-      logger.error('Failed to delete documentation file', {
+      logger.error("Failed to delete documentation file", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -266,18 +272,18 @@ export class FilesRepository {
 
       const params = {
         id,
-        updated_at: questDBClient.getCurrentTimestamp()
+        updated_at: questDBClient.getCurrentTimestamp(),
       };
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.debug('Download count incremented', { id });
+      logger.debug("Download count incremented", { id });
 
       return true;
     } catch (error) {
-      logger.error('Failed to increment download count', {
+      logger.error("Failed to increment download count", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -289,8 +295,8 @@ export class FilesRepository {
   async findByIdea(ideaId) {
     return this.findAll({
       idea_id: ideaId,
-      order_by: 'created_at',
-      order_direction: 'ASC'
+      order_by: "created_at",
+      order_direction: "ASC",
     });
   }
 
@@ -300,8 +306,8 @@ export class FilesRepository {
   async findBySystem(systemId) {
     return this.findAll({
       system_id: systemId,
-      order_by: 'created_at',
-      order_direction: 'ASC'
+      order_by: "created_at",
+      order_direction: "ASC",
     });
   }
 
@@ -311,8 +317,8 @@ export class FilesRepository {
   async findByUploader(uploader) {
     return this.findAll({
       uploaded_by: uploader,
-      order_by: 'created_at',
-      order_direction: 'DESC'
+      order_by: "created_at",
+      order_direction: "DESC",
     });
   }
 
@@ -329,8 +335,8 @@ export class FilesRepository {
   async findPublic() {
     return this.findAll({
       is_public: true,
-      order_by: 'download_count',
-      order_direction: 'DESC'
+      order_by: "download_count",
+      order_direction: "DESC",
     });
   }
 
@@ -344,11 +350,12 @@ export class FilesRepository {
   /**
    * Get large files (above threshold)
    */
-  async findLargeFiles(thresholdBytes = 10 * 1024 * 1024) { // 10MB default
+  async findLargeFiles(thresholdBytes = 10 * 1024 * 1024) {
+    // 10MB default
     return this.findAll({
       min_size: thresholdBytes,
-      order_by: 'size_bytes',
-      order_direction: 'DESC'
+      order_by: "size_bytes",
+      order_direction: "DESC",
     });
   }
 
@@ -382,17 +389,17 @@ export class FilesRepository {
         by_uploader: {},
         by_visibility: {
           public: { count: 0, size: 0 },
-          private: { count: 0, size: 0 }
+          private: { count: 0, size: 0 },
         },
         size_distribution: {
-          small: 0,    // < 1MB
-          medium: 0,   // 1MB - 10MB
-          large: 0,    // 10MB - 100MB
-          xlarge: 0    // > 100MB
-        }
+          small: 0, // < 1MB
+          medium: 0, // 1MB - 10MB
+          large: 0, // 10MB - 100MB
+          xlarge: 0, // > 100MB
+        },
       };
 
-      rows.forEach(row => {
+      rows.forEach((row) => {
         stats.total += row.count;
         stats.total_size += row.total_size || 0;
         stats.total_downloads += row.total_downloads || 0;
@@ -410,17 +417,20 @@ export class FilesRepository {
         stats.by_uploader[row.uploaded_by] += row.count;
 
         // Group by visibility
-        const visibility = row.is_public ? 'public' : 'private';
+        const visibility = row.is_public ? "public" : "private";
         stats.by_visibility[visibility].count += row.count;
         stats.by_visibility[visibility].size += row.total_size || 0;
 
         // Size distribution (based on average size)
         const avgSize = row.avg_size || 0;
-        if (avgSize < 1024 * 1024) { // < 1MB
+        if (avgSize < 1024 * 1024) {
+          // < 1MB
           stats.size_distribution.small += row.count;
-        } else if (avgSize < 10 * 1024 * 1024) { // < 10MB
+        } else if (avgSize < 10 * 1024 * 1024) {
+          // < 10MB
           stats.size_distribution.medium += row.count;
-        } else if (avgSize < 100 * 1024 * 1024) { // < 100MB
+        } else if (avgSize < 100 * 1024 * 1024) {
+          // < 100MB
           stats.size_distribution.large += row.count;
         } else {
           stats.size_distribution.xlarge += row.count;
@@ -431,8 +441,8 @@ export class FilesRepository {
 
       return stats;
     } catch (error) {
-      logger.error('Failed to get file statistics', {
-        error: error.message
+      logger.error("Failed to get file statistics", {
+        error: error.message,
       });
       throw error;
     }
@@ -452,7 +462,7 @@ export class FilesRepository {
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
       idea_id: row.idea_id || null,
-      system_id: row.system_id || null
+      system_id: row.system_id || null,
     };
   }
 }
@@ -461,7 +471,7 @@ let filesRepositoryInstance = null;
 
 export function getFilesRepository() {
   if (!filesRepositoryInstance) {
-    if (config.database.strategy === 'postgres') {
+    if (config.database.strategy === "postgres") {
       filesRepositoryInstance = createPostgresFilesRepository();
     } else {
       filesRepositoryInstance = new FilesRepository();

@@ -1,33 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Columns,
   FileDiff,
   LayoutList,
   MoveLeft,
   MoveRight,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
-import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
+} from "../ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { computeDiff, DiffMode, formatSimilarity } from '../../utils/diff';
-import type { Job } from '../../types/jobs';
-import { useJob } from '../../hooks/useJobs';
+} from "../ui/select";
+import { computeDiff, DiffMode, formatSimilarity } from "../../utils/diff";
+import type { Job } from "../../types/jobs";
+import { useJob } from "../../hooks/useJobs";
 
-type ViewMode = 'split' | 'unified';
+type ViewMode = "split" | "unified";
 
 interface ResultsComparisonProps {
   open: boolean;
@@ -43,39 +43,39 @@ interface DiffableValue {
 }
 
 const PREFERRED_ORDER = [
-  'markdown',
-  'html',
-  'rawHtml',
-  'json',
-  'metadata',
-  'links',
-  'screenshot',
+  "markdown",
+  "html",
+  "rawHtml",
+  "json",
+  "metadata",
+  "links",
+  "screenshot",
 ];
 
 function toComparable(value: unknown): string | object {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.join('\n');
+    return value.join("\n");
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     return value;
   }
   if (value === null || value === undefined) {
-    return '';
+    return "";
   }
   return String(value);
 }
 
 function formatForDisplay(value: unknown): string {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.join('\n');
+    return value.join("\n");
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     try {
       return JSON.stringify(value, null, 2);
     } catch {
@@ -83,7 +83,7 @@ function formatForDisplay(value: unknown): string {
     }
   }
   if (value === null || value === undefined) {
-    return '';
+    return "";
   }
   return String(value);
 }
@@ -94,8 +94,8 @@ function collectDiffableValues(
 ): DiffableValue[] {
   const values = new Map<string, DiffableValue>();
 
-  const merge = (source: unknown, side: 'left' | 'right') => {
-    if (!source || typeof source !== 'object') {
+  const merge = (source: unknown, side: "left" | "right") => {
+    if (!source || typeof source !== "object") {
       return;
     }
     Object.entries(source as Record<string, unknown>).forEach(
@@ -104,10 +104,10 @@ function collectDiffableValues(
         const entry = values.get(diffKey) ?? {
           key: diffKey,
           label: key,
-          left: '',
-          right: '',
+          left: "",
+          right: "",
         };
-        if (side === 'left') {
+        if (side === "left") {
           entry.left = value;
         } else {
           entry.right = value;
@@ -117,15 +117,15 @@ function collectDiffableValues(
     );
   };
 
-  merge(left?.results ?? null, 'left');
-  merge(right?.results ?? null, 'right');
+  merge(left?.results ?? null, "left");
+  merge(right?.results ?? null, "right");
 
   // Include metadata such as options formats if relevant
-  values.set('options', {
-    key: 'options',
-    label: 'Options (JSON)',
-    left: left?.options ?? '',
-    right: right?.options ?? '',
+  values.set("options", {
+    key: "options",
+    label: "Options (JSON)",
+    left: left?.options ?? "",
+    right: right?.options ?? "",
   });
 
   const sorted = Array.from(values.values()).sort((a, b) => {
@@ -143,13 +143,13 @@ function collectDiffableValues(
 }
 
 function defaultModeForKey(key: string): DiffMode {
-  if (key === 'json' || key === 'metadata' || key === 'options') {
-    return 'json';
+  if (key === "json" || key === "metadata" || key === "options") {
+    return "json";
   }
-  if (key === 'html' || key === 'rawHtml') {
-    return 'lines';
+  if (key === "html" || key === "rawHtml") {
+    return "lines";
   }
-  return 'lines';
+  return "lines";
 }
 
 export function ResultsComparison({
@@ -173,9 +173,9 @@ export function ResultsComparison({
     comparableValues[0]?.key ?? null,
   );
   const [mode, setMode] = useState<DiffMode>(
-    defaultModeForKey(comparableValues[0]?.key ?? 'markdown'),
+    defaultModeForKey(comparableValues[0]?.key ?? "markdown"),
   );
-  const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [viewMode, setViewMode] = useState<ViewMode>("split");
   const changeRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const changeIndexRef = useRef(0);
 
@@ -190,7 +190,7 @@ export function ResultsComparison({
     ) {
       const nextKey = comparableValues[0]?.key ?? null;
       setSelectedKey(nextKey);
-      setMode(defaultModeForKey(nextKey ?? 'markdown'));
+      setMode(defaultModeForKey(nextKey ?? "markdown"));
     }
   }, [comparableValues, selectedKey]);
 
@@ -203,7 +203,7 @@ export function ResultsComparison({
     }
     const leftValue = toComparable(selectedValue.left);
     const rightValue = toComparable(selectedValue.right);
-    const diffMode = mode === 'json' ? 'json' : mode;
+    const diffMode = mode === "json" ? "json" : mode;
     return computeDiff(leftValue, rightValue, diffMode);
   }, [mode, selectedValue]);
 
@@ -217,7 +217,7 @@ export function ResultsComparison({
       return [];
     }
     return diffResult.chunks.reduce<number[]>((acc, chunk, index) => {
-      if (chunk.type !== 'unchanged') {
+      if (chunk.type !== "unchanged") {
         acc.push(index);
       }
       return acc;
@@ -235,7 +235,7 @@ export function ResultsComparison({
     const targetIndex = changeIndices[changeIndexRef.current];
     const node = changeRefs.current[targetIndex];
     if (node) {
-      node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -245,7 +245,7 @@ export function ResultsComparison({
         <DialogHeader>
           <DialogTitle>Compare Job Results</DialogTitle>
           <DialogDescription>
-            {left ? left.url : 'Job A'} vs {right ? right.url : 'Job B'}
+            {left ? left.url : "Job A"} vs {right ? right.url : "Job B"}
           </DialogDescription>
         </DialogHeader>
 
@@ -301,10 +301,10 @@ export function ResultsComparison({
 
           <div className="ml-auto flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
             <span>
-              Similarity:{' '}
+              Similarity:{" "}
               {diffResult
                 ? formatSimilarity(diffResult.summary.similarity)
-                : '—'}
+                : "—"}
             </span>
             <Button
               type="button"
@@ -334,7 +334,7 @@ export function ResultsComparison({
             <div className="flex h-64 items-center justify-center text-sm text-gray-500 dark:text-gray-400">
               Select two jobs to generate a comparison.
             </div>
-          ) : viewMode === 'split' ? (
+          ) : viewMode === "split" ? (
             <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
               <div className="space-y-2">
                 <h4 className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -364,11 +364,11 @@ export function ResultsComparison({
               <div className="space-y-2 text-xs leading-relaxed">
                 {diffResult?.chunks.map((chunk, index) => {
                   const color =
-                    chunk.type === 'added'
-                      ? 'bg-emerald-100 dark:bg-emerald-900/40'
-                      : chunk.type === 'removed'
-                        ? 'bg-rose-100 dark:bg-rose-900/40'
-                        : 'bg-transparent';
+                    chunk.type === "added"
+                      ? "bg-emerald-100 dark:bg-emerald-900/40"
+                      : chunk.type === "removed"
+                        ? "bg-rose-100 dark:bg-rose-900/40"
+                        : "bg-transparent";
                   return (
                     <div
                       key={`${chunk.type}-${index}`}

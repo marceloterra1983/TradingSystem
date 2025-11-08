@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Wifi, AlertTriangle } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Wifi, AlertTriangle } from "lucide-react";
 
 export function LogsColetaPage() {
   const sections = [
     {
-      id: 'connection-logs',
+      id: "connection-logs",
       content: (
         <PlaceholderSection
           cardId="logs-connection"
@@ -16,7 +16,7 @@ export function LogsColetaPage() {
       ),
     },
     {
-      id: 'error-logs',
+      id: "error-logs",
       content: (
         <PlaceholderSection
           cardId="logs-error"

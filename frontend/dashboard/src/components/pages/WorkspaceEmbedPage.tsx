@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { WorkspaceListSection } from './workspace/components/WorkspaceListSection';
-import { StatusBoardSection } from './workspace/components/StatusBoardSection';
-import { useInitializeWorkspaceEvents } from './workspace/store/useWorkspaceStore';
+import { useMemo } from "react";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { WorkspaceListSection } from "./workspace/components/WorkspaceListSection";
+import { StatusBoardSection } from "./workspace/components/StatusBoardSection";
+import { useInitializeWorkspaceEvents } from "./workspace/store/useWorkspaceStore";
 
 /**
  * Workspace Page - Embedded in Dashboard
@@ -14,11 +14,11 @@ export function WorkspaceEmbedPage() {
   const sections = useMemo(
     () => [
       {
-        id: 'workspace-table',
+        id: "workspace-table",
         content: <WorkspaceListSection />,
       },
       {
-        id: 'workspace-kanban',
+        id: "workspace-kanban",
         content: <StatusBoardSection />,
       },
     ],

@@ -1,16 +1,16 @@
-import express from 'express';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import docsHealthMetrics from '../services/docsHealthMetrics.js';
-import { logger } from '../config/logger.js';
-import { config } from '../config/appConfig.js';
+import express from "express";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import docsHealthMetrics from "../services/docsHealthMetrics.js";
+import { logger } from "../config/logger.js";
+import { config } from "../config/appConfig.js";
 import {
   computeCoverageMetrics,
   computeFreshnessMetrics,
   computeIssueBreakdown,
-} from '../../../../shared/docs/metrics.js';
+} from "../../../../shared/docs/metrics.js";
 
 const router = express.Router();
 
@@ -28,18 +28,22 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
  */
 async function loadAuditData() {
   // Check cache
-  if (cachedAuditData && cacheTimestamp && Date.now() - cacheTimestamp < CACHE_DURATION) {
+  if (
+    cachedAuditData &&
+    cacheTimestamp &&
+    Date.now() - cacheTimestamp < CACHE_DURATION
+  ) {
     return cachedAuditData;
   }
 
   try {
     // Find latest audit directory in /tmp
-    const tmpDir = '/tmp';
+    const tmpDir = "/tmp";
     const files = await fs.readdir(tmpDir);
-    const auditDirs = files.filter((f) => f.startsWith('docs-audit-'));
+    const auditDirs = files.filter((f) => f.startsWith("docs-audit-"));
 
     if (auditDirs.length === 0) {
-      throw new Error('No audit data found. Run audit script first.');
+      throw new Error("No audit data found. Run audit script first.");
     }
 
     // Get most recent audit directory
@@ -47,14 +51,23 @@ async function loadAuditData() {
     const auditPath = path.join(tmpDir, latestAuditDir);
 
     // Load JSON reports
-    const frontmatterPath = path.join(auditPath, 'frontmatter.json');
-    const linksPath = path.join(auditPath, 'links.json');
-    const duplicatesPath = path.join(auditPath, 'duplicates.json');
+    const frontmatterPath = path.join(auditPath, "frontmatter.json");
+    const linksPath = path.join(auditPath, "links.json");
+    const duplicatesPath = path.join(auditPath, "duplicates.json");
 
     const [frontmatterData, linksData, duplicatesData] = await Promise.all([
-      fs.readFile(frontmatterPath, 'utf-8').then(JSON.parse).catch(() => ({})),
-      fs.readFile(linksPath, 'utf-8').then(JSON.parse).catch(() => ({})),
-      fs.readFile(duplicatesPath, 'utf-8').then(JSON.parse).catch(() => ({})),
+      fs
+        .readFile(frontmatterPath, "utf-8")
+        .then(JSON.parse)
+        .catch(() => ({})),
+      fs
+        .readFile(linksPath, "utf-8")
+        .then(JSON.parse)
+        .catch(() => ({})),
+      fs
+        .readFile(duplicatesPath, "utf-8")
+        .then(JSON.parse)
+        .catch(() => ({})),
     ]);
 
     // Combine data
@@ -62,7 +75,7 @@ async function loadAuditData() {
       frontmatter: frontmatterData,
       links: linksData,
       duplicates: duplicatesData,
-      audit_date: latestAuditDir.replace('docs-audit-', ''),
+      audit_date: latestAuditDir.replace("docs-audit-", ""),
       audit_path: auditPath,
     };
 
@@ -72,7 +85,7 @@ async function loadAuditData() {
 
     return auditData;
   } catch (error) {
-    logger.error('[DocsHealth] Failed to load audit data:', error);
+    logger.error("[DocsHealth] Failed to load audit data:", error);
     throw error;
   }
 }
@@ -82,12 +95,12 @@ async function loadAuditData() {
  */
 async function findLatestReport() {
   try {
-    const projectRoot = path.resolve(__dirname, '../../../../../'); // Up to project root
-    const reportsDir = path.join(projectRoot, 'docs/reports');
+    const projectRoot = path.resolve(__dirname, "../../../../../"); // Up to project root
+    const reportsDir = path.join(projectRoot, "docs/reports");
 
     const files = await fs.readdir(reportsDir);
-    const auditReports = files.filter(
-      (f) => f.match(/^\d{4}-\d{2}-\d{2}-documentation-audit\.md$/)
+    const auditReports = files.filter((f) =>
+      f.match(/^\d{4}-\d{2}-\d{2}-documentation-audit\.md$/),
     );
 
     if (auditReports.length === 0) {
@@ -99,17 +112,17 @@ async function findLatestReport() {
     const reportPath = path.join(reportsDir, latestReport);
 
     // Read report metadata (first 50 lines for frontmatter + summary)
-    const reportContent = await fs.readFile(reportPath, 'utf-8');
-    const lines = reportContent.split('\n').slice(0, 50);
+    const reportContent = await fs.readFile(reportPath, "utf-8");
+    const lines = reportContent.split("\n").slice(0, 50);
 
     return {
-      report_date: latestReport.replace('-documentation-audit.md', ''),
+      report_date: latestReport.replace("-documentation-audit.md", ""),
       report_path: reportPath,
       report_file: latestReport,
-      preview: lines.join('\n'),
+      preview: lines.join("\n"),
     };
   } catch (error) {
-    logger.error('[DocsHealth] Failed to find latest report:', error);
+    logger.error("[DocsHealth] Failed to find latest report:", error);
     return null;
   }
 }
@@ -119,7 +132,7 @@ async function findLatestReport() {
  * High-level health summary
  */
 router.get(
-  '/summary',
+  "/summary",
   asyncHandler(async (req, res) => {
     try {
       const auditData = await loadAuditData();
@@ -147,14 +160,17 @@ router.get(
       });
     } catch (error) {
       // Graceful degradation when no audit data exists
-      logger.warn('[DocsHealth] No audit data available, returning defaults', error.message);
-      
+      logger.warn(
+        "[DocsHealth] No audit data available, returning defaults",
+        error.message,
+      );
+
       res.json({
         success: true,
         data: {
           healthScore: 0,
-          grade: 'N/A',
-          status: 'No Data',
+          grade: "N/A",
+          status: "No Data",
           lastAuditDate: null,
           totalFiles: 0,
           issuesSummary: {
@@ -164,11 +180,12 @@ router.get(
             outdated: 0,
           },
           hasData: false,
-          message: 'No audit data available. Run the documentation audit script to generate health metrics.',
+          message:
+            "No audit data available. Run the documentation audit script to generate health metrics.",
         },
       });
     }
-  })
+  }),
 );
 
 /**
@@ -176,7 +193,7 @@ router.get(
  * Detailed metrics from Prometheus gauges
  */
 router.get(
-  '/metrics',
+  "/metrics",
   asyncHandler(async (req, res) => {
     const metrics = await docsHealthMetrics.getHealthMetrics();
 
@@ -184,7 +201,7 @@ router.get(
       success: true,
       data: metrics,
     });
-  })
+  }),
 );
 
 /**
@@ -193,16 +210,19 @@ router.get(
  * Query params: type (frontmatter|links|duplicates|outdated), limit (default 50)
  */
 router.get(
-  '/issues',
+  "/issues",
   asyncHandler(async (req, res) => {
     const { type, limit = 50 } = req.query;
-    
+
     let auditData;
     try {
       auditData = await loadAuditData();
     } catch (error) {
       // Graceful degradation when no audit data exists
-      logger.warn('[DocsHealth] No audit data for issues endpoint', error.message);
+      logger.warn(
+        "[DocsHealth] No audit data for issues endpoint",
+        error.message,
+      );
       return res.json({
         success: true,
         data: {
@@ -211,7 +231,8 @@ router.get(
           showing: 0,
           issues: [],
           hasData: false,
-          message: 'No audit data available. Run the documentation audit script first.',
+          message:
+            "No audit data available. Run the documentation audit script first.",
         },
       });
     }
@@ -219,36 +240,38 @@ router.get(
     let issues = [];
 
     switch (type) {
-      case 'frontmatter':
+      case "frontmatter":
         issues = (auditData.frontmatter.missing_files || []).map((file) => ({
           file: file.path,
-          issue: 'Missing frontmatter',
-          severity: 'critical',
+          issue: "Missing frontmatter",
+          severity: "critical",
           details: file.missing_fields || [],
         }));
         break;
 
-      case 'links':
+      case "links":
         issues = (auditData.links.broken_links_list || []).map((link) => ({
           file: link.file,
           line: link.line,
           link_text: link.text,
           url: link.url,
           error: link.error,
-          priority: link.priority || 'warning',
+          priority: link.priority || "warning",
         }));
         break;
 
-      case 'duplicates':
-        issues = (auditData.duplicates.exact_duplicate_groups || []).map((group) => ({
-          files: group.files,
-          hash: group.hash,
-          count: group.count,
-          category: 'exact_duplicate',
-        }));
+      case "duplicates":
+        issues = (auditData.duplicates.exact_duplicate_groups || []).map(
+          (group) => ({
+            files: group.files,
+            hash: group.hash,
+            count: group.count,
+            category: "exact_duplicate",
+          }),
+        );
         break;
 
-      case 'outdated':
+      case "outdated":
         issues = (auditData.frontmatter.outdated_files || []).map((file) => ({
           file: file.path,
           last_review: file.last_review,
@@ -261,7 +284,8 @@ router.get(
       default:
         return res.status(400).json({
           success: false,
-          error: 'Invalid issue type. Must be: frontmatter, links, duplicates, or outdated',
+          error:
+            "Invalid issue type. Must be: frontmatter, links, duplicates, or outdated",
         });
     }
 
@@ -278,7 +302,7 @@ router.get(
         issues: paginatedIssues,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -289,19 +313,21 @@ router.get(
  * @param {string} step - Step interval (e.g., '1d', '1h')
  * @returns {Promise<Array>} Time series data points
  */
-async function queryPrometheus(query, start, end, step = '1d') {
+async function queryPrometheus(query, start, end, step = "1d") {
   const prometheusUrl = config.prometheus?.url;
   if (!prometheusUrl) {
-    logger.debug('[DocsHealth] Prometheus URL not configured; skipping query', { query });
+    logger.debug("[DocsHealth] Prometheus URL not configured; skipping query", {
+      query,
+    });
     return [];
   }
 
   try {
-    const url = new URL('/api/v1/query_range', prometheusUrl);
-    url.searchParams.append('query', query);
-    url.searchParams.append('start', start.toString());
-    url.searchParams.append('end', end.toString());
-    url.searchParams.append('step', step);
+    const url = new URL("/api/v1/query_range", prometheusUrl);
+    url.searchParams.append("query", query);
+    url.searchParams.append("start", start.toString());
+    url.searchParams.append("end", end.toString());
+    url.searchParams.append("step", step);
 
     const response = await fetch(url.toString());
     if (!response.ok) {
@@ -309,17 +335,17 @@ async function queryPrometheus(query, start, end, step = '1d') {
     }
 
     const data = await response.json();
-    if (data.status !== 'success' || !data.data?.result?.[0]?.values) {
+    if (data.status !== "success" || !data.data?.result?.[0]?.values) {
       return [];
     }
 
     // Transform Prometheus data to our format
     return data.data.result[0].values.map(([timestamp, value]) => ({
-      timestamp: new Date(timestamp * 1000).toISOString().split('T')[0],
+      timestamp: new Date(timestamp * 1000).toISOString().split("T")[0],
       value: parseFloat(value),
     }));
   } catch (error) {
-    logger.error('[DocsHealth] Prometheus query failed:', error);
+    logger.error("[DocsHealth] Prometheus query failed:", error);
     return [];
   }
 }
@@ -330,7 +356,7 @@ async function queryPrometheus(query, start, end, step = '1d') {
  * Query params: days (default 30)
  */
 router.get(
-  '/trends',
+  "/trends",
   asyncHandler(async (req, res) => {
     const { days = 30 } = req.query;
     const daysNum = parseInt(days);
@@ -339,11 +365,12 @@ router.get(
     const start = now - daysNum * 24 * 60 * 60;
 
     // Query Prometheus for historical metrics
-    const [healthScoreTrend, brokenLinksTrend, outdatedDocsTrend] = await Promise.all([
-      queryPrometheus('docs_health_score', start, now),
-      queryPrometheus('sum(docs_links_broken)', start, now),
-      queryPrometheus('docs_outdated_count', start, now),
-    ]);
+    const [healthScoreTrend, brokenLinksTrend, outdatedDocsTrend] =
+      await Promise.all([
+        queryPrometheus("docs_health_score", start, now),
+        queryPrometheus("sum(docs_links_broken)", start, now),
+        queryPrometheus("docs_outdated_count", start, now),
+      ]);
 
     // If Prometheus is unavailable or no data, return empty arrays instead of mock data
     res.json({
@@ -354,10 +381,13 @@ router.get(
         broken_links: brokenLinksTrend,
         outdated_docs: outdatedDocsTrend,
         prometheus_url: config.prometheus.url,
-        has_data: healthScoreTrend.length > 0 || brokenLinksTrend.length > 0 || outdatedDocsTrend.length > 0,
+        has_data:
+          healthScoreTrend.length > 0 ||
+          brokenLinksTrend.length > 0 ||
+          outdatedDocsTrend.length > 0,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -365,28 +395,28 @@ router.get(
  * Latest audit report metadata
  */
 router.get(
-  '/latest-report',
+  "/latest-report",
   asyncHandler(async (req, res) => {
     const report = await findLatestReport();
 
     if (!report) {
       return res.status(404).json({
         success: false,
-        error: 'No audit reports found',
+        error: "No audit reports found",
       });
     }
 
     // Parse summary statistics from preview
-    const lines = report.preview.split('\n');
+    const lines = report.preview.split("\n");
     let healthScore = null;
     let issueCount = null;
 
     for (const line of lines) {
-      if (line.includes('Health Score:')) {
+      if (line.includes("Health Score:")) {
         const match = line.match(/(\d+\.?\d*)/);
         if (match) healthScore = parseFloat(match[1]);
       }
-      if (line.includes('Total Issues:') || line.includes('issues found')) {
+      if (line.includes("Total Issues:") || line.includes("issues found")) {
         const match = line.match(/(\d+)/);
         if (match) issueCount = parseInt(match[1]);
       }
@@ -402,7 +432,7 @@ router.get(
         issueCount,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -410,7 +440,7 @@ router.get(
  * Aggregated metrics for dashboard visualisations
  */
 router.get(
-  '/dashboard-metrics',
+  "/dashboard-metrics",
   asyncHandler(async (req, res) => {
     try {
       const auditData = await loadAuditData();
@@ -469,9 +499,13 @@ router.get(
 
       const coverage = computeCoverageMetrics({
         totalFiles:
-          frontmatter.total_files ?? frontmatter.total ?? frontmatter.summary?.total_files,
+          frontmatter.total_files ??
+          frontmatter.total ??
+          frontmatter.summary?.total_files,
         ownerDistribution:
-          frontmatter.owner_distribution ?? frontmatter.summary?.owner_distribution ?? {},
+          frontmatter.owner_distribution ??
+          frontmatter.summary?.owner_distribution ??
+          {},
         records: frontmatterEntries,
       });
 
@@ -482,13 +516,13 @@ router.get(
         data: {
           metadata: {
             generatedAt: new Date().toISOString(),
-            version: '1.0.0',
-            source: 'documentation-api',
+            version: "1.0.0",
+            source: "documentation-api",
           },
           healthScore: {
             current: metrics.health_score ?? 0,
-            grade: metrics.grade ?? 'N/A',
-            status: metrics.status ?? 'No Data',
+            grade: metrics.grade ?? "N/A",
+            status: metrics.status ?? "No Data",
             trend: calculateTrend(historical),
           },
           freshness,
@@ -498,20 +532,20 @@ router.get(
         },
       });
     } catch (error) {
-      logger.error('[DocsHealth] Failed to generate dashboard metrics:', error);
+      logger.error("[DocsHealth] Failed to generate dashboard metrics:", error);
       res.json({
         success: true,
         data: {
           metadata: {
             generatedAt: new Date().toISOString(),
-            version: '1.0.0',
-            source: 'documentation-api',
+            version: "1.0.0",
+            source: "documentation-api",
           },
           healthScore: {
             current: 0,
-            grade: 'N/A',
-            status: 'No Data',
-            trend: 'stable',
+            grade: "N/A",
+            status: "No Data",
+            trend: "stable",
           },
           freshness: {
             distribution: [],
@@ -531,11 +565,11 @@ router.get(
           historical: [],
           hasData: false,
           message:
-            'No audit data available. Run documentation audit script to populate dashboard metrics.',
+            "No audit data available. Run documentation audit script to populate dashboard metrics.",
         },
       });
     }
-  })
+  }),
 );
 
 function extractFileEntries(frontmatterData = {}) {
@@ -578,11 +612,12 @@ function getCount(...sources) {
 }
 
 function normalizeFrontmatterData(data = {}) {
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     return {};
   }
 
-  const summary = data.summary && typeof data.summary === 'object' ? data.summary : {};
+  const summary =
+    data.summary && typeof data.summary === "object" ? data.summary : {};
   const normalized = { ...data };
 
   if (normalized.total_files == null && summary.total_files != null) {
@@ -602,7 +637,9 @@ function normalizeFrontmatterData(data = {}) {
   if (normalized.missing_count == null) {
     const missingCount =
       summary.files_missing_frontmatter ??
-      (Array.isArray(normalized.missing_files) ? normalized.missing_files.length : undefined);
+      (Array.isArray(normalized.missing_files)
+        ? normalized.missing_files.length
+        : undefined);
     if (missingCount != null) {
       normalized.missing_count = missingCount;
     }
@@ -611,13 +648,18 @@ function normalizeFrontmatterData(data = {}) {
   if (!normalized.incomplete && Array.isArray(data.incomplete_frontmatter)) {
     normalized.incomplete = data.incomplete_frontmatter;
   }
-  if (!normalized.incomplete_files && Array.isArray(data.incomplete_frontmatter)) {
+  if (
+    !normalized.incomplete_files &&
+    Array.isArray(data.incomplete_frontmatter)
+  ) {
     normalized.incomplete_files = data.incomplete_frontmatter;
   }
   if (normalized.incomplete_count == null) {
     const incompleteCount =
       summary.files_incomplete_frontmatter ??
-      (Array.isArray(normalized.incomplete_files) ? normalized.incomplete_files.length : undefined);
+      (Array.isArray(normalized.incomplete_files)
+        ? normalized.incomplete_files.length
+        : undefined);
     if (incompleteCount != null) {
       normalized.incomplete_count = incompleteCount;
     }
@@ -644,13 +686,18 @@ function normalizeFrontmatterData(data = {}) {
     }
   }
 
-  if (!normalized.outdated_files && Array.isArray(data.freshness_analysis?.outdated_documents)) {
+  if (
+    !normalized.outdated_files &&
+    Array.isArray(data.freshness_analysis?.outdated_documents)
+  ) {
     normalized.outdated_files = data.freshness_analysis.outdated_documents;
   }
   if (normalized.outdated_count == null) {
     const outdatedCount =
       summary.outdated_documents ??
-      (Array.isArray(normalized.outdated_files) ? normalized.outdated_files.length : undefined);
+      (Array.isArray(normalized.outdated_files)
+        ? normalized.outdated_files.length
+        : undefined);
     if (outdatedCount != null) {
       normalized.outdated_count = outdatedCount;
     }
@@ -667,9 +714,9 @@ async function getHistoricalMetrics(days = 30) {
   const start = now - days * 24 * 60 * 60;
 
   const [healthSeries, issueSeries] = await Promise.all([
-    queryPrometheus('docs_health_score', start, now),
+    queryPrometheus("docs_health_score", start, now),
     queryPrometheus(
-      'docs_links_broken + docs_frontmatter_missing + docs_outdated_count',
+      "docs_links_broken + docs_frontmatter_missing + docs_outdated_count",
       start,
       now,
     ),
@@ -702,7 +749,7 @@ async function getHistoricalMetrics(days = 30) {
 
 function calculateTrend(historical = []) {
   if (!Array.isArray(historical) || historical.length < 2) {
-    return 'stable';
+    return "stable";
   }
 
   const recent = historical.slice(-7);
@@ -710,9 +757,9 @@ function calculateTrend(historical = []) {
   const last = recent[recent.length - 1]?.healthScore ?? 0;
   const delta = last - first;
 
-  if (delta > 5) return 'improving';
-  if (delta < -5) return 'declining';
-  return 'stable';
+  if (delta > 5) return "improving";
+  if (delta < -5) return "declining";
+  return "stable";
 }
 
 /**
@@ -721,14 +768,15 @@ function calculateTrend(historical = []) {
  * Called by CI/CD workflow after audit run
  */
 router.post(
-  '/update-metrics',
+  "/update-metrics",
   asyncHandler(async (req, res) => {
     const auditData = req.body;
 
     if (!auditData || !auditData.frontmatter) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid audit data. Must include frontmatter, links, and duplicates',
+        error:
+          "Invalid audit data. Must include frontmatter, links, and duplicates",
       });
     }
 
@@ -740,7 +788,7 @@ router.post(
     cachedAuditData = auditData;
     cacheTimestamp = Date.now();
 
-    logger.info('[DocsHealth] Updated Prometheus metrics from audit data', {
+    logger.info("[DocsHealth] Updated Prometheus metrics from audit data", {
       health_score: auditData.health_score,
       total_files: auditData.frontmatter.total_files,
       broken_links: auditData.links.broken_links,
@@ -748,9 +796,9 @@ router.post(
 
     res.json({
       success: true,
-      message: 'Metrics updated successfully',
+      message: "Metrics updated successfully",
     });
-  })
+  }),
 );
 
 /**
@@ -759,26 +807,26 @@ router.post(
  * Body: { issue_type: 'frontmatter' | 'links' | 'duplicates' }
  */
 router.post(
-  '/record-fix',
+  "/record-fix",
   asyncHandler(async (req, res) => {
     const { issue_type } = req.body;
 
-    if (!['frontmatter', 'links', 'duplicates'].includes(issue_type)) {
+    if (!["frontmatter", "links", "duplicates"].includes(issue_type)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid issue_type. Must be: frontmatter, links, or duplicates',
+        error: "Invalid issue_type. Must be: frontmatter, links, or duplicates",
       });
     }
 
     docsHealthMetrics.recordIssueFixed(issue_type);
 
-    logger.info('[DocsHealth] Recorded issue fix', { issue_type });
+    logger.info("[DocsHealth] Recorded issue fix", { issue_type });
 
     res.json({
       success: true,
-      message: 'Issue fix recorded',
+      message: "Issue fix recorded",
     });
-  })
+  }),
 );
 
 export default router;

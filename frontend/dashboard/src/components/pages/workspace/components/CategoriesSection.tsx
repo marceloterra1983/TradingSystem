@@ -10,9 +10,9 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../../../ui/collapsible-card';
-import CategoriesCRUDCard from '../CategoriesCRUDCard';
-import { Folder } from 'lucide-react';
+} from "../../../ui/collapsible-card";
+import CategoriesCRUDCard from "../CategoriesCRUDCard";
+import { Folder } from "lucide-react";
 
 export function CategoriesSection() {
   return (

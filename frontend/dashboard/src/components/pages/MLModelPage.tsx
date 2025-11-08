@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Brain, Settings, History } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Brain, Settings, History } from "lucide-react";
 
 export function MLModelPage() {
   const sections = [
     {
-      id: 'model-status',
+      id: "model-status",
       content: (
         <PlaceholderSection
           cardId="ml-model-status"
@@ -16,7 +16,7 @@ export function MLModelPage() {
       ),
     },
     {
-      id: 'model-config',
+      id: "model-config",
       content: (
         <PlaceholderSection
           cardId="ml-model-config"
@@ -27,7 +27,7 @@ export function MLModelPage() {
       ),
     },
     {
-      id: 'model-versions',
+      id: "model-versions",
       content: (
         <PlaceholderSection
           cardId="ml-model-versions"

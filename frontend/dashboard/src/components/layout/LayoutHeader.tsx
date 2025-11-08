@@ -1,10 +1,10 @@
-import { Menu, Sun, Moon, Copy, Check } from 'lucide-react';
-import { Clock } from '../ui/clock';
-import { cn } from '../../lib/utils';
-import { Page, getSectionByPageId } from '../../data/navigation';
-import { Logo } from '../ui/logo';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useState } from 'react';
+import { Menu, Sun, Moon, Copy, Check } from "lucide-react";
+import { Clock } from "../ui/clock";
+import { cn } from "../../lib/utils";
+import { Page, getSectionByPageId } from "../../data/navigation";
+import { Logo } from "../ui/logo";
+import { useTheme } from "../../contexts/ThemeContext";
+import { useState } from "react";
 
 export interface LayoutHeaderProps {
   currentPage: Page;
@@ -38,15 +38,15 @@ export function LayoutHeader({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy URL:', error);
+      console.error("Failed to copy URL:", error);
     }
   };
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-20 flex h-14 items-center justify-between px-4 transition-colors duration-200',
-        'border-b border-[color:var(--ts-surface-border)] bg-[color:var(--ts-backdrop-blur)] backdrop-blur-xl',
+        "sticky top-0 z-20 flex h-14 items-center justify-between px-4 transition-colors duration-200",
+        "border-b border-[color:var(--ts-surface-border)] bg-[color:var(--ts-backdrop-blur)] backdrop-blur-xl",
       )}
     >
       {/* Left side - Title & Context */}
@@ -85,7 +85,7 @@ export function LayoutHeader({
             <h1 className="text-base font-semibold text-[color:var(--ts-text-primary)]">
               {currentPage.title}
             </h1>
-            {currentSection && currentSection.label !== 'Docs' && (
+            {currentSection && currentSection.label !== "Docs" && (
               <span className="rounded bg-[color:var(--ts-surface-hover)] px-2 py-0.5 text-xs font-medium text-[color:var(--ts-text-muted)]">
                 {currentSection.label}
               </span>
@@ -110,10 +110,10 @@ export function LayoutHeader({
         <button
           onClick={toggleTheme}
           className="rounded-lg p-2 transition-colors hover:bg-[color:var(--ts-surface-hover)]"
-          aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
+          aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+          title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
         >
-          {resolvedTheme === 'dark' ? (
+          {resolvedTheme === "dark" ? (
             <Sun className="h-5 w-5 text-[color:var(--ts-text-muted)]" />
           ) : (
             <Moon className="h-5 w-5 text-[color:var(--ts-text-muted)]" />

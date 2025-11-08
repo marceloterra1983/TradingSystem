@@ -3,8 +3,8 @@
  * Quick Win P1-4: Extract filter logic from SignalsTable.tsx
  */
 
-import { useState, useMemo } from 'react';
-import type { Signal } from './useSignalsData';
+import { useState, useMemo } from "react";
+import type { Signal } from "./useSignalsData";
 
 export interface SignalsFilters {
   asset: string;
@@ -15,26 +15,26 @@ export interface SignalsFilters {
 }
 
 export function useSignalsFilters(signals: Signal[]) {
-  const [filterAsset, setFilterAsset] = useState<string>('all');
-  const [filterDirection, setFilterDirection] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterDateFrom, setFilterDateFrom] = useState<string>('');
-  const [filterDateTo, setFilterDateTo] = useState<string>('');
+  const [filterAsset, setFilterAsset] = useState<string>("all");
+  const [filterDirection, setFilterDirection] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
 
   const filteredSignals = useMemo(() => {
     return signals.filter((signal) => {
       // Filter by asset
-      if (filterAsset !== 'all' && signal.asset !== filterAsset) {
+      if (filterAsset !== "all" && signal.asset !== filterAsset) {
         return false;
       }
 
       // Filter by direction
-      if (filterDirection !== 'all' && signal.direction !== filterDirection) {
+      if (filterDirection !== "all" && signal.direction !== filterDirection) {
         return false;
       }
 
       // Filter by status
-      if (filterStatus !== 'all' && signal.status !== filterStatus) {
+      if (filterStatus !== "all" && signal.status !== filterStatus) {
         return false;
       }
 
@@ -54,14 +54,21 @@ export function useSignalsFilters(signals: Signal[]) {
 
       return true;
     });
-  }, [signals, filterAsset, filterDirection, filterStatus, filterDateFrom, filterDateTo]);
+  }, [
+    signals,
+    filterAsset,
+    filterDirection,
+    filterStatus,
+    filterDateFrom,
+    filterDateTo,
+  ]);
 
   const resetFilters = () => {
-    setFilterAsset('all');
-    setFilterDirection('all');
-    setFilterStatus('all');
-    setFilterDateFrom('');
-    setFilterDateTo('');
+    setFilterAsset("all");
+    setFilterDirection("all");
+    setFilterStatus("all");
+    setFilterDateFrom("");
+    setFilterDateTo("");
   };
 
   return {
@@ -81,4 +88,3 @@ export function useSignalsFilters(signals: Signal[]) {
     resetFilters,
   };
 }
-

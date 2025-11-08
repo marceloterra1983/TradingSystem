@@ -1,18 +1,18 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import semver from 'semver';
+import { promises as fs } from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import semver from "semver";
 
 class VersionManager {
   constructor(specsDir) {
     this.specsDir = specsDir;
-    this.versionsDir = path.join(specsDir, 'versions');
-    this.baseVersion = '0.0.0';
+    this.versionsDir = path.join(specsDir, "versions");
+    this.baseVersion = "0.0.0";
     this.baseMajor = 0;
     this.cache = {
       all: [],
-      latest: '0.0.0',
-      stable: '0.0.0',
+      latest: "0.0.0",
+      stable: "0.0.0",
     };
   }
 
@@ -20,7 +20,9 @@ class VersionManager {
     await fs.mkdir(this.specsDir, { recursive: true });
     await fs.mkdir(this.versionsDir, { recursive: true });
 
-    const version = await this.readSpecVersion(path.join(this.specsDir, 'openapi.yaml'));
+    const version = await this.readSpecVersion(
+      path.join(this.specsDir, "openapi.yaml"),
+    );
     if (version && semver.valid(version)) {
       this.baseVersion = version;
       this.baseMajor = semver.major(version);
@@ -44,7 +46,9 @@ class VersionManager {
     const resolved = this.resolveVersionId(identifier);
 
     const isBase = resolved === this.baseVersion;
-    const versionPath = isBase ? this.specsDir : path.join(this.versionsDir, resolved);
+    const versionPath = isBase
+      ? this.specsDir
+      : path.join(this.versionsDir, resolved);
     const exists = await this.pathExists(versionPath);
     if (!exists) {
       throw new Error(`Version ${identifier} not found`);
@@ -52,15 +56,16 @@ class VersionManager {
 
     const specs = {
       openapi: isBase
-        ? path.join(this.specsDir, 'openapi.yaml')
-        : path.join(versionPath, 'openapi.yaml'),
+        ? path.join(this.specsDir, "openapi.yaml")
+        : path.join(versionPath, "openapi.yaml"),
       asyncapi: isBase
-        ? path.join(this.specsDir, 'asyncapi.yaml')
-        : path.join(versionPath, 'asyncapi.yaml'),
+        ? path.join(this.specsDir, "asyncapi.yaml")
+        : path.join(versionPath, "asyncapi.yaml"),
     };
 
     const lastUpdated =
-      (await this.fileTimestamp(specs.openapi)) || (await this.fileTimestamp(specs.asyncapi));
+      (await this.fileTimestamp(specs.openapi)) ||
+      (await this.fileTimestamp(specs.asyncapi));
 
     return {
       version: resolved,
@@ -70,26 +75,36 @@ class VersionManager {
     };
   }
 
-  async createVersion(type = 'minor') {
+  async createVersion(type = "minor") {
     await this.refreshCache();
 
-    const bumpType = ['major', 'minor', 'patch'].includes(type) ? type : 'minor';
+    const bumpType = ["major", "minor", "patch"].includes(type)
+      ? type
+      : "minor";
     const sourceVersion = this.cache.latest;
     const source = await this.getVersion(sourceVersion);
-    const sourceVersionValue = semver.valid(source.version) ? source.version : this.baseVersion;
+    const sourceVersionValue = semver.valid(source.version)
+      ? source.version
+      : this.baseVersion;
 
     const newVersion = semver.inc(sourceVersionValue, bumpType);
     if (!newVersion) {
-      throw new Error(`Unable to compute ${bumpType} version from ${sourceVersionValue}`);
+      throw new Error(
+        `Unable to compute ${bumpType} version from ${sourceVersionValue}`,
+      );
     }
 
     const targetDir = path.join(this.versionsDir, newVersion);
     await fs.mkdir(targetDir, { recursive: true });
 
-    await this.copySpecWithVersion(source.specs.openapi, path.join(targetDir, 'openapi.yaml'), newVersion);
+    await this.copySpecWithVersion(
+      source.specs.openapi,
+      path.join(targetDir, "openapi.yaml"),
+      newVersion,
+    );
     await this.copySpecWithVersion(
       source.specs.asyncapi,
-      path.join(targetDir, 'asyncapi.yaml'),
+      path.join(targetDir, "asyncapi.yaml"),
       newVersion,
     );
 
@@ -102,14 +117,17 @@ class VersionManager {
       type: bumpType,
       path: targetDir,
       specs: {
-        openapi: path.join(targetDir, 'openapi.yaml'),
-        asyncapi: path.join(targetDir, 'asyncapi.yaml'),
+        openapi: path.join(targetDir, "openapi.yaml"),
+        asyncapi: path.join(targetDir, "asyncapi.yaml"),
       },
     };
   }
 
   async compareVersions(v1, v2) {
-    const [version1, version2] = await Promise.all([this.getVersion(v1), this.getVersion(v2)]);
+    const [version1, version2] = await Promise.all([
+      this.getVersion(v1),
+      this.getVersion(v2),
+    ]);
 
     const [openApi1, openApi2] = await Promise.all([
       this.readYaml(version1.specs.openapi),
@@ -129,7 +147,10 @@ class VersionManager {
           (openApi1.components && openApi1.components.schemas) || {},
           (openApi2.components && openApi2.components.schemas) || {},
         ),
-        channels: this.diffObject(asyncApi1.channels || {}, asyncApi2.channels || {}),
+        channels: this.diffObject(
+          asyncApi1.channels || {},
+          asyncApi2.channels || {},
+        ),
       },
     };
   }
@@ -167,7 +188,8 @@ class VersionManager {
   async reindexVersion(version) {
     const resolved = this.resolveVersionId(version);
     this.cache.all = this.cache.all.filter((entry) => entry !== resolved);
-    this.cache.latest = this.cache.all[this.cache.all.length - 1] || this.baseVersion;
+    this.cache.latest =
+      this.cache.all[this.cache.all.length - 1] || this.baseVersion;
     return this.getVersion(resolved);
   }
 
@@ -182,7 +204,9 @@ class VersionManager {
 
   async refreshCache() {
     const entries = await fs.readdir(this.versionsDir).catch(() => []);
-    const versions = entries.filter((entry) => semver.valid(entry)).sort(semver.compare);
+    const versions = entries
+      .filter((entry) => semver.valid(entry))
+      .sort(semver.compare);
 
     const all = [];
     if (semver.valid(this.baseVersion)) {
@@ -196,7 +220,9 @@ class VersionManager {
 
     const latest = all.length ? all[all.length - 1] : this.baseVersion;
     const stableCandidate =
-      [...all].reverse().find((version) => semver.major(version) === this.baseMajor) || latest;
+      [...all]
+        .reverse()
+        .find((version) => semver.major(version) === this.baseMajor) || latest;
 
     this.cache = {
       all,
@@ -206,16 +232,16 @@ class VersionManager {
   }
 
   resolveVersionId(identifier) {
-    if (!identifier || identifier === 'current') {
+    if (!identifier || identifier === "current") {
       return this.cache.latest;
     }
-    if (identifier === 'latest') {
+    if (identifier === "latest") {
       return this.cache.latest;
     }
-    if (identifier === 'stable') {
+    if (identifier === "stable") {
       return this.cache.stable;
     }
-    if (identifier === 'base') {
+    if (identifier === "base") {
       return this.baseVersion;
     }
     if (!this.cache.all.includes(identifier)) {
@@ -234,7 +260,7 @@ class VersionManager {
   }
 
   async readYaml(filePath) {
-    const raw = await fs.readFile(filePath, 'utf8');
+    const raw = await fs.readFile(filePath, "utf8");
     return yaml.load(raw);
   }
 
@@ -245,12 +271,12 @@ class VersionManager {
     }
     spec.info.version = version;
     const serialized = yaml.dump(spec, { noRefs: true, lineWidth: 120 });
-    await fs.writeFile(targetPath, serialized, 'utf8');
+    await fs.writeFile(targetPath, serialized, "utf8");
   }
 
   async copySchemas(sourcePath, targetPath) {
-    const sourceDir = path.join(sourcePath, 'schemas');
-    const targetDir = path.join(targetPath, 'schemas');
+    const sourceDir = path.join(sourcePath, "schemas");
+    const targetDir = path.join(targetPath, "schemas");
     if (!(await this.pathExists(sourceDir))) {
       return;
     }

@@ -5,4 +5,4 @@
  * This file exists to keep documentation references working while the
  * refactor is finalized.
  */
-export { SignalsTable } from './SignalsTable';
+export { SignalsTable } from "./SignalsTable";

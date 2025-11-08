@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { List, BarChart3 } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { List, BarChart3 } from "lucide-react";
 
 export function FeaturesPage() {
   const sections = [
     {
-      id: 'feature-list',
+      id: "feature-list",
       content: (
         <PlaceholderSection
           cardId="features-list"
@@ -16,7 +16,7 @@ export function FeaturesPage() {
       ),
     },
     {
-      id: 'feature-importance',
+      id: "feature-importance",
       content: (
         <PlaceholderSection
           cardId="features-importance"

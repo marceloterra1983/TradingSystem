@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { DollarSign, TrendingUp, LineChart } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { DollarSign, TrendingUp, LineChart } from "lucide-react";
 
 /**
  * Trading Performance Page - P&L, metrics, and analytics
@@ -8,7 +8,7 @@ import { DollarSign, TrendingUp, LineChart } from 'lucide-react';
 export function PerformancePage() {
   const sections = [
     {
-      id: 'pnl',
+      id: "pnl",
       content: (
         <PlaceholderSection
           cardId="performance-pnl"
@@ -19,7 +19,7 @@ export function PerformancePage() {
       ),
     },
     {
-      id: 'metrics',
+      id: "metrics",
       content: (
         <PlaceholderSection
           cardId="performance-metrics"
@@ -30,7 +30,7 @@ export function PerformancePage() {
       ),
     },
     {
-      id: 'charts',
+      id: "charts",
       content: (
         <PlaceholderSection
           cardId="performance-charts"

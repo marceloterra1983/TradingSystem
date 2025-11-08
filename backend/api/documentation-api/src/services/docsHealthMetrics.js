@@ -1,110 +1,110 @@
-import promClient from 'prom-client';
+import promClient from "prom-client";
 
 // Use the default registry for all metrics
 const _register = promClient.register;
 
 // Gauges - Current state metrics
 const healthScore = new promClient.Gauge({
-  name: 'docs_health_score',
-  help: 'Overall documentation health score (0-100)',
+  name: "docs_health_score",
+  help: "Overall documentation health score (0-100)",
 });
 
 const totalFiles = new promClient.Gauge({
-  name: 'docs_total_files',
-  help: 'Total number of markdown documentation files',
-  labelNames: ['domain'],
+  name: "docs_total_files",
+  help: "Total number of markdown documentation files",
+  labelNames: ["domain"],
 });
 
 const frontmatterComplete = new promClient.Gauge({
-  name: 'docs_frontmatter_complete',
-  help: 'Number of files with complete frontmatter',
+  name: "docs_frontmatter_complete",
+  help: "Number of files with complete frontmatter",
 });
 
 const frontmatterMissing = new promClient.Gauge({
-  name: 'docs_frontmatter_missing',
-  help: 'Number of files missing frontmatter',
+  name: "docs_frontmatter_missing",
+  help: "Number of files missing frontmatter",
 });
 
 const frontmatterIncomplete = new promClient.Gauge({
-  name: 'docs_frontmatter_incomplete',
-  help: 'Number of files with incomplete frontmatter',
+  name: "docs_frontmatter_incomplete",
+  help: "Number of files with incomplete frontmatter",
 });
 
 const linksTotal = new promClient.Gauge({
-  name: 'docs_links_total',
-  help: 'Total number of links found in documentation',
-  labelNames: ['type'], // internal, external
+  name: "docs_links_total",
+  help: "Total number of links found in documentation",
+  labelNames: ["type"], // internal, external
 });
 
 const linksBroken = new promClient.Gauge({
-  name: 'docs_links_broken',
-  help: 'Number of broken links',
-  labelNames: ['priority'], // critical, warning, info
+  name: "docs_links_broken",
+  help: "Number of broken links",
+  labelNames: ["priority"], // critical, warning, info
 });
 
 const linksSuccessRate = new promClient.Gauge({
-  name: 'docs_links_success_rate',
-  help: 'Link success rate percentage',
+  name: "docs_links_success_rate",
+  help: "Link success rate percentage",
 });
 
 const outdatedCount = new promClient.Gauge({
-  name: 'docs_outdated_count',
-  help: 'Number of documents older than threshold days',
+  name: "docs_outdated_count",
+  help: "Number of documents older than threshold days",
 });
 
 const duplicateGroups = new promClient.Gauge({
-  name: 'docs_duplicate_groups',
-  help: 'Number of exact duplicate groups',
+  name: "docs_duplicate_groups",
+  help: "Number of exact duplicate groups",
 });
 
 const duplicateSimilarTitles = new promClient.Gauge({
-  name: 'docs_duplicate_similar_titles',
-  help: 'Number of similar title pairs',
+  name: "docs_duplicate_similar_titles",
+  help: "Number of similar title pairs",
 });
 
 const duplicateSimilarSummaries = new promClient.Gauge({
-  name: 'docs_duplicate_similar_summaries',
-  help: 'Number of similar summary pairs',
+  name: "docs_duplicate_similar_summaries",
+  help: "Number of similar summary pairs",
 });
 
 const diagramsTotal = new promClient.Gauge({
-  name: 'docs_diagrams_total',
-  help: 'Total number of PlantUML diagrams',
+  name: "docs_diagrams_total",
+  help: "Total number of PlantUML diagrams",
 });
 
 const diagramsMissing = new promClient.Gauge({
-  name: 'docs_diagrams_missing',
-  help: 'Estimated number of guides without diagrams',
+  name: "docs_diagrams_missing",
+  help: "Estimated number of guides without diagrams",
 });
 
 // Counters - Cumulative metrics
 const auditRunsTotal = new promClient.Counter({
-  name: 'docs_audit_runs_total',
-  help: 'Total number of documentation audits executed',
+  name: "docs_audit_runs_total",
+  help: "Total number of documentation audits executed",
 });
 
 const issuesFixedTotal = new promClient.Counter({
-  name: 'docs_issues_fixed_total',
-  help: 'Total number of documentation issues resolved',
-  labelNames: ['issue_type'], // frontmatter, links, duplicates
+  name: "docs_issues_fixed_total",
+  help: "Total number of documentation issues resolved",
+  labelNames: ["issue_type"], // frontmatter, links, duplicates
 });
 
 // Histograms - Distribution metrics
 const fileAgeDays = new promClient.Histogram({
-  name: 'docs_file_age_days',
-  help: 'Distribution of document ages in days',
+  name: "docs_file_age_days",
+  help: "Distribution of document ages in days",
   buckets: [0, 7, 30, 60, 90, 180, 365],
 });
 
 const fileSizeLines = new promClient.Histogram({
-  name: 'docs_file_size_lines',
-  help: 'Distribution of file sizes in lines',
+  name: "docs_file_size_lines",
+  help: "Distribution of file sizes in lines",
   buckets: [0, 50, 100, 200, 500, 1000, 2000],
 });
 
 const auditDuration = new promClient.Histogram({
-  name: 'docs_audit_duration_seconds',
-  help: 'Duration of documentation audit execution',
+  name: "docs_audit_duration_seconds",
+  help: "Duration of documentation audit execution",
   buckets: [1, 5, 10, 30, 60, 120],
 });
 
@@ -151,7 +151,7 @@ class DocsHealthMetrics {
       const healthScoreValue = this.calculateHealthScore(
         frontmatter,
         links,
-        duplicates
+        duplicates,
       );
       this.healthScore.set(healthScoreValue);
 
@@ -171,7 +171,7 @@ class DocsHealthMetrics {
           this.totalFiles.set({ domain }, count);
         });
       } else {
-        this.totalFiles.set({ domain: 'all' }, totalFilesCount);
+        this.totalFiles.set({ domain: "all" }, totalFilesCount);
       }
 
       // Link metrics
@@ -180,16 +180,18 @@ class DocsHealthMetrics {
       const externalLinksCount = links.external_links || 0;
       const brokenLinksCount = links.broken_links || 0;
 
-      this.linksTotal.set({ type: 'internal' }, internalLinksCount);
-      this.linksTotal.set({ type: 'external' }, externalLinksCount);
+      this.linksTotal.set({ type: "internal" }, internalLinksCount);
+      this.linksTotal.set({ type: "external" }, externalLinksCount);
 
       // Broken links by priority
       if (links.broken_by_priority) {
-        Object.entries(links.broken_by_priority).forEach(([priority, count]) => {
-          this.linksBroken.set({ priority }, count);
-        });
+        Object.entries(links.broken_by_priority).forEach(
+          ([priority, count]) => {
+            this.linksBroken.set({ priority }, count);
+          },
+        );
       } else {
-        this.linksBroken.set({ priority: 'all' }, brokenLinksCount);
+        this.linksBroken.set({ priority: "all" }, brokenLinksCount);
       }
 
       // Link success rate
@@ -234,14 +236,17 @@ class DocsHealthMetrics {
         });
       }
 
-      console.log('[DocsHealthMetrics] Updated all health metrics', {
+      console.log("[DocsHealthMetrics] Updated all health metrics", {
         healthScore: healthScoreValue,
         totalFiles: totalFilesCount,
         brokenLinks: brokenLinksCount,
         successRate: successRate.toFixed(2),
       });
     } catch (error) {
-      console.error('[DocsHealthMetrics] Failed to update health metrics:', error);
+      console.error(
+        "[DocsHealthMetrics] Failed to update health metrics:",
+        error,
+      );
       throw error;
     }
   }
@@ -312,29 +317,31 @@ class DocsHealthMetrics {
   async getHealthMetrics() {
     try {
       // Get gauge values
-      const healthScoreValue = await this.getGaugeValue('docs_health_score');
-      const totalFilesValue = await this.getGaugeSum('docs_total_files');
+      const healthScoreValue = await this.getGaugeValue("docs_health_score");
+      const totalFilesValue = await this.getGaugeSum("docs_total_files");
       const frontmatterCompleteValue = await this.getGaugeValue(
-        'docs_frontmatter_complete'
+        "docs_frontmatter_complete",
       );
       const frontmatterMissingValue = await this.getGaugeValue(
-        'docs_frontmatter_missing'
+        "docs_frontmatter_missing",
       );
-      const linksBrokenValue = await this.getGaugeSum('docs_links_broken');
+      const linksBrokenValue = await this.getGaugeSum("docs_links_broken");
       const linksSuccessRateValue = await this.getGaugeValue(
-        'docs_links_success_rate'
+        "docs_links_success_rate",
       );
-      const outdatedCountValue = await this.getGaugeValue('docs_outdated_count');
+      const outdatedCountValue = await this.getGaugeValue(
+        "docs_outdated_count",
+      );
       const duplicateGroupsValue = await this.getGaugeValue(
-        'docs_duplicate_groups'
+        "docs_duplicate_groups",
       );
 
       // Get counter values
       const auditRunsTotalValue = await this.getCounterValue(
-        'docs_audit_runs_total'
+        "docs_audit_runs_total",
       );
       const issuesFixedTotalValue = await this.getCounterValue(
-        'docs_issues_fixed_total'
+        "docs_issues_fixed_total",
       );
 
       return {
@@ -352,7 +359,7 @@ class DocsHealthMetrics {
         status: this.calculateStatus(healthScoreValue),
       };
     } catch (error) {
-      console.error('[DocsHealthMetrics] Failed to get health metrics:', error);
+      console.error("[DocsHealthMetrics] Failed to get health metrics:", error);
       throw error;
     }
   }
@@ -366,7 +373,7 @@ class DocsHealthMetrics {
 
     const metric = result.get();
     if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
-    
+
     return metric.values.length > 0 ? metric.values[0].value : 0;
   }
 
@@ -379,7 +386,7 @@ class DocsHealthMetrics {
 
     const metric = result.get();
     if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
-    
+
     return metric.values.reduce((sum, value) => sum + value.value, 0);
   }
 
@@ -392,7 +399,7 @@ class DocsHealthMetrics {
 
     const metric = result.get();
     if (!metric || !metric.values || !Array.isArray(metric.values)) return 0;
-    
+
     return metric.values.reduce((sum, value) => sum + value.value, 0);
   }
 
@@ -400,22 +407,22 @@ class DocsHealthMetrics {
    * Calculate grade from health score
    */
   calculateGrade(score) {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
+    if (score >= 90) return "A";
+    if (score >= 80) return "B";
+    if (score >= 70) return "C";
+    if (score >= 60) return "D";
+    return "F";
   }
 
   /**
    * Calculate status from health score
    */
   calculateStatus(score) {
-    if (score >= 90) return 'Excellent';
-    if (score >= 80) return 'Good';
-    if (score >= 70) return 'Fair';
-    if (score >= 60) return 'Poor';
-    return 'Critical';
+    if (score >= 90) return "Excellent";
+    if (score >= 80) return "Good";
+    if (score >= 70) return "Fair";
+    if (score >= 60) return "Poor";
+    return "Critical";
   }
 }
 

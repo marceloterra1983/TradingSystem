@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Youtube, Play, ExternalLink } from 'lucide-react';
+import React, { useState } from "react";
+import { Youtube, Play, ExternalLink } from "lucide-react";
 
 interface YouTubeAuthor {
   name: string;
@@ -14,7 +14,7 @@ interface YouTubeThumbnail {
 
 interface YouTubePreviewProps {
   preview: {
-    type: 'youtube';
+    type: "youtube";
     url: string;
     videoId: string;
     title: string;
@@ -48,7 +48,7 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
             ✕
           </button>
         </div>
-        
+
         <div className="px-3 pb-3">
           <a
             href={preview.url}
@@ -61,7 +61,9 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
             {preview.url}
           </a>
           {/* YouTube iframe */}
-          <div className="relative mt-2 pb-[56.25%]"> {/* 16:9 aspect ratio */}
+          <div className="relative mt-2 pb-[56.25%]">
+            {" "}
+            {/* 16:9 aspect ratio */}
             <iframe
               className="absolute top-0 left-0 w-full h-full"
               src={`https://www.youtube.com/embed/${preview.videoId}?autoplay=1`}
@@ -80,7 +82,7 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
   return (
     <div className="mt-4 border border-slate-700 rounded-lg overflow-hidden bg-slate-800/50 hover:border-red-500 transition-colors">
       {/* Thumbnail */}
-      <div 
+      <div
         className="relative cursor-pointer group"
         onClick={() => setShowEmbed(true)}
       >
@@ -90,10 +92,11 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
           className="w-full aspect-video object-cover"
           onError={(e) => {
             // Fallback thumbnail
-            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${preview.videoId}/hqdefault.jpg`;
+            (e.target as HTMLImageElement).src =
+              `https://img.youtube.com/vi/${preview.videoId}/hqdefault.jpg`;
           }}
         />
-        
+
         {/* Play button overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
           <div className="w-20 h-20 rounded-full bg-red-600/90 group-hover:bg-red-600 flex items-center justify-center shadow-lg transition-all group-hover:scale-110">
@@ -137,4 +140,3 @@ export const YouTubePreview: React.FC<YouTubePreviewProps> = ({ preview }) => {
     </div>
   );
 };
-

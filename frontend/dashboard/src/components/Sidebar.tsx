@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import clsx from "clsx";
 import {
   LayoutDashboard,
   Wallet,
@@ -11,7 +11,7 @@ import {
   Shield,
   BookOpen,
   Settings,
-} from 'lucide-react';
+} from "lucide-react";
 
 export interface SidebarProps {
   currentView: string;
@@ -21,32 +21,32 @@ export interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'positions', label: 'Positions', icon: Wallet },
-  { id: 'orders', label: 'Orders', icon: FileText },
-  { id: 'signals', label: 'Signals', icon: TrendingUp },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "positions", label: "Positions", icon: Wallet },
+  { id: "orders", label: "Orders", icon: FileText },
+  { id: "signals", label: "Signals", icon: TrendingUp },
 ];
 
 const systemLinks = [
-  { id: 'home', label: 'Home', icon: Home, url: '/' },
+  { id: "home", label: "Home", icon: Home, url: "/" },
   {
-    id: 'docs',
-    label: 'Documentation',
+    id: "docs",
+    label: "Documentation",
     icon: BookOpen,
-    url: '/documentation-hub',
+    url: "/documentation-hub",
   },
   {
-    id: 'data-capture',
-    label: 'Data Capture',
+    id: "data-capture",
+    label: "Data Capture",
     icon: Settings,
-    url: '/data-capture-ui',
+    url: "/data-capture-ui",
   },
-  { id: 'database', label: 'Database', icon: Database, url: '/database-ui' },
+  { id: "database", label: "Database", icon: Database, url: "/database-ui" },
   {
-    id: 'risk',
-    label: 'Risk Management',
+    id: "risk",
+    label: "Risk Management",
     icon: Shield,
-    url: '/risk-management-ui',
+    url: "/risk-management-ui",
   },
 ];
 
@@ -59,8 +59,8 @@ export function Sidebar({
   return (
     <aside
       className={clsx(
-        'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
-        isOpen ? 'w-64' : 'w-20',
+        "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col",
+        isOpen ? "w-64" : "w-20",
       )}
     >
       {/* Logo / Header */}
@@ -75,7 +75,7 @@ export function Sidebar({
           <button
             onClick={onToggle}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors ml-auto"
-            aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isOpen ? (
               <ChevronLeft className="w-5 h-5 text-gray-600" />
@@ -90,11 +90,11 @@ export function Sidebar({
       <nav className="flex-1 p-4 space-y-1">
         <div
           className={clsx(
-            'text-xs font-semibold text-gray-500 uppercase mb-2',
-            !isOpen && 'text-center',
+            "text-xs font-semibold text-gray-500 uppercase mb-2",
+            !isOpen && "text-center",
           )}
         >
-          {isOpen ? 'Dashboard' : '━'}
+          {isOpen ? "Dashboard" : "━"}
         </div>
 
         {menuItems.map((item) => {
@@ -106,11 +106,11 @@ export function Sidebar({
               key={item.id}
               onClick={() => onViewChange(item.id)}
               className={clsx(
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
+                "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                 isActive
-                  ? 'bg-cyan-50 text-cyan-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100',
-                !isOpen && 'justify-center',
+                  ? "bg-cyan-50 text-cyan-700 font-medium"
+                  : "text-gray-700 hover:bg-gray-100",
+                !isOpen && "justify-center",
               )}
               title={!isOpen ? item.label : undefined}
             >
@@ -125,11 +125,11 @@ export function Sidebar({
       <div className="p-4 border-t border-gray-200">
         <div
           className={clsx(
-            'text-xs font-semibold text-gray-500 uppercase mb-2',
-            !isOpen && 'text-center',
+            "text-xs font-semibold text-gray-500 uppercase mb-2",
+            !isOpen && "text-center",
           )}
         >
-          {isOpen ? 'Systems' : '━'}
+          {isOpen ? "Systems" : "━"}
         </div>
 
         <div className="space-y-1">
@@ -141,8 +141,8 @@ export function Sidebar({
                 key={link.id}
                 href={link.url}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                  !isOpen && 'justify-center',
+                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                  !isOpen && "justify-center",
                 )}
                 title={!isOpen ? link.label : undefined}
               >

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   BookOpen,
   BarChart3,
@@ -16,42 +16,40 @@ import {
   Layout,
   GitBranch,
   MessageCircle,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
 // This ensures only the current page's code is loaded, reducing initial bundle size by 40-60%
 
 const WorkspacePageNew = React.lazy(
-  () => import('../components/pages/WorkspacePageNew'),
+  () => import("../components/pages/WorkspacePageNew"),
 );
 const TPCapitalOpcoesPage = React.lazy(
-  () => import('../components/pages/TPCapitalOpcoesPage'),
+  () => import("../components/pages/TPCapitalOpcoesPage"),
 );
 const DocusaurusPageNew = React.lazy(
-  () => import('../components/pages/DocusaurusPage'),
+  () => import("../components/pages/DocusaurusPage"),
 );
 const DatabasePageNew = React.lazy(
-  () => import('../components/pages/DatabasePage'),
+  () => import("../components/pages/DatabasePage"),
 );
-const MiroPage = React.lazy(() => import('../components/pages/MiroPage'));
+const MiroPage = React.lazy(() => import("../components/pages/MiroPage"));
 const LlamaIndexPage = React.lazy(
-  () => import('../components/pages/LlamaIndexPage'),
+  () => import("../components/pages/LlamaIndexPage"),
 );
-const KestraPage = React.lazy(() => import('../components/pages/KestraPage'));
-const CatalogPage = React.lazy(
-  () => import('../components/pages/CatalogPage'),
-);
+const KestraPage = React.lazy(() => import("../components/pages/KestraPage"));
+const CatalogPage = React.lazy(() => import("../components/pages/CatalogPage"));
 const CourseCrawlerPage = React.lazy(
-  () => import('../components/pages/CourseCrawlerPage'),
+  () => import("../components/pages/CourseCrawlerPage"),
 );
 const GovernancePage = React.lazy(
-  () => import('../components/pages/GovernancePage'),
+  () => import("../components/pages/GovernancePage"),
 );
 const TelegramGatewayFinal = React.lazy(
-  () => import('../components/pages/TelegramGatewayFinal'),
+  () => import("../components/pages/TelegramGatewayFinal"),
 );
-const N8nPage = React.lazy(() => import('../components/pages/N8nPage'));
-const WahaPage = React.lazy(() => import('../components/pages/WahaPage'));
+const N8nPage = React.lazy(() => import("../components/pages/N8nPage"));
+const WahaPage = React.lazy(() => import("../components/pages/WahaPage"));
 
 // ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
 // Use functions instead of eager instantiation to enable true code splitting
@@ -177,39 +175,39 @@ export const NAVIGATION_DATA: Section[] = [
   // 0. APPS (Cyan)
   // ========================================
   {
-    id: 'dashboard',
+    id: "dashboard",
     icon: <BarChart3 className="w-5 h-5" />,
-    label: 'Apps',
+    label: "Apps",
     pages: [
       {
-        id: 'tp-capital',
-        title: 'TP CAPITAL',
+        id: "tp-capital",
+        title: "TP CAPITAL",
         header: {
-          title: 'TP CAPITAL',
-          subtitle: 'Sinais Telegram em tempo real',
+          title: "TP CAPITAL",
+          subtitle: "Sinais Telegram em tempo real",
         },
         parts: [],
         customContent: tpCapitalContent,
         icon: <TrendingUp className="h-4 w-4" />,
       },
       {
-        id: 'telegram-gateway',
-        title: 'Telegram Gateway',
+        id: "telegram-gateway",
+        title: "Telegram Gateway",
         header: {
-          title: 'Telegram Gateway',
+          title: "Telegram Gateway",
           subtitle:
-            'Monitoramento do serviço MTProto, filas e mensagens persistidas',
+            "Monitoramento do serviço MTProto, filas e mensagens persistidas",
         },
         parts: [],
         customContent: telegramGatewayContent,
         icon: <MessageSquare className="h-4 w-4" />,
       },
       {
-        id: 'workspace',
-        title: 'Workspace',
+        id: "workspace",
+        title: "Workspace",
         header: {
-          title: 'Workspace',
-          subtitle: 'Ideias, sugestões e brainstorming de funcionalidades',
+          title: "Workspace",
+          subtitle: "Ideias, sugestões e brainstorming de funcionalidades",
         },
         parts: [], // Empty - uses customContent
         // ✅ CustomizablePageLayout - 3 sections: Categories + CRUD table + Kanban board
@@ -217,24 +215,24 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <Briefcase className="h-4 w-4" />,
       },
       {
-        id: 'course-crawler',
-        title: 'Course Crawler',
+        id: "course-crawler",
+        title: "Course Crawler",
         header: {
-          title: 'Course Crawler',
+          title: "Course Crawler",
           subtitle:
-            'Formulário de credenciais, agendamentos e visualização dos artefatos da stack dedicada',
+            "Formulário de credenciais, agendamentos e visualização dos artefatos da stack dedicada",
         },
         parts: [],
         customContent: courseCrawlerContent,
         icon: <GraduationCap className="h-4 w-4" />,
       },
       {
-        id: 'rag-services',
-        title: 'RAG Services',
+        id: "rag-services",
+        title: "RAG Services",
         header: {
-          title: 'RAG Services',
+          title: "RAG Services",
           subtitle:
-            'Consultas, ingestão e integrações RAG baseadas em LangChain.',
+            "Consultas, ingestão e integrações RAG baseadas em LangChain.",
         },
         parts: [],
         customContent: llamaIndexContent,
@@ -247,64 +245,65 @@ export const NAVIGATION_DATA: Section[] = [
   // 1. TOOLBOX (Gray)
   // ========================================
   {
-    id: 'configuracoes',
+    id: "configuracoes",
     icon: <Server className="w-5 h-5" />,
-    label: 'Toolbox',
+    label: "Toolbox",
     pages: [
       {
-        id: 'miro',
-        title: 'Miro',
+        id: "miro",
+        title: "Miro",
         header: {
-          title: 'Miro Board',
+          title: "Miro Board",
           subtitle:
-            'Quadro colaborativo para planejamento visual e brainstorming',
+            "Quadro colaborativo para planejamento visual e brainstorming",
         },
         parts: [],
         customContent: miroContent,
         icon: <Layout className="h-4 w-4" />,
       },
       {
-        id: 'knowledge-database',
-        title: 'Database',
+        id: "knowledge-database",
+        title: "Database",
         header: {
-          title: 'Database Tools',
+          title: "Database Tools",
           subtitle:
-            'QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel',
+            "QuestDB Console, pgAdmin, pgWeb e Adminer em um único painel",
         },
         parts: [],
         customContent: databaseContent,
         icon: <Database className="h-4 w-4" />,
       },
       {
-        id: 'kestra-orchestrator',
-        title: 'Kestra',
+        id: "kestra-orchestrator",
+        title: "Kestra",
         header: {
-          title: 'Kestra Orchestrator',
+          title: "Kestra Orchestrator",
           subtitle:
-            'Automação de pipelines declarativos com filas e storage dedicados.',
+            "Automação de pipelines declarativos com filas e storage dedicados.",
         },
         parts: [],
         customContent: kestraContent,
         icon: <GitBranch className="h-4 w-4" />,
       },
       {
-        id: 'n8n-automation',
-        title: 'n8n',
+        id: "n8n-automation",
+        title: "n8n",
         header: {
-          title: 'n8n Automations',
-          subtitle: 'Workflows low-code com queues dedicadas e webhooks internos.',
+          title: "n8n Automations",
+          subtitle:
+            "Workflows low-code com queues dedicadas e webhooks internos.",
         },
         parts: [],
         customContent: n8nContent,
         icon: <Workflow className="h-4 w-4" />,
       },
       {
-        id: 'waha-dashboard',
-        title: 'WAHA',
+        id: "waha-dashboard",
+        title: "WAHA",
         header: {
-          title: 'WAHA Dashboard',
+          title: "WAHA Dashboard",
           subtitle:
-            'Interface oficial do WAHA rodando localmente (engine NOWEB).',
+            "Interface oficial do WAHA rodando localmente (engine NOWEB).",
         },
         parts: [],
         customContent: wahaContent,
@@ -317,40 +316,41 @@ export const NAVIGATION_DATA: Section[] = [
   // 2. KNOWLEDGE (Indigo)
   // ========================================
   {
-    id: 'knowledge',
+    id: "knowledge",
     icon: <BookOpen className="w-5 h-5" />,
-    label: 'Knowledge',
+    label: "Knowledge",
     pages: [
       {
-        id: 'governance',
-        title: 'Governance',
+        id: "governance",
+        title: "Governance",
         header: {
-          title: 'Governance Hub',
-          subtitle: 'Strategy, controls, evidence and review cadences em tempo real',
+          title: "Governance Hub",
+          subtitle:
+            "Strategy, controls, evidence and review cadences em tempo real",
         },
         parts: [],
         customContent: governanceContent,
         icon: <ShieldCheck className="h-4 w-4" />,
       },
       {
-        id: 'catalog',
-        title: 'Catalog',
+        id: "catalog",
+        title: "Catalog",
         header: {
-          title: 'Catalog',
+          title: "Catalog",
           subtitle:
-            'Catálogo unificado dos agentes Claude e comandos personalizados, comutável diretamente no cabeçalho.',
+            "Catálogo unificado dos agentes Claude e comandos personalizados, comutável diretamente no cabeçalho.",
         },
         parts: [],
         customContent: claudeCatalogContent,
         icon: <List className="h-4 w-4" />,
       },
       {
-        id: 'docs',
-        title: 'Docs',
+        id: "docs",
+        title: "Docs",
         header: {
-          title: 'TradingSystem Docs',
+          title: "TradingSystem Docs",
           subtitle:
-            'Docs portal, context hub e referências operacionais atualizadas',
+            "Docs portal, context hub e referências operacionais atualizadas",
         },
         parts: [], // Empty - uses customContent
         customContent: docusaurusContent,
@@ -361,13 +361,12 @@ export const NAVIGATION_DATA: Section[] = [
 ];
 
 const LEGACY_PAGE_ALIASES: Record<string, string> = {
-  'ai-agents-directory': 'catalog',
-  'claude-commands': 'catalog',
-  waha: 'waha-dashboard',
+  "ai-agents-directory": "catalog",
+  "claude-commands": "catalog",
+  waha: "waha-dashboard",
 };
 
-const resolvePageId = (pageId: string) =>
-  LEGACY_PAGE_ALIASES[pageId] ?? pageId;
+const resolvePageId = (pageId: string) => LEGACY_PAGE_ALIASES[pageId] ?? pageId;
 
 /**
  * Flatten all pages from all sections for easy lookup

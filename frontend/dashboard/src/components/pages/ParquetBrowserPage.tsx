@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { FolderTree, Search } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { FolderTree, Search } from "lucide-react";
 
 export function ParquetBrowserPage() {
   const sections = [
     {
-      id: 'file-tree',
+      id: "file-tree",
       content: (
         <PlaceholderSection
           cardId="parquet-file-tree"
@@ -16,7 +16,7 @@ export function ParquetBrowserPage() {
       ),
     },
     {
-      id: 'query-interface',
+      id: "query-interface",
       content: (
         <PlaceholderSection
           cardId="parquet-query"

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 // ✅ Custom hook seguindo as regras React do Playbooks
 export interface TradingData {
@@ -30,7 +30,7 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
     error: queryError,
     refetch,
   } = useQuery({
-    queryKey: ['trading-data', symbol],
+    queryKey: ["trading-data", symbol],
     queryFn: async (): Promise<TradingData> => {
       const response = await fetch(`/api/trading/${symbol}`);
       if (!response.ok) {
@@ -47,7 +47,7 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
     if (err instanceof Error) {
       setError(err);
     } else {
-      setError(new Error('Erro desconhecido ao buscar dados de trading'));
+      setError(new Error("Erro desconhecido ao buscar dados de trading"));
     }
   }, []);
 
@@ -76,7 +76,7 @@ export function useTradingData(symbol: string): UseTradingDataReturn {
  */
 export function useMultipleTradingData(symbols: string[]) {
   console.warn(
-    'useMultipleTradingData is deprecated; use individual useTradingData calls instead.',
+    "useMultipleTradingData is deprecated; use individual useTradingData calls instead.",
     symbols,
   );
   return {

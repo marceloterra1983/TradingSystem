@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface Collection {
   name: string;
@@ -11,7 +11,7 @@ interface Collection {
   priority: number;
   exists: boolean;
   count: number | null;
-  status: 'ready' | 'empty' | 'not_created';
+  status: "ready" | "empty" | "not_created";
   metadata: {
     modelSize: string;
     language: string;
@@ -40,7 +40,7 @@ export function CollectionsTable({
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [defaultCollection, setDefaultCollection] = useState<string>('');
+  const [defaultCollection, setDefaultCollection] = useState<string>("");
 
   useEffect(() => {
     fetchCollections();
@@ -51,7 +51,7 @@ export function CollectionsTable({
 
   const fetchCollections = async () => {
     try {
-      const response = await fetch('/api/v1/rag/collections');
+      const response = await fetch("/api/v1/rag/collections");
       const data: CollectionsResponse = await response.json();
 
       if (data.success) {
@@ -59,10 +59,10 @@ export function CollectionsTable({
         setDefaultCollection(data.defaultCollection);
         setError(null);
       } else {
-        setError('Failed to load collections');
+        setError("Failed to load collections");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -70,19 +70,19 @@ export function CollectionsTable({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'ready':
+      case "ready":
         return (
           <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
             ✓ Ready
           </span>
         );
-      case 'empty':
+      case "empty":
         return (
           <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
             ⚠ Empty
           </span>
         );
-      case 'not_created':
+      case "not_created":
         return (
           <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
             ○ Not Created
@@ -94,8 +94,8 @@ export function CollectionsTable({
   };
 
   const formatCount = (count: number | null): string => {
-    if (count === null) return '—';
-    if (count === 0) return '0';
+    if (count === null) return "—";
+    if (count === 0) return "0";
     return count.toLocaleString();
   };
 
@@ -157,7 +157,7 @@ export function CollectionsTable({
             Ready
           </div>
           <div className="mt-1 text-3xl font-semibold text-green-600 dark:text-green-400">
-            {collections.filter((c) => c.status === 'ready').length}
+            {collections.filter((c) => c.status === "ready").length}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
@@ -225,8 +225,8 @@ export function CollectionsTable({
                   key={collection.name}
                   className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                     selectedCollection === collection.name
-                      ? 'bg-blue-50 dark:bg-blue-900/20'
-                      : ''
+                      ? "bg-blue-50 dark:bg-blue-900/20"
+                      : ""
                   }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -267,8 +267,8 @@ export function CollectionsTable({
                       <div
                         className={`text-lg font-bold ${
                           collection.count && collection.count > 0
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-gray-400 dark:text-gray-500'
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-400 dark:text-gray-500"
                         }`}
                       >
                         {formatCount(collection.count)}
@@ -284,21 +284,21 @@ export function CollectionsTable({
                     {getStatusBadge(collection.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    {collection.status === 'ready' && onSelectCollection && (
+                    {collection.status === "ready" && onSelectCollection && (
                       <button
                         onClick={() => onSelectCollection(collection.name)}
                         className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                           selectedCollection === collection.name
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         }`}
                       >
                         {selectedCollection === collection.name
-                          ? '✓ Selected'
-                          : 'Select'}
+                          ? "✓ Selected"
+                          : "Select"}
                       </button>
                     )}
-                    {collection.status !== 'ready' && (
+                    {collection.status !== "ready" && (
                       <span className="text-gray-400 dark:text-gray-500 text-xs">
                         Not available
                       </span>

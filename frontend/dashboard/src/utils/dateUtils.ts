@@ -10,8 +10,8 @@ import {
   normalizeTimestamp,
   formatTimestamp as formatTsRobust,
   APP_TIMEZONE,
-} from './timestampUtils';
-import { formatInTimeZone } from 'date-fns-tz';
+} from "./timestampUtils";
+import { formatInTimeZone } from "date-fns-tz";
 
 const TIMEZONE = APP_TIMEZONE;
 
@@ -24,15 +24,15 @@ const TIMEZONE = APP_TIMEZONE;
 export function formatTimestamp(
   value: string | number | Date | null | undefined,
 ): string {
-  if (!value) return '–';
+  if (!value) return "–";
 
   const normalized = normalizeTimestamp(value);
   if (!normalized) {
-    return typeof value === 'string' ? value : '–';
+    return typeof value === "string" ? value : "–";
   }
 
   const result = formatTsRobust(normalized, false);
-  if (!result) return '–';
+  if (!result) return "–";
 
   return `${result.date}, ${result.time}`;
 }
@@ -46,18 +46,18 @@ export function formatTimestamp(
 export function formatTimestampShort(
   value: string | number | Date | null | undefined,
 ): string {
-  if (!value) return '–';
+  if (!value) return "–";
 
   const normalized = normalizeTimestamp(value);
   if (!normalized) {
-    return typeof value === 'string' ? value : '–';
+    return typeof value === "string" ? value : "–";
   }
 
   try {
     const date = new Date(normalized);
-    return formatInTimeZone(date, TIMEZONE, 'dd/MM/yyyy, HH:mm');
+    return formatInTimeZone(date, TIMEZONE, "dd/MM/yyyy, HH:mm");
   } catch (error) {
-    return '–';
+    return "–";
   }
 }
 
@@ -67,16 +67,18 @@ export function formatTimestampShort(
  * @returns Formatted date string (dd/mm/yyyy)
  * @deprecated Use formatTimestamp from timestampUtils and extract date field
  */
-export function formatDate(value: string | number | Date | null | undefined): string {
-  if (!value) return '–';
+export function formatDate(
+  value: string | number | Date | null | undefined,
+): string {
+  if (!value) return "–";
 
   const normalized = normalizeTimestamp(value);
   if (!normalized) {
-    return typeof value === 'string' ? value : '–';
+    return typeof value === "string" ? value : "–";
   }
 
   const result = formatTsRobust(normalized, false);
-  return result?.date || '–';
+  return result?.date || "–";
 }
 
 /**
@@ -87,19 +89,19 @@ export function formatShortDate(
   value: string | number | Date | null | undefined,
 ): string {
   if (!value) {
-    return '–';
+    return "–";
   }
 
   const normalized = normalizeTimestamp(value);
   if (!normalized) {
-    return typeof value === 'string' ? value : '–';
+    return typeof value === "string" ? value : "–";
   }
 
   try {
     const date = new Date(normalized);
-    return formatInTimeZone(date, TIMEZONE, 'dd/MM');
+    return formatInTimeZone(date, TIMEZONE, "dd/MM");
   } catch (error) {
-    return '–';
+    return "–";
   }
 }
 
@@ -109,16 +111,18 @@ export function formatShortDate(
  * @returns Formatted time string (hh:mm:ss)
  * @deprecated Use formatTimestamp from timestampUtils and extract time field
  */
-export function formatTime(value: string | number | Date | null | undefined): string {
-  if (!value) return '–';
+export function formatTime(
+  value: string | number | Date | null | undefined,
+): string {
+  if (!value) return "–";
 
   const normalized = normalizeTimestamp(value);
   if (!normalized) {
-    return typeof value === 'string' ? value : '–';
+    return typeof value === "string" ? value : "–";
   }
 
   const result = formatTsRobust(normalized, false);
-  return result?.time || '–';
+  return result?.time || "–";
 }
 
 /**
@@ -137,10 +141,10 @@ export function getNow(): Date {
  */
 export function utcToSaoPaulo(utcTimestamp: string | number): string {
   const normalized = normalizeTimestamp(utcTimestamp);
-  if (!normalized) return '–';
+  if (!normalized) return "–";
 
   const result = formatTsRobust(normalized, false);
-  if (!result) return '–';
+  if (!result) return "–";
 
   return `${result.date}, ${result.time}`;
 }

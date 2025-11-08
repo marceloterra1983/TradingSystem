@@ -1,37 +1,37 @@
-import { Suspense, lazy, useState } from 'react';
-import { Button } from '../ui/button';
-import { cn } from '../../lib/utils';
+import { Suspense, lazy, useState } from "react";
+import { Button } from "../ui/button";
+import { cn } from "../../lib/utils";
 
-const AgentsCatalogView = lazy(() => import('../catalog/AgentsCatalogView'));
+const AgentsCatalogView = lazy(() => import("../catalog/AgentsCatalogView"));
 const CommandsCatalogView = lazy(
-  () => import('../catalog/CommandsCatalogView'),
+  () => import("../catalog/CommandsCatalogView"),
 );
 const AgentsCommandsCatalogView = lazy(
-  () => import('../catalog/AgentsCommandsCatalogView'),
+  () => import("../catalog/AgentsCommandsCatalogView"),
 );
 
-type CatalogSection = 'agents' | 'commands' | 'unified';
+type CatalogSection = "agents" | "commands" | "unified";
 
 const CATALOG_SECTIONS: Array<{
   id: CatalogSection;
   label: string;
 }> = [
   {
-    id: 'agents',
-    label: 'Agents',
+    id: "agents",
+    label: "Agents",
   },
   {
-    id: 'commands',
-    label: 'Commands',
+    id: "commands",
+    label: "Commands",
   },
   {
-    id: 'unified',
-    label: 'Agents/Commands',
+    id: "unified",
+    label: "Agents/Commands",
   },
 ];
 
 export default function CatalogPage(): JSX.Element {
-  const [activeSection, setActiveSection] = useState<CatalogSection>('agents');
+  const [activeSection, setActiveSection] = useState<CatalogSection>("agents");
 
   const renderHeaderActions = () =>
     CATALOG_SECTIONS.map((section) => {
@@ -45,10 +45,10 @@ export default function CatalogPage(): JSX.Element {
           aria-pressed={isActive}
           data-testid={`catalog-section-${section.id}`}
           className={cn(
-            'rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 disabled:opacity-100',
+            "rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 disabled:opacity-100",
             isActive
-              ? 'border-[color:var(--ts-accent)] bg-[color:var(--ts-accent)] text-white shadow-sm hover:bg-[color:var(--ts-accent-strong)] focus:ring-[color:var(--ts-accent)]'
-              : 'border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-[color:var(--ts-text-secondary)] hover:border-[color:var(--ts-accent)] hover:text-[color:var(--ts-accent-strong)]',
+              ? "border-[color:var(--ts-accent)] bg-[color:var(--ts-accent)] text-white shadow-sm hover:bg-[color:var(--ts-accent-strong)] focus:ring-[color:var(--ts-accent)]"
+              : "border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] text-[color:var(--ts-text-secondary)] hover:border-[color:var(--ts-accent)] hover:text-[color:var(--ts-accent-strong)]",
           )}
         >
           {section.label}
@@ -64,18 +64,18 @@ export default function CatalogPage(): JSX.Element {
         fallback={
           <CatalogFallback
             message={
-              activeSection === 'commands'
-                ? 'Carregando commands...'
-                : activeSection === 'unified'
-                  ? 'Carregando catálogo unificado...'
-                  : 'Carregando agents...'
+              activeSection === "commands"
+                ? "Carregando commands..."
+                : activeSection === "unified"
+                  ? "Carregando catálogo unificado..."
+                  : "Carregando agents..."
             }
           />
         }
       >
-        {activeSection === 'commands' ? (
+        {activeSection === "commands" ? (
           <CommandsCatalogView headerActions={headerActions} />
-        ) : activeSection === 'unified' ? (
+        ) : activeSection === "unified" ? (
           <AgentsCommandsCatalogView headerActions={headerActions} />
         ) : (
           <AgentsCatalogView headerActions={headerActions} />

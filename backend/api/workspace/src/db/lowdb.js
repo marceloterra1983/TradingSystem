@@ -1,19 +1,61 @@
-import { mkdirSync } from 'node:fs';
-import path from 'node:path';
-import { Low } from 'lowdb';
-import { JSONFile } from 'lowdb/node';
-import { config } from '../config.js';
+import { mkdirSync } from "node:fs";
+import path from "node:path";
+import { Low } from "lowdb";
+import { JSONFile } from "lowdb/node";
+import { config } from "../config.js";
 
 const defaultData = {
   items: [],
   categories: [
-    { id: 'feature', name: 'feature', description: 'Novas funcionalidades', color: '#10b981', display_order: 1, active: true },
-    { id: 'bug', name: 'bug', description: 'Correção de bugs', color: '#ef4444', display_order: 2, active: true },
-    { id: 'improvement', name: 'improvement', description: 'Melhorias em funcionalidades existentes', color: '#3b82f6', display_order: 3, active: true },
-    { id: 'documentation', name: 'documentation', description: 'Documentação técnica', color: '#8b5cf6', display_order: 4, active: true },
-    { id: 'research', name: 'research', description: 'Pesquisa e exploração de tecnologias', color: '#f59e0b', display_order: 5, active: true },
-    { id: 'other', name: 'other', description: 'Outros itens não categorizados', color: '#6b7280', display_order: 6, active: true }
-  ]
+    {
+      id: "feature",
+      name: "feature",
+      description: "Novas funcionalidades",
+      color: "#10b981",
+      display_order: 1,
+      active: true,
+    },
+    {
+      id: "bug",
+      name: "bug",
+      description: "Correção de bugs",
+      color: "#ef4444",
+      display_order: 2,
+      active: true,
+    },
+    {
+      id: "improvement",
+      name: "improvement",
+      description: "Melhorias em funcionalidades existentes",
+      color: "#3b82f6",
+      display_order: 3,
+      active: true,
+    },
+    {
+      id: "documentation",
+      name: "documentation",
+      description: "Documentação técnica",
+      color: "#8b5cf6",
+      display_order: 4,
+      active: true,
+    },
+    {
+      id: "research",
+      name: "research",
+      description: "Pesquisa e exploração de tecnologias",
+      color: "#f59e0b",
+      display_order: 5,
+      active: true,
+    },
+    {
+      id: "other",
+      name: "other",
+      description: "Outros itens não categorizados",
+      color: "#6b7280",
+      display_order: 6,
+      active: true,
+    },
+  ],
 };
 
 const ensureDir = (filePath) => {
@@ -33,7 +75,7 @@ export class LowdbClient {
   async init() {
     if (this.ready) return;
     await this.db.read();
-    if (!this.db.data || typeof this.db.data !== 'object') {
+    if (!this.db.data || typeof this.db.data !== "object") {
       this.db.data = defaultData;
       await this.db.write();
     }
@@ -112,7 +154,10 @@ export class LowdbClient {
     await this.init();
     const idx = this.db.data.categories.findIndex((cat) => cat.id === id);
     if (idx === -1) return null;
-    this.db.data.categories[idx] = { ...this.db.data.categories[idx], ...updates };
+    this.db.data.categories[idx] = {
+      ...this.db.data.categories[idx],
+      ...updates,
+    };
     await this.db.write();
     return this.db.data.categories[idx];
   }

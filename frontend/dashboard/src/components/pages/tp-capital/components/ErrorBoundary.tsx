@@ -1,18 +1,18 @@
 /**
  * ErrorBoundary Component
- * 
+ *
  * React error boundary for TP-Capital module
  * Catches and handles runtime errors gracefully
- * 
+ *
  * @module tp-capital/components
  */
 
-import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { AlertTriangle } from 'lucide-react';
-import { Button } from '../../../ui/button';
-import { createLogger } from '../utils/logger';
+import { Component, type ReactNode, type ErrorInfo } from "react";
+import { AlertTriangle } from "lucide-react";
+import { Button } from "../../../ui/button";
+import { createLogger } from "../utils/logger";
 
-const logger = createLogger('ErrorBoundary');
+const logger = createLogger("ErrorBoundary");
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -27,9 +27,9 @@ interface ErrorBoundaryState {
 
 /**
  * Error Boundary Component
- * 
+ *
  * Catches React errors in child components and displays a fallback UI
- * 
+ *
  * @example
  * ```tsx
  * <ErrorBoundary>
@@ -37,7 +37,10 @@ interface ErrorBoundaryState {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -56,8 +59,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({ errorInfo });
-    
-    logger.error('React Error Boundary caught error', error, {
+
+    logger.error("React Error Boundary caught error", error, {
       componentStack: errorInfo.componentStack,
     });
 
@@ -88,11 +91,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 Erro ao carregar componente
               </h3>
               <p className="text-sm text-red-800 dark:text-red-200 mb-4">
-                Ocorreu um erro inesperado ao renderizar este componente.
-                Por favor, tente recarregar a página.
+                Ocorreu um erro inesperado ao renderizar este componente. Por
+                favor, tente recarregar a página.
               </p>
-              
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+
+              {process.env.NODE_ENV === "development" && this.state.error && (
                 <details className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 rounded text-xs font-mono">
                   <summary className="cursor-pointer font-semibold text-red-900 dark:text-red-100 mb-2">
                     Detalhes do erro (desenvolvimento)
@@ -136,4 +139,3 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children;
   }
 }
-

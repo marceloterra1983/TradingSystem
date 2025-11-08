@@ -1,6 +1,6 @@
-import * as React from 'react';
+import * as React from "react";
 
-import { cn } from '../../lib/utils';
+import { cn } from "../../lib/utils";
 
 interface IframeWithUrlProps
   extends React.IframeHTMLAttributes<HTMLIFrameElement> {
@@ -10,7 +10,10 @@ interface IframeWithUrlProps
   showLink?: boolean;
 }
 
-export const IframeWithUrl = React.forwardRef<HTMLIFrameElement, IframeWithUrlProps>(
+export const IframeWithUrl = React.forwardRef<
+  HTMLIFrameElement,
+  IframeWithUrlProps
+>(
   (
     {
       src,
@@ -18,21 +21,27 @@ export const IframeWithUrl = React.forwardRef<HTMLIFrameElement, IframeWithUrlPr
       className,
       urlLabel,
       showLink = true,
-      linkTarget = '_blank',
+      linkTarget = "_blank",
       ...props
     },
     ref,
   ) => {
-    const displayUrl = urlLabel ?? src ?? '';
+    const displayUrl = urlLabel ?? src ?? "";
     const shouldRenderUrl = Boolean(displayUrl);
 
     return (
-      <div className={cn('flex flex-col', shouldRenderUrl && showLink ? 'gap-2' : '', wrapperClassName)}>
+      <div
+        className={cn(
+          "flex flex-col",
+          shouldRenderUrl && showLink ? "gap-2" : "",
+          wrapperClassName,
+        )}
+      >
         {shouldRenderUrl && showLink && (
           <a
             href={src}
             target={linkTarget}
-            rel={linkTarget === '_blank' ? 'noopener noreferrer' : undefined}
+            rel={linkTarget === "_blank" ? "noopener noreferrer" : undefined}
             className="max-w-full truncate text-xs font-medium text-[color:var(--ts-text-muted)] hover:underline"
             title={displayUrl}
             data-testid="iframe-source-url"
@@ -55,7 +64,6 @@ export const IframeWithUrl = React.forwardRef<HTMLIFrameElement, IframeWithUrlPr
   },
 );
 
-IframeWithUrl.displayName = 'IframeWithUrl';
+IframeWithUrl.displayName = "IframeWithUrl";
 
 export default IframeWithUrl;
-

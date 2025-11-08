@@ -1,6 +1,6 @@
-import { pool } from '../db/pool.js';
-import { encryptSecret, decryptSecret } from '../lib/crypto.js';
-import type { CourseRecord, CourseInput } from '../types.js';
+import { pool } from "../db/pool.js";
+import { encryptSecret, decryptSecret } from "../lib/crypto.js";
+import type { CourseRecord, CourseInput } from "../types.js";
 
 interface CourseRow {
   id: string;
@@ -41,14 +41,14 @@ function sanitizeCourse(record: CourseRecord) {
 
 export async function listCourses() {
   const result = await pool.query<CourseRow>(
-    'SELECT * FROM course_crawler.courses ORDER BY created_at DESC',
+    "SELECT * FROM course_crawler.courses ORDER BY created_at DESC",
   );
   return result.rows.map((row: CourseRow) => sanitizeCourse(mapRow(row)));
 }
 
 export async function getCourse(id: string) {
   const result = await pool.query<CourseRow>(
-    'SELECT * FROM course_crawler.courses WHERE id = $1',
+    "SELECT * FROM course_crawler.courses WHERE id = $1",
     [id],
   );
   if (result.rowCount === 0) {
@@ -59,7 +59,7 @@ export async function getCourse(id: string) {
 
 export async function getCourseWithSecret(id: string) {
   const result = await pool.query<CourseRow>(
-    'SELECT * FROM course_crawler.courses WHERE id = $1',
+    "SELECT * FROM course_crawler.courses WHERE id = $1",
     [id],
   );
   if (result.rowCount === 0) {
@@ -68,13 +68,13 @@ export async function getCourseWithSecret(id: string) {
   const record = mapRow(result.rows[0]);
   return {
     ...record,
-    password: record.password ? decryptSecret(record.password) : '',
+    password: record.password ? decryptSecret(record.password) : "",
   };
 }
 
 export async function createCourse(input: CourseInput) {
   // Only encrypt if password is provided (not empty string)
-  const encrypted = input.password ? encryptSecret(input.password) : '';
+  const encrypted = input.password ? encryptSecret(input.password) : "";
   const targetUrls = input.targetUrls ?? [];
   const result = await pool.query<CourseRow>(
     `
@@ -88,12 +88,9 @@ export async function createCourse(input: CourseInput) {
   return sanitizeCourse(mapRow(result.rows[0]));
 }
 
-export async function updateCourse(
-  id: string,
-  input: Partial<CourseInput>,
-) {
+export async function updateCourse(id: string, input: Partial<CourseInput>) {
   const existing = await pool.query<CourseRow>(
-    'SELECT * FROM course_crawler.courses WHERE id = $1',
+    "SELECT * FROM course_crawler.courses WHERE id = $1",
     [id],
   );
   if (existing.rowCount === 0) {
@@ -103,11 +100,13 @@ export async function updateCourse(
   // Only update password if a new non-empty password is provided
   // Empty string means "don't change password"
   const encrypted =
-    input.password !== undefined && input.password !== ''
+    input.password !== undefined && input.password !== ""
       ? encryptSecret(input.password)
       : current.password_encrypted;
   const targetUrls =
-    input.targetUrls !== undefined ? input.targetUrls : current.target_urls ?? [];
+    input.targetUrls !== undefined
+      ? input.targetUrls
+      : (current.target_urls ?? []);
 
   const result = await pool.query<CourseRow>(
     `
@@ -134,5 +133,5 @@ export async function updateCourse(
 }
 
 export async function deleteCourse(id: string) {
-  await pool.query('DELETE FROM course_crawler.courses WHERE id = $1', [id]);
+  await pool.query("DELETE FROM course_crawler.courses WHERE id = $1", [id]);
 }

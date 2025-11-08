@@ -1,10 +1,10 @@
-import type { ScrapeOptions, CrawlOptions } from '../services/firecrawlService';
+import type { ScrapeOptions, CrawlOptions } from "../services/firecrawlService";
 
 export function isValidUrl(url: string): boolean {
   if (!url) return false;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
   }
@@ -46,17 +46,17 @@ function isValidCssSelector(selector: string): boolean {
 
 function isGenericSelector(selector: string): boolean {
   const generic = [
-    'div',
-    'span',
-    'p',
-    'a',
-    'img',
-    'table',
-    'tr',
-    'td',
-    'li',
-    'ul',
-    'ol',
+    "div",
+    "span",
+    "p",
+    "a",
+    "img",
+    "table",
+    "tr",
+    "td",
+    "li",
+    "ul",
+    "ol",
   ];
   return generic.includes(selector.trim().toLowerCase());
 }
@@ -72,21 +72,21 @@ export function validateScrapeOptions(
   if (requireUrl) {
     if (!options.url || !isValidUrl(options.url)) {
       errors.url =
-        'Please provide a valid URL starting with http:// or https://';
+        "Please provide a valid URL starting with http:// or https://";
     }
   } else if (options.url) {
     if (!isValidUrl(options.url)) {
-      errors.url = 'Default URL must start with http:// or https://';
+      errors.url = "Default URL must start with http:// or https://";
     }
   } else {
     warnings.url =
-      'No default URL provided. Users must supply one when running the template.';
+      "No default URL provided. Users must supply one when running the template.";
   }
 
   if (!options.formats || options.formats.length === 0) {
-    errors.formats = 'Select at least one output format';
+    errors.formats = "Select at least one output format";
   } else if (options.formats.length > 4) {
-    warnings.formats = 'Selecting many formats may slow down scraping.';
+    warnings.formats = "Selecting many formats may slow down scraping.";
   }
 
   if (options.waitFor !== undefined) {
@@ -95,9 +95,9 @@ export function validateScrapeOptions(
       options.waitFor < 0 ||
       options.waitFor > 30_000
     ) {
-      errors.waitFor = 'Wait time must be between 0 and 30000 milliseconds';
+      errors.waitFor = "Wait time must be between 0 and 30000 milliseconds";
     } else if (options.waitFor > 10000) {
-      warnings.waitFor = 'Long wait times may slow down scraping.';
+      warnings.waitFor = "Long wait times may slow down scraping.";
     }
   }
 
@@ -107,14 +107,14 @@ export function validateScrapeOptions(
       options.timeout < 1000 ||
       options.timeout > 120_000
     ) {
-      errors.timeout = 'Timeout must be between 1000 and 120000 milliseconds';
+      errors.timeout = "Timeout must be between 1000 and 120000 milliseconds";
     } else {
       if (options.waitFor !== undefined && options.timeout < options.waitFor) {
-        errors.timeout = 'Timeout must be greater than wait time.';
+        errors.timeout = "Timeout must be greater than wait time.";
       }
       if (options.timeout > 60_000) {
         warnings.timeout =
-          'Timeout greater than 60s may cause resource issues.';
+          "Timeout greater than 60s may cause resource issues.";
       }
     }
   }
@@ -124,11 +124,11 @@ export function validateScrapeOptions(
       (tag) => !isValidCssSelector(tag),
     );
     if (invalid.length) {
-      errors.includeTags = `Invalid CSS selectors: ${invalid.join(', ')}`;
+      errors.includeTags = `Invalid CSS selectors: ${invalid.join(", ")}`;
     }
     const generic = options.includeTags.filter(isGenericSelector);
     if (generic.length) {
-      warnings.includeTags = `Generic selectors may capture unwanted areas: ${generic.join(', ')}`;
+      warnings.includeTags = `Generic selectors may capture unwanted areas: ${generic.join(", ")}`;
     }
   }
 
@@ -137,11 +137,11 @@ export function validateScrapeOptions(
       (tag) => !isValidCssSelector(tag),
     );
     if (invalid.length) {
-      errors.excludeTags = `Invalid CSS selectors: ${invalid.join(', ')}`;
+      errors.excludeTags = `Invalid CSS selectors: ${invalid.join(", ")}`;
     }
     const generic = options.excludeTags.filter(isGenericSelector);
     if (generic.length) {
-      warnings.excludeTags = `Generic selectors may remove useful content: ${generic.join(', ')}`;
+      warnings.excludeTags = `Generic selectors may remove useful content: ${generic.join(", ")}`;
     }
   }
 
@@ -159,19 +159,19 @@ export function validateCrawlOptions(
   const warnings: Record<string, string> = {};
 
   if (!options.url || !isValidUrl(options.url)) {
-    errors.url = 'Please provide a valid URL starting with http:// or https://';
+    errors.url = "Please provide a valid URL starting with http:// or https://";
   }
 
   if (!isValidCrawlLimit(options.limit)) {
-    errors.limit = 'Limit must be between 1 and 1000 pages';
+    errors.limit = "Limit must be between 1 and 1000 pages";
   } else if ((options.limit ?? 0) > 500) {
-    warnings.limit = 'High page limits may take a long time to finish.';
+    warnings.limit = "High page limits may take a long time to finish.";
   }
 
   if (!isValidCrawlDepth(options.maxDepth)) {
-    errors.maxDepth = 'Depth must be between 1 and 10 levels';
+    errors.maxDepth = "Depth must be between 1 and 10 levels";
   } else if ((options.maxDepth ?? 0) > 5) {
-    warnings.maxDepth = 'Deep crawls may capture irrelevant pages.';
+    warnings.maxDepth = "Deep crawls may capture irrelevant pages.";
   }
 
   if (options.scrapeOptions) {

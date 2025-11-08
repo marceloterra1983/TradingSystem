@@ -7,10 +7,10 @@
  * @module middleware/errorHandler
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { logger, logError } from '../utils/logger';
-import { ApiResponse } from './responseWrapper';
+import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
+import { logger, logError } from "../utils/logger";
+import { ApiResponse } from "./responseWrapper";
 
 /**
  * Custom Application Error class
@@ -29,7 +29,7 @@ export class AppError extends Error {
     message: string,
     code: string,
     details?: any,
-    isOperational: boolean = true
+    isOperational: boolean = true,
   ) {
     super(message);
 
@@ -51,50 +51,58 @@ export class AppError extends Error {
  */
 
 export class BadRequestError extends AppError {
-  constructor(message: string, code: string = 'BAD_REQUEST', details?: any) {
+  constructor(message: string, code: string = "BAD_REQUEST", details?: any) {
     super(400, message, code, details);
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized', code: string = 'UNAUTHORIZED', details?: any) {
+  constructor(
+    message: string = "Unauthorized",
+    code: string = "UNAUTHORIZED",
+    details?: any,
+  ) {
     super(401, message, code, details);
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden', code: string = 'FORBIDDEN', details?: any) {
+  constructor(
+    message: string = "Forbidden",
+    code: string = "FORBIDDEN",
+    details?: any,
+  ) {
     super(403, message, code, details);
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string, code: string = 'NOT_FOUND', details?: any) {
+  constructor(message: string, code: string = "NOT_FOUND", details?: any) {
     super(404, message, code, details);
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string, code: string = 'CONFLICT', details?: any) {
+  constructor(message: string, code: string = "CONFLICT", details?: any) {
     super(409, message, code, details);
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message: string, details?: any) {
-    super(400, message, 'VALIDATION_ERROR', details);
+    super(400, message, "VALIDATION_ERROR", details);
   }
 }
 
 export class InternalServerError extends AppError {
-  constructor(message: string = 'Internal server error', details?: any) {
-    super(500, message, 'INTERNAL_SERVER_ERROR', details, false);
+  constructor(message: string = "Internal server error", details?: any) {
+    super(500, message, "INTERNAL_SERVER_ERROR", details, false);
   }
 }
 
 export class ServiceUnavailableError extends AppError {
   constructor(message: string, details?: any) {
-    super(503, message, 'SERVICE_UNAVAILABLE', details);
+    super(503, message, "SERVICE_UNAVAILABLE", details);
   }
 }
 
@@ -104,31 +112,36 @@ export class ServiceUnavailableError extends AppError {
 
 export class RagQueryError extends AppError {
   constructor(message: string, details?: any) {
-    super(400, message, 'RAG_QUERY_ERROR', details);
+    super(400, message, "RAG_QUERY_ERROR", details);
   }
 }
 
 export class IngestionError extends AppError {
   constructor(message: string, details?: any) {
-    super(500, message, 'INGESTION_ERROR', details);
+    super(500, message, "INGESTION_ERROR", details);
   }
 }
 
 export class CollectionNotFoundError extends NotFoundError {
   constructor(collectionName: string) {
-    super(`Collection '${collectionName}' not found`, 'COLLECTION_NOT_FOUND', { collectionName });
+    super(`Collection '${collectionName}' not found`, "COLLECTION_NOT_FOUND", {
+      collectionName,
+    });
   }
 }
 
 export class JobNotFoundError extends NotFoundError {
   constructor(jobId: string) {
-    super(`Job '${jobId}' not found`, 'JOB_NOT_FOUND', { jobId });
+    super(`Job '${jobId}' not found`, "JOB_NOT_FOUND", { jobId });
   }
 }
 
 export class CircuitBreakerOpenError extends ServiceUnavailableError {
   constructor(service: string) {
-    super(`Service '${service}' is temporarily unavailable`, { service, reason: 'circuit_breaker_open' });
+    super(`Service '${service}' is temporarily unavailable`, {
+      service,
+      reason: "circuit_breaker_open",
+    });
   }
 }
 
@@ -142,12 +155,12 @@ export const errorHandler = (
   err: Error | AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Response => {
   // Default error values
   let statusCode = 500;
-  let errorCode = 'INTERNAL_SERVER_ERROR';
-  let message = 'An unexpected error occurred';
+  let errorCode = "INTERNAL_SERVER_ERROR";
+  let message = "An unexpected error occurred";
   let details: any = undefined;
 
   // Handle custom AppError instances
@@ -159,8 +172,8 @@ export const errorHandler = (
 
     // Log operational errors as warnings, programming errors as errors
     if (err.isOperational) {
-      logger.warn('Operational error', {
-        requestId: req.headers['x-request-id'],
+      logger.warn("Operational error", {
+        requestId: req.headers["x-request-id"],
         method: req.method,
         path: req.path,
         statusCode,
@@ -170,7 +183,7 @@ export const errorHandler = (
       });
     } else {
       logError(err, {
-        requestId: req.headers['x-request-id'],
+        requestId: req.headers["x-request-id"],
         method: req.method,
         path: req.path,
         statusCode,
@@ -181,68 +194,65 @@ export const errorHandler = (
   // Handle Zod validation errors
   else if (err instanceof ZodError) {
     statusCode = 400;
-    errorCode = 'VALIDATION_ERROR';
-    message = 'Request validation failed';
+    errorCode = "VALIDATION_ERROR";
+    message = "Request validation failed";
     details = {
-      errors: err.errors.map(e => ({
-        path: e.path.join('.'),
+      errors: err.errors.map((e) => ({
+        path: e.path.join("."),
         message: e.message,
         code: e.code,
       })),
     };
 
-    logger.warn('Validation error', {
-      requestId: req.headers['x-request-id'],
+    logger.warn("Validation error", {
+      requestId: req.headers["x-request-id"],
       method: req.method,
       path: req.path,
       details,
     });
   }
   // Handle JWT errors
-  else if (err.name === 'JsonWebTokenError') {
+  else if (err.name === "JsonWebTokenError") {
     statusCode = 401;
-    errorCode = 'INVALID_TOKEN';
-    message = 'Invalid authentication token';
+    errorCode = "INVALID_TOKEN";
+    message = "Invalid authentication token";
 
-    logger.warn('JWT error', {
-      requestId: req.headers['x-request-id'],
+    logger.warn("JWT error", {
+      requestId: req.headers["x-request-id"],
       method: req.method,
       path: req.path,
       error: err.message,
     });
-  }
-  else if (err.name === 'TokenExpiredError') {
+  } else if (err.name === "TokenExpiredError") {
     statusCode = 401;
-    errorCode = 'TOKEN_EXPIRED';
-    message = 'Authentication token has expired';
+    errorCode = "TOKEN_EXPIRED";
+    message = "Authentication token has expired";
 
-    logger.warn('Token expired', {
-      requestId: req.headers['x-request-id'],
+    logger.warn("Token expired", {
+      requestId: req.headers["x-request-id"],
       method: req.method,
       path: req.path,
     });
   }
   // Handle MongoDB/Mongoose errors
-  else if (err.name === 'CastError') {
+  else if (err.name === "CastError") {
     statusCode = 400;
-    errorCode = 'INVALID_ID';
-    message = 'Invalid ID format';
-  }
-  else if (err.name === 'ValidationError') {
+    errorCode = "INVALID_ID";
+    message = "Invalid ID format";
+  } else if (err.name === "ValidationError") {
     statusCode = 400;
-    errorCode = 'VALIDATION_ERROR';
-    message = 'Validation failed';
-  }
-  else if (err.name === 'MongoError' && (err as any).code === 11000) {
+    errorCode = "VALIDATION_ERROR";
+    message = "Validation failed";
+  } else if (err.name === "MongoError" && (err as any).code === 11000) {
     statusCode = 409;
-    errorCode = 'DUPLICATE_KEY';
-    message = 'Resource already exists';
+    errorCode = "DUPLICATE_KEY";
+    message = "Resource already exists";
   }
   // Handle all other errors
   else {
     // Log unexpected errors
     logError(err, {
-      requestId: req.headers['x-request-id'],
+      requestId: req.headers["x-request-id"],
       method: req.method,
       path: req.path,
       body: req.body,
@@ -251,8 +261,8 @@ export const errorHandler = (
     });
 
     // Hide error details in production
-    if (process.env.NODE_ENV === 'production') {
-      message = 'An unexpected error occurred';
+    if (process.env.NODE_ENV === "production") {
+      message = "An unexpected error occurred";
     } else {
       message = err.message;
       details = {
@@ -272,8 +282,8 @@ export const errorHandler = (
     },
     meta: {
       timestamp: new Date().toISOString(),
-      requestId: (req.headers['x-request-id'] as string) || 'unknown',
-      version: 'v1',
+      requestId: (req.headers["x-request-id"] as string) || "unknown",
+      version: "v1",
       path: req.path,
     },
   };
@@ -286,23 +296,27 @@ export const errorHandler = (
  *
  * Catches all requests to undefined routes
  */
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction): Response => {
+export const notFoundHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Response => {
   const errorResponse: ApiResponse = {
     success: false,
     error: {
-      code: 'ROUTE_NOT_FOUND',
+      code: "ROUTE_NOT_FOUND",
       message: `Cannot ${req.method} ${req.path}`,
     },
     meta: {
       timestamp: new Date().toISOString(),
-      requestId: (req.headers['x-request-id'] as string) || 'unknown',
-      version: 'v1',
+      requestId: (req.headers["x-request-id"] as string) || "unknown",
+      version: "v1",
       path: req.path,
     },
   };
 
-  logger.warn('Route not found', {
-    requestId: req.headers['x-request-id'],
+  logger.warn("Route not found", {
+    requestId: req.headers["x-request-id"],
     method: req.method,
     path: req.path,
   });

@@ -327,3 +327,10 @@ venv/                  # Virtual environment directory
 !.envrc                # Allow .envrc (project config - MUST be committed)
 .env.backup-*
 config/.env.local
+
+# TypeScript cache
+*.tsbuildinfo
+.tsbuildinfo
+
+# Build optimization cache
+.agents-cache.json

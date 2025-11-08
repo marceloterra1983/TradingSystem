@@ -3,16 +3,20 @@ title: Telegram Gateway API - Quick Start
 sidebar_position: 2
 tags: [api, telegram, quickstart, guide]
 domain: api
+owner: DocsOps
 type: guide
 summary: Get started with Telegram Gateway API in 5 minutes
+description: Get started with Telegram Gateway API in 5 minutes
 status: active
 last_review: "2025-11-04"
+lastReviewed: "2025-11-08"
 ---
 
 # 🚀 Telegram Gateway API - Quick Start
 
 Get up and running with the Telegram Gateway API in 5 minutes!
 
+lastReviewed: "2025-11-08"
 ---
 
 ## ✅ Prerequisites
@@ -32,6 +36,7 @@ curl http://localhost:4007/health  # MTProto Gateway
 curl http://localhost:4010/health  # Gateway API
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔑 Step 1: Get Your API Key
@@ -48,6 +53,7 @@ grep "TELEGRAM_GATEWAY_API_KEY" .env
 
 **Save this key** - you'll need it for all API requests!
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📥 Step 2: Sync Messages
@@ -88,6 +94,7 @@ curl -X POST http://localhost:4010/api/telegram-gateway/sync-messages \
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📊 Step 3: Query Messages
@@ -151,6 +158,7 @@ curl "http://localhost:4010/api/messages?search=COMPRA&limit=20" | jq '.'
 curl "http://localhost:4010/api/messages?channelId=-1001649127710&startDate=2025-11-04&search=PETR4&limit=20" | jq '.'
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📁 Step 4: Manage Channels
@@ -230,6 +238,7 @@ curl "http://localhost:4010/api/channels/-1001649127710/stats" | jq '.'
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔍 Step 5: Advanced Queries
@@ -266,6 +275,7 @@ curl "http://localhost:4010/api/messages?sortBy=date&sortOrder=desc" | jq '.'
 curl "http://localhost:4010/api/messages?sortBy=date&sortOrder=asc" | jq '.'
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📸 Step 6: Download Photos
@@ -291,6 +301,7 @@ curl "http://localhost:4010/api/telegram-gateway/photos/-1001649127710/12345" \
 - ✅ Proxies to MTProto Gateway (Port 4007)
 - ✅ Returns JPEG with proper Content-Type
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔄 Step 7: Monitor Gateway
@@ -357,6 +368,7 @@ curl http://localhost:4010/api/telegram-gateway/metrics | jq '.'
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## ⚡ Step 8: Real-time Updates
@@ -375,6 +387,7 @@ The easiest way to interact with the API is through the Dashboard:
 - ✅ Real-time Gateway logs
 - ✅ Link previews (Twitter, YouTube, Instagram, Generic)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🧪 Step 9: Test Authentication
@@ -391,6 +404,7 @@ curl http://localhost:4010/api/telegram-gateway/auth/status | jq '.'
 curl -X POST http://localhost:4010/api/telegram-gateway/auth/start | jq '.'
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📊 Step 10: Export Data
@@ -407,6 +421,7 @@ curl "http://localhost:4010/api/messages?channelId=-1001649127710&limit=1000" | 
 curl "http://localhost:4010/api/channels/-1001649127710/stats" | jq '.' > channel-stats.json
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎯 Common Use Cases
@@ -440,6 +455,7 @@ curl "http://localhost:4010/api/messages?startDate=$TODAY&endDate=$TODAY" | jq '
 curl "http://localhost:4010/api/channels" | jq '.data[] | select(.lastMessageDate >= (now - 86400 | todate))'
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🐛 Troubleshooting
@@ -488,6 +504,7 @@ curl http://localhost:4010/api/channels
 curl http://localhost:4007/health
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📚 Next Steps
@@ -498,6 +515,7 @@ curl http://localhost:4007/health
 4. **[Setup Monitoring](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/tools/monitoring/overview.mdx)** - Grafana dashboards
 5. **[Performance Tuning](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/performance-tuning.mdx)** - Optimize queries
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔗 Related Documentation
@@ -507,6 +525,7 @@ curl http://localhost:4007/health
 - [Operations Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/operations.mdx)
 - [Troubleshooting](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/apps/telegram-gateway/troubleshooting.mdx)
 
+lastReviewed: "2025-11-08"
 ---
 
 **Happy coding! 🚀**

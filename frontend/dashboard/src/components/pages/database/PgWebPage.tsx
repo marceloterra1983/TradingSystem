@@ -1,5 +1,5 @@
-import { DatabaseEmbedFrame } from './DatabaseEmbedFrame';
-import { apiConfig } from '../../../config/api';
+import { DatabaseEmbedFrame } from "./DatabaseEmbedFrame";
+import { apiConfig } from "../../../config/api";
 
 export function PgWebPage() {
   return (

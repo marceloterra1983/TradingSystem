@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   firecrawlService,
   ScrapeOptions,
@@ -7,9 +7,9 @@ import {
   CrawlResult,
   CrawlStatus,
   FirecrawlHealthResponse,
-} from '../services/firecrawlService';
-import { useToast } from './useToast';
-import { resolveErrorMessage } from '../utils/errors';
+} from "../services/firecrawlService";
+import { useToast } from "./useToast";
+import { resolveErrorMessage } from "../utils/errors";
 
 export function useScrape() {
   const toast = useToast();
@@ -18,13 +18,13 @@ export function useScrape() {
     mutationFn: (options) => firecrawlService.scrape(options),
     onSuccess: (result) => {
       if (result.success) {
-        toast.success('Page scraped successfully');
+        toast.success("Page scraped successfully");
       } else {
-        toast.error(result.error || 'Failed to scrape page');
+        toast.error(result.error || "Failed to scrape page");
       }
     },
     onError: (error) => {
-      toast.error(resolveErrorMessage(error, 'Failed to scrape page'));
+      toast.error(resolveErrorMessage(error, "Failed to scrape page"));
     },
   });
 }
@@ -37,18 +37,18 @@ export function useCrawl() {
     mutationFn: (options) => firecrawlService.crawl(options),
     onSuccess: (result) => {
       if (result.success) {
-        toast.success('Crawl job started successfully');
+        toast.success("Crawl job started successfully");
       } else {
-        toast.error(result.error || 'Failed to start crawl job');
+        toast.error(result.error || "Failed to start crawl job");
       }
       queryClient
-        .invalidateQueries({ queryKey: ['crawl-jobs'] })
+        .invalidateQueries({ queryKey: ["crawl-jobs"] })
         .catch((error) => {
-          console.warn('Failed to invalidate crawl jobs query', error);
+          console.warn("Failed to invalidate crawl jobs query", error);
         });
     },
     onError: (error) => {
-      toast.error(resolveErrorMessage(error, 'Failed to start crawl job'));
+      toast.error(resolveErrorMessage(error, "Failed to start crawl job"));
     },
   });
 }
@@ -62,12 +62,12 @@ export function useCrawlStatus(
   options?: UseCrawlStatusOptions,
 ) {
   return useQuery<CrawlStatus>({
-    queryKey: ['crawl-status', crawlId],
+    queryKey: ["crawl-status", crawlId],
     queryFn: () => {
       if (!crawlId) {
         return Promise.resolve({
           success: false,
-          error: 'No crawl ID provided',
+          error: "No crawl ID provided",
         });
       }
       return firecrawlService.getCrawlStatus(crawlId);
@@ -78,14 +78,14 @@ export function useCrawlStatus(
     refetchInterval: (query) => {
       const status = (query.state.data as CrawlStatus | undefined)?.data
         ?.status;
-      return status === 'scraping' ? 5000 : false;
+      return status === "scraping" ? 5000 : false;
     },
   });
 }
 
 export function useFirecrawlHealth() {
   return useQuery<FirecrawlHealthResponse>({
-    queryKey: ['firecrawl-health'],
+    queryKey: ["firecrawl-health"],
     queryFn: () => firecrawlService.healthCheck(),
     refetchInterval: 30_000,
     staleTime: 20_000,

@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -11,7 +11,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'bg-white rounded-lg border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700',
+          "bg-white rounded-lg border border-gray-200 shadow-sm dark:bg-gray-900 dark:border-gray-700",
           className,
         )}
         {...props}
@@ -22,7 +22,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   },
 );
 
-Card.displayName = 'Card';
+Card.displayName = "Card";
 
 export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -34,7 +34,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          'px-6 py-4 border-b border-gray-200 dark:border-gray-700',
+          "px-6 py-4 border-b border-gray-200 dark:border-gray-700",
           className,
         )}
         {...props}
@@ -45,7 +45,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   },
 );
 
-CardHeader.displayName = 'CardHeader';
+CardHeader.displayName = "CardHeader";
 
 export interface CardTitleProps
   extends React.HTMLAttributes<HTMLHeadingElement> {
@@ -58,7 +58,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
       <h3
         ref={ref}
         className={cn(
-          'text-lg font-semibold text-gray-900 dark:text-gray-100',
+          "text-lg font-semibold text-gray-900 dark:text-gray-100",
           className,
         )}
         {...props}
@@ -69,7 +69,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   },
 );
 
-CardTitle.displayName = 'CardTitle';
+CardTitle.displayName = "CardTitle";
 
 export interface CardDescriptionProps
   extends React.HTMLAttributes<HTMLParagraphElement> {
@@ -83,7 +83,7 @@ export const CardDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn('text-sm text-gray-600 mt-1 dark:text-gray-400', className)}
+      className={cn("text-sm text-gray-600 mt-1 dark:text-gray-400", className)}
       {...props}
     >
       {children}
@@ -91,7 +91,7 @@ export const CardDescription = React.forwardRef<
   );
 });
 
-CardDescription.displayName = 'CardDescription';
+CardDescription.displayName = "CardDescription";
 
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -100,14 +100,14 @@ export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
 export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('px-6 py-4', className)} {...props}>
+      <div ref={ref} className={cn("px-6 py-4", className)} {...props}>
         {children}
       </div>
     );
   },
 );
 
-CardContent.displayName = 'CardContent';
+CardContent.displayName = "CardContent";
 
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -119,7 +119,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
       <div
         ref={ref}
         className={cn(
-          'px-6 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950',
+          "px-6 py-4 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-950",
           className,
         )}
         {...props}
@@ -130,4 +130,4 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   },
 );
 
-CardFooter.displayName = 'CardFooter';
+CardFooter.displayName = "CardFooter";

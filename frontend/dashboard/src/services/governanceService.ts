@@ -57,7 +57,7 @@ export interface GovernanceArtifact {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { cache: 'no-store' });
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
     throw new Error(
       `Failed to load governance snapshot (${response.status} ${response.statusText})`,
@@ -74,5 +74,5 @@ export async function getGovernanceSnapshot(): Promise<GovernanceSnapshot> {
 }
 
 export async function getStaticGovernanceSnapshot(): Promise<GovernanceSnapshot> {
-  return fetchJson<GovernanceSnapshot>('/data/governance/latest.json');
+  return fetchJson<GovernanceSnapshot>("/data/governance/latest.json");
 }

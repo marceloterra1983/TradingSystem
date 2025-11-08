@@ -12,7 +12,7 @@
  * @module components/pages/collections/IngestionProgressModal
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from "react";
 import {
   X,
   CheckCircle2,
@@ -23,22 +23,22 @@ import {
   Database,
   Clock,
   Zap,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
+} from "lucide-react";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../../ui/dialog';
-import { Progress } from '../../ui/progress';
-import { ScrollArea } from '../../ui/scroll-area';
-import { Badge } from '../../ui/badge';
+} from "../../ui/dialog";
+import { Progress } from "../../ui/progress";
+import { ScrollArea } from "../../ui/scroll-area";
+import { Badge } from "../../ui/badge";
 import {
   useIngestionProgress,
   type IngestionLogEntry,
-} from '../../../hooks/useIngestionProgress';
+} from "../../../hooks/useIngestionProgress";
 
 /**
  * Component Props
@@ -63,41 +63,41 @@ function formatDuration(ms: number): string {
  * Format number with thousands separator
  */
 function formatNumber(num: number): string {
-  return num.toLocaleString('pt-BR');
+  return num.toLocaleString("pt-BR");
 }
 
 /**
  * Get level icon and color
  */
-function getLevelStyle(level: IngestionLogEntry['level']): {
+function getLevelStyle(level: IngestionLogEntry["level"]): {
   icon: React.ReactNode;
   colorClass: string;
 } {
   switch (level) {
-    case 'success':
+    case "success":
       return {
         icon: <CheckCircle2 className="h-3 w-3" />,
-        colorClass: 'text-emerald-600 dark:text-emerald-400',
+        colorClass: "text-emerald-600 dark:text-emerald-400",
       };
-    case 'error':
+    case "error":
       return {
         icon: <XCircle className="h-3 w-3" />,
-        colorClass: 'text-red-600 dark:text-red-400',
+        colorClass: "text-red-600 dark:text-red-400",
       };
-    case 'warn':
+    case "warn":
       return {
         icon: <AlertTriangle className="h-3 w-3" />,
-        colorClass: 'text-amber-600 dark:text-amber-400',
+        colorClass: "text-amber-600 dark:text-amber-400",
       };
-    case 'info':
+    case "info":
       return {
         icon: <Zap className="h-3 w-3" />,
-        colorClass: 'text-blue-600 dark:text-blue-400',
+        colorClass: "text-blue-600 dark:text-blue-400",
       };
-    case 'debug':
+    case "debug":
       return {
         icon: <Loader2 className="h-3 w-3" />,
-        colorClass: 'text-slate-500 dark:text-slate-400',
+        colorClass: "text-slate-500 dark:text-slate-400",
       };
   }
 }
@@ -107,10 +107,10 @@ function getLevelStyle(level: IngestionLogEntry['level']): {
  */
 const LogEntry: React.FC<{ log: IngestionLogEntry }> = ({ log }) => {
   const { icon, colorClass } = getLevelStyle(log.level);
-  const time = new Date(log.timestamp).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  const time = new Date(log.timestamp).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 
   return (
@@ -171,7 +171,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   useEffect(() => {
     if (autoScroll && scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]',
+        "[data-radix-scroll-area-viewport]",
       );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
@@ -196,19 +196,19 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
     if (!status) return null;
 
     switch (status) {
-      case 'PENDING':
+      case "PENDING":
         return (
           <Badge variant="outline" className="text-blue-600">
             Aguardando
           </Badge>
         );
-      case 'PROCESSING':
+      case "PROCESSING":
         return <Badge className="bg-blue-600">Processando</Badge>;
-      case 'COMPLETED':
+      case "COMPLETED":
         return <Badge className="bg-emerald-600">Concluído</Badge>;
-      case 'FAILED':
+      case "FAILED":
         return <Badge variant="destructive">Falhou</Badge>;
-      case 'CANCELLED':
+      case "CANCELLED":
         return (
           <Badge variant="outline" className="text-amber-600">
             Cancelado
@@ -224,10 +224,10 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
     return (
       <div className="flex items-center gap-1.5">
         <div
-          className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}
+          className={`h-2 w-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`}
         />
         <span className="text-xs text-slate-500">
-          {isConnected ? 'Conectado' : 'Desconectado'}
+          {isConnected ? "Conectado" : "Desconectado"}
         </span>
       </div>
     );
@@ -236,7 +236,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   const handleClose = () => {
     if (
       isComplete ||
-      confirm('A ingestão está em andamento. Deseja fechar mesmo assim?')
+      confirm("A ingestão está em andamento. Deseja fechar mesmo assim?")
     ) {
       clearLogs();
       onClose();
@@ -244,7 +244,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
   };
 
   const handleCancel = async () => {
-    if (confirm('Deseja realmente cancelar a ingestão em andamento?')) {
+    if (confirm("Deseja realmente cancelar a ingestão em andamento?")) {
       await cancel();
     }
   };
@@ -330,7 +330,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
               <div className="font-mono text-lg font-semibold text-slate-700 dark:text-slate-200">
                 {estimatedTimeRemaining
                   ? formatDuration(estimatedTimeRemaining)
-                  : '--'}
+                  : "--"}
               </div>
             </div>
           </div>
@@ -377,7 +377,7 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
                 onClick={() => setAutoScroll(!autoScroll)}
                 className="h-7 text-xs"
               >
-                {autoScroll ? '📌 Auto-scroll' : '📌 Manual'}
+                {autoScroll ? "📌 Auto-scroll" : "📌 Manual"}
               </Button>
             </div>
           </div>
@@ -420,11 +420,11 @@ export const IngestionProgressModal: React.FC<IngestionProgressModalProps> = ({
           </div>
 
           <Button
-            variant={isComplete ? 'default' : 'outline'}
+            variant={isComplete ? "default" : "outline"}
             size="sm"
             onClick={handleClose}
           >
-            {isComplete ? 'Fechar' : 'Minimizar'}
+            {isComplete ? "Fechar" : "Minimizar"}
           </Button>
         </div>
       </DialogContent>

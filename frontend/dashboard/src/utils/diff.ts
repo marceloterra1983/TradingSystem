@@ -1,8 +1,8 @@
-import { diffJson, diffLines, diffWords } from 'diff';
+import { diffJson, diffLines, diffWords } from "diff";
 
-export type DiffMode = 'lines' | 'words' | 'json';
+export type DiffMode = "lines" | "words" | "json";
 
-export type DiffChunkType = 'added' | 'removed' | 'unchanged';
+export type DiffChunkType = "added" | "removed" | "unchanged";
 
 export interface DiffChunk {
   value: string;
@@ -28,11 +28,11 @@ function mapChunk(chunk: {
   removed?: boolean;
   count?: number;
 }): DiffChunk {
-  let type: DiffChunkType = 'unchanged';
+  let type: DiffChunkType = "unchanged";
   if (chunk.added) {
-    type = 'added';
+    type = "added";
   } else if (chunk.removed) {
-    type = 'removed';
+    type = "removed";
   }
 
   return {
@@ -48,9 +48,9 @@ function summarize(chunks: DiffChunk[]): DiffSummary {
   let unchanged = 0;
 
   for (const chunk of chunks) {
-    if (chunk.type === 'added') {
+    if (chunk.type === "added") {
       added += chunk.count;
-    } else if (chunk.type === 'removed') {
+    } else if (chunk.type === "removed") {
       removed += chunk.count;
     } else {
       unchanged += chunk.count;
@@ -71,20 +71,20 @@ function summarize(chunks: DiffChunk[]): DiffSummary {
 export function computeDiff(
   original: string | object | null | undefined,
   updated: string | object | null | undefined,
-  mode: DiffMode = 'lines',
+  mode: DiffMode = "lines",
 ): DiffResult {
-  const left = original ?? '';
-  const right = updated ?? '';
+  const left = original ?? "";
+  const right = updated ?? "";
 
   const originalString =
-    typeof left === 'string' ? left : JSON.stringify(left, null, 2);
+    typeof left === "string" ? left : JSON.stringify(left, null, 2);
   const updatedString =
-    typeof right === 'string' ? right : JSON.stringify(right, null, 2);
+    typeof right === "string" ? right : JSON.stringify(right, null, 2);
 
   const diffChunks =
-    mode === 'json'
+    mode === "json"
       ? diffJson(originalString, updatedString)
-      : mode === 'words'
+      : mode === "words"
         ? diffWords(originalString, updatedString)
         : diffLines(originalString, updatedString);
 

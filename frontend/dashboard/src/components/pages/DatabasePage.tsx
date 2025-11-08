@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { ExternalLink, Loader2, Play } from 'lucide-react';
-import { Button } from '../ui/button';
-import { ENDPOINTS } from '../../config/endpoints';
-import { IframeWithUrl } from '../common/IframeWithUrl';
-import { useToast } from '../../hooks/useToast';
-import { startLauncherTool } from '../../services/launcherService';
+import * as React from "react";
+import { ExternalLink, Loader2, Play } from "lucide-react";
+import { Button } from "../ui/button";
+import { ENDPOINTS } from "../../config/endpoints";
+import { IframeWithUrl } from "../common/IframeWithUrl";
+import { useToast } from "../../hooks/useToast";
+import { startLauncherTool } from "../../services/launcherService";
 
-type ToolId = 'pgadmin' | 'pgweb' | 'adminer' | 'questdb';
-type TabId = 'overview' | ToolId;
+type ToolId = "pgadmin" | "pgweb" | "adminer" | "questdb";
+type TabId = "overview" | ToolId;
 
 type EndpointOption = {
   label: string;
@@ -15,34 +15,34 @@ type EndpointOption = {
 };
 
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: '/db-ui/pgadmin', label: 'Proxy (/db-ui/pgadmin)' },
-  pgweb: { url: 'http://localhost:8081', label: 'Porta 8081' },
-  adminer: { url: '/db-ui/adminer', label: 'Proxy (/db-ui/adminer)' },
-  questdb: { url: 'http://localhost:9002', label: 'Porta 9002' },
+  pgadmin: { url: "/db-ui/pgadmin", label: "Proxy (/db-ui/pgadmin)" },
+  pgweb: { url: "http://localhost:8081", label: "Porta 8081" },
+  adminer: { url: "/db-ui/adminer", label: "Proxy (/db-ui/adminer)" },
+  questdb: { url: "http://localhost:9002", label: "Porta 9002" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: 'Proxy (/db-ui/pgadmin)', url: '/db-ui/pgadmin' },
-    { label: 'Direto (.env)', url: ENDPOINTS.pgAdmin },
-    { label: 'Porta 5050', url: 'http://localhost:5050' },
-    { label: 'Legacy 7100', url: 'http://localhost:7100' },
+    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin" },
+    { label: "Direto (.env)", url: ENDPOINTS.pgAdmin },
+    { label: "Porta 5050", url: "http://localhost:5050" },
+    { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
-    { label: 'Proxy (/db-ui/pgweb)', url: '/db-ui/pgweb' },
-    { label: 'Direto (.env)', url: ENDPOINTS.pgWeb },
-    { label: 'Legacy 7102', url: 'http://localhost:7102' },
+    { label: "Proxy (/db-ui/pgweb)", url: "/db-ui/pgweb" },
+    { label: "Direto (.env)", url: ENDPOINTS.pgWeb },
+    { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: 'Direto (.env)', url: ENDPOINTS.adminer },
-    { label: 'Porta 8082', url: 'http://localhost:8082' },
-    { label: 'Proxy (/db-ui/adminer)', url: '/db-ui/adminer' },
-    { label: 'Legacy 7101', url: 'http://localhost:7101' },
+    { label: "Direto (.env)", url: ENDPOINTS.adminer },
+    { label: "Porta 8082", url: "http://localhost:8082" },
+    { label: "Proxy (/db-ui/adminer)", url: "/db-ui/adminer" },
+    { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
-    { label: 'Proxy (/db-ui/questdb)', url: '/db-ui/questdb' },
-    { label: 'Direto (.env)', url: ENDPOINTS.questdb },
-    { label: 'Legacy 7010', url: 'http://localhost:7010' },
+    { label: "Proxy (/db-ui/questdb)", url: "/db-ui/questdb" },
+    { label: "Direto (.env)", url: ENDPOINTS.questdb },
+    { label: "Legacy 7010", url: "http://localhost:7010" },
   ],
 };
 
@@ -66,152 +66,166 @@ type DatabaseOverviewEntry = {
 
 const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
   {
-    id: 'workspace',
-    name: 'Workspace TimescaleDB',
-    engine: 'PostgreSQL / TimescaleDB 17',
-    host: 'localhost',
-    port: '5450 → container 5432',
-    database: 'workspace',
-    user: 'postgres',
+    id: "workspace",
+    name: "Workspace TimescaleDB",
+    engine: "PostgreSQL / TimescaleDB 17",
+    host: "localhost",
+    port: "5450 → container 5432",
+    database: "workspace",
+    user: "postgres",
     password: {
-      env: 'WORKSPACE_DB_PASSWORD',
-      defaultValue: 'workspace_secure_pass',
+      env: "WORKSPACE_DB_PASSWORD",
+      defaultValue: "workspace_secure_pass",
     },
-    connectionUri: 'postgresql://postgres:${WORKSPACE_DB_PASSWORD}@localhost:5450/workspace?sslmode=disable',
-    dockerService: 'workspace-db',
-    composeFile: 'tools/compose/docker-compose.workspace-simple.yml',
-    notes: 'Clean Architecture workspace catalog + metadata. Mounted on tradingsystem_backend network.',
+    connectionUri:
+      "postgresql://postgres:${WORKSPACE_DB_PASSWORD}@localhost:5450/workspace?sslmode=disable",
+    dockerService: "workspace-db",
+    composeFile: "tools/compose/docker-compose.workspace-simple.yml",
+    notes:
+      "Clean Architecture workspace catalog + metadata. Mounted on tradingsystem_backend network.",
   },
   {
-    id: 'tp-capital',
-    name: 'TP Capital TimescaleDB',
-    engine: 'PostgreSQL / TimescaleDB 16',
-    host: 'localhost',
-    port: '5440 → container 5432',
-    database: 'tp_capital_db',
-    user: 'tp_capital',
+    id: "tp-capital",
+    name: "TP Capital TimescaleDB",
+    engine: "PostgreSQL / TimescaleDB 16",
+    host: "localhost",
+    port: "5440 → container 5432",
+    database: "tp_capital_db",
+    user: "tp_capital",
     password: {
-      env: 'TP_CAPITAL_DB_PASSWORD',
-      defaultValue: 'tp_capital_secure_pass_2024',
+      env: "TP_CAPITAL_DB_PASSWORD",
+      defaultValue: "tp_capital_secure_pass_2024",
     },
-    connectionUri: 'postgresql://${TP_CAPITAL_DB_USER:-tp_capital}:${TP_CAPITAL_DB_PASSWORD}@localhost:5440/tp_capital_db?sslmode=disable',
-    dockerService: 'tp-capital-timescale',
-    composeFile: 'tools/compose/docker-compose.tp-capital-stack.yml',
-    notes: 'Use PgBouncer em localhost:6435 para workloads de produção.',
+    connectionUri:
+      "postgresql://${TP_CAPITAL_DB_USER:-tp_capital}:${TP_CAPITAL_DB_PASSWORD}@localhost:5440/tp_capital_db?sslmode=disable",
+    dockerService: "tp-capital-timescale",
+    composeFile: "tools/compose/docker-compose.tp-capital-stack.yml",
+    notes: "Use PgBouncer em localhost:6435 para workloads de produção.",
   },
   {
-    id: 'telegram',
-    name: 'Telegram Gateway TimescaleDB',
-    engine: 'PostgreSQL / TimescaleDB 16',
-    host: 'localhost',
-    port: '5434 → container 5432',
-    database: 'telegram_gateway',
-    user: 'telegram',
+    id: "telegram",
+    name: "Telegram Gateway TimescaleDB",
+    engine: "PostgreSQL / TimescaleDB 16",
+    host: "localhost",
+    port: "5434 → container 5432",
+    database: "telegram_gateway",
+    user: "telegram",
     password: {
-      env: 'TELEGRAM_DB_PASSWORD',
-      defaultValue: 'NYMBgrENUZP8FqUHN1Yo8sdzSfs3kLhp',
+      env: "TELEGRAM_DB_PASSWORD",
+      defaultValue: "NYMBgrENUZP8FqUHN1Yo8sdzSfs3kLhp",
     },
-    connectionUri: 'postgresql://${TELEGRAM_DB_USER:-telegram}:${TELEGRAM_DB_PASSWORD}@localhost:5434/telegram_gateway?sslmode=disable',
-    dockerService: 'telegram-timescale',
-    composeFile: 'tools/compose/docker-compose.telegram.yml',
-    notes: 'Gateway MTProto + automações. PgBouncer disponível em localhost:6434.',
+    connectionUri:
+      "postgresql://${TELEGRAM_DB_USER:-telegram}:${TELEGRAM_DB_PASSWORD}@localhost:5434/telegram_gateway?sslmode=disable",
+    dockerService: "telegram-timescale",
+    composeFile: "tools/compose/docker-compose.telegram.yml",
+    notes:
+      "Gateway MTProto + automações. PgBouncer disponível em localhost:6434.",
   },
   {
-    id: 'n8n',
-    name: 'n8n Workflows DB',
-    engine: 'PostgreSQL 16',
-    host: '127.0.0.1',
-    port: '5442 → container 5432',
-    database: 'n8n',
-    user: 'n8n',
+    id: "n8n",
+    name: "n8n Workflows DB",
+    engine: "PostgreSQL 16",
+    host: "127.0.0.1",
+    port: "5442 → container 5432",
+    database: "n8n",
+    user: "n8n",
     password: {
-      env: 'N8N_POSTGRES_PASSWORD',
-      defaultValue: 'ts_n8n_db_1vZeP9LqC4yS6aUwX8mH',
+      env: "N8N_POSTGRES_PASSWORD",
+      defaultValue: "ts_n8n_db_1vZeP9LqC4yS6aUwX8mH",
     },
-    connectionUri: 'postgresql://${N8N_POSTGRES_USER:-n8n}:${N8N_POSTGRES_PASSWORD}@localhost:5442/${N8N_POSTGRES_DB:-n8n}',
-    dockerService: 'n8n-postgres',
-    composeFile: 'tools/compose/docker-compose.n8n.yml',
-    notes: 'Persistência das execuções e credenciais do n8n. Respeita credenciais definidas em .env.',
+    connectionUri:
+      "postgresql://${N8N_POSTGRES_USER:-n8n}:${N8N_POSTGRES_PASSWORD}@localhost:5442/${N8N_POSTGRES_DB:-n8n}",
+    dockerService: "n8n-postgres",
+    composeFile: "tools/compose/docker-compose.n8n.yml",
+    notes:
+      "Persistência das execuções e credenciais do n8n. Respeita credenciais definidas em .env.",
   },
   {
-    id: 'firecrawl',
-    name: 'Firecrawl Collector DB',
-    engine: 'PostgreSQL 15',
-    host: 'localhost',
-    port: '5436 → container 5432',
-    database: 'firecrawl',
-    user: 'firecrawl',
+    id: "firecrawl",
+    name: "Firecrawl Collector DB",
+    engine: "PostgreSQL 15",
+    host: "localhost",
+    port: "5436 → container 5432",
+    database: "firecrawl",
+    user: "firecrawl",
     password: {
-      env: 'FIRECRAWL_DB_PASSWORD',
-      defaultValue: 'GS3C6wRrIG0RGm1cWylIlZWUm4L1YcLN',
+      env: "FIRECRAWL_DB_PASSWORD",
+      defaultValue: "GS3C6wRrIG0RGm1cWylIlZWUm4L1YcLN",
     },
-    connectionUri: 'postgresql://firecrawl:${FIRECRAWL_DB_PASSWORD}@localhost:5436/firecrawl',
-    dockerService: 'tools-firecrawl-postgres',
-    composeFile: 'tools/compose/docker-compose.firecrawl.yml',
-    notes: 'Armazena tarefas de crawling e cache de conteúdos.',
+    connectionUri:
+      "postgresql://firecrawl:${FIRECRAWL_DB_PASSWORD}@localhost:5436/firecrawl",
+    dockerService: "tools-firecrawl-postgres",
+    composeFile: "tools/compose/docker-compose.firecrawl.yml",
+    notes: "Armazena tarefas de crawling e cache de conteúdos.",
   },
   {
-    id: 'course-crawler',
-    name: 'Course Crawler DB',
-    engine: 'PostgreSQL 15',
-    host: 'localhost',
-    port: '55433 → container 5432',
-    database: 'coursecrawler',
-    user: 'postgres',
+    id: "course-crawler",
+    name: "Course Crawler DB",
+    engine: "PostgreSQL 15",
+    host: "localhost",
+    port: "55433 → container 5432",
+    database: "coursecrawler",
+    user: "postgres",
     password: {
-      env: 'COURSE_CRAWLER_DB_PASSWORD',
-      defaultValue: 'coursecrawler',
+      env: "COURSE_CRAWLER_DB_PASSWORD",
+      defaultValue: "coursecrawler",
     },
-    connectionUri: 'postgresql://${COURSE_CRAWLER_DB_USER:-postgres}:${COURSE_CRAWLER_DB_PASSWORD:-coursecrawler}@localhost:55433/${COURSE_CRAWLER_DB_NAME:-coursecrawler}',
-    dockerService: 'course-crawler-db',
-    composeFile: 'tools/compose/docker-compose.course-crawler.yml',
-    notes: 'Persistência dos scrapers e pipelines do Course Crawler (API + worker).',
+    connectionUri:
+      "postgresql://${COURSE_CRAWLER_DB_USER:-postgres}:${COURSE_CRAWLER_DB_PASSWORD:-coursecrawler}@localhost:55433/${COURSE_CRAWLER_DB_NAME:-coursecrawler}",
+    dockerService: "course-crawler-db",
+    composeFile: "tools/compose/docker-compose.course-crawler.yml",
+    notes:
+      "Persistência dos scrapers e pipelines do Course Crawler (API + worker).",
   },
   {
-    id: 'waha',
-    name: 'WAHA WhatsApp DB',
-    engine: 'PostgreSQL 16',
-    host: '127.0.0.1',
-    port: '5438 → container 5432',
-    database: 'waha',
-    user: 'waha',
+    id: "waha",
+    name: "WAHA WhatsApp DB",
+    engine: "PostgreSQL 16",
+    host: "127.0.0.1",
+    port: "5438 → container 5432",
+    database: "waha",
+    user: "waha",
     password: {
-      env: 'WAHA_POSTGRES_PASSWORD',
-      defaultValue: 'ts_waha_db_v5kAXFBJcuGZvzZrGM21k8mubgQmnNfkwUCEEFlXVPs',
+      env: "WAHA_POSTGRES_PASSWORD",
+      defaultValue: "ts_waha_db_v5kAXFBJcuGZvzZrGM21k8mubgQmnNfkwUCEEFlXVPs",
     },
-    connectionUri: 'postgresql://${WAHA_POSTGRES_USER:-waha}:${WAHA_POSTGRES_PASSWORD}@localhost:5438/${WAHA_POSTGRES_DB:-waha}',
-    dockerService: 'waha-postgres',
-    composeFile: 'tools/compose/docker-compose.waha.yml',
-    notes: 'Armazena sessões, mensagens e webhooks do WAHA (Noweb).',
+    connectionUri:
+      "postgresql://${WAHA_POSTGRES_USER:-waha}:${WAHA_POSTGRES_PASSWORD}@localhost:5438/${WAHA_POSTGRES_DB:-waha}",
+    dockerService: "waha-postgres",
+    composeFile: "tools/compose/docker-compose.waha.yml",
+    notes: "Armazena sessões, mensagens e webhooks do WAHA (Noweb).",
   },
   {
-    id: 'kestra',
-    name: 'Kestra Orchestrator DB',
-    engine: 'PostgreSQL 15 (internal)',
-    host: 'tools-kestra-postgres',
-    port: '5432 (somente rede interna)',
-    database: 'kestra',
-    user: 'kestra',
+    id: "kestra",
+    name: "Kestra Orchestrator DB",
+    engine: "PostgreSQL 15 (internal)",
+    host: "tools-kestra-postgres",
+    port: "5432 (somente rede interna)",
+    database: "kestra",
+    user: "kestra",
     password: {
-      env: 'KESTRA_DB_PASSWORD',
-      defaultValue: 'kestra',
+      env: "KESTRA_DB_PASSWORD",
+      defaultValue: "kestra",
     },
-    connectionUri: 'postgresql://${KESTRA_DB_USER:-kestra}:${KESTRA_DB_PASSWORD:-kestra}@tools-kestra-postgres:5432/${KESTRA_DB_NAME:-kestra}',
-    dockerService: 'tools-kestra-postgres',
-    composeFile: 'tools/compose/docker-compose.tools.yml',
-    notes: 'Não possui bind para localhost. Conectar via docker exec ou serviços na mesma network.',
+    connectionUri:
+      "postgresql://${KESTRA_DB_USER:-kestra}:${KESTRA_DB_PASSWORD:-kestra}@tools-kestra-postgres:5432/${KESTRA_DB_NAME:-kestra}",
+    dockerService: "tools-kestra-postgres",
+    composeFile: "tools/compose/docker-compose.tools.yml",
+    notes:
+      "Não possui bind para localhost. Conectar via docker exec ou serviços na mesma network.",
   },
   {
-    id: 'questdb',
-    name: 'QuestDB Console',
-    engine: 'QuestDB (HTTP + ILP)',
-    host: 'http://localhost:9002',
-    port: 'HTTP 9002 / ILP 9009',
-    database: 'N/A (SQL over HTTP)',
-    user: 'N/A',
-    dockerService: 'dbui-questdb',
-    composeFile: 'tools/compose/docker-compose.database-ui.yml',
-    notes: 'Console SQL para séries temporais. ILP (Influx Line Protocol) exposto em localhost:9009.',
+    id: "questdb",
+    name: "QuestDB Console",
+    engine: "QuestDB (HTTP + ILP)",
+    host: "http://localhost:9002",
+    port: "HTTP 9002 / ILP 9009",
+    database: "N/A (SQL over HTTP)",
+    user: "N/A",
+    dockerService: "dbui-questdb",
+    composeFile: "tools/compose/docker-compose.database-ui.yml",
+    notes:
+      "Console SQL para séries temporais. ILP (Influx Line Protocol) exposto em localhost:9009.",
   },
 ];
 
@@ -228,87 +242,87 @@ type DatabaseTool = {
 
 const TOOLS: DatabaseTool[] = [
   {
-    id: 'pgadmin',
-    name: 'pgAdmin',
+    id: "pgadmin",
+    name: "pgAdmin",
     description:
-      'Console completo para administrar Postgres/TimescaleDB, criar schemas e gerenciar usuários.',
+      "Console completo para administrar Postgres/TimescaleDB, criar schemas e gerenciar usuários.",
     defaultUrl: DATABASE_UI_DEFAULTS.pgadmin.url,
     defaultLabel: DATABASE_UI_DEFAULTS.pgadmin.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.pgadmin,
-    docsLink: '/docs/ops/database-ui#pgadmin',
+    docsLink: "/docs/ops/database-ui#pgadmin",
     startHints: [
-      'bash scripts/docker/start-stacks.sh --phase timescale',
-      'ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgadmin',
+      "bash scripts/docker/start-stacks.sh --phase timescale",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgadmin",
     ],
   },
   {
-    id: 'pgweb',
-    name: 'pgweb',
+    id: "pgweb",
+    name: "pgweb",
     description:
-      'Cliente web leve para consultas rápidas em Postgres/Timescale, ideal para inspeções e testes.',
+      "Cliente web leve para consultas rápidas em Postgres/Timescale, ideal para inspeções e testes.",
     defaultUrl: DATABASE_UI_DEFAULTS.pgweb.url,
     defaultLabel: DATABASE_UI_DEFAULTS.pgweb.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.pgweb,
-    docsLink: '/docs/ops/database-ui#pgweb',
+    docsLink: "/docs/ops/database-ui#pgweb",
     startHints: [
-      'bash scripts/docker/start-stacks.sh --phase database-ui',
-      'ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgweb',
+      "bash scripts/docker/start-stacks.sh --phase database-ui",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgweb",
     ],
   },
   {
-    id: 'adminer',
-    name: 'Adminer',
+    id: "adminer",
+    name: "Adminer",
     description:
-      'Interface minimalista para manipular bancos SQL (Postgres, MySQL, etc.) em tarefas pontuais.',
+      "Interface minimalista para manipular bancos SQL (Postgres, MySQL, etc.) em tarefas pontuais.",
     defaultUrl: DATABASE_UI_DEFAULTS.adminer.url,
     defaultLabel: DATABASE_UI_DEFAULTS.adminer.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.adminer,
-    docsLink: '/docs/ops/database-ui#adminer',
+    docsLink: "/docs/ops/database-ui#adminer",
     startHints: [
-      'bash scripts/docker/start-stacks.sh --phase database-ui',
-      'ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-adminer',
+      "bash scripts/docker/start-stacks.sh --phase database-ui",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-adminer",
     ],
   },
   {
-    id: 'questdb',
-    name: 'QuestDB Console',
+    id: "questdb",
+    name: "QuestDB Console",
     description:
-      'Console SQL para séries temporais e análises de mercado (dados do TP Capital / ingestão histórica).',
+      "Console SQL para séries temporais e análises de mercado (dados do TP Capital / ingestão histórica).",
     defaultUrl: DATABASE_UI_DEFAULTS.questdb.url,
     defaultLabel: DATABASE_UI_DEFAULTS.questdb.label,
     fallbackUrls: DIRECT_ENDPOINT_OPTIONS.questdb,
-    docsLink: '/docs/tools/rag/architecture#questdb',
+    docsLink: "/docs/tools/rag/architecture#questdb",
     startHints: [
-      'bash scripts/docker/start-stacks.sh --phase database-ui',
-      'ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-questdb',
+      "bash scripts/docker/start-stacks.sh --phase database-ui",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-questdb",
     ],
   },
 ];
 
 const NAV_TABS: { id: TabId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
+  { id: "overview", label: "Overview" },
   ...TOOLS.map((tool) => ({ id: tool.id, label: tool.name })),
 ];
 
 const MAINTENANCE_ACTIONS: {
-  id: 'dashboard-rebuild' | 'docker-prune';
+  id: "dashboard-rebuild" | "docker-prune";
   label: string;
   description: string;
-  variant?: 'default' | 'outline' | 'destructive';
+  variant?: "default" | "outline" | "destructive";
 }[] = [
   {
-    id: 'dashboard-rebuild',
-    label: 'Rebuild Dashboard',
+    id: "dashboard-rebuild",
+    label: "Rebuild Dashboard",
     description:
-      'Recompila a imagem do dashboard com o .env atual e reinicia o container.',
-    variant: 'outline',
+      "Recompila a imagem do dashboard com o .env atual e reinicia o container.",
+    variant: "outline",
   },
   {
-    id: 'docker-prune',
-    label: 'Limpar imagens antigas',
+    id: "docker-prune",
+    label: "Limpar imagens antigas",
     description:
-      'Executa docker image/builder/volume prune para liberar espaço local.',
-    variant: 'destructive',
+      "Executa docker image/builder/volume prune para liberar espaço local.",
+    variant: "destructive",
   },
 ];
 
@@ -319,7 +333,12 @@ interface ToolContentFrameProps {
   onError: () => void;
 }
 
-function ToolContentFrame({ tool, activeUrl, iframeError, onError }: ToolContentFrameProps) {
+function ToolContentFrame({
+  tool,
+  activeUrl,
+  iframeError,
+  onError,
+}: ToolContentFrameProps) {
   return (
     <div className="flex-1 overflow-hidden">
       {!activeUrl ? (
@@ -328,7 +347,9 @@ function ToolContentFrame({ tool, activeUrl, iframeError, onError }: ToolContent
         </div>
       ) : iframeError ? (
         <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-red-600 dark:text-red-400">
-          <p>Não foi possível carregar o painel <strong>{tool.name}</strong>.</p>
+          <p>
+            Não foi possível carregar o painel <strong>{tool.name}</strong>.
+          </p>
           <p>Tente selecionar outro endpoint ou abrir em uma nova aba.</p>
           <Button size="sm" variant="outline" onClick={onError}>
             Tentar novamente
@@ -355,8 +376,9 @@ function DatabaseOverviewPanel() {
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
       <div className="text-sm text-gray-600 dark:text-gray-300">
-        Visão consolidada dos bancos operados localmente. Utilize os valores padrão como referência
-        e mantenha o `.env` como fonte oficial para senhas ou overrides.
+        Visão consolidada dos bancos operados localmente. Utilize os valores
+        padrão como referência e mantenha o `.env` como fonte oficial para
+        senhas ou overrides.
       </div>
       <div className="flex-1 overflow-auto rounded-2xl border border-gray-200 bg-gray-50 shadow-inner dark:border-gray-800 dark:bg-gray-900/40">
         <table className="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-800">
@@ -373,8 +395,12 @@ function DatabaseOverviewPanel() {
             {DATABASES_OVERVIEW.map((db) => (
               <tr key={db.id} className="align-top">
                 <td className="px-4 py-3">
-                  <div className="font-semibold text-gray-900 dark:text-gray-50">{db.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{db.engine}</div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-50">
+                    {db.name}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {db.engine}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div>
@@ -394,34 +420,37 @@ function DatabaseOverviewPanel() {
                     <span className="font-medium">Database:</span> {db.database}
                   </div>
                   <div>
-                    <span className="font-medium">Usuário:</span> {db.user ?? '—'}
+                    <span className="font-medium">Usuário:</span>{" "}
+                    {db.user ?? "—"}
                   </div>
                   <div>
-                    <span className="font-medium">Senha:</span>{' '}
+                    <span className="font-medium">Senha:</span>{" "}
                     {db.password ? (
                       <>
                         <code>{db.password.env}</code>
                         {db.password.defaultValue && (
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {' '}
+                            {" "}
                             (default: {db.password.defaultValue})
                           </span>
                         )}
                       </>
                     ) : (
-                      'N/A'
+                      "N/A"
                     )}
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div>
-                    <span className="font-medium">Serviço:</span>{' '}
+                    <span className="font-medium">Serviço:</span>{" "}
                     <code>{db.dockerService}</code>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{db.composeFile}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {db.composeFile}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                  {db.notes ?? '—'}
+                  {db.notes ?? "—"}
                 </td>
               </tr>
             ))}
@@ -434,26 +463,32 @@ function DatabaseOverviewPanel() {
 
 export default function DatabasePageNew() {
   const toast = useToast();
-  const [selectedUrls, setSelectedUrls] = React.useState<Record<ToolId, string>>(
-    () =>
-      TOOLS.reduce(
-        (acc, tool) => ({
-          ...acc,
-          [tool.id]: tool.defaultUrl,
-        }),
-        {} as Record<ToolId, string>,
-      ),
+  const [selectedUrls, setSelectedUrls] = React.useState<
+    Record<ToolId, string>
+  >(() =>
+    TOOLS.reduce(
+      (acc, tool) => ({
+        ...acc,
+        [tool.id]: tool.defaultUrl,
+      }),
+      {} as Record<ToolId, string>,
+    ),
   );
-  const [activeTab, setActiveTab] = React.useState<TabId>('overview');
+  const [activeTab, setActiveTab] = React.useState<TabId>("overview");
   const [iframeError, setIframeError] = React.useState(false);
   const [launchingTool, setLaunchingTool] = React.useState<string | null>(null);
-  const [maintenanceAction, setMaintenanceAction] = React.useState<string | null>(null);
+  const [maintenanceAction, setMaintenanceAction] = React.useState<
+    string | null
+  >(null);
   const apiAvailable =
-    typeof import.meta.env.VITE_LAUNCHER_API_URL === 'string' &&
+    typeof import.meta.env.VITE_LAUNCHER_API_URL === "string" &&
     import.meta.env.VITE_LAUNCHER_API_URL.trim().length > 0;
 
-  const activeToolData = activeTab === 'overview' ? null : TOOLS.find((tool) => tool.id === activeTab);
-  const activeUrl = activeToolData ? selectedUrls[activeToolData.id] : '';
+  const activeToolData =
+    activeTab === "overview"
+      ? null
+      : TOOLS.find((tool) => tool.id === activeTab);
+  const activeUrl = activeToolData ? selectedUrls[activeToolData.id] : "";
 
   const handleEndpointError = React.useCallback(
     (tool: DatabaseTool) => {
@@ -486,8 +521,8 @@ export default function DatabasePageNew() {
   };
 
   const handleOpenInNewTab = () => {
-    if (activeTab !== 'overview' && activeUrl) {
-      window.open(activeUrl, '_blank', 'noopener,noreferrer');
+    if (activeTab !== "overview" && activeUrl) {
+      window.open(activeUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -499,7 +534,7 @@ export default function DatabasePageNew() {
           {NAV_TABS.map((tab) => (
             <Button
               key={tab.id}
-              variant={activeTab === tab.id ? 'primary' : 'outline'}
+              variant={activeTab === tab.id ? "primary" : "outline"}
               size="sm"
               onClick={(e) => {
                 e.preventDefault();
@@ -516,7 +551,7 @@ export default function DatabasePageNew() {
           variant="outline"
           size="sm"
           onClick={handleOpenInNewTab}
-          disabled={activeTab === 'overview' || !activeUrl}
+          disabled={activeTab === "overview" || !activeUrl}
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Open in new tab
@@ -525,7 +560,7 @@ export default function DatabasePageNew() {
 
       {/* Content Frame - Separated from buttons */}
       <div className="h-[calc(100vh-200px)] w-full flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-slate-900">
-        {activeTab === 'overview' ? (
+        {activeTab === "overview" ? (
           <DatabaseOverviewPanel />
         ) : (
           activeToolData && (
@@ -546,7 +581,8 @@ export default function DatabasePageNew() {
               Manutenção do Dashboard
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Execute ações administrativas (rebuild/limpeza) diretamente do dashboard.
+              Execute ações administrativas (rebuild/limpeza) diretamente do
+              dashboard.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
@@ -566,22 +602,22 @@ export default function DatabasePageNew() {
                   </div>
                   <Button
                     size="sm"
-                    variant={action.variant ?? 'outline'}
+                    variant={action.variant ?? "outline"}
                     disabled={maintenanceAction === action.id}
                     onClick={async () => {
                       setMaintenanceAction(action.id);
                       try {
                         await startLauncherTool(action.id);
                         toast.success(
-                          action.id === 'dashboard-rebuild'
-                            ? 'Rebuild solicitado; acompanhe os logs do dashboard.'
-                            : 'Limpeza do Docker iniciada.'
+                          action.id === "dashboard-rebuild"
+                            ? "Rebuild solicitado; acompanhe os logs do dashboard."
+                            : "Limpeza do Docker iniciada.",
                         );
                       } catch (error) {
                         toast.error(
                           error instanceof Error
                             ? error.message
-                            : 'Falha ao executar comando',
+                            : "Falha ao executar comando",
                         );
                       } finally {
                         setMaintenanceAction(null);
@@ -602,9 +638,9 @@ export default function DatabasePageNew() {
         </section>
       ) : (
         <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/10 dark:text-amber-200">
-          Configure <code>VITE_LAUNCHER_API_URL</code> e{' '}
-          <code>VITE_LAUNCHER_API_TOKEN</code> para liberar comandos de manutenção
-          diretamente do dashboard.
+          Configure <code>VITE_LAUNCHER_API_URL</code> e{" "}
+          <code>VITE_LAUNCHER_API_TOKEN</code> para liberar comandos de
+          manutenção diretamente do dashboard.
         </section>
       )}
 
@@ -637,7 +673,7 @@ export default function DatabasePageNew() {
                     toast.error(
                       error instanceof Error
                         ? error.message
-                        : 'Falha ao iniciar container',
+                        : "Falha ao iniciar container",
                     );
                   } finally {
                     setLaunchingTool(null);
@@ -662,9 +698,9 @@ export default function DatabasePageNew() {
         </h3>
         <ul className="mt-3 list-disc space-y-1 pl-5">
           <li>
-            Scripts oficiais: <code>bash scripts/docker/start-stacks.sh</code>{' '}
-            permite subir apenas o bloco necessário usando{' '}
-            <code>--phase timescale</code>, <code>--phase tools</code> ou{' '}
+            Scripts oficiais: <code>bash scripts/docker/start-stacks.sh</code>{" "}
+            permite subir apenas o bloco necessário usando{" "}
+            <code>--phase timescale</code>, <code>--phase tools</code> ou{" "}
             <code>--phase data</code>.
           </li>
           <li>
@@ -673,7 +709,7 @@ export default function DatabasePageNew() {
           </li>
           <li>
             Caso um serviço esteja offline, verifique se a porta não está em uso
-            e se o container correspondente está listado em{' '}
+            e se o container correspondente está listado em{" "}
             <code>docker ps</code>.
           </li>
         </ul>

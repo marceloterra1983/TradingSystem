@@ -1,4 +1,4 @@
-import { Activity } from 'lucide-react';
+import { Activity } from "lucide-react";
 
 interface ConnectionStatusProps {
   showDetails?: boolean;
@@ -13,7 +13,7 @@ interface ConnectionStatusProps {
  */
 export function ConnectionStatus({
   showDetails = false,
-  className = '',
+  className = "",
 }: ConnectionStatusProps) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>

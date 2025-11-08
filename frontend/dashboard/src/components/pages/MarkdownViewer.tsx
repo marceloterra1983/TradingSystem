@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
-import { buildDocsUrl } from '@/lib/docsUrl';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
+import { buildDocsUrl } from "@/lib/docsUrl";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
 /**
  * Simple Markdown Viewer - Displays markdown content without Docusaurus shell
@@ -10,17 +10,17 @@ import { IframeWithUrl } from '../common/IframeWithUrl';
  */
 export default function MarkdownViewer(): JSX.Element {
   const [searchParams] = useSearchParams();
-  const path = searchParams.get('path') || '';
-  const title = searchParams.get('title') || 'Document';
+  const path = searchParams.get("path") || "";
+  const title = searchParams.get("title") || "Document";
 
-  const [, setContent] = useState<string>('');
+  const [, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchContent() {
       if (!path) {
-        setError('No document path provided');
+        setError("No document path provided");
         setLoading(false);
         return;
       }
@@ -32,19 +32,19 @@ export default function MarkdownViewer(): JSX.Element {
         // Try to fetch rendered markdown from Docusaurus through the dashboard proxy
         const docsUrl = buildDocsUrl(path);
 
-        console.log('[MarkdownViewer] Fetching:', docsUrl);
+        console.log("[MarkdownViewer] Fetching:", docsUrl);
 
         const response = await axios.get(docsUrl, {
-          headers: { Accept: 'text/html,text/markdown,text/plain,*/*' },
+          headers: { Accept: "text/html,text/markdown,text/plain,*/*" },
           timeout: 10000,
         });
 
         setContent(response.data);
         setLoading(false);
       } catch (err) {
-        console.error('[MarkdownViewer] Failed to fetch document:', err);
+        console.error("[MarkdownViewer] Failed to fetch document:", err);
         setError(
-          err instanceof Error ? err.message : 'Failed to load document',
+          err instanceof Error ? err.message : "Failed to load document",
         );
         setLoading(false);
       }
@@ -77,7 +77,7 @@ export default function MarkdownViewer(): JSX.Element {
           <p className="text-slate-600 dark:text-slate-400 mb-4">{error}</p>
           <div className="text-sm text-slate-500 dark:text-slate-500 mb-6">
             <p>
-              Caminho:{' '}
+              Caminho:{" "}
               <code className="bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">
                 {path}
               </code>
@@ -127,7 +127,7 @@ export default function MarkdownViewer(): JSX.Element {
           <IframeWithUrl
             src={buildDocsUrl(path)}
             className="w-full border-0"
-            style={{ height: 'calc(100vh - 120px)', minHeight: '600px' }}
+            style={{ height: "calc(100vh - 120px)", minHeight: "600px" }}
             title={title}
             sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
           />

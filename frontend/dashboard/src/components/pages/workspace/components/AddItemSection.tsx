@@ -1,33 +1,33 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../../../ui/collapsible-card';
-import { Button } from '../../../ui/button';
-import { Input } from '../../../ui/input';
-import { Label } from '../../../ui/label';
-import { Plus, Clock } from 'lucide-react';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
+} from "../../../ui/collapsible-card";
+import { Button } from "../../../ui/button";
+import { Input } from "../../../ui/input";
+import { Label } from "../../../ui/label";
+import { Plus, Clock } from "lucide-react";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
 import type {
   ItemFormState,
   ItemCategory,
   ItemPriority,
-} from '../types/workspace.types';
+} from "../types/workspace.types";
 import {
   CATEGORY_CONFIG,
   PRIORITY_CONFIG,
-} from '../constants/workspace.constants';
-import { cn } from '../../../../lib/utils';
+} from "../constants/workspace.constants";
+import { cn } from "../../../../lib/utils";
 
 const INITIAL_ITEM_FORM: ItemFormState = {
-  title: '',
-  description: '',
-  category: 'documentacao',
-  priority: 'medium',
-  tags: '',
+  title: "",
+  description: "",
+  category: "documentacao",
+  priority: "medium",
+  tags: "",
 };
 
 export function AddItemSection() {
@@ -37,7 +37,7 @@ export function AddItemSection() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     text: string;
   } | null>(null);
 
@@ -48,13 +48,13 @@ export function AddItemSection() {
 
     try {
       const tagsArray = formData.tags
-        .split(',')
+        .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
       const created = await createItem({ ...formData, tags: tagsArray });
 
       setMessage({
-        type: 'success',
+        type: "success",
         text: `Item "${created.title}" criado com sucesso!`,
       });
       setFormData({ ...INITIAL_ITEM_FORM });
@@ -63,8 +63,8 @@ export function AddItemSection() {
         setMessage(null);
       }, 3000);
     } catch (error) {
-      console.error('Failed to create item:', error);
-      setMessage({ type: 'error', text: 'Erro ao criar item.' });
+      console.error("Failed to create item:", error);
+      setMessage({ type: "error", text: "Erro ao criar item." });
     } finally {
       setSubmitting(false);
     }
@@ -177,10 +177,10 @@ export function AddItemSection() {
           {message && (
             <div
               className={cn(
-                'rounded-lg p-4 text-sm',
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-950 dark:border-green-800 dark:text-green-400'
-                  : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400',
+                "rounded-lg p-4 text-sm",
+                message.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-950 dark:border-green-800 dark:text-green-400"
+                  : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400",
               )}
             >
               {message.text}

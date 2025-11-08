@@ -5,7 +5,7 @@
  * Automatically includes X-API-Key header
  */
 
-import { getApiUrl } from '../config/api';
+import { getApiUrl } from "../config/api";
 
 /**
  * Get TP Capital API Key from environment
@@ -25,19 +25,19 @@ export async function tpCapitalFetch(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<Response> {
-  const baseUrl = getApiUrl('tpCapital');
+  const baseUrl = getApiUrl("tpCapital");
   const apiKey = getApiKey();
 
   // Prepare headers
   const headers = new Headers(options.headers);
-  headers.set('Content-Type', 'application/json');
+  headers.set("Content-Type", "application/json");
 
   // Add API Key if available
   if (apiKey) {
-    headers.set('X-API-Key', apiKey);
+    headers.set("X-API-Key", apiKey);
   } else {
     console.warn(
-      '[TP Capital] VITE_TP_CAPITAL_API_KEY not configured - requests may fail on protected endpoints',
+      "[TP Capital] VITE_TP_CAPITAL_API_KEY not configured - requests may fail on protected endpoints",
     );
   }
 
@@ -63,7 +63,7 @@ export const tpCapitalApi = {
   get: async (endpoint: string, options: RequestInit = {}) => {
     return tpCapitalFetch(endpoint, {
       ...options,
-      method: 'GET',
+      method: "GET",
     });
   },
 
@@ -73,7 +73,7 @@ export const tpCapitalApi = {
   post: async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
     return tpCapitalFetch(endpoint, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   },
@@ -84,7 +84,7 @@ export const tpCapitalApi = {
   put: async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
     return tpCapitalFetch(endpoint, {
       ...options,
-      method: 'PUT',
+      method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
     });
   },
@@ -99,7 +99,7 @@ export const tpCapitalApi = {
   ) => {
     return tpCapitalFetch(endpoint, {
       ...options,
-      method: 'DELETE',
+      method: "DELETE",
       body: body ? JSON.stringify(body) : undefined,
     });
   },
@@ -143,15 +143,15 @@ export async function getSignals(
 ): Promise<Signal[]> {
   const queryParams = new URLSearchParams();
 
-  if (params.limit) queryParams.set('limit', String(params.limit));
-  if (params.channel) queryParams.set('channel', params.channel);
-  if (params.type) queryParams.set('type', params.type);
-  if (params.search) queryParams.set('search', params.search);
-  if (params.from) queryParams.set('from', String(params.from));
-  if (params.to) queryParams.set('to', String(params.to));
+  if (params.limit) queryParams.set("limit", String(params.limit));
+  if (params.channel) queryParams.set("channel", params.channel);
+  if (params.type) queryParams.set("type", params.type);
+  if (params.search) queryParams.set("search", params.search);
+  if (params.from) queryParams.set("from", String(params.from));
+  if (params.to) queryParams.set("to", String(params.to));
 
   const query = queryParams.toString();
-  const endpoint = query ? `/signals?${query}` : '/signals';
+  const endpoint = query ? `/signals?${query}` : "/signals";
 
   const response = await tpCapitalApi.get(endpoint);
 
@@ -164,7 +164,7 @@ export async function getSignals(
 }
 
 export async function deleteSignal(ingestedAt: string): Promise<void> {
-  const response = await tpCapitalApi.delete('/signals', { ingestedAt });
+  const response = await tpCapitalApi.delete("/signals", { ingestedAt });
 
   if (!response.ok) {
     throw new Error(`Failed to delete signal: ${response.statusText}`);
@@ -175,7 +175,7 @@ export async function syncMessages(): Promise<{
   success: boolean;
   message: string;
 }> {
-  const response = await tpCapitalApi.post('/sync-messages');
+  const response = await tpCapitalApi.post("/sync-messages");
 
   if (!response.ok) {
     const error = await response.json();
@@ -190,9 +190,9 @@ export interface TelegramChannel {
   id: string;
   label: string;
   channel_id: string;
-  channel_type: 'source' | 'destination';
+  channel_type: "source" | "destination";
   description?: string;
-  status: 'active' | 'inactive' | 'deleted';
+  status: "active" | "inactive" | "deleted";
   signal_count?: number;
   last_signal?: string;
   created_at: string;
@@ -200,7 +200,7 @@ export interface TelegramChannel {
 }
 
 export async function getTelegramChannels(): Promise<TelegramChannel[]> {
-  const response = await tpCapitalApi.get('/telegram-channels');
+  const response = await tpCapitalApi.get("/telegram-channels");
 
   if (!response.ok) {
     throw new Error(`Failed to fetch channels: ${response.statusText}`);
@@ -211,9 +211,9 @@ export async function getTelegramChannels(): Promise<TelegramChannel[]> {
 }
 
 export async function createTelegramChannel(
-  channel: Omit<TelegramChannel, 'id' | 'status' | 'created_at' | 'updated_at'>,
+  channel: Omit<TelegramChannel, "id" | "status" | "created_at" | "updated_at">,
 ): Promise<TelegramChannel> {
-  const response = await tpCapitalApi.post('/telegram-channels', channel);
+  const response = await tpCapitalApi.post("/telegram-channels", channel);
 
   if (!response.ok) {
     const error = await response.json();
@@ -246,7 +246,7 @@ export async function deleteTelegramChannel(id: string): Promise<void> {
 }
 
 export async function reloadChannels(): Promise<void> {
-  const response = await tpCapitalApi.post('/reload-channels');
+  const response = await tpCapitalApi.post("/reload-channels");
 
   if (!response.ok) {
     throw new Error(`Failed to reload channels: ${response.statusText}`);

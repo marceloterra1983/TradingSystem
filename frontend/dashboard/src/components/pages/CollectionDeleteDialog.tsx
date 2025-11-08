@@ -7,14 +7,14 @@
  * @module components/pages/CollectionDeleteDialog
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   AlertTriangle,
   Trash2,
   Database,
   FileText,
   Package,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +22,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Badge } from '../ui/badge';
-import type { Collection } from '../../types/collections';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Badge } from "../ui/badge";
+import type { Collection } from "../../types/collections";
 
 /**
  * Component props
@@ -61,7 +61,7 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
       await onConfirm();
       onClose();
     } catch (error) {
-      console.error('Delete error:', error);
+      console.error("Delete error:", error);
       // Error handling is done by parent component
     } finally {
       setIsDeleting(false);
@@ -189,7 +189,7 @@ export const CollectionDeleteDialog: React.FC<CollectionDeleteDialogProps> = ({
           {/* Confirmation Input */}
           <div className="space-y-2">
             <p className="text-sm font-medium">
-              Para confirmar, digite o nome da coleção:{' '}
+              Para confirmar, digite o nome da coleção:{" "}
               <code className="px-1 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-red-600">
                 {collection.name}
               </code>

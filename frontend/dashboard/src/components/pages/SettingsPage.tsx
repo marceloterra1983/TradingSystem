@@ -1,5 +1,5 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
 import {
   User,
   Bell,
@@ -8,7 +8,7 @@ import {
   Shield,
   Database,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 
 /**
  * Settings Page - System configuration and user preferences
@@ -16,7 +16,7 @@ import {
 export function SettingsPage() {
   const sections = [
     {
-      id: 'user-profile',
+      id: "user-profile",
       content: (
         <PlaceholderSection
           cardId="settings-user-profile"
@@ -27,7 +27,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'notifications',
+      id: "notifications",
       content: (
         <PlaceholderSection
           cardId="settings-notifications"
@@ -38,7 +38,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'appearance',
+      id: "appearance",
       content: (
         <PlaceholderSection
           cardId="settings-appearance"
@@ -49,7 +49,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'language',
+      id: "language",
       content: (
         <PlaceholderSection
           cardId="settings-language"
@@ -60,7 +60,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'security',
+      id: "security",
       content: (
         <PlaceholderSection
           cardId="settings-security"
@@ -71,7 +71,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'data-storage',
+      id: "data-storage",
       content: (
         <PlaceholderSection
           cardId="settings-data-storage"
@@ -82,7 +82,7 @@ export function SettingsPage() {
       ),
     },
     {
-      id: 'performance',
+      id: "performance",
       content: (
         <PlaceholderSection
           cardId="settings-performance"

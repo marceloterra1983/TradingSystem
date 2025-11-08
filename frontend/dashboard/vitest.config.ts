@@ -10,7 +10,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['src/__tests__/setup.ts'],
+    setupFiles: [
+      'src/__tests__/setup-act-env.ts',
+      'src/__tests__/setup.ts',
+    ],
     include: [
       'src/**/*.test.{ts,tsx}',
       'src/**/*.spec.{ts,tsx}',

@@ -27,12 +27,12 @@ Container principal que renderiza todas as notificações toast. Deve ser inclu�
 import { ToastContainer } from "./components/ui/toast";
 
 function App() {
-    return (
-        <>
-            {/* ... outros componentes */}
-            <ToastContainer />
-        </>
-    );
+  return (
+    <>
+      {/* ... outros componentes */}
+      <ToastContainer />
+    </>
+  );
 }
 ```
 
@@ -58,18 +58,18 @@ Hook customizado para disparar notificações de forma simples e consistente.
 import { useToast } from "../../hooks/useToast";
 
 function MyComponent() {
-    const toast = useToast();
+  const toast = useToast();
 
-    const handleAction = async () => {
-        try {
-            await someAsyncAction();
-            toast.success("Operação concluída com sucesso");
-        } catch (error) {
-            toast.error("Falha na operação");
-        }
-    };
+  const handleAction = async () => {
+    try {
+      await someAsyncAction();
+      toast.success("Operação concluída com sucesso");
+    } catch (error) {
+      toast.error("Falha na operação");
+    }
+  };
 
-    return <button onClick={handleAction}>Executar</button>;
+  return <button onClick={handleAction}>Executar</button>;
 }
 ```
 
@@ -95,13 +95,13 @@ function MyComponent() {
 
 ```tsx
 const mutation = useMutation({
-    mutationFn: (data) => apiService.updateData(data),
-    onSuccess: () => {
-        toast.success("Dados atualizados com sucesso");
-    },
-    onError: () => {
-        toast.error("Falha ao atualizar dados");
-    },
+  mutationFn: (data) => apiService.updateData(data),
+  onSuccess: () => {
+    toast.success("Dados atualizados com sucesso");
+  },
+  onError: () => {
+    toast.error("Falha ao atualizar dados");
+  },
 });
 ```
 
@@ -109,13 +109,13 @@ const mutation = useMutation({
 
 ```tsx
 const runMutation = useMutation({
-    mutationFn: (name: string) => agentsService.runAgent(name),
-    onSuccess: (_, name) => {
-        toast.success(`Agent "${name}" executado com sucesso`);
-    },
-    onError: (_, name) => {
-        toast.error(`Falha ao executar agent "${name}"`);
-    },
+  mutationFn: (name: string) => agentsService.runAgent(name),
+  onSuccess: (_, name) => {
+    toast.success(`Agent "${name}" executado com sucesso`);
+  },
+  onError: (_, name) => {
+    toast.error(`Falha ao executar agent "${name}"`);
+  },
 });
 ```
 
@@ -123,25 +123,31 @@ const runMutation = useMutation({
 
 ```tsx
 function MyComponent() {
-    const toast = useToast();
+  const toast = useToast();
 
-    return (
-        <>
-            <button onClick={() => toast.success("Salvo!")}>Success</button>
+  return (
+    <>
+      <button onClick={() => toast.success("Salvo!")}>Success</button>
 
-            <button onClick={() => toast.error("Erro ao processar")}>Error</button>
+      <button onClick={() => toast.error("Erro ao processar")}>Error</button>
 
-            <button onClick={() => toast.warning("Atenção: limite próximo")}>Warning</button>
+      <button onClick={() => toast.warning("Atenção: limite próximo")}>
+        Warning
+      </button>
 
-            <button onClick={() => toast.info("Processo iniciado")}>Info</button>
+      <button onClick={() => toast.info("Processo iniciado")}>Info</button>
 
-            {/* Toast persistente (não fecha automaticamente) */}
-            <button onClick={() => toast.info("Mensagem persistente", 0)}>Persistent</button>
+      {/* Toast persistente (não fecha automaticamente) */}
+      <button onClick={() => toast.info("Mensagem persistente", 0)}>
+        Persistent
+      </button>
 
-            {/* Duração customizada (5 segundos) */}
-            <button onClick={() => toast.success("Longa duração", 5000)}>Custom Duration</button>
-        </>
-    );
+      {/* Duração customizada (5 segundos) */}
+      <button onClick={() => toast.success("Longa duração", 5000)}>
+        Custom Duration
+      </button>
+    </>
+  );
 }
 ```
 
@@ -153,17 +159,17 @@ Gerenciamento de estado das notificações usando Zustand.
 
 ```tsx
 interface Toast {
-    id: string;
-    type: "success" | "error" | "info" | "warning";
-    message: string;
-    duration?: number;
+  id: string;
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  duration?: number;
 }
 
 interface ToastStore {
-    toasts: Toast[];
-    addToast: (toast: Omit<Toast, "id">) => void;
-    removeToast: (id: string) => void;
-    clearToasts: () => void;
+  toasts: Toast[];
+  addToast: (toast: Omit<Toast, "id">) => void;
+  removeToast: (id: string) => void;
+  clearToasts: () => void;
 }
 ```
 
@@ -173,14 +179,14 @@ interface ToastStore {
 import { useToastStore } from "../store/toastStore";
 
 function MyComponent() {
-    const { toasts, addToast, clearToasts } = useToastStore();
+  const { toasts, addToast, clearToasts } = useToastStore();
 
-    return (
-        <>
-            <div>Total de notificações: {toasts.length}</div>
-            <button onClick={clearToasts}>Limpar todas</button>
-        </>
-    );
+  return (
+    <>
+      <div>Total de notificações: {toasts.length}</div>
+      <button onClick={clearToasts}>Limpar todas</button>
+    </>
+  );
 }
 ```
 
@@ -190,28 +196,28 @@ function MyComponent() {
 
 1. **Mensagens concisas**: Use mensagens curtas e diretas
 
-    ```tsx
-    toast.success("Agent habilitado"); // ✅
-    toast.success("O agent foi habilitado com sucesso e está pronto para uso"); // ❌ muito longo
-    ```
+   ```tsx
+   toast.success("Agent habilitado"); // ✅
+   toast.success("O agent foi habilitado com sucesso e está pronto para uso"); // ❌ muito longo
+   ```
 
 2. **Contexto específico**: Inclua informações relevantes
 
-    ```tsx
-    toast.success(`Agent "${name}" executado com sucesso`); // ✅
-    toast.success("Operação concluída"); // ❌ muito genérico
-    ```
+   ```tsx
+   toast.success(`Agent "${name}" executado com sucesso`); // ✅
+   toast.success("Operação concluída"); // ❌ muito genérico
+   ```
 
 3. **Tipo apropriado**: Use o tipo correto para cada situação
-    - `success`: Operação concluída com sucesso
-    - `error`: Falha na operação
-    - `warning`: Atenção/aviso ao usuário
-    - `info`: Informação geral
+   - `success`: Operação concluída com sucesso
+   - `error`: Falha na operação
+   - `warning`: Atenção/aviso ao usuário
+   - `info`: Informação geral
 
 4. **Timing adequado**: Use duração apropriada
-    - 3000ms (padrão): Mensagens gerais
-    - 5000ms+: Mensagens importantes ou longas
-    - 0 (persistente): Requer ação do usuário
+   - 3000ms (padrão): Mensagens gerais
+   - 5000ms+: Mensagens importantes ou longas
+   - 0 (persistente): Requer ação do usuário
 
 ### ❌ Evitar
 

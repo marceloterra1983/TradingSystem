@@ -1,66 +1,66 @@
-import express from 'express';
-import path from 'path';
-import { promises as fs } from 'fs';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
-import DocsHealthChecker from '../services/docsHealthChecker.js';
+import express from "express";
+import path from "path";
+import { promises as fs } from "fs";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
+import DocsHealthChecker from "../services/docsHealthChecker.js";
 
 const router = express.Router();
 const require = createRequire(import.meta.url);
-const archiver = require('archiver');
+const archiver = require("archiver");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../../../../../');
-const docsRoot = path.join(projectRoot, 'docs');
-const specsDir = path.join(docsRoot, 'spec');
+const projectRoot = path.resolve(__dirname, "../../../../../");
+const docsRoot = path.join(projectRoot, "docs");
+const specsDir = path.join(docsRoot, "spec");
 
 const setYamlContentType = (req, res, next) => {
-  if (req.path.endsWith('.yaml') || req.path.endsWith('.yml')) {
-    res.type('text/yaml');
+  if (req.path.endsWith(".yaml") || req.path.endsWith(".yml")) {
+    res.type("text/yaml");
   }
   next();
 };
 
-router.get('/spec/*', setYamlContentType, express.static(docsRoot));
+router.get("/spec/*", setYamlContentType, express.static(docsRoot));
 
 const healthChecker = new DocsHealthChecker(specsDir);
 
-router.get('/status', async (_req, res) => {
+router.get("/status", async (_req, res) => {
   try {
     const health = await healthChecker.checkHealth();
     res.json(health);
   } catch (error) {
-    console.error('Error generating docs status:', error);
+    console.error("Error generating docs status:", error);
     res.status(500).json({
-      status: 'error',
-      error: 'Failed to generate documentation status',
+      status: "error",
+      error: "Failed to generate documentation status",
       lastChecked: new Date().toISOString(),
     });
   }
 });
 
-router.get('/check', async (_req, res) => {
+router.get("/check", async (_req, res) => {
   try {
     await healthChecker.checkHealth();
-    res.json({ status: 'ok', message: 'Documentation check completed' });
+    res.json({ status: "ok", message: "Documentation check completed" });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 });
 
-router.get('/download', async (_req, res) => {
+router.get("/download", async (_req, res) => {
   try {
-    const archive = archiver('zip');
+    const archive = archiver("zip");
 
-    res.attachment('tradingsystem-specs.zip');
+    res.attachment("tradingsystem-specs.zip");
     archive.pipe(res);
 
     const files = [
-      { path: 'openapi.yaml', name: 'openapi.yaml' },
-      { path: 'asyncapi.yaml', name: 'asyncapi.yaml' },
-      { path: 'schemas', name: 'schemas' },
-      { path: 'examples', name: 'examples' },
+      { path: "openapi.yaml", name: "openapi.yaml" },
+      { path: "asyncapi.yaml", name: "asyncapi.yaml" },
+      { path: "schemas", name: "schemas" },
+      { path: "examples", name: "examples" },
     ];
 
     for (const file of files) {
@@ -76,9 +76,9 @@ router.get('/download', async (_req, res) => {
 
     await archive.finalize();
   } catch (error) {
-    console.error('Error creating spec archive:', error);
+    console.error("Error creating spec archive:", error);
     res.status(500).json({
-      error: 'Failed to create specification archive',
+      error: "Failed to create specification archive",
     });
   }
 });

@@ -5,17 +5,17 @@ import {
   RefreshCw,
   Server,
   Zap,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
+} from "lucide-react";
+import { Button } from "../../ui/button";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
-import { Badge } from '../../ui/badge';
-import { TelegramGatewayOverview } from '../../../hooks/useTelegramGateway';
+} from "../../ui/collapsible-card";
+import { Badge } from "../../ui/badge";
+import { TelegramGatewayOverview } from "../../../hooks/useTelegramGateway";
 
 interface StatusSummaryProps {
   overview?: TelegramGatewayOverview;
@@ -30,23 +30,23 @@ interface StatusSummaryProps {
 const STATUS_META = {
   healthy: {
     icon: CheckCircle,
-    label: 'Gateway conectado',
-    className: 'text-emerald-600 dark:text-emerald-400',
+    label: "Gateway conectado",
+    className: "text-emerald-600 dark:text-emerald-400",
   },
   unhealthy: {
     icon: AlertTriangle,
-    label: 'Gateway desconectado',
-    className: 'text-red-600 dark:text-red-400',
+    label: "Gateway desconectado",
+    className: "text-red-600 dark:text-red-400",
   },
   unknown: {
     icon: AlertTriangle,
-    label: 'Status desconhecido',
-    className: 'text-amber-600 dark:text-amber-400',
+    label: "Status desconhecido",
+    className: "text-amber-600 dark:text-amber-400",
   },
 } as const;
 
 function formatDuration(seconds?: number) {
-  if (!seconds || Number.isNaN(seconds)) return '—';
+  if (!seconds || Number.isNaN(seconds)) return "—";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   if (hours > 0) return `${hours}h ${minutes}m`;
@@ -55,15 +55,15 @@ function formatDuration(seconds?: number) {
 }
 
 function formatTimestamp(timestamp?: string) {
-  if (!timestamp) return '—';
+  if (!timestamp) return "—";
   try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     }).format(new Date(timestamp));
   } catch {
     return timestamp;
@@ -79,24 +79,24 @@ export function StatusSummary({
   isReloading,
   lastUpdated,
 }: StatusSummaryProps) {
-  const status = overview?.health?.status ?? 'unknown';
+  const status = overview?.health?.status ?? "unknown";
   const meta = STATUS_META[status] ?? STATUS_META.unknown;
   const Icon = meta.icon;
   const connectionOk = overview?.metrics?.summary?.connectionStatus === 1;
 
   const telegramLabel =
-    overview?.health?.telegram === 'connected'
-      ? 'Telegram conectado'
-      : overview?.health?.telegram === 'disconnected'
-        ? 'Telegram desconectado'
-        : 'Telegram status desconhecido';
+    overview?.health?.telegram === "connected"
+      ? "Telegram conectado"
+      : overview?.health?.telegram === "disconnected"
+        ? "Telegram desconectado"
+        : "Telegram status desconhecido";
 
   const telegramClass =
-    overview?.health?.telegram === 'connected'
-      ? 'text-emerald-600 dark:text-emerald-400'
-      : overview?.health?.telegram === 'disconnected'
-        ? 'text-red-600 dark:text-red-400'
-        : 'text-amber-600 dark:text-amber-400';
+    overview?.health?.telegram === "connected"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : overview?.health?.telegram === "disconnected"
+        ? "text-red-600 dark:text-red-400"
+        : "text-amber-600 dark:text-amber-400";
 
   return (
     <CollapsibleCard cardId="telegram-gateway-status">
@@ -163,13 +163,13 @@ export function StatusSummary({
                 </span>
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                Uptime:{' '}
+                Uptime:{" "}
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {formatDuration(overview?.health?.uptime)}
                 </span>
               </p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Atualizado em{' '}
+                Atualizado em{" "}
                 {formatTimestamp(overview?.timestamp || lastUpdated)}
               </p>
             </div>
@@ -186,7 +186,7 @@ export function StatusSummary({
                 </span>
               </div>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                Conexão MTProto {connectionOk ? 'ativa' : 'inativa'}
+                Conexão MTProto {connectionOk ? "ativa" : "inativa"}
               </p>
             </div>
             <div className="rounded-md border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
@@ -194,7 +194,7 @@ export function StatusSummary({
                 Mensagens persistidas
               </p>
               <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                {overview?.messages?.total ?? '—'}
+                {overview?.messages?.total ?? "—"}
               </p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 TimescaleDB sincronizado
@@ -208,7 +208,7 @@ export function StatusSummary({
                 {overview?.queue?.totalMessages ?? 0}
               </p>
               <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
-                {overview?.queue?.path ?? 'sem arquivo configurado'}
+                {overview?.queue?.path ?? "sem arquivo configurado"}
               </p>
             </div>
           </div>

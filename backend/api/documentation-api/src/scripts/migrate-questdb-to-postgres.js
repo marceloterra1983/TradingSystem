@@ -10,33 +10,33 @@
  *   QUESTDB_HOST / QUESTDB_PORT  QuestDB connectivity (optional overrides)
  */
 
-import { fileURLToPath } from 'url';
-import path from 'path';
-import '../../../../shared/config/load-env.js';
-import process from 'process';
-import { PrismaClient } from '@prisma/client';
-import questdbClient from '../utils/questDBClient.js';
+import { fileURLToPath } from "url";
+import path from "path";
+import "../../../../shared/config/load-env.js";
+import process from "process";
+import { PrismaClient } from "@prisma/client";
+import questdbClient from "../utils/questDBClient.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const _projectRoot = path.resolve(__dirname, '../../../../');
+const _projectRoot = path.resolve(__dirname, "../../../../");
 
-const DRY_RUN = process.argv.includes('--dry-run');
-const SKIP_EXISTING = process.argv.includes('--skip-existing');
-const TRUNCATE_FIRST = process.argv.includes('--truncate');
+const DRY_RUN = process.argv.includes("--dry-run");
+const SKIP_EXISTING = process.argv.includes("--skip-existing");
+const TRUNCATE_FIRST = process.argv.includes("--truncate");
 
 const DATABASE_URL = process.env.DOCUMENTATION_DATABASE_URL;
 
 const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m'
+  reset: "\x1b[0m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  red: "\x1b[31m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
 };
 
-function log(message, color = 'reset') {
+function log(message, color = "reset") {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
@@ -45,7 +45,7 @@ function parseJsonSafe(value, fallback) {
     return fallback;
   }
   try {
-    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return parsed ?? fallback;
   } catch {
     return fallback;
@@ -59,7 +59,7 @@ function normalizeTags(value) {
 
 function normalizeMetadata(value) {
   const parsed = parseJsonSafe(value, null);
-  return parsed && typeof parsed === 'object' ? parsed : null;
+  return parsed && typeof parsed === "object" ? parsed : null;
 }
 
 function parseDate(value, fallback = null) {
@@ -94,39 +94,62 @@ function ensureDatabaseUrl() {
     return;
   }
   if (!DATABASE_URL) {
-    log('✗ DOCUMENTATION_DATABASE_URL is not defined. Aborting migration.', 'red');
+    log(
+      "✗ DOCUMENTATION_DATABASE_URL is not defined. Aborting migration.",
+      "red",
+    );
     process.exit(1);
   }
 }
 
 async function truncateTables(prisma) {
   if (DRY_RUN) {
-    log('[DRY RUN] Would truncate documentation tables before migration', 'yellow');
+    log(
+      "[DRY RUN] Would truncate documentation tables before migration",
+      "yellow",
+    );
     return;
   }
 
-  log('⚠️  Truncating PostgreSQL tables (documentation_files, documentation_ideas, documentation_systems)', 'yellow');
-  await prisma.$executeRawUnsafe('TRUNCATE TABLE "documentation_files" RESTART IDENTITY CASCADE');
-  await prisma.$executeRawUnsafe('TRUNCATE TABLE "documentation_ideas" RESTART IDENTITY CASCADE');
-  await prisma.$executeRawUnsafe('TRUNCATE TABLE "documentation_systems" RESTART IDENTITY CASCADE');
-  log('✓ Tables truncated', 'green');
+  log(
+    "⚠️  Truncating PostgreSQL tables (documentation_files, documentation_ideas, documentation_systems)",
+    "yellow",
+  );
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE "documentation_files" RESTART IDENTITY CASCADE',
+  );
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE "documentation_ideas" RESTART IDENTITY CASCADE',
+  );
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE "documentation_systems" RESTART IDENTITY CASCADE',
+  );
+  log("✓ Tables truncated", "green");
 }
 
 async function migrateSystems(prisma) {
-  log('\n📡 Migrating documentation systems...', 'blue');
-  const rows = await questdbClient.executeSelect('SELECT * FROM documentation_systems');
-  log(`• Found ${rows.length} systems in QuestDB`, 'cyan');
+  log("\n📡 Migrating documentation systems...", "blue");
+  const rows = await questdbClient.executeSelect(
+    "SELECT * FROM documentation_systems",
+  );
+  log(`• Found ${rows.length} systems in QuestDB`, "cyan");
 
-  const summary = { total: rows.length, created: 0, updated: 0, skipped: 0, errors: [] };
+  const summary = {
+    total: rows.length,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    errors: [],
+  };
 
   for (const row of rows) {
     const payload = {
       id: row.id,
       name: row.name,
       description: row.description || null,
-      type: row.type || 'unknown',
+      type: row.type || "unknown",
       url: row.url || null,
-      status: row.status || 'unknown',
+      status: row.status || "unknown",
       lastChecked: parseDate(row.last_checked),
       responseTimeMs: parseIntSafe(row.response_time_ms),
       version: row.version || null,
@@ -140,17 +163,22 @@ async function migrateSystems(prisma) {
       createdBy: row.created_by || null,
       designatedTimestamp: parseDate(row.designated_timestamp),
       createdAt: parseDate(row.created_at) ?? new Date(),
-      updatedAt: parseDate(row.updated_at) ?? new Date()
+      updatedAt: parseDate(row.updated_at) ?? new Date(),
     };
 
     if (DRY_RUN) {
-      log(`  [DRY RUN] Would upsert system "${payload.name}" (${payload.id})`, 'cyan');
+      log(
+        `  [DRY RUN] Would upsert system "${payload.name}" (${payload.id})`,
+        "cyan",
+      );
       continue;
     }
 
     try {
       if (SKIP_EXISTING) {
-        const existing = await prisma.documentationSystem.findUnique({ where: { id: payload.id } });
+        const existing = await prisma.documentationSystem.findUnique({
+          where: { id: payload.id },
+        });
         if (existing) {
           summary.skipped += 1;
           continue;
@@ -160,20 +188,30 @@ async function migrateSystems(prisma) {
       await prisma.documentationSystem.upsert({
         where: { id: payload.id },
         create: payload,
-        update: payload
+        update: payload,
       });
 
       summary.created += 1;
     } catch (error) {
-      summary.errors.push({ id: payload.id, name: payload.name, reason: error.message });
-      log(`  ✗ Failed to migrate system "${payload.name}": ${error.message}`, 'red');
+      summary.errors.push({
+        id: payload.id,
+        name: payload.name,
+        reason: error.message,
+      });
+      log(
+        `  ✗ Failed to migrate system "${payload.name}": ${error.message}`,
+        "red",
+      );
     }
   }
 
   if (!DRY_RUN) {
-    log(`✓ Systems migrated: ${summary.created} created/updated, ${summary.skipped} skipped`, 'green');
+    log(
+      `✓ Systems migrated: ${summary.created} created/updated, ${summary.skipped} skipped`,
+      "green",
+    );
     if (summary.errors.length > 0) {
-      log(`✗ Systems with errors: ${summary.errors.length}`, 'red');
+      log(`✗ Systems with errors: ${summary.errors.length}`, "red");
     }
   }
 
@@ -181,22 +219,30 @@ async function migrateSystems(prisma) {
 }
 
 async function migrateIdeas(prisma) {
-  log('\n🧠 Migrating documentation ideas...', 'blue');
-  const rows = await questdbClient.executeSelect('SELECT * FROM documentation_ideas');
-  log(`• Found ${rows.length} ideas in QuestDB`, 'cyan');
+  log("\n🧠 Migrating documentation ideas...", "blue");
+  const rows = await questdbClient.executeSelect(
+    "SELECT * FROM documentation_ideas",
+  );
+  log(`• Found ${rows.length} ideas in QuestDB`, "cyan");
 
-  const summary = { total: rows.length, created: 0, updated: 0, skipped: 0, errors: [] };
+  const summary = {
+    total: rows.length,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    errors: [],
+  };
 
   for (const row of rows) {
     const payload = {
       id: row.id,
       title: row.title,
       description: row.description || null,
-      status: row.status || 'backlog',
-      category: row.category || 'uncategorized',
-      priority: row.priority || 'medium',
+      status: row.status || "backlog",
+      category: row.category || "uncategorized",
+      priority: row.priority || "medium",
       assignedTo: row.assigned_to || null,
-      createdBy: row.created_by || 'system',
+      createdBy: row.created_by || "system",
       systemId: row.system_id || null,
       tags: normalizeTags(row.tags),
       estimatedHours: parseIntSafe(row.estimated_hours),
@@ -205,17 +251,22 @@ async function migrateIdeas(prisma) {
       completedAt: parseDate(row.completed_at),
       designatedTimestamp: parseDate(row.designated_timestamp),
       createdAt: parseDate(row.created_at) ?? new Date(),
-      updatedAt: parseDate(row.updated_at) ?? new Date()
+      updatedAt: parseDate(row.updated_at) ?? new Date(),
     };
 
     if (DRY_RUN) {
-      log(`  [DRY RUN] Would upsert idea "${payload.title}" (${payload.id})`, 'cyan');
+      log(
+        `  [DRY RUN] Would upsert idea "${payload.title}" (${payload.id})`,
+        "cyan",
+      );
       continue;
     }
 
     try {
       if (SKIP_EXISTING) {
-        const existing = await prisma.documentationIdea.findUnique({ where: { id: payload.id } });
+        const existing = await prisma.documentationIdea.findUnique({
+          where: { id: payload.id },
+        });
         if (existing) {
           summary.skipped += 1;
           continue;
@@ -225,20 +276,30 @@ async function migrateIdeas(prisma) {
       await prisma.documentationIdea.upsert({
         where: { id: payload.id },
         create: payload,
-        update: payload
+        update: payload,
       });
 
       summary.created += 1;
     } catch (error) {
-      summary.errors.push({ id: payload.id, title: payload.title, reason: error.message });
-      log(`  ✗ Failed to migrate idea "${payload.title}": ${error.message}`, 'red');
+      summary.errors.push({
+        id: payload.id,
+        title: payload.title,
+        reason: error.message,
+      });
+      log(
+        `  ✗ Failed to migrate idea "${payload.title}": ${error.message}`,
+        "red",
+      );
     }
   }
 
   if (!DRY_RUN) {
-    log(`✓ Ideas migrated: ${summary.created} created/updated, ${summary.skipped} skipped`, 'green');
+    log(
+      `✓ Ideas migrated: ${summary.created} created/updated, ${summary.skipped} skipped`,
+      "green",
+    );
     if (summary.errors.length > 0) {
-      log(`✗ Ideas with errors: ${summary.errors.length}`, 'red');
+      log(`✗ Ideas with errors: ${summary.errors.length}`, "red");
     }
   }
 
@@ -246,11 +307,19 @@ async function migrateIdeas(prisma) {
 }
 
 async function migrateFiles(prisma) {
-  log('\n📎 Migrating documentation files metadata...', 'blue');
-  const rows = await questdbClient.executeSelect('SELECT * FROM documentation_files');
-  log(`• Found ${rows.length} file records in QuestDB`, 'cyan');
+  log("\n📎 Migrating documentation files metadata...", "blue");
+  const rows = await questdbClient.executeSelect(
+    "SELECT * FROM documentation_files",
+  );
+  log(`• Found ${rows.length} file records in QuestDB`, "cyan");
 
-  const summary = { total: rows.length, created: 0, updated: 0, skipped: 0, errors: [] };
+  const summary = {
+    total: rows.length,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    errors: [],
+  };
 
   for (const row of rows) {
     const payload = {
@@ -264,22 +333,27 @@ async function migrateFiles(prisma) {
       ideaId: row.idea_id || null,
       systemId: row.system_id || null,
       uploadedBy: row.uploaded_by || null,
-      isPublic: row.is_public === true || row.is_public === 'true',
+      isPublic: row.is_public === true || row.is_public === "true",
       downloadCount: parseIntSafe(row.download_count) ?? 0,
       checksum: row.checksum || null,
       createdAt: parseDate(row.created_at) ?? new Date(),
       updatedAt: parseDate(row.updated_at) ?? new Date(),
-      designatedTimestamp: parseDate(row.designated_timestamp)
+      designatedTimestamp: parseDate(row.designated_timestamp),
     };
 
     if (DRY_RUN) {
-      log(`  [DRY RUN] Would upsert file "${payload.originalName}" (${payload.id})`, 'cyan');
+      log(
+        `  [DRY RUN] Would upsert file "${payload.originalName}" (${payload.id})`,
+        "cyan",
+      );
       continue;
     }
 
     try {
       if (SKIP_EXISTING) {
-        const existing = await prisma.documentationFile.findUnique({ where: { id: payload.id } });
+        const existing = await prisma.documentationFile.findUnique({
+          where: { id: payload.id },
+        });
         if (existing) {
           summary.skipped += 1;
           continue;
@@ -289,20 +363,30 @@ async function migrateFiles(prisma) {
       await prisma.documentationFile.upsert({
         where: { id: payload.id },
         create: payload,
-        update: payload
+        update: payload,
       });
 
       summary.created += 1;
     } catch (error) {
-      summary.errors.push({ id: payload.id, filename: payload.originalName, reason: error.message });
-      log(`  ✗ Failed to migrate file "${payload.originalName}": ${error.message}`, 'red');
+      summary.errors.push({
+        id: payload.id,
+        filename: payload.originalName,
+        reason: error.message,
+      });
+      log(
+        `  ✗ Failed to migrate file "${payload.originalName}": ${error.message}`,
+        "red",
+      );
     }
   }
 
   if (!DRY_RUN) {
-    log(`✓ Files migrated: ${summary.created} created/updated, ${summary.skipped} skipped`, 'green');
+    log(
+      `✓ Files migrated: ${summary.created} created/updated, ${summary.skipped} skipped`,
+      "green",
+    );
     if (summary.errors.length > 0) {
-      log(`✗ Files with errors: ${summary.errors.length}`, 'red');
+      log(`✗ Files with errors: ${summary.errors.length}`, "red");
     }
   }
 
@@ -310,16 +394,16 @@ async function migrateFiles(prisma) {
 }
 
 async function main() {
-  log('╔════════════════════════════════════════════════════════════╗', 'cyan');
-  log('║  QuestDB → PostgreSQL Migration (Documentation Data)       ║', 'cyan');
-  log('╚════════════════════════════════════════════════════════════╝', 'cyan');
+  log("╔════════════════════════════════════════════════════════════╗", "cyan");
+  log("║  QuestDB → PostgreSQL Migration (Documentation Data)       ║", "cyan");
+  log("╚════════════════════════════════════════════════════════════╝", "cyan");
 
   if (DRY_RUN) {
-    log('⚠️  DRY RUN MODE - No changes will be made to PostgreSQL', 'yellow');
+    log("⚠️  DRY RUN MODE - No changes will be made to PostgreSQL", "yellow");
   }
 
   if (SKIP_EXISTING) {
-    log('ℹ️  Existing records will be preserved (skip-existing)', 'yellow');
+    log("ℹ️  Existing records will be preserved (skip-existing)", "yellow");
   }
 
   ensureDatabaseUrl();
@@ -327,19 +411,19 @@ async function main() {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: DATABASE_URL
-      }
-    }
+        url: DATABASE_URL,
+      },
+    },
   });
 
   try {
     if (!DRY_RUN) {
       await prisma.$connect();
-      log('✓ Connected to PostgreSQL via Prisma', 'green');
+      log("✓ Connected to PostgreSQL via Prisma", "green");
     }
 
     await questdbClient.initialize();
-    log('✓ Connected to QuestDB', 'green');
+    log("✓ Connected to QuestDB", "green");
 
     if (TRUNCATE_FIRST) {
       await truncateTables(prisma);
@@ -348,18 +432,20 @@ async function main() {
     const results = {
       systems: await migrateSystems(prisma),
       ideas: await migrateIdeas(prisma),
-      files: await migrateFiles(prisma)
+      files: await migrateFiles(prisma),
     };
 
     if (!DRY_RUN) {
-      log('\n✅ Migration completed successfully', 'green');
+      log("\n✅ Migration completed successfully", "green");
     } else {
-      log('\nℹ️  Dry run finished', 'cyan');
+      log("\nℹ️  Dry run finished", "cyan");
     }
 
-    log('\nSummary:', 'blue');
+    log("\nSummary:", "blue");
     for (const [entity, summary] of Object.entries(results)) {
-      log(`• ${entity}: total=${summary.total}, migrated=${summary.created}, skipped=${summary.skipped}, errors=${summary.errors.length}`);
+      log(
+        `• ${entity}: total=${summary.total}, migrated=${summary.created}, skipped=${summary.skipped}, errors=${summary.errors.length}`,
+      );
     }
   } finally {
     if (!DRY_RUN) {
@@ -373,7 +459,7 @@ async function main() {
 }
 
 main().catch((error) => {
-  log('\n✗ Migration failed', 'red');
-  log(error.stack || error.message, 'red');
+  log("\n✗ Migration failed", "red");
+  log(error.stack || error.message, "red");
   process.exit(1);
 });

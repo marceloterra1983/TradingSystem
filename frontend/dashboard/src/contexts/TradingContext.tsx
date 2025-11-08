@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useCallback, useState } from 'react';
-import { TradingData } from '../hooks/useTradingData';
+import React, { createContext, useContext, useCallback, useState } from "react";
+import { TradingData } from "../hooks/useTradingData";
 
 // ✅ Context API seguindo as regras React do Playbooks
 
@@ -31,7 +31,7 @@ const TradingContext = createContext<TradingContextType | undefined>(undefined);
 export function useTradingContext(): TradingContextType {
   const context = useContext(TradingContext);
   if (context === undefined) {
-    throw new Error('useTradingContext must be used within TradingProvider');
+    throw new Error("useTradingContext must be used within TradingProvider");
   }
   return context;
 }

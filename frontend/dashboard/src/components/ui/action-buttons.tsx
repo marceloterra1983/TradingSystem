@@ -1,6 +1,6 @@
-import { Button } from './button';
-import { Eye, Edit2, Trash2, Check, X, Plus } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { Button } from "./button";
+import { Eye, Edit2, Trash2, Check, X, Plus } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 /**
  * Standardized Action Button Components
@@ -41,17 +41,17 @@ export function ActionButtons({
   onDelete,
   onCheck,
   onUncheck,
-  viewTooltip = 'Visualizar',
-  editTooltip = 'Editar',
-  deleteTooltip = 'Deletar',
-  checkTooltip = 'Verificar',
-  uncheckTooltip = 'Desmarcar',
+  viewTooltip = "Visualizar",
+  editTooltip = "Editar",
+  deleteTooltip = "Deletar",
+  checkTooltip = "Verificar",
+  uncheckTooltip = "Desmarcar",
   editDisabled = false,
   deleteDisabled = false,
   className,
 }: ActionButtonsProps) {
   return (
-    <div className={cn('flex items-center gap-1', className)}>
+    <div className={cn("flex items-center gap-1", className)}>
       {onView && (
         <Button
           variant="ghost"
@@ -131,7 +131,7 @@ interface ActionButtonProps {
 export function ViewButton({
   onClick,
   disabled,
-  tooltip = 'Visualizar',
+  tooltip = "Visualizar",
   className,
 }: ActionButtonProps) {
   return (
@@ -139,7 +139,7 @@ export function ViewButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800',
+        "h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800",
         className,
       )}
       onClick={onClick}
@@ -154,7 +154,7 @@ export function ViewButton({
 export function EditButton({
   onClick,
   disabled,
-  tooltip = 'Editar',
+  tooltip = "Editar",
   className,
 }: ActionButtonProps) {
   return (
@@ -162,7 +162,7 @@ export function EditButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800',
+        "h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800",
         className,
       )}
       onClick={onClick}
@@ -177,7 +177,7 @@ export function EditButton({
 export function DeleteButton({
   onClick,
   disabled,
-  tooltip = 'Deletar',
+  tooltip = "Deletar",
   className,
 }: ActionButtonProps) {
   return (
@@ -185,7 +185,7 @@ export function DeleteButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'h-10 w-10 p-0 hover:bg-red-50 dark:hover:bg-red-950 text-red-600 hover:text-red-700',
+        "h-10 w-10 p-0 hover:bg-red-50 dark:hover:bg-red-950 text-red-600 hover:text-red-700",
         className,
       )}
       onClick={onClick}
@@ -200,7 +200,7 @@ export function DeleteButton({
 export function CheckButton({
   onClick,
   disabled,
-  tooltip = 'Verificar',
+  tooltip = "Verificar",
   className,
 }: ActionButtonProps) {
   return (
@@ -208,7 +208,7 @@ export function CheckButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'h-10 w-10 p-0 hover:bg-green-50 dark:hover:bg-green-950 text-green-600 hover:text-green-700',
+        "h-10 w-10 p-0 hover:bg-green-50 dark:hover:bg-green-950 text-green-600 hover:text-green-700",
         className,
       )}
       onClick={onClick}
@@ -223,7 +223,7 @@ export function CheckButton({
 export function UncheckButton({
   onClick,
   disabled,
-  tooltip = 'Desmarcar',
+  tooltip = "Desmarcar",
   className,
 }: ActionButtonProps) {
   return (
@@ -231,7 +231,7 @@ export function UncheckButton({
       variant="ghost"
       size="sm"
       className={cn(
-        'h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600',
+        "h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600",
         className,
       )}
       onClick={onClick}
@@ -246,14 +246,14 @@ export function UncheckButton({
 export function AddButton({
   onClick,
   disabled,
-  tooltip = 'Adicionar',
+  tooltip = "Adicionar",
   className,
 }: ActionButtonProps) {
   return (
     <Button
       variant="default"
       size="sm"
-      className={cn('h-10 w-10 p-0', className)}
+      className={cn("h-10 w-10 p-0", className)}
       onClick={onClick}
       disabled={disabled}
       title={tooltip}

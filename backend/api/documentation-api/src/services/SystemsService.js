@@ -1,5 +1,5 @@
-import systemsRepository from '../repositories/SystemsRepository.js';
-import { logger } from '../config/logger.js';
+import systemsRepository from "../repositories/SystemsRepository.js";
+import { logger } from "../config/logger.js";
 
 /**
  * Service for managing documentation systems
@@ -20,27 +20,27 @@ export class SystemsService {
       // Check if system with same name already exists
       const existing = await this.repository.findAll({ name: systemData.name });
       if (existing.length > 0) {
-        throw new Error('System with this name already exists');
+        throw new Error("System with this name already exists");
       }
 
       // Add audit trail
       const system = await this.repository.create({
         ...systemData,
-        created_by: userId
+        created_by: userId,
       });
 
-      logger.info('System created successfully', {
+      logger.info("System created successfully", {
         systemId: system.id,
         name: system.name,
-        userId
+        userId,
       });
 
       return system;
     } catch (error) {
-      logger.error('Failed to create system', {
+      logger.error("Failed to create system", {
         error: error.message,
         data: systemData,
-        userId
+        userId,
       });
       throw error;
     }
@@ -53,13 +53,13 @@ export class SystemsService {
     try {
       const system = await this.repository.findById(id);
       if (!system) {
-        throw new Error('System not found');
+        throw new Error("System not found");
       }
       return system;
     } catch (error) {
-      logger.error('Failed to get system by ID', {
+      logger.error("Failed to get system by ID", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -72,9 +72,9 @@ export class SystemsService {
     try {
       return await this.repository.findAll(filters);
     } catch (error) {
-      logger.error('Failed to get all systems', {
+      logger.error("Failed to get all systems", {
         error: error.message,
-        filters
+        filters,
       });
       throw error;
     }
@@ -88,7 +88,7 @@ export class SystemsService {
       // Check if system exists
       const existing = await this.repository.findById(id);
       if (!existing) {
-        throw new Error('System not found');
+        throw new Error("System not found");
       }
 
       // Validate update data
@@ -97,19 +97,19 @@ export class SystemsService {
       // Update system
       const updatedSystem = await this.repository.update(id, updateData);
 
-      logger.info('System updated successfully', {
+      logger.info("System updated successfully", {
         systemId: id,
         fields: Object.keys(updateData),
-        userId
+        userId,
       });
 
       return updatedSystem;
     } catch (error) {
-      logger.error('Failed to update system', {
+      logger.error("Failed to update system", {
         error: error.message,
         id,
         updateData,
-        userId
+        userId,
       });
       throw error;
     }
@@ -123,7 +123,7 @@ export class SystemsService {
       // Check if system exists
       const existing = await this.repository.findById(id);
       if (!existing) {
-        throw new Error('System not found');
+        throw new Error("System not found");
       }
 
       // Check if system has associated ideas or files
@@ -131,18 +131,18 @@ export class SystemsService {
 
       await this.repository.delete(id);
 
-      logger.info('System deleted successfully', {
+      logger.info("System deleted successfully", {
         systemId: id,
         systemName: existing.name,
-        userId
+        userId,
       });
 
       return true;
     } catch (error) {
-      logger.error('Failed to delete system', {
+      logger.error("Failed to delete system", {
         error: error.message,
         id,
-        userId
+        userId,
       });
       throw error;
     }
@@ -155,37 +155,37 @@ export class SystemsService {
     try {
       const system = await this.repository.findById(id);
       if (!system) {
-        throw new Error('System not found');
+        throw new Error("System not found");
       }
 
       if (!system.url) {
         return {
-          status: 'unknown',
-          message: 'No URL configured for health check',
-          response_time_ms: null
+          status: "unknown",
+          message: "No URL configured for health check",
+          response_time_ms: null,
         };
       }
 
       const startTime = Date.now();
-      let status = 'online';
+      let status = "online";
       let responseTimeMs = null;
-      let message = 'System is accessible';
+      let message = "System is accessible";
 
       try {
         // Simple HTTP health check
         const response = await fetch(system.url, {
-          method: 'GET',
-          timeout: 10000 // 10 seconds
+          method: "GET",
+          timeout: 10000, // 10 seconds
         });
 
         responseTimeMs = Date.now() - startTime;
 
         if (!response.ok) {
-          status = 'error';
+          status = "error";
           message = `HTTP ${response.status}: ${response.statusText}`;
         }
       } catch (error) {
-        status = 'offline';
+        status = "offline";
         message = error.message;
         responseTimeMs = Date.now() - startTime;
       }
@@ -194,19 +194,19 @@ export class SystemsService {
       await this.repository.update(id, {
         status,
         last_checked: new Date().toISOString(),
-        response_time_ms: responseTimeMs
+        response_time_ms: responseTimeMs,
       });
 
       return {
         status,
         message,
         response_time_ms: responseTimeMs,
-        last_checked: new Date().toISOString()
+        last_checked: new Date().toISOString(),
       };
     } catch (error) {
-      logger.error('Failed to check system health', {
+      logger.error("Failed to check system health", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -219,22 +219,25 @@ export class SystemsService {
     try {
       const systems = await this.repository.findAll();
       const healthChecks = await Promise.allSettled(
-        systems.map(system => this.checkSystemHealth(system.id))
+        systems.map((system) => this.checkSystemHealth(system.id)),
       );
 
       const results = healthChecks.map((result, index) => ({
         system: systems[index],
-        health: result.status === 'fulfilled' ? result.value : {
-          status: 'error',
-          message: result.reason.message,
-          response_time_ms: null
-        }
+        health:
+          result.status === "fulfilled"
+            ? result.value
+            : {
+                status: "error",
+                message: result.reason.message,
+                response_time_ms: null,
+              },
       }));
 
       return results;
     } catch (error) {
-      logger.error('Failed to check all systems health', {
-        error: error.message
+      logger.error("Failed to check all systems health", {
+        error: error.message,
       });
       throw error;
     }
@@ -247,9 +250,9 @@ export class SystemsService {
     try {
       return await this.repository.findByStatus(status);
     } catch (error) {
-      logger.error('Failed to get systems by status', {
+      logger.error("Failed to get systems by status", {
         error: error.message,
-        status
+        status,
       });
       throw error;
     }
@@ -262,9 +265,9 @@ export class SystemsService {
     try {
       return await this.repository.findByType(type);
     } catch (error) {
-      logger.error('Failed to get systems by type', {
+      logger.error("Failed to get systems by type", {
         error: error.message,
-        type
+        type,
       });
       throw error;
     }
@@ -276,14 +279,14 @@ export class SystemsService {
   async searchSystems(query) {
     try {
       if (!query || query.trim().length < 2) {
-        throw new Error('Search query must be at least 2 characters long');
+        throw new Error("Search query must be at least 2 characters long");
       }
 
       return await this.repository.search(query.trim());
     } catch (error) {
-      logger.error('Failed to search systems', {
+      logger.error("Failed to search systems", {
         error: error.message,
-        query
+        query,
       });
       throw error;
     }
@@ -296,8 +299,8 @@ export class SystemsService {
     try {
       return await this.repository.getStatistics();
     } catch (error) {
-      logger.error('Failed to get system statistics', {
-        error: error.message
+      logger.error("Failed to get system statistics", {
+        error: error.message,
       });
       throw error;
     }
@@ -310,32 +313,32 @@ export class SystemsService {
     const errors = [];
 
     if (!data.name || data.name.trim().length === 0) {
-      errors.push('Name is required');
+      errors.push("Name is required");
     }
 
     if (data.name && data.name.length > 255) {
-      errors.push('Name must be less than 255 characters');
+      errors.push("Name must be less than 255 characters");
     }
 
     if (!data.type) {
-      errors.push('Type is required');
+      errors.push("Type is required");
     }
 
-    const validTypes = ['api', 'webapp', 'docs', 'tool'];
+    const validTypes = ["api", "webapp", "docs", "tool"];
     if (data.type && !validTypes.includes(data.type)) {
-      errors.push(`Type must be one of: ${validTypes.join(', ')}`);
+      errors.push(`Type must be one of: ${validTypes.join(", ")}`);
     }
 
     if (data.url && !this.isValidUrl(data.url)) {
-      errors.push('URL must be a valid HTTP/HTTPS URL');
+      errors.push("URL must be a valid HTTP/HTTPS URL");
     }
 
     if (data.description && data.description.length > 1000) {
-      errors.push('Description must be less than 1000 characters');
+      errors.push("Description must be less than 1000 characters");
     }
 
     if (errors.length > 0) {
-      throw new Error(`Validation failed: ${errors.join(', ')}`);
+      throw new Error(`Validation failed: ${errors.join(", ")}`);
     }
   }
 
@@ -346,30 +349,30 @@ export class SystemsService {
     const errors = [];
 
     if (data.name && data.name.trim().length === 0) {
-      errors.push('Name cannot be empty');
+      errors.push("Name cannot be empty");
     }
 
     if (data.name && data.name.length > 255) {
-      errors.push('Name must be less than 255 characters');
+      errors.push("Name must be less than 255 characters");
     }
 
     if (data.type) {
-      const validTypes = ['api', 'webapp', 'docs', 'tool'];
+      const validTypes = ["api", "webapp", "docs", "tool"];
       if (!validTypes.includes(data.type)) {
-        errors.push(`Type must be one of: ${validTypes.join(', ')}`);
+        errors.push(`Type must be one of: ${validTypes.join(", ")}`);
       }
     }
 
     if (data.url && !this.isValidUrl(data.url)) {
-      errors.push('URL must be a valid HTTP/HTTPS URL');
+      errors.push("URL must be a valid HTTP/HTTPS URL");
     }
 
     if (data.description && data.description.length > 1000) {
-      errors.push('Description must be less than 1000 characters');
+      errors.push("Description must be less than 1000 characters");
     }
 
     if (errors.length > 0) {
-      throw new Error(`Validation failed: ${errors.join(', ')}`);
+      throw new Error(`Validation failed: ${errors.join(", ")}`);
     }
   }
 
@@ -379,7 +382,7 @@ export class SystemsService {
   isValidUrl(string) {
     try {
       new URL(string);
-      return string.startsWith('http://') || string.startsWith('https://');
+      return string.startsWith("http://") || string.startsWith("https://");
     } catch (_err) {
       return false;
     }

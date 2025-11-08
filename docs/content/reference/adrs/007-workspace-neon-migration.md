@@ -1,5 +1,6 @@
 ---
 title: "ADR 007: Workspace Database Migration to Neon PostgreSQL"
+tags: [documentation]
 slug: /reference/adrs/007-workspace-neon-migration
 description: Decision record evaluating Neon PostgreSQL as the dedicated database for the Workspace service.
 owner: ArchitectureGuild

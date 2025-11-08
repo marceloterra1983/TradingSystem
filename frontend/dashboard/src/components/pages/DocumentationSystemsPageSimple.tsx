@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { RefreshCw, Server, Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { RefreshCw, Server, Plus } from "lucide-react";
 import documentationService, {
   System,
-} from '../../services/documentationService';
+} from "../../services/documentationService";
 
 export default function DocumentationSystemsPageSimple() {
   const [systems, setSystems] = useState<System[]>([]);
@@ -17,11 +17,11 @@ export default function DocumentationSystemsPageSimple() {
       if (response.success) {
         setSystems(response.data);
       } else {
-        setError('Failed to load systems');
+        setError("Failed to load systems");
       }
     } catch (err) {
       setError((err as Error).message);
-      console.error('Error loading systems:', err);
+      console.error("Error loading systems:", err);
     } finally {
       setLoading(false);
     }
@@ -37,16 +37,16 @@ export default function DocumentationSystemsPageSimple() {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'online':
-        return 'bg-green-500';
-      case 'offline':
-        return 'bg-red-500';
-      case 'maintenance':
-        return 'bg-yellow-500';
-      case 'degraded':
-        return 'bg-orange-500';
+      case "online":
+        return "bg-green-500";
+      case "offline":
+        return "bg-red-500";
+      case "maintenance":
+        return "bg-yellow-500";
+      case "degraded":
+        return "bg-orange-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
@@ -67,7 +67,7 @@ export default function DocumentationSystemsPageSimple() {
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>
@@ -111,7 +111,7 @@ export default function DocumentationSystemsPageSimple() {
                 <div className="flex items-center gap-3">
                   <Server
                     className="h-6 w-6"
-                    style={{ color: system.color || '#3b82f6' }}
+                    style={{ color: system.color || "#3b82f6" }}
                   />
                   <div>
                     <h3 className="font-semibold text-lg">{system.name}</h3>
@@ -127,7 +127,7 @@ export default function DocumentationSystemsPageSimple() {
                     system.status,
                   )}`}
                 >
-                  {system.status || 'unknown'}
+                  {system.status || "unknown"}
                 </span>
               </div>
 
@@ -135,7 +135,7 @@ export default function DocumentationSystemsPageSimple() {
               <div className="space-y-2 text-sm">
                 {system.url && (
                   <div>
-                    <span className="text-gray-500">URL:</span>{' '}
+                    <span className="text-gray-500">URL:</span>{" "}
                     <a
                       href={system.url}
                       target="_blank"
@@ -148,13 +148,13 @@ export default function DocumentationSystemsPageSimple() {
                 )}
                 {system.port && (
                   <div>
-                    <span className="text-gray-500">Port:</span>{' '}
+                    <span className="text-gray-500">Port:</span>{" "}
                     <span className="font-mono">{system.port}</span>
                   </div>
                 )}
                 {system.tags && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {system.tags.split(',').map((tag, idx) => (
+                    {system.tags.split(",").map((tag, idx) => (
                       <span
                         key={idx}
                         className="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
@@ -188,8 +188,8 @@ export default function DocumentationSystemsPageSimple() {
           </div>
           <div className="text-sm text-gray-600">
             <strong>
-              {systems.filter((s) => s.status === 'online').length}
-            </strong>{' '}
+              {systems.filter((s) => s.status === "online").length}
+            </strong>{" "}
             online
           </div>
         </div>

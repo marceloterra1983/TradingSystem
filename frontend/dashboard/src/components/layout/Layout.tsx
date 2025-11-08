@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { LayoutSidebar } from './LayoutSidebar';
-import { LayoutHeader } from './LayoutHeader';
-import { PageContent } from './PageContent';
-import { getPageById, getDefaultPage } from '../../data/navigation';
+import * as React from "react";
+import { LayoutSidebar } from "./LayoutSidebar";
+import { LayoutHeader } from "./LayoutHeader";
+import { PageContent } from "./PageContent";
+import { getPageById, getDefaultPage } from "../../data/navigation";
 import {
   isBrowser,
   safeLocalStorageGet,
   safeLocalStorageSet,
-} from '../../utils/browser';
+} from "../../utils/browser";
 
 export interface LayoutProps {
   children?: React.ReactNode;
@@ -19,15 +19,15 @@ const extractPageIdFromHash = (hash: string): string | null => {
     return null;
   }
   let normalized = hash.trim();
-  if (normalized.startsWith('#/')) {
+  if (normalized.startsWith("#/")) {
     normalized = normalized.slice(2);
-  } else if (normalized.startsWith('#')) {
+  } else if (normalized.startsWith("#")) {
     normalized = normalized.slice(1);
   }
   if (!normalized) {
     return null;
   }
-  const [rawId] = normalized.split('?');
+  const [rawId] = normalized.split("?");
   if (!rawId) {
     return null;
   }
@@ -58,7 +58,7 @@ const extractPageIdFromHash = (hash: string): string | null => {
 export function Layout({ defaultPageId }: LayoutProps) {
   // Sidebar collapse state - always start expanded
   const [isCollapsed, setIsCollapsed] = React.useState(() => {
-    const saved = safeLocalStorageGet('sidebar-collapsed');
+    const saved = safeLocalStorageGet("sidebar-collapsed");
     if (!saved) {
       return false;
     }
@@ -71,7 +71,7 @@ export function Layout({ defaultPageId }: LayoutProps) {
 
   // Sidebar width state
   const [sidebarWidth, setSidebarWidth] = React.useState(() => {
-    const saved = safeLocalStorageGet('sidebar-width');
+    const saved = safeLocalStorageGet("sidebar-width");
     if (!saved) {
       return 280;
     }
@@ -82,7 +82,9 @@ export function Layout({ defaultPageId }: LayoutProps) {
   // Get initial page from hash or default
   const getInitialPage = React.useCallback(() => {
     const fallbackId = defaultPageId || getDefaultPage().id;
-    const hashPageId = isBrowser ? extractPageIdFromHash(window.location.hash) : null;
+    const hashPageId = isBrowser
+      ? extractPageIdFromHash(window.location.hash)
+      : null;
     const targetId = hashPageId || fallbackId;
     return getPageById(targetId)?.id || getDefaultPage().id;
   }, [defaultPageId]);
@@ -100,18 +102,18 @@ export function Layout({ defaultPageId }: LayoutProps) {
       const pageId = extractPageIdFromHash(window.location.hash) || fallbackId;
       setCurrentPageId(getPageById(pageId)?.id || fallbackId);
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
   // Persist sidebar state to localStorage
   React.useEffect(() => {
-    safeLocalStorageSet('sidebar-collapsed', JSON.stringify(isCollapsed));
+    safeLocalStorageSet("sidebar-collapsed", JSON.stringify(isCollapsed));
   }, [isCollapsed]);
 
   // Persist sidebar width to localStorage
   React.useEffect(() => {
-    safeLocalStorageSet('sidebar-width', sidebarWidth.toString());
+    safeLocalStorageSet("sidebar-width", sidebarWidth.toString());
   }, [sidebarWidth]);
 
   // Handle page change with useCallback - update hash

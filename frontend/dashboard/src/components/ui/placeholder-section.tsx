@@ -3,8 +3,8 @@ import {
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardContent,
-} from './collapsible-card';
-import { AlertCircle, Rocket } from 'lucide-react';
+} from "./collapsible-card";
+import { AlertCircle, Rocket } from "lucide-react";
 
 export interface PlaceholderSectionProps {
   cardId: string;
@@ -21,7 +21,7 @@ export interface PlaceholderSectionProps {
 export function PlaceholderSection({
   cardId,
   title,
-  description = 'Esta funcionalidade será implementada em breve.',
+  description = "Esta funcionalidade será implementada em breve.",
   icon,
   defaultCollapsed = false,
 }: PlaceholderSectionProps) {

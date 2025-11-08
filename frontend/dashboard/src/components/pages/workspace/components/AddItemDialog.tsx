@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,32 +6,30 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../ui/dialog';
-import { Button } from '../../../ui/button';
-import { Input } from '../../../ui/input';
-import { Label } from '../../../ui/label';
-import { Plus, Clock } from 'lucide-react';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
+} from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
+import { Input } from "../../../ui/input";
+import { Label } from "../../../ui/label";
+import { Plus, Clock } from "lucide-react";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
 import type {
   ItemFormState,
   ItemCategory,
   ItemPriority,
-} from '../types/workspace.types';
-import {
-  PRIORITY_CONFIG,
-} from '../constants/workspace.constants';
-import { cn } from '../../../../lib/utils';
+} from "../types/workspace.types";
+import { PRIORITY_CONFIG } from "../constants/workspace.constants";
+import { cn } from "../../../../lib/utils";
 import {
   categoriesService,
   type Category,
-} from '../../../../services/categoriesService';
+} from "../../../../services/categoriesService";
 
 const INITIAL_ITEM_FORM: ItemFormState = {
-  title: '',
-  description: '',
-  category: '', // Will be set to first category from API
-  priority: 'medium',
-  tags: '',
+  title: "",
+  description: "",
+  category: "", // Will be set to first category from API
+  priority: "medium",
+  tags: "",
 };
 
 interface AddItemDialogProps {
@@ -46,7 +44,7 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     text: string;
   } | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -61,7 +59,7 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
         setLoadingCategories(true);
         const data = await categoriesService.getCategories({
           active_only: true,
-          order_by: 'display_order',
+          order_by: "display_order",
         });
         setCategories(data);
 
@@ -70,7 +68,7 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
           setFormData((prev) => ({ ...prev, category: data[0].name }));
         }
       } catch (error) {
-        console.error('Failed to load categories:', error);
+        console.error("Failed to load categories:", error);
         // Fallback to empty array on error
         setCategories([]);
       } finally {
@@ -88,13 +86,13 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
 
     try {
       const tagsArray = formData.tags
-        .split(',')
+        .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
       const created = await createItem({ ...formData, tags: tagsArray });
 
       setMessage({
-        type: 'success',
+        type: "success",
         text: `Item "${created.title}" criado com sucesso!`,
       });
 
@@ -104,10 +102,10 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
         setFormData({ ...INITIAL_ITEM_FORM });
       }, 2000);
     } catch (error) {
-      console.error('Failed to create item:', error);
+      console.error("Failed to create item:", error);
       setMessage({
-        type: 'error',
-        text: 'Erro ao criar item. Verifique a consola.',
+        type: "error",
+        text: "Erro ao criar item. Verifique a consola.",
       });
     } finally {
       setSubmitting(false);
@@ -181,7 +179,7 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
                 ) : categories.length > 0 ? (
                   categories.map((category) => (
                     <option key={category.id} value={category.name}>
-                      {category.name}{' '}
+                      {category.name}{" "}
                       {category.description && `- ${category.description}`}
                     </option>
                   ))
@@ -228,10 +226,10 @@ export function AddItemDialog({ open, onOpenChange }: AddItemDialogProps) {
           {message && (
             <div
               className={cn(
-                'rounded-lg p-4 text-sm',
-                message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-950 dark:border-green-800 dark:text-green-400'
-                  : 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400',
+                "rounded-lg p-4 text-sm",
+                message.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-950 dark:border-green-800 dark:text-green-400"
+                  : "bg-red-50 text-red-800 border border-red-200 dark:bg-red-950 dark:border-red-800 dark:text-red-400",
               )}
             >
               {message.text}

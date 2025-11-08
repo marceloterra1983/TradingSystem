@@ -7,30 +7,32 @@
  * @module config/cors
  */
 
-import cors, { CorsOptions } from 'cors';
-import { Request } from 'express';
-import { logger } from '../utils/logger';
+import cors, { CorsOptions } from "cors";
+import { Request } from "express";
+import { logger } from "../utils/logger";
 
 /**
  * Allowed origins based on environment
  */
 const getAllowedOrigins = (): string[] => {
-  const env = process.env.NODE_ENV || 'development';
+  const env = process.env.NODE_ENV || "development";
 
-  if (env === 'production') {
+  if (env === "production") {
     // Production: Only allow configured frontend URL
     const frontendUrl = process.env.FRONTEND_URL;
 
     if (!frontendUrl) {
-      throw new Error('FRONTEND_URL environment variable must be set in production');
+      throw new Error(
+        "FRONTEND_URL environment variable must be set in production",
+      );
     }
 
     return [frontendUrl];
   }
 
-  if (env === 'test') {
+  if (env === "test") {
     // Test: Allow all origins
-    return ['*'];
+    return ["*"];
   }
 
   // Development: Prefer registry-provided URLs, fallback to localhost hostnames without hardcoded literals
@@ -45,7 +47,7 @@ const getAllowedOrigins = (): string[] => {
     return registryOrigins;
   }
 
-  const defaultHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
+  const defaultHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || "localhost";
   const legacyPorts = [3103, 3000, 3400];
   return legacyPorts.map((port) => `http://${defaultHost}:${port}`);
 };
@@ -58,7 +60,7 @@ const getAllowedOrigins = (): string[] => {
  */
 const validateOrigin = (
   origin: string | undefined,
-  callback: (err: Error | null, allowed?: boolean) => void
+  callback: (err: Error | null, allowed?: boolean) => void,
 ): void => {
   const allowedOrigins = getAllowedOrigins();
 
@@ -68,10 +70,10 @@ const validateOrigin = (
   }
 
   // Check if origin is allowed
-  if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+  if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
     callback(null, true);
   } else {
-    logger.warn('CORS: Blocked request from unauthorized origin', { origin });
+    logger.warn("CORS: Blocked request from unauthorized origin", { origin });
     callback(new Error(`Origin ${origin} not allowed by CORS`));
   }
 };
@@ -87,30 +89,30 @@ export const corsOptions: CorsOptions = {
   credentials: true,
 
   // Allowed HTTP methods
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
   // Allowed request headers
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'X-Request-ID',
-    'X-Internal-Auth',
-    'Accept',
-    'Origin',
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "X-Request-ID",
+    "X-Internal-Auth",
+    "Accept",
+    "Origin",
   ],
 
   // Expose custom headers to the client
   exposedHeaders: [
-    'X-Total-Count',
-    'X-Page-Count',
-    'X-Per-Page',
-    'X-Current-Page',
-    'X-Cache-Status',
-    'X-Request-ID',
-    'X-RateLimit-Limit',
-    'X-RateLimit-Remaining',
-    'X-RateLimit-Reset',
+    "X-Total-Count",
+    "X-Page-Count",
+    "X-Per-Page",
+    "X-Current-Page",
+    "X-Cache-Status",
+    "X-Request-ID",
+    "X-RateLimit-Limit",
+    "X-RateLimit-Remaining",
+    "X-RateLimit-Reset",
   ],
 
   // Cache preflight requests for 24 hours
@@ -144,14 +146,14 @@ export const dynamicCors = (options: Partial<CorsOptions> = {}) => {
 export const strictCors = (): CorsOptions => ({
   ...corsOptions,
   origin: (origin, callback) => {
-    const env = process.env.NODE_ENV || 'development';
+    const env = process.env.NODE_ENV || "development";
 
     // In production, only allow the configured frontend URL
-    if (env === 'production') {
+    if (env === "production") {
       const frontendUrl = process.env.FRONTEND_URL;
 
       if (!frontendUrl) {
-        return callback(new Error('FRONTEND_URL not configured'));
+        return callback(new Error("FRONTEND_URL not configured"));
       }
 
       if (origin === frontendUrl) {
@@ -174,7 +176,7 @@ export const strictCors = (): CorsOptions => ({
  */
 export const publicCors = (): CorsOptions => ({
   ...corsOptions,
-  origin: '*',
+  origin: "*",
   credentials: false,
 });
 
@@ -184,8 +186,8 @@ export const publicCors = (): CorsOptions => ({
 export const logCorsConfig = (): void => {
   const allowedOrigins = getAllowedOrigins();
 
-  logger.info('CORS configuration initialized', {
-    environment: process.env.NODE_ENV || 'development',
+  logger.info("CORS configuration initialized", {
+    environment: process.env.NODE_ENV || "development",
     allowedOrigins,
     credentials: corsOptions.credentials,
     methods: corsOptions.methods,
@@ -197,30 +199,37 @@ export const logCorsConfig = (): void => {
  *
  * Adds additional security headers beyond CORS
  */
-import { Request as ExpressRequest, Response, NextFunction } from 'express';
+import { Request as ExpressRequest, Response, NextFunction } from "express";
 
-export const securityHeaders = (req: ExpressRequest, res: Response, next: NextFunction): void => {
+export const securityHeaders = (
+  req: ExpressRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
   // Prevent clickjacking
-  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader("X-Frame-Options", "DENY");
 
   // Prevent MIME type sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader("X-Content-Type-Options", "nosniff");
 
   // Enable XSS protection
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader("X-XSS-Protection", "1; mode=block");
 
   // Referrer policy
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
   // Content Security Policy (adjust based on your needs)
   res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
   );
 
   // Strict Transport Security (HTTPS only)
-  if (process.env.NODE_ENV === 'production') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+    );
   }
 
   next();

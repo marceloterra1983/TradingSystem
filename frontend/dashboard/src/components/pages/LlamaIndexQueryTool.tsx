@@ -1,25 +1,25 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   llamaIndexService,
   type QueryResponse,
   type SearchResultItem,
   type GpuPolicyResponse,
   type LlamaIndexGpuMetadata,
-} from '../../services/llamaIndexService';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Checkbox } from '../ui/checkbox';
-import { Badge } from '../ui/badge';
-import { Clock, Trash2 } from 'lucide-react';
+} from "../../services/llamaIndexService";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Checkbox } from "../ui/checkbox";
+import { Badge } from "../ui/badge";
+import { Clock, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import type { Collection } from '../../types/collections';
+} from "../ui/select";
+import type { Collection } from "../../types/collections";
 
 interface LlamaIndexQueryToolProps {
   collection?: string | null;
@@ -31,7 +31,7 @@ interface HistoryItem {
   id: string;
   query: string;
   timestamp: Date;
-  type: 'llm' | 'search';
+  type: "llm" | "search";
   answer?: QueryResponse;
   results?: SearchResultItem[];
   error?: string;
@@ -39,10 +39,10 @@ interface HistoryItem {
 }
 
 const formatSeconds = (value?: number | null): string => {
-  if (value == null) return '-';
+  if (value == null) return "-";
   const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return '-';
-  if (numeric < 0.01) return '<0.01s';
+  if (!Number.isFinite(numeric)) return "-";
+  if (numeric < 0.01) return "<0.01s";
   return `${numeric.toFixed(2)}s`;
 };
 
@@ -59,7 +59,7 @@ function GpuSummary({
       <Badge variant="outline">GPU</Badge>
       <span>Espera {formatSeconds(gpu.waitTimeSeconds)}</span>
       <span>Concorrência {gpu.maxConcurrency}</span>
-      <span>{forced ? 'Forçado' : 'Modo automático'}</span>
+      <span>{forced ? "Forçado" : "Modo automático"}</span>
       {lockEnabled && <span>Lock {gpu.lock?.path}</span>}
     </div>
   );
@@ -70,7 +70,7 @@ export function LlamaIndexQueryTool({
   collections,
   onCollectionChange,
 }: LlamaIndexQueryToolProps): JSX.Element {
-  const [text, setText] = React.useState('Explain our docs structure');
+  const [text, setText] = React.useState("Explain our docs structure");
   const [maxResults, setMaxResults] = React.useState(3);
   const [useLlm, setUseLlm] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -95,7 +95,7 @@ export function LlamaIndexQueryTool({
         const message =
           err instanceof Error
             ? err.message
-            : 'Falha ao carregar política de GPU';
+            : "Falha ao carregar política de GPU";
         setGpuPolicyError(message);
       });
   }, [collection]);
@@ -140,7 +140,7 @@ export function LlamaIndexQueryTool({
           id: queryId,
           query: text,
           timestamp: new Date(),
-          type: 'llm',
+          type: "llm",
           answer: resp,
           collection: resolvedCollection,
         };
@@ -159,7 +159,7 @@ export function LlamaIndexQueryTool({
           id: queryId,
           query: text,
           timestamp: new Date(),
-          type: 'search',
+          type: "search",
           results: items,
           collection: fallbackCollection,
         };
@@ -170,8 +170,8 @@ export function LlamaIndexQueryTool({
         id: queryId,
         query: text,
         timestamp: new Date(),
-        type: useLlm ? 'llm' : 'search',
-        error: e?.message || 'Unknown error',
+        type: useLlm ? "llm" : "search",
+        error: e?.message || "Unknown error",
         collection: selectedCollection ?? null,
       };
       setHistory((prev) => [item, ...prev]);
@@ -181,7 +181,7 @@ export function LlamaIndexQueryTool({
   };
 
   const handleClearHistory = () => {
-    if (confirm('Limpar todo o histórico de queries?')) {
+    if (confirm("Limpar todo o histórico de queries?")) {
       setHistory([]);
     }
   };
@@ -197,12 +197,12 @@ export function LlamaIndexQueryTool({
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
 
-    if (seconds < 60) return 'agora';
+    if (seconds < 60) return "agora";
     if (minutes < 60) return `${minutes}m atrás`;
     if (hours < 24) return `${hours}h atrás`;
-    return date.toLocaleString('pt-BR', {
-      dateStyle: 'short',
-      timeStyle: 'short',
+    return date.toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
     });
   };
 
@@ -223,9 +223,9 @@ export function LlamaIndexQueryTool({
               {collections.map((item) => (
                 <SelectItem key={item.name} value={item.name}>
                   {item.name}
-                  {typeof item.stats?.vectorsCount === 'number'
+                  {typeof item.stats?.vectorsCount === "number"
                     ? ` • ${item.stats.vectorsCount.toLocaleString()} vetores`
-                    : ''}
+                    : ""}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -242,8 +242,8 @@ export function LlamaIndexQueryTool({
             <Badge variant="outline">GPU</Badge>
             <span className="font-semibold">
               {gpuPolicy.policy.forced
-                ? 'Execução forçada na GPU'
-                : 'GPU opcional'}
+                ? "Execução forçada na GPU"
+                : "GPU opcional"}
             </span>
           </div>
           <span>Concorrência máx.: {gpuPolicy.maxConcurrency}</span>
@@ -269,7 +269,7 @@ export function LlamaIndexQueryTool({
             onChange={(e) => setText(e.target.value)}
             placeholder="Pergunta ou termos de busca"
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !loading) {
+              if (e.key === "Enter" && !loading) {
                 handleRun();
               }
             }}
@@ -285,7 +285,7 @@ export function LlamaIndexQueryTool({
               max={10}
               value={maxResults}
               onChange={(e) =>
-                setMaxResults(parseInt(e.target.value || '1', 10))
+                setMaxResults(parseInt(e.target.value || "1", 10))
               }
             />
           </div>
@@ -299,7 +299,7 @@ export function LlamaIndexQueryTool({
             </span>
           </label>
           <Button onClick={handleRun} disabled={loading} className="self-end">
-            {loading ? 'Executando…' : 'Executar'}
+            {loading ? "Executando…" : "Executar"}
           </Button>
         </div>
       </div>
@@ -336,8 +336,8 @@ export function LlamaIndexQueryTool({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={item.type === 'llm' ? 'default' : 'outline'}>
-                    {item.type === 'llm' ? 'LLM Query' : 'Search'}
+                  <Badge variant={item.type === "llm" ? "default" : "outline"}>
+                    {item.type === "llm" ? "LLM Query" : "Search"}
                   </Badge>
                   {item.collection && (
                     <Badge

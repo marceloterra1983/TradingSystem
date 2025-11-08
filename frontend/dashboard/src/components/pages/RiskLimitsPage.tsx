@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Calendar, Shield, AlertTriangle } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Calendar, Shield, AlertTriangle } from "lucide-react";
 
 export function RiskLimitsPage() {
   const sections = [
     {
-      id: 'daily-limits',
+      id: "daily-limits",
       content: (
         <PlaceholderSection
           cardId="limits-daily"
@@ -16,7 +16,7 @@ export function RiskLimitsPage() {
       ),
     },
     {
-      id: 'position-limits',
+      id: "position-limits",
       content: (
         <PlaceholderSection
           cardId="limits-position"
@@ -27,7 +27,7 @@ export function RiskLimitsPage() {
       ),
     },
     {
-      id: 'exposure',
+      id: "exposure",
       content: (
         <PlaceholderSection
           cardId="limits-exposure"

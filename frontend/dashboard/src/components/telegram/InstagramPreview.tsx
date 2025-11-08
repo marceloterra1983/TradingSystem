@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Instagram, ExternalLink, Play } from 'lucide-react';
+import React, { useState } from "react";
+import { Instagram, ExternalLink, Play } from "lucide-react";
 
 interface InstagramAuthor {
   name: string;
@@ -14,10 +14,10 @@ interface InstagramThumbnail {
 
 interface InstagramPreviewProps {
   preview: {
-    type: 'instagram';
+    type: "instagram";
     url: string;
     postId: string;
-    postType: 'post' | 'reel';
+    postType: "post" | "reel";
     title?: string;
     author: InstagramAuthor;
     thumbnail: InstagramThumbnail;
@@ -26,7 +26,9 @@ interface InstagramPreviewProps {
   };
 }
 
-export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) => {
+export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
+  preview,
+}) => {
   const [showEmbed, setShowEmbed] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -39,7 +41,9 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
           <div className="flex items-center gap-2">
             <Instagram className="w-5 h-5 text-pink-500" />
             <span className="text-sm font-medium text-white">
-              {preview.postType === 'reel' ? 'Instagram Reel' : 'Instagram Post'}
+              {preview.postType === "reel"
+                ? "Instagram Reel"
+                : "Instagram Post"}
             </span>
           </div>
           <button
@@ -50,7 +54,7 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
             ✕
           </button>
         </div>
-        
+
         <div className="px-3 pt-3">
           <a
             href={preview.url}
@@ -64,11 +68,11 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
           </a>
         </div>
         {/* Instagram iframe embed */}
-        <div className="relative bg-white" style={{ height: '600px' }}>
+        <div className="relative bg-white" style={{ height: "600px" }}>
           <iframe
             className="w-full h-full"
             src={`https://www.instagram.com/p/${preview.postId}/embed/captioned`}
-            title={preview.title || 'Instagram Post'}
+            title={preview.title || "Instagram Post"}
             frameBorder="0"
             scrolling="no"
             allowTransparency
@@ -82,7 +86,7 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
   return (
     <div className="mt-4 border border-slate-700 rounded-lg overflow-hidden bg-slate-800/50 hover:border-pink-500 transition-colors">
       {/* Thumbnail */}
-      <div 
+      <div
         className="relative cursor-pointer group"
         onClick={() => setShowEmbed(true)}
       >
@@ -90,22 +94,22 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
           <>
             <img
               src={preview.thumbnail.url}
-              alt={preview.title || 'Instagram Post'}
+              alt={preview.title || "Instagram Post"}
               className="w-full aspect-square object-cover"
               onError={() => setImageError(true)}
             />
-            
+
             {/* Overlay for reels (play button) */}
-            {preview.postType === 'reel' && (
+            {preview.postType === "reel" && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
                 <div className="w-20 h-20 rounded-full bg-pink-600/90 group-hover:bg-pink-600 flex items-center justify-center shadow-lg transition-all group-hover:scale-110">
                   <Play className="w-10 h-10 text-white ml-1" fill="white" />
                 </div>
               </div>
             )}
-            
+
             {/* Instagram icon overlay for regular posts */}
-            {preview.postType === 'post' && (
+            {preview.postType === "post" && (
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="bg-black/60 backdrop-blur-sm rounded-lg p-2">
                   <Instagram className="w-5 h-5 text-white" />
@@ -133,10 +137,11 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
             )}
             {preview.basic && (
               <p className="text-sm text-slate-400 mb-1">
-                {preview.postType === 'reel' ? '🎬 Reel' : '📸 Post'} do Instagram
+                {preview.postType === "reel" ? "🎬 Reel" : "📸 Post"} do
+                Instagram
               </p>
             )}
-            {preview.author.name && preview.author.name !== 'Instagram' && (
+            {preview.author.name && preview.author.name !== "Instagram" && (
               <a
                 href={preview.author.url}
                 target="_blank"
@@ -149,7 +154,8 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
             )}
             {preview.basic && (
               <p className="text-xs text-slate-500 mt-1">
-                Preview básico (configure INSTAGRAM_ACCESS_TOKEN para preview rico)
+                Preview básico (configure INSTAGRAM_ACCESS_TOKEN para preview
+                rico)
               </p>
             )}
           </div>
@@ -168,4 +174,3 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({ preview }) =
     </div>
   );
 };
-

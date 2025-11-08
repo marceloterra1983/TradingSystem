@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { FileText } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { FileText } from "lucide-react";
 
 export function ADRPage() {
   const sections = [
     {
-      id: 'adr-list',
+      id: "adr-list",
       content: (
         <PlaceholderSection
           cardId="adr-list"

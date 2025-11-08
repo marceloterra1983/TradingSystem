@@ -1,10 +1,10 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
-import { AlertTriangle, Loader2, X } from 'lucide-react';
-import documentationService from '../../services/documentationService';
+import { useEffect, useState, lazy, Suspense } from "react";
+import { AlertTriangle, Loader2, X } from "lucide-react";
+import documentationService from "../../services/documentationService";
 
 // Lazy load markdown rendering to reduce bundle size
 const MarkdownPreview = lazy(() =>
-  import('../ui/MarkdownPreview').then((mod) => ({
+  import("../ui/MarkdownPreview").then((mod) => ({
     default: mod.MarkdownPreview,
   })),
 );
@@ -28,32 +28,32 @@ export function DocPreviewModal({
   url,
   docPath,
 }: DocPreviewModalProps) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Close on ESC key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("keydown", handleEscape);
       // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) {
-      setContent('');
+      setContent("");
       setError(null);
     }
   }, [isOpen]);
@@ -68,23 +68,23 @@ export function DocPreviewModal({
     const load = async () => {
       setLoading(true);
       setError(null);
-      setContent('');
+      setContent("");
 
       try {
         const raw = await documentationService.getDocContent(docPath);
         if (!cancelled) {
           const stripped = raw.replace(
             /^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u,
-            '',
+            "",
           );
           setContent(stripped.trim());
         }
       } catch (err) {
         if (!cancelled) {
           setError(
-            err instanceof Error ? err.message : 'Falha ao carregar documento',
+            err instanceof Error ? err.message : "Falha ao carregar documento",
           );
-          setContent('');
+          setContent("");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -170,10 +170,10 @@ export function DocPreviewModal({
         {/* Footer */}
         <div className="px-6 py-3 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-sm">
           <div className="text-slate-600 dark:text-slate-400">
-            Pressione{' '}
+            Pressione{" "}
             <kbd className="px-2 py-1 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 font-mono text-xs">
               ESC
-            </kbd>{' '}
+            </kbd>{" "}
             ou clique fora para fechar
           </div>
           <a

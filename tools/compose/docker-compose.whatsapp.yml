@@ -1,0 +1,542 @@
+# ==============================================================================
+# WhatsApp Gateway Stack - Complete Message Storage & Sync
+# ==============================================================================
+# Architecture: Similar to Telegram Stack
+# Components: TimescaleDB + Redis + MinIO + WhatsApp Gateway + Sync Service
+# Purpose: Full WhatsApp message persistence with auto-sync
+# ==============================================================================
+
+name: whatsapp-stack
+
+services:
+  # ============================================================================
+  # 1. TimescaleDB - Dedicated Database for WhatsApp
+  # ============================================================================
+  whatsapp-timescaledb:
+    container_name: whatsapp-timescale
+    image: timescale/timescaledb:latest-pg16
+    platform: linux/amd64
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      POSTGRES_DB: whatsapp_gateway
+      POSTGRES_USER: ${WHATSAPP_DB_USER:-whatsapp}
+      POSTGRES_PASSWORD: ${WHATSAPP_DB_PASSWORD}
+      TIMESCALEDB_TELEMETRY: 'off'
+      
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: >-
+        --encoding=UTF-8
+        --locale=C
+        --data-checksums
+    
+    ports:
+      - "${WHATSAPP_DB_PORT:-5435}:5432"
+    
+    volumes:
+      - whatsapp-timescaledb-data:/var/lib/postgresql/data
+      - ../../backend/data/timescaledb/whatsapp-gateway:/docker-entrypoint-initdb.d:ro
+      - ./whatsapp/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c shared_buffers=512MB
+      -c effective_cache_size=1536MB
+      -c maintenance_work_mem=128MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c max_connections=100
+      -c shared_preload_libraries=timescaledb,pg_stat_statements
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U whatsapp -d whatsapp_gateway && psql -U whatsapp -d whatsapp_gateway -c "SELECT 1" > /dev/null 2>&1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    
+    networks:
+      - whatsapp_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=timescaledb"
+      - "com.tradingsystem.component=database"
+      - "com.tradingsystem.description=Dedicated TimescaleDB for WhatsApp Gateway"
+
+  # ============================================================================
+  # 2. PgBouncer - Connection Pooling Layer
+  # ============================================================================
+  whatsapp-pgbouncer:
+    container_name: whatsapp-pgbouncer
+    image: pgbouncer/pgbouncer:latest
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      - DATABASES_HOST=whatsapp-timescaledb
+      - DATABASES_PORT=5432
+      - DATABASES_USER=${WHATSAPP_DB_USER:-whatsapp}
+      - DATABASES_PASSWORD=${WHATSAPP_DB_PASSWORD}
+      - DATABASES_DBNAME=whatsapp_gateway
+    
+    ports:
+      - "${WHATSAPP_PGBOUNCER_PORT:-6435}:6432"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    depends_on:
+      whatsapp-timescaledb:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ['CMD-SHELL', 'nc -z localhost 6432']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - whatsapp_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=pgbouncer"
+      - "com.tradingsystem.component=connection-pooler"
+      - "com.tradingsystem.description=Connection pooling for TimescaleDB"
+
+  # ============================================================================
+  # 3. Redis - Cache & Sync Queue
+  # ============================================================================
+  whatsapp-redis:
+    container_name: whatsapp-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    command: >
+      redis-server
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --tcp-backlog 511
+      --timeout 0
+      --tcp-keepalive 300
+      --maxclients 1000
+    
+    ports:
+      - "${WHATSAPP_REDIS_PORT:-6380}:6379"
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - whatsapp_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.description=Redis for caching and sync queue"
+
+  # ============================================================================
+  # 4. MinIO - Media Storage (S3-compatible)
+  # ============================================================================
+  whatsapp-minio:
+    container_name: whatsapp-minio
+    image: quay.io/minio/minio:latest
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      MINIO_ROOT_USER: ${WHATSAPP_MINIO_ROOT_USER:-whatsappadmin}
+      MINIO_ROOT_PASSWORD: ${WHATSAPP_MINIO_ROOT_PASSWORD:-whatsappsecret}
+      MINIO_REGION: ${WHATSAPP_MINIO_REGION:-us-east-1}
+    
+    command: server /data --console-address ":9001"
+    
+    ports:
+      - "${WHATSAPP_MINIO_API_PORT:-9302}:9000"
+      - "${WHATSAPP_MINIO_CONSOLE_PORT:-9303}:9001"
+    
+    volumes:
+      - whatsapp-minio-data:/data
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    
+    networks:
+      - whatsapp_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=storage"
+      - "com.tradingsystem.service=minio"
+      - "com.tradingsystem.description=S3-compatible media storage"
+
+  # ============================================================================
+  # 5. MinIO Bucket Initialization
+  # ============================================================================
+  whatsapp-minio-init:
+    container_name: whatsapp-minio-init
+    image: quay.io/minio/mc:latest
+    restart: 'no'
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    depends_on:
+      whatsapp-minio:
+        condition: service_healthy
+    
+    entrypoint: /bin/sh
+    command: >
+      -c "
+        set -euo pipefail;
+        mc alias set whatsapp http://whatsapp-minio:9000 ${WHATSAPP_MINIO_ROOT_USER:-whatsappadmin} ${WHATSAPP_MINIO_ROOT_PASSWORD:-whatsappsecret};
+        if ! mc ls whatsapp/${WHATSAPP_MINIO_BUCKET:-whatsapp-media} >/dev/null 2>&1; then
+          mc mb whatsapp/${WHATSAPP_MINIO_BUCKET:-whatsapp-media};
+        fi;
+        mc anonymous set download whatsapp/${WHATSAPP_MINIO_BUCKET:-whatsapp-media};
+        echo 'MinIO bucket initialized successfully';
+      "
+    
+    networks:
+      - whatsapp_backend
+
+  # ============================================================================
+  # 6. WhatsApp Gateway Core (WAHA/Evolution/Custom)
+  # ============================================================================
+  whatsapp-gateway-core:
+    container_name: whatsapp-gateway-core
+    image: ${WHATSAPP_CORE_IMAGE:-devlikeapro/waha:latest-baileys}
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      NODE_ENV: production
+      TZ: ${WHATSAPP_TZ:-America/Sao_Paulo}
+      
+      # API Authentication
+      WAHA_API_KEY: ${WHATSAPP_API_KEY:-changeme-whatsapp-api-key}
+      WAHA_DASHBOARD_ENABLED: ${WHATSAPP_DASHBOARD_ENABLED:-true}
+      WAHA_DASHBOARD_USERNAME: ${WHATSAPP_DASHBOARD_USERNAME:-admin}
+      WAHA_DASHBOARD_PASSWORD: ${WHATSAPP_DASHBOARD_PASSWORD:-changeme}
+      
+      # Database (Session Storage)
+      WHATSAPP_SESSIONS_POSTGRESQL_URL: postgres://${WHATSAPP_DB_USER:-whatsapp}:${WHATSAPP_DB_PASSWORD}@whatsapp-pgbouncer:6432/whatsapp_gateway?sslmode=disable
+      
+      # Media Storage (MinIO)
+      WAHA_MEDIA_STORAGE: S3
+      WAHA_S3_REGION: ${WHATSAPP_MINIO_REGION:-us-east-1}
+      WAHA_S3_BUCKET: ${WHATSAPP_MINIO_BUCKET:-whatsapp-media}
+      WAHA_S3_ENDPOINT: http://whatsapp-minio:9000
+      WAHA_S3_ACCESS_KEY_ID: ${WHATSAPP_MINIO_ROOT_USER:-whatsappadmin}
+      WAHA_S3_SECRET_ACCESS_KEY: ${WHATSAPP_MINIO_ROOT_PASSWORD:-whatsappsecret}
+      WAHA_S3_FORCE_PATH_STYLE: 'true'
+      WAHA_S3_PROXY_FILES: 'true'
+      
+      # Webhook
+      WAHA_HOOK_URL: http://whatsapp-gateway-api:${WHATSAPP_GATEWAY_API_PORT:-4011}/webhooks/messages
+      WAHA_HOOK_EVENTS: ${WHATSAPP_HOOK_EVENTS:-message,message.ack,session.status}
+      WAHA_HOOK_CUSTOM_HEADERS: "X-WHATSAPP-TOKEN:${WHATSAPP_WEBHOOK_TOKEN:-whatsapp-webhook-dev-token}"
+      
+      # Logs
+      WAHA_LOG_FORMAT: JSON
+      WAHA_LOG_LEVEL: ${WHATSAPP_LOG_LEVEL:-info}
+      WAHA_PRINT_QR: ${WHATSAPP_PRINT_QR:-false}
+    
+    ports:
+      - "${WHATSAPP_CORE_PORT:-3311}:3000"
+    
+    volumes:
+      - whatsapp-sessions:/app/.sessions
+    
+    depends_on:
+      whatsapp-pgbouncer:
+        condition: service_healthy
+      whatsapp-redis:
+        condition: service_healthy
+      whatsapp-minio-init:
+        condition: service_completed_successfully
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    
+    networks:
+      - whatsapp_backend
+      - tradingsystem_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=gateway"
+      - "com.tradingsystem.service=core"
+      - "com.tradingsystem.description=WhatsApp core gateway service"
+
+  # ============================================================================
+  # 7. WhatsApp Gateway API - Message Storage & Sync
+  # ============================================================================
+  whatsapp-gateway-api:
+    container_name: whatsapp-gateway-api
+    build:
+      context: ../../backend/api/whatsapp-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      NODE_ENV: production
+      
+      # API Settings
+      WHATSAPP_GATEWAY_API_PORT: ${WHATSAPP_GATEWAY_API_PORT:-4011}
+      WHATSAPP_GATEWAY_API_TOKEN: ${WHATSAPP_GATEWAY_API_TOKEN}
+      WHATSAPP_WEBHOOK_TOKEN: ${WHATSAPP_WEBHOOK_TOKEN:-whatsapp-webhook-dev-token}
+      
+      # Database (via PgBouncer)
+      WHATSAPP_GATEWAY_DB_HOST: whatsapp-pgbouncer
+      WHATSAPP_GATEWAY_DB_PORT: 6432
+      WHATSAPP_GATEWAY_DB_NAME: whatsapp_gateway
+      WHATSAPP_GATEWAY_DB_USER: ${WHATSAPP_DB_USER:-whatsapp}
+      WHATSAPP_GATEWAY_DB_PASSWORD: ${WHATSAPP_DB_PASSWORD}
+      WHATSAPP_GATEWAY_DB_SCHEMA: whatsapp_gateway
+      WHATSAPP_GATEWAY_DB_POOL_MAX: 20
+      WHATSAPP_GATEWAY_DB_IDLE_TIMEOUT_MS: 30000
+      
+      # Redis
+      WHATSAPP_REDIS_HOST: whatsapp-redis
+      WHATSAPP_REDIS_PORT: 6379
+      WHATSAPP_REDIS_ENABLED: 'true'
+      
+      # MinIO
+      WHATSAPP_MINIO_ENDPOINT: http://whatsapp-minio:9000
+      WHATSAPP_MINIO_ACCESS_KEY: ${WHATSAPP_MINIO_ROOT_USER:-whatsappadmin}
+      WHATSAPP_MINIO_SECRET_KEY: ${WHATSAPP_MINIO_ROOT_PASSWORD:-whatsappsecret}
+      WHATSAPP_MINIO_BUCKET: ${WHATSAPP_MINIO_BUCKET:-whatsapp-media}
+      WHATSAPP_MINIO_REGION: ${WHATSAPP_MINIO_REGION:-us-east-1}
+      
+      # WhatsApp Core Service
+      WHATSAPP_CORE_URL: http://whatsapp-gateway-core:3000
+      WHATSAPP_CORE_API_KEY: ${WHATSAPP_API_KEY:-changeme-whatsapp-api-key}
+      
+      # Sync Settings
+      WHATSAPP_SYNC_ENABLED: ${WHATSAPP_SYNC_ENABLED:-true}
+      WHATSAPP_SYNC_INTERVAL_MS: ${WHATSAPP_SYNC_INTERVAL_MS:-300000}
+      WHATSAPP_SYNC_BATCH_SIZE: ${WHATSAPP_SYNC_BATCH_SIZE:-100}
+      WHATSAPP_SYNC_MAX_RETRIES: ${WHATSAPP_SYNC_MAX_RETRIES:-3}
+    
+    ports:
+      - "${WHATSAPP_GATEWAY_API_PORT:-4011}:4011"
+    
+    depends_on:
+      whatsapp-pgbouncer:
+        condition: service_healthy
+      whatsapp-redis:
+        condition: service_healthy
+      whatsapp-minio-init:
+        condition: service_completed_successfully
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4011/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    networks:
+      - whatsapp_backend
+      - tradingsystem_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=api"
+      - "com.tradingsystem.service=gateway-api"
+      - "com.tradingsystem.description=REST API for message storage and sync"
+
+  # ============================================================================
+  # 8. WhatsApp Sync Service - Background Message Sync
+  # ============================================================================
+  whatsapp-sync-service:
+    container_name: whatsapp-sync-service
+    build:
+      context: ../../backend/services/whatsapp-sync
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    
+    environment:
+      NODE_ENV: production
+      
+      # Database
+      WHATSAPP_GATEWAY_DB_HOST: whatsapp-pgbouncer
+      WHATSAPP_GATEWAY_DB_PORT: 6432
+      WHATSAPP_GATEWAY_DB_NAME: whatsapp_gateway
+      WHATSAPP_GATEWAY_DB_USER: ${WHATSAPP_DB_USER:-whatsapp}
+      WHATSAPP_GATEWAY_DB_PASSWORD: ${WHATSAPP_DB_PASSWORD}
+      
+      # Redis
+      WHATSAPP_REDIS_HOST: whatsapp-redis
+      WHATSAPP_REDIS_PORT: 6379
+      
+      # WhatsApp Core
+      WHATSAPP_CORE_URL: http://whatsapp-gateway-core:3000
+      WHATSAPP_CORE_API_KEY: ${WHATSAPP_API_KEY:-changeme-whatsapp-api-key}
+      
+      # MinIO
+      WHATSAPP_MINIO_ENDPOINT: http://whatsapp-minio:9000
+      WHATSAPP_MINIO_ACCESS_KEY: ${WHATSAPP_MINIO_ROOT_USER:-whatsappadmin}
+      WHATSAPP_MINIO_SECRET_KEY: ${WHATSAPP_MINIO_ROOT_PASSWORD:-whatsappsecret}
+      WHATSAPP_MINIO_BUCKET: ${WHATSAPP_MINIO_BUCKET:-whatsapp-media}
+      
+      # Sync Configuration
+      WHATSAPP_SYNC_INTERVAL_MS: ${WHATSAPP_SYNC_INTERVAL_MS:-300000}
+      WHATSAPP_SYNC_BATCH_SIZE: ${WHATSAPP_SYNC_BATCH_SIZE:-100}
+      WHATSAPP_SYNC_LOOKBACK_DAYS: ${WHATSAPP_SYNC_LOOKBACK_DAYS:-7}
+      WHATSAPP_SYNC_CONCURRENT_CHATS: ${WHATSAPP_SYNC_CONCURRENT_CHATS:-5}
+    
+    depends_on:
+      whatsapp-gateway-api:
+        condition: service_healthy
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    healthcheck:
+      test: ['CMD', 'node', '-e', "process.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    networks:
+      - whatsapp_backend
+    
+    labels:
+      - "com.tradingsystem.stack=whatsapp"
+      - "com.tradingsystem.tier=workers"
+      - "com.tradingsystem.service=sync"
+      - "com.tradingsystem.description=Background service for message synchronization"
+
+# ==============================================================================
+# VOLUMES
+# ==============================================================================
+volumes:
+  whatsapp-timescaledb-data:
+    name: whatsapp-timescaledb-data
+  whatsapp-minio-data:
+    name: whatsapp-minio-data
+  whatsapp-sessions:
+    name: whatsapp-sessions
+
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+networks:
+  whatsapp_backend:
+    driver: bridge
+    name: whatsapp_backend
+  tradingsystem_backend:
+    external: true
+

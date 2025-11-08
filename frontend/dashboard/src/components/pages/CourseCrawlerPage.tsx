@@ -1,5 +1,5 @@
 const APP_URL =
-  import.meta.env.VITE_COURSE_CRAWLER_APP_URL ?? 'http://localhost:4201';
+  import.meta.env.VITE_COURSE_CRAWLER_APP_URL ?? "http://localhost:4201";
 
 export default function CourseCrawlerPage() {
   return (

@@ -1,6 +1,6 @@
-import express from 'express';
-import StatsService from '../services/StatsService.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
+import express from "express";
+import StatsService from "../services/StatsService.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
@@ -9,17 +9,17 @@ const router = express.Router();
  * Get comprehensive dashboard statistics
  */
 router.get(
-  '/dashboard',
+  "/dashboard",
   asyncHandler(async (req, res) => {
-    const timeframe = req.query.timeframe || '30d';
+    const timeframe = req.query.timeframe || "30d";
     const stats = await StatsService.getDashboardStats();
 
     res.json({
       success: true,
       data: stats,
-      timeframe
+      timeframe,
     });
-  })
+  }),
 );
 
 /**
@@ -27,15 +27,15 @@ router.get(
  * Get system-specific statistics
  */
 router.get(
-  '/systems',
+  "/systems",
   asyncHandler(async (req, res) => {
     const stats = await StatsService.getSystemStats();
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
-  })
+  }),
 );
 
 /**
@@ -43,15 +43,15 @@ router.get(
  * Get idea-specific statistics
  */
 router.get(
-  '/ideas',
+  "/ideas",
   asyncHandler(async (req, res) => {
     const stats = await StatsService.getIdeaStats();
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
-  })
+  }),
 );
 
 /**
@@ -59,15 +59,15 @@ router.get(
  * Get file-specific statistics
  */
 router.get(
-  '/files',
+  "/files",
   asyncHandler(async (req, res) => {
     const stats = await StatsService.getFileStats();
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
-  })
+  }),
 );
 
 /**
@@ -75,15 +75,15 @@ router.get(
  * Get health summary for all systems
  */
 router.get(
-  '/health',
+  "/health",
   asyncHandler(async (req, res) => {
     const healthSummary = await StatsService.getHealthSummary();
 
     res.json({
       success: true,
-      data: healthSummary
+      data: healthSummary,
     });
-  })
+  }),
 );
 
 /**
@@ -91,16 +91,16 @@ router.get(
  * Get analytics data for charts and visualizations
  */
 router.get(
-  '/analytics',
+  "/analytics",
   asyncHandler(async (req, res) => {
-    const timeframe = req.query.timeframe || '30d';
+    const timeframe = req.query.timeframe || "30d";
     const analyticsData = await StatsService.getAnalyticsData(timeframe);
 
     res.json({
       success: true,
-      data: analyticsData
+      data: analyticsData,
     });
-  })
+  }),
 );
 
 /**
@@ -108,31 +108,34 @@ router.get(
  * Global search across all entity types
  */
 router.get(
-  '/search',
+  "/search",
   asyncHandler(async (req, res) => {
     const { q: query } = req.query;
 
     if (!query || query.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        error: 'Search query must be at least 2 characters long'
+        error: "Search query must be at least 2 characters long",
       });
     }
 
     const filters = {
-      systems: req.query.systems !== 'false',
-      ideas: req.query.ideas !== 'false',
-      files: req.query.files !== 'false',
-      limit: req.query.limit ? parseInt(req.query.limit) : 20
+      systems: req.query.systems !== "false",
+      ideas: req.query.ideas !== "false",
+      files: req.query.files !== "false",
+      limit: req.query.limit ? parseInt(req.query.limit) : 20,
     };
 
-    const searchResults = await StatsService.globalSearch(query.trim(), filters);
+    const searchResults = await StatsService.globalSearch(
+      query.trim(),
+      filters,
+    );
 
     res.json({
       success: true,
-      data: searchResults
+      data: searchResults,
     });
-  })
+  }),
 );
 
 /**
@@ -140,16 +143,16 @@ router.get(
  * Get recent activity across all entities
  */
 router.get(
-  '/activity',
+  "/activity",
   asyncHandler(async (req, res) => {
     const days = req.query.days ? parseInt(req.query.days) : 7;
     const activity = await StatsService.getRecentActivity(days);
 
     res.json({
       success: true,
-      data: activity
+      data: activity,
     });
-  })
+  }),
 );
 
 export default router;

@@ -1,161 +1,174 @@
-import { useEffect, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
-import { Button } from '../ui/button';
-import EscopoPageNew from './EscopoPageNew';
-import APIViewerPage from './APIViewerPage';
-import DocsHybridSearchPage from './DocsHybridSearchPage';
-import { apiConfig } from '../../config/api';
-import DocumentationMetricsPage from './DocumentationMetricsPage';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { Button } from "../ui/button";
+import EscopoPageNew from "./EscopoPageNew";
+import APIViewerPage from "./APIViewerPage";
+import DocsHybridSearchPage from "./DocsHybridSearchPage";
+import { apiConfig } from "../../config/api";
+import DocumentationMetricsPage from "./DocumentationMetricsPage";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
-type DocsView = 'overview' | 'docs' | 'metrics' | 'docsApi' | 'docsHybrid';
+type DocsView = "overview" | "docs" | "metrics" | "docsApi" | "docsHybrid";
 
-const VIEW_KEYS: DocsView[] = ['overview', 'docs', 'metrics', 'docsApi', 'docsHybrid'];
+const VIEW_KEYS: DocsView[] = [
+  "overview",
+  "docs",
+  "metrics",
+  "docsApi",
+  "docsHybrid",
+];
 
 const resolveInitialView = (): DocsView => {
-  if (typeof window === 'undefined') {
-    return 'docs';
+  if (typeof window === "undefined") {
+    return "docs";
   }
-  const hash = window.location.hash ?? '';
-  const queryIndex = hash.indexOf('?');
-  const queryString = queryIndex >= 0 ? hash.substring(queryIndex + 1) : '';
+  const hash = window.location.hash ?? "";
+  const queryIndex = hash.indexOf("?");
+  const queryString = queryIndex >= 0 ? hash.substring(queryIndex + 1) : "";
   const params = new URLSearchParams(queryString);
-  const viewParam = params.get('view');
+  const viewParam = params.get("view");
   if (viewParam && VIEW_KEYS.includes(viewParam as DocsView)) {
     return viewParam as DocsView;
   }
-  return 'docs';
+  return "docs";
 };
 
 export function DocusaurusPageNew() {
   const [activeView, setActiveView] = useState<DocsView>(resolveInitialView);
-  const isOverview = activeView === 'overview';
-  const isDocsView = activeView === 'docs';
-  const isMetricsView = activeView === 'metrics';
-  const isDocsApiView = activeView === 'docsApi';
-  const isDocsHybridView = activeView === 'docsHybrid';
+  const isOverview = activeView === "overview";
+  const isDocsView = activeView === "docs";
+  const isMetricsView = activeView === "metrics";
+  const isDocsApiView = activeView === "docsApi";
+  const isDocsHybridView = activeView === "docsHybrid";
 
   // Iframe source for Docusaurus (version next for development/unreleased docs)
-  const iframeSrc = isDocsView ? 'http://localhost:3404/next/' : undefined;
-  const iframeTitle = activeView === 'docs' ? 'TradingSystem Documentation Portal' : undefined;
+  const iframeSrc = isDocsView ? "http://localhost:3404/next/" : undefined;
+  const iframeTitle =
+    activeView === "docs" ? "TradingSystem Documentation Portal" : undefined;
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
     const url = new URL(window.location.href);
-    url.hash = '#/docs';
+    url.hash = "#/docs";
     const params = new URLSearchParams();
-    if (activeView !== 'docs') {
-      params.set('view', activeView);
+    if (activeView !== "docs") {
+      params.set("view", activeView);
     }
     const queryString = params.toString();
     if (queryString) {
       url.hash = `${url.hash}?${queryString}`;
     }
-    window.history.replaceState(null, '', url.toString());
+    window.history.replaceState(null, "", url.toString());
   }, [activeView]);
 
-  console.log('[DocusaurusPage] activeView:', activeView);
-  console.log('[DocusaurusPage] iframeSrc:', iframeSrc);
-  console.log('[DocusaurusPage] DEV mode:', import.meta.env.DEV);
+  console.log("[DocusaurusPage] activeView:", activeView);
+  console.log("[DocusaurusPage] iframeSrc:", iframeSrc);
+  console.log("[DocusaurusPage] DEV mode:", import.meta.env.DEV);
 
   const handleOpenInNewTab = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
     if (isOverview) {
       window.open(
         `${window.location.origin}/#/escopo`,
-        '_blank',
-        'noopener,noreferrer',
+        "_blank",
+        "noopener,noreferrer",
       );
     } else if (isDocsHybridView) {
       window.open(
         `${window.location.origin}/#/docs-hybrid-search`,
-        '_blank',
-        'noopener,noreferrer',
+        "_blank",
+        "noopener,noreferrer",
       );
     } else if (isDocsApiView) {
-      window.open(apiConfig.docsApiUrl, '_blank', 'noopener,noreferrer');
+      window.open(apiConfig.docsApiUrl, "_blank", "noopener,noreferrer");
     } else if (isMetricsView) {
-      window.open(`${window.location.origin}/#/docs?view=metrics`, '_blank', 'noopener,noreferrer');
+      window.open(
+        `${window.location.origin}/#/docs?view=metrics`,
+        "_blank",
+        "noopener,noreferrer",
+      );
     } else if (iframeSrc) {
-      window.open(iframeSrc, '_blank', 'noopener,noreferrer');
+      window.open(iframeSrc, "_blank", "noopener,noreferrer");
     }
   };
 
-  const handleViewChange = (
-    view: DocsView,
-  ) => {
-    console.log('[DocusaurusPage] Changing view to:', view);
+  const handleViewChange = (view: DocsView) => {
+    console.log("[DocusaurusPage] Changing view to:", view);
     setActiveView(view);
   };
 
   const canOpenInNewTab =
-    isOverview || isDocsApiView || isDocsHybridView || isMetricsView || Boolean(iframeSrc);
+    isOverview ||
+    isDocsApiView ||
+    isDocsHybridView ||
+    isMetricsView ||
+    Boolean(iframeSrc);
 
   return (
     <div className="min-h-[calc(100vh-160px)] w-full">
       <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant={isOverview ? 'primary' : 'outline'}
+            variant={isOverview ? "primary" : "outline"}
             size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleViewChange('overview');
+              handleViewChange("overview");
             }}
             disabled={isOverview}
           >
             Overview
           </Button>
           <Button
-            variant={isDocsView ? 'primary' : 'outline'}
+            variant={isDocsView ? "primary" : "outline"}
             size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleViewChange('docs');
+              handleViewChange("docs");
             }}
             disabled={isDocsView}
           >
             Docusaurus
           </Button>
           <Button
-            variant={isMetricsView ? 'primary' : 'outline'}
+            variant={isMetricsView ? "primary" : "outline"}
             size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleViewChange('metrics');
+              handleViewChange("metrics");
             }}
             disabled={isMetricsView}
           >
             Metrics
           </Button>
           <Button
-            variant={activeView === 'docsApi' ? 'primary' : 'outline'}
+            variant={activeView === "docsApi" ? "primary" : "outline"}
             size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleViewChange('docsApi');
+              handleViewChange("docsApi");
             }}
-            disabled={activeView === 'docsApi'}
+            disabled={activeView === "docsApi"}
           >
             DocsAPI
           </Button>
           <Button
-            variant={isDocsHybridView ? 'primary' : 'outline'}
+            variant={isDocsHybridView ? "primary" : "outline"}
             size="sm"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleViewChange('docsHybrid');
+              handleViewChange("docsHybrid");
             }}
             disabled={isDocsHybridView}
           >
@@ -196,10 +209,10 @@ export function DocusaurusPageNew() {
               className="flex-1 w-full h-full min-h-[calc(100vh-140px)] rounded-lg border-2 border-blue-500 shadow-sm"
               wrapperClassName="flex-1"
               onLoad={() =>
-                console.log('[DocusaurusPage] Iframe carregado com sucesso')
+                console.log("[DocusaurusPage] Iframe carregado com sucesso")
               }
               onError={() =>
-                console.error('[DocusaurusPage] Erro ao carregar iframe')
+                console.error("[DocusaurusPage] Erro ao carregar iframe")
               }
             />
           ) : (

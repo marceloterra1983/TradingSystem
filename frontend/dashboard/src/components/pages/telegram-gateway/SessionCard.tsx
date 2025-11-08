@@ -1,13 +1,13 @@
-import { TelegramGatewaySessionStatus } from '../../../hooks/useTelegramGateway';
-import { Badge } from '../../ui/badge';
+import { TelegramGatewaySessionStatus } from "../../../hooks/useTelegramGateway";
+import { Badge } from "../../ui/badge";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
-import { AlertTriangle, ShieldCheck, User, Hash, Clock } from 'lucide-react';
+} from "../../ui/collapsible-card";
+import { AlertTriangle, ShieldCheck, User, Hash, Clock } from "lucide-react";
 
 interface SessionCardProps {
   session?: TelegramGatewaySessionStatus;
@@ -15,7 +15,7 @@ interface SessionCardProps {
 }
 
 function formatAge(ageMs?: number) {
-  if (typeof ageMs !== 'number' || Number.isNaN(ageMs)) return '—';
+  if (typeof ageMs !== "number" || Number.isNaN(ageMs)) return "—";
   const minutes = Math.floor(ageMs / 60000);
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
@@ -25,15 +25,15 @@ function formatAge(ageMs?: number) {
 }
 
 function formatTimestamp(timestamp?: string) {
-  if (!timestamp) return '—';
+  if (!timestamp) return "—";
   try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     }).format(new Date(timestamp));
   } catch {
     return timestamp;
@@ -67,14 +67,14 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
           <div className="space-y-4 text-sm text-slate-700 dark:text-slate-200">
             <div className="flex flex-wrap items-center gap-3">
               <Badge
-                variant={exists ? 'default' : 'outline'}
+                variant={exists ? "default" : "outline"}
                 className={
                   exists
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
-                    : ''
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+                    : ""
                 }
               >
-                {exists ? 'Sessão ativa' : 'Sessão ausente'}
+                {exists ? "Sessão ativa" : "Sessão ausente"}
               </Badge>
               {session?.hash && (
                 <Badge variant="outline" className="font-mono text-xs">
@@ -97,7 +97,7 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                     </dd>
                     <dd className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                       {process.env.TELEGRAM_PHONE_NUMBER ||
-                        'Autenticação por telefone'}
+                        "Autenticação por telefone"}
                     </dd>
                   </div>
                 </div>
@@ -120,11 +120,11 @@ export function SessionCard({ session, isLoading }: SessionCardProps) {
                     Arquivo de Sessão
                   </dt>
                   <dd className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-slate-300">
-                    {session?.path ?? '—'}
+                    {session?.path ?? "—"}
                   </dd>
                   <dd className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    Tamanho:{' '}
-                    {session?.sizeBytes ? `${session.sizeBytes} bytes` : '—'}
+                    Tamanho:{" "}
+                    {session?.sizeBytes ? `${session.sizeBytes} bytes` : "—"}
                   </dd>
                 </div>
               </dl>

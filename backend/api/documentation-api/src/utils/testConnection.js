@@ -1,34 +1,36 @@
-import questDBClient from './questDBClient.js';
-import { logger } from '../config/logger.js';
+import questDBClient from "./questDBClient.js";
+import { logger } from "../config/logger.js";
 
 /**
  * Test QuestDB connection and schema creation
  */
 async function testConnection() {
   try {
-    logger.info('Testing QuestDB connection...');
+    logger.info("Testing QuestDB connection...");
 
     // Test basic connectivity
     const health = await questDBClient.healthCheck();
-    logger.info('QuestDB health check result', health);
+    logger.info("QuestDB health check result", health);
 
-    if (health.status !== 'healthy') {
+    if (health.status !== "healthy") {
       throw new Error(`QuestDB is unhealthy: ${health.error}`);
     }
 
     // Test schema files exist
     const _schemaFiles = [
-      '01_documentation_systems.sql',
-      '02_documentation_ideas.sql',
-      '03_documentation_files.sql',
-      '04_documentation_audit_log.sql'
+      "01_documentation_systems.sql",
+      "02_documentation_ideas.sql",
+      "03_documentation_files.sql",
+      "04_documentation_audit_log.sql",
     ];
 
-    logger.info('Testing schema queries...');
+    logger.info("Testing schema queries...");
 
     // Test basic SELECT
-    const testResult = await questDBClient.executeSelect('SELECT 1 as test, now() as timestamp');
-    logger.info('Basic query test successful', testResult);
+    const testResult = await questDBClient.executeSelect(
+      "SELECT 1 as test, now() as timestamp",
+    );
+    logger.info("Basic query test successful", testResult);
 
     // Test table creation queries (dry run)
     const createTablesTest = await questDBClient.query(`
@@ -37,23 +39,22 @@ async function testConnection() {
       WHERE table_name LIKE 'documentation_%'
     `);
 
-    logger.info('Existing documentation tables:', createTablesTest);
+    logger.info("Existing documentation tables:", createTablesTest);
 
     // Test UUID generation
     const testUUID = questDBClient.generateUUID();
-    logger.info('UUID generation test', { uuid: testUUID });
+    logger.info("UUID generation test", { uuid: testUUID });
 
     // Test timestamp generation
     const testTimestamp = questDBClient.getCurrentTimestamp();
-    logger.info('Timestamp generation test', { timestamp: testTimestamp });
+    logger.info("Timestamp generation test", { timestamp: testTimestamp });
 
-    logger.info('✅ QuestDB connection test completed successfully');
+    logger.info("✅ QuestDB connection test completed successfully");
     return true;
-
   } catch (error) {
-    logger.error('❌ QuestDB connection test failed', {
+    logger.error("❌ QuestDB connection test failed", {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     return false;
   }
@@ -64,7 +65,7 @@ async function testConnection() {
  */
 async function initializeSchemas() {
   try {
-    logger.info('Initializing database schemas...');
+    logger.info("Initializing database schemas...");
 
     // Check if tables already exist
     const existingTables = await questDBClient.executeSelect(`
@@ -73,15 +74,18 @@ async function initializeSchemas() {
       WHERE table_name LIKE 'documentation_%'
     `);
 
-    const existingTableNames = existingTables.map(t => t.table_name);
-    logger.info('Existing tables:', existingTableNames);
+    const existingTableNames = existingTables.map((t) => t.table_name);
+    logger.info("Existing tables:", existingTableNames);
 
     // Create tables that don't exist
     const schemas = [
-      { file: '01_documentation_systems.sql', table: 'documentation_systems' },
-      { file: '02_documentation_ideas.sql', table: 'documentation_ideas' },
-      { file: '03_documentation_files.sql', table: 'documentation_files' },
-      { file: '04_documentation_audit_log.sql', table: 'documentation_audit_log' }
+      { file: "01_documentation_systems.sql", table: "documentation_systems" },
+      { file: "02_documentation_ideas.sql", table: "documentation_ideas" },
+      { file: "03_documentation_files.sql", table: "documentation_files" },
+      {
+        file: "04_documentation_audit_log.sql",
+        table: "documentation_audit_log",
+      },
     ];
 
     for (const schema of schemas) {
@@ -94,13 +98,12 @@ async function initializeSchemas() {
       }
     }
 
-    logger.info('✅ Database schema initialization completed');
+    logger.info("✅ Database schema initialization completed");
     return true;
-
   } catch (error) {
-    logger.error('❌ Database schema initialization failed', {
+    logger.error("❌ Database schema initialization failed", {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     return false;
   }
@@ -110,21 +113,21 @@ async function initializeSchemas() {
  * Run all connection and initialization tests
  */
 async function runAllTests() {
-  logger.info('🚀 Starting QuestDB connection and initialization tests...');
+  logger.info("🚀 Starting QuestDB connection and initialization tests...");
 
   const connectionTest = await testConnection();
   if (!connectionTest) {
-    logger.error('Connection test failed, stopping initialization');
+    logger.error("Connection test failed, stopping initialization");
     return false;
   }
 
   const schemaTest = await initializeSchemas();
   if (!schemaTest) {
-    logger.error('Schema initialization failed');
+    logger.error("Schema initialization failed");
     return false;
   }
 
-  logger.info('🎉 All tests completed successfully!');
+  logger.info("🎉 All tests completed successfully!");
   return true;
 }
 
@@ -138,7 +141,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(success ? 0 : 1);
     })
     .catch((error) => {
-      logger.error('Test execution failed', error);
+      logger.error("Test execution failed", error);
       process.exit(1);
     });
 }

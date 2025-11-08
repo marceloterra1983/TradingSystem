@@ -1,5 +1,11 @@
-import React from 'react';
-import { Twitter, Heart, Repeat2, MessageCircle, ExternalLink } from 'lucide-react';
+import React from "react";
+import {
+  Twitter,
+  Heart,
+  Repeat2,
+  MessageCircle,
+  ExternalLink,
+} from "lucide-react";
 
 interface TwitterAuthor {
   id: string;
@@ -15,14 +21,14 @@ interface TwitterMetrics {
 }
 
 interface TwitterMedia {
-  type: 'photo' | 'video';
+  type: "photo" | "video";
   url: string;
   thumbnail?: string;
 }
 
 interface TwitterPreviewProps {
   preview: {
-    type: 'twitter';
+    type: "twitter";
     url: string;
     tweetId?: string;
     text?: string;
@@ -52,7 +58,8 @@ export const TwitterPreview: React.FC<TwitterPreviewProps> = ({ preview }) => {
               className="w-12 h-12 rounded-full flex-shrink-0"
               onError={(e) => {
                 // Fallback to placeholder if image fails to load
-                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(preview.author!.name)}&background=3b82f6&color=fff&size=48`;
+                (e.target as HTMLImageElement).src =
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(preview.author!.name)}&background=3b82f6&color=fff&size=48`;
               }}
             />
           )}
@@ -88,18 +95,18 @@ export const TwitterPreview: React.FC<TwitterPreviewProps> = ({ preview }) => {
         {/* Media */}
         {preview.media && (
           <div className="px-3 pb-3">
-            {preview.media.type === 'photo' && (
+            {preview.media.type === "photo" && (
               <img
                 src={preview.media.url}
                 alt="Tweet media"
                 className="rounded-lg w-full max-h-96 object-cover"
                 onError={(e) => {
                   // Hide image if it fails to load
-                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).style.display = "none";
                 }}
               />
             )}
-            {preview.media.type === 'video' && preview.media.thumbnail && (
+            {preview.media.type === "video" && preview.media.thumbnail && (
               <div className="relative rounded-lg overflow-hidden">
                 <img
                   src={preview.media.thumbnail}
@@ -155,11 +162,11 @@ export const TwitterPreview: React.FC<TwitterPreviewProps> = ({ preview }) => {
       {preview.image && (
         <img
           src={preview.image}
-          alt={preview.title || 'Tweet'}
+          alt={preview.title || "Tweet"}
           className="w-full h-48 object-cover"
           onError={(e) => {
             // Hide image if it fails to load
-            (e.target as HTMLImageElement).style.display = 'none';
+            (e.target as HTMLImageElement).style.display = "none";
           }}
         />
       )}
@@ -203,15 +210,14 @@ function formatMetric(value: number): string {
 function formatDate(isoString: string): string {
   try {
     const date = new Date(isoString);
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return isoString;
   }
 }
-

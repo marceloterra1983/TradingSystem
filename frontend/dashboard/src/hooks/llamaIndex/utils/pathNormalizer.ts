@@ -25,7 +25,7 @@ export function sanitizeUrl(
   value: string | undefined,
   fallback: string,
 ): string {
-  if (!value || typeof value !== 'string') {
+  if (!value || typeof value !== "string") {
     return fallback;
   }
 
@@ -35,7 +35,7 @@ export function sanitizeUrl(
   }
 
   // Remove trailing slashes
-  return trimmed.replace(/\/+$/, '') || fallback;
+  return trimmed.replace(/\/+$/, "") || fallback;
 }
 
 /**
@@ -54,9 +54,9 @@ export function sanitizeUrl(
  */
 export function normalizeCollectionName(
   collectionName: string | null | undefined,
-  defaultValue = 'documentation',
+  defaultValue = "documentation",
 ): string {
-  if (!collectionName || typeof collectionName !== 'string') {
+  if (!collectionName || typeof collectionName !== "string") {
     return defaultValue;
   }
 
@@ -90,24 +90,24 @@ export function normalizeCollectionName(
 export function normalizeIndexedPath(
   value: string | null | undefined,
 ): string | null {
-  if (!value || typeof value !== 'string') {
+  if (!value || typeof value !== "string") {
     return null;
   }
 
   // Normalize Windows backslashes to forward slashes
-  let normalized = value.replace(/\\/g, '/');
+  let normalized = value.replace(/\\/g, "/");
 
   // Extract path after last occurrence of /docs/
-  const docsPos = normalized.lastIndexOf('/docs/');
+  const docsPos = normalized.lastIndexOf("/docs/");
   if (docsPos >= 0) {
-    normalized = normalized.slice(docsPos + '/docs/'.length);
+    normalized = normalized.slice(docsPos + "/docs/".length);
   }
   // Remove /data/docs/ prefix if present
-  else if (normalized.startsWith('/data/docs/')) {
-    normalized = normalized.slice('/data/docs/'.length);
+  else if (normalized.startsWith("/data/docs/")) {
+    normalized = normalized.slice("/data/docs/".length);
   }
   // Remove leading slash
-  else if (normalized.startsWith('/')) {
+  else if (normalized.startsWith("/")) {
     normalized = normalized.slice(1);
   }
 
@@ -139,26 +139,26 @@ export function normalizeIndexedPath(
 export function inferModelFromName(
   collectionName: string | null | undefined,
 ): string | null {
-  if (!collectionName || typeof collectionName !== 'string') {
+  if (!collectionName || typeof collectionName !== "string") {
     return null;
   }
 
   const lower = collectionName.toLowerCase();
 
-  if (lower.includes('gemma')) {
-    return 'embeddinggemma:latest';
+  if (lower.includes("gemma")) {
+    return "embeddinggemma:latest";
   }
-  if (lower.includes('mxbai')) {
-    return 'mxbai-embed-large';
+  if (lower.includes("mxbai")) {
+    return "mxbai-embed-large";
   }
-  if (lower.includes('nomic')) {
-    return 'nomic-embed-text';
+  if (lower.includes("nomic")) {
+    return "nomic-embed-text";
   }
-  if (lower.includes('e5')) {
-    return 'intfloat/multilingual-e5-large';
+  if (lower.includes("e5")) {
+    return "intfloat/multilingual-e5-large";
   }
-  if (lower.includes('mini') && lower.includes('lm')) {
-    return 'all-minilm-l6-v2';
+  if (lower.includes("mini") && lower.includes("lm")) {
+    return "all-minilm-l6-v2";
   }
 
   return null;
@@ -180,9 +180,9 @@ export function inferModelFromName(
  */
 export function formatNumber(
   value: number | null | undefined,
-  fallback = '–',
+  fallback = "–",
 ): string {
-  return typeof value === 'number' ? value.toLocaleString() : fallback;
+  return typeof value === "number" ? value.toLocaleString() : fallback;
 }
 
 /**
@@ -199,10 +199,10 @@ export function formatNumber(
  * // Returns: '2.0 MB'
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
 
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;

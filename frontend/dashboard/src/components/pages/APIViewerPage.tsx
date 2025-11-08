@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   ExternalLink,
   Book,
@@ -6,9 +6,9 @@ import {
   FileJson,
   ChevronDown,
   Server,
-} from 'lucide-react';
-import { Button } from '../ui/button';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
 /**
  * API Viewer Page - Dedicated API documentation viewer
@@ -31,63 +31,63 @@ interface ApiSpec {
   docusaurusRoute: string; // e.g. /api/documentation-api
 }
 
-type ViewerType = 'redoc' | 'swagger' | 'rapidoc' | 'raw';
+type ViewerType = "redoc" | "swagger" | "rapidoc" | "raw";
 
 const API_SPECS: ApiSpec[] = [
   {
-    id: 'documentation-api',
-    name: 'Documentation',
-    description: 'Documentation management, ideas, specs, search, and files',
-    port: '3402',
-    specFile: 'documentation-api.openapi.yaml',
-    docusaurusRoute: '/api/documentation-api',
+    id: "documentation-api",
+    name: "Documentation",
+    description: "Documentation management, ideas, specs, search, and files",
+    port: "3402",
+    specFile: "documentation-api.openapi.yaml",
+    docusaurusRoute: "/api/documentation-api",
   },
   {
-    id: 'workspace-api',
-    name: 'Workspace',
-    description: 'CRUD operations for workspace items with Kanban workflow',
-    port: '3200',  // Updated: LowDB Stack (WSL2 workaround)
-    specFile: 'workspace.openapi.yaml',
-    docusaurusRoute: '/api/workspace',
+    id: "workspace-api",
+    name: "Workspace",
+    description: "CRUD operations for workspace items with Kanban workflow",
+    port: "3200", // Updated: LowDB Stack (WSL2 workaround)
+    specFile: "workspace.openapi.yaml",
+    docusaurusRoute: "/api/workspace",
   },
   {
-    id: 'tp-capital-api',
-    name: 'TP Capital',
-    description: 'Trading signals ingestion, Telegram bot/channel management',
-    port: '3200',
-    specFile: 'tp-capital.openapi.yaml',
-    docusaurusRoute: '/api/tp-capital',
+    id: "tp-capital-api",
+    name: "TP Capital",
+    description: "Trading signals ingestion, Telegram bot/channel management",
+    port: "3200",
+    specFile: "tp-capital.openapi.yaml",
+    docusaurusRoute: "/api/tp-capital",
   },
   {
-    id: 'firecrawl-proxy',
-    name: 'Firecrawl Proxy',
-    description: 'Web scraping proxy with Firecrawl integration',
-    port: '3600',
-    specFile: 'firecrawl-proxy.openapi.yaml',
-    docusaurusRoute: '/api/firecrawl',
+    id: "firecrawl-proxy",
+    name: "Firecrawl Proxy",
+    description: "Web scraping proxy with Firecrawl integration",
+    port: "3600",
+    specFile: "firecrawl-proxy.openapi.yaml",
+    docusaurusRoute: "/api/firecrawl",
   },
   {
-    id: 'telegram-gateway-api',
-    name: 'Telegram Gateway',
-    description: 'REST API for Telegram messages and channels (TimescaleDB)',
-    port: '4010',
-    specFile: 'telegram-gateway-api.openapi.yaml',
-    docusaurusRoute: '/api/telegram-gateway',
+    id: "telegram-gateway-api",
+    name: "Telegram Gateway",
+    description: "REST API for Telegram messages and channels (TimescaleDB)",
+    port: "4010",
+    specFile: "telegram-gateway-api.openapi.yaml",
+    docusaurusRoute: "/api/telegram-gateway",
   },
   {
-    id: 'alert-router',
-    name: 'Alert Router',
-    description: 'Alertmanager webhook → GitHub Issues automation',
-    port: '8080',
-    specFile: 'alert-router.openapi.yaml',
-    docusaurusRoute: '/api/alert-router',
+    id: "alert-router",
+    name: "Alert Router",
+    description: "Alertmanager webhook → GitHub Issues automation",
+    port: "8080",
+    specFile: "alert-router.openapi.yaml",
+    docusaurusRoute: "/api/alert-router",
   },
 ];
 
 export function APIViewerPage() {
   const [selectedApi, setSelectedApi] = useState<ApiSpec>(API_SPECS[0]);
-  const [viewerType, setViewerType] = useState<ViewerType>('redoc');
-  const [viewerUrl, setViewerUrl] = useState<string>('');
+  const [viewerType, setViewerType] = useState<ViewerType>("redoc");
+  const [viewerUrl, setViewerUrl] = useState<string>("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -99,39 +99,39 @@ export function APIViewerPage() {
     // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.api-dropdown')) {
+      if (!target.closest(".api-dropdown")) {
         setIsDropdownOpen(false);
       }
     };
 
     if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
   const updateViewerUrl = () => {
-    let url = '';
+    let url = "";
 
     const docsSpecUrl = `/specs/${selectedApi.specFile}`;
 
     switch (viewerType) {
-      case 'redoc':
+      case "redoc":
         // Use local Redoc HTML to avoid SPA/route issues; spec served via /specs proxy
         url = `/viewers/redoc.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-      case 'swagger':
+      case "swagger":
         // Local Swagger UI embedding Docusaurus spec file
         url = `/viewers/swagger.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-      case 'rapidoc':
+      case "rapidoc":
         // Local RapiDoc embedding Docusaurus spec file
         url = `/viewers/rapidoc.html?url=${encodeURIComponent(docsSpecUrl)}`;
         break;
-      case 'raw':
+      case "raw":
         // Link directly to the spec served by Docusaurus static assets
         url = docsSpecUrl;
         break;
@@ -142,12 +142,12 @@ export function APIViewerPage() {
 
   const handleOpenInNewTab = () => {
     if (viewerUrl) {
-      window.open(viewerUrl, '_blank', 'noopener,noreferrer');
+      window.open(viewerUrl, "_blank", "noopener,noreferrer");
     }
   };
 
   const handleDownloadSpec = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = `/specs/${selectedApi.specFile}`;
     link.download = `${selectedApi.id}.openapi.yaml`;
     document.body.appendChild(link);
@@ -157,27 +157,27 @@ export function APIViewerPage() {
 
   const getViewerIcon = (type: ViewerType) => {
     switch (type) {
-      case 'redoc':
+      case "redoc":
         return <Book className="h-4 w-4" />;
-      case 'swagger':
+      case "swagger":
         return <Code className="h-4 w-4" />;
-      case 'rapidoc':
+      case "rapidoc":
         return <FileJson className="h-4 w-4" />;
-      case 'raw':
+      case "raw":
         return <FileJson className="h-4 w-4" />;
     }
   };
 
   const getViewerDescription = (type: ViewerType) => {
     switch (type) {
-      case 'redoc':
-        return 'Beautiful, responsive documentation with 3-panel layout';
-      case 'swagger':
+      case "redoc":
+        return "Beautiful, responsive documentation with 3-panel layout";
+      case "swagger":
         return 'Interactive explorer with "Try it out" functionality';
-      case 'rapidoc':
-        return 'Modern, customizable viewer with theme support';
-      case 'raw':
-        return 'View or download raw OpenAPI specification';
+      case "rapidoc":
+        return "Modern, customizable viewer with theme support";
+      case "raw":
+        return "View or download raw OpenAPI specification";
     }
   };
 
@@ -201,7 +201,7 @@ export function APIViewerPage() {
               </div>
               <ChevronDown
                 className={`h-4 w-4 transition-transform duration-200 ${
-                  isDropdownOpen ? 'rotate-180' : ''
+                  isDropdownOpen ? "rotate-180" : ""
                 }`}
               />
             </button>
@@ -222,8 +222,8 @@ export function APIViewerPage() {
                         flex w-full items-center justify-between gap-2 border-b border-gray-100 px-3 py-2 text-left transition-all last:border-b-0
                         ${
                           selectedApi.id === api.id
-                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                            : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'
+                            ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                            : "hover:bg-gray-50 dark:hover:bg-slate-700/50"
                         }
                       `}
                     >
@@ -232,8 +232,8 @@ export function APIViewerPage() {
                         <span
                           className={`truncate text-sm font-medium ${
                             selectedApi.id === api.id
-                              ? 'text-white'
-                              : 'text-gray-900 dark:text-gray-100'
+                              ? "text-white"
+                              : "text-gray-900 dark:text-gray-100"
                           }`}
                         >
                           {api.name}
@@ -242,8 +242,8 @@ export function APIViewerPage() {
                       <span
                         className={`flex-shrink-0 text-xs font-medium ${
                           selectedApi.id === api.id
-                            ? 'text-white/90'
-                            : 'text-blue-600 dark:text-cyan-400'
+                            ? "text-white/90"
+                            : "text-blue-600 dark:text-cyan-400"
                         }`}
                       >
                         :{api.port}
@@ -264,7 +264,7 @@ export function APIViewerPage() {
               Viewer
             </span>
             <div className="flex gap-1.5">
-              {(['redoc', 'swagger', 'rapidoc', 'raw'] as ViewerType[]).map(
+              {(["redoc", "swagger", "rapidoc", "raw"] as ViewerType[]).map(
                 (type) => (
                   <button
                     key={type}
@@ -274,8 +274,8 @@ export function APIViewerPage() {
                     group relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-200
                     ${
                       viewerType === type
-                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40 scale-105'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:scale-102 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80'
+                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/40 scale-105"
+                        : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:scale-102 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:bg-gray-700/80"
                     }
                   `}
                   >
@@ -313,7 +313,7 @@ export function APIViewerPage() {
 
       {/* Viewer Container */}
       <div className="h-[calc(100%-72px)] w-full">
-        {viewerType === 'raw' ? (
+        {viewerType === "raw" ? (
           // Raw spec view
           <div className="h-full w-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-slate-900">
             <div className="mb-4">
@@ -338,7 +338,7 @@ export function APIViewerPage() {
                   variant="primary"
                   size="sm"
                   onClick={() =>
-                    window.open(`/specs/${selectedApi.specFile}`, '_blank')
+                    window.open(`/specs/${selectedApi.specFile}`, "_blank")
                   }
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
@@ -360,29 +360,29 @@ export function APIViewerPage() {
                 <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                   <li>
                     <button
-                      onClick={() => setViewerType('redoc')}
+                      onClick={() => setViewerType("redoc")}
                       className="text-blue-600 hover:underline dark:text-blue-400"
                     >
                       Redoc
-                    </button>{' '}
+                    </button>{" "}
                     - Beautiful, responsive 3-panel documentation
                   </li>
                   <li>
                     <button
-                      onClick={() => setViewerType('swagger')}
+                      onClick={() => setViewerType("swagger")}
                       className="text-blue-600 hover:underline dark:text-blue-400"
                     >
                       Swagger UI
-                    </button>{' '}
+                    </button>{" "}
                     - Interactive API explorer with live testing
                   </li>
                   <li>
                     <button
-                      onClick={() => setViewerType('rapidoc')}
+                      onClick={() => setViewerType("rapidoc")}
                       className="text-blue-600 hover:underline dark:text-blue-400"
                     >
                       RapiDoc
-                    </button>{' '}
+                    </button>{" "}
                     - Modern, customizable API documentation
                   </li>
                 </ul>

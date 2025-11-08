@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { SignalsTable } from './tp-capital/SignalsTable';
-import { LogsViewer } from './tp-capital/LogsViewer';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { SignalsTable } from "./tp-capital/SignalsTable";
+import { LogsViewer } from "./tp-capital/LogsViewer";
 
 /**
  * TP Capital Opções Page
@@ -13,11 +13,11 @@ import { LogsViewer } from './tp-capital/LogsViewer';
 export function TPCapitalOpcoesPage() {
   const sections = [
     {
-      id: 'tp-capital-signals',
+      id: "tp-capital-signals",
       content: <SignalsTable />,
     },
     {
-      id: 'tp-capital-logs',
+      id: "tp-capital-logs",
       content: <LogsViewer />,
     },
   ];

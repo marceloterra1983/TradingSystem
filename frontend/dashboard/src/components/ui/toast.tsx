@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   X,
   CheckCircle2,
   AlertCircle,
   Info,
   AlertTriangle,
-} from 'lucide-react';
-import { Toast as ToastType, useToastStore } from '../../store/toastStore';
-import { cn } from '../../lib/utils';
+} from "lucide-react";
+import { Toast as ToastType, useToastStore } from "../../store/toastStore";
+import { cn } from "../../lib/utils";
 
 interface ToastProps {
   toast: ToastType;
@@ -44,27 +44,27 @@ function Toast({ toast }: ToastProps) {
 
   const styles = {
     success:
-      'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200',
+      "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200",
     error:
-      'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200',
+      "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200",
     warning:
-      'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200',
-    info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200',
+      "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200",
+    info: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200",
   };
 
   const iconStyles = {
-    success: 'text-green-600 dark:text-green-400',
-    error: 'text-red-600 dark:text-red-400',
-    warning: 'text-yellow-600 dark:text-yellow-400',
-    info: 'text-blue-600 dark:text-blue-400',
+    success: "text-green-600 dark:text-green-400",
+    error: "text-red-600 dark:text-red-400",
+    warning: "text-yellow-600 dark:text-yellow-400",
+    info: "text-blue-600 dark:text-blue-400",
   };
 
   return (
     <div
       className={cn(
-        'flex items-start gap-3 rounded-lg border p-4 shadow-lg transition-all duration-300 min-w-[320px] max-w-md',
+        "flex items-start gap-3 rounded-lg border p-4 shadow-lg transition-all duration-300 min-w-[320px] max-w-md",
         styles[toast.type],
-        isExiting ? 'opacity-0 translate-x-full' : 'opacity-100 translate-x-0',
+        isExiting ? "opacity-0 translate-x-full" : "opacity-100 translate-x-0",
       )}
     >
       <div className={iconStyles[toast.type]}>{icons[toast.type]}</div>

@@ -8,14 +8,15 @@
  * @module timestampUtils
  */
 
-import { isValid } from 'date-fns';
-import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { isValid } from "date-fns";
+import { toZonedTime, fromZonedTime, formatInTimeZone } from "date-fns-tz";
 
 /**
  * Application timezone - default to São Paulo
  * Can be overridden via environment variable
  */
-export const APP_TIMEZONE = import.meta.env.VITE_TIMEZONE || 'America/Sao_Paulo';
+export const APP_TIMEZONE =
+  import.meta.env.VITE_TIMEZONE || "America/Sao_Paulo";
 
 /**
  * Constants for validation
@@ -36,7 +37,9 @@ const YEAR_3000_MS = 32503680000000;
  * @param timestamp - Timestamp in various formats
  * @returns Timestamp in milliseconds (UTC), or null if invalid
  */
-export function normalizeTimestamp(timestamp: string | number | Date | null | undefined): number | null {
+export function normalizeTimestamp(
+  timestamp: string | number | Date | null | undefined,
+): number | null {
   if (!timestamp) return null;
 
   // Date object
@@ -46,7 +49,7 @@ export function normalizeTimestamp(timestamp: string | number | Date | null | un
   }
 
   // String - could be ISO string or numeric string
-  if (typeof timestamp === 'string') {
+  if (typeof timestamp === "string") {
     // Try parsing as number first
     const asNumber = Number(timestamp);
     if (!isNaN(asNumber)) {
@@ -61,11 +64,14 @@ export function normalizeTimestamp(timestamp: string | number | Date | null | un
   }
 
   // Number - check if seconds or milliseconds
-  if (typeof timestamp === 'number') {
+  if (typeof timestamp === "number") {
     // Heuristic: timestamps before year 3000 are likely in seconds
     if (timestamp < YEAR_3000_MS / 1000) {
       // Check if it's in valid range as seconds (2000-2100)
-      if (timestamp >= YEAR_2000_MS / 1000 && timestamp <= YEAR_2100_MS / 1000) {
+      if (
+        timestamp >= YEAR_2000_MS / 1000 &&
+        timestamp <= YEAR_2100_MS / 1000
+      ) {
         return timestamp * 1000; // Convert to milliseconds
       }
     }
@@ -85,12 +91,15 @@ export function normalizeTimestamp(timestamp: string | number | Date | null | un
  * @param endOfDay - If true, returns 23:59:59.999, else 00:00:00.000
  * @returns Timestamp in milliseconds (UTC)
  */
-export function dateStringToSaoPauloTimestamp(dateStr: string, endOfDay = false): number | null {
+export function dateStringToSaoPauloTimestamp(
+  dateStr: string,
+  endOfDay = false,
+): number | null {
   if (!dateStr) return null;
 
   try {
     // Parse date components
-    const [year, month, day] = dateStr.split('-').map(Number);
+    const [year, month, day] = dateStr.split("-").map(Number);
 
     if (!year || !month || !day) return null;
 
@@ -99,8 +108,8 @@ export function dateStringToSaoPauloTimestamp(dateStr: string, endOfDay = false)
     if (day < 1 || day > 31) return null;
 
     // Create time string
-    const timeStr = endOfDay ? '23:59:59.999' : '00:00:00.000';
-    const dateTimeStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${timeStr}`;
+    const timeStr = endOfDay ? "23:59:59.999" : "00:00:00.000";
+    const dateTimeStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${timeStr}`;
 
     // Parse as date and convert from São Paulo time to UTC
     const localDate = new Date(dateTimeStr);
@@ -116,7 +125,11 @@ export function dateStringToSaoPauloTimestamp(dateStr: string, endOfDay = false)
     // Return null if result is NaN
     return isNaN(timestamp) ? null : timestamp;
   } catch (error) {
-    console.error('[dateStringToSaoPauloTimestamp] Error parsing date:', dateStr, error);
+    console.error(
+      "[dateStringToSaoPauloTimestamp] Error parsing date:",
+      dateStr,
+      error,
+    );
     return null;
   }
 }
@@ -130,7 +143,7 @@ export function dateStringToSaoPauloTimestamp(dateStr: string, endOfDay = false)
  */
 export function formatTimestamp(
   timestamp: string | number | Date | null | undefined,
-  includeMilliseconds = false
+  includeMilliseconds = false,
 ): { time: string; date: string } | null {
   const normalizedTs = normalizeTimestamp(timestamp);
 
@@ -146,18 +159,22 @@ export function formatTimestamp(
     }
 
     // Format time
-    let timeFormat = 'HH:mm:ss';
+    let timeFormat = "HH:mm:ss";
     if (includeMilliseconds) {
-      timeFormat = 'HH:mm:ss.SSS';
+      timeFormat = "HH:mm:ss.SSS";
     }
     const time = formatInTimeZone(date, APP_TIMEZONE, timeFormat);
 
     // Format date
-    const dateStr = formatInTimeZone(date, APP_TIMEZONE, 'dd/MM/yyyy');
+    const dateStr = formatInTimeZone(date, APP_TIMEZONE, "dd/MM/yyyy");
 
     return { time, date: dateStr };
   } catch (error) {
-    console.error('[formatTimestamp] Error formatting timestamp:', timestamp, error);
+    console.error(
+      "[formatTimestamp] Error formatting timestamp:",
+      timestamp,
+      error,
+    );
     return null;
   }
 }
@@ -168,11 +185,13 @@ export function formatTimestamp(
  * @param timestamp - Timestamp to format
  * @returns Relative time string in Portuguese
  */
-export function formatRelativeTime(timestamp: string | number | Date | null | undefined): string {
+export function formatRelativeTime(
+  timestamp: string | number | Date | null | undefined,
+): string {
   const normalizedTs = normalizeTimestamp(timestamp);
 
   if (!normalizedTs) {
-    return '?';
+    return "?";
   }
 
   try {
@@ -186,19 +205,23 @@ export function formatRelativeTime(timestamp: string | number | Date | null | un
     const diffDays = Math.floor(diffHours / 24);
 
     // Recent times
-    if (diffSeconds < 10) return 'agora mesmo';
+    if (diffSeconds < 10) return "agora mesmo";
     if (diffSeconds < 60) return `há ${diffSeconds}s`;
     if (diffMinutes < 60) return `há ${diffMinutes}min`;
     if (diffHours < 24) return `há ${diffHours}h`;
-    if (diffDays === 1) return 'ontem';
+    if (diffDays === 1) return "ontem";
     if (diffDays < 7) return `há ${diffDays} dias`;
 
     // Format absolute date in São Paulo timezone
     const date = new Date(normalizedTs);
-    return formatInTimeZone(date, APP_TIMEZONE, 'dd/MM');
+    return formatInTimeZone(date, APP_TIMEZONE, "dd/MM");
   } catch (error) {
-    console.error('[formatRelativeTime] Error formatting timestamp:', timestamp, error);
-    return '?';
+    console.error(
+      "[formatRelativeTime] Error formatting timestamp:",
+      timestamp,
+      error,
+    );
+    return "?";
   }
 }
 
@@ -209,7 +232,9 @@ export function formatRelativeTime(timestamp: string | number | Date | null | un
  * @param timestamp - Timestamp to format
  * @returns ISO 8601 string with UTC timezone (e.g., "2025-11-05T12:00:00.000Z")
  */
-export function formatISO(timestamp: string | number | Date | null | undefined): string | null {
+export function formatISO(
+  timestamp: string | number | Date | null | undefined,
+): string | null {
   const normalizedTs = normalizeTimestamp(timestamp);
 
   if (!normalizedTs) {
@@ -220,7 +245,7 @@ export function formatISO(timestamp: string | number | Date | null | undefined):
     const date = new Date(normalizedTs);
     return date.toISOString();
   } catch (error) {
-    console.error('[formatISO] Error formatting timestamp:', timestamp, error);
+    console.error("[formatISO] Error formatting timestamp:", timestamp, error);
     return null;
   }
 }
@@ -231,7 +256,9 @@ export function formatISO(timestamp: string | number | Date | null | undefined):
  * @param timestamp - Timestamp to validate
  * @returns true if valid, false otherwise
  */
-export function isValidTimestamp(timestamp: string | number | Date | null | undefined): boolean {
+export function isValidTimestamp(
+  timestamp: string | number | Date | null | undefined,
+): boolean {
   const normalizedTs = normalizeTimestamp(timestamp);
 
   if (!normalizedTs) {
@@ -250,7 +277,7 @@ export function isValidTimestamp(timestamp: string | number | Date | null | unde
  */
 export function parseTimestampSafe(
   primary: string | number | Date | null | undefined,
-  fallback: string | number | Date | null | undefined
+  fallback: string | number | Date | null | undefined,
 ): number {
   const primaryTs = normalizeTimestamp(primary);
   if (primaryTs && isValidTimestamp(primaryTs)) {
@@ -262,10 +289,13 @@ export function parseTimestampSafe(
     return fallbackTs;
   }
 
-  console.warn('[parseTimestampSafe] Both timestamps invalid, using current time', {
-    primary,
-    fallback,
-  });
+  console.warn(
+    "[parseTimestampSafe] Both timestamps invalid, using current time",
+    {
+      primary,
+      fallback,
+    },
+  );
 
   return Date.now();
 }

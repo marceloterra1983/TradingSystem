@@ -4,16 +4,16 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useLlamaIndexStatus } from '../useLlamaIndexStatus';
-import type { LlamaIndexStatusResponse } from '../useLlamaIndexStatus';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { renderHook, waitFor, act } from "@testing-library/react";
+import { useLlamaIndexStatus } from "../useLlamaIndexStatus";
+import type { LlamaIndexStatusResponse } from "../useLlamaIndexStatus";
 
 // Mock fetch globally
 const mockFetch = vi.fn();
 global.fetch = mockFetch as any;
 
-describe('useLlamaIndexStatus', () => {
+describe("useLlamaIndexStatus", () => {
   beforeEach(() => {
     mockFetch.mockClear();
   });
@@ -22,8 +22,8 @@ describe('useLlamaIndexStatus', () => {
     vi.clearAllTimers();
   });
 
-  describe('initialization', () => {
-    it('should initialize with default values', () => {
+  describe("initialization", () => {
+    it("should initialize with default values", () => {
       const { result } = renderHook(() =>
         useLlamaIndexStatus({ autoFetch: false }),
       );
@@ -35,26 +35,26 @@ describe('useLlamaIndexStatus', () => {
       expect(result.current.loadedCollection).toBeNull();
     });
 
-    it('should initialize with provided collection', () => {
+    it("should initialize with provided collection", () => {
       const { result } = renderHook(() =>
         useLlamaIndexStatus({
-          initialCollection: 'docs_index_mxbai',
+          initialCollection: "docs_index_mxbai",
           autoFetch: false,
         }),
       );
 
-      expect(result.current.selectedCollection).toBe('docs_index_mxbai');
+      expect(result.current.selectedCollection).toBe("docs_index_mxbai");
     });
 
-    it('should auto-fetch on mount when autoFetch is true', async () => {
+    it("should auto-fetch on mount when autoFetch is true", async () => {
       const mockResponse: LlamaIndexStatusResponse = {
-        timestamp: '2025-10-31T12:00:00Z',
+        timestamp: "2025-10-31T12:00:00Z",
         services: {
-          query: { ok: true, status: 200, message: 'ok' },
-          ingestion: { ok: true, status: 200, message: 'ok' },
+          query: { ok: true, status: 200, message: "ok" },
+          ingestion: { ok: true, status: 200, message: "ok" },
         },
         qdrant: {
-          collection: 'documentation',
+          collection: "documentation",
           ok: true,
           status: 200,
           count: 100,
@@ -85,34 +85,34 @@ describe('useLlamaIndexStatus', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
-    it('should not auto-fetch when autoFetch is false', () => {
+    it("should not auto-fetch when autoFetch is false", () => {
       renderHook(() => useLlamaIndexStatus({ autoFetch: false }));
 
       expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 
-  describe('fetchStatus', () => {
-    it('should fetch status successfully', async () => {
+  describe("fetchStatus", () => {
+    it("should fetch status successfully", async () => {
       const mockResponse: LlamaIndexStatusResponse = {
-        timestamp: '2025-10-31T12:00:00Z',
-        requestedCollection: 'docs_index_mxbai',
+        timestamp: "2025-10-31T12:00:00Z",
+        requestedCollection: "docs_index_mxbai",
         services: {
-          query: { ok: true, status: 200, message: 'ok' },
-          ingestion: { ok: true, status: 200, message: 'ok' },
+          query: { ok: true, status: 200, message: "ok" },
+          ingestion: { ok: true, status: 200, message: "ok" },
         },
         qdrant: {
-          collection: 'docs_index_mxbai',
+          collection: "docs_index_mxbai",
           ok: true,
           status: 200,
           count: 250,
-          sample: ['doc1.md', 'doc2.md'],
+          sample: ["doc1.md", "doc2.md"],
         },
         collections: [
           {
-            name: 'docs_index_mxbai',
+            name: "docs_index_mxbai",
             count: 250,
-            embeddingModel: 'mxbai-embed-large',
+            embeddingModel: "mxbai-embed-large",
           },
         ],
       };
@@ -127,19 +127,19 @@ describe('useLlamaIndexStatus', () => {
         useLlamaIndexStatus({ autoFetch: false }),
       );
 
-      await waitFor(() => result.current.fetchStatus('docs_index_mxbai'));
+      await waitFor(() => result.current.fetchStatus("docs_index_mxbai"));
 
       await waitFor(() => {
         expect(result.current.statusLoading).toBe(false);
       });
 
       expect(result.current.statusData).toEqual(mockResponse);
-      expect(result.current.loadedCollection).toBe('docs_index_mxbai');
+      expect(result.current.loadedCollection).toBe("docs_index_mxbai");
       expect(result.current.statusError).toBeNull();
     });
 
-    it('should handle fetch errors gracefully', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    it("should handle fetch errors gracefully", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
       const { result } = renderHook(() =>
         useLlamaIndexStatus({ autoFetch: false }),
@@ -152,14 +152,14 @@ describe('useLlamaIndexStatus', () => {
       });
 
       expect(result.current.statusData).toBeNull();
-      expect(result.current.statusError).toContain('Network error');
+      expect(result.current.statusError).toContain("Network error");
     });
 
-    it('should handle 401 errors with custom message', async () => {
+    it("should handle 401 errors with custom message", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        text: async () => 'Unauthorized',
+        text: async () => "Unauthorized",
       });
 
       const { result } = renderHook(() =>
@@ -172,23 +172,23 @@ describe('useLlamaIndexStatus', () => {
         expect(result.current.statusLoading).toBe(false);
       });
 
-      expect(result.current.statusError).toContain('401');
-      expect(result.current.statusError).toContain('porta 3402');
+      expect(result.current.statusError).toContain("401");
+      expect(result.current.statusError).toContain("porta 3402");
     });
 
-    it('should build correct URL with collection parameter', async () => {
+    it("should build correct URL with collection parameter", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
         text: async () =>
           JSON.stringify({
-            timestamp: '2025-10-31T12:00:00Z',
+            timestamp: "2025-10-31T12:00:00Z",
             services: {
-              query: { ok: true, status: 200, message: 'ok' },
-              ingestion: { ok: true, status: 200, message: 'ok' },
+              query: { ok: true, status: 200, message: "ok" },
+              ingestion: { ok: true, status: 200, message: "ok" },
             },
             qdrant: {
-              collection: 'test',
+              collection: "test",
               ok: true,
               status: 200,
               count: 0,
@@ -201,22 +201,22 @@ describe('useLlamaIndexStatus', () => {
         useLlamaIndexStatus({ autoFetch: false }),
       );
 
-      await waitFor(() => result.current.fetchStatus('test_collection'));
+      await waitFor(() => result.current.fetchStatus("test_collection"));
 
       await waitFor(() => {
         expect(result.current.statusLoading).toBe(false);
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/v1/rag/status?collection=test_collection',
+        "/api/v1/rag/status?collection=test_collection",
       );
     });
 
-    it('should handle empty response body', async () => {
+    it("should handle empty response body", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        text: async () => '',
+        text: async () => "",
       });
 
       const { result } = renderHook(() =>
@@ -233,20 +233,20 @@ describe('useLlamaIndexStatus', () => {
     });
   });
 
-  describe('handleRefresh', () => {
-    it('should refresh with current selectedCollection', async () => {
+  describe("handleRefresh", () => {
+    it("should refresh with current selectedCollection", async () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
         text: async () =>
           JSON.stringify({
-            timestamp: '2025-10-31T12:00:00Z',
+            timestamp: "2025-10-31T12:00:00Z",
             services: {
-              query: { ok: true, status: 200, message: 'ok' },
-              ingestion: { ok: true, status: 200, message: 'ok' },
+              query: { ok: true, status: 200, message: "ok" },
+              ingestion: { ok: true, status: 200, message: "ok" },
             },
             qdrant: {
-              collection: 'docs_index_mxbai',
+              collection: "docs_index_mxbai",
               ok: true,
               status: 200,
               count: 100,
@@ -257,7 +257,7 @@ describe('useLlamaIndexStatus', () => {
 
       const { result } = renderHook(() =>
         useLlamaIndexStatus({
-          initialCollection: 'docs_index_mxbai',
+          initialCollection: "docs_index_mxbai",
           autoFetch: false,
         }),
       );
@@ -269,12 +269,12 @@ describe('useLlamaIndexStatus', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/v1/rag/status?collection=docs_index_mxbai',
+        "/api/v1/rag/status?collection=docs_index_mxbai",
       );
     });
   });
 
-  describe('polling', () => {
+  describe("polling", () => {
     beforeEach(() => {
       vi.useFakeTimers();
     });
@@ -283,19 +283,19 @@ describe('useLlamaIndexStatus', () => {
       vi.useRealTimers();
     });
 
-    it('should poll at specified interval', async () => {
+    it("should poll at specified interval", async () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
         text: async () =>
           JSON.stringify({
-            timestamp: '2025-10-31T12:00:00Z',
+            timestamp: "2025-10-31T12:00:00Z",
             services: {
-              query: { ok: true, status: 200, message: 'ok' },
-              ingestion: { ok: true, status: 200, message: 'ok' },
+              query: { ok: true, status: 200, message: "ok" },
+              ingestion: { ok: true, status: 200, message: "ok" },
             },
             qdrant: {
-              collection: 'documentation',
+              collection: "documentation",
               ok: true,
               status: 200,
               count: 0,
@@ -311,36 +311,42 @@ describe('useLlamaIndexStatus', () => {
         }),
       );
 
-      // Wait for initial auto-fetch
-      await vi.waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledTimes(1);
+      // Wait for initial auto-fetch inside React act wrapper
+      await act(async () => {
+        await waitFor(() => {
+          expect(mockFetch).toHaveBeenCalledTimes(1);
+        });
       });
 
       // Advance timer and flush promises
-      await vi.advanceTimersByTimeAsync(5000);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000);
+      });
 
       // Polling should have triggered
       expect(mockFetch).toHaveBeenCalledTimes(2);
 
       // Advance again
-      await vi.advanceTimersByTimeAsync(5000);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000);
+      });
 
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
-    it('should not poll when interval is 0', () => {
+    it("should not poll when interval is 0", () => {
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
         text: async () =>
           JSON.stringify({
-            timestamp: '2025-10-31T12:00:00Z',
+            timestamp: "2025-10-31T12:00:00Z",
             services: {
-              query: { ok: true, status: 200, message: 'ok' },
-              ingestion: { ok: true, status: 200, message: 'ok' },
+              query: { ok: true, status: 200, message: "ok" },
+              ingestion: { ok: true, status: 200, message: "ok" },
             },
             qdrant: {
-              collection: 'documentation',
+              collection: "documentation",
               ok: true,
               status: 200,
               count: 0,
@@ -356,24 +362,26 @@ describe('useLlamaIndexStatus', () => {
         }),
       );
 
-      vi.advanceTimersByTime(10000);
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
 
       // Should not have polled
       expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 
-  describe('collection fallback', () => {
-    it('should use requestedCollection from response', async () => {
+  describe("collection fallback", () => {
+    it("should use requestedCollection from response", async () => {
       const mockResponse: LlamaIndexStatusResponse = {
-        timestamp: '2025-10-31T12:00:00Z',
-        requestedCollection: 'docs_index_mxbai',
+        timestamp: "2025-10-31T12:00:00Z",
+        requestedCollection: "docs_index_mxbai",
         services: {
-          query: { ok: true, status: 200, message: 'ok' },
-          ingestion: { ok: true, status: 200, message: 'ok' },
+          query: { ok: true, status: 200, message: "ok" },
+          ingestion: { ok: true, status: 200, message: "ok" },
         },
         qdrant: {
-          collection: 'documentation',
+          collection: "documentation",
           ok: true,
           status: 200,
           count: 100,
@@ -391,25 +399,25 @@ describe('useLlamaIndexStatus', () => {
         useLlamaIndexStatus({ autoFetch: false }),
       );
 
-      await waitFor(() => result.current.fetchStatus('docs_index_mxbai'));
+      await waitFor(() => result.current.fetchStatus("docs_index_mxbai"));
 
       await waitFor(() => {
         expect(result.current.statusLoading).toBe(false);
       });
 
       // Should use requestedCollection, not qdrant.collection
-      expect(result.current.loadedCollection).toBe('docs_index_mxbai');
+      expect(result.current.loadedCollection).toBe("docs_index_mxbai");
     });
 
-    it('should fallback to qdrant.collection if requestedCollection is missing', async () => {
+    it("should fallback to qdrant.collection if requestedCollection is missing", async () => {
       const mockResponse: LlamaIndexStatusResponse = {
-        timestamp: '2025-10-31T12:00:00Z',
+        timestamp: "2025-10-31T12:00:00Z",
         services: {
-          query: { ok: true, status: 200, message: 'ok' },
-          ingestion: { ok: true, status: 200, message: 'ok' },
+          query: { ok: true, status: 200, message: "ok" },
+          ingestion: { ok: true, status: 200, message: "ok" },
         },
         qdrant: {
-          collection: 'documentation',
+          collection: "documentation",
           ok: true,
           status: 200,
           count: 100,
@@ -433,7 +441,7 @@ describe('useLlamaIndexStatus', () => {
         expect(result.current.statusLoading).toBe(false);
       });
 
-      expect(result.current.loadedCollection).toBe('documentation');
+      expect(result.current.loadedCollection).toBe("documentation");
     });
   });
 });

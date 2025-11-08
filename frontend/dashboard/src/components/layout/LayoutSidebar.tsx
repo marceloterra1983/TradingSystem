@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { NAVIGATION_DATA, Section } from '../../data/navigation';
-import { isBrowser } from '../../utils/browser';
-import { Logo } from '../ui/logo';
+import * as React from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { cn } from "../../lib/utils";
+import { NAVIGATION_DATA, Section } from "../../data/navigation";
+import { isBrowser } from "../../utils/browser";
+import { Logo } from "../ui/logo";
 
 export interface LayoutSidebarProps {
   isCollapsed: boolean;
@@ -82,11 +82,11 @@ export function LayoutSidebar({
       return;
     }
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
     }
     return undefined;
@@ -100,12 +100,12 @@ export function LayoutSidebar({
         width: isCollapsed ? 72 : width,
       }}
       transition={{
-        type: 'spring',
+        type: "spring",
         stiffness: 300,
         damping: 30,
       }}
       className="relative flex flex-col border-r border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-muted)] backdrop-blur-lg transition-colors duration-200"
-      style={{ width: isCollapsed ? '72px' : `${width}px` }}
+      style={{ width: isCollapsed ? "72px" : `${width}px` }}
     >
       {/* Logo Header */}
       <div className="flex items-center justify-between border-b border-[color:var(--ts-surface-border)] p-4">
@@ -123,7 +123,7 @@ export function LayoutSidebar({
         <button
           onClick={onToggleCollapse}
           className="rounded-lg p-1.5 transition-colors hover:bg-[color:var(--ts-surface-hover)]"
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4 text-[color:var(--ts-text-muted)]" />
@@ -156,7 +156,7 @@ export function LayoutSidebar({
           initial={false}
           animate={{
             opacity: isCollapsed ? 0 : 1,
-            height: isCollapsed ? 0 : 'auto',
+            height: isCollapsed ? 0 : "auto",
           }}
           className="overflow-hidden"
         >
@@ -208,11 +208,11 @@ function SidebarSection({
       <button
         onClick={onToggle}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
           hasActivePage
-            ? 'bg-[color:var(--ts-accent-soft)] text-[color:var(--ts-accent-strong)]'
-            : 'text-[color:var(--ts-text-secondary)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]',
-          isCollapsed && 'justify-center px-2',
+            ? "bg-[color:var(--ts-accent-soft)] text-[color:var(--ts-accent-strong)]"
+            : "text-[color:var(--ts-text-secondary)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]",
+          isCollapsed && "justify-center px-2",
         )}
         title={isCollapsed ? section.label : undefined}
       >
@@ -235,7 +235,7 @@ function SidebarSection({
       {!isCollapsed && isExpanded && (
         <motion.div
           initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
+          animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="ml-4 space-y-1 overflow-hidden"
@@ -248,19 +248,19 @@ function SidebarSection({
                 key={page.id}
                 onClick={() => onPageChange(page.id)}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors',
+                  "flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors",
                   isActive
-                    ? 'bg-[color:var(--ts-accent-soft)] font-medium text-[color:var(--ts-accent-strong)]'
-                    : 'text-[color:var(--ts-text-muted)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]',
+                    ? "bg-[color:var(--ts-accent-soft)] font-medium text-[color:var(--ts-accent-strong)]"
+                    : "text-[color:var(--ts-text-muted)] hover:bg-[color:var(--ts-surface-hover)] hover:text-[color:var(--ts-text-primary)]",
                 )}
               >
                 {page.icon ? (
                   <span
                     className={cn(
-                      'flex h-4 w-4 items-center justify-center',
+                      "flex h-4 w-4 items-center justify-center",
                       isActive
-                        ? 'text-[color:var(--ts-accent-strong)]'
-                        : 'text-[color:var(--ts-text-muted)]',
+                        ? "text-[color:var(--ts-accent-strong)]"
+                        : "text-[color:var(--ts-text-muted)]",
                     )}
                   >
                     {page.icon}
@@ -268,10 +268,10 @@ function SidebarSection({
                 ) : (
                   <div
                     className={cn(
-                      'h-1.5 w-1.5 rounded-full',
+                      "h-1.5 w-1.5 rounded-full",
                       isActive
-                        ? 'bg-[color:var(--ts-accent-strong)]'
-                        : 'bg-[color:var(--ts-text-muted)] opacity-60',
+                        ? "bg-[color:var(--ts-accent-strong)]"
+                        : "bg-[color:var(--ts-text-muted)] opacity-60",
                     )}
                   />
                 )}

@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { TrendingUp, History } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { TrendingUp, History } from "lucide-react";
 
 export function PositionsPage() {
   const sections = [
     {
-      id: 'active-positions',
+      id: "active-positions",
       content: (
         <PlaceholderSection
           cardId="positions-active"
@@ -16,7 +16,7 @@ export function PositionsPage() {
       ),
     },
     {
-      id: 'position-history',
+      id: "position-history",
       content: (
         <PlaceholderSection
           cardId="positions-history"

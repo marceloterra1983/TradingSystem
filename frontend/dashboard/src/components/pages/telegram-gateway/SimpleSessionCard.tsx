@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { ShieldCheck, Info, Clock, Hash } from 'lucide-react';
-import { Badge } from '../../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { ShieldCheck, Info, Clock, Hash } from "lucide-react";
+import { Badge } from "../../ui/badge";
 
 interface SimpleSessionCardProps {
   session?: {
@@ -21,7 +21,7 @@ export function SimpleSessionCard({
   const hasSession = session?.exists || false;
 
   const formatAge = (ms?: number) => {
-    if (!ms) return '—';
+    if (!ms) return "—";
     const hours = Math.floor(ms / 3600000);
     const days = Math.floor(hours / 24);
     if (days > 0) return `${days}d ${hours % 24}h`;
@@ -30,9 +30,9 @@ export function SimpleSessionCard({
   };
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '—';
+    if (!dateStr) return "—";
     try {
-      return new Date(dateStr).toLocaleString('pt-BR');
+      return new Date(dateStr).toLocaleString("pt-BR");
     } catch {
       return dateStr;
     }
@@ -66,10 +66,10 @@ export function SimpleSessionCard({
         {/* Status Badge */}
         <div>
           <Badge
-            variant={hasSession ? 'default' : 'outline'}
-            className={hasSession ? 'bg-emerald-500' : ''}
+            variant={hasSession ? "default" : "outline"}
+            className={hasSession ? "bg-emerald-500" : ""}
           >
-            {hasSession ? 'Sessão Ativa' : 'Sessão Ausente'}
+            {hasSession ? "Sessão Ativa" : "Sessão Ausente"}
           </Badge>
         </div>
 

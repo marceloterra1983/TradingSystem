@@ -1,9 +1,9 @@
 /**
  * usePolling - Reusable polling hook
- * 
+ *
  * Quick Win P2-5: Extract polling pattern used in 5 components
  * ROI: 4.3x (30min to implement, saves 2h in future maintenance)
- * 
+ *
  * @example
  * const { isPolling, togglePolling, stopPolling } = usePolling(fetchData, {
  *   interval: 10000,
@@ -12,7 +12,7 @@
  * });
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export interface UsePollingOptions {
   /** Polling interval in milliseconds (default: 10000) */
@@ -43,7 +43,7 @@ export interface UsePollingReturn {
  */
 export function usePolling(
   fn: () => Promise<void> | void,
-  options: UsePollingOptions = {}
+  options: UsePollingOptions = {},
 ): UsePollingReturn {
   const {
     interval = 10000,
@@ -123,4 +123,3 @@ export function usePolling(
     poll,
   };
 }
-

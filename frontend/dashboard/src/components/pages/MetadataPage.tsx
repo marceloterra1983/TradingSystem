@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Tag, Database } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Tag, Database } from "lucide-react";
 
 export function MetadataPage() {
   const sections = [
     {
-      id: 'symbols',
+      id: "symbols",
       content: (
         <PlaceholderSection
           cardId="metadata-symbols"
@@ -16,7 +16,7 @@ export function MetadataPage() {
       ),
     },
     {
-      id: 'datasets',
+      id: "datasets",
       content: (
         <PlaceholderSection
           cardId="metadata-datasets"

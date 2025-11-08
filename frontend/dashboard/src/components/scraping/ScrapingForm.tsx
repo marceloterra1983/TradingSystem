@@ -1,7 +1,7 @@
-import React from 'react';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { ScrapeFormat, ScrapeOptions } from '../../services/firecrawlService';
+import React from "react";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { ScrapeFormat, ScrapeOptions } from "../../services/firecrawlService";
 
 interface ScrapingFormProps {
   onSubmit: (options: ScrapeOptions) => void;
@@ -10,13 +10,13 @@ interface ScrapingFormProps {
 }
 
 export const AVAILABLE_FORMATS: ScrapeFormat[] = [
-  'markdown',
-  'html',
-  'rawHtml',
-  'links',
-  'screenshot',
-  'screenshot@fullPage',
-  'json',
+  "markdown",
+  "html",
+  "rawHtml",
+  "links",
+  "screenshot",
+  "screenshot@fullPage",
+  "json",
 ];
 
 export const ScrapingForm: React.FC<ScrapingFormProps> = ({
@@ -24,8 +24,8 @@ export const ScrapingForm: React.FC<ScrapingFormProps> = ({
   loading,
   error,
 }) => {
-  const [url, setUrl] = React.useState('');
-  const [formats, setFormats] = React.useState<ScrapeFormat[]>(['markdown']);
+  const [url, setUrl] = React.useState("");
+  const [formats, setFormats] = React.useState<ScrapeFormat[]>(["markdown"]);
   const [onlyMainContent, setOnlyMainContent] = React.useState(true);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
@@ -74,7 +74,7 @@ export const ScrapingForm: React.FC<ScrapingFormProps> = ({
             }
           }}
           className={
-            errors.url ? 'border-red-500 focus:ring-red-500' : undefined
+            errors.url ? "border-red-500 focus:ring-red-500" : undefined
           }
         />
         {errors.url && <p className="text-xs text-red-600">{errors.url}</p>}
@@ -119,11 +119,11 @@ export const ScrapingForm: React.FC<ScrapingFormProps> = ({
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={loading || !url}>
-          {loading ? 'Scraping...' : 'Scrape Page'}
+          {loading ? "Scraping..." : "Scrape Page"}
         </Button>
         {error && (
           <p className="text-sm text-red-600">
-            {error.message || 'An error occurred while scraping'}
+            {error.message || "An error occurred while scraping"}
           </p>
         )}
       </div>

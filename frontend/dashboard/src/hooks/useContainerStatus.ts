@@ -5,7 +5,7 @@
  * Uses simple HTTP health checks to verify container availability.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export interface UseContainerStatusResult {
   isRunning: boolean;
@@ -27,10 +27,10 @@ async function checkContainerHealth(url: string): Promise<boolean> {
       // Use no-cors mode to avoid cross-origin failures.
       // A resolved fetch means the service responded (even if opaque), so consider it running.
       await fetch(url, {
-        method: 'GET',
-        mode: 'no-cors',
+        method: "GET",
+        mode: "no-cors",
         signal: controller.signal,
-        cache: 'no-cache',
+        cache: "no-cache",
       });
       return true;
     } finally {
@@ -38,7 +38,7 @@ async function checkContainerHealth(url: string): Promise<boolean> {
     }
   } catch (error) {
     // Network failures (connection refused), aborts, or other fetch errors mean the service isn't reachable yet.
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (error instanceof DOMException && error.name === "AbortError") {
       return false;
     }
     if (error instanceof TypeError) {
@@ -53,7 +53,7 @@ async function checkContainerHealth(url: string): Promise<boolean> {
  * Hook to check if a database container is running
  */
 export function useContainerStatus(
-  containerName: 'pgadmin' | 'pgweb' | 'adminer' | 'questdb' | null,
+  containerName: "pgadmin" | "pgweb" | "adminer" | "questdb" | null,
   healthCheckUrl: string | null,
 ): UseContainerStatusResult {
   const [isRunning, setIsRunning] = useState(false);
@@ -92,7 +92,7 @@ export function useContainerStatus(
       const running = await checkContainerHealth(healthCheckUrl);
       setIsRunning(running);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
       setIsRunning(false);
     } finally {
       setIsLoading(false);

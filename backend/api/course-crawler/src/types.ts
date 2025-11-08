@@ -20,7 +20,7 @@ export type CourseInput = {
 export interface CrawlRunRecord {
   id: string;
   courseId: string;
-  status: 'queued' | 'running' | 'success' | 'failed' | 'cancelled';
+  status: "queued" | "running" | "success" | "failed" | "cancelled";
   outputsDir: string | null;
   metrics: Record<string, unknown> | null;
   error: string | null;

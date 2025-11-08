@@ -3,10 +3,10 @@
  * Extracted from TelegramGatewayFinal.tsx
  */
 
-import { useState, useCallback } from 'react';
-import type { GatewayData, Channel, TelegramMessage } from '../types';
+import { useState, useCallback } from "react";
+import type { GatewayData, Channel, TelegramMessage } from "../types";
 
-const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || '';
+const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || "";
 
 export interface UseGatewayDataReturn {
   data: GatewayData | null;
@@ -19,8 +19,8 @@ export interface UseGatewayDataReturn {
 }
 
 export function useGatewayData(
-  filterChannel = 'all',
-  filterLimit = '50'
+  filterChannel = "all",
+  filterLimit = "50",
 ): UseGatewayDataReturn {
   const [data, setData] = useState<GatewayData | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -32,22 +32,22 @@ export function useGatewayData(
     try {
       setLoading(true);
       setError(null);
-      
+
       const GATEWAY_TOKEN = getGatewayToken();
       const headers = {
-        'X-Gateway-Token': GATEWAY_TOKEN,
+        "X-Gateway-Token": GATEWAY_TOKEN,
       };
 
       // Build messages URL with filters
-      const limit = filterLimit === 'all' ? '10000' : (filterLimit || '50');
+      const limit = filterLimit === "all" ? "10000" : filterLimit || "50";
       let messagesUrl = `/api/messages?limit=${limit}&sort=desc`;
-      if (filterChannel !== 'all') {
+      if (filterChannel !== "all") {
         messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc`;
       }
 
       const [overviewRes, channelsRes, messagesRes] = await Promise.all([
-        fetch('/api/telegram-gateway/overview', { headers }),
-        fetch('/api/channels', { headers }),
+        fetch("/api/telegram-gateway/overview", { headers }),
+        fetch("/api/channels", { headers }),
         fetch(messagesUrl, { headers }),
       ]);
 
@@ -66,9 +66,10 @@ export function useGatewayData(
         setMessages(json.data || []);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao buscar dados';
+      const message =
+        err instanceof Error ? err.message : "Erro ao buscar dados";
       setError(message);
-      console.error('Error fetching gateway data:', err);
+      console.error("Error fetching gateway data:", err);
     } finally {
       setLoading(false);
     }
@@ -84,4 +85,3 @@ export function useGatewayData(
     refetch: fetchData,
   };
 }
-

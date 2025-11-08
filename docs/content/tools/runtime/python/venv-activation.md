@@ -1,4 +1,12 @@
-# 🚀 Ativação Automática do Ambiente Virtual - TradingSystem
+---
+title: "Venv Activation"
+tags: [documentation]
+domain: devops
+type: guide
+summary: "Documentation for Venv Activation"
+status: active
+last_review: "2025-11-08"
+---# 🚀 Ativação Automática do Ambiente Virtual - TradingSystem
 
 Este projeto está configurado para ativar automaticamente o ambiente virtual Python quando você abrir um terminal no VS Code/Cursor.
 

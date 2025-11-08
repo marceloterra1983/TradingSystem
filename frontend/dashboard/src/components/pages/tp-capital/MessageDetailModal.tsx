@@ -5,8 +5,8 @@ import {
   MessageSquare,
   Image as ImageIcon,
   Send,
-} from 'lucide-react';
-import type { ForwardedMessage } from './ForwardedMessagesTable';
+} from "lucide-react";
+import type { ForwardedMessage } from "./ForwardedMessagesTable";
 
 interface MessageDetailModalProps {
   message: ForwardedMessage | null;
@@ -23,14 +23,14 @@ export function MessageDetailModal({
 
   const formatFullDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('pt-BR', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     }).format(date);
   };
 
@@ -102,9 +102,9 @@ export function MessageDetailModal({
                   Método de Encaminhamento
                 </p>
                 <p className="text-sm text-gray-900 dark:text-gray-100 mt-1">
-                  {message.forward_method === 'copy'
-                    ? 'Cópia (restrição)'
-                    : 'Encaminhamento direto'}
+                  {message.forward_method === "copy"
+                    ? "Cópia (restrição)"
+                    : "Encaminhamento direto"}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Message ID: {message.message_id}
@@ -144,7 +144,7 @@ export function MessageDetailModal({
                 </h3>
               </div>
               <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700">
-                {message.image_url.startsWith('/telegram-images/') ? (
+                {message.image_url.startsWith("/telegram-images/") ? (
                   // Imagem real baixada
                   <div className="flex flex-col items-center">
                     <img
@@ -153,14 +153,14 @@ export function MessageDetailModal({
                       className="max-w-full max-h-96 rounded-lg shadow-lg"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
+                        target.style.display = "none";
                         const errorMsg =
                           target.nextElementSibling as HTMLElement;
-                        if (errorMsg) errorMsg.style.display = 'block';
+                        if (errorMsg) errorMsg.style.display = "block";
                       }}
                     />
                     <div
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       className="text-center text-red-600 dark:text-red-400"
                     >
                       <p className="text-sm">Erro ao carregar imagem</p>

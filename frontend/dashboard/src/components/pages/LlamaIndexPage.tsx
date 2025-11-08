@@ -5,7 +5,7 @@
  * with customizable layout, drag-and-drop cards, and collection management
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -13,30 +13,30 @@ import {
   Zap,
   Server,
   Layers,
-} from 'lucide-react';
-import { Button } from '../ui/button';
+} from "lucide-react";
+import { Button } from "../ui/button";
 import {
   CustomizablePageLayout,
   type PageSection,
-} from '../layout/CustomizablePageLayout';
+} from "../layout/CustomizablePageLayout";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../ui/collapsible-card';
-import { CollectionsManagementCard } from './CollectionsManagementCard';
-import LlamaIndexQueryTool from './LlamaIndexQueryTool';
-import { useRagManager } from '../../hooks/llamaIndex/useRagManager';
-import type { Collection } from '../../types/collections';
+} from "../ui/collapsible-card";
+import { CollectionsManagementCard } from "./CollectionsManagementCard";
+import LlamaIndexQueryTool from "./LlamaIndexQueryTool";
+import { useRagManager } from "../../hooks/llamaIndex/useRagManager";
+import type { Collection } from "../../types/collections";
 
 /**
  * Format number with locale
  */
 function formatNumber(value: number | null | undefined): string {
-  if (typeof value !== 'number' || Number.isNaN(value)) return '—';
-  return value.toLocaleString('pt-BR');
+  if (typeof value !== "number" || Number.isNaN(value)) return "—";
+  return value.toLocaleString("pt-BR");
 }
 
 /**
@@ -45,7 +45,7 @@ function formatNumber(value: number | null | undefined): string {
 interface OverviewCardProps {
   loading: boolean;
   error: string | null;
-  status: ReturnType<typeof useRagManager>['status'];
+  status: ReturnType<typeof useRagManager>["status"];
   onRefresh: () => void;
 }
 
@@ -59,47 +59,47 @@ function OverviewCardContent({
     if (!status) return [];
     return [
       {
-        id: 'query',
-        label: 'Query Service',
+        id: "query",
+        label: "Query Service",
         ok: status.services?.query?.ok ?? false,
-        message: status.services?.query?.message ?? 'Sem dados',
+        message: status.services?.query?.message ?? "Sem dados",
         icon: Zap,
       },
       {
-        id: 'ingestion',
-        label: 'Ingestion Service',
+        id: "ingestion",
+        label: "Ingestion Service",
         ok: status.services?.ingestion?.ok ?? false,
-        message: status.services?.ingestion?.message ?? 'Sem dados',
+        message: status.services?.ingestion?.message ?? "Sem dados",
         icon: Server,
       },
       {
-        id: 'ollama',
-        label: 'Ollama LLM',
+        id: "ollama",
+        label: "Ollama LLM",
         ok: status.services?.ollama?.ok ?? false,
-        message: status.services?.ollama?.message ?? 'Sem dados',
+        message: status.services?.ollama?.message ?? "Sem dados",
         icon: Server,
       },
       {
-        id: 'redis',
-        label: 'Redis Cache',
+        id: "redis",
+        label: "Redis Cache",
         ok: status.services?.redis?.ok ?? false,
-        message: status.services?.redis?.message ?? 'Sem dados',
+        message: status.services?.redis?.message ?? "Sem dados",
         icon: Layers,
       },
       {
-        id: 'collections',
-        label: 'Collections Service',
+        id: "collections",
+        label: "Collections Service",
         ok: status.services?.collections?.ok ?? false,
-        message: status.services?.collections?.message ?? 'Sem dados',
+        message: status.services?.collections?.message ?? "Sem dados",
         icon: RefreshCw,
       },
       {
-        id: 'qdrant',
-        label: 'Qdrant Vector DB',
+        id: "qdrant",
+        label: "Qdrant Vector DB",
         ok: status.qdrant?.ok ?? false,
         message: status.qdrant
           ? `${status.qdrant.collection} • ${formatNumber(status.qdrant.count)} vetores`
-          : 'Sem dados',
+          : "Sem dados",
         icon: Zap,
       },
     ];
@@ -115,7 +115,7 @@ function OverviewCardContent({
           disabled={loading}
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Atualizar
         </Button>
       </div>
@@ -149,7 +149,7 @@ function OverviewCardContent({
                 </span>
                 <Icon
                   className={`h-4 w-4 ml-auto ${
-                    service.ok ? 'text-emerald-500' : 'text-amber-500'
+                    service.ok ? "text-emerald-500" : "text-amber-500"
                   }`}
                 />
               </div>
@@ -220,7 +220,7 @@ export function LlamaIndexPage(): JSX.Element {
   const sections: PageSection[] = useMemo(
     () => [
       {
-        id: 'rag-overview',
+        id: "rag-overview",
         content: (
           <CollapsibleCard id="rag-overview">
             <CollapsibleCardHeader>
@@ -245,7 +245,7 @@ export function LlamaIndexPage(): JSX.Element {
         ),
       },
       {
-        id: 'collections-management',
+        id: "collections-management",
         content: (
           <CollapsibleCard id="collections-management">
             <CollapsibleCardHeader>
@@ -288,7 +288,7 @@ export function LlamaIndexPage(): JSX.Element {
         ),
       },
       {
-        id: 'query-tool',
+        id: "query-tool",
         content: (
           <CollapsibleCard id="query-tool">
             <CollapsibleCardHeader>

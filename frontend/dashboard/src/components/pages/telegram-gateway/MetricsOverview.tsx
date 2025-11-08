@@ -4,16 +4,16 @@ import {
   Repeat,
   ShieldAlert,
   TrendingUp,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
-import { Skeleton } from '../../ui/skeleton';
-import { TelegramGatewayMetricsSummary } from '../../../hooks/useTelegramGateway';
+} from "../../ui/collapsible-card";
+import { Skeleton } from "../../ui/skeleton";
+import { TelegramGatewayMetricsSummary } from "../../../hooks/useTelegramGateway";
 
 interface MetricsOverviewProps {
   metrics?: TelegramGatewayMetricsSummary;
@@ -21,8 +21,8 @@ interface MetricsOverviewProps {
 }
 
 function formatNumber(value: number | null | undefined) {
-  if (value === null || typeof value === 'undefined' || Number.isNaN(value))
-    return '—';
+  if (value === null || typeof value === "undefined" || Number.isNaN(value))
+    return "—";
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
   return Math.round(value).toString();
@@ -31,39 +31,39 @@ function formatNumber(value: number | null | undefined) {
 export function MetricsOverview({ metrics, isLoading }: MetricsOverviewProps) {
   const cards = [
     {
-      label: 'Mensagens recebidas',
+      label: "Mensagens recebidas",
       value: formatNumber(metrics?.messagesReceivedTotal ?? null),
       icon: BarChart3,
-      description: 'Total acumulado desde a última reinicialização do gateway',
-      accent: 'text-blue-600 dark:text-blue-400',
+      description: "Total acumulado desde a última reinicialização do gateway",
+      accent: "text-blue-600 dark:text-blue-400",
     },
     {
-      label: 'Mensagens publicadas',
+      label: "Mensagens publicadas",
       value: formatNumber(metrics?.messagesPublishedTotal ?? null),
       icon: TrendingUp,
-      description: 'Entregues com sucesso aos endpoints configurados',
-      accent: 'text-emerald-600 dark:text-emerald-400',
+      description: "Entregues com sucesso aos endpoints configurados",
+      accent: "text-emerald-600 dark:text-emerald-400",
     },
     {
-      label: 'Falhas de publicação',
+      label: "Falhas de publicação",
       value: formatNumber(metrics?.publishFailuresTotal ?? null),
       icon: ShieldAlert,
-      description: 'Tentativas que falharam após todos os retries',
-      accent: 'text-red-600 dark:text-red-400',
+      description: "Tentativas que falharam após todos os retries",
+      accent: "text-red-600 dark:text-red-400",
     },
     {
-      label: 'Tentativas de retry',
+      label: "Tentativas de retry",
       value: formatNumber(metrics?.retryAttemptsTotal ?? null),
       icon: Repeat,
-      description: 'Retries executados com backoff exponencial',
-      accent: 'text-amber-600 dark:text-amber-400',
+      description: "Retries executados com backoff exponencial",
+      accent: "text-amber-600 dark:text-amber-400",
     },
     {
-      label: 'Fila de falhas (runtime)',
+      label: "Fila de falhas (runtime)",
       value: formatNumber(metrics?.failureQueueSize ?? null),
       icon: Activity,
-      description: 'Tamanho reportado via métrica Prometheus',
-      accent: 'text-purple-600 dark:text-purple-400',
+      description: "Tamanho reportado via métrica Prometheus",
+      accent: "text-purple-600 dark:text-purple-400",
     },
   ];
 

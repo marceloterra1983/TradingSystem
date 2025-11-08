@@ -17,7 +17,7 @@ export interface EmbeddingModel {
   isDefault: boolean;
   available: boolean;
   capabilities?: string[];
-  performance?: 'fast' | 'balanced' | 'quality';
+  performance?: "fast" | "balanced" | "quality";
   useCase?: string;
 }
 
@@ -28,7 +28,7 @@ export interface Collection {
   name: string;
   description: string;
   directory: string;
-  embeddingModel: 'nomic-embed-text' | 'mxbai-embed-large' | 'embeddinggemma';
+  embeddingModel: "nomic-embed-text" | "mxbai-embed-large" | "embeddinggemma";
   chunkSize: number;
   chunkOverlap: number;
   fileTypes: string[];
@@ -99,7 +99,7 @@ export interface CreateCollectionRequest {
   name: string;
   description: string;
   directory: string;
-  embeddingModel: 'nomic-embed-text' | 'mxbai-embed-large' | 'embeddinggemma';
+  embeddingModel: "nomic-embed-text" | "mxbai-embed-large" | "embeddinggemma";
   chunkSize?: number;
   chunkOverlap?: number;
   fileTypes?: string[];
@@ -129,7 +129,7 @@ export interface UpdateCollectionRequest {
  */
 export interface IngestionJobResponse {
   jobId: string;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
   message: string;
 }
 
@@ -170,7 +170,7 @@ export interface CollectionFormState {
   name: string;
   description: string;
   directory: string;
-  embeddingModel: 'nomic-embed-text' | 'mxbai-embed-large' | 'embeddinggemma';
+  embeddingModel: "nomic-embed-text" | "mxbai-embed-large" | "embeddinggemma";
   chunkSize: number;
   chunkOverlap: number;
   fileTypes: string[];
@@ -183,33 +183,33 @@ export interface CollectionFormState {
  * Collection action types
  */
 export type CollectionAction =
-  | 'create'
-  | 'edit'
-  | 'delete'
-  | 'clone'
-  | 'ingest'
-  | 'clean-orphans';
+  | "create"
+  | "edit"
+  | "delete"
+  | "clone"
+  | "ingest"
+  | "clean-orphans";
 
 /**
  * Collection dialog mode
  */
-export type CollectionDialogMode = 'create' | 'edit' | 'clone';
+export type CollectionDialogMode = "create" | "edit" | "clone";
 
 /**
  * Collection sort field
  */
 export type CollectionSortField =
-  | 'name'
-  | 'model'
-  | 'directory'
-  | 'chunks'
-  | 'documents'
-  | 'orphans';
+  | "name"
+  | "model"
+  | "directory"
+  | "chunks"
+  | "documents"
+  | "orphans";
 
 /**
  * Sort direction
  */
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc";
 
 /**
  * Collection filter
@@ -233,7 +233,7 @@ export interface CollectionSort {
  * Bulk action
  */
 export interface BulkAction {
-  type: 'delete' | 'reingest' | 'enable' | 'disable';
+  type: "delete" | "reingest" | "enable" | "disable";
   collectionNames: string[];
 }
 
@@ -241,17 +241,17 @@ export interface BulkAction {
  * Health check response
  */
 export interface HealthCheckResponse {
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   timestamp: string;
   version: string;
   environment: string;
   services: {
     ingestion: {
-      status: 'healthy' | 'unhealthy';
+      status: "healthy" | "unhealthy";
       url: string;
     };
     fileWatcher: {
-      status: 'active' | 'inactive';
+      status: "active" | "inactive";
       enabled: boolean;
       watchedDirectories: number;
       eventsProcessed: number;

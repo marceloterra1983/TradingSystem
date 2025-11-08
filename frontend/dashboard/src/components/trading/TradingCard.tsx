@@ -1,6 +1,6 @@
-import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
-import { TradingData } from '../../hooks/useTradingData';
+import React from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { TradingData } from "../../hooks/useTradingData";
 
 // ✅ Componente funcional seguindo as regras React do Playbooks
 interface TradingCardProps {
@@ -16,14 +16,14 @@ interface TradingCardProps {
 export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
   data,
   onCardClick,
-  className = '',
+  className = "",
 }) {
   const { symbol, price, change, volume, lastUpdate } = data;
 
   const isPositive = change >= 0;
   const changeIcon = isPositive ? TrendingUp : TrendingDown;
-  const changeColor = isPositive ? 'text-green-600' : 'text-red-600';
-  const bgColor = isPositive ? 'bg-green-50' : 'bg-red-50';
+  const changeColor = isPositive ? "text-green-600" : "text-red-600";
+  const bgColor = isPositive ? "bg-green-50" : "bg-red-50";
 
   const handleClick = () => {
     onCardClick?.(symbol);
@@ -36,7 +36,7 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleClick();
         }
@@ -59,12 +59,12 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
           <div className={`flex items-center gap-1 ${changeColor}`}>
             {React.createElement(changeIcon, {
               size: 16,
-              'aria-label': isPositive
-                ? 'Tendência positiva'
-                : 'Tendência negativa',
+              "aria-label": isPositive
+                ? "Tendência positiva"
+                : "Tendência negativa",
             })}
             <span className="font-medium">
-              {isPositive ? '+' : ''}
+              {isPositive ? "+" : ""}
               {change.toFixed(2)}%
             </span>
           </div>
@@ -79,4 +79,4 @@ export const TradingCard = React.memo<TradingCardProps>(function TradingCard({
 });
 
 // ✅ PropTypes equivalent com TypeScript
-TradingCard.displayName = 'TradingCard';
+TradingCard.displayName = "TradingCard";

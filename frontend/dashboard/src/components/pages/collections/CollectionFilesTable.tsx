@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import {
   FileText,
   RefreshCw,
@@ -9,9 +9,9 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import {
   Table,
   TableBody,
@@ -19,36 +19,36 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../../ui/table';
-import { Badge } from '../../ui/badge';
+} from "../../ui/table";
+import { Badge } from "../../ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../../ui/tooltip';
+} from "../../ui/tooltip";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../ui/select';
+} from "../../ui/select";
 
 type SortField =
-  | 'path'
-  | 'extension'
-  | 'sizeBytes'
-  | 'chunkCount'
-  | 'status'
-  | 'lastModified';
-type SortDirection = 'asc' | 'desc';
+  | "path"
+  | "extension"
+  | "sizeBytes"
+  | "chunkCount"
+  | "status"
+  | "lastModified";
+type SortDirection = "asc" | "desc";
 
 interface CollectionFile {
   path: string;
   sizeBytes: number;
   chunkCount: number;
-  status: 'indexed' | 'pending' | 'orphan' | 'error';
+  status: "indexed" | "pending" | "orphan" | "error";
   lastModified: string;
 }
 
@@ -82,27 +82,27 @@ interface CollectionFilesTableProps {
 
 // Helper functions defined outside component to avoid re-creation
 const getFileName = (path: string): string => {
-  const parts = path.split('/');
+  const parts = path.split("/");
   return parts[parts.length - 1];
 };
 
 const getFileExtension = (path: string): string => {
   const fileName = getFileName(path);
-  const lastDotIndex = fileName.lastIndexOf('.');
-  if (lastDotIndex === -1 || lastDotIndex === 0) return '';
+  const lastDotIndex = fileName.lastIndexOf(".");
+  if (lastDotIndex === -1 || lastDotIndex === 0) return "";
   return fileName.substring(lastDotIndex + 1).toLowerCase();
 };
 
 const getRelativePath = (fullPath: string): string => {
   // Remove the base path and show relative path from collection directory
-  const parts = fullPath.split('/');
+  const parts = fullPath.split("/");
   // Find the index of 'content' and take everything after it
-  const contentIndex = parts.indexOf('content');
+  const contentIndex = parts.indexOf("content");
   if (contentIndex !== -1 && contentIndex < parts.length - 1) {
-    return parts.slice(contentIndex + 1).join('/');
+    return parts.slice(contentIndex + 1).join("/");
   }
   // Fallback: show last 3 parts
-  return parts.slice(-3).join('/');
+  return parts.slice(-3).join("/");
 };
 
 const formatBytes = (bytes: number): string => {
@@ -113,8 +113,8 @@ const formatBytes = (bytes: number): string => {
 
 export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
   collectionName,
-  collectionDirectory = '',
-  collectionModel = '',
+  collectionDirectory = "",
+  collectionModel = "",
   directorySizeMB = 0,
   onClose,
   isExpanded = true,
@@ -125,9 +125,9 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
   const [summary, setSummary] = useState<FileSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<SortField>('path');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>("path");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -143,10 +143,10 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
         setFiles(data.data.files);
         setSummary(data.data.summary);
       } else {
-        setError('Failed to load files');
+        setError("Failed to load files");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -177,36 +177,36 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
       let comparison = 0;
 
       switch (sortField) {
-        case 'path':
+        case "path":
           comparison = getRelativePath(a.path).localeCompare(
             getRelativePath(b.path),
           );
           break;
-        case 'extension':
+        case "extension":
           const extA = getFileExtension(a.path);
           const extB = getFileExtension(b.path);
           comparison = extA.localeCompare(extB);
           break;
-        case 'sizeBytes':
+        case "sizeBytes":
           comparison = a.sizeBytes - b.sizeBytes;
           break;
-        case 'chunkCount':
+        case "chunkCount":
           comparison = a.chunkCount - b.chunkCount;
           break;
-        case 'status':
+        case "status":
           // Order: indexed < pending < orphan < error
           const statusOrder = { indexed: 1, pending: 2, orphan: 3, error: 4 };
           comparison =
             (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
           break;
-        case 'lastModified':
+        case "lastModified":
           comparison =
             new Date(a.lastModified).getTime() -
             new Date(b.lastModified).getTime();
           break;
       }
 
-      return sortDirection === 'asc' ? comparison : -comparison;
+      return sortDirection === "asc" ? comparison : -comparison;
     });
 
     return sorted;
@@ -214,10 +214,10 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -225,7 +225,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
     if (sortField !== field) {
       return <ArrowUpDown className="h-3 w-3 text-gray-400" />;
     }
-    return sortDirection === 'asc' ? (
+    return sortDirection === "asc" ? (
       <ArrowUp className="h-3 w-3 text-blue-600" />
     ) : (
       <ArrowDown className="h-3 w-3 text-blue-600" />
@@ -243,7 +243,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
             ✓
           </Badge>
         ),
-        tooltip: 'Arquivo indexado com sucesso',
+        tooltip: "Arquivo indexado com sucesso",
       },
       pending: {
         badge: (
@@ -254,7 +254,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
             ⏳
           </Badge>
         ),
-        tooltip: 'Aguardando indexação',
+        tooltip: "Aguardando indexação",
       },
       orphan: {
         badge: (
@@ -265,7 +265,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
             👻
           </Badge>
         ),
-        tooltip: 'Arquivo deletado mas ainda indexado',
+        tooltip: "Arquivo deletado mas ainda indexado",
       },
       error: {
         badge: (
@@ -273,7 +273,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
             ✗
           </Badge>
         ),
-        tooltip: 'Erro ao indexar',
+        tooltip: "Erro ao indexar",
       },
     };
 
@@ -410,7 +410,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
             />
             {searchTerm && (
               <button
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-4 w-4" />
@@ -431,13 +431,13 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
                 <div className="flex items-center gap-1">
                   <span className="text-gray-500">Indexados:</span>
                   <span className="font-semibold text-green-600 dark:text-green-400">
-                    {files.filter((f) => f.status === 'indexed').length}
+                    {files.filter((f) => f.status === "indexed").length}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-gray-500">Pendentes:</span>
                   <span className="font-semibold text-yellow-600 dark:text-yellow-400">
-                    {files.filter((f) => f.status === 'pending').length}
+                    {files.filter((f) => f.status === "pending").length}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -449,7 +449,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
                 <div className="flex items-center gap-1">
                   <span className="text-gray-500">Órfãos:</span>
                   <span className="font-semibold text-orange-600 dark:text-orange-400">
-                    {files.filter((f) => f.status === 'orphan').length}
+                    {files.filter((f) => f.status === "orphan").length}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -473,56 +473,56 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
                     </TableHead>
                     <TableHead className="text-xs font-semibold py-2">
                       <button
-                        onClick={() => handleSort('path')}
+                        onClick={() => handleSort("path")}
                         className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                       >
                         Arquivo
-                        {getSortIcon('path')}
+                        {getSortIcon("path")}
                       </button>
                     </TableHead>
                     <TableHead className="text-center text-xs font-semibold py-2 w-20">
                       <button
-                        onClick={() => handleSort('extension')}
+                        onClick={() => handleSort("extension")}
                         className="flex items-center justify-center gap-1 hover:text-blue-600 transition-colors mx-auto"
                       >
                         Ext
-                        {getSortIcon('extension')}
+                        {getSortIcon("extension")}
                       </button>
                     </TableHead>
                     <TableHead className="text-right text-xs font-semibold py-2">
                       <button
-                        onClick={() => handleSort('sizeBytes')}
+                        onClick={() => handleSort("sizeBytes")}
                         className="flex items-center justify-end gap-1 hover:text-blue-600 transition-colors ml-auto"
                       >
                         Tamanho
-                        {getSortIcon('sizeBytes')}
+                        {getSortIcon("sizeBytes")}
                       </button>
                     </TableHead>
                     <TableHead className="text-right text-xs font-semibold py-2">
                       <button
-                        onClick={() => handleSort('chunkCount')}
+                        onClick={() => handleSort("chunkCount")}
                         className="flex items-center justify-end gap-1 hover:text-blue-600 transition-colors ml-auto"
                       >
                         Chunks
-                        {getSortIcon('chunkCount')}
+                        {getSortIcon("chunkCount")}
                       </button>
                     </TableHead>
                     <TableHead className="text-center text-xs font-semibold py-2">
                       <button
-                        onClick={() => handleSort('status')}
+                        onClick={() => handleSort("status")}
                         className="flex items-center justify-center gap-1 hover:text-blue-600 transition-colors mx-auto"
                       >
                         Status
-                        {getSortIcon('status')}
+                        {getSortIcon("status")}
                       </button>
                     </TableHead>
                     <TableHead className="text-right text-xs font-semibold py-2">
                       <button
-                        onClick={() => handleSort('lastModified')}
+                        onClick={() => handleSort("lastModified")}
                         className="flex items-center justify-end gap-1 hover:text-blue-600 transition-colors ml-auto"
                       >
                         Modificado
-                        {getSortIcon('lastModified')}
+                        {getSortIcon("lastModified")}
                       </button>
                     </TableHead>
                   </TableRow>
@@ -536,7 +536,7 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
                       >
                         {searchTerm
                           ? `Nenhum arquivo encontrado para "${searchTerm}"`
-                          : 'Nenhum arquivo indexado'}
+                          : "Nenhum arquivo indexado"}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -582,12 +582,12 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
                           </TableCell>
                           <TableCell className="text-right text-xs py-1 text-gray-500 dark:text-gray-400">
                             {new Date(file.lastModified).toLocaleDateString(
-                              'pt-BR',
+                              "pt-BR",
                               {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               },
                             )}
                           </TableCell>
@@ -604,10 +604,10 @@ export const CollectionFilesTable: React.FC<CollectionFilesTableProps> = ({
           {searchTerm && (
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
               {filteredAndSortedFiles.length} arquivo
-              {filteredAndSortedFiles.length !== 1 ? 's' : ''} encontrado
-              {filteredAndSortedFiles.length !== 1 ? 's' : ''} •{' '}
+              {filteredAndSortedFiles.length !== 1 ? "s" : ""} encontrado
+              {filteredAndSortedFiles.length !== 1 ? "s" : ""} •{" "}
               <button
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
                 className="text-blue-600 hover:underline"
               >
                 Limpar busca

@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { Input } from '../../ui/input';
-import { Button } from '../../ui/button';
+import { useState } from "react";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
 import {
   useCreateTelegramGatewayChannel,
   useDeleteTelegramGatewayChannel,
   useTelegramGatewayChannels,
   useUpdateTelegramGatewayChannel,
-} from '../../../hooks/useTelegramGateway';
-import { Badge } from '../../ui/badge';
+} from "../../../hooks/useTelegramGateway";
+import { Badge } from "../../ui/badge";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
+} from "../../ui/collapsible-card";
 import {
   Loader2,
   PlusCircle,
@@ -22,7 +22,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Trash2,
-} from 'lucide-react';
+} from "lucide-react";
 
 export function ChannelsManagerCard() {
   const { data: channels = [], isLoading } = useTelegramGatewayChannels();
@@ -30,9 +30,9 @@ export function ChannelsManagerCard() {
   const updateMutation = useUpdateTelegramGatewayChannel();
   const deleteMutation = useDeleteTelegramGatewayChannel();
 
-  const [channelId, setChannelId] = useState('');
-  const [label, setLabel] = useState('');
-  const [description, setDescription] = useState('');
+  const [channelId, setChannelId] = useState("");
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleCreate = async () => {
     if (!channelId.trim()) return;
@@ -41,9 +41,9 @@ export function ChannelsManagerCard() {
       label: label.trim() || undefined,
       description: description.trim() || undefined,
     });
-    setChannelId('');
-    setLabel('');
-    setDescription('');
+    setChannelId("");
+    setLabel("");
+    setDescription("");
   };
 
   const handleToggle = async (id: string, isActive: boolean) => {
@@ -62,15 +62,15 @@ export function ChannelsManagerCard() {
     },
   ) => {
     const newLabel =
-      typeof window !== 'undefined'
-        ? window.prompt('Descrição curta (opcional):', current.label ?? '')
-        : (current.label ?? '');
+      typeof window !== "undefined"
+        ? window.prompt("Descrição curta (opcional):", current.label ?? "")
+        : (current.label ?? "");
     if (newLabel === null) return;
 
     const newDescription =
-      typeof window !== 'undefined'
-        ? window.prompt('Observações (opcional):', current.description ?? '')
-        : (current.description ?? '');
+      typeof window !== "undefined"
+        ? window.prompt("Observações (opcional):", current.description ?? "")
+        : (current.description ?? "");
     if (newDescription === null) return;
 
     await updateMutation.mutateAsync({
@@ -82,7 +82,7 @@ export function ChannelsManagerCard() {
 
   const handleDelete = async (id: string, channel: string) => {
     const confirmed =
-      typeof window === 'undefined'
+      typeof window === "undefined"
         ? true
         : window.confirm(
             `Remover canal ${channel}? As mensagens deixarão de ser processadas.`,
@@ -193,21 +193,21 @@ export function ChannelsManagerCard() {
                       {channel.channelId}
                     </td>
                     <td className="px-3 py-3 align-top text-sm text-slate-600 dark:text-slate-300">
-                      {channel.label || '—'}
+                      {channel.label || "—"}
                     </td>
                     <td className="px-3 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
-                      {channel.description || '—'}
+                      {channel.description || "—"}
                     </td>
                     <td className="px-3 py-3 align-top">
                       <Badge
-                        variant={channel.isActive ? 'default' : 'outline'}
+                        variant={channel.isActive ? "default" : "outline"}
                         className={
                           channel.isActive
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
-                            : ''
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+                            : ""
                         }
                       >
-                        {channel.isActive ? 'Ativo' : 'Inativo'}
+                        {channel.isActive ? "Ativo" : "Inativo"}
                       </Badge>
                     </td>
                     <td className="px-3 py-3 text-right">

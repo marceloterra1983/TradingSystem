@@ -9,20 +9,20 @@ import {
   normalizeTimestamp,
   formatRelativeTime as formatRelTsRobust,
   APP_TIMEZONE,
-} from '../../../../utils/timestampUtils';
-import { formatInTimeZone } from 'date-fns-tz';
+} from "../../../../utils/timestampUtils";
+import { formatInTimeZone } from "date-fns-tz";
 
 /**
  * Format bytes to human-readable string
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
 
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
 /**
@@ -46,13 +46,13 @@ export function formatUptime(ms: number): string {
  */
 export function formatDate(dateString: string | number): string {
   const normalized = normalizeTimestamp(dateString);
-  if (!normalized) return '–';
+  if (!normalized) return "–";
 
   try {
     const date = new Date(normalized);
-    return formatInTimeZone(date, APP_TIMEZONE, 'dd/MM/yyyy, HH:mm');
+    return formatInTimeZone(date, APP_TIMEZONE, "dd/MM/yyyy, HH:mm");
   } catch (error) {
-    return '–';
+    return "–";
   }
 }
 
@@ -62,8 +62,7 @@ export function formatDate(dateString: string | number): string {
  */
 export function formatRelativeTime(dateString: string | number): string {
   const normalized = normalizeTimestamp(dateString);
-  if (!normalized) return '–';
+  if (!normalized) return "–";
 
   return formatRelTsRobust(normalized);
 }
-

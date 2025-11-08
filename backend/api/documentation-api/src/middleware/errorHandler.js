@@ -1,12 +1,17 @@
-import { logger } from '../config/logger.js';
+import { logger } from "../config/logger.js";
 
 /**
  * Custom error classes for better error handling
  */
 export class AppError extends Error {
-  constructor(message, statusCode = 500, code = 'INTERNAL_ERROR', details = null) {
+  constructor(
+    message,
+    statusCode = 500,
+    code = "INTERNAL_ERROR",
+    details = null,
+  ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
     this.statusCode = statusCode;
     this.code = code;
     this.details = details;
@@ -17,8 +22,8 @@ export class AppError extends Error {
 
 export class ValidationError extends AppError {
   constructor(message, details = null) {
-    super(message, 400, 'VALIDATION_ERROR', details);
-    this.name = 'ValidationError';
+    super(message, 400, "VALIDATION_ERROR", details);
+    this.name = "ValidationError";
   }
 }
 
@@ -27,28 +32,28 @@ export class NotFoundError extends AppError {
     const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`;
-    super(message, 404, 'NOT_FOUND', { resource, identifier });
-    this.name = 'NotFoundError';
+    super(message, 404, "NOT_FOUND", { resource, identifier });
+    this.name = "NotFoundError";
   }
 }
 
 export class ServiceUnavailableError extends AppError {
   constructor(service, details = null) {
     const message = `Service '${service}' is currently unavailable`;
-    super(message, 503, 'SERVICE_UNAVAILABLE', { service, ...details });
-    this.name = 'ServiceUnavailableError';
+    super(message, 503, "SERVICE_UNAVAILABLE", { service, ...details });
+    this.name = "ServiceUnavailableError";
   }
 }
 
 export class ExternalServiceError extends AppError {
   constructor(service, originalError, details = null) {
     const message = `External service '${service}' failed: ${originalError.message}`;
-    super(message, 502, 'EXTERNAL_SERVICE_ERROR', {
+    super(message, 502, "EXTERNAL_SERVICE_ERROR", {
       service,
       originalError: originalError.message,
       ...details,
     });
-    this.name = 'ExternalServiceError';
+    this.name = "ExternalServiceError";
   }
 }
 
@@ -61,17 +66,17 @@ export const errorHandler = (err, req, res, _next) => {
 
   // Log error
   const isOperational = err instanceof AppError && err.isOperational;
-  const logLevel = isOperational ? 'warn' : 'error';
+  const logLevel = isOperational ? "warn" : "error";
 
-  logger[logLevel]('API Error', {
+  logger[logLevel]("API Error", {
     error: error.message,
-    code: err.code || 'UNKNOWN',
+    code: err.code || "UNKNOWN",
     stack: err.stack,
     url: req.url,
     method: req.method,
     ip: req.ip,
-    userAgent: req.get('User-Agent'),
-    isOperational
+    userAgent: req.get("User-Agent"),
+    isOperational,
   });
 
   // If it's already an AppError, use its statusCode
@@ -80,41 +85,50 @@ export const errorHandler = (err, req, res, _next) => {
     error.code = err.code;
   } else {
     // Legacy error detection
-    if (error.message.includes('ECONNREFUSED') || error.message.includes('QuestDB')) {
-      error.message = 'Database connection error';
+    if (
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("QuestDB")
+    ) {
+      error.message = "Database connection error";
       error.statusCode = 503;
-      error.code = 'DATABASE_ERROR';
-    } else if (error.message.includes('Validation failed')) {
+      error.code = "DATABASE_ERROR";
+    } else if (error.message.includes("Validation failed")) {
       error.statusCode = 400;
-      error.code = 'VALIDATION_ERROR';
-    } else if (error.message.includes('not found')) {
+      error.code = "VALIDATION_ERROR";
+    } else if (error.message.includes("not found")) {
       error.statusCode = 404;
-      error.code = 'NOT_FOUND';
-    } else if (error.message.includes('already exists')) {
+      error.code = "NOT_FOUND";
+    } else if (error.message.includes("already exists")) {
       error.statusCode = 409;
-      error.code = 'CONFLICT';
-    } else if (error.message.includes('Unauthorized') || error.message.includes('Access denied')) {
+      error.code = "CONFLICT";
+    } else if (
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Access denied")
+    ) {
       error.statusCode = 401;
-      error.code = 'UNAUTHORIZED';
-    } else if (error.message.includes('Forbidden')) {
+      error.code = "UNAUTHORIZED";
+    } else if (error.message.includes("Forbidden")) {
       error.statusCode = 403;
-      error.code = 'FORBIDDEN';
-    } else if (error.message.includes('Bad Request') || error.message.includes('Invalid')) {
+      error.code = "FORBIDDEN";
+    } else if (
+      error.message.includes("Bad Request") ||
+      error.message.includes("Invalid")
+    ) {
       error.statusCode = 400;
-      error.code = 'BAD_REQUEST';
+      error.code = "BAD_REQUEST";
     }
   }
 
   // Default error response
   const statusCode = error.statusCode || 500;
-  const message = statusCode === 500 ? 'Internal server error' : error.message;
+  const message = statusCode === 500 ? "Internal server error" : error.message;
 
   const response = {
     success: false,
     error: {
       message,
-      code: error.code || 'INTERNAL_ERROR'
-    }
+      code: error.code || "INTERNAL_ERROR",
+    },
   };
 
   // Add details if present
@@ -123,7 +137,7 @@ export const errorHandler = (err, req, res, _next) => {
   }
 
   // Add development info
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     response.error.stack = err.stack;
     response.error.original = error;
   }
@@ -153,17 +167,17 @@ export const asyncHandler = (fn) => {
  * Rate limit error handler
  */
 export const rateLimitHandler = (req, res) => {
-  logger.warn('Rate limit exceeded', {
+  logger.warn("Rate limit exceeded", {
     ip: req.ip,
     url: req.url,
     method: req.method,
-    userAgent: req.get('User-Agent')
+    userAgent: req.get("User-Agent"),
   });
 
   res.status(429).json({
     success: false,
-    error: 'Too many requests, please try again later',
-    retryAfter: 60 // seconds
+    error: "Too many requests, please try again later",
+    retryAfter: 60, // seconds
   });
 };
 
@@ -171,18 +185,18 @@ export const rateLimitHandler = (req, res) => {
  * Malformed request handler
  */
 export const malformedRequestHandler = (err, req, res, next) => {
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    logger.warn('Malformed JSON request', {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    logger.warn("Malformed JSON request", {
       error: err.message,
       url: req.url,
       method: req.method,
-      ip: req.ip
+      ip: req.ip,
     });
 
     return res.status(400).json({
       success: false,
-      error: 'Malformed JSON request',
-      details: 'Invalid JSON format in request body'
+      error: "Malformed JSON request",
+      details: "Invalid JSON format in request body",
     });
   }
 
@@ -193,18 +207,18 @@ export const malformedRequestHandler = (err, req, res, next) => {
  * CORS error handler
  */
 export const corsErrorHandler = (err, req, res, next) => {
-  if (err.message.includes('CORS')) {
-    logger.warn('CORS error', {
+  if (err.message.includes("CORS")) {
+    logger.warn("CORS error", {
       error: err.message,
-      origin: req.get('Origin'),
+      origin: req.get("Origin"),
       url: req.url,
-      method: req.method
+      method: req.method,
     });
 
     return res.status(403).json({
       success: false,
-      error: 'CORS policy violation',
-      details: 'Cross-origin request not allowed'
+      error: "CORS policy violation",
+      details: "Cross-origin request not allowed",
     });
   }
 
@@ -215,59 +229,59 @@ export const corsErrorHandler = (err, req, res, next) => {
  * File upload error handler
  */
 export const fileUploadErrorHandler = (err, req, res, next) => {
-  if (err.code === 'LIMIT_FILE_SIZE') {
+  if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({
       success: false,
-      error: 'File size too large',
-      details: `Maximum file size is ${err.limit} bytes`
+      error: "File size too large",
+      details: `Maximum file size is ${err.limit} bytes`,
     });
   }
 
-  if (err.code === 'LIMIT_FILE_COUNT') {
+  if (err.code === "LIMIT_FILE_COUNT") {
     return res.status(400).json({
       success: false,
-      error: 'Too many files',
-      details: `Maximum ${err.limit} files allowed`
+      error: "Too many files",
+      details: `Maximum ${err.limit} files allowed`,
     });
   }
 
-  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+  if (err.code === "LIMIT_UNEXPECTED_FILE") {
     return res.status(400).json({
       success: false,
-      error: 'Unexpected file field',
-      details: 'File field name not expected'
+      error: "Unexpected file field",
+      details: "File field name not expected",
     });
   }
 
-  if (err.code === 'LIMIT_PART_COUNT') {
+  if (err.code === "LIMIT_PART_COUNT") {
     return res.status(400).json({
       success: false,
-      error: 'Too many parts',
-      details: 'Request contains too many form parts'
+      error: "Too many parts",
+      details: "Request contains too many form parts",
     });
   }
 
-  if (err.code === 'LIMIT_FIELD_KEY') {
+  if (err.code === "LIMIT_FIELD_KEY") {
     return res.status(400).json({
       success: false,
-      error: 'Field name too long',
-      details: 'Form field name exceeds maximum length'
+      error: "Field name too long",
+      details: "Form field name exceeds maximum length",
     });
   }
 
-  if (err.code === 'LIMIT_FIELD_VALUE') {
+  if (err.code === "LIMIT_FIELD_VALUE") {
     return res.status(400).json({
       success: false,
-      error: 'Field value too long',
-      details: 'Form field value exceeds maximum length'
+      error: "Field value too long",
+      details: "Form field value exceeds maximum length",
     });
   }
 
-  if (err.code === 'LIMIT_FIELD_COUNT') {
+  if (err.code === "LIMIT_FIELD_COUNT") {
     return res.status(400).json({
       success: false,
-      error: 'Too many fields',
-      details: 'Form contains too many fields'
+      error: "Too many fields",
+      details: "Form contains too many fields",
     });
   }
 

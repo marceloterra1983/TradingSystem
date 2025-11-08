@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { FileText, Shield } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { FileText, Shield } from "lucide-react";
 
 /**
  * System Logs Page - Centralized logging and audit trail
@@ -8,7 +8,7 @@ import { FileText, Shield } from 'lucide-react';
 export function LogsDashboardPage() {
   const sections = [
     {
-      id: 'system-logs',
+      id: "system-logs",
       content: (
         <PlaceholderSection
           cardId="logs-system"
@@ -19,7 +19,7 @@ export function LogsDashboardPage() {
       ),
     },
     {
-      id: 'audit-trail',
+      id: "audit-trail",
       content: (
         <PlaceholderSection
           cardId="logs-audit"

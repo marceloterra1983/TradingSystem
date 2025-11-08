@@ -1,7 +1,7 @@
-import create from 'zustand';
-import { useEffect } from 'react';
-import { libraryService } from '../../../../services/libraryService';
-import type { Item, ItemFormWithStatus } from '../types/workspace.types';
+import create from "zustand";
+import { useEffect } from "react";
+import { libraryService } from "../../../../services/libraryService";
+import type { Item, ItemFormWithStatus } from "../types/workspace.types";
 
 const areItemsEqual = (previous: Item[], next: Item[]): boolean => {
   if (previous.length !== next.length) {
@@ -49,7 +49,7 @@ interface WorkspaceState {
   lastSyncedAt: string | null;
   loadItems: (options?: { force?: boolean }) => Promise<void>;
   createItem: (
-    formData: Omit<Item, 'id' | 'createdAt' | 'status'>,
+    formData: Omit<Item, "id" | "createdAt" | "status">,
   ) => Promise<Item>;
   updateItem: (
     id: string,
@@ -62,9 +62,9 @@ const normalizeTags = (tags?: unknown): string[] | undefined => {
   if (Array.isArray(tags)) {
     return tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0);
   }
-  if (typeof tags === 'string') {
+  if (typeof tags === "string") {
     return tags
-      .split(',')
+      .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0);
   }
@@ -95,14 +95,16 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const request = (async () => {
       try {
         const data = await libraryService.getAllItems();
-        
+
         // Filter out items without valid IDs (safety check for React keys)
-        const validItems = data.filter(item => item.id && item.id !== null);
-        
+        const validItems = data.filter((item) => item.id && item.id !== null);
+
         if (validItems.length < data.length) {
-          console.warn(`[WorkspaceStore] Filtered ${data.length - validItems.length} items without IDs`);
+          console.warn(
+            `[WorkspaceStore] Filtered ${data.length - validItems.length} items without IDs`,
+          );
         }
-        
+
         set((state) => {
           const itemsChanged = !areItemsEqual(state.items, validItems);
           return {
@@ -119,7 +121,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
           loading: state.items.length === 0 ? false : state.loading,
           syncing: false,
         }));
-        console.error('Error loading items:', err);
+        console.error("Error loading items:", err);
         throw err;
       } finally {
         ongoingLoad = null;
@@ -154,7 +156,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   updateItem: async (id, formData) => {
     const { tags, ...restOfFormData } = formData;
 
-    const updatePayload: Partial<Omit<Item, 'id' | 'createdAt'>> = {
+    const updatePayload: Partial<Omit<Item, "id" | "createdAt">> = {
       ...restOfFormData,
       tags: normalizeTags(tags),
     };

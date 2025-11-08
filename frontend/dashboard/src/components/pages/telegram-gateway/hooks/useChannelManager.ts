@@ -3,9 +3,9 @@
  * Extracted from TelegramGatewayFinal.tsx
  */
 
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
-const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || '';
+const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || "";
 
 export interface ChannelData {
   channelId: string;
@@ -21,23 +21,26 @@ export interface UseChannelManagerReturn {
 }
 
 export function useChannelManager(
-  onSuccess?: () => Promise<void>
+  onSuccess?: () => Promise<void>,
 ): UseChannelManagerReturn {
-  const getHeaders = useCallback(() => ({
-    'Content-Type': 'application/json',
-    'X-Gateway-Token': getGatewayToken(),
-  }), []);
+  const getHeaders = useCallback(
+    () => ({
+      "Content-Type": "application/json",
+      "X-Gateway-Token": getGatewayToken(),
+    }),
+    [],
+  );
 
   const createChannel = useCallback(
     async (data: ChannelData): Promise<boolean> => {
       if (!data.channelId.trim()) {
-        alert('Channel ID é obrigatório!');
+        alert("Channel ID é obrigatório!");
         return false;
       }
 
       try {
-        const response = await fetch('/api/channels', {
-          method: 'POST',
+        const response = await fetch("/api/channels", {
+          method: "POST",
           headers: getHeaders(),
           body: JSON.stringify({
             channelId: data.channelId.trim(),
@@ -49,7 +52,9 @@ export function useChannelManager(
         const result = await response.json();
 
         if (!response.ok) {
-          alert(`Erro ao criar canal: ${result.message || response.statusText}`);
+          alert(
+            `Erro ao criar canal: ${result.message || response.statusText}`,
+          );
           return false;
         }
 
@@ -66,14 +71,14 @@ export function useChannelManager(
         return false;
       }
     },
-    [getHeaders, onSuccess]
+    [getHeaders, onSuccess],
   );
 
   const updateChannel = useCallback(
     async (id: string, data: Partial<ChannelData>): Promise<boolean> => {
       try {
         const response = await fetch(`/api/channels/${id}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: getHeaders(),
           body: JSON.stringify(data),
         });
@@ -84,7 +89,7 @@ export function useChannelManager(
           return false;
         }
 
-        alert('✅ Canal atualizado com sucesso!');
+        alert("✅ Canal atualizado com sucesso!");
         if (onSuccess) await onSuccess();
         return true;
       } catch (err) {
@@ -93,14 +98,14 @@ export function useChannelManager(
         return false;
       }
     },
-    [getHeaders, onSuccess]
+    [getHeaders, onSuccess],
   );
 
   const toggleChannel = useCallback(
     async (id: string, isActive: boolean): Promise<boolean> => {
       try {
         const response = await fetch(`/api/channels/${id}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: getHeaders(),
           body: JSON.stringify({ isActive: !isActive }),
         });
@@ -110,7 +115,7 @@ export function useChannelManager(
           let message = response.statusText;
           try {
             const parsed = raw ? JSON.parse(raw) : null;
-            if (parsed && typeof parsed === 'object') {
+            if (parsed && typeof parsed === "object") {
               message = parsed.message || JSON.stringify(parsed);
             } else if (raw) {
               message = raw;
@@ -122,7 +127,7 @@ export function useChannelManager(
           return false;
         }
 
-        alert(`✅ Canal ${isActive ? 'desativado' : 'ativado'} com sucesso!`);
+        alert(`✅ Canal ${isActive ? "desativado" : "ativado"} com sucesso!`);
         if (onSuccess) await onSuccess();
         return true;
       } catch (err) {
@@ -131,7 +136,7 @@ export function useChannelManager(
         return false;
       }
     },
-    [getHeaders, onSuccess]
+    [getHeaders, onSuccess],
   );
 
   const deleteChannel = useCallback(
@@ -140,8 +145,8 @@ export function useChannelManager(
 
       try {
         const response = await fetch(`/api/channels/${id}`, {
-          method: 'DELETE',
-          headers: { 'X-Gateway-Token': getGatewayToken() },
+          method: "DELETE",
+          headers: { "X-Gateway-Token": getGatewayToken() },
         });
 
         if (!response.ok) {
@@ -150,7 +155,7 @@ export function useChannelManager(
           return false;
         }
 
-        alert('✅ Canal removido com sucesso!');
+        alert("✅ Canal removido com sucesso!");
         if (onSuccess) await onSuccess();
         return true;
       } catch (err) {
@@ -159,7 +164,7 @@ export function useChannelManager(
         return false;
       }
     },
-    [onSuccess]
+    [onSuccess],
   );
 
   return {
@@ -169,4 +174,3 @@ export function useChannelManager(
     toggleChannel,
   };
 }
-

@@ -3,10 +3,13 @@ title: AI Agent Guide - Vite Proxy Configuration
 sidebar_position: 6
 tags: [frontend, ai, automation, proxy, best-practices]
 domain: frontend
+owner: FrontendGuild
 type: guide
-summary: Comprehensive guide for AI agents working with Vite proxy configuration. Prevents recurring "API Indisponível" errors through automated validation and clear patterns.
+summary: "Comprehensive guide for AI agents working with Vite proxy configuration"
+description: "Guide for AI agents on proxy configuration and best practices to prevent API errors"
 status: active
 last_review: "2025-11-06"
+lastReviewed: "2025-11-08"
 ---
 
 # AI Agent Guide - Vite Proxy Configuration
@@ -16,6 +19,7 @@ last_review: "2025-11-06"
 **Status:** ✅ Production-Ready Pattern
 **Priority:** P0 - Critical
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎯 Purpose
@@ -24,6 +28,7 @@ This document provides **AI-optimized instructions** for working with Vite proxy
 
 **Why This Matters:** Between 2025-10-27 and 2025-11-06, we experienced **4 recurring incidents** of "API Indisponível" errors caused by incorrect proxy configuration. This pattern must never repeat.
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🚨 Red Flags (Immediate Action Required)
@@ -66,6 +71,7 @@ VITE_SERVICE_PROXY_TARGET=http://service-api:PORT
 VITE_SERVICE_API_URL=http://localhost:PORT
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## ✅ Correct Patterns (Copy-Paste Ready)
@@ -155,6 +161,7 @@ server: {
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔄 Automated Workflow (Follow This Exactly)
@@ -253,6 +260,7 @@ server: {
    curl http://localhost:3103/api/my-service/test
    ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🧪 Pre-Deployment Checklist
@@ -271,6 +279,7 @@ Before marking any proxy-related task as complete:
 - [ ] ✅ **ESLint** passes (no hardcoded URL warnings)
 - [ ] ✅ **Service health check** passes
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📚 Required Reading (Before Any Changes)
@@ -287,6 +296,7 @@ Before marking any proxy-related task as complete:
 5. **Relatório `outputs/CATEGORIES-API-FIX-2025-11-06.md`** - Categories incident
 6. **Relatório `outputs/API-OPTIMIZATION-REPORT-2025-11-06.md`** - Full system analysis
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎓 Understanding the Architecture
@@ -345,6 +355,7 @@ VITE_WORKSPACE_API_URL=/api/workspace
 **Golden Rule:**
 > If a variable has the `VITE_` prefix, it will be embedded in the browser bundle and accessible to JavaScript. **NEVER** put container hostnames in VITE_ variables.
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🤖 Communication Guidelines
@@ -387,6 +398,7 @@ this.baseUrl = '/api/workspace/items';
 Should I proceed with this fix?
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔧 Debugging Commands (Copy-Paste Ready)
@@ -417,6 +429,7 @@ docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
 cd frontend/dashboard && npm run lint
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📊 Historical Incident Log
@@ -432,6 +445,7 @@ cd frontend/dashboard && npm run lint
 **Pattern:** 100% of incidents caused by container hostnames exposed to browser
 **Prevention:** ESLint rules + validation script + this documentation
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎯 Success Criteria
@@ -446,6 +460,7 @@ You have successfully completed a proxy-related task when:
 6. ✅ Documentation created (if incident)
 7. ✅ Container rebuilt and healthy
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🚀 Quick Reference
@@ -466,6 +481,7 @@ bash scripts/env/validate-env.sh && curl -s http://localhost:3103/api/[service]/
 docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 **Last Updated:** 2025-11-06
@@ -473,6 +489,7 @@ docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
 **Review Frequency:** After each proxy-related incident (immediately)
 **Status:** ✅ Production-Ready Pattern
 
+lastReviewed: "2025-11-08"
 ---
 
 ## ⚡ TL;DR for Experienced AI Agents

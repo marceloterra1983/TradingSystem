@@ -17,11 +17,25 @@ if git diff --cached --name-only | grep -q "config/ports/registry.yaml"; then
     scripts/maintenance/ports-health.sh
 fi
 
+# ============================================================================
+# CRITICAL: Hardcoded URLs Prevention (ALWAYS RUN)
+# ============================================================================
+# Policy: governance/controls/hardcoded-urls-prevention-policy.md
+# This check runs on EVERY commit to prevent hardcoded localhost URLs
+
+echo "🔎 Scanning for hardcoded localhost URLs..."
+npm run ports:scan-hardcoded || {
+  echo ""
+  echo "❌ Hardcoded localhost URLs detected!"
+  echo "📖 Policy: governance/controls/hardcoded-urls-prevention-policy.md"
+  echo "💡 Use environment variables from .env instead"
+  exit 1
+}
+
+# Port registry validation (only when ports changed)
 if git diff --cached --name-only | grep -Eq "(config/ports/registry.yaml|tools/ports/)"; then
   echo "🔍 ports:validate"
   npm run ports:validate
-  echo "🔎 ports:scan-hardcoded"
-  npm run ports:scan-hardcoded
 fi
 
 if [ "${SKIP_DOCS_AUTO:-0}" = "1" ]; then

@@ -112,8 +112,8 @@ _Largura ajusta automaticamente mantendo proporções_
 
 - Símbolo + texto "TradingSystem"
 - Arquivos:
-    - Light: `/assets/branding/logo-compact.svg`
-    - Dark: `/assets/branding/logo-compact-dark.svg`
+  - Light: `/assets/branding/logo-compact.svg`
+  - Dark: `/assets/branding/logo-compact-dark.svg`
 - Uso: Sidebars, headers
 
 ### `variant="full"`
@@ -152,14 +152,18 @@ Efeitos aplicados:
 ### Classes Tailwind
 
 ```tsx
-<Logo variant="icon" size="md" className="opacity-80 hover:opacity-100 mx-auto" />
+<Logo
+  variant="icon"
+  size="md"
+  className="opacity-80 hover:opacity-100 mx-auto"
+/>
 ```
 
 ### Inline Styles
 
 ```tsx
 <div style={{ display: "flex", justifyContent: "center" }}>
-    <Logo variant="compact" size="lg" />
+  <Logo variant="compact" size="lg" />
 </div>
 ```
 
@@ -169,7 +173,11 @@ Efeitos aplicados:
 
 ```tsx
 {
-    !isCollapsed ? <Logo variant="compact" size="md" /> : <Logo variant="icon" size="sm" />;
+  !isCollapsed ? (
+    <Logo variant="compact" size="md" />
+  ) : (
+    <Logo variant="icon" size="sm" />
+  );
 }
 ```
 
@@ -177,7 +185,7 @@ Efeitos aplicados:
 
 ```tsx
 {
-    isMobile && <Logo variant="icon" size="sm" className="lg:hidden" />;
+  isMobile && <Logo variant="icon" size="sm" className="lg:hidden" />;
 }
 ```
 
@@ -193,13 +201,13 @@ Efeitos aplicados:
 
 1. **Verifique os arquivos SVG**:
 
-    ```bash
-    ls -la frontend/dashboard/public/assets/branding/
-    ```
+   ```bash
+   ls -la frontend/dashboard/public/assets/branding/
+   ```
 
 2. **Verifique o console**:
-    - Erros de carregamento aparecem no console
-    - Fallback automático para emoji 📊
+   - Erros de carregamento aparecem no console
+   - Fallback automático para emoji 📊
 
 ### Logo borrado/pixelado
 

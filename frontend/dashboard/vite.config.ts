@@ -557,6 +557,21 @@ export default defineConfig(({ mode }) => {
               return 'utils-vendor';
             }
 
+            // Date utilities (date-fns ~20KB)
+            if (id.includes('node_modules/date-fns')) {
+              return 'date-vendor';
+            }
+
+            // Router (react-router-dom ~30KB - used everywhere)
+            if (id.includes('node_modules/react-router-dom')) {
+              return 'router-vendor';
+            }
+
+            // Diff utility (only used in specific pages)
+            if (id.includes('node_modules/diff')) {
+              return 'diff-vendor';
+            }
+
             // Chart libraries (Recharts ~100KB)
             if (id.includes('node_modules/recharts') ||
                 id.includes('node_modules/chart.js')) {

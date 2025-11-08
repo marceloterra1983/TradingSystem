@@ -1,8 +1,8 @@
-import type { Express } from 'express';
-import { workerState } from '../jobs/worker.js';
+import type { Express } from "express";
+import { workerState } from "../jobs/worker.js";
 
 export function registerHealthRoutes(app: Express) {
-  app.get('/health', (req, res) => {
+  app.get("/health", (req, res) => {
     const now = Date.now();
     const activeRuns = Array.from(workerState.activeRuns.entries()).map(
       ([runId, info]) => ({
@@ -17,7 +17,7 @@ export function registerHealthRoutes(app: Express) {
     const workerHealthy = workerState.isRunning && timeSinceLastPoll < 30000; // 30s threshold
 
     res.json({
-      status: workerHealthy ? 'healthy' : 'unhealthy',
+      status: workerHealthy ? "healthy" : "unhealthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       worker: {
@@ -30,7 +30,7 @@ export function registerHealthRoutes(app: Express) {
     });
   });
 
-  app.get('/health/worker', (req, res) => {
+  app.get("/health/worker", (req, res) => {
     const now = Date.now();
     const activeRuns = Array.from(workerState.activeRuns.entries()).map(
       ([runId, info]) => ({

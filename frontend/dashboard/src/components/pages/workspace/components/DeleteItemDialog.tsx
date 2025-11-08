@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,10 +6,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../ui/dialog';
-import { Button } from '../../../ui/button';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import type { Item } from '../types/workspace.types';
+} from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
+import type { Item } from "../types/workspace.types";
 
 interface DeleteItemDialogProps {
   item: Item;
@@ -33,7 +33,7 @@ export function DeleteItemDialog({
     setError(null);
 
     if (usingFallbackData) {
-      setError('Não é possível deletar dados de exemplo.');
+      setError("Não é possível deletar dados de exemplo.");
       setDeleting(false);
       return;
     }
@@ -42,8 +42,8 @@ export function DeleteItemDialog({
       await deleteItem(item.id);
       onOpenChange(false);
     } catch (err) {
-      console.error('Failed to delete item:', err);
-      setError('Erro ao deletar o item.');
+      console.error("Failed to delete item:", err);
+      setError("Erro ao deletar o item.");
     } finally {
       setDeleting(false);
     }
@@ -89,7 +89,7 @@ export function DeleteItemDialog({
             }}
             disabled={deleting}
           >
-            {deleting ? 'Deletando...' : 'Deletar Item'}
+            {deleting ? "Deletando..." : "Deletar Item"}
           </Button>
         </DialogFooter>
       </DialogContent>

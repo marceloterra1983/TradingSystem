@@ -1,19 +1,19 @@
-import { useMemo } from 'react';
-import { DndContext, DragOverlay } from '@dnd-kit/core';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import { useItemDragDrop } from '../hooks/useItemDragDrop';
-import { DroppableColumn } from './DroppableColumn';
-import { WorkspaceItemDragPreview } from './DraggableItemCard';
+import { useMemo } from "react";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
+import { useItemDragDrop } from "../hooks/useItemDragDrop";
+import { DroppableColumn } from "./DroppableColumn";
+import { WorkspaceItemDragPreview } from "./DraggableItemCard";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../../../ui/collapsible-card';
-import { BarChart3, RefreshCw } from 'lucide-react';
-import { STATUS_CONFIG } from '../constants/workspace.constants';
-import type { ItemStatus, Item } from '../types/workspace.types';
+} from "../../../ui/collapsible-card";
+import { BarChart3, RefreshCw } from "lucide-react";
+import { STATUS_CONFIG } from "../constants/workspace.constants";
+import type { ItemStatus, Item } from "../types/workspace.types";
 
 export function StatusBoardSection() {
   const items = useWorkspaceStore((state) => state.items);
@@ -27,7 +27,7 @@ export function StatusBoardSection() {
     const groups: Record<ItemStatus, Item[]> = {
       new: [],
       review: [],
-      'in-progress': [],
+      "in-progress": [],
       completed: [],
       rejected: [],
     };

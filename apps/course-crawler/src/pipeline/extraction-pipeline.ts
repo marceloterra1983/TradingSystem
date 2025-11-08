@@ -3,7 +3,7 @@ import path from 'node:path';
 import TurndownService from 'turndown';
 import type { Logger } from 'pino';
 import { loadEnvironment, type EnvironmentConfig } from '../config/environment.js';
-import { loadPlatformConfig } from '../config/platform.js';
+import { loadPlatformConfigForUrl } from '../config/platform.js';
 import { createNavigationController } from '../navigation/controller.js';
 import {
   createAuthenticatedSession,
@@ -18,6 +18,7 @@ import {
 } from '../types.js';
 import { createStableId } from '../utils/id.js';
 import { computeMetrics } from '../observability/metrics.js';
+import { retryBrowserOperation } from '../utils/retry.js';
 
 interface PipelineResult {
   run: ExtractionRun;
@@ -48,7 +49,7 @@ export async function runExtractionPipeline(
 
   const startedAt = new Date();
   const navigation = createNavigationController({ env, logger });
-  const platformConfig = await loadPlatformConfig(env.browser.selectorsConfigPath);
+  const platformConfig = await loadPlatformConfigForUrl(env.browser.baseUrl);
   const turndown = new TurndownService({ headingStyle: 'atx' });
   const incidents: string[] = [];
 
@@ -121,13 +122,27 @@ async function enrichCourse(
     for (const moduleResource of course.modules) {
       for (const classResource of moduleResource.classes) {
         try {
-          await page.goto(classResource.url, { waitUntil: 'networkidle' });
-          await page.waitForTimeout(500);
+          // Navigate with retry
+          await retryBrowserOperation(
+            async () => {
+              await page.goto(classResource.url, { waitUntil: 'networkidle' });
+              await page.waitForTimeout(500);
+            },
+            logger,
+            `navigate to ${classResource.title}`
+          );
 
-          const contentHtml = await page
-            .locator(platformConfig.classes.contentSelector)
-            .first()
-            .evaluate((node) => node.innerHTML);
+          // Extract content with retry
+          const contentHtml = await retryBrowserOperation(
+            async () => {
+              return await page
+                .locator(platformConfig.classes.contentSelector)
+                .first()
+                .evaluate((node) => node.innerHTML);
+            },
+            logger,
+            `extract content for ${classResource.title}`
+          );
           const rawHtml = contentHtml ?? '';
           const markdown = turndown.turndown(rawHtml);
 

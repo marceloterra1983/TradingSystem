@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Clock, History, Edit } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Clock, History, Edit } from "lucide-react";
 
 export function OrdersPage() {
   const sections = [
     {
-      id: 'active-orders',
+      id: "active-orders",
       content: (
         <PlaceholderSection
           cardId="orders-active"
@@ -16,7 +16,7 @@ export function OrdersPage() {
       ),
     },
     {
-      id: 'order-history',
+      id: "order-history",
       content: (
         <PlaceholderSection
           cardId="orders-history"
@@ -27,7 +27,7 @@ export function OrdersPage() {
       ),
     },
     {
-      id: 'manual-order',
+      id: "manual-order",
       content: (
         <PlaceholderSection
           cardId="orders-manual"

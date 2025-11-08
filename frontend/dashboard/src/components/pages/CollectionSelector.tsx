@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 interface Collection {
   name: string;
   displayName: string;
   embeddingModel: string;
   dimensions: number;
-  status: 'ready' | 'empty' | 'not_created';
+  status: "ready" | "empty" | "not_created";
   count: number | null;
 }
 
@@ -20,7 +20,7 @@ interface CollectionSelectorProps {
 export function CollectionSelector({
   value,
   onChange,
-  className = '',
+  className = "",
   onLoaded,
   autoSelectFirst = false,
 }: CollectionSelectorProps) {
@@ -29,13 +29,13 @@ export function CollectionSelector({
 
   const fetchCollections = useCallback(async () => {
     try {
-      const response = await fetch('/api/v1/rag/collections');
+      const response = await fetch("/api/v1/rag/collections");
       const data = await response.json();
 
       if (data.success) {
         // Filtrar apenas coleções prontas
         const readyCollections = data.collections.filter(
-          (c: Collection) => c.status === 'ready',
+          (c: Collection) => c.status === "ready",
         );
         setCollections(readyCollections);
         onLoaded?.(readyCollections);
@@ -50,7 +50,7 @@ export function CollectionSelector({
         }
       }
     } catch (err) {
-      console.error('Failed to load collections:', err);
+      console.error("Failed to load collections:", err);
     } finally {
       setLoading(false);
     }
@@ -93,14 +93,14 @@ export function CollectionSelector({
       >
         {collections.map((collection) => (
           <option key={collection.name} value={collection.name}>
-            {collection.displayName} ({collection.count?.toLocaleString() || 0}{' '}
+            {collection.displayName} ({collection.count?.toLocaleString() || 0}{" "}
             docs, {collection.dimensions}d)
           </option>
         ))}
       </select>
       <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
         {collections.find((c) => c.name === value)?.embeddingModel ||
-          'Select a collection'}
+          "Select a collection"}
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
-import { ScrollArea } from '../../ui/scroll-area';
-import { TelegramGatewayQueueStatus } from '../../../hooks/useTelegramGateway';
-import { AlertTriangle, FileWarning, List, RefreshCw } from 'lucide-react';
-import { Button } from '../../ui/button';
+import { ScrollArea } from "../../ui/scroll-area";
+import { TelegramGatewayQueueStatus } from "../../../hooks/useTelegramGateway";
+import { AlertTriangle, FileWarning, List, RefreshCw } from "lucide-react";
+import { Button } from "../../ui/button";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
+} from "../../ui/collapsible-card";
 
 interface FailureQueueCardProps {
   queue?: TelegramGatewayQueueStatus;
@@ -17,9 +17,9 @@ interface FailureQueueCardProps {
 }
 
 function formatBytes(size?: number) {
-  if (typeof size !== 'number' || Number.isNaN(size)) return '—';
-  if (size === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
+  if (typeof size !== "number" || Number.isNaN(size)) return "—";
+  if (size === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
   const exponent = Math.min(
     Math.floor(Math.log(size) / Math.log(1024)),
     units.length - 1,
@@ -28,15 +28,15 @@ function formatBytes(size?: number) {
 }
 
 function formatTimestamp(timestamp?: string | null) {
-  if (!timestamp) return '—';
+  if (!timestamp) return "—";
   try {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     }).format(new Date(timestamp));
   } catch {
     return timestamp;
@@ -117,7 +117,7 @@ export function FailureQueueCard({
                   </span>
                 </div>
                 <p className="mt-2 break-all text-sm font-medium text-slate-700 dark:text-slate-200">
-                  {queue?.path ?? '—'}
+                  {queue?.path ?? "—"}
                 </p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export function FailureQueueCard({
                 <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
                   <span>Pré-visualização (mais recentes)</span>
                   <span>
-                    Exibindo {queue?.previewCount ?? 0} de{' '}
+                    Exibindo {queue?.previewCount ?? 0} de{" "}
                     {queue?.totalMessages ?? 0}
                   </span>
                 </div>
@@ -136,11 +136,11 @@ export function FailureQueueCard({
                       <li key={`queue-entry-${index}`} className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                           <span>
-                            Canal: <strong>{entry.channelId ?? 'N/D'}</strong>
+                            Canal: <strong>{entry.channelId ?? "N/D"}</strong>
                           </span>
                           <span>
-                            Mensagem:{' '}
-                            <strong>{entry.messageId ?? 'N/D'}</strong>
+                            Mensagem:{" "}
+                            <strong>{entry.messageId ?? "N/D"}</strong>
                           </span>
                           <span>
                             Falhou em {formatTimestamp(entry.failedAt)}
@@ -150,7 +150,7 @@ export function FailureQueueCard({
                           )}
                         </div>
                         <p className="mt-2 line-clamp-3 text-sm text-slate-700 dark:text-slate-200">
-                          {entry.textPreview || '(sem mensagem)'}
+                          {entry.textPreview || "(sem mensagem)"}
                         </p>
                         {entry.parseError && (
                           <p className="mt-2 text-xs text-red-500 dark:text-red-400">

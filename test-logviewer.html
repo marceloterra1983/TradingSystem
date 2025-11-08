@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LogViewer Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+        .log-entry { padding: 8px; margin: 4px 0; background: #2a2a2a; border-left: 3px solid #4a9eff; }
+        .timestamp { color: #888; }
+        .level { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; }
+        .level-info { background: #4a9eff; color: #fff; }
+        .level-error { background: #ff4a4a; color: #fff; }
+        h2 { color: #4a9eff; }
+    </style>
+</head>
+<body>
+    <h2>📊 LogViewer - Melhorias Testadas</h2>
+    <p>Simulando logs para run: <code>e158a5b5-14e2-4c61-8d77-427825efcfde</code></p>
+    <div id="logs"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3601';
+        const runId = 'e158a5b5-14e2-4c61-8d77-427825efcfde';
+
+        async function fetchAndDisplayLogs() {
+            try {
+                const response = await fetch(`${API_URL}/runs/${runId}`);
+                const run = await response.json();
+
+                const logs = [];
+
+                // Platform detection
+                if (run.baseUrl) {
+                    const platform = run.baseUrl.includes('memberkit') ? 'Memberkit' :
+                                    run.baseUrl.includes('jumba') ? 'Jumba' :
+                                    run.baseUrl.includes('hotmart') ? 'Hotmart' : 'Generic';
+                    logs.push({
+                        timestamp: run.createdAt || new Date().toISOString(),
+                        level: 'info',
+                        message: `🔍 Platform detected: ${platform}`
+                    });
+                } else {
+                    logs.push({
+                        timestamp: run.createdAt || new Date().toISOString(),
+                        level: 'info',
+                        message: `🔍 Platform detected: Generic (no baseUrl)`
+                    });
+                }
+
+                // Status updates
+                if (run.startedAt) {
+                    logs.push({
+                        timestamp: run.startedAt,
+                        level: 'info',
+                        message: `▶️  Execution started`
+                    });
+                }
+
+                // Progress metrics
+                if (run.metrics) {
+                    if (run.metrics.coursesProcessed > 0) {
+                        logs.push({
+                            timestamp: new Date().toISOString(),
+                            level: 'info',
+                            message: `📚 Courses discovered: ${run.metrics.coursesProcessed}`
+                        });
+                    }
+                    if (run.metrics.modulesProcessed > 0) {
+                        logs.push({
+                            timestamp: new Date().toISOString(),
+                            level: 'info',
+                            message: `📂 Modules processed: ${run.metrics.modulesProcessed}`
+                        });
+                    }
+                    if (run.metrics.classesProcessed > 0) {
+                        logs.push({
+                            timestamp: new Date().toISOString(),
+                            level: 'info',
+                            message: `🎓 Classes extracted: ${run.metrics.classesProcessed}`
+                        });
+                    }
+                    if (run.metrics.videosDetected > 0) {
+                        logs.push({
+                            timestamp: new Date().toISOString(),
+                            level: 'info',
+                            message: `🎬 Videos detected: ${run.metrics.videosDetected}`
+                        });
+                    }
+                }
+
+                // Completion
+                if (run.status === 'success' && run.finishedAt) {
+                    logs.push({
+                        timestamp: run.finishedAt,
+                        level: 'info',
+                        message: `✅ Run completed successfully!`
+                    });
+                }
+
+                // Display logs
+                const logsDiv = document.getElementById('logs');
+                logsDiv.innerHTML = logs.map(log => `
+                    <div class="log-entry">
+                        <span class="timestamp">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                        <span class="level level-${log.level}">${log.level.toUpperCase()}</span>
+                        <span>${log.message}</span>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                document.getElementById('logs').innerHTML = `
+                    <div class="log-entry" style="border-left-color: #ff4a4a;">
+                        <span class="level level-error">ERROR</span>
+                        <span>Failed to fetch run details: ${error.message}</span>
+                    </div>
+                `;
+            }
+        }
+
+        fetchAndDisplayLogs();
+    </script>
+</body>
+</html>

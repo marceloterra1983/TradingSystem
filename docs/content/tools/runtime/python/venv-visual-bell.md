@@ -1,4 +1,12 @@
-# 🔔 Visual Bell + Venv Automático - SOLUÇÃO FINAL
+---
+title: "Venv Visual Bell"
+tags: [documentation]
+domain: devops
+type: guide
+summary: "Documentation for Venv Visual Bell"
+status: active
+last_review: "2025-11-08"
+---# 🔔 Visual Bell + Venv Automático - SOLUÇÃO FINAL
 
 ## ✅ Problema Resolvido
 

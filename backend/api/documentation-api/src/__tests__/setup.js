@@ -4,10 +4,10 @@
  */
 
 // Set test environment variables
-process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET_KEY = 'test-secret-key';
-process.env.INTER_SERVICE_SECRET = 'test-inter-service-secret';
-process.env.LOG_LEVEL = 'error';  // Reduce log noise during tests
+process.env.NODE_ENV = "test";
+process.env.JWT_SECRET_KEY = "test-secret-key";
+process.env.INTER_SERVICE_SECRET = "test-inter-service-secret";
+process.env.LOG_LEVEL = "error"; // Reduce log noise during tests
 
 // Mock console to avoid log spam
 global.console = {
@@ -20,5 +20,4 @@ global.console = {
 };
 
 // Global test utilities
-global.wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
+global.wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

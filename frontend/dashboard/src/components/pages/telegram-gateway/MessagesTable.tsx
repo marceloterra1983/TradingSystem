@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -7,32 +7,32 @@ import {
   Search,
   Trash2,
   Undo,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../ui/select';
+} from "../../ui/select";
 import {
   TelegramGatewayMessage,
   TelegramGatewayMessagesFilters,
   TelegramGatewayMessagesResponse,
-} from '../../../hooks/useTelegramGateway';
+} from "../../../hooks/useTelegramGateway";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
-import { Badge } from '../../ui/badge';
-import { cn } from '../../../lib/utils';
-import { normalizeTimestamp } from '../../../utils/timestampUtils';
-import { formatInTimeZone } from 'date-fns-tz';
+} from "../../ui/collapsible-card";
+import { Badge } from "../../ui/badge";
+import { cn } from "../../../lib/utils";
+import { normalizeTimestamp } from "../../../utils/timestampUtils";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface MessagesTableProps {
   data?: TelegramGatewayMessagesResponse;
@@ -48,48 +48,48 @@ interface MessagesTableProps {
 }
 
 const STATUS_OPTIONS = [
-  'received',
-  'retrying',
-  'published',
-  'queued',
-  'failed',
-  'reprocess_pending',
-  'reprocessed',
+  "received",
+  "retrying",
+  "published",
+  "queued",
+  "failed",
+  "reprocess_pending",
+  "reprocessed",
 ] as const;
 
 const STATUS_BADGE_CLASSNAME: Record<string, string> = {
   received:
-    'border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300',
+    "border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300",
   retrying:
-    'border-amber-400 text-amber-600 dark:border-amber-400/60 dark:text-amber-300',
+    "border-amber-400 text-amber-600 dark:border-amber-400/60 dark:text-amber-300",
   published:
-    'border-emerald-400 text-emerald-600 dark:border-emerald-400/60 dark:text-emerald-300',
+    "border-emerald-400 text-emerald-600 dark:border-emerald-400/60 dark:text-emerald-300",
   queued:
-    'border-cyan-400 text-cyan-600 dark:border-cyan-400/60 dark:text-cyan-300',
+    "border-cyan-400 text-cyan-600 dark:border-cyan-400/60 dark:text-cyan-300",
   failed:
-    'border-red-400 text-red-600 dark:border-red-400/60 dark:text-red-300',
+    "border-red-400 text-red-600 dark:border-red-400/60 dark:text-red-300",
   reprocess_pending:
-    'border-blue-400 text-blue-600 dark:border-blue-400/60 dark:text-blue-300',
+    "border-blue-400 text-blue-600 dark:border-blue-400/60 dark:text-blue-300",
   reprocessed:
-    'border-violet-400 text-violet-600 dark:border-violet-400/60 dark:text-violet-300',
+    "border-violet-400 text-violet-600 dark:border-violet-400/60 dark:text-violet-300",
 };
 
 function formatDate(value?: string | number) {
-  if (!value) return '—';
+  if (!value) return "—";
 
   const normalized = normalizeTimestamp(value);
-  if (!normalized) return '—';
+  if (!normalized) return "—";
 
   try {
     const date = new Date(normalized);
-    return formatInTimeZone(date, 'America/Sao_Paulo', 'dd/MM/yyyy, HH:mm:ss');
+    return formatInTimeZone(date, "America/Sao_Paulo", "dd/MM/yyyy, HH:mm:ss");
   } catch {
-    return '—';
+    return "—";
   }
 }
 
 function truncate(text?: string | null, length = 120) {
-  if (!text) return '';
+  if (!text) return "";
   return text.length > length ? `${text.slice(0, length)}…` : text;
 }
 
@@ -105,7 +105,7 @@ export function MessagesTable({
   isReprocessing,
   isDeleting,
 }: MessagesTableProps) {
-  const [search, setSearch] = useState(filters.search ?? '');
+  const [search, setSearch] = useState(filters.search ?? "");
   const [highlightedMessages, setHighlightedMessages] = useState<Set<string>>(
     new Set(),
   );
@@ -160,10 +160,10 @@ export function MessagesTable({
     return Array.from(set).sort();
   }, [messages]);
 
-  const currentStatus = filters.status?.[0] ?? 'all';
+  const currentStatus = filters.status?.[0] ?? "all";
   const currentChannel = Array.isArray(filters.channelId)
-    ? (filters.channelId[0] ?? 'all')
-    : (filters.channelId ?? 'all');
+    ? (filters.channelId[0] ?? "all")
+    : (filters.channelId ?? "all");
   const limit = filters.limit ?? 25;
   const offset = filters.offset ?? 0;
 
@@ -183,14 +183,14 @@ export function MessagesTable({
 
   const handleStatusChange = (value: string) => {
     updateFilters({
-      status: value === 'all' ? undefined : [value],
+      status: value === "all" ? undefined : [value],
       offset: 0,
     });
   };
 
   const handleChannelChange = (value: string) => {
     updateFilters({
-      channelId: value === 'all' ? undefined : value,
+      channelId: value === "all" ? undefined : value,
       offset: 0,
     });
   };
@@ -217,10 +217,10 @@ export function MessagesTable({
   };
 
   const handleClearFilters = () => {
-    setSearch('');
+    setSearch("");
     onFiltersChange({
       limit,
-      sort: filters.sort ?? 'desc',
+      sort: filters.sort ?? "desc",
     });
   };
 
@@ -264,7 +264,7 @@ export function MessagesTable({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') {
+                if (event.key === "Enter") {
                   event.preventDefault();
                   handleSearchSubmit();
                 }
@@ -365,10 +365,10 @@ export function MessagesTable({
                       <tr
                         key={message.id}
                         className={cn(
-                          'transition-colors duration-300',
+                          "transition-colors duration-300",
                           isHighlighted
-                            ? 'bg-yellow-100/80 dark:bg-yellow-900/20'
-                            : 'bg-white dark:bg-slate-950/60',
+                            ? "bg-yellow-100/80 dark:bg-yellow-900/20"
+                            : "bg-white dark:bg-slate-950/60",
                         )}
                       >
                         <td className="px-3 py-3 align-top font-mono text-xs text-slate-500 dark:text-slate-400">
@@ -384,17 +384,17 @@ export function MessagesTable({
                             #{message.messageId}
                           </span>
                           <span className="mt-1 block text-[10px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                            {message.source ?? 'unknown'}
+                            {message.source ?? "unknown"}
                           </span>
                         </td>
                         <td className="px-3 py-3 align-top">
                           <Badge
                             variant="outline"
                             className={cn(
-                              'text-xs font-semibold capitalize',
+                              "text-xs font-semibold capitalize",
                               STATUS_BADGE_CLASSNAME[
                                 message.status as keyof typeof STATUS_BADGE_CLASSNAME
-                              ] ?? 'text-slate-600 dark:text-slate-300',
+                              ] ?? "text-slate-600 dark:text-slate-300",
                             )}
                           >
                             {message.status}
@@ -455,7 +455,7 @@ export function MessagesTable({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
           <div>
             Exibindo {messages.length} registros
-            {pagination?.total ? ` de ${pagination.total}` : ''} • Página{' '}
+            {pagination?.total ? ` de ${pagination.total}` : ""} • Página{" "}
             {Math.floor(offset / limit) + 1}
           </div>
           <div className="flex items-center gap-2">

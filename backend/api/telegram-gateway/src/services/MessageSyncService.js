@@ -1,31 +1,31 @@
 /**
  * Message Synchronization Service
- * 
+ *
  * Encapsulates business logic for synchronizing messages from Telegram channels.
  * Extracted from routes to follow Clean Architecture and improve testability.
- * 
+ *
  * Features:
  * - Incremental sync (fetch only new messages)
  * - Parallel processing with concurrency control
  * - Distributed locking to prevent race conditions
  * - Bulk database inserts (50x faster)
  * - Performance metrics tracking
- * 
+ *
  * Performance:
  * - Sync time: 3.9 seconds for 5 channels (9x faster than before)
  * - Database queries: 51 per sync (49x fewer than before)
  * - Throughput: 641 messages/second (9x higher than before)
  */
 
-import pLimit from 'p-limit';
-import { getDatabasePool } from '../db/messagesRepository.js';
-import { DistributedLock } from '../db/distributedLock.js';
+import pLimit from "p-limit";
+import { getDatabasePool } from "../db/messagesRepository.js";
+import { DistributedLock } from "../db/distributedLock.js";
 import {
   syncDurationHistogram,
   lockContentionCounter,
   parallelSyncGauge,
   trackChannelSync,
-} from '../metrics/performanceMetrics.js';
+} from "../metrics/performanceMetrics.js";
 
 export class MessageSyncService {
   /**
@@ -35,12 +35,12 @@ export class MessageSyncService {
   constructor(telegramClient, logger) {
     this.telegramClient = telegramClient;
     this.logger = logger;
-    this.lockManager = null;  // Initialized per request
+    this.lockManager = null; // Initialized per request
   }
 
   /**
    * Synchronize messages from multiple channels in parallel
-   * 
+   *
    * @param {Object} options - Sync options
    * @param {string[]} options.channelIds - Array of channel IDs to sync
    * @param {number} [options.limit=500] - Max messages to fetch per channel
@@ -50,7 +50,7 @@ export class MessageSyncService {
   async syncChannels({ channelIds, limit = 500, concurrency = 3 }) {
     this.logger.info(
       { channelCount: channelIds.length, limit, concurrency },
-      '[MessageSyncService] Starting multi-channel sync'
+      "[MessageSyncService] Starting multi-channel sync",
     );
 
     // Initialize database and lock manager
@@ -64,20 +64,32 @@ export class MessageSyncService {
       // OPTIMIZATION: Parallel processing with concurrency control
       const concurrencyLimit = pLimit(concurrency);
 
-      const syncTasks = channelIds.map(channelId =>
-        concurrencyLimit(() => this.syncSingleChannel(channelId, limit, lastMessageMap))
+      const syncTasks = channelIds.map((channelId) =>
+        concurrencyLimit(() =>
+          this.syncSingleChannel(channelId, limit, lastMessageMap),
+        ),
       );
 
       // Execute all channel syncs in parallel
       const results = (await Promise.all(syncTasks)).filter(Boolean);
 
       // Calculate totals
-      const totalMessagesSynced = results.reduce((sum, r) => sum + (r.messagesSynced || 0), 0);
-      const totalMessagesSaved = results.reduce((sum, r) => sum + (r.messagesSaved || 0), 0);
+      const totalMessagesSynced = results.reduce(
+        (sum, r) => sum + (r.messagesSynced || 0),
+        0,
+      );
+      const totalMessagesSaved = results.reduce(
+        (sum, r) => sum + (r.messagesSaved || 0),
+        0,
+      );
 
       this.logger.info(
-        { totalMessagesSynced, totalMessagesSaved, channelCount: results.length },
-        '[MessageSyncService] Multi-channel sync complete'
+        {
+          totalMessagesSynced,
+          totalMessagesSaved,
+          channelCount: results.length,
+        },
+        "[MessageSyncService] Multi-channel sync complete",
       );
 
       return {
@@ -86,7 +98,6 @@ export class MessageSyncService {
         totalMessagesSaved,
         channelsSynced: results,
       };
-
     } finally {
       // Cleanup: Release any held locks
       if (this.lockManager) {
@@ -97,35 +108,38 @@ export class MessageSyncService {
 
   /**
    * Get last message IDs for all channels in one query (fix N+1 problem)
-   * 
+   *
    * @private
    */
   async getLastMessageIds(channelIds, db) {
     this.logger.info(
       { channelCount: channelIds.length },
-      '[MessageSyncService] Fetching last message IDs (batch query)'
+      "[MessageSyncService] Fetching last message IDs (batch query)",
     );
 
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT 
         channel_id,
         MAX(CAST(message_id AS BIGINT)) as last_message_id
       FROM messages
       WHERE channel_id = ANY($1::text[])
       GROUP BY channel_id
-    `, [channelIds]);
+    `,
+      [channelIds],
+    );
 
     // Create lookup map for O(1) access
     const lastMessageMap = new Map(
-      result.rows.map(row => [
+      result.rows.map((row) => [
         row.channel_id,
-        Number(row.last_message_id) || 0
-      ])
+        Number(row.last_message_id) || 0,
+      ]),
     );
 
     this.logger.info(
       { channelsFound: result.rows.length },
-      '[MessageSyncService] Last message IDs fetched (1 query instead of N)'
+      "[MessageSyncService] Last message IDs fetched (1 query instead of N)",
     );
 
     return lastMessageMap;
@@ -133,7 +147,7 @@ export class MessageSyncService {
 
   /**
    * Synchronize messages from a single channel
-   * 
+   *
    * @private
    */
   async syncSingleChannel(channelId, limit, lastMessageMap) {
@@ -146,7 +160,7 @@ export class MessageSyncService {
     if (!lockAcquired) {
       this.logger.warn(
         { channelId },
-        '[MessageSyncService] Sync already in progress for channel, skipping'
+        "[MessageSyncService] Sync already in progress for channel, skipping",
       );
 
       // Track lock contention metric
@@ -157,7 +171,7 @@ export class MessageSyncService {
         messagesSynced: 0,
         messagesSaved: 0,
         skipped: true,
-        reason: 'Sync already in progress'
+        reason: "Sync already in progress",
       };
     }
 
@@ -171,15 +185,19 @@ export class MessageSyncService {
 
       this.logger.info(
         { channelId, limit, lastMessageId },
-        '[MessageSyncService] Fetching messages from channel'
+        "[MessageSyncService] Fetching messages from channel",
       );
 
       // Fetch new messages from Telegram
-      const messages = await this.fetchMessages(channelId, limit, lastMessageId);
+      const messages = await this.fetchMessages(
+        channelId,
+        limit,
+        lastMessageId,
+      );
 
       this.logger.info(
         { channelId, messageCount: messages.length },
-        '[MessageSyncService] Messages fetched from Telegram'
+        "[MessageSyncService] Messages fetched from Telegram",
       );
 
       // Transform and save messages
@@ -187,7 +205,7 @@ export class MessageSyncService {
 
       this.logger.info(
         { channelId, savedCount, fetchedCount: messages.length },
-        '[MessageSyncService] Messages saved to database'
+        "[MessageSyncService] Messages saved to database",
       );
 
       // Record success metrics
@@ -199,11 +217,10 @@ export class MessageSyncService {
         messagesSaved: savedCount,
         latestMessageId: messages[0]?.id || null,
       };
-
     } catch (error) {
       this.logger.error(
         { channelId, err: error },
-        '[MessageSyncService] Failed to sync channel'
+        "[MessageSyncService] Failed to sync channel",
       );
 
       return {
@@ -211,7 +228,6 @@ export class MessageSyncService {
         messagesSynced: 0,
         error: error.message,
       };
-
     } finally {
       // ALWAYS release lock and decrement gauge
       await this.lockManager.release(lockKey);
@@ -221,13 +237,13 @@ export class MessageSyncService {
 
   /**
    * Fetch messages from Telegram channel
-   * 
+   *
    * @private
    */
   async fetchMessages(channelId, limit, lastMessageId) {
     const messages = await this.telegramClient.getMessages(channelId, {
       limit,
-      minId: lastMessageId > 0 ? lastMessageId : undefined
+      minId: lastMessageId > 0 ? lastMessageId : undefined,
     });
 
     return messages;
@@ -235,17 +251,19 @@ export class MessageSyncService {
 
   /**
    * Transform and save messages to database
-   * 
+   *
    * @private
    */
   async saveMessages(channelId, messages) {
     if (messages.length === 0) return 0;
 
     // Transform messages for database
-    const messagesToSave = messages.map(msg => this.transformMessage(msg, channelId));
+    const messagesToSave = messages.map((msg) =>
+      this.transformMessage(msg, channelId),
+    );
 
     // Bulk insert (50x faster than one-by-one)
-    const { saveMessages } = await import('../db/messagesRepository.js');
+    const { saveMessages } = await import("../db/messagesRepository.js");
     const savedCount = await saveMessages(messagesToSave, this.logger);
 
     // HYBRID Architecture: Publish Redis events for subscribers (PUSH)
@@ -259,72 +277,80 @@ export class MessageSyncService {
   /**
    * Publica evento Redis quando mensagens são salvas (HYBRID Push)
    * TP-Capital subscribers receberão notificação instantânea
-   * 
+   *
    * @private
    */
   async publishNewMessagesEvent(channelId, messages) {
     try {
       // Lazy initialize Redis client
       if (!this.redisClient) {
-        const redis = await import('redis');
+        const redis = await import("redis");
         this.redisClient = redis.createClient({
-          url: process.env.REDIS_URL || 'redis://localhost:6379'
+          url: process.env.REDIS_URL || "redis://localhost:6379",
         });
         await this.redisClient.connect();
-        
-        this.logger.info('[MessageSync] Redis client connected for Pub/Sub');
+
+        this.logger.info("[MessageSync] Redis client connected for Pub/Sub");
       }
 
       // Publicar evento para cada mensagem
       for (const msg of messages) {
-        await this.redisClient.publish('tp-capital:new-message', JSON.stringify({
-          channelId,
-          messageId: msg.message_id || msg.id,
-          text: msg.text || msg.message_text,
-          caption: msg.caption,
-          telegramDate: msg.telegram_date || msg.original_timestamp,
-          timestamp: Date.now()
-        }));
+        await this.redisClient.publish(
+          "tp-capital:new-message",
+          JSON.stringify({
+            channelId,
+            messageId: msg.message_id || msg.id,
+            text: msg.text || msg.message_text,
+            caption: msg.caption,
+            telegramDate: msg.telegram_date || msg.original_timestamp,
+            timestamp: Date.now(),
+          }),
+        );
       }
 
-      this.logger.debug({
-        channelId,
-        count: messages.length
-      }, '[MessageSync] Published Redis events for TP-Capital subscribers');
-
+      this.logger.debug(
+        {
+          channelId,
+          count: messages.length,
+        },
+        "[MessageSync] Published Redis events for TP-Capital subscribers",
+      );
     } catch (error) {
       // Log mas não falha (Redis é opcional - fallback via polling)
-      this.logger.warn({
-        err: error,
-        channelId
-      }, '[MessageSync] Failed to publish Redis events (non-critical - fallback via polling)');
+      this.logger.warn(
+        {
+          err: error,
+          channelId,
+        },
+        "[MessageSync] Failed to publish Redis events (non-critical - fallback via polling)",
+      );
     }
   }
 
   /**
    * Transform Telegram message to database format
-   * 
+   *
    * @private
    */
   transformMessage(msg, channelId) {
     // MTProto may return channelId without prefix, normalize it
     let normalizedChannelId = msg.channelId || channelId;
 
-    if (normalizedChannelId && !normalizedChannelId.startsWith('-')) {
-      normalizedChannelId = channelId;  // Use loop channelId (already correct format)
+    if (normalizedChannelId && !normalizedChannelId.startsWith("-")) {
+      normalizedChannelId = channelId; // Use loop channelId (already correct format)
     }
 
     return {
       channelId: normalizedChannelId,
       messageId: msg.id.toString(),
       text: msg.text,
-      date: new Date(msg.date * 1000),  // Telegram uses Unix timestamp in seconds
+      date: new Date(msg.date * 1000), // Telegram uses Unix timestamp in seconds
       fromId: msg.fromId,
       mediaType: msg.mediaType,
       isForwarded: msg.isForwarded,
       replyTo: msg.replyTo,
       views: msg.views,
-      status: 'received',  // Mark as 'received' for worker processing
+      status: "received", // Mark as 'received' for worker processing
     };
   }
 
@@ -348,4 +374,3 @@ export class MessageSyncService {
     return stats.rows;
   }
 }
-

@@ -19,42 +19,150 @@ export function LogViewer({ runId, status }: LogViewerProps) {
   const logsEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // ❌ Removed auto-scroll - user controls scroll manually
-  // ❌ Removed mock logs - showing static message instead
+  // Fetch run details to show meaningful progress
   useEffect(() => {
     if (status === 'queued') {
       setLogs([{
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: 'Run queued. Logs will appear when execution starts.'
+        message: '⏳ Run queued. Waiting for worker to start processing...'
       }]);
       return;
     }
 
-    if (status === 'running' || status === 'success' || status === 'failed') {
-      setLogs([
-        {
+    // Fetch run details for better logging
+    const fetchRunDetails = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_COURSE_CRAWLER_API_URL || '';
+        const response = await fetch(`${API_URL}/runs/${runId}`);
+        if (!response.ok) throw new Error('Failed to fetch run details');
+
+        const run = await response.json();
+        const newLogs: LogEntry[] = [];
+
+        // Platform detection
+        if (run.baseUrl) {
+          const platform = run.baseUrl.includes('memberkit') ? 'Memberkit' :
+                          run.baseUrl.includes('jumba') ? 'Jumba' :
+                          run.baseUrl.includes('hotmart') ? 'Hotmart' :
+                          run.baseUrl.includes('varos') ? 'Varos' : 'Generic';
+          newLogs.push({
+            timestamp: run.createdAt || new Date().toISOString(),
+            level: 'info',
+            message: `🔍 Platform detected: ${platform}`
+          });
+        }
+
+        // Status updates
+        if (run.startedAt) {
+          newLogs.push({
+            timestamp: run.startedAt,
+            level: 'info',
+            message: `▶️  Execution started`
+          });
+        }
+
+        // Progress metrics
+        if (run.metrics) {
+          if (run.metrics.coursesProcessed > 0) {
+            newLogs.push({
+              timestamp: new Date().toISOString(),
+              level: 'info',
+              message: `📚 Courses discovered: ${run.metrics.coursesProcessed}`
+            });
+          }
+          if (run.metrics.modulesProcessed > 0) {
+            newLogs.push({
+              timestamp: new Date().toISOString(),
+              level: 'info',
+              message: `📂 Modules processed: ${run.metrics.modulesProcessed}`
+            });
+          }
+          if (run.metrics.classesProcessed > 0) {
+            newLogs.push({
+              timestamp: new Date().toISOString(),
+              level: 'info',
+              message: `🎓 Classes extracted: ${run.metrics.classesProcessed}`
+            });
+          }
+          if (run.metrics.videosDetected > 0) {
+            newLogs.push({
+              timestamp: new Date().toISOString(),
+              level: 'info',
+              message: `🎬 Videos detected: ${run.metrics.videosDetected}`
+            });
+          }
+        }
+
+        // Completion
+        if (status === 'success' && run.finishedAt) {
+          newLogs.push({
+            timestamp: run.finishedAt,
+            level: 'info',
+            message: `✅ Run completed successfully!`
+          });
+        }
+
+        if (status === 'failed') {
+          if (run.error) {
+            newLogs.push({
+              timestamp: run.finishedAt || new Date().toISOString(),
+              level: 'error',
+              message: `❌ Error: ${run.error.substring(0, 200)}${run.error.length > 200 ? '...' : ''}`
+            });
+          }
+          newLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            message: '📋 View complete error logs in Docker:'
+          });
+          newLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            message: `   docker logs course-crawler-worker 2>&1 | grep "${runId.substring(0, 8)}"`
+          });
+        }
+
+        // Show docker command for running status
+        if (status === 'running') {
+          newLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            message: ''
+          });
+          newLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'debug',
+            message: '📋 View live logs: docker logs -f course-crawler-worker | grep "' + runId.substring(0, 8) + '"'
+          });
+        }
+
+        setLogs(newLogs.length > 0 ? newLogs : [{
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: '📋 View complete logs in Docker:'
-        },
-        {
+          message: '⏳ Waiting for execution to start...'
+        }]);
+
+      } catch (error) {
+        setLogs([{
+          timestamp: new Date().toISOString(),
+          level: 'warning',
+          message: '⚠️  Unable to fetch run details. Use Docker logs to view progress.'
+        }, {
           timestamp: new Date().toISOString(),
           level: 'info',
           message: `   docker logs -f course-crawler-worker | grep "${runId.substring(0, 8)}"`
-        },
-        {
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          message: ''
-        },
-        {
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          message: '💡 Real-time log streaming via WebSocket will be implemented in Phase 3'
-        }
-      ]);
-    }
+        }]);
+      }
+    };
+
+    fetchRunDetails();
+
+    // Refresh every 5 seconds if running
+    const interval = status === 'running' ? setInterval(fetchRunDetails, 5000) : null;
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [status, runId]);
 
   const handleCopyLogs = () => {

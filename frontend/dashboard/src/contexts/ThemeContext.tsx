@@ -1,12 +1,12 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   isBrowser,
   safeLocalStorageGet,
   safeLocalStorageSet,
-} from '../utils/browser';
+} from "../utils/browser";
 
-type Theme = 'light' | 'dark' | 'system';
-type ResolvedTheme = 'light' | 'dark';
+type Theme = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -27,16 +27,16 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
-  storageKey = 'theme',
+  defaultTheme = "system",
+  storageKey = "theme",
 }: ThemeProviderProps) {
   const getSystemTheme = React.useCallback((): ResolvedTheme => {
     if (!isBrowser || !window.matchMedia) {
-      return 'light';
+      return "light";
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   }, []);
 
   const [theme, setThemeState] = React.useState<Theme>(() => {
@@ -49,10 +49,10 @@ export function ThemeProvider({
       const stored = safeLocalStorageGet(storageKey) as Theme;
       const initialTheme = stored || defaultTheme;
       const resolved =
-        initialTheme === 'system' ? getSystemTheme() : initialTheme;
+        initialTheme === "system" ? getSystemTheme() : initialTheme;
       if (isBrowser) {
         const root = window.document.documentElement;
-        root.classList.remove('light', 'dark');
+        root.classList.remove("light", "dark");
         root.classList.add(resolved);
       }
       return resolved;
@@ -64,7 +64,7 @@ export function ThemeProvider({
       return;
     }
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove("light", "dark");
     root.classList.add(resolvedTheme);
   }, [resolvedTheme]);
 
@@ -72,14 +72,14 @@ export function ThemeProvider({
     (newTheme: Theme) => {
       safeLocalStorageSet(storageKey, newTheme);
       setThemeState(newTheme);
-      const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
+      const resolved = newTheme === "system" ? getSystemTheme() : newTheme;
       setResolvedTheme(resolved);
     },
     [storageKey, getSystemTheme],
   );
 
   const toggleTheme = React.useCallback(() => {
-    const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
     setTheme(newTheme);
   }, [resolvedTheme, setTheme]);
 
@@ -87,15 +87,15 @@ export function ThemeProvider({
     if (!isBrowser) {
       return;
     }
-    if (theme !== 'system') return;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (theme !== "system") return;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
       const systemTheme = getSystemTheme();
       setResolvedTheme(systemTheme);
     };
-    mediaQuery.addEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
     return () => {
-      mediaQuery.removeEventListener('change', handleChange);
+      mediaQuery.removeEventListener("change", handleChange);
     };
   }, [theme, getSystemTheme]);
 
@@ -117,7 +117,7 @@ export function ThemeProvider({
 export function useTheme() {
   const context = React.useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }

@@ -1,11 +1,11 @@
-import { useTheme } from '../../contexts/ThemeContext';
-import { cn } from '../../lib/utils';
+import { useTheme } from "../../contexts/ThemeContext";
+import { cn } from "../../lib/utils";
 
 export interface LogoProps {
   /** Variante do logo */
-  variant?: 'icon' | 'compact' | 'full';
+  variant?: "icon" | "compact" | "full";
   /** Tamanho do logo */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Classes CSS adicionais */
   className?: string;
   /** Mostrar apenas o ícone mesmo em variante compact/full */
@@ -16,25 +16,25 @@ export interface LogoProps {
 
 const sizeClasses = {
   icon: {
-    xs: 'h-6 w-6',
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
-    lg: 'h-12 w-12',
-    xl: 'h-16 w-16',
+    xs: "h-6 w-6",
+    sm: "h-8 w-8",
+    md: "h-10 w-10",
+    lg: "h-12 w-12",
+    xl: "h-16 w-16",
   },
   compact: {
-    xs: 'h-6',
-    sm: 'h-8',
-    md: 'h-10',
-    lg: 'h-12',
-    xl: 'h-16',
+    xs: "h-6",
+    sm: "h-8",
+    md: "h-10",
+    lg: "h-12",
+    xl: "h-16",
   },
   full: {
-    xs: 'h-6',
-    sm: 'h-8',
-    md: 'h-10',
-    lg: 'h-12',
-    xl: 'h-16',
+    xs: "h-6",
+    sm: "h-8",
+    md: "h-10",
+    lg: "h-12",
+    xl: "h-16",
   },
 };
 
@@ -61,8 +61,8 @@ const sizeClasses = {
  * @component
  */
 export function Logo({
-  variant = 'compact',
-  size = 'md',
+  variant = "compact",
+  size = "md",
   className,
   iconOnly = false,
   onClick,
@@ -71,45 +71,45 @@ export function Logo({
 
   // Determinar qual arquivo usar
   const getLogoSrc = () => {
-    if (variant === 'icon' || iconOnly) {
-      return '/assets/branding/logo-icon.svg';
+    if (variant === "icon" || iconOnly) {
+      return "/assets/branding/logo-icon.svg";
     }
 
-    if (variant === 'full') {
-      return '/assets/branding/logo-full.svg';
+    if (variant === "full") {
+      return "/assets/branding/logo-full.svg";
     }
 
     // variant === 'compact'
-    return resolvedTheme === 'dark'
-      ? '/assets/branding/logo-compact-dark.svg'
-      : '/assets/branding/logo-compact.svg';
+    return resolvedTheme === "dark"
+      ? "/assets/branding/logo-compact-dark.svg"
+      : "/assets/branding/logo-compact.svg";
   };
 
   const logoSrc = getLogoSrc();
-  const sizeClass = sizeClasses[iconOnly ? 'icon' : variant][size];
+  const sizeClass = sizeClasses[iconOnly ? "icon" : variant][size];
 
   return (
     <img
       src={logoSrc}
       alt="TradingSystem"
       className={cn(
-        'w-auto object-contain transition-all duration-300',
+        "w-auto object-contain transition-all duration-300",
         sizeClass,
         onClick &&
-          'cursor-pointer hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]',
+          "cursor-pointer hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]",
         className,
       )}
       onClick={onClick}
       onError={(e) => {
-        console.error('Logo failed to load:', logoSrc);
+        console.error("Logo failed to load:", logoSrc);
         // Fallback para emoji se falhar
         const target = e.currentTarget as HTMLImageElement;
-        target.style.display = 'none';
+        target.style.display = "none";
         const parent = target.parentElement;
-        if (parent && !parent.querySelector('.logo-fallback')) {
-          const fallback = document.createElement('span');
-          fallback.className = 'logo-fallback text-2xl';
-          fallback.textContent = '📊';
+        if (parent && !parent.querySelector(".logo-fallback")) {
+          const fallback = document.createElement("span");
+          fallback.className = "logo-fallback text-2xl";
+          fallback.textContent = "📊";
           parent.appendChild(fallback);
         }
       }}

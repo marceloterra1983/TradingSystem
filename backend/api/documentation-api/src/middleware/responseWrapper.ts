@@ -7,7 +7,7 @@
  * @module middleware/responseWrapper
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 /**
  * Standard API Response Format
@@ -49,14 +49,18 @@ export interface PaginatedResponse<T> {
  * Wraps all successful responses in standardized format
  * Adds metadata (timestamp, request ID, version, path)
  */
-export const responseWrapper = (req: Request, res: Response, next: NextFunction) => {
+export const responseWrapper = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   // Store original json method
   const originalJson = res.json.bind(res);
 
   // Override json method
-  res.json = function(data: any): Response {
+  res.json = function (data: any): Response {
     // Check if response is already formatted
-    if (data && typeof data === 'object' && data.success !== undefined) {
+    if (data && typeof data === "object" && data.success !== undefined) {
       return originalJson(data);
     }
 
@@ -66,10 +70,10 @@ export const responseWrapper = (req: Request, res: Response, next: NextFunction)
       data,
       meta: {
         timestamp: new Date().toISOString(),
-        requestId: (req.headers['x-request-id'] as string) || 'unknown',
-        version: 'v1',
-        path: req.path
-      }
+        requestId: (req.headers["x-request-id"] as string) || "unknown",
+        version: "v1",
+        path: req.path,
+      },
     };
 
     return originalJson(wrappedResponse);
@@ -85,7 +89,7 @@ export const sendSuccess = <T>(
   res: Response,
   data: T,
   message?: string,
-  statusCode: number = 200
+  statusCode: number = 200,
 ): Response => {
   const response: ApiResponse<T> = {
     success: true,
@@ -93,10 +97,10 @@ export const sendSuccess = <T>(
     ...(message && { message }),
     meta: {
       timestamp: new Date().toISOString(),
-      requestId: res.locals.requestId || 'unknown',
-      version: 'v1',
-      path: res.locals.path || ''
-    }
+      requestId: res.locals.requestId || "unknown",
+      version: "v1",
+      path: res.locals.path || "",
+    },
   };
 
   return res.status(statusCode).json(response);
@@ -110,7 +114,7 @@ export const sendPaginated = <T>(
   data: T[],
   page: number,
   limit: number,
-  total: number
+  total: number,
 ): Response => {
   const totalPages = Math.ceil(total / limit);
 
@@ -124,15 +128,15 @@ export const sendPaginated = <T>(
         total,
         totalPages,
         hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     },
     meta: {
       timestamp: new Date().toISOString(),
-      requestId: res.locals.requestId || 'unknown',
-      version: 'v1',
-      path: res.locals.path || ''
-    }
+      requestId: res.locals.requestId || "unknown",
+      version: "v1",
+      path: res.locals.path || "",
+    },
   };
 
   return res.status(200).json(paginatedResponse);
@@ -146,21 +150,21 @@ export const sendError = (
   code: string,
   message: string,
   statusCode: number = 400,
-  details?: any
+  details?: any,
 ): Response => {
   const errorResponse: ApiResponse = {
     success: false,
     error: {
       code,
       message,
-      ...(details && { details })
+      ...(details && { details }),
     },
     meta: {
       timestamp: new Date().toISOString(),
-      requestId: res.locals.requestId || 'unknown',
-      version: 'v1',
-      path: res.locals.path || ''
-    }
+      requestId: res.locals.requestId || "unknown",
+      version: "v1",
+      path: res.locals.path || "",
+    },
   };
 
   return res.status(statusCode).json(errorResponse);

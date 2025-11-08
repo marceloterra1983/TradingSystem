@@ -1,56 +1,58 @@
-import fs from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
-import { spawn } from 'child_process';
-import { fileURLToPath } from 'url';
-import { config } from '../config.js';
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import { config } from "../config.js";
 import {
   listMessages as listMessagesFromRepository,
   getDatabasePool,
-} from '../db/messagesRepository.js';
+} from "../db/messagesRepository.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../../../../../');
+const projectRoot = path.resolve(__dirname, "../../../../../");
 
 const defaultGatewayPort = Number(process.env.TELEGRAM_GATEWAY_PORT || 4006);
 const gatewayBaseUrl =
   process.env.TELEGRAM_GATEWAY_URL || `http://localhost:${defaultGatewayPort}`;
 
 const resolvePath = (value, fallbackSegments) => {
-  if (value && typeof value === 'string' && value.trim().length > 0) {
+  if (value && typeof value === "string" && value.trim().length > 0) {
     return path.isAbsolute(value) ? value : path.join(projectRoot, value);
   }
   return path.join(projectRoot, ...fallbackSegments);
 };
 
-const failureQueuePath = resolvePath(process.env.TELEGRAM_GATEWAY_FAILURE_QUEUE_PATH, [
-  'apps',
-  'telegram-gateway',
-  'data',
-  'failure-queue.jsonl',
-]);
+const failureQueuePath = resolvePath(
+  process.env.TELEGRAM_GATEWAY_FAILURE_QUEUE_PATH,
+  ["apps", "telegram-gateway", "data", "failure-queue.jsonl"],
+);
 
 const sessionFilePath = resolvePath(process.env.TELEGRAM_GATEWAY_SESSION_FILE, [
-  'apps',
-  'telegram-gateway',
-  '.session',
-  'telegram-gateway.session',
+  "apps",
+  "telegram-gateway",
+  ".session",
+  "telegram-gateway.session",
 ]);
 
 const cacheTtlMs = Number(process.env.TELEGRAM_GATEWAY_CACHE_TTL_MS || 5000);
-const queuePreviewLimit = Number(process.env.TELEGRAM_GATEWAY_QUEUE_PREVIEW_LIMIT || 10);
-const recentMessagesLimit = Number(process.env.TELEGRAM_GATEWAY_RECENT_MESSAGES_LIMIT || 20);
+const queuePreviewLimit = Number(
+  process.env.TELEGRAM_GATEWAY_QUEUE_PREVIEW_LIMIT || 10,
+);
+const recentMessagesLimit = Number(
+  process.env.TELEGRAM_GATEWAY_RECENT_MESSAGES_LIMIT || 20,
+);
 const authLogLimit = Number(process.env.TELEGRAM_GATEWAY_AUTH_LOG_LIMIT || 200);
 
 const caches = new Map();
 
 const cacheKeys = {
-  OVERVIEW: 'overview',
-  METRICS: 'metrics',
-  QUEUE: 'queue',
-  SESSION: 'session',
-  MESSAGE_SUMMARY: 'messageSummary',
+  OVERVIEW: "overview",
+  METRICS: "metrics",
+  QUEUE: "queue",
+  SESSION: "session",
+  MESSAGE_SUMMARY: "messageSummary",
 };
 
 const setCache = (key, data, ttl = cacheTtlMs) => {
@@ -81,7 +83,7 @@ export const invalidateCaches = (keys) => {
 
 const authState = {
   process: null,
-  status: 'idle',
+  status: "idle",
   logs: [],
   startedAt: null,
   finishedAt: null,
@@ -89,7 +91,9 @@ const authState = {
 };
 
 const stripAnsi = (value) =>
-  typeof value === 'string' ? value.replace(/\u001B\[[0-9;]*[A-Za-z]/g, '') : value;
+  typeof value === "string"
+    ? value.replace(/\u001B\[[0-9;]*[A-Za-z]/g, "")
+    : value;
 
 const appendAuthLog = (level, message) => {
   authState.logs.push({
@@ -108,8 +112,8 @@ const updateAuthStatus = (status) => {
 
 const ensureAuthProcess = () => {
   if (!authState.process) {
-    const error = new Error('Nenhum processo de autenticação em execução');
-    error.code = 'NO_PROCESS';
+    const error = new Error("Nenhum processo de autenticação em execução");
+    error.code = "NO_PROCESS";
     throw error;
   }
   return authState.process;
@@ -118,33 +122,35 @@ const ensureAuthProcess = () => {
 const normalizeChunk = (chunk) => {
   const text = stripAnsi(chunk.toString());
   return text
-    .replace(/\r\n/g, '\n')
-    .split('\n')
+    .replace(/\r\n/g, "\n")
+    .split("\n")
     .filter((line) => line.trim().length > 0);
 };
 
 const detectAuthHints = (line) => {
   const normalized = stripAnsi(line).toLowerCase();
-  const accentless = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const accentless = normalized
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
   if (
-    normalized.includes('enter the code') ||
-    normalized.includes('enter code') ||
-    normalized.includes('verification code') ||
-    normalized.includes('auth code') ||
-    accentless.includes('digite o codigo') ||
-    accentless.includes('informe o codigo') ||
-    accentless.includes('codigo de autenticacao')
+    normalized.includes("enter the code") ||
+    normalized.includes("enter code") ||
+    normalized.includes("verification code") ||
+    normalized.includes("auth code") ||
+    accentless.includes("digite o codigo") ||
+    accentless.includes("informe o codigo") ||
+    accentless.includes("codigo de autenticacao")
   ) {
-    updateAuthStatus('waiting_code');
+    updateAuthStatus("waiting_code");
   } else if (
-    normalized.includes('2fa password') ||
-    normalized.includes('two-factor password') ||
-    accentless.includes('senha de 2fa') ||
-    accentless.includes('senha 2fa')
+    normalized.includes("2fa password") ||
+    normalized.includes("two-factor password") ||
+    accentless.includes("senha de 2fa") ||
+    accentless.includes("senha 2fa")
   ) {
-    updateAuthStatus('waiting_password');
-  } else if (normalized.includes('signed in successfully')) {
-    updateAuthStatus('completed');
+    updateAuthStatus("waiting_password");
+  } else if (normalized.includes("signed in successfully")) {
+    updateAuthStatus("completed");
   }
 };
 
@@ -167,26 +173,26 @@ async function fetchGatewayHealth() {
   // MOCK: Return mock health data (MTProto client not yet implemented)
   // This avoids circular HTTP calls to self and always returns "connected" status
   return {
-    status: 'healthy',
-    telegram: 'connected', // Mock connection status
-    service: 'telegram-gateway-api',
+    status: "healthy",
+    telegram: "connected", // Mock connection status
+    service: "telegram-gateway-api",
     timestamp: new Date().toISOString(),
-    note: 'MTProto client not yet implemented - showing mock status',
+    note: "MTProto client not yet implemented - showing mock status",
   };
 }
 
 const parsePrometheus = (text) => {
   const metrics = {};
-  if (typeof text !== 'string') {
+  if (typeof text !== "string") {
     return metrics;
   }
 
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   for (const rawLine of lines) {
     const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
+    if (!line || line.startsWith("#")) continue;
 
-    const spaceIndex = line.indexOf(' ');
+    const spaceIndex = line.indexOf(" ");
     if (spaceIndex === -1) continue;
 
     const metricPart = line.slice(0, spaceIndex);
@@ -197,16 +203,19 @@ const parsePrometheus = (text) => {
     let metricName = metricPart;
     let labels = {};
 
-    const labelStart = metricPart.indexOf('{');
+    const labelStart = metricPart.indexOf("{");
     if (labelStart !== -1) {
       metricName = metricPart.slice(0, labelStart);
-      const labelChunk = metricPart.slice(labelStart + 1, metricPart.length - 1);
+      const labelChunk = metricPart.slice(
+        labelStart + 1,
+        metricPart.length - 1,
+      );
       labels = {};
       if (labelChunk.length > 0) {
-        for (const part of labelChunk.split(',')) {
-          const [key, rawVal] = part.split('=');
-          if (!key || typeof rawVal === 'undefined') continue;
-          labels[key.trim()] = rawVal.trim().replace(/^"|"$/g, '');
+        for (const part of labelChunk.split(",")) {
+          const [key, rawVal] = part.split("=");
+          if (!key || typeof rawVal === "undefined") continue;
+          labels[key.trim()] = rawVal.trim().replace(/^"|"$/g, "");
         }
       }
     }
@@ -241,12 +250,12 @@ const summariseMetrics = (parsedMetrics) => {
   };
 
   return {
-    connectionStatus: firstValue('telegram_connection_status'),
-    messagesReceivedTotal: sumSamples('telegram_messages_received_total'),
-    messagesPublishedTotal: sumSamples('telegram_messages_published_total'),
-    publishFailuresTotal: sumSamples('telegram_publish_failures_total'),
-    retryAttemptsTotal: sumSamples('telegram_retry_attempts_total'),
-    failureQueueSize: firstValue('telegram_failure_queue_size'),
+    connectionStatus: firstValue("telegram_connection_status"),
+    messagesReceivedTotal: sumSamples("telegram_messages_received_total"),
+    messagesPublishedTotal: sumSamples("telegram_messages_published_total"),
+    publishFailuresTotal: sumSamples("telegram_publish_failures_total"),
+    retryAttemptsTotal: sumSamples("telegram_retry_attempts_total"),
+    failureQueueSize: firstValue("telegram_failure_queue_size"),
   };
 };
 
@@ -272,10 +281,10 @@ async function fetchGatewayMetrics() {
 const readFailureQueue = async (limit = queuePreviewLimit) => {
   try {
     const stats = await fs.stat(failureQueuePath);
-    const content = await fs.readFile(failureQueuePath, 'utf8');
+    const content = await fs.readFile(failureQueuePath, "utf8");
     const lines = content
       .trim()
-      .split('\n')
+      .split("\n")
       .filter((line) => line.trim().length > 0);
 
     const total = lines.length;
@@ -289,7 +298,8 @@ const readFailureQueue = async (limit = queuePreviewLimit) => {
           return {
             channelId: entry.channelId ?? null,
             messageId: entry.messageId ?? null,
-            textPreview: typeof entry.text === 'string' ? entry.text.slice(0, 160) : null,
+            textPreview:
+              typeof entry.text === "string" ? entry.text.slice(0, 160) : null,
             failedAt: entry.failedAt ?? null,
             queuedAt: entry.queuedAt ?? null,
             createdAt: entry.timestamp ?? entry.receivedAt ?? null,
@@ -311,7 +321,7 @@ const readFailureQueue = async (limit = queuePreviewLimit) => {
       preview,
     };
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if (error.code === "ENOENT") {
       return {
         exists: false,
         path: failureQueuePath,
@@ -327,7 +337,7 @@ const readSessionMetadata = async () => {
   try {
     const stats = await fs.stat(sessionFilePath);
     const ageMs = Date.now() - stats.mtimeMs;
-    const hash = crypto.createHash('sha1');
+    const hash = crypto.createHash("sha1");
     const content = await fs.readFile(sessionFilePath);
     hash.update(content);
     return {
@@ -336,10 +346,10 @@ const readSessionMetadata = async () => {
       sizeBytes: stats.size,
       updatedAt: stats.mtime.toISOString(),
       ageMs,
-      hash: hash.digest('hex').slice(0, 16),
+      hash: hash.digest("hex").slice(0, 16),
     };
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if (error.code === "ENOENT") {
       return {
         exists: false,
         path: sessionFilePath,
@@ -350,13 +360,13 @@ const readSessionMetadata = async () => {
 };
 
 const statuses = [
-  'received',
-  'retrying',
-  'published',
-  'queued',
-  'failed',
-  'reprocess_pending',
-  'reprocessed',
+  "received",
+  "retrying",
+  "published",
+  "queued",
+  "failed",
+  "reprocess_pending",
+  "reprocessed",
 ];
 
 const toIdentifier = (value) => `"${String(value).replace(/"/g, '""')}"`;
@@ -391,7 +401,7 @@ export const buildMessageSummary = async ({ logger } = {}) => {
   const recent = await listMessagesFromRepository(
     {
       limit: recentMessagesLimit,
-      sort: 'desc',
+      sort: "desc",
     },
     logger,
   );
@@ -431,14 +441,14 @@ export const getMetrics = async () => {
 };
 
 export const getQueue = async ({ limit } = {}) => {
-  if (typeof limit === 'undefined') {
+  if (typeof limit === "undefined") {
     const cached = getCached(cacheKeys.QUEUE);
     if (cached) return cached;
   }
 
   try {
     const queue = await readFailureQueue(limit);
-    if (typeof limit === 'undefined') {
+    if (typeof limit === "undefined") {
       return setCache(cacheKeys.QUEUE, queue);
     }
     return queue;
@@ -447,7 +457,7 @@ export const getQueue = async ({ limit } = {}) => {
       error: error.message,
       path: failureQueuePath,
     };
-    if (typeof limit === 'undefined') {
+    if (typeof limit === "undefined") {
       return setCache(cacheKeys.QUEUE, payload, 2000);
     }
     return payload;
@@ -460,27 +470,29 @@ export const getSession = async () => {
 
   try {
     // When MTProto is containerized, check session via MTProto health endpoint
-    const mtprotoServiceUrl = process.env.MTPROTO_SERVICE_URL || process.env.GATEWAY_SERVICE_URL || 'http://localhost:4007';
-    
+    const mtprotoServiceUrl =
+      process.env.MTPROTO_SERVICE_URL ||
+      process.env.GATEWAY_SERVICE_URL;
+
     const response = await fetch(`${mtprotoServiceUrl}/health`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(5000),
     });
-    
+
     if (!response.ok) {
       return setCache(
         cacheKeys.SESSION,
         {
           exists: false,
           path: sessionFilePath,
-          error: 'MTProto service not accessible'
+          error: "MTProto service not accessible",
         },
-        2000
+        2000,
       );
     }
-    
+
     const health = await response.json();
-    const isConnected = health.telegram === 'connected';
-    
+    const isConnected = health.telegram === "connected";
+
     return setCache(cacheKeys.SESSION, {
       exists: isConnected,
       path: sessionFilePath,
@@ -507,11 +519,16 @@ export const getOverview = async ({ logger } = {}) => {
 
   try {
     const [health, metrics, queue, session, messages] = await Promise.all([
-      fetchGatewayHealth().catch((error) => ({ status: 'unknown', error: error.message })),
+      fetchGatewayHealth().catch((error) => ({
+        status: "unknown",
+        error: error.message,
+      })),
       getMetrics(),
       getQueue(),
       getSession(),
-      buildMessageSummary({ logger }).catch((error) => ({ error: error.message })),
+      buildMessageSummary({ logger }).catch((error) => ({
+        error: error.message,
+      })),
     ]);
 
     return setCache(cacheKeys.OVERVIEW, {
@@ -545,67 +562,71 @@ export const getAuthenticationStatus = () => ({
 
 export const startAuthentication = () => {
   if (authState.process) {
-    const error = new Error('Uma autenticação já está em andamento');
-    error.code = 'ALREADY_RUNNING';
+    const error = new Error("Uma autenticação já está em andamento");
+    error.code = "ALREADY_RUNNING";
     throw error;
   }
 
-  const command = process.platform === 'win32'
-    ? 'authenticate-interactive.sh'
-    : './authenticate-interactive.sh';
-  const workingDir = path.join(projectRoot, 'apps', 'telegram-gateway');
-  appendAuthLog('system', `Executando script de autenticação: ${command} (cwd: ${workingDir})`);
+  const command =
+    process.platform === "win32"
+      ? "authenticate-interactive.sh"
+      : "./authenticate-interactive.sh";
+  const workingDir = path.join(projectRoot, "apps", "telegram-gateway");
+  appendAuthLog(
+    "system",
+    `Executando script de autenticação: ${command} (cwd: ${workingDir})`,
+  );
   const child = spawn(command, {
-    cwd: path.join(projectRoot, 'apps', 'telegram-gateway'),
+    cwd: path.join(projectRoot, "apps", "telegram-gateway"),
     env: {
       ...process.env,
-      FORCE_COLOR: '1',
+      FORCE_COLOR: "1",
     },
-    stdio: ['pipe', 'pipe', 'pipe'],
-    shell: process.platform === 'win32',
+    stdio: ["pipe", "pipe", "pipe"],
+    shell: process.platform === "win32",
   });
 
   authState.process = child;
-  authState.status = 'starting';
+  authState.status = "starting";
   authState.startedAt = new Date().toISOString();
   authState.finishedAt = null;
   authState.exitCode = null;
   authState.logs = [];
 
-  appendAuthLog('system', 'Processo de autenticação iniciado');
+  appendAuthLog("system", "Processo de autenticação iniciado");
 
-  child.stdout.on('data', (chunk) => {
+  child.stdout.on("data", (chunk) => {
     const lines = normalizeChunk(chunk);
     lines.forEach((line) => {
-      appendAuthLog('stdout', line);
+      appendAuthLog("stdout", line);
       detectAuthHints(line);
     });
   });
 
-  child.stderr.on('data', (chunk) => {
+  child.stderr.on("data", (chunk) => {
     const lines = normalizeChunk(chunk);
     lines.forEach((line) => {
-      appendAuthLog('stderr', line);
+      appendAuthLog("stderr", line);
       detectAuthHints(line);
     });
   });
 
-  child.on('error', (error) => {
-    appendAuthLog('error', `Falha ao iniciar autenticação: ${error.message}`);
-    authState.status = 'error';
-    authState.exitCode = typeof error.code === 'number' ? error.code : null;
+  child.on("error", (error) => {
+    appendAuthLog("error", `Falha ao iniciar autenticação: ${error.message}`);
+    authState.status = "error";
+    authState.exitCode = typeof error.code === "number" ? error.code : null;
     authState.finishedAt = new Date().toISOString();
     authState.process = null;
   });
 
-  child.on('close', (code) => {
-    appendAuthLog('system', `Processo encerrado com código ${code}`);
+  child.on("close", (code) => {
+    appendAuthLog("system", `Processo encerrado com código ${code}`);
     authState.exitCode = code;
     authState.finishedAt = new Date().toISOString();
-    if (authState.status === 'cancelling') {
-      authState.status = 'cancelled';
-    } else if (authState.status !== 'completed') {
-      authState.status = code === 0 ? 'completed' : 'error';
+    if (authState.status === "cancelling") {
+      authState.status = "cancelled";
+    } else if (authState.status !== "completed") {
+      authState.status = code === 0 ? "completed" : "error";
     }
     authState.process = null;
   });
@@ -613,9 +634,9 @@ export const startAuthentication = () => {
   // Avança o prompt inicial automaticamente
   setTimeout(() => {
     if (child.stdin.writable) {
-      child.stdin.write('\n');
-      appendAuthLog('system', 'Prompt inicial confirmado automaticamente');
-      authState.status = 'waiting_code';
+      child.stdin.write("\n");
+      appendAuthLog("system", "Prompt inicial confirmado automaticamente");
+      authState.status = "waiting_code";
     }
   }, 300);
 
@@ -625,28 +646,31 @@ export const startAuthentication = () => {
 export const submitAuthenticationInput = (value) => {
   const processRef = ensureAuthProcess();
   if (!processRef.stdin.writable) {
-    const error = new Error('Não é possível enviar entrada - stdin fechado');
-    error.code = 'STDIN_CLOSED';
+    const error = new Error("Não é possível enviar entrada - stdin fechado");
+    error.code = "STDIN_CLOSED";
     throw error;
   }
 
   processRef.stdin.write(`${value}\n`);
-  appendAuthLog('input', 'Entrada enviada ao processo (conteúdo não exibido por segurança)');
-  if (authState.status === 'waiting_code') {
-    authState.status = 'processing_code';
-  } else if (authState.status === 'waiting_password') {
-    authState.status = 'processing_password';
+  appendAuthLog(
+    "input",
+    "Entrada enviada ao processo (conteúdo não exibido por segurança)",
+  );
+  if (authState.status === "waiting_code") {
+    authState.status = "processing_code";
+  } else if (authState.status === "waiting_password") {
+    authState.status = "processing_password";
   }
 };
 
 export const cancelAuthentication = () => {
   const processRef = ensureAuthProcess();
-  appendAuthLog('system', 'Cancelamento solicitado pelo usuário');
-  authState.status = 'cancelling';
-  processRef.kill('SIGTERM');
+  appendAuthLog("system", "Cancelamento solicitado pelo usuário");
+  authState.status = "cancelling";
+  processRef.kill("SIGTERM");
   setTimeout(() => {
     if (authState.process) {
-      authState.process.kill('SIGKILL');
+      authState.process.kill("SIGKILL");
     }
   }, 2000);
 };

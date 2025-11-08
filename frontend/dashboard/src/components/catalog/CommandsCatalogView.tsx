@@ -1,26 +1,26 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../ui/collapsible-card';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { Input } from '../ui/input';
+} from "../ui/collapsible-card";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Dialog, DialogContent, DialogFooter } from '../ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
-import { MarkdownPreview } from '../ui/MarkdownPreview';
-import { useToast } from '../../hooks/useToast';
+} from "../ui/select";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
+import { MarkdownPreview } from "../ui/MarkdownPreview";
+import { useToast } from "../../hooks/useToast";
 import {
   ArrowDown,
   ArrowUp,
@@ -33,9 +33,9 @@ import {
   FileWarning,
   Filter,
   Search,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { commandsDatabase } from '../../data/commandsCatalog';
+import { commandsDatabase } from "../../data/commandsCatalog";
 
 type CommandRecord = (typeof commandsDatabase.commands)[number];
 
@@ -43,22 +43,22 @@ const ALL_COMMANDS = commandsDatabase.commands;
 const TOTAL_COMMANDS = ALL_COMMANDS.length;
 
 const surfaceCardClass =
-  'rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] shadow-[var(--ts-shadow-sm)] transition-shadow hover:shadow-[var(--ts-shadow-lg)]';
-const mutedTextClass = 'text-[color:var(--ts-text-muted)]';
+  "rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] shadow-[var(--ts-shadow-sm)] transition-shadow hover:shadow-[var(--ts-shadow-lg)]";
+const mutedTextClass = "text-[color:var(--ts-text-muted)]";
 const filterBadgeClass =
-  'border-[color:var(--ts-accent)] text-[color:var(--ts-accent-strong)]';
+  "border-[color:var(--ts-accent)] text-[color:var(--ts-accent-strong)]";
 
 type SortField =
-  | 'command'
-  | 'category'
-  | 'capacidades'
-  | 'momentoIdeal'
-  | 'exemploMomento'
-  | 'tipoSaida'
-  | 'tags'
-  | 'exemplos';
+  | "command"
+  | "category"
+  | "capacidades"
+  | "momentoIdeal"
+  | "exemploMomento"
+  | "tipoSaida"
+  | "tags"
+  | "exemplos";
 
-type SortDirection = 'asc' | 'desc';
+type SortDirection = "asc" | "desc";
 
 interface CommandsCatalogViewProps {
   headerActions?: ReactNode;
@@ -69,21 +69,21 @@ export default function CommandsCatalogView({
 }: CommandsCatalogViewProps = {}): JSX.Element {
   const toast = useToast();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [tagFilter, setTagFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCommand, setSelectedCommand] = useState<CommandRecord | null>(
     null,
   );
-  const [sortField, setSortField] = useState<SortField>('command');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>("command");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const categories = useMemo(() => {
     return Array.from(
       new Set(
         ALL_COMMANDS.map((item) => item.category).filter(
-          (category) => category && category !== 'Observacoes Finais',
+          (category) => category && category !== "Observacoes Finais",
         ),
       ),
     ).sort();
@@ -109,50 +109,50 @@ export default function CommandsCatalogView({
         item.momentoIdeal,
         item.exemploMomento,
         item.tipoSaida,
-        item.exemplos.join(' '),
-        (item.tags ?? []).join(' '),
+        item.exemplos.join(" "),
+        (item.tags ?? []).join(" "),
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return haystack.includes(normalizedSearch);
     };
 
     const matchesCategory = (command: CommandRecord) =>
-      categoryFilter === 'all' ||
+      categoryFilter === "all" ||
       command.category === categoryFilter ||
-      (!command.category && categoryFilter === 'sem-categoria');
+      (!command.category && categoryFilter === "sem-categoria");
 
     const matchesTag = (command: CommandRecord) =>
-      tagFilter === 'all' || (command.tags ?? []).includes(tagFilter);
+      tagFilter === "all" || (command.tags ?? []).includes(tagFilter);
 
     const toComparable = (command: CommandRecord, field: SortField) => {
       switch (field) {
-        case 'command':
-          return command.command ?? '';
-        case 'category':
-          return command.category ?? '';
-        case 'capacidades':
-          return command.capacidades ?? '';
-        case 'momentoIdeal':
-          return command.momentoIdeal ?? '';
-        case 'exemploMomento':
-          return command.exemploMomento ?? '';
-        case 'tipoSaida':
-          return command.tipoSaida ?? '';
-        case 'tags':
-          return (command.tags ?? []).join(', ');
-        case 'exemplos':
-          return command.exemplos.join(', ');
+        case "command":
+          return command.command ?? "";
+        case "category":
+          return command.category ?? "";
+        case "capacidades":
+          return command.capacidades ?? "";
+        case "momentoIdeal":
+          return command.momentoIdeal ?? "";
+        case "exemploMomento":
+          return command.exemploMomento ?? "";
+        case "tipoSaida":
+          return command.tipoSaida ?? "";
+        case "tags":
+          return (command.tags ?? []).join(", ");
+        case "exemplos":
+          return command.exemplos.join(", ");
         default:
-          return '';
+          return "";
       }
     };
 
     const filtered = ALL_COMMANDS.filter(
       (command) =>
-        command.category !== 'Observacoes Finais' &&
+        command.category !== "Observacoes Finais" &&
         matchesSearch(command) &&
         matchesCategory(command) &&
         matchesTag(command),
@@ -162,10 +162,10 @@ export default function CommandsCatalogView({
       const aValue = toComparable(a, sortField).toLowerCase();
       const bValue = toComparable(b, sortField).toLowerCase();
       if (aValue < bValue) {
-        return sortDirection === 'asc' ? -1 : 1;
+        return sortDirection === "asc" ? -1 : 1;
       }
       if (aValue > bValue) {
-        return sortDirection === 'asc' ? 1 : -1;
+        return sortDirection === "asc" ? 1 : -1;
       }
       // fallback secondary sort by command name
       const aCommand = a.command.toLowerCase();
@@ -195,9 +195,9 @@ export default function CommandsCatalogView({
   };
 
   const handleClearFilters = useCallback(() => {
-    setCategoryFilter('all');
-    setTagFilter('all');
-    setSearchTerm('');
+    setCategoryFilter("all");
+    setTagFilter("all");
+    setSearchTerm("");
   }, []);
 
   const copyText = useCallback(
@@ -212,7 +212,7 @@ export default function CommandsCatalogView({
       }
 
       if (!navigator?.clipboard) {
-        toast.error('Clipboard API indisponível neste navegador.');
+        toast.error("Clipboard API indisponível neste navegador.");
         return;
       }
 
@@ -220,8 +220,8 @@ export default function CommandsCatalogView({
         await navigator.clipboard.writeText(text);
         toast.success(successMessage);
       } catch (error) {
-        console.error('Failed to copy text', error);
-        toast.error('Não foi possível copiar o conteúdo.');
+        console.error("Failed to copy text", error);
+        toast.error("Não foi possível copiar o conteúdo.");
       }
     },
     [toast],
@@ -231,8 +231,8 @@ export default function CommandsCatalogView({
     (command: CommandRecord) =>
       copyText(
         command.filePath,
-        'Caminho copiado para a área de transferência.',
-        'Arquivo não localizado no diretório de comandos.',
+        "Caminho copiado para a área de transferência.",
+        "Arquivo não localizado no diretório de comandos.",
       ),
     [copyText],
   );
@@ -241,8 +241,8 @@ export default function CommandsCatalogView({
     (command: CommandRecord) =>
       copyText(
         command.command,
-        'Comando copiado para a área de transferência.',
-        'Comando inválido para copiar.',
+        "Comando copiado para a área de transferência.",
+        "Comando inválido para copiar.",
       ),
     [copyText],
   );
@@ -251,41 +251,41 @@ export default function CommandsCatalogView({
     (example: string) =>
       copyText(
         example,
-        'Exemplo copiado para a área de transferência.',
-        'Exemplo inválido para copiar.',
+        "Exemplo copiado para a área de transferência.",
+        "Exemplo inválido para copiar.",
       ),
     [copyText],
   );
 
   const handleDownload = (command: CommandRecord) => {
     if (!command.fileContent || !command.fileName) {
-      toast.error('Conteúdo do comando não disponível para download.');
+      toast.error("Conteúdo do comando não disponível para download.");
       return;
     }
 
     const blob = new Blob([command.fileContent], {
-      type: 'text/markdown;charset=utf-8',
+      type: "text/markdown;charset=utf-8",
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = command.fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.success('Download do arquivo iniciado.');
+    toast.success("Download do arquivo iniciado.");
   };
 
   const handleSort = (field: SortField) => {
     setSortField((prevField) => {
       if (prevField === field) {
         setSortDirection((prevDirection) =>
-          prevDirection === 'asc' ? 'desc' : 'asc',
+          prevDirection === "asc" ? "desc" : "asc",
         );
         return prevField;
       }
-      setSortDirection('asc');
+      setSortDirection("asc");
       return field;
     });
   };
@@ -294,7 +294,7 @@ export default function CommandsCatalogView({
     if (field !== sortField) {
       return <ArrowUpDown className="h-3 w-3 opacity-50" />;
     }
-    return sortDirection === 'asc' ? (
+    return sortDirection === "asc" ? (
       <ArrowUp className="h-3 w-3" />
     ) : (
       <ArrowDown className="h-3 w-3" />
@@ -304,7 +304,7 @@ export default function CommandsCatalogView({
   const sections = useMemo(
     () => [
       {
-        id: 'commands-dashboard',
+        id: "commands-dashboard",
         content: (
           <CollapsibleCard
             cardId="commands-dashboard"
@@ -341,7 +341,10 @@ export default function CommandsCatalogView({
                       />
                     </div>
                   </div>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <Select
+                    value={categoryFilter}
+                    onValueChange={setCategoryFilter}
+                  >
                     <SelectTrigger
                       className="w-full"
                       data-testid="commands-category-filter"
@@ -377,21 +380,23 @@ export default function CommandsCatalogView({
                   </Select>
                 </div>
 
-                <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
+                <div
+                  className={`flex items-center gap-2 text-xs ${mutedTextClass}`}
+                >
                   <span>
-                    Exibindo{' '}
+                    Exibindo{" "}
                     <strong className="text-[color:var(--ts-text-secondary)]">
                       {filteredCommands.length}
-                    </strong>{' '}
-                    de{' '}
+                    </strong>{" "}
+                    de{" "}
                     <strong className="text-[color:var(--ts-text-secondary)]">
                       {TOTAL_COMMANDS}
-                    </strong>{' '}
+                    </strong>{" "}
                     comandos documentados.
                   </span>
-                  {(categoryFilter !== 'all' ||
-                    tagFilter !== 'all' ||
-                    searchTerm.trim() !== '') && (
+                  {(categoryFilter !== "all" ||
+                    tagFilter !== "all" ||
+                    searchTerm.trim() !== "") && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -412,19 +417,19 @@ export default function CommandsCatalogView({
                     busca.
                   </div>
                 ) : (
-                <div
-                  className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 md:grid-cols-2 2xl:grid-cols-3"
-                  data-testid="commands-card-grid"
-                >
-                  {filteredCommands.map((command) => (
-                    <div
-                      key={command.command}
-                      className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
-                      data-testid="command-card"
-                      data-command-id={command.command}
-                      data-command-category={command.category ?? ''}
-                      data-command-tags={(command.tags ?? []).join(',')}
-                    >
+                  <div
+                    className="grid max-h-[520px] gap-4 overflow-y-auto pr-1 md:grid-cols-2 2xl:grid-cols-3"
+                    data-testid="commands-card-grid"
+                  >
+                    {filteredCommands.map((command) => (
+                      <div
+                        key={command.command}
+                        className="flex h-full flex-col gap-3 rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] p-4 shadow-[var(--ts-shadow-sm)] transition-all hover:border-[color:var(--ts-accent)] hover:shadow-[var(--ts-shadow-lg)]"
+                        data-testid="command-card"
+                        data-command-id={command.command}
+                        data-command-category={command.category ?? ""}
+                        data-command-tags={(command.tags ?? []).join(",")}
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
@@ -443,13 +448,13 @@ export default function CommandsCatalogView({
                         </div>
                         {command.category && (
                           <div className="text-sm text-[color:var(--ts-text-secondary)]">
-                            <span className="font-semibold">Categoria:</span>{' '}
+                            <span className="font-semibold">Categoria:</span>{" "}
                             {command.category}
                           </div>
                         )}
                         {command.capacidades && (
                           <div className="text-sm text-[color:var(--ts-text-secondary)]">
-                            <span className="font-semibold">Capacidades:</span>{' '}
+                            <span className="font-semibold">Capacidades:</span>{" "}
                             {command.capacidades}
                           </div>
                         )}
@@ -457,7 +462,7 @@ export default function CommandsCatalogView({
                           <div className="text-sm text-[color:var(--ts-text-secondary)]">
                             <span className="font-semibold">
                               Momento ideal:
-                            </span>{' '}
+                            </span>{" "}
                             {command.momentoIdeal}
                           </div>
                         )}
@@ -465,7 +470,7 @@ export default function CommandsCatalogView({
                           <div className={`text-xs ${mutedTextClass}`}>
                             <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Exemplo prático:
-                            </span>{' '}
+                            </span>{" "}
                             {command.exemploMomento}
                           </div>
                         )}
@@ -473,7 +478,7 @@ export default function CommandsCatalogView({
                           <div className={`text-xs ${mutedTextClass}`}>
                             <span className="font-medium text-[color:var(--ts-text-secondary)]">
                               Tipo de saída:
-                            </span>{' '}
+                            </span>{" "}
                             {command.tipoSaida}
                           </div>
                         )}
@@ -545,7 +550,7 @@ export default function CommandsCatalogView({
         ),
       },
       {
-        id: 'commands-table',
+        id: "commands-table",
         content: (
           <CollapsibleCard
             cardId="commands-table"
@@ -553,9 +558,12 @@ export default function CommandsCatalogView({
             className={surfaceCardClass}
           >
             <CollapsibleCardHeader>
-              <CollapsibleCardTitle>Visualização em Tabela</CollapsibleCardTitle>
+              <CollapsibleCardTitle>
+                Visualização em Tabela
+              </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Mesmos dados filtrados acima, apresentados em formato tabular para comparação rápida.
+                Mesmos dados filtrados acima, apresentados em formato tabular
+                para comparação rápida.
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
@@ -576,38 +584,48 @@ export default function CommandsCatalogView({
                           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--ts-text-muted)]" />
                           <Input
                             value={searchTerm}
-                            onChange={(event) => setSearchTerm(event.target.value)}
+                            onChange={(event) =>
+                              setSearchTerm(event.target.value)
+                            }
                             placeholder="Filtrar comandos por texto, categoria ou tag"
                             data-testid="commands-table-search-input"
                             className="pl-9"
                           />
                         </div>
                       </div>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger
-                      className="w-full"
-                      data-testid="commands-table-category-filter"
-                    >
-                      <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
-                      <SelectValue placeholder="Categoria" />
-                    </SelectTrigger>
+                      <Select
+                        value={categoryFilter}
+                        onValueChange={setCategoryFilter}
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          data-testid="commands-table-category-filter"
+                        >
+                          <Filter className="mr-2 h-4 w-4 text-[color:var(--ts-text-muted)]" />
+                          <SelectValue placeholder="Categoria" />
+                        </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todas as categorias</SelectItem>
+                          <SelectItem value="all">
+                            Todas as categorias
+                          </SelectItem>
                           {categories.map((category) => (
-                            <SelectItem key={`table-cat-${category}`} value={category}>
+                            <SelectItem
+                              key={`table-cat-${category}`}
+                              value={category}
+                            >
                               {category}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                  <Select value={tagFilter} onValueChange={setTagFilter}>
-                    <SelectTrigger
-                      className="w-full"
-                      data-testid="commands-table-tag-filter"
-                    >
-                      <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
-                      <SelectValue placeholder="Tag" />
-                    </SelectTrigger>
+                      <Select value={tagFilter} onValueChange={setTagFilter}>
+                        <SelectTrigger
+                          className="w-full"
+                          data-testid="commands-table-tag-filter"
+                        >
+                          <Filter className="mr-2 h-4 w-4 rotate-90 text-[color:var(--ts-text-muted)]" />
+                          <SelectValue placeholder="Tag" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">Todas as tags</SelectItem>
                           {tagOptions.map((tag) => (
@@ -618,21 +636,23 @@ export default function CommandsCatalogView({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className={`flex items-center gap-2 text-xs ${mutedTextClass}`}>
+                    <div
+                      className={`flex items-center gap-2 text-xs ${mutedTextClass}`}
+                    >
                       <span>
-                        Exibindo{' '}
+                        Exibindo{" "}
                         <strong className="text-[color:var(--ts-text-secondary)]">
                           {filteredCommands.length}
-                        </strong>{' '}
-                        de{' '}
+                        </strong>{" "}
+                        de{" "}
                         <strong className="text-[color:var(--ts-text-secondary)]">
                           {TOTAL_COMMANDS}
-                        </strong>{' '}
+                        </strong>{" "}
                         comandos.
                       </span>
-                      {(categoryFilter !== 'all' ||
-                        tagFilter !== 'all' ||
-                        searchTerm.trim() !== '') && (
+                      {(categoryFilter !== "all" ||
+                        tagFilter !== "all" ||
+                        searchTerm.trim() !== "") && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -651,190 +671,192 @@ export default function CommandsCatalogView({
                     >
                       <thead className="bg-[color:var(--ts-surface-1)] text-xs font-semibold uppercase tracking-wider text-[color:var(--ts-text-muted)]">
                         <tr>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('command')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Comando
-                            {renderSortIcon('command')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('category')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Categoria
-                            {renderSortIcon('category')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('capacidades')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Capacidades
-                            {renderSortIcon('capacidades')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('momentoIdeal')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Momento ideal
-                            {renderSortIcon('momentoIdeal')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('exemploMomento')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Exemplo prático
-                            {renderSortIcon('exemploMomento')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('tipoSaida')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Tipo de saída
-                            {renderSortIcon('tipoSaida')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('tags')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Tags
-                            {renderSortIcon('tags')}
-                          </button>
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left">
-                          <button
-                            type="button"
-                            onClick={() => handleSort('exemplos')}
-                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                          >
-                            Exemplos
-                            {renderSortIcon('exemplos')}
-                          </button>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[color:var(--ts-surface-border)] text-[color:var(--ts-text-secondary)]">
-                      {filteredCommands.map((command) => (
-                        <tr
-                          key={`table-${command.command}`}
-                          className="hover:bg-[color:var(--ts-surface-hover)]"
-                          data-command-row
-                          data-command-id={command.command}
-                          data-command-category={command.category ?? ''}
-                          data-command-tags={(command.tags ?? []).join(',')}
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex flex-col gap-1">
-                              <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
-                                {command.command}
-                              </code>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                  onClick={() => handleCopyCommand(command)}
-                                  aria-label={`Copiar ${command.command}`}
-                                >
-                                  <Copy className="h-3.5 w-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                  onClick={() => handleOpenCommand(command)}
-                                  aria-label={`Visualizar ${command.command}`}
-                                >
-                                  <Eye className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.category ?? '—'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.capacidades ?? '—'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.momentoIdeal ?? '—'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.exemploMomento ?? '—'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <span className="block text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.tipoSaida ?? '—'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <div
-                              className={`flex flex-wrap gap-1 text-[10px] uppercase tracking-wide ${mutedTextClass}`}
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("command")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
                             >
-                              {(command.tags ?? []).map((tag) => (
-                                <Badge
-                                  key={`${command.command}-table-tag-${tag}`}
-                                  variant="outline"
-                                  className={`text-[10px] font-medium ${filterBadgeClass}`}
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 align-top">
-                            <div className="flex flex-wrap gap-2 text-xs text-[color:var(--ts-text-secondary)]">
-                              {command.exemplos.length > 0
-                                ? command.exemplos.map((example) => (
-                                    <div
-                                      key={`${command.command}-table-example-${example}`}
-                                      className="flex items-center gap-1 rounded border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-2 py-0.5  bg-[color:var(--ts-surface-1)]"
-                                    >
-                                      <span>{example}</span>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-5 w-5 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
-                                        onClick={() => handleCopyExample(example)}
-                                        aria-label={`Copiar exemplo ${example}`}
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  ))
-                                : '—'}
-                            </div>
-                          </td>
+                              Comando
+                              {renderSortIcon("command")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("category")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Categoria
+                              {renderSortIcon("category")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("capacidades")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Capacidades
+                              {renderSortIcon("capacidades")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("momentoIdeal")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Momento ideal
+                              {renderSortIcon("momentoIdeal")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("exemploMomento")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Exemplo prático
+                              {renderSortIcon("exemploMomento")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("tipoSaida")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Tipo de saída
+                              {renderSortIcon("tipoSaida")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("tags")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Tags
+                              {renderSortIcon("tags")}
+                            </button>
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-left">
+                            <button
+                              type="button"
+                              onClick={() => handleSort("exemplos")}
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                            >
+                              Exemplos
+                              {renderSortIcon("exemplos")}
+                            </button>
+                          </th>
                         </tr>
-                      ))}
+                      </thead>
+                      <tbody className="divide-y divide-[color:var(--ts-surface-border)] text-[color:var(--ts-text-secondary)]">
+                        {filteredCommands.map((command) => (
+                          <tr
+                            key={`table-${command.command}`}
+                            className="hover:bg-[color:var(--ts-surface-hover)]"
+                            data-command-row
+                            data-command-id={command.command}
+                            data-command-category={command.category ?? ""}
+                            data-command-tags={(command.tags ?? []).join(",")}
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col gap-1">
+                                <code className="rounded bg-[color:var(--ts-surface-1)] px-2 py-1 text-xs font-semibold text-[color:var(--ts-text-secondary)]">
+                                  {command.command}
+                                </code>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                    onClick={() => handleCopyCommand(command)}
+                                    aria-label={`Copiar ${command.command}`}
+                                  >
+                                    <Copy className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                    onClick={() => handleOpenCommand(command)}
+                                    aria-label={`Visualizar ${command.command}`}
+                                  >
+                                    <Eye className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.category ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.capacidades ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.momentoIdeal ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.exemploMomento ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <span className="block text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.tipoSaida ?? "—"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <div
+                                className={`flex flex-wrap gap-1 text-[10px] uppercase tracking-wide ${mutedTextClass}`}
+                              >
+                                {(command.tags ?? []).map((tag) => (
+                                  <Badge
+                                    key={`${command.command}-table-tag-${tag}`}
+                                    variant="outline"
+                                    className={`text-[10px] font-medium ${filterBadgeClass}`}
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 align-top">
+                              <div className="flex flex-wrap gap-2 text-xs text-[color:var(--ts-text-secondary)]">
+                                {command.exemplos.length > 0
+                                  ? command.exemplos.map((example) => (
+                                      <div
+                                        key={`${command.command}-table-example-${example}`}
+                                        className="flex items-center gap-1 rounded border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-2 py-0.5  bg-[color:var(--ts-surface-1)]"
+                                      >
+                                        <span>{example}</span>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-5 w-5 text-[color:var(--ts-text-secondary)] hover:text-[color:var(--ts-text-primary)]"
+                                          onClick={() =>
+                                            handleCopyExample(example)
+                                          }
+                                          aria-label={`Copiar exemplo ${example}`}
+                                        >
+                                          <Copy className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    ))
+                                  : "—"}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>

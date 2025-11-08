@@ -1,11 +1,11 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '../ui/accordion';
-import { Page } from '../../data/navigation';
+} from "../ui/accordion";
+import { Page } from "../../data/navigation";
 
 export interface PageContentProps {
   page: Page;
@@ -50,7 +50,7 @@ export function PageContent({
               <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
                 <div className="font-medium">Falha ao carregar a página.</div>
                 <div className="text-xs opacity-80">
-                  {this.state.error?.message || 'Erro desconhecido'}
+                  {this.state.error?.message || "Erro desconhecido"}
                 </div>
               </div>
             </div>
@@ -74,7 +74,7 @@ export function PageContent({
               </div>
             }
           >
-            {typeof page.customContent === 'function'
+            {typeof page.customContent === "function"
               ? page.customContent()
               : page.customContent}
           </React.Suspense>

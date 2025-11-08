@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,34 +6,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../ui/dialog';
-import { Button } from '../../../ui/button';
-import { Input } from '../../../ui/input';
-import { Label } from '../../../ui/label';
-import { Textarea } from '../../../ui/textarea';
+} from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
+import { Input } from "../../../ui/input";
+import { Label } from "../../../ui/label";
+import { Textarea } from "../../../ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../ui/select';
+} from "../../../ui/select";
 import {
   PRIORITY_CONFIG,
   STATUS_CONFIG,
-} from '../constants/workspace.constants';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
+} from "../constants/workspace.constants";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
 import type {
   Item,
   ItemFormWithStatus,
   ItemCategory,
   ItemPriority,
   ItemStatus,
-} from '../types/workspace.types';
+} from "../types/workspace.types";
 import {
   categoriesService,
   type Category,
-} from '../../../../services/categoriesService';
+} from "../../../../services/categoriesService";
 
 const itemToFormState = (item: Item): ItemFormWithStatus => ({
   title: item.title,
@@ -41,7 +41,7 @@ const itemToFormState = (item: Item): ItemFormWithStatus => ({
   category: item.category,
   priority: item.priority,
   status: item.status,
-  tags: item.tags.join(', '),
+  tags: item.tags.join(", "),
 });
 
 interface EditItemDialogProps {
@@ -80,7 +80,7 @@ export function EditItemDialog({
     item.priority,
     item.status,
     item.createdAt,
-    item.tags.join(','),
+    item.tags.join(","),
   ]);
 
   // Load categories from API
@@ -92,11 +92,11 @@ export function EditItemDialog({
         setLoadingCategories(true);
         const data = await categoriesService.getCategories({
           active_only: true,
-          order_by: 'display_order',
+          order_by: "display_order",
         });
         setCategories(data);
       } catch (error) {
-        console.error('Failed to load categories:', error);
+        console.error("Failed to load categories:", error);
         setCategories([]);
       } finally {
         setLoadingCategories(false);
@@ -113,7 +113,7 @@ export function EditItemDialog({
 
     if (usingFallbackData) {
       setError(
-        'Não é possível editar dados de exemplo. Inicie o servidor da API para editar itens reais.',
+        "Não é possível editar dados de exemplo. Inicie o servidor da API para editar itens reais.",
       );
       setSubmitting(false);
       return;
@@ -130,9 +130,9 @@ export function EditItemDialog({
       });
       onOpenChange(false);
     } catch (err) {
-      console.error('Failed to update item:', err);
+      console.error("Failed to update item:", err);
       setError(
-        'Erro ao atualizar o item. Verifique a consola para mais detalhes.',
+        "Erro ao atualizar o item. Verifique a consola para mais detalhes.",
       );
     } finally {
       setSubmitting(false);
@@ -193,7 +193,7 @@ export function EditItemDialog({
                 <SelectTrigger id="edit-category">
                   <SelectValue
                     placeholder={
-                      loadingCategories ? 'Carregando...' : 'Selecione'
+                      loadingCategories ? "Carregando..." : "Selecione"
                     }
                   />
                 </SelectTrigger>
@@ -288,7 +288,7 @@ export function EditItemDialog({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Salvando...' : 'Salvar Alterações'}
+              {submitting ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </DialogFooter>
         </form>

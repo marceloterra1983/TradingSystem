@@ -5,15 +5,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../../ui/dialog';
-import { Button } from '../../../ui/button';
-import { cn } from '../../../../lib/utils';
+} from "../../../ui/dialog";
+import { Button } from "../../../ui/button";
+import { cn } from "../../../../lib/utils";
 import {
   PRIORITY_CONFIG,
   STATUS_CONFIG,
-} from '../constants/workspace.constants';
-import type { Item } from '../types/workspace.types';
-import { Tag, Folder } from 'lucide-react';
+} from "../constants/workspace.constants";
+import type { Item } from "../types/workspace.types";
+import { Tag, Folder } from "lucide-react";
 
 interface ViewItemDialogProps {
   item: Item;
@@ -39,12 +39,12 @@ export function ViewItemDialog({
             <span className="break-words">{item.title}</span>
           </DialogTitle>
           <DialogDescription>
-            Criada em{' '}
-            {new Date(item.createdAt).toLocaleDateString('pt-BR', {
-              timeZone: 'America/Sao_Paulo',
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
+            Criada em{" "}
+            {new Date(item.createdAt).toLocaleDateString("pt-BR", {
+              timeZone: "America/Sao_Paulo",
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
             })}
           </DialogDescription>
         </DialogHeader>
@@ -84,7 +84,7 @@ export function ViewItemDialog({
               </h4>
               <div
                 className={cn(
-                  'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium',
+                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium",
                   PRIORITY_CONFIG[item.priority].color,
                 )}
               >
@@ -100,7 +100,7 @@ export function ViewItemDialog({
               </h4>
               <div
                 className={cn(
-                  'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium',
+                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium",
                   STATUS_CONFIG[item.status].color,
                 )}
               >
@@ -137,9 +137,9 @@ export function ViewItemDialog({
                 <span className="font-semibold">ID:</span> #{item.id}
               </div>
               <div>
-                <span className="font-semibold">Data de criação:</span>{' '}
-                {new Date(item.createdAt).toLocaleString('pt-BR', {
-                  timeZone: 'America/Sao_Paulo',
+                <span className="font-semibold">Data de criação:</span>{" "}
+                {new Date(item.createdAt).toLocaleString("pt-BR", {
+                  timeZone: "America/Sao_Paulo",
                 })}
               </div>
             </div>

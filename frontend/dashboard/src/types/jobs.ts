@@ -1,13 +1,13 @@
 export type JobStatus =
-  | 'queued'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'pending'
+  | "queued"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "pending"
   | string;
 
-export type JobType = 'scrape' | 'analysis' | 'sync' | 'notification' | string;
+export type JobType = "scrape" | "analysis" | "sync" | "notification" | string;
 
 export interface Job {
   id: string;

@@ -14,6 +14,7 @@ function formatRange(ranges, stack) {
 }
 
 export async function generateDocs(registry, { targetPath = DEFAULTS.docsPath, now = new Date() } = {}) {
+  const reviewDate = now.toISOString().slice(0, 10);
   const lines = [
     '---',
     'title: Port Registry & Services Matrix',
@@ -23,6 +24,8 @@ export async function generateDocs(registry, { targetPath = DEFAULTS.docsPath, n
     '  - networking',
     '  - governance',
     "slug: /tools/ports-services/overview",
+    'owner: Platform Architecture',
+    `lastReviewed: '${reviewDate}'`,
     '---',
     '',
     '> **⚠️ Arquivo gerado automaticamente. Não editar manualmente.**',

@@ -17,12 +17,12 @@ const config = {
   organizationName: 'marceloterra1983',
   projectName: 'TradingSystem',
   markdown: {
-    mermaid: true,
+    mermaid: process.env.NODE_ENV === 'production',
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: process.env.NODE_ENV === 'production' ? ['@docusaurus/theme-mermaid'] : [],
   presets: [
     [
       'classic',

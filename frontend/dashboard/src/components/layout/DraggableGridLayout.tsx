@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -10,15 +10,15 @@ import {
   closestCenter,
   DragOverEvent,
   useDroppable,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { cn } from '../../lib/utils';
-import type { ColumnCount } from '../../hooks/useCustomLayout';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "../../lib/utils";
+import type { ColumnCount } from "../../hooks/useCustomLayout";
 
 /**
  * Draggable Grid Layout Component
@@ -146,7 +146,7 @@ export function DraggableGridLayout({
 
     const sourceItems = columnGroups[sourceColumnIndex] ?? [];
     const sourceIndex =
-      typeof active.data.current?.sortable?.index === 'number'
+      typeof active.data.current?.sortable?.index === "number"
         ? active.data.current?.sortable?.index
         : sourceItems.findIndex((item) => item.id === activeId);
 
@@ -160,7 +160,7 @@ export function DraggableGridLayout({
 
     if (isSameColumn) {
       const overIndex =
-        typeof over.data.current?.sortable?.index === 'number'
+        typeof over.data.current?.sortable?.index === "number"
           ? over.data.current?.sortable?.index
           : sourceItems.length - 1;
 
@@ -170,7 +170,7 @@ export function DraggableGridLayout({
     } else {
       const targetItems = columnGroups[targetColumnIndex] ?? [];
       const overIndex =
-        typeof over.data.current?.sortable?.index === 'number'
+        typeof over.data.current?.sortable?.index === "number"
           ? over.data.current?.sortable?.index
           : targetItems.length;
 
@@ -201,11 +201,11 @@ export function DraggableGridLayout({
     >
       <div
         className={cn(
-          'grid gap-1',
-          columns === 1 && 'grid-cols-1',
-          columns === 2 && 'grid-cols-1 lg:grid-cols-2',
-          columns === 3 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-          columns === 4 && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+          "grid gap-1",
+          columns === 1 && "grid-cols-1",
+          columns === 2 && "grid-cols-1 lg:grid-cols-2",
+          columns === 3 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+          columns === 4 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
         )}
       >
         {Array.from({ length: columns }, (_, columnIndex) => (
@@ -269,13 +269,13 @@ function DroppableColumn({
         ref={setNodeRef}
         data-column={columnIndex}
         className={cn(
-          'min-h-[400px] rounded-lg transition-all p-3 relative',
-          isDragging && 'border-2 border-dashed',
+          "min-h-[400px] rounded-lg transition-all p-3 relative",
+          isDragging && "border-2 border-dashed",
           isOver
-            ? 'border-cyan-500 bg-cyan-50/50 dark:border-cyan-400 dark:bg-cyan-950/20 scale-[1.02]'
+            ? "border-cyan-500 bg-cyan-50/50 dark:border-cyan-400 dark:bg-cyan-950/20 scale-[1.02]"
             : isDragging
-              ? 'border-gray-300 dark:border-gray-600 bg-gray-50/30 dark:bg-gray-800/30'
-              : 'border-transparent',
+              ? "border-gray-300 dark:border-gray-600 bg-gray-50/30 dark:bg-gray-800/30"
+              : "border-transparent",
         )}
       >
         {/* Column Number Indicator */}
@@ -341,7 +341,7 @@ function SortableItem({
     id,
     transition: {
       duration: 200,
-      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
     },
   });
 
@@ -355,7 +355,7 @@ function SortableItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn('relative group', isOver && !isDragging && 'scale-[1.02]')}
+      className={cn("relative group", isOver && !isDragging && "scale-[1.02]")}
     >
       {/* Drag Handle - Left side vertical bar */}
       <div
@@ -363,12 +363,12 @@ function SortableItem({
         {...attributes}
         {...listeners}
         className={cn(
-          'absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg',
-          'bg-gray-300 dark:bg-gray-600',
-          'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
-          'cursor-grab active:cursor-grabbing',
-          'hover:bg-cyan-500 hover:w-2',
-          'z-40',
+          "absolute left-0 top-0 bottom-0 w-1.5 rounded-l-lg",
+          "bg-gray-300 dark:bg-gray-600",
+          "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+          "cursor-grab active:cursor-grabbing",
+          "hover:bg-cyan-500 hover:w-2",
+          "z-40",
         )}
         title="Arrastar para mover"
       />
@@ -383,12 +383,12 @@ function SortableItem({
       {/* Component Content */}
       <div
         className={cn(
-          'transition-all duration-200',
+          "transition-all duration-200",
           isDragging &&
-            'ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-gray-900 shadow-2xl',
+            "ring-2 ring-cyan-500 ring-offset-2 dark:ring-offset-gray-900 shadow-2xl",
           isOver &&
             !isDragging &&
-            'ring-2 ring-cyan-300 ring-offset-1 dark:ring-cyan-600',
+            "ring-2 ring-cyan-300 ring-offset-1 dark:ring-cyan-600",
         )}
       >
         {children}

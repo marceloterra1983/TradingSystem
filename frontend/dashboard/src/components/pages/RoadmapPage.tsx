@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Calendar } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Calendar } from "lucide-react";
 
 export function RoadmapPage() {
   const sections = [
     {
-      id: 'roadmap-timeline',
+      id: "roadmap-timeline",
       content: (
         <PlaceholderSection
           cardId="roadmap-timeline"

@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../../ui/collapsible-card';
+} from "../../ui/collapsible-card";
 import {
   MessageSquare,
   Eye,
@@ -14,12 +14,12 @@ import {
   Image as ImageIcon,
   RefreshCw,
   Search,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { MessageDetailModal } from './MessageDetailModal';
-import { normalizeTimestamp } from '../../../utils/timestampUtils';
-import { formatInTimeZone } from 'date-fns-tz';
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { MessageDetailModal } from "./MessageDetailModal";
+import { normalizeTimestamp } from "../../../utils/timestampUtils";
+import { formatInTimeZone } from "date-fns-tz";
 
 export interface ForwardedMessage {
   id: number;
@@ -33,14 +33,14 @@ export interface ForwardedMessage {
   image_height?: number;
   forwarded_at: string;
   destination_channel_id?: number;
-  forward_method?: 'forward' | 'copy';
+  forward_method?: "forward" | "copy";
 }
 
 async function fetchForwardedMessages(
   limit: number,
 ): Promise<ForwardedMessage[]> {
   // ✅ Using authenticated helper
-  const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
+  const { tpCapitalApi } = await import("../../../utils/tpCapitalApi");
   const response = await tpCapitalApi.get(`/forwarded-messages?limit=${limit}`);
 
   if (!response.ok) {
@@ -54,9 +54,9 @@ export function ForwardedMessagesTable() {
   const [limit, setLimit] = useState(50);
   const [selectedMessage, setSelectedMessage] =
     useState<ForwardedMessage | null>(null);
-  const [channelFilter, setChannelFilter] = useState('all');
-  const [mediaFilter, setMediaFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [channelFilter, setChannelFilter] = useState("all");
+  const [mediaFilter, setMediaFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     data: messages = [],
@@ -64,7 +64,7 @@ export function ForwardedMessagesTable() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['forwarded-messages', limit],
+    queryKey: ["forwarded-messages", limit],
     queryFn: () => fetchForwardedMessages(limit),
     refetchInterval: 60000, // Auto-refresh a cada 60s (antes: 15s - causa rate limit)
     staleTime: 30000,
@@ -84,20 +84,20 @@ export function ForwardedMessagesTable() {
   const filteredMessages = useMemo(() => {
     return messages.filter((msg) => {
       const matchesChannel =
-        channelFilter === 'all' ||
+        channelFilter === "all" ||
         (msg.source_channel_name || `Canal ${msg.source_channel_id}`) ===
           channelFilter;
 
       const matchesMedia =
-        mediaFilter === 'all' ||
-        (mediaFilter === 'with-media' && msg.image_url) ||
-        (mediaFilter === 'no-media' && !msg.image_url);
+        mediaFilter === "all" ||
+        (mediaFilter === "with-media" && msg.image_url) ||
+        (mediaFilter === "no-media" && !msg.image_url);
 
       const matchesSearch = searchTerm
-        ? (msg.message_text || '')
+        ? (msg.message_text || "")
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          (msg.source_channel_name || '')
+          (msg.source_channel_name || "")
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
         : true;
@@ -108,18 +108,18 @@ export function ForwardedMessagesTable() {
 
   const formatDate = (dateStr: string | number) => {
     const normalized = normalizeTimestamp(dateStr);
-    if (!normalized) return '–';
+    if (!normalized) return "–";
 
     try {
       const date = new Date(normalized);
-      return formatInTimeZone(date, 'America/Sao_Paulo', 'dd/MM/yy, HH:mm');
+      return formatInTimeZone(date, "America/Sao_Paulo", "dd/MM/yy, HH:mm");
     } catch {
-      return '–';
+      return "–";
     }
   };
 
   const truncateText = (text: string, maxLength: number) => {
-    if (!text) return '';
+    if (!text) return "";
     return text.length > maxLength
       ? `${text.substring(0, maxLength)}...`
       : text;
@@ -136,7 +136,7 @@ export function ForwardedMessagesTable() {
                 Mensagens Encaminhadas
               </CollapsibleCardTitle>
               <CollapsibleCardDescription>
-                Exibindo {filteredMessages.length} de {messages.length}{' '}
+                Exibindo {filteredMessages.length} de {messages.length}{" "}
                 mensagens
               </CollapsibleCardDescription>
             </div>
@@ -206,16 +206,16 @@ export function ForwardedMessagesTable() {
             </select>
 
             {/* Botão limpar filtros */}
-            {(channelFilter !== 'all' ||
-              mediaFilter !== 'all' ||
+            {(channelFilter !== "all" ||
+              mediaFilter !== "all" ||
               searchTerm) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setChannelFilter('all');
-                  setMediaFilter('all');
-                  setSearchTerm('');
+                  setChannelFilter("all");
+                  setMediaFilter("all");
+                  setSearchTerm("");
                 }}
                 className="h-9"
               >
@@ -238,7 +238,7 @@ export function ForwardedMessagesTable() {
                 <AlertCircle className="h-6 w-6" />
                 <p className="text-sm">Erro ao carregar mensagens</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  {error instanceof Error ? error.message : 'Erro desconhecido'}
+                  {error instanceof Error ? error.message : "Erro desconhecido"}
                 </p>
               </div>
             </div>
@@ -253,9 +253,9 @@ export function ForwardedMessagesTable() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setChannelFilter('all');
-                    setMediaFilter('all');
-                    setSearchTerm('');
+                    setChannelFilter("all");
+                    setMediaFilter("all");
+                    setSearchTerm("");
                   }}
                   className="mt-2"
                 >
@@ -325,7 +325,7 @@ export function ForwardedMessagesTable() {
                       </td>
                       <td className="px-4 py-3 max-w-md">
                         <p className="text-gray-700 dark:text-gray-300 truncate">
-                          {truncateText(message.message_text || '', 80)}
+                          {truncateText(message.message_text || "", 80)}
                         </p>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -340,14 +340,14 @@ export function ForwardedMessagesTable() {
                       <td className="px-4 py-3 text-center">
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                            message.forward_method === 'copy'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
-                              : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                            message.forward_method === "copy"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
                           }`}
                         >
-                          {message.forward_method === 'copy'
-                            ? 'Cópia'
-                            : 'Encaminhar'}
+                          {message.forward_method === "copy"
+                            ? "Cópia"
+                            : "Encaminhar"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -366,8 +366,8 @@ export function ForwardedMessagesTable() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const destLink = `https://t.me/c/${String(message.destination_channel_id).replace('-100', '')}`;
-                            window.open(destLink, '_blank');
+                            const destLink = `https://t.me/c/${String(message.destination_channel_id).replace("-100", "")}`;
+                            window.open(destLink, "_blank");
                           }}
                           className="h-7 px-2"
                           title="Abrir canal de destino no Telegram"

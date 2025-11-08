@@ -7,8 +7,8 @@
  * @module components/pages/CollectionFormDialog
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronDown, Info } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from "react";
+import { ChevronDown, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,26 +16,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { Badge } from '../ui/badge';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
+import { Badge } from "../ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '../ui/collapsible';
-import { EmbeddingModelSelector } from './EmbeddingModelSelector';
-import { DirectorySelector } from './DirectorySelector';
+} from "../ui/collapsible";
+import { EmbeddingModelSelector } from "./EmbeddingModelSelector";
+import { DirectorySelector } from "./DirectorySelector";
 import type {
   Collection,
   EmbeddingModel,
   CollectionDialogMode,
   CollectionFormState,
   FormErrors,
-} from '../../types/collections';
+} from "../../types/collections";
 // Quick Win P1-3: Validation integrada!
 
 /**
@@ -55,13 +55,13 @@ interface CollectionFormDialogProps {
  * Default form values
  */
 const DEFAULT_FORM_STATE: CollectionFormState = {
-  name: '',
-  description: '',
-  directory: '/data/docs/content',
-  embeddingModel: 'nomic-embed-text',
+  name: "",
+  description: "",
+  directory: "/data/docs/content",
+  embeddingModel: "nomic-embed-text",
   chunkSize: 512,
   chunkOverlap: 50,
-  fileTypes: ['md', 'mdx'],
+  fileTypes: ["md", "mdx"],
   recursive: true,
   enabled: true,
   autoUpdate: true,
@@ -78,41 +78,41 @@ const validateForm = (
 
   // Name validation
   if (!state.name.trim()) {
-    errors.name = 'Nome é obrigatório';
+    errors.name = "Nome é obrigatório";
   } else if (!/^[a-z0-9_]+$/.test(state.name)) {
     errors.name =
-      'Nome deve conter apenas letras minúsculas, números e underscores';
+      "Nome deve conter apenas letras minúsculas, números e underscores";
   } else if (state.name.length > 100) {
-    errors.name = 'Nome muito longo (máximo 100 caracteres)';
+    errors.name = "Nome muito longo (máximo 100 caracteres)";
   }
 
   // Description validation
   if (!state.description.trim()) {
-    errors.description = 'Descrição é obrigatória';
+    errors.description = "Descrição é obrigatória";
   } else if (state.description.length > 500) {
-    errors.description = 'Descrição muito longa (máximo 500 caracteres)';
+    errors.description = "Descrição muito longa (máximo 500 caracteres)";
   }
 
   // Directory validation
   if (!state.directory.trim()) {
-    errors.directory = 'Diretório é obrigatório';
-  } else if (!state.directory.startsWith('/')) {
-    errors.directory = 'Diretório deve ser um caminho absoluto (iniciar com /)';
+    errors.directory = "Diretório é obrigatório";
+  } else if (!state.directory.startsWith("/")) {
+    errors.directory = "Diretório deve ser um caminho absoluto (iniciar com /)";
   }
 
   // Chunk size validation
   if (state.chunkSize < 100 || state.chunkSize > 2048) {
-    errors.chunkSize = 'Chunk size deve estar entre 100 e 2048';
+    errors.chunkSize = "Chunk size deve estar entre 100 e 2048";
   }
 
   // Chunk overlap validation
   if (state.chunkOverlap < 0 || state.chunkOverlap > 500) {
-    errors.chunkOverlap = 'Chunk overlap deve estar entre 0 e 500';
+    errors.chunkOverlap = "Chunk overlap deve estar entre 0 e 500";
   }
 
   // File types validation
   if (state.fileTypes.length === 0) {
-    errors.fileTypes = 'Pelo menos um tipo de arquivo é obrigatório';
+    errors.fileTypes = "Pelo menos um tipo de arquivo é obrigatório";
   }
 
   return errors;
@@ -145,7 +145,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
     if (open) {
       // console.log('🔍 [CollectionFormDialog] Initializing form:', { mode });
 
-      if (mode === 'edit' && collection) {
+      if (mode === "edit" && collection) {
         setFormState({
           name: collection.name,
           description: collection.description,
@@ -158,7 +158,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
           enabled: collection.enabled,
           autoUpdate: collection.autoUpdate,
         });
-      } else if (mode === 'clone' && collection) {
+      } else if (mode === "clone" && collection) {
         setFormState({
           ...collection,
           name: `${collection.name}_clone`,
@@ -215,12 +215,12 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
   /**
    * Handle file types input with better UX
    */
-  const [fileTypesInput, setFileTypesInput] = React.useState('');
+  const [fileTypesInput, setFileTypesInput] = React.useState("");
 
   // Sync fileTypesInput when form state changes externally
   React.useEffect(() => {
     if (open) {
-      setFileTypesInput(formState.fileTypes.join(', '));
+      setFileTypesInput(formState.fileTypes.join(", "));
     }
   }, [open, formState.fileTypes.length]);
 
@@ -228,15 +228,15 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
     setFileTypesInput(value);
 
     // Only process if user typed comma, space, or semicolon
-    if (value.endsWith(',') || value.endsWith(' ') || value.endsWith(';')) {
+    if (value.endsWith(",") || value.endsWith(" ") || value.endsWith(";")) {
       const types = value
         .split(/[,\s;]+/)
-        .map((t) => t.trim().replace(/^\./, '')) // Remove leading dots
+        .map((t) => t.trim().replace(/^\./, "")) // Remove leading dots
         .filter((t) => t.length > 0);
 
       if (types.length > 0) {
-        handleChange('fileTypes', types);
-        setFileTypesInput(types.join(', ') + ', '); // Keep comma for next entry
+        handleChange("fileTypes", types);
+        setFileTypesInput(types.join(", ") + ", "); // Keep comma for next entry
       }
     }
   };
@@ -245,12 +245,12 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
     // Process remaining text on blur
     const types = fileTypesInput
       .split(/[,\s;]+/)
-      .map((t) => t.trim().replace(/^\./, ''))
+      .map((t) => t.trim().replace(/^\./, ""))
       .filter((t) => t.length > 0);
 
     if (types.length > 0) {
-      handleChange('fileTypes', types);
-      setFileTypesInput(types.join(', '));
+      handleChange("fileTypes", types);
+      setFileTypesInput(types.join(", "));
     }
   };
 
@@ -258,11 +258,10 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
    * Handle submit
    */
   const handleSubmit = async () => {
-
     // Validate form
     const validationErrors = validateForm(formState, mode);
     if (Object.keys(validationErrors).length > 0) {
-      console.error('❌ Validation errors:', validationErrors);
+      console.error("❌ Validation errors:", validationErrors);
       setErrors(validationErrors);
       return;
     }
@@ -275,16 +274,16 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
 
       // Add timeout to prevent infinite loading
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request timeout (60s)')), 60000),
+        setTimeout(() => reject(new Error("Request timeout (60s)")), 60000),
       );
 
       await Promise.race([onSubmit(formState), timeoutPromise]);
 
       onClose();
     } catch (error) {
-      console.error('❌ Form submission error:', error);
+      console.error("❌ Form submission error:", error);
       alert(
-        `Erro ao criar coleção: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Erro ao criar coleção: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       // Error handling is done by parent component
     } finally {
@@ -298,14 +297,14 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
    */
   const getTitle = (): string => {
     switch (mode) {
-      case 'create':
-        return 'Nova Coleção';
-      case 'edit':
-        return 'Editar Coleção';
-      case 'clone':
-        return 'Clonar Coleção';
+      case "create":
+        return "Nova Coleção";
+      case "edit":
+        return "Editar Coleção";
+      case "clone":
+        return "Clonar Coleção";
       default:
-        return 'Coleção';
+        return "Coleção";
     }
   };
 
@@ -314,14 +313,14 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
    */
   const getDescription = (): string => {
     switch (mode) {
-      case 'create':
-        return 'Crie uma nova coleção para indexar documentos.';
-      case 'edit':
-        return 'Edite as configurações da coleção. Alterar o modelo requer re-indexação.';
-      case 'clone':
-        return 'Clone esta coleção com um novo nome.';
+      case "create":
+        return "Crie uma nova coleção para indexar documentos.";
+      case "edit":
+        return "Edite as configurações da coleção. Alterar o modelo requer re-indexação.";
+      case "clone":
+        return "Clone esta coleção com um novo nome.";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -331,7 +330,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getTitle()}
-            {mode === 'edit' && collection && (
+            {mode === "edit" && collection && (
               <Badge variant="outline" className="font-normal">
                 {collection.name}
               </Badge>
@@ -349,15 +348,15 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
             <Input
               id="name"
               value={formState.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value)}
               placeholder="ex: documentation"
-              disabled={mode === 'edit' || isSubmitting}
-              className={errors.name ? 'border-red-500' : ''}
+              disabled={mode === "edit" || isSubmitting}
+              className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
               <p className="text-sm text-red-500">{errors.name}</p>
             )}
-            {mode === 'edit' && (
+            {mode === "edit" && (
               <p className="text-xs text-slate-500">
                 <Info className="h-3 w-3 inline mr-1" />
                 Nome não pode ser alterado após criação
@@ -373,10 +372,10 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
             <Input
               id="description"
               value={formState.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+              onChange={(e) => handleChange("description", e.target.value)}
               placeholder="ex: Documentação geral do projeto"
               disabled={isSubmitting}
-              className={errors.description ? 'border-red-500' : ''}
+              className={errors.description ? "border-red-500" : ""}
             />
             {errors.description && (
               <p className="text-sm text-red-500">{errors.description}</p>
@@ -391,10 +390,10 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
             <EmbeddingModelSelector
               models={models}
               value={formState.embeddingModel}
-              onChange={(value) => handleChange('embeddingModel', value as any)}
-              disabled={mode === 'edit' || isSubmitting}
+              onChange={(value) => handleChange("embeddingModel", value as any)}
+              disabled={mode === "edit" || isSubmitting}
             />
-            {mode === 'edit' && (
+            {mode === "edit" && (
               <p className="text-xs text-slate-500">
                 <Info className="h-3 w-3 inline mr-1" />
                 Modelo não pode ser alterado após criação da coleção
@@ -409,10 +408,10 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
             </Label>
             <DirectorySelector
               value={formState.directory}
-              onChange={(path) => handleChange('directory', path)}
-              disabled={mode === 'edit'}
+              onChange={(path) => handleChange("directory", path)}
+              disabled={mode === "edit"}
             />
-            {mode === 'edit' && (
+            {mode === "edit" && (
               <p className="text-xs text-slate-500">
                 <Info className="h-3 w-3 inline mr-1" />
                 Diretório de origem não pode ser alterado após criação da
@@ -431,7 +430,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                 <span>Configurações Avançadas</span>
                 <ChevronDown
                   className={`h-4 w-4 transition-transform ${
-                    isAdvancedOpen ? 'transform rotate-180' : ''
+                    isAdvancedOpen ? "transform rotate-180" : ""
                   }`}
                 />
               </Button>
@@ -445,12 +444,12 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   type="number"
                   value={formState.chunkSize}
                   onChange={(e) =>
-                    handleChange('chunkSize', parseInt(e.target.value))
+                    handleChange("chunkSize", parseInt(e.target.value))
                   }
                   min={100}
                   max={2048}
                   disabled={isSubmitting}
-                  className={errors.chunkSize ? 'border-red-500' : ''}
+                  className={errors.chunkSize ? "border-red-500" : ""}
                 />
                 {errors.chunkSize && (
                   <p className="text-sm text-red-500">{errors.chunkSize}</p>
@@ -465,12 +464,12 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   type="number"
                   value={formState.chunkOverlap}
                   onChange={(e) =>
-                    handleChange('chunkOverlap', parseInt(e.target.value))
+                    handleChange("chunkOverlap", parseInt(e.target.value))
                   }
                   min={0}
                   max={500}
                   disabled={isSubmitting}
-                  className={errors.chunkOverlap ? 'border-red-500' : ''}
+                  className={errors.chunkOverlap ? "border-red-500" : ""}
                 />
                 {errors.chunkOverlap && (
                   <p className="text-sm text-red-500">{errors.chunkOverlap}</p>
@@ -492,7 +491,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   onBlur={handleFileTypesBlur}
                   placeholder="md, mdx, txt, json"
                   disabled={isSubmitting}
-                  className={errors.fileTypes ? 'border-red-500' : ''}
+                  className={errors.fileTypes ? "border-red-500" : ""}
                 />
                 {formState.fileTypes.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -524,7 +523,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   id="recursive"
                   checked={formState.recursive}
                   onCheckedChange={(checked) =>
-                    handleChange('recursive', checked)
+                    handleChange("recursive", checked)
                   }
                   disabled={isSubmitting}
                 />
@@ -539,7 +538,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   id="enabled"
                   checked={formState.enabled}
                   onCheckedChange={(checked) =>
-                    handleChange('enabled', checked)
+                    handleChange("enabled", checked)
                   }
                   disabled={isSubmitting}
                 />
@@ -554,7 +553,7 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
                   id="autoUpdate"
                   checked={formState.autoUpdate}
                   onCheckedChange={(checked) =>
-                    handleChange('autoUpdate', checked)
+                    handleChange("autoUpdate", checked)
                   }
                   disabled={isSubmitting}
                 />
@@ -574,10 +573,10 @@ export const CollectionFormDialog: React.FC<CollectionFormDialogProps> = ({
             {isSubmitting || isLoading ? (
               <>
                 <span className="animate-spin mr-2">⏳</span>
-                {mode === 'edit' ? 'Salvando...' : 'Criando...'}
+                {mode === "edit" ? "Salvando..." : "Criando..."}
               </>
             ) : (
-              <>{mode === 'edit' ? 'Salvar' : 'Criar'}</>
+              <>{mode === "edit" ? "Salvar" : "Criar"}</>
             )}
           </Button>
         </DialogFooter>

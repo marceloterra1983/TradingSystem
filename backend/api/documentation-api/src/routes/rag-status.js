@@ -3,9 +3,9 @@
  * Uses CollectionService for business logic
  */
 
-import express from 'express';
-import { CollectionService } from '../services/CollectionService.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
+import express from "express";
+import { CollectionService } from "../services/CollectionService.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
@@ -27,30 +27,37 @@ const collectionService = new CollectionService({
  * Query params:
  * - collection: Collection name (optional, defaults to env variable)
  */
-router.get('/status', asyncHandler(async (req, res) => {
-  const collection = (req.query.collection || req.query.col || '').toString().trim() || null;
+router.get(
+  "/status",
+  asyncHandler(async (req, res) => {
+    const collection =
+      (req.query.collection || req.query.col || "").toString().trim() || null;
 
-  const status = await collectionService.getCollectionStatus(collection);
-  res.json(status);
-}));
+    const status = await collectionService.getCollectionStatus(collection);
+    res.json(status);
+  }),
+);
 
 /**
  * GET /api/v1/rag/status/health
  * Lightweight health probe used by container orchestration
  */
-router.get('/status/health', asyncHandler(async (_req, res) => {
-  const status = await collectionService.getCollectionStatus(null);
-  res.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    services: status?.services ?? {},
-    qdrant: {
-      ok: status?.qdrant?.ok ?? false,
-      collection: status?.qdrant?.collection ?? null,
-      count: status?.qdrant?.count ?? null,
-    },
-  });
-}));
+router.get(
+  "/status/health",
+  asyncHandler(async (_req, res) => {
+    const status = await collectionService.getCollectionStatus(null);
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      services: status?.services ?? {},
+      qdrant: {
+        ok: status?.qdrant?.ok ?? false,
+        collection: status?.qdrant?.collection ?? null,
+        count: status?.qdrant?.count ?? null,
+      },
+    });
+  }),
+);
 
 /**
  * POST /api/v1/rag/ingest
@@ -63,30 +70,34 @@ router.get('/status/health', asyncHandler(async (_req, res) => {
  * - chunk_overlap: Chunk overlap (optional)
  * - directory_path: Directory to ingest (optional)
  */
-router.post('/ingest', asyncHandler(async (req, res) => {
-  const {
-    collection_name,
-    collection,
-    collectionName,
-    embedding_model,
-    chunk_size,
-    chunk_overlap,
-    directory_path,
-  } = req.body || {};
+router.post(
+  "/ingest",
+  asyncHandler(async (req, res) => {
+    const {
+      collection_name,
+      collection,
+      collectionName,
+      embedding_model,
+      chunk_size,
+      chunk_overlap,
+      directory_path,
+    } = req.body || {};
 
-  // Normalize collection name from various possible field names
-  const normalizedCollectionName = collection_name || collection || collectionName || null;
+    // Normalize collection name from various possible field names
+    const normalizedCollectionName =
+      collection_name || collection || collectionName || null;
 
-  const result = await collectionService.ingestDocuments({
-    collectionName: normalizedCollectionName,
-    embeddingModel: embedding_model,
-    chunkSize: chunk_size,
-    chunkOverlap: chunk_overlap,
-    directoryPath: directory_path,
-  });
+    const result = await collectionService.ingestDocuments({
+      collectionName: normalizedCollectionName,
+      embeddingModel: embedding_model,
+      chunkSize: chunk_size,
+      chunkOverlap: chunk_overlap,
+      directoryPath: directory_path,
+    });
 
-  res.json(result);
-}));
+    res.json(result);
+  }),
+);
 
 /**
  * POST /api/v1/rag/clean-orphans
@@ -95,26 +106,27 @@ router.post('/ingest', asyncHandler(async (req, res) => {
  * Body/Query:
  * - collection: Collection name (optional)
  */
-router.post('/clean-orphans', asyncHandler(async (req, res) => {
-  const collection =
-    req.body?.collection ||
-    req.query?.collection ||
-    null;
+router.post(
+  "/clean-orphans",
+  asyncHandler(async (req, res) => {
+    const collection = req.body?.collection || req.query?.collection || null;
 
-  const result = await collectionService.cleanOrphanChunks(collection);
+    const result = await collectionService.cleanOrphanChunks(collection);
 
-  const message = result.orphansDeleted > 0
-    ? `${result.orphansDeleted} chunks órfãos removidos com sucesso.`
-    : 'Nenhum chunk órfão encontrado.';
+    const message =
+      result.orphansDeleted > 0
+        ? `${result.orphansDeleted} chunks órfãos removidos com sucesso.`
+        : "Nenhum chunk órfão encontrado.";
 
-  res.json({
-    success: result.success,
-    message,
-    orphansFound: result.orphansFound,
-    orphansDeleted: result.orphansDeleted,
-    collection,
-  });
-}));
+    res.json({
+      success: result.success,
+      message,
+      orphansFound: result.orphansFound,
+      orphansDeleted: result.orphansDeleted,
+      collection,
+    });
+  }),
+);
 
 /**
  * DELETE /api/v1/rag/collection/:collection
@@ -123,28 +135,34 @@ router.post('/clean-orphans', asyncHandler(async (req, res) => {
  * Params:
  * - collection: Collection name
  */
-router.delete('/collection/:collection', asyncHandler(async (req, res) => {
-  const collection = req.params.collection;
+router.delete(
+  "/collection/:collection",
+  asyncHandler(async (req, res) => {
+    const collection = req.params.collection;
 
-  if (!collection || collection.trim().length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: 'Collection name is required',
-    });
-  }
+    if (!collection || collection.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Collection name is required",
+      });
+    }
 
-  const result = await collectionService.deleteCollection(collection);
-  res.json(result);
-}));
+    const result = await collectionService.deleteCollection(collection);
+    res.json(result);
+  }),
+);
 
 /**
  * GET /api/v1/rag/collections
  * List all available collections
  */
-router.get('/collections', asyncHandler(async (_req, res) => {
-  const result = await collectionService.listCollections();
-  res.json(result);
-}));
+router.get(
+  "/collections",
+  asyncHandler(async (_req, res) => {
+    const result = await collectionService.listCollections();
+    res.json(result);
+  }),
+);
 
 /**
  * POST /api/v1/rag/cache/invalidate
@@ -153,17 +171,20 @@ router.get('/collections', asyncHandler(async (_req, res) => {
  * Body:
  * - collection: Collection name (optional, invalidates all if not provided)
  */
-router.post('/cache/invalidate', asyncHandler(async (req, res) => {
-  const collection = req.body?.collection || null;
+router.post(
+  "/cache/invalidate",
+  asyncHandler(async (req, res) => {
+    const collection = req.body?.collection || null;
 
-  collectionService.invalidateCache(collection);
+    collectionService.invalidateCache(collection);
 
-  res.json({
-    success: true,
-    message: collection
-      ? `Cache invalidated for collection: ${collection}`
-      : 'All caches invalidated',
-  });
-}));
+    res.json({
+      success: true,
+      message: collection
+        ? `Cache invalidated for collection: ${collection}`
+        : "All caches invalidated",
+    });
+  }),
+);
 
 export default router;

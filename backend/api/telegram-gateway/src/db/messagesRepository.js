@@ -1,5 +1,5 @@
-import pg from 'pg';
-import { config } from '../config.js';
+import pg from "pg";
+import { config } from "../config.js";
 
 // Configure pg to parse BIGINT as string to avoid precision loss
 pg.types.setTypeParser(20, (val) => String(val)); // BIGINT
@@ -25,11 +25,11 @@ const mapRow = (row) => {
     caption: row.caption,
     mediaType: row.media_type,
     mediaRefs:
-      row.media_refs && typeof row.media_refs === 'object'
+      row.media_refs && typeof row.media_refs === "object"
         ? row.media_refs
         : Array.isArray(row.media_refs)
-        ? row.media_refs
-        : [],
+          ? row.media_refs
+          : [],
     status: row.status,
     receivedAt: row.received_at,
     telegramDate: row.telegram_date,
@@ -38,14 +38,15 @@ const mapRow = (row) => {
     queuedAt: row.queued_at,
     reprocessRequestedAt: row.reprocess_requested_at,
     reprocessedAt: row.reprocessed_at,
-    metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : {},
+    metadata:
+      row.metadata && typeof row.metadata === "object" ? row.metadata : {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
   };
 };
 
-const buildArrayCondition = (field, values, paramIndex, type = 'text') => {
+const buildArrayCondition = (field, values, paramIndex, type = "text") => {
   if (!values || values.length === 0) return null;
   if (values.length === 1) {
     return {
@@ -83,16 +84,19 @@ const getPool = async (logger) => {
 
   // On each new client connection, set the search_path to ensure unqualified
   // queries hit the right schema.
-  pool.on('connect', (client) => {
+  pool.on("connect", (client) => {
     client.query(searchPathSql).catch((error) => {
-      logger?.error?.({ err: error }, 'Failed to set search_path for Telegram Gateway DB');
+      logger?.error?.(
+        { err: error },
+        "Failed to set search_path for Telegram Gateway DB",
+      );
     });
   });
 
   const client = await pool.connect();
   try {
     // Basic connectivity
-    await client.query('SELECT 1');
+    await client.query("SELECT 1");
 
     // Ensure schema exists and set search_path for this session
     await client.query(`CREATE SCHEMA IF NOT EXISTS ${schemaIdent}`);
@@ -146,7 +150,7 @@ const getPool = async (logger) => {
 
     logger?.info?.(
       { schema: config.database.schema, table: config.database.table },
-      'Telegram Gateway API: ensured schema/tables exist',
+      "Telegram Gateway API: ensured schema/tables exist",
     );
   } finally {
     client.release();
@@ -171,7 +175,12 @@ export const listMessages = async (filters = {}, logger) => {
       ? filters.channelId
       : [filters.channelId];
 
-    const condition = buildArrayCondition('channel_id', channelIds, paramIndex, 'bigint');
+    const condition = buildArrayCondition(
+      "channel_id",
+      channelIds,
+      paramIndex,
+      "bigint",
+    );
     if (condition) {
       conditions.push(condition.clause);
       params.push(...condition.params);
@@ -186,8 +195,12 @@ export const listMessages = async (filters = {}, logger) => {
   }
 
   if (filters.source) {
-    const { clause, params: clauseParams, next } = buildArrayCondition(
-      'source',
+    const {
+      clause,
+      params: clauseParams,
+      next,
+    } = buildArrayCondition(
+      "source",
       Array.isArray(filters.source) ? filters.source : [filters.source],
       paramIndex,
     ) || {};
@@ -202,10 +215,10 @@ export const listMessages = async (filters = {}, logger) => {
     const statuses = Array.isArray(filters.status)
       ? filters.status
       : String(filters.status)
-          .split(',')
+          .split(",")
           .map((status) => status.trim())
           .filter(Boolean);
-    const condition = buildArrayCondition('status', statuses, paramIndex);
+    const condition = buildArrayCondition("status", statuses, paramIndex);
     if (condition) {
       conditions.push(condition.clause);
       params.push(...condition.params);
@@ -226,18 +239,23 @@ export const listMessages = async (filters = {}, logger) => {
   }
 
   if (filters.search) {
-    conditions.push(`(text ILIKE $${paramIndex} OR caption ILIKE $${paramIndex})`);
+    conditions.push(
+      `(text ILIKE $${paramIndex} OR caption ILIKE $${paramIndex})`,
+    );
     params.push(`%${filters.search}%`);
     paramIndex += 1;
   }
 
   if (!filters.includeDeleted) {
-    conditions.push('deleted_at IS NULL');
+    conditions.push("deleted_at IS NULL");
   }
 
-  const orderDirection = filters.sort?.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+  const orderDirection = filters.sort?.toLowerCase() === "asc" ? "ASC" : "DESC";
   const limit = Math.min(
-    Math.max(Number.parseInt(filters.limit, 10) || config.pagination.defaultLimit, 1),
+    Math.max(
+      Number.parseInt(filters.limit, 10) || config.pagination.defaultLimit,
+      1,
+    ),
     config.pagination.maxLimit,
   );
   const offset = Math.max(Number.parseInt(filters.offset, 10) || 0, 0);
@@ -271,7 +289,7 @@ export const listMessages = async (filters = {}, logger) => {
       deleted_at,
       COUNT(*) OVER() AS total_count
     FROM ${tableIdentifier}
-    ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
+    ${conditions.length ? `WHERE ${conditions.join(" AND ")}` : ""}
     ORDER BY telegram_date ${orderDirection}, id ${orderDirection}
     LIMIT $${paramIndex}
     OFFSET $${paramIndex + 1};
@@ -347,7 +365,7 @@ export const softDeleteMessage = async (id, { reason, logger } = {}) => {
 
 export const markReprocessRequested = async (
   id,
-  { requestedBy = 'dashboard', logger } = {},
+  { requestedBy = "dashboard", logger } = {},
 ) => {
   const db = await getPool(logger);
   const metadata = {
@@ -380,34 +398,34 @@ export const closeRepository = async () => {
 
 export const pingDatabase = async (logger) => {
   const db = await getPool(logger);
-  await db.query('SELECT NOW()');
+  await db.query("SELECT NOW()");
 };
 
 /**
  * Salva mensagens no banco de dados (BULK INSERT - 50x mais rápido!)
- * 
+ *
  * Performance:
  * - Antes: 500 msgs × 10ms = 5000ms (one-by-one)
  * - Agora: 500 msgs ÷ 1 = 100ms (bulk insert)
  * - Speedup: 50x faster!
- * 
+ *
  * @param {Array} messages - Array de mensagens do Telegram
  * @param {Object} logger - Logger instance
  * @returns {Promise<number>} - Número de mensagens salvas
  */
 export const saveMessages = async (messages, logger) => {
   if (!messages || messages.length === 0) return 0;
-  
+
   const db = await getPool(logger);
   const client = await db.connect();
-  
+
   try {
-    await client.query('BEGIN');
-    
+    await client.query("BEGIN");
+
     // STEP 1: Filter out messages that already exist in database
     // Build array of (channel_id, message_id) pairs to check
-    const messageKeys = messages.map(msg => [msg.channelId, msg.messageId]);
-    
+    const messageKeys = messages.map((msg) => [msg.channelId, msg.messageId]);
+
     // Query to find existing message_ids
     const existingQuery = `
       SELECT DISTINCT channel_id, message_id
@@ -416,75 +434,83 @@ export const saveMessages = async (messages, logger) => {
         SELECT * FROM unnest($1::text[], $2::bigint[])
       )
     `;
-    
+
     const channelIds = messageKeys.map(([channelId]) => channelId);
     const messageIds = messageKeys.map(([, messageId]) => messageId);
-    
-    const existingResult = await client.query(existingQuery, [channelIds, messageIds]);
-    
+
+    const existingResult = await client.query(existingQuery, [
+      channelIds,
+      messageIds,
+    ]);
+
     // Create set of existing (channel_id, message_id) for fast lookup
     const existingKeys = new Set(
-      existingResult.rows.map(row => `${row.channel_id}:${row.message_id}`)
+      existingResult.rows.map((row) => `${row.channel_id}:${row.message_id}`),
     );
-    
+
     // Filter to only new messages
-    const newMessages = messages.filter(msg => {
+    const newMessages = messages.filter((msg) => {
       const key = `${msg.channelId}:${msg.messageId}`;
       return !existingKeys.has(key);
     });
-    
+
     logger?.info?.(
-      { 
-        total: messages.length, 
-        existing: existingKeys.size, 
-        new: newMessages.length 
+      {
+        total: messages.length,
+        existing: existingKeys.size,
+        new: newMessages.length,
       },
-      '[BulkInsert] Dedup check complete'
+      "[BulkInsert] Dedup check complete",
     );
-    
+
     // If all messages already exist, return early
     if (newMessages.length === 0) {
-      await client.query('COMMIT');
-      logger?.info?.('[BulkInsert] All messages already exist, nothing to insert');
+      await client.query("COMMIT");
+      logger?.info?.(
+        "[BulkInsert] All messages already exist, nothing to insert",
+      );
       return 0;
     }
-    
+
     // STEP 2: Bulk insert only new messages
     // PostgreSQL parameter limit: ~65,000
     // With 9 params per message: max batch = 7000 messages
     // Use conservative chunk size of 500
     const CHUNK_SIZE = 500;
     let totalSaved = 0;
-    
+
     for (let i = 0; i < newMessages.length; i += CHUNK_SIZE) {
       const chunk = newMessages.slice(i, i + CHUNK_SIZE);
-      
+
       // Build VALUES clause: ($1,$2,...), ($10,$11,...), ...
-      const values = chunk.map((msg, idx) => {
-        const base = idx * 9 + 1;
-        return `($${base}, $${base+1}, $${base+2}, $${base+3}, $${base+4}, $${base+5}, $${base+6}, $${base+7}, $${base+8})`;
-      }).join(', ');
-      
+      const values = chunk
+        .map((msg, idx) => {
+          const base = idx * 9 + 1;
+          return `($${base}, $${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+        })
+        .join(", ");
+
       // Flatten parameters: [msg1.field1, msg1.field2, ..., msg2.field1, ...]
-      const flatParams = chunk.flatMap(msg => [
+      const flatParams = chunk.flatMap((msg) => [
         msg.channelId,
         msg.messageId,
-        msg.text || '',
+        msg.text || "",
         msg.date,
-        'mtproto',
-        'channel_post',
+        "mtproto",
+        "channel_post",
         msg.mediaType || null,
-        msg.status || 'received',
+        msg.status || "received",
         JSON.stringify({
           fromId: msg.fromId,
           isForwarded: msg.isForwarded,
           replyTo: msg.replyTo,
           views: msg.views,
-        })
+        }),
       ]);
-      
+
       // Bulk INSERT (no ON CONFLICT needed - already filtered)
-      const result = await client.query(`
+      const result = await client.query(
+        `
         INSERT INTO messages (
           channel_id,
           message_id,
@@ -498,30 +524,31 @@ export const saveMessages = async (messages, logger) => {
         )
         VALUES ${values}
         RETURNING id
-      `, flatParams);
-      
+      `,
+        flatParams,
+      );
+
       totalSaved += result.rowCount;
-      
+
       logger?.debug?.(
         { chunkSize: chunk.length, savedInChunk: result.rowCount, totalSaved },
-        '[BulkInsert] Chunk processed'
+        "[BulkInsert] Chunk processed",
       );
     }
-    
-    await client.query('COMMIT');
-    
+
+    await client.query("COMMIT");
+
     logger?.info?.(
       { totalMessages: messages.length, savedCount: totalSaved },
-      '[BulkInsert] Bulk insert complete (50x faster than one-by-one)'
+      "[BulkInsert] Bulk insert complete (50x faster than one-by-one)",
     );
-    
+
     return totalSaved;
-    
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     logger?.error?.(
       { err: error, messageCount: messages.length },
-      '[BulkInsert] Failed, rolled back transaction'
+      "[BulkInsert] Failed, rolled back transaction",
     );
     throw error;
   } finally {
@@ -532,7 +559,7 @@ export const saveMessages = async (messages, logger) => {
 /**
  * Find unprocessed messages for a specific consumer
  * Used by downstream services (e.g., TP-Capital) to poll for new messages
- * 
+ *
  * @param {Object} filters - Filter options
  * @param {string} filters.channelId - Channel ID to filter
  * @param {string[]} filters.statuses - Array of statuses (default: ['received'])
@@ -555,8 +582,8 @@ export const findUnprocessed = async (filters = {}, logger) => {
   }
 
   // Status filter (default: 'received')
-  const statuses = filters.statuses || ['received'];
-  const condition = buildArrayCondition('status', statuses, paramIndex);
+  const statuses = filters.statuses || ["received"];
+  const condition = buildArrayCondition("status", statuses, paramIndex);
   if (condition) {
     conditions.push(condition.clause);
     params.push(...condition.params);
@@ -565,13 +592,15 @@ export const findUnprocessed = async (filters = {}, logger) => {
 
   // Exclude already processed by specific consumer
   if (filters.excludeProcessedBy) {
-    conditions.push(`COALESCE(metadata->>'processed_by', '') <> $${paramIndex}`);
+    conditions.push(
+      `COALESCE(metadata->>'processed_by', '') <> $${paramIndex}`,
+    );
     params.push(filters.excludeProcessedBy);
     paramIndex += 1;
   }
 
   // Deleted_at filter
-  conditions.push('deleted_at IS NULL');
+  conditions.push("deleted_at IS NULL");
 
   const limit = Math.min(
     Math.max(Number.parseInt(filters.limit, 10) || 1000, 1),
@@ -599,7 +628,7 @@ export const findUnprocessed = async (filters = {}, logger) => {
       created_at,
       updated_at
     FROM ${tableIdentifier}
-    WHERE ${conditions.join(' AND ')}
+    WHERE ${conditions.join(" AND ")}
     ORDER BY received_at ASC, id ASC
     LIMIT $${paramIndex};
   `;
@@ -611,7 +640,7 @@ export const findUnprocessed = async (filters = {}, logger) => {
 /**
  * Mark messages as processed by a specific consumer
  * Updates status to 'published' and adds processed_by metadata
- * 
+ *
  * @param {Array<string>} messageIds - Array of message IDs to mark
  * @param {string} processedBy - Consumer name (e.g., 'tp-capital')
  * @param {Object} logger - Logger instance
@@ -619,9 +648,9 @@ export const findUnprocessed = async (filters = {}, logger) => {
  */
 export const markAsProcessed = async (messageIds, processedBy, logger) => {
   if (!messageIds || messageIds.length === 0) return 0;
-  
+
   const db = await getPool(logger);
-  
+
   const metadata = {
     processed_by: processedBy,
     processed_at: new Date().toISOString(),
@@ -629,7 +658,7 @@ export const markAsProcessed = async (messageIds, processedBy, logger) => {
 
   // Convert to strings so Postgres can cast the array to BIGINT[] safely
   const messageIdsAsText = messageIds.map((id) => String(id));
-  
+
   const query = `
     UPDATE ${tableIdentifier}
     SET
@@ -641,17 +670,20 @@ export const markAsProcessed = async (messageIds, processedBy, logger) => {
     RETURNING id, message_id;
   `;
 
-  const result = await db.query(query, [messageIdsAsText, JSON.stringify(metadata)]);
-  
+  const result = await db.query(query, [
+    messageIdsAsText,
+    JSON.stringify(metadata),
+  ]);
+
   logger?.info?.(
-    { 
-      messageIds: messageIds.length, 
-      updated: result.rowCount, 
-      processedBy 
+    {
+      messageIds: messageIds.length,
+      updated: result.rowCount,
+      processedBy,
     },
-    '[MarkAsProcessed] Messages marked as published'
+    "[MarkAsProcessed] Messages marked as published",
   );
-  
+
   return result.rowCount;
 };
 

@@ -1,6 +1,5 @@
-import { v4 as uuid } from 'uuid';
-import { pool, withTransaction } from '../db/pool.js';
-import type { CrawlRunRecord } from '../types.js';
+import { pool, withTransaction } from "../db/pool.js";
+import type { CrawlRunRecord } from "../types.js";
 
 interface RunRow {
   id: string;
@@ -20,7 +19,7 @@ function mapRow(row: RunRow): CrawlRunRecord {
   return {
     id: row.id,
     courseId: row.course_id,
-    status: row.status as CrawlRunRecord['status'],
+    status: row.status as CrawlRunRecord["status"],
     outputsDir: row.outputs_dir,
     metrics: row.metrics,
     error: row.error,
@@ -80,9 +79,9 @@ export async function getRun(id: string) {
 }
 
 export async function fetchNextQueuedRun() {
-  console.log('[RunService] 🔍 Fetching next queued run...');
+  console.log("[RunService] 🔍 Fetching next queued run...");
   return withTransaction(async (client) => {
-    console.log('[RunService] 📊 Querying for queued runs...');
+    console.log("[RunService] 📊 Querying for queued runs...");
     const run = await client.query<RunRow>(
       `
         SELECT *
@@ -96,7 +95,7 @@ export async function fetchNextQueuedRun() {
     console.log(`[RunService] 📋 Query returned ${run.rowCount} row(s)`);
 
     if (run.rowCount === 0) {
-      console.log('[RunService] ⏸️  No queued runs found');
+      console.log("[RunService] ⏸️  No queued runs found");
       return null;
     }
 
@@ -115,7 +114,11 @@ export async function fetchNextQueuedRun() {
     );
 
     console.log(`[RunService] ✅ Run ${record.id} marked as running`);
-    return mapRow({ ...record, status: 'running', started_at: new Date().toISOString() } as RunRow);
+    return mapRow({
+      ...record,
+      status: "running",
+      started_at: new Date().toISOString(),
+    } as RunRow);
   });
 }
 

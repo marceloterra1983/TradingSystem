@@ -7,9 +7,9 @@
  * @module middleware/auth
  */
 
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { sendError } from './responseWrapper';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { sendError } from "./responseWrapper";
 
 /**
  * JWT Payload structure
@@ -17,7 +17,7 @@ import { sendError } from './responseWrapper';
 export interface JWTPayload {
   userId: string;
   email: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
   iat: number;
   exp: number;
 }
@@ -44,7 +44,7 @@ export interface AuthenticatedRequest extends Request {
 export const authMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void | Response => {
   try {
     // Extract token from Authorization header
@@ -53,37 +53,32 @@ export const authMiddleware = (
     if (!authHeader) {
       return sendError(
         res,
-        'MISSING_AUTH_HEADER',
-        'Authorization header is required',
-        401
+        "MISSING_AUTH_HEADER",
+        "Authorization header is required",
+        401,
       );
     }
 
-    if (!authHeader.startsWith('Bearer ')) {
+    if (!authHeader.startsWith("Bearer ")) {
       return sendError(
         res,
-        'INVALID_AUTH_HEADER',
+        "INVALID_AUTH_HEADER",
         'Authorization header must start with "Bearer "',
-        401
+        401,
       );
     }
 
     const token = authHeader.substring(7);
 
     if (!token) {
-      return sendError(
-        res,
-        'MISSING_TOKEN',
-        'JWT token is required',
-        401
-      );
+      return sendError(res, "MISSING_TOKEN", "JWT token is required", 401);
     }
 
     // Verify token
     const jwtSecret = process.env.JWT_SECRET_KEY;
 
     if (!jwtSecret) {
-      throw new Error('JWT_SECRET_KEY environment variable not set');
+      throw new Error("JWT_SECRET_KEY environment variable not set");
     }
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
@@ -92,47 +87,29 @@ export const authMiddleware = (
     (req as AuthenticatedRequest).user = decoded;
 
     // Store request ID for logging
-    res.locals.requestId = req.headers['x-request-id'] || crypto.randomUUID();
+    res.locals.requestId = req.headers["x-request-id"] || crypto.randomUUID();
     res.locals.path = req.path;
 
     next();
   } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
-      return sendError(
-        res,
-        'TOKEN_EXPIRED',
-        'JWT token has expired',
-        401,
-        { expiredAt: error.expiredAt }
-      );
+    if (error.name === "TokenExpiredError") {
+      return sendError(res, "TOKEN_EXPIRED", "JWT token has expired", 401, {
+        expiredAt: error.expiredAt,
+      });
     }
 
-    if (error.name === 'JsonWebTokenError') {
-      return sendError(
-        res,
-        'INVALID_TOKEN',
-        'Invalid JWT token',
-        401
-      );
+    if (error.name === "JsonWebTokenError") {
+      return sendError(res, "INVALID_TOKEN", "Invalid JWT token", 401);
     }
 
-    if (error.name === 'NotBeforeError') {
-      return sendError(
-        res,
-        'TOKEN_NOT_ACTIVE',
-        'Token not active yet',
-        401,
-        { date: error.date }
-      );
+    if (error.name === "NotBeforeError") {
+      return sendError(res, "TOKEN_NOT_ACTIVE", "Token not active yet", 401, {
+        date: error.date,
+      });
     }
 
     // Unexpected error
-    return sendError(
-      res,
-      'AUTH_ERROR',
-      'Authentication failed',
-      500
-    );
+    return sendError(res, "AUTH_ERROR", "Authentication failed", 500);
   }
 };
 
@@ -148,29 +125,24 @@ export const authMiddleware = (
  *   res.json({ message: 'Admin only' });
  * });
  */
-export const requireRole = (...roles: Array<'admin' | 'user'>) => {
+export const requireRole = (...roles: Array<"admin" | "user">) => {
   return (req: Request, res: Response, next: NextFunction): void | Response => {
     const user = (req as AuthenticatedRequest).user;
 
     if (!user) {
-      return sendError(
-        res,
-        'UNAUTHORIZED',
-        'User not authenticated',
-        401
-      );
+      return sendError(res, "UNAUTHORIZED", "User not authenticated", 401);
     }
 
     if (!roles.includes(user.role)) {
       return sendError(
         res,
-        'FORBIDDEN',
-        'Insufficient permissions to access this resource',
+        "FORBIDDEN",
+        "Insufficient permissions to access this resource",
         403,
         {
           required: roles,
-          actual: user.role
-        }
+          actual: user.role,
+        },
       );
     }
 
@@ -197,12 +169,12 @@ export const requireRole = (...roles: Array<'admin' | 'user'>) => {
 export const optionalAuth = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return next();
     }
 
@@ -229,13 +201,13 @@ export const optionalAuth = (
  * @param expiresIn - Token expiration time (default: 1h)
  */
 export const generateToken = (
-  payload: Omit<JWTPayload, 'iat' | 'exp'>,
-  expiresIn: string = '1h'
+  payload: Omit<JWTPayload, "iat" | "exp">,
+  expiresIn: string = "1h",
 ): string => {
   const jwtSecret = process.env.JWT_SECRET_KEY;
 
   if (!jwtSecret) {
-    throw new Error('JWT_SECRET_KEY environment variable not set');
+    throw new Error("JWT_SECRET_KEY environment variable not set");
   }
 
   return jwt.sign(payload, jwtSecret, { expiresIn });
@@ -249,12 +221,12 @@ export const generateToken = (
  */
 export const generateRefreshToken = (
   userId: string,
-  expiresIn: string = '7d'
+  expiresIn: string = "7d",
 ): string => {
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
   if (!jwtRefreshSecret) {
-    throw new Error('JWT_REFRESH_SECRET environment variable not set');
+    throw new Error("JWT_REFRESH_SECRET environment variable not set");
   }
 
   return jwt.sign({ userId }, jwtRefreshSecret, { expiresIn });
@@ -265,11 +237,13 @@ export const generateRefreshToken = (
  *
  * @param refreshToken - Refresh token to verify
  */
-export const verifyRefreshToken = (refreshToken: string): { userId: string } => {
+export const verifyRefreshToken = (
+  refreshToken: string,
+): { userId: string } => {
   const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
 
   if (!jwtRefreshSecret) {
-    throw new Error('JWT_REFRESH_SECRET environment variable not set');
+    throw new Error("JWT_REFRESH_SECRET environment variable not set");
   }
 
   return jwt.verify(refreshToken, jwtRefreshSecret) as { userId: string };

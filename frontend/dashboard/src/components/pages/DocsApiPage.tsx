@@ -1,6 +1,6 @@
-import React from 'react';
-import { apiConfig } from '@/config/api';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import React from "react";
+import { apiConfig } from "@/config/api";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
 export const DocsApiPage: React.FC = () => {
   return (

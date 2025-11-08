@@ -1,27 +1,27 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, Search } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from "react";
+import { ExternalLink, Search } from "lucide-react";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { buildDocsUrl } from '@/lib/docsUrl';
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { buildDocsUrl } from "@/lib/docsUrl";
 import documentationService, {
   SearchResult,
   SearchSuggestion,
-} from '@/services/documentationService';
-import { useDebounce } from '@/hooks/useDebounce';
+} from "@/services/documentationService";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const MIN_QUERY_LENGTH = 2;
 
 export const DocumentationPage: React.FC = () => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query.trim(), 400);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(
@@ -30,7 +30,7 @@ export const DocumentationPage: React.FC = () => {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterSource, setFilterSource] = useState<string>('all');
+  const [filterSource, setFilterSource] = useState<string>("all");
 
   useEffect(() => {
     let ignore = false;
@@ -48,7 +48,7 @@ export const DocumentationPage: React.FC = () => {
         setIsLoading(true);
         const [searchResponse, suggestionResponse] = await Promise.all([
           documentationService.search(debouncedQuery, {
-            source: filterSource === 'all' ? undefined : filterSource,
+            source: filterSource === "all" ? undefined : filterSource,
             limit: 30,
           }),
           documentationService.getSuggestions(debouncedQuery, 5),
@@ -73,7 +73,7 @@ export const DocumentationPage: React.FC = () => {
           const message =
             err instanceof Error
               ? err.message
-              : 'Falha ao buscar na documentação';
+              : "Falha ao buscar na documentação";
           setError(message);
           setResults([]);
           setSuggestions([]);
@@ -97,7 +97,7 @@ export const DocumentationPage: React.FC = () => {
   };
 
   const filteredResults = useMemo(() => {
-    if (filterSource === 'all') {
+    if (filterSource === "all") {
       return results;
     }
     return results.filter((result) => result.source === filterSource);
@@ -115,12 +115,12 @@ export const DocumentationPage: React.FC = () => {
 
   const openDocument = (result: SearchResult) => {
     if (result.path) {
-      const href = result.path.startsWith('http')
+      const href = result.path.startsWith("http")
         ? result.path
         : buildDocsUrl(result.path);
-      window.open(href, '_blank', 'noopener,noreferrer');
+      window.open(href, "_blank", "noopener,noreferrer");
     } else if (result.source) {
-      window.open(result.source, '_blank', 'noopener,noreferrer');
+      window.open(result.source, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -165,11 +165,11 @@ export const DocumentationPage: React.FC = () => {
                 <span>Filtros:</span>
                 <button
                   className={`rounded-full px-3 py-1 ${
-                    filterSource === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                    filterSource === "all"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
                   }`}
-                  onClick={() => setFilterSource('all')}
+                  onClick={() => setFilterSource("all")}
                 >
                   Todos
                 </button>
@@ -178,8 +178,8 @@ export const DocumentationPage: React.FC = () => {
                     key={source}
                     className={`rounded-full px-3 py-1 ${
                       filterSource === source
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
                     }`}
                     onClick={() => setFilterSource(source)}
                   >
@@ -194,7 +194,7 @@ export const DocumentationPage: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               {suggestions.map((suggestion) => (
                 <button
-                  key={`${suggestion.text}-${suggestion.type ?? ''}`}
+                  key={`${suggestion.text}-${suggestion.type ?? ""}`}
                   onClick={() => handleSuggestionClick(suggestion)}
                   className="rounded-full bg-slate-200 px-3 py-1 text-xs text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                 >
@@ -221,8 +221,8 @@ export const DocumentationPage: React.FC = () => {
               <Card>
                 <CardContent className="p-4 text-sm text-slate-500">
                   {debouncedQuery.length < MIN_QUERY_LENGTH
-                    ? 'Digite pelo menos duas letras para buscar.'
-                    : 'Nenhum resultado encontrado para esta consulta.'}
+                    ? "Digite pelo menos duas letras para buscar."
+                    : "Nenhum resultado encontrado para esta consulta."}
                 </CardContent>
               </Card>
             ) : (
@@ -231,16 +231,16 @@ export const DocumentationPage: React.FC = () => {
                   key={result.id}
                   className={`w-full rounded-lg border p-4 text-left transition hover:border-blue-400 ${
                     selectedResult?.id === result.id
-                      ? 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800'
-                      : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+                      ? "border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-slate-800"
+                      : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
                   }`}
                   onClick={() => setSelectedResult(result)}
                 >
                   <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                    {result.title || result.path || 'Resultado'}
+                    {result.title || result.path || "Resultado"}
                   </h3>
                   <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300">
-                    {result.description || 'Sem descrição disponível'}
+                    {result.description || "Sem descrição disponível"}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
                     {result.source && (
@@ -277,17 +277,17 @@ export const DocumentationPage: React.FC = () => {
                     </Button>
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Fonte: {selectedResult.source ?? 'desconhecida'}
+                    Fonte: {selectedResult.source ?? "desconhecida"}
                     {selectedResult.version
                       ? ` • v${selectedResult.version}`
-                      : ''}
-                    {selectedResult.method ? ` • ${selectedResult.method}` : ''}
+                      : ""}
+                    {selectedResult.method ? ` • ${selectedResult.method}` : ""}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <p className="text-slate-700 dark:text-slate-200">
                     {selectedResult.description ||
-                      'Sem descrição fornecida para este item.'}
+                      "Sem descrição fornecida para este item."}
                   </p>
                   {selectedResult.path && (
                     <div className="rounded-lg bg-slate-100 p-3 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">

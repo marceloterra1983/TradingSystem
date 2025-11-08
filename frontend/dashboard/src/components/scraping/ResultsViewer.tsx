@@ -1,12 +1,12 @@
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Button } from '../ui/button';
-import { Link } from 'react-router-dom';
-import { downloadFile } from '../../utils/download';
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
+import { downloadFile } from "../../utils/download";
 import type {
   ScrapeData,
   CrawlResultData,
-} from '../../services/firecrawlService';
+} from "../../services/firecrawlService";
 
 type ResultsData = ScrapeData | CrawlResultData | Record<string, unknown>;
 
@@ -31,15 +31,15 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
   const dataRecord = data as Record<string, unknown>;
 
   const availableTabs = Object.entries(dataRecord)
-    .filter(([key]) => key !== 'rawHtml' && selectedFormats.includes(key)) // Handle raw HTML separately and respect selected formats
+    .filter(([key]) => key !== "rawHtml" && selectedFormats.includes(key)) // Handle raw HTML separately and respect selected formats
     .map(([key]) => key);
 
-  const rawHtmlValue = dataRecord['rawHtml'];
-  const rawHtmlContent = typeof rawHtmlValue === 'string' ? rawHtmlValue : null;
+  const rawHtmlValue = dataRecord["rawHtml"];
+  const rawHtmlContent = typeof rawHtmlValue === "string" ? rawHtmlValue : null;
 
   const hasData =
     availableTabs.length > 0 ||
-    (rawHtmlContent && selectedFormats.includes('rawHtml'));
+    (rawHtmlContent && selectedFormats.includes("rawHtml"));
 
   if (!hasData) {
     return (
@@ -60,17 +60,17 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
     const timestamp = new Date().getTime();
     downloadFile(
       `scrape-result-${timestamp}-raw.html`,
-      'text/html;charset=utf-8',
+      "text/html;charset=utf-8",
       rawHtmlContent,
     );
   };
 
   const handleDownload = (format: string, content: unknown) => {
     const timestamp = new Date().getTime();
-    const extension = format === 'json' ? 'json' : 'txt';
-    const mimeType = format === 'json' ? 'application/json' : 'text/plain';
+    const extension = format === "json" ? "json" : "txt";
+    const mimeType = format === "json" ? "application/json" : "text/plain";
     const formattedContent =
-      typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+      typeof content === "string" ? content : JSON.stringify(content, null, 2);
     downloadFile(
       `scrape-result-${timestamp}.${extension}`,
       mimeType,
@@ -83,7 +83,7 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Results</h3>
         <div className="space-x-2">
-          {rawHtmlContent && selectedFormats.includes('rawHtml') && (
+          {rawHtmlContent && selectedFormats.includes("rawHtml") && (
             <Button variant="outline" onClick={handleRawHtmlDownload}>
               Download Raw HTML
             </Button>
@@ -118,7 +118,7 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
                   Download
                 </Button>
                 <pre className="max-h-96 overflow-auto p-4 text-sm">
-                  {typeof dataRecord[tab] === 'string'
+                  {typeof dataRecord[tab] === "string"
                     ? (dataRecord[tab] as string)
                     : JSON.stringify(dataRecord[tab], null, 2)}
                 </pre>

@@ -7,14 +7,14 @@
 // Extract base URL from VITE_WORKSPACE_API_URL (remove /items if present)
 const getBaseApiUrl = () => {
   const workspaceUrl =
-    import.meta.env.VITE_WORKSPACE_API_URL || 'http://localhost:3200/api';  // FIXED: LowDB Stack (WSL2 networking workaround)
+    import.meta.env.VITE_WORKSPACE_API_URL || "http://localhost:3200/api"; // FIXED: LowDB Stack (WSL2 networking workaround)
   // Remove /items from the end if present
-  return workspaceUrl.replace(/\/items$/, '');
+  return workspaceUrl.replace(/\/items$/, "");
 };
 
 const WORKSPACE_API_URL = getBaseApiUrl();
 
-console.warn('[CategoriesService] WORKSPACE_API_URL:', WORKSPACE_API_URL);
+console.warn("[CategoriesService] WORKSPACE_API_URL:", WORKSPACE_API_URL);
 
 export interface Category {
   id: string;
@@ -63,9 +63,12 @@ class CategoriesService {
   constructor() {
     // Use relative path to leverage Vite proxy (same fix as LibraryService)
     // Browser → /api/workspace/categories → Vite Proxy → workspace-api:3200/api/categories
-    this.baseUrl = '/api/workspace/categories';
+    this.baseUrl = "/api/workspace/categories";
 
-    console.warn('[CategoriesService] Using relative path (Vite proxy):', this.baseUrl);
+    console.warn(
+      "[CategoriesService] Using relative path (Vite proxy):",
+      this.baseUrl,
+    );
   }
 
   /**
@@ -73,15 +76,15 @@ class CategoriesService {
    */
   async getCategories(params?: {
     active_only?: boolean;
-    order_by?: 'display_order' | 'name' | 'created_at' | 'updated_at';
+    order_by?: "display_order" | "name" | "created_at" | "updated_at";
   }): Promise<Category[]> {
     const queryParams = new URLSearchParams();
 
     if (params?.active_only !== undefined) {
-      queryParams.append('active_only', params.active_only.toString());
+      queryParams.append("active_only", params.active_only.toString());
     }
     if (params?.order_by) {
-      queryParams.append('order_by', params.order_by);
+      queryParams.append("order_by", params.order_by);
     }
 
     const url = queryParams.toString()
@@ -89,21 +92,21 @@ class CategoriesService {
       : this.baseUrl;
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch categories');
+      throw new Error(error.message || "Failed to fetch categories");
     }
 
     const result: CategoryResponse<Category[]> = await response.json();
 
     if (!result.success || !result.data) {
-      throw new Error(result.error || 'Failed to fetch categories');
+      throw new Error(result.error || "Failed to fetch categories");
     }
 
     return result.data;
@@ -114,21 +117,21 @@ class CategoriesService {
    */
   async getCategory(id: string): Promise<Category> {
     const response = await fetch(`${this.baseUrl}/${id}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch category');
+      throw new Error(error.message || "Failed to fetch category");
     }
 
     const result: CategoryResponse<Category> = await response.json();
 
     if (!result.success || !result.data) {
-      throw new Error(result.error || 'Failed to fetch category');
+      throw new Error(result.error || "Failed to fetch category");
     }
 
     return result.data;
@@ -139,9 +142,9 @@ class CategoriesService {
    */
   async createCategory(data: CreateCategoryDTO): Promise<Category> {
     const response = await fetch(this.baseUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -150,16 +153,16 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       if (result.errors && result.errors.length > 0) {
-        const errorMessages = result.errors.map((e) => e.msg).join(', ');
+        const errorMessages = result.errors.map((e) => e.msg).join(", ");
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || 'Failed to create category',
+        result.error || result.message || "Failed to create category",
       );
     }
 
     if (!result.data) {
-      throw new Error('No data returned from server');
+      throw new Error("No data returned from server");
     }
 
     return result.data;
@@ -170,9 +173,9 @@ class CategoriesService {
    */
   async updateCategory(id: string, data: UpdateCategoryDTO): Promise<Category> {
     const response = await fetch(`${this.baseUrl}/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -181,16 +184,16 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       if (result.errors && result.errors.length > 0) {
-        const errorMessages = result.errors.map((e) => e.msg).join(', ');
+        const errorMessages = result.errors.map((e) => e.msg).join(", ");
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || 'Failed to update category',
+        result.error || result.message || "Failed to update category",
       );
     }
 
     if (!result.data) {
-      throw new Error('No data returned from server');
+      throw new Error("No data returned from server");
     }
 
     return result.data;
@@ -201,9 +204,9 @@ class CategoriesService {
    */
   async deleteCategory(id: string): Promise<void> {
     const response = await fetch(`${this.baseUrl}/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -211,7 +214,7 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || 'Failed to delete category',
+        result.error || result.message || "Failed to delete category",
       );
     }
   }
@@ -221,9 +224,9 @@ class CategoriesService {
    */
   async toggleCategory(id: string): Promise<Category> {
     const response = await fetch(`${this.baseUrl}/${id}/toggle`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -231,12 +234,12 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || 'Failed to toggle category',
+        result.error || result.message || "Failed to toggle category",
       );
     }
 
     if (!result.data) {
-      throw new Error('No data returned from server');
+      throw new Error("No data returned from server");
     }
 
     return result.data;

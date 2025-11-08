@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   isBrowser,
   safeLocalStorageGet,
   safeLocalStorageSet,
-} from '../utils/browser';
+} from "../utils/browser";
 
 /**
  * Custom Layout Hook
@@ -55,7 +55,7 @@ interface UseCustomLayoutReturn {
   resetLayout: () => void;
 }
 
-const STORAGE_KEY_PREFIX = 'tradingSystem_layout_';
+const STORAGE_KEY_PREFIX = "tradingSystem_layout_";
 
 export function useCustomLayout({
   pageId,
@@ -75,9 +75,9 @@ export function useCustomLayout({
           if (
             parsed.columns &&
             parsed.componentLayout &&
-            typeof parsed.componentLayout === 'object'
+            typeof parsed.componentLayout === "object"
           ) {
-            if (!parsed.columnOrder || typeof parsed.columnOrder !== 'object') {
+            if (!parsed.columnOrder || typeof parsed.columnOrder !== "object") {
               const defaultLayout = createDefaultLayout(
                 componentIds,
                 parsed.columns,
@@ -95,7 +95,7 @@ export function useCustomLayout({
         }
       } catch (error) {
         console.error(
-          '[useCustomLayout] Failed to load layout from localStorage:',
+          "[useCustomLayout] Failed to load layout from localStorage:",
           error,
         );
       }
@@ -114,7 +114,7 @@ export function useCustomLayout({
       safeLocalStorageSet(storageKey, JSON.stringify(layout));
     } catch (error) {
       console.error(
-        '[useCustomLayout] Failed to save layout to localStorage:',
+        "[useCustomLayout] Failed to save layout to localStorage:",
         error,
       );
     }

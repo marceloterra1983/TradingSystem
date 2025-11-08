@@ -3,10 +3,13 @@ title: Vite Proxy Configuration - Best Practices
 sidebar_position: 5
 tags: [frontend, vite, proxy, configuration, best-practices]
 domain: frontend
+owner: FrontendGuild
 type: guide
-summary: Comprehensive guide for configuring Vite proxy to connect browser code to Docker containers. Critical patterns to prevent "API Indisponível" errors.
+summary: "Comprehensive guide for configuring Vite proxy to connect browser code to Docker containers"
+description: "Best practices for Vite proxy configuration to prevent API errors and connectivity issues"
 status: active
 last_review: "2025-11-06"
+lastReviewed: "2025-11-08"
 ---
 
 # Vite Proxy Configuration - Best Practices
@@ -15,6 +18,7 @@ last_review: "2025-11-06"
 **Status:** ✅ Production-Ready Pattern
 **Priority:** P0 - Critical (Security & Connectivity)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🎯 Overview
@@ -23,6 +27,7 @@ This document establishes the **canonical pattern** for connecting frontend brow
 
 **Why This Matters:** Incorrect proxy configuration causes "API Indisponível" errors that are difficult to debug because they appear as silent network failures in the browser.
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🏗️ Architecture Flow
@@ -54,6 +59,7 @@ This document establishes the **canonical pattern** for connecting frontend brow
 └─────────────────────────────────────────────────────────────┘
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔑 Critical Rules (NEVER VIOLATE)
@@ -103,6 +109,7 @@ const proxy = resolveProxy(
 );
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📋 Complete Configuration Checklist
@@ -230,6 +237,7 @@ class WorkspaceServiceBad {
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔍 Troubleshooting Guide
@@ -296,6 +304,7 @@ GET http://localhost:3200/api/items net::ERR_CONNECTION_REFUSED
 
 **Fix:** Change to relative path `/api/workspace/items` (goes through proxy on port 3103).
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📝 Service Template
@@ -369,6 +378,7 @@ class MyService {
 export const myService = new MyService();
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🧪 Testing Checklist
@@ -386,6 +396,7 @@ Before deploying a new service:
 - [ ] ✅ No browser console errors
 - [ ] ✅ Service health check passes
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🚨 Common Mistakes
@@ -443,6 +454,7 @@ docker compose up -d
 docker compose up -d --build
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 📊 Service Inventory (Current Status)
@@ -455,6 +467,7 @@ docker compose up -d --build
 | **Docusaurus** | `/next/*` | `docs-hub:80` | ✅ Working |
 | **LlamaIndex RAG** | `/api/v1/rag/*` | `llamaindex-query:8202` | ✅ Working |
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🔗 Related Documentation
@@ -465,6 +478,7 @@ docker compose up -d --build
 - **Relatório `outputs/PROXY-FIXES-COMPLETE-2025-11-06.md`** - resumo completo
 - **CLAUDE.md (raiz do repositório)** - seção “When Working with Vite Proxy Configuration”
 
+lastReviewed: "2025-11-08"
 ---
 
 ## 🤖 Instructions for AI Assistants
@@ -483,6 +497,7 @@ When working with Vite proxy configuration:
 2. Check for hardcoded localhost URLs in services → Change to relative paths
 3. Rebuild container → Test with curl → Verify in browser
 
+lastReviewed: "2025-11-08"
 ---
 
 **Last Updated:** 2025-11-06

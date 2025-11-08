@@ -1,4 +1,4 @@
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
 export function MCPControlPage() {
   return (

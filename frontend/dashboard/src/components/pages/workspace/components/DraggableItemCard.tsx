@@ -1,14 +1,12 @@
-import { useState } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Card, CardContent } from '../../../ui/card';
-import { Eye, Folder } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import {
-  PRIORITY_CONFIG,
-} from '../constants/workspace.constants';
-import type { Item } from '../types/workspace.types';
-import { ViewItemDialog } from './ViewItemDialog';
+import { useState } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Card, CardContent } from "../../../ui/card";
+import { Eye, Folder } from "lucide-react";
+import { cn } from "../../../../lib/utils";
+import { PRIORITY_CONFIG } from "../constants/workspace.constants";
+import type { Item } from "../types/workspace.types";
+import { ViewItemDialog } from "./ViewItemDialog";
 
 interface DraggableItemCardProps {
   item: Item;
@@ -33,8 +31,8 @@ function WorkspaceItemCardContent({
   return (
     <Card
       className={cn(
-        'hover:shadow-md transition-shadow',
-        'bg-white dark:bg-gray-800',
+        "hover:shadow-md transition-shadow",
+        "bg-white dark:bg-gray-800",
         className,
       )}
     >
@@ -48,7 +46,7 @@ function WorkspaceItemCardContent({
         <div className="flex items-center justify-between">
           <span
             className={cn(
-              'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium',
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
               PRIORITY_CONFIG[item.priority].color,
             )}
           >
@@ -86,7 +84,7 @@ export function DraggableItemCard({ item }: DraggableItemCardProps) {
   } = useSortable({
     id: item.id,
     data: {
-      type: 'item',
+      type: "item",
       status: item.status,
     },
   });

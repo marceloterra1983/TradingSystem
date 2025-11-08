@@ -1,5 +1,5 @@
-import { jest } from '@jest/globals';
-import { CategoryService } from '../CategoryService.js';
+import { jest } from "@jest/globals";
+import { CategoryService } from "../CategoryService.js";
 
 const createLoggerMock = () => ({
   debug: jest.fn(),
@@ -15,18 +15,18 @@ const createService = (mockCategories) => {
   return { service, mockDb };
 };
 
-describe('CategoryService - normalization', () => {
+describe("CategoryService - normalization", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('normalizes legacy lowdb payloads that only expose `active`', async () => {
+  it("normalizes legacy lowdb payloads that only expose `active`", async () => {
     const rawCategories = [
       {
-        id: 'feature',
-        name: 'feature',
-        description: 'Novas funcionalidades',
-        color: '#10b981',
+        id: "feature",
+        name: "feature",
+        description: "Novas funcionalidades",
+        color: "#10b981",
         display_order: 3,
         active: true,
       },
@@ -37,19 +37,19 @@ describe('CategoryService - normalization', () => {
 
     expect(categories).toHaveLength(1);
     expect(categories[0]).toMatchObject({
-      id: 'feature',
-      name: 'feature',
+      id: "feature",
+      name: "feature",
       is_active: true,
       display_order: 3,
-      color: '#10b981',
+      color: "#10b981",
     });
   });
 
-  it('provides sensible fallbacks when optional fields are missing', async () => {
+  it("provides sensible fallbacks when optional fields are missing", async () => {
     const rawCategories = [
       {
-        name: 'docs',
-        description: 'Documentação',
+        name: "docs",
+        description: "Documentação",
         active: false,
       },
     ];
@@ -58,11 +58,11 @@ describe('CategoryService - normalization', () => {
     const categories = await service.getCategories(true);
 
     expect(categories[0]).toMatchObject({
-      id: 'docs',
-      name: 'docs',
+      id: "docs",
+      name: "docs",
       is_active: false,
       display_order: 1, // falls back to index when no order info present
-      color: '#6B7280', // default brand gray
+      color: "#6B7280", // default brand gray
     });
   });
 });

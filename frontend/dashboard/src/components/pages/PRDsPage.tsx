@@ -4,16 +4,16 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { ExternalLink, Loader2, AlertTriangle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import { apiConfig } from '../../config/api';
-import { buildDocsUrl, normalizeDocsBase } from '../../lib/docsUrl';
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { ExternalLink, Loader2, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { apiConfig } from "../../config/api";
+import { buildDocsUrl, normalizeDocsBase } from "../../lib/docsUrl";
 
 /**
  * PRD Loading Strategy:
@@ -29,7 +29,7 @@ interface PRD {
   id: string;
   name: string;
   fileName: string;
-  status: 'implemented' | 'draft' | 'planned';
+  status: "implemented" | "draft" | "planned";
   owner: string;
   lastSynced: string;
   docsSlug?: string;
@@ -39,7 +39,7 @@ const resolveDocsHubBase = (): string => {
   const env = import.meta.env as Record<string, string | undefined>;
   const override = env.VITE_PRD_BASE_URL;
   const candidate =
-    typeof override === 'string' && override.trim()
+    typeof override === "string" && override.trim()
       ? override
       : apiConfig.docsUrl;
   return normalizeDocsBase(candidate);
@@ -47,14 +47,14 @@ const resolveDocsHubBase = (): string => {
 
 const isDocsHubEnabled = (): boolean => {
   const env = import.meta.env as Record<string, string | undefined>;
-  return (env.VITE_USE_DOCS_V2_PRD || '').toLowerCase() === 'true';
+  return (env.VITE_USE_DOCS_V2_PRD || "").toLowerCase() === "true";
 };
 
 const getLegacyBaseUrl = (): string => {
-  if (typeof window === 'undefined') {
-    return '';
+  if (typeof window === "undefined") {
+    return "";
   }
-  return window.location.origin.replace(/\/+$/, '');
+  return window.location.origin.replace(/\/+$/, "");
 };
 
 /**
@@ -62,29 +62,29 @@ const getLegacyBaseUrl = (): string => {
  */
 const PRDS_PT: PRD[] = [
   {
-    id: 'banco-ideias',
-    name: 'banco-ideias-prd.md',
-    fileName: 'banco-ideias-prd.md',
-    status: 'implemented',
-    owner: 'Marcelo Terra',
-    lastSynced: '2025-10-09',
-    docsSlug: 'prd/products/trading-app/feature-idea-bank.pt',
+    id: "banco-ideias",
+    name: "banco-ideias-prd.md",
+    fileName: "banco-ideias-prd.md",
+    status: "implemented",
+    owner: "Marcelo Terra",
+    lastSynced: "2025-10-09",
+    docsSlug: "prd/products/trading-app/feature-idea-bank.pt",
   },
   {
-    id: 'monitoramento-prometheus',
-    name: 'monitoramento-prometheus-prd.md',
-    fileName: 'monitoramento-prometheus-prd.md',
-    status: 'draft',
-    owner: 'Marcelo Terra',
-    lastSynced: '2025-10-10',
+    id: "monitoramento-prometheus",
+    name: "monitoramento-prometheus-prd.md",
+    fileName: "monitoramento-prometheus-prd.md",
+    status: "draft",
+    owner: "Marcelo Terra",
+    lastSynced: "2025-10-10",
   },
   {
-    id: 'docusaurus-implementation',
-    name: 'docusaurus-implementation-prd.md',
-    fileName: 'docusaurus-implementation-prd.md',
-    status: 'draft',
-    owner: 'Docs / Ops',
-    lastSynced: '2025-10-10',
+    id: "docusaurus-implementation",
+    name: "docusaurus-implementation-prd.md",
+    fileName: "docusaurus-implementation-prd.md",
+    status: "draft",
+    owner: "Docs / Ops",
+    lastSynced: "2025-10-10",
   },
 ];
 
@@ -93,46 +93,46 @@ const PRDS_PT: PRD[] = [
  */
 const PRDS_EN: PRD[] = [
   {
-    id: 'banco-ideias-en',
-    name: 'banco-ideias-prd.md',
-    fileName: 'banco-ideias-prd.md',
-    status: 'implemented',
-    owner: 'Marcelo Terra',
-    lastSynced: '2025-10-09',
-    docsSlug: 'prd/products/trading-app/feature-idea-bank',
+    id: "banco-ideias-en",
+    name: "banco-ideias-prd.md",
+    fileName: "banco-ideias-prd.md",
+    status: "implemented",
+    owner: "Marcelo Terra",
+    lastSynced: "2025-10-09",
+    docsSlug: "prd/products/trading-app/feature-idea-bank",
   },
   {
-    id: 'monitoramento-prometheus-en',
-    name: 'monitoramento-prometheus-prd.md',
-    fileName: 'monitoramento-prometheus-prd.md',
-    status: 'draft',
-    owner: 'Marcelo Terra',
-    lastSynced: '2025-10-10',
+    id: "monitoramento-prometheus-en",
+    name: "monitoramento-prometheus-prd.md",
+    fileName: "monitoramento-prometheus-prd.md",
+    status: "draft",
+    owner: "Marcelo Terra",
+    lastSynced: "2025-10-10",
   },
   {
-    id: 'docusaurus-implementation-en',
-    name: 'docusaurus-implementation-prd.md',
-    fileName: 'docusaurus-implementation-prd.md',
-    status: 'draft',
-    owner: 'Docs / Ops',
-    lastSynced: '2025-10-10',
+    id: "docusaurus-implementation-en",
+    name: "docusaurus-implementation-prd.md",
+    fileName: "docusaurus-implementation-prd.md",
+    status: "draft",
+    owner: "Docs / Ops",
+    lastSynced: "2025-10-10",
   },
 ];
 
 /**
  * Status Badge Component
  */
-function StatusBadge({ status }: { status: PRD['status'] }) {
+function StatusBadge({ status }: { status: PRD["status"] }) {
   const labels = {
-    implemented: '✅ Implemented',
-    draft: '📝 Draft',
-    planned: '🔮 Planned',
+    implemented: "✅ Implemented",
+    draft: "📝 Draft",
+    planned: "🔮 Planned",
   };
 
   const colors = {
-    implemented: 'bg-green-500/10 text-green-700 border-green-500/20',
-    draft: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
-    planned: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
+    implemented: "bg-green-500/10 text-green-700 border-green-500/20",
+    draft: "bg-blue-500/10 text-blue-700 border-blue-500/20",
+    planned: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
   };
 
   return (
@@ -152,23 +152,23 @@ function PRDSection({
   description,
 }: {
   prds: PRD[];
-  language: 'pt' | 'en';
+  language: "pt" | "en";
   title: string;
   description: string;
 }) {
   const docsHubBase = resolveDocsHubBase();
   const docsHubFlagEnabled = isDocsHubEnabled();
   const [selectedPRD, setSelectedPRD] = useState<PRD | null>(null);
-  const [prdContent, setPrdContent] = useState<string>('');
+  const [prdContent, setPrdContent] = useState<string>("");
   const [loadingContent, setLoadingContent] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [activePrdUrl, setActivePrdUrl] = useState<string>('');
+  const [activePrdUrl, setActivePrdUrl] = useState<string>("");
 
   useEffect(() => {
     if (!selectedPRD) {
-      setPrdContent('');
+      setPrdContent("");
       setLoadError(null);
-      setActivePrdUrl('');
+      setActivePrdUrl("");
       return;
     }
 
@@ -185,8 +185,8 @@ function PRDSection({
         : null;
     const legacyUrl = `${getLegacyBaseUrl()}/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`;
     const fetchCandidates = [
-      ...(docsUrl ? [{ source: 'docs', url: docsUrl }] : []),
-      { source: 'legacy', url: legacyUrl },
+      ...(docsUrl ? [{ source: "docs", url: docsUrl }] : []),
+      { source: "legacy", url: legacyUrl },
     ] as const;
 
     const loadPrdContent = async () => {
@@ -203,7 +203,7 @@ function PRDSection({
             const content = await response.text();
             const contentWithoutFrontmatter = content.replace(
               /^---\n[\s\S]*?\n---\n/,
-              '',
+              "",
             );
             setPrdContent(contentWithoutFrontmatter);
             setActivePrdUrl(candidate.url);
@@ -213,33 +213,33 @@ function PRDSection({
             const message =
               candidateError instanceof Error
                 ? candidateError.message
-                : 'Unexpected error';
-            console.warn('[PRD Viewer] attempt failed', candidate.url, message);
+                : "Unexpected error";
+            console.warn("[PRD Viewer] attempt failed", candidate.url, message);
             lastError = message;
           }
         }
 
         throw new Error(
-          `Failed to load PRD from docs and legacy sources. Last error: ${lastError ?? 'unknown error'}`,
+          `Failed to load PRD from docs and legacy sources. Last error: ${lastError ?? "unknown error"}`,
         );
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'Unexpected error';
+          error instanceof Error ? error.message : "Unexpected error";
         console.error(
-          '[PRD Viewer] error loading file',
+          "[PRD Viewer] error loading file",
           selectedPRD?.fileName,
           message,
         );
-        setPrdContent('');
-        setActivePrdUrl('');
+        setPrdContent("");
+        setActivePrdUrl("");
         setLoadError(
           [
-            'PRD not available.',
+            "PRD not available.",
             docsEnabled
-              ? 'Verify docs build or disable VITE_USE_DOCS_V2_PRD until migration completes.'
-              : 'Legacy static fallback also failed. Confirm public/docs export is present.',
+              ? "Verify docs build or disable VITE_USE_DOCS_V2_PRD until migration completes."
+              : "Legacy static fallback also failed. Confirm public/docs export is present.",
             `Detail: ${message}`,
-          ].join(' '),
+          ].join(" "),
         );
       } finally {
         setLoadingContent(false);
@@ -348,8 +348,8 @@ function PRDSection({
                     if (preferredUrl) {
                       window.open(
                         preferredUrl,
-                        '_blank',
-                        'noopener,noreferrer',
+                        "_blank",
+                        "noopener,noreferrer",
                       );
                     }
                   }}
@@ -406,12 +406,12 @@ function PRDSection({
                 )}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Content source:{' '}
+                Content source:{" "}
                 {activePrdUrl
                   ? activePrdUrl
-                  : `/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`}{' '}
-                (docs migration mode{' '}
-                {docsHubFlagEnabled ? 'enabled' : 'disabled'})
+                  : `/docs_legacy/context/shared/product/prd/${language}/${selectedPRD.fileName}`}{" "}
+                (docs migration mode{" "}
+                {docsHubFlagEnabled ? "enabled" : "disabled"})
               </p>
             </div>
           </CardContent>

@@ -1,14 +1,14 @@
-import questDBClient from '../utils/questDBClient.js';
-import { logger } from '../config/logger.js';
-import { config } from '../config/appConfig.js';
-import { createPostgresIdeasRepository } from './postgres/IdeasRepository.js';
+import questDBClient from "../utils/questDBClient.js";
+import { logger } from "../config/logger.js";
+import { config } from "../config/appConfig.js";
+import { createPostgresIdeasRepository } from "./postgres/IdeasRepository.js";
 
 /**
  * Repository for managing documentation ideas in QuestDB
  */
 export class IdeasRepository {
   constructor() {
-    this.tableName = 'documentation_ideas';
+    this.tableName = "documentation_ideas";
   }
 
   /**
@@ -37,9 +37,9 @@ export class IdeasRepository {
         id,
         title: ideaData.title,
         description: ideaData.description || null,
-        status: ideaData.status || 'backlog',
+        status: ideaData.status || "backlog",
         category: ideaData.category,
-        priority: ideaData.priority || 'medium',
+        priority: ideaData.priority || "medium",
         assigned_to: ideaData.assigned_to || null,
         created_by: ideaData.created_by,
         system_id: ideaData.system_id || null,
@@ -49,18 +49,18 @@ export class IdeasRepository {
         due_date: ideaData.due_date || null,
         created_at: now,
         updated_at: now,
-        designated_timestamp: now
+        designated_timestamp: now,
       };
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation idea created', { id, title: ideaData.title });
+      logger.info("Documentation idea created", { id, title: ideaData.title });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to create documentation idea', {
+      logger.error("Failed to create documentation idea", {
         error: error.message,
-        data: ideaData
+        data: ideaData,
       });
       throw error;
     }
@@ -80,9 +80,9 @@ export class IdeasRepository {
 
       return this.transformRow(rows[0]);
     } catch (error) {
-      logger.error('Failed to find idea by ID', {
+      logger.error("Failed to find idea by ID", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -143,8 +143,8 @@ export class IdeasRepository {
       }
 
       // Add ordering
-      const orderBy = filters.order_by || 'updated_at';
-      const orderDirection = filters.order_direction || 'DESC';
+      const orderBy = filters.order_by || "updated_at";
+      const orderDirection = filters.order_direction || "DESC";
       sql += ` ORDER BY ${orderBy} ${orderDirection}`;
 
       // Add pagination
@@ -157,11 +157,11 @@ export class IdeasRepository {
       }
 
       const rows = await questDBClient.executeSelect(sql, params);
-      return rows.map(row => this.transformRow(row));
+      return rows.map((row) => this.transformRow(row));
     } catch (error) {
-      logger.error('Failed to find ideas', {
+      logger.error("Failed to find ideas", {
         error: error.message,
-        filters
+        filters,
       });
       throw error;
     }
@@ -179,17 +179,27 @@ export class IdeasRepository {
 
       // Build dynamic update query
       const allowedFields = [
-        'title', 'description', 'status', 'category', 'priority',
-        'assigned_to', 'system_id', 'tags', 'estimated_hours',
-        'actual_hours', 'due_date'
+        "title",
+        "description",
+        "status",
+        "category",
+        "priority",
+        "assigned_to",
+        "system_id",
+        "tags",
+        "estimated_hours",
+        "actual_hours",
+        "due_date",
       ];
 
       for (const field of allowedFields) {
         if (updateData[field] !== undefined) {
           fields.push(`${field} = :${field}`);
 
-          if (field === 'tags') {
-            params[field] = updateData[field] ? JSON.stringify(updateData[field]) : null;
+          if (field === "tags") {
+            params[field] = updateData[field]
+              ? JSON.stringify(updateData[field])
+              : null;
           } else {
             params[field] = updateData[field];
           }
@@ -197,33 +207,36 @@ export class IdeasRepository {
       }
 
       // Handle completed_at when status changes to 'done'
-      if (updateData.status === 'done') {
-        fields.push('completed_at = :completed_at');
+      if (updateData.status === "done") {
+        fields.push("completed_at = :completed_at");
         params.completed_at = now;
       }
 
       if (fields.length === 0) {
-        throw new Error('No valid fields to update');
+        throw new Error("No valid fields to update");
       }
 
-      fields.push('updated_at = :updated_at');
+      fields.push("updated_at = :updated_at");
 
       const sql = `
         UPDATE ${this.tableName}
-        SET ${fields.join(', ')}
+        SET ${fields.join(", ")}
         WHERE id = :id
       `;
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation idea updated', { id, fields: fields.join(', ') });
+      logger.info("Documentation idea updated", {
+        id,
+        fields: fields.join(", "),
+      });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to update documentation idea', {
+      logger.error("Failed to update documentation idea", {
         error: error.message,
         id,
-        updateData
+        updateData,
       });
       throw error;
     }
@@ -237,19 +250,19 @@ export class IdeasRepository {
       // First check if idea exists
       const existing = await this.findById(id);
       if (!existing) {
-        throw new Error('Idea not found');
+        throw new Error("Idea not found");
       }
 
       const sql = `DELETE FROM ${this.tableName} WHERE id = :id`;
       await questDBClient.executeWrite(sql, { id });
 
-      logger.info('Documentation idea deleted', { id, title: existing.title });
+      logger.info("Documentation idea deleted", { id, title: existing.title });
 
       return true;
     } catch (error) {
-      logger.error('Failed to delete documentation idea', {
+      logger.error("Failed to delete documentation idea", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -259,7 +272,11 @@ export class IdeasRepository {
    * Get ideas by status (for Kanban board)
    */
   async findByStatus(status) {
-    return this.findAll({ status, order_by: 'priority', order_direction: 'DESC' });
+    return this.findAll({
+      status,
+      order_by: "priority",
+      order_direction: "DESC",
+    });
   }
 
   /**
@@ -311,7 +328,7 @@ export class IdeasRepository {
     const now = questDBClient.getCurrentTimestamp();
     return this.findAll({
       due_date_to: now,
-      status: ['backlog', 'todo', 'in_progress']
+      status: ["backlog", "todo", "in_progress"],
     });
   }
 
@@ -345,15 +362,15 @@ export class IdeasRepository {
         hours: {
           total_estimated: 0,
           total_actual: 0,
-          completion_rate: 0
-        }
+          completion_rate: 0,
+        },
       };
 
       let totalEstimated = 0;
       let totalActual = 0;
       let completedCount = 0;
 
-      rows.forEach(row => {
+      rows.forEach((row) => {
         stats.total += row.count;
 
         // Group by status
@@ -388,7 +405,7 @@ export class IdeasRepository {
           totalActual += row.avg_actual_hours * row.count;
         }
 
-        if (row.status === 'done') {
+        if (row.status === "done") {
           completedCount += row.count;
         }
       });
@@ -397,13 +414,15 @@ export class IdeasRepository {
       stats.hours.total_actual = Math.round(totalActual);
 
       if (stats.total > 0) {
-        stats.hours.completion_rate = Math.round((completedCount / stats.total) * 100);
+        stats.hours.completion_rate = Math.round(
+          (completedCount / stats.total) * 100,
+        );
       }
 
       return stats;
     } catch (error) {
-      logger.error('Failed to get idea statistics', {
-        error: error.message
+      logger.error("Failed to get idea statistics", {
+        error: error.message,
       });
       throw error;
     }
@@ -422,8 +441,10 @@ export class IdeasRepository {
       updated_at: new Date(row.updated_at),
       due_date: row.due_date ? new Date(row.due_date) : null,
       completed_at: row.completed_at ? new Date(row.completed_at) : null,
-      estimated_hours: row.estimated_hours ? parseInt(row.estimated_hours) : null,
-      actual_hours: row.actual_hours ? parseInt(row.actual_hours) : null
+      estimated_hours: row.estimated_hours
+        ? parseInt(row.estimated_hours)
+        : null,
+      actual_hours: row.actual_hours ? parseInt(row.actual_hours) : null,
     };
   }
 }
@@ -432,7 +453,7 @@ let repositoryInstance = null;
 
 export function getIdeasRepository() {
   if (!repositoryInstance) {
-    if (config.database.strategy === 'postgres') {
+    if (config.database.strategy === "postgres") {
       repositoryInstance = createPostgresIdeasRepository();
     } else {
       repositoryInstance = new IdeasRepository();

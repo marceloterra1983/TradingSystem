@@ -1,21 +1,21 @@
 /**
  * Base PostgreSQL Client
- * 
+ *
  * Abstract base class for all PostgreSQL-compatible database clients.
  * Eliminates code duplication across NeonClient, PostgreSQLClient, and TimescaleDBClient.
- * 
+ *
  * Features:
  * - Connection pooling
  * - Automatic reconnection
  * - Query timeout handling
  * - Row mapping (snake_case → camelCase)
  * - JSONB and array handling
- * 
+ *
  * @abstract
  * @module db/base-postgresql-client
  */
 
-import pg from 'pg';
+import pg from "pg";
 
 export class BasePostgreSQLClient {
   /**
@@ -60,7 +60,7 @@ export class BasePostgreSQLClient {
         min: this.config.min || 2,
         idleTimeoutMillis: this.config.idleTimeoutMillis || 30000,
         connectionTimeoutMillis: this.config.connectionTimeoutMillis || 5000,
-        
+
         // Set search path to specified schema
         options: `-c search_path=${this.config.schema},public`,
       };
@@ -78,19 +78,27 @@ export class BasePostgreSQLClient {
       this.pool = new pg.Pool(poolConfig);
 
       // Handle pool errors
-      this.pool.on('error', (err) => {
-        console.error(`[${this.clientName}] Unexpected error on idle client:`, err);
+      this.pool.on("error", (err) => {
+        console.error(
+          `[${this.clientName}] Unexpected error on idle client:`,
+          err,
+        );
       });
 
       // Test connection
       const client = await this.pool.connect();
-      await client.query('SELECT 1 AS health_check');
+      await client.query("SELECT 1 AS health_check");
       client.release();
 
       this.ready = true;
-      console.log(`[${this.clientName}] Connected successfully to ${this.config.database}`);
+      console.log(
+        `[${this.clientName}] Connected successfully to ${this.config.database}`,
+      );
     } catch (error) {
-      console.error(`[${this.clientName}] Failed to initialize connection:`, error);
+      console.error(
+        `[${this.clientName}] Failed to initialize connection:`,
+        error,
+      );
       throw error;
     }
   }
@@ -98,7 +106,7 @@ export class BasePostgreSQLClient {
   /**
    * Map database row to API-friendly format
    * Converts snake_case to camelCase and handles null values
-   * 
+   *
    * @param {Object} row - Database row
    * @returns {Object} Mapped row
    */
@@ -109,7 +117,8 @@ export class BasePostgreSQLClient {
       ...row,
       id: String(row.id), // Convert integer ID to string for frontend compatibility
       tags: Array.isArray(row.tags) ? row.tags : [],
-      metadata: row.metadata && typeof row.metadata === 'object' ? row.metadata : {},
+      metadata:
+        row.metadata && typeof row.metadata === "object" ? row.metadata : {},
       updatedAt: row.updated_at ?? row.created_at,
       createdAt: row.created_at,
       createdBy: row.created_by,
@@ -119,23 +128,23 @@ export class BasePostgreSQLClient {
 
   /**
    * Map JavaScript field names to database column names
-   * 
+   *
    * @param {string} jsField - JavaScript field name (camelCase)
    * @returns {string} Database column name (snake_case)
    */
   mapFieldName(jsField) {
     const fieldMap = {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-      createdBy: 'created_by',
-      updatedBy: 'updated_by',
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      createdBy: "created_by",
+      updatedBy: "updated_by",
     };
     return fieldMap[jsField] || jsField;
   }
 
   /**
    * Get all items
-   * 
+   *
    * @returns {Promise<Array>} Array of workspace items
    */
   async getItems() {
@@ -170,7 +179,7 @@ export class BasePostgreSQLClient {
 
   /**
    * Get a single item by ID
-   * 
+   *
    * @param {string|number} id - Item ID
    * @returns {Promise<Object|null>} Item or null if not found
    */
@@ -206,7 +215,7 @@ export class BasePostgreSQLClient {
 
   /**
    * Create a new item
-   * 
+   *
    * @param {Object} item - Item data
    * @returns {Promise<Object>} Created item
    */
@@ -237,14 +246,14 @@ export class BasePostgreSQLClient {
         item.title,
         item.description,
         item.category,
-        item.priority || 'medium',
-        item.status || 'new',
+        item.priority || "medium",
+        item.status || "new",
         Array.isArray(item.tags) ? item.tags : [],
         item.createdAt ? new Date(item.createdAt) : new Date(),
         item.updatedAt ? new Date(item.updatedAt) : new Date(),
         item.createdBy || null,
         item.updatedBy || null,
-        item.metadata && typeof item.metadata === 'object' ? item.metadata : {},
+        item.metadata && typeof item.metadata === "object" ? item.metadata : {},
       ];
 
       const result = await this.pool.query(query, values);
@@ -257,7 +266,7 @@ export class BasePostgreSQLClient {
 
   /**
    * Update an existing item
-   * 
+   *
    * @param {string|number} id - Item ID
    * @param {Object} updates - Fields to update
    * @returns {Promise<Object|null>} Updated item or null if not found
@@ -275,13 +284,17 @@ export class BasePostgreSQLClient {
       updates.updatedAt = new Date().toISOString();
 
       Object.keys(updates).forEach((key) => {
-        if (key === 'tags') {
+        if (key === "tags") {
           updateFields.push(`${this.mapFieldName(key)} = $${paramIndex}`);
           values.push(Array.isArray(updates[key]) ? updates[key] : []);
-        } else if (key === 'metadata') {
+        } else if (key === "metadata") {
           updateFields.push(`${this.mapFieldName(key)} = $${paramIndex}`);
-          values.push(updates[key] && typeof updates[key] === 'object' ? updates[key] : {});
-        } else if (key === 'createdAt' || key === 'updatedAt') {
+          values.push(
+            updates[key] && typeof updates[key] === "object"
+              ? updates[key]
+              : {},
+          );
+        } else if (key === "createdAt" || key === "updatedAt") {
           updateFields.push(`${this.mapFieldName(key)} = $${paramIndex}`);
           values.push(new Date(updates[key]));
         } else {
@@ -295,7 +308,7 @@ export class BasePostgreSQLClient {
 
       const query = `
         UPDATE ${this.config.table}
-        SET ${updateFields.join(', ')}
+        SET ${updateFields.join(", ")}
         WHERE id = $${paramIndex}
         RETURNING
           id,
@@ -327,7 +340,7 @@ export class BasePostgreSQLClient {
 
   /**
    * Delete an item
-   * 
+   *
    * @param {string|number} id - Item ID
    * @returns {Promise<boolean>} True if deleted, false if not found
    */
@@ -346,7 +359,7 @@ export class BasePostgreSQLClient {
 
   /**
    * Get categories
-   * 
+   *
    * @returns {Promise<Array>} Array of categories
    */
   async getCategories() {
@@ -387,4 +400,3 @@ export class BasePostgreSQLClient {
     }
   }
 }
-

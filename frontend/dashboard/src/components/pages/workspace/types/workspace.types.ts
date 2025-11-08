@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from "lucide-react";
 
 /**
  * Data Structures
@@ -6,14 +6,14 @@ import type { LucideIcon } from 'lucide-react';
 // Categories are now loaded dynamically from the API
 export type ItemCategory = string;
 
-export type ItemPriority = 'low' | 'medium' | 'high' | 'critical';
+export type ItemPriority = "low" | "medium" | "high" | "critical";
 
 export type ItemStatus =
-  | 'new'
-  | 'review'
-  | 'in-progress'
-  | 'completed'
-  | 'rejected';
+  | "new"
+  | "review"
+  | "in-progress"
+  | "completed"
+  | "rejected";
 
 export interface Item {
   id: string;

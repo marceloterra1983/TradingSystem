@@ -2,6 +2,5 @@
  * Centralized exports for Telegram Gateway hooks
  */
 
-export * from './useGatewayData';
-export * from './useChannelManager';
-
+export * from "./useGatewayData";
+export * from "./useChannelManager";

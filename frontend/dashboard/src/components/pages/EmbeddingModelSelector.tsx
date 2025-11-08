@@ -7,7 +7,7 @@
  * @module components/pages/EmbeddingModelSelector
  */
 
-import React from 'react';
+import React from "react";
 import {
   Check,
   AlertCircle,
@@ -15,17 +15,17 @@ import {
   Zap,
   Target,
   Sparkles,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Badge } from '../ui/badge';
-import { cn } from '../../lib/utils';
-import type { EmbeddingModel } from '../../types/collections';
+} from "../ui/select";
+import { Badge } from "../ui/badge";
+import { cn } from "../../lib/utils";
+import type { EmbeddingModel } from "../../types/collections";
 
 /**
  * Component props
@@ -43,11 +43,11 @@ interface EmbeddingModelSelectorProps {
  */
 const getPerformanceIcon = (performance?: string) => {
   switch (performance) {
-    case 'fast':
+    case "fast":
       return <Zap className="h-4 w-4 text-blue-500" />;
-    case 'quality':
+    case "quality":
       return <Sparkles className="h-4 w-4 text-purple-500" />;
-    case 'balanced':
+    case "balanced":
       return <Target className="h-4 w-4 text-emerald-500" />;
     default:
       return null;
@@ -69,7 +69,7 @@ export const EmbeddingModelSelector: React.FC<EmbeddingModelSelectorProps> = ({
    */
   const getSelectedModelDisplay = (): string => {
     const selected = models.find((m) => m.name === value);
-    if (!selected) return 'Selecione um modelo';
+    if (!selected) return "Selecione um modelo";
 
     return `${selected.name} (${selected.dimensions}d)`;
   };
@@ -98,7 +98,7 @@ export const EmbeddingModelSelector: React.FC<EmbeddingModelSelectorProps> = ({
       onValueChange={onChange}
       disabled={disabled || models.length === 0}
     >
-      <SelectTrigger className={cn('w-full', className)}>
+      <SelectTrigger className={cn("w-full", className)}>
         <SelectValue placeholder="Selecione um modelo">
           {getSelectedModelDisplay()}
         </SelectValue>
@@ -155,9 +155,9 @@ export const EmbeddingModelSelector: React.FC<EmbeddingModelSelectorProps> = ({
                       <div className="flex items-center gap-1">
                         {getPerformanceIcon(model.performance)}
                         <span className="text-xs capitalize text-slate-500">
-                          {model.performance === 'fast' && 'Rápido'}
-                          {model.performance === 'quality' && 'Alta Qualidade'}
-                          {model.performance === 'balanced' && 'Equilibrado'}
+                          {model.performance === "fast" && "Rápido"}
+                          {model.performance === "quality" && "Alta Qualidade"}
+                          {model.performance === "balanced" && "Equilibrado"}
                         </span>
                       </div>
                     )}

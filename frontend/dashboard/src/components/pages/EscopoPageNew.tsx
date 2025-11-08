@@ -6,7 +6,7 @@ import {
   Building2,
   ListChecks,
   AlertTriangle,
-} from 'lucide-react';
+} from "lucide-react";
 
 /**
  * Escopo Page (New) - TradingSystem Project Overview
@@ -136,7 +136,7 @@ function EscopoTechStack() {
             Linguagens
           </h3>
           <div className="flex flex-wrap gap-2">
-            {['TypeScript', 'JavaScript', 'Python', 'C#'].map((tech) => (
+            {["TypeScript", "JavaScript", "Python", "C#"].map((tech) => (
               <span
                 key={tech}
                 className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm"
@@ -152,12 +152,12 @@ function EscopoTechStack() {
           </h3>
           <div className="flex flex-wrap gap-2">
             {[
-              'React',
-              'Express',
-              'Vite',
-              'TailwindCSS',
-              'Prisma',
-              'LlamaIndex',
+              "React",
+              "Express",
+              "Vite",
+              "TailwindCSS",
+              "Prisma",
+              "LlamaIndex",
             ].map((tech) => (
               <span
                 key={tech}
@@ -173,7 +173,7 @@ function EscopoTechStack() {
             Databases & Storage
           </h3>
           <div className="flex flex-wrap gap-2">
-            {['TimescaleDB', 'QuestDB', 'PostgreSQL', 'Redis', 'Qdrant'].map(
+            {["TimescaleDB", "QuestDB", "PostgreSQL", "Redis", "Qdrant"].map(
               (tech) => (
                 <span
                   key={tech}
@@ -202,29 +202,29 @@ function EscopoSystems() {
       <div className="grid grid-cols-1 gap-3">
         {[
           {
-            name: 'Dashboard',
-            port: '3103',
-            desc: 'Interface principal React + Vite',
+            name: "Dashboard",
+            port: "3103",
+            desc: "Interface principal React + Vite",
           },
           {
-            name: 'Workspace API',
-            port: '3200',
-            desc: 'Gestão de workspace e documentação',
+            name: "Workspace API",
+            port: "3200",
+            desc: "Gestão de workspace e documentação",
           },
           {
-            name: 'Documentation API',
-            port: '3400',
-            desc: 'API de busca e gerenciamento de docs',
+            name: "Documentation API",
+            port: "3400",
+            desc: "API de busca e gerenciamento de docs",
           },
           {
-            name: 'Status API',
-            port: '3500',
-            desc: 'Monitoramento e orquestração',
+            name: "Status API",
+            port: "3500",
+            desc: "Monitoramento e orquestração",
           },
           {
-            name: 'TP-Capital',
-            port: '4005',
-            desc: 'Ingestão de sinais Telegram',
+            name: "TP-Capital",
+            port: "4005",
+            desc: "Ingestão de sinais Telegram",
           },
         ].map((system) => (
           <div

@@ -1,11 +1,11 @@
-import * as React from 'react';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import * as React from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "../../lib/utils";
 import {
   isBrowser,
   safeLocalStorageGet,
   safeLocalStorageSet,
-} from '../../utils/browser';
+} from "../../utils/browser";
 
 export interface CollapsibleCardProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -47,9 +47,9 @@ export const CollapsibleCard = React.forwardRef<
         setIsCollapsed(newState);
       };
 
-      window.addEventListener('collapse-all-cards', handleCollapseAll);
+      window.addEventListener("collapse-all-cards", handleCollapseAll);
       return () =>
-        window.removeEventListener('collapse-all-cards', handleCollapseAll);
+        window.removeEventListener("collapse-all-cards", handleCollapseAll);
     }, [cardId]);
 
     const toggleCollapsed = () => {
@@ -67,8 +67,8 @@ export const CollapsibleCard = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'rounded-xl border shadow-[var(--ts-shadow-sm)] transition-all duration-200',
-          'border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] hover:shadow-[var(--ts-shadow-lg)]',
+          "rounded-xl border shadow-[var(--ts-shadow-sm)] transition-all duration-200",
+          "border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] hover:shadow-[var(--ts-shadow-lg)]",
           className,
         )}
         {...props}
@@ -77,23 +77,23 @@ export const CollapsibleCard = React.forwardRef<
           if (
             React.isValidElement<CollapsibleCardHeaderProps>(child) &&
             (child.type === CollapsibleCardHeader ||
-              child.props.__collapsibleType === 'header')
+              child.props.__collapsibleType === "header")
           ) {
             return React.cloneElement(child, {
               isCollapsed,
               onToggle: toggleCollapsed,
-              __collapsibleType: 'header' as const,
+              __collapsibleType: "header" as const,
             });
           }
 
           if (
             React.isValidElement<CollapsibleCardContentProps>(child) &&
             (child.type === CollapsibleCardContent ||
-              child.props.__collapsibleType === 'content')
+              child.props.__collapsibleType === "content")
           ) {
             return React.cloneElement(child, {
               isCollapsed,
-              __collapsibleType: 'content' as const,
+              __collapsibleType: "content" as const,
             });
           }
 
@@ -104,14 +104,14 @@ export const CollapsibleCard = React.forwardRef<
   },
 );
 
-CollapsibleCard.displayName = 'CollapsibleCard';
+CollapsibleCard.displayName = "CollapsibleCard";
 
 export interface CollapsibleCardHeaderProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   isCollapsed?: boolean;
   onToggle?: () => void;
-  __collapsibleType?: 'header';
+  __collapsibleType?: "header";
 }
 
 const CollapsibleCardHeaderComponent = React.forwardRef<
@@ -133,7 +133,7 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
       if (!onToggle) {
         return;
       }
-      if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         event.stopPropagation();
         onToggle();
@@ -144,8 +144,8 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'flex items-center gap-4 border-b border-[color:var(--ts-surface-border)] px-6 py-4 transition-colors',
-          isCollapsed && 'border-b-0',
+          "flex items-center gap-4 border-b border-[color:var(--ts-surface-border)] px-6 py-4 transition-colors",
+          isCollapsed && "border-b-0",
           className,
         )}
         {...props}
@@ -156,17 +156,17 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
           onClick={handleChevronClick}
           onKeyDown={handleChevronKeyDown}
           className={cn(
-            'flex-shrink-0 rounded-md p-1 transition-colors',
-            'hover:bg-[color:var(--ts-surface-hover)]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ts-accent)]',
+            "flex-shrink-0 rounded-md p-1 transition-colors",
+            "hover:bg-[color:var(--ts-surface-hover)]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ts-accent)]",
           )}
-          aria-label={isCollapsed ? 'Expandir seção' : 'Recolher seção'}
+          aria-label={isCollapsed ? "Expandir seção" : "Recolher seção"}
           aria-expanded={!isCollapsed}
         >
           <ChevronDown
             className={cn(
-              'h-5 w-5 text-[color:var(--ts-text-muted)] transition-transform duration-200',
-              isCollapsed && 'rotate-180',
+              "h-5 w-5 text-[color:var(--ts-text-muted)] transition-transform duration-200",
+              isCollapsed && "rotate-180",
             )}
           />
         </button>
@@ -175,12 +175,12 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
   },
 );
 
-CollapsibleCardHeaderComponent.displayName = 'CollapsibleCardHeader';
+CollapsibleCardHeaderComponent.displayName = "CollapsibleCardHeader";
 
 export const CollapsibleCardHeader = Object.assign(
   CollapsibleCardHeaderComponent,
   {
-    __collapsibleType: 'header' as const,
+    __collapsibleType: "header" as const,
   },
 );
 
@@ -201,7 +201,7 @@ export const CollapsibleCardTitle = React.forwardRef<
     {
       ref,
       className: cn(
-        'text-lg font-semibold text-[color:var(--ts-text-primary)]',
+        "text-lg font-semibold text-[color:var(--ts-text-primary)]",
         className,
       ),
       ...props,
@@ -210,7 +210,7 @@ export const CollapsibleCardTitle = React.forwardRef<
   );
 });
 
-CollapsibleCardTitle.displayName = 'CollapsibleCardTitle';
+CollapsibleCardTitle.displayName = "CollapsibleCardTitle";
 
 export interface CollapsibleCardDescriptionProps
   extends React.HTMLAttributes<HTMLParagraphElement> {
@@ -224,7 +224,10 @@ export const CollapsibleCardDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn('mt-1 text-sm text-[color:var(--ts-text-muted)]', className)}
+      className={cn(
+        "mt-1 text-sm text-[color:var(--ts-text-muted)]",
+        className,
+      )}
       {...props}
     >
       {children}
@@ -232,13 +235,13 @@ export const CollapsibleCardDescription = React.forwardRef<
   );
 });
 
-CollapsibleCardDescription.displayName = 'CollapsibleCardDescription';
+CollapsibleCardDescription.displayName = "CollapsibleCardDescription";
 
 export interface CollapsibleCardContentProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   isCollapsed?: boolean;
-  __collapsibleType?: 'content';
+  __collapsibleType?: "content";
 }
 
 const CollapsibleCardContentComponent = React.forwardRef<
@@ -249,23 +252,23 @@ const CollapsibleCardContentComponent = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'overflow-hidden transition-all duration-200',
-        isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[5000px] opacity-100',
+        "overflow-hidden transition-all duration-200",
+        isCollapsed ? "max-h-0 opacity-0" : "max-h-[5000px] opacity-100",
       )}
     >
-      <div className={cn('px-6 py-4', className)} {...props}>
+      <div className={cn("px-6 py-4", className)} {...props}>
         {children}
       </div>
     </div>
   );
 });
 
-CollapsibleCardContentComponent.displayName = 'CollapsibleCardContent';
+CollapsibleCardContentComponent.displayName = "CollapsibleCardContent";
 
 export const CollapsibleCardContent = Object.assign(
   CollapsibleCardContentComponent,
   {
-    __collapsibleType: 'content' as const,
+    __collapsibleType: "content" as const,
   },
 );
 
@@ -282,7 +285,7 @@ export const CollapsibleCardFooter = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'border-t border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-6 py-4',
+        "border-t border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-1)] px-6 py-4",
         className,
       )}
       {...props}
@@ -292,4 +295,4 @@ export const CollapsibleCardFooter = React.forwardRef<
   );
 });
 
-CollapsibleCardFooter.displayName = 'CollapsibleCardFooter';
+CollapsibleCardFooter.displayName = "CollapsibleCardFooter";

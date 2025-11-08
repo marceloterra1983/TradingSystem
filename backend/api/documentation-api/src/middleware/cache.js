@@ -13,7 +13,7 @@ const cache = new Map();
 export function cacheMiddleware(ttlSeconds = 300) {
   return (req, res, next) => {
     // Only cache GET requests
-    if (req.method !== 'GET') {
+    if (req.method !== "GET") {
       return next();
     }
 
@@ -22,8 +22,11 @@ export function cacheMiddleware(ttlSeconds = 300) {
 
     // Check if cached and not expired
     if (cached && Date.now() < cached.expiresAt) {
-      res.setHeader('X-Cache', 'HIT');
-      res.setHeader('X-Cache-Expires', new Date(cached.expiresAt).toISOString());
+      res.setHeader("X-Cache", "HIT");
+      res.setHeader(
+        "X-Cache-Expires",
+        new Date(cached.expiresAt).toISOString(),
+      );
       return res.json(cached.data);
     }
 
@@ -35,11 +38,11 @@ export function cacheMiddleware(ttlSeconds = 300) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         cache.set(key, {
           data,
-          expiresAt: Date.now() + (ttlSeconds * 1000)
+          expiresAt: Date.now() + ttlSeconds * 1000,
         });
 
-        res.setHeader('X-Cache', 'MISS');
-        res.setHeader('X-Cache-TTL', `${ttlSeconds}s`);
+        res.setHeader("X-Cache", "MISS");
+        res.setHeader("X-Cache-TTL", `${ttlSeconds}s`);
       }
 
       return originalJson(data);
@@ -76,7 +79,7 @@ export function getCacheStats() {
     total_entries: entries.length,
     active_entries: entries.filter(([_, v]) => now < v.expiresAt).length,
     expired_entries: entries.filter(([_, v]) => now >= v.expiresAt).length,
-    total_size_bytes: JSON.stringify(Array.from(cache.values())).length
+    total_size_bytes: JSON.stringify(Array.from(cache.values())).length,
   };
 }
 
@@ -98,9 +101,12 @@ export function cleanExpiredCache() {
 }
 
 // Auto-cleanup expired entries every 10 minutes
-setInterval(() => {
-  const removed = cleanExpiredCache();
-  if (removed > 0) {
-    console.log(`[Cache] Cleaned ${removed} expired entries`);
-  }
-}, 10 * 60 * 1000);
+setInterval(
+  () => {
+    const removed = cleanExpiredCache();
+    if (removed > 0) {
+      console.log(`[Cache] Cleaned ${removed} expired entries`);
+    }
+  },
+  10 * 60 * 1000,
+);

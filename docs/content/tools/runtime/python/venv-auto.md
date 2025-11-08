@@ -1,4 +1,12 @@
-# 🎯 Venv Automático por Projeto - CONFIGURADO
+---
+title: "Venv Auto"
+tags: [documentation]
+domain: devops
+type: guide
+summary: "Documentation for Venv Auto"
+status: active
+last_review: "2025-11-08"
+---# 🎯 Venv Automático por Projeto - CONFIGURADO
 
 ## ✅ Como Funciona Agora
 

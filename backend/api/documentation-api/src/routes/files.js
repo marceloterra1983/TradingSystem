@@ -1,8 +1,8 @@
-import express from 'express';
-import FilesService from '../services/FilesService.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import { upload, handleUploadError } from '../middleware/upload.js';
-import { logger } from '../config/logger.js';
+import express from "express";
+import FilesService from "../services/FilesService.js";
+import { asyncHandler } from "../middleware/errorHandler.js";
+import { upload, handleUploadError } from "../middleware/upload.js";
+import { logger } from "../config/logger.js";
 
 const router = express.Router();
 
@@ -11,17 +11,17 @@ const router = express.Router();
  * Upload single file
  */
 router.post(
-  '/upload',
-  upload.single('file'),
+  "/upload",
+  upload.single("file"),
   handleUploadError,
   asyncHandler(async (req, res) => {
     const { system_id, idea_id, description, is_public } = req.body;
-    const userId = req.headers['x-user-id'] || 'anonymous';
+    const userId = req.headers["x-user-id"] || "anonymous";
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        error: 'No file uploaded'
+        error: "No file uploaded",
       });
     }
 
@@ -33,34 +33,38 @@ router.post(
       system_id: system_id || null,
       idea_id: idea_id || null,
       description: description || null,
-      is_public: is_public === 'true' || is_public === true
+      is_public: is_public === "true" || is_public === true,
     };
 
     // Read file buffer
-    const fs = await import('fs');
+    const fs = await import("fs");
     const fileBuffer = fs.readFileSync(req.file.path);
 
     try {
-      const fileRecord = await FilesService.uploadFile(fileData, fileBuffer, userId);
+      const fileRecord = await FilesService.uploadFile(
+        fileData,
+        fileBuffer,
+        userId,
+      );
 
       res.status(201).json({
         success: true,
         data: fileRecord,
-        message: 'File uploaded successfully'
+        message: "File uploaded successfully",
       });
     } catch (error) {
       // Clean up uploaded file if database operation fails
       try {
         fs.unlinkSync(req.file.path);
       } catch (cleanupError) {
-        logger.error('Failed to clean up file after error', {
+        logger.error("Failed to clean up file after error", {
           error: cleanupError.message,
-          path: req.file.path
+          path: req.file.path,
         });
       }
       throw error;
     }
-  })
+  }),
 );
 
 /**
@@ -68,21 +72,21 @@ router.post(
  * Upload multiple files
  */
 router.post(
-  '/upload-multiple',
-  upload.array('files', 5),
+  "/upload-multiple",
+  upload.array("files", 5),
   handleUploadError,
   asyncHandler(async (req, res) => {
     const { system_id, idea_id, description, is_public } = req.body;
-    const userId = req.headers['x-user-id'] || 'anonymous';
+    const userId = req.headers["x-user-id"] || "anonymous";
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'No files uploaded'
+        error: "No files uploaded",
       });
     }
 
-    const fs = await import('fs');
+    const fs = await import("fs");
     const uploadedFiles = [];
     const errors = [];
 
@@ -97,29 +101,32 @@ router.post(
           system_id: system_id || null,
           idea_id: idea_id || null,
           description: description || null,
-          is_public: is_public === 'true' || is_public === true
+          is_public: is_public === "true" || is_public === true,
         };
 
         // Read file buffer
         const fileBuffer = fs.readFileSync(file.path);
 
         // Upload file
-        const fileRecord = await FilesService.uploadFile(fileData, fileBuffer, userId);
+        const fileRecord = await FilesService.uploadFile(
+          fileData,
+          fileBuffer,
+          userId,
+        );
         uploadedFiles.push(fileRecord);
-
       } catch (error) {
         errors.push({
           filename: file.originalname,
-          error: error.message
+          error: error.message,
         });
 
         // Clean up failed file
         try {
           fs.unlinkSync(file.path);
         } catch (cleanupError) {
-          logger.error('Failed to clean up file after error', {
+          logger.error("Failed to clean up file after error", {
             error: cleanupError.message,
-            path: file.path
+            path: file.path,
           });
         }
       }
@@ -128,8 +135,8 @@ router.post(
     if (uploadedFiles.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'No files were uploaded successfully',
-        details: errors
+        error: "No files were uploaded successfully",
+        details: errors,
       });
     }
 
@@ -139,9 +146,9 @@ router.post(
       success: true,
       data: uploadedFiles,
       message: `${uploadedFiles.length} file(s) uploaded successfully`,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     });
-  })
+  }),
 );
 
 /**
@@ -149,7 +156,7 @@ router.post(
  * List all files with filtering
  */
 router.get(
-  '/',
+  "/",
   asyncHandler(async (req, res) => {
     const filters = {
       system_id: req.query.system_id,
@@ -164,8 +171,8 @@ router.get(
       created_to: req.query.created_to,
       limit: req.query.limit ? parseInt(req.query.limit) : 50,
       offset: req.query.offset ? parseInt(req.query.offset) : 0,
-      order_by: req.query.order_by || 'created_at',
-      order_direction: req.query.order_direction || 'DESC'
+      order_by: req.query.order_by || "created_at",
+      order_direction: req.query.order_direction || "DESC",
     };
 
     const result = await FilesService.listFiles(filters);
@@ -176,10 +183,10 @@ router.get(
       pagination: {
         total: result.length,
         limit: filters.limit,
-        offset: filters.offset
-      }
+        offset: filters.offset,
+      },
     });
-  })
+  }),
 );
 
 /**
@@ -187,15 +194,15 @@ router.get(
  * Get file metadata by ID
  */
 router.get(
-  '/:id',
+  "/:id",
   asyncHandler(async (req, res) => {
     const file = await FilesService.getFile(req.params.id);
 
     res.json({
       success: true,
-      data: file
+      data: file,
     });
-  })
+  }),
 );
 
 /**
@@ -203,18 +210,20 @@ router.get(
  * Download file
  */
 router.get(
-  '/:id/download',
+  "/:id/download",
   asyncHandler(async (req, res) => {
-    const { content, filename, mime_type } = await FilesService.downloadFile(req.params.id);
+    const { content, filename, mime_type } = await FilesService.downloadFile(
+      req.params.id,
+    );
 
     res.set({
-      'Content-Type': mime_type,
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-cache'
+      "Content-Type": mime_type,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-cache",
     });
 
     res.send(content);
-  })
+  }),
 );
 
 /**
@@ -222,17 +231,21 @@ router.get(
  * Update file metadata
  */
 router.put(
-  '/:id',
+  "/:id",
   asyncHandler(async (req, res) => {
-    const userId = req.headers['x-user-id'] || 'anonymous';
-    const updatedFile = await FilesService.updateFile(req.params.id, req.body, userId);
+    const userId = req.headers["x-user-id"] || "anonymous";
+    const updatedFile = await FilesService.updateFile(
+      req.params.id,
+      req.body,
+      userId,
+    );
 
     res.json({
       success: true,
       data: updatedFile,
-      message: 'File metadata updated successfully'
+      message: "File metadata updated successfully",
     });
-  })
+  }),
 );
 
 /**
@@ -240,16 +253,16 @@ router.put(
  * Delete file
  */
 router.delete(
-  '/:id',
+  "/:id",
   asyncHandler(async (req, res) => {
-    const userId = req.headers['x-user-id'] || 'anonymous';
+    const userId = req.headers["x-user-id"] || "anonymous";
     await FilesService.deleteFile(req.params.id, userId);
 
     res.json({
       success: true,
-      message: 'File deleted successfully'
+      message: "File deleted successfully",
     });
-  })
+  }),
 );
 
 /**
@@ -257,16 +270,16 @@ router.delete(
  * Get files for a specific idea
  */
 router.get(
-  '/idea/:ideaId',
+  "/idea/:ideaId",
   asyncHandler(async (req, res) => {
     const files = await FilesService.getFilesForIdea(req.params.ideaId);
 
     res.json({
       success: true,
       data: files,
-      count: files.length
+      count: files.length,
     });
-  })
+  }),
 );
 
 /**
@@ -274,16 +287,16 @@ router.get(
  * Get files for a specific system
  */
 router.get(
-  '/system/:systemId',
+  "/system/:systemId",
   asyncHandler(async (req, res) => {
     const files = await FilesService.getFilesForSystem(req.params.systemId);
 
     res.json({
       success: true,
       data: files,
-      count: files.length
+      count: files.length,
     });
-  })
+  }),
 );
 
 /**
@@ -291,14 +304,14 @@ router.get(
  * Search files
  */
 router.get(
-  '/search',
+  "/search",
   asyncHandler(async (req, res) => {
     const { q: query } = req.query;
 
     if (!query || query.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        error: 'Search query must be at least 2 characters long'
+        error: "Search query must be at least 2 characters long",
       });
     }
 
@@ -308,9 +321,9 @@ router.get(
       success: true,
       data: files,
       count: files.length,
-      query: query.trim()
+      query: query.trim(),
     });
-  })
+  }),
 );
 
 /**
@@ -318,15 +331,15 @@ router.get(
  * Get file statistics
  */
 router.get(
-  '/statistics',
+  "/statistics",
   asyncHandler(async (req, res) => {
     const stats = await FilesService.getFileStatistics();
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
-  })
+  }),
 );
 
 /**
@@ -334,7 +347,7 @@ router.get(
  * Get upload configuration and directory info
  */
 router.get(
-  '/upload-info',
+  "/upload-info",
   asyncHandler(async (req, res) => {
     const uploadInfo = await FilesService.getUploadInfo();
 
@@ -344,17 +357,34 @@ router.get(
         ...uploadInfo,
         max_file_size: 50 * 1024 * 1024, // 50MB
         allowed_extensions: [
-          '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-          '.txt', '.md', '.markdown',
-          '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp',
-          '.json', '.xml', '.csv',
-          '.yaml', '.yml',
-          '.zip', '.rar'
+          ".pdf",
+          ".doc",
+          ".docx",
+          ".xls",
+          ".xlsx",
+          ".ppt",
+          ".pptx",
+          ".txt",
+          ".md",
+          ".markdown",
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+          ".svg",
+          ".webp",
+          ".json",
+          ".xml",
+          ".csv",
+          ".yaml",
+          ".yml",
+          ".zip",
+          ".rar",
         ],
-        max_files_per_request: 5
-      }
+        max_files_per_request: 5,
+      },
     });
-  })
+  }),
 );
 
 export default router;

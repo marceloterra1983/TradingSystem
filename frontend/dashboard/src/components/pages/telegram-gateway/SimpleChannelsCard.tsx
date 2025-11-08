@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Radio, Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
-import { Badge } from '../../ui/badge';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Radio, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { useState } from "react";
 
 interface Channel {
   id: string;
@@ -32,8 +32,8 @@ export function SimpleChannelsCard({
   onToggle,
   onDelete,
 }: SimpleChannelsCardProps) {
-  const [channelId, setChannelId] = useState('');
-  const [label, setLabel] = useState('');
+  const [channelId, setChannelId] = useState("");
+  const [label, setLabel] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -46,8 +46,8 @@ export function SimpleChannelsCard({
         channelId: channelId.trim(),
         label: label.trim() || undefined,
       });
-      setChannelId('');
-      setLabel('');
+      setChannelId("");
+      setLabel("");
     } finally {
       setIsSaving(false);
     }
@@ -58,8 +58,8 @@ export function SimpleChannelsCard({
     try {
       await onToggle(id, currentIsActive);
     } catch (error) {
-      console.error('Failed to toggle channel:', error);
-      alert(`Erro ao ${currentIsActive ? 'desativar' : 'ativar'} canal`);
+      console.error("Failed to toggle channel:", error);
+      alert(`Erro ao ${currentIsActive ? "desativar" : "ativar"} canal`);
     } finally {
       setTogglingId(null);
     }
@@ -76,7 +76,7 @@ export function SimpleChannelsCard({
             <CardTitle>Canais Monitorados</CardTitle>
           </div>
           <Badge variant="outline">
-            {activeCount} ativo{activeCount !== 1 ? 's' : ''} /{' '}
+            {activeCount} ativo{activeCount !== 1 ? "s" : ""} /{" "}
             {channels.length} total
           </Badge>
         </div>
@@ -103,7 +103,7 @@ export function SimpleChannelsCard({
             className="w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
-            {isSaving ? 'Adicionando...' : 'Adicionar Canal'}
+            {isSaving ? "Adicionando..." : "Adicionar Canal"}
           </Button>
         </div>
 
@@ -159,7 +159,7 @@ export function SimpleChannelsCard({
                     {togglingId === channel.id ? (
                       <>
                         <div className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        {channel.isActive ? 'Desativando...' : 'Ativando...'}
+                        {channel.isActive ? "Desativando..." : "Ativando..."}
                       </>
                     ) : channel.isActive ? (
                       <>

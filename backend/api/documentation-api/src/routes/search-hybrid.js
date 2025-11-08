@@ -1,7 +1,7 @@
-import express from 'express';
-import { query, validationResult } from 'express-validator';
-import SemanticSearchService from '../services/semanticSearchService.js';
-import CollectionService from '../services/CollectionService.js';
+import express from "express";
+import { query, validationResult } from "express-validator";
+import SemanticSearchService from "../services/semanticSearchService.js";
+import CollectionService from "../services/CollectionService.js";
 
 // Router and shared instances
 const router = express.Router();
@@ -16,14 +16,21 @@ export function initializeHybridRoute(deps = {}) {
 }
 
 const validate = [
-  query('q').trim().isLength({ min: 2, max: 200 }).withMessage('Query is required (min 2 chars)'),
-  query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),
-  query('alpha').optional().isFloat({ min: 0, max: 1 }).toFloat(),
-  query('domain').optional().isString(),
-  query('type').optional().isString(),
-  query('tags').optional().isString(),
-  query('status').optional().isString(),
-  query('collection').optional().isString().trim().isLength({ min: 1, max: 128 }),
+  query("q")
+    .trim()
+    .isLength({ min: 2, max: 200 })
+    .withMessage("Query is required (min 2 chars)"),
+  query("limit").optional().isInt({ min: 1, max: 50 }).toInt(),
+  query("alpha").optional().isFloat({ min: 0, max: 1 }).toFloat(),
+  query("domain").optional().isString(),
+  query("type").optional().isString(),
+  query("tags").optional().isString(),
+  query("status").optional().isString(),
+  query("collection")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 128 }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -47,14 +54,16 @@ function normalizeScores(mapOfScores) {
 }
 
 function basePathFromUrl(url) {
-  const i = url.indexOf('#');
+  const i = url.indexOf("#");
   return i === -1 ? url : url.slice(0, i);
 }
 
 function applyFilters(doc, filters) {
-  if (filters.domain && doc.domain && doc.domain !== filters.domain) return false;
+  if (filters.domain && doc.domain && doc.domain !== filters.domain)
+    return false;
   if (filters.type && doc.type && doc.type !== filters.type) return false;
-  if (filters.status && doc.status && doc.status !== filters.status) return false;
+  if (filters.status && doc.status && doc.status !== filters.status)
+    return false;
   if (filters.tags && filters.tags.length > 0) {
     const tags = Array.isArray(doc.tags) ? doc.tags : [];
     for (const t of filters.tags) if (!tags.includes(t)) return false;
@@ -62,37 +71,46 @@ function applyFilters(doc, filters) {
   return true;
 }
 
-router.get('/search-hybrid', validate, async (req, res) => {
+router.get("/search-hybrid", validate, async (req, res) => {
   try {
     const { q, limit = 10 } = req.query;
-    const alpha = typeof req.query.alpha === 'number' ? req.query.alpha : 0.65;
-    const requestedCollectionRaw = typeof req.query.collection === 'string' ? req.query.collection.trim() : '';
-    const defaultCollection = semanticService?.getDefaultCollection?.() || 'documentation';
+    const alpha = typeof req.query.alpha === "number" ? req.query.alpha : 0.65;
+    const requestedCollectionRaw =
+      typeof req.query.collection === "string"
+        ? req.query.collection.trim()
+        : "";
+    const defaultCollection =
+      semanticService?.getDefaultCollection?.() || "documentation";
     let targetCollection = requestedCollectionRaw || defaultCollection;
 
     let collectionMeta = null;
     if (collectionService) {
       try {
-        collectionMeta = await collectionService.getCollectionDefinition(targetCollection);
+        collectionMeta =
+          await collectionService.getCollectionDefinition(targetCollection);
         targetCollection = collectionMeta?.name || targetCollection;
       } catch (err) {
         if (requestedCollectionRaw) {
           const statusCode = err?.statusCode || 400;
           return res.status(statusCode).json({
-            error: 'Invalid collection',
-            message: err?.message || `Collection '${requestedCollectionRaw}' not found`,
+            error: "Invalid collection",
+            message:
+              err?.message ||
+              `Collection '${requestedCollectionRaw}' not found`,
           });
         }
         // fallback silently to default collection if metadata is unavailable
       }
     }
 
-    const embeddingModelOverride = collectionMeta?.embeddingModel || semanticService?.getDefaultEmbeddingModel?.();
+    const embeddingModelOverride =
+      collectionMeta?.embeddingModel ||
+      semanticService?.getDefaultEmbeddingModel?.();
 
     // Parse filters
     const tagArray = req.query.tags
       ? String(req.query.tags)
-          .split(',')
+          .split(",")
           .map((t) => t.trim())
           .filter(Boolean)
           .slice(0, 10)
@@ -108,7 +126,7 @@ router.get('/search-hybrid', validate, async (req, res) => {
     const lexScoresById = new Map();
     const lexDocsById = new Map();
     if (!markdownSearchService || !markdownSearchService.index) {
-      throw new Error('Markdown search index not ready');
+      throw new Error("Markdown search index not ready");
     }
     const lexRaw = markdownSearchService.index.search({
       query: q.trim(),
@@ -119,7 +137,7 @@ router.get('/search-hybrid', validate, async (req, res) => {
       for (const field of lexRaw) {
         for (const r of field.result || []) {
           const id = r.id;
-          const score = typeof r.score === 'number' ? r.score : 1;
+          const score = typeof r.score === "number" ? r.score : 1;
           const doc = markdownSearchService.docsById?.[id];
           if (!doc) continue;
           // Apply post filters
@@ -155,19 +173,26 @@ router.get('/search-hybrid', validate, async (req, res) => {
         if (!applyFilters(p, filters)) continue;
         semanticItems.push({
           id: item.id,
-          score: typeof item.score === 'number' ? item.score : 0,
+          score: typeof item.score === "number" ? item.score : 0,
           path: p.path,
-          url: p.url || (p.path ? `/docs/${String(p.path).replace(/\.mdx?$/, '')}` : undefined),
+          url:
+            p.url ||
+            (p.path
+              ? `/docs/${String(p.path).replace(/\.mdx?$/, "")}`
+              : undefined),
           title: p.title || p.path,
           tags: p.tags || [],
           domain: p.domain || undefined,
           type: p.type || undefined,
-          snippet: p.content || '',
+          snippet: p.content || "",
         });
       }
     } catch (semError) {
       // If semantic search fails (Qdrant/Ollama unavailable), continue with lexical-only results
-      console.warn('[HybridSearch] Semantic search failed, falling back to lexical-only:', semError.message);
+      console.warn(
+        "[HybridSearch] Semantic search failed, falling back to lexical-only:",
+        semError.message,
+      );
       semanticItems = [];
     }
 
@@ -176,15 +201,18 @@ router.get('/search-hybrid', validate, async (req, res) => {
     const seen = new Set();
     const qLower = q.toLowerCase();
     for (const it of semanticItems) {
-      const url = it.url || it.path || '';
+      const url = it.url || it.path || "";
       if (!url) continue;
       const base = basePathFromUrl(url);
       const lex = baseLex.get(base) || 0; // lexical support for same page
       let combined = alpha * it.score + (1 - alpha) * lex;
       // Light heuristic boosts
-      const titleLc = String(it.title || '').toLowerCase();
+      const titleLc = String(it.title || "").toLowerCase();
       if (titleLc.includes(qLower)) combined += 0.05;
-      if (Array.isArray(it.tags) && it.tags.some((t) => String(t).toLowerCase().includes(qLower))) {
+      if (
+        Array.isArray(it.tags) &&
+        it.tags.some((t) => String(t).toLowerCase().includes(qLower))
+      ) {
         combined += 0.02;
       }
       results.push({
@@ -193,7 +221,7 @@ router.get('/search-hybrid', validate, async (req, res) => {
         path: it.path,
         snippet: it.snippet,
         score: Number(combined.toFixed(6)),
-        source: 'hybrid',
+        source: "hybrid",
         components: { semantic: true, lexical: lex > 0 },
         tags: it.tags,
         domain: it.domain,
@@ -212,9 +240,9 @@ router.get('/search-hybrid', validate, async (req, res) => {
         title: doc.title,
         url,
         path: url,
-        snippet: doc.summary || '',
+        snippet: doc.summary || "",
         score: Number(combined.toFixed(6)),
-        source: 'hybrid',
+        source: "hybrid",
         components: { semantic: false, lexical: true },
         tags: Array.isArray(doc.tags) ? doc.tags : [],
         domain: doc.domain,
@@ -233,7 +261,9 @@ router.get('/search-hybrid', validate, async (req, res) => {
       collection: targetCollection,
     });
   } catch (error) {
-    return res.status(500).json({ error: 'Hybrid search failed', message: error.message });
+    return res
+      .status(500)
+      .json({ error: "Hybrid search failed", message: error.message });
   }
 });
 

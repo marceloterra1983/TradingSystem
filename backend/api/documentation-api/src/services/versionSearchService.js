@@ -1,11 +1,11 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import { createRequire } from 'module';
-import VersionManager from './versionManager.js';
+import { promises as fs } from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import { createRequire } from "module";
+import VersionManager from "./versionManager.js";
 
 const require = createRequire(import.meta.url);
-const { Document } = require('flexsearch');
+const { Document } = require("flexsearch");
 
 class VersionSearchService {
   constructor(specsDir) {
@@ -19,7 +19,9 @@ class VersionSearchService {
       await this.versionManager.initialize();
       const versions = await this.versionManager.listVersions();
 
-      await Promise.all(versions.all.map((version) => this.createIndexForVersion(version)));
+      await Promise.all(
+        versions.all.map((version) => this.createIndexForVersion(version)),
+      );
 
       return {
         versions: versions.all.length,
@@ -33,11 +35,19 @@ class VersionSearchService {
   async createIndexForVersion(version) {
     const index = new Document({
       document: {
-        id: 'id',
-        index: ['title', 'description', 'path', 'method', 'content'],
-        store: ['type', 'title', 'description', 'path', 'method', 'source', 'version'],
+        id: "id",
+        index: ["title", "description", "path", "method", "content"],
+        store: [
+          "type",
+          "title",
+          "description",
+          "path",
+          "method",
+          "source",
+          "version",
+        ],
       },
-      tokenize: 'forward',
+      tokenize: "forward",
       resolution: 9,
       cache: 100,
     });
@@ -45,49 +55,54 @@ class VersionSearchService {
     try {
       const versionPath = await this.versionManager.getVersion(version);
 
-      const openApiPath = path.join(versionPath.path, 'openapi.yaml');
-      const openApiContent = await fs.readFile(openApiPath, 'utf8');
+      const openApiPath = path.join(versionPath.path, "openapi.yaml");
+      const openApiContent = await fs.readFile(openApiPath, "utf8");
       const openApi = yaml.load(openApiContent);
       await this.indexOpenApi(index, openApi, version);
 
-      const asyncApiPath = path.join(versionPath.path, 'asyncapi.yaml');
-      const asyncApiContent = await fs.readFile(asyncApiPath, 'utf8');
+      const asyncApiPath = path.join(versionPath.path, "asyncapi.yaml");
+      const asyncApiContent = await fs.readFile(asyncApiPath, "utf8");
       const asyncApi = yaml.load(asyncApiContent);
       await this.indexAsyncApi(index, asyncApi, version);
 
-      const schemasDir = path.join(versionPath.path, 'schemas');
+      const schemasDir = path.join(versionPath.path, "schemas");
       await this.indexSchemas(index, schemasDir, version);
 
       this.indices.set(version, index);
       return index;
     } catch (error) {
-      throw new Error(`Failed to create index for version ${version}: ${error.message}`);
+      throw new Error(
+        `Failed to create index for version ${version}: ${error.message}`,
+      );
     }
   }
 
   async indexOpenApi(index, spec, version) {
     index.add({
       id: `api-info-${version}`,
-      type: 'api-info',
+      type: "api-info",
       title: spec.info.title,
       description: spec.info.description,
       content: JSON.stringify(spec.info),
-      source: 'openapi',
+      source: "openapi",
       version,
     });
 
     for (const [specPath, methods] of Object.entries(spec.paths)) {
       for (const [method, operation] of Object.entries(methods)) {
-        if (typeof operation === 'object') {
+        if (typeof operation === "object") {
           index.add({
             id: `path-${specPath}-${method}-${version}`,
-            type: 'endpoint',
-            title: operation.summary || operation.operationId || `${method.toUpperCase()} ${specPath}`,
-            description: operation.description || '',
+            type: "endpoint",
+            title:
+              operation.summary ||
+              operation.operationId ||
+              `${method.toUpperCase()} ${specPath}`,
+            description: operation.description || "",
             path: specPath,
             method: method.toUpperCase(),
             content: JSON.stringify(operation),
-            source: 'openapi',
+            source: "openapi",
             version,
           });
         }
@@ -98,11 +113,11 @@ class VersionSearchService {
       for (const [name, schema] of Object.entries(spec.components.schemas)) {
         index.add({
           id: `schema-${name}-${version}`,
-          type: 'schema',
+          type: "schema",
           title: name,
-          description: schema.description || '',
+          description: schema.description || "",
           content: JSON.stringify(schema),
-          source: 'openapi',
+          source: "openapi",
           version,
         });
       }
@@ -112,23 +127,23 @@ class VersionSearchService {
   async indexAsyncApi(index, spec, version) {
     index.add({
       id: `async-api-info-${version}`,
-      type: 'api-info',
+      type: "api-info",
       title: spec.info.title,
       description: spec.info.description,
       content: JSON.stringify(spec.info),
-      source: 'asyncapi',
+      source: "asyncapi",
       version,
     });
 
     for (const [channelName, channel] of Object.entries(spec.channels)) {
       index.add({
         id: `channel-${channelName}-${version}`,
-        type: 'channel',
+        type: "channel",
         title: channel.title || channelName,
-        description: channel.description || '',
+        description: channel.description || "",
         path: channelName,
         content: JSON.stringify(channel),
-        source: 'asyncapi',
+        source: "asyncapi",
         version,
       });
     }
@@ -137,11 +152,11 @@ class VersionSearchService {
       for (const [name, message] of Object.entries(spec.components.messages)) {
         index.add({
           id: `message-${name}-${version}`,
-          type: 'message',
+          type: "message",
           title: message.title || name,
-          description: message.summary || message.description || '',
+          description: message.summary || message.description || "",
           content: JSON.stringify(message),
-          source: 'asyncapi',
+          source: "asyncapi",
           version,
         });
       }
@@ -152,38 +167,41 @@ class VersionSearchService {
     try {
       const files = await fs.readdir(schemasDir);
       for (const file of files) {
-        if (file.endsWith('.json') || file.endsWith('.yaml')) {
-          const content = await fs.readFile(path.join(schemasDir, file), 'utf8');
-          const schema = file.endsWith('.yaml') ? yaml.load(content) : JSON.parse(content);
+        if (file.endsWith(".json") || file.endsWith(".yaml")) {
+          const content = await fs.readFile(
+            path.join(schemasDir, file),
+            "utf8",
+          );
+          const schema = file.endsWith(".yaml")
+            ? yaml.load(content)
+            : JSON.parse(content);
 
           index.add({
             id: `schema-file-${file}-${version}`,
-            type: 'schema',
+            type: "schema",
             title: schema.title || file,
-            description: schema.description || '',
+            description: schema.description || "",
             path: `schemas/${file}`,
             content: JSON.stringify(schema),
-            source: 'schema',
+            source: "schema",
             version,
           });
         }
       }
     } catch (error) {
-      console.warn(`Failed to index schemas for version ${version}:`, error.message);
+      console.warn(
+        `Failed to index schemas for version ${version}:`,
+        error.message,
+      );
     }
   }
 
   async search(searchQuery, options = {}) {
-    const {
-      version = 'latest',
-      type,
-      source,
-      limit = 10,
-    } = options;
+    const { version = "latest", type, source, limit = 10 } = options;
 
     try {
       const resolvedVersion =
-        version === 'latest' || version === 'stable'
+        version === "latest" || version === "stable"
           ? (await this.versionManager.listVersions())[version]
           : version;
 
@@ -233,7 +251,7 @@ class VersionSearchService {
   }
 
   async suggest(searchQuery, options = {}) {
-    const { version = 'latest', limit = 5 } = options;
+    const { version = "latest", limit = 5 } = options;
 
     const results = await this.search(searchQuery, {
       version,
@@ -247,10 +265,9 @@ class VersionSearchService {
       version: result.version,
     }));
 
-    return Array.from(new Map(suggestions.map((item) => [item.text, item])).values()).slice(
-      0,
-      limit,
-    );
+    return Array.from(
+      new Map(suggestions.map((item) => [item.text, item])).values(),
+    ).slice(0, limit);
   }
 
   async addVersion(version) {

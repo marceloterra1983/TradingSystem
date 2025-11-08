@@ -1,6 +1,6 @@
-import { createPool } from 'generic-pool';
-import fetch from 'node-fetch';
-import { logger } from '../config/logger.js';
+import { createPool } from "generic-pool";
+import fetch from "node-fetch";
+import { logger } from "../config/logger.js";
 
 /**
  * QuestDB Client with Connection Pooling
@@ -8,11 +8,12 @@ import { logger } from '../config/logger.js';
  */
 class QuestDBClient {
   constructor(options = {}) {
-    this.host = options.host || process.env.QUESTDB_HOST || 'localhost';
+    this.host = options.host || process.env.QUESTDB_HOST || "localhost";
     this.port = options.port || process.env.QUESTDB_PORT || 9000;
-    this.user = options.user || process.env.QUESTDB_USER || 'admin';
-    this.password = options.password || process.env.QUESTDB_PASSWORD || 'quest';
-    this.database = options.database || process.env.QUESTDB_DATABASE || 'questdb';
+    this.user = options.user || process.env.QUESTDB_USER || "admin";
+    this.password = options.password || process.env.QUESTDB_PASSWORD || "quest";
+    this.database =
+      options.database || process.env.QUESTDB_DATABASE || "questdb";
 
     this.pool = null;
     this.initialized = false;
@@ -30,37 +31,43 @@ class QuestDBClient {
       create: async () => {
         const connection = {
           id: Math.random().toString(36).substring(7),
-          created: Date.now()
+          created: Date.now(),
         };
 
         // Test connection with simple query
         try {
-          await this.executeQuery('SELECT 1 as test', [connection]);
-          logger.debug('QuestDB connection created', { connectionId: connection.id });
+          await this.executeQuery("SELECT 1 as test", [connection]);
+          logger.debug("QuestDB connection created", {
+            connectionId: connection.id,
+          });
           return connection;
         } catch (error) {
-          logger.error('Failed to create QuestDB connection', { error: error.message });
+          logger.error("Failed to create QuestDB connection", {
+            error: error.message,
+          });
           throw error;
         }
       },
 
       destroy: async (connection) => {
-        logger.debug('QuestDB connection destroyed', { connectionId: connection.id });
+        logger.debug("QuestDB connection destroyed", {
+          connectionId: connection.id,
+        });
       },
 
       validate: async (connection) => {
         try {
-          await this.executeQuery('SELECT 1 as test', [connection]);
+          await this.executeQuery("SELECT 1 as test", [connection]);
           return true;
         } catch (_error) {
           return false;
         }
-      }
+      },
     };
 
     this.pool = createPool(factory, {
       max: 10, // maximum number of connections
-      min: 2,  // minimum number of connections
+      min: 2, // minimum number of connections
       acquireTimeoutMillis: 30000,
       createTimeoutMillis: 30000,
       destroyTimeoutMillis: 5000,
@@ -70,10 +77,10 @@ class QuestDBClient {
     });
 
     this.initialized = true;
-    logger.info('QuestDB connection pool initialized', {
+    logger.info("QuestDB connection pool initialized", {
       host: this.host,
       port: this.port,
-      database: this.database
+      database: this.database,
     });
   }
 
@@ -105,11 +112,11 @@ class QuestDBClient {
       query,
       db: this.database,
       user: this.user,
-      password: this.password
+      password: this.password,
     });
 
     if (connectionId) {
-      params.append('connection_id', connectionId);
+      params.append("connection_id", connectionId);
     }
 
     return `${baseUrl}?${params.toString()}`;
@@ -123,18 +130,18 @@ class QuestDBClient {
     const startTime = Date.now();
 
     try {
-      logger.debug('Executing QuestDB query', {
-        query: query.substring(0, 100) + (query.length > 100 ? '...' : ''),
-        connectionId: connection?.id
+      logger.debug("Executing QuestDB query", {
+        query: query.substring(0, 100) + (query.length > 100 ? "..." : ""),
+        connectionId: connection?.id,
       });
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
-        timeout: 30000 // 30 seconds timeout
+        timeout: 30000, // 30 seconds timeout
       });
 
       if (!response.ok) {
@@ -145,20 +152,20 @@ class QuestDBClient {
       const result = await response.json();
       const duration = Date.now() - startTime;
 
-      logger.debug('QuestDB query completed', {
+      logger.debug("QuestDB query completed", {
         duration: `${duration}ms`,
         rowCount: result.dataset?.length || 0,
-        connectionId: connection?.id
+        connectionId: connection?.id,
       });
 
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      logger.error('QuestDB query failed', {
-        query: query.substring(0, 100) + (query.length > 100 ? '...' : ''),
+      logger.error("QuestDB query failed", {
+        query: query.substring(0, 100) + (query.length > 100 ? "..." : ""),
         error: error.message,
         duration: `${duration}ms`,
-        connectionId: connection?.id
+        connectionId: connection?.id,
       });
       throw error;
     }
@@ -176,8 +183,11 @@ class QuestDBClient {
       let processedSql = sql;
       for (const [key, value] of Object.entries(params)) {
         const placeholder = `:${key}`;
-        if (typeof value === 'string') {
-          processedSql = processedSql.replace(placeholder, `'${value.replace(/'/g, "''")}'`);
+        if (typeof value === "string") {
+          processedSql = processedSql.replace(
+            placeholder,
+            `'${value.replace(/'/g, "''")}'`,
+          );
         } else {
           processedSql = processedSql.replace(placeholder, value);
         }
@@ -200,7 +210,7 @@ class QuestDBClient {
     return {
       success: true,
       affectedRows: result.query?.affectedRows || 0,
-      message: 'Query executed successfully'
+      message: "Query executed successfully",
     };
   }
 
@@ -219,11 +229,12 @@ class QuestDBClient {
     const dataset = result.dataset[0] || {};
 
     // Get row count from first column's data length
-    const rowCount = columns.length > 0 ? (dataset[columns[0].name]?.length || 0) : 0;
-    
+    const rowCount =
+      columns.length > 0 ? dataset[columns[0].name]?.length || 0 : 0;
+
     return Array.from({ length: rowCount }, (_, index) => {
       const row = {};
-      columns.forEach(column => {
+      columns.forEach((column) => {
         row[column.name] = dataset[column.name]?.[index] || null;
       });
       return row;
@@ -243,27 +254,27 @@ class QuestDBClient {
    */
   async healthCheck() {
     try {
-      const result = await this.executeQuery('SELECT 1 as test');
+      const result = await this.executeQuery("SELECT 1 as test");
       return {
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
-        version: result.query?.version || 'unknown',
+        version: result.query?.version || "unknown",
         connections: {
           active: this.pool?.numUsed || 0,
           idle: this.pool?.numFree || 0,
-          total: this.pool?.size || 0
-        }
+          total: this.pool?.size || 0,
+        },
       };
     } catch (error) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         timestamp: new Date().toISOString(),
         error: error.message,
         connections: {
           active: 0,
           idle: 0,
-          total: 0
-        }
+          total: 0,
+        },
       };
     }
   }
@@ -277,7 +288,7 @@ class QuestDBClient {
       await this.pool.clear();
       this.pool = null;
       this.initialized = false;
-      logger.info('QuestDB connection pool closed');
+      logger.info("QuestDB connection pool closed");
     }
   }
 
@@ -285,11 +296,14 @@ class QuestDBClient {
    * Generate UUID for new records
    */
   generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      },
+    );
   }
 
   /**

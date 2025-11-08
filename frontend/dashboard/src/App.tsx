@@ -1,9 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Layout } from './components/layout/Layout';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { ToastContainer } from './components/ui/toast';
-import { TooltipProvider } from './components/ui/tooltip';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/layout/Layout";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastContainer } from "./components/ui/toast";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,7 +19,7 @@ interface AppContentProps {
   defaultPageId?: string;
 }
 
-function AppContent({ defaultPageId = 'workspace' }: AppContentProps) {
+function AppContent({ defaultPageId = "workspace" }: AppContentProps) {
   return (
     <TooltipProvider>
       <Layout defaultPageId={defaultPageId} />
@@ -34,7 +34,10 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<AppContent defaultPageId="workspace" />} />
+            <Route
+              path="/"
+              element={<AppContent defaultPageId="workspace" />}
+            />
             <Route
               path="/documentation/metrics"
               element={<AppContent defaultPageId="documentation-metrics" />}

@@ -1,8 +1,8 @@
-import { ReactNode, useState, useMemo } from 'react';
-import { useCustomLayout, ColumnCount } from '../../hooks/useCustomLayout';
-import { LayoutControls } from './LayoutControls';
-import { DraggableGridLayout } from './DraggableGridLayout';
-import { safeLocalStorageSet, safeDispatchEvent } from '../../utils/browser';
+import { ReactNode, useState, useMemo } from "react";
+import { useCustomLayout, ColumnCount } from "../../hooks/useCustomLayout";
+import { LayoutControls } from "./LayoutControls";
+import { DraggableGridLayout } from "./DraggableGridLayout";
+import { safeLocalStorageSet, safeDispatchEvent } from "../../utils/browser";
 
 /**
  * Customizable Page Layout
@@ -68,7 +68,7 @@ export function CustomizablePageLayout({
     });
 
     // Trigger a custom event to notify CollapsibleCard components
-    safeDispatchEvent('collapse-all-cards', { collapsed: newState });
+    safeDispatchEvent("collapse-all-cards", { collapsed: newState });
   };
 
   // Prepare components for DraggableGridLayout - use ordered list
@@ -132,7 +132,7 @@ export function CustomizablePageLayout({
       {/* Layout Controls */}
       <div
         className={`mb-6 flex flex-col gap-3 sm:flex-row sm:items-center ${
-          leftActions ? 'sm:justify-between' : 'sm:justify-end'
+          leftActions ? "sm:justify-between" : "sm:justify-end"
         }`}
       >
         {leftActions ? (

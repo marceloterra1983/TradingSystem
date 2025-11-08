@@ -1,12 +1,15 @@
-import { ensurePrismaConnection, getPrismaClient } from '../../utils/prismaClient.js';
-import { logger } from '../../config/logger.js';
+import {
+  ensurePrismaConnection,
+  getPrismaClient,
+} from "../../utils/prismaClient.js";
+import { logger } from "../../config/logger.js";
 
 const STATUS_ORDER_FIELDS = new Set([
-  'updated_at',
-  'created_at',
-  'priority',
-  'due_date',
-  'title'
+  "updated_at",
+  "created_at",
+  "priority",
+  "due_date",
+  "title",
 ]);
 
 function normalizeIdea(record) {
@@ -17,7 +20,7 @@ function normalizeIdea(record) {
   const tags = Array.isArray(record.tags)
     ? record.tags
     : record.tags
-      ? typeof record.tags === 'string'
+      ? typeof record.tags === "string"
         ? JSON.parse(record.tags)
         : []
       : [];
@@ -39,53 +42,53 @@ function normalizeIdea(record) {
     completed_at: record.completedAt ?? null,
     designated_timestamp: record.designatedTimestamp ?? null,
     created_at: record.createdAt,
-    updated_at: record.updatedAt
+    updated_at: record.updatedAt,
   };
 }
 
 function sanitizeUpdates(updates = {}) {
   const allowed = new Set([
-    'title',
-    'description',
-    'status',
-    'category',
-    'priority',
-    'assigned_to',
-    'system_id',
-    'tags',
-    'estimated_hours',
-    'actual_hours',
-    'due_date',
-    'completed_at'
+    "title",
+    "description",
+    "status",
+    "category",
+    "priority",
+    "assigned_to",
+    "system_id",
+    "tags",
+    "estimated_hours",
+    "actual_hours",
+    "due_date",
+    "completed_at",
   ]);
 
   return Object.fromEntries(
     Object.entries(updates)
       .filter(([key, value]) => allowed.has(key) && value !== undefined)
       .map(([key, value]) => {
-        if (key === 'tags' && Array.isArray(value)) {
+        if (key === "tags" && Array.isArray(value)) {
           return [key, Array.from(new Set(value))];
         }
         return [key, value];
-      })
+      }),
   );
 }
 
-function mapOrderBy(orderBy = 'updated_at', orderDirection = 'DESC') {
+function mapOrderBy(orderBy = "updated_at", orderDirection = "DESC") {
   const normalizedField = orderBy.toLowerCase();
   if (!STATUS_ORDER_FIELDS.has(normalizedField)) {
-    return { updatedAt: 'desc' };
+    return { updatedAt: "desc" };
   }
 
   const prismaField = {
-    updated_at: 'updatedAt',
-    created_at: 'createdAt',
-    priority: 'priority',
-    due_date: 'dueDate',
-    title: 'title'
+    updated_at: "updatedAt",
+    created_at: "createdAt",
+    priority: "priority",
+    due_date: "dueDate",
+    title: "title",
   }[normalizedField];
 
-  const direction = orderDirection?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+  const direction = orderDirection?.toLowerCase() === "asc" ? "asc" : "desc";
 
   return { [prismaField]: direction };
 }
@@ -145,8 +148,8 @@ function buildFilters(filters = {}) {
 
   if (filters.search) {
     where.OR = [
-      { title: { contains: filters.search, mode: 'insensitive' } },
-      { description: { contains: filters.search, mode: 'insensitive' } }
+      { title: { contains: filters.search, mode: "insensitive" } },
+      { description: { contains: filters.search, mode: "insensitive" } },
     ];
   }
 
@@ -172,9 +175,9 @@ class PostgresIdeasRepository {
     const payload = {
       title: data.title,
       description: data.description ?? null,
-      status: data.status || 'backlog',
+      status: data.status || "backlog",
       category: data.category,
-      priority: data.priority || 'medium',
+      priority: data.priority || "medium",
       assignedTo: data.assigned_to ?? data.assignedTo ?? null,
       createdBy: data.created_by ?? data.createdBy,
       systemId: data.system_id ?? data.systemId ?? null,
@@ -183,12 +186,14 @@ class PostgresIdeasRepository {
       actualHours: data.actual_hours ?? data.actualHours ?? null,
       dueDate: data.due_date ? new Date(data.due_date) : null,
       completedAt: data.completed_at ? new Date(data.completed_at) : null,
-      designatedTimestamp: data.designated_timestamp ? new Date(data.designated_timestamp) : now,
-      createdAt: data.created_at ? new Date(data.created_at) : now
+      designatedTimestamp: data.designated_timestamp
+        ? new Date(data.designated_timestamp)
+        : now,
+      createdAt: data.created_at ? new Date(data.created_at) : now,
     };
 
     const idea = await this.client.documentationIdea.create({
-      data: payload
+      data: payload,
     });
 
     return normalizeIdea(idea);
@@ -197,7 +202,7 @@ class PostgresIdeasRepository {
   async findById(id) {
     await this.ensureConnected();
     const idea = await this.client.documentationIdea.findUnique({
-      where: { id }
+      where: { id },
     });
     return normalizeIdea(idea);
   }
@@ -213,7 +218,7 @@ class PostgresIdeasRepository {
       where,
       orderBy: mapOrderBy(filters.order_by, filters.order_direction),
       take,
-      skip
+      skip,
     });
 
     return ideas.map(normalizeIdea);
@@ -224,33 +229,53 @@ class PostgresIdeasRepository {
     const sanitized = sanitizeUpdates(updates);
 
     if (Object.keys(sanitized).length === 0) {
-      throw new Error('No valid fields to update');
+      throw new Error("No valid fields to update");
     }
 
     const data = {
       ...(sanitized.title !== undefined ? { title: sanitized.title } : {}),
-      ...(sanitized.description !== undefined ? { description: sanitized.description } : {}),
+      ...(sanitized.description !== undefined
+        ? { description: sanitized.description }
+        : {}),
       ...(sanitized.status !== undefined ? { status: sanitized.status } : {}),
-      ...(sanitized.category !== undefined ? { category: sanitized.category } : {}),
-      ...(sanitized.priority !== undefined ? { priority: sanitized.priority } : {}),
-      ...(sanitized.assigned_to !== undefined ? { assignedTo: sanitized.assigned_to } : {}),
-      ...(sanitized.system_id !== undefined ? { systemId: sanitized.system_id } : {}),
+      ...(sanitized.category !== undefined
+        ? { category: sanitized.category }
+        : {}),
+      ...(sanitized.priority !== undefined
+        ? { priority: sanitized.priority }
+        : {}),
+      ...(sanitized.assigned_to !== undefined
+        ? { assignedTo: sanitized.assigned_to }
+        : {}),
+      ...(sanitized.system_id !== undefined
+        ? { systemId: sanitized.system_id }
+        : {}),
       ...(sanitized.tags !== undefined ? { tags: sanitized.tags ?? [] } : {}),
-      ...(sanitized.estimated_hours !== undefined ? { estimatedHours: sanitized.estimated_hours } : {}),
-      ...(sanitized.actual_hours !== undefined ? { actualHours: sanitized.actual_hours } : {}),
-      ...(sanitized.due_date !== undefined ? { dueDate: sanitized.due_date ? new Date(sanitized.due_date) : null } : {}),
+      ...(sanitized.estimated_hours !== undefined
+        ? { estimatedHours: sanitized.estimated_hours }
+        : {}),
+      ...(sanitized.actual_hours !== undefined
+        ? { actualHours: sanitized.actual_hours }
+        : {}),
+      ...(sanitized.due_date !== undefined
+        ? { dueDate: sanitized.due_date ? new Date(sanitized.due_date) : null }
+        : {}),
       ...(sanitized.completed_at !== undefined
-        ? { completedAt: sanitized.completed_at ? new Date(sanitized.completed_at) : null }
-        : {})
+        ? {
+            completedAt: sanitized.completed_at
+              ? new Date(sanitized.completed_at)
+              : null,
+          }
+        : {}),
     };
 
-    if (sanitized.status === 'done' && sanitized.completed_at === undefined) {
+    if (sanitized.status === "done" && sanitized.completed_at === undefined) {
       data.completedAt = new Date();
     }
 
     const updated = await this.client.documentationIdea.update({
       where: { id },
-      data
+      data,
     });
 
     return normalizeIdea(updated);
@@ -259,13 +284,17 @@ class PostgresIdeasRepository {
   async delete(id) {
     await this.ensureConnected();
     await this.client.documentationIdea.delete({
-      where: { id }
+      where: { id },
     });
     return true;
   }
 
   async findByStatus(status) {
-    return this.findAll({ status, order_by: 'priority', order_direction: 'DESC' });
+    return this.findAll({
+      status,
+      order_by: "priority",
+      order_direction: "DESC",
+    });
   }
 
   async findByCategory(category) {
@@ -296,19 +325,19 @@ class PostgresIdeasRepository {
     const now = new Date();
     return this.findAll({
       due_date_to: now.toISOString(),
-      status: ['backlog', 'todo', 'in_progress']
+      status: ["backlog", "todo", "in_progress"],
     });
   }
 
   async getStatistics() {
     await this.ensureConnected();
     const grouped = await this.client.documentationIdea.groupBy({
-      by: ['status', 'category', 'priority', 'assignedTo'],
+      by: ["status", "category", "priority", "assignedTo"],
       _count: { _all: true },
       _avg: {
         estimatedHours: true,
-        actualHours: true
-      }
+        actualHours: true,
+      },
     });
 
     const stats = {
@@ -320,8 +349,8 @@ class PostgresIdeasRepository {
       hours: {
         total_estimated: 0,
         total_actual: 0,
-        completion_rate: 0
-      }
+        completion_rate: 0,
+      },
     };
 
     let totalEstimated = 0;
@@ -330,10 +359,10 @@ class PostgresIdeasRepository {
 
     grouped.forEach((group) => {
       const count = group._count._all;
-      const status = group.status || 'unknown';
-      const category = group.category || 'uncategorized';
-      const priority = group.priority || 'unknown';
-      const assignee = group.assignedTo || 'unassigned';
+      const status = group.status || "unknown";
+      const category = group.category || "uncategorized";
+      const priority = group.priority || "unknown";
+      const assignee = group.assignedTo || "unassigned";
 
       stats.total += count;
 
@@ -350,20 +379,21 @@ class PostgresIdeasRepository {
         totalActual += group._avg.actualHours * count;
       }
 
-      if (status === 'done') {
+      if (status === "done") {
         completedCount += count;
       }
     });
 
     stats.hours.total_estimated = Math.round(totalEstimated);
     stats.hours.total_actual = Math.round(totalActual);
-    stats.hours.completion_rate = stats.total > 0 ? Math.round((completedCount / stats.total) * 100) : 0;
+    stats.hours.completion_rate =
+      stats.total > 0 ? Math.round((completedCount / stats.total) * 100) : 0;
 
     return stats;
   }
 }
 
 export function createPostgresIdeasRepository() {
-  logger.info('Using PostgreSQL repository for documentation ideas');
+  logger.info("Using PostgreSQL repository for documentation ideas");
   return new PostgresIdeasRepository();
 }

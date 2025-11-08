@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   CustomizablePageLayout,
   PageSection,
-} from '../layout/CustomizablePageLayout';
+} from "../layout/CustomizablePageLayout";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../ui/collapsible-card';
-import { ENDPOINTS } from '../../config/endpoints';
+} from "../ui/collapsible-card";
+import { ENDPOINTS } from "../../config/endpoints";
 
 type LinkItem = {
   name: string;
@@ -36,7 +36,7 @@ function CopyButton({ value }: { value: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (error) {
-      console.error('Unable to copy to clipboard', error);
+      console.error("Unable to copy to clipboard", error);
     }
   };
 
@@ -46,7 +46,7 @@ function CopyButton({ value }: { value: string }) {
       onClick={() => void handleCopy()}
       className="text-xs font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:text-blue-400 dark:hover:text-blue-300"
     >
-      {copied ? 'Copied!' : 'Copy'}
+      {copied ? "Copied!" : "Copy"}
     </button>
   );
 }
@@ -54,89 +54,89 @@ function CopyButton({ value }: { value: string }) {
 export function URLsPage() {
   const sections: UrlSection[] = [
     {
-      id: 'application-services',
-      title: 'Application & Service URLs',
+      id: "application-services",
+      title: "Application & Service URLs",
       description:
-        'Primary HTTP services that make up the local TradingSystem stack.',
+        "Primary HTTP services that make up the local TradingSystem stack.",
       links: [
-        { name: 'Dashboard (Vite UI)', url: 'http://localhost:3103' },
-        { name: 'Workspace API', url: 'http://localhost:3200/api/items' },
-        { name: 'TP Capital Signals API', url: 'http://localhost:3201' },
-        { name: 'Documentation API', url: 'http://localhost:3400' },
-        { name: 'Documentation Hub (docs)', url: 'http://localhost:3400' },
-        { name: 'Firecrawl', url: 'http://localhost:3002' },
-        { name: 'Firecrawl Proxy', url: 'http://localhost:3600' },
-        { name: 'Agent MCP Dashboard', url: 'http://localhost:8080' },
+        { name: "Dashboard (Vite UI)", url: "http://localhost:3103" },
+        { name: "Workspace API", url: "http://localhost:3200/api/items" },
+        { name: "TP Capital Signals API", url: "http://localhost:3201" },
+        { name: "Documentation API", url: "http://localhost:3400" },
+        { name: "Documentation Hub (docs)", url: "http://localhost:3400" },
+        { name: "Firecrawl", url: "http://localhost:3002" },
+        { name: "Firecrawl Proxy", url: "http://localhost:3600" },
+        { name: "Agent MCP Dashboard", url: "http://localhost:8080" },
         {
-          name: 'Docusaurus Docs (manual override)',
-          url: 'http://localhost:3400',
+          name: "Docusaurus Docs (manual override)",
+          url: "http://localhost:3400",
           optional: true,
         },
       ],
     },
     {
-      id: 'database-ui-tools',
-      title: 'Database UI Tools',
+      id: "database-ui-tools",
+      title: "Database UI Tools",
       description:
-        'Web interfaces that connect to TimescaleDB and QuestDB for database administration and exploration.',
+        "Web interfaces that connect to TimescaleDB and QuestDB for database administration and exploration.",
       links: [
-        { name: 'pgAdmin', url: ENDPOINTS.pgAdmin },
-        { name: 'pgweb', url: ENDPOINTS.pgWeb },
+        { name: "pgAdmin", url: ENDPOINTS.pgAdmin },
+        { name: "pgweb", url: ENDPOINTS.pgWeb },
         {
-          name: 'Adminer (optional)',
+          name: "Adminer (optional)",
           url: ENDPOINTS.adminer,
           optional: true,
         },
         {
-          name: 'Azimutt (optional)',
-          url: 'http://localhost:8084',
+          name: "Azimutt (optional)",
+          url: "http://localhost:8084",
           optional: true,
         },
       ],
     },
     {
-      id: 'questdb',
-      title: 'QuestDB',
-      description: 'QuestDB admin endpoints and connection helpers.',
+      id: "questdb",
+      title: "QuestDB",
+      description: "QuestDB admin endpoints and connection helpers.",
       links: [
         {
-          name: 'QuestDB Web Console (REST/SQL)',
-          url: 'http://localhost:9000',
+          name: "QuestDB Web Console (REST/SQL)",
+          url: "http://localhost:9000",
         },
         {
-          name: 'QuestDB Influx (ILP)',
-          value: 'tcp://localhost:9009',
+          name: "QuestDB Influx (ILP)",
+          value: "tcp://localhost:9009",
           description:
-            'Line protocol endpoint for ILP clients (no HTTP interface).',
+            "Line protocol endpoint for ILP clients (no HTTP interface).",
         },
         {
-          name: 'QuestDB PostgreSQL (psql)',
-          value: 'postgresql://admin:quest@localhost:8812/qdb',
+          name: "QuestDB PostgreSQL (psql)",
+          value: "postgresql://admin:quest@localhost:8812/qdb",
           description:
-            'Default credentials shown. Update if you changed QuestDB auth.',
+            "Default credentials shown. Update if you changed QuestDB auth.",
         },
       ],
     },
     {
-      id: 'timescaledb',
-      title: 'TimescaleDB',
+      id: "timescaledb",
+      title: "TimescaleDB",
       description:
-        'Connection helpers for TimescaleDB (primary analytical store).',
+        "Connection helpers for TimescaleDB (primary analytical store).",
       links: [
         {
-          name: 'TimescaleDB (psql)',
+          name: "TimescaleDB (psql)",
           value:
-            'postgresql://timescale:<TIMESCALEDB_PASSWORD>@localhost:5433/tradingsystem',
+            "postgresql://timescale:<TIMESCALEDB_PASSWORD>@localhost:5433/tradingsystem",
           description:
-            'Replace <TIMESCALEDB_PASSWORD> with the value configured in the root .env file.',
+            "Replace <TIMESCALEDB_PASSWORD> with the value configured in the root .env file.",
         },
       ],
     },
     {
-      id: 'openapi',
-      title: 'Swagger / OpenAPI',
+      id: "openapi",
+      title: "Swagger / OpenAPI",
       links: [
-        { name: 'Swagger / OpenAPI UI', url: 'http://localhost:8200/docs' },
+        { name: "Swagger / OpenAPI UI", url: "http://localhost:8200/docs" },
       ],
     },
   ];

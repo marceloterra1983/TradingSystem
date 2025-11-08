@@ -1,32 +1,32 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardContent,
-} from '../ui/collapsible-card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+} from "../ui/collapsible-card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 // Quick Win P1-1: Hooks e componentes integrados!
-import { useGatewayData, useChannelManager } from './telegram-gateway/hooks';
+import { useGatewayData, useChannelManager } from "./telegram-gateway/hooks";
 // import { GatewayFilters } from './telegram-gateway/components/GatewayFilters';
-import { usePolling } from '../../hooks';
+import { usePolling } from "../../hooks";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from "../ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../ui/dialog';
+} from "../ui/dialog";
 import {
   CheckCircle,
   XCircle,
@@ -52,19 +52,19 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-} from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { GatewayLogsCard } from '../telegram/GatewayLogsCard';
-import { TwitterPreview } from '../telegram/TwitterPreview';
-import { YouTubePreview } from '../telegram/YouTubePreview';
-import { InstagramPreview } from '../telegram/InstagramPreview';
-import { GenericLinkPreview } from '../telegram/GenericLinkPreview';
+} from "lucide-react";
+import { cn } from "../../lib/utils";
+import { GatewayLogsCard } from "../telegram/GatewayLogsCard";
+import { TwitterPreview } from "../telegram/TwitterPreview";
+import { YouTubePreview } from "../telegram/YouTubePreview";
+import { InstagramPreview } from "../telegram/InstagramPreview";
+import { GenericLinkPreview } from "../telegram/GenericLinkPreview";
 
 // Helper para converter string de input date (YYYY-MM-DD) para Date no horário local
 const parseDateInputHelper = (dateStr: string): Date | null => {
   if (!dateStr) return null;
   try {
-    const [year, month, day] = dateStr.split('-').map(Number);
+    const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day);
   } catch {
     return null;
@@ -100,39 +100,37 @@ interface Channel {
 }
 
 const surfaceCardClass =
-  'rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60';
+  "rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60";
 const statusLabelClass =
-  'text-sm font-medium text-slate-600 dark:text-slate-300';
+  "text-sm font-medium text-slate-600 dark:text-slate-300";
 const statusValueClass =
-  'text-2xl font-bold text-slate-900 dark:text-slate-100';
-const statusMutedTextClass =
-  'text-xs text-slate-500 dark:text-slate-400';
+  "text-2xl font-bold text-slate-900 dark:text-slate-100";
+const statusMutedTextClass = "text-xs text-slate-500 dark:text-slate-400";
 
 export function TelegramGatewayFinal() {
   // Message filters (needed before useGatewayData)
-  const [filterChannel, setFilterChannel] = useState<string>('all');
-  const [filterText, setFilterText] = useState<string>('');
-  const [filterDateFrom, setFilterDateFrom] = useState<string>('');
-  const [filterDateTo, setFilterDateTo] = useState<string>('');
-  const [filterLimit, setFilterLimit] = useState<string>('50');
+  const [filterChannel, setFilterChannel] = useState<string>("all");
+  const [filterText, setFilterText] = useState<string>("");
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
+  const [filterLimit, setFilterLimit] = useState<string>("50");
 
   // Sorting state
-  const [sortColumn, setSortColumn] = useState<'date' | 'channel' | 'text'>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc'); // Default: última mensagem no topo
+  const [sortColumn, setSortColumn] = useState<"date" | "channel" | "text">(
+    "date",
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc"); // Default: última mensagem no topo
 
   // Quick Win P1-1: Using extracted hooks
-  const {
-    data,
-    channels,
-    messages,
-    loading,
-    fetchData,
-  } = useGatewayData(filterChannel, filterLimit);
+  const { data, channels, messages, loading, fetchData } = useGatewayData(
+    filterChannel,
+    filterLimit,
+  );
 
   // Channel form
-  const [newChannelId, setNewChannelId] = useState('');
-  const [newChannelLabel, setNewChannelLabel] = useState('');
-  const [newChannelDesc, setNewChannelDesc] = useState('');
+  const [newChannelId, setNewChannelId] = useState("");
+  const [newChannelLabel, setNewChannelLabel] = useState("");
+  const [newChannelDesc, setNewChannelDesc] = useState("");
 
   // Message dialog
   const [selectedMessage, setSelectedMessage] = useState<any | null>(null);
@@ -147,7 +145,7 @@ export function TelegramGatewayFinal() {
   }>({
     show: false,
     success: false,
-    message: '',
+    message: "",
   });
 
   // Message highlighting
@@ -204,7 +202,7 @@ export function TelegramGatewayFinal() {
 
   const handleCheckMessages = async () => {
     setIsSyncing(true);
-    setSyncResult({ show: false, success: false, message: '' });
+    setSyncResult({ show: false, success: false, message: "" });
 
     try {
       const token =
@@ -213,13 +211,13 @@ export function TelegramGatewayFinal() {
           import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined
         )?.trim() ||
         (import.meta.env.VITE_API_SECRET_TOKEN as string | undefined)?.trim() ||
-        '';
+        "";
 
-      const response = await fetch('/api/telegram-gateway/sync-messages', {
-        method: 'POST',
+      const response = await fetch("/api/telegram-gateway/sync-messages", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'X-API-Key': token } : {}),
+          "Content-Type": "application/json",
+          ...(token ? { "X-API-Key": token } : {}),
         },
       });
 
@@ -233,7 +231,7 @@ export function TelegramGatewayFinal() {
           message:
             totalSynced > 0
               ? `✅ ${totalSynced} mensagem(ns) recuperada(s) com sucesso!`
-              : '✓ Todas as mensagens estão sincronizadas.',
+              : "✓ Todas as mensagens estão sincronizadas.",
         });
 
         // Recarregar mensagens após sincronização
@@ -244,31 +242,31 @@ export function TelegramGatewayFinal() {
         setSyncResult({
           show: true,
           success: false,
-          message: `❌ Erro: ${result.message || 'Falha ao sincronizar mensagens'}`,
+          message: `❌ Erro: ${result.message || "Falha ao sincronizar mensagens"}`,
         });
       }
     } catch (error) {
       setSyncResult({
         show: true,
         success: false,
-        message: '❌ Erro ao conectar com o serviço de sincronização',
+        message: "❌ Erro ao conectar com o serviço de sincronização",
       });
     } finally {
       setIsSyncing(false);
 
       // Auto-hide resultado após 5 segundos
       setTimeout(() => {
-        setSyncResult({ show: false, success: false, message: '' });
+        setSyncResult({ show: false, success: false, message: "" });
       }, 5000);
     }
   };
 
   const handleClearFilters = () => {
-    setFilterChannel('all');
-    setFilterText('');
-    setFilterDateFrom('');
-    setFilterDateTo('');
-    setFilterLimit('50');
+    setFilterChannel("all");
+    setFilterText("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
+    setFilterLimit("50");
   };
 
   const getChannelLabel = useCallback(
@@ -291,7 +289,7 @@ export function TelegramGatewayFinal() {
 
       // Se é uma URL, criar link clicável
       if (part.match(urlRegex)) {
-        const href = part.startsWith('http') ? part : `https://${part}`;
+        const href = part.startsWith("http") ? part : `https://${part}`;
         return (
           <a
             key={index}
@@ -312,14 +310,14 @@ export function TelegramGatewayFinal() {
   };
 
   // Handler for sorting
-  const handleSort = (column: 'date' | 'channel' | 'text') => {
+  const handleSort = (column: "date" | "channel" | "text") => {
     if (sortColumn === column) {
       // Toggle direction
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       // New column, default to desc for date, asc for others
       setSortColumn(column);
-      setSortDirection(column === 'date' ? 'desc' : 'asc');
+      setSortDirection(column === "date" ? "desc" : "asc");
     }
   };
 
@@ -328,7 +326,7 @@ export function TelegramGatewayFinal() {
       messages.length > 0 ? messages : data?.messages?.recent || [];
 
     // Filter by channel
-    if (filterChannel !== 'all') {
+    if (filterChannel !== "all") {
       filtered = filtered.filter((msg: any) => msg.channelId === filterChannel);
     }
 
@@ -336,7 +334,7 @@ export function TelegramGatewayFinal() {
     if (filterText.trim()) {
       const searchTerm = filterText.toLowerCase();
       filtered = filtered.filter((msg: any) => {
-        const text = (msg.text || msg.caption || '').toLowerCase();
+        const text = (msg.text || msg.caption || "").toLowerCase();
         const channelLabel = getChannelLabel(msg.channelId).toLowerCase();
         return text.includes(searchTerm) || channelLabel.includes(searchTerm);
       });
@@ -373,27 +371,27 @@ export function TelegramGatewayFinal() {
       let compareValue = 0;
 
       switch (sortColumn) {
-        case 'date': {
+        case "date": {
           const dateA = new Date(a.telegramDate || a.receivedAt || 0).getTime();
           const dateB = new Date(b.telegramDate || b.receivedAt || 0).getTime();
           compareValue = dateA - dateB;
           break;
         }
-        case 'channel': {
+        case "channel": {
           const labelA = getChannelLabel(a.channelId).toLowerCase();
           const labelB = getChannelLabel(b.channelId).toLowerCase();
           compareValue = labelA.localeCompare(labelB);
           break;
         }
-        case 'text': {
-          const textA = (a.text || a.caption || '').toLowerCase();
-          const textB = (b.text || b.caption || '').toLowerCase();
+        case "text": {
+          const textA = (a.text || a.caption || "").toLowerCase();
+          const textB = (b.text || b.caption || "").toLowerCase();
           compareValue = textA.localeCompare(textB);
           break;
         }
       }
 
-      return sortDirection === 'asc' ? compareValue : -compareValue;
+      return sortDirection === "asc" ? compareValue : -compareValue;
     });
 
     return sorted;
@@ -431,61 +429,70 @@ export function TelegramGatewayFinal() {
     });
 
     if (success) {
-      setNewChannelId('');
-      setNewChannelLabel('');
-      setNewChannelDesc('');
+      setNewChannelId("");
+      setNewChannelLabel("");
+      setNewChannelDesc("");
     }
   }, [createChannel, newChannelId, newChannelLabel, newChannelDesc]);
 
-  const handleToggleChannel = useCallback(async (id: string, isActive: boolean) => {
-    await toggleChannelApi(id, isActive);
-  }, [toggleChannelApi]);
+  const handleToggleChannel = useCallback(
+    async (id: string, isActive: boolean) => {
+      await toggleChannelApi(id, isActive);
+    },
+    [toggleChannelApi],
+  );
 
-  const handleDeleteChannel = useCallback(async (id: string, channelId: string) => {
-    await deleteChannelApi(id, channelId);
-  }, [deleteChannelApi]);
+  const handleDeleteChannel = useCallback(
+    async (id: string, channelId: string) => {
+      await deleteChannelApi(id, channelId);
+    },
+    [deleteChannelApi],
+  );
 
-  const handleEditChannel = useCallback(async (id: string, current: Channel) => {
-    const newLabel = prompt('Novo rótulo:', current.label || '');
-    if (newLabel === null) return;
+  const handleEditChannel = useCallback(
+    async (id: string, current: Channel) => {
+      const newLabel = prompt("Novo rótulo:", current.label || "");
+      if (newLabel === null) return;
 
-    const newDesc = prompt('Nova descrição:', current.description || '');
-    if (newDesc === null) return;
+      const newDesc = prompt("Nova descrição:", current.description || "");
+      if (newDesc === null) return;
 
-    await updateChannel(id, {
-      label: newLabel || undefined,
-      description: newDesc || undefined,
-    });
-  }, [updateChannel]);
+      await updateChannel(id, {
+        label: newLabel || undefined,
+        description: newDesc || undefined,
+      });
+    },
+    [updateChannel],
+  );
 
   const formatTime = (dateStr?: string) => {
-    if (!dateStr) return '—';
+    if (!dateStr) return "—";
     try {
-      return new Date(dateStr).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+      return new Date(dateStr).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
       });
     } catch {
-      return '—';
+      return "—";
     }
   };
 
   const formatDateOnly = (dateStr?: string) => {
-    if (!dateStr) return '—';
+    if (!dateStr) return "—";
     try {
-      return new Date(dateStr).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
+      return new Date(dateStr).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
       });
     } catch {
-      return '—';
+      return "—";
     }
   };
 
   const formatUptime = (seconds?: number) => {
-    if (!seconds) return '—';
+    if (!seconds) return "—";
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     return `${h}h ${m}m`;
@@ -495,7 +502,7 @@ export function TelegramGatewayFinal() {
     () => [
       // Status Overview Card
       {
-        id: 'status-overview',
+        id: "status-overview",
         content: (
           <CollapsibleCard
             cardId="telegram-gateway-status"
@@ -519,9 +526,9 @@ export function TelegramGatewayFinal() {
                   disabled={loading}
                 >
                   <RefreshCw
-                    className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                    className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
                   />
-                  {loading ? 'Atualizando...' : 'Atualizar'}
+                  {loading ? "Atualizando..." : "Atualizar"}
                 </Button>
               </div>
 
@@ -530,7 +537,7 @@ export function TelegramGatewayFinal() {
                 <div className={surfaceCardClass}>
                   <div className="flex items-center justify-between mb-2">
                     <span className={statusLabelClass}>Gateway</span>
-                    {data?.health?.status === 'healthy' ? (
+                    {data?.health?.status === "healthy" ? (
                       <CheckCircle className="h-5 w-5 text-emerald-400" />
                     ) : (
                       <XCircle className="h-5 w-5 text-red-400" />
@@ -538,7 +545,7 @@ export function TelegramGatewayFinal() {
                   </div>
                   <div className="flex items-baseline gap-2">
                     <p className={statusValueClass}>
-                      {data?.health?.status || 'unknown'}
+                      {data?.health?.status || "unknown"}
                     </p>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
                       • {formatUptime(data?.health?.uptime)}
@@ -551,16 +558,24 @@ export function TelegramGatewayFinal() {
                   <div className="flex items-center justify-between mb-2">
                     <span className={statusLabelClass}>Telegram</span>
                     <Wifi
-                      className={`h-5 w-5 ${data?.health?.telegram === 'connected' ? 'text-emerald-400' : 'text-red-400'}`}
+                      className={`h-5 w-5 ${data?.health?.telegram === "connected" ? "text-emerald-400" : "text-red-400"}`}
                     />
                   </div>
                   <Badge
-                    variant={data?.health?.telegram === 'connected' ? 'success' : 'destructive'}
+                    variant={
+                      data?.health?.telegram === "connected"
+                        ? "success"
+                        : "destructive"
+                    }
                   >
-                    {data?.health?.telegram === 'connected' ? 'Conectado' : 'Desconectado'}
+                    {data?.health?.telegram === "connected"
+                      ? "Conectado"
+                      : "Desconectado"}
                   </Badge>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {data?.health?.telegram === 'connected' ? 'MTProto ativo' : 'Verificar autenticação'}
+                    {data?.health?.telegram === "connected"
+                      ? "MTProto ativo"
+                      : "Verificar autenticação"}
                   </p>
                 </div>
 
@@ -573,7 +588,9 @@ export function TelegramGatewayFinal() {
                   <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
                     {data?.messages?.total || 0}
                   </p>
-                  <p className={cn(statusMutedTextClass, 'mt-1')}>Persistidas no TimescaleDB</p>
+                  <p className={cn(statusMutedTextClass, "mt-1")}>
+                    Persistidas no TimescaleDB
+                  </p>
                 </div>
 
                 {/* Session - Compact and balanced */}
@@ -581,25 +598,28 @@ export function TelegramGatewayFinal() {
                   <div className="flex items-center justify-between mb-2">
                     <span className={statusLabelClass}>Sessão</span>
                     <ShieldCheck
-                      className={`h-5 w-5 ${data?.session?.exists ? 'text-emerald-400' : 'text-slate-600'}`}
+                      className={`h-5 w-5 ${data?.session?.exists ? "text-emerald-400" : "text-slate-600"}`}
                     />
                   </div>
-                  
+
                   <Badge
-                    variant={data?.session?.exists ? 'success' : 'secondary'}
+                    variant={data?.session?.exists ? "success" : "secondary"}
                     className={cn(
-                      'mb-2',
-                      !data?.session?.exists && 'text-slate-700 dark:text-slate-100',
+                      "mb-2",
+                      !data?.session?.exists &&
+                        "text-slate-700 dark:text-slate-100",
                     )}
                   >
-                    {data?.session?.exists ? '✓ Autenticada' : 'Ausente'}
+                    {data?.session?.exists ? "✓ Autenticada" : "Ausente"}
                   </Badge>
 
                   {data?.session?.exists ? (
                     <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                       {data.session.hash && (
                         <div className="flex items-center gap-1">
-                          <span className="text-slate-500 dark:text-slate-500">Hash:</span>
+                          <span className="text-slate-500 dark:text-slate-500">
+                            Hash:
+                          </span>
                           <code className="font-mono text-cyan-700 dark:text-cyan-400">
                             {data.session.hash.substring(0, 12)}...
                           </code>
@@ -607,7 +627,8 @@ export function TelegramGatewayFinal() {
                       )}
                       {data.session.updatedAt && (
                         <div>
-                          {formatDateOnly(data.session.updatedAt)}, {formatTime(data.session.updatedAt)}
+                          {formatDateOnly(data.session.updatedAt)},{" "}
+                          {formatTime(data.session.updatedAt)}
                         </div>
                       )}
                       {data.session.sizeBytes && (
@@ -626,8 +647,8 @@ export function TelegramGatewayFinal() {
 
               {/* Alert */}
               {data &&
-                (data.health?.status !== 'healthy' ||
-                  data.health?.telegram !== 'connected' ||
+                (data.health?.status !== "healthy" ||
+                  data.health?.telegram !== "connected" ||
                   !data.session?.exists) && (
                   <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
                     <div className="flex items-start gap-3">
@@ -637,10 +658,10 @@ export function TelegramGatewayFinal() {
                           Sistema não está completamente operacional
                         </p>
                         <ul className="space-y-1 text-sm text-amber-700 dark:text-amber-200">
-                          {data.health?.status !== 'healthy' && (
+                          {data.health?.status !== "healthy" && (
                             <li>• Gateway MTProto offline (porta 4010)</li>
                           )}
-                          {data.health?.telegram !== 'connected' && (
+                          {data.health?.telegram !== "connected" && (
                             <li>• Telegram desconectado</li>
                           )}
                           {!data.session?.exists && (
@@ -661,7 +682,7 @@ export function TelegramGatewayFinal() {
 
       // Messages Table Card
       {
-        id: 'messages-table',
+        id: "messages-table",
         content: (
           <CollapsibleCard
             cardId="telegram-gateway-messages"
@@ -671,7 +692,7 @@ export function TelegramGatewayFinal() {
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-cyan-400" />
                 <CollapsibleCardTitle level={2}>
-                  Mensagens ({filteredMessages.length} de{' '}
+                  Mensagens ({filteredMessages.length} de{" "}
                   {messages.length > 0
                     ? messages.length
                     : data?.messages?.total || 0}
@@ -706,10 +727,10 @@ export function TelegramGatewayFinal() {
                 {syncResult.show && (
                   <div
                     className={cn(
-                      'rounded-md border px-3 py-1.5 text-sm font-medium',
+                      "rounded-md border px-3 py-1.5 text-sm font-medium",
                       syncResult.success
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200'
-                        : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-200',
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200"
+                        : "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-200",
                     )}
                   >
                     {syncResult.message}
@@ -718,7 +739,7 @@ export function TelegramGatewayFinal() {
               </div>
 
               {/* Filters Section */}
-              <div className={cn(surfaceCardClass, 'mb-4')}>
+              <div className={cn(surfaceCardClass, "mb-4")}>
                 <div className="mb-3 flex items-center gap-2">
                   <Filter className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -815,14 +836,14 @@ export function TelegramGatewayFinal() {
                 </div>
 
                 {/* Active Filters Info */}
-                {(filterChannel !== 'all' ||
+                {(filterChannel !== "all" ||
                   filterText ||
                   filterDateFrom ||
                   filterDateTo ||
-                  filterLimit !== '50') && (
+                  filterLimit !== "50") && (
                   <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
                     <span>Filtros ativos:</span>
-                    {filterChannel !== 'all' && (
+                    {filterChannel !== "all" && (
                       <Badge
                         variant="outline"
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
@@ -830,12 +851,15 @@ export function TelegramGatewayFinal() {
                         Canal: {getChannelLabel(filterChannel)}
                       </Badge>
                     )}
-                    {filterLimit !== '50' && (
+                    {filterLimit !== "50" && (
                       <Badge
                         variant="outline"
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
-                        Limite: {filterLimit === 'all' ? 'Todos' : `${filterLimit} registros`}
+                        Limite:{" "}
+                        {filterLimit === "all"
+                          ? "Todos"
+                          : `${filterLimit} registros`}
                       </Badge>
                     )}
                     {filterText && (
@@ -851,8 +875,10 @@ export function TelegramGatewayFinal() {
                         variant="outline"
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
-                        De:{' '}
-                        {parseDateInputHelper(filterDateFrom)?.toLocaleDateString('pt-BR') || filterDateFrom}
+                        De:{" "}
+                        {parseDateInputHelper(
+                          filterDateFrom,
+                        )?.toLocaleDateString("pt-BR") || filterDateFrom}
                       </Badge>
                     )}
                     {filterDateTo && (
@@ -860,8 +886,10 @@ export function TelegramGatewayFinal() {
                         variant="outline"
                         className="border-cyan-300 text-cyan-700 dark:border-cyan-700 dark:text-cyan-300"
                       >
-                        Até:{' '}
-                        {parseDateInputHelper(filterDateTo)?.toLocaleDateString('pt-BR') || filterDateTo}
+                        Até:{" "}
+                        {parseDateInputHelper(filterDateTo)?.toLocaleDateString(
+                          "pt-BR",
+                        ) || filterDateTo}
                       </Badge>
                     )}
                   </div>
@@ -877,14 +905,14 @@ export function TelegramGatewayFinal() {
                   <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">Nenhuma mensagem encontrada</p>
                   <p className="text-sm mt-1">
-                    {filterChannel !== 'all' ||
+                    {filterChannel !== "all" ||
                     filterText ||
                     filterDateFrom ||
                     filterDateTo
-                      ? 'Nenhuma mensagem corresponde aos filtros aplicados'
-                      : data?.health?.telegram === 'connected'
-                        ? 'Aguardando mensagens dos canais...'
-                        : 'Conecte o Telegram primeiro'}
+                      ? "Nenhuma mensagem corresponde aos filtros aplicados"
+                      : data?.health?.telegram === "connected"
+                        ? "Aguardando mensagens dos canais..."
+                        : "Conecte o Telegram primeiro"}
                   </p>
                 </div>
               ) : (
@@ -894,12 +922,12 @@ export function TelegramGatewayFinal() {
                       <tr className="text-left">
                         <th className="px-4 pb-3">
                           <button
-                            onClick={() => handleSort('date')}
+                            onClick={() => handleSort("date")}
                             className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                           >
                             Enviada
-                            {sortColumn === 'date' ? (
-                              sortDirection === 'asc' ? (
+                            {sortColumn === "date" ? (
+                              sortDirection === "asc" ? (
                                 <ArrowUp className="h-4 w-4" />
                               ) : (
                                 <ArrowDown className="h-4 w-4" />
@@ -911,12 +939,12 @@ export function TelegramGatewayFinal() {
                         </th>
                         <th className="px-4 pb-3">
                           <button
-                            onClick={() => handleSort('channel')}
+                            onClick={() => handleSort("channel")}
                             className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                           >
                             Canal
-                            {sortColumn === 'channel' ? (
-                              sortDirection === 'asc' ? (
+                            {sortColumn === "channel" ? (
+                              sortDirection === "asc" ? (
                                 <ArrowUp className="h-4 w-4" />
                               ) : (
                                 <ArrowDown className="h-4 w-4" />
@@ -931,12 +959,12 @@ export function TelegramGatewayFinal() {
                         </th>
                         <th className="px-4 pb-3">
                           <button
-                            onClick={() => handleSort('text')}
+                            onClick={() => handleSort("text")}
                             className="flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                           >
                             Texto
-                            {sortColumn === 'text' ? (
-                              sortDirection === 'asc' ? (
+                            {sortColumn === "text" ? (
+                              sortDirection === "asc" ? (
                                 <ArrowUp className="h-4 w-4" />
                               ) : (
                                 <ArrowDown className="h-4 w-4" />
@@ -955,10 +983,10 @@ export function TelegramGatewayFinal() {
                           <tr
                             key={msg.id}
                             className={cn(
-                              'transition-colors duration-300',
+                              "transition-colors duration-300",
                               isHighlighted
-                                ? 'bg-yellow-100/80 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'
-                                : 'hover:bg-slate-50 dark:hover:bg-slate-800/50',
+                                ? "bg-yellow-100/80 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
+                                : "hover:bg-slate-50 dark:hover:bg-slate-800/50",
                             )}
                           >
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
@@ -993,7 +1021,7 @@ export function TelegramGatewayFinal() {
                             </td>
                             <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
                               <div className="flex items-start gap-2">
-                                {msg.mediaType === 'photo' && (
+                                {msg.mediaType === "photo" && (
                                   <>
                                     <Image
                                       className="h-4 w-4 text-cyan-400 flex-shrink-0 mt-0.5"
@@ -1029,7 +1057,7 @@ export function TelegramGatewayFinal() {
 
       // Channels CRUD Table
       {
-        id: 'channels-crud',
+        id: "channels-crud",
         content: (
           <CollapsibleCard
             cardId="telegram-gateway-channels"
@@ -1045,14 +1073,14 @@ export function TelegramGatewayFinal() {
                   variant="outline"
                   className="ml-2 border-slate-300 text-slate-700 dark:border-slate-700 dark:text-slate-200"
                 >
-                  {channels.filter((c) => c.isActive).length} /{' '}
+                  {channels.filter((c) => c.isActive).length} /{" "}
                   {channels.length}
                 </Badge>
               </div>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
               {/* Add Form */}
-              <div className={cn(surfaceCardClass, 'mb-6')}>
+              <div className={cn(surfaceCardClass, "mb-6")}>
                 <p className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Adicionar Novo Canal
                 </p>
@@ -1129,25 +1157,31 @@ export function TelegramGatewayFinal() {
                           </td>
                           <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
                             {channel.label || (
-                              <span className="italic text-slate-500 dark:text-slate-400">—</span>
+                              <span className="italic text-slate-500 dark:text-slate-400">
+                                —
+                              </span>
                             )}
                           </td>
                           <td className="max-w-xs px-4 py-3 text-slate-700 dark:text-slate-200">
                             <div className="truncate">
                               {channel.description || (
-                                <span className="italic text-slate-500 dark:text-slate-400">—</span>
+                                <span className="italic text-slate-500 dark:text-slate-400">
+                                  —
+                                </span>
                               )}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <Badge
-                              variant={channel.isActive ? 'success' : 'secondary'}
+                              variant={
+                                channel.isActive ? "success" : "secondary"
+                              }
                               className={cn(
                                 !channel.isActive &&
-                                  'text-slate-700 dark:text-slate-100',
+                                  "text-slate-700 dark:text-slate-100",
                               )}
                             >
-                              {channel.isActive ? 'Ativo' : 'Inativo'}
+                              {channel.isActive ? "Ativo" : "Inativo"}
                             </Badge>
                           </td>
                           <td className="px-4 py-3 text-right">
@@ -1201,7 +1235,10 @@ export function TelegramGatewayFinal() {
                                 aria-label={`Remover canal ${channel.label || channel.channelId}`}
                                 title={`Remover canal ${channel.label || channel.channelId}`}
                               >
-                                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                <Trash2
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
                               </Button>
                             </div>
                           </td>
@@ -1230,10 +1267,8 @@ export function TelegramGatewayFinal() {
 
       // Gateway Logs Card
       {
-        id: 'gateway-logs',
-        content: (
-          <GatewayLogsCard />
-        ),
+        id: "gateway-logs",
+        content: <GatewayLogsCard />,
       },
     ],
     [
@@ -1302,15 +1337,15 @@ export function TelegramGatewayFinal() {
                   <p className="text-sm text-slate-700 dark:text-slate-300 italic">
                     "{selectedMessage.metadata.replyTo.text.substring(0, 200)}
                     {selectedMessage.metadata.replyTo.text.length > 200
-                      ? '...'
-                      : ''}
+                      ? "..."
+                      : ""}
                     "
                   </p>
                 </div>
               )}
 
               {/* Message Image */}
-              {selectedMessage.mediaType === 'photo' && (
+              {selectedMessage.mediaType === "photo" && (
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Imagem
@@ -1318,11 +1353,12 @@ export function TelegramGatewayFinal() {
                   <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-slate-950">
                     {(() => {
                       // Build photo URL using relative path (via Vite proxy)
-                      const photoUrl = selectedMessage.photoUrl || 
-                        (selectedMessage.channelId && selectedMessage.messageId 
+                      const photoUrl =
+                        selectedMessage.photoUrl ||
+                        (selectedMessage.channelId && selectedMessage.messageId
                           ? `/api/telegram-gateway/photos/${selectedMessage.channelId}/${selectedMessage.messageId}`
                           : null);
-                      
+
                       if (photoUrl) {
                         return (
                           <img
@@ -1330,15 +1366,15 @@ export function TelegramGatewayFinal() {
                             alt="Imagem da mensagem"
                             className="w-full h-auto max-h-96 object-contain"
                             onError={(e) => {
-                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.style.display = "none";
                               e.currentTarget.nextElementSibling?.classList.remove(
-                                'hidden',
+                                "hidden",
                               );
                             }}
                           />
                         );
                       }
-                      
+
                       // Fallback if no photo URL can be constructed
                       return (
                         <div className="p-8 text-center">
@@ -1362,9 +1398,9 @@ export function TelegramGatewayFinal() {
               {/* Message Text */}
               <div>
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                  {selectedMessage.mediaType === 'photo'
-                    ? 'Legenda'
-                    : 'Texto da Mensagem'}
+                  {selectedMessage.mediaType === "photo"
+                    ? "Legenda"
+                    : "Texto da Mensagem"}
                 </p>
                 <div className="p-4 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700">
                   <div className="text-sm text-slate-900 dark:text-slate-100 whitespace-pre-wrap break-words">
@@ -1380,42 +1416,52 @@ export function TelegramGatewayFinal() {
               </div>
 
               {/* Twitter Link Preview */}
-              {selectedMessage.metadata?.linkPreview?.type === 'twitter' && (
+              {selectedMessage.metadata?.linkPreview?.type === "twitter" && (
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Link do Twitter
                   </p>
-                  <TwitterPreview preview={selectedMessage.metadata.linkPreview} />
+                  <TwitterPreview
+                    preview={selectedMessage.metadata.linkPreview}
+                  />
                 </div>
               )}
 
               {/* YouTube Link Preview */}
-              {selectedMessage.metadata?.linkPreview?.type === 'youtube' && (
+              {selectedMessage.metadata?.linkPreview?.type === "youtube" && (
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Vídeo do YouTube
                   </p>
-                  <YouTubePreview preview={selectedMessage.metadata.linkPreview} />
+                  <YouTubePreview
+                    preview={selectedMessage.metadata.linkPreview}
+                  />
                 </div>
               )}
 
               {/* Instagram Link Preview */}
-              {selectedMessage.metadata?.linkPreview?.type === 'instagram' && (
+              {selectedMessage.metadata?.linkPreview?.type === "instagram" && (
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                    {selectedMessage.metadata.linkPreview.postType === 'reel' ? 'Reel do Instagram' : 'Post do Instagram'}
+                    {selectedMessage.metadata.linkPreview.postType === "reel"
+                      ? "Reel do Instagram"
+                      : "Post do Instagram"}
                   </p>
-                  <InstagramPreview preview={selectedMessage.metadata.linkPreview} />
+                  <InstagramPreview
+                    preview={selectedMessage.metadata.linkPreview}
+                  />
                 </div>
               )}
 
               {/* Generic Link Preview */}
-              {selectedMessage.metadata?.linkPreview?.type === 'generic' && (
+              {selectedMessage.metadata?.linkPreview?.type === "generic" && (
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Link Externo
                   </p>
-                  <GenericLinkPreview preview={selectedMessage.metadata.linkPreview} />
+                  <GenericLinkPreview
+                    preview={selectedMessage.metadata.linkPreview}
+                  />
                 </div>
               )}
 

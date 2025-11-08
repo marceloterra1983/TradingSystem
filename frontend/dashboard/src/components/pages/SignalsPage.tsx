@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Zap, TrendingUp } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Zap, TrendingUp } from "lucide-react";
 
 export function SignalsPage() {
   const sections = [
     {
-      id: 'recent-signals',
+      id: "recent-signals",
       content: (
         <PlaceholderSection
           cardId="signals-recent"
@@ -16,7 +16,7 @@ export function SignalsPage() {
       ),
     },
     {
-      id: 'signal-performance',
+      id: "signal-performance",
       content: (
         <PlaceholderSection
           cardId="signals-performance"

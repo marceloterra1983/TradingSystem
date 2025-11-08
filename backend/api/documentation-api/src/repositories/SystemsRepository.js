@@ -1,14 +1,14 @@
-import questDBClient from '../utils/questDBClient.js';
-import { logger } from '../config/logger.js';
-import { config } from '../config/appConfig.js';
-import { createPostgresSystemsRepository } from './postgres/SystemsRepository.js';
+import questDBClient from "../utils/questDBClient.js";
+import { logger } from "../config/logger.js";
+import { config } from "../config/appConfig.js";
+import { createPostgresSystemsRepository } from "./postgres/SystemsRepository.js";
 
 /**
  * Repository for managing documentation systems in QuestDB
  */
 export class SystemsRepository {
   constructor() {
-    this.tableName = 'documentation_systems';
+    this.tableName = "documentation_systems";
   }
 
   /**
@@ -37,27 +37,32 @@ export class SystemsRepository {
         description: systemData.description || null,
         type: systemData.type,
         url: systemData.url || null,
-        status: systemData.status || 'unknown',
+        status: systemData.status || "unknown",
         last_checked: systemData.last_checked || now,
         response_time_ms: systemData.response_time_ms || null,
         version: systemData.version || null,
         owner: systemData.owner || null,
         tags: systemData.tags ? JSON.stringify(systemData.tags) : null,
-        metadata: systemData.metadata ? JSON.stringify(systemData.metadata) : null,
+        metadata: systemData.metadata
+          ? JSON.stringify(systemData.metadata)
+          : null,
         created_at: now,
         updated_at: now,
-        designated_timestamp: now
+        designated_timestamp: now,
       };
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation system created', { id, name: systemData.name });
+      logger.info("Documentation system created", {
+        id,
+        name: systemData.name,
+      });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to create documentation system', {
+      logger.error("Failed to create documentation system", {
         error: error.message,
-        data: systemData
+        data: systemData,
       });
       throw error;
     }
@@ -77,9 +82,9 @@ export class SystemsRepository {
 
       return this.transformRow(rows[0]);
     } catch (error) {
-      logger.error('Failed to find system by ID', {
+      logger.error("Failed to find system by ID", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -126,11 +131,11 @@ export class SystemsRepository {
       }
 
       const rows = await questDBClient.executeSelect(sql, params);
-      return rows.map(row => this.transformRow(row));
+      return rows.map((row) => this.transformRow(row));
     } catch (error) {
-      logger.error('Failed to find systems', {
+      logger.error("Failed to find systems", {
         error: error.message,
-        filters
+        filters,
       });
       throw error;
     }
@@ -152,16 +157,27 @@ export class SystemsRepository {
 
       // Build dynamic update query
       const allowedFields = [
-        'name', 'description', 'type', 'url', 'status', 'last_checked',
-        'response_time_ms', 'version', 'owner', 'tags', 'metadata'
+        "name",
+        "description",
+        "type",
+        "url",
+        "status",
+        "last_checked",
+        "response_time_ms",
+        "version",
+        "owner",
+        "tags",
+        "metadata",
       ];
 
       for (const field of allowedFields) {
         if (updateData[field] !== undefined) {
           fields.push(`${field} = :${field}`);
 
-          if (field === 'tags' || field === 'metadata') {
-            params[field] = updateData[field] ? JSON.stringify(updateData[field]) : null;
+          if (field === "tags" || field === "metadata") {
+            params[field] = updateData[field]
+              ? JSON.stringify(updateData[field])
+              : null;
           } else {
             params[field] = updateData[field];
           }
@@ -169,27 +185,30 @@ export class SystemsRepository {
       }
 
       if (fields.length === 0) {
-        throw new Error('No valid fields to update');
+        throw new Error("No valid fields to update");
       }
 
-      fields.push('updated_at = :updated_at');
+      fields.push("updated_at = :updated_at");
 
       const sql = `
         UPDATE ${this.tableName}
-        SET ${fields.join(', ')}
+        SET ${fields.join(", ")}
         WHERE id = :id
       `;
 
       await questDBClient.executeWrite(sql, params);
 
-      logger.info('Documentation system updated', { id, fields: fields.join(', ') });
+      logger.info("Documentation system updated", {
+        id,
+        fields: fields.join(", "),
+      });
 
       return await this.findById(id);
     } catch (error) {
-      logger.error('Failed to update documentation system', {
+      logger.error("Failed to update documentation system", {
         error: error.message,
         id,
-        updateData
+        updateData,
       });
       throw error;
     }
@@ -203,19 +222,19 @@ export class SystemsRepository {
       // First check if system exists
       const existing = await this.findById(id);
       if (!existing) {
-        throw new Error('System not found');
+        throw new Error("System not found");
       }
 
       const sql = `DELETE FROM ${this.tableName} WHERE id = :id`;
       await questDBClient.executeWrite(sql, { id });
 
-      logger.info('Documentation system deleted', { id, name: existing.name });
+      logger.info("Documentation system deleted", { id, name: existing.name });
 
       return true;
     } catch (error) {
-      logger.error('Failed to delete documentation system', {
+      logger.error("Failed to delete documentation system", {
         error: error.message,
-        id
+        id,
       });
       throw error;
     }
@@ -271,13 +290,13 @@ export class SystemsRepository {
         total: 0,
         by_status: {},
         by_type: {},
-        avg_response_time: 0
+        avg_response_time: 0,
       };
 
       let totalResponseTime = 0;
       let responseTimeCount = 0;
 
-      rows.forEach(row => {
+      rows.forEach((row) => {
         stats.total += row.count;
 
         // Group by status
@@ -300,13 +319,15 @@ export class SystemsRepository {
       });
 
       if (responseTimeCount > 0) {
-        stats.avg_response_time = Math.round(totalResponseTime / responseTimeCount);
+        stats.avg_response_time = Math.round(
+          totalResponseTime / responseTimeCount,
+        );
       }
 
       return stats;
     } catch (error) {
-      logger.error('Failed to get system statistics', {
-        error: error.message
+      logger.error("Failed to get system statistics", {
+        error: error.message,
       });
       throw error;
     }
@@ -324,7 +345,7 @@ export class SystemsRepository {
       metadata: row.metadata ? JSON.parse(row.metadata) : null,
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
-      last_checked: row.last_checked ? new Date(row.last_checked) : null
+      last_checked: row.last_checked ? new Date(row.last_checked) : null,
     };
   }
 }
@@ -334,7 +355,9 @@ export class SystemsRepository {
  */
 class NullSystemsRepository {
   async create() {
-    throw new Error('Systems management is disabled (database strategy is "none")');
+    throw new Error(
+      'Systems management is disabled (database strategy is "none")',
+    );
   }
 
   async findById() {
@@ -350,11 +373,15 @@ class NullSystemsRepository {
   }
 
   async update() {
-    throw new Error('Systems management is disabled (database strategy is "none")');
+    throw new Error(
+      'Systems management is disabled (database strategy is "none")',
+    );
   }
 
   async delete() {
-    throw new Error('Systems management is disabled (database strategy is "none")');
+    throw new Error(
+      'Systems management is disabled (database strategy is "none")',
+    );
   }
 
   async findByStatus() {
@@ -378,7 +405,7 @@ class NullSystemsRepository {
       total: 0,
       by_status: {},
       by_type: {},
-      avg_response_time: 0
+      avg_response_time: 0,
     };
   }
 
@@ -391,10 +418,10 @@ let systemsRepositoryInstance = null;
 
 export function getSystemsRepository() {
   if (!systemsRepositoryInstance) {
-    if (config.database.strategy === 'none') {
-      logger.info('Using NullSystemsRepository (database disabled)');
+    if (config.database.strategy === "none") {
+      logger.info("Using NullSystemsRepository (database disabled)");
       systemsRepositoryInstance = new NullSystemsRepository();
-    } else if (config.database.strategy === 'postgres') {
+    } else if (config.database.strategy === "postgres") {
       systemsRepositoryInstance = createPostgresSystemsRepository();
     } else {
       systemsRepositoryInstance = new SystemsRepository();

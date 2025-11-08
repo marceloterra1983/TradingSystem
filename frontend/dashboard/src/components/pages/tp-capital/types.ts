@@ -1,14 +1,14 @@
 /**
  * TP-Capital Type Definitions
- * 
+ *
  * Centralized TypeScript interfaces and types
- * 
+ *
  * @module tp-capital/types
  */
 
 /**
  * Signal row data structure
- * 
+ *
  * Represents a trading signal from TP Capital Telegram channel
  */
 export interface SignalRow {

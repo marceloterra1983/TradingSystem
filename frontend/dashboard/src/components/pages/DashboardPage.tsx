@@ -1,15 +1,15 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from '../ui/card';
-import { useTradingStore } from '../../store/appStore';
-import type { Trade } from '../../store/appStore';
-import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
-import { cn } from '../../lib/utils';
+} from "../ui/card";
+import { useTradingStore } from "../../store/appStore";
+import type { Trade } from "../../store/appStore";
+import { TrendingUp, TrendingDown, Activity, DollarSign } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 /**
  * Dashboard Page Components
@@ -25,37 +25,37 @@ export function DashboardKPIs() {
   const totalPnL = positions.reduce((sum, pos) => sum + pos.pnl, 0);
   const totalPositions = positions.length;
   const activeOrders = orders.filter(
-    (o) => o.status === 'SUBMITTED' || o.status === 'PARTIAL',
+    (o) => o.status === "SUBMITTED" || o.status === "PARTIAL",
   ).length;
   const recentSignals = signals.slice(0, 10).length;
 
   const kpis = [
     {
-      title: 'Total P&L',
+      title: "Total P&L",
       value: `$${totalPnL.toFixed(2)}`,
-      change: totalPnL >= 0 ? '+' + totalPnL.toFixed(2) : totalPnL.toFixed(2),
-      trend: totalPnL >= 0 ? 'up' : 'down',
+      change: totalPnL >= 0 ? "+" + totalPnL.toFixed(2) : totalPnL.toFixed(2),
+      trend: totalPnL >= 0 ? "up" : "down",
       icon: DollarSign,
     },
     {
-      title: 'Active Positions',
+      title: "Active Positions",
       value: totalPositions,
       change: `${totalPositions} open`,
-      trend: 'neutral',
+      trend: "neutral",
       icon: Activity,
     },
     {
-      title: 'Active Orders',
+      title: "Active Orders",
       value: activeOrders,
       change: `${activeOrders} pending`,
-      trend: 'neutral',
+      trend: "neutral",
       icon: TrendingUp,
     },
     {
-      title: 'Recent Signals',
+      title: "Recent Signals",
       value: recentSignals,
       change: `Last 10 signals`,
-      trend: 'neutral',
+      trend: "neutral",
       icon: TrendingDown,
     },
   ];
@@ -77,12 +77,12 @@ export function DashboardKPIs() {
                   </p>
                   <p
                     className={cn(
-                      'mt-1 text-sm font-medium',
-                      kpi.trend === 'up' &&
-                        'text-green-600 dark:text-green-400',
-                      kpi.trend === 'down' && 'text-red-600 dark:text-red-400',
-                      kpi.trend === 'neutral' &&
-                        'text-gray-500 dark:text-gray-400',
+                      "mt-1 text-sm font-medium",
+                      kpi.trend === "up" &&
+                        "text-green-600 dark:text-green-400",
+                      kpi.trend === "down" && "text-red-600 dark:text-red-400",
+                      kpi.trend === "neutral" &&
+                        "text-gray-500 dark:text-gray-400",
                     )}
                   >
                     {kpi.change}
@@ -90,20 +90,20 @@ export function DashboardKPIs() {
                 </div>
                 <div
                   className={cn(
-                    'rounded-full p-3',
-                    kpi.trend === 'up' && 'bg-green-100',
-                    kpi.trend === 'down' && 'bg-red-100',
-                    kpi.trend === 'neutral' && 'bg-gray-100 dark:bg-gray-800',
+                    "rounded-full p-3",
+                    kpi.trend === "up" && "bg-green-100",
+                    kpi.trend === "down" && "bg-red-100",
+                    kpi.trend === "neutral" && "bg-gray-100 dark:bg-gray-800",
                   )}
                 >
                   <Icon
                     className={cn(
-                      'h-6 w-6',
-                      kpi.trend === 'up' &&
-                        'text-green-600 dark:text-green-400',
-                      kpi.trend === 'down' && 'text-red-600 dark:text-red-400',
-                      kpi.trend === 'neutral' &&
-                        'text-gray-600 dark:text-gray-400',
+                      "h-6 w-6",
+                      kpi.trend === "up" &&
+                        "text-green-600 dark:text-green-400",
+                      kpi.trend === "down" && "text-red-600 dark:text-red-400",
+                      kpi.trend === "neutral" &&
+                        "text-gray-600 dark:text-gray-400",
                     )}
                   />
                 </div>
@@ -158,10 +158,10 @@ export function DashboardMarketOverview() {
                   </p>
                   <p
                     className={cn(
-                      'text-sm font-medium',
-                      trade.aggressor === 'BUY'
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'text-red-600 dark:text-red-400',
+                      "text-sm font-medium",
+                      trade.aggressor === "BUY"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400",
                     )}
                   >
                     {trade.aggressor}
@@ -209,10 +209,10 @@ export function DashboardRecentActivity() {
                   </span>
                   <span
                     className={cn(
-                      'rounded px-2 py-0.5 text-xs font-medium',
-                      trade.aggressor === 'BUY'
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
+                      "rounded px-2 py-0.5 text-xs font-medium",
+                      trade.aggressor === "BUY"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400",
                     )}
                   >
                     {trade.aggressor}
@@ -244,19 +244,19 @@ export function DashboardRecentActivity() {
                     {order.symbol}
                   </span>
                   <span className="text-gray-700">
-                    {order.quantity} @ ${order.price?.toFixed(2) || 'Market'}
+                    {order.quantity} @ ${order.price?.toFixed(2) || "Market"}
                   </span>
                   <span
                     className={cn(
-                      'rounded px-2 py-0.5 text-xs font-medium',
-                      order.status === 'FILLED' &&
-                        'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400',
-                      order.status === 'SUBMITTED' &&
-                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-400',
-                      order.status === 'CANCELED' &&
-                        'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
-                      order.status === 'REJECTED' &&
-                        'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400',
+                      "rounded px-2 py-0.5 text-xs font-medium",
+                      order.status === "FILLED" &&
+                        "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+                      order.status === "SUBMITTED" &&
+                        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-400",
+                      order.status === "CANCELED" &&
+                        "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+                      order.status === "REJECTED" &&
+                        "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-400",
                     )}
                   >
                     {order.status}

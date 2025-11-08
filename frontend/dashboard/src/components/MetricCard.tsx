@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import clsx from 'clsx';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ReactNode } from "react";
+import clsx from "clsx";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 export interface MetricCardProps {
   title: string;
@@ -8,8 +8,8 @@ export interface MetricCardProps {
   change?: number;
   changeLabel?: string;
   icon?: ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-  variant?: 'default' | 'success' | 'danger' | 'warning' | 'info';
+  trend?: "up" | "down" | "neutral";
+  variant?: "default" | "success" | "danger" | "warning" | "info";
   loading?: boolean;
   className?: string;
 }
@@ -21,7 +21,7 @@ export function MetricCard({
   changeLabel,
   icon,
   trend,
-  variant = 'default',
+  variant = "default",
   loading = false,
   className,
 }: MetricCardProps) {
@@ -29,35 +29,35 @@ export function MetricCard({
     if (!trend) return null;
 
     switch (trend) {
-      case 'up':
+      case "up":
         return <TrendingUp className="w-4 h-4 text-green-600" />;
-      case 'down':
+      case "down":
         return <TrendingDown className="w-4 h-4 text-red-600" />;
-      case 'neutral':
+      case "neutral":
         return <Minus className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getTrendColor = () => {
-    if (change === undefined) return '';
+    if (change === undefined) return "";
 
-    if (change > 0) return 'text-green-600';
-    if (change < 0) return 'text-red-600';
-    return 'text-gray-600';
+    if (change > 0) return "text-green-600";
+    if (change < 0) return "text-red-600";
+    return "text-gray-600";
   };
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'success':
-        return 'border-l-4 border-green-500 bg-green-50';
-      case 'danger':
-        return 'border-l-4 border-red-500 bg-red-50';
-      case 'warning':
-        return 'border-l-4 border-yellow-500 bg-yellow-50';
-      case 'info':
-        return 'border-l-4 border-blue-500 bg-blue-50';
+      case "success":
+        return "border-l-4 border-green-500 bg-green-50";
+      case "danger":
+        return "border-l-4 border-red-500 bg-red-50";
+      case "warning":
+        return "border-l-4 border-yellow-500 bg-yellow-50";
+      case "info":
+        return "border-l-4 border-blue-500 bg-blue-50";
       default:
-        return 'border border-gray-200';
+        return "border border-gray-200";
     }
   };
 
@@ -65,7 +65,7 @@ export function MetricCard({
     return (
       <div
         className={clsx(
-          'bg-white rounded-lg p-6 shadow-sm',
+          "bg-white rounded-lg p-6 shadow-sm",
           getVariantStyles(),
           className,
         )}
@@ -82,7 +82,7 @@ export function MetricCard({
   return (
     <div
       className={clsx(
-        'bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow',
+        "bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow",
         getVariantStyles(),
         className,
       )}
@@ -96,8 +96,8 @@ export function MetricCard({
             <div className="flex items-center gap-2">
               {getTrendIcon()}
               {change !== undefined && (
-                <span className={clsx('text-sm font-medium', getTrendColor())}>
-                  {change > 0 && '+'}
+                <span className={clsx("text-sm font-medium", getTrendColor())}>
+                  {change > 0 && "+"}
                   {change}%
                 </span>
               )}

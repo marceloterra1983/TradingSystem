@@ -1,0 +1,29 @@
+{
+  "login": {
+    "url": "https://sso.hotmart.com/login",
+    "usernameSelector": "input[name=\"username\"]",
+    "passwordSelector": "input[name=\"password\"]",
+    "submitSelector": "button[type=\"submit\"]",
+    "postLoginWaitSelector": "a[href*=\"/club/\"], div[class*=\"user\"], img[alt*=\"avatar\"]"
+  },
+  "courses": {
+    "url": "https://hotmart.com/pt-BR/club/construtordecapital",
+    "courseItemSelector": "div[class*=\"product\"], div[class*=\"course\"], a[href*=\"/club/\"]",
+    "titleSelector": "h1, h2, h3, [class*=\"title\"]",
+    "linkSelector": "a[href*=\"/club/\"]"
+  },
+  "modules": {
+    "moduleListSelector": "div[class*=\"module\"], div[class*=\"section\"], ul li",
+    "titleSelector": "h2, h3, h4, [class*=\"title\"]",
+    "linkSelector": "a"
+  },
+  "classes": {
+    "classListSelector": "div[class*=\"lesson\"], div[class*=\"class\"], li",
+    "titleSelector": "span, a, [class*=\"title\"]",
+    "linkSelector": "a",
+    "contentSelector": "div[class*=\"content\"], div[class*=\"description\"], p",
+    "attachmentSelector": "a[href*=\"download\"], a[href*=\".pdf\"], a[href*=\".zip\"]",
+    "videoSelector": "video, iframe[src*=\"player\"], iframe[src*=\"vimeo\"], iframe[src*=\"youtube\"]",
+    "durationSelector": "[class*=\"duration\"], [class*=\"time\"]"
+  }
+}

@@ -1,23 +1,23 @@
 /**
  * SignalsFilterBar Component
- * 
+ *
  * Extracted from SignalsTable.tsx (Refactoring: 2025-11-04)
  * Responsible for filtering controls (channel, type, search, limit)
- * 
+ *
  * @module tp-capital/components
  */
 
-import { Button } from '../../../ui/button';
+import { Button } from "../../../ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../ui/select';
-import { Input } from '../../../ui/input';
-import { RefreshCcw, RotateCcw, FileDown, FileSpreadsheet } from 'lucide-react';
-import { LIMIT_OPTIONS } from '../constants';
+} from "../../../ui/select";
+import { Input } from "../../../ui/input";
+import { RefreshCcw, RotateCcw, FileDown, FileSpreadsheet } from "lucide-react";
+import { LIMIT_OPTIONS } from "../constants";
 
 export interface SignalsFilterBarProps {
   // Filter state
@@ -57,12 +57,12 @@ export interface SignalsFilterBarProps {
 
 /**
  * Filter bar for TP-Capital signals table
- * 
+ *
  * Provides filtering, search, and action controls in a compact layout.
- * 
+ *
  * @param props - Filter configuration and handlers
  * @returns Filter bar component
- * 
+ *
  * @example
  * ```tsx
  * <SignalsFilterBar
@@ -123,8 +123,8 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
           <div
             className={`px-3 py-1.5 rounded-md text-sm font-medium ${
               syncResult.success
-                ? 'bg-emerald-950/50 border border-emerald-800 text-emerald-300'
-                : 'bg-red-950/50 border border-red-800 text-red-300'
+                ? "bg-emerald-950/50 border border-emerald-800 text-emerald-300"
+                : "bg-red-950/50 border border-red-800 text-red-300"
             }`}
           >
             {syncResult.message}
@@ -228,7 +228,7 @@ export function SignalsFilterBar(props: SignalsFilterBarProps) {
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
             />
           </Button>
 

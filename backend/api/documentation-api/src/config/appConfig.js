@@ -1,56 +1,62 @@
-import './load-env-wrapper.js';
+import "./load-env-wrapper.js";
 
-const defaultStrategy = process.env.NODE_ENV === 'test' ? 'none' : 'none';
-const rawStrategy = (process.env.DOCUMENTATION_DB_STRATEGY || defaultStrategy).toLowerCase();
-const normalizedStrategy = rawStrategy === 'postgresql' ? 'postgres' : rawStrategy;
+const defaultStrategy = process.env.NODE_ENV === "test" ? "none" : "none";
+const rawStrategy = (
+  process.env.DOCUMENTATION_DB_STRATEGY || defaultStrategy
+).toLowerCase();
+const normalizedStrategy =
+  rawStrategy === "postgresql" ? "postgres" : rawStrategy;
 
 export const config = {
   server: {
-    port: Number(process.env.PORT || 3400)
+    port: Number(process.env.PORT || 3400),
   },
   vectors: {
-    qdrantUrl: process.env.QDRANT_URL || 'http://localhost:6333',
-    qdrantCollection: process.env.QDRANT_COLLECTION || 'documentation',
-    ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-    ollamaEmbeddingModel: process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
+    qdrantUrl: process.env.QDRANT_URL || "http://localhost:6333",
+    qdrantCollection: process.env.QDRANT_COLLECTION || "documentation",
+    ollamaBaseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+    ollamaEmbeddingModel:
+      process.env.OLLAMA_EMBEDDING_MODEL || "nomic-embed-text",
     // Max chunk size (approx tokens), overlap; used by indexer script
     chunkSize: Number(process.env.DOCS_CHUNK_SIZE || 800),
-    chunkOverlap: Number(process.env.DOCS_CHUNK_OVERLAP || 120)
+    chunkOverlap: Number(process.env.DOCS_CHUNK_OVERLAP || 120),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3103,http://localhost:3400,http://localhost:3401',
-    disable: process.env.DISABLE_CORS === 'true'
+    origin: process.env.CORS_ORIGIN,
+    disable: process.env.DISABLE_CORS === "true",
   },
   rateLimit: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60000),
-    max: Number(process.env.RATE_LIMIT_MAX || 200)
+    max: Number(process.env.RATE_LIMIT_MAX || 200),
   },
   database: {
-    strategy: normalizedStrategy
+    strategy: normalizedStrategy,
   },
   questdb: {
-    host: process.env.QUESTDB_HOST || 'localhost',
+    host: process.env.QUESTDB_HOST || "localhost",
     port: Number(process.env.QUESTDB_PORT || 9000),
-    user: process.env.QUESTDB_USER || 'admin',
-    password: process.env.QUESTDB_PASSWORD || 'quest',
-    database: process.env.QUESTDB_DATABASE || 'questdb'
+    user: process.env.QUESTDB_USER || "admin",
+    password: process.env.QUESTDB_PASSWORD || "quest",
+    database: process.env.QUESTDB_DATABASE || "questdb",
   },
   postgres: {
-    url: process.env.DOCUMENTATION_DATABASE_URL || '',
-    schema: process.env.DOCUMENTATION_DATABASE_SCHEMA || 'public',
-    ssl: process.env.DOCUMENTATION_DATABASE_SSL === 'true',
+    url: process.env.DOCUMENTATION_DATABASE_URL || "",
+    schema: process.env.DOCUMENTATION_DATABASE_SCHEMA || "public",
+    ssl: process.env.DOCUMENTATION_DATABASE_SSL === "true",
     connectionLimit: Number(process.env.DOCUMENTATION_DATABASE_POOL_MAX || 10),
-    connectionTimeoutMs: Number(process.env.DOCUMENTATION_DATABASE_TIMEOUT_MS || 5000)
+    connectionTimeoutMs: Number(
+      process.env.DOCUMENTATION_DATABASE_TIMEOUT_MS || 5000,
+    ),
   },
   prometheus: {
-    url: process.env.PROMETHEUS_URL || 'http://localhost:9090'
-  }
+    url: process.env.PROMETHEUS_URL || "http://localhost:9090",
+  },
 };
 
 export function isPostgresStrategy() {
-  return config.database.strategy === 'postgres';
+  return config.database.strategy === "postgres";
 }
 
 export function isQuestDbStrategy() {
-  return config.database.strategy === 'questdb';
+  return config.database.strategy === "questdb";
 }

@@ -1,2 +1,2 @@
-export { ResultsComparison } from './ResultsComparison';
-export { JobStatistics } from './JobStatistics';
+export { ResultsComparison } from "./ResultsComparison";
+export { JobStatistics } from "./JobStatistics";

@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { BarChart3, Activity } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { BarChart3, Activity } from "lucide-react";
 
 /**
  * System Overview Page - KPIs and system health monitoring
@@ -8,7 +8,7 @@ import { BarChart3, Activity } from 'lucide-react';
 export function OverviewPage() {
   const sections = [
     {
-      id: 'kpis',
+      id: "kpis",
       content: (
         <PlaceholderSection
           cardId="overview-kpis"
@@ -19,7 +19,7 @@ export function OverviewPage() {
       ),
     },
     {
-      id: 'system-health',
+      id: "system-health",
       content: (
         <PlaceholderSection
           cardId="overview-system-health"

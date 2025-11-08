@@ -1,7 +1,7 @@
 /**
  * Systems Repository
  * Data access layer for systems management
- * 
+ *
  * NOTE: This is a stub implementation for testing purposes.
  * Replace with actual database integration when ready.
  */
@@ -17,18 +17,18 @@ let nextId = 1;
  */
 export async function findAll(filters = {}) {
   let results = Array.from(systems.values());
-  
+
   // Apply filters
   if (filters.status) {
-    results = results.filter(system => system.status === filters.status);
+    results = results.filter((system) => system.status === filters.status);
   }
-  
+
   if (filters.name) {
-    results = results.filter(system => 
-      system.name.toLowerCase().includes(filters.name.toLowerCase())
+    results = results.filter((system) =>
+      system.name.toLowerCase().includes(filters.name.toLowerCase()),
     );
   }
-  
+
   return results;
 }
 
@@ -52,9 +52,9 @@ export async function create(systemData) {
     id,
     ...systemData,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
-  
+
   systems.set(id, system);
   return system;
 }
@@ -68,15 +68,15 @@ export async function create(systemData) {
 export async function update(id, updates) {
   const system = systems.get(id);
   if (!system) {
-    throw new Error('System not found');
+    throw new Error("System not found");
   }
-  
+
   const updated = {
     ...system,
     ...updates,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
-  
+
   systems.set(id, updated);
   return updated;
 }
@@ -110,6 +110,5 @@ export const systemsRepository = {
   create,
   update,
   delete: deleteSystem,
-  count
+  count,
 };
-

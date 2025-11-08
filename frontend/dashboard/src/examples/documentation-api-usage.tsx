@@ -1,6 +1,6 @@
 // Example of using the Documentation Search API
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface SearchResult {
   content: string;
@@ -30,10 +30,10 @@ async function advancedSearch(
   query: string,
   filters: SearchFilters,
 ): Promise<SearchResult[]> {
-  const response = await fetch('/api/v1/search', {
-    method: 'POST',
+  const response = await fetch("/api/v1/search", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ query, filters }),
   });
@@ -53,7 +53,7 @@ function useDocumentationSearch() {
       const results = await advancedSearch(query, filters || {});
       setResults(results);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed');
+      setError(err instanceof Error ? err.message : "Search failed");
       setResults([]);
     } finally {
       setIsLoading(false);
@@ -65,10 +65,10 @@ function useDocumentationSearch() {
 
 // Example 4: Getting Document Details
 // Example 4: Get documentation facets (domain/type/tags/status)
-async function getDocsFacets(query = '') {
+async function getDocsFacets(query = "") {
   const url = query
     ? `/api/v1/docs/facets?q=${encodeURIComponent(query)}`
-    : '/api/v1/docs/facets';
+    : "/api/v1/docs/facets";
   const response = await fetch(url);
   return response.json();
 }
@@ -87,19 +87,19 @@ function DocumentationSearch() {
 
   const handleSearch = async () => {
     // Basic search
-    const basicResults = await basicSearch('clean architecture');
+    const basicResults = await basicSearch("clean architecture");
 
     // Advanced search with filters
-    const advancedResults = await advancedSearch('clean architecture', {
-      type: ['markdown'],
-      updated: '2024',
+    const advancedResults = await advancedSearch("clean architecture", {
+      type: ["markdown"],
+      updated: "2024",
     });
 
     // Get documentation facets
-    const facets = await getDocsFacets('architecture');
+    const facets = await getDocsFacets("architecture");
 
     // Get search suggestions
-    const suggestions = await getSearchSuggestions('clean arch');
+    const suggestions = await getSearchSuggestions("clean arch");
   };
 
   return <div>{/* Your search UI components */}</div>;
@@ -107,7 +107,7 @@ function DocumentationSearch() {
 
 // Example 6: Real-time Search with Debounce
 function useDebounceSearch(delay = 300) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const { results, isLoading, error, search } = useDocumentationSearch();
 
   useEffect(() => {
@@ -141,12 +141,12 @@ async function docsSearch(
   },
 ) {
   const params = new URLSearchParams();
-  if (query) params.set('q', query);
-  if (opts?.domain) params.set('domain', opts.domain);
-  if (opts?.type) params.set('type', opts.type);
-  if (opts?.tags?.length) params.set('tags', opts.tags.join(','));
-  if (opts?.status) params.set('status', opts.status);
-  if (opts?.limit) params.set('limit', String(opts.limit));
+  if (query) params.set("q", query);
+  if (opts?.domain) params.set("domain", opts.domain);
+  if (opts?.type) params.set("type", opts.type);
+  if (opts?.tags?.length) params.set("tags", opts.tags.join(","));
+  if (opts?.status) params.set("status", opts.status);
+  if (opts?.limit) params.set("limit", String(opts.limit));
   const response = await fetch(`/api/v1/docs/search?${params.toString()}`);
   return response.json();
 }

@@ -1,6 +1,6 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Activity, TrendingUp } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Activity, TrendingUp } from "lucide-react";
 
 /**
  * Market Overview Page - Current market conditions
@@ -8,7 +8,7 @@ import { Activity, TrendingUp } from 'lucide-react';
 export function MarketOverviewPage() {
   const sections = [
     {
-      id: 'market-status',
+      id: "market-status",
       content: (
         <PlaceholderSection
           cardId="market-status"
@@ -19,7 +19,7 @@ export function MarketOverviewPage() {
       ),
     },
     {
-      id: 'top-movers',
+      id: "top-movers",
       content: (
         <PlaceholderSection
           cardId="market-top-movers"

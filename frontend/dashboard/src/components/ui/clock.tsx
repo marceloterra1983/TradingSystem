@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { Clock as ClockIcon } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import * as React from "react";
+import { Clock as ClockIcon } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 export interface ClockProps {
   className?: string;
@@ -41,25 +41,25 @@ export function Clock({
     return () => clearInterval(timer);
   }, []);
 
-  const timeString = time.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  const timeString = time.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
 
-  const dateString = time.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+  const dateString = time.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 
   return (
     <div
       className={cn(
-        'flex items-center gap-2 rounded-lg px-3 py-1.5',
-        'bg-gray-100 dark:bg-gray-800',
-        'border border-gray-200 dark:border-gray-700',
-        'transition-colors',
+        "flex items-center gap-2 rounded-lg px-3 py-1.5",
+        "bg-gray-100 dark:bg-gray-800",
+        "border border-gray-200 dark:border-gray-700",
+        "transition-colors",
         className,
       )}
     >

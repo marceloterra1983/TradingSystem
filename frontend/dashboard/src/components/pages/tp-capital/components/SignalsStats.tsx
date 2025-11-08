@@ -1,13 +1,13 @@
 /**
  * SignalsStats Component
- * 
+ *
  * Extracted from SignalsTable.tsx (Refactoring: 2025-11-04)
  * Displays signal statistics and counts
- * 
+ *
  * @module tp-capital/components
  */
 
-import { SignalRow } from '../types';
+import { SignalRow } from "../types";
 
 export interface SignalsStatsProps {
   signals: SignalRow[];
@@ -16,12 +16,12 @@ export interface SignalsStatsProps {
 
 /**
  * Statistics summary for signals table
- * 
+ *
  * Shows total signals and filtered count.
- * 
+ *
  * @param props - Signal arrays
  * @returns Stats component
- * 
+ *
  * @example
  * ```tsx
  * <SignalsStats
@@ -35,16 +35,15 @@ export function SignalsStats(props: SignalsStatsProps) {
 
   return (
     <div className="text-sm text-gray-600 dark:text-gray-400">
-      Exibindo{' '}
+      Exibindo{" "}
       <span className="font-semibold text-gray-900 dark:text-white">
         {filteredSignals.length}
-      </span>{' '}
-      de{' '}
+      </span>{" "}
+      de{" "}
       <span className="font-semibold text-gray-900 dark:text-white">
         {signals.length}
-      </span>{' '}
+      </span>{" "}
       sinais
     </div>
   );
 }
-

@@ -1,25 +1,25 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useSensors, useSensor, PointerSensor } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import type { ItemStatus } from '../types/workspace.types';
+import { useState, useCallback, useMemo } from "react";
+import { useSensors, useSensor, PointerSensor } from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
+import type { ItemStatus } from "../types/workspace.types";
 
 const STATUS_VALUES: ItemStatus[] = [
-  'new',
-  'review',
-  'in-progress',
-  'completed',
-  'rejected',
+  "new",
+  "review",
+  "in-progress",
+  "completed",
+  "rejected",
 ];
 
 // Check if a value corresponds to a valid ItemStatus
 function isItemStatus(value: unknown): value is ItemStatus {
   return (
-    typeof value === 'string' && STATUS_VALUES.includes(value as ItemStatus)
+    typeof value === "string" && STATUS_VALUES.includes(value as ItemStatus)
   );
 }
 
-function getStatusFromOver(over: DragEndEvent['over']): ItemStatus | null {
+function getStatusFromOver(over: DragEndEvent["over"]): ItemStatus | null {
   if (!over) {
     return null;
   }

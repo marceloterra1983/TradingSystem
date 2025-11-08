@@ -1,27 +1,27 @@
 /**
  * API Module - TP-Capital
- * 
+ *
  * Handles all HTTP requests to TP-Capital backend
- * 
+ *
  * @module tp-capital/api
  */
 
-import type { 
-  FetchSignalsParams, 
-  FetchSignalsResponse, 
+import type {
+  FetchSignalsParams,
+  FetchSignalsResponse,
   FetchLogsResponse,
-  LogEntry
-} from './types';
-import { FALLBACK_SAMPLE_SIGNALS } from './constants';
-import { buildLogsQuery, buildDeleteUrl } from './utils';
-import { createLogger } from './utils/logger';
+  LogEntry,
+} from "./types";
+import { FALLBACK_SAMPLE_SIGNALS } from "./constants";
+import { buildLogsQuery, buildDeleteUrl } from "./utils";
+import { createLogger } from "./utils/logger";
 
-const logger = createLogger('API');
+const logger = createLogger("API");
 
 const SAMPLE_LOGS: LogEntry[] = [
   {
-    level: 'info',
-    message: 'Exemplo de log - serviço offline',
+    level: "info",
+    message: "Exemplo de log - serviço offline",
     timestamp: new Date().toISOString(),
     context: { sample: true },
   },
@@ -32,18 +32,18 @@ export async function fetchSignals(
 ): Promise<FetchSignalsResponse> {
   try {
     // Dynamic import to avoid bundling issues
-    const { tpCapitalApi } = await import('../../../utils/tpCapitalApi');
-    
+    const { tpCapitalApi } = await import("../../../utils/tpCapitalApi");
+
     const queryParams = new URLSearchParams();
-    if (params.limit) queryParams.set('limit', String(params.limit));
-    if (params.channel) queryParams.set('channel', params.channel);
-    if (params.signalType) queryParams.set('type', params.signalType);
-    if (params.search) queryParams.set('search', params.search);
-    if (params.from) queryParams.set('from', params.from);
-    if (params.to) queryParams.set('to', params.to);
+    if (params.limit) queryParams.set("limit", String(params.limit));
+    if (params.channel) queryParams.set("channel", params.channel);
+    if (params.signalType) queryParams.set("type", params.signalType);
+    if (params.search) queryParams.set("search", params.search);
+    if (params.from) queryParams.set("from", params.from);
+    if (params.to) queryParams.set("to", params.to);
 
     const query = queryParams.toString();
-    const endpoint = query ? `/signals?${query}` : '/signals';
+    const endpoint = query ? `/signals?${query}` : "/signals";
 
     // ✅ Using authenticated helper
     const response = await tpCapitalApi.get(endpoint);
@@ -60,8 +60,8 @@ export async function fetchSignals(
     const message =
       error instanceof Error
         ? error.message
-        : 'Unknown error while fetching signals';
-    logger.error('Failed to fetch TP Capital signals', error);
+        : "Unknown error while fetching signals";
+    logger.error("Failed to fetch TP Capital signals", error);
     return {
       rows: FALLBACK_SAMPLE_SIGNALS,
       usingFallback: true,
@@ -88,8 +88,8 @@ export async function fetchLogs(params: {
     const message =
       error instanceof Error
         ? error.message
-        : 'Unknown error while fetching logs';
-    console.error('Failed to fetch TP Capital logs', error);
+        : "Unknown error while fetching logs";
+    console.error("Failed to fetch TP Capital logs", error);
     return {
       rows: SAMPLE_LOGS,
       usingFallback: true,
@@ -103,8 +103,8 @@ export async function deleteSignal(ingestedAt: string): Promise<void> {
 
   try {
     const response = await fetch(url, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ingestedAt }),
     });
 
@@ -115,9 +115,9 @@ export async function deleteSignal(ingestedAt: string): Promise<void> {
       );
     }
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
-        'Não foi possível conectar ao serviço TP-Capital. Verifique se o backend está rodando.',
+        "Não foi possível conectar ao serviço TP-Capital. Verifique se o backend está rodando.",
       );
     }
     throw error;

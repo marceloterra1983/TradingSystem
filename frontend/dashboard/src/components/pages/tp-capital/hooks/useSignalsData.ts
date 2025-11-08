@@ -3,18 +3,18 @@
  * Quick Win P1-4: Extract data fetching logic from SignalsTable.tsx
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { tpCapitalApi } from '../../../../utils/tpCapitalApi';
+import { useState, useEffect, useCallback } from "react";
+import { tpCapitalApi } from "../../../../utils/tpCapitalApi";
 
 export interface Signal {
   id: string;
   asset: string;
-  direction: 'LONG' | 'SHORT';
+  direction: "LONG" | "SHORT";
   entry: number;
   stopLoss: number;
   takeProfit: number;
   timestamp: string;
-  status: 'active' | 'closed' | 'cancelled';
+  status: "active" | "closed" | "cancelled";
   channelId?: string;
   confidence?: number;
 }
@@ -35,15 +35,16 @@ export function useSignalsData(options: UseSignalsDataOptions = {}) {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await tpCapitalApi.get('/signals');
+
+      const response = await tpCapitalApi.get("/signals");
       const data = await response.json();
-      
+
       setSignals(data.signals || data.data || []);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao buscar signals';
+      const message =
+        err instanceof Error ? err.message : "Erro ao buscar signals";
       setError(message);
-      console.error('[useSignalsData] Error:', err);
+      console.error("[useSignalsData] Error:", err);
     } finally {
       setLoading(false);
     }
@@ -65,4 +66,3 @@ export function useSignalsData(options: UseSignalsDataOptions = {}) {
     refetch: fetchSignals,
   };
 }
-

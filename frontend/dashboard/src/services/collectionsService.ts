@@ -18,7 +18,7 @@ import type {
   ModelsListResponse,
   HealthCheckResponse,
   ApiResponse,
-} from '../types/collections';
+} from "../types/collections";
 
 /**
  * Collections Service class
@@ -30,16 +30,16 @@ class CollectionsService {
     // In development, ALWAYS use Vite proxy (relative URLs)
     // In production, use environment variables or default to empty string (same origin)
     if (import.meta.env.DEV) {
-      this.baseUrl = ''; // Use Vite proxy in development
+      this.baseUrl = ""; // Use Vite proxy in development
       console.debug(
-        '[collectionsService] Using Vite proxy (relative URLs) in development',
+        "[collectionsService] Using Vite proxy (relative URLs) in development",
       );
     } else {
       const sanitize = (url: string | undefined | null): string | null => {
         if (!url) return null;
         const trimmed = url.trim();
         if (!trimmed) return null;
-        return trimmed.replace(/\/+$/, '');
+        return trimmed.replace(/\/+$/, "");
       };
 
       const directCollectionsUrl = sanitize(
@@ -49,24 +49,24 @@ class CollectionsService {
         import.meta.env.VITE_API_BASE_URL as string,
       );
       const useUnifiedDomain =
-        (import.meta.env.VITE_USE_UNIFIED_DOMAIN as string) === 'true';
+        (import.meta.env.VITE_USE_UNIFIED_DOMAIN as string) === "true";
 
       if (directCollectionsUrl) {
         this.baseUrl = directCollectionsUrl;
       } else if (useUnifiedDomain && unifiedApiUrl) {
         this.baseUrl = unifiedApiUrl;
       } else {
-        this.baseUrl = ''; // Same origin in production
+        this.baseUrl = ""; // Same origin in production
       }
 
       console.debug(
-        '[collectionsService] baseUrl resolved to',
-        this.baseUrl || '(same origin)',
+        "[collectionsService] baseUrl resolved to",
+        this.baseUrl || "(same origin)",
         directCollectionsUrl
-          ? '(direct)'
+          ? "(direct)"
           : useUnifiedDomain && unifiedApiUrl
-            ? '(unified fallback)'
-            : '(default)',
+            ? "(unified fallback)"
+            : "(default)",
       );
     }
   }
@@ -80,11 +80,11 @@ class CollectionsService {
       const timestamp = Date.now();
       const url = `${this.baseUrl}/api/v1/rag/collections?useCache=${useCache}&_t=${timestamp}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
         },
       });
 
@@ -95,12 +95,12 @@ class CollectionsService {
       const data: ApiResponse<CollectionsListResponse> = await response.json();
 
       if (!data.success || !data.data) {
-        throw new Error(data.error?.message || 'Failed to fetch collections');
+        throw new Error(data.error?.message || "Failed to fetch collections");
       }
 
       return data.data.collections;
     } catch (error) {
-      console.error('Error fetching collections:', error);
+      console.error("Error fetching collections:", error);
       throw error;
     }
   }
@@ -113,9 +113,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -127,7 +127,7 @@ class CollectionsService {
       const data: ApiResponse<Collection> = await response.json();
 
       if (!data.success || !data.data) {
-        throw new Error(data.error?.message || 'Failed to fetch collection');
+        throw new Error(data.error?.message || "Failed to fetch collection");
       }
 
       return data.data;
@@ -143,7 +143,7 @@ class CollectionsService {
   async createCollection(
     request: CreateCollectionRequest,
   ): Promise<Collection> {
-    console.log('🚀 [collectionsService] createCollection called', {
+    console.log("🚀 [collectionsService] createCollection called", {
       request,
       baseUrl: this.baseUrl,
       url: `${this.baseUrl}/api/v1/rag/collections`,
@@ -151,12 +151,12 @@ class CollectionsService {
 
     try {
       const startTime = Date.now();
-      console.log('📤 Sending POST request...');
+      console.log("📤 Sending POST request...");
 
       const response = await fetch(`${this.baseUrl}/api/v1/rag/collections`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(request),
       });
@@ -168,26 +168,26 @@ class CollectionsService {
 
       if (!response.ok) {
         console.error(
-          '❌ Response not OK:',
+          "❌ Response not OK:",
           response.status,
           response.statusText,
         );
         const errorData = await response.json();
-        console.error('Error data:', errorData);
+        console.error("Error data:", errorData);
         throw new Error(
           errorData.error?.message ||
             `Failed to create collection: ${response.statusText}`,
         );
       }
 
-      console.log('📥 Parsing response JSON...');
+      console.log("📥 Parsing response JSON...");
       const data: ApiResponse<CollectionOperationResponse> =
         await response.json();
-      console.log('✅ Response parsed:', data);
+      console.log("✅ Response parsed:", data);
 
       if (!data.success || !data.data?.collection) {
-        console.error('❌ Invalid response structure:', data);
-        throw new Error(data.error?.message || 'Failed to create collection');
+        console.error("❌ Invalid response structure:", data);
+        throw new Error(data.error?.message || "Failed to create collection");
       }
 
       console.log(
@@ -195,7 +195,7 @@ class CollectionsService {
       );
       return data.data.collection;
     } catch (error) {
-      console.error('❌ Error creating collection:', error);
+      console.error("❌ Error creating collection:", error);
       throw error;
     }
   }
@@ -211,9 +211,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}`,
         {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(updates),
         },
@@ -231,7 +231,7 @@ class CollectionsService {
         await response.json();
 
       if (!data.success || !data.data?.collection) {
-        throw new Error(data.error?.message || 'Failed to update collection');
+        throw new Error(data.error?.message || "Failed to update collection");
       }
 
       return data.data.collection;
@@ -249,9 +249,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -267,7 +267,7 @@ class CollectionsService {
       const data: ApiResponse<DeleteCollectionResponse> = await response.json();
 
       if (!data.success || !data.data) {
-        throw new Error(data.error?.message || 'Failed to delete collection');
+        throw new Error(data.error?.message || "Failed to delete collection");
       }
 
       return data.data;
@@ -314,9 +314,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}/ingest`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -333,7 +333,7 @@ class CollectionsService {
         await response.json();
 
       if (!data.success) {
-        throw new Error(data.error?.message || 'Failed to trigger ingestion');
+        throw new Error(data.error?.message || "Failed to trigger ingestion");
       }
     } catch (error) {
       console.error(`Error ingesting collection ${name}:`, error);
@@ -349,9 +349,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}/clean-orphans`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -367,7 +367,7 @@ class CollectionsService {
       const data: ApiResponse = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error?.message || 'Failed to clean orphans');
+        throw new Error(data.error?.message || "Failed to clean orphans");
       }
     } catch (error) {
       console.error(`Error cleaning orphans for collection ${name}:`, error);
@@ -383,9 +383,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/collections/${name}/stats`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -400,7 +400,7 @@ class CollectionsService {
 
       if (!data.success || !data.data) {
         throw new Error(
-          data.error?.message || 'Failed to fetch collection stats',
+          data.error?.message || "Failed to fetch collection stats",
         );
       }
 
@@ -415,24 +415,24 @@ class CollectionsService {
    * Get all available embedding models
    */
   async getModels(): Promise<EmbeddingModel[]> {
-    console.log('🟡 [collectionsService] getModels() called');
-    console.log('🟡 [collectionsService] baseUrl:', this.baseUrl);
+    console.log("🟡 [collectionsService] getModels() called");
+    console.log("🟡 [collectionsService] baseUrl:", this.baseUrl);
     console.log(
-      '🟡 [collectionsService] Full URL:',
+      "🟡 [collectionsService] Full URL:",
       `${this.baseUrl}/api/v1/rag/models`,
     );
 
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/rag/models`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
-      console.log('🟡 [collectionsService] Response status:', response.status);
+      console.log("🟡 [collectionsService] Response status:", response.status);
       console.log(
-        '🟡 [collectionsService] Response headers:',
+        "🟡 [collectionsService] Response headers:",
         Object.fromEntries(response.headers.entries()),
       );
 
@@ -441,19 +441,19 @@ class CollectionsService {
       }
 
       const data: ApiResponse<ModelsListResponse> = await response.json();
-      console.log('🟡 [collectionsService] Response data:', data);
+      console.log("🟡 [collectionsService] Response data:", data);
 
       if (!data.success || !data.data) {
-        throw new Error(data.error?.message || 'Failed to fetch models');
+        throw new Error(data.error?.message || "Failed to fetch models");
       }
 
       console.log(
-        '🟡 [collectionsService] Models extracted:',
+        "🟡 [collectionsService] Models extracted:",
         data.data.models,
       );
       return data.data.models;
     } catch (error) {
-      console.error('🔴 [collectionsService] Error fetching models:', error);
+      console.error("🔴 [collectionsService] Error fetching models:", error);
       throw error;
     }
   }
@@ -466,9 +466,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/models/${name}`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -480,7 +480,7 @@ class CollectionsService {
       const data: ApiResponse<EmbeddingModel> = await response.json();
 
       if (!data.success || !data.data) {
-        throw new Error(data.error?.message || 'Failed to fetch model');
+        throw new Error(data.error?.message || "Failed to fetch model");
       }
 
       return data.data;
@@ -498,9 +498,9 @@ class CollectionsService {
       const response = await fetch(
         `${this.baseUrl}/api/v1/rag/models/${name}/validate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       );
@@ -523,9 +523,9 @@ class CollectionsService {
   async healthCheck(): Promise<HealthCheckResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/health`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -536,7 +536,7 @@ class CollectionsService {
       const data: HealthCheckResponse = await response.json();
       return data;
     } catch (error) {
-      console.error('Error checking RAG services health:', error);
+      console.error("Error checking RAG services health:", error);
       throw error;
     }
   }

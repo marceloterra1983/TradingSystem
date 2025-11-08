@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from "fs";
+import path from "path";
 
 class RedocManager {
   constructor(specsDir, templatePath) {
@@ -9,13 +9,16 @@ class RedocManager {
 
   async generateRedocHtml(version, outputDir) {
     try {
-      const template = await fs.readFile(this.templatePath, 'utf8');
+      const template = await fs.readFile(this.templatePath, "utf8");
 
-      const versionedTemplate = template.replace(/\/docs\/spec\//g, `/docs/spec/${version}/`);
+      const versionedTemplate = template.replace(
+        /\/docs\/spec\//g,
+        `/docs/spec/${version}/`,
+      );
 
       await fs.mkdir(outputDir, { recursive: true });
 
-      await fs.writeFile(path.join(outputDir, 'redoc.html'), versionedTemplate);
+      await fs.writeFile(path.join(outputDir, "redoc.html"), versionedTemplate);
     } catch (error) {
       throw new Error(`Failed to generate Redoc HTML: ${error.message}`);
     }

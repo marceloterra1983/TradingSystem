@@ -12,14 +12,14 @@
  * @module hooks
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
-const SUPPORTED_SCHEMA_VERSION = '1.1.0';
+const SUPPORTED_SCHEMA_VERSION = "1.1.0";
 
 function validateAgentsModule(module: {
   AGENT_CATALOG_SCHEMA_VERSION?: string;
   AGENT_CATEGORY_ORDER?: string[];
-  AI_AGENTS_DIRECTORY?: AgentsData['agents'];
+  AI_AGENTS_DIRECTORY?: AgentsData["agents"];
 }) {
   const version = module.AGENT_CATALOG_SCHEMA_VERSION;
   if (version !== SUPPORTED_SCHEMA_VERSION) {
@@ -28,18 +28,24 @@ function validateAgentsModule(module: {
     );
   }
 
-  if (!Array.isArray(module.AGENT_CATEGORY_ORDER) || module.AGENT_CATEGORY_ORDER.length === 0) {
-    throw new Error('AGENT_CATEGORY_ORDER não foi carregado corretamente.');
+  if (
+    !Array.isArray(module.AGENT_CATEGORY_ORDER) ||
+    module.AGENT_CATEGORY_ORDER.length === 0
+  ) {
+    throw new Error("AGENT_CATEGORY_ORDER não foi carregado corretamente.");
   }
 
-  if (!Array.isArray(module.AI_AGENTS_DIRECTORY) || module.AI_AGENTS_DIRECTORY.length === 0) {
-    throw new Error('AI_AGENTS_DIRECTORY retornou vazio ou inválido.');
+  if (
+    !Array.isArray(module.AI_AGENTS_DIRECTORY) ||
+    module.AI_AGENTS_DIRECTORY.length === 0
+  ) {
+    throw new Error("AI_AGENTS_DIRECTORY retornou vazio ou inválido.");
   }
 
   for (const agent of module.AI_AGENTS_DIRECTORY) {
     if (!agent.id || !agent.name || !agent.category) {
       throw new Error(
-        `Registro de agente inválido detectado: ${JSON.stringify(agent?.name ?? 'desconhecido')}`,
+        `Registro de agente inválido detectado: ${JSON.stringify(agent?.name ?? "desconhecido")}`,
       );
     }
   }
@@ -83,11 +89,11 @@ export interface AgentsData {
  */
 export function useAgentsData() {
   return useQuery<AgentsData, Error>({
-    queryKey: ['agents-directory'],
+    queryKey: ["agents-directory"],
 
     queryFn: async () => {
       // Dynamic import - chunk loaded only when this function executes
-      const module = await import('../data/aiAgentsDirectory');
+      const module = await import("../data/aiAgentsDirectory");
       validateAgentsModule(module);
 
       return {

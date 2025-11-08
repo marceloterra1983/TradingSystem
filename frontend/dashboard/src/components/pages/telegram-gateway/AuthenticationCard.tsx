@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { ScrollArea } from '../../ui/scroll-area';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { ScrollArea } from "../../ui/scroll-area";
 import {
   useTelegramGatewayAuthCancel,
   useTelegramGatewayAuthStart,
   useTelegramGatewayAuthStatus,
   useTelegramGatewayAuthSubmit,
   TelegramGatewayAuthStatusValue,
-} from '../../../hooks/useTelegramGateway';
-import { useToast } from '../../../hooks/useToast';
-import { resolveErrorMessage } from '../../../utils/errors';
+} from "../../../hooks/useTelegramGateway";
+import { useToast } from "../../../hooks/useToast";
+import { resolveErrorMessage } from "../../../utils/errors";
 import {
   KeyRound,
   Loader2,
@@ -19,7 +19,7 @@ import {
   ScrollText,
   StopCircle,
   Terminal,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,69 +27,69 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
+} from "../../ui/dialog";
 import {
   CollapsibleCard,
   CollapsibleCardContent,
   CollapsibleCardDescription,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
-} from '../../ui/collapsible-card';
+} from "../../ui/collapsible-card";
 
 const STATUS_META: Record<
   TelegramGatewayAuthStatusValue,
   { label: string; description: string; accent: string }
 > = {
   idle: {
-    label: 'Aguardando',
-    description: 'Inicie o fluxo de autenticação para renovar a sessão.',
-    accent: 'text-slate-500 dark:text-slate-400',
+    label: "Aguardando",
+    description: "Inicie o fluxo de autenticação para renovar a sessão.",
+    accent: "text-slate-500 dark:text-slate-400",
   },
   starting: {
-    label: 'Inicializando',
-    description: 'Preparando script de autenticação...',
-    accent: 'text-blue-600 dark:text-blue-400',
+    label: "Inicializando",
+    description: "Preparando script de autenticação...",
+    accent: "text-blue-600 dark:text-blue-400",
   },
   waiting_code: {
-    label: 'Aguardando código',
-    description: 'Digite o código recebido via SMS (Telegram).',
-    accent: 'text-amber-600 dark:text-amber-400',
+    label: "Aguardando código",
+    description: "Digite o código recebido via SMS (Telegram).",
+    accent: "text-amber-600 dark:text-amber-400",
   },
   processing_code: {
-    label: 'Processando código',
-    description: 'Validando código informado...',
-    accent: 'text-blue-600 dark:text-blue-400',
+    label: "Processando código",
+    description: "Validando código informado...",
+    accent: "text-blue-600 dark:text-blue-400",
   },
   waiting_password: {
-    label: 'Aguardando senha',
-    description: 'Digite a senha de 2FA (se configurada).',
-    accent: 'text-amber-600 dark:text-amber-400',
+    label: "Aguardando senha",
+    description: "Digite a senha de 2FA (se configurada).",
+    accent: "text-amber-600 dark:text-amber-400",
   },
   processing_password: {
-    label: 'Processando senha',
-    description: 'Validando senha de 2FA informada...',
-    accent: 'text-blue-600 dark:text-blue-400',
+    label: "Processando senha",
+    description: "Validando senha de 2FA informada...",
+    accent: "text-blue-600 dark:text-blue-400",
   },
   completed: {
-    label: 'Sessão autenticada',
+    label: "Sessão autenticada",
     description:
-      'Sessão salva com sucesso. O gateway pode ser iniciado normalmente.',
-    accent: 'text-emerald-600 dark:text-emerald-400',
+      "Sessão salva com sucesso. O gateway pode ser iniciado normalmente.",
+    accent: "text-emerald-600 dark:text-emerald-400",
   },
   cancelled: {
-    label: 'Processo cancelado',
-    description: 'O fluxo foi interrompido manualmente antes da conclusão.',
-    accent: 'text-slate-500 dark:text-slate-400',
+    label: "Processo cancelado",
+    description: "O fluxo foi interrompido manualmente antes da conclusão.",
+    accent: "text-slate-500 dark:text-slate-400",
   },
   cancelling: {
-    label: 'Cancelando',
-    description: 'Encerrando processo de autenticação...',
-    accent: 'text-amber-600 dark:text-amber-400',
+    label: "Cancelando",
+    description: "Encerrando processo de autenticação...",
+    accent: "text-amber-600 dark:text-amber-400",
   },
   error: {
-    label: 'Erro na autenticação',
-    description: 'Verifique os logs para entender a falha e tente novamente.',
-    accent: 'text-red-600 dark:text-red-400',
+    label: "Erro na autenticação",
+    description: "Verifique os logs para entender a falha e tente novamente.",
+    accent: "text-red-600 dark:text-red-400",
   },
 };
 
@@ -101,29 +101,29 @@ const LOG_STYLES: Record<
   }
 > = {
   system: {
-    label: '[system]',
-    className: 'text-cyan-600 dark:text-cyan-300',
+    label: "[system]",
+    className: "text-cyan-600 dark:text-cyan-300",
   },
   stdout: {
-    label: '[stdout]',
-    className: 'text-emerald-600 dark:text-emerald-300',
+    label: "[stdout]",
+    className: "text-emerald-600 dark:text-emerald-300",
   },
   stderr: {
-    label: '[stderr]',
-    className: 'text-amber-600 dark:text-amber-300',
+    label: "[stderr]",
+    className: "text-amber-600 dark:text-amber-300",
   },
   input: {
-    label: '[input]',
-    className: 'text-slate-600 dark:text-slate-400',
+    label: "[input]",
+    className: "text-slate-600 dark:text-slate-400",
   },
   error: {
-    label: '[error]',
-    className: 'text-red-600 dark:text-red-300',
+    label: "[error]",
+    className: "text-red-600 dark:text-red-300",
   },
 };
 
 export function AuthenticationCard() {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const { data: authStatus } = useTelegramGatewayAuthStatus();
   const startMutation = useTelegramGatewayAuthStart();
@@ -131,36 +131,36 @@ export function AuthenticationCard() {
   const cancelMutation = useTelegramGatewayAuthCancel();
   const toast = useToast();
 
-  const status = authStatus?.status ?? 'idle';
+  const status = authStatus?.status ?? "idle";
   const meta = STATUS_META[status] ?? STATUS_META.idle;
   const logs = authStatus?.logs ?? [];
   const running = authStatus?.running ?? false;
   const isStarting = startMutation.isPending;
   const logsViewportRef = useRef<HTMLDivElement | null>(null);
 
-  const canStart = !running && status !== 'starting';
-  const canCancel = running && status !== 'cancelling';
+  const canStart = !running && status !== "starting";
+  const canCancel = running && status !== "cancelling";
   const canSubmitInput =
     running &&
-    (status === 'waiting_code' ||
-      status === 'waiting_password' ||
-      status === 'processing_code');
+    (status === "waiting_code" ||
+      status === "waiting_password" ||
+      status === "processing_code");
 
   const resolveAuthErrorMessage = (error: unknown, fallback: string) => {
-    if (error && typeof error === 'object') {
+    if (error && typeof error === "object") {
       const err = error as { details?: unknown };
-      if (typeof err.details === 'string' && err.details.trim() !== '') {
+      if (typeof err.details === "string" && err.details.trim() !== "") {
         return err.details.trim();
       }
-      if (err.details && typeof err.details === 'object') {
+      if (err.details && typeof err.details === "object") {
         const details = err.details as { message?: unknown; error?: unknown };
         if (
-          typeof details.message === 'string' &&
-          details.message.trim() !== ''
+          typeof details.message === "string" &&
+          details.message.trim() !== ""
         ) {
           return details.message.trim();
         }
-        if (typeof details.error === 'string' && details.error.trim() !== '') {
+        if (typeof details.error === "string" && details.error.trim() !== "") {
           return details.error.trim();
         }
       }
@@ -172,9 +172,9 @@ export function AuthenticationCard() {
     const message = resolveAuthErrorMessage(error, fallback);
     const statusCode =
       error &&
-      typeof error === 'object' &&
-      'status' in error &&
-      typeof (error as { status?: unknown }).status === 'number'
+      typeof error === "object" &&
+      "status" in error &&
+      typeof (error as { status?: unknown }).status === "number"
         ? (error as { status?: number }).status
         : undefined;
     if (statusCode === 409) {
@@ -188,20 +188,20 @@ export function AuthenticationCard() {
     try {
       await startMutation.mutateAsync();
       toast.success(
-        'Fluxo de autenticação iniciado. Acompanhe os logs para próximos passos.',
+        "Fluxo de autenticação iniciado. Acompanhe os logs para próximos passos.",
       );
       setIsTerminalOpen(true);
     } catch (error) {
-      handleAuthError(error, 'Não foi possível iniciar a autenticação.');
+      handleAuthError(error, "Não foi possível iniciar a autenticação.");
     }
   };
 
   const handleCancel = async () => {
     try {
       await cancelMutation.mutateAsync();
-      toast.info('Solicitado cancelamento do fluxo de autenticação.');
+      toast.info("Solicitado cancelamento do fluxo de autenticação.");
     } catch (error) {
-      handleAuthError(error, 'Não foi possível cancelar a autenticação.');
+      handleAuthError(error, "Não foi possível cancelar a autenticação.");
     }
   };
 
@@ -210,10 +210,10 @@ export function AuthenticationCard() {
     if (!value) return;
     try {
       await submitMutation.mutateAsync(value);
-      toast.success('Entrada enviada ao processo de autenticação.');
-      setInputValue('');
+      toast.success("Entrada enviada ao processo de autenticação.");
+      setInputValue("");
     } catch (error) {
-      handleAuthError(error, 'Não foi possível enviar a entrada.');
+      handleAuthError(error, "Não foi possível enviar a entrada.");
     }
   };
 
@@ -235,28 +235,28 @@ export function AuthenticationCard() {
 
   const latestLog = useMemo(() => logs[logs.length - 1], [logs]);
   const emptyLogsMessage = useMemo(() => {
-    if (isStarting || status === 'starting') {
-      return 'Inicializando script de autenticação... aguardando a primeira saída do processo.';
+    if (isStarting || status === "starting") {
+      return "Inicializando script de autenticação... aguardando a primeira saída do processo.";
     }
     if (
       running ||
-      status === 'waiting_code' ||
-      status === 'processing_code' ||
-      status === 'waiting_password' ||
-      status === 'processing_password'
+      status === "waiting_code" ||
+      status === "processing_code" ||
+      status === "waiting_password" ||
+      status === "processing_password"
     ) {
-      return 'Script em execução. Assim que o Telegram solicitar, informe o código ou senha no campo abaixo.';
+      return "Script em execução. Assim que o Telegram solicitar, informe o código ou senha no campo abaixo.";
     }
-    if (status === 'completed') {
-      return 'Processo concluído. Nenhum log adicional disponível.';
+    if (status === "completed") {
+      return "Processo concluído. Nenhum log adicional disponível.";
     }
-    if (status === 'cancelling' || status === 'cancelled') {
-      return 'Processo cancelado. Reinicie a autenticação para gerar novos logs.';
+    if (status === "cancelling" || status === "cancelled") {
+      return "Processo cancelado. Reinicie a autenticação para gerar novos logs.";
     }
-    if (status === 'error') {
-      return 'Processo falhou antes de emitir logs. Verifique os scripts de inicialização e tente novamente.';
+    if (status === "error") {
+      return "Processo falhou antes de emitir logs. Verifique os scripts de inicialização e tente novamente.";
     }
-    return 'Processo não iniciado. Clique em Iniciar para executar o script.';
+    return "Processo não iniciado. Clique em Iniciar para executar o script.";
   }, [isStarting, running, status]);
 
   return (
@@ -334,26 +334,26 @@ export function AuthenticationCard() {
               <div>
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   Início:
-                </span>{' '}
+                </span>{" "}
                 {authStatus?.startedAt
-                  ? new Date(authStatus.startedAt).toLocaleString('pt-BR')
-                  : '—'}
+                  ? new Date(authStatus.startedAt).toLocaleString("pt-BR")
+                  : "—"}
               </div>
               <div>
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   Fim:
-                </span>{' '}
+                </span>{" "}
                 {authStatus?.finishedAt
-                  ? new Date(authStatus.finishedAt).toLocaleString('pt-BR')
-                  : '—'}
+                  ? new Date(authStatus.finishedAt).toLocaleString("pt-BR")
+                  : "—"}
               </div>
               <div>
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   Saída:
-                </span>{' '}
-                {typeof authStatus?.exitCode === 'number'
+                </span>{" "}
+                {typeof authStatus?.exitCode === "number"
                   ? authStatus.exitCode
-                  : '—'}
+                  : "—"}
               </div>
             </div>
           </div>
@@ -397,11 +397,11 @@ export function AuthenticationCard() {
               </span>
               {latestLog && (
                 <span>
-                  Último registro:{' '}
-                  {new Date(latestLog.timestamp).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
+                  Último registro:{" "}
+                  {new Date(latestLog.timestamp).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
                   })}
                 </span>
               )}
@@ -413,7 +413,7 @@ export function AuthenticationCard() {
                 ) : (
                   logs.map((log, index) => {
                     const levelMeta = LOG_STYLES[log.level] ?? {
-                      className: 'text-slate-600 dark:text-slate-400',
+                      className: "text-slate-600 dark:text-slate-400",
                       label: `[${log.level}]`,
                     };
                     return (
@@ -423,18 +423,18 @@ export function AuthenticationCard() {
                       >
                         <span className="text-slate-500 dark:text-slate-500">
                           [
-                          {new Date(log.timestamp).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
+                          {new Date(log.timestamp).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
                           })}
                           ]
-                        </span>{' '}
+                        </span>{" "}
                         <span
                           className={`${levelMeta.className} font-semibold`}
                         >
                           {levelMeta.label}
-                        </span>{' '}
+                        </span>{" "}
                         <span>{log.message}</span>
                       </li>
                     );
@@ -454,7 +454,7 @@ export function AuthenticationCard() {
               Terminal de autenticação MTProto
             </DialogTitle>
             <DialogDescription className="text-slate-400">
-              Fluxo interativo do script{' '}
+              Fluxo interativo do script{" "}
               <code>authenticate-interactive.sh</code>. Responda aos prompts
               abaixo.
             </DialogDescription>
@@ -470,7 +470,7 @@ export function AuthenticationCard() {
                 ) : (
                   logs.map((log, index) => {
                     const levelMeta = LOG_STYLES[log.level] ?? {
-                      className: 'text-slate-400',
+                      className: "text-slate-400",
                       label: `[${log.level}]`,
                     };
                     return (
@@ -479,17 +479,17 @@ export function AuthenticationCard() {
                         className="whitespace-pre-wrap text-slate-200"
                       >
                         <span className="text-slate-500">
-                          {new Date(log.timestamp).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
+                          {new Date(log.timestamp).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
                           })}
-                        </span>{' '}
+                        </span>{" "}
                         <span
                           className={`${levelMeta.className} font-semibold`}
                         >
                           {levelMeta.label}
-                        </span>{' '}
+                        </span>{" "}
                         <span>{log.message}</span>
                       </div>
                     );
@@ -538,38 +538,38 @@ export function AuthenticationCard() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="flex items-center gap-1">
                 <div
-                  className={`h-2 w-2 rounded-full ${running ? 'bg-emerald-400' : 'bg-slate-500'}`}
+                  className={`h-2 w-2 rounded-full ${running ? "bg-emerald-400" : "bg-slate-500"}`}
                 />
                 Status: {meta.label}
               </span>
               <span>
-                Início:{' '}
+                Início:{" "}
                 {authStatus?.startedAt
-                  ? new Date(authStatus.startedAt).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
+                  ? new Date(authStatus.startedAt).toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
                     })
-                  : '—'}
+                  : "—"}
               </span>
               <span>
-                Fim:{' '}
+                Fim:{" "}
                 {authStatus?.finishedAt
                   ? new Date(authStatus.finishedAt).toLocaleTimeString(
-                      'pt-BR',
+                      "pt-BR",
                       {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
                       },
                     )
-                  : '—'}
+                  : "—"}
               </span>
               <span>
-                Exit code:{' '}
-                {typeof authStatus?.exitCode === 'number'
+                Exit code:{" "}
+                {typeof authStatus?.exitCode === "number"
                   ? authStatus.exitCode
-                  : '—'}
+                  : "—"}
               </span>
             </div>
             <div className="flex items-center gap-2">

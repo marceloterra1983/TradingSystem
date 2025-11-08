@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../../../ui/collapsible-card';
-import { Button } from '../../../ui/button';
+} from "../../../ui/collapsible-card";
+import { Button } from "../../../ui/button";
 import {
   Lightbulb,
   Plus,
@@ -17,20 +17,20 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-} from 'lucide-react';
-import { useItemFilters } from '../hooks/useItemFilters';
-import { AddItemDialog } from './AddItemDialog';
-import { ItemActions } from './ItemActions';
-import { cn } from '../../../../lib/utils';
+} from "lucide-react";
+import { useItemFilters } from "../hooks/useItemFilters";
+import { AddItemDialog } from "./AddItemDialog";
+import { ItemActions } from "./ItemActions";
+import { cn } from "../../../../lib/utils";
 import {
   STATUS_CONFIG,
   PRIORITY_CONFIG,
-} from '../constants/workspace.constants';
-import { useWorkspaceStore } from '../store/useWorkspaceStore';
-import { formatTimestampShort } from '../../../../utils/dateUtils';
+} from "../constants/workspace.constants";
+import { useWorkspaceStore } from "../store/useWorkspaceStore";
+import { formatTimestampShort } from "../../../../utils/dateUtils";
 
-type SortField = 'title' | 'category' | 'status' | 'priority' | 'createdAt';
-type SortDirection = 'asc' | 'desc' | null;
+type SortField = "title" | "category" | "status" | "priority" | "createdAt";
+type SortDirection = "asc" | "desc" | null;
 
 export function WorkspaceListSection() {
   const loading = useWorkspaceStore((state) => state.loading);
@@ -39,23 +39,23 @@ export function WorkspaceListSection() {
   const lastSyncedAt = useWorkspaceStore((state) => state.lastSyncedAt);
   const { filteredItems } = useItemFilters(); // searchTerm and setters are not used here, but in a filter component
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [sortField, setSortField] = useState<SortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const usingFallbackData = !!error;
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       // Cycle through: desc -> asc -> null (default)
-      if (sortDirection === 'desc') {
-        setSortDirection('asc');
-      } else if (sortDirection === 'asc') {
+      if (sortDirection === "desc") {
+        setSortDirection("asc");
+      } else if (sortDirection === "asc") {
         setSortDirection(null);
-        setSortField('createdAt');
+        setSortField("createdAt");
       }
     } else {
       setSortField(field);
-      setSortDirection('desc');
+      setSortDirection("desc");
     }
   };
 
@@ -75,25 +75,25 @@ export function WorkspaceListSection() {
       let bValue: string | number | Date;
 
       switch (sortField) {
-        case 'title':
+        case "title":
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
           break;
-        case 'category':
+        case "category":
           aValue = a.category.toLowerCase();
           bValue = b.category.toLowerCase();
           break;
-        case 'status':
+        case "status":
           aValue = a.status.toLowerCase();
           bValue = b.status.toLowerCase();
           break;
-        case 'priority':
+        case "priority":
           // Priority order: critical > high > medium > low
           const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
           aValue = priorityOrder[a.priority as keyof typeof priorityOrder];
           bValue = priorityOrder[b.priority as keyof typeof priorityOrder];
           break;
-        case 'createdAt':
+        case "createdAt":
           aValue = new Date(a.createdAt).getTime();
           bValue = new Date(b.createdAt).getTime();
           break;
@@ -101,8 +101,8 @@ export function WorkspaceListSection() {
           return 0;
       }
 
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
   }, [filteredItems, sortField, sortDirection]);
@@ -113,10 +113,10 @@ export function WorkspaceListSection() {
     if (sortField !== field) {
       return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
     }
-    if (sortDirection === 'asc') {
+    if (sortDirection === "asc") {
       return <ArrowUp className="h-3.5 w-3.5" />;
     }
-    if (sortDirection === 'desc') {
+    if (sortDirection === "desc") {
       return <ArrowDown className="h-3.5 w-3.5" />;
     }
     return <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />;
@@ -156,10 +156,10 @@ export function WorkspaceListSection() {
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                'flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border',
+                "flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border",
                 loading || syncing
-                  ? 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200'
-                  : 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300',
+                  ? "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200"
+                  : "border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300",
               )}
             >
               {loading || syncing ? (
@@ -169,12 +169,12 @@ export function WorkspaceListSection() {
               )}
               <span>
                 {loading && sortedItems.length === 0
-                  ? 'Carregando...'
+                  ? "Carregando..."
                   : syncing
-                    ? 'Sincronizando...'
+                    ? "Sincronizando..."
                     : lastSyncedAt
                       ? `Atualizado em ${formatTimestampShort(lastSyncedAt)}`
-                      : 'Aguardando sincronização'}
+                      : "Aguardando sincronização"}
               </span>
             </div>
             <Button
@@ -271,7 +271,7 @@ export function WorkspaceListSection() {
                         <td className="px-4 py-3">
                           <span
                             className={cn(
-                              'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium',
+                              "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
                               STATUS_CONFIG[item.status].color,
                             )}
                           >
@@ -282,7 +282,7 @@ export function WorkspaceListSection() {
                         <td className="px-4 py-3">
                           <span
                             className={cn(
-                              'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium',
+                              "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium",
                               PRIORITY_CONFIG[item.priority].color,
                             )}
                           >
@@ -313,9 +313,9 @@ export function WorkspaceListSection() {
                         </td>
                         <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
                           {new Date(item.createdAt).toLocaleDateString(
-                            'pt-BR',
+                            "pt-BR",
                             {
-                              timeZone: 'America/Sao_Paulo',
+                              timeZone: "America/Sao_Paulo",
                             },
                           )}
                         </td>

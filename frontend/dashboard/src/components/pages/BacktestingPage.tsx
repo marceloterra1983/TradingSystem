@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { History, Play } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { History, Play } from "lucide-react";
 
 export function BacktestingPage() {
   const sections = [
     {
-      id: 'backtest-runs',
+      id: "backtest-runs",
       content: (
         <PlaceholderSection
           cardId="backtest-runs"
@@ -16,7 +16,7 @@ export function BacktestingPage() {
       ),
     },
     {
-      id: 'backtest-new',
+      id: "backtest-new",
       content: (
         <PlaceholderSection
           cardId="backtest-new"

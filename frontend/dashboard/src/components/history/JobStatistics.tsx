@@ -12,22 +12,22 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
-import { useStatistics } from '../../hooks/useJobs';
-import type { StatisticsFilters } from '../../types/jobs';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+} from "recharts";
+import { useStatistics } from "../../hooks/useJobs";
+import type { StatisticsFilters } from "../../types/jobs";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
   buildJobsPerDayData,
   buildStatusChartData,
   buildTypeChartData,
   formatSuccessRate,
-} from '../../utils/charts';
-import { formatTimestampShort } from '../../utils/dateUtils';
+} from "../../utils/charts";
+import { formatTimestampShort } from "../../utils/dateUtils";
 
-const STATUS_COLORS = ['#047857', '#0ea5e9', '#f59e0b', '#ef4444'];
-const TYPE_COLORS = ['#6366f1', '#a855f7'];
+const STATUS_COLORS = ["#047857", "#0ea5e9", "#f59e0b", "#ef4444"];
+const TYPE_COLORS = ["#6366f1", "#a855f7"];
 
 interface JobStatisticsProps {
   filters: StatisticsFilters;
@@ -51,17 +51,17 @@ export function JobStatistics({
           Job statistics
         </h3>
         <span className="text-xs text-gray-500 dark:text-gray-400">
-          Updated{' '}
+          Updated{" "}
           {statsQuery.isFetching
-            ? '…'
+            ? "…"
             : stats
               ? formatTimestampShort(new Date().toISOString())
-              : 'never'}
+              : "never"}
         </span>
         <div className="ml-auto flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <Input
             type="date"
-            value={filters.dateFrom ?? ''}
+            value={filters.dateFrom ?? ""}
             onChange={(event) =>
               onFiltersChange({
                 ...filters,
@@ -73,7 +73,7 @@ export function JobStatistics({
           <span>to</span>
           <Input
             type="date"
-            value={filters.dateTo ?? ''}
+            value={filters.dateTo ?? ""}
             onChange={(event) =>
               onFiltersChange({
                 ...filters,
@@ -140,7 +140,7 @@ export function JobStatistics({
                 {formatSuccessRate(stats.totals.successRate)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Completed: {stats.byStatus.completed ?? 0} • Failed:{' '}
+                Completed: {stats.byStatus.completed ?? 0} • Failed:{" "}
                 {stats.byStatus.failed ?? 0}
               </p>
             </Card>
@@ -152,7 +152,7 @@ export function JobStatistics({
                 {stats.totals.templates}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Most used: {stats.popularTemplates[0]?.name ?? '—'}
+                Most used: {stats.popularTemplates[0]?.name ?? "—"}
               </p>
             </Card>
           </div>
@@ -181,7 +181,7 @@ export function JobStatistics({
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => [`${value} jobs`, '']}
+                      formatter={(value: number) => [`${value} jobs`, ""]}
                     />
                     <Legend />
                   </PieChart>

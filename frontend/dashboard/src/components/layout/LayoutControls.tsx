@@ -6,11 +6,11 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Rows,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { cn } from '../../lib/utils';
-import type { ColumnCount } from '../../hooks/useCustomLayout';
-import { Button } from '../ui/button';
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { cn } from "../../lib/utils";
+import type { ColumnCount } from "../../hooks/useCustomLayout";
+import { Button } from "../ui/button";
 
 /**
  * Layout Controls Component
@@ -35,10 +35,10 @@ const COLUMN_OPTIONS: {
   icon: LucideIcon;
   label: string;
 }[] = [
-  { value: 1, icon: Rows, label: '1 Coluna' },
-  { value: 2, icon: Columns2, label: '2 Colunas' },
-  { value: 3, icon: Columns3, label: '3 Colunas' },
-  { value: 4, icon: Columns4, label: '4 Colunas' },
+  { value: 1, icon: Rows, label: "1 Coluna" },
+  { value: 2, icon: Columns2, label: "2 Colunas" },
+  { value: 3, icon: Columns3, label: "3 Colunas" },
+  { value: 4, icon: Columns4, label: "4 Colunas" },
 ];
 
 export function LayoutControls({
@@ -58,14 +58,14 @@ export function LayoutControls({
           variant="outline"
           size="icon"
           className={cn(
-            'h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300',
-            'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+            "h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300",
+            "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900",
           )}
           title={
-            allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'
+            allCollapsed ? "Expandir todos os cards" : "Recolher todos os cards"
           }
           aria-label={
-            allCollapsed ? 'Expandir todos os cards' : 'Recolher todos os cards'
+            allCollapsed ? "Expandir todos os cards" : "Recolher todos os cards"
           }
           aria-pressed={allCollapsed}
         >
@@ -91,12 +91,12 @@ export function LayoutControls({
               variant="ghost"
               size="icon"
               className={cn(
-                'h-9 w-9 rounded-none border-none transition-colors',
-                index === 0 && 'rounded-l-md',
-                index === COLUMN_OPTIONS.length - 1 && 'rounded-r-md',
+                "h-9 w-9 rounded-none border-none transition-colors",
+                index === 0 && "rounded-l-md",
+                index === COLUMN_OPTIONS.length - 1 && "rounded-r-md",
                 isActive
-                  ? 'bg-cyan-600 text-white hover:bg-cyan-500 focus:ring-cyan-500 dark:bg-cyan-600 dark:hover:bg-cyan-500'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
+                  ? "bg-cyan-600 text-white hover:bg-cyan-500 focus:ring-cyan-500 dark:bg-cyan-600 dark:hover:bg-cyan-500"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
               )}
               title={option.label}
               aria-label={option.label}
@@ -116,8 +116,8 @@ export function LayoutControls({
           variant="outline"
           size="icon"
           className={cn(
-            'h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300',
-            'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900',
+            "h-9 w-9 text-gray-600 shadow-sm transition-colors dark:text-gray-300",
+            "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900",
           )}
           title="Resetar layout"
           aria-label="Resetar layout"

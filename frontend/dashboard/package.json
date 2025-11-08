@@ -10,7 +10,7 @@
     "dev:ci": "vite --host 0.0.0.0 --port 3103 --strictPort",
     "dev:docusaurus": "npm --prefix ../../docs run docs:dev",
     "dev:vite": "vite --host 0.0.0.0 --port 3103 --strictPort",
-    "prebuild": "if [ \"$SKIP_DASHBOARD_PREBUILD\" = \"1\" ]; then echo \"⚠️  Skipping agents:generate prebuild\"; else npm --prefix ../.. run agents:generate; fi",
+    "prebuild": "if [ \"$SKIP_DASHBOARD_PREBUILD\" = \"1\" ]; then echo \"⚠️  Skipping agents:generate prebuild\"; else node scripts/check-agents-cache.cjs || (npm --prefix ../.. run agents:generate && node scripts/convert-agents-to-json.mjs); fi",
     "build": "npm run copy:docs && tsc && NODE_ENV=production vite build",
     "build:dev": "npm run copy:docs && tsc && vite build",
     "build:analyze": "npm run build && npm run preview -- --open",

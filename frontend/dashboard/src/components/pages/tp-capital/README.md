@@ -41,6 +41,7 @@ tp-capital/
 ### Key Components
 
 #### SignalsTable (Main Component)
+
 - **Props:** None (self-contained)
 - **Features:**
   - TanStack Query for data fetching (30s refetch interval)
@@ -51,6 +52,7 @@ tp-capital/
 - **Lines:** 280 (43% reduction from 494)
 
 #### SignalsFilterBar
+
 - **Props:** 15 props (filters, options, handlers)
 - **Features:**
   - Channel/type dropdowns
@@ -61,6 +63,7 @@ tp-capital/
 - **Lines:** 92
 
 #### SignalRow
+
 - **Props:** Signal data, delete handler, loading state
 - **Features:**
   - Buy range display
@@ -70,6 +73,7 @@ tp-capital/
 - **Lines:** 125
 
 #### ErrorBoundary
+
 - **Props:** Children, optional fallback
 - **Features:**
   - Catches React errors
@@ -82,6 +86,7 @@ tp-capital/
 ### Utilities
 
 #### filterHelpers.ts
+
 ```typescript
 // Case-insensitive search
 containsIgnoreCase(value: string, term: string): boolean
@@ -97,6 +102,7 @@ createSearchPredicate<T>(
 ```
 
 #### logger.ts
+
 ```typescript
 // Create logger instance
 const logger = createLogger('ComponentName');
@@ -212,7 +218,7 @@ Test Files  1 passed (1)
 ### Basic Usage
 
 ```tsx
-import { SignalsTable } from './components/pages/tp-capital/SignalsTable';
+import { SignalsTable } from "./components/pages/tp-capital/SignalsTable";
 
 function Dashboard() {
   return <SignalsTable />;
@@ -222,8 +228,8 @@ function Dashboard() {
 ### With Error Boundary
 
 ```tsx
-import { SignalsTable } from './components/pages/tp-capital/SignalsTable';
-import { ErrorBoundary } from './components/pages/tp-capital/components';
+import { SignalsTable } from "./components/pages/tp-capital/SignalsTable";
+import { ErrorBoundary } from "./components/pages/tp-capital/components";
 
 function Dashboard() {
   return (
@@ -238,15 +244,15 @@ function Dashboard() {
 
 ### Refactoring Results
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Total Lines** | 2,167 | 1,200 | 45% reduction |
-| **SignalsTable** | 494 | 280 | 43% reduction |
-| **Components** | 1 monolith | 4 modular | Better separation |
-| **Test Coverage** | 0% | 80%+ | Baseline established |
-| **TypeScript Types** | Implicit | 9 explicit | Type safety |
-| **Code Duplication** | High | Low | DRY principles |
-| **Error Handling** | Console only | Logger + ErrorBoundary | Production-ready |
+| Metric               | Before       | After                  | Improvement          |
+| -------------------- | ------------ | ---------------------- | -------------------- |
+| **Total Lines**      | 2,167        | 1,200                  | 45% reduction        |
+| **SignalsTable**     | 494          | 280                    | 43% reduction        |
+| **Components**       | 1 monolith   | 4 modular              | Better separation    |
+| **Test Coverage**    | 0%           | 80%+                   | Baseline established |
+| **TypeScript Types** | Implicit     | 9 explicit             | Type safety          |
+| **Code Duplication** | High         | Low                    | DRY principles       |
+| **Error Handling**   | Console only | Logger + ErrorBoundary | Production-ready     |
 
 ### Key Improvements
 
@@ -340,20 +346,24 @@ npm run lint:fix
 ### Common Issues
 
 #### "Service unavailable" warning
+
 **Cause:** TP-Capital backend not running  
 **Solution:** Start backend with `docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d`
 
 #### Tests failing
+
 **Cause:** Dependencies not installed or outdated  
 **Solution:** Run `npm install` in `frontend/dashboard/`
 
 #### Type errors
+
 **Cause:** Missing types or incorrect imports  
 **Solution:** Check `types.ts` and ensure imports use `type` keyword for interfaces
 
 ## 📞 Support
 
 For issues or questions, see:
+
 - [Architecture Review](governance/reviews/architecture-2025-11-01/)
 - [TP-Capital Docs](docs/content/apps/tp-capital/)
 - [Frontend Guidelines](docs/content/frontend/guidelines/)
@@ -363,4 +373,3 @@ For issues or questions, see:
 **Last Updated:** 2025-11-04  
 **Refactoring Lead:** AI Agent  
 **Review Status:** ✅ Completed
-

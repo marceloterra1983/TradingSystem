@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   RefreshCw,
   TrendingUp,
@@ -7,7 +7,7 @@ import {
   FileText,
   AlertCircle,
   CheckCircle,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -23,7 +23,7 @@ import {
   Pie,
   Cell,
   Legend,
-} from 'recharts';
+} from "recharts";
 
 import {
   Card,
@@ -31,81 +31,109 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import { Skeleton } from '../ui/skeleton';
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Progress } from "../ui/progress";
+import { Skeleton } from "../ui/skeleton";
 import documentationService, {
   DocumentationMetrics,
-} from '../../services/documentationService';
+} from "../../services/documentationService";
 
-type Trend = 'improving' | 'declining' | 'stable';
+type Trend = "improving" | "declining" | "stable";
 
-const HEALTH_COLORS: Record<'excellent' | 'good' | 'fair' | 'poor' | 'critical', string> = {
-  excellent: 'text-emerald-600 dark:text-emerald-400',
-  good: 'text-lime-600 dark:text-lime-400',
-  fair: 'text-amber-600 dark:text-amber-400',
-  poor: 'text-orange-600 dark:text-orange-400',
-  critical: 'text-rose-600 dark:text-rose-400',
+const HEALTH_COLORS: Record<
+  "excellent" | "good" | "fair" | "poor" | "critical",
+  string
+> = {
+  excellent: "text-emerald-600 dark:text-emerald-400",
+  good: "text-lime-600 dark:text-lime-400",
+  fair: "text-amber-600 dark:text-amber-400",
+  poor: "text-orange-600 dark:text-orange-400",
+  critical: "text-rose-600 dark:text-rose-400",
 };
 
 const SEVERITY_META: Array<{
-  key: keyof DocumentationMetrics['issues']['bySeverity'];
+  key: keyof DocumentationMetrics["issues"]["bySeverity"];
   label: string;
   color: string;
 }> = [
-  { key: 'critical', label: 'Critical', color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200' },
-  { key: 'high', label: 'High', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-200' },
-  { key: 'medium', label: 'Medium', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200' },
-  { key: 'low', label: 'Low', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200' },
+  {
+    key: "critical",
+    label: "Critical",
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200",
+  },
+  {
+    key: "high",
+    label: "High",
+    color:
+      "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-200",
+  },
+  {
+    key: "medium",
+    label: "Medium",
+    color:
+      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200",
+  },
+  {
+    key: "low",
+    label: "Low",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200",
+  },
 ];
 
-const PIE_COLORS = ['#F87171', '#FB923C', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA'];
+const PIE_COLORS = [
+  "#F87171",
+  "#FB923C",
+  "#FBBF24",
+  "#34D399",
+  "#60A5FA",
+  "#A78BFA",
+];
 
 const formatDate = (iso: string) =>
-  new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
   }).format(new Date(iso));
 
 function getTrendMeta(trend: Trend) {
   switch (trend) {
-    case 'improving':
+    case "improving":
       return {
         Icon: TrendingUp,
-        text: 'Improving',
-        className: 'text-emerald-600 dark:text-emerald-400',
+        text: "Improving",
+        className: "text-emerald-600 dark:text-emerald-400",
       };
-    case 'declining':
+    case "declining":
       return {
         Icon: TrendingDown,
-        text: 'Declining',
-        className: 'text-rose-600 dark:text-rose-400',
+        text: "Declining",
+        className: "text-rose-600 dark:text-rose-400",
       };
     default:
       return {
         Icon: Minus,
-        text: 'Stable',
-        className: 'text-slate-500 dark:text-slate-400',
+        text: "Stable",
+        className: "text-slate-500 dark:text-slate-400",
       };
   }
 }
 
 function getGradeVariant(grade?: string) {
-  if (!grade) return 'secondary' as const;
+  if (!grade) return "secondary" as const;
 
   switch (grade.toUpperCase()) {
-    case 'A':
-      return 'success' as const;
-    case 'B':
-      return 'default' as const;
-    case 'C':
-      return 'warning' as const;
-    case 'D':
-      return 'warning' as const;
+    case "A":
+      return "success" as const;
+    case "B":
+      return "default" as const;
+    case "C":
+      return "warning" as const;
+    case "D":
+      return "warning" as const;
     default:
-      return 'destructive' as const;
+      return "destructive" as const;
   }
 }
 
@@ -128,63 +156,80 @@ export default function DocumentationMetricsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [dataSource, setDataSource] = useState<'api' | 'static'>('api');
+  const [dataSource, setDataSource] = useState<"api" | "static">("api");
 
-  const loadMetrics = useCallback(
-    async (showSpinner: boolean = true) => {
-      if (showSpinner) {
-        setLoading(true);
-      }
-      setError(null);
+  const loadMetrics = useCallback(async (showSpinner: boolean = true) => {
+    if (showSpinner) {
+      setLoading(true);
+    }
+    setError(null);
 
-      const applyMetrics = (data: DocumentationMetrics, source: 'api' | 'static') => {
-        setMetrics(data);
-        setDataSource(source);
-        setLastUpdated(
-          data.metadata?.generatedAt ? new Date(data.metadata.generatedAt) : new Date(),
+    const applyMetrics = (
+      data: DocumentationMetrics,
+      source: "api" | "static",
+    ) => {
+      setMetrics(data);
+      setDataSource(source);
+      setLastUpdated(
+        data.metadata?.generatedAt
+          ? new Date(data.metadata.generatedAt)
+          : new Date(),
+      );
+    };
+
+    try {
+      const response = await documentationService.getDocumentationMetrics();
+      if (!response.success || !response.data) {
+        throw new Error(
+          "Received unsuccessful response from documentation metrics API",
         );
-      };
-
-      try {
-        const response = await documentationService.getDocumentationMetrics();
-        if (!response.success || !response.data) {
-          throw new Error('Received unsuccessful response from documentation metrics API');
-        }
-
-        applyMetrics(response.data, 'api');
-        return;
-      } catch (err) {
-        console.error('[DocumentationMetrics] Failed to load metrics from API, trying snapshot:', err);
-        try {
-          const fallback = await documentationService.getStaticDocumentationMetrics();
-          applyMetrics(fallback, 'static');
-          return;
-        } catch (fallbackErr) {
-          console.error('[DocumentationMetrics] Fallback snapshot load failed:', fallbackErr);
-          const apiMessage = err instanceof Error ? err.message : 'API request failed';
-          const fallbackMessage =
-            fallbackErr instanceof Error ? fallbackErr.message : 'Snapshot unavailable';
-          setError(
-            `Unable to load documentation metrics (API: ${apiMessage}; snapshot: ${fallbackMessage})`,
-          );
-          setMetrics(null);
-          setDataSource('api');
-        }
-      } finally {
-        if (showSpinner) {
-          setLoading(false);
-        }
       }
-    },
-    [],
-  );
+
+      applyMetrics(response.data, "api");
+      return;
+    } catch (err) {
+      console.error(
+        "[DocumentationMetrics] Failed to load metrics from API, trying snapshot:",
+        err,
+      );
+      try {
+        const fallback =
+          await documentationService.getStaticDocumentationMetrics();
+        applyMetrics(fallback, "static");
+        return;
+      } catch (fallbackErr) {
+        console.error(
+          "[DocumentationMetrics] Fallback snapshot load failed:",
+          fallbackErr,
+        );
+        const apiMessage =
+          err instanceof Error ? err.message : "API request failed";
+        const fallbackMessage =
+          fallbackErr instanceof Error
+            ? fallbackErr.message
+            : "Snapshot unavailable";
+        setError(
+          `Unable to load documentation metrics (API: ${apiMessage}; snapshot: ${fallbackMessage})`,
+        );
+        setMetrics(null);
+        setDataSource("api");
+      }
+    } finally {
+      if (showSpinner) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     void loadMetrics();
 
-    const interval = window.setInterval(() => {
-      void loadMetrics(false);
-    }, 5 * 60 * 1000);
+    const interval = window.setInterval(
+      () => {
+        void loadMetrics(false);
+      },
+      5 * 60 * 1000,
+    );
 
     return () => {
       window.clearInterval(interval);
@@ -194,7 +239,7 @@ export default function DocumentationMetricsPage() {
   const freshnessRate = useMemo(() => {
     if (!metrics?.freshness?.distribution) return 0;
     return metrics.freshness.distribution
-      .filter((item) => item.label !== '>90 days')
+      .filter((item) => item.label !== ">90 days")
       .reduce((sum, item) => sum + (item.percentage ?? 0), 0);
   }, [metrics]);
 
@@ -208,9 +253,11 @@ export default function DocumentationMetricsPage() {
 
   const trendMeta = getTrendMeta(metrics?.healthScore?.trend as Trend);
   const healthStatusClass =
-    HEALTH_COLORS[(metrics?.healthScore?.status as keyof typeof HEALTH_COLORS) || 'good'] || '';
-  const sourceBadgeVariant = dataSource === 'api' ? 'success' : 'warning';
-  const sourceLabel = dataSource === 'api' ? 'Live API' : 'Docs Snapshot';
+    HEALTH_COLORS[
+      (metrics?.healthScore?.status as keyof typeof HEALTH_COLORS) || "good"
+    ] || "";
+  const sourceBadgeVariant = dataSource === "api" ? "success" : "warning";
+  const sourceLabel = dataSource === "api" ? "Live API" : "Docs Snapshot";
 
   const handleRefresh = () => {
     void loadMetrics();
@@ -260,7 +307,9 @@ export default function DocumentationMetricsPage() {
           <div className="flex items-start gap-3 rounded-lg border border-red-200 px-4 py-4 dark:border-red-800">
             <AlertCircle className="mt-0.5 h-5 w-5" />
             <div className="space-y-2 text-sm">
-              <p className="font-semibold">Failed to load documentation metrics</p>
+              <p className="font-semibold">
+                Failed to load documentation metrics
+              </p>
               <p>{error}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh}>
                 Try again
@@ -284,7 +333,8 @@ export default function DocumentationMetricsPage() {
             Documentation Metrics Dashboard
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Real-time health, freshness, and quality metrics sourced from the documentation audit pipeline.
+            Real-time health, freshness, and quality metrics sourced from the
+            documentation audit pipeline.
           </p>
           {lastUpdated && (
             <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-500">
@@ -322,7 +372,7 @@ export default function DocumentationMetricsPage() {
               </CardDescription>
             </div>
             <Badge variant={getGradeVariant(metrics.healthScore.grade)}>
-              Grade {metrics.healthScore.grade ?? 'N/A'}
+              Grade {metrics.healthScore.grade ?? "N/A"}
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -331,17 +381,26 @@ export default function DocumentationMetricsPage() {
                 {Math.round((metrics.healthScore.current ?? 0) * 10) / 10}
               </span>
               <div className="flex flex-col gap-1 text-xs">
-                <span className={`font-semibold capitalize ${healthStatusClass}`}>
-                  {metrics.healthScore.status ?? 'No Data'}
+                <span
+                  className={`font-semibold capitalize ${healthStatusClass}`}
+                >
+                  {metrics.healthScore.status ?? "No Data"}
                 </span>
-                <span className={`inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 ${trendMeta.className}`}>
+                <span
+                  className={`inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 ${trendMeta.className}`}
+                >
                   <trendMeta.Icon className="h-3.5 w-3.5" />
                   {trendMeta.text}
                 </span>
               </div>
             </div>
             <div>
-              <Progress value={Math.min(100, Math.max(0, metrics.healthScore.current ?? 0))} />
+              <Progress
+                value={Math.min(
+                  100,
+                  Math.max(0, metrics.healthScore.current ?? 0),
+                )}
+              />
             </div>
           </CardContent>
         </Card>
@@ -374,7 +433,9 @@ export default function DocumentationMetricsPage() {
               <CardTitle className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                 Freshness Rate
               </CardTitle>
-              <CardDescription>Files reviewed within the last 90 days</CardDescription>
+              <CardDescription>
+                Files reviewed within the last 90 days
+              </CardDescription>
             </div>
             <div className="rounded-full bg-emerald-50 p-2 dark:bg-emerald-500/10">
               <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -399,7 +460,9 @@ export default function DocumentationMetricsPage() {
               <CardTitle className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                 Total Issues
               </CardTitle>
-              <CardDescription>Aggregated across severity levels</CardDescription>
+              <CardDescription>
+                Aggregated across severity levels
+              </CardDescription>
             </div>
             <div className="rounded-full bg-rose-50 p-2 dark:bg-rose-500/10">
               <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
@@ -420,7 +483,9 @@ export default function DocumentationMetricsPage() {
                     key={key}
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${color}`}
                   >
-                    <span className="text-gray-800 dark:text-gray-200">{label}</span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      {label}
+                    </span>
                     <span className="font-semibold">{value}</span>
                   </span>
                 );
@@ -434,7 +499,9 @@ export default function DocumentationMetricsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Health Score Trend</CardTitle>
-            <CardDescription>Rolling snapshots from the last 90 days</CardDescription>
+            <CardDescription>
+              Rolling snapshots from the last 90 days
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-72">
             {historicalData.length === 0 ? (
@@ -442,20 +509,42 @@ export default function DocumentationMetricsPage() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historicalData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-800" />
-                  <XAxis dataKey="formattedDate" stroke="var(--ts-text-muted)" minTickGap={16} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200 dark:stroke-gray-800"
+                  />
+                  <XAxis
+                    dataKey="formattedDate"
+                    stroke="var(--ts-text-muted)"
+                    minTickGap={16}
+                  />
                   <YAxis stroke="var(--ts-text-muted)" domain={[0, 100]} />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--ts-surface-0)',
-                      borderRadius: '0.75rem',
-                      border: '1px solid var(--ts-surface-border)',
+                      background: "var(--ts-surface-0)",
+                      borderRadius: "0.75rem",
+                      border: "1px solid var(--ts-surface-border)",
                     }}
-                    formatter={(value: number) => [`${value.toFixed(1)} pts`, 'Health Score']}
+                    formatter={(value: number) => [
+                      `${value.toFixed(1)} pts`,
+                      "Health Score",
+                    ]}
                   />
-                  <ReferenceLine y={90} stroke="#34D399" strokeDasharray="4 4" />
-                  <ReferenceLine y={70} stroke="#F59E0B" strokeDasharray="4 4" />
-                  <ReferenceLine y={50} stroke="#F97316" strokeDasharray="4 4" />
+                  <ReferenceLine
+                    y={90}
+                    stroke="#34D399"
+                    strokeDasharray="4 4"
+                  />
+                  <ReferenceLine
+                    y={70}
+                    stroke="#F59E0B"
+                    strokeDasharray="4 4"
+                  />
+                  <ReferenceLine
+                    y={50}
+                    stroke="#F97316"
+                    strokeDasharray="4 4"
+                  />
                   <Line
                     type="monotone"
                     dataKey="healthScore"
@@ -479,30 +568,33 @@ export default function DocumentationMetricsPage() {
             {metrics.freshness?.distribution?.length ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={metrics.freshness.distribution}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-800" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200 dark:stroke-gray-800"
+                  />
                   <XAxis dataKey="label" stroke="var(--ts-text-muted)" />
                   <YAxis stroke="var(--ts-text-muted)" allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--ts-surface-0)',
-                      borderRadius: '0.75rem',
-                      border: '1px solid var(--ts-surface-border)',
+                      background: "var(--ts-surface-0)",
+                      borderRadius: "0.75rem",
+                      border: "1px solid var(--ts-surface-border)",
                     }}
                     formatter={(value: number, _key, payload) => [
                       `${value} files (${payload?.payload?.percentage ?? 0}%)`,
-                      'Files',
+                      "Files",
                     ]}
                   />
                   <Bar dataKey="count" radius={8}>
                     {metrics.freshness.distribution.map((item) => {
                       const color =
-                        item.label === '<30 days'
-                          ? '#34D399'
-                          : item.label === '30-60 days'
-                            ? '#A3E635'
-                            : item.label === '60-90 days'
-                              ? '#F59E0B'
-                              : '#F97316';
+                        item.label === "<30 days"
+                          ? "#34D399"
+                          : item.label === "30-60 days"
+                            ? "#A3E635"
+                            : item.label === "60-90 days"
+                              ? "#F59E0B"
+                              : "#F97316";
                       return <Cell key={item.label} fill={color} />;
                     })}
                   </Bar>
@@ -517,39 +609,52 @@ export default function DocumentationMetricsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Issue Breakdown</CardTitle>
-            <CardDescription>Grouping across frontmatter, links, and content</CardDescription>
+            <CardDescription>
+              Grouping across frontmatter, links, and content
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-72">
-            {metrics.issues?.breakdown && Object.keys(metrics.issues.breakdown).length > 0 ? (
+            {metrics.issues?.breakdown &&
+            Object.keys(metrics.issues.breakdown).length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--ts-surface-0)',
-                      borderRadius: '0.75rem',
-                      border: '1px solid var(--ts-surface-border)',
+                      background: "var(--ts-surface-0)",
+                      borderRadius: "0.75rem",
+                      border: "1px solid var(--ts-surface-border)",
                     }}
                     formatter={(value: number, name: string, payload) => {
                       const total = metrics.issues.total || 1;
                       const percentage = ((value / total) * 100).toFixed(1);
-                      return [`${value} issues (${percentage}%)`, name ?? payload?.name ?? 'Type'];
+                      return [
+                        `${value} issues (${percentage}%)`,
+                        name ?? payload?.name ?? "Type",
+                      ];
                     }}
                   />
                   <Legend />
                   <Pie
-                    data={Object.entries(metrics.issues.breakdown).map(([name, value]) => ({
-                      name,
-                      value,
-                    }))}
+                    data={Object.entries(metrics.issues.breakdown).map(
+                      ([name, value]) => ({
+                        name,
+                        value,
+                      }),
+                    )}
                     dataKey="value"
                     nameKey="name"
                     innerRadius={70}
                     outerRadius={110}
                     paddingAngle={4}
                   >
-                    {Object.entries(metrics.issues.breakdown).map(([name], idx) => (
-                      <Cell key={name} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-                    ))}
+                    {Object.entries(metrics.issues.breakdown).map(
+                      ([name], idx) => (
+                        <Cell
+                          key={name}
+                          fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                        />
+                      ),
+                    )}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -562,7 +667,9 @@ export default function DocumentationMetricsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Coverage by Owner</CardTitle>
-            <CardDescription>Distribution of documentation ownership</CardDescription>
+            <CardDescription>
+              Distribution of documentation ownership
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-72">
             {metrics.coverage?.byOwner?.length ? (
@@ -574,23 +681,34 @@ export default function DocumentationMetricsPage() {
                   }))}
                   layout="vertical"
                 >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-800" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200 dark:stroke-gray-800"
+                  />
                   <XAxis type="number" stroke="var(--ts-text-muted)" />
-                  <YAxis type="category" dataKey="owner" stroke="var(--ts-text-muted)" width={140} />
+                  <YAxis
+                    type="category"
+                    dataKey="owner"
+                    stroke="var(--ts-text-muted)"
+                    width={140}
+                  />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--ts-surface-0)',
-                      borderRadius: '0.75rem',
-                      border: '1px solid var(--ts-surface-border)',
+                      background: "var(--ts-surface-0)",
+                      borderRadius: "0.75rem",
+                      border: "1px solid var(--ts-surface-border)",
                     }}
                     formatter={(value: number, _key, payload) => [
                       `${value} files (${payload?.payload?.percentage ?? 0}%)`,
-                      payload?.payload?.owner ?? 'Owner',
+                      payload?.payload?.owner ?? "Owner",
                     ]}
                   />
                   <Bar dataKey="count" radius={6}>
                     {metrics.coverage.byOwner.map((owner, idx) => (
-                      <Cell key={owner.owner} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                      <Cell
+                        key={owner.owner}
+                        fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -604,7 +722,9 @@ export default function DocumentationMetricsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Coverage by Category</CardTitle>
-            <CardDescription>Domain coverage inferred from file paths</CardDescription>
+            <CardDescription>
+              Domain coverage inferred from file paths
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-72">
             {metrics.coverage?.byCategory?.length ? (
@@ -616,23 +736,34 @@ export default function DocumentationMetricsPage() {
                   }))}
                   layout="vertical"
                 >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-800" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-gray-200 dark:stroke-gray-800"
+                  />
                   <XAxis type="number" stroke="var(--ts-text-muted)" />
-                  <YAxis type="category" dataKey="category" stroke="var(--ts-text-muted)" width={140} />
+                  <YAxis
+                    type="category"
+                    dataKey="category"
+                    stroke="var(--ts-text-muted)"
+                    width={140}
+                  />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--ts-surface-0)',
-                      borderRadius: '0.75rem',
-                      border: '1px solid var(--ts-surface-border)',
+                      background: "var(--ts-surface-0)",
+                      borderRadius: "0.75rem",
+                      border: "1px solid var(--ts-surface-border)",
                     }}
                     formatter={(value: number, _key, payload) => [
                       `${value} files (${payload?.payload?.percentage ?? 0}%)`,
-                      payload?.payload?.category ?? 'Category',
+                      payload?.payload?.category ?? "Category",
                     ]}
                   />
                   <Bar dataKey="count" radius={6}>
                     {metrics.coverage.byCategory.map((category, idx) => (
-                      <Cell key={category.category} fill={PIE_COLORS[(idx + 2) % PIE_COLORS.length]} />
+                      <Cell
+                        key={category.category}
+                        fill={PIE_COLORS[(idx + 2) % PIE_COLORS.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -649,7 +780,8 @@ export default function DocumentationMetricsPage() {
           Next steps
         </h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Address critical frontmatter gaps and broken links first. Review stale content (&gt;90 days) and ensure ownership coverage remains balanced
+          Address critical frontmatter gaps and broken links first. Review stale
+          content (&gt;90 days) and ensure ownership coverage remains balanced
           across guilds.
         </p>
       </section>

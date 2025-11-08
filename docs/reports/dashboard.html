@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Quality Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #6b7280;
+        }
+        .score-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .score-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #EF4444;
+            line-height: 1;
+        }
+        .score-label {
+            font-size: 1.5rem;
+            color: #EF4444;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .metric-title {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            color: #1f2937;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .metric-subtitle {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .progress-bar {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #10b981, #059669);
+            height: 100%;
+            transition: width 1s ease;
+        }
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .component-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .component-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .component-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .footer {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Documentation Quality Dashboard</h1>
+            <p>Real-time metrics and health monitoring</p>
+        </div>
+
+        <div class="score-card">
+            <div class="score-value">57</div>
+            <div class="score-label">NEEDS ATTENTION</div>
+            <p style="color: #6b7280; margin-top: 1rem;">Overall Documentation Health Score</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Total Files</div>
+                <div class="metric-value">282</div>
+                <div class="metric-subtitle">Documentation files</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Frontmatter Compliance</div>
+                <div class="metric-value">282/282</div>
+                <div class="metric-subtitle">100.0% complete</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100.0%"></div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Average Readability</div>
+                <div class="metric-value">14.7</div>
+                <div class="metric-subtitle">Flesch Reading Ease</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Files with Issues</div>
+                <div class="metric-value">2</div>
+                <div class="metric-subtitle">Requiring attention</div>
+            </div>
+        </div>
+
+        <div class="components-grid">
+
+            <div class="component-card">
+                <div class="component-header">
+                    <div class="component-name">Frontmatter</div>
+                    <div class="component-score">100</div>
+                </div>
+                <span class="badge badge-success">Excellent</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100.0%"></div>
+                </div>
+            </div>
+
+            <div class="component-card">
+                <div class="component-header">
+                    <div class="component-name">Readability</div>
+                    <div class="component-score">15</div>
+                </div>
+                <span class="badge badge-danger">Needs Work</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 14.681881533101045%"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>Last updated: 2025-11-08 10:42:59</p>
+            <p style="margin-top: 0.5rem;">Generated by Documentation Quality Dashboard v1.0</p>
+        </div>
+    </div>
+
+    <script>
+        // Animate progress bars on load
+        window.addEventListener('load', function() {
+            const fills = document.querySelectorAll('.progress-fill');
+            fills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0%';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

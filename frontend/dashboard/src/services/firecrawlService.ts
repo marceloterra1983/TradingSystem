@@ -1,16 +1,16 @@
-import { getApiUrl } from '../config/api';
+import { getApiUrl } from "../config/api";
 
-const API_BASE_URL = getApiUrl('firecrawlProxy').replace(/\/$/, '');
+const API_BASE_URL = getApiUrl("firecrawlProxy").replace(/\/$/, "");
 const API_V1_BASE_URL = `${API_BASE_URL}/api/v1`;
 
 export type ScrapeFormat =
-  | 'markdown'
-  | 'html'
-  | 'rawHtml'
-  | 'links'
-  | 'screenshot'
-  | 'screenshot@fullPage'
-  | 'json';
+  | "markdown"
+  | "html"
+  | "rawHtml"
+  | "links"
+  | "screenshot"
+  | "screenshot@fullPage"
+  | "json";
 
 export interface ScrapeOptions {
   url: string;
@@ -59,7 +59,7 @@ export interface CrawlResult {
   error?: string;
 }
 
-export type CrawlJobStatus = 'scraping' | 'completed' | 'failed';
+export type CrawlJobStatus = "scraping" | "completed" | "failed";
 
 export interface CrawlStatusItem {
   url: string;
@@ -87,7 +87,7 @@ export interface CrawlStatus {
 }
 
 export interface FirecrawlHealthResponse {
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   error?: string;
 }
 
@@ -95,37 +95,37 @@ async function parseJsonResponse<T>(response: Response): Promise<T | null> {
   try {
     return (await response.json()) as T;
   } catch (error) {
-    console.error('Failed to parse Firecrawl response JSON:', error);
+    console.error("Failed to parse Firecrawl response JSON:", error);
     return null;
   }
 }
 
 function isBarePayload(payload: unknown): boolean {
-  if (payload === null || typeof payload !== 'object') {
+  if (payload === null || typeof payload !== "object") {
     return false;
   }
 
   const record = payload as Record<string, unknown>;
-  return !('success' in record) && !('error' in record);
+  return !("success" in record) && !("error" in record);
 }
 
 function formatProxyOfflineMessage(): string {
   try {
     const url = new URL(API_BASE_URL);
-    const hint = `${url.origin}${url.pathname === '/' ? '' : url.pathname}`;
+    const hint = `${url.origin}${url.pathname === "/" ? "" : url.pathname}`;
     return `Unable to reach the Firecrawl proxy at ${hint}. Start or verify the proxy service (default port 3600) before retrying.`;
   } catch {
-    return 'Unable to reach the configured Firecrawl proxy service. Ensure the proxy (default port 3600) is running and accessible.';
+    return "Unable to reach the configured Firecrawl proxy service. Ensure the proxy (default port 3600) is running and accessible.";
   }
 }
 
 function normalizeFirecrawlError(message: string): string {
   const normalized = message.trim().toLowerCase();
   if (
-    normalized.includes('failed to fetch') ||
-    normalized.includes('networkerror') ||
-    normalized.includes('network request failed') ||
-    normalized.includes('load failed')
+    normalized.includes("failed to fetch") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network request failed") ||
+    normalized.includes("load failed")
   ) {
     return formatProxyOfflineMessage();
   }
@@ -136,9 +136,9 @@ export const firecrawlService = {
   async scrape(options: ScrapeOptions): Promise<ScrapeResult> {
     try {
       const response = await fetch(`${API_V1_BASE_URL}/scrape`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           url: options.url,
@@ -162,7 +162,7 @@ export const firecrawlService = {
       if (!payload) {
         return {
           success: false,
-          error: 'Invalid response from Firecrawl scrape endpoint',
+          error: "Invalid response from Firecrawl scrape endpoint",
         };
       }
 
@@ -181,9 +181,9 @@ export const firecrawlService = {
         error: result.error,
       };
     } catch (error) {
-      console.error('Error calling Firecrawl scrape endpoint:', error);
+      console.error("Error calling Firecrawl scrape endpoint:", error);
       const message =
-        error instanceof Error ? error.message : 'Unknown scrape error';
+        error instanceof Error ? error.message : "Unknown scrape error";
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
@@ -191,9 +191,9 @@ export const firecrawlService = {
   async crawl(options: CrawlOptions): Promise<CrawlResult> {
     try {
       const response = await fetch(`${API_V1_BASE_URL}/crawl`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           url: options.url,
@@ -218,7 +218,7 @@ export const firecrawlService = {
       if (!payload) {
         return {
           success: false,
-          error: 'Invalid response from Firecrawl crawl endpoint',
+          error: "Invalid response from Firecrawl crawl endpoint",
         };
       }
 
@@ -228,9 +228,9 @@ export const firecrawlService = {
         error: payload.error,
       };
     } catch (error) {
-      console.error('Error starting Firecrawl crawl job:', error);
+      console.error("Error starting Firecrawl crawl job:", error);
       const message =
-        error instanceof Error ? error.message : 'Unknown crawl error';
+        error instanceof Error ? error.message : "Unknown crawl error";
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
@@ -252,7 +252,7 @@ export const firecrawlService = {
       if (!payload) {
         return {
           success: false,
-          error: 'Invalid response from Firecrawl crawl status endpoint',
+          error: "Invalid response from Firecrawl crawl status endpoint",
         };
       }
 
@@ -271,9 +271,9 @@ export const firecrawlService = {
         error: result.error,
       };
     } catch (error) {
-      console.error('Error fetching Firecrawl crawl status:', error);
+      console.error("Error fetching Firecrawl crawl status:", error);
       const message =
-        error instanceof Error ? error.message : 'Unknown crawl status error';
+        error instanceof Error ? error.message : "Unknown crawl status error";
       return { success: false, error: normalizeFirecrawlError(message) };
     }
   },
@@ -283,16 +283,16 @@ export const firecrawlService = {
       const response = await fetch(`${API_BASE_URL}/health`);
       if (!response.ok) {
         return {
-          status: 'error',
+          status: "error",
           error: `HTTP error! status: ${response.status}`,
         };
       }
-      return { status: 'ok' };
+      return { status: "ok" };
     } catch (error) {
-      console.error('Error checking Firecrawl proxy health:', error);
+      console.error("Error checking Firecrawl proxy health:", error);
       const message =
-        error instanceof Error ? error.message : 'Unknown health check error';
-      return { status: 'error', error: normalizeFirecrawlError(message) };
+        error instanceof Error ? error.message : "Unknown health check error";
+      return { status: "error", error: normalizeFirecrawlError(message) };
     }
   },
 };

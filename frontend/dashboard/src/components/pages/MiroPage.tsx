@@ -1,5 +1,5 @@
-import { ExternalLink, Maximize2 } from 'lucide-react';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import { ExternalLink, Maximize2 } from "lucide-react";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
 /**
  * MiroPage Component
@@ -13,11 +13,11 @@ import { IframeWithUrl } from '../common/IframeWithUrl';
  * - Botão para abrir em nova aba se preferir
  */
 export function MiroPage() {
-  const miroUrl = 'https://miro.com/app/board/uXjVJ3tP9YI=/';
-  const miroEmbedUrl = 'https://miro.com/app/live-embed/uXjVJ3tP9YI=/';
+  const miroUrl = "https://miro.com/app/board/uXjVJ3tP9YI=/";
+  const miroEmbedUrl = "https://miro.com/app/live-embed/uXjVJ3tP9YI=/";
 
   const handleOpenExternal = () => {
-    window.open(miroUrl, '_blank', 'noopener,noreferrer');
+    window.open(miroUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -65,9 +65,9 @@ export function MiroPage() {
           src={miroEmbedUrl}
           className="w-full h-full"
           style={{
-            border: 'none',
-            height: 'calc(100vh - 60px)', // Subtrai a altura do header
-            minHeight: 'calc(100vh - 60px)',
+            border: "none",
+            height: "calc(100vh - 60px)", // Subtrai a altura do header
+            minHeight: "calc(100vh - 60px)",
           }}
           allow="fullscreen; clipboard-read; clipboard-write"
           sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"

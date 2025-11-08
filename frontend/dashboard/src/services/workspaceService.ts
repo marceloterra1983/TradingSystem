@@ -1,13 +1,13 @@
-import axios from 'axios';
+import axios from "axios";
 import type {
   Item,
   ItemCategory,
   ItemPriority,
   ItemStatus,
-} from '../components/pages/workspace/types/workspace.types';
+} from "../components/pages/workspace/types/workspace.types";
 
 // Base URL for workspace API
-const WORKSPACE_API_URL = '/api/workspace';
+const WORKSPACE_API_URL = "/api/workspace";
 
 export interface CreateItemPayload {
   title: string;

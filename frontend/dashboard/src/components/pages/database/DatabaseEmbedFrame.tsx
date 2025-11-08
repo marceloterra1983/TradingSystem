@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { ExternalLink } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { IframeWithUrl } from '../../common/IframeWithUrl';
+import * as React from "react";
+import { ExternalLink } from "lucide-react";
+import { Button } from "../../ui/button";
+import { IframeWithUrl } from "../../common/IframeWithUrl";
 
 interface AlternateUrl {
   label: string;
@@ -18,7 +18,7 @@ interface DatabaseEmbedFrameProps {
   alternateUrls?: AlternateUrl[];
 }
 
-const isBrowser = typeof window !== 'undefined';
+const isBrowser = typeof window !== "undefined";
 
 const uniqueByUrl = (options: AlternateUrl[]): AlternateUrl[] => {
   const map = new Map<string, AlternateUrl>();
@@ -35,12 +35,12 @@ export function DatabaseEmbedFrame({
   title,
   openLabel,
   iframeTitle,
-  sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-modals',
-  allow = 'clipboard-read; clipboard-write',
+  sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-modals",
+  allow = "clipboard-read; clipboard-write",
   alternateUrls = [],
 }: DatabaseEmbedFrameProps) {
   const options = React.useMemo<AlternateUrl[]>(() => {
-    const baseOption = { label: 'Auto', url };
+    const baseOption = { label: "Auto", url };
     return uniqueByUrl([baseOption, ...alternateUrls]);
   }, [url, alternateUrls]);
 
@@ -51,7 +51,7 @@ export function DatabaseEmbedFrame({
     if (!isBrowser || !activeOption) {
       return;
     }
-    window.open(activeOption.url, '_blank', 'noopener,noreferrer');
+    window.open(activeOption.url, "_blank", "noopener,noreferrer");
   }, [activeOption]);
 
   return (
@@ -66,7 +66,7 @@ export function DatabaseEmbedFrame({
               {options.map((option, index) => (
                 <Button
                   key={option.url}
-                  variant={index === activeIndex ? 'primary' : 'outline'}
+                  variant={index === activeIndex ? "primary" : "outline"}
                   size="sm"
                   onClick={() => setActiveIndex(index)}
                   disabled={index === activeIndex}

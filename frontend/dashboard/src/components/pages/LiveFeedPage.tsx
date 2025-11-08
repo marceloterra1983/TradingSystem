@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Radio, BookOpen } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Radio, BookOpen } from "lucide-react";
 
 export function LiveFeedPage() {
   const sections = [
     {
-      id: 'trade-feed',
+      id: "trade-feed",
       content: (
         <PlaceholderSection
           cardId="live-trade-feed"
@@ -16,7 +16,7 @@ export function LiveFeedPage() {
       ),
     },
     {
-      id: 'orderbook-feed',
+      id: "orderbook-feed",
       content: (
         <PlaceholderSection
           cardId="live-orderbook-feed"

@@ -1,42 +1,42 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import { createRequire } from 'module';
+import { promises as fs } from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const { Document } = require('flexsearch');
+const { Document } = require("flexsearch");
 
 class DocumentationSearchService {
   constructor(specsDir) {
     this.specsDir = specsDir;
     this.index = new Document({
       document: {
-        id: 'id',
-        index: ['title', 'description', 'path', 'method', 'content'],
-        store: ['type', 'title', 'description', 'path', 'method', 'source'],
+        id: "id",
+        index: ["title", "description", "path", "method", "content"],
+        store: ["type", "title", "description", "path", "method", "source"],
       },
-      tokenize: 'forward',
+      tokenize: "forward",
       resolution: 9,
     });
   }
 
   async indexDocumentation() {
     try {
-      const openApiPath = path.join(this.specsDir, 'openapi.yaml');
-      const openApiContent = await fs.readFile(openApiPath, 'utf8');
+      const openApiPath = path.join(this.specsDir, "openapi.yaml");
+      const openApiContent = await fs.readFile(openApiPath, "utf8");
       const openApi = yaml.load(openApiContent);
       await this.indexOpenApi(openApi);
 
-      const asyncApiPath = path.join(this.specsDir, 'asyncapi.yaml');
-      const asyncApiContent = await fs.readFile(asyncApiPath, 'utf8');
+      const asyncApiPath = path.join(this.specsDir, "asyncapi.yaml");
+      const asyncApiContent = await fs.readFile(asyncApiPath, "utf8");
       const asyncApi = yaml.load(asyncApiContent);
       await this.indexAsyncApi(asyncApi);
 
-      const schemasDir = path.join(this.specsDir, 'schemas');
+      const schemasDir = path.join(this.specsDir, "schemas");
       await this.indexSchemas(schemasDir);
 
       return {
-        status: 'success',
+        status: "success",
         indexed: this.index.info(),
       };
     } catch (error) {
@@ -46,26 +46,29 @@ class DocumentationSearchService {
 
   async indexOpenApi(spec) {
     this.index.add({
-      id: 'api-info',
-      type: 'api-info',
+      id: "api-info",
+      type: "api-info",
       title: spec.info.title,
       description: spec.info.description,
       content: JSON.stringify(spec.info),
-      source: 'openapi',
+      source: "openapi",
     });
 
     for (const [specPath, methods] of Object.entries(spec.paths || {})) {
       for (const [method, operation] of Object.entries(methods)) {
-        if (typeof operation === 'object') {
+        if (typeof operation === "object") {
           this.index.add({
             id: `path-${specPath}-${method}`,
-            type: 'endpoint',
-            title: operation.summary || operation.operationId || `${method.toUpperCase()} ${specPath}`,
-            description: operation.description || '',
+            type: "endpoint",
+            title:
+              operation.summary ||
+              operation.operationId ||
+              `${method.toUpperCase()} ${specPath}`,
+            description: operation.description || "",
             path: specPath,
             method: method.toUpperCase(),
             content: JSON.stringify(operation),
-            source: 'openapi',
+            source: "openapi",
           });
         }
       }
@@ -75,11 +78,11 @@ class DocumentationSearchService {
       for (const [name, schema] of Object.entries(spec.components.schemas)) {
         this.index.add({
           id: `schema-${name}`,
-          type: 'schema',
+          type: "schema",
           title: name,
-          description: schema.description || '',
+          description: schema.description || "",
           content: JSON.stringify(schema),
-          source: 'openapi',
+          source: "openapi",
         });
       }
     }
@@ -87,23 +90,23 @@ class DocumentationSearchService {
 
   async indexAsyncApi(spec) {
     this.index.add({
-      id: 'async-api-info',
-      type: 'api-info',
+      id: "async-api-info",
+      type: "api-info",
       title: spec.info.title,
       description: spec.info.description,
       content: JSON.stringify(spec.info),
-      source: 'asyncapi',
+      source: "asyncapi",
     });
 
     for (const [channelName, channel] of Object.entries(spec.channels || {})) {
       this.index.add({
         id: `channel-${channelName}`,
-        type: 'channel',
+        type: "channel",
         title: channel.title || channelName,
-        description: channel.description || '',
+        description: channel.description || "",
         path: channelName,
         content: JSON.stringify(channel),
-        source: 'asyncapi',
+        source: "asyncapi",
       });
     }
 
@@ -111,11 +114,11 @@ class DocumentationSearchService {
       for (const [name, message] of Object.entries(spec.components.messages)) {
         this.index.add({
           id: `message-${name}`,
-          type: 'message',
+          type: "message",
           title: message.title || name,
-          description: message.summary || message.description || '',
+          description: message.summary || message.description || "",
           content: JSON.stringify(message),
-          source: 'asyncapi',
+          source: "asyncapi",
         });
       }
     }
@@ -125,23 +128,28 @@ class DocumentationSearchService {
     try {
       const files = await fs.readdir(schemasDir);
       for (const file of files) {
-        if (file.endsWith('.json') || file.endsWith('.yaml')) {
-          const content = await fs.readFile(path.join(schemasDir, file), 'utf8');
-          const schema = file.endsWith('.yaml') ? yaml.load(content) : JSON.parse(content);
+        if (file.endsWith(".json") || file.endsWith(".yaml")) {
+          const content = await fs.readFile(
+            path.join(schemasDir, file),
+            "utf8",
+          );
+          const schema = file.endsWith(".yaml")
+            ? yaml.load(content)
+            : JSON.parse(content);
 
           this.index.add({
             id: `schema-file-${file}`,
-            type: 'schema',
+            type: "schema",
             title: schema.title || file,
-            description: schema.description || '',
+            description: schema.description || "",
             path: `schemas/${file}`,
             content: JSON.stringify(schema),
-            source: 'schema',
+            source: "schema",
           });
         }
       }
     } catch (error) {
-      console.warn('Failed to index schemas:', error.message);
+      console.warn("Failed to index schemas:", error.message);
     }
   }
 
@@ -189,10 +197,11 @@ class DocumentationSearchService {
       source: result.source,
     }));
 
-    return Array.from(new Map(suggestions.map((suggestion) => [suggestion.text, suggestion])).values()).slice(
-      0,
-      limit,
-    );
+    return Array.from(
+      new Map(
+        suggestions.map((suggestion) => [suggestion.text, suggestion]),
+      ).values(),
+    ).slice(0, limit);
   }
 }
 

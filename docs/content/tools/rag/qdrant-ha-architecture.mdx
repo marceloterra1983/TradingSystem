@@ -3,10 +3,13 @@ title: Qdrant High Availability Architecture
 sidebar_position: 4
 tags: [qdrant, high-availability, infrastructure]
 domain: tools
+owner: DocsOps
 type: architecture
 summary: Qdrant 3-node HA cluster with Raft consensus and HAProxy load balancing
+description: "Qdrant 3-node HA cluster with Raft consensus and HAProxy load balancing"
 status: active
 last_review: "2025-11-03"
+lastReviewed: "2025-11-08"
 ---
 
 # Qdrant High Availability Architecture
@@ -22,6 +25,7 @@ The Qdrant High Availability (HA) setup consists of a **3-node cluster** with **
 - **Load Balancing** - HAProxy distributes read queries
 - **Zero Data Loss** - Write consistency ensures durability
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Architecture Diagram
@@ -43,6 +47,7 @@ The Qdrant High Availability (HA) setup consists of a **3-node cluster** with **
     Raft :6335        Raft :6337        Raft :6339
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Components
@@ -74,6 +79,7 @@ services:
 - **Node 2**: 6336 (API), 6337 (Raft)
 - **Node 3**: 6338 (API), 6339 (Raft)
 
+lastReviewed: "2025-11-08"
 ---
 
 ### 2. HAProxy Load Balancer
@@ -98,6 +104,7 @@ backend qdrant_cluster
 - **API**: `http://localhost:6340` (load balanced)
 - **Stats**: `http://localhost:8404/stats` (HAProxy dashboard)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Replication Strategy
@@ -123,6 +130,7 @@ Collection 'documentation' with 100,000 vectors:
 Total Storage: 2x original size
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Failover Scenarios
@@ -144,6 +152,7 @@ Total Storage: 2x original size
 
 **Downtime**: **~5 seconds** (election time)
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Scenario 2: Replica Node Fails
@@ -161,6 +170,7 @@ Total Storage: 2x original size
 
 **Downtime**: **0 seconds** (no impact on availability)
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Scenario 3: Split Brain (Network Partition)
@@ -182,6 +192,7 @@ After Network Split:
   Node2 ↔ Node3 (elect new leader)
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Performance Characteristics
@@ -199,6 +210,7 @@ Single Node: 100 queries/sec
 HA Cluster:  300 queries/sec (3x)
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Write Performance
@@ -217,6 +229,7 @@ HA Cluster:  300 queries/sec (3x)
 - Similar to single node (writes go to leader)
 - Bottleneck: leader node capacity
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Monitoring
@@ -246,6 +259,7 @@ curl http://localhost:6340/cluster
 }
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Metrics to Monitor
@@ -266,6 +280,7 @@ curl http://localhost:6340/cluster
    - Monitor HAProxy logs for node state changes
    - Check Qdrant logs for leader elections
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Migration from Single Node
@@ -285,6 +300,7 @@ bash scripts/qdrant/migrate-to-ha-cluster.sh
 
 **Downtime**: ~2 minutes (during migration)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Configuration Files
@@ -298,6 +314,7 @@ bash scripts/qdrant/migrate-to-ha-cluster.sh
 **Migration Script:**
 - `scripts/qdrant/migrate-to-ha-cluster.sh`
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Best Practices
@@ -314,6 +331,7 @@ const qdrantUrl = "http://qdrant-lb:6333";
 const qdrantUrl = "http://qdrant-node1:6333"; // Don't target nodes directly
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### 2. Set Appropriate Replication Factor
@@ -325,6 +343,7 @@ const qdrantUrl = "http://qdrant-node1:6333"; // Don't target nodes directly
 **For Development:**
 - RF = 1 (save storage)
 
+lastReviewed: "2025-11-08"
 ---
 
 ### 3. Monitor Cluster Health
@@ -337,6 +356,7 @@ const qdrantUrl = "http://qdrant-node1:6333"; // Don't target nodes directly
 - Test failover (stop 1 node, verify recovery)
 - Check replication lag
 
+lastReviewed: "2025-11-08"
 ---
 
 ### 4. Backup Strategy
@@ -349,6 +369,7 @@ const qdrantUrl = "http://qdrant-node1:6333"; // Don't target nodes directly
 - Keep backups of collection metadata
 - Can recreate collections from metadata + raw data
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Troubleshooting
@@ -369,6 +390,7 @@ docker logs qdrant-node2 | grep "bootstrap"
 docker restart qdrant-node2
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Issue: Split Brain Detected
@@ -389,6 +411,7 @@ docker volume rm qdrant_node1_data qdrant_node2_data qdrant_node3_data
 docker compose -f tools/compose/docker-compose.qdrant-ha.yml up -d
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### Issue: High Replication Lag
@@ -408,6 +431,7 @@ docker stats | grep qdrant
 # Scale up resources if needed
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Security Considerations
@@ -425,6 +449,7 @@ environment:
 curl -H "api-key: ${QDRANT_API_KEY}" http://localhost:6340/collections
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ### 2. Network Isolation
@@ -437,6 +462,7 @@ curl -H "api-key: ${QDRANT_API_KEY}" http://localhost:6340/collections
 - Change default password (`admin/admin`)
 - Or restrict to localhost only
 
+lastReviewed: "2025-11-08"
 ---
 
 ## References
@@ -445,6 +471,7 @@ curl -H "api-key: ${QDRANT_API_KEY}" http://localhost:6340/collections
 - [Raft Consensus Algorithm](https://raft.github.io/)
 - [HAProxy Documentation](http://www.haproxy.org/#docs)
 
+lastReviewed: "2025-11-08"
 ---
 
 **Last Updated**: 2025-11-03  

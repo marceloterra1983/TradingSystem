@@ -1,25 +1,25 @@
-import { config } from '../config.js';
-import { LowdbClient } from './lowdb.js';
-import { TimescaleDBClient } from './timescaledb.js';
-import { NeonClient } from './neon.js';
-import { PostgreSQLClient } from './postgresql.js';
+import { config } from "../config.js";
+import { LowdbClient } from "./lowdb.js";
+import { TimescaleDBClient } from "./timescaledb.js";
+import { NeonClient } from "./neon.js";
+import { PostgreSQLClient } from "./postgresql.js";
 
 let clientInstance;
 
 export const getDbClient = () => {
   if (!clientInstance) {
     switch (config.dbStrategy) {
-      case 'neon':
+      case "neon":
         clientInstance = new NeonClient();
         break;
-      case 'postgresql':
-      case 'postgres':
+      case "postgresql":
+      case "postgres":
         clientInstance = new PostgreSQLClient();
         break;
-      case 'timescaledb':
+      case "timescaledb":
         clientInstance = new TimescaleDBClient();
         break;
-      case 'lowdb':
+      case "lowdb":
       default:
         clientInstance = new LowdbClient();
         break;
@@ -33,7 +33,7 @@ export const getDbClient = () => {
  * Useful for testing and switching strategies
  */
 export const resetDbClient = async () => {
-  if (clientInstance && typeof clientInstance.close === 'function') {
+  if (clientInstance && typeof clientInstance.close === "function") {
     await clientInstance.close();
   }
   clientInstance = null;

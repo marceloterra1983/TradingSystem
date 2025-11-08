@@ -1,12 +1,12 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError } from "axios";
 
 const DEFAULT_BASE_URL =
-  typeof window !== 'undefined'
+  typeof window !== "undefined"
     ? window.location.origin
-    : 'http://localhost:8000';
+    : "http://localhost:8000";
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL &&
-    import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')) ||
+    import.meta.env.VITE_API_BASE_URL.replace(/\/$/, "")) ||
   DEFAULT_BASE_URL;
 
 class ApiService {
@@ -17,7 +17,7 @@ class ApiService {
       baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -40,7 +40,7 @@ class ApiService {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        console.error('[API Error]', error.message);
+        console.error("[API Error]", error.message);
         throw error;
       },
     );
@@ -48,13 +48,13 @@ class ApiService {
 
   // Positions
   async getPositions() {
-    const response = await this.client.get('/api/v1/positions');
+    const response = await this.client.get("/api/v1/positions");
     return response.data;
   }
 
   // Orders
   async getOrders() {
-    const response = await this.client.get('/api/v1/orders');
+    const response = await this.client.get("/api/v1/orders");
     return response.data;
   }
 
@@ -65,21 +65,21 @@ class ApiService {
 
   async executeOrder(order: {
     symbol: string;
-    side: 'BUY' | 'SELL';
+    side: "BUY" | "SELL";
     quantity: number;
-    orderType: 'MARKET' | 'LIMIT' | 'STOP' | 'STOPLIMIT';
+    orderType: "MARKET" | "LIMIT" | "STOP" | "STOPLIMIT";
     price?: number;
     stopPrice?: number;
-    positionType: 'DAYTRADE' | 'SWING';
+    positionType: "DAYTRADE" | "SWING";
     justification: string;
   }) {
-    const response = await this.client.post('/api/v1/execute', order);
+    const response = await this.client.post("/api/v1/execute", order);
     return response.data;
   }
 
   // Signals
   async getLatestSignals(symbol?: string, limit: number = 10) {
-    const response = await this.client.get('/api/v1/signals/latest', {
+    const response = await this.client.get("/api/v1/signals/latest", {
       params: { symbol, limit },
     });
     return response.data;
@@ -96,34 +96,34 @@ class ApiService {
     };
     timestamp: string;
   }) {
-    const response = await this.client.post('/api/v1/signals', data);
+    const response = await this.client.post("/api/v1/signals", data);
     return response.data;
   }
 
   // Risk Management
   async getRiskLimits() {
-    const response = await this.client.get('/api/v1/risk/limits');
+    const response = await this.client.get("/api/v1/risk/limits");
     return response.data;
   }
 
   async activateKillSwitch(data: { reason: string; operator: string }) {
-    const response = await this.client.post('/api/v1/risk/kill-switch', data);
+    const response = await this.client.post("/api/v1/risk/kill-switch", data);
     return response.data;
   }
 
   // Metrics
   async getMetrics() {
-    const response = await this.client.get('/api/v1/metrics');
+    const response = await this.client.get("/api/v1/metrics");
     return response.data;
   }
 
   // Health Check
   async healthCheck() {
     try {
-      const response = await this.client.get('/health');
+      const response = await this.client.get("/health");
       return response.data;
     } catch (error) {
-      return { status: 'unhealthy', error: (error as Error).message };
+      return { status: "unhealthy", error: (error as Error).message };
     }
   }
 }

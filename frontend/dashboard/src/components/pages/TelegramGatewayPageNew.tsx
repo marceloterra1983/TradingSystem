@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from "react";
 import {
   useTelegramGatewayOverview,
   useTelegramGatewayMessages,
@@ -6,16 +6,16 @@ import {
   useCreateTelegramGatewayChannel,
   useUpdateTelegramGatewayChannel,
   useDeleteTelegramGatewayChannel,
-} from '../../hooks/useTelegramGateway';
-import { SimpleStatusCard } from './telegram-gateway/SimpleStatusCard';
-import { SimpleMessagesCard } from './telegram-gateway/SimpleMessagesCard';
-import { SimpleChannelsCard } from './telegram-gateway/SimpleChannelsCard';
-import { Button } from '../ui/button';
+} from "../../hooks/useTelegramGateway";
+import { SimpleStatusCard } from "./telegram-gateway/SimpleStatusCard";
+import { SimpleMessagesCard } from "./telegram-gateway/SimpleMessagesCard";
+import { SimpleChannelsCard } from "./telegram-gateway/SimpleChannelsCard";
+import { Button } from "../ui/button";
 
 export function TelegramGatewayPageNew() {
   const [messageLimit] = useState(10);
   const [messageOffset, setMessageOffset] = useState(0);
-  const [messageStatusFilter, setMessageStatusFilter] = useState<string>('all');
+  const [messageStatusFilter, setMessageStatusFilter] = useState<string>("all");
 
   // Fetch data
   const {
@@ -41,7 +41,7 @@ export function TelegramGatewayPageNew() {
   } = useTelegramGatewayMessages({
     limit: messageLimit,
     offset: messageOffset,
-    sort: 'desc',
+    sort: "desc",
     // Only show messages from active monitored channels
     // If no channels configured, don't filter (permissive mode)
     channelId: activeChannelIds.length > 0 ? activeChannelIds : undefined,

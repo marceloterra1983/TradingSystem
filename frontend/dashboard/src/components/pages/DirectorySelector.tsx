@@ -7,18 +7,18 @@
  * @module components/pages/DirectorySelector
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Folder,
   FolderOpen,
   ChevronRight,
   RefreshCw,
   AlertCircle,
-} from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { ScrollArea } from '../ui/scroll-area';
-import { Alert, AlertDescription } from '../ui/alert';
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { ScrollArea } from "../ui/scroll-area";
+import { Alert, AlertDescription } from "../ui/alert";
 
 /**
  * Directory entry interface
@@ -60,12 +60,12 @@ interface DirectorySelectorProps {
 export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
   value,
   onChange,
-  baseUrl = 'http://localhost:3403',
-  className = '',
+  baseUrl = "http://localhost:3403",
+  className = "",
   disabled = false,
 }) => {
   const [currentPath, setCurrentPath] = useState<string>(
-    value || '/data/tradingsystem',
+    value || "/data/tradingsystem",
   );
   const [directories, setDirectories] = useState<DirectoryEntry[]>([]);
   const [parent, setParent] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch directory');
+        throw new Error("Failed to fetch directory");
       }
 
       const result = await response.json();
@@ -96,7 +96,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
       setParent(data.parent);
       setCurrentPath(data.path);
     } catch (err: any) {
-      setError(err.message || 'Falha ao carregar diretório');
+      setError(err.message || "Falha ao carregar diretório");
       setDirectories([]);
     } finally {
       setLoading(false);
@@ -172,7 +172,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
           disabled={disabled}
         >
           <FolderOpen className="w-4 h-4 mr-2" />
-          {expanded ? 'Fechar' : 'Navegar'}
+          {expanded ? "Fechar" : "Navegar"}
         </Button>
       </div>
 
@@ -195,7 +195,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
             <Input
               value={currentPath}
               onChange={handleManualPathChange}
-              onKeyDown={(e) => e.key === 'Enter' && handleManualPathSubmit()}
+              onKeyDown={(e) => e.key === "Enter" && handleManualPathSubmit()}
               placeholder="/data/docs/content"
               className="flex-1 text-sm"
               disabled={loading || disabled}
@@ -210,7 +210,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
               className="shrink-0"
             >
               <RefreshCw
-                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
               />
             </Button>
           </div>
@@ -255,7 +255,7 @@ export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
           {/* Action buttons */}
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
             <span className="text-xs text-slate-500">
-              {directories.length} pasta{directories.length !== 1 ? 's' : ''}
+              {directories.length} pasta{directories.length !== 1 ? "s" : ""}
             </span>
             <div className="flex gap-2">
               <Button

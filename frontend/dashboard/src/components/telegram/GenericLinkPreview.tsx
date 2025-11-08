@@ -1,9 +1,9 @@
-import React from 'react';
-import { ExternalLink, Globe } from 'lucide-react';
+import React from "react";
+import { ExternalLink, Globe } from "lucide-react";
 
 interface GenericLinkPreviewProps {
   preview: {
-    type: 'generic';
+    type: "generic";
     url: string;
     title: string;
     description?: string | null;
@@ -14,7 +14,9 @@ interface GenericLinkPreviewProps {
   };
 }
 
-export const GenericLinkPreview: React.FC<GenericLinkPreviewProps> = ({ preview }) => {
+export const GenericLinkPreview: React.FC<GenericLinkPreviewProps> = ({
+  preview,
+}) => {
   const [imageError, setImageError] = React.useState(false);
 
   return (
@@ -61,9 +63,7 @@ export const GenericLinkPreview: React.FC<GenericLinkPreviewProps> = ({ preview 
 
         {/* Domain (if no siteName) */}
         {!preview.siteName && !preview.description && (
-          <p className="text-xs text-slate-500 mt-1">
-            {preview.domain}
-          </p>
+          <p className="text-xs text-slate-500 mt-1">{preview.domain}</p>
         )}
       </div>
     </a>

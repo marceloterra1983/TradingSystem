@@ -1,12 +1,12 @@
-import { useCallback } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { collectionsService } from '../../services/collectionsService';
+import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { collectionsService } from "../../services/collectionsService";
 import type {
   Collection,
   CreateCollectionRequest,
   UpdateCollectionRequest,
   EmbeddingModel,
-} from '../../types/collections';
+} from "../../types/collections";
 
 export interface RagStatusServiceInfo {
   ok: boolean;
@@ -41,15 +41,15 @@ export interface RagStatusResponse {
 }
 
 const queryKeys = {
-  collections: ['rag', 'collections'] as const,
-  models: ['rag', 'models'] as const,
+  collections: ["rag", "collections"] as const,
+  models: ["rag", "models"] as const,
   status: (collection?: string | null) =>
-    ['rag', 'status', collection ?? 'all'] as const,
+    ["rag", "status", collection ?? "all"] as const,
 };
 
 const normalizeError = (err: unknown): string | null => {
   if (!err) return null;
-  if (typeof err === 'string') return err;
+  if (typeof err === "string") return err;
   if (err instanceof Error) return err.message;
   try {
     return JSON.stringify(err);
@@ -59,14 +59,14 @@ const normalizeError = (err: unknown): string | null => {
 };
 
 const apiBase =
-  (import.meta.env.VITE_API_BASE_URL || '').trim() || 'http://localhost:3402';
+  (import.meta.env.VITE_API_BASE_URL || "").trim() || "http://localhost:3402";
 
 async function fetchStatus(
   collection?: string | null,
 ): Promise<RagStatusResponse | null> {
   const querySuffix = collection
     ? `?collection=${encodeURIComponent(collection)}`
-    : '';
+    : "";
   const response = await fetch(`${apiBase}/api/v1/rag/status${querySuffix}`);
   const raw = await response.text();
   if (!response.ok) {
@@ -151,7 +151,7 @@ export function useRagManager(options: UseRagManagerOptions = {}) {
   });
 
   const refreshCollections = useCallback(() => {
-    console.log('🔄 Forcing collections refetch...');
+    console.log("🔄 Forcing collections refetch...");
     collectionsQuery.refetch();
     modelsQuery.refetch();
     queryClient.invalidateQueries({ queryKey: queryKeys.collections });

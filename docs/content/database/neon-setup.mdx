@@ -7,10 +7,13 @@ tags:
   - workspace
   - postgresql
 domain: database
+owner: DocsOps
 type: guide
 summary: Setup guide for Neon PostgreSQL serverless database for the Workspace application. Includes installation, configuration, migration, and troubleshooting.
+description: "Setup guide for Neon PostgreSQL serverless database for the Workspace application. Includes installation, configuration, migration, and troubleshooting."
 status: active
 last_review: "2025-11-03"
+lastReviewed: "2025-11-08"
 ---
 
 # Neon Database Setup
@@ -114,6 +117,7 @@ bash scripts/database/test-neon-connection.sh
 
 You should see all 10 tests passing ✓
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Configuration
@@ -138,6 +142,7 @@ You should see all 10 tests passing ✓
 NEON_DATABASE_URL=postgresql://postgres:neon_secure_pass@localhost:5433/workspace
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Database Branching
@@ -182,6 +187,7 @@ docker exec neon-compute psql -U postgres -c \
 3. **Data Exploration**: Experiment with data without affecting production
 4. **CI/CD**: Automated testing with ephemeral database branches
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Migration from TimescaleDB
@@ -220,6 +226,7 @@ export LIBRARY_DB_STRATEGY=timescaledb
 docker compose restart workspace
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Monitoring & Maintenance
@@ -274,6 +281,7 @@ Add to crontab for daily backups:
 0 2 * * * /home/marce/Projetos/TradingSystem/scripts/database/backup-neon.sh
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Troubleshooting
@@ -351,6 +359,7 @@ RUST_LOG=debug  # For Neon components
 docker compose restart
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Performance Optimization
@@ -394,6 +403,7 @@ deploy:
       memory: 512M
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Advanced Usage
@@ -434,6 +444,7 @@ CREATE TRIGGER trigger_items_updated_at
   EXECUTE FUNCTION workspace.update_updated_at_column();
 ```
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Comparison: Neon vs TimescaleDB
@@ -450,6 +461,7 @@ CREATE TRIGGER trigger_items_updated_at
 
 **Recommendation**: Use Neon for Workspace (general CRUD app), TimescaleDB for TP Capital (time-series data).
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Production Considerations
@@ -480,6 +492,7 @@ Neon also offers managed cloud service (neon.tech):
 - Global edge network
 - Managed infrastructure
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Resources
@@ -489,6 +502,7 @@ Neon also offers managed cloud service (neon.tech):
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [ADR: Workspace Neon Migration](../reference/adrs/007-workspace-neon-migration)
 
+lastReviewed: "2025-11-08"
 ---
 
 ## Support
@@ -499,6 +513,7 @@ For issues or questions:
 3. Check Neon logs: `docker logs neon-compute -f`
 4. Review project documentation: `docs/content/database/`
 
+lastReviewed: "2025-11-08"
 ---
 
 **Last Updated**: 2025-11-03  

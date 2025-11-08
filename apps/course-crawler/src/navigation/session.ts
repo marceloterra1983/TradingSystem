@@ -1,7 +1,18 @@
 import type { Logger } from 'pino';
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
+import CircuitBreaker from 'opossum';
 import type { EnvironmentConfig } from '../config/environment.js';
 import type { PlatformConfig } from '../config/platform.js';
+
+// Circuit breaker configuration for browser operations
+const browserBreakerConfig = {
+  timeout: 30000, // 30 seconds for browser launch
+  errorThresholdPercentage: 50,
+  resetTimeout: 60000, // Try again after 1 minute
+  rollingCountTimeout: 10000,
+  rollingCountBuckets: 10,
+  name: 'BrowserCircuitBreaker',
+};
 
 export interface AuthenticatedSession {
   browser: Browser;
@@ -9,7 +20,8 @@ export interface AuthenticatedSession {
   page: Page;
 }
 
-export async function createAuthenticatedSession(
+// Internal implementation without circuit breaker
+async function _createAuthenticatedSession(
   env: EnvironmentConfig,
   platformConfig: PlatformConfig,
   logger: Logger,
@@ -24,6 +36,40 @@ export async function createAuthenticatedSession(
   await loginWithBrowserUseOrPlaywright(page, platformConfig, env, logger);
 
   return { browser, context, page };
+}
+
+// Circuit breaker for browser session creation
+const browserBreaker = new CircuitBreaker(_createAuthenticatedSession, browserBreakerConfig);
+
+// Log circuit state changes
+browserBreaker.on('open', () => {
+  console.warn('[BrowserCircuitBreaker] ⚠️  Circuit opened - too many browser failures');
+});
+
+browserBreaker.on('halfOpen', () => {
+  console.info('[BrowserCircuitBreaker] 🔄 Circuit half-open - testing if browser is healthy');
+});
+
+browserBreaker.on('close', () => {
+  console.info('[BrowserCircuitBreaker] ✅ Circuit closed - browser operations healthy');
+});
+
+browserBreaker.on('fallback', () => {
+  console.warn('[BrowserCircuitBreaker] 🔀 Fallback triggered');
+});
+
+// Fallback: return error instead of crashing
+browserBreaker.fallback(() => {
+  throw new Error('Browser automation temporarily unavailable. Circuit breaker is open. Please try again later.');
+});
+
+// Public API with circuit breaker protection
+export async function createAuthenticatedSession(
+  env: EnvironmentConfig,
+  platformConfig: PlatformConfig,
+  logger: Logger,
+): Promise<AuthenticatedSession> {
+  return browserBreaker.fire(env, platformConfig, logger);
 }
 
 export async function loginWithBrowserUseOrPlaywright(

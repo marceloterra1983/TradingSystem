@@ -8,7 +8,7 @@
  * we implement additional validation and sanitization here.
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
 
 /**
  * Sanitize URL input to prevent XSS attacks
@@ -16,7 +16,7 @@ import DOMPurify from 'isomorphic-dompurify';
  * @returns {string|boolean} - Sanitized URL or false if invalid
  */
 function sanitizeUrl(url) {
-  if (!url || typeof url !== 'string') {
+  if (!url || typeof url !== "string") {
     return false;
   }
 
@@ -24,7 +24,8 @@ function sanitizeUrl(url) {
   const sanitized = DOMPurify.sanitize(url.trim());
 
   // Basic URL pattern validation (more restrictive than validator)
-  const safeUrlPattern = /^https?:\/\/(?:[-\w.])+(?:[:\d]+)?(?:\/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)?$/;
+  const safeUrlPattern =
+    /^https?:\/\/(?:[-\w.])+(?:[:\d]+)?(?:\/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)?$/;
 
   if (!safeUrlPattern.test(sanitized)) {
     return false;
@@ -38,7 +39,7 @@ function sanitizeUrl(url) {
     /file:/i,
     /ftp:/i,
     /<script/i,
-    /on\w+\s*=/i
+    /on\w+\s*=/i,
   ];
 
   for (const pattern of dangerousPatterns) {
@@ -55,7 +56,7 @@ function sanitizeUrl(url) {
  */
 export function sanitizeUrlInput(req, res, next) {
   // Check common URL fields in request body
-  const urlFields = ['url', 'website', 'link', 'href', 'redirect', 'callback'];
+  const urlFields = ["url", "website", "link", "href", "redirect", "callback"];
 
   if (req.body) {
     for (const field of urlFields) {
@@ -63,9 +64,10 @@ export function sanitizeUrlInput(req, res, next) {
         const sanitized = sanitizeUrl(req.body[field]);
         if (!sanitized) {
           return res.status(400).json({
-            error: 'Invalid URL format',
+            error: "Invalid URL format",
             field,
-            message: 'The provided URL contains invalid or potentially malicious content'
+            message:
+              "The provided URL contains invalid or potentially malicious content",
           });
         }
         req.body[field] = sanitized;
@@ -80,9 +82,10 @@ export function sanitizeUrlInput(req, res, next) {
         const sanitized = sanitizeUrl(value);
         if (!sanitized) {
           return res.status(400).json({
-            error: 'Invalid URL parameter',
+            error: "Invalid URL parameter",
             parameter: key,
-            message: 'The provided URL parameter contains invalid or potentially malicious content'
+            message:
+              "The provided URL parameter contains invalid or potentially malicious content",
           });
         }
         req.query[key] = sanitized;
@@ -103,5 +106,5 @@ export function isValidUrl(url) {
 export default {
   sanitizeUrlInput,
   isValidUrl,
-  sanitizeUrl
+  sanitizeUrl,
 };

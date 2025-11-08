@@ -1,9 +1,9 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Shared modules
-import { createLogger } from '../../../shared/logger/index.js';
+import { createLogger } from "../../../shared/logger/index.js";
 import {
   configureCors,
   configureRateLimit,
@@ -11,38 +11,43 @@ import {
   createErrorHandler,
   createNotFoundHandler,
   createCorrelationIdMiddleware,
-} from '../../../shared/middleware/index.js';
-import { createHealthCheckHandler } from '../../../shared/middleware/health.js';
-import { configureCompression, compressionMetrics } from '../../../shared/middleware/compression.js';
+} from "../../../shared/middleware/index.js";
+import { createHealthCheckHandler } from "../../../shared/middleware/health.js";
+import {
+  configureCompression,
+  compressionMetrics,
+} from "../../../shared/middleware/compression.js";
 
 // Application routes
-import systemsRoutes from './routes/systems.js';
-import ideasRoutes from './routes/ideas.js';
-import filesRoutes from './routes/files.js';
-import statsRoutes from './routes/stats.js';
-import searchRoutes from './routes/search.js';
-import specsRoutes from './routes/specs.js';
-import docsHealthRoutes from './routes/docs-health.js';
-import semanticRoutes from './routes/semantic.js';
-import ragProxyRoutes from './routes/rag-proxy.js';
-import ragStatusRoutes from './routes/rag-status.js';
-import ragCollectionsRoutes from './routes/rag-collections.js';
-import markdownSearchRoutes, { initializeRoute } from './routes/markdown-search.js';
-import hybridRoutes, { initializeHybridRoute } from './routes/search-hybrid.js';
-import markdownContentRoutes from './routes/markdown-content.js';
-import apiV1Router from './routes/api-v1.js';
+import systemsRoutes from "./routes/systems.js";
+import ideasRoutes from "./routes/ideas.js";
+import filesRoutes from "./routes/files.js";
+import statsRoutes from "./routes/stats.js";
+import searchRoutes from "./routes/search.js";
+import specsRoutes from "./routes/specs.js";
+import docsHealthRoutes from "./routes/docs-health.js";
+import semanticRoutes from "./routes/semantic.js";
+import ragProxyRoutes from "./routes/rag-proxy.js";
+import ragStatusRoutes from "./routes/rag-status.js";
+import ragCollectionsRoutes from "./routes/rag-collections.js";
+import markdownSearchRoutes, {
+  initializeRoute,
+} from "./routes/markdown-search.js";
+import hybridRoutes, { initializeHybridRoute } from "./routes/search-hybrid.js";
+import markdownContentRoutes from "./routes/markdown-content.js";
+import apiV1Router from "./routes/api-v1.js";
 
 // Application services
-import MarkdownSearchService from './services/markdownSearchService.js';
-import searchMetrics from './services/searchMetrics.js';
-import { metricsMiddleware, metricsHandler } from './metrics.js';
-import questdbClient from './utils/questDBClient.js';
+import MarkdownSearchService from "./services/markdownSearchService.js";
+import searchMetrics from "./services/searchMetrics.js";
+import { metricsMiddleware, metricsHandler } from "./metrics.js";
+import questdbClient from "./utils/questDBClient.js";
 import {
   config,
   isQuestDbStrategy,
   isPostgresStrategy,
-} from './config/appConfig.js';
-import { ensurePrismaConnection } from './utils/prismaClient.js';
+} from "./config/appConfig.js";
+import { ensurePrismaConnection } from "./utils/prismaClient.js";
 
 // ES Module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -50,13 +55,13 @@ const __dirname = path.dirname(__filename);
 
 // Get project root - in container: /app, in dev: 4 levels up
 // Check if running in container (has /app dir) or dev (nested in repo)
-const isContainer = __dirname.startsWith('/app');
+const isContainer = __dirname.startsWith("/app");
 const projectRoot = isContainer
-  ? '/app'
-  : path.resolve(__dirname, '../../../../');
+  ? "/app"
+  : path.resolve(__dirname, "../../../../");
 
 // Initialize Markdown Search Service
-const markdownDocsDir = path.join(projectRoot, 'docs/content');
+const markdownDocsDir = path.join(projectRoot, "docs/content");
 const markdownSearchService = new MarkdownSearchService(markdownDocsDir);
 
 // Make markdownDocsDir available globally for markdown-content route
@@ -70,10 +75,14 @@ const app = express();
 const PORT = config.server.port;
 
 // Initialize logger
-const logger = createLogger('documentation-api', {
-  version: '1.0.0',
+const logger = createLogger("documentation-api", {
+  version: "1.0.0",
   base: {
-    dbStrategy: isQuestDbStrategy() ? 'questdb' : isPostgresStrategy() ? 'postgres' : 'flexsearch',
+    dbStrategy: isQuestDbStrategy()
+      ? "questdb"
+      : isPostgresStrategy()
+        ? "postgres"
+        : "flexsearch",
   },
 });
 
@@ -84,19 +93,19 @@ app.use(configureCompression({ logger }));
 app.use(configureHelmet({ logger }));
 app.use(configureCors({ logger, disableCors: config.cors.disable }));
 app.use(configureRateLimit({ logger }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 app.use(metricsMiddleware);
 
 // Serve static files from docs directory
-app.use('/spec', express.static(path.join(projectRoot, 'docs/spec')));
+app.use("/spec", express.static(path.join(projectRoot, "docs/spec")));
 // Legacy mounts kept for backward compatibility; point to docs/build if available
-app.use('/docs', express.static(path.join(projectRoot, 'docs/build')));
-app.use('/_static', express.static(path.join(projectRoot, 'docs/build')));
+app.use("/docs", express.static(path.join(projectRoot, "docs/build")));
+app.use("/_static", express.static(path.join(projectRoot, "docs/build")));
 
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = Date.now() - start;
     logger.info({
       method: req.method,
@@ -109,27 +118,27 @@ app.use((req, res, next) => {
 });
 
 // Documentation endpoints
-app.get('/docs', (req, res) => {
-  res.sendFile(path.join(projectRoot, 'docs/build/index.html'));
+app.get("/docs", (req, res) => {
+  res.sendFile(path.join(projectRoot, "docs/build/index.html"));
 });
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.json({
     success: true,
-    service: 'documentation-api',
-    version: '1.0.0',
+    service: "documentation-api",
+    version: "1.0.0",
     endpoints: {
-      health: '/health',
-      documentation: '/docs',
-      openapi: '/spec/openapi.yaml',
-      asyncapi: '/spec/asyncapi.yaml',
+      health: "/health",
+      documentation: "/docs",
+      openapi: "/spec/openapi.yaml",
+      asyncapi: "/spec/asyncapi.yaml",
       api: {
-        systems: '/api/v1/systems',
-        ideas: '/api/v1/ideas',
-        files: '/api/v1/files',
-        stats: '/api/v1/stats',
-        search: '/api/v1/search',
-        suggest: '/api/v1/suggest',
+        systems: "/api/v1/systems",
+        ideas: "/api/v1/ideas",
+        files: "/api/v1/files",
+        stats: "/api/v1/stats",
+        search: "/api/v1/search",
+        suggest: "/api/v1/suggest",
       },
     },
   });
@@ -137,43 +146,43 @@ app.get('/', (req, res) => {
 
 // Health check endpoint - comprehensive check with all dependencies
 app.get(
-  '/health',
+  "/health",
   createHealthCheckHandler({
-    serviceName: 'documentation-api',
-    version: '1.0.0',
+    serviceName: "documentation-api",
+    version: "1.0.0",
     logger,
     checks: {
       database: async () => {
         if (isQuestDbStrategy()) {
           const dbHealthy = await questdbClient.healthCheck();
-          if (dbHealthy.status !== 'healthy') {
+          if (dbHealthy.status !== "healthy") {
             throw new Error(`QuestDB ${dbHealthy.status}`);
           }
           return `questdb connected (${dbHealthy.connections} conns)`;
         }
         if (isPostgresStrategy()) {
           await ensurePrismaConnection();
-          return 'postgres connected';
+          return "postgres connected";
         }
-        return 'no database configured';
+        return "no database configured";
       },
       searchIndex: async () => {
         const count = markdownSearchService.getIndexedCount?.() || 0;
         if (count === 0) {
-          throw new Error('No documents indexed');
+          throw new Error("No documents indexed");
         }
         return `${count} documents indexed`;
       },
     },
-  })
+  }),
 );
 
 // Readiness probe - check if ready to serve traffic
 app.get(
-  '/ready',
+  "/ready",
   createHealthCheckHandler({
-    serviceName: 'documentation-api',
-    version: '1.0.0',
+    serviceName: "documentation-api",
+    version: "1.0.0",
     logger,
     checks: {
       searchIndex: async () => {
@@ -181,59 +190,59 @@ app.get(
         return `${count} documents ready`;
       },
     },
-  })
+  }),
 );
 
 // Liveness probe - minimal check
-app.get('/healthz', (req, res) => {
+app.get("/healthz", (req, res) => {
   res.json({
-    status: 'healthy',
-    service: 'documentation-api',
+    status: "healthy",
+    service: "documentation-api",
     uptime: process.uptime(),
   });
 });
 
 // API Routes
-app.use('/api/v1/systems', systemsRoutes);
-app.use('/api/v1/ideas', ideasRoutes);
-app.use('/api/v1', filesRoutes);
-app.use('/api/v1', statsRoutes);
-app.use('/api/v1', searchRoutes);
-app.use('/api/v1/docs', specsRoutes);
-app.use('/api/v1/docs', markdownSearchRoutes);
-app.use('/api/v1/docs', hybridRoutes);
-app.use('/api/v1/docs', markdownContentRoutes);
-app.use('/api/v1/docs/health', docsHealthRoutes);
-app.use('/api/v1/semantic', semanticRoutes);
-app.use('/api/v1/rag', ragProxyRoutes);
-app.use('/api/v1/rag', ragStatusRoutes);
-app.use('/api/v1/rag/collections', ragCollectionsRoutes);
-app.use('/api/v1/rag/models', (req, res, next) => {
-  req.url = '/models';
+app.use("/api/v1/systems", systemsRoutes);
+app.use("/api/v1/ideas", ideasRoutes);
+app.use("/api/v1", filesRoutes);
+app.use("/api/v1", statsRoutes);
+app.use("/api/v1", searchRoutes);
+app.use("/api/v1/docs", specsRoutes);
+app.use("/api/v1/docs", markdownSearchRoutes);
+app.use("/api/v1/docs", hybridRoutes);
+app.use("/api/v1/docs", markdownContentRoutes);
+app.use("/api/v1/docs/health", docsHealthRoutes);
+app.use("/api/v1/semantic", semanticRoutes);
+app.use("/api/v1/rag", ragProxyRoutes);
+app.use("/api/v1/rag", ragStatusRoutes);
+app.use("/api/v1/rag/collections", ragCollectionsRoutes);
+app.use("/api/v1/rag/models", (req, res, next) => {
+  req.url = "/models";
   return ragCollectionsRoutes(req, res, next);
 });
 
 // Prometheus metrics endpoint
-app.get('/metrics', metricsHandler);
+app.get("/metrics", metricsHandler);
 
 // Error handling middleware
 app.use(createNotFoundHandler({ logger }));
 app.use(
   createErrorHandler({
     logger,
-    includeStack: config.server.env !== 'production',
-  })
+    includeStack: config.server.env !== "production",
+  }),
 );
 
 let server = null;
 const shouldAutoStart =
-  process.env.NODE_ENV !== 'test' &&
-  process.env.VITEST !== 'true' &&
-  typeof process.env.VITEST_WORKER_ID === 'undefined';
+  process.env.NODE_ENV !== "test" &&
+  process.env.VITEST !== "true" &&
+  typeof process.env.VITEST_WORKER_ID === "undefined";
 
 if (shouldAutoStart) {
   server = app.listen(PORT, async () => {
-    logger.startup('Documentation API started', {
+    logger.startup("Documentation API started", {
       port: PORT,
       env: config.server.env,
     });
@@ -242,24 +251,24 @@ if (shouldAutoStart) {
     try {
       if (isQuestDbStrategy()) {
         await questdbClient.initialize();
-        logger.info('QuestDB connection initialized');
+        logger.info("QuestDB connection initialized");
       } else if (isPostgresStrategy()) {
         await ensurePrismaConnection();
-        logger.info('Prisma/PostgreSQL connection initialized');
+        logger.info("Prisma/PostgreSQL connection initialized");
       } else {
-        logger.info('No database configured - using FlexSearch only');
+        logger.info("No database configured - using FlexSearch only");
       }
     } catch (error) {
-      logger.error({ err: error }, 'Failed to initialize database connection');
+      logger.error({ err: error }, "Failed to initialize database connection");
     }
 
     // Initialize markdown search index
     try {
-      logger.info('Indexing markdown documentation...');
+      logger.info("Indexing markdown documentation...");
       const indexResult = await markdownSearchService.indexMarkdownFiles();
-      logger.info({ indexed: indexResult }, 'Markdown documentation indexed');
+      logger.info({ indexed: indexResult }, "Markdown documentation indexed");
     } catch (error) {
-      logger.error({ err: error }, 'Failed to index markdown documentation');
+      logger.error({ err: error }, "Failed to index markdown documentation");
     }
 
     console.log(`\n📚 Documentation API running on http://localhost:${PORT}`);
@@ -272,18 +281,20 @@ if (shouldAutoStart) {
     console.log(`   Files:        http://localhost:${PORT}/api/v1/files`);
     console.log(`   Stats:        http://localhost:${PORT}/api/v1/stats`);
     console.log(`   Docs Search:  http://localhost:${PORT}/api/v1/docs/search`);
-    console.log(`   Docs Facets:  http://localhost:${PORT}/api/v1/docs/facets\n`);
+    console.log(
+      `   Docs Facets:  http://localhost:${PORT}/api/v1/docs/facets\n`,
+    );
   });
 } else {
-  logger.info('Test mode detected - HTTP server auto-start disabled');
+  logger.info("Test mode detected - HTTP server auto-start disabled");
 }
 
 // Graceful shutdown
 const shutdown = async (signal) => {
-  logger.info({ signal }, 'Shutdown signal received');
+  logger.info({ signal }, "Shutdown signal received");
 
   const timeout = setTimeout(() => {
-    logger.error('Shutdown timeout - forcing exit');
+    logger.error("Shutdown timeout - forcing exit");
     process.exit(1);
   }, 10000);
 
@@ -292,39 +303,38 @@ const shutdown = async (signal) => {
     if (server) {
       await new Promise((resolve) => {
         server.close(resolve);
-        logger.info('HTTP server closed');
+        logger.info("HTTP server closed");
       });
     }
 
     // Close database connections
     if (isQuestDbStrategy()) {
       await questdbClient.close?.();
-      logger.info('QuestDB connection closed');
+      logger.info("QuestDB connection closed");
     }
 
     clearTimeout(timeout);
-    logger.info('Graceful shutdown completed');
+    logger.info("Graceful shutdown completed");
     process.exit(0);
   } catch (error) {
-    logger.error({ err: error }, 'Error during shutdown');
+    logger.error({ err: error }, "Error during shutdown");
     clearTimeout(timeout);
     process.exit(1);
   }
 };
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 // Handle uncaught errors
-process.on('uncaughtException', (error) => {
-  logger.fatal({ err: error }, 'Uncaught exception');
+process.on("uncaughtException", (error) => {
+  logger.fatal({ err: error }, "Uncaught exception");
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error({ reason, promise }, 'Unhandled promise rejection');
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error({ reason, promise }, "Unhandled promise rejection");
 });
 
 export { app, server };
 export default app;
-

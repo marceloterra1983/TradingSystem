@@ -2,7 +2,7 @@
  * Centralized API configuration for unified domain and direct port access
  */
 
-import { ENDPOINTS } from './endpoints';
+import { ENDPOINTS } from "./endpoints";
 
 // Types
 export interface ApiConfig {
@@ -22,17 +22,17 @@ export interface ApiConfig {
 }
 
 export type ApiService =
-  | 'library'
-  | 'tpCapital'
-  | 'documentation'
-  | 'telegramGateway'
-  | 'firecrawlProxy';
+  | "library"
+  | "tpCapital"
+  | "documentation"
+  | "telegramGateway"
+  | "firecrawlProxy";
 
 // Unified domain configuration
 const resolveEnv = (...keys: string[]): string | undefined => {
   for (const key of keys) {
     const value = (import.meta.env as Record<string, string | undefined>)[key];
-    if (typeof value === 'string' && value.trim() !== '') {
+    if (typeof value === "string" && value.trim() !== "") {
       return value;
     }
   }
@@ -40,53 +40,53 @@ const resolveEnv = (...keys: string[]): string | undefined => {
 };
 
 const pickFirst = (...values: Array<string | undefined>): string | undefined =>
-  values.find((value) => typeof value === 'string' && value.trim() !== '');
+  values.find((value) => typeof value === "string" && value.trim() !== "");
 
 const unifiedConfig: ApiConfig = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local",
   libraryApi:
-    resolveEnv('VITE_WORKSPACE_API_URL') ||
+    resolveEnv("VITE_WORKSPACE_API_URL") ||
     `${
-      import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+      import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
     }/api/workspace`,
   tpCapitalApi: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
   }/api/tp-capital`,
   documentationApi: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
   }/api/docs`,
   telegramGatewayApi:
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local',
+    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local",
   firecrawlProxyApi: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
   }/api/firecrawl`,
   docsUrl: `${
-    import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
   }/docs`,
-  docsApiUrl: `${import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'}/docs/api/documentation-api`,
+  docsApiUrl: `${import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"}/docs/api/documentation-api`,
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
       import.meta.env.VITE_QUESTDB_CONSOLE_INTERNAL_URL,
       `${
-        import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+        import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
       }/questdb-console`,
       ENDPOINTS.questdb,
-      'http://localhost:9000',
-      'http://localhost:8813',
-      'http://localhost:9002',
+      "http://localhost:9000",
+      "http://localhost:8813",
+      "http://localhost:9002",
     ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
       import.meta.env.VITE_QUESTDB_UI_INTERNAL_URL,
       `${
-        import.meta.env.VITE_API_BASE_URL || 'http://tradingsystem.local'
+        import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
       }/questdb-ui`,
-      'http://localhost:9010',
-      'http://localhost:8813',
-      'http://localhost:9009',
-    ) || 'http://localhost:9010',
+      "http://localhost:9010",
+      "http://localhost:8813",
+      "http://localhost:9009",
+    ) || "http://localhost:9010",
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
   adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
@@ -94,35 +94,35 @@ const unifiedConfig: ApiConfig = {
 
 // Direct port configuration (legacy)
 const directConfig: ApiConfig = {
-  baseUrl: '',
+  baseUrl: "",
   libraryApi:
-    resolveEnv('VITE_WORKSPACE_API_URL') || 'http://localhost:3200/api',  // Updated: LowDB Stack - WSL2 workaround (PORT 3200)
-  tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || '/api/tp-capital',
-  documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || '/api/docs',
-  telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || '',
+    resolveEnv("VITE_WORKSPACE_API_URL") || "http://localhost:3200/api", // Updated: LowDB Stack - WSL2 workaround (PORT 3200)
+  tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || "/api/tp-capital",
+  documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || "/api/docs",
+  telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "",
   firecrawlProxyApi:
-    import.meta.env.VITE_FIRECRAWL_PROXY_URL || 'http://localhost:3600',
-  docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs', // Proxied through Vite to NGINX (localhost:3400)
+    import.meta.env.VITE_FIRECRAWL_PROXY_URL || "http://localhost:3600",
+  docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs", // Proxied through Vite to NGINX (localhost:3400)
   // Note: Port 3400 serves static Docusaurus via NGINX (documentation container)
   // Port 3402 serves RAG Service (Documentation API) with RAG/LlamaIndex integration
   // Vite proxy configuration: /docs -> http://localhost:3400 (no CORS issues)
   // See docker-compose.rag.yml for complete RAG stack architecture
-  docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || 'http://localhost:3402',
+  docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || "http://localhost:3402",
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
       ENDPOINTS.questdb,
-      'http://localhost:9000',
-      'http://localhost:8813',
-      'http://localhost:9002',
+      "http://localhost:9000",
+      "http://localhost:8813",
+      "http://localhost:9002",
     ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
       ENDPOINTS.questdb,
-      'http://localhost:9010',
-      'http://localhost:8813',
-      'http://localhost:9009',
+      "http://localhost:9010",
+      "http://localhost:8813",
+      "http://localhost:9009",
     ) || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
@@ -130,7 +130,7 @@ const directConfig: ApiConfig = {
 };
 
 // Get current configuration based on environment
-const useUnifiedDomain = import.meta.env.VITE_USE_UNIFIED_DOMAIN === 'true';
+const useUnifiedDomain = import.meta.env.VITE_USE_UNIFIED_DOMAIN === "true";
 export const apiConfig: ApiConfig = useUnifiedDomain
   ? unifiedConfig
   : directConfig;
@@ -142,25 +142,25 @@ export const apiConfig: ApiConfig = useUnifiedDomain
  */
 export function getApiUrl(service: ApiService): string {
   switch (service) {
-    case 'library':
+    case "library":
       return apiConfig.libraryApi;
-    case 'tpCapital': {
+    case "tpCapital": {
       // Precedence:
       // 1) Explicit env override (VITE_TP_CAPITAL_API_URL)
       // 2) Default: /api/tp-capital (use proxy)
-      const explicit = resolveEnv('VITE_TP_CAPITAL_API_URL');
+      const explicit = resolveEnv("VITE_TP_CAPITAL_API_URL");
       const url = explicit || apiConfig.tpCapitalApi;
       if (import.meta.env.DEV) {
         // eslint-disable-next-line no-console
-        console.debug('[api] tpCapitalApi =', url);
+        console.debug("[api] tpCapitalApi =", url);
       }
       return url;
     }
-    case 'documentation':
+    case "documentation":
       return apiConfig.documentationApi;
-    case 'telegramGateway':
+    case "telegramGateway":
       return apiConfig.telegramGatewayApi;
-    case 'firecrawlProxy':
+    case "firecrawlProxy":
       return apiConfig.firecrawlProxyApi;
     default:
       throw new Error(`Unknown service: ${service}`);

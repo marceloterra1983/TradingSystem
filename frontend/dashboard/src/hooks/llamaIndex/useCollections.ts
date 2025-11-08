@@ -7,14 +7,14 @@
  * @module hooks/llamaIndex/useCollections
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { collectionsService } from '../../services/collectionsService';
+import { useState, useEffect, useRef } from "react";
+import { collectionsService } from "../../services/collectionsService";
 import type {
   Collection,
   CreateCollectionRequest,
   UpdateCollectionRequest,
   EmbeddingModel,
-} from '../../types/collections';
+} from "../../types/collections";
 
 interface UseCollectionsState {
   collections: Collection[];
@@ -72,7 +72,7 @@ export function useCollections(
     refreshCollections: async () => {
       try {
         setState((prev) => ({ ...prev, isRefreshing: true, error: null }));
-        console.log('🔄 Fetching collections with useCache=false...');
+        console.log("🔄 Fetching collections with useCache=false...");
         const collections = await collectionsService.getCollections(false); // Force fresh data
 
         if (mountedRef.current) {
@@ -82,14 +82,14 @@ export function useCollections(
             isRefreshing: false,
             isLoading: false,
           }));
-          console.log('✓ Collections refreshed:', collections.length);
+          console.log("✓ Collections refreshed:", collections.length);
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to fetch collections';
-        console.error('Error refreshing collections:', error);
+            : "Failed to fetch collections";
+        console.error("Error refreshing collections:", error);
         if (mountedRef.current) {
           setState((prev) => ({
             ...prev,
@@ -103,21 +103,21 @@ export function useCollections(
 
     refreshModels: async () => {
       if (!loadModels) {
-        console.log('🔵 [useCollections] loadModels is false, skipping');
+        console.log("🔵 [useCollections] loadModels is false, skipping");
         return;
       }
 
-      console.log('🔵 [useCollections] Fetching models...');
+      console.log("🔵 [useCollections] Fetching models...");
       try {
         const models = await collectionsService.getModels();
-        console.log('🔵 [useCollections] Models fetched:', models);
+        console.log("🔵 [useCollections] Models fetched:", models);
 
         if (mountedRef.current) {
           setState((prev) => ({ ...prev, models }));
-          console.log('🔵 [useCollections] Models state updated');
+          console.log("🔵 [useCollections] Models state updated");
         }
       } catch (error) {
-        console.error('🔴 [useCollections] Error refreshing models:', error);
+        console.error("🔴 [useCollections] Error refreshing models:", error);
       }
     },
 
@@ -142,7 +142,7 @@ export function useCollections(
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to create collection';
+            : "Failed to create collection";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -164,7 +164,7 @@ export function useCollections(
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to update collection';
+            : "Failed to update collection";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -179,7 +179,7 @@ export function useCollections(
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to delete collection';
+            : "Failed to delete collection";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -216,7 +216,7 @@ export function useCollections(
         return clonedCollection;
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : 'Failed to clone collection';
+          error instanceof Error ? error.message : "Failed to clone collection";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -231,7 +231,7 @@ export function useCollections(
         const errorMessage =
           error instanceof Error
             ? error.message
-            : 'Failed to trigger ingestion';
+            : "Failed to trigger ingestion";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -244,7 +244,7 @@ export function useCollections(
         setTimeout(() => functionsRef.current.refreshCollections(), 1000);
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : 'Failed to clean orphans';
+          error instanceof Error ? error.message : "Failed to clean orphans";
         setState((prev) => ({ ...prev, error: errorMessage }));
         throw error;
       }
@@ -258,11 +258,11 @@ export function useCollections(
   // Initial load - ONLY ONCE
   useEffect(() => {
     if (initDoneRef.current) {
-      console.log('🔵 [useCollections] Init already done, skipping');
+      console.log("🔵 [useCollections] Init already done, skipping");
       return;
     }
 
-    console.log('🔵 [useCollections] Initial load starting...');
+    console.log("🔵 [useCollections] Initial load starting...");
     initDoneRef.current = true;
 
     const init = async () => {
@@ -276,22 +276,22 @@ export function useCollections(
   // Auto-refresh setup
   useEffect(() => {
     if (!autoRefresh) {
-      console.log('🔵 [useCollections] Auto-refresh disabled');
+      console.log("🔵 [useCollections] Auto-refresh disabled");
       return;
     }
 
     console.log(
-      '🔵 [useCollections] Setting up auto-refresh:',
+      "🔵 [useCollections] Setting up auto-refresh:",
       refreshInterval,
     );
     intervalRef.current = setInterval(() => {
-      console.log('🔵 [useCollections] Auto-refresh tick');
+      console.log("🔵 [useCollections] Auto-refresh tick");
       functionsRef.current.refreshCollections();
     }, refreshInterval);
 
     return () => {
       if (intervalRef.current) {
-        console.log('🔵 [useCollections] Cleaning up auto-refresh');
+        console.log("🔵 [useCollections] Cleaning up auto-refresh");
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
@@ -301,7 +301,7 @@ export function useCollections(
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      console.log('🔵 [useCollections] Component unmounting');
+      console.log("🔵 [useCollections] Component unmounting");
       mountedRef.current = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

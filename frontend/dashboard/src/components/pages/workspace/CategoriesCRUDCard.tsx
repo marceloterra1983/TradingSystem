@@ -4,7 +4,7 @@
  * Gerenciamento de categorias com layout consistente ao Workspace
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Plus,
   Pencil,
@@ -15,14 +15,14 @@ import {
   AlertCircle,
   RefreshCw,
   Clock,
-} from 'lucide-react';
-import { Button } from '../../ui/button';
-import { cn } from '../../../lib/utils';
+} from "lucide-react";
+import { Button } from "../../ui/button";
+import { cn } from "../../../lib/utils";
 import {
   categoriesService,
   Category,
   CreateCategoryDTO,
-} from '../../../services/categoriesService';
+} from "../../../services/categoriesService";
 
 export default function CategoriesCRUDCard() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,9 +37,9 @@ export default function CategoriesCRUDCard() {
 
   // Form state for inline editing
   const [formData, setFormData] = useState<Partial<CreateCategoryDTO>>({
-    name: '',
-    description: '',
-    color: '#6B7280',
+    name: "",
+    description: "",
+    color: "#6B7280",
     display_order: 0,
   });
 
@@ -52,23 +52,23 @@ export default function CategoriesCRUDCard() {
     return name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, ''); // Remove invalid characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, ""); // Remove invalid characters
   };
 
   // Validate category name format
   const validateCategoryName = (name: string): string | null => {
     if (!name) {
-      return 'Nome é obrigatório';
+      return "Nome é obrigatório";
     }
     if (name.length < 2) {
-      return 'Nome deve ter pelo menos 2 caracteres';
+      return "Nome deve ter pelo menos 2 caracteres";
     }
     if (name.length > 100) {
-      return 'Nome deve ter no máximo 100 caracteres';
+      return "Nome deve ter no máximo 100 caracteres";
     }
     if (!/^[a-z0-9-]+$/.test(name)) {
-      return 'Nome deve conter apenas letras minúsculas, números e hífens';
+      return "Nome deve conter apenas letras minúsculas, números e hífens";
     }
     return null;
   };
@@ -80,21 +80,21 @@ export default function CategoriesCRUDCard() {
       setApiUnavailable(false);
       const data = await categoriesService.getCategories({
         active_only: false,
-        order_by: 'display_order',
+        order_by: "display_order",
       });
       setCategories(data);
       setLastSyncedAt(new Date());
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : 'Erro ao carregar categorias';
+        err instanceof Error ? err.message : "Erro ao carregar categorias";
       // Check if it's a connection error
       if (
-        errorMsg.includes('fetch') ||
-        errorMsg.includes('network') ||
-        errorMsg.includes('Failed to fetch')
+        errorMsg.includes("fetch") ||
+        errorMsg.includes("network") ||
+        errorMsg.includes("Failed to fetch")
       ) {
         setApiUnavailable(true);
-        setError('Não foi possível conectar ao servidor da API');
+        setError("Não foi possível conectar ao servidor da API");
       } else {
         setError(errorMsg);
       }
@@ -109,7 +109,7 @@ export default function CategoriesCRUDCard() {
     setValidationError(null);
 
     // Normalize the name
-    const normalizedName = normalizeCategoryName(formData.name || '');
+    const normalizedName = normalizeCategoryName(formData.name || "");
 
     // Validate the normalized name
     const validationErr = validateCategoryName(normalizedName);
@@ -132,18 +132,18 @@ export default function CategoriesCRUDCard() {
       resetForm();
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : 'Erro ao criar categoria';
+        err instanceof Error ? err.message : "Erro ao criar categoria";
 
       // Check if it's a validation error from backend
       if (
-        errorMsg.includes('must contain only') ||
-        errorMsg.includes('already exists') ||
-        errorMsg.includes('must be between')
+        errorMsg.includes("must contain only") ||
+        errorMsg.includes("already exists") ||
+        errorMsg.includes("must be between")
       ) {
         setValidationError(errorMsg);
-      } else if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
+      } else if (errorMsg.includes("fetch") || errorMsg.includes("network")) {
         setApiUnavailable(true);
-        setError('Não foi possível conectar ao servidor da API');
+        setError("Não foi possível conectar ao servidor da API");
       } else {
         setError(errorMsg);
       }
@@ -177,17 +177,17 @@ export default function CategoriesCRUDCard() {
       resetForm();
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : 'Erro ao atualizar categoria';
+        err instanceof Error ? err.message : "Erro ao atualizar categoria";
 
       if (
-        errorMsg.includes('must contain only') ||
-        errorMsg.includes('already exists') ||
-        errorMsg.includes('must be between')
+        errorMsg.includes("must contain only") ||
+        errorMsg.includes("already exists") ||
+        errorMsg.includes("must be between")
       ) {
         setValidationError(errorMsg);
-      } else if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
+      } else if (errorMsg.includes("fetch") || errorMsg.includes("network")) {
         setApiUnavailable(true);
-        setError('Não foi possível conectar ao servidor da API');
+        setError("Não foi possível conectar ao servidor da API");
       } else {
         setError(errorMsg);
       }
@@ -206,7 +206,7 @@ export default function CategoriesCRUDCard() {
       await loadCategories();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Erro ao deletar categoria',
+        err instanceof Error ? err.message : "Erro ao deletar categoria",
       );
     } finally {
       setSyncing(false);
@@ -220,7 +220,7 @@ export default function CategoriesCRUDCard() {
       await categoriesService.toggleCategory(id);
       await loadCategories();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao alternar status');
+      setError(err instanceof Error ? err.message : "Erro ao alternar status");
     } finally {
       setSyncing(false);
     }
@@ -230,8 +230,8 @@ export default function CategoriesCRUDCard() {
     setEditingId(category.id);
     setFormData({
       name: category.name,
-      description: category.description || '',
-      color: category.color || '#6B7280',
+      description: category.description || "",
+      color: category.color || "#6B7280",
       display_order: category.display_order,
     });
   };
@@ -246,9 +246,9 @@ export default function CategoriesCRUDCard() {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      description: '',
-      color: '#6B7280',
+      name: "",
+      description: "",
+      color: "#6B7280",
       display_order: 0,
     });
   };
@@ -258,20 +258,20 @@ export default function CategoriesCRUDCard() {
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
 
-    if (minutes < 1) return 'agora';
+    if (minutes < 1) return "agora";
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h`;
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
     });
   };
 
   const showLoadingState = loading && categories.length === 0;
   const normalizedPreview = formData.name
     ? normalizeCategoryName(formData.name)
-    : '';
+    : "";
   const showNormalizedPreview =
     formData.name && normalizedPreview !== formData.name;
 
@@ -281,10 +281,10 @@ export default function CategoriesCRUDCard() {
       <div className="flex items-center justify-between">
         <div
           className={cn(
-            'flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border',
+            "flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border",
             loading || syncing
-              ? 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200'
-              : 'border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300',
+              ? "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-200"
+              : "border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300",
           )}
         >
           {loading || syncing ? (
@@ -294,12 +294,12 @@ export default function CategoriesCRUDCard() {
           )}
           <span>
             {loading && categories.length === 0
-              ? 'Carregando...'
+              ? "Carregando..."
               : syncing
-                ? 'Sincronizando...'
+                ? "Sincronizando..."
                 : lastSyncedAt
                   ? `Atualizado em ${formatTimestampShort(lastSyncedAt)}`
-                  : 'Aguardando sincronização'}
+                  : "Aguardando sincronização"}
           </span>
         </div>
         <Button
@@ -394,7 +394,7 @@ export default function CategoriesCRUDCard() {
                 />
                 {showNormalizedPreview && (
                   <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-                    Será salvo como:{' '}
+                    Será salvo como:{" "}
                     <span className="font-mono font-semibold">
                       {normalizedPreview}
                     </span>
@@ -574,20 +574,20 @@ export default function CategoriesCRUDCard() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs max-w-xs truncate">
-                        {category.description || '—'}
+                        {category.description || "—"}
                       </td>
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleToggle(category.id)}
                           disabled={apiUnavailable}
                           className={cn(
-                            'inline-flex items-center px-2 py-1 rounded-md text-xs font-medium',
+                            "inline-flex items-center px-2 py-1 rounded-md text-xs font-medium",
                             category.is_active
-                              ? 'bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200'
-                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
+                              ? "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400",
                           )}
                         >
-                          {category.is_active ? 'Ativa' : 'Inativa'}
+                          {category.is_active ? "Ativa" : "Inativa"}
                         </button>
                       </td>
                       <td className="px-4 py-3">

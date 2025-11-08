@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { MessageSquare, Zap } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { MessageSquare, Zap } from "lucide-react";
 
 export function TelegramDataPage() {
   const sections = [
     {
-      id: 'telegram-messages',
+      id: "telegram-messages",
       content: (
         <PlaceholderSection
           cardId="telegram-messages"
@@ -16,7 +16,7 @@ export function TelegramDataPage() {
       ),
     },
     {
-      id: 'telegram-signals',
+      id: "telegram-signals",
       content: (
         <PlaceholderSection
           cardId="telegram-signals"

@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Power, Zap, Bell } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Power, Zap, Bell } from "lucide-react";
 
 export function RiskControlsPage() {
   const sections = [
     {
-      id: 'kill-switch',
+      id: "kill-switch",
       content: (
         <PlaceholderSection
           cardId="controls-kill-switch"
@@ -16,7 +16,7 @@ export function RiskControlsPage() {
       ),
     },
     {
-      id: 'circuit-breakers',
+      id: "circuit-breakers",
       content: (
         <PlaceholderSection
           cardId="controls-circuit-breakers"
@@ -27,7 +27,7 @@ export function RiskControlsPage() {
       ),
     },
     {
-      id: 'alerts',
+      id: "alerts",
       content: (
         <PlaceholderSection
           cardId="controls-alerts"

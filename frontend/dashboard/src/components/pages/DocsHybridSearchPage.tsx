@@ -6,18 +6,18 @@ import {
   useState,
   lazy,
   Suspense,
-} from 'react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+} from "react";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import {
   CollapsibleCard,
   CollapsibleCardHeader,
   CollapsibleCardTitle,
   CollapsibleCardDescription,
   CollapsibleCardContent,
-} from '../ui/collapsible-card';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+} from "../ui/collapsible-card";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import {
   ExternalLink,
   Copy,
@@ -25,20 +25,20 @@ import {
   ChevronDown,
   Loader2,
   AlertTriangle,
-} from 'lucide-react';
+} from "lucide-react";
 import documentationService, {
   DocsHybridItem,
-} from '../../services/documentationService';
-import { DocPreviewModal } from './DocPreviewModal';
-import { CollectionSelector } from './CollectionSelector';
+} from "../../services/documentationService";
+import { DocPreviewModal } from "./DocPreviewModal";
+import { CollectionSelector } from "./CollectionSelector";
 import {
   normalizeDocsApiPath,
   resolveDocsPreviewUrl,
-} from '../../utils/docusaurus';
+} from "../../utils/docusaurus";
 import {
   useRagQuery,
   type RagQueryResult,
-} from '../../hooks/llamaIndex/useRagQuery';
+} from "../../hooks/llamaIndex/useRagQuery";
 // Quick Win P1-2: Hooks integrados!
 // import { useDocSearch, useDocFilters } from './docs-search/hooks';
 import {
@@ -47,12 +47,12 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from '../ui/select';
-import { logger } from '../../utils/logger';
+} from "../ui/select";
+import { logger } from "../../utils/logger";
 
 // Lazy load markdown rendering (~63KB saved from initial bundle)
 const MarkdownPreview = lazy(() =>
-  import('../ui/MarkdownPreview').then((mod) => ({
+  import("../ui/MarkdownPreview").then((mod) => ({
     default: mod.MarkdownPreview,
   })),
 );
@@ -66,11 +66,11 @@ function useDebouncedValue<T>(value: T, delay = 350): T {
   return debounced;
 }
 
-const STORAGE_KEY_RESULTS = 'docsHybridSearch_results';
-const STORAGE_KEY_QUERY = 'docsHybridSearch_lastQuery';
-const STORAGE_KEY_COLLECTION = 'docsHybridSearch_collection';
+const STORAGE_KEY_RESULTS = "docsHybridSearch_results";
+const STORAGE_KEY_QUERY = "docsHybridSearch_lastQuery";
+const STORAGE_KEY_COLLECTION = "docsHybridSearch_collection";
 const HYBRID_SEARCH_LIMIT = 50;
-const DEFAULT_COLLECTION_SCOPE = 'default';
+const DEFAULT_COLLECTION_SCOPE = "default";
 
 type FacetOption = {
   value: string;
@@ -78,36 +78,36 @@ type FacetOption = {
   count: number;
 };
 
-type SearchMode = 'hybrid' | 'rag-semantic';
+type SearchMode = "hybrid" | "rag-semantic";
 
 const SEARCH_MODE_LABELS: Record<SearchMode, string> = {
-  hybrid: 'Híbrido (FlexSearch + Qdrant)',
-  'rag-semantic': 'RAG Semântico (Qdrant direto)',
+  hybrid: "Híbrido (FlexSearch + Qdrant)",
+  "rag-semantic": "RAG Semântico (Qdrant direto)",
 };
 
 const STATUS_LABEL_MAP: Record<string, string> = {
-  active: 'Ativo',
-  draft: 'Rascunho',
-  planned: 'Planejado',
-  completed: 'Concluído',
-  accepted: 'Aceito',
-  deprecated: 'Depreciado',
+  active: "Ativo",
+  draft: "Rascunho",
+  planned: "Planejado",
+  completed: "Concluído",
+  accepted: "Aceito",
+  deprecated: "Depreciado",
 };
 
 const STATUS_ORDER = [
-  'active',
-  'planned',
-  'accepted',
-  'completed',
-  'draft',
-  'deprecated',
+  "active",
+  "planned",
+  "accepted",
+  "completed",
+  "draft",
+  "deprecated",
 ];
 
-const UNCLASSIFIED_LABEL = 'Não classificado';
+const UNCLASSIFIED_LABEL = "Não classificado";
 
 const toTitleCase = (segment: string): string => {
   const lower = segment.toLowerCase();
-  if (segment === '›') {
+  if (segment === "›") {
     return segment;
   }
   if (lower.length <= 3) {
@@ -121,34 +121,34 @@ const formatFacetLabel = (raw?: string): string => {
     return UNCLASSIFIED_LABEL;
   }
   const trimmed = raw.trim();
-  if (!trimmed || trimmed === 'undefined' || trimmed === 'null') {
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") {
     return UNCLASSIFIED_LABEL;
   }
   const cleaned = trimmed
-    .replace(/\.mdx?$/i, '')
-    .replace(/\.md$/i, '')
-    .replace(/_/g, ' ')
-    .replace(/-/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/\.mdx?$/i, "")
+    .replace(/\.md$/i, "")
+    .replace(/_/g, " ")
+    .replace(/-/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
-    .replace(/\//g, ' › ');
+    .replace(/\//g, " › ");
   if (!cleaned) {
     return UNCLASSIFIED_LABEL;
   }
-  return cleaned.split(/\s+/).filter(Boolean).map(toTitleCase).join(' ');
+  return cleaned.split(/\s+/).filter(Boolean).map(toTitleCase).join(" ");
 };
 
-const normalizeTag = (tag?: string): string => tag?.trim().toLowerCase() ?? '';
+const normalizeTag = (tag?: string): string => tag?.trim().toLowerCase() ?? "";
 
 const formatTagLabel = (raw?: string): string => {
   if (!raw) {
     return UNCLASSIFIED_LABEL;
   }
-  const cleaned = raw.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+  const cleaned = raw.replace(/[-_]/g, " ").replace(/\s+/g, " ").trim();
   if (!cleaned) {
     return UNCLASSIFIED_LABEL;
   }
-  return cleaned.split(' ').filter(Boolean).map(toTitleCase).join(' ');
+  return cleaned.split(" ").filter(Boolean).map(toTitleCase).join(" ");
 };
 
 const formatStatusLabel = (raw?: string): string => {
@@ -184,7 +184,7 @@ const buildFacetOptions = (
     });
 };
 
-const sanitizeCollection = (value?: string): string => (value ?? '').trim();
+const sanitizeCollection = (value?: string): string => (value ?? "").trim();
 
 const buildScopedKey = (baseKey: string, collection?: string): string => {
   const scope = sanitizeCollection(collection) || DEFAULT_COLLECTION_SCOPE;
@@ -192,7 +192,7 @@ const buildScopedKey = (baseKey: string, collection?: string): string => {
 };
 
 const safeGetItem = (key: string): string | null => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
   try {
@@ -203,29 +203,29 @@ const safeGetItem = (key: string): string | null => {
 };
 
 const safeSetItem = (key: string, value: string): void => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
   try {
     window.localStorage.setItem(key, value);
   } catch (error) {
-    console.error('[DocsSearch] Failed to persist key', { key, error });
+    console.error("[DocsSearch] Failed to persist key", { key, error });
   }
 };
 
 const safeRemoveItem = (key: string): void => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
   try {
     window.localStorage.removeItem(key);
   } catch (error) {
-    console.error('[DocsSearch] Failed to remove key', { key, error });
+    console.error("[DocsSearch] Failed to remove key", { key, error });
   }
 };
 
 const readStoredCollection = (): string =>
-  sanitizeCollection(safeGetItem(STORAGE_KEY_COLLECTION) ?? '');
+  sanitizeCollection(safeGetItem(STORAGE_KEY_COLLECTION) ?? "");
 
 const writeStoredCollection = (collection: string): void => {
   const sanitized = sanitizeCollection(collection);
@@ -243,7 +243,7 @@ const readStoredQuery = (collection?: string): string => {
   if (scopedValue !== null) {
     return scopedValue;
   }
-  return safeGetItem(STORAGE_KEY_QUERY) ?? '';
+  return safeGetItem(STORAGE_KEY_QUERY) ?? "";
 };
 
 const writeStoredQuery = (collection: string, value: string): void => {
@@ -266,10 +266,10 @@ const readStoredResults = (collection?: string): DocsHybridItem[] => {
     if (Array.isArray(parsed)) {
       return parsed;
     }
-    console.warn('[DocsSearch] Stored results malformed, resetting cache');
+    console.warn("[DocsSearch] Stored results malformed, resetting cache");
     return [];
   } catch (error) {
-    console.error('[DocsSearch] Failed to parse cached results', error);
+    console.error("[DocsSearch] Failed to parse cached results", error);
     return [];
   }
 };
@@ -301,8 +301,8 @@ const convertRagResultToHybridItem = (
 ): DocsHybridItem => {
   // Ensure URL uses proxy prefix for same-origin Docusaurus access
   let docUrl = ragResult.url;
-  if (!docUrl.startsWith('/docs/')) {
-    docUrl = `/docs/${docUrl.replace(/^\/+/, '')}`;
+  if (!docUrl.startsWith("/docs/")) {
+    docUrl = `/docs/${docUrl.replace(/^\/+/, "")}`;
   }
 
   return {
@@ -311,7 +311,7 @@ const convertRagResultToHybridItem = (
     path: ragResult.path,
     snippet: ragResult.snippet,
     score: ragResult.score,
-    source: 'rag' as const,
+    source: "rag" as const,
     components: { semantic: true, lexical: false },
     tags: ragResult.metadata?.tags || [],
     domain: undefined,
@@ -325,7 +325,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
   if (initialCollectionRef.current === null) {
     initialCollectionRef.current = readStoredCollection();
   }
-  const initialCollection = initialCollectionRef.current || '';
+  const initialCollection = initialCollectionRef.current || "";
 
   const [collection, setCollection] = useState<string>(initialCollection);
   const [query, setQuery] = useState<string>(() =>
@@ -335,18 +335,18 @@ export default function DocsHybridSearchPage(): JSX.Element {
     readStoredQuery(initialCollection),
   );
   const [alpha, setAlpha] = useState(0.65);
-  const [searchMode, setSearchMode] = useState<SearchMode>('hybrid');
+  const [searchMode, setSearchMode] = useState<SearchMode>("hybrid");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<DocsHybridItem[]>(() => {
     const restored = readStoredResults(initialCollection);
     if (restored.length > 0) {
       logger.debug(
-        '[DocsSearch] Restored',
+        "[DocsSearch] Restored",
         restored.length,
-        'results from localStorage',
+        "results from localStorage",
         {
-          collection: initialCollection || 'default',
+          collection: initialCollection || "default",
         },
       );
     }
@@ -370,16 +370,16 @@ export default function DocsHybridSearchPage(): JSX.Element {
     docPath: string;
   }>({
     isOpen: false,
-    title: '',
-    url: '',
-    docPath: '',
+    title: "",
+    url: "",
+    docPath: "",
   });
   const [expandedDocs, setExpandedDocs] = useState<Record<string, boolean>>({});
   const [docPreviews, setDocPreviews] = useState<
     Record<
       string,
       {
-        status: 'idle' | 'loading' | 'ready' | 'error';
+        status: "idle" | "loading" | "ready" | "error";
         content?: string;
         error?: string;
       }
@@ -400,25 +400,25 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
   const stripFrontmatter = useCallback(
     (raw: string) =>
-      raw.replace(/^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u, '').trim(),
+      raw.replace(/^---\s*[\r\n]+[\s\S]*?[\r\n]+---\s*[\r\n]*/u, "").trim(),
     [],
   );
 
   const deriveDocPath = useCallback((result: DocsHybridItem) => {
     if (result.path && result.path.trim().length > 0) {
-      return `/${result.path.replace(/^\/+/, '')}`;
+      return `/${result.path.replace(/^\/+/, "")}`;
     }
-    return normalizeDocsApiPath(result.url, 'next');
+    return normalizeDocsApiPath(result.url, "next");
   }, []);
 
   const fetchDocContent = useCallback(
     async (key: string, docPath: string) => {
       setDocPreviews((prev) => {
         const current = prev[key];
-        if (current?.status === 'loading') {
+        if (current?.status === "loading") {
           return prev;
         }
-        return { ...prev, [key]: { status: 'loading' } };
+        return { ...prev, [key]: { status: "loading" } };
       });
 
       try {
@@ -426,17 +426,17 @@ export default function DocsHybridSearchPage(): JSX.Element {
         const content = stripFrontmatter(raw);
         setDocPreviews((prev) => ({
           ...prev,
-          [key]: { status: 'ready', content },
+          [key]: { status: "ready", content },
         }));
       } catch (err) {
         setDocPreviews((prev) => ({
           ...prev,
           [key]: {
-            status: 'error',
+            status: "error",
             error:
               err instanceof Error
                 ? err.message
-                : 'Falha ao carregar documento',
+                : "Falha ao carregar documento",
           },
         }));
       }
@@ -451,7 +451,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
       setExpandedDocs((prev) => ({ ...prev, [docPath]: shouldExpand }));
       if (shouldExpand) {
         const previewState = docPreviews[docPath];
-        if (!previewState || previewState.status === 'error') {
+        if (!previewState || previewState.status === "error") {
           void fetchDocContent(docPath, docPath);
         }
       }
@@ -461,12 +461,12 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
   // Modal preview handler - opens in-page modal overlay
   const openPreview = (result: DocsHybridItem) => {
-    const normalizedPath = normalizeDocsApiPath(result.url, 'next');
-    const previewUrl = resolveDocsPreviewUrl(result.url, 'next', {
+    const normalizedPath = normalizeDocsApiPath(result.url, "next");
+    const previewUrl = resolveDocsPreviewUrl(result.url, "next", {
       absolute: true,
     });
 
-    logger.debug('[DocsSearch] Opening preview modal:', {
+    logger.debug("[DocsSearch] Opening preview modal:", {
       originalUrl: result.url,
       normalizedPath,
       previewUrl,
@@ -485,8 +485,8 @@ export default function DocsHybridSearchPage(): JSX.Element {
     // This prevents overwriting localStorage on mount before restoration completes
     if (!initialSearchDone.current) return;
 
-    logger.debug('[DocsSearch] Persisting results', {
-      collection: collection || 'default',
+    logger.debug("[DocsSearch] Persisting results", {
+      collection: collection || "default",
       count: results.length,
     });
     writeStoredResults(collection, results);
@@ -507,8 +507,8 @@ export default function DocsHybridSearchPage(): JSX.Element {
       return;
     }
 
-    logger.debug('[DocsSearch] Collection changed', {
-      collection: collection || 'default',
+    logger.debug("[DocsSearch] Collection changed", {
+      collection: collection || "default",
     });
 
     const storedQueryForCollection = readStoredQuery(collection);
@@ -531,9 +531,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
   useEffect(() => {
     mounted.current = true;
-    logger.debug('[DocsSearch] Component mounted/remounted');
+    logger.debug("[DocsSearch] Component mounted/remounted");
     return () => {
-      logger.debug('[DocsSearch] Component unmounting');
+      logger.debug("[DocsSearch] Component unmounting");
       mounted.current = false;
     };
   }, []);
@@ -594,7 +594,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
   useEffect(() => {
     async function loadFacets() {
       try {
-        const f = await documentationService.getDocsFacets('');
+        const f = await documentationService.getDocsFacets("");
         if (mounted.current)
           setFacets({
             domains: f.domains || [],
@@ -629,7 +629,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
         results.length > 0
       ) {
         logger.debug(
-          '[DocsSearch] Skipping initial search - results already loaded from localStorage',
+          "[DocsSearch] Skipping initial search - results already loaded from localStorage",
         );
         initialSearchDone.current = true;
         return;
@@ -637,7 +637,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
       // 🔒 Prevent concurrent searches
       if (searchInProgress.current) {
-        logger.debug('[DocsSearch] Search already in progress, skipping');
+        logger.debug("[DocsSearch] Search already in progress, skipping");
         return;
       }
 
@@ -647,21 +647,21 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
       try {
         // Use RAG semantic search if mode is 'rag-semantic'
-        if (searchMode === 'rag-semantic') {
+        if (searchMode === "rag-semantic") {
           logger.debug(
-            '[DocsSearch] Using RAG semantic search for:',
+            "[DocsSearch] Using RAG semantic search for:",
             debouncedQuery,
           );
 
           await ragQuery.search(debouncedQuery, {
-            collection: collection || 'documentation__nomic',
+            collection: collection || "documentation__nomic",
             limit: HYBRID_SEARCH_LIMIT,
             scoreThreshold: 0.7,
           });
 
           // Check if request was cancelled
           if (controller.signal.aborted) {
-            logger.debug('[DocsSearch] RAG search aborted');
+            logger.debug("[DocsSearch] RAG search aborted");
             return;
           }
 
@@ -671,9 +671,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
               convertRagResultToHybridItem,
             );
             logger.debug(
-              '[DocsSearch] RAG search succeeded:',
+              "[DocsSearch] RAG search succeeded:",
               convertedResults.length,
-              'results',
+              "results",
               {
                 performance: ragQuery.performance,
                 cached: ragQuery.cached,
@@ -691,7 +691,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
         } else {
           // Try hybrid search (semantic + lexical via FlexSearch)
           logger.debug(
-            '[DocsSearch] Trying hybrid search for:',
+            "[DocsSearch] Trying hybrid search for:",
             debouncedQuery,
           );
           const data = await documentationService.docsHybridSearch(
@@ -710,17 +710,17 @@ export default function DocsHybridSearchPage(): JSX.Element {
           // Check if request was cancelled
           if (controller.signal.aborted) {
             logger.debug(
-              '[DocsSearch] Request aborted (component unmounted or new search)',
+              "[DocsSearch] Request aborted (component unmounted or new search)",
             );
             return;
           }
 
           logger.debug(
-            '[DocsSearch] Hybrid search succeeded:',
+            "[DocsSearch] Hybrid search succeeded:",
             data.results.length,
-            'results',
+            "results",
             {
-              collection: data.collection || collection || 'default',
+              collection: data.collection || collection || "default",
             },
           );
 
@@ -737,20 +737,20 @@ export default function DocsHybridSearchPage(): JSX.Element {
       } catch (e) {
         // Check if request was cancelled
         if (controller.signal.aborted) {
-          logger.debug('[DocsSearch] Request aborted during error handling');
+          logger.debug("[DocsSearch] Request aborted during error handling");
           return;
         }
 
         // Fallback to lexical-only search if hybrid fails (Qdrant/Ollama unavailable)
         const errorMsg = e instanceof Error ? e.message : String(e);
-        logger.debug('[DocsSearch] Hybrid search failed:', errorMsg);
-        logger.debug('[DocsSearch] Attempting lexical fallback...');
+        logger.debug("[DocsSearch] Hybrid search failed:", errorMsg);
+        logger.debug("[DocsSearch] Attempting lexical fallback...");
 
         if (
-          errorMsg.includes('Qdrant') ||
-          errorMsg.includes('Ollama') ||
-          errorMsg.includes('timeout') ||
-          errorMsg.includes('Hybrid search failed')
+          errorMsg.includes("Qdrant") ||
+          errorMsg.includes("Ollama") ||
+          errorMsg.includes("timeout") ||
+          errorMsg.includes("Hybrid search failed")
         ) {
           try {
             const lexicalData = await documentationService.docsLexicalSearch(
@@ -766,14 +766,14 @@ export default function DocsHybridSearchPage(): JSX.Element {
 
             // Check if request was cancelled
             if (controller.signal.aborted) {
-              logger.debug('[DocsSearch] Lexical fallback aborted');
+              logger.debug("[DocsSearch] Lexical fallback aborted");
               return;
             }
 
             logger.debug(
-              '[DocsSearch] Lexical search succeeded:',
+              "[DocsSearch] Lexical search succeeded:",
               lexicalData.results.length,
-              'results',
+              "results",
             );
 
             if (mounted.current && !controller.signal.aborted) {
@@ -782,8 +782,8 @@ export default function DocsHybridSearchPage(): JSX.Element {
                 lexicalData.results.map((r) => {
                   // Ensure URL uses proxy prefix for same-origin Docusaurus access
                   let docUrl = r.path;
-                  if (!docUrl.startsWith('/docs/')) {
-                    docUrl = `/docs/${docUrl.replace(/^\/+/, '')}`;
+                  if (!docUrl.startsWith("/docs/")) {
+                    docUrl = `/docs/${docUrl.replace(/^\/+/, "")}`;
                   }
                   return {
                     title: r.title,
@@ -791,7 +791,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                     path: r.path,
                     snippet: r.summary,
                     score: r.score || 0,
-                    source: 'lexical' as const,
+                    source: "lexical" as const,
                     components: { semantic: false, lexical: true },
                     tags: r.tags,
                     domain: r.domain,
@@ -800,9 +800,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
                   };
                 });
               logger.debug(
-                '[DocsSearch] Setting',
+                "[DocsSearch] Setting",
                 convertedResults.length,
-                'converted results',
+                "converted results",
               );
               setResults(convertedResults);
               setLastSearchedQuery(debouncedQuery);
@@ -810,21 +810,21 @@ export default function DocsHybridSearchPage(): JSX.Element {
             }
           } catch (lexErr) {
             if (controller.signal.aborted) {
-              logger.debug('[DocsSearch] Lexical error handling aborted');
+              logger.debug("[DocsSearch] Lexical error handling aborted");
               return;
             }
 
-            logger.error('[DocsSearch] Lexical search also failed:', lexErr);
+            logger.error("[DocsSearch] Lexical search also failed:", lexErr);
             if (mounted.current && !controller.signal.aborted) {
               setError(
-                lexErr instanceof Error ? lexErr.message : 'Search failed',
+                lexErr instanceof Error ? lexErr.message : "Search failed",
               );
             }
           }
         } else {
-          logger.error('[DocsSearch] Non-recoverable error:', errorMsg);
+          logger.error("[DocsSearch] Non-recoverable error:", errorMsg);
           if (mounted.current && !controller.signal.aborted) {
-            setError(errorMsg || 'Search failed');
+            setError(errorMsg || "Search failed");
           }
         }
       } finally {
@@ -869,7 +869,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
       if (dtype && result.type !== dtype) {
         return false;
       }
-      if (status && (result.status ?? 'active') !== status) {
+      if (status && (result.status ?? "active") !== status) {
         return false;
       }
       if (normalizedSelectedTags.length > 0) {
@@ -922,7 +922,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
   const sections = useMemo(() => {
     return [
       {
-        id: 'hybrid-config',
+        id: "hybrid-config",
         content: (
           <CollapsibleCard cardId="hybrid-config" defaultCollapsed={false}>
             <CollapsibleCardHeader>
@@ -935,7 +935,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                 <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-300">
                   Coleção ativa:
                   <Badge variant="outline">
-                    {collection || 'documentation'}
+                    {collection || "documentation"}
                   </Badge>
                 </span>
               </CollapsibleCardDescription>
@@ -955,11 +955,11 @@ export default function DocsHybridSearchPage(): JSX.Element {
                           value={query}
                           onChange={(e) => setQuery(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' && query.trim()) {
+                            if (e.key === "Enter" && query.trim()) {
                               setQuery((q) => q.trim());
                             }
-                            if (e.key === 'Escape') {
-                              setQuery('');
+                            if (e.key === "Escape") {
+                              setQuery("");
                               setResults([]);
                             }
                           }}
@@ -976,10 +976,10 @@ export default function DocsHybridSearchPage(): JSX.Element {
                       {(query || results.length > 0) && (
                         <Button
                           onClick={() => {
-                            setQuery('');
+                            setQuery("");
                             setResults([]);
                             setError(null);
-                            setLastSearchedQuery('');
+                            setLastSearchedQuery("");
                             clearStoredState(collection);
                             ragQuery.clear();
                           }}
@@ -1016,7 +1016,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                             {SEARCH_MODE_LABELS.hybrid}
                           </SelectItem>
                           <SelectItem value="rag-semantic">
-                            {SEARCH_MODE_LABELS['rag-semantic']}
+                            {SEARCH_MODE_LABELS["rag-semantic"]}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -1031,9 +1031,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
                       Domínio
                     </label>
                     <Select
-                      value={domain ?? '__all__'}
+                      value={domain ?? "__all__"}
                       onValueChange={(value) =>
-                        setDomain(value === '__all__' ? undefined : value)
+                        setDomain(value === "__all__" ? undefined : value)
                       }
                     >
                       <SelectTrigger className="h-10">
@@ -1057,9 +1057,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
                       Tipo
                     </label>
                     <Select
-                      value={dtype ?? '__all__'}
+                      value={dtype ?? "__all__"}
                       onValueChange={(value) =>
-                        setDtype(value === '__all__' ? undefined : value)
+                        setDtype(value === "__all__" ? undefined : value)
                       }
                     >
                       <SelectTrigger className="h-10">
@@ -1083,9 +1083,9 @@ export default function DocsHybridSearchPage(): JSX.Element {
                       Status
                     </label>
                     <Select
-                      value={status ?? '__all__'}
+                      value={status ?? "__all__"}
                       onValueChange={(value) =>
-                        setStatus(value === '__all__' ? undefined : value)
+                        setStatus(value === "__all__" ? undefined : value)
                       }
                     >
                       <SelectTrigger className="h-10">
@@ -1212,7 +1212,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
         ),
       },
       {
-        id: 'hybrid-results',
+        id: "hybrid-results",
         content: (
           <CollapsibleCard cardId="hybrid-results" defaultCollapsed={false}>
             <CollapsibleCardHeader>
@@ -1233,15 +1233,15 @@ export default function DocsHybridSearchPage(): JSX.Element {
                     )}
                   </>
                 ) : (
-                  'Nenhum resultado'
+                  "Nenhum resultado"
                 )}
               </CollapsibleCardDescription>
             </CollapsibleCardHeader>
             <CollapsibleCardContent>
               <ul className="space-y-3">
                 {filteredResults.map((r) => {
-                  const normalizedPath = normalizeDocsApiPath(r.url, 'next');
-                  const fullDocUrl = resolveDocsPreviewUrl(r.url, 'next', {
+                  const normalizedPath = normalizeDocsApiPath(r.url, "next");
+                  const fullDocUrl = resolveDocsPreviewUrl(r.url, "next", {
                     absolute: true,
                   });
                   const docPath = deriveDocPath(r);
@@ -1268,12 +1268,12 @@ export default function DocsHybridSearchPage(): JSX.Element {
                             className="h-8 w-8 rounded-md border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                             title={
                               isExpanded
-                                ? 'Ocultar prévia inline'
-                                : 'Mostrar prévia inline'
+                                ? "Ocultar prévia inline"
+                                : "Mostrar prévia inline"
                             }
                           >
                             <ChevronDown
-                              className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                             />
                           </button>
                           <Badge variant="outline">
@@ -1297,7 +1297,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                           </Button>
                           <Button
                             variant="ghost"
-                            onClick={() => window.open(fullDocUrl, '_blank')}
+                            onClick={() => window.open(fullDocUrl, "_blank")}
                             className="h-8 px-2"
                             title={`Abrir em nova aba (${normalizedPath})`}
                           >
@@ -1337,19 +1337,19 @@ export default function DocsHybridSearchPage(): JSX.Element {
                       </div>
                       {isExpanded && (
                         <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/40">
-                          {inlinePreview?.status === 'loading' && (
+                          {inlinePreview?.status === "loading" && (
                             <div className="flex items-center gap-2 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
                               <Loader2 className="h-4 w-4 animate-spin" />
                               <span>Carregando prévia…</span>
                             </div>
                           )}
-                          {inlinePreview?.status === 'error' && (
+                          {inlinePreview?.status === "error" && (
                             <div className="space-y-2 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
                               <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
                                 <AlertTriangle className="h-4 w-4" />
                                 <span>
                                   {inlinePreview.error ??
-                                    'Falha ao carregar a prévia.'}
+                                    "Falha ao carregar a prévia."}
                                 </span>
                               </div>
                               <Button
@@ -1364,7 +1364,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                               </Button>
                             </div>
                           )}
-                          {inlinePreview?.status === 'ready' && (
+                          {inlinePreview?.status === "ready" && (
                             <div className="max-h-80 overflow-y-auto px-4 py-3">
                               <Suspense
                                 fallback={
@@ -1377,7 +1377,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
                                 }
                               >
                                 <MarkdownPreview
-                                  content={inlinePreview.content ?? ''}
+                                  content={inlinePreview.content ?? ""}
                                 />
                               </Suspense>
                             </div>
@@ -1438,7 +1438,7 @@ export default function DocsHybridSearchPage(): JSX.Element {
       <DocPreviewModal
         isOpen={previewModal.isOpen}
         onClose={() =>
-          setPreviewModal({ isOpen: false, title: '', url: '', docPath: '' })
+          setPreviewModal({ isOpen: false, title: "", url: "", docPath: "" })
         }
         title={previewModal.title}
         url={previewModal.url}

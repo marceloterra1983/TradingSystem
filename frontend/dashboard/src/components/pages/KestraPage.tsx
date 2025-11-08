@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { IframeWithUrl } from '../common/IframeWithUrl';
+import { useMemo } from "react";
+import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_KESTRA_HTTP_URL = 'http://localhost:8180';
+const DEFAULT_KESTRA_HTTP_URL = "http://localhost:8180";
 
 const sanitizeUrl = (value: string | undefined, fallback: string): string => {
-  if (!value || typeof value !== 'string') {
+  if (!value || typeof value !== "string") {
     return fallback;
   }
   try {
     const url = new URL(value.trim());
-    url.pathname = url.pathname.replace(/\/+$/, '');
+    url.pathname = url.pathname.replace(/\/+$/, "");
     return url.toString();
   } catch {
     return fallback;
@@ -36,7 +36,7 @@ export function KestraPage(): JSX.Element {
         src={uiUrl}
         className="w-full h-full"
         style={{
-          border: 'none',
+          border: "none",
         }}
         title="Kestra Orchestrator UI"
         allow="clipboard-read; clipboard-write; fullscreen"

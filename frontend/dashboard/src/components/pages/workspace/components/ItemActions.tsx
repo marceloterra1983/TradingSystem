@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { ActionButtons } from '../../../ui/action-buttons';
-import { ViewItemDialog } from './ViewItemDialog';
-import { EditItemDialog } from './EditItemDialog';
-import { DeleteItemDialog } from './DeleteItemDialog';
-import type { Item } from '../types/workspace.types';
+import { useState } from "react";
+import { ActionButtons } from "../../../ui/action-buttons";
+import { ViewItemDialog } from "./ViewItemDialog";
+import { EditItemDialog } from "./EditItemDialog";
+import { DeleteItemDialog } from "./DeleteItemDialog";
+import type { Item } from "../types/workspace.types";
 
 interface ItemActionsProps {
   item: Item;

@@ -1,5 +1,5 @@
-import { Menu, Activity } from 'lucide-react';
-import ConnectionStatus from './ConnectionStatus';
+import { Menu, Activity } from "lucide-react";
+import ConnectionStatus from "./ConnectionStatus";
 
 export interface HeaderProps {
   onToggleSidebar: () => void;
@@ -43,10 +43,10 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
           {/* Current Time */}
           <div className="text-sm text-gray-600">
-            {new Date().toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
+            {new Date().toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
             })}
           </div>
         </div>

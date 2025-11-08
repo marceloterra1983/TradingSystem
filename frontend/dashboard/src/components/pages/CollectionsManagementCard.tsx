@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Plus,
   Search,
@@ -7,11 +7,11 @@ import {
   RefreshCw,
   Trash,
   AlertCircle,
-} from 'lucide-react';
-import { useToast } from '../../hooks/useToast';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
+} from "lucide-react";
+import { useToast } from "../../hooks/useToast";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
 import {
   Table,
   TableBody,
@@ -19,18 +19,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
+} from "../ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
-import { CollectionFormDialog } from './CollectionFormDialog';
-import { CollectionDeleteDialog } from './CollectionDeleteDialog';
-import { IngestionLogsViewer } from './collections/IngestionLogsViewer';
-import { CollectionFilesTable } from './collections/CollectionFilesTable';
-import { BatchIngestionProgressModal } from './collections/BatchIngestionProgressModal';
+} from "../ui/tooltip";
+import { CollectionFormDialog } from "./CollectionFormDialog";
+import { CollectionDeleteDialog } from "./CollectionDeleteDialog";
+import { IngestionLogsViewer } from "./collections/IngestionLogsViewer";
+import { CollectionFilesTable } from "./collections/CollectionFilesTable";
+import { BatchIngestionProgressModal } from "./collections/BatchIngestionProgressModal";
 import type {
   Collection,
   CollectionDialogMode,
@@ -38,7 +38,7 @@ import type {
   CreateCollectionRequest,
   UpdateCollectionRequest,
   EmbeddingModel,
-} from '../../types/collections';
+} from "../../types/collections";
 
 interface CollectionsManagementCardProps {
   className?: string;
@@ -75,9 +75,9 @@ export const CollectionsManagementCard: React.FC<
   onClearError,
 }) => {
   const toast = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<CollectionDialogMode>('create');
+  const [dialogMode, setDialogMode] = useState<CollectionDialogMode>("create");
   const [selectedCollection, setSelectedCollection] = useState<
     Collection | undefined
   >();
@@ -98,7 +98,7 @@ export const CollectionsManagementCard: React.FC<
   );
   const [batchIngestionModalOpen, setBatchIngestionModalOpen] = useState(false);
   const [batchIngestionCollection, setBatchIngestionCollection] =
-    useState<string>('');
+    useState<string>("");
 
   // Auto-select first collection
   React.useEffect(() => {
@@ -113,7 +113,7 @@ export const CollectionsManagementCard: React.FC<
     if (!onRefreshCollections || dialogOpen) return; // Stop refresh when dialog is open
 
     const interval = setInterval(() => {
-      console.log('🔄 Auto-refreshing collections stats...');
+      console.log("🔄 Auto-refreshing collections stats...");
       onRefreshCollections();
     }, 10000); // 10 seconds
 
@@ -137,19 +137,19 @@ export const CollectionsManagementCard: React.FC<
 
   const handleCreate = () => {
     setSelectedCollection(undefined);
-    setDialogMode('create');
+    setDialogMode("create");
     setDialogOpen(true);
   };
 
   const handleEdit = (collection: Collection) => {
     setSelectedCollection(collection);
-    setDialogMode('edit');
+    setDialogMode("edit");
     setDialogOpen(true);
   };
 
   const handleClone = (collection: Collection) => {
     setSelectedCollection(collection);
-    setDialogMode('clone');
+    setDialogMode("clone");
     setDialogOpen(true);
   };
 
@@ -162,20 +162,20 @@ export const CollectionsManagementCard: React.FC<
    * Helper to show toast AND persist to backend logs
    */
   const toastAndLog = async (
-    level: 'info' | 'success' | 'error' | 'warn',
+    level: "info" | "success" | "error" | "warn",
     message: string,
     collectionName: string,
     details?: Record<string, any>,
   ) => {
     // Show toast in UI
     switch (level) {
-      case 'success':
+      case "success":
         toast.success(message, 5000);
         break;
-      case 'error':
+      case "error":
         toast.error(message);
         break;
-      case 'warn':
+      case "warn":
         toast.warning(message);
         break;
       default:
@@ -184,9 +184,9 @@ export const CollectionsManagementCard: React.FC<
 
     // Persist to backend logs
     try {
-      await fetch('/api/v1/rag/ingestion/logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/v1/rag/ingestion/logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           level,
           message,
@@ -195,7 +195,7 @@ export const CollectionsManagementCard: React.FC<
         }),
       });
     } catch (error) {
-      console.warn('Failed to persist toast log:', error);
+      console.warn("Failed to persist toast log:", error);
     }
   };
 
@@ -209,7 +209,7 @@ export const CollectionsManagementCard: React.FC<
       const pendingCount = stats?.pendingFiles ?? 0;
       const orphansCount = stats?.orphanChunks ?? 0;
 
-      console.log('🔄 Ingest triggered:', {
+      console.log("🔄 Ingest triggered:", {
         collection: collection.name,
         hasOrphans,
         hasPending,
@@ -220,12 +220,12 @@ export const CollectionsManagementCard: React.FC<
       // If nothing to do, exit early
       if (!hasOrphans && !hasPending) {
         await toastAndLog(
-          'info',
-          'Nenhuma alteração detectada. Todos os arquivos já estão indexados.',
+          "info",
+          "Nenhuma alteração detectada. Todos os arquivos já estão indexados.",
           collection.name,
           { pendingFiles: 0, orphanChunks: 0 },
         );
-        console.log('✓ No orphans or pending files to process');
+        console.log("✓ No orphans or pending files to process");
         return;
       }
 
@@ -237,7 +237,7 @@ export const CollectionsManagementCard: React.FC<
         );
 
         await toastAndLog(
-          'info',
+          "info",
           `Iniciando ingestão em lote: ${pendingCount} arquivo(s). Processando em blocos para evitar travamentos...`,
           collection.name,
           { pendingFiles: pendingCount, batchMode: true },
@@ -245,10 +245,10 @@ export const CollectionsManagementCard: React.FC<
 
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_RAG_SERVICE_URL || 'http://localhost:3403'}/api/v1/rag/ingestion/batch/${collection.name}`,
+            `${import.meta.env.VITE_RAG_SERVICE_URL || "http://localhost:3403"}/api/v1/rag/ingestion/batch/${collection.name}`,
             {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ batchSize: 10 }),
             },
           );
@@ -264,19 +264,19 @@ export const CollectionsManagementCard: React.FC<
             setBatchIngestionModalOpen(true);
 
             await toastAndLog(
-              'success',
+              "success",
               `Ingestão em lote iniciada! ${data.data.totalFiles} arquivo(s) em ${data.data.estimatedBatches} lote(s).`,
               collection.name,
               { jobId: data.data.jobId, totalFiles: data.data.totalFiles },
             );
           }
         } catch (error) {
-          console.error('❌ Batch ingestion failed:', error);
+          console.error("❌ Batch ingestion failed:", error);
           await toastAndLog(
-            'error',
-            `Falha ao iniciar ingestão em lote: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            "error",
+            `Falha ao iniciar ingestão em lote: ${error instanceof Error ? error.message : "Unknown error"}`,
             collection.name,
-            { error: error instanceof Error ? error.message : 'Unknown error' },
+            { error: error instanceof Error ? error.message : "Unknown error" },
           );
         } finally {
           setOperationLoading(null);
@@ -287,8 +287,8 @@ export const CollectionsManagementCard: React.FC<
       // Show informative toast with estimated time
       const estimatedSeconds = (orphansCount > 0 ? 2 : 0) + pendingCount * 2;
       await toastAndLog(
-        'info',
-        `Iniciando ingestão: ${pendingCount} arquivo(s) pendente(s)${hasOrphans ? ` + ${orphansCount} chunk(s) órfão(s)` : ''}. ` +
+        "info",
+        `Iniciando ingestão: ${pendingCount} arquivo(s) pendente(s)${hasOrphans ? ` + ${orphansCount} chunk(s) órfão(s)` : ""}. ` +
           `Tempo estimado: ~${estimatedSeconds}s.`,
         collection.name,
         {
@@ -302,7 +302,7 @@ export const CollectionsManagementCard: React.FC<
       if (hasOrphans) {
         console.log(`🧹 Limpando ${orphansCount} chunk(s) órfão(s)...`);
         await toastAndLog(
-          'info',
+          "info",
           `🧹 Limpando ${orphansCount} chunk(s) órfão(s)...`,
           collection.name,
           { orphanChunks: orphansCount },
@@ -313,7 +313,7 @@ export const CollectionsManagementCard: React.FC<
           const cleanResponse = await fetch(
             `/api/v1/rag/collections/${collection.name}/clean-orphans`,
             {
-              method: 'POST',
+              method: "POST",
             },
           );
           const cleanData = await cleanResponse.json();
@@ -326,7 +326,7 @@ export const CollectionsManagementCard: React.FC<
               cleanData.data,
             );
             await toastAndLog(
-              'success',
+              "success",
               `✅ ${cleaned} chunk(s) órfão(s) removido(s) (${(cleanDuration / 1000).toFixed(1)}s)`,
               collection.name,
               { deletedChunks: cleaned, durationSeconds: cleanDuration / 1000 },
@@ -338,12 +338,12 @@ export const CollectionsManagementCard: React.FC<
             }
           }
         } catch (error) {
-          console.error('Failed to clean orphans:', error);
+          console.error("Failed to clean orphans:", error);
           await toastAndLog(
-            'error',
-            'Erro ao limpar chunks órfãos',
+            "error",
+            "Erro ao limpar chunks órfãos",
             collection.name,
-            { error: error instanceof Error ? error.message : 'Unknown error' },
+            { error: error instanceof Error ? error.message : "Unknown error" },
           );
         }
       }
@@ -353,7 +353,7 @@ export const CollectionsManagementCard: React.FC<
         console.log(`📥 Indexando ${pendingCount} arquivo(s) pendente(s)...`);
         console.log(`⏱️  Estimativa: ~${pendingCount * 2}s (com GPU RTX 5090)`);
         await toastAndLog(
-          'info',
+          "info",
           `📚 Indexando ${pendingCount} arquivo(s) pendente(s)... Tempo estimado: ~${pendingCount * 2}s`,
           collection.name,
           { pendingFiles: pendingCount, estimatedSeconds: pendingCount * 2 },
@@ -365,7 +365,7 @@ export const CollectionsManagementCard: React.FC<
           const response = await fetch(
             `/api/v1/rag/collections/${collection.name}/ingest`,
             {
-              method: 'POST',
+              method: "POST",
             },
           );
           const result = await response.json();
@@ -407,7 +407,7 @@ export const CollectionsManagementCard: React.FC<
               : `Nenhum arquivo novo (${filesProcessed} total verificados)`;
 
           await toastAndLog(
-            'success',
+            "success",
             `✅ Ingestão concluída! ${successMessage}`,
             collection.name,
             {
@@ -430,17 +430,17 @@ export const CollectionsManagementCard: React.FC<
           // (but we already called the API directly above)
         } catch (error) {
           const ingestDuration = Date.now() - ingestStart;
-          console.error('❌ Ingestion failed:', error);
+          console.error("❌ Ingestion failed:", error);
           console.log(
             `   ⏱️  Failed after: ${(ingestDuration / 1000).toFixed(2)}s`,
           );
 
           await toastAndLog(
-            'error',
+            "error",
             `❌ Falha na ingestão após ${(ingestDuration / 1000).toFixed(1)}s`,
             collection.name,
             {
-              error: error instanceof Error ? error.message : 'Unknown error',
+              error: error instanceof Error ? error.message : "Unknown error",
               durationSeconds: ingestDuration / 1000,
             },
           );
@@ -456,9 +456,9 @@ export const CollectionsManagementCard: React.FC<
         }, 2000);
       }
 
-      console.log('✓ Ingest process completed');
+      console.log("✓ Ingest process completed");
     } catch (error) {
-      console.error('Ingest process error:', error);
+      console.error("Ingest process error:", error);
       // Error toast já foi mostrado acima
     } finally {
       setOperationLoading(null);
@@ -466,7 +466,7 @@ export const CollectionsManagementCard: React.FC<
   };
 
   const handleFormSubmit = async (data: CollectionFormState) => {
-    if (dialogMode === 'create') {
+    if (dialogMode === "create") {
       const request: CreateCollectionRequest = {
         name: data.name,
         description: data.description,
@@ -480,7 +480,7 @@ export const CollectionsManagementCard: React.FC<
         autoUpdate: data.autoUpdate,
       };
       await onCreateCollection(request);
-    } else if (dialogMode === 'edit' && selectedCollection) {
+    } else if (dialogMode === "edit" && selectedCollection) {
       const updates: UpdateCollectionRequest = {
         description: data.description,
         // directory is immutable - cannot be changed after creation
@@ -495,7 +495,7 @@ export const CollectionsManagementCard: React.FC<
       await onUpdateCollection(selectedCollection.name, updates);
       // Force refresh of files table after updating collection
       setFilesTableKey((prev) => prev + 1);
-    } else if (dialogMode === 'clone' && selectedCollection) {
+    } else if (dialogMode === "clone" && selectedCollection) {
       await onCloneCollection(selectedCollection.name, data.name);
     }
 
@@ -523,20 +523,20 @@ export const CollectionsManagementCard: React.FC<
           {onRefreshCollections && (
             <Button
               onClick={async () => {
-                console.log('🔄 Manual refresh button clicked');
+                console.log("🔄 Manual refresh button clicked");
                 console.log(
-                  '📊 Current collections count:',
+                  "📊 Current collections count:",
                   collections.length,
                 );
                 await onRefreshCollections();
-                console.log('✓ Refresh completed');
+                console.log("✓ Refresh completed");
               }}
               size="sm"
               variant="outline"
               disabled={isLoading}
             >
               <RefreshCw
-                className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+                className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
               />
               Atualizar
             </Button>
@@ -645,7 +645,7 @@ export const CollectionsManagementCard: React.FC<
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
                       onClick={() => {
                         console.log(
-                          '🖱️ Collection row clicked:',
+                          "🖱️ Collection row clicked:",
                           collection.name,
                         );
                         setViewFilesCollection(collection.name);
@@ -695,7 +695,7 @@ export const CollectionsManagementCard: React.FC<
                         {indexedFiles.toLocaleString()}
                       </TableCell>
                       <TableCell
-                        className={`align-middle text-right font-mono text-sm ${pendingFiles > 0 ? 'text-amber-600 font-semibold' : ''}`}
+                        className={`align-middle text-right font-mono text-sm ${pendingFiles > 0 ? "text-amber-600 font-semibold" : ""}`}
                       >
                         {pendingFiles.toLocaleString()}
                       </TableCell>
@@ -703,7 +703,7 @@ export const CollectionsManagementCard: React.FC<
                         {chunkCount.toLocaleString()}
                       </TableCell>
                       <TableCell
-                        className={`align-middle text-right font-mono text-sm ${orphanChunks > 0 ? 'text-orange-600 font-semibold' : ''}`}
+                        className={`align-middle text-right font-mono text-sm ${orphanChunks > 0 ? "text-orange-600 font-semibold" : ""}`}
                       >
                         {orphanChunks.toLocaleString()}
                       </TableCell>
@@ -755,14 +755,14 @@ export const CollectionsManagementCard: React.FC<
                                   disabled={isRunning}
                                 >
                                   <RefreshCw
-                                    className={`h-4 w-4 ${isRunning ? 'animate-spin' : ''}`}
+                                    className={`h-4 w-4 ${isRunning ? "animate-spin" : ""}`}
                                   />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
                                 {isRunning
-                                  ? 'Ingestão em andamento...'
-                                  : 'Executar ingestão'}
+                                  ? "Ingestão em andamento..."
+                                  : "Executar ingestão"}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -801,11 +801,11 @@ export const CollectionsManagementCard: React.FC<
             collectionName={viewFilesCollection}
             collectionDirectory={
               collections.find((c) => c.name === viewFilesCollection)
-                ?.directory || ''
+                ?.directory || ""
             }
             collectionModel={
               collections.find((c) => c.name === viewFilesCollection)
-                ?.embeddingModel || ''
+                ?.embeddingModel || ""
             }
             directorySizeMB={
               collections.find((c) => c.name === viewFilesCollection)?.stats
@@ -826,7 +826,7 @@ export const CollectionsManagementCard: React.FC<
       {collections.length > 0 && (
         <div className="mt-6">
           <IngestionLogsViewer
-            collectionFilter={searchTerm || 'all'}
+            collectionFilter={searchTerm || "all"}
             refreshInterval={5000}
             maxLogs={100}
           />

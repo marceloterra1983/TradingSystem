@@ -1,18 +1,18 @@
 /**
  * useFallbackState - Reusable fallback state hook
- * 
+ *
  * Quick Win P2-6: Extract fallback pattern with loading/error/empty states
  * ROI: 3.8x (30min to implement, saves 1.9h in future maintenance)
- * 
+ *
  * @example
- * const { data, loading, error, isEmpty, setData, setLoading, setError, reset } = 
+ * const { data, loading, error, isEmpty, setData, setLoading, setError, reset } =
  *   useFallbackState<User[]>([], {
  *     onError: (err) => console.error(err),
  *     loadingDelay: 300
  *   });
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export interface UseFallbackStateOptions<T> {
   /** Callback when error occurs */
@@ -49,7 +49,7 @@ export interface UseFallbackStateReturn<T> {
  */
 export function useFallbackState<T>(
   initialData: T,
-  options: UseFallbackStateOptions<T> = {}
+  options: UseFallbackStateOptions<T> = {},
 ): UseFallbackStateReturn<T> {
   const { onError, loadingDelay = 0, isEmpty: customIsEmpty } = options;
 
@@ -82,7 +82,7 @@ export function useFallbackState<T>(
 
       setLoadingInternal(isLoading);
     },
-    [loadingDelay]
+    [loadingDelay],
   );
 
   // Set error with callback
@@ -95,7 +95,7 @@ export function useFallbackState<T>(
         onError(err instanceof Error ? err : errorMessage);
       }
     },
-    [onError]
+    [onError],
   );
 
   // Reset to initial state
@@ -107,7 +107,7 @@ export function useFallbackState<T>(
 
   // Execute async function with automatic state management
   const execute = useCallback(
-    async <R = void,>(fn: () => Promise<R>): Promise<R | undefined> => {
+    async <R = void>(fn: () => Promise<R>): Promise<R | undefined> => {
       setLoading(true);
       setError(null);
 
@@ -125,7 +125,7 @@ export function useFallbackState<T>(
         return undefined;
       }
     },
-    [setLoading, setError]
+    [setLoading, setError],
   );
 
   // Check if data is empty
@@ -133,8 +133,8 @@ export function useFallbackState<T>(
     ? customIsEmpty(data)
     : data == null ||
       (Array.isArray(data) && data.length === 0) ||
-      (typeof data === 'object' && Object.keys(data).length === 0) ||
-      (typeof data === 'string' && data.trim() === '');
+      (typeof data === "object" && Object.keys(data).length === 0) ||
+      (typeof data === "string" && data.trim() === "");
 
   // Cleanup
   useEffect(() => {
@@ -160,4 +160,3 @@ export function useFallbackState<T>(
     execute,
   };
 }
-

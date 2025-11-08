@@ -1,18 +1,18 @@
 /**
  * SignalRow Component
- * 
+ *
  * Extracted from SignalsTable.tsx (Refactoring: 2025-11-04)
  * Displays a single signal row in the table
- * 
+ *
  * Updated 2025-11-04: 8 mandatory columns format
  * Horário/Data | Ativo | Compra Menor | Compra Maior | Alvo1 | Alvo2 | Alvo Final | Stop
- * 
+ *
  * @module tp-capital/components
  */
 
-import { AlertTriangle } from 'lucide-react';
-import { formatNumber, formatTimestamp } from '../utils';
-import { SignalRow as SignalRowType } from '../types';
+import { AlertTriangle } from "lucide-react";
+import { formatNumber, formatTimestamp } from "../utils";
+import { SignalRow as SignalRowType } from "../types";
 
 export interface SignalRowProps {
   signal: SignalRowType;
@@ -20,10 +20,10 @@ export interface SignalRowProps {
 
 /**
  * Signal row component with mandatory 8 columns
- * 
+ *
  * @param props - Signal data
  * @returns Table row component
- * 
+ *
  * @example
  * ```tsx
  * <SignalRow signal={signalData} />
@@ -31,9 +31,12 @@ export interface SignalRowProps {
  */
 export function SignalRow(props: SignalRowProps) {
   const { signal } = props;
-  
+
   const formattedTimestamp = formatTimestamp(signal.ts);
-  const isDateObject = formattedTimestamp && typeof formattedTimestamp === 'object' && 'time' in formattedTimestamp;
+  const isDateObject =
+    formattedTimestamp &&
+    typeof formattedTimestamp === "object" &&
+    "time" in formattedTimestamp;
 
   return (
     <tr className="border-b dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
@@ -109,4 +112,3 @@ export function SignalRow(props: SignalRowProps) {
     </tr>
   );
 }
-

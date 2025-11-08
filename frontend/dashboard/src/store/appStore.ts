@@ -1,11 +1,11 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 export interface Trade {
   symbol: string;
   price: number;
   volume: number;
-  aggressor: 'BUY' | 'SELL';
+  aggressor: "BUY" | "SELL";
   timestamp: string;
 }
 
@@ -16,7 +16,7 @@ export interface Position {
   currentPrice: number;
   pnl: number;
   pnlPercent: number;
-  positionType: 'DAYTRADE' | 'SWING';
+  positionType: "DAYTRADE" | "SWING";
   openedAt: string;
 }
 
@@ -24,12 +24,12 @@ export interface Order {
   orderId: string;
   brokerOrderId?: string;
   symbol: string;
-  side: 'BUY' | 'SELL';
+  side: "BUY" | "SELL";
   quantity: number;
   filledQuantity: number;
   avgFillPrice?: number;
-  status: 'SUBMITTED' | 'FILLED' | 'PARTIAL' | 'CANCELED' | 'REJECTED';
-  orderType: 'MARKET' | 'LIMIT' | 'STOP' | 'STOPLIMIT';
+  status: "SUBMITTED" | "FILLED" | "PARTIAL" | "CANCELED" | "REJECTED";
+  orderType: "MARKET" | "LIMIT" | "STOP" | "STOPLIMIT";
   price?: number;
   stopPrice?: number;
   createdAt: string;
@@ -39,7 +39,7 @@ export interface Order {
 export interface Signal {
   signalId: string;
   symbol: string;
-  action: 'BUY' | 'SELL' | 'HOLD';
+  action: "BUY" | "SELL" | "HOLD";
   confidence: number;
   priceTarget?: number;
   stopLoss?: number;
@@ -68,9 +68,9 @@ export interface PortInfo {
   name: string;
   description: string;
   url: string;
-  status: 'online' | 'offline' | 'unknown';
+  status: "online" | "offline" | "unknown";
   lastUpdated: string;
-  category: 'core' | 'api' | 'monitoring' | 'database' | 'ui';
+  category: "core" | "api" | "monitoring" | "database" | "ui";
 }
 
 interface TradingState {
@@ -105,7 +105,7 @@ interface TradingState {
   setPorts: (ports: PortInfo[]) => void;
   updatePortStatus: (
     port: number,
-    status: 'online' | 'offline' | 'unknown',
+    status: "online" | "offline" | "unknown",
   ) => void;
   reset: () => void;
 }
@@ -130,7 +130,7 @@ export const useTradingStore = create<TradingState>()(
             trades: [trade, ...state.trades].slice(0, 1000), // Keep last 1000 trades
           }),
           false,
-          'addTrade',
+          "addTrade",
         ),
 
       updateOrderBook: (orderBook) =>
@@ -141,10 +141,10 @@ export const useTradingStore = create<TradingState>()(
             return { orderBooks: newOrderBooks };
           },
           false,
-          'updateOrderBook',
+          "updateOrderBook",
         ),
 
-      setPositions: (positions) => set({ positions }, false, 'setPositions'),
+      setPositions: (positions) => set({ positions }, false, "setPositions"),
 
       updatePosition: (position) =>
         set(
@@ -160,10 +160,10 @@ export const useTradingStore = create<TradingState>()(
             return { positions: [...state.positions, position] };
           },
           false,
-          'updatePosition',
+          "updatePosition",
         ),
 
-      setOrders: (orders) => set({ orders }, false, 'setOrders'),
+      setOrders: (orders) => set({ orders }, false, "setOrders"),
 
       updateOrder: (order) =>
         set(
@@ -179,7 +179,7 @@ export const useTradingStore = create<TradingState>()(
             return { orders: [...state.orders, order] };
           },
           false,
-          'updateOrder',
+          "updateOrder",
         ),
 
       addSignal: (signal) =>
@@ -188,11 +188,11 @@ export const useTradingStore = create<TradingState>()(
             signals: [signal, ...state.signals].slice(0, 100), // Keep last 100 signals
           }),
           false,
-          'addSignal',
+          "addSignal",
         ),
 
       setRiskLimits: (limits) =>
-        set({ riskLimits: limits }, false, 'setRiskLimits'),
+        set({ riskLimits: limits }, false, "setRiskLimits"),
 
       addConnectedSymbol: (symbol) =>
         set(
@@ -200,7 +200,7 @@ export const useTradingStore = create<TradingState>()(
             connectedSymbols: new Set([...state.connectedSymbols, symbol]),
           }),
           false,
-          'addConnectedSymbol',
+          "addConnectedSymbol",
         ),
 
       removeConnectedSymbol: (symbol) =>
@@ -211,12 +211,12 @@ export const useTradingStore = create<TradingState>()(
             return { connectedSymbols: newSymbols };
           },
           false,
-          'removeConnectedSymbol',
+          "removeConnectedSymbol",
         ),
 
-      clearTrades: () => set({ trades: [] }, false, 'clearTrades'),
+      clearTrades: () => set({ trades: [] }, false, "clearTrades"),
 
-      setPorts: (ports) => set({ ports }, false, 'setPorts'),
+      setPorts: (ports) => set({ ports }, false, "setPorts"),
 
       updatePortStatus: (port, status) =>
         set(
@@ -229,7 +229,7 @@ export const useTradingStore = create<TradingState>()(
             return { ports: newPorts };
           },
           false,
-          'updatePortStatus',
+          "updatePortStatus",
         ),
 
       reset: () =>
@@ -245,9 +245,9 @@ export const useTradingStore = create<TradingState>()(
             ports: [],
           },
           false,
-          'reset',
+          "reset",
         ),
     }),
-    { name: 'TradingStore' },
+    { name: "TradingStore" },
   ),
 );

@@ -1,13 +1,16 @@
-import { randomUUID } from 'crypto';
-import { ensurePrismaConnection, getPrismaClient } from '../../utils/prismaClient.js';
-import { logger } from '../../config/logger.js';
+import { randomUUID } from "crypto";
+import {
+  ensurePrismaConnection,
+  getPrismaClient,
+} from "../../utils/prismaClient.js";
+import { logger } from "../../config/logger.js";
 
 const ORDERABLE_FIELDS = new Map([
-  ['created_at', 'createdAt'],
-  ['updated_at', 'updatedAt'],
-  ['size_bytes', 'sizeBytes'],
-  ['download_count', 'downloadCount'],
-  ['original_name', 'originalName']
+  ["created_at", "createdAt"],
+  ["updated_at", "updatedAt"],
+  ["size_bytes", "sizeBytes"],
+  ["download_count", "downloadCount"],
+  ["original_name", "originalName"],
 ]);
 
 function normalizeFile(record) {
@@ -31,13 +34,13 @@ function normalizeFile(record) {
     checksum: record.checksum ?? null,
     created_at: record.createdAt,
     updated_at: record.updatedAt,
-    designated_timestamp: record.designatedTimestamp ?? null
+    designated_timestamp: record.designatedTimestamp ?? null,
   };
 }
 
-function mapOrderBy(orderBy = 'created_at', orderDirection = 'DESC') {
-  const field = ORDERABLE_FIELDS.get(orderBy.toLowerCase()) ?? 'createdAt';
-  const direction = orderDirection?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+function mapOrderBy(orderBy = "created_at", orderDirection = "DESC") {
+  const field = ORDERABLE_FIELDS.get(orderBy.toLowerCase()) ?? "createdAt";
+  const direction = orderDirection?.toLowerCase() === "asc" ? "asc" : "desc";
   return { [field]: direction };
 }
 
@@ -90,8 +93,8 @@ function buildWhere(filters = {}) {
 
   if (filters.search) {
     where.OR = [
-      { originalName: { contains: filters.search, mode: 'insensitive' } },
-      { description: { contains: filters.search, mode: 'insensitive' } }
+      { originalName: { contains: filters.search, mode: "insensitive" } },
+      { description: { contains: filters.search, mode: "insensitive" } },
     ];
   }
 
@@ -139,8 +142,10 @@ class PostgresFilesRepository {
         downloadCount: fileData.download_count ?? 0,
         checksum: fileData.checksum ?? null,
         createdAt: fileData.created_at ? new Date(fileData.created_at) : now,
-        designatedTimestamp: fileData.designated_timestamp ? new Date(fileData.designated_timestamp) : now
-      }
+        designatedTimestamp: fileData.designated_timestamp
+          ? new Date(fileData.designated_timestamp)
+          : now,
+      },
     });
 
     return normalizeFile(record);
@@ -149,7 +154,7 @@ class PostgresFilesRepository {
   async findById(id) {
     await this.ensureConnected();
     const record = await this.client.documentationFile.findUnique({
-      where: { id }
+      where: { id },
     });
     return normalizeFile(record);
   }
@@ -164,7 +169,7 @@ class PostgresFilesRepository {
       where,
       orderBy: mapOrderBy(filters.order_by, filters.order_direction),
       take,
-      skip
+      skip,
     });
 
     return records.map(normalizeFile);
@@ -191,12 +196,12 @@ class PostgresFilesRepository {
     }
 
     if (Object.keys(data).length === 0) {
-      throw new Error('No valid fields to update');
+      throw new Error("No valid fields to update");
     }
 
     const record = await this.client.documentationFile.update({
       where: { id },
-      data
+      data,
     });
 
     return normalizeFile(record);
@@ -205,7 +210,7 @@ class PostgresFilesRepository {
   async delete(id) {
     await this.ensureConnected();
     await this.client.documentationFile.delete({
-      where: { id }
+      where: { id },
     });
     return true;
   }
@@ -216,23 +221,35 @@ class PostgresFilesRepository {
       where: { id },
       data: {
         downloadCount: {
-          increment: 1
-        }
-      }
+          increment: 1,
+        },
+      },
     });
     return true;
   }
 
   async findByIdea(ideaId) {
-    return this.findAll({ idea_id: ideaId, order_by: 'created_at', order_direction: 'ASC' });
+    return this.findAll({
+      idea_id: ideaId,
+      order_by: "created_at",
+      order_direction: "ASC",
+    });
   }
 
   async findBySystem(systemId) {
-    return this.findAll({ system_id: systemId, order_by: 'created_at', order_direction: 'ASC' });
+    return this.findAll({
+      system_id: systemId,
+      order_by: "created_at",
+      order_direction: "ASC",
+    });
   }
 
   async findByUploader(uploader) {
-    return this.findAll({ uploaded_by: uploader, order_by: 'created_at', order_direction: 'DESC' });
+    return this.findAll({
+      uploaded_by: uploader,
+      order_by: "created_at",
+      order_direction: "DESC",
+    });
   }
 
   async findByMimeType(mimeType) {
@@ -240,7 +257,11 @@ class PostgresFilesRepository {
   }
 
   async findPublic() {
-    return this.findAll({ is_public: true, order_by: 'download_count', order_direction: 'DESC' });
+    return this.findAll({
+      is_public: true,
+      order_by: "download_count",
+      order_direction: "DESC",
+    });
   }
 
   async search(query) {
@@ -250,8 +271,8 @@ class PostgresFilesRepository {
   async findLargeFiles(thresholdBytes = 10 * 1024 * 1024) {
     return this.findAll({
       min_size: thresholdBytes,
-      order_by: 'size_bytes',
-      order_direction: 'DESC'
+      order_by: "size_bytes",
+      order_direction: "DESC",
     });
   }
 
@@ -260,7 +281,7 @@ class PostgresFilesRepository {
 
     const totals = await this.client.documentationFile.aggregate({
       _count: { _all: true },
-      _sum: { sizeBytes: true, downloadCount: true }
+      _sum: { sizeBytes: true, downloadCount: true },
     });
 
     const grouped = await this.client.documentationFile.findMany({
@@ -269,8 +290,8 @@ class PostgresFilesRepository {
         uploadedBy: true,
         isPublic: true,
         sizeBytes: true,
-        downloadCount: true
-      }
+        downloadCount: true,
+      },
     });
 
     const stats = {
@@ -281,20 +302,20 @@ class PostgresFilesRepository {
       by_uploader: {},
       by_visibility: {
         public: { count: 0, size: 0 },
-        private: { count: 0, size: 0 }
+        private: { count: 0, size: 0 },
       },
       size_distribution: {
         small: 0,
         medium: 0,
         large: 0,
-        xlarge: 0
-      }
+        xlarge: 0,
+      },
     };
 
     grouped.forEach((item) => {
-      const mime = item.mimeType || 'unknown';
-      const uploader = item.uploadedBy || 'unknown';
-      const visibility = item.isPublic ? 'public' : 'private';
+      const mime = item.mimeType || "unknown";
+      const uploader = item.uploadedBy || "unknown";
+      const visibility = item.isPublic ? "public" : "private";
       const size = Number(item.sizeBytes ?? 0n);
 
       stats.by_mime_type[mime] = (stats.by_mime_type[mime] || 0) + 1;
@@ -319,6 +340,6 @@ class PostgresFilesRepository {
 }
 
 export function createPostgresFilesRepository() {
-  logger.info('Using PostgreSQL repository for documentation files');
+  logger.info("Using PostgreSQL repository for documentation files");
   return new PostgresFilesRepository();
 }

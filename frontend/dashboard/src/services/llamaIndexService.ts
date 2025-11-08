@@ -55,14 +55,14 @@ export interface GpuPolicyResponse {
   cooldownSeconds: number;
 }
 
-const DEFAULT_QUERY_URL = 'http://localhost:8202';
-const DEFAULT_PROXY_PATH = '/api/v1/rag';
+const DEFAULT_QUERY_URL = "http://localhost:8202";
+const DEFAULT_PROXY_PATH = "/api/v1/rag";
 
 // UPDATED 2025-11-03: Support for Kong Gateway
-const KONG_GATEWAY_URL = import.meta.env.VITE_KONG_GATEWAY_URL || '';
+const KONG_GATEWAY_URL = import.meta.env.VITE_KONG_GATEWAY_URL || "";
 
-export type ServiceMode = 'auto' | 'proxy' | 'direct' | 'kong';
-let overrideMode: ServiceMode = 'auto';
+export type ServiceMode = "auto" | "proxy" | "direct" | "kong";
+let overrideMode: ServiceMode = "auto";
 
 export function setMode(mode: ServiceMode) {
   overrideMode = mode;
@@ -75,58 +75,58 @@ export function getMode(): ServiceMode {
 type EndpointPlan = {
   primary: string;
   secondary?: string;
-  primaryKind: 'direct' | 'proxy';
+  primaryKind: "direct" | "proxy";
 };
 
 function resolveEndpoints(): EndpointPlan {
   const env = import.meta.env as Record<string, string | undefined>;
-  const useUnified = `${env.VITE_USE_UNIFIED_DOMAIN}`.toLowerCase() === 'true';
+  const useUnified = `${env.VITE_USE_UNIFIED_DOMAIN}`.toLowerCase() === "true";
   const apiBase = env.VITE_API_BASE_URL?.trim();
   const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(
     /\/+$/,
-    '',
+    "",
   );
   const proxy =
     apiBase && apiBase.length > 0
-      ? `${apiBase.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
+      ? `${apiBase.replace(/\/+$/, "")}${DEFAULT_PROXY_PATH}`
       : DEFAULT_PROXY_PATH;
-  
+
   // UPDATED 2025-11-03: Kong Gateway support
-  const kong = KONG_GATEWAY_URL 
-    ? `${KONG_GATEWAY_URL.replace(/\/+$/, '')}${DEFAULT_PROXY_PATH}`
-    : '';
-  
+  const kong = KONG_GATEWAY_URL
+    ? `${KONG_GATEWAY_URL.replace(/\/+$/, "")}${DEFAULT_PROXY_PATH}`
+    : "";
+
   const preferProxy = Boolean(proxy);
   const preferKong = Boolean(kong);
 
   // Priority: kong > proxy > direct
-  if (overrideMode === 'kong' && kong) {
-    return { primary: kong, secondary: proxy || direct, primaryKind: 'proxy' };
+  if (overrideMode === "kong" && kong) {
+    return { primary: kong, secondary: proxy || direct, primaryKind: "proxy" };
   }
-  if (overrideMode === 'proxy' && proxy) {
-    return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
+  if (overrideMode === "proxy" && proxy) {
+    return { primary: proxy, secondary: direct, primaryKind: "proxy" };
   }
-  if (overrideMode === 'direct') {
-    return { primary: direct, secondary: proxy || kong, primaryKind: 'direct' };
+  if (overrideMode === "direct") {
+    return { primary: direct, secondary: proxy || kong, primaryKind: "direct" };
   }
 
   // Auto mode: prefer Kong > unified proxy > proxy > direct
   if (preferKong) {
-    return { primary: kong, secondary: proxy || direct, primaryKind: 'proxy' };
+    return { primary: kong, secondary: proxy || direct, primaryKind: "proxy" };
   }
   if (useUnified && proxy) {
-    return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
+    return { primary: proxy, secondary: direct, primaryKind: "proxy" };
   }
   if (preferProxy) {
-    return { primary: proxy, secondary: direct, primaryKind: 'proxy' };
+    return { primary: proxy, secondary: direct, primaryKind: "proxy" };
   }
 
-  return { primary: direct, secondary: undefined, primaryKind: 'direct' };
+  return { primary: direct, secondary: undefined, primaryKind: "direct" };
 }
 
 function authHeader(): HeadersInit {
   const env = import.meta.env as Record<string, string | undefined>;
-  const token = (env.VITE_LLAMAINDEX_JWT || '').trim();
+  const token = (env.VITE_LLAMAINDEX_JWT || "").trim();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -141,11 +141,11 @@ async function fetchWithFallback(
   const plan = resolveEndpoints();
   const auth = authHeader();
 
-  const attempts: Array<{ base: string; kind: 'primary' | 'secondary' }> = [
-    { base: plan.primary, kind: 'primary' },
+  const attempts: Array<{ base: string; kind: "primary" | "secondary" }> = [
+    { base: plan.primary, kind: "primary" },
   ];
   if (plan.secondary) {
-    attempts.push({ base: plan.secondary, kind: 'secondary' });
+    attempts.push({ base: plan.secondary, kind: "secondary" });
   }
 
   let lastError: Error | null = null;
@@ -160,7 +160,7 @@ async function fetchWithFallback(
         ...init,
         headers,
       });
-      if (response.ok || attempt.kind === 'secondary' || !plan.secondary) {
+      if (response.ok || attempt.kind === "secondary" || !plan.secondary) {
         if (!response.ok) {
           const text = await response.text();
           throw new Error(
@@ -181,9 +181,9 @@ async function fetchWithFallback(
         `Request failed (${response.status}). Retrying via fallback.`,
       );
     } catch (err: any) {
-      if (attempt.kind === 'secondary' || !plan.secondary) {
-        if (err?.name === 'TypeError' && err?.message === 'Failed to fetch') {
-          throw new Error('Não foi possível conectar ao serviço LlamaIndex.');
+      if (attempt.kind === "secondary" || !plan.secondary) {
+        if (err?.name === "TypeError" && err?.message === "Failed to fetch") {
+          throw new Error("Não foi possível conectar ao serviço LlamaIndex.");
         }
         throw err instanceof Error ? err : new Error(String(err));
       }
@@ -191,7 +191,7 @@ async function fetchWithFallback(
     }
   }
 
-  throw lastError || new Error('Falha ao contatar serviço LlamaIndex.');
+  throw lastError || new Error("Falha ao contatar serviço LlamaIndex.");
 }
 
 export async function search(
@@ -204,10 +204,10 @@ export async function search(
     max_results: String(maxResults),
   });
   if (collection) {
-    params.set('collection', collection);
+    params.set("collection", collection);
   }
   const resp = await fetchWithFallback(`/search?${params.toString()}`, {
-    method: 'GET',
+    method: "GET",
   });
   if (!resp.ok) {
     const msg = await resp.text();
@@ -228,9 +228,9 @@ export async function queryDocs(
   if (collection) {
     payload.collection = collection;
   }
-  const resp = await fetchWithFallback('/query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const resp = await fetchWithFallback("/query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   if (!resp.ok) {
@@ -241,7 +241,7 @@ export async function queryDocs(
 }
 
 export async function fetchGpuPolicy(): Promise<GpuPolicyResponse> {
-  const resp = await fetchWithFallback('/gpu/policy', { method: 'GET' });
+  const resp = await fetchWithFallback("/gpu/policy", { method: "GET" });
   if (!resp.ok) {
     const msg = await resp.text();
     throw new Error(`GPU policy fetch failed (${resp.status}): ${msg}`);
@@ -252,51 +252,51 @@ export async function fetchGpuPolicy(): Promise<GpuPolicyResponse> {
 export function endpointInfo(): {
   url: string;
   mode: ServiceMode;
-  resolved: 'proxy' | 'direct';
+  resolved: "proxy" | "direct";
 } {
   const plan = resolveEndpoints();
-  const resolved: 'proxy' | 'direct' =
-    plan.primaryKind === 'proxy' ? 'proxy' : 'direct';
+  const resolved: "proxy" | "direct" =
+    plan.primaryKind === "proxy" ? "proxy" : "direct";
   return { url: plan.primary, mode: overrideMode, resolved };
 }
 
 export async function checkHealth(): Promise<{
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   message: string;
   url: string;
-  resolved: 'proxy' | 'direct';
+  resolved: "proxy" | "direct";
 }> {
   const env = import.meta.env as Record<string, string | undefined>;
-  const apiBase = (env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+  const apiBase = (env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
   const direct = (env.VITE_LLAMAINDEX_QUERY_URL || DEFAULT_QUERY_URL).replace(
     /\/+$/,
-    '',
+    "",
   );
   const info = endpointInfo();
-  let url = '';
-  if (info.resolved === 'proxy') {
+  let url = "";
+  if (info.resolved === "proxy") {
     // documentation-api health endpoint (supports unified domain + local dev proxy)
     url = apiBase
       ? `${apiBase}/api/v1/rag/status/health`
-      : '/api/v1/rag/status/health';
+      : "/api/v1/rag/status/health";
   } else {
     url = `${direct}/health`;
   }
   try {
-    const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+    const resp = await fetch(url, { method: "GET", cache: "no-store" });
     if (resp.ok || resp.status === 304) {
-      return { status: 'ok', message: 'OK', url, resolved: info.resolved };
+      return { status: "ok", message: "OK", url, resolved: info.resolved };
     }
     return {
-      status: 'error',
+      status: "error",
       message: `HTTP ${resp.status}`,
       url,
       resolved: info.resolved,
     };
   } catch (e: any) {
     return {
-      status: 'error',
-      message: e?.message || 'Network error',
+      status: "error",
+      message: e?.message || "Network error",
       url,
       resolved: info.resolved,
     };

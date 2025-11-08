@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   RefreshCw,
   Server,
   Lightbulb,
   FileText,
   TrendingUp,
-} from 'lucide-react';
-import documentationService from '../../services/documentationService';
+} from "lucide-react";
+import documentationService from "../../services/documentationService";
 
 interface DocumentationStatsPayload {
   systems?: {
@@ -40,11 +40,11 @@ export default function DocumentationStatsPageSimple() {
       if (response.success) {
         setStats(response.data);
       } else {
-        setError('Failed to load statistics');
+        setError("Failed to load statistics");
       }
     } catch (err) {
       setError((err as Error).message);
-      console.error('Error loading statistics:', err);
+      console.error("Error loading statistics:", err);
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function DocumentationStatsPageSimple() {
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>
@@ -163,7 +163,7 @@ export default function DocumentationStatsPageSimple() {
           <div className="text-2xl font-bold">
             {stats.ideas?.completion_rate !== undefined
               ? `${(stats.ideas.completion_rate * 100).toFixed(0)}%`
-              : 'N/A'}
+              : "N/A"}
           </div>
           <p className="text-xs text-gray-500 mt-1">
             {stats.ideas?.by_status?.done || 0} completed
@@ -181,13 +181,13 @@ export default function DocumentationStatsPageSimple() {
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-3 w-3 rounded-full ${
-                      status === 'online'
-                        ? 'bg-green-500'
-                        : status === 'offline'
-                          ? 'bg-red-500'
-                          : status === 'degraded'
-                            ? 'bg-orange-500'
-                            : 'bg-yellow-500'
+                      status === "online"
+                        ? "bg-green-500"
+                        : status === "offline"
+                          ? "bg-red-500"
+                          : status === "degraded"
+                            ? "bg-orange-500"
+                            : "bg-yellow-500"
                     }`}
                   />
                   <span className="text-sm capitalize">{status}</span>
@@ -209,17 +209,17 @@ export default function DocumentationStatsPageSimple() {
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-3 w-3 rounded-full ${
-                      status === 'done'
-                        ? 'bg-green-500'
-                        : status === 'in_progress'
-                          ? 'bg-blue-500'
-                          : status === 'cancelled'
-                            ? 'bg-red-500'
-                            : 'bg-gray-500'
+                      status === "done"
+                        ? "bg-green-500"
+                        : status === "in_progress"
+                          ? "bg-blue-500"
+                          : status === "cancelled"
+                            ? "bg-red-500"
+                            : "bg-gray-500"
                     }`}
                   />
                   <span className="text-sm capitalize">
-                    {status.replace('_', ' ')}
+                    {status.replace("_", " ")}
                   </span>
                 </div>
                 <span className="text-sm font-semibold">{count as number}</span>
@@ -265,11 +265,11 @@ export default function DocumentationStatsPageSimple() {
                   <div className="flex items-center gap-3">
                     <div
                       className={`h-3 w-3 rounded-full ${
-                        priority === 'high'
-                          ? 'bg-red-500'
-                          : priority === 'medium'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-500'
+                        priority === "high"
+                          ? "bg-red-500"
+                          : priority === "medium"
+                            ? "bg-yellow-500"
+                            : "bg-gray-500"
                       }`}
                     />
                     <span className="text-sm capitalize">{priority}</span>

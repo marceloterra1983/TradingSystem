@@ -1,5 +1,5 @@
-import { TradingCard } from './TradingCard';
-import { TradingData } from '../../hooks/useTradingData';
+import { TradingCard } from "./TradingCard";
+import { TradingData } from "../../hooks/useTradingData";
 
 // ✅ Componente funcional seguindo as regras React do Playbooks
 interface TradingListProps {
@@ -19,7 +19,7 @@ export function TradingList({
   onCardClick,
   loading = false,
   error,
-  className = '',
+  className = "",
 }: TradingListProps) {
   // ✅ Loading state
   if (loading) {
@@ -114,4 +114,4 @@ export function TradingList({
 }
 
 // ✅ PropTypes equivalent com TypeScript
-TradingList.displayName = 'TradingList';
+TradingList.displayName = "TradingList";

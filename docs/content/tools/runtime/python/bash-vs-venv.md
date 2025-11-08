@@ -1,4 +1,12 @@
-# 🔧 Como Escolher Entre Bash e Venv
+---
+title: "Bash Vs Venv"
+tags: [documentation]
+domain: devops
+type: guide
+summary: "Documentation for Bash Vs Venv"
+status: active
+last_review: "2025-11-08"
+---# 🔧 Como Escolher Entre Bash e Venv
 
 ## ✅ Configuração Atual
 

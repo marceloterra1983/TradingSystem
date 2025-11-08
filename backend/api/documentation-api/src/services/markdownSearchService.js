@@ -1,8 +1,8 @@
-import FlexSearch from 'flexsearch';
-import fs from 'fs/promises';
-import path from 'path';
-import yaml from 'js-yaml';
-import logger from '../utils/logger.js';
+import FlexSearch from "flexsearch";
+import fs from "fs/promises";
+import path from "path";
+import yaml from "js-yaml";
+import logger from "../utils/logger.js";
 
 /**
  * Markdown Search Service
@@ -40,21 +40,21 @@ class MarkdownSearchService {
   initializeIndex() {
     this.index = new FlexSearch.Document({
       document: {
-        id: 'id',
-        index: ['title', 'summary', 'content'],
+        id: "id",
+        index: ["title", "summary", "content"],
         store: [
-          'title',
-          'domain',
-          'type',
-          'tags',
-          'status',
-          'path',
-          'summary',
-          'last_review',
+          "title",
+          "domain",
+          "type",
+          "tags",
+          "status",
+          "path",
+          "summary",
+          "last_review",
         ],
-        tag: 'tags', // Enable tag-based filtering
+        tag: "tags", // Enable tag-based filtering
       },
-      tokenize: 'forward',
+      tokenize: "forward",
       cache: true,
       context: {
         resolution: 9,
@@ -63,7 +63,7 @@ class MarkdownSearchService {
       },
     });
 
-    logger.info('FlexSearch index initialized for markdown documentation');
+    logger.info("FlexSearch index initialized for markdown documentation");
   }
 
   /**
@@ -84,7 +84,7 @@ class MarkdownSearchService {
       const bodyContent = match[2];
       return { frontmatter, content: bodyContent };
     } catch (error) {
-      logger.warn({ err: error }, 'Failed to parse frontmatter');
+      logger.warn({ err: error }, "Failed to parse frontmatter");
       return null;
     }
   }
@@ -98,10 +98,10 @@ class MarkdownSearchService {
   extractContent(content, maxChars = 500) {
     // Remove markdown syntax for cleaner search
     let cleanContent = content
-      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-      .replace(/`[^`]+`/g, '') // Remove inline code
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Replace links with text
-      .replace(/[#*_~]/g, '') // Remove markdown formatting
+      .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+      .replace(/`[^`]+`/g, "") // Remove inline code
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1") // Replace links with text
+      .replace(/[#*_~]/g, "") // Remove markdown formatting
       .trim();
 
     return cleanContent.substring(0, maxChars);
@@ -114,9 +114,9 @@ class MarkdownSearchService {
    */
   generateId(filePath) {
     return filePath
-      .replace(/\\/g, '/')
-      .replace(/\.md$/, '')
-      .replace(/[^a-zA-Z0-9/-]/g, '-')
+      .replace(/\\/g, "/")
+      .replace(/\.md$/, "")
+      .replace(/[^a-zA-Z0-9/-]/g, "-")
       .toLowerCase();
   }
 
@@ -127,14 +127,14 @@ class MarkdownSearchService {
    */
   shouldExclude(filePath) {
     const excludePatterns = [
-      'node_modules',
-      '.git',
-      'build',
-      'dist',
-      '.next',
-      'coverage',
-      'temp',
-      'tmp',
+      "node_modules",
+      ".git",
+      "build",
+      "dist",
+      ".next",
+      "coverage",
+      "temp",
+      "tmp",
     ];
 
     return excludePatterns.some((pattern) => filePath.includes(pattern));
@@ -163,13 +163,16 @@ class MarkdownSearchService {
           files.push(...subFiles);
         } else if (
           entry.isFile() &&
-          (entry.name.endsWith('.md') || entry.name.endsWith('.mdx') || entry.name.endsWith('.txt') || entry.name.endsWith('.pdf'))
+          (entry.name.endsWith(".md") ||
+            entry.name.endsWith(".mdx") ||
+            entry.name.endsWith(".txt") ||
+            entry.name.endsWith(".pdf"))
         ) {
           files.push(fullPath);
         }
       }
     } catch (error) {
-      logger.warn({ err: error, dir }, 'Failed to scan directory');
+      logger.warn({ err: error, dir }, "Failed to scan directory");
     }
 
     return files;
@@ -182,14 +185,14 @@ class MarkdownSearchService {
   async indexMarkdownFiles() {
     // Prevent concurrent reindexing
     if (this.reindexLock) {
-      logger.warn('Reindexing already in progress, skipping');
-      return { error: 'Reindexing in progress' };
+      logger.warn("Reindexing already in progress, skipping");
+      return { error: "Reindexing in progress" };
     }
 
     // Debounce reindexing (max once per minute)
     if (this.lastReindexTime && Date.now() - this.lastReindexTime < 60000) {
-      logger.warn('Reindex called too soon, skipping');
-      return { error: 'Reindex rate limit' };
+      logger.warn("Reindex called too soon, skipping");
+      return { error: "Reindex rate limit" };
     }
 
     this.reindexLock = true;
@@ -202,7 +205,7 @@ class MarkdownSearchService {
 
       // Scan for markdown files
       const files = await this.scanDirectory(this.docsDir);
-      logger.info({ fileCount: files.length }, 'Scanning markdown files');
+      logger.info({ fileCount: files.length }, "Scanning markdown files");
 
       let indexed = 0;
       const domains = new Set();
@@ -213,11 +216,11 @@ class MarkdownSearchService {
 
       for (const filePath of files) {
         try {
-          const content = await fs.readFile(filePath, 'utf-8');
+          const content = await fs.readFile(filePath, "utf-8");
           const parsed = this.parseFrontmatter(content);
 
           if (!parsed || !parsed.frontmatter) {
-            errors.push({ file: filePath, error: 'No frontmatter' });
+            errors.push({ file: filePath, error: "No frontmatter" });
             continue;
           }
 
@@ -225,21 +228,28 @@ class MarkdownSearchService {
 
           // Basic required field
           if (!frontmatter.title) {
-            errors.push({ file: filePath, error: 'Missing title in frontmatter' });
+            errors.push({
+              file: filePath,
+              error: "Missing title in frontmatter",
+            });
             continue;
           }
 
           // Derive missing fields from v2 schema or path
           const relativeFromDocs = path
             .relative(this.docsDir, filePath)
-            .replace(/\\/g, '/');
-          const segments = relativeFromDocs.split('/');
+            .replace(/\\/g, "/");
+          const segments = relativeFromDocs.split("/");
 
-          const derivedDomain = frontmatter.domain || (segments[0] || 'shared');
+          const derivedDomain = frontmatter.domain || segments[0] || "shared";
           const derivedType =
-            frontmatter.type || (segments[1] && segments[1] !== '_category_.json' ? segments[1] : 'guide');
-          const summary = frontmatter.summary || frontmatter.description || '';
-          const lastReview = frontmatter.last_review || frontmatter.lastReviewed || '';
+            frontmatter.type ||
+            (segments[1] && segments[1] !== "_category_.json"
+              ? segments[1]
+              : "guide");
+          const summary = frontmatter.summary || frontmatter.description || "";
+          const lastReview =
+            frontmatter.last_review || frontmatter.lastReviewed || "";
 
           // Generate document ID
           const id = this.generateId(path.relative(this.docsDir, filePath));
@@ -247,9 +257,9 @@ class MarkdownSearchService {
           // Generate relative path for links
           const relativePath = path
             .relative(this.docsDir, filePath)
-            .replace(/\\/g, '/')
-            .replace(/\.md$/, '');
-          const cleanPath = relativePath.replace(/\.mdx$/, '');
+            .replace(/\\/g, "/")
+            .replace(/\.md$/, "");
+          const cleanPath = relativePath.replace(/\.mdx$/, "");
 
           // Extract content for full-text search
           const searchContent = this.extractContent(bodyContent);
@@ -261,7 +271,7 @@ class MarkdownSearchService {
             domain: derivedDomain,
             type: derivedType,
             tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
-            status: frontmatter.status || 'active',
+            status: frontmatter.status || "active",
             path: `/docs/${cleanPath}`,
             summary,
             content: searchContent,
@@ -283,7 +293,7 @@ class MarkdownSearchService {
           indexed++;
         } catch (error) {
           errors.push({ file: filePath, error: error.message });
-          logger.warn({ err: error, file: filePath }, 'Failed to index file');
+          logger.warn({ err: error, file: filePath }, "Failed to index file");
         }
       }
 
@@ -312,7 +322,7 @@ class MarkdownSearchService {
           errors: errors.length,
           duration_ms: duration,
         },
-        'Markdown indexing complete'
+        "Markdown indexing complete",
       );
 
       return {
@@ -338,7 +348,7 @@ class MarkdownSearchService {
    */
   async search(query, filters = {}, limit = 20) {
     if (!this.index) {
-      throw new Error('Index not initialized');
+      throw new Error("Index not initialized");
     }
 
     try {
@@ -400,7 +410,7 @@ class MarkdownSearchService {
       // Additional tags filtering (if not handled by FlexSearch tag search)
       if (filters.tags && filters.tags.length > 0) {
         documents = documents.filter((doc) =>
-          filters.tags.every((tag) => doc.tags.includes(tag))
+          filters.tags.every((tag) => doc.tags.includes(tag)),
         );
       }
 
@@ -422,7 +432,7 @@ class MarkdownSearchService {
         })),
       };
     } catch (error) {
-      logger.error({ err: error, query, filters }, 'Search failed');
+      logger.error({ err: error, query, filters }, "Search failed");
       throw error;
     }
   }
@@ -432,7 +442,7 @@ class MarkdownSearchService {
    * @param {string} query - Search query (optional)
    * @returns {Promise<object>} - Facet counts
    */
-  async getFacets(query = '') {
+  async getFacets(query = "") {
     // Check cache
     if (
       this.facetCache.data &&
@@ -502,7 +512,7 @@ class MarkdownSearchService {
 
       return facets;
     } catch (error) {
-      logger.error({ err: error, query }, 'Failed to compute facets');
+      logger.error({ err: error, query }, "Failed to compute facets");
       throw error;
     }
   }
@@ -523,7 +533,7 @@ class MarkdownSearchService {
       const results = this.index.search({
         query: query.trim(),
         limit,
-        index: ['title'], // Search only in titles
+        index: ["title"], // Search only in titles
         enrich: true, // Get enriched results
       });
 
@@ -551,7 +561,7 @@ class MarkdownSearchService {
 
       return suggestions.slice(0, limit);
     } catch (error) {
-      logger.error({ err: error, query }, 'Suggestion failed');
+      logger.error({ err: error, query }, "Suggestion failed");
       return [];
     }
   }
@@ -561,7 +571,7 @@ class MarkdownSearchService {
    * @returns {Promise<object>} - Reindexing statistics
    */
   async reindex() {
-    logger.info('Manual reindex triggered');
+    logger.info("Manual reindex triggered");
     return this.indexMarkdownFiles();
   }
 
@@ -587,4 +597,3 @@ class MarkdownSearchService {
 }
 
 export default MarkdownSearchService;
-

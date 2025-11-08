@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Button } from '../ui/button';
+import { useCallback, useState } from "react";
+import { Button } from "../ui/button";
 import {
   useTelegramGatewayDeleteMessage,
   useTelegramGatewayMessages,
@@ -8,22 +8,22 @@ import {
   useTelegramGatewayReprocess,
   TelegramGatewayMessage,
   TelegramGatewayMessagesFilters,
-} from '../../hooks/useTelegramGateway';
-import { StatusSummary } from './telegram-gateway/StatusSummary';
-import { MetricsOverview } from './telegram-gateway/MetricsOverview';
-import { MessagesTable } from './telegram-gateway/MessagesTable';
-import { FailureQueueCard } from './telegram-gateway/FailureQueueCard';
-import { SessionCard } from './telegram-gateway/SessionCard';
-import { ChannelsManagerCard } from './telegram-gateway/ChannelsManagerCard';
-import { AuthenticationCard } from './telegram-gateway/AuthenticationCard';
-import { ConnectionDiagnosticCard } from './telegram-gateway/ConnectionDiagnosticCard';
-import { RefreshCw } from 'lucide-react';
+} from "../../hooks/useTelegramGateway";
+import { StatusSummary } from "./telegram-gateway/StatusSummary";
+import { MetricsOverview } from "./telegram-gateway/MetricsOverview";
+import { MessagesTable } from "./telegram-gateway/MessagesTable";
+import { FailureQueueCard } from "./telegram-gateway/FailureQueueCard";
+import { SessionCard } from "./telegram-gateway/SessionCard";
+import { ChannelsManagerCard } from "./telegram-gateway/ChannelsManagerCard";
+import { AuthenticationCard } from "./telegram-gateway/AuthenticationCard";
+import { ConnectionDiagnosticCard } from "./telegram-gateway/ConnectionDiagnosticCard";
+import { RefreshCw } from "lucide-react";
 
 export function TelegramGatewayPage() {
   const [messageFilters, setMessageFilters] =
     useState<TelegramGatewayMessagesFilters>({
       limit: 25,
-      sort: 'desc',
+      sort: "desc",
     });
 
   const {
@@ -52,7 +52,7 @@ export function TelegramGatewayPage() {
     async (message: TelegramGatewayMessage) => {
       await reprocessMutation.mutateAsync({
         id: message.id,
-        requestedBy: 'dashboard',
+        requestedBy: "dashboard",
       });
     },
     [reprocessMutation],
@@ -61,9 +61,9 @@ export function TelegramGatewayPage() {
   const handleDelete = useCallback(
     async (message: TelegramGatewayMessage) => {
       const confirmed =
-        typeof window !== 'undefined'
+        typeof window !== "undefined"
           ? window.confirm(
-              'Tem certeza que deseja marcar esta mensagem como removida?',
+              "Tem certeza que deseja marcar esta mensagem como removida?",
             )
           : true;
       if (!confirmed) return;

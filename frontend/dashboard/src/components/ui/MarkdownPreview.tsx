@@ -5,9 +5,9 @@
  * This component is lazy-loaded to reduce initial bundle size (~63KB savings).
  */
 
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -16,7 +16,7 @@ interface MarkdownPreviewProps {
 
 export function MarkdownPreview({
   content,
-  className = '',
+  className = "",
 }: MarkdownPreviewProps) {
   return (
     <div

@@ -61,5 +61,4 @@ export interface MessageFilters {
   searchTerm: string;
 }
 
-export type GatewayStatus = 'healthy' | 'unhealthy' | 'unknown';
-
+export type GatewayStatus = "healthy" | "unhealthy" | "unknown";

@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { WorkspaceListSection } from './workspace/components/WorkspaceListSection';
-import { StatusBoardSection } from './workspace/components/StatusBoardSection';
-import { CategoriesSection } from './workspace/components/CategoriesSection';
-import { useInitializeWorkspaceEvents } from './workspace/store/useWorkspaceStore';
+import { useMemo } from "react";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { WorkspaceListSection } from "./workspace/components/WorkspaceListSection";
+import { StatusBoardSection } from "./workspace/components/StatusBoardSection";
+import { CategoriesSection } from "./workspace/components/CategoriesSection";
+import { useInitializeWorkspaceEvents } from "./workspace/store/useWorkspaceStore";
 
 /**
  * Workspace Page - CRUD Table + Kanban Board + Categories Management
@@ -21,15 +21,15 @@ export function WorkspacePageNew() {
   const sections = useMemo(
     () => [
       {
-        id: 'workspace-categories',
+        id: "workspace-categories",
         content: <CategoriesSection />,
       },
       {
-        id: 'workspace-table',
+        id: "workspace-table",
         content: <WorkspaceListSection />,
       },
       {
-        id: 'workspace-kanban',
+        id: "workspace-kanban",
         content: <StatusBoardSection />,
       },
     ],

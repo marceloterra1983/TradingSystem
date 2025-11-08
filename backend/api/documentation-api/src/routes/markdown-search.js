@@ -1,6 +1,6 @@
-import express from 'express';
-import { query, validationResult } from 'express-validator';
-import logger from '../utils/logger.js';
+import express from "express";
+import { query, validationResult } from "express-validator";
+import logger from "../utils/logger.js";
 
 const router = express.Router();
 
@@ -21,21 +21,21 @@ export function initializeRoute(deps) {
  * Validation middleware
  */
 const validateSearch = [
-  query('q').optional().isString().isLength({ min: 2, max: 200 }).trim(),
-  query('domain').optional().isString().trim().isLength({ min: 1, max: 100 }),
-  query('type').optional().isString().trim().isLength({ min: 1, max: 100 }),
-  query('tags').optional().isString(),
-  query('status').optional().isString().trim().isLength({ min: 1, max: 50 }),
-  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  query("q").optional().isString().isLength({ min: 2, max: 200 }).trim(),
+  query("domain").optional().isString().trim().isLength({ min: 1, max: 100 }),
+  query("type").optional().isString().trim().isLength({ min: 1, max: 100 }),
+  query("tags").optional().isString(),
+  query("status").optional().isString().trim().isLength({ min: 1, max: 50 }),
+  query("limit").optional().isInt({ min: 1, max: 100 }).toInt(),
 ];
 
 const validateSuggest = [
-  query('q').isString().isLength({ min: 2, max: 200 }).trim(),
-  query('limit').optional().isInt({ min: 1, max: 10 }).toInt(),
+  query("q").isString().isLength({ min: 2, max: 200 }).trim(),
+  query("limit").optional().isInt({ min: 1, max: 10 }).toInt(),
 ];
 
 const validateFacets = [
-  query('q').optional().isString().isLength({ min: 0, max: 200 }).trim(),
+  query("q").optional().isString().isLength({ min: 0, max: 200 }).trim(),
 ];
 
 /**
@@ -51,7 +51,7 @@ const reindexRateLimit = (() => {
       const waitTime = Math.ceil((minInterval - (now - lastReindex)) / 1000);
       return res.status(429).json({
         success: false,
-        error: 'Rate limit exceeded',
+        error: "Rate limit exceeded",
         message: `Please wait ${waitTime} seconds before reindexing again`,
       });
     }
@@ -64,7 +64,7 @@ const reindexRateLimit = (() => {
  * Main search endpoint
  * GET /api/v1/docs/search?q=query&domain=frontend&type=guide&tags=ui,dark-mode&status=active&limit=20
  */
-router.get('/search', validateSearch, async (req, res) => {
+router.get("/search", validateSearch, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -76,12 +76,12 @@ router.get('/search', validateSearch, async (req, res) => {
   const startTime = Date.now();
 
   try {
-    const { q = '', domain, type, tags, status, limit = 20 } = req.query;
+    const { q = "", domain, type, tags, status, limit = 20 } = req.query;
 
     // Parse tags
     const tagArray = tags
       ? tags
-          .split(',')
+          .split(",")
           .map((t) => t.trim())
           .filter((t) => t.length > 0)
           .slice(0, 10) // Max 10 tags
@@ -111,7 +111,7 @@ router.get('/search', validateSearch, async (req, res) => {
         resultCount: results.total,
         duration_ms: duration,
       },
-      'Search executed'
+      "Search executed",
     );
 
     res.json({
@@ -124,15 +124,15 @@ router.get('/search', validateSearch, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error({ err: error }, 'Search endpoint error');
+    logger.error({ err: error }, "Search endpoint error");
 
     if (searchMetrics) {
-      searchMetrics.recordError('search');
+      searchMetrics.recordError("search");
     }
 
     res.status(500).json({
       success: false,
-      error: 'Search failed',
+      error: "Search failed",
       message: error.message,
     });
   }
@@ -142,7 +142,7 @@ router.get('/search', validateSearch, async (req, res) => {
  * Facets endpoint
  * GET /api/v1/docs/facets?q=query
  */
-router.get('/facets', validateFacets, async (req, res) => {
+router.get("/facets", validateFacets, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -152,7 +152,7 @@ router.get('/facets', validateFacets, async (req, res) => {
   }
 
   try {
-    const { q = '' } = req.query;
+    const { q = "" } = req.query;
 
     const facets = await markdownSearchService.getFacets(q);
 
@@ -161,22 +161,22 @@ router.get('/facets', validateFacets, async (req, res) => {
       searchMetrics.recordFacetRequest();
     }
 
-    logger.debug({ query: q, facetCounts: facets }, 'Facets computed');
+    logger.debug({ query: q, facetCounts: facets }, "Facets computed");
 
     res.json({
       success: true,
       facets,
     });
   } catch (error) {
-    logger.error({ err: error }, 'Facets endpoint error');
+    logger.error({ err: error }, "Facets endpoint error");
 
     if (searchMetrics) {
-      searchMetrics.recordError('facets');
+      searchMetrics.recordError("facets");
     }
 
     res.status(500).json({
       success: false,
-      error: 'Facets computation failed',
+      error: "Facets computation failed",
       message: error.message,
     });
   }
@@ -186,7 +186,7 @@ router.get('/facets', validateFacets, async (req, res) => {
  * Autocomplete suggestions endpoint
  * GET /api/v1/docs/suggest?q=dar&limit=5
  */
-router.get('/suggest', validateSuggest, async (req, res) => {
+router.get("/suggest", validateSuggest, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -202,7 +202,7 @@ router.get('/suggest', validateSuggest, async (req, res) => {
 
     logger.debug(
       { query: q, suggestionCount: suggestions.length },
-      'Suggestions generated'
+      "Suggestions generated",
     );
 
     res.json({
@@ -210,11 +210,11 @@ router.get('/suggest', validateSuggest, async (req, res) => {
       suggestions,
     });
   } catch (error) {
-    logger.error({ err: error }, 'Suggest endpoint error');
+    logger.error({ err: error }, "Suggest endpoint error");
 
     res.status(500).json({
       success: false,
-      error: 'Suggestion failed',
+      error: "Suggestion failed",
       message: error.message,
     });
   }
@@ -224,9 +224,9 @@ router.get('/suggest', validateSuggest, async (req, res) => {
  * Reindex endpoint
  * POST /api/v1/docs/reindex
  */
-router.post('/reindex', reindexRateLimit, async (req, res) => {
+router.post("/reindex", reindexRateLimit, async (req, res) => {
   try {
-    logger.info('Reindex triggered via API');
+    logger.info("Reindex triggered via API");
 
     const result = await markdownSearchService.reindex();
 
@@ -242,11 +242,11 @@ router.post('/reindex', reindexRateLimit, async (req, res) => {
       indexed: result,
     });
   } catch (error) {
-    logger.error({ err: error }, 'Reindex endpoint error');
+    logger.error({ err: error }, "Reindex endpoint error");
 
     res.status(500).json({
       success: false,
-      error: 'Reindex failed',
+      error: "Reindex failed",
       message: error.message,
     });
   }
@@ -256,7 +256,7 @@ router.post('/reindex', reindexRateLimit, async (req, res) => {
  * Stats endpoint (optional, for monitoring)
  * GET /api/v1/docs/stats
  */
-router.get('/stats', async (req, res) => {
+router.get("/stats", async (req, res) => {
   try {
     const stats = markdownSearchService.getStats();
 
@@ -265,19 +265,14 @@ router.get('/stats', async (req, res) => {
       stats,
     });
   } catch (error) {
-    logger.error({ err: error }, 'Stats endpoint error');
+    logger.error({ err: error }, "Stats endpoint error");
 
     res.status(500).json({
       success: false,
-      error: 'Failed to get stats',
+      error: "Failed to get stats",
       message: error.message,
     });
   }
 });
 
 export default router;
-
-
-
-
-

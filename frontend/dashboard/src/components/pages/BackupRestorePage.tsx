@@ -1,11 +1,11 @@
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
-import { PlaceholderSection } from '../ui/placeholder-section';
-import { Save, RefreshCcw } from 'lucide-react';
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
+import { PlaceholderSection } from "../ui/placeholder-section";
+import { Save, RefreshCcw } from "lucide-react";
 
 export function BackupRestorePage() {
   const sections = [
     {
-      id: 'backups',
+      id: "backups",
       content: (
         <PlaceholderSection
           cardId="backup-list"
@@ -16,7 +16,7 @@ export function BackupRestorePage() {
       ),
     },
     {
-      id: 'restore',
+      id: "restore",
       content: (
         <PlaceholderSection
           cardId="backup-restore"

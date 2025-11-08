@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   RefreshCcw,
   Play,
@@ -6,15 +6,15 @@ import {
   FileText,
   Plus,
   FolderOpen,
-} from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from '../ui/tooltip';
+} from "../ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -22,16 +22,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from "../ui/select";
 
 export interface LlamaIndexServiceStatus {
   ok: boolean;
@@ -116,7 +116,7 @@ export interface CollectionDocumentStats {
 
 export interface CollectionLogState {
   lines: string[];
-  status: 'idle' | 'running' | 'success' | 'error';
+  status: "idle" | "running" | "success" | "error";
   visible: boolean;
   lastUpdated: number;
 }
@@ -181,20 +181,20 @@ export function LlamaIndexIngestionStatusCard({
   onDeleteCollection,
   creatingCollection = false,
 }: LlamaIndexIngestionStatusCardProps): JSX.Element {
-  const HIDDEN_COLLECTIONS = React.useMemo(() => new Set(['repository']), []);
+  const HIDDEN_COLLECTIONS = React.useMemo(() => new Set(["repository"]), []);
 
   // State for create collection dialog
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
-  const [newCollectionName, setNewCollectionName] = React.useState('');
+  const [newCollectionName, setNewCollectionName] = React.useState("");
   const [availableModels, setAvailableModels] = React.useState<ModelOption[]>(
     [],
   );
-  const [selectedModelName, setSelectedModelName] = React.useState('');
+  const [selectedModelName, setSelectedModelName] = React.useState("");
   const [selectedModelDimensions, setSelectedModelDimensions] = React.useState<
     number | null
   >(null);
   const [selectedDirectory, setSelectedDirectory] =
-    React.useState('docs/content');
+    React.useState("docs/content");
   const [loadingModels, setLoadingModels] = React.useState(false);
   const directoryInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -206,9 +206,9 @@ export function LlamaIndexIngestionStatusCard({
       const webkitPath = (file as any).webkitRelativePath;
       if (webkitPath) {
         // Extract directory path (remove filename)
-        const parts = webkitPath.split('/');
+        const parts = webkitPath.split("/");
         parts.pop(); // Remove filename
-        const dirPath = parts.join('/') || '.';
+        const dirPath = parts.join("/") || ".";
         setSelectedDirectory(dirPath);
       }
     }
@@ -218,7 +218,7 @@ export function LlamaIndexIngestionStatusCard({
   React.useEffect(() => {
     if (createDialogOpen && availableModels.length === 0) {
       setLoadingModels(true);
-      fetch('/api/v1/rag/collections/models')
+      fetch("/api/v1/rag/collections/models")
         .then((res) => res.json())
         .then((data) => {
           const configuredModels = Array.isArray(data.configured)
@@ -227,31 +227,31 @@ export function LlamaIndexIngestionStatusCard({
           const configuredLookup = new Map<string, any>();
           configuredModels.forEach((cfg: any) => {
             if (!cfg) return;
-            const cfgName = typeof cfg.name === 'string' ? cfg.name : null;
+            const cfgName = typeof cfg.name === "string" ? cfg.name : null;
             const cfgFullName =
-              typeof cfg.fullName === 'string' ? cfg.fullName : null;
+              typeof cfg.fullName === "string" ? cfg.fullName : null;
             if (cfgName) configuredLookup.set(cfgName, cfg);
             if (cfgFullName) configuredLookup.set(cfgFullName, cfg);
           });
 
           const modelsData = data.models || [];
           const modelOptions: ModelOption[] = modelsData.map((model: any) => {
-            if (typeof model === 'string') {
+            if (typeof model === "string") {
               return { name: model };
             }
             const name = model.name || model.displayName || String(model);
             const rawDim = model.dimensions;
             let parsedDimensions: number | undefined;
-            if (typeof rawDim === 'number') {
+            if (typeof rawDim === "number") {
               parsedDimensions = rawDim;
-            } else if (typeof rawDim === 'string') {
+            } else if (typeof rawDim === "string") {
               const numeric = Number(rawDim);
               if (Number.isFinite(numeric)) {
                 parsedDimensions = numeric;
               }
             }
             if (parsedDimensions === undefined) {
-              const baseName = name.split(':')[0];
+              const baseName = name.split(":")[0];
               const candidates = [
                 model.fullName,
                 model.displayName,
@@ -264,7 +264,7 @@ export function LlamaIndexIngestionStatusCard({
                 if (!cfg) continue;
                 const cfgDim = cfg.dimensions;
                 const numeric =
-                  typeof cfgDim === 'number' ? cfgDim : Number(cfgDim);
+                  typeof cfgDim === "number" ? cfgDim : Number(cfgDim);
                 if (Number.isFinite(numeric)) {
                   parsedDimensions = Number(numeric);
                   break;
@@ -283,19 +283,19 @@ export function LlamaIndexIngestionStatusCard({
           if (modelOptions.length > 0) {
             setSelectedModelName(modelOptions[0].name);
             setSelectedModelDimensions(
-              typeof modelOptions[0].dimensions === 'number'
+              typeof modelOptions[0].dimensions === "number"
                 ? modelOptions[0].dimensions
                 : null,
             );
           }
         })
         .catch((err) => {
-          console.error('Failed to fetch models:', err);
+          console.error("Failed to fetch models:", err);
           // Fallback models
           const fallbackModels: ModelOption[] = [
-            { name: 'nomic-embed-text', dimensions: 768 },
-            { name: 'mxbai-embed-large', dimensions: 384 },
-            { name: 'embeddinggemma', dimensions: 768 },
+            { name: "nomic-embed-text", dimensions: 768 },
+            { name: "mxbai-embed-large", dimensions: 384 },
+            { name: "embeddinggemma", dimensions: 768 },
           ];
           setAvailableModels(fallbackModels);
           setSelectedModelName(fallbackModels[0].name);
@@ -324,19 +324,19 @@ export function LlamaIndexIngestionStatusCard({
     );
 
     // Reset form and close dialog
-    setNewCollectionName('');
+    setNewCollectionName("");
     if (availableModels.length > 0) {
       setSelectedModelName(availableModels[0].name);
       setSelectedModelDimensions(
-        typeof availableModels[0].dimensions === 'number'
+        typeof availableModels[0].dimensions === "number"
           ? availableModels[0].dimensions
           : null,
       );
     } else {
-      setSelectedModelName('');
+      setSelectedModelName("");
       setSelectedModelDimensions(null);
     }
-    setSelectedDirectory('docs/content');
+    setSelectedDirectory("docs/content");
     setCreateDialogOpen(false);
   };
   const visibleCollections = React.useMemo(
@@ -354,7 +354,7 @@ export function LlamaIndexIngestionStatusCard({
     ) {
       return selectedCollection;
     }
-    return visibleCollections[0]?.name ?? collectionOptions[0]?.name ?? '';
+    return visibleCollections[0]?.name ?? collectionOptions[0]?.name ?? "";
   })();
 
   const docStats =
@@ -370,7 +370,7 @@ export function LlamaIndexIngestionStatusCard({
 
   const statsKey = effectiveCollectionValue
     ? effectiveCollectionValue.toLowerCase()
-    : '';
+    : "";
   const docDirectory = docStats?.docsDirectory ?? null;
   const docError = docStats?.error ?? null;
   const docScanTruncated = Boolean(docStats?.indexedScanTruncated);
@@ -382,28 +382,28 @@ export function LlamaIndexIngestionStatusCard({
   const docIndexedSample = resetAppliedSelected ? [] : docIndexedSampleRaw;
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB'];
+    const sizes = ["B", "KB", "MB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
   // Create unified file list with status
   const indexedSet = new Set(docIndexedSample);
-  const [sortBy, setSortBy] = React.useState<'path' | 'size' | 'status'>(
-    'path',
+  const [sortBy, setSortBy] = React.useState<"path" | "size" | "status">(
+    "path",
   );
-  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>(
-    'asc',
+  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+    "asc",
   );
 
-  const handleSort = (column: 'path' | 'size' | 'status') => {
+  const handleSort = (column: "path" | "size" | "status") => {
     if (sortBy === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortBy(column);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -417,18 +417,18 @@ export function LlamaIndexIngestionStatusCard({
     return list.sort((a, b) => {
       let comparison = 0;
 
-      if (sortBy === 'path') {
+      if (sortBy === "path") {
         comparison = a.path.localeCompare(b.path);
-      } else if (sortBy === 'size') {
+      } else if (sortBy === "size") {
         comparison = a.size - b.size;
-      } else if (sortBy === 'status') {
+      } else if (sortBy === "status") {
         // true (indexed) = 1, false (pendente) = 0
         // ASC: pendente (0) antes de indexed (1)
         // DESC: indexed (1) antes de pendente (0)
         comparison = (a.indexed ? 1 : 0) - (b.indexed ? 1 : 0);
       }
 
-      return sortDirection === 'asc' ? comparison : -comparison;
+      return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [docAllFiles, indexedSet, sortBy, sortDirection]);
 
@@ -442,10 +442,10 @@ export function LlamaIndexIngestionStatusCard({
             </p>
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span>
-                Última atualização:{' '}
+                Última atualização:{" "}
                 {data?.timestamp
                   ? new Date(data.timestamp).toLocaleString()
-                  : '–'}
+                  : "–"}
               </span>
               <span className="inline-flex items-center gap-1 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
@@ -461,7 +461,7 @@ export function LlamaIndexIngestionStatusCard({
             className="gap-2"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
             Atualizar
           </Button>
@@ -501,10 +501,10 @@ export function LlamaIndexIngestionStatusCard({
                     <div className="flex items-center gap-2">
                       {visibleCollections.length > 0 && (
                         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {visibleCollections.length}{' '}
+                          {visibleCollections.length}{" "}
                           {visibleCollections.length === 1
-                            ? 'coleção'
-                            : 'coleções'}
+                            ? "coleção"
+                            : "coleções"}
                         </span>
                       )}
                       <Button
@@ -566,22 +566,22 @@ export function LlamaIndexIngestionStatusCard({
                             );
                             const docTotal =
                               docOverview &&
-                              typeof docOverview.total === 'number'
+                              typeof docOverview.total === "number"
                                 ? docOverview.total
                                 : 0;
                             const docIndexedRaw =
                               docOverview &&
-                              typeof docOverview.indexed === 'number'
+                              typeof docOverview.indexed === "number"
                                 ? docOverview.indexed
                                 : 0;
                             const docMissingRaw =
                               docOverview &&
-                              typeof docOverview.missing === 'number'
+                              typeof docOverview.missing === "number"
                                 ? docOverview.missing
                                 : Math.max(docTotal - docIndexedRaw, 0);
                             const docOrphansRaw =
                               docOverview &&
-                              typeof docOverview.orphans === 'number'
+                              typeof docOverview.orphans === "number"
                                 ? docOverview.orphans
                                 : 0;
                             const docIndexed = resetApplied ? 0 : docIndexedRaw;
@@ -593,9 +593,9 @@ export function LlamaIndexIngestionStatusCard({
                             const displayChunks =
                               docOverview?.chunks ?? option.count ?? docIndexed;
                             const formatDocValue = (value: number | null) =>
-                              typeof value === 'number'
+                              typeof value === "number"
                                 ? value.toLocaleString()
-                                : '—';
+                                : "—";
                             const logEntry = collectionLogs[statsKey];
                             const logLines = logEntry?.lines ?? [];
                             const logVisible = Boolean(logEntry?.visible);
@@ -615,8 +615,8 @@ export function LlamaIndexIngestionStatusCard({
                                 onClick={() => onCollectionChange(option.name)}
                                 onKeyDown={(event) => {
                                   if (
-                                    event.key === 'Enter' ||
-                                    event.key === ' '
+                                    event.key === "Enter" ||
+                                    event.key === " "
                                   ) {
                                     event.preventDefault();
                                     onCollectionChange(option.name);
@@ -624,8 +624,8 @@ export function LlamaIndexIngestionStatusCard({
                                 }}
                                 className={`cursor-pointer border-t border-slate-200 dark:border-slate-700 transition-colors ${
                                   isActive
-                                    ? 'bg-sky-50 dark:bg-sky-900/30'
-                                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                                    ? "bg-sky-50 dark:bg-sky-900/30"
+                                    : "hover:bg-slate-50 dark:hover:bg-slate-800/60"
                                 }`}
                               >
                                 <td className="px-3 py-2 align-middle text-slate-700 dark:text-slate-200">
@@ -655,7 +655,7 @@ export function LlamaIndexIngestionStatusCard({
                                       {option.embeddingModel}
                                     </Badge>
                                   ) : (
-                                    '—'
+                                    "—"
                                   )}
                                 </td>
                                 <td className="px-3 py-2 align-middle text-slate-500 dark:text-slate-400">
@@ -663,13 +663,13 @@ export function LlamaIndexIngestionStatusCard({
                                     <TooltipTrigger asChild>
                                       <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded cursor-help truncate max-w-[200px] inline-block">
                                         {(option as any).sourceDirectory ||
-                                          'docs/content'}
+                                          "docs/content"}
                                       </code>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p className="font-mono text-xs">
                                         {(option as any).sourceDirectory ||
-                                          'docs/content'}
+                                          "docs/content"}
                                       </p>
                                     </TooltipContent>
                                   </Tooltip>
@@ -680,7 +680,7 @@ export function LlamaIndexIngestionStatusCard({
                                 <td className="px-3 py-2 align-middle text-right text-slate-600 dark:text-slate-300">
                                   <Badge
                                     variant={
-                                      docOrphans > 0 ? 'destructive' : 'outline'
+                                      docOrphans > 0 ? "destructive" : "outline"
                                     }
                                   >
                                     {formatDocValue(docOrphans)}
@@ -698,7 +698,7 @@ export function LlamaIndexIngestionStatusCard({
                                   <div className="flex items-center justify-end gap-1">
                                     <Badge
                                       variant={
-                                        docMissing === 0 ? 'default' : 'outline'
+                                        docMissing === 0 ? "default" : "outline"
                                       }
                                     >
                                       {formatDocValue(docMissing)}
@@ -729,14 +729,14 @@ export function LlamaIndexIngestionStatusCard({
                                             }}
                                           >
                                             <RefreshCcw
-                                              className={`h-4 w-4 text-red-600 dark:text-red-400 ${cleaningOrphans && isActive ? 'animate-spin' : ''}`}
+                                              className={`h-4 w-4 text-red-600 dark:text-red-400 ${cleaningOrphans && isActive ? "animate-spin" : ""}`}
                                             />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                           {cleaningOrphans && isActive
-                                            ? 'Limpando órfãos...'
-                                            : `Limpar ${docOrphans} órfão${docOrphans > 1 ? 's' : ''}`}
+                                            ? "Limpando órfãos..."
+                                            : `Limpar ${docOrphans} órfão${docOrphans > 1 ? "s" : ""}`}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
@@ -756,14 +756,14 @@ export function LlamaIndexIngestionStatusCard({
                                           }}
                                         >
                                           <Play
-                                            className={`h-4 w-4 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'} ${ingesting && isActive ? 'animate-pulse' : ''}`}
+                                            className={`h-4 w-4 ${isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-400"} ${ingesting && isActive ? "animate-pulse" : ""}`}
                                           />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent>
                                         {ingesting && isActive
-                                          ? 'Vetorizando...'
-                                          : 'Iniciar ingestão'}
+                                          ? "Vetorizando..."
+                                          : "Iniciar ingestão"}
                                       </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
@@ -787,8 +787,8 @@ export function LlamaIndexIngestionStatusCard({
                                       </TooltipTrigger>
                                       <TooltipContent>
                                         {deleting
-                                          ? 'Apagando...'
-                                          : 'Apagar coleção'}
+                                          ? "Apagando..."
+                                          : "Apagar coleção"}
                                       </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>
@@ -803,16 +803,16 @@ export function LlamaIndexIngestionStatusCard({
                                           }}
                                         >
                                           <FileText
-                                            className={`h-4 w-4 ${logVisible ? 'text-blue-600 dark:text-blue-400' : logHasContent ? 'text-slate-600 dark:text-slate-400' : 'text-slate-400 dark:text-slate-600'}`}
+                                            className={`h-4 w-4 ${logVisible ? "text-blue-600 dark:text-blue-400" : logHasContent ? "text-slate-600 dark:text-slate-400" : "text-slate-400 dark:text-slate-600"}`}
                                           />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent>
                                         {logHasContent
                                           ? logVisible
-                                            ? 'Ocultar log'
-                                            : 'Mostrar log'
-                                          : 'Nenhum log disponível'}
+                                            ? "Ocultar log"
+                                            : "Mostrar log"
+                                          : "Nenhum log disponível"}
                                       </TooltipContent>
                                     </Tooltip>
                                   </div>
@@ -840,21 +840,21 @@ export function LlamaIndexIngestionStatusCard({
                       return null;
                     }
                     const statusLabel =
-                      logEntry.status === 'running'
-                        ? 'Em execução'
-                        : logEntry.status === 'success'
-                          ? 'Concluído'
-                          : logEntry.status === 'error'
-                            ? 'Erro'
-                            : 'Aguardando';
+                      logEntry.status === "running"
+                        ? "Em execução"
+                        : logEntry.status === "success"
+                          ? "Concluído"
+                          : logEntry.status === "error"
+                            ? "Erro"
+                            : "Aguardando";
                     const statusColor =
-                      logEntry.status === 'running'
-                        ? 'text-amber-400'
-                        : logEntry.status === 'success'
-                          ? 'text-emerald-400'
-                          : logEntry.status === 'error'
-                            ? 'text-red-400'
-                            : 'text-slate-400';
+                      logEntry.status === "running"
+                        ? "text-amber-400"
+                        : logEntry.status === "success"
+                          ? "text-emerald-400"
+                          : logEntry.status === "error"
+                            ? "text-red-400"
+                            : "text-slate-400";
 
                     return (
                       <div
@@ -874,7 +874,7 @@ export function LlamaIndexIngestionStatusCard({
                           </div>
                           <div className="flex items-center gap-2 text-[11px] text-slate-400">
                             <span>
-                              Atualizado em{' '}
+                              Atualizado em{" "}
                               {new Date(
                                 logEntry.lastUpdated,
                               ).toLocaleTimeString()}
@@ -891,7 +891,7 @@ export function LlamaIndexIngestionStatusCard({
                         </div>
                         <div className="max-h-60 overflow-y-auto px-3 py-2">
                           <pre className="whitespace-pre-wrap break-words text-[11px] font-mono leading-relaxed">
-                            {logEntry.lines.join('\n')}
+                            {logEntry.lines.join("\n")}
                           </pre>
                         </div>
                       </div>
@@ -904,7 +904,7 @@ export function LlamaIndexIngestionStatusCard({
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
                   {docDirectory && (
                     <p>
-                      Diretório monitorado:{' '}
+                      Diretório monitorado:{" "}
                       <code className="bg-slate-200/60 dark:bg-slate-800 px-1 py-0.5 rounded font-mono text-[11px] break-all">
                         {docDirectory}
                       </code>
@@ -935,14 +935,14 @@ export function LlamaIndexIngestionStatusCard({
                       <span className="flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                         <span className="text-slate-500 dark:text-slate-400">
-                          {unifiedFileList.filter((f) => f.indexed).length}{' '}
+                          {unifiedFileList.filter((f) => f.indexed).length}{" "}
                           indexados
                         </span>
                       </span>
                       <span className="flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                         <span className="text-slate-500 dark:text-slate-400">
-                          {unifiedFileList.filter((f) => !f.indexed).length}{' '}
+                          {unifiedFileList.filter((f) => !f.indexed).length}{" "}
                           pendentes
                         </span>
                       </span>
@@ -957,39 +957,39 @@ export function LlamaIndexIngestionStatusCard({
                           </th>
                           <th
                             className="text-left p-2 font-semibold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
-                            onClick={() => handleSort('path')}
+                            onClick={() => handleSort("path")}
                           >
                             <div className="flex items-center gap-1">
                               <span>Arquivo</span>
-                              {sortBy === 'path' && (
+                              {sortBy === "path" && (
                                 <span className="text-blue-600 dark:text-blue-400">
-                                  {sortDirection === 'asc' ? '▲' : '▼'}
+                                  {sortDirection === "asc" ? "▲" : "▼"}
                                 </span>
                               )}
                             </div>
                           </th>
                           <th
                             className="text-right p-2 font-semibold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
-                            onClick={() => handleSort('size')}
+                            onClick={() => handleSort("size")}
                           >
                             <div className="flex items-center justify-end gap-1">
                               <span>Tamanho</span>
-                              {sortBy === 'size' && (
+                              {sortBy === "size" && (
                                 <span className="text-blue-600 dark:text-blue-400">
-                                  {sortDirection === 'asc' ? '▲' : '▼'}
+                                  {sortDirection === "asc" ? "▲" : "▼"}
                                 </span>
                               )}
                             </div>
                           </th>
                           <th
                             className="text-center p-2 font-semibold text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none"
-                            onClick={() => handleSort('status')}
+                            onClick={() => handleSort("status")}
                           >
                             <div className="flex items-center justify-center gap-1">
                               <span>Status</span>
-                              {sortBy === 'status' && (
+                              {sortBy === "status" && (
                                 <span className="text-blue-600 dark:text-blue-400">
-                                  {sortDirection === 'asc' ? '▲' : '▼'}
+                                  {sortDirection === "asc" ? "▲" : "▼"}
                                 </span>
                               )}
                             </div>
@@ -1057,61 +1057,61 @@ export function LlamaIndexIngestionStatusCard({
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {lastIngestion.message ||
                 (lastIngestion.success
-                  ? 'Ingestão concluída.'
-                  : 'Ingestão executada.')}
+                  ? "Ingestão concluída."
+                  : "Ingestão executada.")}
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
-              {typeof lastIngestion.documents_loaded === 'number' ? (
+              {typeof lastIngestion.documents_loaded === "number" ? (
                 <div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {lastIngestion.documents_loaded}
-                  </span>{' '}
+                  </span>{" "}
                   documentos carregados
                 </div>
               ) : null}
-              {typeof lastIngestion.chunks_generated === 'number' ? (
+              {typeof lastIngestion.chunks_generated === "number" ? (
                 <div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {lastIngestion.chunks_generated}
-                  </span>{' '}
+                  </span>{" "}
                   fragmentos indexados
                 </div>
-              ) : typeof lastIngestion.documents_processed === 'number' ? (
+              ) : typeof lastIngestion.documents_processed === "number" ? (
                 <div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {lastIngestion.documents_processed}
-                  </span>{' '}
+                  </span>{" "}
                   documentos processados
                 </div>
               ) : null}
               <div>
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {lastIngestion.files_ingested ?? 0}
-                </span>{' '}
+                </span>{" "}
                 arquivos ingeridos
               </div>
-              {typeof lastIngestion.files_considered === 'number' && (
+              {typeof lastIngestion.files_considered === "number" && (
                 <div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {lastIngestion.files_considered}
-                  </span>{' '}
+                  </span>{" "}
                   arquivos considerados
                 </div>
               )}
-              {typeof lastIngestion.files_skipped === 'number' && (
+              {typeof lastIngestion.files_skipped === "number" && (
                 <div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {lastIngestion.files_skipped}
-                  </span>{' '}
+                  </span>{" "}
                   arquivos ignorados
                 </div>
               )}
             </div>
-            {(typeof lastIngestion.chunk_size === 'number' ||
-              typeof lastIngestion.chunk_overlap === 'number') && (
+            {(typeof lastIngestion.chunk_size === "number" ||
+              typeof lastIngestion.chunk_overlap === "number") && (
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Chunking: tamanho {lastIngestion.chunk_size ?? '–'} • overlap{' '}
-                {lastIngestion.chunk_overlap ?? '–'}
+                Chunking: tamanho {lastIngestion.chunk_size ?? "–"} • overlap{" "}
+                {lastIngestion.chunk_overlap ?? "–"}
               </p>
             )}
             {lastIngestion.skipped_files_size?.length ? (
@@ -1172,7 +1172,7 @@ export function LlamaIndexIngestionStatusCard({
                 className="col-span-3"
               />
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Use formato:{' '}
+                Use formato:{" "}
                 <code className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
                   nome__modelo
                 </code>
@@ -1194,7 +1194,7 @@ export function LlamaIndexIngestionStatusCard({
                       (m) => m.name === value,
                     );
                     setSelectedModelDimensions(
-                      typeof modelInfo?.dimensions === 'number' &&
+                      typeof modelInfo?.dimensions === "number" &&
                         Number.isFinite(modelInfo.dimensions)
                         ? modelInfo.dimensions
                         : null,
@@ -1209,9 +1209,9 @@ export function LlamaIndexIngestionStatusCard({
                     {availableModels.map((model) => (
                       <SelectItem key={model.name} value={model.name}>
                         {model.displayName || model.name}
-                        {typeof model.dimensions === 'number'
+                        {typeof model.dimensions === "number"
                           ? ` (${model.dimensions} dims)`
-                          : ''}
+                          : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1244,7 +1244,7 @@ export function LlamaIndexIngestionStatusCard({
                   directory="true"
                   multiple
                   onChange={handleDirectorySelect}
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                 />
                 <Button
                   type="button"
@@ -1267,11 +1267,11 @@ export function LlamaIndexIngestionStatusCard({
                   Sugestões:
                 </span>
                 {[
-                  'docs/content',
-                  'docs/content/api',
-                  'frontend',
-                  'backend',
-                  '.',
+                  "docs/content",
+                  "docs/content/api",
+                  "frontend",
+                  "backend",
+                  ".",
                 ].map((dir) => (
                   <button
                     key={dir}
@@ -1280,7 +1280,7 @@ export function LlamaIndexIngestionStatusCard({
                     onClick={() => setSelectedDirectory(dir)}
                     disabled={creatingCollection}
                   >
-                    {dir === '.' ? '📁 Raiz' : `📁 ${dir}`}
+                    {dir === "." ? "📁 Raiz" : `📁 ${dir}`}
                   </button>
                 ))}
               </div>
@@ -1309,7 +1309,7 @@ export function LlamaIndexIngestionStatusCard({
                   Criando...
                 </>
               ) : (
-                'Criar Coleção'
+                "Criar Coleção"
               )}
             </Button>
           </DialogFooter>

@@ -1,15 +1,15 @@
-import { Activity, Network, PlugZap, ShieldCheck } from 'lucide-react';
-import { CustomizablePageLayout } from '../layout/CustomizablePageLayout';
+import { Activity, Network, PlugZap, ShieldCheck } from "lucide-react";
+import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import ConnectionStatus from '../ConnectionStatus';
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import ConnectionStatus from "../ConnectionStatus";
 
 /**
  * Connections Page (New) - With Customizable Layout
@@ -19,15 +19,15 @@ import ConnectionStatus from '../ConnectionStatus';
 export function ConnectionsPageNew() {
   const sections = [
     {
-      id: 'websocket-status',
+      id: "websocket-status",
       content: <WebSocketStatusSection />,
     },
     {
-      id: 'profitdll-status',
+      id: "profitdll-status",
       content: <ProfitDLLStatusSection />,
     },
     {
-      id: 'service-health',
+      id: "service-health",
       content: <ServiceHealthSection />,
     },
   ];
@@ -76,13 +76,13 @@ function WebSocketStatusSection() {
           <AlertTitle>Healthcheck local</AlertTitle>
           <AlertDescription className="space-y-1 text-xs">
             <p>
-              <span className="font-medium">Status:</span>{' '}
+              <span className="font-medium">Status:</span>{" "}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
                 curl http://localhost:3200/api/health
               </code>
             </p>
             <p>
-              <span className="font-medium">Logs:</span>{' '}
+              <span className="font-medium">Logs:</span>{" "}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
                 docker compose logs backend-workspace -f
               </code>
@@ -147,26 +147,26 @@ function ProfitDLLStatusSection() {
 function ServiceHealthSection() {
   const services = [
     {
-      name: 'Telegram Gateway',
-      description: 'Processa autenticação, mensagens e fila de retry',
-      port: '4010',
-      scope: 'Local',
-      check: 'curl http://localhost:4010/api/telegram-gateway/overview',
+      name: "Telegram Gateway",
+      description: "Processa autenticação, mensagens e fila de retry",
+      port: "4010",
+      scope: "Local",
+      check: "curl http://localhost:4010/api/telegram-gateway/overview",
     },
     {
-      name: 'Workspace API',
-      description: 'Comandos REST e eventos WebSocket do domínio Workspace',
-      port: '3200',
-      scope: 'Local',
-      check: 'curl http://localhost:3200/api/health',
+      name: "Workspace API",
+      description: "Comandos REST e eventos WebSocket do domínio Workspace",
+      port: "3200",
+      scope: "Local",
+      check: "curl http://localhost:3200/api/health",
     },
     {
-      name: 'RAG Service',
+      name: "RAG Service",
       description:
-        'Documentation API + LlamaIndex + RAG (docker-compose.rag.yml)',
-      port: '3402',
-      scope: 'Container',
-      check: 'curl http://localhost:3402/health',
+        "Documentation API + LlamaIndex + RAG (docker-compose.rag.yml)",
+      port: "3402",
+      scope: "Container",
+      check: "curl http://localhost:3402/health",
     },
   ];
 
@@ -207,7 +207,7 @@ function ServiceHealthSection() {
               <p className="mt-3 text-xs">
                 <span className="font-medium text-slate-600 dark:text-slate-300">
                   Healthcheck:
-                </span>{' '}
+                </span>{" "}
                 <code className="rounded bg-slate-100 px-2 py-0.5 text-[11px] dark:bg-slate-900">
                   {service.check}
                 </code>

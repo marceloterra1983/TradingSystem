@@ -1,20 +1,20 @@
-import { getDatabasePool } from './messagesRepository.js';
+import { getDatabasePool } from "./messagesRepository.js";
 
 const parseChannelId = (value) => {
   try {
-    if (typeof value === 'undefined' || value === null) {
-      throw new Error('channelId vazio');
+    if (typeof value === "undefined" || value === null) {
+      throw new Error("channelId vazio");
     }
     const asString = String(value).trim();
     if (!asString) {
-      throw new Error('channelId vazio');
+      throw new Error("channelId vazio");
     }
     // Validate using BigInt but return normalized string to avoid pg BigInt param issues
     const normalized = BigInt(asString).toString();
     return normalized;
   } catch (error) {
     const err = new Error(`Canal inválido: ${error.message}`);
-    err.code = 'INVALID_CHANNEL_ID';
+    err.code = "INVALID_CHANNEL_ID";
     throw err;
   }
 };
@@ -41,7 +41,13 @@ export const listChannels = async ({ logger }) => {
   return result.rows.map(mapChannelRow);
 };
 
-export const createChannel = async ({ channelId, label, description, isActive = true, logger }) => {
+export const createChannel = async ({
+  channelId,
+  label,
+  description,
+  isActive = true,
+  logger,
+}) => {
   const db = await getDatabasePool(logger);
   const numericChannelId = parseChannelId(channelId);
 
@@ -66,33 +72,33 @@ export const updateChannel = async (
   const values = [];
   let index = 1;
 
-  if (typeof channelId !== 'undefined') {
+  if (typeof channelId !== "undefined") {
     updates.push(`channel_id = $${index}`);
     values.push(parseChannelId(channelId));
     index += 1;
   }
 
-  if (typeof label !== 'undefined') {
+  if (typeof label !== "undefined") {
     updates.push(`label = $${index}`);
     values.push(label || null);
     index += 1;
   }
 
-  if (typeof description !== 'undefined') {
+  if (typeof description !== "undefined") {
     updates.push(`description = $${index}`);
     values.push(description || null);
     index += 1;
   }
 
-  if (typeof isActive !== 'undefined') {
+  if (typeof isActive !== "undefined") {
     updates.push(`is_active = $${index}`);
     values.push(Boolean(isActive));
     index += 1;
   }
 
   if (updates.length === 0) {
-    const error = new Error('Nenhuma mudança fornecida');
-    error.code = 'NO_CHANGES';
+    const error = new Error("Nenhuma mudança fornecida");
+    error.code = "NO_CHANGES";
     throw error;
   }
 
@@ -100,15 +106,15 @@ export const updateChannel = async (
 
   const result = await db.query(
     `UPDATE channels
-     SET ${updates.join(', ')}
+     SET ${updates.join(", ")}
      WHERE id = $${index}
      RETURNING id, channel_id, label, description, is_active, created_at, updated_at`,
     values,
   );
 
   if (result.rows.length === 0) {
-    const error = new Error('Canal não encontrado');
-    error.code = 'NOT_FOUND';
+    const error = new Error("Canal não encontrado");
+    error.code = "NOT_FOUND";
     throw error;
   }
 
@@ -123,8 +129,8 @@ export const deleteChannel = async (id, { logger }) => {
   );
 
   if (result.rows.length === 0) {
-    const error = new Error('Canal não encontrado');
-    error.code = 'NOT_FOUND';
+    const error = new Error("Canal não encontrado");
+    error.code = "NOT_FOUND";
     throw error;
   }
 };

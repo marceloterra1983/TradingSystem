@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import { apiConfig, getApiUrl } from '../config/api';
-import bundledMetricsSnapshotJson from '../data/documentation-metrics-fallback.json';
+import axios, { AxiosInstance, AxiosError } from "axios";
+import { apiConfig, getApiUrl } from "../config/api";
+import bundledMetricsSnapshotJson from "../data/documentation-metrics-fallback.json";
 
 export interface System {
   id: string;
@@ -8,7 +8,7 @@ export interface System {
   description?: string;
   url?: string;
   port?: number;
-  status?: 'online' | 'offline' | 'maintenance';
+  status?: "online" | "offline" | "maintenance";
   color?: string;
   tags?: string;
   created_at?: string;
@@ -20,9 +20,9 @@ export interface Idea {
   title: string;
   description?: string;
   system_id?: string;
-  status: 'backlog' | 'in_progress' | 'done' | 'cancelled';
-  priority?: 'low' | 'medium' | 'high';
-  category?: 'api' | 'frontend' | 'backend' | 'infrastructure';
+  status: "backlog" | "in_progress" | "done" | "cancelled";
+  priority?: "low" | "medium" | "high";
+  category?: "api" | "frontend" | "backend" | "infrastructure";
   assigned_to?: string;
   created_by?: string;
   created_at?: string;
@@ -127,7 +127,8 @@ export interface DocumentationMetrics {
   }>;
 }
 
-const BUNDLED_METRICS_SNAPSHOT = bundledMetricsSnapshotJson as DocumentationMetrics;
+const BUNDLED_METRICS_SNAPSHOT =
+  bundledMetricsSnapshotJson as DocumentationMetrics;
 
 export interface SystemHealth {
   id: string;
@@ -173,7 +174,7 @@ export interface DocsHybridItem {
   path: string;
   snippet?: string;
   score: number;
-  source: 'hybrid' | 'lexical' | 'rag';
+  source: "hybrid" | "lexical" | "rag";
   components: { semantic: boolean; lexical: boolean };
   tags?: string[];
   domain?: string;
@@ -204,38 +205,38 @@ export interface DocsFacets {
 }
 
 const STATIC_METRICS_PATHS = [
-  '/docs/dashboard/metrics.json',
-  '/dashboard/metrics.json',
-  '/docs/metrics/index.json',
-  '/metrics/index.json',
+  "/docs/dashboard/metrics.json",
+  "/dashboard/metrics.json",
+  "/docs/metrics/index.json",
+  "/metrics/index.json",
 ];
 
-const DOCUMENTATION_METRICS_PATH = '/api/v1/docs/health/dashboard-metrics';
+const DOCUMENTATION_METRICS_PATH = "/api/v1/docs/health/dashboard-metrics";
 const ABSOLUTE_URL_REGEX = /^https?:\/\//i;
 const FALLBACK_DOCS_API_BASES = [
-  'http://localhost:3405',
-  'http://127.0.0.1:3405',
-  'http://localhost:3401',
-  'http://127.0.0.1:3401',
+  "http://localhost:3405",
+  "http://127.0.0.1:3405",
+  "http://localhost:3401",
+  "http://127.0.0.1:3401",
 ];
 const FALLBACK_DOCS_STATIC_BASES = [
-  'http://localhost:3404',
-  'http://127.0.0.1:3404',
+  "http://localhost:3404",
+  "http://127.0.0.1:3404",
 ];
 
 type MetricsEndpointAttempt = {
-  type: 'client' | 'absolute';
+  type: "client" | "absolute";
   url: string;
   label: string;
 };
 
 const joinUrl = (base: string, path: string) => {
-  const sanitizedBase = base.replace(/\/+$/, '');
-  const sanitizedPath = path.replace(/^\/+/, '');
+  const sanitizedBase = base.replace(/\/+$/, "");
+  const sanitizedPath = path.replace(/^\/+/, "");
   return `${sanitizedBase}/${sanitizedPath}`;
 };
 
-const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
 const resolveAbsoluteBase = (value?: string | null): string | null => {
   if (!value) {
@@ -244,7 +245,11 @@ const resolveAbsoluteBase = (value?: string | null): string | null => {
   if (ABSOLUTE_URL_REGEX.test(value)) {
     return trimTrailingSlash(value);
   }
-  if (value.startsWith('/') && typeof window !== 'undefined' && window.location?.origin) {
+  if (
+    value.startsWith("/") &&
+    typeof window !== "undefined" &&
+    window.location?.origin
+  ) {
     return trimTrailingSlash(`${window.location.origin}${value}`);
   }
   return null;
@@ -257,7 +262,7 @@ const buildDocumentationApiBases = (primaryBase?: string | null): string[] => {
     bases.add(resolvedPrimary);
   }
 
-  const configuredBase = resolveAbsoluteBase(getApiUrl('documentation'));
+  const configuredBase = resolveAbsoluteBase(getApiUrl("documentation"));
   if (configuredBase) {
     bases.add(configuredBase);
   }
@@ -272,29 +277,33 @@ const buildDocumentationApiBases = (primaryBase?: string | null): string[] => {
     bases.add(docsPortalApi);
   }
 
-  if (typeof window !== 'undefined' && window.location?.origin) {
+  if (typeof window !== "undefined" && window.location?.origin) {
     bases.add(trimTrailingSlash(`${window.location.origin}/api/docs`));
-    bases.add(trimTrailingSlash(`${window.location.origin}/docs/api/documentation-api`));
+    bases.add(
+      trimTrailingSlash(`${window.location.origin}/docs/api/documentation-api`),
+    );
   }
 
-  FALLBACK_DOCS_API_BASES.forEach((fallback) => bases.add(trimTrailingSlash(fallback)));
+  FALLBACK_DOCS_API_BASES.forEach((fallback) =>
+    bases.add(trimTrailingSlash(fallback)),
+  );
 
   return Array.from(bases);
 };
 
 const buildStaticMetricsUrls = (): string[] => {
   const candidates = new Set<string>();
-  const normalizedDocsUrl = (apiConfig.docsUrl || '').replace(/\/+$/, '');
+  const normalizedDocsUrl = (apiConfig.docsUrl || "").replace(/\/+$/, "");
 
   const maybeAddAbsolute = (base: string | null | undefined) => {
     if (!base) return;
-    for (const path of ['/dashboard/metrics.json', '/metrics/index.json']) {
+    for (const path of ["/dashboard/metrics.json", "/metrics/index.json"]) {
       candidates.add(joinUrl(base, path));
     }
   };
 
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    const origin = window.location.origin.replace(/\/+$/, '');
+  if (typeof window !== "undefined" && window.location?.origin) {
+    const origin = window.location.origin.replace(/\/+$/, "");
     maybeAddAbsolute(`${origin}/docs`);
     maybeAddAbsolute(origin);
   }
@@ -315,10 +324,10 @@ class DocumentationService {
     // Routes like '/api/v1/docs/facets' will be combined with baseURL to form '/api/docs/api/v1/docs/facets'
     // The Vite proxy strips '/api/docs' and forwards to the backend at http://localhost:3402
     this.client = axios.create({
-      baseURL: getApiUrl('documentation'), // '/api/docs'
+      baseURL: getApiUrl("documentation"), // '/api/docs'
       timeout: 30000, // Increased to 30s for slow searches
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -326,7 +335,7 @@ class DocumentationService {
     this.client.interceptors.request.use(
       (config) => {
         // Add timestamp to prevent caching for non-GET requests
-        if (config.method !== 'get') {
+        if (config.method !== "get") {
           config.params = {
             ...config.params,
             _t: Date.now(),
@@ -343,10 +352,10 @@ class DocumentationService {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        console.error('[Documentation API Error]', error.message);
+        console.error("[Documentation API Error]", error.message);
         if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
         }
         throw error;
       },
@@ -357,16 +366,13 @@ class DocumentationService {
   // SYSTEMS API
   // ====================
 
-  async getSystems(params?: {
-    status?: string;
-    limit?: number;
-  }): Promise<{
+  async getSystems(params?: { status?: string; limit?: number }): Promise<{
     success: boolean;
     data: System[];
     count: number;
     total: number;
   }> {
-    const response = await this.client.get('/api/v1/systems', { params });
+    const response = await this.client.get("/api/v1/systems", { params });
     return response.data;
   }
 
@@ -376,15 +382,15 @@ class DocumentationService {
   }
 
   async createSystem(
-    system: Omit<System, 'id' | 'created_at' | 'updated_at'>,
+    system: Omit<System, "id" | "created_at" | "updated_at">,
   ): Promise<{ success: boolean; data: System }> {
-    const response = await this.client.post('/api/v1/systems', system);
+    const response = await this.client.post("/api/v1/systems", system);
     return response.data;
   }
 
   async updateSystem(
     id: string,
-    updates: Partial<Omit<System, 'id' | 'created_at' | 'updated_at'>>,
+    updates: Partial<Omit<System, "id" | "created_at" | "updated_at">>,
   ): Promise<{ success: boolean; data: System }> {
     const response = await this.client.put(`/api/v1/systems/${id}`, updates);
     return response.data;
@@ -410,7 +416,7 @@ class DocumentationService {
       version?: string;
     },
   ): Promise<SearchResponse> {
-    const response = await this.client.get('/api/v1/search', {
+    const response = await this.client.get("/api/v1/search", {
       params: {
         q: query,
         type: params?.type,
@@ -423,7 +429,7 @@ class DocumentationService {
   }
 
   async getSuggestions(query: string, limit = 5): Promise<SearchSuggestion[]> {
-    const response = await this.client.get('/api/v1/suggest', {
+    const response = await this.client.get("/api/v1/suggest", {
       params: { q: query, limit },
     });
     return response.data?.suggestions ?? [];
@@ -447,23 +453,23 @@ class DocumentationService {
   ): Promise<DocsHybridResponse> {
     const params: Record<string, string | number> = { q: query };
     if (opts?.limit) params.limit = opts.limit;
-    if (typeof opts?.alpha === 'number') params.alpha = opts.alpha;
+    if (typeof opts?.alpha === "number") params.alpha = opts.alpha;
     if (opts?.domain) params.domain = opts.domain;
     if (opts?.type) params.type = opts.type;
     if (opts?.status) params.status = opts.status;
-    if (opts?.tags?.length) params.tags = opts.tags.join(',');
+    if (opts?.tags?.length) params.tags = opts.tags.join(",");
     if (opts?.collection) params.collection = opts.collection;
 
-    const response = await this.client.get('/api/v1/docs/search-hybrid', {
+    const response = await this.client.get("/api/v1/docs/search-hybrid", {
       params,
     });
     return response.data as DocsHybridResponse;
   }
 
-  async getDocsFacets(query = ''): Promise<DocsFacets> {
+  async getDocsFacets(query = ""): Promise<DocsFacets> {
     const params: Record<string, string> = {};
     if (query) params.q = query;
-    const response = await this.client.get('/api/v1/docs/facets', { params });
+    const response = await this.client.get("/api/v1/docs/facets", { params });
     return response.data?.facets as DocsFacets;
   }
 
@@ -498,9 +504,9 @@ class DocumentationService {
     if (opts?.domain) params.domain = opts.domain;
     if (opts?.type) params.type = opts.type;
     if (opts?.status) params.status = opts.status;
-    if (opts?.tags?.length) params.tags = opts.tags.join(',');
+    if (opts?.tags?.length) params.tags = opts.tags.join(",");
 
-    const response = await this.client.get('/api/v1/docs/search', { params });
+    const response = await this.client.get("/api/v1/docs/search", { params });
     return response.data as {
       total: number;
       results: Array<{
@@ -518,11 +524,11 @@ class DocumentationService {
 
   async getDocContent(docPath: string): Promise<string> {
     if (!docPath) {
-      throw new Error('Caminho do documento não informado');
+      throw new Error("Caminho do documento não informado");
     }
 
     const stripPrefix = (value: string) => {
-      const withoutLeading = value.replace(/^\/+/, '').replace(/^docs\//, '');
+      const withoutLeading = value.replace(/^\/+/, "").replace(/^docs\//, "");
       try {
         return decodeURIComponent(withoutLeading);
       } catch {
@@ -531,11 +537,11 @@ class DocumentationService {
     };
 
     const base = stripPrefix(docPath);
-    const segments = base.split('/').filter(Boolean);
+    const segments = base.split("/").filter(Boolean);
     const baseCandidates = new Set<string>();
     if (base) baseCandidates.add(base);
     if (segments.length > 1) {
-      baseCandidates.add(segments.slice(1).join('/'));
+      baseCandidates.add(segments.slice(1).join("/"));
     }
     baseCandidates.add(`versioned_docs/${base}`);
 
@@ -544,7 +550,7 @@ class DocumentationService {
       if (!candidate) {
         return;
       }
-      if (candidate.endsWith('.md') || candidate.endsWith('.mdx')) {
+      if (candidate.endsWith(".md") || candidate.endsWith(".mdx")) {
         pathCandidates.add(candidate);
       } else {
         pathCandidates.add(`${candidate}.mdx`);
@@ -555,14 +561,14 @@ class DocumentationService {
     let lastError: unknown;
     for (const candidate of pathCandidates) {
       try {
-        const response = await this.client.get('/api/v1/docs/content', {
+        const response = await this.client.get("/api/v1/docs/content", {
           params: { path: candidate },
         });
         const content = (response.data as { content?: string })?.content;
-        if (typeof content === 'string') {
+        if (typeof content === "string") {
           return content;
         }
-        lastError = new Error('Documento retornado sem conteúdo');
+        lastError = new Error("Documento retornado sem conteúdo");
       } catch (error) {
         lastError = error;
       }
@@ -594,12 +600,12 @@ class DocumentationService {
     count: number;
     total: number;
   }> {
-    const response = await this.client.get('/api/v1/ideas', { params });
+    const response = await this.client.get("/api/v1/ideas", { params });
     return response.data;
   }
 
   async getKanbanBoard(): Promise<{ success: boolean; data: KanbanBoard }> {
-    const response = await this.client.get('/api/v1/ideas/kanban');
+    const response = await this.client.get("/api/v1/ideas/kanban");
     return response.data;
   }
 
@@ -609,15 +615,15 @@ class DocumentationService {
   }
 
   async createIdea(
-    idea: Omit<Idea, 'id' | 'created_at' | 'updated_at' | 'completed_at'>,
+    idea: Omit<Idea, "id" | "created_at" | "updated_at" | "completed_at">,
   ): Promise<{ success: boolean; data: Idea }> {
-    const response = await this.client.post('/api/v1/ideas', idea);
+    const response = await this.client.post("/api/v1/ideas", idea);
     return response.data;
   }
 
   async updateIdea(
     id: string,
-    updates: Partial<Omit<Idea, 'id' | 'created_at'>>,
+    updates: Partial<Omit<Idea, "id" | "created_at">>,
   ): Promise<{ success: boolean; data: Idea }> {
     const response = await this.client.put(`/api/v1/ideas/${id}`, updates);
     return response.data;
@@ -639,10 +645,10 @@ class DocumentationService {
   ): Promise<{ success: boolean; data: FileMetadata[] }> {
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append('files', file);
+      formData.append("files", file);
     });
     if (uploadedBy) {
-      formData.append('uploaded_by', uploadedBy);
+      formData.append("uploaded_by", uploadedBy);
     }
 
     const response = await this.client.post(
@@ -650,7 +656,7 @@ class DocumentationService {
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       },
     );
@@ -666,7 +672,7 @@ class DocumentationService {
 
   async downloadFile(fileId: string): Promise<Blob> {
     const response = await this.client.get(`/api/v1/files/${fileId}`, {
-      responseType: 'blob',
+      responseType: "blob",
     });
     return response.data;
   }
@@ -688,7 +694,7 @@ class DocumentationService {
       by_idea: Record<string, number>;
     };
   }> {
-    const response = await this.client.get('/api/v1/files/stats');
+    const response = await this.client.get("/api/v1/files/stats");
     return response.data;
   }
 
@@ -709,14 +715,14 @@ class DocumentationService {
     cached?: boolean;
     generated_at?: string;
   }> {
-    const response = await this.client.get('/api/v1/stats');
+    const response = await this.client.get("/api/v1/stats");
     return response.data;
   }
 
   async getActivityTimeline(
     days: number = 30,
   ): Promise<{ success: boolean; data: ActivityData[]; cached?: boolean }> {
-    const response = await this.client.get('/api/v1/stats/activity', {
+    const response = await this.client.get("/api/v1/stats/activity", {
       params: { days },
     });
     return response.data;
@@ -729,7 +735,7 @@ class DocumentationService {
       overall_health: string;
     };
   }> {
-    const response = await this.client.get('/api/v1/stats/health');
+    const response = await this.client.get("/api/v1/stats/health");
     return response.data;
   }
 
@@ -741,27 +747,31 @@ class DocumentationService {
     success: boolean;
     data: DocumentationMetrics;
   }> {
-    const attempts = this.buildDocumentationMetricsAttempts(DOCUMENTATION_METRICS_PATH);
+    const attempts = this.buildDocumentationMetricsAttempts(
+      DOCUMENTATION_METRICS_PATH,
+    );
     const attemptErrors: string[] = [];
     const requestTimeout =
-      typeof this.client.defaults.timeout === 'number' ? this.client.defaults.timeout : 30000;
+      typeof this.client.defaults.timeout === "number"
+        ? this.client.defaults.timeout
+        : 30000;
 
     for (const attempt of attempts) {
       try {
         const response =
-          attempt.type === 'client'
+          attempt.type === "client"
             ? await this.client.get(DOCUMENTATION_METRICS_PATH)
             : await axios.get(attempt.url, {
                 timeout: requestTimeout,
                 headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json',
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
                 },
                 withCredentials: false,
               });
 
         if (response?.data?.success && response.data.data) {
-          if (attempt.type === 'absolute') {
+          if (attempt.type === "absolute") {
             console.warn(
               `[DocumentationService] Primary metrics endpoint unavailable, using fallback ${attempt.label}`,
             );
@@ -776,7 +786,7 @@ class DocumentationService {
     }
 
     throw new Error(
-      `All documentation metrics endpoints failed (${attemptErrors.join(' | ')})`,
+      `All documentation metrics endpoints failed (${attemptErrors.join(" | ")})`,
     );
   }
 
@@ -788,15 +798,17 @@ class DocumentationService {
       for (const url of candidates) {
         try {
           const response = await fetch(url, {
-            cache: 'no-store',
+            cache: "no-store",
             headers: {
-              'Cache-Control': 'no-cache',
-              Accept: 'application/json',
+              "Cache-Control": "no-cache",
+              Accept: "application/json",
             },
           });
 
           if (!response.ok) {
-            lastError = new Error(`HTTP ${response.status} ${response.statusText}`);
+            lastError = new Error(
+              `HTTP ${response.status} ${response.statusText}`,
+            );
             continue;
           }
 
@@ -808,8 +820,8 @@ class DocumentationService {
             (payload as { data?: DocumentationMetrics })?.data ??
             (payload as DocumentationMetrics);
 
-          if (!data || typeof data !== 'object' || !('healthScore' in data)) {
-            lastError = new Error('Invalid fallback metrics payload');
+          if (!data || typeof data !== "object" || !("healthScore" in data)) {
+            lastError = new Error("Invalid fallback metrics payload");
             continue;
           }
 
@@ -824,23 +836,25 @@ class DocumentationService {
 
     if (BUNDLED_METRICS_SNAPSHOT) {
       console.warn(
-        '[DocumentationService] Remote metrics snapshots unavailable, using bundled fallback snapshot',
-        lastError?.message || '',
+        "[DocumentationService] Remote metrics snapshots unavailable, using bundled fallback snapshot",
+        lastError?.message || "",
       );
       return BUNDLED_METRICS_SNAPSHOT;
     }
 
     throw new Error(
-      `Fallback metrics request failed${lastError ? `: ${lastError.message}` : ''}`,
+      `Fallback metrics request failed${lastError ? `: ${lastError.message}` : ""}`,
     );
   }
 
-  private buildDocumentationMetricsAttempts(path: string): MetricsEndpointAttempt[] {
+  private buildDocumentationMetricsAttempts(
+    path: string,
+  ): MetricsEndpointAttempt[] {
     const attempts: MetricsEndpointAttempt[] = [
       {
-        type: 'client',
+        type: "client",
         url: path,
-        label: 'configured documentation API',
+        label: "configured documentation API",
       },
     ];
 
@@ -858,7 +872,7 @@ class DocumentationService {
       }
       seen.add(endpoint);
       attempts.push({
-        type: 'absolute',
+        type: "absolute",
         url: endpoint,
         label: base,
       });
@@ -891,10 +905,10 @@ class DocumentationService {
     error?: string;
   }> {
     try {
-      const response = await this.client.get('/health');
+      const response = await this.client.get("/health");
       return response.data;
     } catch (error) {
-      return { status: 'unhealthy', error: (error as Error).message };
+      return { status: "unhealthy", error: (error as Error).message };
     }
   }
 }

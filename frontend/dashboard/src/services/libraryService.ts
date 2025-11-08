@@ -1,8 +1,8 @@
-import type { Item } from '../components/pages/workspace/types/workspace.types';
-import { workspaceItemsEndpoint } from './workspaceApiBase';
+import type { Item } from "../components/pages/workspace/types/workspace.types";
+import { workspaceItemsEndpoint } from "./workspaceApiBase";
 
 // Resolve workspace API endpoint ensuring it targets /items
-const itemsEndpoint = (suffix = '') => workspaceItemsEndpoint(suffix);
+const itemsEndpoint = (suffix = "") => workspaceItemsEndpoint(suffix);
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -24,25 +24,29 @@ export const libraryService = {
   async getAllItems(): Promise<Item[]> {
     try {
       const endpoint = itemsEndpoint();
-      console.log('[LibraryService] Fetching items from:', endpoint);
-      
+      console.log("[LibraryService] Fetching items from:", endpoint);
+
       const response = await fetch(endpoint, {
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
         },
       });
-      
-      console.log('[LibraryService] Response status:', response.status, response.ok ? 'OK' : 'FAILED');
-      
+
+      console.log(
+        "[LibraryService] Response status:",
+        response.status,
+        response.ok ? "OK" : "FAILED",
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result: ApiResponse<Item[]> = await response.json();
-      console.log('[LibraryService] Items fetched:', result.data?.length || 0);
+      console.log("[LibraryService] Items fetched:", result.data?.length || 0);
       return result.data || [];
     } catch (error) {
-      console.error('[LibraryService] Error fetching items:', error);
-      console.error('[LibraryService] Endpoint was:', itemsEndpoint());
+      console.error("[LibraryService] Error fetching items:", error);
+      console.error("[LibraryService] Endpoint was:", itemsEndpoint());
       throw error;
     }
   },
@@ -51,13 +55,13 @@ export const libraryService = {
    * Create a new item
    */
   async createItem(
-    itemData: Omit<Item, 'id' | 'createdAt' | 'status'>,
+    itemData: Omit<Item, "id" | "createdAt" | "status">,
   ): Promise<Item> {
     try {
       const response = await fetch(itemsEndpoint(), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(itemData),
       });
@@ -71,11 +75,11 @@ export const libraryService = {
 
       const result: ApiResponse<Item> = await response.json();
       if (!result.data) {
-        throw new Error('No data returned from server');
+        throw new Error("No data returned from server");
       }
       return result.data;
     } catch (error) {
-      console.error('Error creating item:', error);
+      console.error("Error creating item:", error);
       throw error;
     }
   },
@@ -85,13 +89,13 @@ export const libraryService = {
    */
   async updateItem(
     id: string,
-    itemData: Partial<Omit<Item, 'id' | 'createdAt'>>,
+    itemData: Partial<Omit<Item, "id" | "createdAt">>,
   ): Promise<Item> {
     try {
       const response = await fetch(itemsEndpoint(`/${id}`), {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(itemData),
       });
@@ -105,11 +109,11 @@ export const libraryService = {
 
       const result: ApiResponse<Item> = await response.json();
       if (!result.data) {
-        throw new Error('No data returned from server');
+        throw new Error("No data returned from server");
       }
       return result.data;
     } catch (error) {
-      console.error('Error updating item:', error);
+      console.error("Error updating item:", error);
       throw error;
     }
   },
@@ -120,7 +124,7 @@ export const libraryService = {
   async deleteItem(id: string): Promise<void> {
     try {
       const response = await fetch(itemsEndpoint(`/${id}`), {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
@@ -130,7 +134,7 @@ export const libraryService = {
         );
       }
     } catch (error) {
-      console.error('Error deleting item:', error);
+      console.error("Error deleting item:", error);
       throw error;
     }
   },

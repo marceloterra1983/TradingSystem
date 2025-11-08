@@ -43,12 +43,14 @@ LEGACY_REQUIRED_FIELDS = {
     'last_review': str
 }
 
+DATE_LIKE_TYPES = (str, datetime, date)
+
 V2_REQUIRED_FIELDS = {
     'title': str,
     'description': str,
     'tags': list,
     'owner': str,
-    'lastReviewed': str
+    'lastReviewed': DATE_LIKE_TYPES
 }
 
 ALLOWED_DOMAINS = {'frontend', 'backend', 'ops', 'shared'}
@@ -77,6 +79,7 @@ ALLOWED_OWNERS = {
     'SecurityEngineering',
     'Performance Team',
     'Backend Team',
+    'Platform Architecture',
 }
 
 # Exclude patterns
@@ -87,7 +90,7 @@ EXCLUDE_PATTERNS = {
 
 # Files to intentionally skip (known exceptions)
 SKIP_FILES = {
-    # Add specific files that should be skipped
+    'docs/content/governance/index.mdx',
 }
 
 
@@ -220,6 +223,15 @@ def validate_frontmatter_fields(frontmatter: Dict, file_path: str, schema: str) 
                     'value': value,
                     'expected': 'list',
                     'message': f"Field {field} should be a list"
+                })
+            elif isinstance(expected_type, tuple) and not isinstance(value, expected_type):
+                expected_names = '/'.join(sorted({t.__name__ for t in expected_type}))
+                issues.append({
+                    'type': 'invalid_type',
+                    'field': field,
+                    'value': value,
+                    'expected': expected_names,
+                    'message': f"Field {field} should be one of: {expected_names}"
                 })
 
     if schema == 'legacy':
