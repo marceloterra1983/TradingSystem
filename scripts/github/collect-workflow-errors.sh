@@ -272,5 +272,8 @@ echo "   code $OUTPUT_FILE"
 echo ""
 
 # Criar link simbólico para último relatório
-ln -sf "$(basename "$OUTPUT_FILE")" "$OUTPUT_DIR/LATEST.md"
+# Use caminho relativo para evitar "File name too long"
+cd "$OUTPUT_DIR"
+ln -sf "$(basename "$OUTPUT_FILE")" LATEST.md
+cd - > /dev/null
 echo -e "${GREEN}📌 Última versão disponível em: $OUTPUT_DIR/LATEST.md${NC}"
