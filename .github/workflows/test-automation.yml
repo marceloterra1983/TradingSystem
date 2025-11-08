@@ -11,6 +11,7 @@ on:
 
 env:
   NODE_VERSION: '20'
+  HAS_CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN != '' }}
 
 jobs:
   frontend-tests:
@@ -46,13 +47,18 @@ jobs:
         continue-on-error: true
 
       - name: Upload coverage to Codecov
-        if: always()
+        if: always() && env.HAS_CODECOV_TOKEN == 'true'
         uses: codecov/codecov-action@v4
         with:
           files: ./frontend/dashboard/coverage/coverage-final.json
           flags: frontend
           name: frontend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+
+      - name: Skip Codecov upload (token missing)
+        if: always() && env.HAS_CODECOV_TOKEN != 'true'
+        run: echo "Skipping Codecov upload because CODECOV_TOKEN is not configured for this repository."
 
       - name: Upload test results
         if: always()
@@ -126,13 +132,18 @@ jobs:
         continue-on-error: true
 
       - name: Upload coverage to Codecov
-        if: always()
+        if: always() && env.HAS_CODECOV_TOKEN == 'true'
         uses: codecov/codecov-action@v4
         with:
           files: ./${{ matrix.service.path }}/coverage/coverage-final.json
           flags: backend,${{ matrix.service.name }}
           name: ${{ matrix.service.name }}-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+
+      - name: Skip Codecov upload (token missing)
+        if: always() && env.HAS_CODECOV_TOKEN != 'true'
+        run: echo "Skipping Codecov upload because CODECOV_TOKEN is not configured for this repository."
 
       - name: Upload test results
         if: always()
