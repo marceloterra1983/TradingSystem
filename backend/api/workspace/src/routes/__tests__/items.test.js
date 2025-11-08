@@ -49,7 +49,7 @@ describe("Items Router", () => {
     app.use("/api/items", itemsRouter);
 
     // Error handler
-    app.use((err, req, res, next) => {
+    app.use((err, req, res, _next) => {
       const status = err.statusCode || err.status || 500;
       res.status(status).json({
         success: false,
@@ -401,7 +401,7 @@ describe("Items Router", () => {
     });
 
     it("should reject empty id", async () => {
-      const response = await request(app).delete("/api/items/").expect(404); // Express returns 404 for missing route param
+      await request(app).delete("/api/items/").expect(404); // Express returns 404 for missing route param
 
       expect(mockDb.deleteItem).not.toHaveBeenCalled();
     });

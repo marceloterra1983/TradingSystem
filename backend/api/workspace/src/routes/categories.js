@@ -44,7 +44,7 @@ const invalidateAllCategoryCaches = () => {
   try {
     const workspaceService = getWorkspaceService();
     workspaceService.invalidateCategoriesCache();
-  } catch (error) {
+  } catch {
     // WorkspaceService may not be initialized yet, that's OK
     logger.debug(
       "WorkspaceService not initialized, skipping cache invalidation",
@@ -150,8 +150,7 @@ router.post("/validate", async (req, res, next) => {
  */
 router.post("/", async (req, res, next) => {
   try {
-    const { name, display_name, description, color, icon, display_order } =
-      req.body;
+    const { name, display_name, description, display_order } = req.body;
 
     // Validate required fields
     if (!name) {

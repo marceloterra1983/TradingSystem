@@ -87,13 +87,6 @@ export default defineConfig(({ mode }) => {
     const telegramGatewayProxy = resolveProxy(env.VITE_TELEGRAM_GATEWAY_PROXY_TARGET || env.VITE_TELEGRAM_GATEWAY_API_URL, 'http://localhost:4010');
     const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
     const n8nProxy = resolveProxy(env.N8N_PROXY_TARGET || env.VITE_N8N_PROXY_TARGET || env.VITE_N8N_URL, 'http://localhost:3680');
-    const n8nBasePath = (() => {
-        const configured = normalizePath(env.N8N_PATH || '/n8n');
-        if (!configured || configured === '/') {
-            return '/n8n';
-        }
-        return configured.startsWith('/') ? configured : `/${configured}`;
-    })();
     const docsProxyConfig = {
         target: docsProxy.target,
         changeOrigin: true,
@@ -340,7 +333,7 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     configure: (proxy, _options) => {
                         attachN8nBasicAuth(proxy);
-                        proxy.on('error', (err, req, res) => {
+                        proxy.on('error', (err, req, _res) => {
                             console.warn('[n8n assets proxy]', req.url, err.message);
                         });
                     },

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 import AgentsCatalogView from "../AgentsCatalogView";
@@ -11,12 +12,7 @@ import {
 
 vi.mock("@/hooks/useAgentsDataOptimized", () => ({
   useAgentsDataOptimized: vi.fn(),
-  useAgentContent: vi.fn(() => ({
-    data: null,
-    isLoading: false,
-    error: null,
-    refetch: vi.fn(),
-  })),
+  useAgentContent: vi.fn(),
 }));
 
 vi.mock("@/components/layout/CustomizablePageLayout", () => ({
@@ -55,13 +51,29 @@ beforeAll(() => {
   });
 });
 
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
+
 beforeEach(() => {
   mockedUseAgentsData.mockReset();
-  mockedUseAgentContent.mockClear();
+  mockedUseAgentContent.mockReset();
+
   mockedUseAgentContent.mockReturnValue({
     data: null,
-    isLoading: false,
     error: null,
+    isLoading: false,
+    isFetching: false,
     refetch: vi.fn(),
   } as any);
 });
@@ -76,7 +88,7 @@ describe("AgentsCatalogView", () => {
       refetch: vi.fn(),
     } as any);
 
-    render(<AgentsCatalogView />);
+    render(<AgentsCatalogView />, { wrapper: createWrapper() });
 
     expect(screen.getByTestId("agents-loading-state")).toBeInTheDocument();
   });
@@ -91,7 +103,7 @@ describe("AgentsCatalogView", () => {
       refetch,
     } as any);
 
-    render(<AgentsCatalogView />);
+    render(<AgentsCatalogView />, { wrapper: createWrapper() });
 
     const retryButton = screen.getByRole("button", {
       name: /tentar novamente/i,
@@ -130,7 +142,7 @@ describe("AgentsCatalogView", () => {
       refetch: vi.fn(),
     } as any);
 
-    render(<AgentsCatalogView />);
+    render(<AgentsCatalogView />, { wrapper: createWrapper() });
 
     expect(screen.getAllByText("@typescript-pro").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Frontend & UX").length).toBeGreaterThan(0);

@@ -52,7 +52,6 @@ async function convertToJson() {
     const entriesStr = directoryMatch[1];
     const entries = [];
 
-    let currentEntry = null;
     let braceDepth = 0;
     let currentBlock = '';
 

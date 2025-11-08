@@ -38,6 +38,7 @@ jobs:
           type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
           sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo mkdir -p /etc/apt/sources.list.d
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
           sudo apt update
           sudo apt install gh -y
@@ -104,28 +105,32 @@ jobs:
             }
 
             // Postar comentário
+            const commentBody = [
+              "## 🚨 Relatório Automático de Erros",
+              "",
+              "Workflows com falhas foram detectados. Veja o relatório consolidado abaixo:",
+              "",
+              "<details>",
+              "<summary>📄 Clique para expandir o relatório completo</summary>",
+              "",
+              reportContent,
+              "",
+              "</details>",
+              "",
+              "### 📦 Download do Relatório Completo",
+              "",
+              "O relatório completo está disponível nos **Artifacts** desta execução:",
+              `- [Download Error Report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              "",
+              "---",
+              "🤖 *Gerado automaticamente por [Error Report Generator](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/error-report-generator.yml)*`,
+            ].join("\n");
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
-              body: `## 🚨 Relatório Automático de Erros
-
-Workflows com falhas foram detectados. Veja o relatório consolidado abaixo:
-
-<details>
-<summary>📄 Clique para expandir o relatório completo</summary>
-
-${reportContent}
-
-</details>
-
-### 📦 Download do Relatório Completo
-
-O relatório completo está disponível nos **Artifacts** desta execução:
-- [Download Error Report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-
----
-🤖 *Gerado automaticamente por [Error Report Generator](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/error-report-generator.yml)*`
+              body: commentBody,
             });
 
       - name: Create Issue (if too many failures)
@@ -149,43 +154,47 @@ O relatório completo está disponível nos **Artifacts** desta execução:
 
               const reportPath = `workflow-errors/${files[0]}`;
 
+              const issueBody = [
+                "## ⚠️ Multiple Workflow Failures Detected",
+                "",
+                `**Total Recent Failures:** ${failureCount}`,
+                "**Threshold:** 5",
+                `**Generated:** ${new Date().toISOString()}`,
+                "",
+                "### 📊 Immediate Actions Required",
+                "",
+                "1. Review the error report artifact",
+                "2. Identify common failure patterns",
+                "3. Fix critical issues blocking CI/CD",
+                "4. Re-run failed workflows after fixes",
+                "",
+                "### 📄 Error Report",
+                "",
+                "Download the complete error report from the latest workflow run:",
+                `- [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                "",
+                "### 🛠️ Quick Diagnostics",
+                "",
+                "```bash",
+                "# View recent failures",
+                "bash scripts/github/check-workflows.sh failures",
+                "",
+                "# Generate fresh report",
+                "bash scripts/github/collect-workflow-errors.sh 20",
+                "",
+                "# Monitor in real-time",
+                "bash scripts/github/monitor-workflows.sh 30",
+                "```",
+                "",
+                "---",
+                "🤖 *Auto-generated alert by Error Report Generator*",
+              ].join("\n");
+
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: `🚨 Alert: ${failureCount} workflow failures detected`,
-                body: `## ⚠️ Multiple Workflow Failures Detected
-
-**Total Recent Failures:** ${failureCount}
-**Threshold:** 5
-**Generated:** ${new Date().toISOString()}
-
-### 📊 Immediate Actions Required
-
-1. Review the error report artifact
-2. Identify common failure patterns
-3. Fix critical issues blocking CI/CD
-4. Re-run failed workflows after fixes
-
-### 📄 Error Report
-
-Download the complete error report from the latest workflow run:
-- [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-
-### 🛠️ Quick Diagnostics
-
-\`\`\`bash
-# View recent failures
-bash scripts/github/check-workflows.sh failures
-
-# Generate fresh report
-bash scripts/github/collect-workflow-errors.sh 20
-
-# Monitor in real-time
-bash scripts/github/monitor-workflows.sh 30
-\`\`\`
-
----
-🤖 *Auto-generated alert by Error Report Generator*`,
+                body: issueBody,
                 labels: ['ci/cd', 'bug', 'high-priority']
               });
 

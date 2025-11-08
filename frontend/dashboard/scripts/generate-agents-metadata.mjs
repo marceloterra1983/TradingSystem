@@ -37,7 +37,7 @@ console.log(`✓ Found ${agentsArray.length} agents in source file`);
 
 // Strip fileContent from each agent
 const metadataArray = agentsArray.map(agent => {
-  const { fileContent, ...metadata } = agent;
+  const { fileContent: _fileContent, ...metadata } = agent;
   return metadata;
 });
 

@@ -52,7 +52,7 @@ async function main() {
   try {
     await fs.access(config.lowdbPath);
     console.log('✅ LowDB file found');
-  } catch (error) {
+  } catch {
     console.log('ℹ️  No LowDB file found - skipping migration');
     console.log('   This is normal if you are starting fresh or already migrated.');
     process.exit(0);
@@ -103,11 +103,11 @@ async function main() {
   console.log('[4/6] Migrating items to TimescaleDB...');
   const client = await pool.connect();
 
+  let inserted = 0;
+  let skipped = 0;
+
   try {
     await client.query('BEGIN');
-
-    let inserted = 0;
-    let skipped = 0;
 
     for (const item of data.items) {
       const query = `

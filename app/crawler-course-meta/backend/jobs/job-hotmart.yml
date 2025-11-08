@@ -1,0 +1,34 @@
+id: job-hotmart-2025-11-08
+platform: hotmart
+start_urls:
+  - https://hotmart.com/course/meu-curso
+auth:
+  method: form
+  owner_login: true
+  credentials_env:
+    username: OWNER_USERNAME
+    password: OWNER_PASSWORD
+  session_store:
+    enabled: true
+    path: ./sessions/hotmart.session.enc
+    encrypt_with_env: SESSION_KEY
+selectors:
+  course:
+    title: css:h1.course-title
+    description: css:div.course-description
+    author: css:.instructor-name
+  modules:
+    root: css:ul.modules > li
+    title: css:.module-title
+    lessons:
+      root: css:.lessons > li
+      title: css:.lesson-title
+      url: css:a::href
+scroll:
+  enabled: true
+  step: 800
+  delay_ms: 300
+  max_scrolls: 120
+output:
+  format: [json, md]
+  directory: ./outputs/hotmart

@@ -15,14 +15,17 @@ jobs:
   notify-telegram:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
       - name: Send Telegram notification
-        if: ${{ secrets.TELEGRAM_BOT_TOKEN && secrets.TELEGRAM_CHAT_ID }}
+        if: ${{ env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != '' }}
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ env.TELEGRAM_CHAT_ID }}
+          token: ${{ env.TELEGRAM_BOT_TOKEN }}
           format: markdown
           message: |
             🚨 **GitHub Actions Failure**
@@ -40,13 +43,15 @@ jobs:
   notify-discord:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
 
     steps:
       - name: Send Discord notification
-        if: ${{ secrets.DISCORD_WEBHOOK }}
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
         uses: sarisia/actions-status-discord@v1
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook: ${{ env.DISCORD_WEBHOOK_URL }}
           status: failure
           title: "Workflow Failed: ${{ github.event.workflow_run.name }}"
           description: |
@@ -62,7 +67,7 @@ jobs:
 
     steps:
       - name: Send Slack notification
-        if: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
