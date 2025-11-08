@@ -2,6 +2,7 @@ FROM node:20-alpine
 
 # Install system dependencies for sharp
 RUN apk add --no-cache \
+    curl \
     python3 \
     make \
     g++ \

@@ -10,5 +10,8 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vite-plugin-preload-hints.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite-plugin-preload-hints.ts"
+  ]
 }

@@ -275,7 +275,7 @@ services:
   # ============================================================================
   whatsapp-gateway-core:
     container_name: whatsapp-gateway-core
-    image: ${WHATSAPP_CORE_IMAGE:-devlikeapro/waha:latest-baileys}
+    image: ${WHATSAPP_CORE_IMAGE:-devlikeapro/waha:latest}
     restart: unless-stopped
     
     env_file:

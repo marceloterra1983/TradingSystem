@@ -510,10 +510,16 @@ export default defineConfig(({ mode }) => {
           drop_console: isProd,
           drop_debugger: true,
           pure_funcs: isProd ? ['console.log', 'console.info', 'console.debug'] : [],
+          passes: 2, // Extra compression pass for better minification
+        },
+        mangle: {
+          safari10: true, // Safari 10+ compatibility
         },
       },
       rollupOptions: {
         output: {
+          // Aggressive code splitting for better caching
+          experimentalMinChunkSize: 10240, // 10KB minimum chunk size
           manualChunks(id) {
             // Vendor chunks - Core React (most stable)
             if (id.includes('node_modules/react/') || 
@@ -583,17 +589,11 @@ export default defineConfig(({ mode }) => {
               return 'animation-vendor';
             }
 
-            // Catalog views with large data files (661KB agents directory)
-            // Split these into separate chunks for better caching
-            if (id.includes('/catalog/AgentsCatalogView') ||
-                id.includes('/data/aiAgentsDirectory')) {
-              return 'agents-catalog';
-            }
-
-            if (id.includes('/catalog/CommandsCatalogView') ||
-                id.includes('/data/commandsDirectory')) {
-              return 'commands-catalog';
-            }
+            // NOTE: Catalog views and data are NOT manually chunked
+            // Let Vite create separate chunks naturally for better lazy loading:
+            // - Component chunks: ~10-20KB each
+            // - Metadata chunks: ~25KB (loaded with component)
+            // - Full data chunks: ~350KB (loaded on-demand only)
 
             // Heavy pages (>50KB) - Split for better lazy loading
             if (id.includes('/pages/LlamaIndexPage')) {
@@ -622,8 +622,13 @@ export default defineConfig(({ mode }) => {
           assetFileNames: 'assets/[name]-[hash].[ext]',
         },
       },
-      chunkSizeWarningLimit: 500,
+      // Bundle size budgets and warnings
+      chunkSizeWarningLimit: 400, // Stricter limit: 400KB (down from 500KB)
       reportCompressedSize: true,
+      // Set target for modern browsers to enable more optimizations
+      target: 'es2020',
+      // Enable CSS code splitting
+      cssCodeSplit: true,
     },
     optimizeDeps: {
       include: [

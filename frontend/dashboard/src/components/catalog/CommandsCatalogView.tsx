@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
 import { MarkdownPreview } from "../ui/MarkdownPreview";
 import { useToast } from "../../hooks/useToast";
+import { useCommandsData } from "../../hooks/useCommandsData";
 import {
   ArrowDown,
   ArrowUp,
@@ -32,15 +33,25 @@ import {
   FileText,
   FileWarning,
   Filter,
+  Loader2,
   Search,
 } from "lucide-react";
 
-import { commandsDatabase } from "../../data/commandsCatalog";
-
-type CommandRecord = (typeof commandsDatabase.commands)[number];
-
-const ALL_COMMANDS = commandsDatabase.commands;
-const TOTAL_COMMANDS = ALL_COMMANDS.length;
+type CommandRecord = {
+  command: string;
+  category: string;
+  capacidades: string;
+  momentoIdeal: string;
+  exemplos: string[];
+  exemploMomento: string;
+  tipoSaida: string;
+  tags: string[];
+  argumentos?: string;
+  fileContent?: string;
+  fileName?: string;
+  filePath?: string;
+  label?: string;
+};
 
 const surfaceCardClass =
   "rounded-lg border border-[color:var(--ts-surface-border)] bg-[color:var(--ts-surface-0)] shadow-[var(--ts-shadow-sm)] transition-shadow hover:shadow-[var(--ts-shadow-lg)]";
@@ -79,6 +90,12 @@ export default function CommandsCatalogView({
   const [sortField, setSortField] = useState<SortField>("command");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
+  // Lazy load commands data
+  const { data: commandsDb, isLoading, error } = useCommandsData();
+
+  const ALL_COMMANDS = commandsDb?.commands ?? [];
+  const TOTAL_COMMANDS = ALL_COMMANDS.length;
+
   const categories = useMemo(() => {
     return Array.from(
       new Set(
@@ -87,13 +104,13 @@ export default function CommandsCatalogView({
         ),
       ),
     ).sort();
-  }, []);
+  }, [ALL_COMMANDS]);
 
   const tagOptions = useMemo(() => {
     return Array.from(
       new Set(ALL_COMMANDS.flatMap((item) => item.tags ?? [])),
     ).sort();
-  }, []);
+  }, [ALL_COMMANDS]);
 
   const filteredCommands = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -883,6 +900,59 @@ export default function CommandsCatalogView({
       sortDirection,
     ],
   );
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <CustomizablePageLayout
+        pageId="commands-toolbox"
+        title="Claude Commands Toolbox"
+        subtitle="Carregando catálogo de comandos..."
+        sections={[
+          {
+            id: "loading",
+            content: (
+              <div className="flex min-h-[400px] items-center justify-center">
+                <div className="flex flex-col items-center gap-3 text-sm text-[color:var(--ts-text-muted)]">
+                  <Loader2 className="h-8 w-8 animate-spin text-[color:var(--ts-accent)]" />
+                  <span>Carregando comandos...</span>
+                </div>
+              </div>
+            ),
+          },
+        ]}
+        defaultColumns={1}
+        leftActions={headerActions}
+      />
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <CustomizablePageLayout
+        pageId="commands-toolbox"
+        title="Claude Commands Toolbox"
+        subtitle="Erro ao carregar comandos"
+        sections={[
+          {
+            id: "error",
+            content: (
+              <div className="flex min-h-[400px] items-center justify-center">
+                <div className="flex flex-col items-center gap-3 text-sm text-[color:var(--ts-text-muted)]">
+                  <FileWarning className="h-8 w-8 text-red-500" />
+                  <span>Erro ao carregar catálogo de comandos</span>
+                  <span className="text-xs">{error.message}</span>
+                </div>
+              </div>
+            ),
+          },
+        ]}
+        defaultColumns={1}
+        leftActions={headerActions}
+      />
+    );
+  }
 
   return (
     <>

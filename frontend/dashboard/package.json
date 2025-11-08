@@ -51,6 +51,8 @@
     "test:e2e:report": "playwright show-report",
     "test:e2e:codegen": "playwright codegen http://localhost:3103/#/telegram-gateway",
     "check:bundle": "npm run build && du -sh dist && ls -lh dist/assets/*.js | head -10",
+    "check:bundle:size": "node scripts/check-bundle-size.mjs",
+    "check:bundle:size:strict": "node scripts/check-bundle-size.mjs --strict",
     "analyze:bundle": "npm run build && node scripts/analyze-bundle.js",
     "analyze:bundle:json": "npm run build && node scripts/analyze-bundle.js --json",
     "analyze:bundle:ci": "npm run build && node scripts/analyze-bundle.js --ci",

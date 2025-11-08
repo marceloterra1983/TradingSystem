@@ -22,8 +22,13 @@ if [ ! -f "$PROJECT_ROOT/.env" ]; then
     exit 1
 fi
 
-# Check required env vars
+# Load environment
+set -a
 source "$PROJECT_ROOT/.env"
+[ -f "$PROJECT_ROOT/.env.shared" ] && source "$PROJECT_ROOT/.env.shared"
+set +a
+
+# Check required env vars
 
 required_vars=(
     "WHATSAPP_DB_PASSWORD"
@@ -94,7 +99,7 @@ echo ""
 echo "✅ WhatsApp Gateway Stack started successfully!"
 echo ""
 echo "📋 Service URLs:"
-echo "  - WhatsApp Core (WAHA):     http://localhost:${WHATSAPP_CORE_PORT:-3311}"
+echo "  - WhatsApp Core (WAHA):     http://localhost:${WHATSAPP_CORE_PORT:-3310}"
 echo "  - Gateway API:              http://localhost:${WHATSAPP_GATEWAY_API_PORT:-4011}"
 echo "  - TimescaleDB:              localhost:${WHATSAPP_DB_PORT:-5435}"
 echo "  - PgBouncer:                localhost:${WHATSAPP_PGBOUNCER_PORT:-6435}"

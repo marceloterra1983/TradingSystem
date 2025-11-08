@@ -1,0 +1,109 @@
+
+> documentation-dashboard@1.2.0 prebuild
+> if [ "$SKIP_DASHBOARD_PREBUILD" = "1" ]; then echo "⚠️  Skipping agents:generate prebuild"; else node scripts/check-agents-cache.cjs || (npm --prefix ../.. run agents:generate && node scripts/convert-agents-to-json.mjs); fi
+
+✅ Agents directory cache valid, skipping generation
+
+> documentation-dashboard@1.2.0 build
+> npm run copy:docs && tsc && NODE_ENV=production vite build
+
+
+> documentation-dashboard@1.2.0 copy:docs
+> node scripts/copy-docs.js
+
+✅ Skipping PRD copy (not needed for build)
+vite v7.1.12 building for production...
+transforming...
+✓ 3372 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                        2.13 kB │ gzip:   0.64 kB
+dist/assets/index-BpFlxQ-T.css                       140.25 kB │ gzip:  19.98 kB
+dist/assets/CourseCrawlerPage-C0BgqniY.js              0.38 kB │ gzip:   0.28 kB
+dist/assets/tpCapitalApi-nUwUyn-4.js                   0.91 kB │ gzip:   0.48 kB
+dist/assets/N8nPage-Bn8IQF4u.js                        1.00 kB │ gzip:   0.61 kB
+dist/assets/KestraPage-BLhYpOaL.js                     1.01 kB │ gzip:   0.62 kB
+dist/assets/router-vendor-CoPjJm_u.js                  1.21 kB │ gzip:   0.66 kB
+dist/assets/WahaPage-CRCUxxHu.js                       1.52 kB │ gzip:   0.84 kB
+dist/assets/MiroPage-Cl_gSTEJ.js                       2.45 kB │ gzip:   1.13 kB
+dist/assets/CatalogPage-Fbv7t0F0.js                    2.78 kB │ gzip:   1.08 kB
+dist/assets/state-vendor-Bk4yT4AF.js                   3.37 kB │ gzip:   1.55 kB
+dist/assets/markdown-vendor-TUTPKATA.js                3.63 kB │ gzip:   1.48 kB
+dist/assets/AgentsCommandsCatalogView-Co_y24ai.js     10.15 kB │ gzip:   3.14 kB
+dist/assets/DatabasePage-D7mRjLjF.js                  14.57 kB │ gzip:   4.59 kB
+dist/assets/GovernancePage-8kTFlXzx.js                17.39 kB │ gzip:   5.07 kB
+dist/assets/icons-vendor-vrXrH5Db.js                  22.01 kB │ gzip:   6.92 kB
+dist/assets/page-tpcapital-DZUbidyh.js                22.34 kB │ gzip:   6.66 kB
+dist/assets/index-B46i23Sj.js                         25.33 kB │ gzip:   7.79 kB
+dist/assets/date-vendor-Bh3fnUye.js                   28.10 kB │ gzip:   8.28 kB
+dist/assets/page-workspace-CfbDm1hX.js                46.14 kB │ gzip:  10.77 kB
+dist/assets/dnd-vendor-DiM3R5kS.js                    47.90 kB │ gzip:  15.76 kB
+dist/assets/TelegramGatewayFinal-BAwl1WRN.js          48.51 kB │ gzip:  11.21 kB
+dist/assets/utils-vendor-Bq5K4YQy.js                  61.65 kB │ gzip:  21.55 kB
+dist/assets/ui-radix-V-o2XXJK.js                      69.66 kB │ gzip:  20.98 kB
+dist/assets/animation-vendor-D-K6E0mL.js              75.02 kB │ gzip:  23.11 kB
+dist/assets/page-docusaurus-du4zS9vo.js               78.54 kB │ gzip:  20.55 kB
+dist/assets/page-llama-Cj7kl_O6.js                    84.40 kB │ gzip:  20.53 kB
+dist/assets/react-vendor-UftIcPbZ.js                 136.65 kB │ gzip:  44.10 kB
+dist/assets/charts-vendor-DFYTUC8x.js                273.18 kB │ gzip:  60.07 kB
+dist/assets/commands-catalog-D2auikYE.js             286.16 kB │ gzip:  82.08 kB
+dist/assets/vendor-CJz2WUwx.js                       608.46 kB │ gzip: 190.28 kB
+dist/assets/agents-catalog-CLyaiI5S.js             1,262.80 kB │ gzip: 359.18 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.03s
+
+✨ [vite-plugin-compression]:algorithm=gzip - compressed file successfully: 
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/DatabasePage-D7mRjLjF.js.gz           14.22kb / gzip: 4.48kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/GovernancePage-8kTFlXzx.js.gz         16.98kb / gzip: 4.95kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/TelegramGatewayFinal-BAwl1WRN.js.gz   47.37kb / gzip: 10.89kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/date-vendor-Bh3fnUye.js.gz            27.44kb / gzip: 8.08kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/dnd-vendor-DiM3R5kS.js.gz             46.77kb / gzip: 15.37kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/icons-vendor-vrXrH5Db.js.gz           21.49kb / gzip: 6.69kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-tpcapital-DZUbidyh.js.gz         21.82kb / gzip: 6.49kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-workspace-CfbDm1hX.js.gz         45.06kb / gzip: 10.49kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/viewers/redoc.html.gz                        18.70kb / gzip: 4.37kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/index-B46i23Sj.js.gz                  24.74kb / gzip: 7.59kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/animation-vendor-D-K6E0mL.js.gz       73.27kb / gzip: 22.48kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-docusaurus-du4zS9vo.js.gz        76.70kb / gzip: 20.01kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-llama-Cj7kl_O6.js.gz             82.42kb / gzip: 19.98kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/index-BpFlxQ-T.css.gz                 136.96kb / gzip: 19.21kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/ui-radix-V-o2XXJK.js.gz               68.03kb / gzip: 20.45kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/utils-vendor-Bq5K4YQy.js.gz           60.20kb / gzip: 21.03kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/react-vendor-UftIcPbZ.js.gz           133.45kb / gzip: 42.99kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/charts-vendor-DFYTUC8x.js.gz          266.78kb / gzip: 58.43kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/commands-catalog-D2auikYE.js.gz       279.45kb / gzip: 79.96kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/vendor-CJz2WUwx.js.gz                 594.20kb / gzip: 185.37kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/stats.html.gz                                1658.97kb / gzip: 175.97kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/agents-catalog-CLyaiI5S.js.gz         1233.20kb / gzip: 350.21kb
+
+
+
+✨ [vite-plugin-compression]:algorithm=brotliCompress - compressed file successfully: 
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/DatabasePage-D7mRjLjF.js.br           14.22kb / brotliCompress: 3.98kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/GovernancePage-8kTFlXzx.js.br         16.98kb / brotliCompress: 4.41kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/TelegramGatewayFinal-BAwl1WRN.js.br   47.37kb / brotliCompress: 9.63kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/date-vendor-Bh3fnUye.js.br            27.44kb / brotliCompress: 7.21kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/dnd-vendor-DiM3R5kS.js.br             46.77kb / brotliCompress: 13.81kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/index-B46i23Sj.js.br                  24.74kb / brotliCompress: 6.77kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-tpcapital-DZUbidyh.js.br         21.82kb / brotliCompress: 5.82kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/index-BpFlxQ-T.css.br                 136.96kb / brotliCompress: 15.20kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-workspace-CfbDm1hX.js.br         45.06kb / brotliCompress: 9.28kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/viewers/redoc.html.br                        18.70kb / brotliCompress: 3.60kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/icons-vendor-vrXrH5Db.js.br           21.49kb / brotliCompress: 5.75kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/animation-vendor-D-K6E0mL.js.br       73.27kb / brotliCompress: 20.13kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-llama-Cj7kl_O6.js.br             82.42kb / brotliCompress: 17.44kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/utils-vendor-Bq5K4YQy.js.br           60.20kb / brotliCompress: 18.71kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/ui-radix-V-o2XXJK.js.br               68.03kb / brotliCompress: 18.24kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/page-docusaurus-du4zS9vo.js.br        76.70kb / brotliCompress: 17.55kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/react-vendor-UftIcPbZ.js.br           133.45kb / brotliCompress: 37.55kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/charts-vendor-DFYTUC8x.js.br          266.78kb / brotliCompress: 47.70kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/commands-catalog-D2auikYE.js.br       279.45kb / brotliCompress: 66.12kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/vendor-CJz2WUwx.js.br                 594.20kb / brotliCompress: 152.71kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/assets/agents-catalog-CLyaiI5S.js.br         1233.20kb / brotliCompress: 181.17kb
+dist//home/marce/Projetos/TradingSystem/frontend/dashboard/stats.html.br                                1658.97kb / brotliCompress: 123.44kb
+
+

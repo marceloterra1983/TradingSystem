@@ -1,0 +1,29 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Bundle Size Check (Frontend Dashboard)
+# Runs only if frontend files changed
+
+# Check if any frontend files were modified
+if git diff --cached --name-only | grep -q "^frontend/dashboard/"; then
+  echo "📦 Checking bundle size..."
+
+  cd frontend/dashboard || exit 1
+
+  # Build production bundle
+  npm run build > /dev/null 2>&1
+
+  # Check bundle sizes
+  if npm run check:bundle:size > /dev/null 2>&1; then
+    echo "✅ Bundle size check passed"
+  else
+    echo ""
+    echo "❌ Bundle size check failed!"
+    echo ""
+    echo "Run 'npm run check:bundle:size' to see details"
+    echo "Or use --no-verify to skip this check (not recommended)"
+    exit 1
+  fi
+
+  cd - > /dev/null || exit 1
+fi

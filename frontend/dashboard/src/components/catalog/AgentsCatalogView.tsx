@@ -41,10 +41,10 @@ import {
   Search,
 } from "lucide-react";
 
-import { useAgentsData, type AgentsData } from "@/hooks/useAgentsData";
+import { useAgentsDataOptimized, useAgentContent, type AgentsData } from "@/hooks/useAgentsDataOptimized";
 
 // Type will be inferred from hook data
-type AgentRecord = AgentsData["agents"][number];
+type AgentRecord = AgentsData["agents"][number] & { fileContent?: string };
 type SortField =
   | "name"
   | "category"
@@ -59,7 +59,7 @@ const getAvailableCategories = (
   agents: AgentRecord[],
   categoryOrder: string[],
 ): string[] => {
-  const existing = new Set(agents.map((agent) => agent.category));
+  const existing = new Set<string>(agents.map((agent) => agent.category));
   return categoryOrder.filter((category) => existing.has(category));
 };
 
@@ -84,7 +84,13 @@ export default function AgentsCatalogView({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const { data, isLoading, error, refetch, isFetching } = useAgentsData();
+  const { data, isLoading, error, refetch, isFetching } = useAgentsDataOptimized();
+
+  // Load full content on-demand when dialog opens
+  const {
+    data: agentContentData,
+    isLoading: isLoadingContent
+  } = useAgentContent(selectedAgent?.id ?? null, dialogOpen);
 
   const sharedLayoutProps = {
     pageId: "ai-agents-directory",
@@ -830,10 +836,17 @@ export default function AgentsCatalogView({
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[520px] bg-[color:var(--ts-surface-0)]">
-            {selectedAgent?.fileContent ? (
+            {isLoadingContent ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-16">
+                <Loader2 className="h-6 w-6 animate-spin text-[color:var(--ts-accent)]" />
+                <p className={`text-sm ${mutedTextClass}`}>
+                  Carregando conteúdo do agente...
+                </p>
+              </div>
+            ) : agentContentData?.fileContent ? (
               <div className="p-6">
                 <MarkdownPreview
-                  content={selectedAgent.fileContent}
+                  content={agentContentData.fileContent}
                   className="max-w-none"
                 />
               </div>

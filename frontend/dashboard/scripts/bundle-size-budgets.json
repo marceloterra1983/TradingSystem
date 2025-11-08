@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "description": "Bundle size budgets for TradingSystem Dashboard",
+  "budgets": {
+    "total": {
+      "description": "Total bundle size (all chunks combined)",
+      "limit": "3000kb",
+      "warning": "2500kb",
+      "current": "~8000kb"
+    },
+    "chunks": {
+      "react-vendor": {
+        "description": "React core libraries (react, react-dom, jsx-runtime)",
+        "limit": "150kb",
+        "warning": "140kb",
+        "current": "136kb"
+      },
+      "vendor": {
+        "description": "Other third-party libraries",
+        "limit": "650kb",
+        "warning": "600kb",
+        "current": "608kb"
+      },
+      "ui-radix": {
+        "description": "Radix UI components",
+        "limit": "80kb",
+        "warning": "70kb",
+        "current": "69kb"
+      },
+      "charts-vendor": {
+        "description": "Recharts visualization library",
+        "limit": "280kb",
+        "warning": "270kb",
+        "current": "273kb",
+        "optimization": "Consider lazy loading charts only when needed"
+      },
+      "animation-vendor": {
+        "description": "Framer Motion animation library",
+        "limit": "80kb",
+        "warning": "75kb",
+        "current": "75kb",
+        "optimization": "Only load animations on demand"
+      },
+      "agents-catalog": {
+        "description": "AI Agents directory data (metadata only)",
+        "limit": "50kb",
+        "warning": "40kb",
+        "current": "1262kb (CRITICAL - needs optimization)",
+        "optimization": "IMPLEMENTED: Split into metadata (~30KB) + lazy-loaded content (~650KB)"
+      },
+      "commands-catalog": {
+        "description": "Commands catalog data",
+        "limit": "50kb",
+        "warning": "40kb",
+        "current": "286kb (HIGH - needs optimization)",
+        "optimization": "IMPLEMENTED: Lazy load via useCommandsData hook"
+      },
+      "page-llama": {
+        "description": "LlamaIndex page chunk",
+        "limit": "90kb",
+        "warning": "85kb",
+        "current": "84kb"
+      },
+      "page-workspace": {
+        "description": "Workspace page chunk",
+        "limit": "50kb",
+        "warning": "45kb",
+        "current": "46kb"
+      },
+      "page-tpcapital": {
+        "description": "TP Capital page chunk",
+        "limit": "30kb",
+        "warning": "25kb",
+        "current": "22kb"
+      }
+    },
+    "assets": {
+      "css": {
+        "description": "Total CSS bundle",
+        "limit": "150kb",
+        "warning": "140kb",
+        "current": "140kb"
+      },
+      "images": {
+        "description": "Total image assets",
+        "limit": "500kb",
+        "warning": "400kb"
+      }
+    }
+  },
+  "thresholds": {
+    "error": 1.0,
+    "warning": 0.9
+  },
+  "notes": [
+    "All sizes are gzipped unless specified otherwise",
+    "Budgets should be reviewed quarterly",
+    "Critical chunks (agents-catalog, commands-catalog) are being optimized with lazy loading",
+    "Charts and animations should be loaded on-demand via dynamic imports"
+  ]
+}

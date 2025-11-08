@@ -1,0 +1,252 @@
+name: Bundle Size Monitoring
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  monitor-bundle-size:
+    name: Weekly Bundle Monitoring
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/dashboard/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Build production bundle
+        working-directory: frontend/dashboard
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Collect bundle metrics
+        id: metrics
+        working-directory: frontend/dashboard
+        run: |
+          # Get timestamp
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+
+          # Total bundle size
+          TOTAL_SIZE=$(du -sb dist | awk '{print $1}')
+          TOTAL_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $TOTAL_SIZE / 1024 / 1024}")
+          echo "TOTAL_SIZE=$TOTAL_SIZE" >> $GITHUB_ENV
+          echo "TOTAL_SIZE_MB=$TOTAL_SIZE_MB" >> $GITHUB_ENV
+
+          # JavaScript size
+          JS_SIZE=$(find dist/assets -name "*.js" -type f -exec du -cb {} + | tail -1 | awk '{print $1}')
+          JS_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $JS_SIZE / 1024 / 1024}")
+          echo "JS_SIZE_MB=$JS_SIZE_MB" >> $GITHUB_ENV
+
+          # CSS size
+          CSS_SIZE=$(find dist/assets -name "*.css" -type f -exec du -cb {} + | tail -1 | awk '{print $1}')
+          CSS_SIZE_KB=$(awk "BEGIN {printf \"%.2f\", $CSS_SIZE / 1024}")
+          echo "CSS_SIZE_KB=$CSS_SIZE_KB" >> $GITHUB_ENV
+
+          # Gzipped sizes
+          TOTAL_GZIP=$(find dist -name "*.gz" -type f -exec du -cb {} + | tail -1 | awk '{print $1}')
+          TOTAL_GZIP_KB=$(awk "BEGIN {printf \"%.2f\", $TOTAL_GZIP / 1024}")
+          echo "TOTAL_GZIP_KB=$TOTAL_GZIP_KB" >> $GITHUB_ENV
+
+          # Largest chunks
+          LARGEST_CHUNK=$(find dist/assets -name "*.js" -type f -exec ls -lh {} \; | sort -rh -k5 | head -1 | awk '{print $9, $5}' | sed 's|dist/assets/||g')
+          echo "LARGEST_CHUNK=$LARGEST_CHUNK" >> $GITHUB_ENV
+
+          # Chunk count
+          CHUNK_COUNT=$(find dist/assets -name "*.js" -type f | wc -l)
+          echo "CHUNK_COUNT=$CHUNK_COUNT" >> $GITHUB_ENV
+
+      - name: Run bundle size check
+        working-directory: frontend/dashboard
+        run: |
+          npm run check:bundle:size > bundle-check.txt 2>&1 || true
+          cat bundle-check.txt
+
+      - name: Generate weekly report
+        run: |
+          cat > bundle-weekly-report.md << 'EOF'
+          # Weekly Bundle Size Report
+
+          **Date:** ${{ env.TIMESTAMP }}
+          **Commit:** ${{ github.sha }}
+
+          ## Summary
+
+          | Metric | Value |
+          |--------|-------|
+          | **Total Bundle** | ${{ env.TOTAL_SIZE_MB }} MB |
+          | **JavaScript** | ${{ env.JS_SIZE_MB }} MB |
+          | **CSS** | ${{ env.CSS_SIZE_KB }} KB |
+          | **Gzipped Total** | ${{ env.TOTAL_GZIP_KB }} KB |
+          | **Chunk Count** | ${{ env.CHUNK_COUNT }} |
+          | **Largest Chunk** | ${{ env.LARGEST_CHUNK }} |
+
+          ## Budget Status
+
+          \`\`\`
+          $(cat frontend/dashboard/bundle-check.txt)
+          \`\`\`
+
+          ## Top 10 Largest Chunks
+
+          \`\`\`
+          $(find frontend/dashboard/dist/assets -name "*.js" -type f -exec ls -lh {} \; | sort -rh -k5 | head -10 | awk '{print $9, $5}' | sed 's|frontend/dashboard/dist/assets/||g')
+          \`\`\`
+
+          ## Recommendations
+
+          $(if (( $(echo "${{ env.TOTAL_SIZE_MB }} > 1.0" | bc -l) )); then echo "⚠️ Total bundle exceeds 1 MB. Consider:"; echo "- Review largest chunks for optimization opportunities"; echo "- Implement additional code splitting"; echo "- Check for duplicate dependencies"; else echo "✅ Bundle size is within acceptable range"; fi)
+
+          ---
+
+          📊 View detailed analysis in the workflow artifacts
+          EOF
+
+          cat bundle-weekly-report.md
+
+      - name: Store metrics history
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const metrics = {
+              timestamp: '${{ env.TIMESTAMP }}',
+              commit: '${{ github.sha }}',
+              totalSize: parseFloat('${{ env.TOTAL_SIZE_MB }}'),
+              jsSize: parseFloat('${{ env.JS_SIZE_MB }}'),
+              cssSize: parseFloat('${{ env.CSS_SIZE_KB }}'),
+              gzipSize: parseFloat('${{ env.TOTAL_GZIP_KB }}'),
+              chunkCount: parseInt('${{ env.CHUNK_COUNT }}')
+            };
+
+            // Try to read existing metrics
+            let history = [];
+            try {
+              const content = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/bundle-metrics.json',
+                ref: 'main'
+              });
+
+              history = JSON.parse(Buffer.from(content.data.content, 'base64').toString());
+            } catch (e) {
+              console.log('No existing metrics file, creating new one');
+            }
+
+            // Add new metrics
+            history.push(metrics);
+
+            // Keep only last 52 weeks (1 year)
+            if (history.length > 52) {
+              history = history.slice(-52);
+            }
+
+            // Update file
+            const content = Buffer.from(JSON.stringify(history, null, 2)).toString('base64');
+
+            try {
+              const existingFile = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/bundle-metrics.json',
+                ref: 'main'
+              });
+
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/bundle-metrics.json',
+                message: `chore: update bundle metrics - ${metrics.timestamp}`,
+                content: content,
+                sha: existingFile.data.sha,
+                branch: 'main'
+              });
+            } catch (e) {
+              // File doesn't exist, create it
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/bundle-metrics.json',
+                message: `chore: initialize bundle metrics tracking - ${metrics.timestamp}`,
+                content: content,
+                branch: 'main'
+              });
+            }
+
+      - name: Create GitHub Issue if bundle size increased significantly
+        if: env.TOTAL_SIZE_MB > 1.5
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '⚠️ Bundle Size Alert: Exceeds 1.5 MB';
+            const body = `
+            ## Bundle Size Alert
+
+            The weekly bundle size monitoring has detected that the bundle size has exceeded 1.5 MB.
+
+            **Current Size:** ${{ env.TOTAL_SIZE_MB }} MB
+            **Gzipped:** ${{ env.TOTAL_GZIP_KB }} KB
+            **Timestamp:** ${{ env.TIMESTAMP }}
+
+            ### Immediate Actions Required
+
+            1. Review the [bundle analysis artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Identify the largest chunks contributing to the increase
+            3. Implement optimization strategies:
+               - Additional code splitting
+               - Lazy loading of heavy components
+               - Dependency audit (check for duplicates)
+               - Tree-shaking improvements
+
+            ### Resources
+
+            - [Bundle Optimization Guide](https://github.com/${{ github.repository }}/blob/main/frontend/dashboard/BUNDLE-OPTIMIZATION.md)
+            - [Bundle Size Budgets](https://github.com/${{ github.repository }}/blob/main/frontend/dashboard/scripts/bundle-size-budgets.json)
+
+            ---
+
+            *This issue was automatically created by the Bundle Size Monitoring workflow*
+            `;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'bundle-size,automated'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['bundle-size', 'performance', 'automated']
+              });
+            }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-bundle-report
+          path: |
+            frontend/dashboard/dist/stats.html
+            bundle-weekly-report.md
+            frontend/dashboard/bundle-check.txt
+          retention-days: 90
