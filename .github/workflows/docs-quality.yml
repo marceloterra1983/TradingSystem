@@ -1,6 +1,13 @@
 name: Documentation Quality Check
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'scripts/docs/**'
+      - '.github/workflows/docs-quality.yml'
   pull_request:
     paths:
       - 'docs/content/**'
@@ -25,6 +32,8 @@ jobs:
   validate-documentation:
     name: Documentation Quality Validation
     runs-on: ubuntu-latest
+    outputs:
+      score: ${{ steps.health.outputs.score || '0' }}
 
     steps:
       - name: Checkout repository
@@ -45,7 +54,7 @@ jobs:
       - name: Run comprehensive maintenance
         id: maintenance
         run: |
-          MODE="${{ github.event.inputs.mode || 'quick' }}"
+          MODE="${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'quick' }}"
           echo "Running maintenance in $MODE mode..."
           bash scripts/docs/comprehensive-maintenance.sh "$MODE"
         continue-on-error: true
@@ -73,7 +82,13 @@ jobs:
         if: always()
         id: health
         run: |
-          REPORT=$(ls -t docs/reports/comprehensive-maintenance-*.md | head -1)
+          REPORT=$(ls -t docs/reports/comprehensive-maintenance-*.md 2>/dev/null | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "No maintenance report found; defaulting score to 0"
+            echo "score=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           SCORE=$(grep -o "Overall Documentation Health: [0-9]*" "$REPORT" | grep -o "[0-9]*" || echo "0")
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "Health Score: $SCORE/100"
@@ -149,7 +164,7 @@ ${score < 75 ? '⚠️ **Action needed**: Health score is below target (75). Ple
   validate-external-links:
     name: External Link Validation
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.mode == 'full'
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'full')
 
     steps:
       - name: Checkout repository
