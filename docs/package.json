@@ -40,6 +40,8 @@
     "yaml": "^2.5.1"
   },
   "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.9.2",
+    "@types/node": "^20.16.11",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.2",
     "markdownlint-cli": "^0.44.0",
