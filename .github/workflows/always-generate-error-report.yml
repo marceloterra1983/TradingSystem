@@ -57,12 +57,14 @@ jobs:
           # Gerar relatório (últimas 20 falhas)
           bash scripts/github/collect-workflow-errors.sh 20
 
-          # Verificar se há relatório
-          if [ -f workflow-errors/LATEST.md ]; then
+          # Verificar se há relatório (no symlink, use timestamped files)
+          LATEST_REPORT=$(ls -t workflow-errors/ERROR-REPORT-*.md 2>/dev/null | head -1)
+
+          if [ -n "$LATEST_REPORT" ] && [ -f "$LATEST_REPORT" ]; then
             echo "report_generated=true" >> $GITHUB_OUTPUT
 
             # Contar erros
-            ERROR_COUNT=$(grep -c "### 🔴" workflow-errors/LATEST.md || echo "0")
+            ERROR_COUNT=$(grep -c "### 🔴" "$LATEST_REPORT" || echo "0")
             echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
           else
             echo "report_generated=false" >> $GITHUB_OUTPUT
