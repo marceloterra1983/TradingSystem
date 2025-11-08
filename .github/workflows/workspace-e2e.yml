@@ -41,8 +41,6 @@ env:
 jobs:
   workflow-lint:
     uses: ./.github/workflows/workflow-lint.yml
-    with:
-      node-version: ${{ env.NODE_VERSION }}
     secrets: inherit
 
   # ===========================================================================

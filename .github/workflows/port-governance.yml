@@ -47,7 +47,7 @@ jobs:
             # Ignore if only mode changed (0 additions, 0 deletions)
             if [ "$additions" != "0" ] || [ "$deletions" != "0" ]; then
               # Check if changes are only timestamps (filter out diff headers too)
-              if git diff "$file" | grep "^[+-]" | grep -v "^---\|^+++\|^[+-].*Generated\|^[+-].*generatedAt\|^[+-].*generated-at\|^[+-].*Última geração\|^[+-].*Last generated" | grep -q .; then
+              if git diff "$file" | grep "^[+-]" | grep -v "^---\|^+++\|^[+-].*Generated\|^[+-].*generatedAt\|^[+-].*generated-at\|^[+-].*Última geração\|^[+-].*Last generated\|^[+-].*AUTO-GENERATED" | grep -q .; then
                 echo "Real content change detected in: $file"
                 echo "$additions insertions, $deletions deletions"
                 git diff "$file"

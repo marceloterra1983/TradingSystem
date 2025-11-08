@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "integrations"
-x-tradingsystem-generated-at: "2025-11-07T20:54:54.116Z"
+x-tradingsystem-generated-at: "2025-11-08T03:40:55.926Z"
 
 x-tradingsystem-ports:
   workspace-api:
