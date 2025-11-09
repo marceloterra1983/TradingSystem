@@ -24,10 +24,10 @@ Garantir que todos os serviços do TradingSystem usem um modelo único de variá
 ## Fontes Canônicas
 | Arquivo | Tipo | Status | Conteúdo |
 | --- | --- | --- | --- |
-| `config/.env.defaults` | Default versionado | ✅ Commitado | Valores não sensíveis, portas, imagens Docker e toggles.
-| `.env` | Secrets locais | ❌ Gitignore | Token real por estação. Deriva de `.env.example` + `scripts/env/setup-env.sh`.
-| `.env.shared` | Gerado | ✅ Commitado | Portas/hosts sincronizados via `npm run ports:sync` (não editar manualmente).
-| `.env.example` | Template mínimo | ✅ Commitado | Apenas chaves que exigem ação humana (API keys, senhas). Mantido sincronizado com este documento.
+| `config/.env.defaults` | Default versionado | ✅ Commitado | Valores não sensíveis, portas, imagens Docker e toggles. |
+| `.env` | Secrets locais | ❌ Gitignore | Token real por estação. Deriva de `.env.example` + `scripts/env/setup-env.sh`. |
+| `.env.shared` | Gerado | ✅ Commitado | Portas/hosts sincronizados via `npm run ports:sync` (não editar manualmente). |
+| `.env.example` | Template mínimo | ✅ Commitado | Apenas chaves que exigem ação humana (API keys, senhas). Mantido sincronizado com este documento. |
 
 > Qualquer outro arquivo `.env*` na raiz é proibido. Arquivos específicos de serviço devem seguir o padrão `<service>/.env.example` + `.env.local` (gitignored).
 
