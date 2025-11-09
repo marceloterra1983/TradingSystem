@@ -75,6 +75,7 @@
     "${workspaceFolder}/venv/lib/python3.12/site-packages"
   ],
   "files.associations": {
+    ".env.defaults": "dotenv",
     "*.env.defaults": "dotenv"
   }
 }
