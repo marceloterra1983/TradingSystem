@@ -49,6 +49,7 @@ services:
       NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler_cli}
       COURSE_CRAWLER_BROWSER_USE_ENABLED: "false"
       COURSE_CRAWLER_MAX_CLASSES_PER_MODULE: ${COURSE_CRAWLER_MAX_CLASSES_PER_MODULE}
+      COURSE_CRAWLER_TIMEOUT_MS: ${COURSE_CRAWLER_TIMEOUT_MS:-3600000}
     volumes:
       - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
       - ../../outputs/course-crawler:/app/outputs

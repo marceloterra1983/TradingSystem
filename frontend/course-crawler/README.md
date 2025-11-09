@@ -135,6 +135,7 @@ Configure API URL via environment variables:
 VITE_COURSE_CRAWLER_API_URL=http://localhost:3601
 VITE_COURSE_CRAWLER_APP_URL=http://localhost:4201
 VITE_DOCKER_CONTROL_URL=http://127.0.0.1:9876
+COURSE_CRAWLER_TIMEOUT_MS=3600000
 ```
 
 These are injected at build time by Vite and referenced in Docker Compose:
@@ -147,6 +148,7 @@ course-crawler-ui:
       VITE_COURSE_CRAWLER_API_URL: ${VITE_COURSE_CRAWLER_API_URL}
       VITE_COURSE_CRAWLER_APP_URL: ${VITE_COURSE_CRAWLER_APP_URL}
       VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9876}
+      COURSE_CRAWLER_TIMEOUT_MS: ${COURSE_CRAWLER_TIMEOUT_MS:-3600000}
 ```
 
 > 💡 The optional `VITE_DOCKER_CONTROL_URL` is used by the **Worker Logs** card to pull
