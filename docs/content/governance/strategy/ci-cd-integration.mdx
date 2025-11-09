@@ -1,0 +1,414 @@
+---
+title: CI/CD Integration Strategy
+description: Roadmap e estratégia para integração de CI/CD com validação
+  automatizada de governança, testes e deployment.
+slug: /governance/strategy/ci-cd-integration
+tags:
+  - ci-cd
+  - automation
+  - deployment
+  - testing
+  - governance
+owner: DevOps
+lastReviewed: 2025-11-08
+sidebar_label: CI/CD Integration
+sidebar_position: 11
+---
+
+<!-- AUTO-GENERATED from governance source. Do not edit in docs/content. -->
+
+---
+title: CI/CD Integration for Documentation
+description: Comprehensive guide to documentation validation, deployment, and monitoring workflows.
+tags: [governance, automation, ci-cd]
+owner: DocsOps
+lastReviewed: 2025-11-03
+---
+
+# CI/CD Integration for Documentation
+
+This guide documents the complete CI/CD ecosystem that keeps the TradingSystem documentation reliable, compliant, and production ready. It covers workflow triggers, validation jobs, notification patterns, and maintenance expectations.
+
+---
+
+## 1. Overview
+
+- **Goal**: fail fast on documentation regressions, guarantee deployment quality, and surface actionable insights to contributors.
+- **Strategy**: run comprehensive validation on every change, enforce branch protection with status checks, and provide rapid feedback through Slack.
+- **Ecosystem**: five GitHub Actions workflows working in concert (validation, deployment, link scanning, code-docs sync validation, scheduled health audits).
+
+### Workflow Relationships
+
+```
+docs-validation.yml (PRs & pushes)
+    ├─ freeze_guard → skip if freeze active
+    ├─ validate-frontmatter → maintenance-audit → docs-check → docs-links
+    └─ notify-slack + validation-summary
+
+docs-deploy.yml (main branch)
+    ├─ freeze_guard
+    ├─ build-docs → deploy-docs
+    ├─ link-check (PRs)
+    └─ validate-frontmatter (Python)
+
+docs-link-validation.yml (PRs, pushes, schedule)
+    ├─ freeze_guard
+    └─ validate-links (JSON report + PR comment)
+
+docs-audit-scheduled.yml (daily schedule)
+    ├─ freeze_guard
+    ├─ run-audit → metrics → commit report
+    └─ degradation alert (GitHub issue + optional Slack)
+
+docs-code-sync-validation.yml (PRs touching code)
+    ├─ freeze_guard
+    ├─ validate-sync
+    ├─ comment-on-pr
+    └─ check-critical-violations
+```
+
+---
+
+## 2. Workflows
+
+### 2.1 Documentation Validation (`.github/workflows/docs-validation.yml`)
+
+- **Purpose**: comprehensive validation on pull requests, pushes, and manual runs.
+- **Triggers**: `pull_request` and `push` on `main` and `develop`, plus `workflow_dispatch`.
+- **Path filters**: `docs/**`, `scripts/docs/**`, `.github/workflows/docs-validation.yml`.
+- **Jobs**:
+  1. **Freeze Guard** – short-circuits the workflow if `FREEZE-NOTICE.md` declares an active freeze.
+  2. **Validate Frontmatter** – runs `validate-frontmatter.py` (schema v2) with JSON artifact output.
+  3. **Maintenance Audit** – executes `maintenance-audit.sh --ci-mode` with threshold-based failure.
+  4. **Docs Check** – runs the full `npm run docs:check` pipeline (auto → lint → typecheck → test → build).
+  5. **Docs Links** – reuses the build artifact to execute `npm run docs:links`.
+  6. **Notify Slack** – posts failures to the DocsOps Slack channel via webhook.
+  7. **Validation Summary** – emits a GitHub Step Summary with per-job status and artifact pointers.
+- **Status checks** (branch protection): `validate-frontmatter`, `maintenance-audit`, `docs-check`, `docs-links`.
+- **Artifacts** (7 days retention): frontmatter validation JSON, maintenance audit report, docs build, docs link log.
+- **Runtime**: ~10–15 minutes depending on link validation scope.
+
+### 2.2 Documentation Deployment (`.github/workflows/docs-deploy.yml`)
+
+- **Purpose**: build and deploy the Docusaurus site to GitHub Pages.
+- **Triggers**: push to `main`, PR to `main`, and `workflow_dispatch`.
+- **Path filters**: `docs/**`, `.github/workflows/docs-deploy.yml`.
+- **Jobs**:
+  1. **Freeze Guard** – skips deployment during freezes.
+  2. **Build Docs** – runs `docs:auto` and `docs:build`, uploads artifact `docs-build`.
+  3. **Deploy Docs** – publishes to GitHub Pages (`main` branch pushes only).
+  4. **Link Check** – executes Lychee for HTML link validation on PRs.
+  5. **Validate Frontmatter** – uses the Python validator for PRs (shared with validation workflow).
+- **Status checks**: `build-docs`, `validate-frontmatter`.
+- **Artifacts**: `docs-build` uploaded for deployment; retained per GitHub Pages defaults.
+- **Runtime**: ~5–8 minutes.
+
+### 2.3 Documentation Link Validation (`.github/workflows/docs-link-validation.yml`)
+
+- **Purpose**: deep link validation with categorised severity and PR comments.
+- **Triggers**: `pull_request` (`main`, `develop`), `push` (`main`, `develop`), scheduled daily at 03:00 UTC, `workflow_dispatch`.
+- **Path filters**: `docs/**`, `**/*.md`, `scripts/docs/check-links.py`.
+- **Jobs**:
+  1. **Freeze Guard** – honours freeze policy.
+  2. **Validate Links** – generates JSON reports, comments on PRs, and fails on critical internal breakages.
+- **Status checks**: `validate-links` (critical issues only).
+- **Artifacts**: JSON reports (`docs/reports/link-validation-*.json`, 30 days retention).
+- **PR automation**: summary comment with critical/warning/external breakdowns.
+- **Runtime**: ~3–5 minutes.
+
+### 2.4 Documentation Health Audit (`.github/workflows/docs-audit-scheduled.yml`)
+
+- **Purpose**: daily maintenance audit and metrics propagation.
+- **Triggers**: scheduled daily at 02:00 UTC, `workflow_dispatch`.
+- **Jobs**:
+  1. **Freeze Guard** – respects freeze windows.
+  2. **Run Audit** – executes extended audit script (frontmatter, links, duplicates).
+  3. **Extract Metrics** – calculates health score, pushes to monitoring systems.
+  4. **Update Metrics / Commit Report** – archives reports and commits updates.
+  5. **Archive Reports** – rotates old reports (>30 days).
+  6. **Check Degradation** – compares health score deltas.
+  7. **Create Issue** – files GitHub issue and notifies Slack if health drops by >5 points.
+- **Status checks**: none (informational).
+- **Artifacts**: audit reports and metrics JSON (90 days retention).
+- **Runtime**: ~5–10 minutes.
+
+### 2.5 Documentation Versioning (`.github/workflows/docs-versioning.yml`)
+
+- **Purpose**: automated version creation on semantic release tags.
+- **Triggers**: `push` tags matching `v[0-9]+.[0-9]+.[0-9]+`, `workflow_dispatch`.
+- **Path filters**: none (tag-based trigger).
+- **Jobs**:
+  1. **Freeze Guard** – honours maintenance freeze windows.
+  2. **Validate Prerequisites** – version format, frontmatter, maintenance audit (threshold 5), `npm run docs:check`.
+  3. **Create Version** – runs `scripts/docs/auto-version.sh --auto-commit`, updates config, pushes snapshot.
+  4. **Verify Version** – checks artifacts, performs production build, validates routing, uploads build artifact.
+  5. **Create Release Notes** – extracts CHANGELOG, creates GitHub Release, uploads reports.
+- **Status checks**: none (informational workflow).
+- **Artifacts**: version report (90 days retention), docs build (7 days retention).
+- **Runtime**: ~15–20 minutes end-to-end.
+- **See also**: [`VERSIONING-AUTOMATION.md`](/governance/versioning-automation).
+
+### 2.6 Code-Docs Synchronization Validation (`.github/workflows/docs-code-sync-validation.yml`)
+
+- **Purpose**: enforce documentation updates whenever mapped code paths change.
+- **Triggers**: pull requests targeting `main` or `develop` that touch backend APIs, database schemas, application code, OpenAPI specs, or `.env.example`; manual `workflow_dispatch`.
+- **Path filters**: `backend/api/**/*.js`, `backend/data/timescaledb/**/*.sql`, `apps/*/src/**/*.{js,ts,tsx}`, `apps/*/package.json`, `backend/api/*/package.json`, `docs/static/specs/*.yaml`, `.env.example`.
+- **Jobs**:
+  1. **Freeze Guard** – aborts when `FREEZE-NOTICE.md` declares an active freeze.
+  2. **Validate Sync** – runs `scripts/agents/docusaurus-daily.mjs --check-sync --severity-threshold high`, uploads report artifact, and surfaces violation counts.
+  3. **Comment on PR** – posts or updates a comment summarizing sync violations, targets, severity, and owners.
+  4. **Check Critical Violations** – fails the workflow when critical violations remain; warns on high, logs medium/low.
+- **Status checks**: `validate-sync`, `check-critical-violations` (required for protected branches).
+- **Artifacts**: sync validation report (`sync-validation-*.json`, 30 days retention).
+- **Runtime**: ~3–5 minutes.
+- **Example**:
+  ```bash
+  # PR introduces new workspace API endpoint
+  git checkout -b feat/workspace-endpoint
+  # edit backend/api/workspace/src/routes/items.js
+  git commit -am "feat: add GET /api/items/:id endpoint"
+  git push origin feat/workspace-endpoint
+  # open PR → workflow runs → fails until docs updated
+  ```
+- **Severity enforcement**:
+  - Critical (API routes, OpenAPI specs): blocks merge.
+  - High (schemas, env vars, configs): posts blocking comment, warns in summary.
+  - Medium/Low (versions, non-breaking features): informational checklist.
+- **Reference**: [`CODE-DOCS-SYNC.md`](/governance/code-docs-sync) for system details.
+
+---
+
+## 3. Validation Scripts
+
+### 3.1 `scripts/docs/validate-frontmatter.py`
+
+- **Scope**: validates YAML frontmatter against schema v2.
+- **Enforced fields**: `title`, `description`, `tags`, `owner`, `lastReviewed`.
+- **Owner validation**: checks against `ALLOWED_OWNERS`.
+- **Date validation**: ISO `YYYY-MM-DD`.
+- **Exit codes**: `0` success, `1` on validation issues.
+- **Output**: JSON report (path configurable via `--output`).
+- **Dependencies**: `pyyaml>=6.0.1` from `requirements-docs.txt`.
+
+### 3.2 `scripts/docs/maintenance-audit.sh`
+
+- **Purpose**: documentation quality guardrail (freshness, length, links, style).
+- **CI mode**: `--ci-mode` activates threshold enforcement with exit code `1` when issues exceed limit.
+- **Threshold override**: `--ci-threshold <N>` (default `10` issues).
+- **Outputs**: Markdown report saved to `docs/reports/maintenance-audit-<timestamp>.md`.
+- **Integration**: used in daily audit and validation workflow.
+
+### 3.3 `npm run docs:check`
+
+- **Pipeline**: `docs:auto` → `docs:validate-generated` → `docs:lint` (non-blocking) → `docs:typecheck` → `docs:test` → `docs:build`.
+- **Failure handling**: any failing step aborts the job.
+- **Artifact**: `docs/build` directory (consumed by link validation job).
+
+### 3.4 `npm run docs:links`
+
+- **Script**: `scripts/docs/check-links.sh` (Linkinator).
+- **Behavior**: builds docs (if necessary) and scans for internal/external link issues.
+- **Exit codes**: non-zero when broken links detected; used to fail CI jobs.
+- **Outputs**: logs captured and uploaded as `docs-links.log`.
+
+---
+
+## 4. Status Checks
+
+### 4.1 Required Checks (Branch Protection for `main` and `develop`)
+
+- `validate-frontmatter`
+- `maintenance-audit`
+- `docs-check`
+- `docs-links`
+- `build-docs`
+- `validate-links`
+
+Configure under **Settings → Branches → Branch protection rules** for `main` and `develop`.
+
+### 4.2 Informational Checks
+
+- `freeze_guard` – runs on every workflow, only indicates freeze state.
+- `notify-slack` – notification helper (non-blocking).
+- `validation-summary` – renders run summary in the workflow UI.
+
+---
+
+## 5. Slack Notifications
+
+### 5.1 Configuration
+
+1. Create an **Incoming Webhook** in Slack (recommended channel: `#tradingsystem-docs`).
+2. Store the webhook URL as a GitHub secret named `SLACK_WEBHOOK_URL`.
+3. Reference the secret in workflows (validation + scheduled audit).
+
+### 5.2 Payload Content
+
+- Workflow name and deep link to the run.
+- Failed job names (comma-separated).
+- Commit SHA and link to commit.
+- Triggering user and PR number (when available).
+- Reminder to review uploaded artifacts.
+
+### 5.3 Testing
+
+```bash
+# Trigger workflow manually from GitHub UI (workflow_dispatch)
+# Introduce a controlled failure (e.g., invalid frontmatter)
+# Confirm Slack alert arrives with correct metadata
+```
+
+---
+
+## 6. Freeze Guard
+
+- **Purpose**: pause automation during critical incidents or maintenance windows.
+- **Activation**: edit `FREEZE-NOTICE.md` to set `**Status**: ACTIVE`.
+- **Behavior**: workflows exit early when freeze is active, preserving required status checks.
+- **Communication**: include reason, duration, and contact in the freeze notice.
+
+Sample notice:
+
+```markdown
+**Status**: ACTIVE
+**Reason**: Database migration in progress
+**Duration**: 2025-11-03 14:00–16:00 UTC
+**Contact**: @ops-team
+```
+
+---
+
+## 7. Artifacts
+
+| Artifact | Workflow | Retention | Contents |
+|----------|----------|-----------|----------|
+| `frontmatter-validation-report` | docs-validation | 7 days | JSON frontmatter validation results |
+| `maintenance-audit-report` | docs-validation | 7 days | Markdown audit report with metrics |
+| `docs-build` | docs-validation / docs-deploy | 7 days | Static build output |
+| `docs-link-validation-log` | docs-validation | 7 days | Linkinator console log |
+| `link-validation-report-<run>` | docs-link-validation | 30 days | Categorised link JSON report |
+| Daily audit artifacts | docs-audit-scheduled | 90 days | Health metrics, reports, archives |
+
+Artifacts are accessible via **Actions → Run → Artifacts**.
+
+---
+
+## 8. Troubleshooting
+
+### 8.1 Frontmatter Validation Failed
+
+- Download `frontmatter-validation-*.json`.
+- Review `invalid_entries` for missing or malformed fields.
+- Common causes: invalid owner, missing description, stale `lastReviewed`.
+
+### 8.2 Maintenance Audit Failed
+
+- Open `maintenance-audit-*.md` and inspect issue breakdown.
+- Compare `issues_found` with CI threshold (default 10).
+- Typical fixes: update stale content, expand short pages, fix internal links.
+- Adjust threshold only with DocsOps approval.
+
+### 8.3 Docs Build Failed
+
+- Check `docs:check` logs for failing step (lint, typecheck, tests, build).
+- Reproduce locally: `cd docs && npm run docs:check`.
+- Ensure Node.js 18+ and dependencies match lockfile.
+
+### 8.4 Link Validation Failed
+
+- Review `docs-links.log` for Linkinator output.
+- Confirm build artifact integrity.
+- Investigate anchor mismatches and redirected URLs.
+- Re-run locally: `cd docs && npm run docs:links`.
+
+### 8.5 Slack Notification Missing
+
+- Verify `SLACK_WEBHOOK_URL` secret is set.
+- Ensure webhook is active in the target channel.
+- Inspect workflow logs for `8398a7/action-slack` errors.
+
+### 8.6 Code-Docs Sync Validation Failures
+
+- **Symptom**: `docs-code-sync-validation` workflow blocks PR merge.
+- **Diagnosis**: review PR comment titled "Documentation Sync Required" for violation table; inspect uploaded sync report artifact.
+- **Common causes**: new API endpoints, schema updates, version bumps, or env vars without accompanying documentation updates.
+- **Resolution**:
+  1. Update the listed documentation files.
+  2. Commit changes to the same PR.
+  3. Re-run validation locally with `npm run docs:check-sync` if desired.
+  4. Re-run the workflow (push or workflow dispatch).
+- **False positives**: refine mapping triggers or severity in `CODE-DOCS-MAPPING.json`, or request temporary bypass via `[skip-sync]` (lead approval required).
+
+---
+
+## 9. Local Development
+
+### 9.1 Run Validations Locally
+
+```bash
+# Frontmatter validation
+pip install -r requirements-docs.txt
+python scripts/docs/validate-frontmatter.py --schema v2 --docs-dir ./docs/content --verbose
+
+# Maintenance audit (threshold enforced)
+bash scripts/docs/maintenance-audit.sh --ci-mode --ci-threshold 10
+
+# Full validation pipeline
+cd docs
+npm run docs:check
+
+# Link validation
+npm run docs:links
+```
+
+### 9.2 Test Workflow Changes
+
+- Use [`act`](https://github.com/nektos/act) for local GitHub Actions simulation, or
+- Push feature branches and monitor workflow runs, or
+- Trigger workflows manually via `workflow_dispatch`.
+
+### 9.3 Secret Management
+
+- Store secrets in `.env` for local testing (never commit).
+- Mirror required secrets in GitHub (Settings → Secrets and variables → Actions).
+
+---
+
+## 10. Maintenance
+
+### 10.1 Quarterly Review
+
+- Revisit CI thresholds and update as needed.
+- Refresh `ALLOWED_OWNERS` in `validate-frontmatter.py`.
+- Audit frozen artifacts in `docs/reports`.
+- Validate Slack channel membership and escalation contacts.
+
+### 10.2 Dependency Updates
+
+- Bump GitHub Actions versions (e.g., `actions/setup-node`, `actions/setup-python`).
+- Update `requirements-docs.txt` (Python) and `docs/package.json` (Node).
+- Run validation workflows on a staging branch before merging dependency changes.
+
+### 10.3 Metrics Monitoring
+
+- Track documentation health score trends (Grafana dashboard).
+- Review GitHub issues opened by scheduled audits.
+- Monitor failure frequency to fine-tune alerting and thresholds.
+
+---
+
+## 11. Related Documentation
+
+- [VALIDATION-GUIDE](/governance/validation-guide) – Manual validation playbook.
+- [MAINTENANCE-CHECKLIST](/governance/maintenance-checklist) – Quarterly maintenance SOP.
+- [AUTOMATED-MAINTENANCE-GUIDE](/governance/automated-maintenance-guide) – Automation reference.
+- [VERSIONING-AUTOMATION](/governance/versioning-automation) – Automated documentation versioning workflow.
+- [CODE-DOCS-SYNC](/governance/code-docs-sync) – Code↔docs synchronization system.
+- `.github/workflows/` – Workflow source files.
+- `scripts/docs/` – Validation scripts and utilities.
+
+---
+
+**Last Updated**: 2025-11-03  
+**Maintained By**: DocsOps Team  
+**Status**: Active

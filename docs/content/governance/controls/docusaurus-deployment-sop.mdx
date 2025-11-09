@@ -1,0 +1,540 @@
+---
+title: SOP - Deployment Seguro do Docusaurus
+description: Procedimento operacional para deployment seguro do Documentation
+  Hub com validações pré-deploy e rollback.
+slug: /governance/controls/docusaurus-deployment-sop
+tags:
+  - sop
+  - docusaurus
+  - deployment
+  - documentation
+owner: DocsOps
+lastReviewed: 2025-11-05
+sidebar_label: SOP-DOCS-001 - Docusaurus Deployment
+sidebar_position: 22
+---
+
+<!-- AUTO-GENERATED from governance source. Do not edit in docs/content. -->
+
+# Docusaurus Deployment - Standard Operating Procedure (SOP)
+
+**Control ID:** SOP-DOCS-001
+**Version:** 1.0.0
+**Last Updated:** 2025-11-07
+**Owner:** DevOps Team
+**Reviewers:** AI Agents, Documentation Team
+
+---
+
+## 🎯 Purpose
+
+This SOP prevents the **500 Internal Server Error** that occurs when the Docusaurus container starts without a valid build, causing NGINX redirect loops.
+
+## 🚨 Critical Rule for AI Agents
+
+**ALWAYS check and rebuild Docusaurus before restarting the docs-hub container!**
+
+```bash
+# RED FLAG: Never do this alone!
+docker compose -f tools/compose/docker-compose.docs.yml restart
+
+# ✅ CORRECT: Always rebuild docs first
+cd docs && npm run docs:build && cd .. && docker compose -f tools/compose/docker-compose.docs.yml up -d --build
+```
+
+---
+
+## 📋 Problem Definition
+
+### Root Cause
+
+The `docs-hub` container mounts `docs/build/` as a volume:
+
+```yaml
+volumes:
+  - ../../docs/build:/usr/share/nginx/html:ro
+```
+
+If `docs/build/` is **empty or outdated**, NGINX cannot serve files, causing:
+- `/next/` → redirect to `/index.html` → not found → redirect to `/index.html` → **infinite loop**
+- HTTP 500 Internal Server Error
+
+### NGINX Error Log Pattern
+
+```
+[error] rewrite or internal redirection cycle while internally redirecting to "/index.html"
+```
+
+---
+
+## 🔍 Detection Methods
+
+### 1. Visual Detection (User Reports)
+
+**Symptoms:**
+- User sees "500 Internal Server Error" page
+- URL shows `http://localhost:3404/next/` or any path
+- Browser console shows `ERR_CONNECTION_REFUSED`
+
+### 2. Automated Detection (Health Check)
+
+```bash
+# Quick health check
+curl -f http://localhost:3404/health || echo "❌ Docs service unhealthy"
+
+# Detailed check with container logs
+docker logs docs-hub --tail 20 | grep -i "error"
+```
+
+### 3. Pre-deployment Validation
+
+```bash
+# Verify build exists
+if [ ! -f "docs/build/index.html" ]; then
+  echo "❌ ERROR: Docusaurus build not found!"
+  exit 1
+fi
+
+# Verify build is recent (less than 1 hour old)
+if [ $(find docs/build/index.html -mmin +60 2>/dev/null | wc -l) -gt 0 ]; then
+  echo "⚠️  WARNING: Docusaurus build is older than 1 hour"
+fi
+```
+
+---
+
+## ✅ Standard Operating Procedures
+
+### SOP 1: Initial Deployment
+
+**When:** First time deploying documentation
+
+```bash
+#!/bin/bash
+# File: scripts/docs/initial-deploy.sh
+
+set -euo pipefail
+
+echo "📚 Docusaurus Initial Deployment"
+
+# 1. Install dependencies
+cd docs
+npm ci
+
+# 2. Build Docusaurus
+echo "🔨 Building Docusaurus..."
+npm run docs:build
+
+# 3. Verify build
+if [ ! -f "build/index.html" ]; then
+  echo "❌ Build failed - index.html not found"
+  exit 1
+fi
+
+# 4. Start container
+cd ..
+docker compose -f tools/compose/docker-compose.docs.yml up -d --build
+
+# 5. Wait for health check
+echo "⏳ Waiting for service to be healthy..."
+timeout 60 bash -c 'until curl -sf http://localhost:3404/health > /dev/null; do sleep 2; done'
+
+echo "✅ Docusaurus deployed successfully!"
+echo "🌐 Access at: http://localhost:3404"
+```
+
+### SOP 2: Content Update Deployment
+
+**When:** Documentation content changed
+
+```bash
+#!/bin/bash
+# File: scripts/docs/update-deploy.sh
+
+set -euo pipefail
+
+echo "📝 Updating Docusaurus content"
+
+# 1. Rebuild Docusaurus
+cd docs
+npm run docs:build
+
+# 2. Verify build succeeded
+if [ ! -f "build/index.html" ]; then
+  echo "❌ Build failed"
+  exit 1
+fi
+
+# 3. Restart container (volume will pick up new files)
+cd ..
+docker compose -f tools/compose/docker-compose.docs.yml restart documentation
+
+# 4. Verify service is healthy
+sleep 5
+curl -f http://localhost:3404/health || {
+  echo "❌ Service unhealthy after restart"
+  docker logs docs-hub --tail 50
+  exit 1
+}
+
+echo "✅ Documentation updated successfully!"
+```
+
+### SOP 3: Emergency Recovery
+
+**When:** Service is showing 500 errors
+
+```bash
+#!/bin/bash
+# File: scripts/docs/emergency-recovery.sh
+
+set -euo pipefail
+
+echo "🚨 Emergency Docusaurus Recovery"
+
+# 1. Check if build exists
+if [ ! -f "docs/build/index.html" ]; then
+  echo "❌ Build missing - running full rebuild"
+  cd docs
+  npm ci
+  npm run docs:build
+  cd ..
+fi
+
+# 2. Force rebuild container with clean state
+echo "🔄 Rebuilding container..."
+docker compose -f tools/compose/docker-compose.docs.yml down
+docker compose -f tools/compose/docker-compose.docs.yml up -d --build --force-recreate
+
+# 3. Verify recovery
+echo "⏳ Verifying recovery..."
+sleep 10
+
+if curl -sf http://localhost:3404/health > /dev/null; then
+  echo "✅ Recovery successful!"
+else
+  echo "❌ Recovery failed - check logs:"
+  docker logs docs-hub --tail 100
+  exit 1
+fi
+```
+
+---
+
+## 🤖 AI Agent Instructions
+
+### Red Flags (Immediate Action Required)
+
+If you encounter ANY of these patterns, **STOP and follow recovery procedure**:
+
+```
+❌ User: "Docusaurus showing 500 error"
+❌ User: "Documentation not loading"
+❌ User: "Getting Internal Server Error on docs"
+❌ Logs: "rewrite or internal redirection cycle"
+❌ Health check fails: curl http://localhost:3404/health
+```
+
+### Automated Recovery Workflow
+
+```markdown
+## Step 1: Diagnose
+- Check if docs/build/index.html exists
+- Check docker logs: `docker logs docs-hub --tail 20`
+- Verify volume mount: `docker inspect docs-hub | jq '.[0].Mounts'`
+
+## Step 2: Rebuild Docusaurus
+cd docs && npm run docs:build
+
+## Step 3: Restart Container
+docker compose -f tools/compose/docker-compose.docs.yml up -d --build --force-recreate
+
+## Step 4: Verify
+curl -f http://localhost:3404/health
+curl -I http://localhost:3404/ | grep "200 OK"
+
+## Step 5: Document
+Create incident report in outputs/ if this was a production issue
+```
+
+### Prevention Checklist
+
+Before modifying documentation or restarting containers:
+
+- [ ] ✅ Verify `docs/build/index.html` exists
+- [ ] ✅ Run `npm run docs:build` if content changed
+- [ ] ✅ Check build timestamp is recent
+- [ ] ✅ Test health endpoint after restart
+- [ ] ✅ Check NGINX logs for redirect errors
+
+---
+
+## 🔧 Automated Validation Scripts
+
+### Pre-commit Hook
+
+**File:** `.git/hooks/pre-commit`
+
+```bash
+#!/bin/bash
+# Validate Docusaurus build before commit
+
+if git diff --cached --name-only | grep -q "^docs/content/"; then
+  echo "📚 Documentation files changed - validating build..."
+
+  cd docs
+  if ! npm run docs:build > /dev/null 2>&1; then
+    echo "❌ Docusaurus build failed!"
+    echo "Run: cd docs && npm run docs:build"
+    exit 1
+  fi
+
+  echo "✅ Docusaurus build valid"
+fi
+```
+
+### CI/CD Validation
+
+**File:** `.github/workflows/docs-validation.yml`
+
+```yaml
+name: Docs Validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/content/**'
+      - 'docs/src/**'
+      - 'docs/docusaurus.config.js'
+
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build Docusaurus
+        working-directory: docs
+        run: npm run docs:build
+
+      - name: Verify build output
+        run: |
+          if [ ! -f "docs/build/index.html" ]; then
+            echo "❌ Build failed - index.html not found"
+            exit 1
+          fi
+
+          # Check build size (should be > 100KB)
+          SIZE=$(du -sb docs/build | cut -f1)
+          if [ $SIZE -lt 102400 ]; then
+            echo "❌ Build suspiciously small: $SIZE bytes"
+            exit 1
+          fi
+
+          echo "✅ Build valid: $SIZE bytes"
+
+      - name: Test NGINX config
+        run: |
+          docker run --rm -v $(pwd)/tools/compose/documentation/nginx.conf:/etc/nginx/nginx.conf:ro nginx:alpine nginx -t
+```
+
+### Health Check Enhancement
+
+**File:** `tools/compose/documentation/healthcheck.sh`
+
+```bash
+#!/bin/sh
+# Enhanced health check for docs-hub container
+
+set -e
+
+# 1. Basic HTTP health
+if ! curl -sf http://localhost/health > /dev/null; then
+  echo "❌ Health endpoint failed"
+  exit 1
+fi
+
+# 2. Verify index.html exists and is served
+if ! curl -sf http://localhost/ | grep -q "docusaurus"; then
+  echo "❌ Homepage not serving correctly"
+  exit 1
+fi
+
+# 3. Check for redirect loops in logs
+if grep -q "rewrite or internal redirection cycle" /var/log/nginx/error.log 2>/dev/null; then
+  echo "❌ Redirect loop detected"
+  exit 1
+fi
+
+echo "✅ All health checks passed"
+exit 0
+```
+
+Update `docker-compose.docs.yml`:
+
+```yaml
+healthcheck:
+  test: ["CMD", "/healthcheck.sh"]
+  interval: 30s
+  timeout: 10s
+  start_period: 15s
+  retries: 3
+```
+
+---
+
+## 📊 Monitoring & Alerts
+
+### Prometheus Metrics
+
+Add to NGINX config:
+
+```nginx
+location /metrics {
+    stub_status on;
+    access_log off;
+}
+```
+
+### Grafana Dashboard Queries
+
+```promql
+# Detect redirect loops
+rate(nginx_http_requests_total{status="500"}[5m]) > 0.1
+
+# Alert on unhealthy docs service
+up{job="docs-hub"} == 0
+```
+
+---
+
+## 📝 Incident Response Template
+
+**File:** `outputs/DOCUSAURUS-500-INCIDENT-TEMPLATE.md`
+
+```markdown
+# Docusaurus 500 Error - Incident Report
+
+**Date:** YYYY-MM-DD HH:MM
+**Reported By:** [User/System]
+**Severity:** P1 (Service Down)
+
+## Symptoms
+- [ ] 500 Internal Server Error on http://localhost:3404
+- [ ] NGINX redirect loop in logs
+- [ ] Empty /usr/share/nginx/html/ directory
+
+## Root Cause
+- [ ] Missing Docusaurus build
+- [ ] Outdated build files
+- [ ] Volume mount issue
+- [ ] NGINX config error
+
+## Resolution Steps Taken
+1. Verified build: `ls -la docs/build/index.html`
+2. Rebuilt Docusaurus: `cd docs && npm run docs:build`
+3. Restarted container: `docker compose up -d --build`
+4. Verified health: `curl http://localhost:3404/health`
+
+## Prevention
+- Updated SOP: [Link]
+- Added validation: [Script path]
+- Documented in: governance/controls/docusaurus-deployment-sop.md
+
+## Timeline
+- HH:MM - Issue detected
+- HH:MM - Root cause identified
+- HH:MM - Fix applied
+- HH:MM - Service restored
+```
+
+---
+
+## 🎓 Training & Knowledge Transfer
+
+### For Developers
+
+**Read these docs in order:**
+1. This SOP (docusaurus-deployment-sop.md)
+2. [Docusaurus README](../../docs/README.md)
+3. [Docker Compose Guide](../../tools/compose/README.md)
+
+**Quick commands reference:**
+```bash
+# Development workflow
+cd docs && npm run start  # Live preview
+
+# Production deployment
+npm run docs:build && docker compose up -d --build
+
+# Troubleshooting
+docker logs docs-hub --tail 100
+curl http://localhost:3404/health
+```
+
+### For AI Agents
+
+**Required reading before ANY docs changes:**
+- This SOP (you are here)
+- [AI Agent Proxy Guide](../../docs/content/frontend/engineering/AI-AGENT-PROXY-GUIDE.md)
+- [CLAUDE.md](../../CLAUDE.md) - Section on documentation
+
+**Automated workflow:**
+1. Detect user issue (keywords: 500, error, docs, not loading)
+2. Run diagnostics: `bash scripts/docs/emergency-recovery.sh`
+3. Document resolution in `outputs/`
+4. Update this SOP if new pattern discovered
+
+---
+
+## 🔄 Maintenance
+
+### Monthly Review
+
+- [ ] Review incident reports for new patterns
+- [ ] Update automated scripts
+- [ ] Test emergency recovery procedure
+- [ ] Verify CI/CD validations working
+
+### Quarterly Audit
+
+- [ ] Review all documentation deployments
+- [ ] Update training materials
+- [ ] Test disaster recovery
+- [ ] Update metrics and alerts
+
+---
+
+## 📚 References
+
+- [Docusaurus Official Docs](https://docusaurus.io/docs)
+- [NGINX Redirect Loop Debugging](https://nginx.org/en/docs/http/ngx_http_rewrite_module.html)
+- [Docker Volume Mounts](https://docs.docker.com/storage/volumes/)
+- Related SOPs:
+  - [Vite Proxy Configuration](../../docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md)
+  - [Docker Container Management](../../tools/compose/README.md)
+
+---
+
+**Version History:**
+
+| Version | Date       | Changes                    | Author        |
+|---------|------------|----------------------------|---------------|
+| 1.0.0   | 2025-11-07 | Initial SOP creation       | AI Agent      |
+
+**Approval:**
+
+- [ ] DevOps Team Lead
+- [ ] Documentation Owner
+- [ ] AI Agent Review

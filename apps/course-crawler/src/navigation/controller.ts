@@ -281,9 +281,15 @@ async function discoverModules(
           node.querySelectorAll(selectors.classListSelector),
         );
         const classes = classNodes.map((classNode, classIndex) => {
-          const linkElement = classNode.querySelector(
-            selectors.classLinkSelector,
-          ) as HTMLAnchorElement | null;
+          const linkElement =
+            (selectors.classLinkSelector
+              ? (classNode.querySelector(
+                  selectors.classLinkSelector,
+                ) as HTMLAnchorElement | null)
+              : null) ??
+            ((classNode.closest && classNode.closest('a')) as
+              | HTMLAnchorElement
+              | null);
           const titleElement = classNode.querySelector(
             selectors.classTitleSelector,
           );
