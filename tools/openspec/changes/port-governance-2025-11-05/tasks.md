@@ -626,7 +626,7 @@ CMD ["node", "src/index.js"]
 
 **Acceptance Criteria:**
 
--   [x] Builds successfully (`docker compose -p telegram-stack ... up`)
+-   [x] Builds successfully (`docker compose -p 4-2-telegram-stack ... up`)
 -   [x] Health check `/health` respondendo 200 em container
 -   [x] Sessões montadas via volume `apps/telegram-gateway/.session`
 -   [ ] Connects to Telegram (depende de credenciais em produção)

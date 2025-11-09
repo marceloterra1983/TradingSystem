@@ -318,7 +318,7 @@ bash scripts/validation/pre-deploy-validation-suite.sh
 **Sign-Off Template**:
 ```
 Date: 2025-11-05
-Stack: telegram-stack
+Stack: 4-2-telegram-stack
 Validated By: [Engineer Name]
 Validation Script: PASSED ✅
 Manual Review: PASSED ✅

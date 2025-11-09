@@ -6,7 +6,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'telegram-stack'
+    cluster: '4-2-telegram-stack'
     environment: 'production'
 
 # Alert manager configuration
