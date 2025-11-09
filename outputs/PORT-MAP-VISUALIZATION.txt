@@ -16,7 +16,7 @@ PORT RANGES (Host Ports)
 │  └─ 3003 ✅  Playwright Service
 │
 ├─ 3100-3199: Dashboard UI
-│  ├─ 3100 ✅  Grafana (telegram-monitoring)
+│  ├─ 3100 ✅  Grafana (4-2-telegram-stack monitoring)
 │  └─ 3103 ✅  Dashboard (main frontend)
 │
 ├─ 3200-3299: Integrations
