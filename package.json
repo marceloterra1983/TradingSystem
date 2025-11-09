@@ -54,6 +54,7 @@
     "dev:dashboard-docs": "bash scripts/docs/start-dashboard-with-docs.sh",
     "smoke:docsapi": "bash scripts/maintenance/smoke-docsapi.sh",
     "smoke:waha": "bash scripts/maintenance/smoke-waha.sh",
+    "docs:guard": "bash scripts/maintenance/watchers/docs-hub-guard.sh",
     "docs:restart": "bash scripts/maintenance/restart-docusaurus.sh",
     "dashboard:restart": "bash scripts/maintenance/restart-dashboard.sh",
     "dev:stack": "bash -c 'bash scripts/maintenance/restart-docusaurus.sh && bash scripts/maintenance/restart-dashboard.sh'",

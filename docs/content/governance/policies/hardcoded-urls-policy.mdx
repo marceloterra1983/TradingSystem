@@ -1,0 +1,282 @@
+---
+title: Política de Prevenção de URLs Hardcoded
+description: Diretrizes para prevenção de URLs hardcoded e uso correto de
+  proxies Vite no frontend.
+slug: /governance/policies/hardcoded-urls-policy
+tags:
+  - frontend
+  - vite
+  - proxy
+  - configuration
+owner: FrontendEngineering
+lastReviewed: 2025-11-08
+sidebar_label: POL-0005 - Hardcoded URLs Prevention
+sidebar_position: 8
+---
+
+<!-- AUTO-GENERATED from governance source. Do not edit in docs/content. -->
+
+---
+title: Hardcoded URLs Prevention Policy
+domain: governance
+type: policy
+tags: [security, quality, automation]
+status: active
+last_review: "2025-11-08"
+summary: Política de 5 camadas para prevenir URLs hardcoded no código e garantir configuração via variáveis de ambiente
+---
+
+# Hardcoded URLs Prevention Policy
+
+## 🎯 Objetivo
+
+**Garantir que NENHUMA URL hardcoded seja commitada no repositório**, exigindo que todas as URLs sejam configuradas via variáveis de ambiente.
+
+## 📋 Motivação
+
+URLs hardcoded causam:
+- ❌ **Quebra em ambientes diferentes** (dev/staging/prod)
+- ❌ **Falhas em containers** (hostnames não resolvem)
+- ❌ **Dificuldade de manutenção** (mudanças requerem edição de código)
+- ❌ **Problemas de segurança** (exposição de endpoints internos)
+
+## 🛡️ Política de 5 Camadas
+
+### Camada 1: Pre-commit Hook (Bloqueio Imediato)
+
+**Status**: ✅ **IMPLEMENTADO**
+
+**Arquivo**: `.husky/pre-commit`
+
+**Validação**: Executa `npm run ports:scan-hardcoded` em **TODOS os commits** (não apenas mudanças em `config/ports/`)
+
+```bash
+# Sempre executar scan de hardcoded URLs
+echo "🔎 Scanning for hardcoded localhost URLs..."
+npm run ports:scan-hardcoded
+```
+
+**Ação**: Se detectar URLs hardcoded → **BLOQUEIA o commit**
+
+**Arquivo validado**: `tools/ports/scan-hardcoded.js`
+
+---
+
+### Camada 2: ESLint Rules (Validação em Tempo de Desenvolvimento)
+
+**Status**: ⚠️ **PARCIALMENTE IMPLEMENTADO** (apenas frontend/dashboard)
+
+**Arquivo**: `.eslintrc.json` (raiz do projeto - será criado)
+
+**Regras**:
+
+```json
+{
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Literal[value=/^https?:\\/\\/localhost:[0-9]{1,5}/]",
+        "message": "❌ Use environment variables instead of hardcoded localhost URLs. See governance/controls/hardcoded-urls-prevention-policy.md"
+      },
+      {
+        "selector": "Literal[value=/^https?:\\/\\/127\\.0\\.0\\.1:[0-9]{1,5}/]",
+        "message": "❌ Use environment variables instead of hardcoded 127.0.0.1 URLs. See governance/controls/hardcoded-urls-prevention-policy.md"
+      },
+      {
+        "selector": "TemplateElement[value.raw=/https?:\\/\\/localhost:[0-9]{1,5}/]",
+        "message": "❌ Use environment variables instead of hardcoded localhost URLs in template literals. See governance/controls/hardcoded-urls-prevention-policy.md"
+      }
+    ]
+  }
+}
+```
+
+**Aplicação**:
+- ✅ Frontend: `frontend/dashboard/.eslintrc.json`
+- ✅ Backend APIs: `backend/api/**/.eslintrc.json`
+- ✅ Apps: `apps/**/.eslintrc.json`
+
+**Ação**: Se detectar URLs hardcoded → **ERRO no editor (IDE)** + **Falha em `npm run lint`**
+
+---
+
+### Camada 3: CI/CD Validation (GitHub Actions)
+
+**Status**: ⚠️ **PARCIALMENTE IMPLEMENTADO** (apenas em alguns workflows)
+
+**Arquivo**: `.github/workflows/code-quality.yml`
+
+**Validação**: Executar validadores em **TODOS os PRs**
+
+```yaml
+- name: Validate Port Registry & Hardcoded URLs
+  run: |
+    npm run ports:validate
+    npm run ports:scan-hardcoded
+
+- name: Run ESLint (All Projects)
+  run: |
+    npm run lint:all
+```
+
+**Ação**: Se detectar URLs hardcoded → **FALHA no CI** → **Bloqueia merge do PR**
+
+---
+
+### Camada 4: Code Review Checklist
+
+**Status**: ⚠️ **NÃO IMPLEMENTADO** (será adicionado ao PR template)
+
+**Arquivo**: `.github/PULL_REQUEST_TEMPLATE.md`
+
+**Checklist obrigatório**:
+
+```markdown
+## 🔐 Security & Configuration
+
+- [ ] ✅ **No hardcoded URLs** - All URLs use environment variables (`.env` or `.env.defaults`)
+- [ ] ✅ **ESLint passes** - `npm run lint:all` without hardcoded URL warnings
+- [ ] ✅ **Port registry updated** - New services added to `config/ports/registry.yaml`
+- [ ] ✅ **Environment variables documented** - Added to `config/.env.defaults` with comments
+```
+
+**Ação**: Revisor deve verificar **manualmente** antes de aprovar PR
+
+---
+
+### Camada 5: Documentation & Templates
+
+**Status**: ✅ **IMPLEMENTADO** (parcialmente)
+
+**Documentação**:
+- ✅ `docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md` (Frontend)
+- ✅ `CLAUDE.md` - Seção "CRITICAL: Environment Variables Configuration"
+- ⚠️ **FALTANDO**: Template de código para novos serviços
+
+**Template de código** (criar em `scripts/templates/new-service-template.js`):
+
+```javascript
+// ✅ CORRETO: Sempre usar variáveis de ambiente
+const config = {
+  apiUrl: process.env.API_URL, // ✅ Sem fallback hardcoded
+  port: process.env.PORT || 3000, // ✅ OK: fallback numérico
+  timeout: Number(process.env.TIMEOUT) || 5000, // ✅ OK: valor numérico
+};
+
+// ❌ ERRADO: Fallback hardcoded com URL
+const badConfig = {
+  apiUrl: process.env.API_URL || "http://localhost:3000", // ❌ NUNCA!
+};
+
+// Validação: Falhar se variável obrigatória não existir
+if (!config.apiUrl) {
+  throw new Error('Missing required environment variable: API_URL');
+}
+```
+
+**Ação**: Desenvolvedores usam template → **Menos chance de erro**
+
+---
+
+## 🚀 Implementação Imediata
+
+### ✅ Concluído (2025-11-08)
+
+1. ✅ **Removidos hardcoded URLs** de 4 arquivos backend
+2. ✅ **Adicionadas variáveis** ao `config/.env.defaults`
+3. ✅ **Validação funcional**: `npm run ports:scan-hardcoded` passa
+
+### 🔧 Pendente (Próximos Passos)
+
+#### 1. Atualizar Pre-commit Hook (PRIORIDADE ALTA)
+
+```bash
+# Editar .husky/pre-commit
+# Adicionar validação SEMPRE (não apenas em mudanças de ports)
+
+echo "🔎 Scanning for hardcoded localhost URLs..."
+npm run ports:scan-hardcoded || {
+  echo "❌ Hardcoded localhost URLs detected!"
+  echo "📖 See governance/controls/hardcoded-urls-prevention-policy.md"
+  exit 1
+}
+```
+
+#### 2. Criar ESLint Config Global (PRIORIDADE ALTA)
+
+```bash
+# Criar .eslintrc.json na raiz
+# Aplicar regras em todos os projetos backend
+npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+```
+
+#### 3. Atualizar CI Workflows (PRIORIDADE MÉDIA)
+
+```bash
+# Editar .github/workflows/code-quality.yml
+# Adicionar validação de hardcoded URLs em TODOS os PRs
+```
+
+#### 4. Atualizar PR Template (PRIORIDADE MÉDIA)
+
+```bash
+# Editar .github/PULL_REQUEST_TEMPLATE.md
+# Adicionar checklist de hardcoded URLs
+```
+
+#### 5. Criar Template de Novo Serviço (PRIORIDADE BAIXA)
+
+```bash
+# Criar scripts/templates/new-service-template.js
+# Documentar em docs/content/reference/templates/
+```
+
+---
+
+## 📊 Métricas de Sucesso
+
+### Indicadores
+
+- **Zero commits com hardcoded URLs** nos últimos 30 dias
+- **100% de cobertura ESLint** em todos os projetos TypeScript/JavaScript
+- **CI passa em 100% dos PRs** (sem warnings de hardcoded URLs)
+- **Tempo médio de detecção** < 1 minuto (pre-commit hook)
+
+### Dashboards
+
+- GitHub Actions: Status dos workflows `code-quality.yml`
+- ESLint Report: `npm run lint:all --format json > eslint-report.json`
+
+---
+
+## 🔗 Referências
+
+### Documentação Relacionada
+
+- [Proxy Best Practices](../../docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md)
+- [Environment Variables Guide](../../docs/content/tools/security-config/env.mdx)
+- [Port Registry Documentation](../../config/ports/README.md)
+- [CLAUDE.md - Environment Variables](../../CLAUDE.md#-critical-environment-variables-configuration)
+
+### Tools
+
+- **Scanner**: `tools/ports/scan-hardcoded.js`
+- **Validator**: `tools/ports/validate.js`
+- **ESLint Config**: `frontend/dashboard/.eslintrc.json` (exemplo)
+
+---
+
+## 📝 Histórico de Revisões
+
+| Data | Versão | Mudanças | Autor |
+|------|--------|----------|-------|
+| 2025-11-08 | 1.0.0 | Política inicial criada após incidente de hardcoded URLs | Claude AI |
+
+---
+
+**Status**: 🟡 **Em Implementação** (3/5 camadas ativas)
+
+**Próxima Revisão**: 2025-12-08 (30 dias)
+
+**Responsável**: DevOps Team + Code Reviewers

@@ -64,17 +64,23 @@ async function processRun() {
   console.log(`[Worker] 📁 Creating output directory: ${runBaseDir}`);
   await fs.mkdir(runBaseDir, { recursive: true });
 
-  const childEnv = {
+  const selectorsOverride =
+    process.env.COURSE_CRAWLER_FORCE_SELECTORS_CONFIG?.trim();
+
+  const childEnv: NodeJS.ProcessEnv = {
     ...process.env,
     COURSE_CRAWLER_BASE_URL: course.baseUrl,
     COURSE_CRAWLER_LOGIN_USERNAME: course.username,
     COURSE_CRAWLER_LOGIN_PASSWORD: course.password,
     COURSE_CRAWLER_OUTPUTS_DIR: runBaseDir,
     COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(","),
-    COURSE_CRAWLER_SELECTORS_CONFIG:
-      process.env.COURSE_CRAWLER_SELECTORS_CONFIG ??
-      "/workspace/apps/course-crawler/config/platform-config.json",
   };
+
+  if (selectorsOverride) {
+    childEnv.COURSE_CRAWLER_SELECTORS_CONFIG = selectorsOverride;
+  } else {
+    delete childEnv.COURSE_CRAWLER_SELECTORS_CONFIG;
+  }
 
   console.log(
     `[Worker] 🔍 Checking CLI path: ${apiEnv.COURSE_CRAWLER_CLI_PATH}`,

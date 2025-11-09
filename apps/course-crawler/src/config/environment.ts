@@ -17,7 +17,7 @@ export interface BrowserConfig {
   headless: boolean;
   concurrency: number;
   useBrowserUse: boolean;
-  selectorsConfigPath: string;
+  selectorsConfigPath?: string;
   username: string;
   password: string;
   maxClassesPerModule?: number;
@@ -77,9 +77,19 @@ const schema = z.object({
   COURSE_CRAWLER_BROWSER_USE_ENABLED: booleanSchema.default(true),
   COURSE_CRAWLER_SELECTORS_CONFIG: z
     .string()
-    .default(
-      path.join(process.cwd(), 'config', 'platform-config.json'),
-    ),
+    .optional()
+    .transform((value) => {
+      if (!value) {
+        return undefined;
+      }
+      const normalized = value.trim();
+      if (!normalized) {
+        return undefined;
+      }
+      return path.isAbsolute(normalized)
+        ? normalized
+        : path.join(process.cwd(), normalized);
+    }),
   COURSE_CRAWLER_LOGIN_USERNAME: z.string(),
   COURSE_CRAWLER_LOGIN_PASSWORD: z.string(),
   COURSE_CRAWLER_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(100).default(70),
@@ -89,11 +99,19 @@ const schema = z.object({
     .min(1)
     .default(3),
   COURSE_CRAWLER_TARGET_URLS: z.string().optional(),
-  COURSE_CRAWLER_MAX_CLASSES_PER_MODULE: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .optional(),
+  COURSE_CRAWLER_MAX_CLASSES_PER_MODULE: z.preprocess(
+    (value) => {
+      if (value === undefined || value === null) {
+        return undefined;
+      }
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed.length === 0 ? undefined : trimmed;
+      }
+      return value;
+    },
+    z.coerce.number().int().min(1).or(z.undefined()),
+  ),
 });
 
 export function loadEnvironment(): EnvironmentConfig {

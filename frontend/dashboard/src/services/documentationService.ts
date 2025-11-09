@@ -125,6 +125,8 @@ export interface DocumentationMetrics {
     healthScore: number;
     issueCount: number;
   }>;
+  hasData?: boolean;
+  message?: string;
 }
 
 const BUNDLED_METRICS_SNAPSHOT =

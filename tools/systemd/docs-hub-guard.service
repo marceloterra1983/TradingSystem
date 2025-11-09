@@ -1,0 +1,18 @@
+[Unit]
+Description=TradingSystem Docs Hub Guard
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/marce/Projetos/TradingSystem
+Environment=DOCS_GUARD_INTERVAL=60
+EnvironmentFile=/etc/tradingsystem/docs-hub-guard.env
+ExecStart=/usr/bin/bash scripts/maintenance/watchers/docs-hub-guard.sh
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/marce/Projetos/TradingSystem/outputs/logs/docs/docs-hub-guard.service.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target

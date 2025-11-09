@@ -24,6 +24,7 @@ services:
       # Docusaurus: Direct access to /next/ → proxied to docs-hub:80/next/ (NGINX serving Docusaurus static site)
       - DOCUSAURUS_PROXY_TARGET=http://docs-hub:80  # Vite proxy target (container-to-container, NOT exposed to browser)
       - VITE_DOCUSAURUS_URL=/  # Browser-facing base URL (empty base, versioned paths like /next/ are used directly)
+      - DOCS_API_PROXY_TARGET=http://docs-api:3000
       # Telegram Gateway API Keys (for frontend authentication)
       - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       - VITE_TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}

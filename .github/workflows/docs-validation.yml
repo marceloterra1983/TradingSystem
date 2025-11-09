@@ -40,10 +40,9 @@ jobs:
 
       - name: Check for broken links
         working-directory: docs
-        continue-on-error: true
         run: |
           echo "🔗 Checking for broken links..."
-          npm run check-links || echo "⚠️ Broken links detected (non-blocking)"
+          npm run docs:links
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

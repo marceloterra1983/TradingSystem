@@ -3,6 +3,7 @@ import { CustomizablePageLayout } from '../components/layout/CustomizablePageLay
 import { CoursesSection } from '../components/CoursesSection';
 import { RunsSection } from '../components/RunsSection';
 import { ArtifactsSection } from '../components/ArtifactsSection';
+import { WorkerLogsSection } from '../components/WorkerLogsSection';
 
 /**
  * Course Crawler Home Page
@@ -25,6 +26,10 @@ export function HomePage() {
       {
         id: 'course-crawler-runs',
         content: <RunsSection />,
+      },
+      {
+        id: 'course-crawler-worker-logs',
+        content: <WorkerLogsSection />,
       },
       {
         id: 'course-crawler-artifacts',

@@ -106,7 +106,7 @@ export default defineConfig(({ mode }) => {
   );
   // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX
   const docsApiProxy = resolveProxy(
-    env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
+    env.DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
     'http://localhost:3405',
   );
   // RAG Collections Service (Directories API) runs on 3403

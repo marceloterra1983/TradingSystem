@@ -1,5 +1,11 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import type { Logger } from 'pino';
-import type { PlatformConfig } from '../config/platform.js';
+import {
+  loadPlatformConfig,
+  loadPlatformConfigForUrl,
+  type PlatformConfig,
+} from '../config/platform.js';
 import type { EnvironmentConfig } from '../config/environment.js';
 import type { CourseResource, ModuleResource } from '../types.js';
 import { createStableId } from '../utils/id.js';
@@ -14,11 +20,27 @@ interface NavigationDependencies {
 }
 
 export function createNavigationController({ env, logger }: NavigationDependencies) {
+  async function resolvePlatformConfig(): Promise<PlatformConfig> {
+    const selectorsConfigPath = env.browser.selectorsConfigPath?.trim();
+
+    if (selectorsConfigPath) {
+      logger.debug(
+        { selectorsConfigPath },
+        '[course-crawler] Using manual selectors config override',
+      );
+      return loadPlatformConfig(selectorsConfigPath);
+    }
+
+    logger.debug(
+      { baseUrl: env.browser.baseUrl },
+      '[course-crawler] Auto-detecting selectors config based on baseUrl',
+    );
+    return loadPlatformConfigForUrl(env.browser.baseUrl);
+  }
+
   return {
     async discoverCourses(): Promise<CourseResource[]> {
-      const platformConfig = await (await import('../config/platform.js')).loadPlatformConfig(
-        env.browser.selectorsConfigPath,
-      );
+      const platformConfig = await resolvePlatformConfig();
 
       const { browser, context, page } = await createAuthenticatedSession(
         env,
@@ -43,6 +65,27 @@ export function createNavigationController({ env, logger }: NavigationDependenci
   };
 }
 
+async function waitForCourseList(
+  page: import('playwright').Page,
+  config: PlatformConfig,
+  env: EnvironmentConfig,
+  logger: Logger,
+) {
+  try {
+    await page.waitForSelector(config.courses.courseItemSelector, {
+      timeout: 15_000,
+    });
+  } catch (error) {
+    await captureCourseDiscoveryArtifacts(
+      page,
+      env,
+      config.courses.courseItemSelector,
+      logger,
+    );
+    throw error;
+  }
+}
+
 async function discoverCourses(
   page: import('playwright').Page,
   config: PlatformConfig,
@@ -50,9 +93,7 @@ async function discoverCourses(
   logger: Logger,
 ): Promise<CourseResource[]> {
   await gotoWithRetry(page, config.courses.url, 'networkidle', logger);
-  await page.waitForSelector(config.courses.courseItemSelector, {
-    timeout: 15_000,
-  });
+  await waitForCourseList(page, config, env, logger);
 
   const courseEntries = await page.$$eval(
     config.courses.courseItemSelector,
@@ -115,6 +156,101 @@ async function discoverCourses(
   return courses;
 }
 
+async function captureCourseDiscoveryArtifacts(
+  page: import('playwright').Page,
+  env: EnvironmentConfig,
+  selector: string,
+  logger: Logger,
+) {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const debugDir = path.join(env.outputsDir, 'logs', 'navigation');
+    await fs.mkdir(debugDir, { recursive: true });
+    const htmlPath = path.join(debugDir, `course-discovery-${timestamp}.html`);
+    const screenshotPath = path.join(
+      debugDir,
+      `course-discovery-${timestamp}.png`,
+    );
+
+    const content = await page.content();
+    await fs.writeFile(htmlPath, content, 'utf-8');
+    try {
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+    } catch (screenshotError) {
+      logger.warn(
+        { err: screenshotError },
+        '[course-crawler] Failed to capture screenshot for course discovery',
+      );
+    }
+
+    logger.error(
+      { selector, htmlPath, screenshotPath },
+      '[course-crawler] Course discovery selector not found; captured debug artifacts',
+    );
+  } catch (artifactError) {
+    logger.error(
+      { err: artifactError, selector },
+      '[course-crawler] Failed to capture debug artifacts for course discovery',
+    );
+  }
+}
+
+async function captureModuleDebugArtifacts(
+  page: import('playwright').Page,
+  env: EnvironmentConfig,
+  courseUrl: string,
+  config: PlatformConfig,
+  logger: Logger,
+) {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const debugDir = path.join(env.outputsDir, 'logs', 'modules');
+    await fs.mkdir(debugDir, { recursive: true });
+
+    const courseSlug = slugify(new URL(courseUrl).pathname || courseUrl);
+    const baseName = `${courseSlug || 'course'}-${timestamp}`;
+    const htmlPath = path.join(debugDir, `${baseName}.html`);
+    const screenshotPath = path.join(debugDir, `${baseName}.png`);
+    const metadataPath = path.join(debugDir, `${baseName}.json`);
+
+    const content = await page.content();
+    await fs.writeFile(htmlPath, content, 'utf-8');
+    try {
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+    } catch (screenshotError) {
+      logger.warn(
+        { err: screenshotError },
+        '[course-crawler] Failed to capture screenshot for module debug',
+      );
+    }
+
+    await fs.writeFile(
+      metadataPath,
+      JSON.stringify(
+        {
+          courseUrl,
+          moduleSelector: config.modules.moduleListSelector,
+          classSelector: config.classes.classListSelector,
+          capturedAt: timestamp,
+        },
+        null,
+        2,
+      ),
+      'utf-8',
+    );
+
+    logger.warn(
+      { htmlPath, screenshotPath },
+      '[course-crawler] Modules contain no classes; captured debug artifacts',
+    );
+  } catch (error) {
+    logger.error(
+      { err: error, courseUrl },
+      '[course-crawler] Failed to capture module debug artifacts',
+    );
+  }
+}
+
 async function discoverModules(
   page: import('playwright').Page,
   courseUrl: string,
@@ -145,9 +281,15 @@ async function discoverModules(
           node.querySelectorAll(selectors.classListSelector),
         );
         const classes = classNodes.map((classNode, classIndex) => {
-          const linkElement = classNode.querySelector(
-            selectors.classLinkSelector,
-          ) as HTMLAnchorElement | null;
+          const linkElement =
+            (selectors.classLinkSelector
+              ? (classNode.querySelector(
+                  selectors.classLinkSelector,
+                ) as HTMLAnchorElement | null)
+              : null) ??
+            ((classNode.closest && classNode.closest('a')) as
+              | HTMLAnchorElement
+              | null);
           const titleElement = classNode.querySelector(
             selectors.classTitleSelector,
           );
@@ -184,6 +326,13 @@ async function discoverModules(
       classDurationSelector: config.classes.durationSelector,
     },
   );
+
+  if (
+    moduleEntries.length > 0 &&
+    moduleEntries.every((entry) => entry.classes.length === 0)
+  ) {
+    await captureModuleDebugArtifacts(page, env, courseUrl, config, logger);
+  }
 
   return moduleEntries.map((moduleEntry) => {
     const limitedClasses = env.browser.maxClassesPerModule
@@ -292,4 +441,12 @@ function parseDuration(input: string): number | undefined {
   }
 
   return undefined;
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
+    .slice(0, 50);
 }

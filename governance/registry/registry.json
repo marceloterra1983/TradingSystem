@@ -1,87 +1,64 @@
 {
-  "version": 1,
-  "generatedAt": "2025-11-05T18:00:00.000Z",
+  "version": 2,
+  "generatedAt": "2025-11-09T01:03:33.201Z",
+  "metadata": {
+    "description": "Registry centralizado de artefatos de governança do TradingSystem",
+    "totalArtifacts": 21,
+    "lastCleanup": "2025-11-08",
+    "cleanupReason": "Removidos artefatos duplicados, obsoletos e de baixa relevância",
+    "lastUpdate": "2025-11-08"
+  },
   "artifacts": [
     {
-      "id": "policies.secrets-env-policy",
-      "title": "Política de Gerenciamento de Segredos e Variáveis de Ambiente",
-      "description": "Diretrizes obrigatórias para gerenciamento, armazenamento e versionamento de segredos (API keys, tokens, senhas, certificados) e variáveis de ambiente no TradingSystem.",
-      "category": "policies",
-      "type": "policy",
-      "owner": "SecurityEngineering",
-      "reviewCycleDays": 90,
+      "id": "controls.docusaurus-deployment-sop",
+      "title": "SOP - Deployment Seguro do Docusaurus",
+      "description": "Procedimento operacional para deployment seguro do Documentation Hub com validações pré-deploy e rollback.",
+      "category": "controls",
+      "type": "sop",
+      "owner": "DocsOps",
+      "reviewCycleDays": 180,
       "lastReviewed": "2025-11-05",
-      "policyId": "POL-0002",
+      "sopId": "SOP-DOCS-001",
       "status": "active",
       "tags": [
-        "security",
-        "compliance",
-        "secrets",
-        "environment-variables"
+        "sop",
+        "docusaurus",
+        "deployment",
+        "documentation"
       ],
-      "path": "policies/secrets-env-policy.md",
+      "path": "controls/docusaurus-deployment-sop.md",
       "publish": {
-        "docsPath": "governance/policies/secrets-env-policy.mdx",
-        "slug": "/governance/policies/secrets-env-policy",
+        "docsPath": "governance/controls/docusaurus-deployment-sop.mdx",
+        "slug": "/governance/controls/docusaurus-deployment-sop",
         "sidebar": "governance",
-        "sidebarLabel": "POL-0002 - Secrets Policy",
-        "sidebarPosition": 5
+        "sidebarLabel": "SOP-DOCS-001 - Docusaurus Deployment",
+        "sidebarPosition": 22
       }
     },
     {
-      "id": "policies.container-infrastructure-policy",
-      "title": "Política de Infraestrutura de Containers, Redes e Comunicação",
-      "description": "Diretrizes obrigatórias para arquitetura de containers, redes Docker, gerenciamento de portas e comunicação inter-serviços no TradingSystem.",
-      "category": "policies",
-      "type": "policy",
-      "owner": "PlatformEngineering",
-      "reviewCycleDays": 90,
+      "id": "controls.governance-json-sanitization-sop",
+      "title": "SOP - Sanitização de JSON de Governança",
+      "description": "Procedimento para sanitização de conteúdo de arquivos antes de embedding em payloads JSON.",
+      "category": "controls",
+      "type": "sop",
+      "owner": "DocsOps",
+      "reviewCycleDays": 180,
       "lastReviewed": "2025-11-05",
-      "policyId": "POL-0003",
+      "sopId": "SOP-DOCS-002",
       "status": "active",
       "tags": [
-        "infrastructure",
-        "containers",
-        "networking",
-        "docker",
-        "ports",
-        "security",
-        "architecture"
+        "sop",
+        "json",
+        "sanitization",
+        "automation"
       ],
-      "path": "policies/container-infrastructure-policy.md",
+      "path": "controls/governance-json-sanitization-sop.md",
       "publish": {
-        "docsPath": "governance/policies/container-infrastructure-policy.mdx",
-        "slug": "/governance/policies/container-infrastructure-policy",
+        "docsPath": "governance/controls/governance-json-sanitization-sop.mdx",
+        "slug": "/governance/controls/governance-json-sanitization-sop",
         "sidebar": "governance",
-        "sidebarLabel": "POL-0003 - Infraestrutura de Containers",
-        "sidebarPosition": 6
-      }
-    },
-    {
-      "id": "standards.secrets-standard",
-      "title": "Padrão Técnico de Segredos e Variáveis de Ambiente",
-      "description": "Requisitos técnicos testáveis e verificáveis para implementação da POL-0002 - Política de Gerenciamento de Segredos.",
-      "category": "standards",
-      "type": "standard",
-      "owner": "SecurityEngineering",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-11-05",
-      "standardId": "STD-010",
-      "status": "active",
-      "relatedPolicies": ["POL-0002"],
-      "tags": [
-        "security",
-        "technical-standard",
-        "secrets",
-        "testing"
-      ],
-      "path": "standards/secrets-standard.md",
-      "publish": {
-        "docsPath": "governance/standards/secrets-standard.mdx",
-        "slug": "/governance/standards/secrets-standard",
-        "sidebar": "governance",
-        "sidebarLabel": "STD-010 - Secrets Standard",
-        "sidebarPosition": 15
+        "sidebarLabel": "SOP-DOCS-002 - JSON Sanitization",
+        "sidebarPosition": 23
       }
     },
     {
@@ -95,8 +72,12 @@
       "lastReviewed": "2025-11-05",
       "sopId": "SOP-SEC-001",
       "status": "active",
-      "relatedPolicies": ["POL-0002"],
-      "relatedStandards": ["STD-010"],
+      "relatedPolicies": [
+        "POL-0002"
+      ],
+      "relatedStandards": [
+        "STD-010"
+      ],
       "tags": [
         "sop",
         "runbook",
@@ -146,1095 +127,403 @@
       }
     },
     {
-      "id": "controls.automated-maintenance-guide",
-      "title": "Automated Maintenance Guide",
-      "description": "Automated Maintenance Guide document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/AUTOMATED-MAINTENANCE-GUIDE.md",
-      "publish": {
-        "docsPath": "governance/automated-maintenance-guide.mdx",
-        "slug": "/governance/automated-maintenance-guide",
-        "sidebar": "governance",
-        "sidebarLabel": "Automated Maintenance Guide",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.code-docs-sync",
-      "title": "Code Docs Sync",
-      "description": "Code Docs Sync document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/CODE-DOCS-SYNC.md",
-      "publish": {
-        "docsPath": "governance/code-docs-sync.mdx",
-        "slug": "/governance/code-docs-sync",
-        "sidebar": "governance",
-        "sidebarLabel": "Code Docs Sync",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.link-migration-reference",
-      "title": "Link Migration Reference",
-      "description": "Link Migration Reference document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/LINK-MIGRATION-REFERENCE.md",
-      "publish": {
-        "docsPath": "governance/link-migration-reference.mdx",
-        "slug": "/governance/link-migration-reference",
-        "sidebar": "governance",
-        "sidebarLabel": "Link Migration Reference",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.maintenance-automation-guide",
-      "title": "Maintenance Automation Guide",
-      "description": "Maintenance Automation Guide document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/MAINTENANCE-AUTOMATION-GUIDE.md",
-      "publish": {
-        "docsPath": "governance/maintenance-automation-guide.mdx",
-        "slug": "/governance/maintenance-automation-guide",
-        "sidebar": "governance",
-        "sidebarLabel": "Maintenance Automation Guide",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.maintenance-checklist",
-      "title": "Maintenance Checklist",
-      "description": "Maintenance Checklist document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/MAINTENANCE-CHECKLIST.md",
-      "publish": {
-        "docsPath": "governance/maintenance-checklist.mdx",
-        "slug": "/governance/maintenance-checklist",
-        "sidebar": "governance",
-        "sidebarLabel": "Maintenance Checklist",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.review-checklist",
-      "title": "Review Checklist",
-      "description": "Review Checklist document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/REVIEW-CHECKLIST.md",
-      "publish": {
-        "docsPath": "governance/review-checklist.mdx",
-        "slug": "/governance/review-checklist",
-        "sidebar": "governance",
-        "sidebarLabel": "Review Checklist",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "controls.validation-guide",
-      "title": "Validation Guide",
-      "description": "Validation Guide document for TradingSystem governance.",
-      "category": "controls",
-      "type": "control",
-      "owner": "DocsOps",
-      "reviewCycleDays": 60,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "controls"
-      ],
-      "path": "controls/VALIDATION-GUIDE.md",
-      "publish": {
-        "docsPath": "governance/validation-guide.mdx",
-        "slug": "/governance/validation-guide",
-        "sidebar": "governance",
-        "sidebarLabel": "Validation Guide",
-        "sidebarPosition": 20
-      }
-    },
-    {
-      "id": "evidence.apps-docs-audit-2025-10-27",
-      "title": "Apps Docs Audit 2025 10 27",
-      "description": "Apps Docs Audit 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "audit",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "audit"
-      ],
-      "path": "evidence/audits/APPS-DOCS-AUDIT-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.audit-summary-2025-10-27",
-      "title": "Audit Summary 2025 10 27",
-      "description": "Audit Summary 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "audit",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "audit"
-      ],
-      "path": "evidence/audits/AUDIT-SUMMARY-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.corrections-applied-2025-10-27",
-      "title": "Corrections Applied 2025 10 27",
-      "description": "Corrections Applied 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "audit",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "audit"
-      ],
-      "path": "evidence/audits/CORRECTIONS-APPLIED-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.env-audit-report",
-      "title": "Env Audit Report",
-      "description": "Env Audit Report document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "audit",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "audit"
-      ],
-      "path": "evidence/audits/ENV-AUDIT-REPORT.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.rag-system-analysis-2025-10-29",
-      "title": "Rag System Analysis 2025 10 29",
-      "description": "Rag System Analysis 2025 10 29 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "audit",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "audit"
-      ],
-      "path": "evidence/audits/RAG-SYSTEM-ANALYSIS-2025-10-29.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.metrics-dashboard",
-      "title": "Metrics Dashboard",
-      "description": "Metrics Dashboard document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "metric",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "metric"
-      ],
-      "path": "evidence/metrics/METRICS-DASHBOARD.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.documentation-index",
-      "title": "Documentation Index",
-      "description": "Documentation Index document for TradingSystem governance.",
+      "id": "evidence.architecture-review-2025-11-01",
+      "title": "Architecture Review - TradingSystem (2025-11-01)",
+      "description": "Revisão arquitetural completa do sistema com análise de padrões, dependências, segurança e recomendações. Score: B+ (85/100).",
       "category": "evidence",
       "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "owner": "Architecture",
+      "reviewCycleDays": 180,
+      "lastReviewed": "2025-11-01",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/DOCUMENTATION-INDEX.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.maintenance-system-summary",
-      "title": "Maintenance System Summary",
-      "description": "Maintenance System Summary document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/MAINTENANCE-SYSTEM-SUMMARY.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.apps-docs-organization-2025-10-27",
-      "title": "Apps Docs Organization 2025 10 27",
-      "description": "Apps Docs Organization 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/organization/APPS-DOCS-ORGANIZATION-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.docs-organization-2025-10-27",
-      "title": "Docs Organization 2025 10 27",
-      "description": "Docs Organization 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/organization/DOCS-ORGANIZATION-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.root-md-files-cleanup-2025-10-29",
-      "title": "Root Md Files Cleanup 2025 10 29",
-      "description": "Root Md Files Cleanup 2025 10 29 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/organization/ROOT-MD-FILES-CLEANUP-2025-10-29.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.scripts-reorganization-2025-10-27",
-      "title": "Scripts Reorganization 2025 10 27",
-      "description": "Scripts Reorganization 2025 10 27 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/organization/SCRIPTS-REORGANIZATION-2025-10-27.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.docusaurus-review-final-report",
-      "title": "Docusaurus Review Final Report",
-      "description": "Docusaurus Review Final Report document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/DOCUSAURUS-REVIEW-FINAL-REPORT.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.readme",
-      "title": "Readme",
-      "description": "Readme document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/README.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.telegram-architecture-summary",
-      "title": "Telegram Architecture Summary",
-      "description": "Telegram Architecture Summary document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/TELEGRAM-ARCHITECTURE-SUMMARY.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.telegram-database-summary",
-      "title": "Telegram Database Summary",
-      "description": "Telegram Database Summary document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/TELEGRAM-DATABASE-SUMMARY.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.appendices",
-      "title": "Appendices",
-      "description": "Appendices document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/appendices.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.conclusion",
-      "title": "Conclusion",
-      "description": "Conclusion document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/conclusion.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.data-and-integration",
-      "title": "Data And Integration",
-      "description": "Data And Integration document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/data-and-integration.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.design-patterns-and-dependencies",
-      "title": "Design Patterns And Dependencies",
-      "description": "Design Patterns And Dependencies document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/design-patterns-and-dependencies.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.index",
-      "title": "Index",
-      "description": "Index document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "architecture",
+        "review",
+        "quality",
+        "technical-debt"
       ],
       "path": "evidence/reports/reviews/architecture-2025-11-01/index.md",
       "publish": null
     },
     {
-      "id": "evidence.recommendations-and-debt",
-      "title": "Recommendations And Debt",
-      "description": "Recommendations And Debt document for TradingSystem governance.",
+      "id": "evidence.cleanup-report-2025-11-08",
+      "title": "Governance Cleanup Report - November 2025",
+      "description": "Relatório detalhado do plano de limpeza e consolidação da estrutura de governança.",
       "category": "evidence",
       "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "owner": "Governance",
+      "reviewCycleDays": 180,
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
         "governance",
-        "evidence",
-        "report"
+        "cleanup",
+        "planning",
+        "analysis"
       ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/recommendations-and-debt.md",
+      "path": "GOVERNANCE-CLEANUP-REPORT-2025-11-08.md",
       "publish": null
     },
     {
-      "id": "evidence.scalability-and-security",
-      "title": "Scalability And Security",
-      "description": "Scalability And Security document for TradingSystem governance.",
+      "id": "evidence.consolidation-summary-2025-11-08",
+      "title": "Governance Consolidation Summary - November 2025",
+      "description": "Sumário executivo da consolidação de governança (46 arquivos arquivados, -58% redução em arquivos ativos).",
       "category": "evidence",
       "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "owner": "Governance",
+      "reviewCycleDays": 180,
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
         "governance",
-        "evidence",
-        "report"
+        "consolidation",
+        "cleanup",
+        "organization"
       ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/scalability-and-security.md",
+      "path": "CONSOLIDATION-SUMMARY-2025-11-08.md",
       "publish": null
     },
     {
-      "id": "evidence.system-structure",
-      "title": "System Structure",
-      "description": "System Structure document for TradingSystem governance.",
+      "id": "evidence.governance-improvement-plan-2025-11-08",
+      "title": "Plano de Melhoria da Governança - TradingSystem",
+      "description": "Análise abrangente da estrutura de governança atual com 15 recomendações prioritárias para melhorias e otimização. Score atual B+ (85/100), meta A (95/100) em 6 meses.",
       "category": "evidence",
       "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "owner": "Governance",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
         "governance",
-        "evidence",
-        "report"
+        "improvement",
+        "strategy",
+        "quality",
+        "recommendations"
       ],
-      "path": "evidence/reports/reviews/architecture-2025-11-01/system-structure.md",
-      "publish": null
+      "path": "evidence/reports/governance-improvement-plan-2025-11-08.md",
+      "publish": {
+        "docsPath": "governance/reports/governance-improvement-plan.mdx",
+        "slug": "/governance/reports/improvement-plan",
+        "sidebar": "governance",
+        "sidebarLabel": "Governance Improvement Plan",
+        "sidebarPosition": 40
+      }
     },
     {
-      "id": "evidence.architecture-2025-11-02-fullstack-review",
-      "title": "Architecture 2025 11 02 Fullstack Review",
-      "description": "Architecture 2025 11 02 Fullstack Review document for TradingSystem governance.",
+      "id": "evidence.metrics-dashboard",
+      "title": "Metrics Dashboard - Documentation Health",
+      "description": "Dashboard de métricas de saúde da documentação com health score, freshness distribution e issue breakdown.",
       "category": "evidence",
-      "type": "report",
+      "type": "metric",
       "owner": "DocsOps",
-      "reviewCycleDays": 120,
+      "reviewCycleDays": 30,
       "lastReviewed": "2025-10-29",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "metrics",
+        "documentation",
+        "health",
+        "dashboard"
       ],
-      "path": "evidence/reports/reviews/architecture-2025-11-02-fullstack-review.mdx",
+      "path": "evidence/metrics/METRICS-DASHBOARD.md",
       "publish": null
     },
     {
-      "id": "evidence.architecture-review-2025-11-02",
-      "title": "Architecture Review 2025 11 02",
-      "description": "Architecture Review 2025 11 02 document for TradingSystem governance.",
+      "id": "evidence.secrets-security-audit-2025-11",
+      "title": "Auditoria de Segurança de Segredos - Novembro 2025",
+      "description": "Auditoria completa de segurança de segredos com scan de repositório, validação de .env e recomendações.",
       "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "type": "audit",
+      "owner": "SecurityEngineering",
+      "reviewCycleDays": 30,
+      "lastReviewed": "2025-11-07",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "security",
+        "audit",
+        "secrets",
+        "compliance"
       ],
-      "path": "evidence/reports/reviews/architecture-2025-11-02/ARCHITECTURE-REVIEW-2025-11-02.md",
+      "path": "evidence/audits/secrets-security-audit-2025-11-07.md",
       "publish": null
     },
     {
-      "id": "evidence.final-summary",
-      "title": "Final Summary",
-      "description": "Final Summary document for TradingSystem governance.",
+      "id": "evidence.tp-capital-connectivity-incident-2025-11-05",
+      "title": "Incident Report - TP Capital Connectivity Failure (2025-11-05)",
+      "description": "Post-mortem do incidente de conectividade do TP Capital com root cause analysis e ações corretivas.",
       "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "type": "incident",
+      "owner": "DevOps",
+      "reviewCycleDays": 180,
+      "lastReviewed": "2025-11-05",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "incident",
+        "tp-capital",
+        "networking",
+        "post-mortem"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/FINAL-SUMMARY.md",
+      "path": "evidence/incidents/2025-11-05-tp-capital-connectivity-failure.md",
       "publish": null
     },
     {
-      "id": "evidence.handoff-guide",
-      "title": "Handoff Guide",
-      "description": "Handoff Guide document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "id": "policies.container-infrastructure-policy",
+      "title": "Política de Infraestrutura de Containers, Redes e Comunicação",
+      "description": "Diretrizes obrigatórias para arquitetura de containers, redes Docker, gerenciamento de portas e comunicação inter-serviços no TradingSystem.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "PlatformEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-05",
+      "policyId": "POL-0003",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "infrastructure",
+        "containers",
+        "networking",
+        "docker",
+        "ports",
+        "security",
+        "architecture"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/HANDOFF-GUIDE.md",
-      "publish": null
+      "path": "policies/container-infrastructure-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/container-infrastructure-policy.mdx",
+        "slug": "/governance/policies/container-infrastructure-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0003 - Infraestrutura de Containers",
+        "sidebarPosition": 6
+      }
     },
     {
-      "id": "evidence.implementation-complete",
-      "title": "Implementation Complete",
-      "description": "Implementation Complete document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
+      "id": "policies.environment-variables-policy",
+      "title": "Política de Variáveis de Ambiente",
+      "description": "Diretrizes para gerenciamento seguro de variáveis de ambiente no TradingSystem.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "SecurityEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-08",
+      "policyId": "POL-0004",
+      "status": "active",
+      "relatedPolicies": [
+        "POL-0002"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/IMPLEMENTATION-COMPLETE.md",
-      "publish": null
+      "tags": [
+        "security",
+        "environment-variables",
+        "configuration"
+      ],
+      "path": "policies/environment-variables-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/environment-variables-policy.mdx",
+        "slug": "/governance/policies/environment-variables-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0004 - Environment Variables",
+        "sidebarPosition": 7
+      }
     },
     {
-      "id": "evidence.index-master",
-      "title": "Index Master",
-      "description": "Index Master document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
+      "id": "policies.hardcoded-urls-policy",
+      "title": "Política de Prevenção de URLs Hardcoded",
+      "description": "Diretrizes para prevenção de URLs hardcoded e uso correto de proxies Vite no frontend.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "FrontendEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-08",
+      "policyId": "POL-0005",
+      "status": "active",
+      "relatedPolicies": [
+        "POL-0003"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/INDEX-MASTER.md",
-      "publish": null
+      "tags": [
+        "frontend",
+        "vite",
+        "proxy",
+        "configuration"
+      ],
+      "path": "policies/hardcoded-urls-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/hardcoded-urls-policy.mdx",
+        "slug": "/governance/policies/hardcoded-urls-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0005 - Hardcoded URLs Prevention",
+        "sidebarPosition": 8
+      }
     },
     {
-      "id": "evidence.migration-summary",
-      "title": "Migration Summary",
-      "description": "Migration Summary document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
+      "id": "policies.secrets-env-policy",
+      "title": "Política de Gerenciamento de Segredos e Variáveis de Ambiente",
+      "description": "Diretrizes obrigatórias para gerenciamento, armazenamento e versionamento de segredos (API keys, tokens, senhas, certificados) e variáveis de ambiente no TradingSystem.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "SecurityEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-05",
+      "policyId": "POL-0002",
+      "status": "active",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "security",
+        "compliance",
+        "secrets",
+        "environment-variables"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/MIGRATION-SUMMARY.md",
-      "publish": null
+      "path": "policies/secrets-env-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/secrets-env-policy.mdx",
+        "slug": "/governance/policies/secrets-env-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0002 - Secrets Policy",
+        "sidebarPosition": 5
+      }
     },
     {
-      "id": "evidence.quick-start",
-      "title": "Quick Start",
-      "description": "Quick Start document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
+      "id": "standards.secrets-standard",
+      "title": "Padrão Técnico de Segredos e Variáveis de Ambiente",
+      "description": "Requisitos técnicos testáveis e verificáveis para implementação da POL-0002 - Política de Gerenciamento de Segredos.",
+      "category": "standards",
+      "type": "standard",
+      "owner": "SecurityEngineering",
+      "reviewCycleDays": 90,
+      "lastReviewed": "2025-11-05",
+      "standardId": "STD-010",
+      "status": "active",
+      "relatedPolicies": [
+        "POL-0002"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/QUICK-START.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.readme",
-      "title": "Readme",
-      "description": "Readme document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
       "tags": [
-        "governance",
-        "evidence",
-        "report"
+        "security",
+        "technical-standard",
+        "secrets",
+        "testing"
       ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/README.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.database-analysis-neon",
-      "title": "Database Analysis Neon",
-      "description": "Database Analysis Neon document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/database-analysis-neon.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.database-analysis-selfhosted",
-      "title": "Database Analysis Selfhosted",
-      "description": "Database Analysis Selfhosted document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/database-analysis-selfhosted.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.database-summary-pt",
-      "title": "Database Summary Pt",
-      "description": "Database Summary Pt document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/database-summary-pt.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.executive-summary",
-      "title": "Executive Summary",
-      "description": "Executive Summary document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/executive-summary.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.github-issues-template",
-      "title": "Github Issues Template",
-      "description": "Github Issues Template document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/github-issues-template.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.index",
-      "title": "Index",
-      "description": "Index document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/architecture-rag-2025-11-03/index.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.implementation-plan",
-      "title": "Implementation Plan",
-      "description": "Implementation Plan document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/performance-2025-11-02/IMPLEMENTATION-PLAN.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.performance-audit-report",
-      "title": "Performance Audit Report",
-      "description": "Performance Audit Report document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/performance-2025-11-02/PERFORMANCE-AUDIT-REPORT.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.readme",
-      "title": "Readme",
-      "description": "Readme document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/performance-2025-11-02/README.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.telegram-architecture-2025-11-03",
-      "title": "Telegram Architecture 2025 11 03",
-      "description": "Telegram Architecture 2025 11 03 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/telegram-architecture-2025-11-03.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.telegram-database-architecture-2025-11-03",
-      "title": "Telegram Database Architecture 2025 11 03",
-      "description": "Telegram Database Architecture 2025 11 03 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/telegram-database-architecture-2025-11-03.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.telegram-migration-summary-2025-11-03",
-      "title": "Telegram Migration Summary 2025 11 03",
-      "description": "Telegram Migration Summary 2025 11 03 document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/reports/reviews/telegram-migration-summary-2025-11-03.md",
-      "publish": null
-    },
-    {
-      "id": "evidence.review-tracking",
-      "title": "Review Tracking",
-      "description": "Review Tracking document for TradingSystem governance.",
-      "category": "evidence",
-      "type": "report",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "evidence",
-        "report"
-      ],
-      "path": "evidence/review-tracking.csv",
-      "publish": null
-    },
-    {
-      "id": "registry.code-docs-mapping",
-      "title": "Code Docs Mapping",
-      "description": "Code Docs Mapping document for TradingSystem governance.",
-      "category": "registry",
-      "type": "registry",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "registry"
-      ],
-      "path": "registry/CODE-DOCS-MAPPING.json",
-      "publish": null
-    },
-    {
-      "id": "registry.registry",
-      "title": "Registry",
-      "description": "Registry document for TradingSystem governance.",
-      "category": "registry",
-      "type": "registry",
-      "owner": "DocsOps",
-      "reviewCycleDays": 120,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "registry"
-      ],
-      "path": "registry/registry.json",
-      "publish": null
+      "path": "standards/secrets-standard.md",
+      "publish": {
+        "docsPath": "governance/standards/secrets-standard.mdx",
+        "slug": "/governance/standards/secrets-standard",
+        "sidebar": "governance",
+        "sidebarLabel": "STD-010 - Secrets Standard",
+        "sidebarPosition": 15
+      }
     },
     {
       "id": "strategy.ci-cd-integration",
-      "title": "Ci Cd Integration",
-      "description": "Ci Cd Integration document for TradingSystem governance.",
+      "title": "CI/CD Integration Strategy",
+      "description": "Roadmap e estratégia para integração de CI/CD com validação automatizada de governança, testes e deployment.",
       "category": "strategy",
       "type": "plan",
-      "owner": "DocsOps",
+      "owner": "DevOps",
       "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
-        "governance",
-        "strategy"
+        "ci-cd",
+        "automation",
+        "deployment",
+        "testing",
+        "governance"
       ],
       "path": "strategy/CI-CD-INTEGRATION.md",
       "publish": {
-        "docsPath": "governance/ci-cd-integration.mdx",
-        "slug": "/governance/ci-cd-integration",
+        "docsPath": "governance/strategy/ci-cd-integration.mdx",
+        "slug": "/governance/strategy/ci-cd-integration",
         "sidebar": "governance",
-        "sidebarLabel": "Ci Cd Integration",
-        "sidebarPosition": 10
+        "sidebarLabel": "CI/CD Integration",
+        "sidebarPosition": 11
       }
     },
     {
       "id": "strategy.communication-plan",
-      "title": "Communication Plan",
-      "description": "Communication Plan document for TradingSystem governance.",
+      "title": "Governance Communication Plan",
+      "description": "Plano de comunicação para stakeholders com updates bi-semanais, status reports e canais de comunicação.",
       "category": "strategy",
       "type": "plan",
-      "owner": "DocsOps",
+      "owner": "Governance",
       "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
+        "communication",
+        "stakeholders",
         "governance",
-        "strategy"
+        "reporting"
       ],
       "path": "strategy/COMMUNICATION-PLAN.md",
       "publish": {
-        "docsPath": "governance/communication-plan.mdx",
-        "slug": "/governance/communication-plan",
+        "docsPath": "governance/strategy/communication-plan.mdx",
+        "slug": "/governance/strategy/communication-plan",
         "sidebar": "governance",
         "sidebarLabel": "Communication Plan",
-        "sidebarPosition": 10
+        "sidebarPosition": 12
       }
     },
     {
-      "id": "strategy.cutover-plan",
-      "title": "Cutover Plan",
-      "description": "Cutover Plan document for TradingSystem governance.",
+      "id": "strategy.governance-action-plan",
+      "title": "Plano de Ação - Melhoria de Governança (EXECUTIVO)",
+      "description": "Plano executivo de ação para implementação das 15 melhorias priorizadas em governança. Roadmap de 12 semanas com 3 fases (Fundação, Otimização, Refinamento).",
       "category": "strategy",
       "type": "plan",
-      "owner": "DocsOps",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
+      "owner": "Governance",
+      "reviewCycleDays": 30,
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
         "governance",
-        "strategy"
+        "action-plan",
+        "executive",
+        "roadmap",
+        "implementation"
       ],
-      "path": "strategy/CUTOVER-PLAN.md",
+      "path": "GOVERNANCE-ACTION-PLAN.md",
       "publish": {
-        "docsPath": "governance/cutover-plan.mdx",
-        "slug": "/governance/cutover-plan",
+        "docsPath": "governance/governance-action-plan.mdx",
+        "slug": "/governance/action-plan",
         "sidebar": "governance",
-        "sidebarLabel": "Cutover Plan",
-        "sidebarPosition": 10
+        "sidebarLabel": "Governance Action Plan",
+        "sidebarPosition": 2
       }
     },
     {
-      "id": "strategy.diagram-migration-guide",
-      "title": "Diagram Migration Guide",
-      "description": "Diagram Migration Guide document for TradingSystem governance.",
+      "id": "strategy.governance-summary",
+      "title": "Governança TradingSystem - Sumário Executivo",
+      "description": "Sumário executivo visual da análise de governança com Quick Wins, roadmap simplificado, KPIs e próximos passos imediatos.",
       "category": "strategy",
       "type": "plan",
-      "owner": "DocsOps",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
+      "owner": "Governance",
+      "reviewCycleDays": 30,
+      "lastReviewed": "2025-11-08",
+      "status": "active",
       "tags": [
         "governance",
-        "strategy"
+        "executive-summary",
+        "kpis",
+        "quick-wins"
       ],
-      "path": "strategy/DIAGRAM-MIGRATION-GUIDE.md",
+      "path": "GOVERNANCE-SUMMARY.md",
       "publish": {
-        "docsPath": "governance/diagram-migration-guide.mdx",
-        "slug": "/governance/diagram-migration-guide",
+        "docsPath": "governance/governance-summary.mdx",
+        "slug": "/governance/summary",
         "sidebar": "governance",
-        "sidebarLabel": "Diagram Migration Guide",
-        "sidebarPosition": 10
-      }
-    },
-    {
-      "id": "strategy.plano-revisao-api-docs",
-      "title": "Plano Revisao Api Docs",
-      "description": "Plano Revisao Api Docs document for TradingSystem governance.",
-      "category": "strategy",
-      "type": "plan",
-      "owner": "DocsOps",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "strategy"
-      ],
-      "path": "strategy/PLANO-REVISAO-API-DOCS.md",
-      "publish": {
-        "docsPath": "governance/plano-revisao-api-docs.mdx",
-        "slug": "/governance/plano-revisao-api-docs",
-        "sidebar": "governance",
-        "sidebarLabel": "Plano Revisao Api Docs",
-        "sidebarPosition": 10
+        "sidebarLabel": "Governance Summary",
+        "sidebarPosition": 1
       }
     },
     {
       "id": "strategy.technical-debt-tracker",
-      "title": "Technical Debt Tracker",
-      "description": "Technical Debt Tracker document for TradingSystem governance.",
+      "title": "Technical Debt Tracker - TradingSystem",
+      "description": "Rastreamento abrangente de débito técnico com priorização, estimativas de esforço e planos de remediação.",
       "category": "strategy",
       "type": "plan",
-      "owner": "DocsOps",
+      "owner": "Architecture",
       "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
+      "lastReviewed": "2025-11-01",
+      "status": "active",
       "tags": [
-        "governance",
-        "strategy"
+        "technical-debt",
+        "planning",
+        "architecture",
+        "quality"
       ],
       "path": "strategy/TECHNICAL-DEBT-TRACKER.md",
       "publish": {
@@ -1244,50 +533,40 @@
         "sidebarLabel": "Technical Debt Tracker",
         "sidebarPosition": 10
       }
-    },
-    {
-      "id": "strategy.versioning-automation",
-      "title": "Versioning Automation",
-      "description": "Versioning Automation document for TradingSystem governance.",
-      "category": "strategy",
-      "type": "plan",
-      "owner": "DocsOps",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "strategy"
-      ],
-      "path": "strategy/VERSIONING-AUTOMATION.md",
-      "publish": {
-        "docsPath": "governance/versioning-automation.mdx",
-        "slug": "/governance/versioning-automation",
-        "sidebar": "governance",
-        "sidebarLabel": "Versioning Automation",
-        "sidebarPosition": 10
-      }
-    },
-    {
-      "id": "strategy.versioning-guide",
-      "title": "Versioning Guide",
-      "description": "Versioning Guide document for TradingSystem governance.",
-      "category": "strategy",
-      "type": "plan",
-      "owner": "DocsOps",
-      "reviewCycleDays": 90,
-      "lastReviewed": "2025-10-29",
-      "tags": [
-        "governance",
-        "strategy"
-      ],
-      "path": "strategy/VERSIONING-GUIDE.md",
-      "publish": {
-        "docsPath": "governance/versioning-guide.mdx",
-        "slug": "/governance/versioning-guide",
-        "sidebar": "governance",
-        "sidebarLabel": "Versioning Guide",
-        "sidebarPosition": 10
-      }
     }
-  ]
+  ],
+  "removedArtifacts": {
+    "count": 56,
+    "reason": "Limpeza de artefatos duplicados, obsoletos ou de baixa relevância",
+    "categories": {
+      "evidence": {
+        "removed": 45,
+        "kept": 4,
+        "reason": "Mantidos apenas reports críticos (architecture review, governance improvement, incident, audit)"
+      },
+      "controls": {
+        "removed": 2,
+        "kept": 4,
+        "reason": "Mantidos apenas SOPs ativos e críticos"
+      },
+      "strategy": {
+        "removed": 7,
+        "kept": 3,
+        "reason": "Mantidos apenas planos ativos (governance action plan, summary, technical debt)"
+      },
+      "registry": {
+        "removed": 2,
+        "kept": 0,
+        "reason": "Metadata removido do registry (não é artefato de governança)"
+      }
+    },
+    "examples": [
+      "Duplicatas de README files",
+      "Reports de organização já finalizados",
+      "Summaries redundantes (telegram, docusaurus)",
+      "Metadata files (CODE-DOCS-MAPPING.json, registry.json)",
+      "Reports intermediários de reviews",
+      "Guias de versioning (movidos para docs)"
+    ]
+  }
 }

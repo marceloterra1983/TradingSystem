@@ -7,6 +7,8 @@ import {
   FileText,
   AlertCircle,
   CheckCircle,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -151,18 +153,84 @@ const emptyMetricsMessage = (
   </div>
 );
 
+const hasMeaningfulMetrics = (payload: DocumentationMetrics | null): boolean => {
+  if (!payload) return false;
+  if (payload.hasData === false) return false;
+
+  const totalFiles = payload.coverage?.totalFiles ?? 0;
+  const issueTotal = payload.issues?.total ?? 0;
+  const hasFreshness =
+    payload.freshness?.distribution?.some((item) => (item?.count ?? 0) > 0) ??
+    false;
+  const hasHistory = payload.historical?.length ? true : false;
+  const healthScore = payload.healthScore?.current ?? 0;
+
+  return (
+    totalFiles > 0 ||
+    issueTotal > 0 ||
+    hasFreshness ||
+    hasHistory ||
+    healthScore > 0
+  );
+};
+
+type NoticeState = {
+  type: "info" | "warning" | "error";
+  message: string;
+};
+
+type TaskAction = {
+  title: string;
+  description: string;
+  commands: string[];
+};
+
+const NOTICE_STYLES: Record<
+  NoticeState["type"],
+  {
+    className: string;
+    icon: typeof Info;
+  }
+> = {
+  info: {
+    className:
+      "border border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/40 dark:bg-blue-900/30 dark:text-blue-100",
+    icon: Info,
+  },
+  warning: {
+    className:
+      "border border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/30 dark:text-amber-100",
+    icon: AlertTriangle,
+  },
+  error: {
+    className:
+      "border border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/30 dark:text-rose-100",
+    icon: AlertCircle,
+  },
+};
+
+const METRICS_COMMAND = "npm --prefix docs run docs:metrics";
+const BUILD_COMMAND = "npm --prefix docs run docs:build";
+const LINK_CHECK_COMMAND = "npm --prefix docs run docs:links";
+const REDEPLOY_DOCS_COMMAND =
+  "docker compose -f tools/compose/docker-compose.docs.yml up -d documentation";
+const WATCHER_RESTART_COMMAND =
+  "sudo systemctl restart docs-hub-guard.service";
+
 export default function DocumentationMetricsPage() {
   const [metrics, setMetrics] = useState<DocumentationMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [dataSource, setDataSource] = useState<"api" | "static">("api");
+  const [notice, setNotice] = useState<NoticeState | null>(null);
 
   const loadMetrics = useCallback(async (showSpinner: boolean = true) => {
     if (showSpinner) {
       setLoading(true);
     }
     setError(null);
+    setNotice(null);
 
     const applyMetrics = (
       data: DocumentationMetrics,
@@ -185,17 +253,61 @@ export default function DocumentationMetricsPage() {
         );
       }
 
-      applyMetrics(response.data, "api");
+      const apiData = response.data;
+      const apiHasData = hasMeaningfulMetrics(apiData);
+
+      if (!apiHasData) {
+        const apiMessage =
+          apiData.message ??
+          "Documentation audit did not emit dashboard metrics yet.";
+        const guidanceMessage = `${apiMessage} Run "${METRICS_COMMAND}" after the documentation audit to refresh the dashboard.`;
+        setNotice({
+          type: "warning",
+          message: guidanceMessage,
+        });
+
+        try {
+          const fallback =
+            await documentationService.getStaticDocumentationMetrics();
+          if (hasMeaningfulMetrics(fallback)) {
+            applyMetrics(fallback, "static");
+            return;
+          }
+        } catch (snapshotErr) {
+          console.error(
+            "[DocumentationMetrics] Failed to load snapshot after empty API payload:",
+            snapshotErr,
+          );
+          setNotice({
+            type: "warning",
+            message: `${guidanceMessage} Snapshot unavailable (${snapshotErr instanceof Error ? snapshotErr.message : String(snapshotErr)}).`,
+          });
+        }
+      }
+
+      applyMetrics(apiData, "api");
+      if (apiData.message && apiData.message.trim().length > 0) {
+        setNotice({
+          type: apiHasData ? "info" : "warning",
+          message: apiData.message.trim(),
+        });
+      }
       return;
     } catch (err) {
       console.error(
         "[DocumentationMetrics] Failed to load metrics from API, trying snapshot:",
         err,
       );
+      const apiMessage =
+        err instanceof Error ? err.message : "API request failed";
       try {
         const fallback =
           await documentationService.getStaticDocumentationMetrics();
         applyMetrics(fallback, "static");
+        setNotice({
+          type: "warning",
+          message: `Documentation API unavailable (${apiMessage}). Displaying snapshot from docs/build/dashboard/metrics.json. After troubleshooting the API, rerun "${METRICS_COMMAND}" and "${BUILD_COMMAND}" to publish fresh metrics.`,
+        });
         return;
       } catch (fallbackErr) {
         console.error(
@@ -211,6 +323,7 @@ export default function DocumentationMetricsPage() {
         setError(
           `Unable to load documentation metrics (API: ${apiMessage}; snapshot: ${fallbackMessage})`,
         );
+        setNotice(null);
         setMetrics(null);
         setDataSource("api");
       }
@@ -258,6 +371,56 @@ export default function DocumentationMetricsPage() {
     ] || "";
   const sourceBadgeVariant = dataSource === "api" ? "success" : "warning";
   const sourceLabel = dataSource === "api" ? "Live API" : "Docs Snapshot";
+  const metadataSource = metrics?.metadata?.source;
+  const metadataVersion = metrics?.metadata?.version;
+  const metricsAvailable = hasMeaningfulMetrics(metrics);
+
+  const recommendedTasks = useMemo<TaskAction[]>(() => {
+    if (!metricsAvailable) {
+      return [
+        {
+          title: "Generate the latest metrics snapshot",
+          description:
+            "Executa o pipeline de métricas e produz docs/build/dashboard/metrics.json com os resultados mais recentes da auditoria.",
+          commands: [METRICS_COMMAND],
+        },
+        {
+          title: "Rebuild & publish the documentation bundle",
+          description:
+            "Gera os assets atualizados do Docusaurus e publica a nova versão no container docs-hub.",
+          commands: [BUILD_COMMAND, REDEPLOY_DOCS_COMMAND],
+        },
+        {
+          title: "Reinicie o docs-hub guard após publicar",
+          description:
+            "Garante que o watcher valide o mount e monitore regressões depois da atualização.",
+          commands: [WATCHER_RESTART_COMMAND],
+        },
+      ];
+    }
+
+    return [
+      {
+        title: "Atualize as métricas periodicamente",
+        description:
+          "Recomenda-se executar o pipeline após ciclos de documentação ou semanalmente.",
+        commands: [METRICS_COMMAND],
+      },
+      {
+        title: "Valide links antes de cada merge",
+        description:
+          "Evita regressões na documentação garantindo que todos os hyperlinks estejam válidos.",
+        commands: [LINK_CHECK_COMMAND],
+      },
+      {
+        title: "Publique as mudanças na stack de docs",
+        description:
+          "Após gerar as métricas, recompile o Docusaurus e reinicie o container para expor os dados.",
+        commands: [BUILD_COMMAND, REDEPLOY_DOCS_COMMAND],
+      },
+    ];
+  }, [metricsAvailable]);
+  const noticeConfig = notice ? NOTICE_STYLES[notice.type] : null;
 
   const handleRefresh = () => {
     void loadMetrics();
@@ -359,6 +522,46 @@ export default function DocumentationMetricsPage() {
           </Button>
         </div>
       </header>
+
+      {notice && noticeConfig && (
+        <div
+          className={`flex items-start gap-3 rounded-lg px-4 py-3 text-sm ${noticeConfig.className}`}
+        >
+          <noticeConfig.icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div className="space-y-1">
+            <p>{notice.message}</p>
+            {dataSource === "static" && (
+              <p className="text-xs text-gray-600 dark:text-gray-300">
+                Snapshot origin:{" "}
+                <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs dark:bg-gray-800">
+                  {metadataSource ?? "docs/build/dashboard/metrics.json"}
+                </code>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(metadataSource || metadataVersion) && (
+        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+          {metadataVersion && (
+            <span>
+              Metrics version{" "}
+              <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs dark:bg-gray-800">
+                {metadataVersion}
+              </code>
+            </span>
+          )}
+          {metadataSource && (
+            <span>
+              Generated by{" "}
+              <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs dark:bg-gray-800">
+                {metadataSource}
+              </code>
+            </span>
+          )}
+        </div>
+      )}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
@@ -777,13 +980,37 @@ export default function DocumentationMetricsPage() {
 
       <section className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Next steps
+          Operational checklist
         </h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Address critical frontmatter gaps and broken links first. Review stale
-          content (&gt;90 days) and ensure ownership coverage remains balanced
-          across guilds.
+          Use estes passos para manter o dashboard de documentação confiável e
+          atualizado.
         </p>
+        <ol className="mt-4 space-y-4">
+          {recommendedTasks.map((task) => (
+            <li
+              key={task.title}
+              className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 dark:border-gray-700 dark:bg-slate-900/60"
+            >
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {task.title}
+              </p>
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                {task.description}
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                {task.commands.map((command) => (
+                  <code
+                    key={command}
+                    className="w-fit rounded bg-gray-900/90 px-2 py-1 text-xs font-mono text-gray-100 dark:bg-gray-800"
+                  >
+                    {command}
+                  </code>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ol>
       </section>
     </div>
   );

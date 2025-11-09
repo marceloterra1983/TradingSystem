@@ -1,0 +1,24 @@
+{
+  "jobId": "job-hotmart-2025-11-08",
+  "runId": "70aac21a-08c4-463e-8606-207ae00cc881",
+  "extractedAt": "2025-11-09T00:18:20.308Z",
+  "selectors": {
+    "course": {
+      "title": "css:h1.course-title",
+      "description": "css:div.course-description",
+      "author": "css:.instructor-name"
+    },
+    "modules": {
+      "root": "css:ul.modules > li",
+      "title": "css:.module-title",
+      "lessons": {
+        "root": "css:.lessons > li",
+        "title": "css:.lesson-title",
+        "url": "css:a::href"
+      }
+    }
+  },
+  "start_urls": [
+    "https://hotmart.com/course/meu-curso"
+  ]
+}

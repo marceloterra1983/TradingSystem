@@ -62,5 +62,15 @@ fi
 echo "🔍 docs lint"
 npm --prefix docs run docs:lint || echo "⚠️  Lint errors found but not blocking commit"
 
+if git diff --cached --name-only | grep -q "^docs/"; then
+  echo "🔗 docs link check"
+  if ! npm --prefix docs run docs:links; then
+    echo ""
+    echo "❌ Broken documentation links detected!"
+    echo "💡 Corrija os links listados acima antes de prosseguir."
+    exit 1
+  fi
+fi
+
 echo "✅ Pre-commit validation passed"
 echo "ℹ️  Note: Run 'bash scripts/maintenance/validate-md-structure.sh' manually if needed"
