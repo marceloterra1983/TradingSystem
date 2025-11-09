@@ -6,7 +6,7 @@ import type { PlatformConfig } from '../config/platform.js';
 
 // Circuit breaker configuration for browser operations
 const browserBreakerConfig = {
-  timeout: 30000, // 30 seconds for browser launch
+  timeout: 60000, // allow slower logins (Hotmart, Jumba) before tripping
   errorThresholdPercentage: 50,
   resetTimeout: 60000, // Try again after 1 minute
   rollingCountTimeout: 10000,
@@ -178,7 +178,11 @@ export async function loginWithBrowserUseOrPlaywright(
   await page.fill(config.login.usernameSelector, env.browser.username);
   await page.fill(config.login.passwordSelector, env.browser.password);
   await Promise.all([
-    waitForNavigationWithRetry(page, { waitUntil: 'domcontentloaded' }, logger),
+    waitForNavigationWithRetry(
+      page,
+      { waitUntil: 'domcontentloaded', timeout: 60000 },
+      logger,
+    ),
     page.click(config.login.submitSelector),
   ]);
   let postLoginVerified = false;
