@@ -60,6 +60,7 @@ services:
       args:
         VITE_COURSE_CRAWLER_API_URL: ${VITE_COURSE_CRAWLER_API_URL:-http://localhost:3601}
         VITE_COURSE_CRAWLER_APP_URL: ${VITE_COURSE_CRAWLER_APP_URL:-http://localhost:4201}
+        VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9876}
     container_name: course-crawler-ui
     depends_on:
       - course-crawler-api

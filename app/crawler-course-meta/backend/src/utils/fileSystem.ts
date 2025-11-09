@@ -15,7 +15,7 @@ export const writeText = (filePath: string, content: string) => {
   fs.writeFileSync(filePath, content, 'utf-8');
 };
 
-export const listArtifacts = (dirPath: string) => {
+export const listArtifacts = (dirPath: string): string[] => {
   if (!fs.existsSync(dirPath)) return [];
   return fs.readdirSync(dirPath).flatMap((entry) => {
     const full = path.join(dirPath, entry);

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Router } from 'express';
 import { jobSchema } from '../core/schema.js';
-import { getJob, listJobs, listRunsByJob, saveJob } from '../core/jobStore.js';
+import { deleteJob, getJob, listJobs, listRunsByJob, saveJob, updateJob } from '../core/jobStore.js';
 import { runJob } from '../core/jobRunner.js';
 import env from '../config/env.js';
 import logger from '../observability/logger.js';
@@ -24,6 +24,34 @@ router.post('/', (req, res) => {
   saveJob(job);
   logger.info({ jobId: job.id }, 'Job created');
   return res.status(201).json({ job });
+});
+
+router.put('/:id', (req, res) => {
+  const parseResult = jobSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return res.status(400).json({ error: parseResult.error.format() });
+  }
+  const payload = parseResult.data;
+  if (payload.id !== req.params.id) {
+    return res.status(400).json({ error: 'Payload id must match params id' });
+  }
+  try {
+    const job = updateJob(req.params.id, payload);
+    logger.info({ jobId: job.id }, 'Job updated');
+    return res.json({ job });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return res.status(404).json({ error: message });
+  }
+});
+
+router.delete('/:id', (req, res) => {
+  const removed = deleteJob(req.params.id);
+  if (!removed) {
+    return res.status(404).json({ error: 'Job not found' });
+  }
+  logger.info({ jobId: req.params.id }, 'Job deleted');
+  return res.status(204).send();
 });
 
 router.get('/:id', (req, res) => {

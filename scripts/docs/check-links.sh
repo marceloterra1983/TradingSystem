@@ -15,7 +15,7 @@ if ! command -v npx >/dev/null 2>&1; then
 fi
 
 echo "[docs] Running linkinator against build output..."
-SKIP_PATTERNS=("mailto:*" "https://github.com/TradingSystem/TradingSystem*")
+SKIP_PATTERNS=("mailto:*" "https://github.com/TradingSystem/TradingSystem*" "http://localhost:*" "https://docs.tradingsystem.local/*")
 if [[ -n "${EXTRA_SKIP:-}" ]]; then
   # Allow callers to append custom skip patterns separated by space
   read -r -a EXTRA_ARRAY <<<"${EXTRA_SKIP}"

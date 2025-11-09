@@ -14,7 +14,7 @@ services:
   # ----------------------------------------------------------------------------
   waha-core:
     container_name: waha-core
-    image: ${WAHA_IMAGE:-devlikeapro/waha:latest-baileys}
+    image: ${WAHA_IMAGE:-devlikeapro/waha:noweb}
     restart: unless-stopped
 
     env_file:

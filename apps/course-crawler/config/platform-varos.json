@@ -1,16 +1,16 @@
 {
   "login": {
     "url": "https://plataforma.varos.com.br/auth/login",
-    "usernameSelector": "input[type=\"email\"]",
-    "passwordSelector": "input[type=\"password\"]",
-    "submitSelector": "button[type=\"submit\"]",
+    "usernameSelector": "#AcessoEmail",
+    "passwordSelector": "#AcessoSenha",
+    "submitSelector": "form#Form button[type=\"submit\"]",
     "postLoginWaitSelector": "a[href*=\"/area/\"], div[class*=\"dashboard\"], nav[class*=\"menu\"], a[href*=\"perfil\"]"
   },
   "courses": {
     "url": "https://plataforma.varos.com.br/area/vitrine",
-    "courseItemSelector": "div[class*=\"course\"], div[class*=\"card\"], a[href*=\"/curso/\"]",
-    "titleSelector": "h1, h2, h3, [class*=\"title\"], [class*=\"nome\"]",
-    "linkSelector": "a[href*=\"/curso/\"], a[href*=\"/area/\"]"
+    "courseItemSelector": "div[class*=\"produto\"], article[class*=\"produto\"], li[class*=\"produto\"], a[href*=\"/area/produto\"], a[href*=\"/area/vitrine\"]",
+    "titleSelector": "h1, h2, h3, strong, span, [class*=\"title\"], [class*=\"nome\"], [class*=\"titulo\"]",
+    "linkSelector": "a[href*=\"/area/\"]"
   },
   "modules": {
     "moduleListSelector": "div[class*=\"module\"], div[class*=\"modulo\"], div[class*=\"section\"], ul li",

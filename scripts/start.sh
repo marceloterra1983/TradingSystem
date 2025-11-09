@@ -68,6 +68,57 @@ SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 METRICS_FILE="$SERVICES_DIR/start-metrics.json"
 mkdir -p "$SERVICES_DIR"
 
+DOCS_BUILD_DIR="$PROJECT_ROOT/docs/build"
+DOCS_BACKUP_ROOT="$PROJECT_ROOT/outputs/backups/docs"
+DOCS_BACKUP_DIR="$DOCS_BACKUP_ROOT/build-backup"
+
+backup_docs_build() {
+    if [ -f "$DOCS_BUILD_DIR/index.html" ]; then
+        mkdir -p "$DOCS_BACKUP_ROOT"
+        rm -rf "$DOCS_BACKUP_DIR"
+        mkdir -p "$DOCS_BACKUP_DIR"
+        cp -a "$DOCS_BUILD_DIR/." "$DOCS_BACKUP_DIR/"
+        log_info "Docs build backup atualizado em $DOCS_BACKUP_DIR"
+    else
+        log_warning "docs/build/index.html não encontrado para backup"
+    fi
+}
+
+restore_docs_build() {
+    if [ -d "$DOCS_BACKUP_DIR" ] && [ -f "$DOCS_BACKUP_DIR/index.html" ]; then
+        log_warning "Restaurando docs/build a partir do backup"
+        rm -rf "$DOCS_BUILD_DIR"
+        mkdir -p "$DOCS_BUILD_DIR"
+        cp -a "$DOCS_BACKUP_DIR/." "$DOCS_BUILD_DIR/"
+    else
+        log_warning "Nenhum backup válido encontrado em $DOCS_BACKUP_DIR"
+    fi
+}
+
+ensure_docs_build() {
+    if [ -f "$DOCS_BUILD_DIR/index.html" ]; then
+        backup_docs_build
+        return 0
+    fi
+
+    log_warning "docs/build/index.html ausente - executando npm --prefix docs run docs:build"
+    if npm --prefix "$PROJECT_ROOT/docs" run docs:build; then
+        backup_docs_build
+        return 0
+    fi
+
+    log_error "Falha ao reconstruir o Docusaurus - tentando restaurar backup anterior"
+    restore_docs_build
+
+    if [ -f "$DOCS_BUILD_DIR/index.html" ]; then
+        log_warning "Backup restaurado com sucesso, utilizando build anterior"
+        return 0
+    fi
+
+    log_error "Nenhum build válido disponível para o Docusaurus"
+    return 1
+}
+
 # Metrics tracking
 declare -A SERVICE_START_TIMES
 declare -A SERVICE_RETRY_COUNTS
@@ -775,6 +826,11 @@ start_docs_stack() {
         ["docs-api"]="docs-api"
     )
     local -a services_to_start=()
+
+    if ! ensure_docs_build; then
+        log_error "Skipping DOCS stack startup por falta de build válido do Docusaurus"
+        return 1
+    fi
 
     if [ "$FORCE_KILL" = true ]; then
         for port in "${DOCS_PORT:-3404}" "${DOCS_API_PORT:-3405}"; do

@@ -14,6 +14,8 @@ const browserBreakerConfig = {
   name: 'BrowserCircuitBreaker',
 };
 
+let lastBrowserFailure: Error | undefined;
+
 export interface AuthenticatedSession {
   browser: Browser;
   context: BrowserContext;
@@ -26,16 +28,54 @@ async function _createAuthenticatedSession(
   platformConfig: PlatformConfig,
   logger: Logger,
 ): Promise<AuthenticatedSession> {
-  const browser = await chromium.launch({
-    headless: env.browser.headless,
-    args: ['--disable-dev-shm-usage'],
-  });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+  let browser: Browser | undefined;
+  let context: BrowserContext | undefined;
+  try {
+    browser = await chromium.launch({
+      headless: env.browser.headless,
+      args: ['--disable-dev-shm-usage'],
+    });
+    context = await browser.newContext();
+    const page = await context.newPage();
 
-  await loginWithBrowserUseOrPlaywright(page, platformConfig, env, logger);
+    logger.info(
+      {
+        loginUrl: platformConfig.login.url,
+        baseUrl: env.browser.baseUrl,
+        headless: env.browser.headless,
+        selectorsConfigPath: env.browser.selectorsConfigPath,
+      },
+      '[course-crawler] Opening authenticated browser session',
+    );
 
-  return { browser, context, page };
+    await loginWithBrowserUseOrPlaywright(page, platformConfig, env, logger);
+    logger.info('[course-crawler] Authenticated browser session established');
+
+    return { browser, context, page };
+  } catch (error) {
+    const normalizedError =
+      error instanceof Error ? error : new Error(String(error));
+    lastBrowserFailure = normalizedError;
+    logger.error(
+      {
+        err: normalizedError,
+        loginUrl: platformConfig.login.url,
+        selectorsConfigPath: env.browser.selectorsConfigPath,
+      },
+      '[course-crawler] Failed to initialize authenticated browser session',
+    );
+    try {
+      await context?.close();
+    } catch {
+      // ignore close errors
+    }
+    try {
+      await browser?.close();
+    } catch {
+      // ignore close errors
+    }
+    throw normalizedError;
+  }
 }
 
 // Circuit breaker for browser session creation
@@ -59,8 +99,24 @@ browserBreaker.on('fallback', () => {
 });
 
 // Fallback: return error instead of crashing
+browserBreaker.on('failure', (error: unknown) => {
+  lastBrowserFailure =
+    error instanceof Error ? error : new Error(String(error));
+  console.error(
+    '[BrowserCircuitBreaker] ❌ Failure while creating browser session:',
+    lastBrowserFailure.message,
+  );
+});
+
 browserBreaker.fallback(() => {
-  throw new Error('Browser automation temporarily unavailable. Circuit breaker is open. Please try again later.');
+  const message =
+    'Browser automation temporarily unavailable. Circuit breaker is open. Please try again later.';
+  if (lastBrowserFailure) {
+    throw new Error(`${message} Last failure: ${lastBrowserFailure.message}`, {
+      cause: lastBrowserFailure,
+    });
+  }
+  throw new Error(message);
 });
 
 // Public API with circuit breaker protection
