@@ -453,6 +453,24 @@ export default defineConfig(({ mode }) => {
             preserveProxyLocation(proxy, '/db-ui/pgadmin');
           },
         },
+        // pgAdmin core endpoints referenced with absolute paths inside the app
+        // (login flows, assets, misc APIs, etc.)
+        '^/(authenticate|browser|misc|settings|user_management|preferences|sqleditor|tools)(/|$)': {
+          target: dbUiPgAdminProxy.target,
+          changeOrigin: true,
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/pgadmin');
+          },
+        },
+        '^/(static)(/|$)': {
+          target: dbUiPgAdminProxy.target,
+          changeOrigin: true,
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+            preserveProxyLocation(proxy, '/db-ui/pgadmin');
+          },
+        },
         '/db-ui/pgweb': {
           target: dbUiPgWebProxy.target,
           changeOrigin: true,
