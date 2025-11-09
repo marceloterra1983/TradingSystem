@@ -1,0 +1,12 @@
+services:
+  timescaledb:
+    ports:
+      - "5433:5432"
+  timescaledb-backup:
+    ports: []
+    expose:
+      - "5432"
+networks:
+  default:
+    external: true
+    name: tradingsystem_backend

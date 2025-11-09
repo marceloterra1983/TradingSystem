@@ -20,17 +20,17 @@ const ADMINER_URL = ENDPOINTS.adminer;
 const QUESTDB_URL = ENDPOINTS.questdb;
 
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: "/db-ui/pgadmin/login", label: "Proxy (/db-ui/pgadmin)" },
+  pgadmin: { url: PGADMIN_URL, label: "Direto (.env)" },
   pgweb: { url: PGWEB_URL, label: "Direto (.env)" },
-  adminer: { url: ADMINER_URL, label: "Direto (.env)" },
+  adminer: { url: "/db-ui/adminer", label: "Proxy (/db-ui/adminer)" },
   questdb: { url: QUESTDB_URL, label: "Direto (.env)" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin/login" },
-    { label: "Porta 5050", url: "http://localhost:5050" },
     { label: "Direto (.env)", url: PGADMIN_URL },
+    { label: "Porta 5050", url: "http://localhost:5050" },
+    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin/login" },
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
@@ -40,9 +40,9 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: "Direto (.env)", url: ADMINER_URL },
-    { label: "Porta 8082", url: "http://localhost:8082" },
     { label: "Proxy (/db-ui/adminer)", url: "/db-ui/adminer" },
+    { label: "Porta 8082", url: "http://localhost:8082" },
+    { label: "Direto (.env)", url: ADMINER_URL },
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
@@ -346,25 +346,6 @@ function ToolContentFrame({
   iframeError,
   onError,
 }: ToolContentFrameProps) {
-  if (tool.id === "pgadmin" && activeUrl.startsWith("http://localhost")) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 bg-slate-50 p-6 text-center dark:bg-slate-900">
-        <div className="max-w-md text-sm text-gray-600 dark:text-gray-300">
-          O pgAdmin bloqueia sessão em iframe quando acessado diretamente em{" "}
-          <strong>{activeUrl}</strong>. Abra em uma nova aba ou volte para a opção
-          “Proxy (/db-ui/pgadmin)” para visualizar embutido.
-        </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => window.open(activeUrl, "_blank", "noopener,noreferrer")}
-        >
-          Abrir pgAdmin em nova aba
-        </Button>
-      </div>
-    );
-  }
-
   const baseClasses =
     "h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-900";
 

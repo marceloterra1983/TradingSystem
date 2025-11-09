@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2025-11-09T01:03:33.201Z",
+  "generatedAt": "2025-11-09T21:50:00.000Z",
   "metadata": {
     "description": "Registry centralizado de artefatos de governança do TradingSystem",
-    "totalArtifacts": 21,
+    "totalArtifacts": 22,
     "lastCleanup": "2025-11-08",
     "cleanupReason": "Removidos artefatos duplicados, obsoletos e de baixa relevância",
-    "lastUpdate": "2025-11-08"
+    "lastUpdate": "2025-11-09"
   },
   "artifacts": [
     {
@@ -350,6 +350,32 @@
         "sidebar": "governance",
         "sidebarLabel": "POL-0005 - Hardcoded URLs Prevention",
         "sidebarPosition": 8
+      }
+    },
+    {
+      "id": "policies.generated-docs-freshness-policy",
+      "title": "Generated Documentation Freshness Policy",
+      "description": "Política obrigatória para manter arquivos de documentação gerados automaticamente atualizados antes de sincronizar com o GitHub.",
+      "category": "policies",
+      "type": "policy",
+      "owner": "DocsOps",
+      "reviewCycleDays": 30,
+      "lastReviewed": "2025-11-09",
+      "policyId": "POL-0006",
+      "status": "active",
+      "tags": [
+        "documentation",
+        "automation",
+        "quality",
+        "governance"
+      ],
+      "path": "policies/generated-docs-freshness-policy.md",
+      "publish": {
+        "docsPath": "governance/policies/generated-docs-freshness-policy.mdx",
+        "slug": "/governance/policies/generated-docs-freshness-policy",
+        "sidebar": "governance",
+        "sidebarLabel": "POL-0006 - Generated Docs Freshness",
+        "sidebarPosition": 9
       }
     },
     {

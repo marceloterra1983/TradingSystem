@@ -455,6 +455,17 @@ export default defineConfig(({ mode }) => {
         },
         // pgAdmin core endpoints referenced with absolute paths inside the app
         // (login flows, assets, misc APIs, etc.)
+        '/static/': {
+          target: dbUiPgAdminProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/static/,
+            path.posix.join(dbUiPgAdminProxy.basePath, '/static'),
+          ),
+          configure: (proxy, _options) => {
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
         '^/(authenticate|browser|misc|settings|user_management|preferences|sqleditor|tools)(/|$)': {
           target: dbUiPgAdminProxy.target,
           changeOrigin: true,
@@ -463,7 +474,7 @@ export default defineConfig(({ mode }) => {
             preserveProxyLocation(proxy, '/db-ui/pgadmin');
           },
         },
-        '^/(static)(/|$)': {
+        '^/(api|favicon.ico)(/|$)': {
           target: dbUiPgAdminProxy.target,
           changeOrigin: true,
           configure: (proxy, _options) => {
