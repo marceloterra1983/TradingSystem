@@ -36,7 +36,7 @@ Criar o **Governance Hub** na raiz do repositório, com taxonomia e automação 
    - Jobs de CI (`docs:check`, `agents:ci`, `commands:ci`) atualizados para ler o registry e falhar caso governança esteja desatualizada (>90 dias sem review).
 
 5. **Execução Containerizada do Dashboard**
-   - `npm run dev:dashboard-docs` vira wrapper de `docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build`.
+   - `npm run dev:dashboard-docs` vira wrapper de `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml up --build`.
    - Documentação e scripts deixam claro que o dashboard (Knowledge) só deve rodar via container para garantir paridade com QA/Prod e acesso aos snapshots gerados.
 
 ## Impact

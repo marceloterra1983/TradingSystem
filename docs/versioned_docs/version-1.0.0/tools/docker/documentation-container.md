@@ -271,7 +271,7 @@ server {
 ### 3. `tools/compose/docker-compose.docs.yml` (Reescrito)
 
 ```yaml
-name: documentation
+name: 2-docs-stack
 
 services:
   documentation:

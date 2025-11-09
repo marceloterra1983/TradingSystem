@@ -141,12 +141,11 @@ class ErrorBoundary extends React.Component {
 4. ✅ **Database** - Multiple iframe embeds
 5. ✅ **Miro** - External board embed
 
-#### 🔧 Toolbox Section (5 pages)
+#### 🔧 Toolbox Section (4 pages)
 1. ✅ **RAG Services** (LlamaIndex) - Query interface
-2. ✅ **AnythingLLM** - External RAG UI
-3. ✅ **Kestra** - Pipeline orchestration
-4. ✅ **n8n Automations** - Low-code workflows
-5. ✅ **Ports** - Port monitoring
+2. ✅ **Kestra** - Pipeline orchestration
+3. ✅ **n8n Automations** - Low-code workflows
+4. ✅ **Ports** - Port monitoring
 
 **Total: 15/18 pages (83%)**
 

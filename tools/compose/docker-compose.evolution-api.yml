@@ -36,7 +36,7 @@ services:
       -c config_file=/etc/postgresql/postgresql.conf
 
     ports:
-      - "${EVOLUTION_DB_HOST_BIND:-127.0.0.1}:${EVOLUTION_DB_PORT:-5436}:5432"
+      - "${EVOLUTION_DB_HOST_BIND:-127.0.0.1}:${EVOLUTION_DB_PORT:-5437}:5432"
 
     volumes:
       - evolution-postgres-data:/var/lib/postgresql/data
@@ -150,7 +150,7 @@ services:
       --timeout 0
 
     ports:
-      - "${EVOLUTION_REDIS_HOST_BIND:-127.0.0.1}:${EVOLUTION_REDIS_PORT:-6386}:6379"
+      - "${EVOLUTION_REDIS_HOST_BIND:-127.0.0.1}:${EVOLUTION_REDIS_PORT:-6388}:6379"
 
     volumes:
       - evolution-redis-data:/data
@@ -203,8 +203,8 @@ services:
     command: server /data --console-address ":9001"
 
     ports:
-      - "${EVOLUTION_MINIO_API_HOST_BIND:-127.0.0.1}:${EVOLUTION_MINIO_API_PORT:-9302}:9000"
-      - "${EVOLUTION_MINIO_CONSOLE_HOST_BIND:-127.0.0.1}:${EVOLUTION_MINIO_CONSOLE_PORT:-9303}:9001"
+      - "${EVOLUTION_MINIO_API_HOST_BIND:-127.0.0.1}:${EVOLUTION_MINIO_API_PORT:-9310}:9000"
+      - "${EVOLUTION_MINIO_CONSOLE_HOST_BIND:-127.0.0.1}:${EVOLUTION_MINIO_CONSOLE_PORT:-9311}:9001"
 
     volumes:
       - evolution-minio-data:/data
@@ -301,6 +301,7 @@ services:
       SSL_CONF_FULLCHAIN: ${EVOLUTION_SSL_CERT_PATH:-}
       DATABASE_PROVIDER: ${EVOLUTION_DATABASE_PROVIDER:-psql_bouncer}
       DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolutiondb}@${EVOLUTION_DB_HOST:-evolution-pgbouncer}:${EVOLUTION_DB_POOL_PORT:-6432}/${EVOLUTION_DB_NAME:-evolution}?pgbouncer=true&schema=${EVOLUTION_DB_SCHEMA:-evolution_api}
+      DATABASE_BOUNCER_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolutiondb}@${EVOLUTION_DB_HOST:-evolution-pgbouncer}:${EVOLUTION_DB_POOL_PORT:-6432}/${EVOLUTION_DB_NAME:-evolution}?pgbouncer=true&schema=${EVOLUTION_DB_SCHEMA:-evolution_api}
       DATABASE_CONNECTION_CLIENT_NAME: ${EVOLUTION_DB_CLIENT_NAME:-evolution-stack}
       CACHE_REDIS_ENABLED: ${EVOLUTION_CACHE_REDIS_ENABLED:-true}
       CACHE_REDIS_URI: ${EVOLUTION_CACHE_REDIS_URI:-redis://evolution-redis:6379/6}
@@ -311,7 +312,7 @@ services:
       S3_ACCESS_KEY: ${EVOLUTION_MINIO_ROOT_USER:-evolution}
       S3_SECRET_KEY: ${EVOLUTION_MINIO_ROOT_PASSWORD:-evolutionminio}
       S3_BUCKET: ${EVOLUTION_MINIO_BUCKET:-evolution-media}
-      S3_ENDPOINT: ${EVOLUTION_S3_ENDPOINT:-http://evolution-minio:9000}
+      S3_ENDPOINT: ${EVOLUTION_S3_ENDPOINT:-evolution-minio}
       S3_REGION: ${EVOLUTION_MINIO_REGION:-us-east-1}
       S3_PORT: ${EVOLUTION_S3_PORT:-9000}
       S3_USE_SSL: ${EVOLUTION_S3_USE_SSL:-false}
@@ -422,3 +423,6 @@ volumes:
 networks:
   evolution_backend:
     driver: bridge
+    ipam:
+      config:
+        - subnet: ${EVOLUTION_NETWORK_SUBNET:-172.35.0.0/24}

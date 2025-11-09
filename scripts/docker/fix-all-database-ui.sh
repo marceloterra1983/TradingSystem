@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para corrigir e sincronizar todos os containers database-ui
+# Script para corrigir e sincronizar todos os containers da stack 3-database-stack
 # Sincroniza com http://localhost:3103/#/knowledge-database
 
 set -e
 
-echo "🔧 Corrigindo e sincronizando containers database-ui..."
+echo "🔧 Corrigindo e sincronizando containers da stack 3-database-stack..."
 echo ""
 
 # Portas esperadas pelo dashboard

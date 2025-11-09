@@ -9,6 +9,17 @@
       "color": "#ffffff",
       "backgroundColor": "#007ACC",
       "show": "always"
+    },
+    {
+      "text": "$(wrench) Rebuild Dashboard",
+      "tooltip": "Rebuild Dashboard container",
+      "command": "workbench.action.tasks.runTask",
+      "arguments": ["🛠️ Rebuild Dashboard"],
+      "alignment": "right",
+      "priority": 95,
+      "color": "#ffffff",
+      "backgroundColor": "#007ACC",
+      "show": "always"
     }
   ],
   "statusbar.command.alwaysShowOnStartup": true,

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para migrar QuestDB de processo host para container database-ui
+# Script para migrar QuestDB de processo host para container da stack 3-database-stack
 # Para processos órfãos ou containers antigos
 
 set -e
 
-echo "🔄 Migrando QuestDB para stack database-ui..."
+echo "🔄 Migrando QuestDB para stack 3-database-stack..."
 echo ""
 
 # 1. Encontrar e parar processos QuestDB

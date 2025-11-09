@@ -14,34 +14,41 @@ type EndpointOption = {
   url: string;
 };
 
+const PGADMIN_URL = ENDPOINTS.pgAdmin;
+const PGWEB_URL = ENDPOINTS.pgWeb;
+const ADMINER_URL = ENDPOINTS.adminer;
+const QUESTDB_URL = ENDPOINTS.questdb;
+
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: "/db-ui/pgadmin", label: "Proxy (/db-ui/pgadmin)" },
-  pgweb: { url: "http://localhost:8081", label: "Porta 8081" },
-  adminer: { url: "/db-ui/adminer", label: "Proxy (/db-ui/adminer)" },
-  questdb: { url: "http://localhost:9002", label: "Porta 9002" },
+  pgadmin: { url: "/db-ui/pgadmin/login", label: "Proxy (/db-ui/pgadmin)" },
+  pgweb: { url: PGWEB_URL, label: "Direto (.env)" },
+  adminer: { url: ADMINER_URL, label: "Direto (.env)" },
+  questdb: { url: QUESTDB_URL, label: "Direto (.env)" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin" },
-    { label: "Direto (.env)", url: ENDPOINTS.pgAdmin },
+    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin/login" },
     { label: "Porta 5050", url: "http://localhost:5050" },
+    { label: "Direto (.env)", url: PGADMIN_URL },
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
+    { label: "Direto (.env)", url: PGWEB_URL },
+    { label: "Porta 8081", url: "http://localhost:8081" },
     { label: "Proxy (/db-ui/pgweb)", url: "/db-ui/pgweb" },
-    { label: "Direto (.env)", url: ENDPOINTS.pgWeb },
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: "Direto (.env)", url: ENDPOINTS.adminer },
+    { label: "Direto (.env)", url: ADMINER_URL },
     { label: "Porta 8082", url: "http://localhost:8082" },
     { label: "Proxy (/db-ui/adminer)", url: "/db-ui/adminer" },
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
+    { label: "Direto (.env)", url: QUESTDB_URL },
+    { label: "HTTP 9002", url: "http://localhost:9002" },
     { label: "Proxy (/db-ui/questdb)", url: "/db-ui/questdb" },
-    { label: "Direto (.env)", url: ENDPOINTS.questdb },
     { label: "Legacy 7010", url: "http://localhost:7010" },
   ],
 };
@@ -339,35 +346,72 @@ function ToolContentFrame({
   iframeError,
   onError,
 }: ToolContentFrameProps) {
-  return (
-    <div className="flex-1 overflow-hidden">
-      {!activeUrl ? (
-        <div className="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+  if (tool.id === "pgadmin" && activeUrl.startsWith("http://localhost")) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 bg-slate-50 p-6 text-center dark:bg-slate-900">
+        <div className="max-w-md text-sm text-gray-600 dark:text-gray-300">
+          O pgAdmin bloqueia sessão em iframe quando acessado diretamente em{" "}
+          <strong>{activeUrl}</strong>. Abra em uma nova aba ou volte para a opção
+          “Proxy (/db-ui/pgadmin)” para visualizar embutido.
+        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => window.open(activeUrl, "_blank", "noopener,noreferrer")}
+        >
+          Abrir pgAdmin em nova aba
+        </Button>
+      </div>
+    );
+  }
+
+  const baseClasses =
+    "h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-900";
+
+  if (!activeUrl) {
+    return (
+      <div className={`${baseClasses} flex items-center justify-center`}>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           Nenhum endpoint configurado para visualização.
         </div>
-      ) : iframeError ? (
-        <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-red-600 dark:text-red-400">
+      </div>
+    );
+  }
+
+  if (iframeError) {
+    return (
+      <div
+        className={`${baseClasses} flex flex-col items-center justify-center gap-3 text-center text-sm text-red-600 dark:text-red-400`}
+      >
+        <div>
           <p>
             Não foi possível carregar o painel <strong>{tool.name}</strong>.
           </p>
-          <p>Tente selecionar outro endpoint ou abrir em uma nova aba.</p>
-          <Button size="sm" variant="outline" onClick={onError}>
-            Tentar novamente
-          </Button>
+          <p className="mt-1 text-xs text-red-500/80 dark:text-red-200/80">
+            Tente selecionar outro endpoint ou abrir em uma nova aba.
+          </p>
         </div>
-      ) : (
-        <IframeWithUrl
-          key={`${tool.id}-${activeUrl}`}
-          src={activeUrl}
-          title={`${tool.name} Dashboard`}
-          wrapperClassName="h-full flex-1"
-          showLink={false}
-          className="w-full h-full rounded-lg border-0"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-downloads"
-          allow="clipboard-read; clipboard-write"
-          onError={onError}
-        />
-      )}
+        <Button size="sm" variant="outline" onClick={onError}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={baseClasses}>
+      <IframeWithUrl
+        key={`${tool.id}-${activeUrl}`}
+        src={activeUrl}
+        title={`${tool.name} Dashboard`}
+        wrapperClassName="h-full"
+        showLink={false}
+        className="w-full h-full"
+        style={{ border: "none" }}
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-downloads allow-top-navigation-by-user-activation allow-storage-access-by-user-activation"
+        allow="clipboard-read; clipboard-write"
+        onError={onError}
+      />
     </div>
   );
 }
@@ -526,194 +570,210 @@ export default function DatabasePageNew() {
     }
   };
 
+  const isToolTab = activeTab !== "overview";
+
   return (
-    <div className="min-h-[calc(100vh-160px)] w-full">
-      {/* Navigation Buttons - Similar to Docs page */}
-      <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between relative z-10">
-        <div className="flex flex-wrap items-center gap-2">
-          {NAV_TABS.map((tab) => (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? "primary" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleTabChange(tab.id);
-              }}
-              disabled={activeTab === tab.id}
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleOpenInNewTab}
-          disabled={activeTab === "overview" || !activeUrl}
+    <div
+      className={
+        isToolTab
+          ? "h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-900"
+          : "min-h-[calc(100vh-160px)] w-full"
+      }
+    >
+      <div className={isToolTab ? "flex h-full flex-col" : undefined}>
+        {/* Navigation Buttons - Similar to Docs page */}
+        <div
+          className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between relative z-10 ${isToolTab ? "p-4" : "mb-2"}`}
         >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Open in new tab
-        </Button>
-      </div>
-
-      {/* Content Frame - Separated from buttons */}
-      <div className="h-[calc(100vh-200px)] w-full flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-slate-900">
-        {activeTab === "overview" ? (
-          <DatabaseOverviewPanel />
-        ) : (
-          activeToolData && (
-            <ToolContentFrame
-              tool={activeToolData}
-              activeUrl={activeUrl}
-              iframeError={iframeError}
-              onError={() => handleEndpointError(activeToolData)}
-            />
-          )
-        )}
-      </div>
-
-      {apiAvailable ? (
-        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
-              Manutenção do Dashboard
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Execute ações administrativas (rebuild/limpeza) diretamente do
-              dashboard.
-            </p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            {MAINTENANCE_ACTIONS.map((action) => (
-              <div
-                key={action.id}
-                className="rounded-xl border border-gray-200 p-3 dark:border-gray-700"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-gray-50">
-                      {action.label}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {action.description}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={action.variant ?? "outline"}
-                    disabled={maintenanceAction === action.id}
-                    onClick={async () => {
-                      setMaintenanceAction(action.id);
-                      try {
-                        await startLauncherTool(action.id);
-                        toast.success(
-                          action.id === "dashboard-rebuild"
-                            ? "Rebuild solicitado; acompanhe os logs do dashboard."
-                            : "Limpeza do Docker iniciada.",
-                        );
-                      } catch (error) {
-                        toast.error(
-                          error instanceof Error
-                            ? error.message
-                            : "Falha ao executar comando",
-                        );
-                      } finally {
-                        setMaintenanceAction(null);
-                      }
-                    }}
-                  >
-                    {maintenanceAction === action.id ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Play className="mr-2 h-4 w-4" />
-                    )}
-                    Executar
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/10 dark:text-amber-200">
-          Configure <code>VITE_LAUNCHER_API_URL</code> e{" "}
-          <code>VITE_LAUNCHER_API_TOKEN</code> para liberar comandos de
-          manutenção diretamente do dashboard.
-        </section>
-      )}
-
-      {apiAvailable && (
-        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-2 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
-                Controle rápido
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Executa comandos docker compose pré-aprovados para iniciar cada
-                ferramenta.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {TOOLS.map((tool) => (
+          <div className="flex flex-wrap items-center gap-2">
+            {NAV_TABS.map((tab) => (
               <Button
-                key={`launch-${tool.id}`}
+                key={tab.id}
+                variant={activeTab === tab.id ? "primary" : "outline"}
                 size="sm"
-                variant="outline"
-                disabled={launchingTool === tool.id}
-                onClick={async () => {
-                  setLaunchingTool(tool.id);
-                  try {
-                    await startLauncherTool(tool.id);
-                    toast.success(`Start solicitado para ${tool.name}`);
-                  } catch (error) {
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : "Falha ao iniciar container",
-                    );
-                  } finally {
-                    setLaunchingTool(null);
-                  }
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleTabChange(tab.id);
                 }}
+                disabled={activeTab === tab.id}
               >
-                {launchingTool === tool.id ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Play className="mr-2 h-4 w-4" />
-                )}
-                Iniciar {tool.name}
+                {tab.label}
               </Button>
             ))}
           </div>
-        </section>
-      )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenInNewTab}
+            disabled={activeTab === "overview" || !activeUrl}
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Open in new tab
+          </Button>
+        </div>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
-        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
-          Referências rápidas
-        </h3>
-        <ul className="mt-3 list-disc space-y-1 pl-5">
-          <li>
-            Scripts oficiais: <code>bash scripts/docker/start-stacks.sh</code>{" "}
-            permite subir apenas o bloco necessário usando{" "}
-            <code>--phase timescale</code>, <code>--phase tools</code> ou{" "}
-            <code>--phase data</code>.
-          </li>
-          <li>
-            Consulte <code>docs/context/ops/service-port-map.md</code> para a
-            matriz completa de portas e URLs.
-          </li>
-          <li>
-            Caso um serviço esteja offline, verifique se a porta não está em uso
-            e se o container correspondente está listado em{" "}
-            <code>docker ps</code>.
-          </li>
-        </ul>
-      </section>
+        {/* Content & sections */}
+        {isToolTab ? (
+          activeToolData && (
+            <div className="flex-1">
+              <ToolContentFrame
+                tool={activeToolData}
+                activeUrl={activeUrl}
+                iframeError={iframeError}
+                onError={() => handleEndpointError(activeToolData)}
+              />
+            </div>
+          )
+        ) : (
+          <>
+            <div className="h-[calc(100vh-200px)] w-full flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-slate-900">
+              <DatabaseOverviewPanel />
+            </div>
+
+            {apiAvailable ? (
+              <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                <div className="mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
+                    Manutenção do Dashboard
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Execute ações administrativas (rebuild/limpeza) diretamente do
+                    dashboard.
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {MAINTENANCE_ACTIONS.map((action) => (
+                    <div
+                      key={action.id}
+                      className="rounded-xl border border-gray-200 p-3 dark:border-gray-700"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-50">
+                            {action.label}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {action.description}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={action.variant ?? "outline"}
+                          disabled={maintenanceAction === action.id}
+                          onClick={async () => {
+                            setMaintenanceAction(action.id);
+                            try {
+                              await startLauncherTool(action.id);
+                              toast.success(
+                                action.id === "dashboard-rebuild"
+                                  ? "Rebuild solicitado; acompanhe os logs do dashboard."
+                                  : "Limpeza do Docker iniciada.",
+                              );
+                            } catch (error) {
+                              toast.error(
+                                error instanceof Error
+                                  ? error.message
+                                  : "Falha ao executar comando",
+                              );
+                            } finally {
+                              setMaintenanceAction(null);
+                            }
+                          }}
+                        >
+                          {maintenanceAction === action.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Play className="mr-2 h-4 w-4" />
+                          )}
+                          Executar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : (
+              <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-900/10 dark:text-amber-200">
+                Configure <code>VITE_LAUNCHER_API_URL</code> e{" "}
+                <code>VITE_LAUNCHER_API_TOKEN</code> para liberar comandos de
+                manutenção diretamente do dashboard.
+              </section>
+            )}
+
+            {apiAvailable && (
+              <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                <div className="mb-2 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
+                      Controle rápido
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Executa comandos docker compose pré-aprovados para iniciar cada
+                      ferramenta.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {TOOLS.map((tool) => (
+                    <Button
+                      key={`launch-${tool.id}`}
+                      size="sm"
+                      variant="outline"
+                      disabled={launchingTool === tool.id}
+                      onClick={async () => {
+                        setLaunchingTool(tool.id);
+                        try {
+                          await startLauncherTool(tool.id);
+                          toast.success(`Start solicitado para ${tool.name}`);
+                        } catch (error) {
+                          toast.error(
+                            error instanceof Error
+                              ? error.message
+                              : "Falha ao iniciar container",
+                          );
+                        } finally {
+                          setLaunchingTool(null);
+                        }
+                      }}
+                    >
+                      {launchingTool === tool.id ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Play className="mr-2 h-4 w-4" />
+                      )}
+                      Iniciar {tool.name}
+                    </Button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
+                Referências rápidas
+              </h3>
+              <ul className="mt-3 list-disc space-y-1 pl-5">
+                <li>
+                  Scripts oficiais: <code>bash scripts/docker/start-stacks.sh</code>{" "}
+                  permite subir apenas o bloco necessário usando{" "}
+                  <code>--phase timescale</code>, <code>--phase tools</code> ou{" "}
+                  <code>--phase data</code>.
+                </li>
+                <li>
+                  Consulte <code>docs/context/ops/service-port-map.md</code> para a
+                  matriz completa de portas e URLs.
+                </li>
+                <li>
+                  Caso um serviço esteja offline, verifique se a porta não está em uso
+                  e se o container correspondente está listado em{" "}
+                  <code>docker ps</code>.
+                </li>
+              </ul>
+            </section>
+          </>
+        )}
+      </div>
     </div>
   );
 }

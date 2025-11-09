@@ -135,6 +135,11 @@ export async function loginWithBrowserUseOrPlaywright(
   logger: Logger,
 ) {
   await navigateWithRetry(page, config.login.url, 'domcontentloaded', logger);
+  const isHotmartLogin = /hotmart\.com/i.test(config.login.url);
+  if (isHotmartLogin) {
+    await dismissHotmartLoginBanners(page, logger);
+    await waitForHotmartLoaderToDisappear(page, logger);
+  }
 
   const allowBrowserUse =
     env.browser.useBrowserUse &&
@@ -177,6 +182,10 @@ export async function loginWithBrowserUseOrPlaywright(
 
   await page.fill(config.login.usernameSelector, env.browser.username);
   await page.fill(config.login.passwordSelector, env.browser.password);
+  if (isHotmartLogin) {
+    await dismissHotmartLoginBanners(page, logger);
+    await waitForHotmartLoaderToDisappear(page, logger);
+  }
   await Promise.all([
     waitForNavigationWithRetry(
       page,
@@ -185,6 +194,9 @@ export async function loginWithBrowserUseOrPlaywright(
     ),
     page.click(config.login.submitSelector),
   ]);
+  if (isHotmartLogin) {
+    await waitForHotmartLoaderToDisappear(page, logger);
+  }
   let postLoginVerified = false;
   try {
     await waitForSelectorWithRetry(
@@ -302,6 +314,61 @@ async function waitForSelectorWithRetry(
         '[course-crawler] Network changed during waitForSelector, retrying',
       );
       await page.waitForTimeout(1000 * attempt);
+    }
+  }
+}
+
+async function dismissHotmartLoginBanners(
+  page: Page,
+  logger: Logger,
+) {
+  const selectors = [
+    'hotmart-cookie-policy button',
+    '#hotmart-cookie-policy button',
+    'button[data-test-id="cookie-accept-all"]',
+    '#cookie-policy button',
+  ];
+  for (const selector of selectors) {
+    try {
+      const element = await page.$(selector);
+      if (element) {
+        await element.click();
+        logger.debug(
+          { selector },
+          '[course-crawler] Dismissed Hotmart cookie banner',
+        );
+        break;
+      }
+    } catch (error) {
+      logger.warn(
+        { err: error, selector },
+        '[course-crawler] Unable to dismiss Hotmart cookie banner',
+      );
+    }
+  }
+}
+
+async function waitForHotmartLoaderToDisappear(page: Page, logger: Logger) {
+  try {
+    await page.waitForSelector('#loader', { state: 'hidden', timeout: 5000 });
+  } catch (error) {
+    logger.debug(
+      { err: error },
+      '[course-crawler] Hotmart loader persisted; forcing removal',
+    );
+    try {
+      await page.evaluate(() => {
+        const loader = document.querySelector('#loader') as HTMLElement | null;
+        if (loader) {
+          loader.style.display = 'none';
+          loader.classList.remove('loader');
+        }
+      });
+    } catch (cleanupError) {
+      logger.warn(
+        { err: cleanupError },
+        '[course-crawler] Failed to remove Hotmart loader overlay',
+      );
     }
   }
 }

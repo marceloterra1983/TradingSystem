@@ -819,7 +819,7 @@ start_docs_stack() {
         return 0
     fi
     
-    local compose_project="documentation"
+    local compose_project="2-docs-stack"
     local -a stack_services=("documentation" "docs-api")
     declare -A service_container_map=(
         ["documentation"]="docs-hub"
@@ -909,7 +909,7 @@ start_docs_stack() {
     if wait_for_containers_health 60 "${containers[@]}"; then
         log_success "✓ DOCS stack healthy"
     else
-        log_warning "⚠ DOCS stack may not be fully healthy yet; inspect logs with: docker compose -p documentation -f $COMPOSE_FILE logs -f"
+        log_warning "⚠ DOCS stack may not be fully healthy yet; inspect logs com: docker compose -p 2-docs-stack -f $COMPOSE_FILE logs -f"
     fi
 }
 

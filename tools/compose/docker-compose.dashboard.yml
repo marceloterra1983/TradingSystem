@@ -1,8 +1,9 @@
-name: dashboard
+name: 1-dashboard-stack
 
 services:
   dashboard:
     container_name: dashboard-ui
+    image: img-dashboard-ui
     build:
       context: ../..
       dockerfile: frontend/dashboard/Dockerfile

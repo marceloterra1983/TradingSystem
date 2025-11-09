@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para liberar portas usadas pelos containers database-ui
+# Script para liberar portas usadas pelos containers da stack 3-database-stack
 # REQUER SUDO
 
 set -e
 
-echo "🔓 Liberando portas para containers database-ui..."
+echo "🔓 Liberando portas para containers da stack 3-database-stack..."
 echo ""
 
 PORTS=(5050 8081 8082 9002 8812 9009)

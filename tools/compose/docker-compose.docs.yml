@@ -13,7 +13,7 @@
 # Last Updated: 2025-10-26
 # ============================================================================
 
-name: documentation
+name: 2-docs-stack
 
 services:
   # ============================================================================
@@ -47,7 +47,7 @@ services:
       start_period: 10s
       retries: 3
     labels:
-      - "com.tradingsystem.stack=documentation"
+      - "com.tradingsystem.stack=2-docs-stack"
       - "com.tradingsystem.service=docs-static"
       - "com.tradingsystem.type=frontend"
       - "com.tradingsystem.port=3404"
@@ -104,7 +104,7 @@ services:
       start_period: 15s
       retries: 3
     labels:
-      - "com.tradingsystem.stack=documentation"
+      - "com.tradingsystem.stack=2-docs-stack"
       - "com.tradingsystem.service=docs-api"
       - "com.tradingsystem.type=backend"
       - "com.tradingsystem.port=3405"

@@ -1,8 +1,9 @@
-name: database-ui
+name: 3-database-stack
 
 services:
   dbui-launcher-api:
     container_name: dbui-launcher-api
+    image: database-ui-dbui-launcher-api
     build:
       context: ../../backend/api/launcher-api
       dockerfile: Dockerfile
@@ -37,6 +38,10 @@ services:
     # This ensures .env values are used instead of defaults
     environment:
       PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT:-5050}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-marcelo.terra@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-pgadmin-pass}
+      PGADMIN_CONFIG_X_FRAME_OPTIONS: "''"
+      PGADMIN_CONFIG_CONTENT_SECURITY_POLICY: "None"
     ports:
       - "${PGADMIN_HOST_PORT:-5050}:${PGADMIN_LISTEN_PORT:-5050}"
     volumes:

@@ -424,10 +424,10 @@ health
     In a second terminal start the **dashboard container** (mandatory from now on):
     ```bash
     # Dashboard (Port 3103) - runs in Docker container
-    docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build
+    docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml up --build
     # or run `docker compose ... up -d` to daemonize (stop with the same command + down)
     ```
-    Stop with `docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml down`.
+    Stop with `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml down`.
 6. **(Optional) Bring up supporting services** from WSL using Docker Compose:
     ```bash
     bash tools/scripts/start-all-stacks.sh
@@ -489,7 +489,7 @@ cd docs && npm run start -- --host 0.0.0.0 --port 3400
 npm run dev:dashboard-docs
 ```
 
-`npm run dev:dashboard-docs` now invokes `docker compose -p dashboard -f tools/compose/docker-compose.dashboard.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
+`npm run dev:dashboard-docs` now invokes `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
 
 #### Pre-commit Hooks
 

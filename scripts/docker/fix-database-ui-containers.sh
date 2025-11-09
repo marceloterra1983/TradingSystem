@@ -1,9 +1,9 @@
 #!/bin/bash
-# Script para corrigir e iniciar todos os containers da stack database-ui
+# Script para corrigir e iniciar todos os containers da stack 3-database-stack
 
 set -e
 
-echo "🔧 Corrigindo containers da stack database-ui..."
+echo "🔧 Corrigindo containers da stack 3-database-stack..."
 echo ""
 
 # 1. Parar processo QuestDB órfão se existir

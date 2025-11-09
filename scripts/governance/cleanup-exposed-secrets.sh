@@ -32,7 +32,6 @@ QUARANTINE_DIR="$PROJECT_ROOT/.quarantine-secrets-$(date +%Y%m%d-%H%M%S)"
 # Arquivos críticos detectados pelo TruffleHog
 CRITICAL_FILES=(
   ".env"
-  "backend/data/anythingllm/documents/marceloterra1983-tradingsystem-main-de85/.env-59e8d647-dfbe-4702-9076-6862a30c8296.json"
   "docs/archive/2025-10-27/TELEGRAM-GATEWAY-REBUILD-COMPLETE.md"
   "docs/archive/2025-10-27/TELEGRAM-POLLING-ATIVADO.md"
   "docs/archive/2025-10-27/TELEGRAM-GATEWAY-COMPLETE.md"
