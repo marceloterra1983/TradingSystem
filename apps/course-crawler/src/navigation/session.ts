@@ -136,7 +136,12 @@ export async function loginWithBrowserUseOrPlaywright(
 ) {
   await navigateWithRetry(page, config.login.url, 'domcontentloaded', logger);
 
-  if (env.browser.useBrowserUse) {
+  const allowBrowserUse =
+    env.browser.useBrowserUse &&
+    !/hotmart\.com/i.test(config.login.url) &&
+    !/academy\.jumba\.com\.br/i.test(config.login.url);
+
+  if (allowBrowserUse) {
     try {
       const moduleRef: any = await import('browser-use');
       const maybeRunner = moduleRef?.default ?? moduleRef?.BrowserUse;
@@ -176,11 +181,34 @@ export async function loginWithBrowserUseOrPlaywright(
     waitForNavigationWithRetry(page, { waitUntil: 'domcontentloaded' }, logger),
     page.click(config.login.submitSelector),
   ]);
-  await waitForSelectorWithRetry(
-    page,
-    config.login.postLoginWaitSelector,
-    logger,
-  );
+  let postLoginVerified = false;
+  try {
+    await waitForSelectorWithRetry(
+      page,
+      config.login.postLoginWaitSelector,
+      logger,
+    );
+    postLoginVerified = true;
+  } catch (error) {
+    logger.warn(
+      {
+        err: error,
+        selector: config.login.postLoginWaitSelector,
+        loginUrl: config.login.url,
+        baseUrl: env.browser.baseUrl,
+      },
+      '[course-crawler] Post-login marker not detected, forcing navigation to target base URL',
+    );
+  }
+
+  if (!postLoginVerified || env.browser.baseUrl !== config.login.url) {
+    await navigateWithRetry(
+      page,
+      env.browser.baseUrl,
+      'domcontentloaded',
+      logger,
+    );
+  }
 }
 
 export async function safeCloseBrowser(browser: Browser, logger: Logger) {

@@ -8,8 +8,8 @@
   },
   "courses": {
     "url": "https://hotmart.com/pt-BR/club/construtordecapital",
-    "courseItemSelector": "div[class*=\"product\"], div[class*=\"course\"], a[href*=\"/club/\"]",
-    "titleSelector": "h1, h2, h3, [class*=\"title\"]",
+    "courseItemSelector": "[data-test=\"product-card\"], [data-test=\"progress-btn\"]",
+    "titleSelector": "h2, [data-test=\"progress-page-name\"]",
     "linkSelector": "a[href*=\"/club/\"]"
   },
   "modules": {

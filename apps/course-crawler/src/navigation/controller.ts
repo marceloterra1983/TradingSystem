@@ -49,6 +49,7 @@ export function createNavigationController({ env, logger }: NavigationDependenci
       );
 
       try {
+        await dismissHotmartCookieBanner(page, logger);
         const courses = await discoverCourses(
           page,
           platformConfig,
@@ -95,26 +96,57 @@ async function discoverCourses(
   await gotoWithRetry(page, config.courses.url, 'networkidle', logger);
   await waitForCourseList(page, config, env, logger);
 
+  const baseUrl = new URL(env.browser.baseUrl);
+  const membershipPath = baseUrl.pathname.replace(/\/$/, '');
+
   const courseEntries = await page.$$eval(
     config.courses.courseItemSelector,
-    (nodes, selectors) =>
+    (
+      nodes,
+      selectors: {
+        titleSelector?: string;
+        linkSelector?: string;
+        membershipPath: string;
+        origin: string;
+      },
+    ) =>
       nodes
         .map((node) => {
           const title =
-            (node.querySelector(selectors.titleSelector)?.textContent ?? '')
-              .trim() || null;
-          const link = node
-            .querySelector(selectors.linkSelector)
-            ?.getAttribute('href');
-          if (!title || !link) {
+            selectors.titleSelector
+              ? node.querySelector(selectors.titleSelector)?.textContent?.trim() ?? ''
+              : node.textContent?.trim() ?? '';
+
+          let href =
+            selectors.linkSelector
+              ? node.querySelector(selectors.linkSelector)?.getAttribute('href') ?? ''
+              : node.getAttribute('href') ?? '';
+
+          if (href?.startsWith('/')) {
+            href = `${selectors.origin}${href}`;
+          }
+
+          const productMatch = node.innerHTML.match(/membership_product\/[^:]+:(\d+)/i);
+          const fallbackUrl = productMatch
+            ? `${selectors.origin}${selectors.membershipPath}/product/${productMatch[1]}`
+            : null;
+
+          const url =
+            href && /^https?:/i.test(href)
+              ? href
+              : fallbackUrl;
+
+          if (!title || !url) {
             return null;
           }
-          return { title, url: new URL(link, window.location.origin).href };
+          return { title, url };
         })
         .filter(Boolean) as Array<{ title: string; url: string }>,
     {
       titleSelector: config.courses.titleSelector,
       linkSelector: config.courses.linkSelector,
+      membershipPath,
+      origin: baseUrl.origin,
     },
   );
 
@@ -449,4 +481,33 @@ function slugify(input: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '')
     .slice(0, 50);
+}
+
+async function dismissHotmartCookieBanner(
+  page: import('playwright').Page,
+  logger: Logger,
+) {
+  const selectors = [
+    'hotmart-cookie-policy button',
+    '#hotmart-cookie-policy button',
+    'button.hot-button--primary',
+  ];
+  for (const selector of selectors) {
+    try {
+      const element = await page.$(selector);
+      if (element) {
+        await element.click();
+        logger.debug(
+          { selector },
+          '[course-crawler] Dismissed cookie banner',
+        );
+        break;
+      }
+    } catch (error) {
+      logger.warn(
+        { err: error, selector },
+        '[course-crawler] Failed to dismiss cookie banner',
+      );
+    }
+  }
 }
