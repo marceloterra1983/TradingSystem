@@ -59,5 +59,8 @@
   "python.analysis.extraPaths": [
     "${workspaceFolder}/venv/lib/python3.12/site-packages"
   ],
-  "chatgpt.openOnStartup": true
+  "chatgpt.openOnStartup": true,
+  "cursorpyright.analysis.extraPaths": [
+    "${workspaceFolder}/venv/lib/python3.12/site-packages"
+  ]
 }
