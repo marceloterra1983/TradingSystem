@@ -68,7 +68,14 @@ if docker ps -a --format '{{.Names}}' | grep -qx data-qdrant; then
     echo "[ok] Qdrant already running"
   fi
 else
-  dc -f tools/compose/docker-compose.database.yml up -d qdrant
+  echo "[step] Creating standalone Qdrant container"
+  docker run -d \
+    --name data-qdrant \
+    --network tradingsystem_backend \
+    -p 6333:6333 -p 6334:6334 \
+    -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
+    --restart unless-stopped \
+    qdrant/qdrant:v1.7.4 >/dev/null || docker start data-qdrant >/dev/null
 fi
 # Ensure Qdrant container is on shared network
 docker network connect tradingsystem_backend data-qdrant 2>/dev/null || true

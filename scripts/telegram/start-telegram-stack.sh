@@ -27,7 +27,7 @@ echo ""
 # Step 1: Start Data Layer (7 containers)
 # ==============================================================================
 echo "1️⃣ Starting data layer containers (7)..."
-docker compose -f docker-compose.telegram.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
 
 # ==============================================================================
 # Step 2: Wait for Health Checks
@@ -73,7 +73,7 @@ done
 # ==============================================================================
 echo ""
 echo "3️⃣ Starting monitoring stack (4 containers)..."
-docker compose -f docker-compose.telegram-monitoring.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
 
 sleep 10
 
@@ -138,7 +138,7 @@ echo ""
 echo "📊 Monitoring:"
 echo "  • MTProto logs: sudo journalctl -u telegram-gateway -f"
 echo "  • Container logs: docker logs -f telegram-timescale"
-echo "  • Stack status: docker compose -f docker-compose.telegram.yml ps"
+echo "  • Stack status: docker compose -f docker-compose.4-2-telegram-stack.yml ps"
 echo "  • Grafana: http://localhost:3100"
 echo "  • Prometheus: http://localhost:9090"
 echo "  • RabbitMQ UI: http://localhost:15672"

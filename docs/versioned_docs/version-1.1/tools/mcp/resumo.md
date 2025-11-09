@@ -197,9 +197,8 @@ npm install -g npx
 # Verifique se está rodando
 docker ps | grep timescaledb
 
-# Inicie se necessário
-cd tools/compose
-docker compose -f docker-compose.database.yml up -d timescaledb
+# Inicie se necessário (stack do TP Capital)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb
 ```
 
 ## 📚 Recursos

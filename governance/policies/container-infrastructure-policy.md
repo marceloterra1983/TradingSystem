@@ -332,7 +332,7 @@ export default defineConfig({
 **OBRIGATÓRIO:**
 ```
 tools/compose/
-├── docker-compose.telegram.yml      # Stack Telegram completa
+├── docker-compose.4-2-telegram-stack.yml      # Stack Telegram completa
 ├── docker-compose.tp-capital.yml    # Stack TP Capital completa
 ├── docker-compose.dashboard.yml     # Frontend UI
 ├── docker-compose.workspace.yml     # Workspace API + DB

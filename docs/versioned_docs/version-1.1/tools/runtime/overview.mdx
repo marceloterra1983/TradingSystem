@@ -87,7 +87,8 @@ Development runtime environments for JavaScript/TypeScript (Node.js), Python, C#
 - All containerized services (databases, APIs, monitoring, documentation, AI tools)
 
 **Docker Compose Stacks:**
-- `tools/compose/docker-compose.database.yml` - Databases (TimescaleDB, QuestDB, PostgreSQL)
+- `tools/compose/docker-compose.database-ui.yml` - Database tooling (pgAdmin, Adminer, QuestDB)
+- `tools/compose/docker-compose.4-1-tp-capital-stack.yml` - TP Capital domain (TimescaleDB, PgBouncer, API)
 - `tools/compose/docker-compose.apps.yml` - Applications (Workspace, TP Capital, etc.)
 - `tools/monitoring/docker-compose.yml` - Monitoring (Prometheus, Grafana, Alertmanager)
 

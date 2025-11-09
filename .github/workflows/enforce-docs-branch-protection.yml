@@ -1,0 +1,57 @@
+name: Enforce Docs Branch Protection
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 3 * * *'  # Daily at 03:15 UTC
+  push:
+    paths:
+      - '.github/workflows/enforce-docs-branch-protection.yml'
+
+jobs:
+  enforce:
+    if: ${{ secrets.DOCS_BRANCH_PROTECTION_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Require documentation status checks
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.DOCS_BRANCH_PROTECTION_TOKEN }}
+          script: |
+            const branches = ['main', 'develop'];
+            const contexts = [
+              'docs-validation / Validate Docusaurus Build',
+              'docs-validation / Validate Documentation Frontmatter',
+              'docs-validation / Validate Governance Snapshot',
+              'docs-validation / Validate PlantUML Diagrams',
+              'docs-validation / Validate Markdown Links',
+              'docs-validation / Validate OpenAPI Specifications',
+            ];
+
+            for (const branch of branches) {
+              core.info(`Enforcing docs status checks on ${branch}`);
+              try {
+                await github.rest.repos.updateStatusCheckProtection({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  branch,
+                  strict: true,
+                  contexts,
+                });
+              } catch (error) {
+                core.setFailed(`Failed to update status checks on ${branch}: ${error.message}`);
+                return;
+              }
+            }
+
+            core.notice(`Docs status checks enforced for: ${contexts.join(', ')}`);
+
+  missing-token:
+    if: ${{ secrets.DOCS_BRANCH_PROTECTION_TOKEN == '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Missing admin token
+        run: |
+          echo "::warning::DOCS_BRANCH_PROTECTION_TOKEN is not configured. Set a repo admin token with 'repo' scope to enable docs branch protection enforcement."

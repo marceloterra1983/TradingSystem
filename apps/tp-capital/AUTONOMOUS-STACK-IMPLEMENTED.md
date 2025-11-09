@@ -118,20 +118,20 @@ TP_CAPITAL_GATEWAY_BATCH_SIZE=100
 bash scripts/docker/start-tp-capital-stack.sh
 
 # Manual
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 ```
 
 ### Stop Stack
 
 ```bash
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down
 ```
 
 ### View Logs
 
 ```bash
 # All containers
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml logs -f
 
 # Specific service
 docker logs -f tp-capital-api
@@ -145,7 +145,7 @@ docker logs -f tp-capital-timescale
 curl http://localhost:4008/health | jq '.checks'
 
 # Container status
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml ps
 ```
 
 ### Query Signals

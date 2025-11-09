@@ -106,7 +106,7 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     connectionUri:
       "postgresql://${TP_CAPITAL_DB_USER:-tp_capital}:${TP_CAPITAL_DB_PASSWORD}@localhost:5440/tp_capital_db?sslmode=disable",
     dockerService: "tp-capital-timescale",
-    composeFile: "tools/compose/docker-compose.tp-capital-stack.yml",
+    composeFile: "tools/compose/docker-compose.4-1-tp-capital-stack.yml",
     notes: "Use PgBouncer em localhost:6435 para workloads de produção.",
   },
   {
@@ -124,7 +124,7 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     connectionUri:
       "postgresql://${TELEGRAM_DB_USER:-telegram}:${TELEGRAM_DB_PASSWORD}@localhost:5434/telegram_gateway?sslmode=disable",
     dockerService: "telegram-timescale",
-    composeFile: "tools/compose/docker-compose.telegram.yml",
+    composeFile: "tools/compose/docker-compose.4-2-telegram-stack.yml",
     notes:
       "Gateway MTProto + automações. PgBouncer disponível em localhost:6434.",
   },

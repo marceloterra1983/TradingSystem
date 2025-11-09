@@ -46,8 +46,8 @@ echo "   📦 RAG Stack (CRÍTICO)..."
 docker compose -f tools/compose/docker-compose.rag.yml up -d 2>&1 | tail -5
 echo ""
 
-echo "   📦 Database Stack..."
-docker compose -f tools/compose/docker-compose.database.yml up -d 2>&1 | tail -5
+echo "   📦 Database UI Stack..."
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d 2>&1 | tail -5
 echo ""
 
 echo "   📦 Timescale Stack..."

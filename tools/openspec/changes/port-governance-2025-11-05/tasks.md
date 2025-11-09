@@ -641,7 +641,7 @@ CMD ["node", "src/index.js"]
 **Dependencies:** TASK-014  
 **Status:** 🟢 Concluído (MTProto + Gateway API rodando via compose)
 
-**Objective:** Add MTProto to docker-compose.telegram.yml
+**Objective:** Add MTProto to docker-compose.4-2-telegram-stack.yml
 
 **Steps:**
 

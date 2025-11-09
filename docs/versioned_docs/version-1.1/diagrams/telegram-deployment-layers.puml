@@ -25,7 +25,7 @@ package "Operating System (Linux/WSL)" {
     package "Docker Engine" {
         
         ' Data Containers
-        package "Data Stack\n(docker-compose.telegram.yml)" <<container>> #ADD8E6 {
+        package "Data Stack\n(docker-compose.4-2-telegram-stack.yml)" <<container>> #ADD8E6 {
             database "TimescaleDB\n\n**Image:** timescale/timescaledb:latest-pg16\n**Volume:** telegram-timescaledb-data\n**Port:** 5434:5432\n**Resources:** 2 CPU, 2GB RAM" as DB
             
             rectangle "PgBouncer\n\n**Image:** edoburu/pgbouncer:1.21.0\n**Port:** 6434:5432\n**Pool:** 20 connections\n**Mode:** transaction" as PgBouncer
@@ -42,7 +42,7 @@ package "Operating System (Linux/WSL)" {
         }
         
         ' Monitoring Containers
-        package "Monitoring Stack\n(docker-compose.telegram-monitoring.yml)" <<monitoring>> #FFE4B5 {
+        package "Monitoring Stack\n(docker-compose.4-2-telegram-stack-monitoring.yml)" <<monitoring>> #FFE4B5 {
             rectangle "Prometheus\n\n**Image:** prom/prometheus:latest\n**Port:** 9090:9090\n**Volume:** telegram-prometheus-data\n**Retention:** 30 days" as Prometheus
             
             rectangle "Grafana\n\n**Image:** grafana/grafana:latest\n**Port:** 3100:3000\n**Volume:** telegram-grafana-data\n**Dashboards:** 6 pre-configured" as Grafana
@@ -125,13 +125,13 @@ note bottom of DB
     
     ```bash
     # Data stack (7 containers)
-    docker compose -f docker-compose.telegram.yml up -d
+    docker compose -f docker-compose.4-2-telegram-stack.yml up -d
     
     # Monitoring stack (4 containers)
-    docker compose -f docker-compose.telegram-monitoring.yml up -d
+    docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
     
     # Status
-    docker compose -f docker-compose.telegram.yml ps
+    docker compose -f docker-compose.4-2-telegram-stack.yml ps
     
     # Logs
     docker logs -f telegram-timescale

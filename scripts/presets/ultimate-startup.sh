@@ -34,7 +34,7 @@ echo "1️⃣ Starting Docker Stacks..."
 echo ""
 
 COMPOSE_FILES=(
-    "tools/compose/docker-compose.database.yml"
+    "tools/compose/docker-compose.database-ui.yml"
     "tools/compose/docker-compose.timescale.yml"
     "tools/compose/docker-compose.redis.yml"
     "tools/compose/docker-compose.rag.yml"
@@ -48,7 +48,11 @@ for COMPOSE_FILE in "${COMPOSE_FILES[@]}"; do
     if [ -f "$COMPOSE_FILE" ]; then
         NAME=$(basename "$COMPOSE_FILE" .yml | sed 's/docker-compose.//')
         echo "   📦 Starting $NAME..."
-        docker compose -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
+        if [ "$COMPOSE_FILE" = "tools/compose/docker-compose.database-ui.yml" ]; then
+            docker compose -p 3-database-stack -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
+        else
+            docker compose -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
+        fi
     fi
 done
 

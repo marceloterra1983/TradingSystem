@@ -71,26 +71,26 @@ docker inspect timescaledb | jq '.[0].State'
 **A. Container is unhealthy:**
 ```bash
 # Restart container
-docker restart timescaledb
+docker restart tp-capital-timescale
 
 # Or recreate
-docker compose -f tools/compose/docker-compose.database.yml up -d --force-recreate timescaledb
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d --force-recreate tp-capital-timescaledb
 ```
 
 **B. Port conflict:**
 ```bash
-# Check if port 7032 is in use
-lsof -i:7032
+# Check if port 5440 is in use
+lsof -i:5440
 
 # Kill conflicting process
-lsof -ti:7032 | xargs kill -9
+lsof -ti:5440 | xargs kill -9
 ```
 
 **C. Volume corruption:**
 ```bash
 # Remove volume and recreate
-docker compose -f tools/compose/docker-compose.database.yml down -v
-docker compose -f tools/compose/docker-compose.database.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down -v tp-capital-timescaledb
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb
 ```
 
 ---
@@ -99,13 +99,13 @@ docker compose -f tools/compose/docker-compose.database.yml up -d
 
 **Symptoms:**
 ```
-Error: connect ECONNREFUSED 127.0.0.1:7032
+Error: connect ECONNREFUSED 127.0.0.1:5440
 ```
 
 **Diagnosis:**
 ```bash
 # Test TimescaleDB connection
-psql -h localhost -p 7032 -U postgres -d trading_system
+psql -h localhost -p 5440 -U tp_capital -d tp_capital_db
 
 # Test QuestDB connection
 curl http://localhost:7040/
@@ -206,7 +206,7 @@ curl http://localhost:4005/health
 docker logs timescaledb | grep ERROR
 
 # Test query manually
-psql -h localhost -p 7032 -U postgres -d trading_system -c "SELECT 1;"
+psql -h localhost -p 5440 -U tp_capital -d tp_capital_db -c "SELECT 1;"
 ```
 
 **B. Missing environment variables:**
@@ -296,7 +296,7 @@ docker stats
 bash scripts/maintenance/health-check-all.sh --format json | jq '.services'
 
 # Check database connections
-psql -h localhost -p 7032 -U postgres -d trading_system -c "SELECT count(*) FROM pg_stat_activity;"
+psql -h localhost -p 5440 -U tp_capital -d tp_capital_db -c "SELECT count(*) FROM pg_stat_activity;"
 ```
 
 **Solutions:**
@@ -358,10 +358,10 @@ node -e "require('dotenv').config(); console.log(process.env.TIMESCALEDB_PASSWOR
 **B. Docker not reading .env:**
 ```bash
 # Check docker-compose env_file
-cat tools/compose/docker-compose.database.yml | grep env_file
+cat tools/compose/docker-compose.4-1-tp-capital-stack.yml | grep env_file
 
 # Manually specify .env
-docker compose --env-file ../../.env -f tools/compose/docker-compose.database.yml up -d
+docker compose --env-file ../../.env -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb
 ```
 
 **C. Validation failing:**
@@ -392,7 +392,7 @@ npm run test -- -u  # Update snapshots
 **B. Missing test database:**
 ```bash
 # Setup test database
-psql -h localhost -p 7032 -U postgres -c "CREATE DATABASE trading_system_test;"
+psql -h localhost -p 5440 -U tp_capital -c "CREATE DATABASE trading_system_test;"
 
 # Run migrations
 npm run migrate:test

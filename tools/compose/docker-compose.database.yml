@@ -11,7 +11,7 @@ name: database
 # Each application now owns its dedicated database stack:
 # - tools/compose/docker-compose.tp-capital-*.yml
 # - tools/compose/docker-compose.workspace-simple.yml
-# - tools/compose/docker-compose.telegram.yml
+# - tools/compose/docker-compose.4-2-telegram-stack.yml
 # ==============================================================================
 
 services:

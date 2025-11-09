@@ -6,7 +6,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
-COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tp-capital-stack.yml"
+COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-1-tp-capital-stack.yml"
 
 cd "$PROJECT_ROOT"
 

@@ -250,7 +250,7 @@ scripts/maintenance/
 - [Telegram Quick Start](../../../../docs/content/api/telegram-gateway-quickstart.mdx)
 
 ### Code
-- Current Compose: `tools/compose/docker-compose.telegram.yml`
+- Current Compose: `tools/compose/docker-compose.4-2-telegram-stack.yml`
 - Gateway Routes: `backend/api/telegram-gateway/src/routes/telegramGateway.js`
 
 ---

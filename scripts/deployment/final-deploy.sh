@@ -66,8 +66,15 @@ echo -e "${GREEN}[3/4] Starting Qdrant...${NC}"
 
 cd /home/marce/Projetos/TradingSystem
 
-docker compose -f tools/compose/docker-compose.database.yml up -d qdrant || {
+docker run -d \
+  --name data-qdrant \
+  --network tradingsystem_backend \
+  -p 6333:6333 -p 6334:6334 \
+  -v "/home/marce/Projetos/TradingSystem/backend/data/qdrant:/qdrant/storage" \
+  --restart unless-stopped \
+  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || {
     echo -e "${YELLOW}  Qdrant may already be running or port conflict${NC}"
+    docker start data-qdrant >/dev/null 2>&1 || true
 }
 
 sleep 5

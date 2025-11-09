@@ -168,8 +168,8 @@ curl http://localhost:7040/  # QuestDB
 ### Docker
 
 ```bash
-# Start specific stack
-docker compose -f tools/compose/docker-compose.database.yml up -d
+# Start database tooling stack
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d
 
 # Restart unhealthy containers
 bash scripts/docker/fix-unhealthy-containers.sh

@@ -142,7 +142,7 @@ bash run-telegram-compose.sh up -d telegram-pgbouncer
 cd /home/marce/Projetos/TradingSystem
 set -a && source .env && set +a
 cd tools/compose
-docker compose -f docker-compose.telegram.yml up -d telegram-pgbouncer --force-recreate
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d telegram-pgbouncer --force-recreate
 ```
 
 **Verify fix**:
@@ -171,7 +171,7 @@ docker inspect telegram-gateway-api | grep "TELEGRAM_GATEWAY_DB_HOST"
 # WRONG:    "TELEGRAM_GATEWAY_DB_HOST=localhost"
 ```
 
-**Fix**: Update `docker-compose.telegram.yml`:
+**Fix**: Update `docker-compose.4-2-telegram-stack.yml`:
 ```yaml
 environment:
   - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer  # NOT localhost
@@ -204,7 +204,7 @@ docker inspect tp-capital-api | grep "TELEGRAM_GATEWAY_URL"
 # CORRECT: "TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010"
 ```
 
-**Fix**: Update `docker-compose.tp-capital-stack.yml`:
+**Fix**: Update `docker-compose.4-1-tp-capital-stack.yml`:
 ```yaml
 environment:
   # ❌ WRONG
@@ -254,7 +254,7 @@ docker network inspect telegram_backend | grep -E "(tp-capital-api|telegram-gate
 # Both containers MUST appear in the output
 ```
 
-**Fix**: Update `docker-compose.tp-capital-stack.yml`:
+**Fix**: Update `docker-compose.4-1-tp-capital-stack.yml`:
 ```yaml
 tp-capital-api:
   networks:
@@ -369,7 +369,7 @@ let query = `
 
 **Restart service**:
 ```bash
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml restart tp-capital-api
 ```
 
 ---
@@ -485,7 +485,7 @@ curl -s "http://localhost:4008/signals?limit=5" \
 # 1. Stop all stacks
 cd tools/compose
 bash run-telegram-compose.sh down
-docker compose -f docker-compose.tp-capital-stack.yml down
+docker compose -f docker-compose.4-1-tp-capital-stack.yml down
 docker compose -f docker-compose.dashboard.yml down
 
 # 2. Validate environment
@@ -495,7 +495,7 @@ bash ../../scripts/validation/validate-env.sh
 bash run-telegram-compose.sh up -d
 sleep 30  # Wait for databases to initialize
 
-docker compose -f docker-compose.tp-capital-stack.yml up -d
+docker compose -f docker-compose.4-1-tp-capital-stack.yml up -d
 sleep 20  # Wait for TP-Capital to connect
 
 docker compose -f docker-compose.dashboard.yml up -d
@@ -509,7 +509,7 @@ bash ../../scripts/validation/validate-network.sh --test-all
 **If circuit breaker stuck open**:
 ```bash
 # Restart TP-Capital API
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml restart tp-capital-api
 
 # Wait 30 seconds for reset timeout
 sleep 30

@@ -33,7 +33,7 @@ services:
     # depends_on:
     #   timescaledb:
     #     condition: service_healthy
-    # NOTE: Now using dedicated tp-capital stack (tools/compose/docker-compose.tp-capital-stack.yml)
+    # NOTE: Now using dedicated tp-capital stack (tools/compose/docker-compose.4-1-tp-capital-stack.yml)
     restart: unless-stopped
     healthcheck:
       test:

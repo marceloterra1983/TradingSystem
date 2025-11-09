@@ -15,7 +15,8 @@ TradingSystem infrastructure runs on **Docker Compose** with multiple stacks for
 
 | Stack | File | Services | Purpose |
 |-------|------|----------|---------|
-| **Database** | docker-compose.database.yml | TimescaleDB, QuestDB, Redis | Time-series databases |
+| **Database UI** | docker-compose.database-ui.yml | pgAdmin, Adminer, pgWeb, QuestDB | Database tooling |
+| **TP Capital** | docker-compose.4-1-tp-capital-stack.yml | TimescaleDB, PgBouncer, Redis, API | Domain stack (signals) |
 | **Qdrant** | docker-compose.qdrant-ha.yml | Qdrant cluster (3 nodes) | Vector database (RAG) |
 | **Monitoring** | docker-compose.monitoring.yml | Prometheus, Grafana | Observability |
 | **RAG** | docker-compose.rag.yml | LlamaIndex, Ollama | AI/RAG system |
@@ -32,8 +33,8 @@ bash scripts/docker/start-stacks.sh
 bash scripts/docker/stop-stacks.sh
 
 # Individual stack
-docker compose -f tools/compose/docker-compose.database.yml up -d
-docker compose -f tools/compose/docker-compose.database.yml down
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml down
 ```
 
 ## Databases
@@ -46,20 +47,25 @@ docker compose -f tools/compose/docker-compose.database.yml down
 
 **Configuration:**
 ```yaml
-# tools/compose/docker-compose.database.yml
-timescaledb:
-  image: timescale/timescaledb:latest-pg15
-  container_name: timescaledb
+# tools/compose/docker-compose.4-1-tp-capital-stack.yml
+tp-capital-timescaledb:
+  image: timescale/timescaledb:latest-pg16
+  container_name: tp-capital-timescale
   ports:
-    - "7032:5432"
+    - "5440:5432"
+  env_file:
+    - ../../.env
+    - ../../.env.shared
   environment:
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=${TIMESCALEDB_PASSWORD}
-    - POSTGRES_DB=trading_system
+    POSTGRES_DB: tp_capital_db
+    POSTGRES_USER: ${TP_CAPITAL_DB_USER:-tp_capital}
+    POSTGRES_PASSWORD: ${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
+    TIMESCALEDB_TELEMETRY: 'off'
   volumes:
-    - timescaledb-data:/var/lib/postgresql/data
+    - tp-capital-timescaledb-data:/var/lib/postgresql/data
+    - ../../backend/data/timescaledb/tp-capital:/docker-entrypoint-initdb.d:ro
   healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U postgres"]
+    test: ['CMD', 'pg_isready', '-U', '${TP_CAPITAL_DB_USER:-tp_capital}', '-d', 'tp_capital_db']
     interval: 10s
     timeout: 5s
     retries: 5

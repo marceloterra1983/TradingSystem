@@ -79,7 +79,7 @@ echo ""
 echo "Next steps:"
 echo "  1. Review the .env file if needed"
 echo "  2. Start the TP-Capital stack:"
-echo "     docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d"
+echo "     docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d"
 echo ""
 echo "==============================================="
 

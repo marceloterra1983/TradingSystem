@@ -92,7 +92,7 @@ PGPASSWORD="pass_timescale" psql -h localhost -p 5433 -U timescale -d APPS-TPCAP
 
 ```bash
 # Ensure the dedicated TP Capital stack is running
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 
 # Restart app containers if they still hold dead connections
 docker compose -f tools/compose/docker-compose.apps.yml restart apps-tpcapital
@@ -102,21 +102,21 @@ docker compose -f tools/compose/docker-compose.apps.yml restart apps-tpcapital
 
 ```bash
 # Update TP Capital DB password inside the dedicated stack
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-timescaledb \
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-timescaledb \
   psql -U tp_capital -d tp_capital_db -c "ALTER USER tp_capital WITH PASSWORD 'new_password';"
 
 # Mirror the change in `.env`
 sed -i 's/TP_CAPITAL_DB_PASSWORD=.*/TP_CAPITAL_DB_PASSWORD=new_password/' .env
 
 # Restart TP Capital API (PgBouncer picks up the new credentials)
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-pgbouncer tp-capital-api
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml restart tp-capital-pgbouncer tp-capital-api
 ```
 
 **Solution C - Database Not Running**:
 
 ```bash
 # Start the dedicated TP Capital stack (includes TimescaleDB + PgBouncer)
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 
 # Wait for it to be healthy
 sleep 10

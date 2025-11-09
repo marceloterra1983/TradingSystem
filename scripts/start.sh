@@ -404,98 +404,45 @@ start_containers() {
     section "Starting Docker Containers"
 
     # Ensure external networks exist (some stacks expect them)
-    for net in tradingsystem_backend tradingsystem_infra tradingsystem_data Database_default tradingsystem_frontend; do
+    for net in tradingsystem_backend tradingsystem_infra tradingsystem_data tradingsystem_frontend; do
         if ! docker network ls --format '{{.Name}}' | grep -qx "$net"; then
             log_info "Creating docker network: $net"
             docker network create "$net" >/dev/null || true
         fi
     done
 
-    # DATABASE stack - QuestDB (shared telemetry store)
-    # Each product stack owns its own database (Timescale/Postgres) containers.
-    local SKIP_DATABASE_STACK=false  # HABILITADO!
-    
-    # Start database stack (ALL 8 services) first if compose file exists
-    local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database.yml"
-    if [ "$SKIP_DATABASE_STACK" = true ]; then
-        log_info "Skipping DATABASE stack (disabled via flag)"
-        log_info "  Use 'bash scripts/presets/start-clean.sh' for essential services only"
-    elif [ -f "$DB_COMPOSE_FILE" ]; then
-        # Provide sane defaults for image variables when not set in .env
+    # Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml"
+    if [ -f "$DB_UI_COMPOSE_FILE" ]; then
         export IMG_VERSION="${IMG_VERSION:-latest}"
-        export QUESTDB_HTTP_PORT="${QUESTDB_HTTP_PORT:-7010}"
-        export QUESTDB_ILP_PORT="${QUESTDB_ILP_PORT:-7011}"
-        export QUESTDB_INFLUX_PORT="${QUESTDB_INFLUX_PORT:-7012}"
+        export QUESTDB_HTTP_PORT="${QUESTDB_HTTP_PORT:-9002}"
+        export QUESTDB_ILP_PORT="${QUESTDB_ILP_PORT:-9009}"
+        export QUESTDB_INFLUX_PORT="${QUESTDB_INFLUX_PORT:-8812}"
 
-        # Check if DATABASE stack is already running
-        local db_running=$(docker ps --filter "name=data-questdb" --format "{{.Names}}" 2>/dev/null | wc -l)
+        local dbui_running
+        dbui_running=$(docker ps --filter "name=dbui-questdb" --format "{{.Names}}" 2>/dev/null | wc -l)
 
-        if [ "$db_running" -gt 0 ]; then
-            local db_health=$(docker inspect --format='{{.State.Health.Status}}' data-questdb 2>/dev/null || echo "unknown")
-            if [ "$db_health" = "healthy" ] || [ "$db_health" = "running" ]; then
-                log_success "✓ DATABASE stack already running and healthy (QuestDB)"
+        if [ "$dbui_running" -gt 0 ]; then
+            local dbui_health
+            dbui_health=$(docker inspect --format='{{.State.Health.Status}}' dbui-questdb 2>/dev/null || echo "unknown")
+            if [ "$dbui_health" = "healthy" ] || [ "$dbui_health" = "running" ]; then
+                log_success "✓ Database UI stack já em execução (QuestDB saudável)"
             else
-                log_warning "DATABASE stack running but not healthy (QuestDB health: $db_health)"
-                log_info "To restart manually: docker compose -p data -f $DB_COMPOSE_FILE restart"
+                log_warning "Database UI stack em execução porém com healthcheck $dbui_health"
+                log_info "Para reiniciar manualmente: docker compose -p 3-database-stack -f $DB_UI_COMPOSE_FILE restart"
             fi
         else
-            log_info "Starting DATABASE stack (QuestDB)..."
-
-            # Track which services to start (exclude running standalone containers)
-            local exclude_services=""
-            
-            # List ALL possible database stack containers (complete list)
-            local all_db_containers=("data-questdb")
-            
-            # Check and handle standalone containers
-            for container in "${all_db_containers[@]}"; do
-                if docker ps --format '{{.Names}}' | grep -qx "$container"; then
-                    # Container is running
-                    log_info "Container $container already running (standalone), skipping in compose"
-                    # Map container name to compose service name
-                    case "$container" in
-                        data-questdb) exclude_services="$exclude_services questdb";;
-                    esac
-                elif docker ps -a --format '{{.Names}}' | grep -qx "$container"; then
-                    # Container exists but is stopped
-                    log_warning "Removing stopped standalone container: $container"
-                    docker rm -f "$container" 2>/dev/null || true
-                fi
-            done
-
-            # Start DATABASE stack (excluding running standalone containers)
-            if [ -n "$exclude_services" ]; then
-                log_info "Excluding services from compose:$exclude_services"
-                # Start all services except excluded ones by listing specific services
-                # Get all services from compose file and filter out excluded
-                local all_services=$(docker compose -p data -f "$DB_COMPOSE_FILE" config --services 2>/dev/null)
-                local services_to_start=""
-                for svc in $all_services; do
-                    local should_exclude=false
-                    for excl in $exclude_services; do
-                        if [ "$svc" = "$excl" ]; then
-                            should_exclude=true
-                            break
-                        fi
-                    done
-                    if [ "$should_exclude" = false ]; then
-                        services_to_start="$services_to_start $svc"
-                    fi
-                done
-                
-                if [ -n "$services_to_start" ]; then
-                    docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans $services_to_start
-                else
-                    log_info "All DATABASE services already running"
-                fi
+            log_info "Iniciando Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)"
+            if docker compose -p 3-database-stack -f "$DB_UI_COMPOSE_FILE" up -d --remove-orphans; then
+                log_success "✓ Database UI stack iniciada"
             else
-                # Start entire DATABASE stack
-                docker compose -p data -f "$DB_COMPOSE_FILE" up -d --remove-orphans
+                log_error "✗ Falha ao iniciar Database UI stack"
+                log_info "  Tente: docker compose -p 3-database-stack -f $DB_UI_COMPOSE_FILE up -d"
+                return 1
             fi
-
         fi
     else
-        log_warning "Database compose file not found; skipping DATABASE stack"
+        log_warning "Database UI compose não encontrado; pulando stack de ferramentas de banco"
     fi
 
     # Dedicated product stacks
@@ -505,7 +452,7 @@ start_containers() {
 }
 
 start_tp_capital_stack() {
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tp-capital-stack.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-1-tp-capital-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "TP Capital compose file not found; skipping TP Capital stack"
         return 0
@@ -700,7 +647,7 @@ start_workspace_stack() {
 }
 
 start_telegram_data_stack() {
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.telegram.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-2-telegram-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Telegram compose file not found; skipping Telegram data stack"
         return 0

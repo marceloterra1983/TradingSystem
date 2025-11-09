@@ -239,8 +239,8 @@ bash scripts/telegram/rollback-migration.sh
 # 1. Stop new stack
 sudo systemctl stop telegram-gateway
 cd /home/marce/Projetos/TradingSystem/tools/compose
-docker compose -f docker-compose.telegram.yml down
-docker compose -f docker-compose.telegram-monitoring.yml down
+docker compose -f docker-compose.4-2-telegram-stack.yml down
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml down
 
 # 2. Restore sessions
 tar -xzf backups/telegram-migration-<timestamp>/telegram-sessions.tar.gz \

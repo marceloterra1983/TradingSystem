@@ -12,10 +12,10 @@ echo "🚀 TRADINGSYSTEM - START ALL"
 echo "=========================================="
 echo ""
 
-# 1. DATABASE Stack primeiro (depende apenas de networks)
-echo "1️⃣ DATABASE Stack (8 serviços)..."
-docker compose -p data -f tools/compose/docker-compose.database.yml up -d
-echo "   ✅ DATABASE iniciando..."
+# 1. Database UI stack primeiro (ferramentas e QuestDB)
+echo "1️⃣ Database UI Stack (pgAdmin/Adminer/QuestDB)..."
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d
+echo "   ✅ Database UI iniciando..."
 sleep 20
 echo ""
 

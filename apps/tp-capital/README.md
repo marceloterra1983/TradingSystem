@@ -58,14 +58,14 @@ Autonomous microservice stack that ingests TP Capital trading signals from Teleg
 bash scripts/docker/start-tp-capital-stack.sh
 
 # Method 2: Docker Compose directly
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 ```
 
 ### Verify Stack Health
 
 ```bash
 # Check all containers
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml ps
 
 # Test API health
 curl http://localhost:4008/health | jq '.checks'
@@ -77,7 +77,7 @@ curl http://localhost:4008/health | jq '.checks'
 
 ```bash
 # All containers
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml logs -f
 
 # Specific container
 docker logs -f tp-capital-api

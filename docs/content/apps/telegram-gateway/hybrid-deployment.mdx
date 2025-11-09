@@ -128,13 +128,13 @@ docker network create tradingsystem_backend || true
 cd /home/marce/Projetos/TradingSystem/tools/compose
 
 # Start data layer (7 containers)
-docker compose -f docker-compose.telegram.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
 
 # Wait for health checks (2-3 minutes)
-docker compose -f docker-compose.telegram.yml ps
+docker compose -f docker-compose.4-2-telegram-stack.yml ps
 
 # Start monitoring stack (4 containers)
-docker compose -f docker-compose.telegram-monitoring.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
 ```
 
 ### Step 5: Install systemd Service
@@ -232,8 +232,8 @@ bash scripts/telegram/start-telegram-stack.sh
 
 # Or manual:
 cd /home/marce/Projetos/TradingSystem/tools/compose
-docker compose -f docker-compose.telegram.yml up -d
-docker compose -f docker-compose.telegram-monitoring.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
 sudo systemctl start telegram-gateway
 ```
 
@@ -245,8 +245,8 @@ bash scripts/telegram/stop-telegram-stack.sh
 
 # Or manual:
 sudo systemctl stop telegram-gateway
-docker compose -f docker-compose.telegram-monitoring.yml down
-docker compose -f docker-compose.telegram.yml down
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml down
+docker compose -f docker-compose.4-2-telegram-stack.yml down
 ```
 
 ### Restart Components
@@ -259,7 +259,7 @@ sudo systemctl restart telegram-gateway
 docker restart telegram-redis-master
 
 # Restart entire data stack
-docker compose -f docker-compose.telegram.yml restart
+docker compose -f docker-compose.4-2-telegram-stack.yml restart
 ```
 
 ### View Logs
@@ -273,7 +273,7 @@ docker logs -f telegram-timescale
 docker logs -f telegram-redis-master
 
 # All containers
-docker compose -f docker-compose.telegram.yml logs -f
+docker compose -f docker-compose.4-2-telegram-stack.yml logs -f
 ```
 
 ---

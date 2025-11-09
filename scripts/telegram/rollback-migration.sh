@@ -53,11 +53,11 @@ fi
 
 # Stop monitoring
 cd "$PROJECT_ROOT/tools/compose"
-docker compose -f docker-compose.telegram-monitoring.yml down
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml down
 echo "  ✅ Stopped monitoring stack"
 
 # Stop data layer
-docker compose -f docker-compose.telegram.yml down
+docker compose -f docker-compose.4-2-telegram-stack.yml down
 echo "  ✅ Stopped data stack"
 
 # ==============================================================================

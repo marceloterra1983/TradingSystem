@@ -39,10 +39,10 @@ echo ""
 # Step 3: List all compose files
 echo -e "${CYAN}Step 3: Detecting compose files...${NC}"
 COMPOSE_FILES=(
-    "tools/compose/docker-compose.database.yml"
+    "tools/compose/docker-compose.database-ui.yml"
     "tools/compose/docker-compose.workspace-stack.yml"
-    "tools/compose/docker-compose.telegram.yml"
-    "tools/compose/docker-compose.tp-capital-stack.yml"
+    "tools/compose/docker-compose.4-2-telegram-stack.yml"
+    "tools/compose/docker-compose.4-1-tp-capital-stack.yml"
     "tools/compose/docker-compose.docs.yml"
     "tools/compose/docker-compose.rag.yml"
     "tools/compose/docker-compose.monitoring.yml"
@@ -63,16 +63,16 @@ echo ""
 echo -e "${CYAN}Step 4: Starting stacks in dependency order...${NC}"
 echo ""
 
-# 4.1 DATABASE Stack (QuestDB shared telemetry)
-echo -e "${CYAN}📊 Starting DATABASE Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.database.yml" up -d; then
-        echo -e "${GREEN}✓ Shared analytics stack started (QuestDB)${NC}"
+# 4.1 Database UI Stack
+echo -e "${CYAN}📊 Starting Database UI Stack...${NC}"
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml" ]; then
+    if docker compose -p 3-database-stack -f "$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml" up -d; then
+        echo -e "${GREEN}✓ Database UI stack started (QuestDB + pgAdmin/Adminer)${NC}"
     else
-        echo -e "${RED}✗ Failed to start database stack${NC}"
+        echo -e "${RED}✗ Failed to start Database UI stack${NC}"
     fi
 else
-    echo -e "${RED}✗ Database compose file not found${NC}"
+    echo -e "${RED}✗ Database UI compose file not found${NC}"
 fi
 echo ""
 
@@ -91,8 +91,8 @@ echo ""
 
 # 4.3 TELEGRAM Stack
 echo -e "${CYAN}📨 Starting TELEGRAM Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.telegram.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.telegram.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-2-telegram-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.4-2-telegram-stack.yml" up -d; then
         echo -e "${GREEN}✓ Telegram stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start Telegram stack${NC}"
@@ -104,8 +104,8 @@ echo ""
 
 # 4.4 TP-CAPITAL Stack
 echo -e "${CYAN}📈 Starting TP-CAPITAL Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.tp-capital-stack.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.tp-capital-stack.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-1-tp-capital-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.4-1-tp-capital-stack.yml" up -d; then
         echo -e "${GREEN}✓ TP-Capital stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start TP-Capital stack${NC}"

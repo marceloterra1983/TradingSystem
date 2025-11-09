@@ -21,7 +21,13 @@ Set in the repo `.env` (see `.env.example`):
 ## Start local services
 
 ```
-docker compose -f tools/compose/docker-compose.database.yml up -d qdrant
+docker run -d \
+  --name data-qdrant \
+  --network tradingsystem_backend \
+  -p 6333:6333 -p 6334:6334 \
+  -v "$PWD/../../data/qdrant:/qdrant/storage" \
+  --restart unless-stopped \
+  qdrant/qdrant:v1.7.4 || docker start data-qdrant
 docker compose -f tools/compose/docker-compose.individual.yml up -d ollama
 docker exec -it ollama ollama pull nomic-embed-text
 ```

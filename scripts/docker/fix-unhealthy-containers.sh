@@ -48,9 +48,17 @@ if docker ps -a --format '{{.Names}}' | grep -qx "data-qdrant"; then
 else
     echo -e "${YELLOW}⚠ Qdrant container doesn't exist, creating...${NC}"
     echo ""
-    echo -e "${CYAN}Starting Qdrant from timescale compose...${NC}"
-    # New stack uses docker-compose.database.yml (Timescale/Qdrant)
-    docker compose -f tools/compose/docker-compose.database.yml up -d questdb
+    echo -e "${CYAN}Criando contêiner Qdrant standalone...${NC}"
+    docker run -d \
+      --name data-qdrant \
+      --network tradingsystem_backend \
+      -p 6333:6333 -p 6334:6334 \
+      -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
+      --restart unless-stopped \
+      qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || {
+        echo -e "${YELLOW}⚠ Falha ao criar contêiner, tentando iniciar se já existir...${NC}"
+        docker start data-qdrant >/dev/null 2>&1 || true
+      }
     
     echo ""
     echo -e "${CYAN}Waiting for Qdrant to be healthy (max 30s)...${NC}"

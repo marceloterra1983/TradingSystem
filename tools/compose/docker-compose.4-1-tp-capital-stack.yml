@@ -1,4 +1,4 @@
-name: tp-capital-stack
+name: 4-1-tp-capital-stack
 
 # ==============================================================================
 # TP-Capital Autonomous Stack - 5 Dedicated Containers
@@ -416,42 +416,42 @@ volumes:
 # ==============================================================================
 # 
 # Start entire TP Capital stack:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 # 
 # View logs (all services):
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml logs -f
 # 
 # View logs (specific service):
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml logs -f tp-capital-api
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml logs -f tp-capital-api
 # 
 # Check status:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml ps
 # 
 # Restart specific service:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml restart tp-capital-api
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml restart tp-capital-api
 # 
 # Stop entire stack:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down
 # 
 # Stop and remove volumes (CAUTION - deletes data):
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down -v
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down -v
 # 
 # Connect to database (via PgBouncer):
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-pgbouncer \
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-pgbouncer \
 #     psql -h localhost -p 6432 -U tp_capital -d tp_capital_db
 # 
 # Connect to database (direct):
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-timescaledb \
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-timescaledb \
 #     psql -U tp_capital -d tp_capital_db
 # 
 # Check Redis cache status:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO
 # 
 # Monitor Redis replication:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO replication
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-redis-master redis-cli INFO replication
 # 
 # Check PgBouncer stats:
-#   docker compose -f tools/compose/docker-compose.tp-capital-stack.yml exec tp-capital-pgbouncer \
+#   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml exec tp-capital-pgbouncer \
 #     psql -h localhost -p 6432 -U pgbouncer pgbouncer -c "SHOW POOLS"
 # 
 # ==============================================================================

@@ -74,7 +74,7 @@ ERROR: password authentication failed for user "telegram"
 # Use wrapper script to export .env variables
 cd tools/compose
 set -a && source ../../.env && set +a
-docker compose -f docker-compose.telegram.yml up -d telegram-pgbouncer
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d telegram-pgbouncer
 ```
 
 **Prevention**: Create validation script to check environment variables before container start
@@ -95,7 +95,7 @@ Circuit breaker OPEN
 
 **Fix**:
 ```yaml
-# docker-compose.tp-capital-stack.yml
+# docker-compose.4-1-tp-capital-stack.yml
 - TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010  # Container hostname
 ```
 
@@ -230,7 +230,7 @@ if (!messageContent || messageContent.trim().length === 0) {
 ## Files Changed
 
 ### 1. Docker Compose Configuration
-- `tools/compose/docker-compose.tp-capital-stack.yml`
+- `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
   - Fixed `TELEGRAM_GATEWAY_URL` to use container hostname
   
 - `tools/compose/docker-compose.dashboard.yml`

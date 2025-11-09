@@ -81,6 +81,12 @@ npm run lint:all  # All projects
 - [ ] API specs updated (OpenAPI/Swagger) (if applicable)
 - [ ] Architecture Decision Record (ADR) created (for significant changes)
 
+**Documentation Build Policy (required when touching `docs/**`, `governance/**`, `ref/**`, `.claude/**`, or `scripts/docs/**`):**
+
+- [ ] Ran `bash scripts/docs/docs-maintenance-validate.sh` locally and resolved all failures
+- [ ] Generated `.build-logs/docs-build.log` via `npm run build:measure` (or `bash scripts/build/parallel-build.sh --measure`)
+- [ ] Attached the latest tail (~200 lines) of `.build-logs/docs-build.log` to this PR (description or comment)
+
 ---
 
 ## 🚀 Deployment Checklist
@@ -163,4 +169,3 @@ npm run lint:all  # All projects
 ---
 
 **Policy Compliance**: This PR follows [TradingSystem Governance Standards](../governance/README.md)
-

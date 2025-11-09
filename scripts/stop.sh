@@ -221,17 +221,16 @@ stop_containers() {
     fi
 }
 
-# Function to stop database stack (TimescaleDB + tools)
+# Function to stop database UI stack
 stop_db_stack() {
-    section "Stopping Database Stack (TimescaleDB)"
-    local DB_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database.yml"
-    if [ ! -f "$DB_COMPOSE_FILE" ]; then
-        log_info "Timescale compose file not found (skipping)"
+    section "Stopping Database UI Stack"
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml"
+    if [ ! -f "$DB_UI_COMPOSE_FILE" ]; then
+        log_info "Database UI compose file not found (skipping)"
         return 0
     fi
-    # Stop primary DB service; down is safe to ensure removal of orphans
-    docker compose -f "$DB_COMPOSE_FILE" down --remove-orphans || true
-    log_success "✓ Database stack stopped"
+    docker compose -p 3-database-stack -f "$DB_UI_COMPOSE_FILE" down --remove-orphans || true
+    log_success "✓ Database UI stack stopped"
 }
 
 # Function to stop DOCS stack

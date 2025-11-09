@@ -298,7 +298,7 @@ tp-capital-redis-master    Up 2 hours (healthy)      0.0.0.0:6381->6379/tcp
 tp-capital-redis-replica   Up 2 hours (healthy)      0.0.0.0:6382->6379/tcp
 ```
 
-**Compose File:** `tools/compose/docker-compose.tp-capital-stack.yml`
+**Compose File:** `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
 
 **Ports:**
 - API: `4008` (external) → `4005` (internal)
@@ -363,7 +363,7 @@ apps/tp-capital/src/gatewayDatabaseClient.js.legacy
 # tools/compose/docker-compose.apps.yml
 # ❌ Comentado: tp-capital service (linha 42)
 # NOTICE: TP-Capital migrated to autonomous stack
-# Use: docker-compose.tp-capital-stack.yml
+# Use: docker-compose.4-1-tp-capital-stack.yml
 ```
 
 ### Validação
@@ -503,7 +503,7 @@ services:
 - ✅ Modified: `apps/tp-capital/src/server.js` (integrated worker)
 
 ### Stack Deployment (Phase 5)
-- ✅ Created: `tools/compose/docker-compose.tp-capital-stack.yml`
+- ✅ Created: `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
 - ✅ Created: `tools/compose/.env.tp-capital`
 - ✅ Created: `tools/compose/tp-capital/postgresql.conf`
 - ✅ Created: `scripts/docker/start-tp-capital-stack.sh`
@@ -607,7 +607,7 @@ Se necessário, rollback disponível:
 
 ```bash
 # 1. Stop autonomous stack
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down
 
 # 2. Restore shared stack
 sed -i 's/^  # tp-capital:/  tp-capital:/' tools/compose/docker-compose.apps.yml

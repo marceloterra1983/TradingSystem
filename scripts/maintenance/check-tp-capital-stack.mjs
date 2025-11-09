@@ -225,13 +225,13 @@ function expectNetworks({
 
 async function validateCompose(results) {
   const tpCompose = await readFileSafe(
-    path.join(repoRoot, 'tools/compose/docker-compose.tp-capital-stack.yml'),
+    path.join(repoRoot, 'tools/compose/docker-compose.4-1-tp-capital-stack.yml'),
   );
   const dashCompose = await readFileSafe(
     path.join(repoRoot, 'tools/compose/docker-compose.dashboard.yml'),
   );
   const telegramCompose = await readFileSafe(
-    path.join(repoRoot, 'tools/compose/docker-compose.telegram.yml'),
+    path.join(repoRoot, 'tools/compose/docker-compose.4-2-telegram-stack.yml'),
   );
 
   expectNetworks({

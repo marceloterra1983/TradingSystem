@@ -7,5 +7,5 @@ source ../../.env
 set +a
 
 # Executar docker compose com argumentos passados
-# NOTA: O nome do projeto (telegram-stack) está definido no YAML via propriedade 'name'
-docker compose -f docker-compose.telegram.yml "$@"
+# NOTA: O nome do projeto (4-2-telegram-stack) está definido no YAML via propriedade 'name'
+docker compose -f docker-compose.4-2-telegram-stack.yml "$@"

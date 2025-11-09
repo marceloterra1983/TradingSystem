@@ -293,7 +293,7 @@ GATEWAY_BATCH_SIZE=100
 **Possible causes:**
 1. Database permissions not granted → Run `setup-gateway-permissions.sql`
 2. Wrong database name → Check `GATEWAY_DATABASE_NAME` in `.env`
-3. TimescaleDB not running → `docker compose -f tools/compose/docker-compose.database.yml up -d`
+3. TimescaleDB not running → `docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb`
 
 ### Messages Not Being Processed
 

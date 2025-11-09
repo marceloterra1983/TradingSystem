@@ -112,10 +112,22 @@ jobs:
       #
 
       - name: Build (Parallel)
+        id: parallel_build
         run: npm run build:measure
         env:
           NODE_ENV: production
           CI: true
+
+      - name: Tail docs build log (last 200 lines)
+        if: ${{ failure() && steps.parallel_build.outcome == 'failure' }}
+        run: |
+          if [ -f ".build-logs/docs-build.log" ]; then
+            echo "------ docs-build.log (tail) ------"
+            tail -n 200 .build-logs/docs-build.log
+            echo "-----------------------------------"
+          else
+            echo "::error::.build-logs/docs-build.log missing. Rerun npm run build:measure locally."
+          fi
 
       # Upload build artifacts
       - name: Upload dashboard build
@@ -130,6 +142,24 @@ jobs:
         with:
           name: docs-build
           path: docs/build
+          retention-days: 7
+
+      - name: Upload docs build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-build-log
+          path: .build-logs/docs-build.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload dashboard build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-build-log
+          path: .build-logs/dashboard-build.log
+          if-no-files-found: warn
           retention-days: 7
 
       # Performance reporting

@@ -326,8 +326,8 @@ docker compose -f tools/compose/docker-compose.STACK.yml exec -u root service-na
 ```bash
 # Start multiple stacks
 docker compose -f tools/compose/docker-compose.workspace-simple.yml up -d
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
-docker compose -f tools/compose/docker-compose.telegram.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-2-telegram-stack.yml up -d
 
 # Or use helper scripts
 bash scripts/docker/start-stacks.sh

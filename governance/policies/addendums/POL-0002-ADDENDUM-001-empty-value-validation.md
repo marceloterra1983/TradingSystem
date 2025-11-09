@@ -94,7 +94,7 @@ source ../../.env
 set +a
 
 # Now run docker compose
-docker compose -f docker-compose.telegram.yml "$@"
+docker compose -f docker-compose.4-2-telegram-stack.yml "$@"
 ```
 
 **Or inline:**
@@ -228,7 +228,7 @@ bash scripts/validation/validate-containers-health.sh
 
 **❌ WRONG (variables not exported):**
 ```bash
-docker compose -f docker-compose.telegram.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
 # TELEGRAM_DB_PASSWORD will be empty!
 ```
 

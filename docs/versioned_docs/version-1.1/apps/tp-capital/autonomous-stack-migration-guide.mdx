@@ -55,7 +55,7 @@ Análise arquitetural detalhada incluindo:
 - Riscos e mitigações
 
 ### 2. Docker Compose Stack
-**Localização:** `tools/compose/docker-compose.tp-capital-stack.yml`
+**Localização:** `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
 
 Define 5 containers:
 - `tp-capital-timescale` (TimescaleDB dedicated)
@@ -116,10 +116,10 @@ TP_CAPITAL_REDIS_REPLICA_PORT=6382
 cd /home/marce/Projetos/TradingSystem
 
 # Iniciar todos os containers
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 
 # Verificar status
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml ps
 
 # Expected output:
 # NAME                         STATUS    PORTS
@@ -214,7 +214,7 @@ curl http://localhost:4005/metrics
 
 ```bash
 # All containers
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml ps
 
 # Detailed health
 curl http://localhost:4005/health | jq '.'
@@ -231,7 +231,7 @@ Para minimizar riscos, mantenha a stack antiga rodando em paralelo:
 docker compose -f tools/compose/docker-compose.apps.yml ps
 
 # 2. Nova stack iniciada
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 
 # 3. Configurar load balancer (Nginx/Traefik) para split 90/10
 # - 90% tráfego → nova stack (porta 4005)
@@ -254,7 +254,7 @@ Se houver problemas com a nova stack:
 
 ```bash
 # 1. Parar nova stack
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml down
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down
 
 # 2. Reiniciar stack antiga
 docker compose -f tools/compose/docker-compose.apps.yml up -d tp-capital

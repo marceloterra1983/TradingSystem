@@ -289,7 +289,7 @@ If you have access to the Telegram channel `-1001649127710`:
 **Possible causes:**
 1. Database permissions not granted → Re-run Step 1
 2. Wrong database name in .env → Check `GATEWAY_DATABASE_NAME=telegram_gateway`
-3. TimescaleDB not running → `docker compose -f tools/compose/docker-compose.database.yml up -d`
+3. TimescaleDB not running → `docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb`
 
 ### Error: "permission denied for table telegram_messages"
 

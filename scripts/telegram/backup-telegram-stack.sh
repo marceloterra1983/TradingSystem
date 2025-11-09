@@ -68,8 +68,8 @@ echo ""
 echo "5️⃣ Backing up configuration files..."
 mkdir -p "$BACKUP_DIR/config"
 
-cp /home/marce/Projetos/TradingSystem/tools/compose/docker-compose.telegram.yml "$BACKUP_DIR/config/"
-cp /home/marce/Projetos/TradingSystem/tools/compose/docker-compose.telegram-monitoring.yml "$BACKUP_DIR/config/"
+cp /home/marce/Projetos/TradingSystem/tools/compose/docker-compose.4-2-telegram-stack.yml "$BACKUP_DIR/config/"
+cp /home/marce/Projetos/TradingSystem/tools/compose/docker-compose.4-2-telegram-stack-monitoring.yml "$BACKUP_DIR/config/"
 cp /home/marce/Projetos/TradingSystem/tools/compose/telegram/*.conf "$BACKUP_DIR/config/" 2>/dev/null || true
 cp /home/marce/Projetos/TradingSystem/tools/compose/telegram/*.ini "$BACKUP_DIR/config/" 2>/dev/null || true
 cp /etc/systemd/system/telegram-gateway.service "$BACKUP_DIR/config/" 2>/dev/null || true

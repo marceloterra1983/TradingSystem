@@ -78,9 +78,9 @@ echo ""
 echo "8️⃣ Tentando iniciar stacks opcionais..."
 echo ""
 
-# Database stack (pode ter conflito, mas tentamos)
-echo "   📦 Database Stack..."
-docker compose -f tools/compose/docker-compose.database.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
+# Database UI stack (pode ter conflito, mas tentamos)
+echo "   📦 Database UI Stack..."
+docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
 echo ""
 
 # Apps stack

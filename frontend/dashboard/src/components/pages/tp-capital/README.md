@@ -348,7 +348,7 @@ npm run lint:fix
 #### "Service unavailable" warning
 
 **Cause:** TP-Capital backend not running  
-**Solution:** Start backend with `docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d`
+**Solution:** Start backend with `docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d`
 
 #### Tests failing
 

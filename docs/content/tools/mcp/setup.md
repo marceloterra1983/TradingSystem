@@ -141,7 +141,7 @@ Você pode verificar quais MCPs estão ativos no Cursor:
 
    ```bash
    cd /home/marce/Projetos/TradingSystem
-   docker compose -f tools/compose/docker-compose.database.yml up -d timescaledb
+   docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescaledb
    ```
 
 ### Erro com NPX?

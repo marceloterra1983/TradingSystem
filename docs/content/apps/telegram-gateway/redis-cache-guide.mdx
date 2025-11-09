@@ -127,7 +127,7 @@ this.HOT_CACHE_TTL = 7200; // 2 hours (was 3600)
 
 #### 2. Increase Memory
 ```yaml
-# tools/compose/docker-compose.telegram.yml
+# tools/compose/docker-compose.4-2-telegram-stack.yml
 command: >
   redis-server
   --maxmemory 2gb  # Was 1gb
@@ -218,7 +218,7 @@ docker exec telegram-redis-master redis-cli INFO memory
 docker exec telegram-redis-master redis-cli FLUSHDB  # ⚠️ Drastic measure
 
 # 3. Increase memory limit
-# Edit docker-compose.telegram.yml: maxmemory 2gb
+# Edit docker-compose.4-2-telegram-stack.yml: maxmemory 2gb
 
 # 4. Reduce TTL
 # Edit RedisTelegramCache.js: HOT_CACHE_TTL = 1800 (30 min)

@@ -16,8 +16,8 @@
 
 ### Infrastructure (20 files) ✅
 **Docker Compose (2 files):**
-- `docker-compose.telegram.yml` - 7 containers (Data layer)
-- `docker-compose.telegram-monitoring.yml` - 4 containers (Monitoring)
+- `docker-compose.4-2-telegram-stack.yml` - 7 containers (Data layer)
+- `docker-compose.4-2-telegram-stack-monitoring.yml` - 4 containers (Monitoring)
 
 **Configuration Files (10 files):**
 - `postgresql.conf` - TimescaleDB performance tuning
@@ -138,8 +138,8 @@ bash scripts/telegram/health-check-telegram.sh
 ```bash
 # 1. Start Docker containers
 cd /home/marce/Projetos/TradingSystem/tools/compose
-docker compose -f docker-compose.telegram.yml up -d
-docker compose -f docker-compose.telegram-monitoring.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
 
 # 2. Verify containers healthy
 docker ps --filter "label=com.tradingsystem.stack=telegram"
@@ -163,7 +163,7 @@ systemctl is-active telegram-gateway
 # Expected: active
 
 # Docker containers
-docker compose -f docker-compose.telegram.yml ps
+docker compose -f docker-compose.4-2-telegram-stack.yml ps
 # Expected: All (healthy)
 
 # Database connectivity

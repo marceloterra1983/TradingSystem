@@ -124,7 +124,13 @@ cd "$PROJECT_ROOT"
 # 5.1: Start Qdrant (single node for now - HA has issues)
 echo ""
 echo -e "${BLUE}  [5.1] Starting Qdrant (single node)...${NC}"
-docker compose -f tools/compose/docker-compose.database.yml up -d qdrant
+docker run -d \
+  --name data-qdrant \
+  --network tradingsystem_backend \
+  -p 6333:6333 -p 6334:6334 \
+  -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
+  --restart unless-stopped \
+  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || docker start data-qdrant >/dev/null 2>&1
 sleep 10
 echo -e "${GREEN}    ✅ Qdrant started${NC}"
 

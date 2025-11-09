@@ -680,7 +680,7 @@ CMD ["node", "src/index.js"]
 
 **Compose Definition:**
 ```yaml
-# tools/compose/docker-compose.telegram.yml
+# tools/compose/docker-compose.4-2-telegram-stack.yml
 services:
   telegram-mtproto:
     container_name: telegram-mtproto
@@ -873,7 +873,7 @@ TradingSystem/
 ├── .env.shared                     # Generated (DO NOT EDIT)
 │
 ├── tools/compose/
-│   ├── docker-compose.telegram.yml # Generated (DO NOT EDIT)
+│   ├── docker-compose.4-2-telegram-stack.yml # Generated (DO NOT EDIT)
 │   ├── docker-compose.frontend.yml # Generated (DO NOT EDIT)
 │   └── ...
 │

@@ -233,9 +233,9 @@ Telegram Gateway (Local)  →  TP Capital Stack (Container)  →  TP Capital DB 
 **Quick Start with Docker**:
 ```bash
 # Start containerized services (dedicated stacks)
-docker compose -f tools/compose/docker-compose.tp-capital-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
 docker compose -f tools/compose/docker-compose.workspace-simple.yml up -d
-docker compose -f tools/compose/docker-compose.telegram.yml up -d telegram-timescaledb telegram-redis-master telegram-rabbitmq
+docker compose -f tools/compose/docker-compose.4-2-telegram-stack.yml up -d telegram-timescaledb telegram-redis-master telegram-rabbitmq
 
 curl http://localhost:4005/health  # Verify TP Capital API
 curl http://localhost:3200/health  # Verify Workspace API
