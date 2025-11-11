@@ -4,9 +4,8 @@
  */
 
 import { useState, useCallback } from "react";
+import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
 import type { GatewayData, Channel, TelegramMessage } from "../types";
-
-const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || "";
 
 export interface UseGatewayDataReturn {
   data: GatewayData | null;
@@ -22,6 +21,7 @@ export function useGatewayData(
   filterChannel = "all",
   filterLimit = "50",
 ): UseGatewayDataReturn {
+  const gatewayToken = TELEGRAM_GATEWAY_TOKEN;
   const [data, setData] = useState<GatewayData | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [messages, setMessages] = useState<TelegramMessage[]>([]);
@@ -33,10 +33,9 @@ export function useGatewayData(
       setLoading(true);
       setError(null);
 
-      const GATEWAY_TOKEN = getGatewayToken();
-      const headers = {
-        "X-Gateway-Token": GATEWAY_TOKEN,
-      };
+      const authHeaders = gatewayToken
+        ? { "X-Gateway-Token": gatewayToken }
+        : undefined;
 
       // Build messages URL with filters
       const limit = filterLimit === "all" ? "10000" : filterLimit || "50";
@@ -46,9 +45,9 @@ export function useGatewayData(
       }
 
       const [overviewRes, channelsRes, messagesRes] = await Promise.all([
-        fetch("/api/telegram-gateway/overview", { headers }),
-        fetch("/api/channels", { headers }),
-        fetch(messagesUrl, { headers }),
+        fetch("/api/telegram-gateway/overview", { headers: authHeaders }),
+        fetch("/api/channels", { headers: authHeaders }),
+        fetch(messagesUrl, { headers: authHeaders }),
       ]);
 
       if (overviewRes.ok) {
@@ -73,7 +72,7 @@ export function useGatewayData(
     } finally {
       setLoading(false);
     }
-  }, [filterChannel, filterLimit]);
+  }, [filterChannel, filterLimit, gatewayToken]);
 
   return {
     data,

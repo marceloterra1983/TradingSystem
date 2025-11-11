@@ -99,7 +99,8 @@ const directConfig: ApiConfig = {
     resolveEnv("VITE_WORKSPACE_API_URL") || "/api/workspace",
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || "/api/tp-capital",
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || "/api/docs",
-  telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "",
+  telegramGatewayApi:
+    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "http://localhost:14010",
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || "/api/firecrawl",
   docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs",

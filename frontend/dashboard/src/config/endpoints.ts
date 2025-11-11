@@ -40,9 +40,9 @@ export const ENDPOINTS = {
   documentation:
     import.meta.env.VITE_DOCUMENTATION_API_URL || "http://localhost:3405",
 
-  /** Telegram Gateway API - Port 4010 (Node.js service) */
+  /** Telegram Gateway API - Port 14010 (Docker exposed) */
   telegramGateway:
-    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "http://localhost:4010",
+    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "http://localhost:14010",
 
   /**
    * Database UI Tools
@@ -57,7 +57,7 @@ export const ENDPOINTS = {
   adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:3910",
 
   /** PgWeb - Lightweight PostgreSQL browser (Direct access - subpath not supported) */
-  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:5051",
+  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:5052",
 
   /**
    * Database Services - Direct Access
@@ -76,7 +76,7 @@ export const ENDPOINTS = {
   },
 
   /** QuestDB - High-performance time-series database (Direct access - subpath not supported) */
-  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9002",
+  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9000",
 
   /** Qdrant - Vector database for RAG/AI - Port 7020 (HTTP API) */
   qdrant: import.meta.env.VITE_QDRANT_URL || "http://localhost:7020",

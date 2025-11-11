@@ -36,10 +36,9 @@ export function configureCompression(options = {}) {
     hasCustomFilter: !!filter
   });
 
-  return compression({
+  const compressionOptions = {
     level,
     threshold,
-
     // Custom filter or default
     filter: filter || ((req, res) => {
       // Don't compress if client explicitly requests no compression
@@ -61,20 +60,9 @@ export function configureCompression(options = {}) {
       // Use compression's default filter for everything else
       return compression.filter(req, res);
     }),
+  };
 
-    // Custom compression strategy for different content types
-    strategy: (req, res) => {
-      const contentType = res.getHeader('Content-Type') || '';
-
-      // Use faster compression for text/json (more compressible)
-      if (contentType.includes('json') || contentType.includes('text')) {
-        return 1; // Z_FILTERED - faster, good for text
-      }
-
-      // Default strategy for other types
-      return 0; // Z_DEFAULT_STRATEGY
-    }
-  });
+  return compression(compressionOptions);
 }
 
 /**

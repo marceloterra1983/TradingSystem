@@ -61,21 +61,25 @@ services:
       - ../../.env
       - ../../.env.shared
     environment:
-      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT:-5050}
+      PGADMIN_LISTEN_PORT: 5050
+      # Disable enhanced cookie protection for iframe support
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    networks:
+      - tradingsystem_backend
+    # Note: No direct port exposure - accessed via nginx proxy
+
+  dbui-pgadmin-proxy:
+    container_name: dbui-pgadmin-proxy
+    image: nginx:alpine
+    restart: unless-stopped
     ports:
-      - "${PGADMIN_LISTEN_PORT:-5050}:${PGADMIN_LISTEN_PORT:-5050}"
+      - "${PGADMIN_LISTEN_PORT:-5050}:5051"
     volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin-nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - tradingsystem_backend
     depends_on:
-      - dbui-questdb
-    healthcheck:
-      test: ['CMD', '/pgadmin4/bin/pgadmin4.py', 'check']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      - dbui-pgadmin
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
@@ -84,7 +88,7 @@ services:
       - "traefik.http.routers.dbui-pgadmin.priority=100"
       - "traefik.http.routers.dbui-pgadmin.middlewares=pgadmin-stripprefix,admin-standard@file"
       - "traefik.http.middlewares.pgadmin-stripprefix.stripprefix.prefixes=/db-ui/pgadmin"
-      - "traefik.http.services.dbui-pgadmin.loadbalancer.server.port=5050"
+      - "traefik.http.services.dbui-pgadmin.loadbalancer.server.port=5051"
 
   dbui-adminer:
     container_name: dbui-adminer
@@ -93,12 +97,24 @@ services:
     env_file:
       - ../../.env
       - ../../.env.shared
-    ports:
-      - "${ADMINER_PORT:-3908}:8080"
     environment:
       ADMINER_DESIGN: ${ADMINER_DESIGN:-flat}
     networks:
       - tradingsystem_backend
+    # Note: No direct port exposure - accessed via nginx proxy
+
+  dbui-adminer-proxy:
+    container_name: dbui-adminer-proxy
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-3910}:3911"
+    volumes:
+      - ./adminer-nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      - dbui-adminer
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
@@ -113,15 +129,10 @@ services:
     container_name: dbui-pgweb
     image: sosedoff/pgweb:latest
     restart: unless-stopped
-    env_file:
-      - ../../.env
-      - ../../.env.shared
-    environment:
-      # Override .env setting - pgWeb should start without pre-configured connection
-      # Users should manually select database from UI
-      DATABASE_URL: ""
+    # NOTE: No env_file loaded to prevent DATABASE_URL from being set
+    # pgWeb should start without pre-configured connection - users select DB from UI
     ports:
-      - "${PGWEB_PORT:-5051}:8081"
+      - "${PGWEB_PORT:-5052}:8081"
     networks:
       - tradingsystem_backend
     labels:

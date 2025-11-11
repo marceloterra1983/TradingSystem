@@ -1,21 +1,67 @@
 name: 4-3-workspace-stack
 
 # ==============================================================================
-# Workspace Stack - 2 Dedicated Containers
+# Workspace Stack - 3 Dedicated Containers (+ Redis Cache)
 # ==============================================================================
-# Architecture: Dedicated PostgreSQL database + REST API
+# Architecture: Dedicated PostgreSQL database + REST API + Redis cache
 # Purpose: Workspace management for projects, notes, and items
-# Resources: 2 CPU, 3GB RAM total
+# Resources: 2.5 CPU, 3.4GB RAM total
 # ==============================================================================
 #
 # Related: backend/api/workspace/
 # Database: PostgreSQL 17 Alpine
-# API: Node.js Express + PostgreSQL
+# Cache: Redis 7 Alpine (Phase 2.3 - Performance Optimization)
+# API: Node.js Express + PostgreSQL + Redis
 # ==============================================================================
 
 services:
   # ============================================================================
-  # 1. PostgreSQL - Dedicated Database for Workspace
+  # 1. Redis - Application Cache for Workspace API (NEW - Phase 2.3)
+  # ============================================================================
+  workspace-redis:
+    image: redis:7-alpine
+    container_name: workspace-redis
+    platform: linux/amd64
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - --maxmemory 256mb
+      - --maxmemory-policy allkeys-lru
+      - --appendonly yes
+      - --save 60 1000
+
+    volumes:
+      - workspace-redis-data:/data
+
+    networks:
+      - tradingsystem_backend
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 384M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+      - "com.tradingsystem.component=application-cache"
+      - "com.tradingsystem.phase=2.3-performance"
+
+  # ============================================================================
+  # 2. PostgreSQL - Dedicated Database for Workspace
   # ============================================================================
   workspace-db:
     image: postgres:17-alpine
@@ -60,7 +106,7 @@ services:
       - "com.tradingsystem.component=database"
 
   # ============================================================================
-  # 2. Workspace API - Application Layer
+  # 3. Workspace API - Application Layer (Updated with Redis Cache)
   # ============================================================================
   workspace-api:
     image: img-apps-workspace:latest
@@ -97,6 +143,12 @@ services:
       - POSTGRES_IDLE_TIMEOUT=30000
       - POSTGRES_CONNECTION_TIMEOUT=30000  # Aumentado de 10000ms para 30000ms (30s)
 
+      # Redis Cache Configuration (Phase 2.3 - Performance Optimization)
+      - REDIS_HOST=workspace-redis
+      - REDIS_PORT=6379
+      - REDIS_CACHE_ENABLED=true
+      - CACHE_REDIS_TTL=300  # 5 minutes default TTL
+
       # CORS
       - CORS_ORIGIN=http://localhost:3103,http://localhost:3400
 
@@ -120,6 +172,8 @@ services:
 
     depends_on:
       workspace-db:
+        condition: service_healthy
+      workspace-redis:
         condition: service_healthy
 
     deploy:
@@ -149,6 +203,7 @@ services:
       - "com.tradingsystem.tier=application"
       - "com.tradingsystem.service=api"
       - "com.tradingsystem.component=workspace-management"
+      - "com.tradingsystem.cache=redis-enabled"
 
       # ============================================================================
       # Traefik Configuration - API Gateway Integration
@@ -193,6 +248,14 @@ volumes:
       - "com.tradingsystem.stack=workspace"
       - "com.tradingsystem.component=database"
 
+  workspace-redis-data:
+    name: workspace-redis-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=cache"
+      - "com.tradingsystem.phase=2.3-performance"
+
 # ==============================================================================
 # USAGE EXAMPLES
 # ==============================================================================
@@ -205,6 +268,12 @@ volumes:
 #
 # View logs (specific service):
 #   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f workspace-api
+#
+# Check Redis cache stats:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml exec workspace-redis redis-cli INFO stats
+#
+# Monitor Redis keys:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml exec workspace-redis redis-cli KEYS '*'
 #
 # Check status:
 #   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps
@@ -227,5 +296,8 @@ volumes:
 #
 # List workspace items (via Traefik gateway):
 #   curl http://localhost:9080/api/workspace/items | jq '.'
+#
+# Check cache headers (should show X-Cache: HIT or MISS):
+#   curl -v http://localhost:9080/api/workspace/items
 #
 # ==============================================================================

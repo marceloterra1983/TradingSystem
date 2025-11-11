@@ -4,8 +4,7 @@
  */
 
 import { useCallback } from "react";
-
-const getGatewayToken = () => import.meta.env.VITE_GATEWAY_TOKEN || "";
+import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
 
 export interface ChannelData {
   channelId: string;
@@ -23,12 +22,17 @@ export interface UseChannelManagerReturn {
 export function useChannelManager(
   onSuccess?: () => Promise<void>,
 ): UseChannelManagerReturn {
+  const gatewayToken = TELEGRAM_GATEWAY_TOKEN;
   const getHeaders = useCallback(
     () => ({
       "Content-Type": "application/json",
-      "X-Gateway-Token": getGatewayToken(),
+      ...(gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
     }),
-    [],
+    [gatewayToken],
+  );
+  const getAuthHeaders = useCallback(
+    () => (gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
+    [gatewayToken],
   );
 
   const createChannel = useCallback(
@@ -146,7 +150,7 @@ export function useChannelManager(
       try {
         const response = await fetch(`/api/channels/${id}`, {
           method: "DELETE",
-          headers: { "X-Gateway-Token": getGatewayToken() },
+          headers: getAuthHeaders(),
         });
 
         if (!response.ok) {
@@ -164,7 +168,7 @@ export function useChannelManager(
         return false;
       }
     },
-    [onSuccess],
+    [getAuthHeaders, onSuccess],
   );
 
   return {

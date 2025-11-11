@@ -16,7 +16,7 @@ services:
       # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
       # Traefik Gateway defaults (override via env caso seja necessário expor portas diretas)
       - TP_CAPITAL_PROXY_TARGET=${TP_CAPITAL_PROXY_TARGET:-http://api-gateway:9080/api/tp-capital}
-      - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=${VITE_TELEGRAM_GATEWAY_PROXY_TARGET:-http://api-gateway:9080/api/telegram-gateway}
+      - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=${VITE_TELEGRAM_GATEWAY_PROXY_TARGET:-http://telegram-gateway-api:4010/api/telegram-gateway}
       - WORKSPACE_PROXY_TARGET=${WORKSPACE_PROXY_TARGET:-http://api-gateway:9080/api/workspace}
       - WORKSPACE_LIBRARY_PROXY_TARGET=${WORKSPACE_LIBRARY_PROXY_TARGET:-http://api-gateway:9080/api/library}
       - DOCUSAURUS_PROXY_TARGET=${DOCUSAURUS_PROXY_TARGET:-http://api-gateway:9080/docs}

@@ -20,10 +20,10 @@ const ADMINER_URL = ENDPOINTS.adminer;
 const QUESTDB_URL = ENDPOINTS.questdb;
 
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: PGADMIN_URL, label: "Traefik (.env)" },
-  pgweb: { url: PGWEB_URL, label: "Traefik (.env)" },
-  adminer: { url: ADMINER_URL, label: "Traefik (.env)" },
-  questdb: { url: QUESTDB_URL, label: "Traefik (.env)" },
+  pgadmin: { url: PGADMIN_URL, label: "Porta Direta (Recomendado)" },
+  pgweb: { url: PGWEB_URL, label: "Porta Direta (Recomendado)" },
+  adminer: { url: ADMINER_URL, label: "Porta Direta (Recomendado)" },
+  questdb: { url: QUESTDB_URL, label: "Porta Direta (Recomendado)" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
@@ -32,7 +32,7 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
-    { label: "Porta 5051 (Recomendado)", url: "http://localhost:5051" },
+    { label: "Porta 5052 (Recomendado)", url: "http://localhost:5052" },
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
@@ -40,7 +40,7 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
-    { label: "HTTP 9002 (Recomendado)", url: "http://localhost:9002" },
+    { label: "HTTP 9000 (Recomendado)", url: "http://localhost:9000" },
     { label: "Legacy 7010", url: "http://localhost:7010" },
   ],
 };

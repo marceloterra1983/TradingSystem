@@ -1,7 +1,13 @@
 /**
- * Items Routes (Refactored)
+ * Items Routes (Refactored with Redis Caching - Phase 2.3)
  *
- * CRUD endpoints for workspace items.
+ * CRUD endpoints for workspace items with Redis caching.
+ *
+ * PHASE 2.3 CHANGES:
+ * - Added Redis caching middleware for GET requests
+ * - Cache invalidation on mutations (POST/PUT/DELETE)
+ * - X-Cache headers for debugging (HIT/MISS)
+ * - Configurable TTL per endpoint
  *
  * REFACTORING CHANGES:
  * - Replaced express-validator with Zod
@@ -11,12 +17,14 @@
  * - Eliminated validateCategory SQL coupling
  *
  * BEFORE: 193 lines with mixed concerns
- * AFTER: ~80 lines (58% reduction)
+ * AFTER: ~120 lines (with caching)
  *
  * @module routes/items
  */
 
 import { Router } from "express";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { getDbClient } from "../db/index.js";
 import { createLogger } from "../../../../shared/logger/index.js";
 import { WorkspaceService } from "../services/WorkspaceService.js";
@@ -29,6 +37,38 @@ import {
   ItemIdSchema,
   FilterItemsSchema,
 } from "../validation/schemas.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const sharedCacheCandidates = [
+  path.resolve(__dirname, "../../../../shared/cache/redis-cache.js"),
+  path.resolve(process.cwd(), "backend/shared/cache/redis-cache.js"),
+  "/app/backend/shared/cache/redis-cache.js",
+];
+
+let redisCacheModule = null;
+
+for (const candidate of sharedCacheCandidates) {
+  try {
+    redisCacheModule = await import(pathToFileURL(candidate).href);
+    break;
+  } catch (error) {
+    if (
+      error.code !== "ERR_MODULE_NOT_FOUND" &&
+      error.code !== "MODULE_NOT_FOUND"
+    ) {
+      throw error;
+    }
+  }
+}
+
+if (!redisCacheModule) {
+  throw new Error(
+    "Workspace items routes: não foi possível carregar o módulo compartilhado de cache Redis. Verifique volumes ou rebuild da imagem.",
+  );
+}
+
+const { createCacheMiddleware, invalidateCache } = redisCacheModule;
 
 const router = Router();
 const logger = createLogger("workspace-items");
@@ -48,6 +88,43 @@ export const resetWorkspaceService = () => {
 };
 
 // ============================================================================
+// CACHE CONFIGURATION (Phase 2.3 - Performance Optimization)
+// ============================================================================
+
+/**
+ * Cache middleware for item lists (5 minutes TTL)
+ * Expected speedup: 200ms → 10ms (95% faster)
+ */
+const cacheItemsList = createCacheMiddleware({
+  ttl: 300, // 5 minutes
+  keyPrefix: "workspace:items:list",
+  logger,
+  enabled: process.env.REDIS_CACHE_ENABLED !== "false",
+});
+
+/**
+ * Cache middleware for single items (5 minutes TTL)
+ * Expected speedup: 150ms → 10ms (93% faster)
+ */
+const cacheSingleItem = createCacheMiddleware({
+  ttl: 300, // 5 minutes
+  keyPrefix: "workspace:items:single",
+  logger,
+  enabled: process.env.REDIS_CACHE_ENABLED !== "false",
+});
+
+/**
+ * Cache middleware for stats (10 minutes TTL - less frequently updated)
+ * Expected speedup: 250ms → 10ms (96% faster)
+ */
+const cacheStats = createCacheMiddleware({
+  ttl: 600, // 10 minutes
+  keyPrefix: "workspace:items:stats",
+  logger,
+  enabled: process.env.REDIS_CACHE_ENABLED !== "false",
+});
+
+// ============================================================================
 // ROUTES
 // ============================================================================
 
@@ -62,8 +139,15 @@ export const resetWorkspaceService = () => {
  * - search: Search in title/description/tags
  * - limit: Max results (default: 100)
  * - offset: Pagination offset (default: 0)
+ *
+ * Cache: 5 minutes
+ * Cache key includes query params for accurate cache hits
  */
-router.get("/", validateQuery(FilterItemsSchema), async (req, res, next) => {
+router.get(
+  "/",
+  validateQuery(FilterItemsSchema),
+  cacheItemsList, // ⚡ CACHE: Phase 2.3
+  async (req, res, next) => {
   try {
     const service = getWorkspaceService();
     const items = await service.getItems(req.query);
@@ -82,10 +166,14 @@ router.get("/", validateQuery(FilterItemsSchema), async (req, res, next) => {
 /**
  * GET /api/items/:id
  * Get a single item by ID
+ *
+ * Cache: 5 minutes
+ * Cache key includes item ID
  */
 router.get(
   "/:id",
   validateParam("id", ItemIdSchema),
+  cacheSingleItem, // ⚡ CACHE: Phase 2.3
   async (req, res, next) => {
     try {
       const service = getWorkspaceService();
@@ -118,11 +206,17 @@ router.get(
  * - category: enum (documentacao, coleta-dados, ...)
  * - priority: enum (low, medium, high, critical)
  * - tags: string[] (optional)
+ *
+ * Cache invalidation: Invalidates list and stats caches
  */
 router.post("/", validate(CreateItemSchema), async (req, res, next) => {
   try {
     const service = getWorkspaceService();
     const item = await service.createItem(req.body, req.user);
+
+    // 🔄 CACHE INVALIDATION: Phase 2.3
+    await invalidateCache("workspace:items:list");
+    await invalidateCache("workspace:items:stats");
 
     res.status(201).json({
       success: true,
@@ -139,6 +233,8 @@ router.post("/", validate(CreateItemSchema), async (req, res, next) => {
  * Update an existing item
  *
  * All fields optional (partial update)
+ *
+ * Cache invalidation: Invalidates specific item, list, and stats caches
  */
 router.put(
   "/:id",
@@ -160,6 +256,11 @@ router.put(
         });
       }
 
+      // 🔄 CACHE INVALIDATION: Phase 2.3
+      await invalidateCache(`workspace:items:single:${req.params.id}`);
+      await invalidateCache("workspace:items:list");
+      await invalidateCache("workspace:items:stats");
+
       res.json({
         success: true,
         message: "Item updated successfully",
@@ -174,6 +275,8 @@ router.put(
 /**
  * DELETE /api/items/:id
  * Delete an item
+ *
+ * Cache invalidation: Invalidates specific item, list, and stats caches
  */
 router.delete(
   "/:id",
@@ -190,6 +293,11 @@ router.delete(
         });
       }
 
+      // 🔄 CACHE INVALIDATION: Phase 2.3
+      await invalidateCache(`workspace:items:single:${req.params.id}`);
+      await invalidateCache("workspace:items:list");
+      await invalidateCache("workspace:items:stats");
+
       res.json({
         success: true,
         message: "Item deleted successfully",
@@ -203,19 +311,25 @@ router.delete(
 /**
  * GET /api/items/stats
  * Get workspace statistics
+ *
+ * Cache: 10 minutes (stats change less frequently)
  */
-router.get("/stats", async (req, res, next) => {
-  try {
-    const service = getWorkspaceService();
-    const stats = await service.getStatistics();
+router.get(
+  "/stats",
+  cacheStats, // ⚡ CACHE: Phase 2.3
+  async (req, res, next) => {
+    try {
+      const service = getWorkspaceService();
+      const stats = await service.getStatistics();
 
-    res.json({
-      success: true,
-      data: stats,
-    });
-  } catch (error) {
-    next(error);
+      res.json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 export const itemsRouter = router;

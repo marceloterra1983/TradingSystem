@@ -81,6 +81,17 @@ http:
           - "/db-ui/questdb"
         forceSlash: true
 
+    # Workspace API path adjustments (/api/workspace/* -> /api/*)
+    workspace-strip:
+      stripPrefix:
+        prefixes:
+          - "/api/workspace"
+        forceSlash: true
+
+    workspace-addapi:
+      addPrefix:
+        prefix: "/api"
+
     # ==========================================================================
     # COMBINED MIDDLEWARES (Chains)
     # ==========================================================================
@@ -94,6 +105,12 @@ http:
           - rate-limit-global
           - compress
           - circuit-breaker
+
+    workspace-path-transform:
+      chain:
+        middlewares:
+          - workspace-strip
+          - workspace-addapi
 
     # Admin UI middleware chain
     admin-standard:

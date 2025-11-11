@@ -10,6 +10,8 @@
 
 import express from "express";
 import promClient from "prom-client";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 // Shared modules
 import { createLogger } from "../../../shared/logger/index.js";
@@ -22,10 +24,39 @@ import {
   createCorrelationIdMiddleware,
 } from "../../../shared/middleware/index.js";
 import { createHealthCheckHandler } from "../../../shared/middleware/health.js";
-import {
-  configureCompression,
-  compressionMetrics,
-} from "../../../shared/middleware/compression.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const compressionModuleCandidates = [
+  path.resolve(process.cwd(), "backend/shared/middleware/compression.js"),
+  path.resolve(__dirname, "../../../shared/middleware/compression.js"),
+  "/app/backend/shared/middleware/compression.js",
+  "/shared/middleware/compression.js",
+];
+
+let compressionModule = null;
+
+for (const candidate of compressionModuleCandidates) {
+  try {
+    compressionModule = await import(pathToFileURL(candidate).href);
+    break;
+  } catch (error) {
+    if (
+      error.code !== "ERR_MODULE_NOT_FOUND" &&
+      error.code !== "MODULE_NOT_FOUND"
+    ) {
+      throw error;
+    }
+  }
+}
+
+if (!compressionModule) {
+  throw new Error(
+    "Workspace API: não foi possível carregar o middleware compartilhado de compressão.",
+  );
+}
+
+const { configureCompression, compressionMetrics } = compressionModule;
 
 // Service-specific modules
 import { config, timescaledbConfig } from "./config.js";

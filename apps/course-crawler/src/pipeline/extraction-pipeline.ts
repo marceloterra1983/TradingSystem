@@ -15,10 +15,12 @@ import {
   type ClassResource,
   type CourseResource,
   type ExtractionRun,
+  type AttachmentResource,
 } from '../types.js';
 import { createStableId } from '../utils/id.js';
 import { computeMetrics } from '../observability/metrics.js';
 import { retryBrowserOperation } from '../utils/retry.js';
+import { downloadAttachment } from './download-manager.js';
 
 interface PipelineResult {
   run: ExtractionRun;
@@ -173,15 +175,18 @@ async function enrichCourse(
               )
             : [];
 
+          const attachmentResources: AttachmentResource[] = attachments.map((attachment) => ({
+            id: createStableId('attachment', `${classResource.id}|${attachment.url}`),
+            name: attachment.name,
+            url: attachment.url,
+            downloadStatus: 'pending',
+          }));
+
           Object.assign<ClassResource, Partial<ClassResource>>(classResource, {
             rawHtml,
             markdown,
             confidenceScore: Math.min(100, Math.max(10, markdown.length / 15)),
-            attachments: attachments.map((attachment) => ({
-              id: createStableId('attachment', `${classResource.id}|${attachment.url}`),
-              name: attachment.name,
-              url: attachment.url,
-            })),
+            attachments: attachmentResources,
             videos: videos.map((video, index) => ({
               id: createStableId('video', `${classResource.id}|${video.url}`),
               title: video.title,
@@ -191,6 +196,50 @@ async function enrichCourse(
             })),
             lastUpdatedAt: new Date().toISOString(),
           });
+
+          // Download attachments if enabled
+          if (env.download.enabled && attachmentResources.length > 0) {
+            const attachmentsDir = path.join(
+              env.outputsDir,
+              'attachments',
+              course.id,
+              classResource.id
+            );
+
+            logger.info(
+              { classId: classResource.id, count: attachmentResources.length },
+              '[course-crawler] Downloading attachments'
+            );
+
+            for (const attachment of attachmentResources) {
+              attachment.downloadStatus = 'downloading';
+
+              const result = await downloadAttachment(
+                attachment.url,
+                attachmentsDir,
+                attachment.name,
+                logger,
+                {
+                  maxRetries: env.download.maxRetries,
+                  timeoutMs: env.download.timeoutMs,
+                  maxFileSizeMB: env.download.maxFileSizeMB,
+                }
+              );
+
+              if (result.success) {
+                attachment.localPath = result.localPath;
+                attachment.fileSizeBytes = result.fileSizeBytes;
+                attachment.downloadStatus = 'completed';
+              } else {
+                attachment.downloadStatus = 'failed';
+                attachment.downloadError = result.error;
+                logger.warn(
+                  { url: attachment.url, error: result.error },
+                  '[course-crawler] Failed to download attachment'
+                );
+              }
+            }
+          }
         } catch (error) {
           const screenshotPath = await captureFailureScreenshot(
             page,
@@ -278,7 +327,18 @@ function renderClassMarkdown(cls: ClassResource) {
   ].join('\n');
 
   const attachments = cls.attachments
-    .map((attachment) => `- [${attachment.name}](${attachment.url})`)
+    .map((attachment) => {
+      if (attachment.downloadStatus === 'completed' && attachment.localPath) {
+        const sizeStr = attachment.fileSizeBytes
+          ? ` (${formatFileSize(attachment.fileSizeBytes)})`
+          : '';
+        return `- 📁 [${attachment.name}](${attachment.localPath})${sizeStr} ✅`;
+      } else if (attachment.downloadStatus === 'failed') {
+        return `- 🔗 [${attachment.name}](${attachment.url}) ⚠️ Download failed: ${attachment.downloadError || 'Unknown error'}`;
+      } else {
+        return `- 🔗 [${attachment.name}](${attachment.url})`;
+      }
+    })
     .join('\n');
   const videos = cls.videos
     .map((video) => `- [${video.title}](${video.url})`)
@@ -304,4 +364,12 @@ function slugify(input: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '')
     .slice(0, 60);
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }

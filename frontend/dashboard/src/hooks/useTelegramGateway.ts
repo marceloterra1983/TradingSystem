@@ -9,7 +9,8 @@ const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
 const TELEGRAM_GATEWAY_SERVICE_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
 const TELEGRAM_GATEWAY_MESSAGES_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/messages`;
 const TELEGRAM_GATEWAY_CHANNELS_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/channels`;
-const TELEGRAM_GATEWAY_TOKEN =
+export const TELEGRAM_GATEWAY_TOKEN =
+  (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
   (
     import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined
   )?.trim() ||

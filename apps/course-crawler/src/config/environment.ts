@@ -23,12 +23,21 @@ export interface BrowserConfig {
   maxClassesPerModule?: number;
 }
 
+export interface DownloadConfig {
+  enabled: boolean;
+  maxFileSizeMB: number;
+  timeoutMs: number;
+  concurrency: number;
+  maxRetries: number;
+}
+
 export interface EnvironmentConfig {
   runtimeEnvironment: 'development' | 'test' | 'production';
   logLevel: LogLevel;
   outputsDir: string;
   neon: NeonConfig;
   browser: BrowserConfig;
+  download: DownloadConfig;
   observability: {
     confidenceThreshold: number;
     selectorFailureThreshold: number;
@@ -112,6 +121,11 @@ const schema = z.object({
     },
     z.coerce.number().int().min(1).or(z.undefined()),
   ),
+  COURSE_CRAWLER_DOWNLOAD_ATTACHMENTS: booleanSchema.default(true),
+  COURSE_CRAWLER_DOWNLOAD_MAX_SIZE_MB: z.coerce.number().positive().default(100),
+  COURSE_CRAWLER_DOWNLOAD_TIMEOUT_MS: z.coerce.number().positive().default(30000),
+  COURSE_CRAWLER_DOWNLOAD_CONCURRENCY: z.coerce.number().int().min(1).max(5).default(2),
+  COURSE_CRAWLER_DOWNLOAD_MAX_RETRIES: z.coerce.number().int().min(1).max(5).default(3),
 });
 
 export function loadEnvironment(): EnvironmentConfig {
@@ -157,6 +171,13 @@ export function loadEnvironment(): EnvironmentConfig {
       username: config.COURSE_CRAWLER_LOGIN_USERNAME,
       password: config.COURSE_CRAWLER_LOGIN_PASSWORD,
       maxClassesPerModule: config.COURSE_CRAWLER_MAX_CLASSES_PER_MODULE,
+    },
+    download: {
+      enabled: config.COURSE_CRAWLER_DOWNLOAD_ATTACHMENTS,
+      maxFileSizeMB: config.COURSE_CRAWLER_DOWNLOAD_MAX_SIZE_MB,
+      timeoutMs: config.COURSE_CRAWLER_DOWNLOAD_TIMEOUT_MS,
+      concurrency: config.COURSE_CRAWLER_DOWNLOAD_CONCURRENCY,
+      maxRetries: config.COURSE_CRAWLER_DOWNLOAD_MAX_RETRIES,
     },
     observability: {
       confidenceThreshold: config.COURSE_CRAWLER_CONFIDENCE_THRESHOLD,

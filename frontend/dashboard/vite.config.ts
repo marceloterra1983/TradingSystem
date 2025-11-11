@@ -162,7 +162,8 @@ export default defineConfig(({ mode }) => {
   );
   const telegramGatewayProxy = resolveProxy(
     env.VITE_TELEGRAM_GATEWAY_PROXY_TARGET || env.VITE_TELEGRAM_GATEWAY_API_URL,
-    'http://localhost:9080/api/telegram-gateway',
+    'http://localhost:14010',
+    '/api/telegram-gateway',
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
   const n8nProxy = resolveProxy(
@@ -620,7 +621,7 @@ export default defineConfig(({ mode }) => {
         env.VITE_TELEGRAM_GATEWAY_API_TOKEN || env.TELEGRAM_GATEWAY_API_TOKEN || env.API_SECRET_TOKEN || '',
       ),
       'import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL': JSON.stringify(
-        env.VITE_TELEGRAM_GATEWAY_API_URL || env.VITE_API_BASE_URL || '',
+        env.VITE_TELEGRAM_GATEWAY_API_URL || env.VITE_API_BASE_URL || 'http://localhost:14010',
       ),
       'import.meta.env.VITE_API_SECRET_TOKEN': JSON.stringify(
         env.VITE_API_SECRET_TOKEN || env.API_SECRET_TOKEN || '',
