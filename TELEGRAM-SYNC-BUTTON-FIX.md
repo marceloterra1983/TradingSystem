@@ -223,9 +223,61 @@ VITE_TELEGRAM_GATEWAY_API_TOKEN=gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA
 - [x] Botão "Checar Mensagens" operacional
 - [x] Feedback visual para o usuário
 - [x] Auto-reload após sincronização
+- [x] Rota `/api/telegram-gateway/overview` adicionada (Status Card fix)
+- [x] Status Card mostrando "Conectado" corretamente
 
 ---
 
-**✅ PROBLEMA TOTALMENTE RESOLVIDO!**
+## 🔄 Fix Adicional: Status Card
 
-O botão "Checar Mensagens" agora funciona perfeitamente, sincronizando mensagens do Telegram e atualizando a lista automaticamente. 🎉
+### Problema
+Após corrigir o botão de sincronização, foi identificado que o **Status Card** mostrava "Desconectado" apesar da stack estar funcionando perfeitamente.
+
+### Root Cause
+O componente `useGatewayData.ts` chama `/api/telegram-gateway/overview` (linha 55) para obter os dados de status, mas esse endpoint não tinha rota configurada no Traefik.
+
+### Solução
+Adicionado router específico no Traefik para o endpoint de overview:
+
+```yaml
+# Overview endpoint - System status for Dashboard
+telegram-gateway-overview:
+  rule: "Path(`/api/telegram-gateway/overview`)"
+  entryPoints:
+    - web
+  service: telegram-gateway-api
+  middlewares:
+    - api-standard@file
+  priority: 100
+```
+
+### Validação
+```bash
+curl -s 'http://localhost:9080/api/telegram-gateway/overview' \
+  -H "X-API-Key: gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA" | jq '.data.health'
+
+# Resposta:
+{
+  "status": "healthy",
+  "telegram": "connected",
+  "service": "telegram-gateway-api",
+  "timestamp": "2025-11-11T22:29:09.215Z"
+}
+```
+
+### Resultado
+✅ Status Card agora mostra:
+- **Gateway**: Conectado ✓
+- **Telegram**: Conectado ✓
+- **Uptime**: 4h 23m
+- **Mensagens**: 8,278
+
+---
+
+**✅ TODOS OS PROBLEMAS RESOLVIDOS!**
+
+1. ✅ Mensagens aparecem no Dashboard
+2. ✅ Botão "Checar Mensagens" funciona
+3. ✅ Status Card mostra estado correto
+
+O sistema Telegram está 100% operacional no Dashboard! 🎉

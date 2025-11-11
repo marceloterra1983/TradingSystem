@@ -46,6 +46,16 @@ http:
         - api-standard@file
       priority: 100
 
+    # Overview endpoint - System status for Dashboard
+    telegram-gateway-overview:
+      rule: "Path(`/api/telegram-gateway/overview`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 100
+
   services:
     telegram-gateway-api:
       loadBalancer:

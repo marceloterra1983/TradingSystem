@@ -1,0 +1,2243 @@
+{
+  "startedAt": "2025-11-11T21:54:07.779Z",
+  "finishedAt": "2025-11-11T22:49:35.387Z",
+  "courses": [
+    {
+      "id": "course_6881721aeb7c",
+      "title": "MQL5 do Zero",
+      "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+      "modules": [
+        {
+          "id": "module_e2b9a2867c46",
+          "title": "Comece por aqui",
+          "order": 1,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_b8c5397dc4ee",
+              "title": "Lista Cronológica de Aulas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4874300-lista-cronologica-de-aulas",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 100,
+              "rawHtml": "\n        <p>Este curso foi desenvolvido e atualizado ao longo do tempo. As aulas estão organizadas por categorias e algumas delas não estão na ordem cronológica de liberação. Caso você opte por seguir na íntegra a evolução do conteúdo. Segue abaixo a liberação cronológica de cada aula:</p><p><br>Extensões de Arquivos<br>Estrutura de Pastas<br>Conhecendo o MetaEditor<br>Compilação e Sintaxe<br>Identificadores e Comentários<br>Variáveis<br>Tipos de Dados<br>Constantes<br>Arrays<br>Enumareadores<br>Structs<br>Casting<br>Escopo<br>Inputs<br>Operações Matemáticas Básicas<br>Operadores Lógicos<br>Tipos de Condicionais<br>Switch Case<br>Loops de Repetição<br>Break e Continue<br>O que são Funções<br>Função Stop Loss<br>Default Value<br>Parâmetros por referência<br>Overloading de Funções<br>Estrutura Básica de um Robô<br>Tipos de Conta - Netting x Hedge<br>Event Handlers<br>Robô de Bandas de Bollinger<br>Carregando Indicadores<br>Adicionando Includes<br>Criando Estrutura de Horários<br>Verificando Novo Candle<br>Chegando Sinal de Entrada - Acessando Cotações<br>Chegando Sinal de Entrada - Manipulando Indicadores<br>Chegando Sinal de Entrada - Validações<br>Enviando Ordem a Mercado<br>Verificando Posições Abertas<br>Enviando Ordens Pendentes<br>Manuplando Ordens Abertas<br>Cancelando Ordens Abertas<br>Fechando Operações Abertas<br>Acessando Histórico de Operações<br>Adicionando BreakEven<br>Stop Móvel / Step Stop<br>Trailing Stop<br>Debugging: Aprendendo a depurar código<br>Métricas Customizadas de Performance<br>Corrigindo Filling Type para mercado de balcão<br>Controlando Limites Financeiros<br>Controlando Limites de Operações<br>Stop Loss Dinâmico - ATR<br>Introduçao a Orientação a Objetos<br>Importando Bibliotecas Externas - Calculando BotSpot Score<br>Controle de Sessão<br>Integrando o Extreme Forward Analysis com seu próprio robô<br>Executando o robô no Forex<br>Permitindo Operações de Swing Trade<br>Criando uma Classe de Funções Utilitárias<br>Criando um Gerenciador de Posições<br>Refatornado Funções de Limites<br>Herança, Polimorfismo e Overload - Isolando Regras da Estratégia<br>Criando um Robô Multi Estratégias<br>Introdução a Objetos Gráficos<br>Verificando Alpha - Comparando com Buy and Hold<br>Criando e Distribuindo um EA com Indicador Customizado<br>Calculando CAGR como Métrica Customizada de Performance<br>Nova Métrica Customizada de Performance: Calculando DD Médio<br>Alterando Template de Cores do Robô<br>Criando um Robô Multi Asset<br>Controlando Sentido das Operações: COmpra, Venda ou Ambas as Pontas<br>Posicionando Ordens no Book - Entradas Limites<br>Aprendendo a Manipular Arquivos<br>Salvando Operações em Arquivo e Manipulando Dados em Planilha<br>Manipulando Variáveis Globais no MT5 - Compartilhando Funções entre Robôs<br>Manipulando Variáveis Globais no MT5 - Compartilhando Funções entre Robôs - Parte 2<br>Manipulando Eventos de Trade com a função OnTrade()<br>Identificando Stop Loss e Inscrementando Lote com OnTradeTransaction() - Parte 1<br>Analisando Erros Comuns de Roteamento de Ordens<br>Identificando Stop Loss e Inscrementando Lote com OnTradeTransaction() - Parte 2<br>Criando Services no Metatrader 5 - Parte I<br>Criando Services no Metatrader 5 - Parte II - Enviando Alertas<br>Enviando Alertas de um Robô para o Telegram - Parte I<br>Enviando Alertas de um Robô para o Telegram - Parte II<br>Enviando Alertas de um Robô para o Telegram - Parte III<br></p>\n      ",
+              "markdown": "Este curso foi desenvolvido e atualizado ao longo do tempo. As aulas estão organizadas por categorias e algumas delas não estão na ordem cronológica de liberação. Caso você opte por seguir na íntegra a evolução do conteúdo. Segue abaixo a liberação cronológica de cada aula:\n\n  \nExtensões de Arquivos  \nEstrutura de Pastas  \nConhecendo o MetaEditor  \nCompilação e Sintaxe  \nIdentificadores e Comentários  \nVariáveis  \nTipos de Dados  \nConstantes  \nArrays  \nEnumareadores  \nStructs  \nCasting  \nEscopo  \nInputs  \nOperações Matemáticas Básicas  \nOperadores Lógicos  \nTipos de Condicionais  \nSwitch Case  \nLoops de Repetição  \nBreak e Continue  \nO que são Funções  \nFunção Stop Loss  \nDefault Value  \nParâmetros por referência  \nOverloading de Funções  \nEstrutura Básica de um Robô  \nTipos de Conta - Netting x Hedge  \nEvent Handlers  \nRobô de Bandas de Bollinger  \nCarregando Indicadores  \nAdicionando Includes  \nCriando Estrutura de Horários  \nVerificando Novo Candle  \nChegando Sinal de Entrada - Acessando Cotações  \nChegando Sinal de Entrada - Manipulando Indicadores  \nChegando Sinal de Entrada - Validações  \nEnviando Ordem a Mercado  \nVerificando Posições Abertas  \nEnviando Ordens Pendentes  \nManuplando Ordens Abertas  \nCancelando Ordens Abertas  \nFechando Operações Abertas  \nAcessando Histórico de Operações  \nAdicionando BreakEven  \nStop Móvel / Step Stop  \nTrailing Stop  \nDebugging: Aprendendo a depurar código  \nMétricas Customizadas de Performance  \nCorrigindo Filling Type para mercado de balcão  \nControlando Limites Financeiros  \nControlando Limites de Operações  \nStop Loss Dinâmico - ATR  \nIntroduçao a Orientação a Objetos  \nImportando Bibliotecas Externas - Calculando BotSpot Score  \nControle de Sessão  \nIntegrando o Extreme Forward Analysis com seu próprio robô  \nExecutando o robô no Forex  \nPermitindo Operações de Swing Trade  \nCriando uma Classe de Funções Utilitárias  \nCriando um Gerenciador de Posições  \nRefatornado Funções de Limites  \nHerança, Polimorfismo e Overload - Isolando Regras da Estratégia  \nCriando um Robô Multi Estratégias  \nIntrodução a Objetos Gráficos  \nVerificando Alpha - Comparando com Buy and Hold  \nCriando e Distribuindo um EA com Indicador Customizado  \nCalculando CAGR como Métrica Customizada de Performance  \nNova Métrica Customizada de Performance: Calculando DD Médio  \nAlterando Template de Cores do Robô  \nCriando um Robô Multi Asset  \nControlando Sentido das Operações: COmpra, Venda ou Ambas as Pontas  \nPosicionando Ordens no Book - Entradas Limites  \nAprendendo a Manipular Arquivos  \nSalvando Operações em Arquivo e Manipulando Dados em Planilha  \nManipulando Variáveis Globais no MT5 - Compartilhando Funções entre Robôs  \nManipulando Variáveis Globais no MT5 - Compartilhando Funções entre Robôs - Parte 2  \nManipulando Eventos de Trade com a função OnTrade()  \nIdentificando Stop Loss e Inscrementando Lote com OnTradeTransaction() - Parte 1  \nAnalisando Erros Comuns de Roteamento de Ordens  \nIdentificando Stop Loss e Inscrementando Lote com OnTradeTransaction() - Parte 2  \nCriando Services no Metatrader 5 - Parte I  \nCriando Services no Metatrader 5 - Parte II - Enviando Alertas  \nEnviando Alertas de um Robô para o Telegram - Parte I  \nEnviando Alertas de um Robô para o Telegram - Parte II  \nEnviando Alertas de um Robô para o Telegram - Parte III",
+              "lastUpdatedAt": "2025-11-11T21:54:17.099Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.846Z"
+        },
+        {
+          "id": "module_5189a1a27734",
+          "title": "Ecossistema do Metatrader 5",
+          "order": 2,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_ef2d57b65fe3",
+              "title": "Extensão de Arquivos",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613286-extensao-de-arquivos",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_f423d7222f5e",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5fbdd44c-5caf-49e6-b286-ec6f98ce1101",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_18d888e4c7ee",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5fbdd44c-5caf-49e6-b286-ec6f98ce1101&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 625,
+              "rawHtml": "<iframe id=\"panda-142c9fe5-4c70-4c79-85a4-6e00ace74b68\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5fbdd44c-5caf-49e6-b286-ec6f98ce1101&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:19.782Z"
+            },
+            {
+              "id": "class_ed0f5dcb8220",
+              "title": "Estrutura de Pastas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613289-estrutura-de-pastas",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_feb427eb8134",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5bb8d2b-7915-4357-8e4b-ec71fd146f6a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_c09e0d9ad510",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5bb8d2b-7915-4357-8e4b-ec71fd146f6a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 189,
+              "rawHtml": "<iframe id=\"panda-27bc6507-2c0c-44fb-b7d0-d9e43ea80265\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a5bb8d2b-7915-4357-8e4b-ec71fd146f6a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:21.903Z"
+            },
+            {
+              "id": "class_07b8768cc28a",
+              "title": "Conhecendo o MetaEditor",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613290-conhecendo-o-metaeditor",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_fcf5a54e476a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ae24f205-c847-4d77-a48c-c8db0395b1ea",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_163750bfb4ae",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ae24f205-c847-4d77-a48c-c8db0395b1ea&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 346,
+              "rawHtml": "<iframe id=\"panda-3fe30211-1d75-4d68-aeb1-329fcb64b543\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ae24f205-c847-4d77-a48c-c8db0395b1ea&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:23.985Z"
+            },
+            {
+              "id": "class_3cd9c75a5111",
+              "title": "Compilação e Sintaxe",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613291-compilacao-e-sintaxe",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_46da6738742c",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=058be9f9-0960-465f-b1a4-7e3e77575bb9",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_818853512562",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=058be9f9-0960-465f-b1a4-7e3e77575bb9&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 540,
+              "rawHtml": "<iframe id=\"panda-8fd322fa-581d-4fbf-a7f1-1a702af940a3\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=058be9f9-0960-465f-b1a4-7e3e77575bb9&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:24.500Z"
+            },
+            {
+              "id": "class_4d916027c879",
+              "title": "Identificadores e Comentários",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613294-identificadores-e-comentarios",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_a7e44be9f4ab",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d92cff65-c82f-4aba-b1de-9be24e5994cc",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_436497784ccf",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d92cff65-c82f-4aba-b1de-9be24e5994cc&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 673,
+              "rawHtml": "<iframe id=\"panda-e1bb0bb8-b9fd-4b4e-a93e-15e5c2b430d0\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d92cff65-c82f-4aba-b1de-9be24e5994cc&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:26.391Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_c2159dbf9dbd",
+          "title": "Fundamentos: Variáveis e Tipos de Dados",
+          "order": 3,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_ac725af68a92",
+              "title": "Variáveis",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613295-variaveis",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_8bac5b9ce291",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aca3b41f-1cc6-4eec-b5ed-c2a2d64bcdcc",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_db66641194e0",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aca3b41f-1cc6-4eec-b5ed-c2a2d64bcdcc&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 589,
+              "rawHtml": "<iframe id=\"panda-56f77fcd-0f20-404a-b04b-e5504c97ce0c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aca3b41f-1cc6-4eec-b5ed-c2a2d64bcdcc&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:28.481Z"
+            },
+            {
+              "id": "class_cd7a7d7ba420",
+              "title": "Tipos de dados",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613297-tipos-de-dados",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_e2e46eb7bd0d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e15ed515-37fb-4759-b9fc-638f4e7b88ef",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_29346bfe8c7c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e15ed515-37fb-4759-b9fc-638f4e7b88ef&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1089,
+              "rawHtml": "<iframe id=\"panda-63ce6908-f02f-4a2b-bc5b-0cb1f18673d0\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e15ed515-37fb-4759-b9fc-638f4e7b88ef&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:30.572Z"
+            },
+            {
+              "id": "class_7bc0ea4b97f9",
+              "title": "Constantes",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613300-constantes",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_b5660b876c2b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=696a9a38-cbfb-4560-bd1d-f870002c75c9",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_a268398cf81e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=696a9a38-cbfb-4560-bd1d-f870002c75c9&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 278,
+              "rawHtml": "<iframe id=\"panda-9283b8a4-9bb8-40fd-98b4-5d322ec837ff\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=696a9a38-cbfb-4560-bd1d-f870002c75c9&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:32.418Z"
+            },
+            {
+              "id": "class_f8b9d20e4c07",
+              "title": "Arrays",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613303-arrays",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_c5bccc28bce1",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a3b8631-0823-4d00-ac0c-d06275784be2",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_5b20ce8cafaf",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a3b8631-0823-4d00-ac0c-d06275784be2&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 671,
+              "rawHtml": "<iframe id=\"panda-35d166d7-5005-4013-b97a-2aab8a0310bf\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a3b8631-0823-4d00-ac0c-d06275784be2&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:34.300Z"
+            },
+            {
+              "id": "class_cd2a15871491",
+              "title": "Enumeradores",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613304-enumeradores",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_d1a94c4dc389",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=64174d7f-f2fc-491e-a64f-1e911831e8f4",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_b460f9e3fe7e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=64174d7f-f2fc-491e-a64f-1e911831e8f4&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 761,
+              "rawHtml": "<iframe id=\"panda-31c75816-ddb7-4895-9d7d-58eef6592cb4\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=64174d7f-f2fc-491e-a64f-1e911831e8f4&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:36.394Z"
+            },
+            {
+              "id": "class_a88822ac5afe",
+              "title": "Structs",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613306-structs",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_b787cc9d4f00",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=04465f84-6ed5-4e58-b8a9-7fc21238b988",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_e1b433f7e8f8",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=04465f84-6ed5-4e58-b8a9-7fc21238b988&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 704,
+              "rawHtml": "<iframe id=\"panda-4e048b70-4564-4294-8d0c-a482fb69210e\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=04465f84-6ed5-4e58-b8a9-7fc21238b988&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:38.369Z"
+            },
+            {
+              "id": "class_ec6cc835932e",
+              "title": "Casting",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613308-casting",
+              "order": 7,
+              "videos": [
+                {
+                  "id": "video_f7da0cfeb87b",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fbe99460-ef3e-40d2-8fa8-6b2f99bc3b41",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_b0b79894ae3e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fbe99460-ef3e-40d2-8fa8-6b2f99bc3b41&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 373,
+              "rawHtml": "<iframe id=\"panda-4678e825-e393-4772-8512-6a564d62692c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fbe99460-ef3e-40d2-8fa8-6b2f99bc3b41&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:40.229Z"
+            },
+            {
+              "id": "class_65f1054b1ef3",
+              "title": "Escopo",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613310-escopo",
+              "order": 8,
+              "videos": [
+                {
+                  "id": "video_9c157c7232f1",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=873c0945-28c9-4336-a3f2-bf988a5352e3",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_0f82cbb82347",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=873c0945-28c9-4336-a3f2-bf988a5352e3&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 933,
+              "rawHtml": "<iframe id=\"panda-0e33a0bf-e5e5-4436-9b2c-1b9272c8df96\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=873c0945-28c9-4336-a3f2-bf988a5352e3&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:42.334Z"
+            },
+            {
+              "id": "class_e66695b84371",
+              "title": "Inputs",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613311-inputs",
+              "order": 9,
+              "videos": [
+                {
+                  "id": "video_c0fc9e1ff7b6",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a09120c-af94-4ce6-af6f-4cdf26c14ee9",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_09de44ad8615",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a09120c-af94-4ce6-af6f-4cdf26c14ee9&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 624,
+              "rawHtml": "<iframe id=\"panda-c9513bc9-62b9-4b0e-9074-4f59d82637a4\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a09120c-af94-4ce6-af6f-4cdf26c14ee9&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:44.428Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_e98e2af2d320",
+          "title": "Fundamentos: Operações, Condicionais e Loops",
+          "order": 4,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_4010ac14d21d",
+              "title": "Operações Matemáticas Básicas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613382-operacoes-matematicas-basicas",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_22f0d34ddec3",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=874fb7c8-9c95-4f89-a27c-0337e445876c",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_38e252d6eadf",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=874fb7c8-9c95-4f89-a27c-0337e445876c&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 984,
+              "rawHtml": "<iframe id=\"panda-66a1390a-45cb-463e-87c8-c193678f2896\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=874fb7c8-9c95-4f89-a27c-0337e445876c&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:46.526Z"
+            },
+            {
+              "id": "class_80eb9fa6c378",
+              "title": "Operadores Lógicos",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613383-operadores-logicos",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_8432fe5f436f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e8164dab-3fec-4c2d-ac9d-72c44241489e",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_725e6b1f6843",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e8164dab-3fec-4c2d-ac9d-72c44241489e&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 696,
+              "rawHtml": "<iframe id=\"panda-99569cec-007e-4155-a1a9-6678e88d141c\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e8164dab-3fec-4c2d-ac9d-72c44241489e&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:48.503Z"
+            },
+            {
+              "id": "class_c97121efe8f0",
+              "title": "Tipos de Condicionais",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613385-tipos-de-condicionais",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_ad7ccb49b53d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1fc80a65-03c2-472a-b1d3-49161a64ef70",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_26c51331e252",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1fc80a65-03c2-472a-b1d3-49161a64ef70&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1022,
+              "rawHtml": "<iframe id=\"panda-88732e4e-ff1b-4a96-b7db-4fcc2456e957\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1fc80a65-03c2-472a-b1d3-49161a64ef70&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:50.618Z"
+            },
+            {
+              "id": "class_d2a13dc98914",
+              "title": "Switch Case",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613387-switch-case",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_d7e67ae195b2",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=54e20df0-9c67-478f-84c2-957d1a619099",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_7c5954bbc0a0",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=54e20df0-9c67-478f-84c2-957d1a619099&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 479,
+              "rawHtml": "<iframe id=\"panda-b17954a4-0923-43d0-9204-ecd36cb738e8\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=54e20df0-9c67-478f-84c2-957d1a619099&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:52.707Z"
+            },
+            {
+              "id": "class_812045803bd2",
+              "title": "Loops de Repetição",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613441-loops-de-repeticao",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_20acea88d748",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c78f575e-5d20-44d9-87ac-334b75ca06b7",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_d91efc97aa3e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c78f575e-5d20-44d9-87ac-334b75ca06b7&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1270,
+              "rawHtml": "<iframe id=\"panda-c7e4d5e8-a3e2-4f4b-a4b2-6222fcd87bea\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=c78f575e-5d20-44d9-87ac-334b75ca06b7&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:54.827Z"
+            },
+            {
+              "id": "class_888ba47b81a5",
+              "title": "Break e Continue",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613443-break-e-continue",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_fb051af46d62",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=786e0c79-2c3e-499e-a57a-154ce4ee8969",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_34d96238b31e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=786e0c79-2c3e-499e-a57a-154ce4ee8969&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 341,
+              "rawHtml": "<iframe id=\"panda-4d19fd36-bc6f-44fe-8f0d-5d829a921701\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=786e0c79-2c3e-499e-a57a-154ce4ee8969&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:55.430Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_8ade5764fe93",
+          "title": "Funções",
+          "order": 5,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_b8a9417f661b",
+              "title": "O que são Funções",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613445-o-que-sao-funcoes",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_b8036fa40efd",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ffcbf2c-6fc9-407d-8039-b262c7c66944",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_644564e2e844",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ffcbf2c-6fc9-407d-8039-b262c7c66944&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 862,
+              "rawHtml": "<iframe id=\"panda-5e5e5d8a-ca88-4080-b2e1-564802c9ce77\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=6ffcbf2c-6fc9-407d-8039-b262c7c66944&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:57.517Z"
+            },
+            {
+              "id": "class_84b635e47696",
+              "title": "Função Stop Loss",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613446-funcao-stop-loss",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_b9e630043773",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2cd6e174-6f6e-4bc5-8b75-c3c800ba4ec4",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_6d9bd31520d8",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2cd6e174-6f6e-4bc5-8b75-c3c800ba4ec4&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 572,
+              "rawHtml": "<iframe id=\"panda-e13500a4-9742-4bd6-969c-aace140d7cb4\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2cd6e174-6f6e-4bc5-8b75-c3c800ba4ec4&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:54:59.761Z"
+            },
+            {
+              "id": "class_6fd6bf614c54",
+              "title": "Default Value",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613448-default-value",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_d14b37f9d452",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fe13398f-3b2d-463f-a36e-1ee6333a1276",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_1589bafc95b1",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fe13398f-3b2d-463f-a36e-1ee6333a1276&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 243,
+              "rawHtml": "<iframe id=\"panda-d3ee2f82-2fac-4ae9-bf9c-334a9305a1db\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=fe13398f-3b2d-463f-a36e-1ee6333a1276&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:01.611Z"
+            },
+            {
+              "id": "class_8ae2ccd4a81b",
+              "title": "Parâmetros por Valor e Referência",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613449-parametros-por-valor-e-referencia",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_ec8c9c7fe16f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2c7e5270-947f-4501-968e-493d2ccec80a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_25f675adf618",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2c7e5270-947f-4501-968e-493d2ccec80a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 503,
+              "rawHtml": "<iframe id=\"panda-28a38204-e6c7-4917-8201-93619c6925c6\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2c7e5270-947f-4501-968e-493d2ccec80a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:03.700Z"
+            },
+            {
+              "id": "class_1a74ab073cd4",
+              "title": "Overloading de Funções",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613450-overloading-de-funcoes",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_e72cbf58d9e0",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e6fdde12-b189-4918-a331-bb5c28d1ec0a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_e8d84cecbf52",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e6fdde12-b189-4918-a331-bb5c28d1ec0a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 168,
+              "rawHtml": "<iframe id=\"panda-0069561c-7d7e-42ed-abf8-498ba902a87d\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=e6fdde12-b189-4918-a331-bb5c28d1ec0a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:05.814Z"
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_3fbb23441057",
+          "title": "Criando um Robô do Zero",
+          "order": 6,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_095f18670c1a",
+              "title": "Estrutura Básica de um Robô",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613451-estrutura-basica-de-um-robo",
+              "order": 1,
+              "videos": [
+                {
+                  "id": "video_727ec620e68d",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95f5beee-1ff5-41c9-ae3d-76eec69ae58f",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_3ef585942529",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95f5beee-1ff5-41c9-ae3d-76eec69ae58f&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 409,
+              "rawHtml": "<iframe id=\"panda-06cc0b15-3f75-441e-8784-477f415b70aa\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95f5beee-1ff5-41c9-ae3d-76eec69ae58f&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:07.987Z"
+            },
+            {
+              "id": "class_9705e16dccd1",
+              "title": "Tipos de conta: Netting x Hedge",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613452-tipos-de-conta-netting-x-hedge",
+              "order": 2,
+              "videos": [
+                {
+                  "id": "video_f35b361a727c",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=088e6918-089c-4414-bee7-e2a03334be48",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_9d0ca5cb197a",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=088e6918-089c-4414-bee7-e2a03334be48&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 415,
+              "rawHtml": "<iframe id=\"panda-4d1b3e37-dc57-409a-a216-9e32187b82a2\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=088e6918-089c-4414-bee7-e2a03334be48&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:10.167Z"
+            },
+            {
+              "id": "class_aff4d22e0b44",
+              "title": "Event Handlers",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613454-event-handlers",
+              "order": 3,
+              "videos": [
+                {
+                  "id": "video_0057de97eddf",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f387be5b-2be9-4e6c-9c51-f93731fe76cd",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_3a7c989be77b",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f387be5b-2be9-4e6c-9c51-f93731fe76cd&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 716,
+              "rawHtml": "<iframe id=\"panda-efeb78a6-9273-468d-a2ff-f4496142bb14\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f387be5b-2be9-4e6c-9c51-f93731fe76cd&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:12.270Z"
+            },
+            {
+              "id": "class_0b3bf8eb49d2",
+              "title": "Robô de Bandas de Bollinger",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613455-robo-de-bandas-de-bollinger",
+              "order": 4,
+              "videos": [
+                {
+                  "id": "video_cb5197ea9c5f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d2c5b8eb-0d80-459d-afef-e770672c8e0a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_8909faa2891c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d2c5b8eb-0d80-459d-afef-e770672c8e0a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 386,
+              "rawHtml": "<iframe id=\"panda-4019b42d-e99c-400e-ba9d-9f18d86b5a53\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=d2c5b8eb-0d80-459d-afef-e770672c8e0a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:14.379Z"
+            },
+            {
+              "id": "class_23db9f9d8798",
+              "title": "Carregando Indicadores",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613456-carregando-indicadores",
+              "order": 5,
+              "videos": [
+                {
+                  "id": "video_efe03e0b8931",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1e9b23b6-f053-478e-896a-00b68c16d393",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_05a268af05f2",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1e9b23b6-f053-478e-896a-00b68c16d393&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 718,
+              "rawHtml": "<iframe id=\"panda-7e6ca0f0-f2a3-49fd-8e56-c28606226d25\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1e9b23b6-f053-478e-896a-00b68c16d393&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:16.472Z"
+            },
+            {
+              "id": "class_7362e7657dd7",
+              "title": "Adicionando Includes",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613457-adicionando-includes",
+              "order": 6,
+              "videos": [
+                {
+                  "id": "video_72047022e3bf",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ea8237a0-417b-42a0-af2f-7b73475e7e41",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_f69e83d2e4b7",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ea8237a0-417b-42a0-af2f-7b73475e7e41&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 628,
+              "rawHtml": "<iframe id=\"panda-86201111-d038-49ef-8364-f2632efc6ce7\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ea8237a0-417b-42a0-af2f-7b73475e7e41&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:18.705Z"
+            },
+            {
+              "id": "class_512d60b316d9",
+              "title": "Criando estrutura de Horários",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613458-criando-estrutura-de-horarios",
+              "order": 7,
+              "videos": [
+                {
+                  "id": "video_7925d9bdafa4",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a1e8f9db-2607-4b43-b71f-80b1d31678cf",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_1f3adb305250",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a1e8f9db-2607-4b43-b71f-80b1d31678cf&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 411,
+              "rawHtml": "<iframe id=\"panda-a5c62646-3e21-40e3-8cf8-c8f1b06a5e40\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a1e8f9db-2607-4b43-b71f-80b1d31678cf&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:20.805Z"
+            },
+            {
+              "id": "class_3506336edbd1",
+              "title": "Verificando Novo Candle",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613459-verificando-novo-candle",
+              "order": 8,
+              "videos": [
+                {
+                  "id": "video_b09366e37eef",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7467c343-0e82-4073-8382-9243a13a6b4c",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_5a68f71b8dbb",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7467c343-0e82-4073-8382-9243a13a6b4c&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 431,
+              "rawHtml": "<iframe id=\"panda-88ba7fd1-e233-40cf-ab0b-71f04c1bde72\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7467c343-0e82-4073-8382-9243a13a6b4c&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:22.926Z"
+            },
+            {
+              "id": "class_b8d1067623dd",
+              "title": "Checando Sinal de Entrada - Acessando Cotações",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613460-checando-sinal-de-entrada-acessando-cotacoes",
+              "order": 9,
+              "videos": [
+                {
+                  "id": "video_8b0d727adde0",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9b5aec79-f258-4c36-b2b1-87e3377bbd24",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_fcdb7fc1ab4e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9b5aec79-f258-4c36-b2b1-87e3377bbd24&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 905,
+              "rawHtml": "<iframe id=\"panda-57b98c6e-4bbc-41d8-9e70-976526ff98b5\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=9b5aec79-f258-4c36-b2b1-87e3377bbd24&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:25.136Z"
+            },
+            {
+              "id": "class_e79148c672be",
+              "title": "Checando Sinal de Entrada - Manipulando Indicadores",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613461-checando-sinal-de-entrada-manipulando-indicadores",
+              "order": 10,
+              "videos": [
+                {
+                  "id": "video_7330bb25ac34",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f053c406-3995-45d7-bca7-fbd7d64fdb3b",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_67221d496317",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f053c406-3995-45d7-bca7-fbd7d64fdb3b&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 810,
+              "rawHtml": "<iframe id=\"panda-1bf9ddbe-7446-4b64-ae26-75599de2d733\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f053c406-3995-45d7-bca7-fbd7d64fdb3b&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:25.803Z"
+            },
+            {
+              "id": "class_cacb7b57f305",
+              "title": "Checando sinal de entrada - Validações",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613462-checando-sinal-de-entrada-validacoes",
+              "order": 11,
+              "videos": [
+                {
+                  "id": "video_efcc7685f92f",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2de27ecc-9a3a-4760-9c27-110a04b58c31",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_29a15bb5f242",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2de27ecc-9a3a-4760-9c27-110a04b58c31&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 706,
+              "rawHtml": "<iframe id=\"panda-9572434b-65c0-4ebb-b677-8e09fe288fea\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2de27ecc-9a3a-4760-9c27-110a04b58c31&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:27.916Z"
+            },
+            {
+              "id": "class_dbe84f28165a",
+              "title": "Enviando Ordem a Mercado",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613463-enviando-ordem-a-mercado",
+              "order": 12,
+              "videos": [
+                {
+                  "id": "video_a3bbd49c20c0",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=65133e29-3bf6-492c-9bdf-a98c6c7a3caa",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_0e407e5f6df3",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=65133e29-3bf6-492c-9bdf-a98c6c7a3caa&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 2098,
+              "rawHtml": "<iframe id=\"panda-2d8f4551-5fea-4560-b620-0b790a012041\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=65133e29-3bf6-492c-9bdf-a98c6c7a3caa&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:30.074Z"
+            },
+            {
+              "id": "class_01abb4d18d52",
+              "title": "Corrigindo Filling Type para mercado de balcão",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613464-corrigindo-filling-type-para-mercado-de-balcao",
+              "order": 13,
+              "videos": [
+                {
+                  "id": "video_2bc031e96fb8",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9080009-0e40-4976-b56e-eae890a42905",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_ec124d6e634e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9080009-0e40-4976-b56e-eae890a42905&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 392,
+              "rawHtml": "<iframe id=\"panda-24cc14f9-0def-4d3b-94b5-91d6d8be4efe\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b9080009-0e40-4976-b56e-eae890a42905&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:32.181Z"
+            },
+            {
+              "id": "class_83d7f7d779ef",
+              "title": "Verificando Posições Abertas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613469-verificando-posicoes-abertas",
+              "order": 14,
+              "videos": [
+                {
+                  "id": "video_32105846ebb3",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a016dcc-7613-43a8-bcc3-b5f90ecc1802",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_11ea67688c57",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a016dcc-7613-43a8-bcc3-b5f90ecc1802&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 512,
+              "rawHtml": "<iframe id=\"panda-bf4d31b2-b64c-4890-af9b-b14a653d3ee8\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=4a016dcc-7613-43a8-bcc3-b5f90ecc1802&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:34.309Z"
+            },
+            {
+              "id": "class_1dfe8708f4ee",
+              "title": "Enviando Ordens Pendentes",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613470-enviando-ordens-pendentes",
+              "order": 15,
+              "videos": [
+                {
+                  "id": "video_778f6b396f60",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f0be1d24-9228-4318-a572-e89551780955",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_61f253e3790d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f0be1d24-9228-4318-a572-e89551780955&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 840,
+              "rawHtml": "<iframe id=\"panda-4abfc127-23d2-46a8-bae7-18d14889c829\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f0be1d24-9228-4318-a572-e89551780955&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:36.436Z"
+            },
+            {
+              "id": "class_8c0d4079b394",
+              "title": "Manipulando Ordens Abertas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613471-manipulando-ordens-abertas",
+              "order": 16,
+              "videos": [
+                {
+                  "id": "video_fb987f0a73b3",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=797219de-2cc6-46e1-a2df-d1b46d9d9a74",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_3a45c692e4c6",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=797219de-2cc6-46e1-a2df-d1b46d9d9a74&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 730,
+              "rawHtml": "<iframe id=\"panda-b9380077-89ad-4828-9c03-3a05e8f3adff\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=797219de-2cc6-46e1-a2df-d1b46d9d9a74&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:38.432Z"
+            },
+            {
+              "id": "class_9bee61a8eb3e",
+              "title": "Cancelando Ordens Abertas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613472-cancelando-ordens-abertas",
+              "order": 17,
+              "videos": [
+                {
+                  "id": "video_ca58dadb88de",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f446dbe4-8767-4e89-b9a3-baba8fdf7dbc",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_3a6c5885fa4b",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f446dbe4-8767-4e89-b9a3-baba8fdf7dbc&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 559,
+              "rawHtml": "<iframe id=\"panda-5eb19923-84ec-4640-9909-786cc189c4b2\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f446dbe4-8767-4e89-b9a3-baba8fdf7dbc&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:40.556Z"
+            },
+            {
+              "id": "class_bd39a46a6c79",
+              "title": "Fechando Operações Abertas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613474-fechando-operacoes-abertas",
+              "order": 18,
+              "videos": [
+                {
+                  "id": "video_584de8e0bb3e",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=cde76adc-c873-4ce0-9cf4-9c207542b740",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_3fe6fc530d29",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=cde76adc-c873-4ce0-9cf4-9c207542b740&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 490,
+              "rawHtml": "<iframe id=\"panda-0d099f23-1c01-4370-9ea3-a6d2db9bebca\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=cde76adc-c873-4ce0-9cf4-9c207542b740&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:42.678Z"
+            },
+            {
+              "id": "class_4fa4b33454bf",
+              "title": "Acessando Histórico de Operações",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613475-acessando-historico-de-operacoes",
+              "order": 19,
+              "videos": [
+                {
+                  "id": "video_74d3c7e70873",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a06c7bb-11da-4366-a1a0-964f9071fc22",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_5a4d1d40824b",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a06c7bb-11da-4366-a1a0-964f9071fc22&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 636,
+              "rawHtml": "<iframe id=\"panda-a1b20fcd-047f-44f2-befd-f1c374e335d9\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7a06c7bb-11da-4366-a1a0-964f9071fc22&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:44.568Z"
+            },
+            {
+              "id": "class_10858ea9cd01",
+              "title": "Criando métricas customizadas de performance",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613476-criando-metricas-customizadas-de-performance",
+              "order": 20,
+              "videos": [
+                {
+                  "id": "video_5c2faf92cbb8",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2698ec62-72f9-409c-bec4-8bdf7113dd8a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_a99f2a9959e8",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2698ec62-72f9-409c-bec4-8bdf7113dd8a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 789,
+              "rawHtml": "<iframe id=\"panda-b73b3649-4be6-48db-8e11-fd834d0a0052\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=2698ec62-72f9-409c-bec4-8bdf7113dd8a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:46.467Z"
+            },
+            {
+              "id": "class_7e189101ddab",
+              "title": "Stop Loss Dinâmico - ATR",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613481-stop-loss-dinamico-atr",
+              "order": 21,
+              "videos": [
+                {
+                  "id": "video_e6e5226fc451",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a17988c-5016-4f35-81ec-d90c34070abd",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_beffe6afc800",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a17988c-5016-4f35-81ec-d90c34070abd&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1035,
+              "rawHtml": "<iframe id=\"panda-36bf196c-6755-4d27-8432-84eb425db05a\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=1a17988c-5016-4f35-81ec-d90c34070abd&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:48.765Z"
+            },
+            {
+              "id": "class_781be5f200fa",
+              "title": "Importando Bibliotecas Externas - Calculando BotSpot Score",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613482-importando-bibliotecas-externas-calculando-botspot-score",
+              "order": 22,
+              "videos": [
+                {
+                  "id": "video_0307567d682a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3a35e497-479a-4aea-9b41-9a5d6cb925c8",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_04bbf215a8e0",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3a35e497-479a-4aea-9b41-9a5d6cb925c8&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 982,
+              "rawHtml": "<iframe id=\"panda-28e14618-2fce-42aa-a29c-54c220e0a588\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3a35e497-479a-4aea-9b41-9a5d6cb925c8&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:50.886Z"
+            },
+            {
+              "id": "class_6d2a887220ad",
+              "title": "Integrando o Extreme Forward Analysis com seu próprio robô",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613483-integrando-o-extreme-forward-analysis-com-seu-proprio-robo",
+              "order": 23,
+              "videos": [
+                {
+                  "id": "video_9f29c24299da",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=39ae3782-0f3a-4e9e-8b0d-81ce448c05f9",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_6256c81120d6",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=39ae3782-0f3a-4e9e-8b0d-81ce448c05f9&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 881,
+              "rawHtml": "<iframe id=\"panda-35f1e716-a734-4bd7-bb44-affa1e317354\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=39ae3782-0f3a-4e9e-8b0d-81ce448c05f9&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:52.786Z"
+            },
+            {
+              "id": "class_0694af193364",
+              "title": "Executando o robô no Forex",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613484-executando-o-robo-no-forex",
+              "order": 24,
+              "videos": [
+                {
+                  "id": "video_507b614bb251",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ee787466-5012-4313-9893-e027d10f6b88",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_b9deadb34f58",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ee787466-5012-4313-9893-e027d10f6b88&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1162,
+              "rawHtml": "<iframe id=\"panda-ce9e4422-6fde-456a-92b9-1a216bca7215\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ee787466-5012-4313-9893-e027d10f6b88&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:54.652Z"
+            },
+            {
+              "id": "class_2d51899758d1",
+              "title": "Introdução a Objetos Gráficos",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613486-introducao-a-objetos-graficos",
+              "order": 25,
+              "videos": [
+                {
+                  "id": "video_bbee51b0d976",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=92e297df-1328-4f95-b1ae-bf7e67357088",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_16ed945ef098",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=92e297df-1328-4f95-b1ae-bf7e67357088&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1056,
+              "rawHtml": "<iframe id=\"panda-0d920951-deff-415d-bdf9-9379c5f54750\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=92e297df-1328-4f95-b1ae-bf7e67357088&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:56.728Z"
+            },
+            {
+              "id": "class_831ea855ef51",
+              "title": "Criando e Distribuindo um EA com Indicador Customizado",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613488-criando-e-distribuindo-um-ea-com-indicador-customizado",
+              "order": 26,
+              "videos": [
+                {
+                  "id": "video_8350e1716965",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7c5367c2-0a62-493f-be5f-9d92742927a6",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_a6a555292f61",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7c5367c2-0a62-493f-be5f-9d92742927a6&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1089,
+              "rawHtml": "<iframe id=\"panda-59af6010-ba56-4588-86dd-a3b200db9941\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=7c5367c2-0a62-493f-be5f-9d92742927a6&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:57.123Z"
+            },
+            {
+              "id": "class_6da18c1782c6",
+              "title": "Calculando CAGR como Métrica Customizada de Performance",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613490-calculando-cagr-como-metrica-customizada-de-performance",
+              "order": 27,
+              "videos": [
+                {
+                  "id": "video_f9aac45a0350",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aef54e98-e2c2-40cc-bd76-ebc8ee1e2c6b",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_ff21c0ad7ba3",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aef54e98-e2c2-40cc-bd76-ebc8ee1e2c6b&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 900,
+              "rawHtml": "<iframe id=\"panda-8d81b30c-337c-43ef-80ce-02212320119b\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=aef54e98-e2c2-40cc-bd76-ebc8ee1e2c6b&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:55:59.061Z"
+            },
+            {
+              "id": "class_c695935c6142",
+              "title": "Alterando Template de Cores do Robô",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613491-alterando-template-de-cores-do-robo",
+              "order": 28,
+              "videos": [
+                {
+                  "id": "video_24a5afd7decf",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a0298b30-b376-49ff-8ea3-1473478e9999",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_745f1d3ad701",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a0298b30-b376-49ff-8ea3-1473478e9999&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 599,
+              "rawHtml": "<iframe id=\"panda-8d4be412-1fb0-49ef-bf23-48b0084536be\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=a0298b30-b376-49ff-8ea3-1473478e9999&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:01.005Z"
+            },
+            {
+              "id": "class_1d77b9efb74d",
+              "title": "Nova Métrica Customizada de Performance: Calculando DD Medio",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613492-nova-metrica-customizada-de-performance-calculando-dd-medio",
+              "order": 29,
+              "videos": [
+                {
+                  "id": "video_0cb2fe89bf6a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5df1d93d-46f7-44b1-acff-511ed3df3f6a",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_7ced39477aa5",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5df1d93d-46f7-44b1-acff-511ed3df3f6a&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1283,
+              "rawHtml": "<iframe id=\"panda-11a36789-501e-4e95-a3dd-cb0d89efa322\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=5df1d93d-46f7-44b1-acff-511ed3df3f6a&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:02.991Z"
+            },
+            {
+              "id": "class_4f5e5c3b8dbf",
+              "title": "Controlando Sentido das Operações: Compra, Venda ou Ambas as Pontas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613493-controlando-sentido-das-operacoes-compra-venda-ou-ambas-as-pontas",
+              "order": 30,
+              "videos": [
+                {
+                  "id": "video_7617c0c5db47",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f76b106a-ba53-4037-bf9b-329b18a7bcb4",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_2a0e55f29872",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f76b106a-ba53-4037-bf9b-329b18a7bcb4&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 665,
+              "rawHtml": "<iframe id=\"panda-2dbd60a8-576f-44b6-908f-abb721728a92\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=f76b106a-ba53-4037-bf9b-329b18a7bcb4&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:04.839Z"
+            },
+            {
+              "id": "class_3c94fd71c48d",
+              "title": "Posicionando ordens no Book - Entradas Limit",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613495-posicionando-ordens-no-book-entradas-limit",
+              "order": 31,
+              "videos": [
+                {
+                  "id": "video_1f44f930bebe",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95cc844b-ba04-433f-91c4-1fcec630996f",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_aaf710c45f9e",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95cc844b-ba04-433f-91c4-1fcec630996f&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 961,
+              "rawHtml": "<iframe id=\"panda-3dd6a098-b7bf-47fb-a18e-fafe806b8f1d\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=95cc844b-ba04-433f-91c4-1fcec630996f&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:06.782Z"
+            },
+            {
+              "id": "class_a7e6c106ae50",
+              "title": "Manipulando Variáveis Globais no MT5 - Compartilhando Informações Entre Robôs",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613498-manipulando-variaveis-globais-no-mt5-compartilhando-informacoes-entre-ro",
+              "order": 32,
+              "videos": [
+                {
+                  "id": "video_e6f8a370b246",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=840701d5-7ae4-40cc-b1c8-f6257ab15003",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_fe4113c19513",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=840701d5-7ae4-40cc-b1c8-f6257ab15003&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1170,
+              "rawHtml": "<iframe id=\"panda-e79069bb-98be-4205-9b03-342a1d14c4df\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=840701d5-7ae4-40cc-b1c8-f6257ab15003&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:08.495Z"
+            },
+            {
+              "id": "class_b73abee272d2",
+              "title": "Manipulando Variáveis Globais no MT5 - Compartilhando Informações Entre Robôs - Parte 2",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613499-manipulando-variaveis-globais-no-mt5-compartilhando-informacoes-entre-ro",
+              "order": 33,
+              "videos": [
+                {
+                  "id": "video_7413468ee61a",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ebdc042d-b2b2-4cf6-aff6-d59d0b850b97",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_63205fb9f398",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ebdc042d-b2b2-4cf6-aff6-d59d0b850b97&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 675,
+              "rawHtml": "<iframe id=\"panda-d1234259-2d59-43ff-8572-2b1d01233c23\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=ebdc042d-b2b2-4cf6-aff6-d59d0b850b97&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:10.446Z"
+            },
+            {
+              "id": "class_f8d72f6f6877",
+              "title": "Manipulando Eventos de Trade com a função OnTrade()",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613501-manipulando-eventos-de-trade-com-a-funcao-ontrade",
+              "order": 34,
+              "videos": [
+                {
+                  "id": "video_58fc8037f745",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=13c0fcc7-373e-4d50-aaf1-b9c1d92d9599",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_734acfdb129d",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=13c0fcc7-373e-4d50-aaf1-b9c1d92d9599&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1080,
+              "rawHtml": "<iframe id=\"panda-8ddf456e-d692-433c-9495-4f474fb98d77\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=13c0fcc7-373e-4d50-aaf1-b9c1d92d9599&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:12.267Z"
+            },
+            {
+              "id": "class_2ff65594918f",
+              "title": "Identificando Stop Loss e Incrementando Lote com OnTradeTransaction() - Parte 1",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613503-identificando-stop-loss-e-incrementando-lote-com-ontradetransaction-part",
+              "order": 35,
+              "videos": [
+                {
+                  "id": "video_e1ed33219021",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=af17f1d3-0f1a-4235-a13c-35ac00fe4c60",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_300f0c157eca",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=af17f1d3-0f1a-4235-a13c-35ac00fe4c60&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 821,
+              "rawHtml": "<iframe id=\"panda-30ec8891-7073-4a16-b4d1-2154d502e1e4\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=af17f1d3-0f1a-4235-a13c-35ac00fe4c60&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:14.017Z"
+            },
+            {
+              "id": "class_867b39555081",
+              "title": "Identificando Stop Loss e Incrementando Lote com OnTradeTransaction() - Parte 2",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613504-identificando-stop-loss-e-incrementando-lote-com-ontradetransaction-part",
+              "order": 36,
+              "videos": [
+                {
+                  "id": "video_346b4a89a7b7",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3c091120-0fbe-4281-91da-b3dd2abf60b6",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_8c901588632c",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3c091120-0fbe-4281-91da-b3dd2abf60b6&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 1261,
+              "rawHtml": "<iframe id=\"panda-af25dfd8-a4de-439d-80dd-944c4c72d68f\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=3c091120-0fbe-4281-91da-b3dd2abf60b6&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:16.056Z"
+            },
+            {
+              "id": "class_3c0b4db6a198",
+              "title": "Criando Services no MT5 - Parte I",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4945250-criando-services-no-mt5-parte-i",
+              "order": 37,
+              "videos": [
+                {
+                  "id": "video_2cf7632d5682",
+                  "title": "Video 1",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b2e17f11-e469-4582-825f-93d42ffb040d",
+                  "order": 1,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                },
+                {
+                  "id": "video_f8faa0c566e4",
+                  "title": "Video 2",
+                  "url": "https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b2e17f11-e469-4582-825f-93d42ffb040d&saveProgress=false&color=f57a00",
+                  "order": 2,
+                  "playable": true,
+                  "downloadStatus": "pending"
+                }
+              ],
+              "attachments": [],
+              "confidenceScore": 10,
+              "durationSeconds": 689,
+              "rawHtml": "<iframe id=\"panda-0c7a5ef5-2d07-480c-9f29-b49ecf40054e\" src=\"https://player-vz-7dc30ad6-b65.tv.pandavideo.com.br/embed/?v=b2e17f11-e469-4582-825f-93d42ffb040d&amp;saveProgress=false&amp;color=f57a00\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture\" allowfullscreen=\"\"></iframe>",
+              "markdown": "",
+              "lastUpdatedAt": "2025-11-11T21:56:18.310Z"
+            },
+            {
+              "id": "class_322295037c8c",
+              "title": "Criando Services no Metatrader 5 - Parte II - Enviando Alertas",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4945255-criando-services-no-metatrader-5-parte-ii-enviando-alertas",
+              "order": 38,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 927
+            },
+            {
+              "id": "class_de1d3d127b64",
+              "title": "Analisando Erros Comuns de Roteamento de Ordens",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613506-analisando-erros-comuns-de-roteamento-de-ordens",
+              "order": 39,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 673
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_dda7fb47aaa6",
+          "title": "Manejo de Posição",
+          "order": 7,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_f7a436a85100",
+              "title": "Adicionando BreakEven",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613515-adicionando-breakeven",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1302
+            },
+            {
+              "id": "class_81aa786bcb7a",
+              "title": "Stop Móvel / Step Stop",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613517-stop-movel-step-stop",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 961
+            },
+            {
+              "id": "class_30f1ed09db3e",
+              "title": "Trailing Stop",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613518-trailing-stop",
+              "order": 3,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1347
+            },
+            {
+              "id": "class_67f6b81155c4",
+              "title": "Debugging: Aprendendo a depurar código",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613519-debugging-aprendendo-a-depurar-codigo",
+              "order": 4,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 907
+            },
+            {
+              "id": "class_9c1080c37727",
+              "title": "Controlando Limites Financeiros",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613520-controlando-limites-financeiros",
+              "order": 5,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 751
+            },
+            {
+              "id": "class_d3de69b1fb94",
+              "title": "Controlando Limites de Operações",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613523-controlando-limites-de-operacoes",
+              "order": 6,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 676
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_bb44deecc53d",
+          "title": "Orientação a Objetos",
+          "order": 8,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_2846c69c6c1d",
+              "title": "Introdução a Orientação a Objetos",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613525-introducao-a-orientacao-a-objetos",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 740
+            },
+            {
+              "id": "class_3eddae90dcf8",
+              "title": "Controle de Sessão",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613526-controle-de-sessao",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 760
+            },
+            {
+              "id": "class_2b8b83d1b508",
+              "title": "Permitido Operações de Swing Trade",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613527-permitido-operacoes-de-swing-trade",
+              "order": 3,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 794
+            },
+            {
+              "id": "class_7d6c0ed17c8f",
+              "title": "Criando uma classe para funções utilitárias",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613528-criando-uma-classe-para-funcoes-utilitarias",
+              "order": 4,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 935
+            },
+            {
+              "id": "class_89b14ca7a073",
+              "title": "Criando um Gerenciador de Posições",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613531-criando-um-gerenciador-de-posicoes",
+              "order": 5,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1014
+            },
+            {
+              "id": "class_6b2591aa7b06",
+              "title": "Refatorando funções de limites",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613533-refatorando-funcoes-de-limites",
+              "order": 6,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 628
+            },
+            {
+              "id": "class_0b164287565a",
+              "title": "Herança, Polimorfismo e Overload: Isolando regras da estratégia",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613535-heranca-polimorfismo-e-overload-isolando-regras-da-estrategia",
+              "order": 7,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1641
+            },
+            {
+              "id": "class_f48e6b6d0b80",
+              "title": "Verificando Alpha - Comparando com Buy and Hold",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613537-verificando-alpha-comparando-com-buy-and-hold",
+              "order": 8,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1047
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_9d8f052a29f3",
+          "title": "Robô Multi Estratégias/Ativos",
+          "order": 9,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_f712f6ddff5e",
+              "title": "Criando um robô multi estratégias",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613536-criando-um-robo-multi-estrategias",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 873
+            },
+            {
+              "id": "class_175f31b2d3f9",
+              "title": "Criando um robô Multi Asset",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613546-criando-um-robo-multi-asset",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1259
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_3b4370e13980",
+          "title": "Manipulação de Arquivos",
+          "order": 10,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_40eb1a3303fe",
+              "title": "Aprendendo a Manipular Arquivos",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613547-aprendendo-a-manipular-arquivos",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 616
+            },
+            {
+              "id": "class_d9a0bd2f6158",
+              "title": "Salvando Operações em Arquivo e Manipulando Dados em Planilha",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613550-salvando-operacoes-em-arquivo-e-manipulando-dados-em-planilha",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 694
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_2dc6f382ef0f",
+          "title": "Integração com Telegram",
+          "order": 11,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_a2435efc818c",
+              "title": "Enviando Alertas de um Robô para o Telegram - Parte I",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613551-enviando-alertas-de-um-robo-para-o-telegram-parte-i",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 1121
+            },
+            {
+              "id": "class_8b7822790f43",
+              "title": "Enviando Alertas de um Robô para o Telegram - Parte II",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4613552-enviando-alertas-de-um-robo-para-o-telegram-parte-ii",
+              "order": 2,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 894
+            },
+            {
+              "id": "class_f26ff9e3160d",
+              "title": "Enviando Alertas de um Robô para o Telegram - Parte III",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4621758-enviando-alertas-de-um-robo-para-o-telegram-parte-iii",
+              "order": 3,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0,
+              "durationSeconds": 854
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        },
+        {
+          "id": "module_6de8e5fdfdd3",
+          "title": "Código Fonte",
+          "order": 12,
+          "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero",
+          "classes": [
+            {
+              "id": "class_9447e2cf75e2",
+              "title": "Código Fonte",
+              "url": "https://dqlabs.memberkit.com.br/230925-mql5-do-zero/4621757-codigo-fonte",
+              "order": 1,
+              "videos": [],
+              "attachments": [],
+              "confidenceScore": 0
+            }
+          ],
+          "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+        }
+      ],
+      "lastUpdatedAt": "2025-11-11T21:54:12.847Z"
+    }
+  ],
+  "metrics": {
+    "totalCourses": 1,
+    "totalModules": 12,
+    "totalClasses": 87,
+    "successRate": 0.011494252873563218,
+    "minConfidence": 0,
+    "avgConfidence": 8.275862068965518,
+    "selectorFailures": 24
+  },
+  "incidents": []
+}
