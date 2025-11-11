@@ -236,10 +236,11 @@ services:
 
 | Range | Propósito | Exemplos |
 |-------|-----------|----------|
-| `3000-3999` | Frontend e UIs | Dashboard (3103), Grafana (3100) |
-| `4000-4999` | Backend APIs | Telegram Gateway (4010), TP Capital (4008), MTProto (4007) |
+| `3000-3999` | Frontend e UIs | Dashboard (via Gateway 9080), Grafana (3100) |
+| `4000-4999` | Backend APIs | Telegram Gateway (via Gateway 9080), TP Capital (via Gateway 9080), MTProto (4007) |
 | `5000-5999` | Databases | Postgres (5432), TimescaleDB (5434, 5435) |
 | `6000-6999` | Cache/Queue | Redis (6379-6387), PgBouncer (6434-6435), RabbitMQ (5672) |
+| `9000-9999` | API Gateway | Traefik HTTP (9080), Traefik Dashboard (9081) |
 | `8000-8999` | Tooling/Utilities | RAG System (8202) |
 | `9000-9999` | Monitoring/Metrics | Prometheus (9193), Exporters (9121, 9188) |
 

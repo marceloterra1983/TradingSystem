@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "automation"
-x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
+x-tradingsystem-generated-at: "2025-11-11T19:38:00.129Z"
 
 x-tradingsystem-ports:
   firecrawl-proxy:
