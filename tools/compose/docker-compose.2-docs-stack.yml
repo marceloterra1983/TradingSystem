@@ -145,12 +145,10 @@ services:
       - "traefik.http.services.docs-api.loadbalancer.server.port=3000"
 
       # Middlewares (path transformation + standard API chain)
-      - "traefik.http.routers.docs-api.middlewares=docs-api-path-transform,api-standard@file"
+      - "traefik.http.routers.docs-api.middlewares=docs-api-stripprefix,api-standard@file"
 
-      # Path transformation: /api/docs/X → /api/X
-      - "traefik.http.middlewares.docs-api-path-transform.chain.middlewares=docs-api-strip,docs-api-addapi"
-      - "traefik.http.middlewares.docs-api-strip.stripprefix.prefixes=/api/docs"
-      - "traefik.http.middlewares.docs-api-addapi.addprefix.prefix=/api"
+      # Path transformation: /api/docs/X → /X (API has routes at root like /health, /search)
+      - "traefik.http.middlewares.docs-api-stripprefix.stripprefix.prefixes=/api/docs"
 
       # Health Check
       - "traefik.http.services.docs-api.loadbalancer.healthcheck.path=/health"
