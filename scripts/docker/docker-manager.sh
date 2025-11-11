@@ -75,7 +75,7 @@ run_group_command() {
     
     case $group in
         "database")
-            compose_file="docker-compose.4-0-database-ui-stack.yml"
+            compose_file="docker-compose.5-0-database-stack.yml"
             ;;
         "documentation")
             compose_file="docker-compose.documentation.yml"

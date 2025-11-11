@@ -21,7 +21,7 @@ Infrastructure tools for service orchestration, reverse proxy, container registr
 
 Docker Compose orchestration files for all platform services organized by concern:
 
-- **`docker-compose.4-0-database-ui-stack.yml`** - Database tooling stack (pgAdmin, Adminer, pgWeb, QuestDB)
+- **`docker-compose.5-0-database-stack.yml`** - Database tooling stack (pgAdmin, Adminer, pgWeb, QuestDB)
 - **`docker-compose.4-1-tp-capital-stack.yml`** - TP Capital domain (TimescaleDB + PgBouncer + API)
 - **`docker-compose.4-3-workspace-stack.yml`** - Workspace domain (PostgreSQL + services)
 - **`docker-compose.apps.yml`** - Application services (Workspace, TP Capital, Documentation API, Firecrawl Proxy)
@@ -37,7 +37,7 @@ Docker Compose orchestration files for all platform services organized by concer
 
 ```bash
 # Start database tooling (pgAdmin/Adminer/QuestDB)
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d
 
 # Start TP Capital domain (inclui TimescaleDB)
 docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d
@@ -49,7 +49,7 @@ docker compose -f tools/compose/docker-compose.apps.yml up -d
 docker compose -f tools/compose/docker-compose.docs.yml up -d
 
 # Stop all
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml down
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml down
 docker compose -f tools/compose/docker-compose.apps.yml down
 ```
 
@@ -107,7 +107,7 @@ Linux systemd service definitions for native services (non-containerized).
 bash scripts/docker/start-stacks.sh
 
 # Or manually
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d
 docker compose -f tools/compose/docker-compose.apps.yml up -d
 docker compose -f tools/monitoring/docker-compose.yml up -d
 ```
@@ -128,7 +128,7 @@ bash scripts/docker/stop-stacks.sh
 
 # Or manually
 docker compose -f tools/compose/docker-compose.apps.yml down
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml down
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml down
 docker compose -f tools/monitoring/docker-compose.yml down
 ```
 

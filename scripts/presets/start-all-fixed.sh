@@ -15,7 +15,7 @@ echo ""
 
 # 1. Database UI stack primeiro (ferramentas e QuestDB)
 echo "1️⃣ Database UI Stack (pgAdmin/Adminer/QuestDB)..."
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d
 echo "   ✅ Database UI iniciando..."
 sleep 20
 echo ""

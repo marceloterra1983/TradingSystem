@@ -39,7 +39,7 @@ echo ""
 # Step 3: List all compose files
 echo -e "${CYAN}Step 3: Detecting compose files...${NC}"
 COMPOSE_FILES=(
-    "tools/compose/docker-compose.4-0-database-ui-stack.yml"
+    "tools/compose/docker-compose.5-0-database-stack.yml"
     "tools/compose/docker-compose.4-3-workspace-stack.yml"
     "tools/compose/docker-compose.4-2-telegram-stack.yml"
     "tools/compose/docker-compose.4-1-tp-capital-stack.yml"
@@ -65,8 +65,8 @@ echo ""
 
 # 4.1 Database UI Stack
 echo -e "${CYAN}📊 Starting Database UI Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml" ]; then
-    if docker compose -p 4-0-database-ui-stack -f "$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.5-0-database-stack.yml" ]; then
+    if docker compose -p 5-0-database-stack -f "$PROJECT_ROOT/tools/compose/docker-compose.5-0-database-stack.yml" up -d; then
         echo -e "${GREEN}✓ Database UI stack started (QuestDB + pgAdmin/Adminer)${NC}"
     else
         echo -e "${RED}✗ Failed to start Database UI stack${NC}"

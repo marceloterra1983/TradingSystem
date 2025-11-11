@@ -222,7 +222,7 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     database: "N/A (SQL over HTTP)",
     user: "N/A",
     dockerService: "dbui-questdb",
-    composeFile: "tools/compose/docker-compose.4-0-database-ui-stack.yml",
+    composeFile: "tools/compose/docker-compose.5-0-database-stack.yml",
     notes:
       "Console SQL para séries temporais. ILP (Influx Line Protocol) exposto em localhost:9009.",
   },
@@ -251,7 +251,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#pgadmin",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase timescale",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-pgadmin",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d dbui-pgadmin",
     ],
   },
   {
@@ -265,7 +265,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#pgweb",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-pgweb",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d dbui-pgweb",
     ],
   },
   {
@@ -279,7 +279,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#adminer",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-adminer",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d dbui-adminer",
     ],
   },
   {
@@ -293,7 +293,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/tools/rag/architecture#questdb",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-questdb",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d dbui-questdb",
     ],
   },
 ];

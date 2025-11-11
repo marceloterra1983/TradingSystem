@@ -377,6 +377,7 @@ services:
       # ========================================================================
       # Enable Traefik routing for TP Capital API
       - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
 
       # HTTP Router Configuration
       - "traefik.http.routers.tp-capital-api.rule=PathPrefix(`/api/tp-capital`)"

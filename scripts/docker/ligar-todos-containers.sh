@@ -47,7 +47,7 @@ docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d 2>&1 | ta
 echo ""
 
 echo "   📦 Database UI Stack..."
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d 2>&1 | tail -5
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d 2>&1 | tail -5
 echo ""
 
 echo "   📦 Timescale Stack..."

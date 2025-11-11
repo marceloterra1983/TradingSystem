@@ -45,7 +45,7 @@ services:
       - tradingsystem_frontend
       - tradingsystem_backend  # Hub network for API access (proxy)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${DASHBOARD_PORT:-9080}/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3103/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -68,7 +68,7 @@ services:
       - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
 
       # Service Configuration (backend target)
-      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=9080"
+      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=3103"
 
       # Middlewares (no path transformation needed - direct passthrough)
       - "traefik.http.routers.dashboard-ui.middlewares=static-standard@file"

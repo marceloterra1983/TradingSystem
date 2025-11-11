@@ -72,7 +72,7 @@ note right of docker_engine
   **Docker Compose Stacks:**
   • docker-compose.apps.yml
   • docker-compose.4-4-rag-stack.yml
-  • docker-compose.4-0-database-ui-stack.yml
+  • docker-compose.5-0-database-stack.yml
   • docker-compose.4-1-tp-capital-stack.yml
   • docker-compose.6-1-monitoring-stack.yml
   • docker-compose.docs.yml

@@ -418,5 +418,5 @@ echo -e "${BLUE}═════════════════════�
 echo ""
     database-ui)
       ensure_network "tradingsystem_backend"
-      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.4-0-database-ui-stack.yml" up -d
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.5-0-database-stack.yml" up -d
       ;;

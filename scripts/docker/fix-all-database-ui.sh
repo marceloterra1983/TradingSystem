@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para corrigir e sincronizar todos os containers da stack 4-0-database-ui-stack
+# Script para corrigir e sincronizar todos os containers da stack 5-0-database-stack
 # Sincroniza com http://localhost:9080/#/knowledge-database
 
 set -e
 
-echo "🔧 Corrigindo e sincronizando containers da stack 4-0-database-ui-stack..."
+echo "🔧 Corrigindo e sincronizando containers da stack 5-0-database-stack..."
 echo ""
 
 # Portas esperadas pelo dashboard
@@ -33,7 +33,7 @@ echo ""
 
 # 2. Parar containers antigos
 echo "2️⃣ Parando containers antigos..."
-docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml down 2>/dev/null || true
+docker compose -f tools/compose/docker-compose.5-0-database-stack.yml down 2>/dev/null || true
 docker rm -f dbui-pgadmin dbui-pgweb dbui-adminer dbui-questdb 2>/dev/null || true
 echo "   ✅ Containers parados"
 
@@ -89,7 +89,7 @@ echo ""
 
 # 6. Iniciar containers
 echo "6️⃣ Iniciando containers..."
-docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d
 echo "   ✅ Containers iniciados"
 
 echo ""

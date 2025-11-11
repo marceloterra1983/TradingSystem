@@ -1,13 +1,12 @@
 http:
   routers:
-    telegram-gateway-overview:
-      rule: "PathPrefix(`/api/telegram-gateway`)"
-      entryPoints:
-        - web
-      service: telegram-gateway-api
-      middlewares:
-        - api-standard@file
-      priority: 30
+    # ===========================================================================
+    # Telegram Gateway API Routes
+    # ===========================================================================
+    # NOTE: Gateway API endpoints are at /api/messages and /api/channels
+    # The /api/telegram-gateway/* endpoints are for MTProto direct access only
+    # and should be accessed via port 14010 directly (not through Traefik)
+    # ===========================================================================
 
     telegram-gateway-messages:
       rule: "PathPrefix(`/api/messages`)"
@@ -16,7 +15,7 @@ http:
       service: telegram-gateway-api
       middlewares:
         - api-standard@file
-      priority: 30
+      priority: 100
 
     telegram-gateway-channels:
       rule: "PathPrefix(`/api/channels`)"
@@ -25,7 +24,27 @@ http:
       service: telegram-gateway-api
       middlewares:
         - api-standard@file
-      priority: 30
+      priority: 100
+
+    # Gateway API health endpoint (direct access only)
+    telegram-gateway-health:
+      rule: "Path(`/api/telegram/health`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 100
+
+    # Sync messages endpoint - POST only
+    telegram-gateway-sync:
+      rule: "Path(`/api/telegram-gateway/sync-messages`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 100
 
   services:
     telegram-gateway-api:

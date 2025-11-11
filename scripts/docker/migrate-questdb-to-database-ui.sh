@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para migrar QuestDB de processo host para container da stack 4-0-database-ui-stack
+# Script para migrar QuestDB de processo host para container da stack 5-0-database-stack
 # Para processos órfãos ou containers antigos
 
 set -e
 
-echo "🔄 Migrando QuestDB para stack 4-0-database-ui-stack..."
+echo "🔄 Migrando QuestDB para stack 5-0-database-stack..."
 echo ""
 
 # 1. Encontrar e parar processos QuestDB
@@ -63,7 +63,7 @@ echo ""
 
 # 4. Iniciar novo container
 echo "4️⃣ Iniciando novo container dbui-questdb..."
-if docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-questdb; then
+if docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d dbui-questdb; then
     echo "   ✅ Container iniciado com sucesso"
     sleep 3
     docker ps --filter "name=questdb" --format "{{.Names}}\t{{.Status}}\t{{.Ports}}"

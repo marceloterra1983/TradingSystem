@@ -226,12 +226,12 @@ stop_containers() {
 # Function to stop database UI stack
 stop_db_stack() {
     section "Stopping Database UI Stack"
-    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml"
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.5-0-database-stack.yml"
     if [ ! -f "$DB_UI_COMPOSE_FILE" ]; then
         log_info "Database UI compose file not found (skipping)"
         return 0
     fi
-    docker compose -p 4-0-database-ui-stack -f "$DB_UI_COMPOSE_FILE" down --remove-orphans || true
+    docker compose -p 5-0-database-stack -f "$DB_UI_COMPOSE_FILE" down --remove-orphans || true
     log_success "✓ Database UI stack stopped"
 }
 

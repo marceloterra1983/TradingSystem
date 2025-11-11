@@ -144,6 +144,56 @@ services:
       - "traefik.http.middlewares.adminer-stripprefix.stripprefix.prefixes=/db-ui/adminer"
       - "traefik.http.services.dbui-adminer.loadbalancer.server.port=80"
 
+  dbui-pgweb-proxy:
+    container_name: dbui-pgweb-proxy
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${PGWEB_PROXY_PORT:-5053}:80"
+    volumes:
+      - ./pgweb-nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - tradingsystem_backend
+    labels:
+      - "com.tradingsystem.stack=0-gateway-stack"
+      - "com.tradingsystem.service=dbui-pgweb-proxy"
+      - "com.tradingsystem.type=reverse-proxy"
+
+      # Traefik routing
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-pgweb-proxy.rule=PathPrefix(`/db-ui/pgweb`)"
+      - "traefik.http.routers.dbui-pgweb-proxy.entrypoints=web"
+      - "traefik.http.routers.dbui-pgweb-proxy.priority=110"
+      - "traefik.http.routers.dbui-pgweb-proxy.middlewares=pgweb-proxy-stripprefix,admin-standard@file"
+      - "traefik.http.middlewares.pgweb-proxy-stripprefix.stripprefix.prefixes=/db-ui/pgweb"
+      - "traefik.http.services.dbui-pgweb-proxy.loadbalancer.server.port=80"
+
+  dbui-questdb-proxy:
+    container_name: dbui-questdb-proxy
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${QUESTDB_PROXY_PORT:-9001}:80"
+    volumes:
+      - ./questdb-nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - tradingsystem_backend
+    labels:
+      - "com.tradingsystem.stack=0-gateway-stack"
+      - "com.tradingsystem.service=dbui-questdb-proxy"
+      - "com.tradingsystem.type=reverse-proxy"
+
+      # Traefik routing
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-questdb-proxy.rule=PathPrefix(`/db-ui/questdb`)"
+      - "traefik.http.routers.dbui-questdb-proxy.entrypoints=web"
+      - "traefik.http.routers.dbui-questdb-proxy.priority=110"
+      - "traefik.http.routers.dbui-questdb-proxy.middlewares=questdb-proxy-stripprefix,admin-standard@file"
+      - "traefik.http.middlewares.questdb-proxy-stripprefix.stripprefix.prefixes=/db-ui/questdb"
+      - "traefik.http.services.dbui-questdb-proxy.loadbalancer.server.port=80"
+
   # ============================================================================
   # Automation Tools Nginx Reverse Proxies
   # ============================================================================

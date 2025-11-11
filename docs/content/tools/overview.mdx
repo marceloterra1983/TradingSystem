@@ -195,7 +195,7 @@ Service port map and health monitoring.
 
 ```bash
 # 1. Start database tooling (pgAdmin/Adminer/QuestDB)
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d
 
 # 2. Start TP Capital domain (TimescaleDB + pgbouncer + API)
 docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d

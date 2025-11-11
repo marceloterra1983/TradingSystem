@@ -15,7 +15,7 @@ TradingSystem infrastructure runs on **Docker Compose** with multiple stacks for
 
 | Stack | File | Services | Purpose |
 |-------|------|----------|---------|
-| **Database UI** | docker-compose.4-0-database-ui-stack.yml | pgAdmin, Adminer, pgWeb, QuestDB | Database tooling |
+| **Database UI** | docker-compose.5-0-database-stack.yml | pgAdmin, Adminer, pgWeb, QuestDB | Database tooling |
 | **TP Capital** | docker-compose.4-1-tp-capital-stack.yml | TimescaleDB, PgBouncer, Redis, API | Domain stack (signals) |
 | **Qdrant** | docker-compose.qdrant-ha.yml | Qdrant cluster (3 nodes) | Vector database (RAG) |
 | **Monitoring** | docker-compose.6-1-monitoring-stack.yml | Prometheus, Grafana | Observability |
@@ -33,8 +33,8 @@ bash scripts/docker/start-stacks.sh
 bash scripts/docker/stop-stacks.sh
 
 # Individual stack
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml down
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml down
 ```
 
 ## Databases

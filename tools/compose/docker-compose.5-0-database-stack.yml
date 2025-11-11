@@ -1,4 +1,4 @@
-name: 4-0-database-ui-stack
+name: 5-0-database-stack
 
 services:
   dbui-launcher-api:

@@ -81,7 +81,7 @@ echo ""
 
 # Database UI stack (pode ter conflito, mas tentamos)
 echo "   📦 Database UI Stack..."
-docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
+docker compose -p 5-0-database-stack -f tools/compose/docker-compose.5-0-database-stack.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
 echo ""
 
 # TP Capital stack

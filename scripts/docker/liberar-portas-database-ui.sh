@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script para liberar portas usadas pelos containers da stack 4-0-database-ui-stack
+# Script para liberar portas usadas pelos containers da stack 5-0-database-stack
 # REQUER SUDO
 
 set -e
 
-echo "🔓 Liberando portas para containers da stack 4-0-database-ui-stack..."
+echo "🔓 Liberando portas para containers da stack 5-0-database-stack..."
 echo ""
 
 PORTS=(5050 5051 3910 9002 8812 9009)
@@ -69,5 +69,5 @@ done
 echo "✅ Processo concluído!"
 echo ""
 echo "Agora você pode iniciar os containers:"
-echo "  docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d"
+echo "  docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d"
 

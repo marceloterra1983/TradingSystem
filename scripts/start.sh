@@ -412,7 +412,7 @@ start_containers() {
     done
 
     # Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)
-    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml"
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.5-0-database-stack.yml"
     if [ -f "$DB_UI_COMPOSE_FILE" ]; then
         export IMG_VERSION="${IMG_VERSION:-latest}"
         export QUESTDB_HTTP_PORT="${QUESTDB_HTTP_PORT:-9002}"
@@ -429,15 +429,15 @@ start_containers() {
                 log_success "✓ Database UI stack já em execução (QuestDB saudável)"
             else
                 log_warning "Database UI stack em execução porém com healthcheck $dbui_health"
-                log_info "Para reiniciar manualmente: docker compose -p 4-0-database-ui-stack -f $DB_UI_COMPOSE_FILE restart"
+                log_info "Para reiniciar manualmente: docker compose -p 5-0-database-stack -f $DB_UI_COMPOSE_FILE restart"
             fi
         else
             log_info "Iniciando Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)"
-            if docker compose -p 4-0-database-ui-stack -f "$DB_UI_COMPOSE_FILE" up -d --remove-orphans; then
+            if docker compose -p 5-0-database-stack -f "$DB_UI_COMPOSE_FILE" up -d --remove-orphans; then
                 log_success "✓ Database UI stack iniciada"
             else
                 log_error "✗ Falha ao iniciar Database UI stack"
-                log_info "  Tente: docker compose -p 4-0-database-ui-stack -f $DB_UI_COMPOSE_FILE up -d"
+                log_info "  Tente: docker compose -p 5-0-database-stack -f $DB_UI_COMPOSE_FILE up -d"
                 return 1
             fi
         fi
