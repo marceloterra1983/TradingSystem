@@ -129,7 +129,7 @@ cd frontend/dashboard
 npm run dev
 
 echo "✅ Governance dashboard deployed!"
-echo "🌐 Access at: http://localhost:3103/#/governance"
+echo "🌐 Access at: http://localhost:9080/#/governance"
 ```
 
 ### SOP 2: Content Update Deployment
@@ -151,7 +151,7 @@ node governance/automation/governance-metrics.mjs
 bash scripts/governance/validate-governance-json.sh
 
 # 3. Restart dashboard (if running)
-if curl -sf http://localhost:3103/health > /dev/null 2>&1; then
+if curl -sf http://localhost:9080/health > /dev/null 2>&1; then
   echo "✅ Dashboard running - changes will be picked up"
 else
   echo "⚠️  Dashboard not running - start with: npm run dev"
@@ -221,7 +221,7 @@ bash scripts/governance/validate-governance-json.sh
 
 ## Step 4: Verify Frontend
 - Clear browser cache (Ctrl+Shift+R)
-- Navigate to http://localhost:3103/#/governance
+- Navigate to http://localhost:9080/#/governance
 - Confirm snapshot loads
 
 ## Step 5: Document
@@ -389,7 +389,7 @@ governance_json_size_bytes > 5242880
 1. Verified JSON invalid: `node -e "JSON.parse(...)"`
 2. Regenerated snapshot: `node governance/automation/governance-metrics.mjs`
 3. Validated output: `bash scripts/governance/validate-governance-json.sh`
-4. Tested in browser: http://localhost:3103/#/governance
+4. Tested in browser: http://localhost:9080/#/governance
 
 ## Prevention
 - Added sanitization function: `sanitizeForJson()`
@@ -427,7 +427,7 @@ bash scripts/governance/validate-governance-json.sh
 bash scripts/governance/emergency-recovery.sh
 
 # Check in browser
-open http://localhost:3103/#/governance
+open http://localhost:9080/#/governance
 ```
 
 ### For AI Agents

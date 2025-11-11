@@ -24,6 +24,89 @@
  * const dbPort = ENDPOINTS.timescaledb.port;
  * ```
  */
+const trim = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const sanitizeAbsoluteUrl = (value?: string): string | undefined => {
+  const trimmed = trim(value);
+  if (!trimmed) return undefined;
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return undefined;
+  }
+  return trimmed.replace(/\/+$/, "");
+};
+
+const resolveBaseUrl = () => {
+  const explicit =
+    sanitizeAbsoluteUrl(import.meta.env.VITE_GATEWAY_HTTP_URL as string | undefined) ??
+    sanitizeAbsoluteUrl(import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+    sanitizeAbsoluteUrl(import.meta.env.VITE_UNIFIED_DOMAIN_URL as string | undefined);
+
+  if (explicit) {
+    return explicit;
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const url = new URL(window.location.origin);
+      const isLocalHost =
+        url.hostname === "localhost" || url.hostname === "127.0.0.1";
+      if (!url.port && isLocalHost) {
+        url.port = "9080";
+      } else if (isLocalHost && url.port !== "9080") {
+        url.port = "9080";
+      }
+      return url.toString().replace(/\/+$/, "");
+    } catch {
+      return window.location.origin.replace(/\/+$/, "");
+    }
+  }
+
+  return "http://localhost:9080";
+};
+
+const composeUrl = (base: string, path: string): string => {
+  try {
+    const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+    const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
+    return new URL(normalizedPath, normalizedBase).toString().replace(/\/+$/, "");
+  } catch {
+    const sanitizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+    const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${sanitizedBase}${sanitizedPath}`.replace(/\/+$/, "");
+  }
+};
+
+const resolveGatewayUrl = (
+  envValue: string | undefined,
+  gatewayPath: string,
+  legacyFallbacks: string[] = [],
+): string => {
+  const candidates: Array<string | undefined> = [];
+  const trimmed = trim(envValue);
+
+  if (trimmed) {
+    if (/^https?:\/\//i.test(trimmed)) {
+      candidates.push(trimmed);
+    } else if (trimmed.startsWith("/")) {
+      candidates.push(composeUrl(GATEWAY_BASE, trimmed));
+    }
+  }
+
+  candidates.push(composeUrl(GATEWAY_BASE, gatewayPath), ...legacyFallbacks);
+
+  const resolved =
+    candidates.find((candidate) => typeof candidate === "string" && candidate.trim().length > 0) ??
+    composeUrl(GATEWAY_BASE, gatewayPath);
+
+  return resolved.replace(/\/+$/, "");
+};
+
+const GATEWAY_BASE = resolveBaseUrl();
+
 export const ENDPOINTS = {
   /**
    * Backend API Services
@@ -31,18 +114,32 @@ export const ENDPOINTS = {
    */
 
   /** Workspace API - Port 3200 (LowDB Stack - WSL2 workaround) */
-  workspace: import.meta.env.VITE_API_BASE_URL || "http://localhost:3200",
+  workspace: resolveGatewayUrl(
+    import.meta.env.VITE_WORKSPACE_API_URL as string | undefined,
+    "/api/workspace",
+    ["http://localhost:3200/api/workspace", "http://localhost:3200"],
+  ),
 
   /** TP Capital Signals API - Port 4008 (Autonomous Stack) */
-  tpCapital: import.meta.env.VITE_TP_CAPITAL_API_URL || "http://localhost:4008",
+  tpCapital: resolveGatewayUrl(
+    import.meta.env.VITE_TP_CAPITAL_API_URL as string | undefined,
+    "/api/tp-capital",
+    ["http://localhost:4008"],
+  ),
 
   /** Documentation API - Port 3405 (Docker container) */
-  documentation:
-    import.meta.env.VITE_DOCUMENTATION_API_URL || "http://localhost:3405",
+  documentation: resolveGatewayUrl(
+    import.meta.env.VITE_DOCUMENTATION_API_URL as string | undefined,
+    "/api/docs",
+    ["http://localhost:3405"],
+  ),
 
   /** Telegram Gateway API - Port 14010 (Docker exposed) */
-  telegramGateway:
-    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "http://localhost:14010",
+  telegramGateway: resolveGatewayUrl(
+    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL as string | undefined,
+    "/api/telegram-gateway",
+    ["http://localhost:14010", "http://localhost:4010"],
+  ),
 
   /**
    * Database UI Tools
@@ -51,13 +148,25 @@ export const ENDPOINTS = {
    */
 
   /** PgAdmin - PostgreSQL/TimescaleDB Web UI (Direct access - subpath not supported) */
-  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:5050",
+  pgAdmin: resolveGatewayUrl(
+    import.meta.env.VITE_PGADMIN_URL as string | undefined,
+    "/db-ui/pgadmin",
+    ["http://localhost:5050"],
+  ),
 
   /** Adminer - Lightweight database management (Direct access - subpath not supported) */
-  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:3910",
+  adminer: resolveGatewayUrl(
+    import.meta.env.VITE_ADMINER_URL as string | undefined,
+    "/db-ui/adminer",
+    ["http://localhost:3910", "http://localhost:8082"],
+  ),
 
   /** PgWeb - Lightweight PostgreSQL browser (Direct access - subpath not supported) */
-  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:5052",
+  pgWeb: resolveGatewayUrl(
+    import.meta.env.VITE_PGWEB_URL as string | undefined,
+    "/db-ui/pgweb",
+    ["http://localhost:5052", "http://localhost:8081"],
+  ),
 
   /**
    * Database Services - Direct Access
@@ -76,7 +185,11 @@ export const ENDPOINTS = {
   },
 
   /** QuestDB - High-performance time-series database (Direct access - subpath not supported) */
-  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9000",
+  questdb: resolveGatewayUrl(
+    import.meta.env.VITE_QUESTDB_URL as string | undefined,
+    "/db-ui/questdb",
+    ["http://localhost:9000", "http://localhost:9002"],
+  ),
 
   /** Qdrant - Vector database for RAG/AI - Port 7020 (HTTP API) */
   qdrant: import.meta.env.VITE_QDRANT_URL || "http://localhost:7020",

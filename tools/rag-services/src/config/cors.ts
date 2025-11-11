@@ -28,11 +28,11 @@ const getAllowedOrigins = (): string[] => {
 
   // Development: Allow common local development URLs
   return [
-    'http://localhost:3103', // Dashboard
+    'http://localhost:9080', // Dashboard via Traefik
     'http://localhost:3000', // Default React dev
     'http://localhost:3400', // Documentation Hub
     'http://localhost:3401', // Documentation API
-    'http://127.0.0.1:3103',
+    'http://127.0.0.1:9080',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3400',
     'http://127.0.0.1:3401',

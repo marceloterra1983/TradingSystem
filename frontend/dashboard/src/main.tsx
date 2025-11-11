@@ -3,6 +3,22 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+// Register service worker for PWA (Phase 2.3 - Browser Caching)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then((registration) => {
+      console.log('[PWA] Service worker registered:', registration.scope);
+
+      // Check for updates every 5 minutes
+      setInterval(() => {
+        registration.update();
+      }, 5 * 60 * 1000);
+    }).catch((error) => {
+      console.error('[PWA] Service worker registration failed:', error);
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

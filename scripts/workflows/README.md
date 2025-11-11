@@ -60,13 +60,13 @@ O template possui **8 seções modulares** que podem ser ativadas/desativadas:
 ### 2. Service Health Check ✅
 - **Quando usar**: Workflows que dependem de serviços rodando
 - **O que verifica**:
-  - Dashboard (3103)
+  - Dashboard (9080)
   - Documentation Hub (3400)
   - APIs (3401, 4005, etc.)
 - **Configuração**:
   ```bash
   SERVICES=(
-      "dashboard:3103"
+      "dashboard:9080"
       "docs-hub:3400"
       "documentation-api:3401"
   )
@@ -260,7 +260,7 @@ main
 ## Service Health Status
 | Service | Port | Status |
 |---------|------|--------|
-| dashboard | 3103 | ✅ Running |
+| dashboard | 9080 | ✅ Running |
 
 ## API Validation
 | API | Endpoint | Status | Response Time |

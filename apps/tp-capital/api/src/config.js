@@ -74,7 +74,7 @@ export const config = {
   },
 
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3103',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:9080',
   },
 
   metrics: {

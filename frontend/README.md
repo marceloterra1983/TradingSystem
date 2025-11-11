@@ -36,7 +36,7 @@ frontend/
 
 ## 🎯 Dashboard - Aplicação Principal
 
-**URL:** http://localhost:3103  
+**URL:** http://localhost:9080  
 **Versão:** 1.2.0  
 **Status:** ✅ Totalmente Funcional
 
@@ -107,7 +107,7 @@ npm install
 
 # 3. Iniciar dev server
 npm run dev
-# Abre em: http://localhost:3103
+# Abre em: http://localhost:9080
 
 # 4. Verificar tipos (opcional)
 npm run type-check
@@ -685,8 +685,8 @@ const handleClick = useCallback(() => {
 ### Dashboard não inicia
 
 ```bash
-# Verificar se porta 3103 está livre
-lsof -ti:3103
+# Verificar se porta 9080 está livre
+lsof -ti:9080
 
 # Limpar e reinstalar
 rm -rf node_modules package-lock.json
@@ -781,7 +781,7 @@ Criar `.env` em `frontend/dashboard/` (opcional - tem defaults):
 
 ```env
 # Porta do dashboard
-VITE_DASHBOARD_PORT=3103
+VITE_DASHBOARD_PORT=9080
 
 # Base URL (para domínio unificado)
 VITE_API_BASE_URL=http://tradingsystem.local
@@ -850,7 +850,7 @@ import { MinhaNovaPage } from '../components/pages/MinhaNovaPage';
 
 ```bash
 npm run dev
-# Acessar: http://localhost:3103
+# Acessar: http://localhost:9080
 # Navegar para a nova página
 ```
 

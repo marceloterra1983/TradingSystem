@@ -11,12 +11,15 @@ services:
       - ../../.env
       - ../../.env.shared
     environment:
-      - DASHBOARD_PORT=${DASHBOARD_PORT:-3103}
+      - DASHBOARD_PORT=${DASHBOARD_PORT:-9080}
       - SKIP_DASHBOARD_PREBUILD=1
+      - VITE_USE_UNIFIED_DOMAIN=${VITE_USE_UNIFIED_DOMAIN:-true}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9080}
       # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
       # Traefik Gateway defaults (override via env caso seja necessário expor portas diretas)
       - TP_CAPITAL_PROXY_TARGET=${TP_CAPITAL_PROXY_TARGET:-http://api-gateway:9080/api/tp-capital}
       - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=${VITE_TELEGRAM_GATEWAY_PROXY_TARGET:-http://telegram-gateway-api:4010/api/telegram-gateway}
+      - VITE_TELEGRAM_GATEWAY_API_URL=${VITE_TELEGRAM_GATEWAY_API_URL:-http://localhost:9080/api/telegram-gateway}
       - WORKSPACE_PROXY_TARGET=${WORKSPACE_PROXY_TARGET:-http://api-gateway:9080/api/workspace}
       - WORKSPACE_LIBRARY_PROXY_TARGET=${WORKSPACE_LIBRARY_PROXY_TARGET:-http://api-gateway:9080/api/library}
       - DOCUSAURUS_PROXY_TARGET=${DOCUSAURUS_PROXY_TARGET:-http://api-gateway:9080/docs}
@@ -42,7 +45,7 @@ services:
       - tradingsystem_frontend
       - tradingsystem_backend  # Hub network for API access (proxy)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${DASHBOARD_PORT:-3103}/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:${DASHBOARD_PORT:-9080}/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -65,7 +68,7 @@ services:
       - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
 
       # Service Configuration (backend target)
-      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=3103"
+      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=9080"
 
       # Middlewares (no path transformation needed - direct passthrough)
       - "traefik.http.routers.dashboard-ui.middlewares=static-standard@file"

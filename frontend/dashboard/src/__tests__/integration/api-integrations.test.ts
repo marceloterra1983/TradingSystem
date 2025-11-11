@@ -21,11 +21,11 @@ describeIntegration("Dashboard ↔ API integration", () => {
   const documentationBase =
     process.env.DASHBOARD_DOCUMENTATION_API_URL ||
     process.env.VITE_DOCUMENTATION_API_URL ||
-    "http://localhost:3402";
+    "http://localhost:9080/api/docs";
   const workspaceBase =
     process.env.DASHBOARD_WORKSPACE_API_URL ||
     process.env.VITE_API_BASE_URL ||
-    "http://localhost:3201";
+    "http://localhost:9080";
   const workspaceHealthOverride = process.env.DASHBOARD_WORKSPACE_HEALTH_URL;
 
   beforeAll(() => {
@@ -38,7 +38,10 @@ describeIntegration("Dashboard ↔ API integration", () => {
     // Provide explicit workspace endpoints to avoid relying on proxy paths.
     const normalizedWorkspace = trimTrailingSlash(workspaceBase);
     vi.stubEnv("VITE_API_BASE_URL", normalizedWorkspace);
-    vi.stubEnv("VITE_WORKSPACE_API_URL", `${normalizedWorkspace}/api`);
+    vi.stubEnv(
+      "VITE_WORKSPACE_API_URL",
+      `${normalizedWorkspace}/api/workspace`,
+    );
   });
 
   afterAll(() => {

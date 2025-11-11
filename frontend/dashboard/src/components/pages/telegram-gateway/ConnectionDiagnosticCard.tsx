@@ -55,14 +55,14 @@ export function ConnectionDiagnosticCard({
   if (gatewayHealthy) {
     diagnostics.push({
       id: "gateway",
-      label: "Gateway MTProto (porta 4010)",
+      label: "Gateway MTProto (Traefik /api/telegram-gateway)",
       status: "ok",
       message: "Gateway está online e respondendo",
     });
   } else {
     diagnostics.push({
       id: "gateway",
-      label: "Gateway MTProto (porta 4010)",
+      label: "Gateway MTProto (Traefik /api/telegram-gateway)",
       status: "error",
       message: "Gateway não está respondendo",
       suggestion: "Execute: cd backend/api/telegram-gateway && npm run dev",

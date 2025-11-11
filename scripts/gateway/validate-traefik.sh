@@ -237,7 +237,7 @@ check_services_health() {
   local services=(
     "workspace-api:3210:/health"
     "docs-api:3405:/health"
-    "dashboard:3103:/health"
+    "dashboard:9080:/health"
   )
 
   for service_config in "${services[@]}"; do

@@ -188,9 +188,9 @@ CREATE INDEX CONCURRENTLY idx_workspace_items_search
 
 **Lighthouse Audits:**
 ```bash
-lighthouse http://localhost:3103 --output=json --output-path=lighthouse-before.json
+lighthouse http://localhost:9080 --output=json --output-path=lighthouse-before.json
 # After optimizations
-lighthouse http://localhost:3103 --output=json --output-path=lighthouse-after.json
+lighthouse http://localhost:9080 --output=json --output-path=lighthouse-after.json
 ```
 
 **Bundle Analysis:**

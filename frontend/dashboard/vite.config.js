@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
         console.log('[vite] API_SECRET_TOKEN=', env.VITE_API_SECRET_TOKEN);
     }
     const isProd = mode === 'production';
-    const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
+    const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 9080;
     const libraryProxy = resolveProxy(env.WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL, 'http://localhost:3210/api');
     const tpCapitalProxy = resolveProxy(env.TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL, 'http://localhost:4008');
     // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX

@@ -421,7 +421,7 @@ const pool = new Pool({
 
 1. **Lighthouse Audits**
    ```bash
-   lighthouse http://localhost:3103 --output=json --output-path=lighthouse-report.json
+   lighthouse http://localhost:9080 --output=json --output-path=lighthouse-report.json
    ```
 
 2. **Bundle Size Analysis**

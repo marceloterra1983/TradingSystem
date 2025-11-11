@@ -90,7 +90,7 @@ WORKSPACE_PORT=3200
 WORKSPACE_EXTERNAL_PORT=3200
 
 # CORS
-CORS_ORIGIN=http://localhost:3103,http://localhost:3400,http://localhost:3401
+CORS_ORIGIN=http://localhost:9080,http://localhost:3400,http://localhost:3401
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=60000

@@ -30,7 +30,7 @@ services:
       COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
       COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
       COURSE_CRAWLER_JWT_SECRET: ${COURSE_CRAWLER_JWT_SECRET:-course-crawler-jwt-secret-change-me-in-production-min-32-chars}
-      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:3103,http://localhost:4201}
+      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:9080,http://localhost:4201}
       COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
       COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
       COURSE_CRAWLER_API_PORT: ${COURSE_CRAWLER_API_PORT:-3601}
@@ -63,7 +63,7 @@ services:
       COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
       COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
       COURSE_CRAWLER_JWT_SECRET: ${COURSE_CRAWLER_JWT_SECRET:-course-crawler-jwt-secret-change-me-in-production-min-32-chars}
-      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:3103,http://localhost:4201}
+      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:9080,http://localhost:4201}
       COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
       COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
       NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
@@ -83,6 +83,24 @@ services:
       retries: 3
       start_period: 30s
 
+  docker-control-server:
+    build:
+      context: ../../tools/docker-control-server
+      dockerfile: Dockerfile
+    container_name: docker-control-server
+    ports:
+      - "9876:9876"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      PORT: 9876
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9876/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   course-crawler-ui:
     build:
       context: ../../frontend/course-crawler
@@ -93,6 +111,8 @@ services:
     container_name: course-crawler-ui
     depends_on:
       course-crawler-api:
+        condition: service_healthy
+      docker-control-server:
         condition: service_healthy
     ports:
       - "${COURSE_CRAWLER_APP_PORT:-4201}:80"

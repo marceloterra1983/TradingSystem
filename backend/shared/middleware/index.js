@@ -53,13 +53,14 @@ export function configureCors(options = {}) {
   } else {
     // Read from environment
     const registryDefaults = [
+      process.env.DASHBOARD_GATEWAY_URL,
       process.env.DASHBOARD_URL,
       process.env.DOCUMENTATION_HUB_URL,
       process.env.DOCUMENTATION_API_URL,
     ].filter(Boolean);
 
     const defaultOriginHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || 'localhost';
-    const legacyFallbackOrigins = [3103, 3400, 3401]
+    const legacyFallbackOrigins = [9080, 3400, 3401]
       .map((port) => `http://${defaultOriginHost}:${port}`)
       .join(',');
 

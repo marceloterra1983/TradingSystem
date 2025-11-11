@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 CONTAINER_NAME="dashboard-ui"
-DASHBOARD_PORT="${DASHBOARD_PORT:-3103}"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 COMPOSE_FILE="${PROJECT_ROOT}/tools/compose/docker-compose.1-dashboard-stack.yml"
 
@@ -124,5 +124,5 @@ echo ""
 echo -e "Container status:"
 docker ps --filter "name=${CONTAINER_NAME}" --format "  {{.Names}}: {{.Status}}"
 echo ""
-echo -e "Dashboard URL: ${BLUE}http://localhost:3103${NC}"
+echo -e "Dashboard URL: ${BLUE}http://localhost:9080${NC}"
 echo ""

@@ -185,10 +185,10 @@ docker system prune -f
 
 ```bash
 # Check port usage
-lsof -i:3103
+lsof -i:9080
 
 # Kill process on port
-lsof -ti:3103 | xargs kill -9
+lsof -ti:9080 | xargs kill -9
 
 # Validate port configuration
 npm run ports:validate
@@ -264,7 +264,7 @@ docker stats
 df -h
 
 # Check services
-curl http://localhost:3103/  # Dashboard
+curl http://localhost:9080/  # Dashboard
 curl http://localhost:3200/api/health  # Workspace
 curl http://localhost:4005/health  # TP Capital
 ```
@@ -460,7 +460,7 @@ bash scripts/restore-from-backup.sh
 
 ## 🔗 Quick Links
 
-- **Dashboard:** http://localhost:3103
+- **Dashboard:** http://localhost:9080
 - **Docs Hub:** http://localhost:3404
 - **Workspace API:** http://localhost:3200
 - **Prometheus:** http://localhost:9090

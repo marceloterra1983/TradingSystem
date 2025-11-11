@@ -1,5 +1,5 @@
 version: "1.0.0"
-lastUpdated: "2025-11-05"
+lastUpdated: "2025-11-11"
 
 ranges:
   frontend-ui: "3000-3099"
@@ -15,6 +15,7 @@ ranges:
   sentinel: "26000-26999"
   devtools: "8000-8299"
   automation-platforms: "8180-8899"
+  dashboard-gateway: "9000-9099"
   monitoring: "9000-9299"
   admin-ui-high: "15000-15999"
 
@@ -70,8 +71,8 @@ services:
       expected: 200
 
   - name: dashboard
-    stack: dashboard-ui
-    port: 3103
+    stack: dashboard-gateway
+    port: 9080
     protocol: http
     owner: Frontend Guild
     description: "Frontend principal do TradingSystem"

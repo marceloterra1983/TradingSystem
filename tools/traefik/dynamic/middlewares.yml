@@ -14,8 +14,8 @@ http:
     cors-global:
       headers:
         accessControlAllowOriginList:
-          - "http://localhost:3103"
           - "http://localhost:9080"
+          - "http://127.0.0.1:9080"
         accessControlAllowMethods:
           - "GET"
           - "POST"
@@ -38,6 +38,13 @@ http:
     security-headers:
       headers:
         frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "same-origin"
+
+    security-headers-allow-iframe:
+      headers:
+        frameDeny: false
         contentTypeNosniff: true
         browserXssFilter: true
         referrerPolicy: "same-origin"
@@ -104,7 +111,6 @@ http:
           - security-headers
           - rate-limit-global
           - compress
-          - circuit-breaker
 
     workspace-path-transform:
       chain:
@@ -126,4 +132,11 @@ http:
         middlewares:
           - cors-global
           - security-headers
+          - compress
+
+    static-allow-iframe:
+      chain:
+        middlewares:
+          - cors-global
+          - security-headers-allow-iframe
           - compress

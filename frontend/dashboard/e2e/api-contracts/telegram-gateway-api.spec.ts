@@ -385,7 +385,7 @@ test.describe('API Contracts - Telegram Gateway', () => {
   test('API responses have CORS headers', async ({ request }) => {
     const response = await request.get(`${baseURL}/api/messages`, {
       headers: {
-        Origin: 'http://localhost:3103',
+        Origin: 'http://localhost:9080',
       },
     });
 

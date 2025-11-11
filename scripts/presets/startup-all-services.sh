@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -49,15 +50,15 @@ echo ""
 echo "4️⃣ Starting Node.js Services..."
 echo ""
 
-# Dashboard (Port 3103)
-echo "   🎨 Starting Dashboard (3103)..."
-if ! lsof -ti:3103 > /dev/null 2>&1; then
+# Dashboard (Port)
+echo "   🎨 Starting Dashboard (${DASHBOARD_PORT})..."
+if ! lsof -ti:${DASHBOARD_PORT} > /dev/null 2>&1; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     npm run dev > /tmp/dashboard.log 2>&1 &
     echo $! > /tmp/dashboard.pid
     echo "   ✅ Dashboard starting (PID: $(cat /tmp/dashboard.pid))"
 else
-    echo "   ⚠️  Port 3103 already in use"
+    echo "   ⚠️  Port ${DASHBOARD_PORT} already in use"
 fi
 cd "$PROJECT_ROOT"
 echo ""
@@ -72,8 +73,8 @@ echo ""
 echo "6️⃣ Health Checks:"
 echo ""
 
-echo "   📊 Dashboard (3103):"
-curl -s http://localhost:3103 > /dev/null 2>&1 && echo "      ✅ Healthy" || echo "      ⚠️  Not ready yet"
+echo "   📊 Dashboard (${DASHBOARD_PORT}):"
+curl -s http://localhost:${DASHBOARD_PORT} > /dev/null 2>&1 && echo "      ✅ Healthy" || echo "      ⚠️  Not ready yet"
 
 echo "   📊 Documentation Hub (3400):"
 curl -s http://localhost:3400 > /dev/null 2>&1 && echo "      ✅ Healthy" || echo "      ⚠️  Not ready (Docker build error)"
@@ -98,7 +99,7 @@ echo "✅ TRADINGSYSTEM STARTUP COMPLETE!"
 echo "=========================================="
 echo ""
 echo "🌐 Access Points:"
-echo "   Dashboard:        http://localhost:3103"
+echo "   Dashboard:        http://localhost:9080"
 echo "   Documentation:    http://localhost:3400"
 echo "   RAG Service:      http://localhost:3402"
 echo "   LlamaIndex:       http://localhost:8202"

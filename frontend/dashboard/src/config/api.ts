@@ -42,51 +42,72 @@ const resolveEnv = (...keys: string[]): string | undefined => {
 const pickFirst = (...values: Array<string | undefined>): string | undefined =>
   values.find((value) => typeof value === "string" && value.trim() !== "");
 
+const normalizeBase = (value: string): string =>
+  value.endsWith("/") ? value.slice(0, -1) : value;
+
+const composeUrl = (base: string, path: string): string => {
+  const sanitizedBase = normalizeBase(base);
+  const sanitizedPath = path.replace(/^\/+/, "");
+  return `${sanitizedBase}/${sanitizedPath}`;
+};
+
+const getBaseUrl = () => {
+  const explicitConfig = resolveEnv(
+    "VITE_GATEWAY_HTTP_URL",
+    "VITE_API_BASE_URL",
+    "VITE_UNIFIED_DOMAIN_URL",
+  );
+
+  if (explicitConfig) {
+    return normalizeBase(explicitConfig);
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const url = new URL(window.location.origin);
+      const isLocalHost =
+        url.hostname === "localhost" || url.hostname === "127.0.0.1";
+      if (url.protocol.startsWith("http")) {
+        if (isLocalHost && url.port !== "9080") {
+          url.port = "9080";
+        } else if (!url.port && isLocalHost) {
+          url.port = "9080";
+        }
+      }
+      return normalizeBase(url.toString());
+    } catch {
+      return normalizeBase(window.location.origin);
+    }
+  }
+
+  return "http://localhost:9080";
+};
+
+const apiBase = getBaseUrl();
+
 const unifiedConfig: ApiConfig = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local",
-  libraryApi:
-    resolveEnv("VITE_WORKSPACE_API_URL") ||
-    `${
-      import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-    }/api/workspace`,
-  tpCapitalApi: `${
-    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-  }/api/tp-capital`,
-  documentationApi: `${
-    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-  }/api/docs`,
-  telegramGatewayApi:
-    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local",
-  firecrawlProxyApi: `${
-    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-  }/api/firecrawl`,
-  docsUrl: `${
-    import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-  }/docs`,
-  docsApiUrl: `${import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"}/docs/api/documentation-api`,
+  baseUrl: apiBase,
+  libraryApi: `${apiBase}/api/workspace`,
+  tpCapitalApi: `${apiBase}/api/tp-capital`,
+  documentationApi: `${apiBase}/api/docs`,
+  telegramGatewayApi: `${apiBase}/api/telegram-gateway`,
+  firecrawlProxyApi: `${apiBase}/api/firecrawl`,
+  docsUrl: composeUrl(apiBase, "/docs"),
+  docsApiUrl: composeUrl(apiBase, "/docs/api/documentation-api"),
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
       import.meta.env.VITE_QUESTDB_CONSOLE_INTERNAL_URL,
-      `${
-        import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-      }/questdb-console`,
+      composeUrl(apiBase, "/db-ui/questdb"),
       ENDPOINTS.questdb,
-      "http://localhost:9000",
-      "http://localhost:8813",
-      "http://localhost:9002",
-    ) || ENDPOINTS.questdb,
+    ) || composeUrl(apiBase, "/db-ui/questdb"),
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
       import.meta.env.VITE_QUESTDB_UI_INTERNAL_URL,
-      `${
-        import.meta.env.VITE_API_BASE_URL || "http://tradingsystem.local"
-      }/questdb-ui`,
+      composeUrl(apiBase, "/db-ui/questdb"),
       "http://localhost:9010",
-      "http://localhost:8813",
-      "http://localhost:9009",
-    ) || "http://localhost:9010",
+    ) || composeUrl(apiBase, "/db-ui/questdb"),
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
   adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
@@ -100,7 +121,7 @@ const directConfig: ApiConfig = {
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || "/api/tp-capital",
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || "/api/docs",
   telegramGatewayApi:
-    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "http://localhost:14010",
+    import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "/api/telegram-gateway",
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || "/api/firecrawl",
   docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs",
@@ -109,6 +130,7 @@ const directConfig: ApiConfig = {
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
+      composeUrl(apiBase, "/db-ui/questdb"),
       ENDPOINTS.questdb,
       "http://localhost:9000",
       "http://localhost:8813",
@@ -117,6 +139,7 @@ const directConfig: ApiConfig = {
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
+      composeUrl(apiBase, "/db-ui/questdb"),
       ENDPOINTS.questdb,
       "http://localhost:9010",
       "http://localhost:8813",
@@ -128,7 +151,7 @@ const directConfig: ApiConfig = {
 };
 
 // Get current configuration based on environment
-const useUnifiedDomain = import.meta.env.VITE_USE_UNIFIED_DOMAIN === "true";
+const useUnifiedDomain = import.meta.env.VITE_USE_UNIFIED_DOMAIN !== "false";
 export const apiConfig: ApiConfig = useUnifiedDomain
   ? unifiedConfig
   : directConfig;

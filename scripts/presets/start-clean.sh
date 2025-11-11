@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -61,8 +62,8 @@ echo "   ✅ Serviços prontos"
 echo ""
 
 # 5. Node.js Services
-echo "5️⃣ Iniciando Dashboard (3103)..."
-if ! lsof -ti:3103 > /dev/null 2>&1; then
+echo "5️⃣ Iniciando Dashboard (${DASHBOARD_PORT})..."
+if ! lsof -ti:${DASHBOARD_PORT} > /dev/null 2>&1; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     if [ ! -d "node_modules" ]; then
         npm install > /dev/null 2>&1
@@ -91,7 +92,7 @@ docker ps --format "      {{.Names}}: {{.Status}}" | head -15
 echo ""
 
 echo "   📊 Endpoints:"
-for SVC in "3402:RAG Service" "8202:LlamaIndex" "6333:Qdrant" "11434:Ollama" "8000:Kong" "3103:Dashboard"; do
+for SVC in "3402:RAG Service" "8202:LlamaIndex" "6333:Qdrant" "11434:Ollama" "8000:Kong" "${DASHBOARD_PORT}:Dashboard"; do
     PORT=$(echo $SVC | cut -d: -f1)
     NAME=$(echo $SVC | cut -d: -f2)
     if timeout 2 curl -s http://localhost:$PORT >/dev/null 2>&1; then
@@ -120,7 +121,7 @@ echo ""
 echo "Containers rodando: $(docker ps | wc -l)"
 echo ""
 echo "🌐 Acesse (no navegador Windows):"
-echo "   • Dashboard:   http://localhost:3103"
+echo "   • Dashboard:   http://localhost:9080"
 echo "   • RAG API:     http://localhost:3402"
 echo "   • Qdrant UI:   http://localhost:6333/dashboard"
 echo ""

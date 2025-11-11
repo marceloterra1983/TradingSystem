@@ -24,14 +24,14 @@ info:
   version: 1.0.0
   contact:
     name: TradingSystem Team
-    url: http://localhost:3103
+    url: http://localhost:9080
   license:
     name: MIT
 
 servers:
   - url: http://localhost:3200
     description: Local development server (Docker container)
-  - url: http://localhost:3103/api/workspace
+  - url: http://localhost:9080/api/workspace
     description: Production proxy via Dashboard (future)
 
 tags:

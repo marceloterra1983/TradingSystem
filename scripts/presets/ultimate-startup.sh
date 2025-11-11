@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -15,8 +16,8 @@ echo ""
 
 # Clean ports
 echo "0️⃣ Cleaning conflicting ports..."
-echo "   Killing processes on: 3103, 3200, 3400, 3401, 3500, 3600, 4008, 9090..."
-for PORT in 3103 3200 3400 3401 3500 3600 4008 9090; do
+echo "   Killing processes on: ${DASHBOARD_PORT}, 3103, 3200, 3400, 3401, 3500, 3600, 4008, 9090..."
+for PORT in "${DASHBOARD_PORT}" 3103 3200 3400 3401 3500 3600 4008 9090; do
     lsof -ti:$PORT | xargs kill -9 2>/dev/null || true
 done
 echo "   ✅ Ports cleared"
@@ -84,7 +85,7 @@ echo "4️⃣ Starting Node.js Services..."
 echo ""
 
 # Dashboard
-echo "   🎨 Dashboard (3103)..."
+echo "   🎨 Dashboard (${DASHBOARD_PORT})..."
 if [ -d "$PROJECT_ROOT/frontend/dashboard" ]; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     if [ ! -d "node_modules" ]; then
@@ -132,7 +133,7 @@ echo ""
 
 echo "🌐 SERVICE ENDPOINTS:"
 SERVICES=(
-    "Dashboard:3103:/"
+    "Dashboard:${DASHBOARD_PORT}:/"
     "Documentation Hub:3400:/"
     "RAG Service:3402:/health"
     "LlamaIndex Query:8202:/health"
@@ -178,7 +179,7 @@ echo "   ⚡ 3-Tier cache active"
 echo "   ⚡ Redis connected"
 echo ""
 echo "Access:"
-echo "   🌐 http://localhost:3103 - Dashboard"
+echo "   🌐 http://localhost:${DASHBOARD_PORT} - Dashboard"
 echo "   📚 http://localhost:3400 - Docs"
 echo "   🔍 http://localhost:3402 - RAG API"
 echo ""

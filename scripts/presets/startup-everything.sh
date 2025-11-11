@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -15,7 +16,7 @@ echo ""
 
 # Kill processes on conflicting ports first
 echo "0️⃣ Cleaning up port conflicts..."
-for PORT in 3103 3200 3400 3401 3500 3600 4005; do
+for PORT in "${DASHBOARD_PORT}" 3103 3200 3400 3401 3500 3600 4005; do
     if lsof -ti:$PORT > /dev/null 2>&1; then
         echo "   🔧 Killing process on port $PORT..."
         lsof -ti:$PORT | xargs kill -9 2>/dev/null || true
@@ -73,9 +74,9 @@ echo ""
 echo "8️⃣ Starting Node.js Services..."
 echo ""
 
-# Dashboard (Port 3103)
-echo "   🎨 Dashboard (3103)..."
-if ! lsof -ti:3103 > /dev/null 2>&1; then
+# Dashboard (Port)
+echo "   🎨 Dashboard (${DASHBOARD_PORT})..."
+if ! lsof -ti:${DASHBOARD_PORT} > /dev/null 2>&1; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     npm run dev > /tmp/dashboard.log 2>&1 &
     echo $! > /tmp/dashboard.pid
@@ -118,7 +119,7 @@ docker ps --format "   {{.Names}}: {{.Status}}" | grep -E "(rag-|data-|prometheu
 echo ""
 
 echo "🌐 WEB SERVICES:"
-for SERVICE in "Dashboard:3103" "Docs Hub:3400" "RAG Service:3402" "LlamaIndex:8202" "Qdrant:6333" "Ollama:11434"; do
+for SERVICE in "Dashboard:${DASHBOARD_PORT}" "Docs Hub:3400" "RAG Service:3402" "LlamaIndex:8202" "Qdrant:6333" "Ollama:11434"; do
     NAME=$(echo $SERVICE | cut -d: -f1)
     PORT=$(echo $SERVICE | cut -d: -f2)
     if curl -s -m 2 http://localhost:$PORT > /dev/null 2>&1; then
@@ -135,7 +136,7 @@ echo "✅ STARTUP COMPLETE!"
 echo "=========================================="
 echo ""
 echo "🌐 Main Access Points:"
-echo "   • Dashboard:      http://localhost:3103"
+echo "   • Dashboard:      http://localhost:9080"
 echo "   • Documentation:  http://localhost:3400"
 echo "   • RAG Service:    http://localhost:3402"
 echo "   • LlamaIndex:     http://localhost:8202/health"
@@ -148,7 +149,7 @@ echo "   • Cache: 3-Tier Active"
 echo "   • Redis: Connected"
 echo ""
 echo "📋 Next Steps:"
-echo "   • Access Dashboard: open http://localhost:3103"
+echo "   • Access Dashboard: open http://localhost:9080"
 echo "   • View Documentation: open http://localhost:3400"
 echo "   • Check Status: bash scripts/maintenance/health-check-all.sh"
 echo ""

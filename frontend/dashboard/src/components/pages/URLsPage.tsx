@@ -11,6 +11,7 @@ import {
   CollapsibleCardContent,
 } from "../ui/collapsible-card";
 import { ENDPOINTS } from "../../config/endpoints";
+import { apiConfig } from "../../config/api";
 
 type LinkItem = {
   name: string;
@@ -52,6 +53,16 @@ function CopyButton({ value }: { value: string }) {
 }
 
 export function URLsPage() {
+  const gatewayRoot =
+    ENDPOINTS.workspace.replace(/\/api\/workspace$/, "") ||
+    "http://localhost:9080";
+
+  const appendPath = (base: string, path: string) => {
+    const sanitizedBase = base.replace(/\/+$/, "");
+    const sanitizedPath = path.replace(/^\/+/, "");
+    return `${sanitizedBase}/${sanitizedPath}`;
+  };
+
   const sections: UrlSection[] = [
     {
       id: "application-services",
@@ -59,17 +70,20 @@ export function URLsPage() {
       description:
         "Primary HTTP services that make up the local TradingSystem stack.",
       links: [
-        { name: "Dashboard (Vite UI)", url: "http://localhost:3103" },
-        { name: "Workspace API", url: "http://localhost:3200/api/items" },
-        { name: "TP Capital Signals API", url: "http://localhost:3201" },
-        { name: "Documentation API", url: "http://localhost:3400" },
-        { name: "Documentation Hub (docs)", url: "http://localhost:3400" },
+        { name: "Dashboard (Gateway)", url: gatewayRoot },
+        {
+          name: "Workspace API",
+          url: appendPath(ENDPOINTS.workspace, "items"),
+        },
+        { name: "TP Capital Signals API", url: ENDPOINTS.tpCapital },
+        { name: "Documentation API", url: ENDPOINTS.documentation },
+        { name: "Documentation Hub (docs)", url: apiConfig.docsUrl },
         { name: "Firecrawl", url: "http://localhost:3002" },
-        { name: "Firecrawl Proxy", url: "http://localhost:3600" },
+        { name: "Firecrawl Proxy", url: apiConfig.firecrawlProxyApi },
         { name: "Agent MCP Dashboard", url: "http://localhost:8080" },
         {
           name: "Docusaurus Docs (manual override)",
-          url: "http://localhost:3400",
+          url: apiConfig.docsUrl,
           optional: true,
         },
       ],
@@ -101,7 +115,7 @@ export function URLsPage() {
       links: [
         {
           name: "QuestDB Web Console (REST/SQL)",
-          url: "http://localhost:9000",
+          url: ENDPOINTS.questdb,
         },
         {
           name: "QuestDB Influx (ILP)",

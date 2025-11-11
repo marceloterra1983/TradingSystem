@@ -31,7 +31,7 @@ export function useChannelManager(
     [gatewayToken],
   );
   const getAuthHeaders = useCallback(
-    () => (gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
+    (): Record<string, string> => (gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
     [gatewayToken],
   );
 

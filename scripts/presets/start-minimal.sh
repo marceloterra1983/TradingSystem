@@ -5,6 +5,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -43,7 +44,7 @@ echo ""
 
 # Dashboard
 echo "3️⃣ Dashboard..."
-if ! lsof -ti:3103 >/dev/null 2>&1; then
+if ! lsof -ti:${DASHBOARD_PORT} >/dev/null 2>&1; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     [ ! -d "node_modules" ] && npm install >/dev/null 2>&1
     npm run dev > /tmp/dashboard.log 2>&1 &
@@ -68,7 +69,7 @@ echo ""
 docker ps --format "   ✅ {{.Names}}" | head -10
 echo ""
 echo "Endpoints:"
-for P in "3103:Dashboard" "3402:RAG API" "8202:LlamaIndex" "6333:Qdrant" "11434:Ollama"; do
+for P in "${DASHBOARD_PORT}:Dashboard" "3402:RAG API" "8202:LlamaIndex" "6333:Qdrant" "11434:Ollama"; do
     PORT=$(echo $P | cut -d: -f1)
     NAME=$(echo $P | cut -d: -f2)
     timeout 2 curl -s http://localhost:$PORT >/dev/null 2>&1 && echo "   ✅ $NAME ($PORT)" || echo "   ⏳ $NAME ($PORT)"
@@ -79,5 +80,5 @@ echo "🎉 SISTEMA MINIMAL OPERACIONAL!"
 echo "=========================================="
 echo ""
 echo "Acesse (navegador Windows):"
-echo "   http://localhost:3103"
+echo "   http://localhost:9080"
 echo ""

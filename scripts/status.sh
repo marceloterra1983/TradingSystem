@@ -11,6 +11,7 @@ set -euo pipefail
 # Load shared libraries
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 
 # Source libraries if available
 if [[ -f "$SCRIPT_DIR/lib/common.sh" ]]; then
@@ -127,7 +128,7 @@ check_local_services() {
     local services=(
         # NOTE: telegram-gateway removed - conflicts with tp-capital-api container (port 4008)
         "telegram-gateway-api:4010"
-        "dashboard:3103"
+        "dashboard:${DASHBOARD_PORT}"
         "status:3500"
     )
 
@@ -297,7 +298,7 @@ show_summary() {
     echo -e "${BLUE}━━━ Quick Access ━━━${NC}"
     echo ""
     echo -e "${CYAN}🖥️  Services:${NC}"
-    echo -e "  Dashboard:                ${CYAN}http://localhost:3103${NC}  (Docker container)"
+    echo -e "  Dashboard:                ${CYAN}http://localhost:9080${NC}  (Traefik gateway)"
     echo -e "  Status API:               ${CYAN}http://localhost:3500${NC}  (Local Node.js)"
     echo -e "  Telegram Gateway API:     ${CYAN}http://localhost:4010${NC}  (Docker container)"
     echo ""

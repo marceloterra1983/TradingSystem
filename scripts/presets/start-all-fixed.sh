@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -51,7 +52,7 @@ echo ""
 
 # 7. Dashboard
 echo "7️⃣ Dashboard (Node.js)..."
-if ! lsof -ti:3103 >/dev/null 2>&1; then
+if ! lsof -ti:${DASHBOARD_PORT} >/dev/null 2>&1; then
     cd "$PROJECT_ROOT/frontend/dashboard"
     [ ! -d "node_modules" ] && npm install >/dev/null 2>&1
     npm run dev > /tmp/dashboard-all.log 2>&1 &
@@ -78,7 +79,7 @@ echo ""
 echo "Total: $(docker ps | wc -l) containers rodando"
 echo ""
 echo "🌐 Acesse (navegador Windows):"
-echo "   • Dashboard:     http://localhost:3103"
+echo "   • Dashboard:     http://localhost:9080"
 echo "   • RAG API:       http://localhost:3402"
 echo "   • DOCS API:      http://localhost:3401"
 echo "   • Workspace:     http://localhost:3200"

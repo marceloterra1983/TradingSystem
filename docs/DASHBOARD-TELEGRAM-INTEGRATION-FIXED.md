@@ -67,7 +67,7 @@ const telegramGatewayProxy = resolveProxy(
 ```
 
 ### Dashboard
-- **URL**: http://localhost:3103
+- **URL**: http://localhost:9080
 - **Proxy Telegram**: `/api/messages` → `http://localhost:9080/api/telegram-gateway/messages`
 - **Proxy Telegram Photos**: `/api/telegram-photo` → `http://localhost:9080/api/telegram-gateway/photo`
 

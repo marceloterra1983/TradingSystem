@@ -1,0 +1,39 @@
+http:
+  routers:
+    telegram-gateway-overview:
+      rule: "PathPrefix(`/api/telegram-gateway`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 30
+
+    telegram-gateway-messages:
+      rule: "PathPrefix(`/api/messages`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 30
+
+    telegram-gateway-channels:
+      rule: "PathPrefix(`/api/channels`)"
+      entryPoints:
+        - web
+      service: telegram-gateway-api
+      middlewares:
+        - api-standard@file
+      priority: 30
+
+  services:
+    telegram-gateway-api:
+      loadBalancer:
+        servers:
+          - url: "http://telegram-gateway-api:4010"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "5s"
+

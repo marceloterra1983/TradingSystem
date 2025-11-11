@@ -50,7 +50,7 @@ ENABLED_SECTIONS=(
 
 # Services that should be running
 SERVICES=(
-    "dashboard:3103"
+    "dashboard:9080"
     "docs-hub:3400"
     "documentation-api:3401"
 )

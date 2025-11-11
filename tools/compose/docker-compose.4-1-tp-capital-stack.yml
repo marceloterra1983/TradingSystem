@@ -317,7 +317,7 @@ services:
       - TELEGRAM_GATEWAY_PORT=4010
       
       # CORS
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:9080,http://localhost:3103}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:9080}
       
       # Rate Limiting (Increased to support dashboard auto-refresh)
       - RATE_LIMIT_WINDOW_MS=60000

@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
+import { VitePWA } from 'vite-plugin-pwa';
 import { preloadHints } from './vite-plugin-preload-hints';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -94,7 +95,7 @@ export default defineConfig(({ mode }) => {
     console.log('[vite] API_SECRET_TOKEN=', env.VITE_API_SECRET_TOKEN);
   }
   const isProd = mode === 'production';
-  const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
+  const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 9080;
 
   const gatewayProxy = resolveProxy(
     env.GATEWAY_HTTP_URL || env.VITE_GATEWAY_HTTP_URL,
@@ -295,6 +296,77 @@ export default defineConfig(({ mode }) => {
         threshold: 10240,
         algorithm: 'brotliCompress',
         ext: '.br',
+      }),
+      // PWA with Service Worker (Phase 2.3 - Browser Caching)
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+        manifest: {
+          name: 'TradingSystem Dashboard',
+          short_name: 'Dashboard',
+          description: 'Documentation System Dashboard with React + Tailwind + TypeScript',
+          theme_color: '#0f172a',
+          background_color: '#0f172a',
+          display: 'standalone',
+          icons: [
+            {
+              src: '/icon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ],
+        },
+        workbox: {
+          // Cache-first strategy for static assets
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          // Runtime caching for API requests
+          runtimeCaching: [
+            {
+              urlPattern: /^https?:\/\/localhost:9080\/api\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'api-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 5, // 5 minutes
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /^https?:\/\/localhost:9080\/docs\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'docs-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+                },
+              },
+            },
+          ],
+          // Clean up old caches
+          cleanupOutdatedCaches: true,
+          // Increase maximum cache size
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        },
+        devOptions: {
+          enabled: false, // Disable in development for easier debugging
+          type: 'module',
+        },
       }),
     ],
     server: {

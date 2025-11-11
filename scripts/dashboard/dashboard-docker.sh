@@ -15,6 +15,9 @@ COMPOSE_FILE="tools/compose/docker-compose.1-dashboard-stack.yml"
 PROJECT_NAME="1-dashboard-stack"
 SERVICE_NAME="dashboard"
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_PORTS=("3103")
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -47,6 +50,20 @@ print_warning() {
     echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
+is_port_in_use() {
+    local port="$1"
+    lsof -ti:"${port}" > /dev/null 2>&1
+}
+
+kill_port_if_in_use() {
+    local port="$1"
+    if is_port_in_use "${port}"; then
+        lsof -ti:"${port}" | xargs kill -9 2>/dev/null || true
+        return 0
+    fi
+    return 1
+}
+
 # Check if docker compose is available
 if ! command -v docker &> /dev/null; then
     print_error "Docker não está instalado ou não está no PATH"
@@ -74,12 +91,19 @@ case "$COMMAND" in
         # Stop and remove container
         $COMPOSE_CMD -p "$PROJECT_NAME" -f "$COMPOSE_FILE" down --remove-orphans || true
         
-        # Also kill any process on port 3103 (dev mode)
-        if lsof -ti:3103 > /dev/null 2>&1; then
-            print_warning "Processo encontrado na porta 3103 (dev mode), encerrando..."
-            lsof -ti:3103 | xargs kill -9 2>/dev/null || true
+        # Also kill any process on dashboard ports
+        if is_port_in_use "${DASHBOARD_PORT}"; then
+            print_warning "Processo encontrado na porta ${DASHBOARD_PORT} (dev mode), encerrando..."
+            kill_port_if_in_use "${DASHBOARD_PORT}"
             sleep 2
         fi
+        for legacy_port in "${LEGACY_PORTS[@]}"; do
+            if is_port_in_use "${legacy_port}"; then
+                print_warning "Processo legado encontrado na porta ${legacy_port}, encerrando..."
+                kill_port_if_in_use "${legacy_port}"
+                sleep 2
+            fi
+        done
         
         print_success "Dashboard parado e removido"
         echo ""
@@ -101,11 +125,17 @@ case "$COMMAND" in
         print_info "Iniciando dashboard..."
         
         # Check if port is in use
-        if lsof -ti:3103 > /dev/null 2>&1; then
-            print_warning "Porta 3103 já está em uso"
+        if is_port_in_use "${DASHBOARD_PORT}"; then
+            print_warning "Porta ${DASHBOARD_PORT} já está em uso"
             print_info "Use 'down' primeiro para parar processos existentes"
             exit 1
         fi
+
+        for legacy_port in "${LEGACY_PORTS[@]}"; do
+            if is_port_in_use "${legacy_port}"; then
+                print_warning "Aviso: porta legada ${legacy_port} está em uso (pode ser um processo antigo)"
+            fi
+        done
         
         # Start container
         $COMPOSE_CMD -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
@@ -115,7 +145,7 @@ case "$COMMAND" in
         sleep 15
         
         # Check if running
-        if curl -s http://localhost:3103 > /dev/null 2>&1; then
+        if curl -s http://localhost:9080 > /dev/null 2>&1; then
             print_success "Dashboard está respondendo!"
         else
             print_warning "Dashboard pode ainda estar inicializando"
@@ -123,7 +153,7 @@ case "$COMMAND" in
         fi
         
         echo ""
-        print_info "Dashboard disponível em: http://localhost:3103"
+        print_info "Dashboard disponível em: http://localhost:9080"
         print_info "Ver logs: docker logs -f dashboard-ui"
         echo ""
         ;;
@@ -136,9 +166,14 @@ case "$COMMAND" in
         # Down
         print_info "[1/3] Parando dashboard..."
         $COMPOSE_CMD -p "$PROJECT_NAME" -f "$COMPOSE_FILE" down --remove-orphans || true
-        if lsof -ti:3103 > /dev/null 2>&1; then
-            lsof -ti:3103 | xargs kill -9 2>/dev/null || true
+        if is_port_in_use "${DASHBOARD_PORT}"; then
+            kill_port_if_in_use "${DASHBOARD_PORT}"
         fi
+        for legacy_port in "${LEGACY_PORTS[@]}"; do
+            if is_port_in_use "${legacy_port}"; then
+                kill_port_if_in_use "${legacy_port}"
+            fi
+        done
         sleep 2
         print_success "Dashboard parado"
         echo ""
@@ -154,14 +189,14 @@ case "$COMMAND" in
         $COMPOSE_CMD -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
         sleep 15
         
-        if curl -s http://localhost:3103 > /dev/null 2>&1; then
+        if curl -s http://localhost:9080 > /dev/null 2>&1; then
             print_success "Dashboard reiniciado e respondendo!"
         else
             print_warning "Dashboard pode ainda estar inicializando"
         fi
         
         echo ""
-        print_info "Dashboard disponível em: http://localhost:3103"
+        print_info "Dashboard disponível em: http://localhost:9080"
         echo ""
         ;;
     
@@ -181,18 +216,24 @@ case "$COMMAND" in
         echo ""
         
         # Check port
-        if lsof -ti:3103 > /dev/null 2>&1; then
-            print_info "Porta 3103 está em uso"
-            lsof -ti:3103 | xargs ps -p 2>/dev/null | head -2 || true
+        if is_port_in_use "${DASHBOARD_PORT}"; then
+            print_info "Porta ${DASHBOARD_PORT} está em uso"
+            lsof -ti:"${DASHBOARD_PORT}" | xargs ps -p 2>/dev/null | head -2 || true
         else
-            print_info "Porta 3103 está livre"
+            print_info "Porta ${DASHBOARD_PORT} está livre"
         fi
+
+        for legacy_port in "${LEGACY_PORTS[@]}"; do
+            if is_port_in_use "${legacy_port}"; then
+                print_warning "Porta legada ${legacy_port} ainda está em uso"
+            fi
+        done
         
         echo ""
         
         # Check HTTP response
-        if curl -s http://localhost:3103 > /dev/null 2>&1; then
-            print_success "Dashboard respondendo em http://localhost:3103"
+        if curl -s http://localhost:9080 > /dev/null 2>&1; then
+            print_success "Dashboard respondendo em http://localhost:9080"
         else
             print_warning "Dashboard não está respondendo"
         fi

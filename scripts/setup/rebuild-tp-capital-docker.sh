@@ -130,6 +130,6 @@ echo "   • Ver logs:      docker logs ${CONTAINER_NAME} -f"
 echo "   • Restart:       docker compose -f ${COMPOSE_FILE} restart ${SERVICE_NAME}"
 echo "   • Stop:          docker compose -f ${COMPOSE_FILE} stop ${SERVICE_NAME}"
 echo ""
-echo "🌐 Acessar Dashboard: http://localhost:3103/tp-capital"
+echo "🌐 Acessar Dashboard: http://localhost:9080/tp-capital"
 echo ""
 

@@ -1,6 +1,6 @@
 # Auto-generated port dictionary for Compose overrides
 # Do not edit manually. Run: npm run ports:sync
-# Generated: 2025-11-11T19:38:00.129Z
+# Generated: 2025-11-11T22:01:27.530Z
 
 x-tradingsystem-ports:
   grafana:
@@ -33,9 +33,9 @@ x-tradingsystem-ports:
     description: "Visualização de especificações OpenAPI/AsyncAPI"
   dashboard:
     env: DASHBOARD_PORT
-    port: 3103
+    port: 9080
     protocol: http
-    stack: dashboard-ui
+    stack: dashboard-gateway
     owner: "Frontend Guild"
     description: "Frontend principal do TradingSystem"
     exposure: gateway

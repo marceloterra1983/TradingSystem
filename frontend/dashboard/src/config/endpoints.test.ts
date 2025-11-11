@@ -73,10 +73,12 @@ describe("Endpoints Configuration", () => {
     it("should have correct default backend API endpoints", () => {
       const { ENDPOINTS } = endpointsModule;
 
-      expect(ENDPOINTS.workspace).toBe("http://localhost:3200");
-      expect(ENDPOINTS.tpCapital).toBe("http://localhost:4008");
-      expect(ENDPOINTS.documentation).toBe("http://localhost:3405");
-      expect(ENDPOINTS.telegramGateway).toBe("http://localhost:4010");
+      expect(ENDPOINTS.workspace).toBe("http://localhost:9080/api/workspace");
+      expect(ENDPOINTS.tpCapital).toBe("http://localhost:9080/api/tp-capital");
+      expect(ENDPOINTS.documentation).toBe("http://localhost:9080/api/docs");
+      expect(ENDPOINTS.telegramGateway).toBe(
+        "http://localhost:9080/api/telegram-gateway",
+      );
     });
 
     it("should configure default database UI endpoints", () => {
@@ -129,11 +131,11 @@ describe("Endpoints Configuration", () => {
         status: 200,
       } as Response);
 
-      const result = await validateEndpoint("http://localhost:3200");
+      const result = await validateEndpoint("http://localhost:9080/api/workspace");
 
       expect(result).toBe(true);
       expect(globalThis.fetch).toHaveBeenCalledWith(
-        "http://localhost:3200/health",
+        "http://localhost:9080/api/workspace/health",
         expect.objectContaining({
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -167,7 +169,7 @@ describe("Endpoints Configuration", () => {
           });
         });
 
-      const result = await validateEndpoint("http://localhost:3200", 5);
+      const result = await validateEndpoint("http://localhost:9080/api/workspace", 5);
 
       expect(result).toBe(false);
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
@@ -181,7 +183,7 @@ describe("Endpoints Configuration", () => {
         status: 500,
       } as Response);
 
-      const result = await validateEndpoint("http://localhost:3200");
+      const result = await validateEndpoint("http://localhost:9080/api/workspace");
 
       expect(result).toBe(false);
     });
@@ -203,11 +205,11 @@ describe("Endpoints Configuration", () => {
       const { getDatabaseUIEndpoints } = endpointsModule;
       const uiEndpoints = getDatabaseUIEndpoints();
 
-      expect(uiEndpoints["PgAdmin"]).toContain("5050");
-      expect(uiEndpoints["Adminer"]).toContain("8082");
-      expect(uiEndpoints["PgWeb"]).toContain("8081");
-      expect(uiEndpoints["QuestDB UI"]).toContain("9002");
-      expect(uiEndpoints["Qdrant Dashboard"]).toContain("7020");
+    expect(uiEndpoints["PgAdmin"]).toMatch("http://localhost:9080/db-ui/pgadmin");
+    expect(uiEndpoints["Adminer"]).toMatch("http://localhost:9080/db-ui/adminer");
+    expect(uiEndpoints["PgWeb"]).toMatch("http://localhost:9080/db-ui/pgweb");
+    expect(uiEndpoints["QuestDB UI"]).toMatch("http://localhost:9080/db-ui/questdb");
+    expect(uiEndpoints["Qdrant Dashboard"]).toContain("7020");
     });
 
     it("should return object with string values", () => {
@@ -253,32 +255,18 @@ describe("Endpoints Configuration", () => {
     it("should report the documented host ports for UIs", () => {
       const { ENDPOINTS } = endpointsModule;
 
-      const pgAdminPort = parseInt(
-        ENDPOINTS.pgAdmin.match(/:(\d+)/)?.[1] || "0",
-      );
-      const adminerPort = parseInt(
-        ENDPOINTS.adminer.match(/:(\d+)/)?.[1] || "0",
-      );
-      const pgWebPort = parseInt(ENDPOINTS.pgWeb.match(/:(\d+)/)?.[1] || "0");
-
-      expect(pgAdminPort).toBe(5050);
-      expect(adminerPort).toBe(8082);
-      expect(pgWebPort).toBe(8081);
+      expect(ENDPOINTS.pgAdmin).toBe("http://localhost:9080/db-ui/pgadmin");
+      expect(ENDPOINTS.adminer).toBe("http://localhost:9080/db-ui/adminer");
+      expect(ENDPOINTS.pgWeb).toBe("http://localhost:9080/db-ui/pgweb");
     });
 
     it("should use documented ports for databases", () => {
       const { ENDPOINTS } = endpointsModule;
 
       expect(ENDPOINTS.timescaledb.port).toBe(7000);
-
-      const questdbPort = parseInt(
-        ENDPOINTS.questdb.match(/:(\d+)/)?.[1] || "0",
-      );
-      expect(questdbPort).toBe(9002);
-
+      expect(ENDPOINTS.questdb).toBe("http://localhost:9080/db-ui/questdb");
       const qdrantPort = parseInt(ENDPOINTS.qdrant.match(/:(\d+)/)?.[1] || "0");
       expect(qdrantPort).toBe(7020);
-
       expect(ENDPOINTS.redis.port).toBe(7030);
     });
   });

@@ -21,6 +21,7 @@ import { createStableId } from '../utils/id.js';
 import { computeMetrics } from '../observability/metrics.js';
 import { retryBrowserOperation } from '../utils/retry.js';
 import { downloadAttachment } from './download-manager.js';
+import { downloadVideo, isVideoUrl, getVideoPlatform } from './video-download-manager.js';
 
 interface PipelineResult {
   run: ExtractionRun;
@@ -182,18 +183,21 @@ async function enrichCourse(
             downloadStatus: 'pending',
           }));
 
+          const videoResources: VideoResource[] = videos.map((video, index) => ({
+            id: createStableId('video', `${classResource.id}|${video.url}`),
+            title: video.title,
+            url: video.url,
+            order: index + 1,
+            playable: Boolean(video.url),
+            downloadStatus: 'pending',
+          }));
+
           Object.assign<ClassResource, Partial<ClassResource>>(classResource, {
             rawHtml,
             markdown,
             confidenceScore: Math.min(100, Math.max(10, markdown.length / 15)),
             attachments: attachmentResources,
-            videos: videos.map((video, index) => ({
-              id: createStableId('video', `${classResource.id}|${video.url}`),
-              title: video.title,
-              url: video.url,
-              order: index + 1,
-              playable: Boolean(video.url),
-            })),
+            videos: videoResources,
             lastUpdatedAt: new Date().toISOString(),
           });
 
@@ -237,6 +241,79 @@ async function enrichCourse(
                   { url: attachment.url, error: result.error },
                   '[course-crawler] Failed to download attachment'
                 );
+              }
+            }
+          }
+
+          // Download videos if enabled
+          if (env.videoDownload.enabled && videoResources.length > 0) {
+            // Filter only video URLs (exclude embedded videos that can't be downloaded)
+            const downloadableVideos = videoResources.filter((v) => isVideoUrl(v.url));
+
+            if (downloadableVideos.length > 0) {
+              const videosDir = path.join(
+                env.outputsDir,
+                'videos',
+                course.id,
+                classResource.id
+              );
+
+              logger.info(
+                {
+                  classId: classResource.id,
+                  total: videoResources.length,
+                  downloadable: downloadableVideos.length,
+                },
+                '[course-crawler] Downloading videos'
+              );
+
+              for (const video of downloadableVideos) {
+                video.downloadStatus = 'downloading';
+                video.platform = getVideoPlatform(video.url);
+
+                const filename = `${video.order.toString().padStart(2, '0')}-${video.title || 'video'}`;
+
+                const result = await downloadVideo(
+                  video.url,
+                  videosDir,
+                  filename,
+                  logger,
+                  {
+                    maxRetries: env.videoDownload.maxRetries,
+                    timeoutMs: env.videoDownload.timeoutMs,
+                    maxFileSizeMB: env.videoDownload.maxFileSizeMB,
+                    quality: env.videoDownload.quality,
+                    format: env.videoDownload.format,
+                    subtitles: env.videoDownload.subtitles,
+                    embedThumbnail: env.videoDownload.embedThumbnail,
+                  }
+                );
+
+                if (result.success) {
+                  video.localPath = result.localPath;
+                  video.fileSizeBytes = result.fileSizeBytes;
+                  video.resolution = result.resolution;
+                  video.format = result.format;
+                  video.downloadStatus = 'completed';
+                  if (result.duration) {
+                    video.durationSeconds = result.duration;
+                  }
+                  logger.info(
+                    {
+                      url: video.url,
+                      path: result.localPath,
+                      size: result.fileSizeBytes,
+                    },
+                    '[course-crawler] Video downloaded successfully'
+                  );
+                } else {
+                  video.downloadStatus = 'failed';
+                  video.downloadError = result.error;
+                  logger.warn(
+                    { url: video.url, error: result.error },
+                    '[course-crawler] Failed to download video'
+                  );
+                }
               }
             }
           }
@@ -341,7 +418,21 @@ function renderClassMarkdown(cls: ClassResource) {
     })
     .join('\n');
   const videos = cls.videos
-    .map((video) => `- [${video.title}](${video.url})`)
+    .map((video) => {
+      if (video.downloadStatus === 'completed' && video.localPath) {
+        const sizeStr = video.fileSizeBytes ? ` (${formatFileSize(video.fileSizeBytes)})` : '';
+        const resolution = video.resolution ? ` [${video.resolution}]` : '';
+        const duration = video.durationSeconds
+          ? ` [${formatDuration(video.durationSeconds)}]`
+          : '';
+        const platform = video.platform ? ` [${video.platform}]` : '';
+        return `- 🎥 [${video.title}](${video.localPath})${resolution}${duration}${sizeStr}${platform} ✅`;
+      } else if (video.downloadStatus === 'failed') {
+        return `- 🔗 [${video.title}](${video.url}) ⚠️ Download failed: ${video.downloadError || 'Unknown error'}`;
+      } else {
+        return `- 🔗 [${video.title}](${video.url})`;
+      }
+    })
     .join('\n');
 
   return [
@@ -372,4 +463,14 @@ function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }

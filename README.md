@@ -229,7 +229,7 @@ Telegram Gateway (Local)  →  TP Capital Stack (Container)  →  TP Capital DB 
 
 **What Runs Locally**:
 - 🐳 **Telegram Gateway** - Shared message ingestion service (Docker, Port 4007)
-- 🐳 **Frontend Dashboard** - React UI (Docker container, Port 3103)
+- 🐳 **Frontend Dashboard** - React UI (Docker container, Port 9080)
 - 🐳 **Other APIs** - Documentation, Status, etc. (Docker containers)
 
 **Quick Start with Docker**:
@@ -425,7 +425,7 @@ health
     ```
     In a second terminal start the **dashboard container** (mandatory from now on):
     ```bash
-    # Dashboard (Port 3103) - runs in Docker container
+    # Dashboard (Port 9080) - runs in Docker container
     docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml up --build
     # or run `docker compose ... up -d` to daemonize (stop with the same command + down)
     ```
@@ -492,7 +492,7 @@ cd docs && npm run start -- --host 0.0.0.0 --port 3400
 npm run dev:dashboard-docs
 ```
 
-`npm run dev:dashboard-docs` now invokes `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
+`npm run dev:dashboard-docs` now invokes `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml up --build`, so the dashboard always runs inside its container (port `9080`). Stop it with `Ctrl+C` or `docker compose ... down`.
 
 #### Pre-commit Hooks
 

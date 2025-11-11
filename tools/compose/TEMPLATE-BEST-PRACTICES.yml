@@ -63,7 +63,7 @@ services:
       - UPSTREAM_SERVICE_URL=http://other-service:8000  # ✅ Container name + internal port
 
       # CORS (load from .env)
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3103,http://localhost:3400}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:9080,http://localhost:3400}
 
       # Rate limiting
       - RATE_LIMIT_WINDOW_MS=60000

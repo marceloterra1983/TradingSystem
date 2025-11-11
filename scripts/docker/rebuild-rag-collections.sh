@@ -57,5 +57,5 @@ echo ""
 echo "📝 Próximos passos:"
 echo "  1. Verificar se 'embeddinggemma' aparece na lista acima"
 echo "  2. Se não aparecer, fazer pull do modelo: docker exec rag-ollama ollama pull embeddinggemma"
-echo "  3. Testar criação de coleção no dashboard (http://localhost:3103)"
+echo "  3. Testar criação de coleção no dashboard (http://localhost:9080)"
 

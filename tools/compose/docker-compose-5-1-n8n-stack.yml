@@ -122,7 +122,7 @@ services:
       - "traefik.http.routers.n8n.service=n8n"
       - "traefik.http.routers.n8n.priority=80"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
-      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix,static-standard@file"
+      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix,static-allow-iframe@file"
       - "traefik.http.middlewares.n8n-stripprefix.stripprefix.prefixes=/n8n"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.path=/healthz"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.interval=30s"

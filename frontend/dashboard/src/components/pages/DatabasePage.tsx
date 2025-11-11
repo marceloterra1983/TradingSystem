@@ -20,10 +20,10 @@ const ADMINER_URL = ENDPOINTS.adminer;
 const QUESTDB_URL = ENDPOINTS.questdb;
 
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: PGADMIN_URL, label: "Porta Direta (Recomendado)" },
-  pgweb: { url: PGWEB_URL, label: "Porta Direta (Recomendado)" },
-  adminer: { url: ADMINER_URL, label: "Porta Direta (Recomendado)" },
-  questdb: { url: QUESTDB_URL, label: "Porta Direta (Recomendado)" },
+  pgadmin: { url: PGADMIN_URL, label: "Gateway Traefik (Recomendado)" },
+  pgweb: { url: PGWEB_URL, label: "Gateway Traefik (Recomendado)" },
+  adminer: { url: ADMINER_URL, label: "Gateway Traefik (Recomendado)" },
+  questdb: { url: QUESTDB_URL, label: "Gateway Traefik (Recomendado)" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {

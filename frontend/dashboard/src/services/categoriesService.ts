@@ -7,7 +7,7 @@
 // Extract base URL from VITE_WORKSPACE_API_URL (remove /items if present)
 const getBaseApiUrl = () => {
   const workspaceUrl =
-    import.meta.env.VITE_WORKSPACE_API_URL || "http://localhost:3200/api"; // FIXED: LowDB Stack (WSL2 networking workaround)
+    import.meta.env.VITE_WORKSPACE_API_URL || "http://localhost:9080/api/workspace"; // Default via Traefik gateway (fallback mantém compatibilidade local)
   // Remove /items from the end if present
   return workspaceUrl.replace(/\/items$/, "");
 };

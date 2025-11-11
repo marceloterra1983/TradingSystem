@@ -203,17 +203,17 @@ function EscopoSystems() {
         {[
           {
             name: "Dashboard",
-            port: "3103",
-            desc: "Interface principal React + Vite",
+            port: "9080 • /",
+            desc: "Interface principal servida via Traefik (porta padrão 9080; Vite legado usava 3103)",
           },
           {
             name: "Workspace API",
-            port: "3200",
+            port: "9080 • /api/workspace",
             desc: "Gestão de workspace e documentação",
           },
           {
             name: "Documentation API",
-            port: "3400",
+            port: "9080 • /api/docs",
             desc: "API de busca e gerenciamento de docs",
           },
           {
@@ -223,7 +223,7 @@ function EscopoSystems() {
           },
           {
             name: "TP-Capital",
-            port: "4005",
+            port: "9080 • /api/tp-capital",
             desc: "Ingestão de sinais Telegram",
           },
         ].map((system) => (

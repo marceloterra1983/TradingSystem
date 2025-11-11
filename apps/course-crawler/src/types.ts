@@ -6,6 +6,13 @@ export interface VideoResource {
   durationSeconds?: number;
   playable: boolean;
   notes?: string;
+  localPath?: string; // Local filesystem path after download
+  downloadStatus?: 'pending' | 'downloading' | 'completed' | 'failed';
+  fileSizeBytes?: number; // File size in bytes
+  resolution?: string; // e.g., "1920x1080"
+  format?: string; // e.g., "mp4"
+  downloadError?: string; // Error message if download failed
+  platform?: string; // e.g., "YouTube", "Vimeo"
 }
 
 export interface AttachmentResource {
@@ -63,6 +70,11 @@ export interface ExtractionMetrics {
   downloadedAttachments?: number; // Successfully downloaded attachments
   downloadFailures?: number; // Failed downloads
   totalDownloadSizeBytes?: number; // Total size of downloaded files
+  totalVideos?: number; // Total videos found
+  downloadedVideos?: number; // Successfully downloaded videos
+  videoDownloadFailures?: number; // Failed video downloads
+  totalVideoSizeBytes?: number; // Total size of downloaded videos
+  totalVideoDurationSeconds?: number; // Total duration of all videos
 }
 
 export interface ExtractionRun {

@@ -15,7 +15,7 @@ tags:
 
 | Serviço | Container | URL/Porta | Descrição |
 |---------|-----------|-----------|-----------|
-| Dashboard | (npm dev server) | http://localhost:3103 | Interface principal do TradingSystem. |
+| Dashboard | (npm dev server) | http://localhost:9080 | Interface principal do TradingSystem (exposta via Traefik). |
 | Documentation API | (npm dev server) | http://localhost:3400 | API de documentação (Express + FlexSearch). |
 | Documentation Hub (docs) | (npm dev server) | http://localhost:3205 | Docusaurus v3 – hub oficial de documentação. |
 | Documentação (Docusaurus v2 - Legacy) | docs-docusaurus | http://localhost:3004 | Hub legado (em processo de desativação). |

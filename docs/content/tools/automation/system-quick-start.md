@@ -57,7 +57,7 @@ stop --clean-logs
 
 | Serviço | URL | Porta |
 |---------|-----|-------|
-| Dashboard | http://localhost:3103 | 3103 |
+| Dashboard | http://localhost:9080 | 9080 |
 | Workspace API | http://localhost:9080/api/workspace | (Traefik) |
 | Documentation Hub | http://localhost:9080/docs | (Traefik) |
 | Documentation API | http://localhost:9080/api/docs | (Traefik) |
@@ -202,7 +202,7 @@ WORKSPACE_PORT=3200
 - [ ] Docker containers estão rodando (`docker ps`)
 - [ ] Iniciei os serviços (`start`)
 - [ ] Verifiquei o status (`status`)
-- [ ] Acessei o Dashboard (http://localhost:3103)
+- [ ] Acessei o Dashboard (http://localhost:9080)
 
 ---
 

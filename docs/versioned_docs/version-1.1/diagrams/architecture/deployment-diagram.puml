@@ -10,7 +10,7 @@ Deployment_Node(dev_workstation, "Developer Workstation", "Windows 11 / WSL2") {
         Deployment_Node(docker_engine, "Docker Engine", "v24+") {
 
             Deployment_Node(frontend_stack, "Frontend Stack") {
-                Container(dashboard, "Dashboard", "React 18 + Vite", "Port 3103")
+                Container(dashboard, "Dashboard", "React 18 + Vite", "Port 9080")
                 Container(docs_hub, "Docs Hub", "Docusaurus v3 + NGINX", "Port 3400")
             }
 

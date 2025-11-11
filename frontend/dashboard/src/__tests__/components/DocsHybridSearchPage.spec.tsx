@@ -45,7 +45,7 @@ vi.mock("../../components/pages/CollectionSelector", () => ({
 
 vi.mock("../../utils/docusaurus", () => ({
   normalizeDocsApiPath: (url: string) => url.replace(/^\/docs\//, "/"),
-  resolveDocsPreviewUrl: (url: string) => `http://localhost:3400${url}`,
+  resolveDocsPreviewUrl: (url: string) => `http://localhost:9080${url}`,
 }));
 
 import documentationService from "../../services/documentationService";

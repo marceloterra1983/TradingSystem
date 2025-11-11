@@ -10,8 +10,8 @@ The TradingSystem frontend is built with **React 18**, **TypeScript**, **Vite 7*
 ## Main Application: Dashboard
 
 **Location:** `frontend/dashboard/`
-**Port:** 3103
-**URL:** http://localhost:3103
+**Port:** 9080
+**URL:** http://localhost:9080
 
 ### Technology Stack
 
@@ -393,7 +393,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Workspace Page', () => {
   test('should display workspace items', async ({ page }) => {
-    await page.goto('http://localhost:3103/#/workspace');
+    await page.goto('http://localhost:9080/#/workspace');
 
     // Wait for items to load
     await page.waitForSelector('[data-testid="workspace-item"]');
@@ -404,7 +404,7 @@ test.describe('Workspace Page', () => {
   });
 
   test('should create new item', async ({ page }) => {
-    await page.goto('http://localhost:3103/#/workspace');
+    await page.goto('http://localhost:9080/#/workspace');
 
     // Click "Add Item" button
     await page.click('[data-testid="add-item-button"]');
@@ -435,7 +435,7 @@ npm run test:e2e:report       # View report
 
 ```bash
 # .env (project root)
-VITE_DASHBOARD_PORT=3103
+VITE_DASHBOARD_PORT=9080
 VITE_API_BASE_URL=http://localhost:3500
 VITE_API_SECRET_TOKEN=your_secret_token
 
@@ -550,7 +550,7 @@ fontFamily: {
 **Location:** `apps/workspace/`
 **Port:** 3900 (standalone UI, optional)
 
-**Note:** The workspace app has both a backend API (port 3200) and an optional standalone React UI (port 3900). The main dashboard at port 3103 also includes workspace functionality via `/workspace` route.
+**Note:** The workspace app has both a backend API (port 3200) and an optional standalone React UI (port 3900). The main dashboard at port 9080 also includes workspace functionality via `/workspace` route.
 
 ## Shared Frontend Assets
 
@@ -569,7 +569,7 @@ frontend/shared/
 
 ## Additional Resources
 
-- **Component Library:** http://localhost:3103 (Storybook planned)
+- **Component Library:** http://localhost:9080 (Storybook planned)
 - **Design System:** [docs/content/frontend/design-system/](../../docs/content/frontend/design-system/)
 - **Accessibility Guidelines:** [docs/content/frontend/guidelines/accessibility.mdx](../../docs/content/frontend/guidelines/accessibility.mdx)
 - **Testing Strategy:** [docs/content/frontend/engineering/testing.mdx](../../docs/content/frontend/engineering/testing.mdx)

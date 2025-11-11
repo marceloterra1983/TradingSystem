@@ -80,7 +80,7 @@ REQUIRED_VARS=(
 OPTIONAL_VARS=(
   "TP_CAPITAL_API_PORT:TP-Capital external port (default: 4008)"
   "TELEGRAM_GATEWAY_API_PORT:Gateway API port (default: 4010)"
-  "DASHBOARD_PORT:Frontend dashboard port (default: 3103)"
+  "DASHBOARD_PORT:Frontend dashboard port (default: 9080)"
 )
 
 # ==============================================================================

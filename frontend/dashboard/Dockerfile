@@ -3,7 +3,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 ENV SKIP_DASHBOARD_PREBUILD=1 \
-    DASHBOARD_PORT=3103
+    DASHBOARD_PORT=9080
 
 ARG DASHBOARD_DIR=frontend/dashboard
 
@@ -15,6 +15,6 @@ RUN npm ci
 
 COPY ${DASHBOARD_DIR} ./
 
-EXPOSE 3103
+EXPOSE 9080
 
 CMD ["npm", "run", "dev:vite"]

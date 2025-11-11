@@ -81,7 +81,7 @@ Este documento mantém o mapeamento oficial de todas as portas alocadas no proje
 
 | Serviço | Porta | Container/Process | URL | Notas |
 |---------|-------|-------------------|-----|-------|
-| Dashboard | 3103 | Vite Dev Server | `http://localhost:3103` | React app |
+| Dashboard | 9080 | Traefik Gateway | `http://localhost:9080` | React app (gateway exposure) |
 | Documentation Hub | Traefik (`/docs`) | `docs-hub` | `http://localhost:9080/docs` | Docusaurus (sem porta dedicada) |
 | Documentation API | Traefik (`/api/docs`) | `documentation-api` | `http://localhost:9080/api/docs` | Docs management via gateway |
 

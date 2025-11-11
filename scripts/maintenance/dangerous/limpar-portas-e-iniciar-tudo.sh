@@ -4,6 +4,7 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 cd "$PROJECT_ROOT"
 
@@ -13,7 +14,7 @@ echo "=========================================="
 echo ""
 
 # Portas que precisam ser liberadas
-PORTS=(3103 3200 3400 3401 3402 3403 3500 3600 4005 5433 5434 5435 5436 5050 6333 6334 6379 6380 8000 8001 8002 8201 8202 8812 9090 11434 3002 3003)
+PORTS=("${DASHBOARD_PORT}" 3103 3200 3400 3401 3402 3403 3500 3600 4005 5433 5434 5435 5436 5050 6333 6334 6379 6380 8000 8001 8002 8201 8202 8812 9090 11434 3002 3003)
 
 echo "1️⃣ Matando processos nas portas críticas..."
 for PORT in "${PORTS[@]}"; do

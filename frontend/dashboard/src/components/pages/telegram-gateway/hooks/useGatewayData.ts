@@ -39,15 +39,22 @@ export function useGatewayData(
 
       // Build messages URL with filters
       const limit = filterLimit === "all" ? "10000" : filterLimit || "50";
-      let messagesUrl = `/api/messages?limit=${limit}&sort=desc`;
+      const cacheBuster = Date.now();
+
+      let messagesUrl = `/api/messages?limit=${limit}&sort=desc&_=${cacheBuster}`;
       if (filterChannel !== "all") {
-        messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc`;
+        messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc&_=${cacheBuster}`;
       }
 
+      const fetchOptions = {
+        headers: authHeaders,
+        cache: "no-store" as RequestCache,
+      };
+
       const [overviewRes, channelsRes, messagesRes] = await Promise.all([
-        fetch("/api/telegram-gateway/overview", { headers: authHeaders }),
-        fetch("/api/channels", { headers: authHeaders }),
-        fetch(messagesUrl, { headers: authHeaders }),
+        fetch(`/api/telegram-gateway/overview?_=${cacheBuster}`, fetchOptions),
+        fetch(`/api/channels?_=${cacheBuster}`, fetchOptions),
+        fetch(messagesUrl, fetchOptions),
       ]);
 
       if (overviewRes.ok) {

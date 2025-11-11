@@ -10,11 +10,8 @@ owner: Platform Architecture
 lastReviewed: '2025-11-11'
 ---
 
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- Source: docs/context/ops/service-port-map.md -->
-<!-- Last generated: 2025-11-11T20:04:57.426Z -->
 > **⚠️ Arquivo gerado automaticamente. Não editar manualmente.**
-> Última geração: 2025-11-11T20:04:57.426Z
+> Última geração: 2025-11-11T22:01:27.530Z
 
 ## Port Ranges
 
@@ -24,6 +21,7 @@ lastReviewed: '2025-11-11'
 | Automation | 3500-5799 |
 | Automation Platforms | 8180-8899 |
 | Cache | 6300-6399 |
+| Dashboard Gateway | 9000-9099 |
 | Dashboard Ui | 3100-3199 |
 | Db Core | 5000-5499 |
 | Devtools | 8000-8299 |
@@ -67,13 +65,18 @@ lastReviewed: '2025-11-11'
 | telegram-redis-replica | 6385 | redis | Telegram Squad | ✅ Active | Replica Redis dedicada a leituras do gateway |
 | n8n-redis | 6390 | redis | ToolingGuild | ✅ Active | Redis Bull queue/event bus da stack n8n |
 
+### Dashboard Gateway (9000-9099)
+
+| Service | Port | Protocol | Owner | Status | Description |
+|---------|------|----------|-------|--------|-------------|
+| dashboard | 9080 | http | Frontend Guild | ✅ Active | Frontend principal do TradingSystem (Traefik /) |
+
 ### Dashboard Ui (3100-3199)
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
 | api-viewer | 3101 | http | Documentacao | ✅ Active | Visualização de especificações OpenAPI/AsyncAPI |
 | documentation-api-viewer | 3102 | http | Documentacao | ⚠️ Deprecated | Viewer secundário usado em validações internas |
-| dashboard | 3103 | http | Frontend Guild | ✅ Active | Frontend principal do TradingSystem (Traefik /) |
 
 ### Db Core (5000-5499)
 

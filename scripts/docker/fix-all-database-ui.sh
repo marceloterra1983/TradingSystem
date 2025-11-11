@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script para corrigir e sincronizar todos os containers da stack 4-0-database-ui-stack
-# Sincroniza com http://localhost:3103/#/knowledge-database
+# Sincroniza com http://localhost:9080/#/knowledge-database
 
 set -e
 

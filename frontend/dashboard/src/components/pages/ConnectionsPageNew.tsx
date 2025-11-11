@@ -68,8 +68,14 @@ function WebSocketStatusSection() {
           </p>
           <ul className="space-y-1">
             <li>• Workspace API (`backend/api/workspace`) em execução.</li>
-            <li>• Porta 3200 disponível direto no host.</li>
-            <li>• Sem proxies intermediários ou túneis externos.</li>
+            <li>
+              • Traefik gateway ativo em{" "}
+              <code className="rounded bg-slate-200 px-1 py-0.5 text-xs dark:bg-slate-800">
+                http://localhost:9080
+              </code>
+              .
+            </li>
+            <li>• Sem proxies externos ou túneis temporários.</li>
           </ul>
         </div>
         <Alert>
@@ -78,7 +84,7 @@ function WebSocketStatusSection() {
             <p>
               <span className="font-medium">Status:</span>{" "}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
-                curl http://localhost:3200/api/health
+                curl http://localhost:9080/api/workspace/health
               </code>
             </p>
             <p>
@@ -149,16 +155,16 @@ function ServiceHealthSection() {
     {
       name: "Telegram Gateway",
       description: "Processa autenticação, mensagens e fila de retry",
-      port: "4010",
-      scope: "Local",
-      check: "curl http://localhost:4010/api/telegram-gateway/overview",
+      port: "9080 • /api/telegram-gateway",
+      scope: "Gateway",
+      check: "curl http://localhost:9080/api/telegram-gateway/overview",
     },
     {
       name: "Workspace API",
       description: "Comandos REST e eventos WebSocket do domínio Workspace",
-      port: "3200",
-      scope: "Local",
-      check: "curl http://localhost:3200/api/health",
+      port: "9080 • /api/workspace",
+      scope: "Gateway",
+      check: "curl http://localhost:9080/api/workspace/health",
     },
     {
       name: "RAG Service",

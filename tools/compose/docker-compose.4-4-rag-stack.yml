@@ -224,7 +224,7 @@ services:
       - PORT=3402
       - HOST=0.0.0.0
       - LOG_LEVEL=info
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3103}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:9080}
       - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
       - QDRANT_URL=http://rag-qdrant:6333
       - OLLAMA_EMBEDDINGS_URL=http://rag-ollama:11434

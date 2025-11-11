@@ -23,16 +23,7 @@ services:
 
     environment:
       NODE_ENV: production
-      TZ: ${WAHA_TZ:-America/Sao_Paulo}
-      WAHA_API_KEY: ${WAHA_API_KEY:-changeme-waha-api-key}
-      WAHA_API_KEY_PLAIN: ${WAHA_API_KEY_PLAIN:-changeme-waha-api-key}
-      WAHA_DASHBOARD_USERNAME: ${WAHA_DASHBOARD_USERNAME:-admin}
-      WAHA_DASHBOARD_PASSWORD: ${WAHA_DASHBOARD_PASSWORD:-changeme-waha-dashboard}
-      WAHA_DASHBOARD_ENABLED: ${WAHA_DASHBOARD_ENABLED:-true}
-      WHATSAPP_SWAGGER_USERNAME: ${WHATSAPP_SWAGGER_USERNAME:-admin}
-      WHATSAPP_SWAGGER_PASSWORD: ${WHATSAPP_SWAGGER_PASSWORD:-changeme-waha-swagger}
-      WHATSAPP_SWAGGER_ENABLED: ${WHATSAPP_SWAGGER_ENABLED:-true}
-      WHATSAPP_DEFAULT_ENGINE: ${WAHA_DEFAULT_ENGINE:-BAILEYS}
+      TZ: America/Sao_Paulo
       WAHA_BASE_URL: ${WAHA_BASE_URL:-http://localhost:3310}
       WAHA_PUBLIC_URL: ${WAHA_PUBLIC_URL:-http://localhost:3310}
       WHATSAPP_API_HOSTNAME: ${WAHA_HOSTNAME:-0.0.0.0}

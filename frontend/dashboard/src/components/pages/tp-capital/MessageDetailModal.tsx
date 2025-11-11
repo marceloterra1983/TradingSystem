@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   Send,
 } from "lucide-react";
+import { ENDPOINTS } from "../../../config/endpoints";
 import type { ForwardedMessage } from "./ForwardedMessagesTable";
 
 interface MessageDetailModalProps {
@@ -148,7 +149,7 @@ export function MessageDetailModal({
                   // Imagem real baixada
                   <div className="flex flex-col items-center">
                     <img
-                      src={`http://localhost:4008${message.image_url}`}
+                      src={`${ENDPOINTS.tpCapital.replace(/\/+$/, "")}${message.image_url}`}
                       alt="Imagem da mensagem"
                       className="max-w-full max-h-96 rounded-lg shadow-lg"
                       onError={(e) => {

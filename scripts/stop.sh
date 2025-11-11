@@ -50,6 +50,7 @@ WITH_DB=false
 WITH_VECTORS=true
 PRUNE_NETWORKS=false
 SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
 
 # Node.js service ports
 # NOTE: Port 3400 removed - docs-hub container (not Node.js service)
@@ -57,7 +58,7 @@ SERVICES_DIR="${LOG_DIR:-/tmp/tradingsystem-logs}"
 declare -A SERVICE_PORTS=(
     ["telegram-gateway"]=4006
     ["telegram-gateway-api"]=4010
-    ["dashboard"]=3103
+    ["dashboard"]=$DASHBOARD_PORT
     ["status"]=3500
 )
 

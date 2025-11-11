@@ -659,7 +659,10 @@ export function TelegramGatewayFinal() {
                         </p>
                         <ul className="space-y-1 text-sm text-amber-700 dark:text-amber-200">
                           {data.health?.status !== "healthy" && (
-                            <li>• Gateway MTProto offline (porta 4010)</li>
+                            <li>
+                              • Gateway MTProto offline (Traefik
+                              /api/telegram-gateway)
+                            </li>
                           )}
                           {data.health?.telegram !== "connected" && (
                             <li>• Telegram desconectado</li>

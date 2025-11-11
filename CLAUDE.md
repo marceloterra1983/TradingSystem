@@ -291,7 +291,7 @@ TradingSystem/
 │
 ├── frontend/                      # 🎨 ALL FRONTEND CODE
 │   ├── apps/
-│   │   └── dashboard/            # Port 3103 - Main React dashboard
+│   │   └── dashboard/            # Port 9080 - Main React dashboard
 │   │       ├── src/components/   # UI components
 │   │       ├── src/store/        # Zustand state management
 │   │       └── src/hooks/        # Custom React hooks
@@ -443,7 +443,7 @@ if (bMarketConnected && bAtivo) {
 - **TP Capital**: `http://localhost:9080/api/tp-capital/*` → `/*`
 
 **Direct Access (Development/Debug Only):**
-- Dashboard: `http://localhost:3103`
+- Dashboard: `http://localhost:9080`
 - Workspace API: `http://localhost:3210`
 - Docs Hub: `http://localhost:3404`
 - Docs API: `http://localhost:3405`
@@ -452,7 +452,7 @@ if (bMarketConnected && bAtivo) {
 ### Gateway Features
 
 - ✅ **Automatic Service Discovery** - Docker labels
-- ✅ **CORS** - Configured for localhost:3103, localhost:9080
+- ✅ **CORS** - Configured para localhost:9080
 - ✅ **Security Headers** - X-Frame-Options, XSS protection
 - ✅ **Rate Limiting** - 100 req/min per IP (burst 50)
 - ✅ **Compression** - gzip/brotli (>1KB responses)
@@ -572,7 +572,7 @@ stop --help           # Ajuda completa
 Se preferir iniciar serviços manualmente:
 
 ```bash
-# Dashboard (Port 3103)
+# Dashboard (Port 9080)
 cd frontend/dashboard
 npm install && npm run dev
 

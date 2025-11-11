@@ -33,7 +33,7 @@ lastReviewed: '2025-10-27'
 - ✅ **Workspace API** (Port 3200) - CRUD Idea Bank
 - ✅ **TP Capital** (Port 4005) - Telegram signal ingestion
 - ✅ **Status Monitor** - Service health monitoring
-- ❌ **Dashboard** (Port 3103) - Frontend React (parado)
+- ❌ **Dashboard** (Port 9080) - Frontend React (exposto via Traefik; Vite legado usava 3103)
 - ❌ **Docusaurus** (Port 3205) - Documentation site (parado)
 
 **Total**: 30 serviços (27 containers + 3 locais rodando)
@@ -138,7 +138,7 @@ lastReviewed: '2025-10-27'
 
 ### ❌ **NÃO CONTAINERIZAR** (1 serviço)
 
-#### Dashboard (Port 3103) - **Containerizar APENAS em PRODUÇÃO**
+#### Dashboard (Port 9080) - **Containerizar APENAS em PRODUÇÃO**
 
 **Desenvolvimento (LOCAL)**:
 

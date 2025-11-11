@@ -138,7 +138,7 @@ declare -A SERVICES=(
     ["telegram-gateway"]="apps/telegram-gateway:${TELEGRAM_MTPROTO_PORT:-4007}:npm start:::3"
     ["telegram-gateway-api"]="backend/api/telegram-gateway:${TELEGRAM_GATEWAY_API_PORT:-4010}:npm run dev::telegram-gateway:3"
     # NOTE: docs stacks run as Docker containers now; keeping entries for local overrides
-    ["dashboard"]="frontend/dashboard:${DASHBOARD_PORT:-3103}:npm run dev:::2"
+    ["dashboard"]="frontend/dashboard:${DASHBOARD_PORT:-9080}:npm run dev:::2"
     ["status"]="apps/status:${SERVICE_LAUNCHER_PORT:-3500}:npm start:::2"
 )
 
@@ -207,7 +207,7 @@ Services:
      - Telegram Gateway API (4010) - REST API for gateway messages
      - DocsAPI (3401) - Documentation API (hybrid search)
      - Docusaurus (3400) - Documentation site
-     - Dashboard (3103) - React dashboard
+     - Dashboard (9080) - React dashboard
 
 Features:
   ✓ Advanced health checks with retry logic
@@ -1563,7 +1563,7 @@ main() {
     echo -e "  📊 Telegram Gateway API:  http://localhost:4010  (health: /health)"
     echo -e "  📚 DocsAPI:               http://localhost:3401  (docs-api container)"
     echo -e "  📖 Documentation Hub:     http://localhost:3400  (docs-hub container)"
-    echo -e "  🎨 Dashboard:             http://localhost:3103  (dashboard container)"
+    echo -e "  🎨 Dashboard:             http://localhost:9080  (via Traefik gateway)"
     echo -e "  📊 Status API:            http://localhost:3500"
     if [ "$WITH_VECTORS" = true ]; then
       echo -e "  🔍 LlamaIndex Query:      http://localhost:8202  (health: /health)"

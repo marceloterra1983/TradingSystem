@@ -37,6 +37,7 @@ const getAllowedOrigins = (): string[] => {
 
   // Development: Prefer registry-provided URLs, fallback to localhost hostnames without hardcoded literals
   const registryOrigins = [
+    process.env.DASHBOARD_GATEWAY_URL,
     process.env.DASHBOARD_URL,
     process.env.DOCUMENTATION_HUB_URL,
     process.env.DOCUMENTATION_API_URL,
@@ -48,7 +49,7 @@ const getAllowedOrigins = (): string[] => {
   }
 
   const defaultHost = process.env.PORT_GOVERNANCE_DEFAULT_HOST || "localhost";
-  const legacyPorts = [3103, 3000, 3400];
+  const legacyPorts = [9080, 3000, 3400];
   return legacyPorts.map((port) => `http://${defaultHost}:${port}`);
 };
 

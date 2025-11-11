@@ -246,7 +246,10 @@ export function SimpleStatusCard({
                 </p>
                 <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
                   {gatewayStatus !== "healthy" && (
-                    <li>• Gateway MTProto não está respondendo (porta 4010)</li>
+                    <li>
+                      • Gateway MTProto não está respondendo (Traefik
+                      /api/telegram-gateway)
+                    </li>
                   )}
                   {telegramStatus !== "connected" && (
                     <li>• Telegram desconectado - verificar autenticação</li>

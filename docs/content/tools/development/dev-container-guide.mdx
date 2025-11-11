@@ -171,7 +171,7 @@ All service ports are automatically forwarded to your host machine:
 
 | Service | Port | URL |
 |---------|------|-----|
-| **Dashboard** | 3103 | http://localhost:3103 |
+| **Dashboard** | 9080 | http://localhost:9080 |
 | **Documentation** | 3404 | http://localhost:3404 |
 | **Workspace API** | 3200 | http://localhost:3200 |
 | **TP Capital** | 4005 | http://localhost:4005 |
@@ -290,19 +290,19 @@ sudo service docker start  # Linux
 
 ### Port Already in Use
 
-**Symptoms:** Error "port 3103 is already allocated"
+**Symptoms:** Error "port 9080 is already allocated"
 
 **Solutions:**
 ```bash
 # Find process using port
-lsof -i :3103
-netstat -tuln | grep 3103
+lsof -i :9080
+netstat -tuln | grep 9080
 
 # Kill process
 kill -9 <PID>
 
 # Or change port in .env
-DASHBOARD_PORT=3104
+DASHBOARD_PORT=9081
 ```
 
 ### Docker-in-Docker Issues

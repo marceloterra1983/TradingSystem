@@ -302,13 +302,13 @@ cat >> "$REPORT_FILE" << 'SECTION5C'
 
 ### Test 3: Dashboard Accessibility
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3103
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9080
 ```
 
 **Status Code**:
 SECTION5C
 
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3103 >> "$REPORT_FILE"
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9080 >> "$REPORT_FILE"
 
 echo "" >> "$REPORT_FILE"
 echo '---' >> "$REPORT_FILE"
@@ -341,7 +341,7 @@ cat >> "$REPORT_FILE" << 'SECTION6'
 - ✅ rag-ollama: HEALTHY
 - ✅ rag-redis: HEALTHY
 - ✅ docs-hub: RUNNING (needs build for preview)
-- ✅ dashboard: HEALTHY (port 3103)
+- ✅ dashboard: HEALTHY (port 9080)
 
 ---
 

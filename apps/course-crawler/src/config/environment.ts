@@ -31,6 +31,18 @@ export interface DownloadConfig {
   maxRetries: number;
 }
 
+export interface VideoDownloadConfig {
+  enabled: boolean;
+  maxFileSizeMB: number;
+  timeoutMs: number;
+  concurrency: number;
+  maxRetries: number;
+  quality: 'best' | 'high' | 'medium' | 'low';
+  format: 'mp4' | 'webm' | 'mkv' | 'best';
+  subtitles: boolean;
+  embedThumbnail: boolean;
+}
+
 export interface EnvironmentConfig {
   runtimeEnvironment: 'development' | 'test' | 'production';
   logLevel: LogLevel;
@@ -38,6 +50,7 @@ export interface EnvironmentConfig {
   neon: NeonConfig;
   browser: BrowserConfig;
   download: DownloadConfig;
+  videoDownload: VideoDownloadConfig;
   observability: {
     confidenceThreshold: number;
     selectorFailureThreshold: number;
@@ -126,6 +139,15 @@ const schema = z.object({
   COURSE_CRAWLER_DOWNLOAD_TIMEOUT_MS: z.coerce.number().positive().default(30000),
   COURSE_CRAWLER_DOWNLOAD_CONCURRENCY: z.coerce.number().int().min(1).max(5).default(2),
   COURSE_CRAWLER_DOWNLOAD_MAX_RETRIES: z.coerce.number().int().min(1).max(5).default(3),
+  COURSE_CRAWLER_VIDEO_DOWNLOAD_ENABLED: booleanSchema.default(true),
+  COURSE_CRAWLER_VIDEO_MAX_SIZE_MB: z.coerce.number().positive().default(500),
+  COURSE_CRAWLER_VIDEO_TIMEOUT_MS: z.coerce.number().positive().default(600000),
+  COURSE_CRAWLER_VIDEO_CONCURRENCY: z.coerce.number().int().min(1).max(3).default(1),
+  COURSE_CRAWLER_VIDEO_MAX_RETRIES: z.coerce.number().int().min(1).max(5).default(3),
+  COURSE_CRAWLER_VIDEO_QUALITY: z.enum(['best', 'high', 'medium', 'low']).default('high'),
+  COURSE_CRAWLER_VIDEO_FORMAT: z.enum(['mp4', 'webm', 'mkv', 'best']).default('mp4'),
+  COURSE_CRAWLER_VIDEO_SUBTITLES: booleanSchema.default(true),
+  COURSE_CRAWLER_VIDEO_EMBED_THUMBNAIL: booleanSchema.default(true),
 });
 
 export function loadEnvironment(): EnvironmentConfig {
@@ -178,6 +200,17 @@ export function loadEnvironment(): EnvironmentConfig {
       timeoutMs: config.COURSE_CRAWLER_DOWNLOAD_TIMEOUT_MS,
       concurrency: config.COURSE_CRAWLER_DOWNLOAD_CONCURRENCY,
       maxRetries: config.COURSE_CRAWLER_DOWNLOAD_MAX_RETRIES,
+    },
+    videoDownload: {
+      enabled: config.COURSE_CRAWLER_VIDEO_DOWNLOAD_ENABLED,
+      maxFileSizeMB: config.COURSE_CRAWLER_VIDEO_MAX_SIZE_MB,
+      timeoutMs: config.COURSE_CRAWLER_VIDEO_TIMEOUT_MS,
+      concurrency: config.COURSE_CRAWLER_VIDEO_CONCURRENCY,
+      maxRetries: config.COURSE_CRAWLER_VIDEO_MAX_RETRIES,
+      quality: config.COURSE_CRAWLER_VIDEO_QUALITY,
+      format: config.COURSE_CRAWLER_VIDEO_FORMAT,
+      subtitles: config.COURSE_CRAWLER_VIDEO_SUBTITLES,
+      embedThumbnail: config.COURSE_CRAWLER_VIDEO_EMBED_THUMBNAIL,
     },
     observability: {
       confidenceThreshold: config.COURSE_CRAWLER_CONFIDENCE_THRESHOLD,

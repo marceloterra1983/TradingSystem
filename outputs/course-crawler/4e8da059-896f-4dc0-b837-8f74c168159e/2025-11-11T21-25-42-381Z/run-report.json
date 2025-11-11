@@ -1,0 +1,15 @@
+{
+  "startedAt": "2025-11-11T21:25:39.609Z",
+  "finishedAt": "2025-11-11T21:25:42.381Z",
+  "courses": [],
+  "metrics": {
+    "totalCourses": 0,
+    "totalModules": 0,
+    "totalClasses": 0,
+    "successRate": 0,
+    "minConfidence": 0,
+    "avgConfidence": 0,
+    "selectorFailures": 0
+  },
+  "incidents": []
+}
