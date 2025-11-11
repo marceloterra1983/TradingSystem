@@ -1,0 +1,555 @@
+---
+title: Dependency Management Guide
+sidebar_position: 3
+tags: [security, dependencies, automation]
+domain: tools
+type: guide
+summary: Automated dependency updates with Dependabot and security best practices
+status: active
+last_review: "2025-11-11"
+---
+
+# 🔐 Dependency Management Guide
+
+**Automated dependency updates with Dependabot - Part of Phase 1.2 Security Improvements**
+
+## 📋 Overview
+
+TradingSystem uses **GitHub Dependabot** for automated dependency updates across multiple ecosystems (npm, pip, Docker, GitHub Actions). This guide explains how the system works and how to review dependency PRs safely.
+
+## 🎯 Goals
+
+### Security
+- **Zero Known Vulnerabilities:** All critical/high vulnerabilities patched within 24-48h
+- **Automated Security Patches:** Security updates auto-merged after CI passes
+- **Proactive Monitoring:** Weekly scans for all dependencies
+
+### Maintenance
+- **Keep Dependencies Fresh:** Regular minor/patch updates prevent drift
+- **Prevent Breaking Changes:** Group compatible updates, test thoroughly
+- **Reduce Technical Debt:** Systematic updates vs emergency patches
+
+## 🏗️ Architecture
+
+### Dependabot Configuration
+
+**File:** `.github/dependabot.yml`
+
+**Monitored Ecosystems:**
+
+| Ecosystem | Directories | Schedule | PRs Limit |
+|-----------|-------------|----------|-----------|
+| **npm** | Frontend, Backend, Docs | Weekly (Mon 9am) | 5-10 per component |
+| **pip** | RAG System, Scripts | Weekly (Mon 9am) | 3-5 per component |
+| **docker** | Compose files | Weekly (Tue 9am) | 3-5 per stack |
+| **github-actions** | Workflows | Weekly (Wed 9am) | 5 |
+
+### Auto-Merge Workflow
+
+**File:** `.github/workflows/dependabot-auto-merge.yml`
+
+**Auto-Merge Criteria:**
+
+✅ **Automatically Merged:**
+- Security patches (any severity)
+- Patch updates (`1.2.3` → `1.2.4`)
+- After all CI checks pass
+
+⚠️ **Manual Review Required:**
+- Minor updates (`1.2.x` → `1.3.0`)
+- Major updates (`1.x.x` → `2.0.0`)
+- Updates with breaking changes
+
+## 🔄 Dependency Update Flow
+
+### 1. Dependabot Creates PR
+
+**Schedule:**
+- **Monday 9am:** npm & pip dependencies
+- **Tuesday 9am:** Docker images
+- **Wednesday 9am:** GitHub Actions
+
+**PR Information:**
+```markdown
+### Dependency Update
+
+**Package:** axios
+**From:** 1.6.5
+**To:** 1.6.7
+**Type:** Patch update
+**Severity:** None
+
+**Changelog:**
+- Bug fix: Handle empty response headers
+- Performance: Reduce bundle size by 2KB
+
+**Compatibility:** ✅ No breaking changes
+```
+
+### 2. CI Checks Run Automatically
+
+**Required Checks:**
+- ✅ Tests pass (`npm run test`)
+- ✅ Linting passes (`npm run lint`)
+- ✅ Build succeeds (`npm run build`)
+- ✅ Security audit passes (`npm audit`)
+- ✅ Bundle size within limits
+
+### 3. Auto-Merge Decision
+
+**Security Patches:**
+```yaml
+# Auto-approved and merged
+Status: ✅ Approved for auto-merge
+Reason: 🔒 Security update (severity: high)
+```
+
+**Patch Updates:**
+```yaml
+# Auto-merged after CI passes
+Status: ✅ Approved for auto-merge
+Reason: ✅ Patch update (non-breaking)
+```
+
+**Major/Minor Updates:**
+```yaml
+# Requires manual review
+Status: ⚠️ Manual review needed
+Reason: ⚠️ Major version update requires manual review
+```
+
+### 4. Merge or Close
+
+**Auto-Merged:**
+- Squash commit with conventional message
+- Example: `chore(deps): bump axios from 1.6.5 to 1.6.7`
+
+**Manually Reviewed:**
+- Review checklist completed
+- Tests verified locally if needed
+- Approved by maintainer
+- Merged with squash commit
+
+## 📊 Reviewing Dependency PRs
+
+### Quick Review (Patch Updates)
+
+**Steps:**
+1. Check PR title and description
+2. Verify CI checks passed (all green)
+3. Scan changelog for unexpected changes
+4. Approve if everything looks good
+
+**Time:** 2-3 minutes
+
+### Standard Review (Minor Updates)
+
+**Steps:**
+1. Read full changelog
+2. Check for deprecation warnings
+3. Review breaking changes section
+4. Test locally if API changes detected
+5. Verify bundle size impact acceptable
+6. Approve and merge
+
+**Time:** 10-15 minutes
+
+### Thorough Review (Major Updates)
+
+**Steps:**
+1. Read migration guide
+2. Check breaking changes carefully
+3. Review dependency graph for conflicts
+4. Test locally with full regression testing
+5. Update code if API changes required
+6. Review bundle size and performance impact
+7. Document any required changes
+8. Approve and merge
+
+**Time:** 30-60 minutes
+
+## 🔍 Review Checklist
+
+### Security Updates
+
+```markdown
+- [ ] Severity level reviewed (critical/high/medium/low)
+- [ ] CVE details checked (if applicable)
+- [ ] No unexpected changes in changelog
+- [ ] CI checks passed
+- [ ] Auto-merge approved (or manually merged)
+```
+
+### Patch Updates
+
+```markdown
+- [ ] Changelog reviewed (bug fixes only)
+- [ ] No breaking changes
+- [ ] CI checks passed
+- [ ] Bundle size impact < 5KB
+- [ ] Ready to merge
+```
+
+### Minor Updates
+
+```markdown
+- [ ] Full changelog reviewed
+- [ ] Breaking changes section checked
+- [ ] Deprecation warnings noted
+- [ ] API changes documented
+- [ ] Tests updated if needed
+- [ ] Local testing completed (if significant changes)
+- [ ] Bundle size impact acceptable
+- [ ] Ready to merge
+```
+
+### Major Updates
+
+```markdown
+- [ ] Migration guide reviewed
+- [ ] Breaking changes fully understood
+- [ ] Code changes required identified
+- [ ] Tests updated for new API
+- [ ] Local regression testing completed
+- [ ] Documentation updated
+- [ ] Team notified of changes
+- [ ] Deployment plan created (if needed)
+- [ ] Ready to merge
+```
+
+## 🚨 Handling Security Vulnerabilities
+
+### Critical/High Severity
+
+**Timeline:** Patch within 24 hours
+
+**Process:**
+1. Dependabot creates PR automatically
+2. Auto-merge workflow approves immediately
+3. CI checks run (must pass)
+4. PR merges automatically
+5. Deploy to production ASAP
+6. Verify vulnerability resolved
+
+**Example:**
+```bash
+# Verify vulnerability is patched
+npm audit
+
+# Should show 0 vulnerabilities
+```
+
+### Medium Severity
+
+**Timeline:** Patch within 48 hours
+
+**Process:**
+1. Review PR within 4 hours
+2. Verify fix doesn't break functionality
+3. Merge after CI passes
+4. Deploy in next regular release
+
+### Low Severity
+
+**Timeline:** Patch within 1 week
+
+**Process:**
+1. Review during regular dependency updates
+2. Group with other minor updates
+3. Merge in batched PR
+4. Deploy in next scheduled release
+
+## 🛠️ Manual Dependency Updates
+
+### When to Update Manually
+
+- Dependabot doesn't support the ecosystem
+- Urgent security patch needed immediately
+- Major refactoring requires specific versions
+- Beta/alpha versions needed for testing
+
+### Process
+
+```bash
+# 1. Update package.json (or requirements.txt)
+npm install axios@latest
+
+# 2. Run tests
+npm run test
+
+# 3. Run linting
+npm run lint
+
+# 4. Check bundle size
+npm run check:bundle
+
+# 5. Commit with conventional message
+git add package.json package-lock.json
+git commit -m "chore(deps): manually update axios to 1.7.0"
+
+# 6. Create PR
+git push origin feature/update-axios
+gh pr create --title "chore(deps): update axios to 1.7.0"
+```
+
+## 📈 Monitoring Dependency Health
+
+### GitHub Security Tab
+
+**Location:** GitHub → Security → Dependabot alerts
+
+**Information:**
+- Active vulnerabilities by severity
+- Dismissed alerts with reasons
+- Patched vulnerabilities over time
+- Dependency graph
+
+### npm audit Reports
+
+```bash
+# Frontend
+cd frontend/dashboard
+npm audit
+
+# Backend
+cd backend/api/workspace
+npm audit
+
+# Generate detailed report
+npm audit --json > audit-report.json
+```
+
+### Bundle Size Monitoring
+
+```bash
+# Check current bundle size
+cd frontend/dashboard
+npm run check:bundle
+
+# Compare with previous version
+git diff HEAD~1 -- dist/assets/*.js
+```
+
+## 🔧 Configuration
+
+### Dependabot Config
+
+```yaml
+# .github/dependabot.yml
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/frontend/dashboard"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+
+    # Group compatible updates
+    groups:
+      production-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+    # Labels for categorization
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+```
+
+### Auto-Merge Policy
+
+```yaml
+# .github/workflows/dependabot-auto-merge.yml
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      # Fetch metadata
+      - uses: dependabot/fetch-metadata@v2
+
+      # Check eligibility
+      # - Security patches: auto-merge
+      # - Patch updates: auto-merge
+      # - Minor/major: manual review
+```
+
+## 📚 Best Practices
+
+### ✅ DO
+
+1. **Review PRs Promptly** - Don't let dependency PRs accumulate
+2. **Read Changelogs** - Understand what's changing
+3. **Test Locally** - For major updates, test before merging
+4. **Monitor Security Alerts** - Check GitHub Security tab weekly
+5. **Keep Dependencies Updated** - Regular updates prevent drift
+6. **Document Breaking Changes** - Update docs when APIs change
+7. **Group Compatible Updates** - Batch minor/patch updates
+
+### ❌ DON'T
+
+1. **Don't Ignore Security Alerts** - Patch within 24-48h
+2. **Don't Skip CI Checks** - Always wait for green checkmarks
+3. **Don't Merge Major Updates Blindly** - Read migration guides
+4. **Don't Defer Updates Indefinitely** - Small frequent updates > large rare updates
+5. **Don't Mix Dependency Updates with Features** - Separate concerns
+6. **Don't Forget to Test** - Especially for major updates
+7. **Don't Auto-Merge Everything** - Major updates need review
+
+## 🆘 Troubleshooting
+
+### Dependabot Not Creating PRs
+
+**Problem:** No dependency PRs for 2+ weeks
+
+**Solutions:**
+```bash
+# 1. Check configuration is valid
+cat .github/dependabot.yml
+
+# 2. Check Dependabot is enabled
+# GitHub → Settings → Code security → Dependabot
+
+# 3. Check open-pull-requests-limit
+# May have hit limit
+
+# 4. Check for errors
+# GitHub → Security → Dependabot alerts → View logs
+```
+
+### Auto-Merge Not Working
+
+**Problem:** Security patches not auto-merging
+
+**Solutions:**
+```yaml
+# 1. Verify permissions in workflow
+permissions:
+  contents: write
+  pull-requests: write
+
+# 2. Check CI status
+# All required checks must pass
+
+# 3. Check branch protection rules
+# Don't require manual approval for Dependabot
+
+# 4. Verify GITHUB_TOKEN has permissions
+# Settings → Actions → General → Workflow permissions
+```
+
+### Merge Conflicts
+
+**Problem:** Dependency PR has merge conflicts
+
+**Solutions:**
+```bash
+# Option 1: Close and let Dependabot recreate
+gh pr close PR_NUMBER
+gh pr comment PR_NUMBER --body "@dependabot recreate"
+
+# Option 2: Resolve manually
+git checkout dependabot/npm_and_yarn/...
+git merge main
+# Resolve conflicts
+git push
+```
+
+### Failed CI Checks
+
+**Problem:** Tests fail after dependency update
+
+**Solutions:**
+```bash
+# 1. Pull PR locally
+gh pr checkout PR_NUMBER
+
+# 2. Run tests
+npm run test
+
+# 3. Debug failures
+npm run test -- --reporter=verbose
+
+# 4. Fix issues
+# Update tests if API changed
+# Fix breaking changes
+
+# 5. Push fixes
+git add .
+git commit -m "fix: update tests for new dependency version"
+git push
+```
+
+## 📊 Metrics
+
+### Target Metrics (Phase 1)
+
+| Metric | Target | Current |
+|--------|--------|---------|
+| **Known Vulnerabilities** | 0 | TBD |
+| **Patch Time (Critical)** | < 24h | TBD |
+| **Patch Time (High)** | < 48h | TBD |
+| **Dependency Freshness** | < 30 days | TBD |
+| **PR Review Time** | < 7 days | TBD |
+
+### Success Criteria
+
+- ✅ Zero critical/high vulnerabilities
+- ✅ 90%+ security patches auto-merged
+- ✅ Average dependency age < 3 months
+- ✅ 100% of dependencies monitored
+- ✅ Weekly automated checks running
+
+## 🔜 Future Enhancements (Phase 2+)
+
+### Automated Security Scanning
+
+- **Snyk Integration:** Real-time vulnerability alerts
+- **SAST Tools:** Static analysis for dependencies
+- **Supply Chain Security:** Verify package signatures
+
+### Advanced Auto-Merge
+
+- **Confidence Scores:** Auto-merge based on adoption metrics
+- **Canary Deployments:** Test updates in staging first
+- **Rollback Automation:** Auto-rollback if metrics degrade
+
+### Dependency Analytics
+
+- **Update Frequency Dashboard:** Track update patterns
+- **Breaking Change Predictor:** ML-based risk assessment
+- **Cost-Benefit Analysis:** Quantify update impact
+
+## 📚 References
+
+### Official Documentation
+- [Dependabot Documentation](https://docs.github.com/en/code-security/dependabot)
+- [npm Audit](https://docs.npmjs.com/cli/v9/commands/npm-audit)
+- [pip Safety](https://pypi.org/project/safety/)
+- [Docker Hub Vulnerability Scanning](https://docs.docker.com/docker-hub/vulnerability-scanning/)
+
+### TradingSystem Guides
+- [Security Best Practices](./security-best-practices.mdx)
+- [CI/CD Pipeline Guide](../ci-cd/pipeline-guide.mdx)
+- [Testing Guide](../testing/test-coverage-guide.mdx)
+
+## 🆘 Support
+
+**Questions or issues with dependencies?**
+
+1. Check [GitHub Security Tab](https://github.com/YOUR_USERNAME/TradingSystem/security)
+2. Review [Dependabot Logs](https://github.com/YOUR_USERNAME/TradingSystem/network/updates)
+3. Ask in project Slack (#security channel)
+
+---
+
+**Last Updated:** 2025-11-11
+**Version:** 1.0 (Phase 1.2 Implementation)
+**Next Review:** Phase 2 Start (2025-12-09)

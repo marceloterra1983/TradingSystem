@@ -35,7 +35,7 @@ RAG (Retrieval-Augmented Generation) services for ingestion, querying, and local
 ```
 
 - **Storage:** Qdrant collections + local file store for embeddings.
-- **Transport:** FastAPI services exposed via `docker-compose.rag.yml`.
+- **Transport:** FastAPI services exposed via `docker-compose.4-4-rag-stack.yml`.
 - **Observability:** Prometheus exporters included in the same stack.
 
 ---
@@ -69,7 +69,7 @@ tools/llamaindex/
 Local LLM runtime used by both ingestion and query flows.
 
 - Default models: `llama3.1:8b` and `nomic-embed-text`.
-- Configured through `tools/compose/docker-compose.rag.yml` (ports 11434/11435).
+- Configured through `tools/compose/docker-compose.4-4-rag-stack.yml` (ports 11434/11435).
 - GPU optional; CPU fallback supported for development laptops.
 
 ---
@@ -84,7 +84,7 @@ npm run docker:build rag
 bash scripts/docker/start-stacks.sh rag
 
 # Or use compose directly
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 ```
 
 ### Health Checks

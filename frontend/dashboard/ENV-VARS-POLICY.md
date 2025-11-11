@@ -65,7 +65,7 @@ if (mode === 'development') {
 
 ### 1. **Docker Compose** (Container Environment)
 
-**Arquivo:** `tools/compose/docker-compose.dashboard.yml`
+**Arquivo:** `tools/compose/docker-compose.1-dashboard-stack.yml`
 
 ```yaml
 services:
@@ -188,7 +188,7 @@ npm run validate:env
 
 **Solução:**
 
-1. Adicione ao `docker-compose.dashboard.yml`:
+1. Adicione ao `docker-compose.1-dashboard-stack.yml`:
    ```yaml
    - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-default}
    ```
@@ -200,7 +200,7 @@ npm run validate:env
 
 3. Rebuild container:
    ```bash
-   docker compose -f tools/compose/docker-compose.dashboard.yml up -d --force-recreate
+   docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --force-recreate
    ```
 
 ---
@@ -209,7 +209,7 @@ npm run validate:env
 
 Quando adicionar uma nova variável `VITE_*`:
 
-- [ ] Adicionar no `docker-compose.dashboard.yml` com fallback
+- [ ] Adicionar no `docker-compose.1-dashboard-stack.yml` com fallback
 - [ ] Adicionar no bloco `define` do `vite.config.ts` com fallbacks
 - [ ] Adicionar log em development no `vite.config.ts`
 - [ ] Se crítica, adicionar no array `CRITICAL_VARS` do `validate-env-vars.mjs`

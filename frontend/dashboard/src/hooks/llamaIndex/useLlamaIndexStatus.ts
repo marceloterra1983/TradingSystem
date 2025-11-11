@@ -235,7 +235,7 @@ export function useLlamaIndexStatus(
           rawMessage.includes("401") ||
           rawMessage.toLowerCase().includes("unauthorized");
         const friendly = is401Error
-          ? "A requisição foi rejeitada (401). Certifique-se de que o RAG Service (porta 3402) esteja em execução via docker-compose.rag.yml ou configure um VITE_LLAMAINDEX_JWT para acesso direto."
+          ? "A requisição foi rejeitada (401). Certifique-se de que o RAG Service (porta 3402) esteja em execução via docker-compose.4-4-rag-stack.yml ou configure um VITE_LLAMAINDEX_JWT para acesso direto."
           : rawMessage;
 
         const scopedMessage =

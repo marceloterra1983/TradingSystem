@@ -127,7 +127,7 @@ Vite has a special behavior: **any environment variable prefixed with `VITE_` is
 
 ### Example 1: Workspace API
 
-**File: `tools/compose/docker-compose.dashboard.yml`**
+**File: `tools/compose/docker-compose.1-dashboard-stack.yml`**
 ```yaml
 environment:
   # ✅ Server-side proxy target (no VITE_ prefix)
@@ -168,7 +168,7 @@ const buildFallbackCandidates = (): Array<string | null> => {
 
 ### Example 2: Docusaurus Documentation
 
-**File: `tools/compose/docker-compose.dashboard.yml`**
+**File: `tools/compose/docker-compose.1-dashboard-stack.yml`**
 ```yaml
 environment:
   # ✅ Server-side proxy target (NGINX container)
@@ -190,7 +190,7 @@ const docsProxy = resolveProxy(
 
 ### Example 3: TP Capital API
 
-**File: `tools/compose/docker-compose.dashboard.yml`**
+**File: `tools/compose/docker-compose.1-dashboard-stack.yml`**
 ```yaml
 environment:
   # ✅ Server-side proxy target

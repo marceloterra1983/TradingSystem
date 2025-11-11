@@ -11,6 +11,17 @@
       "show": "always"
     },
     {
+      "text": "$(debug-restart) Restart Dashboard",
+      "tooltip": "Restart Dashboard container",
+      "command": "workbench.action.tasks.runTask",
+      "arguments": ["🔄 Restart Dashboard"],
+      "alignment": "right",
+      "priority": 97,
+      "color": "#ffffff",
+      "backgroundColor": "#007ACC",
+      "show": "always"
+    },
+    {
       "text": "$(wrench) Rebuild Dashboard",
       "tooltip": "Rebuild Dashboard container",
       "command": "workbench.action.tasks.runTask",

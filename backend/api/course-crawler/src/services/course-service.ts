@@ -75,7 +75,10 @@ export async function getCourseWithSecret(id: string) {
 export async function createCourse(input: CourseInput) {
   // Only encrypt if password is provided (not empty string)
   const encrypted = input.password ? encryptSecret(input.password) : "";
-  const targetUrls = input.targetUrls ?? [];
+  // Use baseUrl as fallback if targetUrls not provided or empty
+  const targetUrls = input.targetUrls && input.targetUrls.length > 0
+    ? input.targetUrls
+    : [input.baseUrl]; // Fallback to baseUrl
   const result = await pool.query<CourseRow>(
     `
       INSERT INTO course_crawler.courses

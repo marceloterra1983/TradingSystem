@@ -102,7 +102,7 @@ O template possui **8 seções modulares** que podem ser ativadas/desativadas:
   ```bash
   CODE_FILES=(
       "frontend/dashboard/src/components/pages/DocsHybridSearchPage.tsx"
-      "tools/compose/docker-compose.rag.yml"
+      "tools/compose/docker-compose.4-4-rag-stack.yml"
   )
   ```
 
@@ -164,7 +164,7 @@ ENABLED_SECTIONS=(
 # Arquivos modificados no bugfix
 CODE_FILES=(
     "frontend/dashboard/src/components/pages/DocsHybridSearchPage.tsx"
-    "tools/compose/docker-compose.rag.yml"
+    "tools/compose/docker-compose.4-4-rag-stack.yml"
     "BUGFIX-SUMMARY.md"
 )
 

@@ -387,7 +387,7 @@ docs/content/apps/tp-capital/runbooks/
 tools/compose/
 ├── docker-compose.4-1-tp-capital-stack.yml  ✅ UPDATED
 │   # Fixed: TELEGRAM_GATEWAY_URL to use container hostname
-└── docker-compose.dashboard.yml  ✅ UPDATED
+└── docker-compose.1-dashboard-stack.yml  ✅ UPDATED
     # Fixed: Use PROXY_TARGET instead of API_URL
 
 apps/tp-capital/src/
@@ -520,7 +520,7 @@ bash scripts/validation/pre-deploy-validation-suite.sh --strict
 cd tools/compose
 bash run-telegram-compose.sh down
 docker compose -f docker-compose.4-1-tp-capital-stack.yml down
-docker compose -f docker-compose.dashboard.yml down
+docker compose -f docker-compose.1-dashboard-stack.yml down
 
 # Validate environment
 bash ../../scripts/validation/validate-env.sh
@@ -528,7 +528,7 @@ bash ../../scripts/validation/validate-env.sh
 # Start in order
 bash run-telegram-compose.sh up -d && sleep 30
 docker compose -f docker-compose.4-1-tp-capital-stack.yml up -d && sleep 20
-docker compose -f docker-compose.dashboard.yml up -d
+docker compose -f docker-compose.1-dashboard-stack.yml up -d
 
 # Verify
 bash ../../scripts/validation/validate-network.sh --test-all

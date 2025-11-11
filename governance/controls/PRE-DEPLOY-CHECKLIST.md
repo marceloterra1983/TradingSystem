@@ -137,7 +137,7 @@ This checklist MUST be completed **before deploying** any Docker Compose stack, 
 #### 3.3 Proxy Target Validation (Frontend)
 ```bash
 [ ] Verify frontend uses PROXY_TARGET (not API_URL) for containerized setups
-    Command: grep "VITE_.*_PROXY_TARGET" tools/compose/docker-compose.dashboard.yml
+    Command: grep "VITE_.*_PROXY_TARGET" tools/compose/docker-compose.1-dashboard-stack.yml
     
     Expected:
     - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005

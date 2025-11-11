@@ -53,6 +53,6 @@ echo -e "${GREEN}Ports freed!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "You can now start Docker containers:"
-echo "  docker compose -f tools/compose/docker-compose.rag.yml up -d"
+echo "  docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d"
 echo ""
 

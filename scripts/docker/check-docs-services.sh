@@ -44,7 +44,7 @@ if docker ps --format '{{.Names}}' | grep -q docs-api; then
 else
     echo -e "  Status: ${RED}❌ Not Running${NC}"
     echo "  Type:   🐳 Docker Container (Expected)"
-    echo "  Hint:   docker compose --env-file .env -f tools/compose/docker-compose.docs.yml up -d"
+    echo "  Hint:   docker compose --env-file .env -f tools/compose/docker-compose.2-docs-stack.yml up -d"
 fi
 
 echo ""
@@ -79,7 +79,7 @@ echo "  📚 Docusaurus:     http://localhost:3400"
 echo "  📡 DocsAPI:        http://localhost:3401"
 echo "  📊 DocsAPI Health: http://localhost:3401/health"
 echo "  📋 OpenAPI Spec:   http://localhost:3401/spec/openapi.yaml"
-echo "  💾 PgAdmin:        http://localhost:5050 (login required)"
+echo "  💾 PgAdmin:        http://localhost:9080/db-ui/pgadmin (login required)"
 echo ""
 
 # Management commands
@@ -88,13 +88,13 @@ echo "║                  Management Commands                        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  Start DocsAPI:"
-echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.docs.yml up -d"
+echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.2-docs-stack.yml up -d"
 echo ""
 echo "  Test DocsAPI:"
 echo "    bash scripts/docker/test-docs-api.sh"
 echo ""
 echo "  View logs:"
-echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.docs.yml logs -f"
+echo "    docker compose --env-file .env.shared -f tools/compose/docker-compose.2-docs-stack.yml logs -f"
 echo ""
 echo "  Start Docusaurus (DEV):"
 echo "    cd docs && npm run start -- --port 3400"

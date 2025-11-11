@@ -11,7 +11,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
-COMPOSE_FILE="tools/compose/docker-compose.dashboard.yml"
+COMPOSE_FILE="tools/compose/docker-compose.1-dashboard-stack.yml"
 PROJECT_NAME="1-dashboard-stack"
 SERVICE_NAME="dashboard"
 

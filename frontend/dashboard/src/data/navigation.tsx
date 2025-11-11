@@ -6,10 +6,12 @@ import {
   Server,
   ShieldCheck,
   Workflow,
+  Bot,
   TrendingUp,
   MessageSquare,
   Briefcase,
   GraduationCap,
+  Flame,
   List,
   FileText,
   Database,
@@ -50,6 +52,12 @@ const TelegramGatewayFinal = React.lazy(
 );
 const N8nPage = React.lazy(() => import("../components/pages/N8nPage"));
 const WahaPage = React.lazy(() => import("../components/pages/WahaPage"));
+const EvolutionPage = React.lazy(
+  () => import("../components/pages/EvolutionPage"),
+);
+const FirecrawlPage = React.lazy(
+  () => import("../components/pages/FirecrawlPage"),
+);
 
 // ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
 // Use functions instead of eager instantiation to enable true code splitting
@@ -67,6 +75,8 @@ const courseCrawlerContent = () => <CourseCrawlerPage />;
 const governanceContent = () => <GovernancePage />;
 const n8nContent = () => <N8nPage />;
 const wahaContent = () => <WahaPage />;
+const evolutionContent = () => <EvolutionPage />;
+const firecrawlContent = () => <FirecrawlPage />;
 
 /**
  * Page Part - Collapsible section within a page
@@ -250,18 +260,6 @@ export const NAVIGATION_DATA: Section[] = [
     label: "Toolbox",
     pages: [
       {
-        id: "miro",
-        title: "Miro",
-        header: {
-          title: "Miro Board",
-          subtitle:
-            "Quadro colaborativo para planejamento visual e brainstorming",
-        },
-        parts: [],
-        customContent: miroContent,
-        icon: <Layout className="h-4 w-4" />,
-      },
-      {
         id: "knowledge-database",
         title: "Database",
         header: {
@@ -272,18 +270,6 @@ export const NAVIGATION_DATA: Section[] = [
         parts: [],
         customContent: databaseContent,
         icon: <Database className="h-4 w-4" />,
-      },
-      {
-        id: "kestra-orchestrator",
-        title: "Kestra",
-        header: {
-          title: "Kestra Orchestrator",
-          subtitle:
-            "Automação de pipelines declarativos com filas e storage dedicados.",
-        },
-        parts: [],
-        customContent: kestraContent,
-        icon: <GitBranch className="h-4 w-4" />,
       },
       {
         id: "n8n-automation",
@@ -298,6 +284,18 @@ export const NAVIGATION_DATA: Section[] = [
         icon: <Workflow className="h-4 w-4" />,
       },
       {
+        id: "evolution-manager",
+        title: "Evolution",
+        header: {
+          title: "Evolution Manager",
+          subtitle:
+            "Orquestração oficial do Evolution API com monitoramento em tempo real.",
+        },
+        parts: [],
+        customContent: evolutionContent,
+        icon: <Bot className="h-4 w-4" />,
+      },
+      {
         id: "waha-dashboard",
         title: "WAHA",
         header: {
@@ -308,6 +306,42 @@ export const NAVIGATION_DATA: Section[] = [
         parts: [],
         customContent: wahaContent,
         icon: <MessageCircle className="h-4 w-4" />,
+      },
+      {
+        id: "kestra-orchestrator",
+        title: "Kestra",
+        header: {
+          title: "Kestra Orchestrator",
+          subtitle:
+            "Automação de pipelines declarativos com filas e storage dedicados.",
+        },
+        parts: [],
+        customContent: kestraContent,
+        icon: <GitBranch className="h-4 w-4" />,
+      },
+      {
+        id: "firecrawl-dashboard",
+        title: "Firecrawl",
+        header: {
+          title: "Firecrawl Dashboard",
+          subtitle:
+            "Console de scraping Firecrawl com status das tarefas e diagnósticos.",
+        },
+        parts: [],
+        customContent: firecrawlContent,
+        icon: <Flame className="h-4 w-4" />,
+      },
+      {
+        id: "miro",
+        title: "Miro",
+        header: {
+          title: "Miro Board",
+          subtitle:
+            "Quadro colaborativo para planejamento visual e brainstorming",
+        },
+        parts: [],
+        customContent: miroContent,
+        icon: <Layout className="h-4 w-4" />,
       },
     ],
   },

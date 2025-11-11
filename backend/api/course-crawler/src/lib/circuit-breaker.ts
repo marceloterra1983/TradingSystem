@@ -28,10 +28,10 @@ export const httpBreakerConfig = {
  * Create a circuit breaker with logging
  */
 export function createCircuitBreaker<
-  T extends (...args: unknown[]) => Promise<unknown>,
+  T extends (...args: any[]) => Promise<any>,
 >(
   fn: T,
-  config: Parameters<typeof CircuitBreaker>[1] = dbBreakerConfig,
+  config: typeof dbBreakerConfig = dbBreakerConfig,
 ): CircuitBreaker<Parameters<T>, ReturnType<T>> {
   const breaker = new CircuitBreaker(fn, config);
 
@@ -54,7 +54,7 @@ export function createCircuitBreaker<
     );
   });
 
-  breaker.on("fallback", (result) => {
+  breaker.on("fallback", (result: unknown) => {
     console.warn(
       `[CircuitBreaker:${config.name}] 🔀 Fallback triggered, result:`,
       result,
@@ -63,7 +63,7 @@ export function createCircuitBreaker<
 
   // Log failures but don't spam
   let failureCount = 0;
-  breaker.on("failure", (error) => {
+  breaker.on("failure", (error: Error) => {
     failureCount++;
     if (failureCount % 10 === 1) {
       // Log every 10th failure

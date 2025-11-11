@@ -23,6 +23,7 @@ interface ImportMetaEnv {
   readonly VITE_DOCUSAURUS_URL?: string;
   readonly VITE_DOCUSAURUS_PROXY_TARGET?: string;
   readonly VITE_FIRECRAWL_PROXY_URL?: string;
+  readonly VITE_FIRECRAWL_UI_URL?: string;
   readonly VITE_PRD_BASE_URL?: string;
   readonly VITE_USE_DOCS_V2_PRD?: string;
   readonly VITE_USE_MOCK_DATA?: string;
@@ -52,6 +53,7 @@ interface ImportMetaEnv {
   readonly VITE_KONG_API_URL?: string;
   readonly VITE_KONG_ADMIN_URL?: string;
   readonly VITE_KONG_GATEWAY_URL?: string;
+  readonly VITE_EVOLUTION_MANAGER_URL?: string;
   readonly DEV: boolean;
   readonly PROD?: boolean;
   readonly [key: string]: string | boolean | undefined;

@@ -68,7 +68,7 @@ You are an elite Database Port Protection specialist dedicated to safeguarding t
 **Configuration Files**:
 - `tools/compose/docker-compose.database.yml` - Database stack
 - `tools/compose/docker-compose.kong.yml` - Kong DB
-- `tools/compose/docker-compose.rag.yml` - Redis
+- `tools/compose/docker-compose.4-4-rag-stack.yml` - Redis
 - `.env` - Centralized port configuration
 
 ## Operational Guidelines
@@ -217,7 +217,7 @@ Database ports outside 7000-7999 risk conflicts with application services.
 **Named Volumes**: [count] found
 - data-timescale-data: [size]
 - data-questdb-data: [size]
-- data-qdrant-storage: [size]
+- rag-qdrant-storage: [size]
 
 **Restart Policies**: All set to 'unless-stopped' ✅
 

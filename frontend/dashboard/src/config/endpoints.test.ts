@@ -82,9 +82,9 @@ describe("Endpoints Configuration", () => {
     it("should configure default database UI endpoints", () => {
       const { ENDPOINTS } = endpointsModule;
 
-      expect(ENDPOINTS.pgAdmin).toBe("http://localhost:5050");
-      expect(ENDPOINTS.adminer).toBe("http://localhost:8082");
-      expect(ENDPOINTS.pgWeb).toBe("http://localhost:8081");
+      expect(ENDPOINTS.pgAdmin).toBe("http://localhost:9080/db-ui/pgadmin");
+      expect(ENDPOINTS.adminer).toBe("http://localhost:9080/db-ui/adminer");
+      expect(ENDPOINTS.pgWeb).toBe("http://localhost:9080/db-ui/pgweb");
     });
 
     it("should expose database services using the documented ports", () => {
@@ -92,7 +92,7 @@ describe("Endpoints Configuration", () => {
 
       expect(ENDPOINTS.timescaledb.port).toBe(7000);
       expect(ENDPOINTS.timescaledb.url).toBe("http://localhost:7000");
-      expect(ENDPOINTS.questdb).toBe("http://localhost:9002");
+      expect(ENDPOINTS.questdb).toBe("http://localhost:9080/db-ui/questdb");
       expect(ENDPOINTS.qdrant).toBe("http://localhost:7020");
       expect(ENDPOINTS.redis.port).toBe(7030);
     });

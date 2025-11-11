@@ -24,7 +24,7 @@ export function getQdrantConfig(options = {}) {
     qdrantUrl = process.env.QDRANT_CLUSTER_URL || 'http://qdrant-lb:80';
   } else {
     // Use single instance (development/testing)
-    qdrantUrl = process.env.QDRANT_URL || 'http://data-qdrant:6333';
+    qdrantUrl = process.env.QDRANT_URL || 'http://rag-qdrant:6333';
   }
   
   return {

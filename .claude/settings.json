@@ -1,15 +1,96 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] Executing: $CLAUDE_TOOL_NAME\" >> .claude/logs/bash-commands.log"
+          },
+          {
+            "type": "prompt",
+            "prompt": "If the bash command contains 'sudo', DO NOT execute it directly. Instead:\n1. Create a script in .claude/sudo-scripts/ with timestamp\n2. Include all sudo commands in the script\n3. Make it executable (chmod +x)\n4. Show the user:\n   - Script location\n   - What commands will be executed\n   - How to run: 'sudo bash [script-path]'\n5. Wait for user confirmation before continuing\n6. NEVER execute sudo commands directly\n\nCommand to check: $ARGUMENTS"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] File operation: $CLAUDE_TOOL_NAME\" >> .claude/logs/file-operations.log"
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] Task started: $CLAUDE_TOOL_NAME\" >> .claude/logs/task-executions.log"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "if command -v osascript >/dev/null 2>&1; then osascript -e 'display notification \"Tool: $CLAUDE_TOOL_NAME completed\" with title \"Claude Code\"'; elif command -v notify-send >/dev/null 2>&1; then notify-send 'Claude Code' \"Tool: $CLAUDE_TOOL_NAME completed\"; fi"
+            "command": "if command -v notify-send >/dev/null 2>&1; then notify-send 'Claude Code' \"Tool: $CLAUDE_TOOL_NAME completed\"; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] Completed: $CLAUDE_TOOL_NAME\" >> .claude/logs/bash-commands.log"
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] Task completed: $CLAUDE_TOOL_NAME\" >> .claude/logs/task-executions.log"
+          }
+        ]
+      },
+      {
+        "matcher": "TodoWrite",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude/logs && echo \"[$(date +'%Y-%m-%d %H:%M:%S')] Todo updated\" >> .claude/logs/todo-updates.log"
           }
         ]
       }
+    ]
+  },
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Task",
+      "WebFetch",
+      "WebSearch",
+      "BashOutput",
+      "KillShell",
+      "NotebookEdit",
+      "TodoWrite",
+      "SlashCommand",
+      "ExitPlanMode"
     ]
   }
 }

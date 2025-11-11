@@ -1,0 +1,177 @@
+name: Dependabot Auto-Merge
+
+# Auto-merge Dependabot PRs for security patches and minor updates
+# Part of: Phase 1.2 - Security Improvements (Improvement Plan v1.0)
+# Created: 2025-11-11
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot-auto-merge:
+    name: Auto-Merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Check auto-merge eligibility
+        id: check
+        run: |
+          # Extract update type and severity
+          UPDATE_TYPE="${{ steps.metadata.outputs.update-type }}"
+          SEVERITY="${{ steps.metadata.outputs.severity }}"
+          PACKAGE_ECOSYSTEM="${{ steps.metadata.outputs.package-ecosystem }}"
+
+          echo "Update Type: $UPDATE_TYPE"
+          echo "Severity: $SEVERITY"
+          echo "Package Ecosystem: $PACKAGE_ECOSYSTEM"
+
+          # Auto-merge criteria
+          AUTO_MERGE=false
+
+          # Rule 1: Security patches (any severity)
+          if [ "$SEVERITY" != "" ]; then
+            echo "✅ Security update detected (severity: $SEVERITY)"
+            AUTO_MERGE=true
+          fi
+
+          # Rule 2: Patch updates (non-breaking)
+          if [ "$UPDATE_TYPE" == "version-update:semver-patch" ]; then
+            echo "✅ Patch update detected (non-breaking)"
+            AUTO_MERGE=true
+          fi
+
+          # Rule 3: Minor updates for dev dependencies only
+          if [ "$UPDATE_TYPE" == "version-update:semver-minor" ]; then
+            # Check if it's a dev dependency (needs PR body inspection)
+            # For now, we'll be conservative and not auto-merge minor updates
+            echo "⚠️ Minor update detected - manual review required"
+            AUTO_MERGE=false
+          fi
+
+          # Rule 4: Never auto-merge major updates
+          if [ "$UPDATE_TYPE" == "version-update:semver-major" ]; then
+            echo "❌ Major update detected - manual review REQUIRED"
+            AUTO_MERGE=false
+          fi
+
+          echo "auto_merge=$AUTO_MERGE" >> $GITHUB_OUTPUT
+
+      - name: Check CI status
+        id: ci_status
+        if: steps.check.outputs.auto_merge == 'true'
+        run: |
+          echo "Waiting for CI checks to complete..."
+          # GitHub will wait for required checks automatically
+          echo "ci_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Enable auto-merge
+        if: steps.check.outputs.auto_merge == 'true'
+        run: |
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve PR (if security update)
+        if: steps.check.outputs.auto_merge == 'true' && steps.metadata.outputs.severity != ''
+        run: |
+          gh pr review --approve "$PR_URL" --body "✅ Auto-approving security update (severity: ${{ steps.metadata.outputs.severity }})"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add comment with merge plan
+        if: steps.check.outputs.auto_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const updateType = '${{ steps.metadata.outputs.update-type }}';
+            const severity = '${{ steps.metadata.outputs.severity }}';
+            const packageName = '${{ steps.metadata.outputs.dependency-names }}';
+
+            let reason = '';
+            if (severity) {
+              reason = `🔒 Security update (severity: ${severity})`;
+            } else if (updateType === 'version-update:semver-patch') {
+              reason = '✅ Patch update (non-breaking)';
+            }
+
+            const comment = `### 🤖 Dependabot Auto-Merge
+
+            **Status:** ✅ Approved for auto-merge
+
+            **Reason:** ${reason}
+
+            **Package:** \`${packageName}\`
+            **Update Type:** \`${updateType}\`
+
+            This PR will be automatically merged once all required CI checks pass.
+
+            ---
+            *Auto-merge enabled by Dependabot Auto-Merge workflow*
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Add comment with manual review required
+        if: steps.check.outputs.auto_merge == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const updateType = '${{ steps.metadata.outputs.update-type }}';
+            const packageName = '${{ steps.metadata.outputs.dependency-names }}';
+
+            let reason = '';
+            if (updateType === 'version-update:semver-major') {
+              reason = '⚠️ Major version update requires manual review';
+            } else if (updateType === 'version-update:semver-minor') {
+              reason = '⚠️ Minor version update requires manual review';
+            } else {
+              reason = '⚠️ Manual review required for this update type';
+            }
+
+            const comment = `### 🤖 Dependabot Manual Review Required
+
+            **Status:** ⚠️ Manual review needed
+
+            **Reason:** ${reason}
+
+            **Package:** \`${packageName}\`
+            **Update Type:** \`${updateType}\`
+
+            Please review this PR carefully before merging.
+
+            **Review Checklist:**
+            - [ ] Check changelog for breaking changes
+            - [ ] Review migration guide (if major update)
+            - [ ] Test locally if needed
+            - [ ] Ensure all tests pass
+            - [ ] Verify no runtime issues
+
+            ---
+            *Auto-merge NOT enabled - manual approval required*
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

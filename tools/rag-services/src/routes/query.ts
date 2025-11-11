@@ -22,7 +22,7 @@ const router = Router();
 // UPDATED 2025-11-03: Support for Qdrant Cluster via load balancer
 const QDRANT_URL = process.env.QDRANT_CLUSTER_ENABLED === 'true' 
   ? (process.env.QDRANT_CLUSTER_URL || 'http://qdrant-lb:80')
-  : (process.env.QDRANT_URL || 'http://data-qdrant:6333');
+  : (process.env.QDRANT_URL || 'http://rag-qdrant:6333');
 
 const OLLAMA_URL = process.env.OLLAMA_EMBEDDINGS_URL || 'http://rag-ollama:11434';
 const DEFAULT_EMBEDDING_MODEL = process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text';

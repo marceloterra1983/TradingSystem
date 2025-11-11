@@ -392,6 +392,9 @@ export function useTelegramGatewayChannels() {
       }>(`${TELEGRAM_GATEWAY_CHANNELS_BASE}`);
       return payload.data ?? [];
     },
+    staleTime: 0, // Force fresh data every time
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when browser tab gains focus
   });
 }
 

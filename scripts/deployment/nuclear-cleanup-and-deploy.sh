@@ -125,33 +125,33 @@ cd "$PROJECT_ROOT"
 echo ""
 echo -e "${BLUE}  [5.1] Starting Qdrant (single node)...${NC}"
 docker run -d \
-  --name data-qdrant \
+  --name rag-qdrant \
   --network tradingsystem_backend \
   -p 6333:6333 -p 6334:6334 \
   -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
   --restart unless-stopped \
-  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || docker start data-qdrant >/dev/null 2>&1
+  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || docker start rag-qdrant >/dev/null 2>&1
 sleep 10
 echo -e "${GREEN}    ✅ Qdrant started${NC}"
 
 # 5.2: Start RAG infrastructure (Ollama, Redis)
 echo ""
 echo -e "${BLUE}  [5.2] Starting RAG infrastructure...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml up -d ollama rag-redis
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d ollama rag-redis
 sleep 10
 echo -e "${GREEN}    ✅ Infrastructure started${NC}"
 
 # 5.3: Start LlamaIndex services
 echo ""
 echo -e "${BLUE}  [5.3] Starting LlamaIndex services...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml up -d llamaindex-query
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d llamaindex-query
 sleep 15
 echo -e "${GREEN}    ✅ LlamaIndex started${NC}"
 
 # 5.4: Start RAG services (depends on LlamaIndex)
 echo ""
 echo -e "${BLUE}  [5.4] Starting RAG services...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-service rag-collections-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-service rag-collections-service
 sleep 10
 echo -e "${GREEN}    ✅ RAG services started${NC}"
 

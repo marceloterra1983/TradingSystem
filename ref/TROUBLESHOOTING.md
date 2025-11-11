@@ -271,7 +271,7 @@ curl http://localhost:7050/collections/docs_index_mxbai
 **C. Service not responding:**
 ```bash
 # Restart RAG stack
-docker compose -f tools/compose/docker-compose.rag.yml restart
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart
 
 # Check logs
 docker logs llamaindex

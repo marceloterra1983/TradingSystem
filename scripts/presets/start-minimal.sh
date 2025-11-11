@@ -21,22 +21,22 @@ echo ""
 
 # RAG Stack
 echo "1️⃣ RAG Stack (6 containers)..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-redis ollama
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-redis ollama
 sleep 10
-docker compose -f tools/compose/docker-compose.rag.yml up -d llamaindex-query rag-service rag-collections-service --no-deps
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d llamaindex-query rag-service rag-collections-service --no-deps
 echo "   ✅ RAG Services rodando"
 echo ""
 
 # Qdrant standalone
 echo "2️⃣ Qdrant..."
-if ! docker ps | grep -q "data-qdrant.*Up"; then
+if ! docker ps | grep -q "rag-qdrant.*Up"; then
     docker run -d \
-      --name data-qdrant \
+      --name rag-qdrant \
       --network tradingsystem_backend \
       -p 6333:6333 -p 6334:6334 \
       -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
       --restart unless-stopped \
-      qdrant/qdrant:v1.7.4 2>/dev/null || docker start data-qdrant
+      qdrant/qdrant:v1.7.4 2>/dev/null || docker start rag-qdrant
 fi
 echo "   ✅ Qdrant rodando"
 echo ""

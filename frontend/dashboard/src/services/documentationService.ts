@@ -216,12 +216,16 @@ const STATIC_METRICS_PATHS = [
 const DOCUMENTATION_METRICS_PATH = "/api/v1/docs/health/dashboard-metrics";
 const ABSOLUTE_URL_REGEX = /^https?:\/\//i;
 const FALLBACK_DOCS_API_BASES = [
+  "http://localhost:9080/api/docs",
+  "http://127.0.0.1:9080/api/docs",
   "http://localhost:3405",
   "http://127.0.0.1:3405",
   "http://localhost:3401",
   "http://127.0.0.1:3401",
 ];
 const FALLBACK_DOCS_STATIC_BASES = [
+  "http://localhost:9080/docs",
+  "http://127.0.0.1:9080/docs",
   "http://localhost:3404",
   "http://127.0.0.1:3404",
 ];

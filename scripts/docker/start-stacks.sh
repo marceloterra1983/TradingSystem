@@ -187,13 +187,12 @@ start_phase() {
       compose_cmd -f "${REPO_ROOT}/tools/monitoring/docker-compose.yml" up -d --build
       ;;
     docs)
-      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.docs.yml" up -d --build
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.2-docs-stack.yml" up -d --build
       ;;
     infra)
       compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.infra.yml" up -d --build
       ;;
     tools)
-      local compose="tools/compose/docker-compose.tools.yml"
       local -a services=()
       local -a services_without_kestra=()
       local should_skip_kestra=0
@@ -390,9 +389,9 @@ echo "  QuestDB API:            http://localhost:9000"
 echo "  QuestDB UI:             http://localhost:9009"
 echo ""
 echo -e "${GREEN}Database UI Tools (TimescaleDB):${NC}"
-echo "  pgAdmin:                http://localhost:5050"
+echo "  pgAdmin:                http://localhost:9080/db-ui/pgadmin"
 echo "  pgweb:                  http://localhost:8081"
-echo "  Adminer (optional):     http://localhost:8082"
+echo "  Adminer (optional):     http://localhost:9080/db-ui/adminer"
 echo "  Azimutt (optional):     http://localhost:8084"
 echo ""
 echo -e "${GREEN}Monitoring:${NC}"
@@ -419,5 +418,5 @@ echo -e "${BLUE}═════════════════════�
 echo ""
     database-ui)
       ensure_network "tradingsystem_backend"
-      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.database-ui.yml" up -d
+      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.4-0-database-ui-stack.yml" up -d
       ;;

@@ -88,7 +88,7 @@ if [ "$ALL_FREE" = true ]; then
     echo -e "${GREEN}✅ ALL PORTS FREE! Ready for Docker!${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo ""
-    echo "Run: docker compose -f tools/compose/docker-compose.rag.yml up -d"
+    echo "Run: docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d"
 else
     echo -e "${RED}========================================${NC}"
     echo -e "${RED}⚠️  Some ports still occupied${NC}"

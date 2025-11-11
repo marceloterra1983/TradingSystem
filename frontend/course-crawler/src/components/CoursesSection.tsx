@@ -184,19 +184,19 @@ export function CoursesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Username
+                  Username <span className="text-xs text-gray-500">(optional - for public courses)</span>
                 </label>
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  required
+                  placeholder="Leave empty for public courses"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Password <span className="text-xs text-gray-500">(optional)</span>
+                  Password <span className="text-xs text-gray-500">(optional - for public courses)</span>
                 </label>
                 <div className="relative">
                   <input

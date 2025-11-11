@@ -25,6 +25,12 @@ export async function generateEnv(registry, { targetPath = DEFAULTS.envPath, now
     '# DO NOT EDIT MANUALLY - Run: npm run ports:sync',
     `# Generated: ${now.toISOString()}`,
     '',
+    '# Traefik gateway defaults',
+    'GATEWAY_HTTP_PORT=9080',
+    'GATEWAY_HTTP_URL=http://localhost:9080',
+    'GATEWAY_DASHBOARD_PORT=9081',
+    'GATEWAY_DASHBOARD_URL=http://localhost:9081/dashboard/',
+    '',
   ];
 
   for (const service of registry.services) {
@@ -37,6 +43,14 @@ export async function generateEnv(registry, { targetPath = DEFAULTS.envPath, now
     lines.push(`${envKey}_PORT=${service.port}`);
     lines.push(`${envKey}_HOST=${host}`);
     lines.push(`${envKey}_URL=${url}`);
+
+    if (service.exposure === 'gateway') {
+      const route = service.gatewayPath || '/';
+      const normalizedRoute = route === '/' ? '' : route;
+      lines.push(`${envKey}_GATEWAY_ROUTE=${route}`);
+      lines.push(`${envKey}_GATEWAY_URL=\${GATEWAY_HTTP_URL:-http://localhost:9080}${normalizedRoute}`);
+    }
+
     lines.push('');
   }
 

@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
   "lastUpdated": "2025-11-05",
-  "generatedAt": "2025-11-08T13:59:24.760Z",
+  "generatedAt": "2025-11-11T19:38:00.129Z",
   "ranges": {
     "frontend-ui": "3000-3099",
     "dashboard-ui": "3100-3199",
     "integrations": "3200-3299",
     "documentation": "3400-3499",
-    "automation": "3500-3699",
+    "automation": "3500-5799",
     "external-integrations": "4000-4099",
     "db-core": "5000-5499",
     "messaging": "5600-5699",
@@ -100,7 +100,10 @@
       "protocol": "http",
       "owner": "Frontend Guild",
       "description": "Frontend principal do TradingSystem",
-      "container": false,
+      "container": true,
+      "network": "tradingsystem_frontend",
+      "exposure": "gateway",
+      "gatewayPath": "/",
       "healthcheck": {
         "endpoint": "/",
         "expected": 200
@@ -113,7 +116,10 @@
       "protocol": "http",
       "owner": "Workspace Team",
       "description": "API Workspace/Library para automações locais",
-      "container": false,
+      "container": true,
+      "network": "tradingsystem_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/api/workspace",
       "healthcheck": {
         "endpoint": "/",
         "expected": 200
@@ -126,7 +132,10 @@
       "protocol": "http",
       "owner": "Documentacao",
       "description": "Hub de documentação (Docusaurus v3)",
-      "container": false,
+      "container": true,
+      "network": "tradingsystem_frontend",
+      "exposure": "gateway",
+      "gatewayPath": "/docs",
       "healthcheck": {
         "endpoint": "/",
         "expected": 200
@@ -139,7 +148,10 @@
       "protocol": "http",
       "owner": "Documentacao",
       "description": "API de documentação (Express + FlexSearch)",
-      "container": false,
+      "container": true,
+      "network": "tradingsystem_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/api/docs",
       "healthcheck": {
         "endpoint": "/health",
         "expected": 200
@@ -152,27 +164,28 @@
       "protocol": "http",
       "owner": "Pesquisa",
       "description": "Proxy Express que protege o Firecrawl upstream",
-      "container": false,
+      "container": true,
+      "network": "tradingsystem_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/api/firecrawl",
       "healthcheck": {
-        "endpoint": "/",
+        "endpoint": "/health",
         "expected": 200
       }
     },
     {
-      "name": "n8n",
-      "stack": "automation",
-      "port": 3680,
+      "name": "tp-capital-api",
+      "stack": "external-integrations",
+      "port": 4005,
       "protocol": "http",
-      "owner": "ToolingGuild",
-      "description": "Editor n8n para orquestrações low-code",
+      "owner": "TP Capital Squad",
+      "description": "API ingestora de sinais do TP Capital",
       "container": true,
-      "network": "n8n_backend",
-      "depends_on": [
-        "n8n-postgres",
-        "n8n-redis"
-      ],
+      "network": "tp_capital_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/api/tp-capital",
       "healthcheck": {
-        "endpoint": "/healthz",
+        "endpoint": "/health",
         "expected": 200
       }
     },
@@ -185,20 +198,6 @@
       "description": "Gateway MTProto principal (HTTP + metrics)",
       "container": true,
       "network": "telegram_backend",
-      "healthcheck": {
-        "endpoint": "/health",
-        "expected": 200
-      }
-    },
-    {
-      "name": "tp-capital-api",
-      "stack": "external-integrations",
-      "port": 4008,
-      "protocol": "http",
-      "owner": "TP Capital Squad",
-      "description": "API ingestora de sinais do TP Capital",
-      "container": true,
-      "network": "tp_capital_net",
       "healthcheck": {
         "endpoint": "/health",
         "expected": 200
@@ -221,7 +220,9 @@
       "healthcheck": {
         "endpoint": "/health",
         "expected": 200
-      }
+      },
+      "exposure": "gateway",
+      "gatewayPath": "/api/telegram-gateway"
     },
     {
       "name": "timescaledb-pgadmin",
@@ -278,6 +279,26 @@
       "description": "Fila AMQP usada para pub/sub interno",
       "container": true,
       "network": "telegram_backend"
+    },
+    {
+      "name": "n8n",
+      "stack": "automation",
+      "port": 5678,
+      "protocol": "http",
+      "owner": "ToolingGuild",
+      "description": "Editor n8n para orquestrações low-code",
+      "container": true,
+      "network": "n8n_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/n8n",
+      "depends_on": [
+        "n8n-postgres",
+        "n8n-redis"
+      ],
+      "healthcheck": {
+        "endpoint": "/healthz",
+        "expected": 200
+      }
     },
     {
       "name": "qdrant",
@@ -362,9 +383,11 @@
       "owner": "ToolingGuild",
       "description": "Kestra orchestrator UI",
       "container": true,
-      "network": "tools_net",
+      "network": "tradingsystem_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/kestra",
       "healthcheck": {
-        "endpoint": "/actuator/health",
+        "endpoint": "/",
         "expected": 200
       }
     },
@@ -376,13 +399,15 @@
       "owner": "ToolingGuild",
       "description": "Kestra management/worker endpoint",
       "container": true,
-      "network": "tools_net",
+      "network": "tradingsystem_backend",
+      "exposure": "gateway",
+      "gatewayPath": "/kestra-management",
       "depends_on": [
         "kestra-orchestrator"
       ],
       "notes": "Interno, mas exposto para troubleshooting",
       "healthcheck": {
-        "endpoint": "/actuator/health",
+        "endpoint": "/health",
         "expected": 200
       }
     },

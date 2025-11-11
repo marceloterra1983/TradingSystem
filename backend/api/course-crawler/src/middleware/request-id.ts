@@ -1,8 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
 import { v4 as uuid } from "uuid";
 
-export interface RequestWithId extends Request {
-  id?: string;
+// Augment Express Request interface globally
+declare global {
+  namespace Express {
+    interface Request {
+      id?: string;
+    }
+  }
 }
 
 /**
@@ -10,7 +15,7 @@ export interface RequestWithId extends Request {
  * Uses X-Request-ID header if present, otherwise generates a new UUID
  */
 export function requestIdMiddleware(
-  req: RequestWithId,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
@@ -34,6 +39,6 @@ export function requestIdMiddleware(
 /**
  * Helper function to get request ID from request
  */
-export function getRequestId(req: RequestWithId): string {
-  return req.id || "unknown";
+export function getRequestId(req: Request): string {
+  return (req.id as string) || "unknown";
 }

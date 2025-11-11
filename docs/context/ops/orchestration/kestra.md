@@ -9,6 +9,7 @@ Kestra fornece orquestração de jobs declarativos on-premise. No TradingSystem 
 
 - **Imagem**: `kestra/kestra:latest` (sempre atualizada com `--pull=always`).
 - **Portas padrão**: `8080` (HTTP principal via `KESTRA_HTTP_PORT`) e `8081` (management/health via `KESTRA_MANAGEMENT_PORT`).
+- **Exposição**: Traefik publica `/kestra` (UI) e `/kestra-management` (health/API); as portas 8080/8081 permanecem internas.
 - **Execução**: serviço `tools-kestra` com comando `server standalone`, dependente do contêiner `tools-kestra-postgres`. Wrappers em `tools/kestra/scripts/` permitem execução manual.
 - **Rede/Container**: utiliza a rede `tradingsystem_backend` e mantém o padrão de nomenclatura `tools-*`.
 - **Persistência**: Postgres dedicado (`tools-kestra-postgres`) e volumes bind em `tools/kestra/storage` (dados) e `tools/kestra/workdir` (workspace temporário).
@@ -29,14 +30,14 @@ Kestra fornece orquestração de jobs declarativos on-premise. No TradingSystem 
    KESTRA_BASICAUTH_USERNAME=admin@tradingsystem.local
    KESTRA_BASICAUTH_PASSWORD="<senha forte>"
    ```
-   > ℹ️ No ambiente padrão, usamos `KESTRA_HTTP_PORT=8180` e `KESTRA_MANAGEMENT_PORT=8685` para evitar conflito com o Timescale Admin (8080).
+   > ℹ️ As variáveis de porta continuam válidas para execução manual/local; em ambientes padronizados, utilize o Traefik (`http://localhost:9080/kestra`).
 4. Diretórios `tools/kestra/storage` e `tools/kestra/workdir` com permissão de escrita (criados automaticamente ao subir o serviço).
 
 ## Como iniciar
 
 ```bash
 # Subir apenas o Kestra (stack Tools) via Compose
-docker compose -f tools/compose/docker-compose.tools.yml up -d kestra
+docker compose -f tools/compose/docker-compose.5-5-kestra-stack.yml up -d kestra
 
 # Subir stack Tools completa (Kestra incluído)
 bash scripts/docker/start-stacks.sh --phase tools
@@ -69,7 +70,7 @@ tools/kestra/scripts/stop.sh
 |------|---------|
 | Listar contêiner | `tools/kestra/scripts/status.sh` |
 | Ver logs | `tools/kestra/scripts/logs.sh` |
-| Prova de saúde | `curl -fsS http://localhost:${KESTRA_MANAGEMENT_PORT}/health` (fallback `/actuator/health` na porta HTTP principal) |
+| Prova de saúde | `curl -fsS http://localhost:9080/kestra-management/health` (fallback interno: `curl -fsS http://kestra:8081/health`) |
 | Uso de recursos | `docker stats --no-stream $(docker ps --filter "ancestor=kestra/kestra:latest" -q)` |
 
 O script `scripts/maintenance/health-check-all.sh` inclui a verificação do Kestra e retorna status `down`/`degraded` caso o contêiner esteja inativo ou a sonda HTTP falhe.
@@ -83,7 +84,7 @@ O script `scripts/maintenance/health-check-all.sh` inclui a verificação do Kes
 ## Segurança
 
 - Os contêineres `tools-kestra` e `tools-kestra-postgres` rodam como `root` e acessam o socket Docker. Restrinja o uso a operadores confiáveis.
-- Proteja as portas expostas (`KESTRA_HTTP_PORT`, `KESTRA_MANAGEMENT_PORT`) com VPN/firewall ou reverse proxy quando houver acesso externo.
+- Exposição externa ocorre via Traefik; mantenha autenticação básica habilitada e proteja o gateway (HTTPS/VPN) conforme política.
 - Armazene senhas (Postgres e Basic Auth) apenas no `.env` e rotacione periodicamente. Inclua `tools/kestra/storage` nos backups ou políticas de retenção.
 
 ## Troubleshooting

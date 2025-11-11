@@ -1,16 +1,16 @@
 #!/bin/bash
-# Script para corrigir e sincronizar todos os containers da stack 3-database-stack
+# Script para corrigir e sincronizar todos os containers da stack 4-0-database-ui-stack
 # Sincroniza com http://localhost:3103/#/knowledge-database
 
 set -e
 
-echo "🔧 Corrigindo e sincronizando containers da stack 3-database-stack..."
+echo "🔧 Corrigindo e sincronizando containers da stack 4-0-database-ui-stack..."
 echo ""
 
 # Portas esperadas pelo dashboard
 PGADMIN_PORT=5050
-PGWEB_PORT=8081
-ADMINER_PORT=8082
+PGWEB_PORT=5051
+ADMINER_PORT=3910
 QUESTDB_PORT=9002
 
 # 1. Verificar processos usando as portas
@@ -33,7 +33,7 @@ echo ""
 
 # 2. Parar containers antigos
 echo "2️⃣ Parando containers antigos..."
-docker compose -f tools/compose/docker-compose.database-ui.yml down 2>/dev/null || true
+docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml down 2>/dev/null || true
 docker rm -f dbui-pgadmin dbui-pgweb dbui-adminer dbui-questdb 2>/dev/null || true
 echo "   ✅ Containers parados"
 
@@ -89,7 +89,7 @@ echo ""
 
 # 6. Iniciar containers
 echo "6️⃣ Iniciando containers..."
-docker compose -f tools/compose/docker-compose.database-ui.yml up -d
+docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
 echo "   ✅ Containers iniciados"
 
 echo ""

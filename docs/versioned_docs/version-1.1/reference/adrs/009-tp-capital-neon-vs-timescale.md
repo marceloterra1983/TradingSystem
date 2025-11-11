@@ -436,7 +436,7 @@ curl http://localhost:4005/signals?limit=10
 ### Documentação
 - [Neon Architecture](https://neon.tech/docs/introduction/architecture)
 - [TimescaleDB vs PostgreSQL](https://docs.timescale.com/use-timescale/latest/about-timescaledb/)
-- [Workspace Neon Setup](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/compose/docker-compose.workspace-stack.yml)
+- [Workspace Neon Setup](https://github.com/marceloterra1983/TradingSystem/blob/main/tools/compose/docker-compose.4-3-workspace-stack.yml)
 
 ### Benchmarks
 - [Neon Performance](https://neon.tech/docs/introduction/benchmarking)

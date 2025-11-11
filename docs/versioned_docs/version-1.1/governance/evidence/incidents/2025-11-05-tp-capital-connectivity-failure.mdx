@@ -109,7 +109,7 @@ Connection refused inside dashboard-ui container
 
 **Fix**:
 ```yaml
-# docker-compose.dashboard.yml
+# docker-compose.1-dashboard-stack.yml
 # Use Vite proxy targets (internal ports)
 - VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
 ```
@@ -226,7 +226,7 @@ if (!messageContent || messageContent.trim().length === 0) {
 - `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
   - Fixed `TELEGRAM_GATEWAY_URL` to use container hostname
   
-- `tools/compose/docker-compose.dashboard.yml`
+- `tools/compose/docker-compose.1-dashboard-stack.yml`
   - Changed to use `VITE_*_PROXY_TARGET` instead of `VITE_*_API_URL`
 
 ### 2. Application Code

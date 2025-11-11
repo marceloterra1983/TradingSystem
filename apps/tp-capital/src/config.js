@@ -129,7 +129,7 @@ const resolveTimescaleConfig = () => {
     pool: {
       max: toInt(process.env.TP_CAPITAL_POOL_MAX || process.env.TIMESCALEDB_POOL_MAX, 10),
       idleTimeoutMs: toInt(process.env.TP_CAPITAL_IDLE_TIMEOUT || process.env.TIMESCALEDB_IDLE_TIMEOUT_MS, 30000),
-      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT || process.env.TIMESCALEDB_CONN_TIMEOUT_MS, 5000),
+      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT || process.env.TIMESCALEDB_CONN_TIMEOUT_MS, 30000), // Aumentado de 5000ms para 30000ms (30s) - PgBouncer pode demorar na primeira conexão
     },
   };
 };
@@ -188,7 +188,7 @@ const resolveNeonConfig = () => {
     pool: {
       max: toInt(process.env.TP_CAPITAL_POOL_MAX, 25),
       idleTimeoutMs: toInt(process.env.TP_CAPITAL_IDLE_TIMEOUT, 30000),
-      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT, 5000),
+      connectionTimeoutMs: toInt(process.env.TP_CAPITAL_CONNECTION_TIMEOUT, 30000), // Aumentado de 5000ms para 30000ms (30s) - PgBouncer pode demorar na primeira conexão
     },
   };
 };
@@ -264,7 +264,7 @@ const resolveGatewayDbConfig = (defaultTimescaleConfig) => {
       idleTimeoutMs: toInt(process.env.GATEWAY_DATABASE_IDLE_TIMEOUT_MS, 30000),
       connectionTimeoutMs: toInt(
         process.env.GATEWAY_DATABASE_CONN_TIMEOUT_MS,
-        5000,
+        30000, // Aumentado de 5000ms para 30000ms (30s) - Conectar ao Telegram TimescaleDB pode demorar
       ),
     },
   };

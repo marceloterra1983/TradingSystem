@@ -84,7 +84,7 @@ Mas os modelos **FUNCIONAM PERFEITAMENTE** no formulário:
 ### Para Ativar Ollama (Opcional):
 ```bash
 # Start Ollama container
-docker compose -f tools/compose/docker-compose.rag.yml up -d ollama
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d ollama
 
 # Pull models (dentro do container)
 docker exec rag-ollama ollama pull nomic-embed-text

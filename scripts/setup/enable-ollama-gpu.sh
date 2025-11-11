@@ -2,7 +2,7 @@
 #
 # Enable GPU Support for Ollama Container
 # 
-# This script modifies docker-compose.rag.yml to use nvidia runtime
+# This script modifies docker-compose.4-4-rag-stack.yml to use nvidia runtime
 # Requires: NVIDIA Container Toolkit installed (already confirmed ✅)
 #
 # RTX 5090 detected - should provide 10-100x faster embeddings!
@@ -11,7 +11,7 @@
 set -e
 
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
-COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.rag.yml"
+COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-4-rag-stack.yml"
 
 echo "🎮 Configurando Ollama para usar GPU RTX 5090..."
 echo ""
@@ -40,7 +40,7 @@ echo "📋 Próximos passos:"
 echo ""
 echo "1. Recriar o container Ollama com GPU:"
 echo "   cd $PROJECT_ROOT"
-echo "   docker compose -f tools/compose/docker-compose.rag.yml up -d --force-recreate rag-ollama"
+echo "   docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d --force-recreate rag-ollama"
 echo ""
 echo "2. Verificar se a GPU está acessível:"
 echo "   docker exec rag-ollama nvidia-smi"

@@ -14,6 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_COURSE_CRAWLER_API_URL || '';
 
 class CourseCrawlerAPI {
   private client: AxiosInstance;
+  private token: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -24,14 +25,71 @@ class CourseCrawlerAPI {
       },
     });
 
+    // Request interceptor for JWT authentication
+    this.client.interceptors.request.use(
+      async (config) => {
+        // Skip auth for /auth endpoints
+        if (config.url?.startsWith('/auth')) {
+          return config;
+        }
+
+        // Get token (auto-login if needed)
+        const token = await this.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
     // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
+        const originalRequest = error.config;
+
+        // If 401 and not already retried, try to get new token
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          this.token = null; // Clear invalid token
+          const newToken = await this.getToken();
+          if (newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return this.client(originalRequest);
+          }
+        }
+
         console.error('[API Error]', error.response?.data || error.message);
         return Promise.reject(error);
       }
     );
+  }
+
+  /**
+   * Get JWT token (auto-login with default credentials)
+   */
+  private async getToken(): Promise<string | null> {
+    if (this.token) {
+      return this.token;
+    }
+
+    try {
+      // Auto-login with default admin credentials
+      const username = import.meta.env.VITE_COURSE_CRAWLER_ADMIN_USERNAME || 'admin';
+      const password = import.meta.env.VITE_COURSE_CRAWLER_ADMIN_PASSWORD || 'changeme';
+
+      const response = await this.client.post('/auth/login', {
+        username,
+        password,
+      });
+
+      this.token = response.data.token;
+      return this.token;
+    } catch (error) {
+      console.error('[Auth] Failed to auto-login:', error);
+      return null;
+    }
   }
 
   // ============================================================================

@@ -27,19 +27,19 @@ echo -e "${BLUE}═════════════════════�
 
 # Stop the container
 echo -e "\n${YELLOW}[1/4] Stopping docs-api container...${NC}"
-docker compose -f tools/compose/docker-compose.docs.yml stop docs-api || true
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml stop docs-api || true
 
 # Remove the container
 echo -e "\n${YELLOW}[2/4] Removing old container...${NC}"
-docker compose -f tools/compose/docker-compose.docs.yml rm -f docs-api || true
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml rm -f docs-api || true
 
 # Rebuild the image
 echo -e "\n${YELLOW}[3/4] Rebuilding image with latest code...${NC}"
-docker compose -f tools/compose/docker-compose.docs.yml build --no-cache docs-api
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml build --no-cache docs-api
 
 # Start the container
 echo -e "\n${YELLOW}[4/4] Starting docs-api container...${NC}"
-docker compose -f tools/compose/docker-compose.docs.yml up -d docs-api
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d docs-api
 
 # Wait for health check
 echo -e "\n${BLUE}Waiting for container to be healthy...${NC}"

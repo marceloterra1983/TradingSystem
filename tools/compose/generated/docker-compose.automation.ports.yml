@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "automation"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   firecrawl-proxy:
@@ -12,9 +12,13 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Pesquisa"
     description: "Proxy Express que protege o Firecrawl upstream"
+    exposure: gateway
+    gatewayPath: /api/firecrawl
   n8n:
     env: N8N_PORT
-    port: 3680
+    port: 5678
     protocol: http
     owner: "ToolingGuild"
     description: "Editor n8n para orquestrações low-code"
+    exposure: gateway
+    gatewayPath: /n8n

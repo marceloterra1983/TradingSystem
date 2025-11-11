@@ -360,7 +360,7 @@ FE --> Admin: Display stats
 
 ### Docker Compose Stack
 
-**File**: `tools/compose/docker-compose.rag.yml`
+**File**: `tools/compose/docker-compose.4-4-rag-stack.yml`
 
 ```yaml
 services:
@@ -375,7 +375,7 @@ services:
       - REDIS_URL=redis://rag-redis:6379
       - REDIS_CACHE_TTL=600
       - REDIS_ENABLED=true
-      - QDRANT_URL=http://data-qdrant:6333
+      - QDRANT_URL=http://rag-qdrant:6333
       - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
       - FILE_WATCHER_ENABLED=true
       - FILE_WATCHER_DEBOUNCE_MS=5000
@@ -436,7 +436,7 @@ FILE_WATCHER_DEBOUNCE_MS=5000
 
 # Ingestion
 LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8201
-QDRANT_URL=http://data-qdrant:6333
+QDRANT_URL=http://rag-qdrant:6333
 OLLAMA_BASE_URL=http://rag-ollama:11434
 OLLAMA_EMBEDDING_MODEL=mxbai-embed-large
 

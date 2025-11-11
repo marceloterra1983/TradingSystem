@@ -222,11 +222,11 @@ firecrawl/
 **Usage:**
 
 ```bash
-# Start Firecrawl Proxy (Port 3600)
-docker compose -f tools/compose/docker-compose.firecrawl.yml up -d
+# Start Firecrawl Proxy (exposto via Traefik)
+docker compose -f tools/compose/docker-compose.5-7-firecrawl-stack.yml up -d firecrawl-proxy
 
 # Scrape URL
-curl -X POST http://localhost:3600/api/scrape \
+curl -X POST http://localhost:9080/api/firecrawl/scrape \
   -H "Content-Type: application/json" \
   -d '{"url": "https://example.com"}'
 
@@ -250,7 +250,7 @@ from llama_index import Document
 
 # Scrape URL
 response = requests.post(
-    "http://localhost:3600/api/scrape",
+    "http://localhost:9080/api/firecrawl/scrape",
     json={"url": "https://docs.example.com"}
 )
 markdown = response.json()["markdown"]
@@ -315,10 +315,10 @@ bash scripts/maintenance/health-check-all.sh
 
 ```bash
 # Start Firecrawl Proxy
-docker compose -f tools/compose/docker-compose.firecrawl.yml up -d
+docker compose -f tools/compose/docker-compose.5-7-firecrawl-stack.yml up -d firecrawl-proxy
 
 # Scrape URL
-curl -X POST http://localhost:3600/api/scrape \
+curl -X POST http://localhost:9080/api/firecrawl/scrape \
   -H "Content-Type: application/json" \
   -d '{"url": "https://docs.profitchart.com"}' | jq '.markdown'
 ```

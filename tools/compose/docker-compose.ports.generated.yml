@@ -1,6 +1,6 @@
 # Auto-generated port dictionary for Compose overrides
 # Do not edit manually. Run: npm run ports:sync
-# Generated: 2025-11-08T13:59:24.760Z
+# Generated: 2025-11-11T19:38:00.129Z
 
 x-tradingsystem-ports:
   grafana:
@@ -38,6 +38,8 @@ x-tradingsystem-ports:
     stack: dashboard-ui
     owner: "Frontend Guild"
     description: "Frontend principal do TradingSystem"
+    exposure: gateway
+    gatewayPath: /
   workspace-api:
     env: WORKSPACE_API_PORT
     port: 3200
@@ -45,13 +47,17 @@ x-tradingsystem-ports:
     stack: integrations
     owner: "Workspace Team"
     description: "API Workspace/Library para automações locais"
+    exposure: gateway
+    gatewayPath: /api/workspace
   tp-capital-api:
     env: TP_CAPITAL_API_PORT
-    port: 4008
+    port: 4005
     protocol: http
     stack: external-integrations
     owner: "TP Capital Squad"
     description: "API ingestora de sinais do TP Capital"
+    exposure: gateway
+    gatewayPath: /api/tp-capital
   documentation-hub:
     env: DOCUMENTATION_HUB_PORT
     port: 3400
@@ -59,6 +65,8 @@ x-tradingsystem-ports:
     stack: documentation
     owner: "Documentacao"
     description: "Hub de documentação (Docusaurus v3)"
+    exposure: gateway
+    gatewayPath: /docs
   documentation-api:
     env: DOCUMENTATION_API_PORT
     port: 3401
@@ -66,6 +74,8 @@ x-tradingsystem-ports:
     stack: documentation
     owner: "Documentacao"
     description: "API de documentação (Express + FlexSearch)"
+    exposure: gateway
+    gatewayPath: /api/docs
   firecrawl-proxy:
     env: FIRECRAWL_PROXY_PORT
     port: 3600
@@ -73,13 +83,17 @@ x-tradingsystem-ports:
     stack: automation
     owner: "Pesquisa"
     description: "Proxy Express que protege o Firecrawl upstream"
+    exposure: gateway
+    gatewayPath: /api/firecrawl
   n8n:
     env: N8N_PORT
-    port: 3680
+    port: 5678
     protocol: http
     stack: automation
     owner: "ToolingGuild"
     description: "Editor n8n para orquestrações low-code"
+    exposure: gateway
+    gatewayPath: /n8n
   telegram-mtproto:
     env: TELEGRAM_MTPROTO_PORT
     port: 4007
@@ -94,6 +108,8 @@ x-tradingsystem-ports:
     stack: external-integrations
     owner: "Telegram Squad"
     description: "API REST do Telegram Gateway (consulta e sync)"
+    exposure: gateway
+    gatewayPath: /api/telegram-gateway
   documentation-api-viewer:
     env: DOCUMENTATION_API_VIEWER_PORT
     port: 3102
@@ -227,6 +243,8 @@ x-tradingsystem-ports:
     stack: automation-platforms
     owner: "ToolingGuild"
     description: "Kestra orchestrator UI"
+    exposure: gateway
+    gatewayPath: /kestra
   kestra-management:
     env: KESTRA_MANAGEMENT_PORT
     port: 8685
@@ -234,3 +252,5 @@ x-tradingsystem-ports:
     stack: automation-platforms
     owner: "ToolingGuild"
     description: "Kestra management/worker endpoint"
+    exposure: gateway
+    gatewayPath: /kestra-management

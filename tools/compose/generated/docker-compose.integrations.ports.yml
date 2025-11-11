@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "integrations"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   workspace-api:
@@ -12,3 +12,5 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Workspace Team"
     description: "API Workspace/Library para automações locais"
+    exposure: gateway
+    gatewayPath: /api/workspace

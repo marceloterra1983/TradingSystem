@@ -41,7 +41,7 @@ scrape_configs:
   # Qdrant - Vector DB Metrics
   - job_name: 'qdrant'
     static_configs:
-      - targets: ['data-qdrant:6333']
+      - targets: ['rag-qdrant:6333']
     metrics_path: '/metrics'
     scrape_interval: 15s
     

@@ -1,0 +1,229 @@
+{
+  "name": "TradingSystem Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+
+  // Features to add to the container
+  "features": {
+    // Node.js 20 LTS (matches CI environment)
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true,
+      "nvmInstall": true
+    },
+    // Python 3.12 (matches current environment)
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12",
+      "installTools": true,
+      "installJupyterlab": false
+    },
+    // Docker-in-Docker (required for running compose stacks)
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    // Git (with credential helper)
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    },
+    // GitHub CLI
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    // Common utilities (curl, wget, jq, etc.)
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "vscode",
+      "uid": "1000",
+      "gid": "1000"
+    }
+  },
+
+  // VS Code customizations
+  "customizations": {
+    "vscode": {
+      // Extensions to install
+      "extensions": [
+        // Essential
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+
+        // Docker
+        "ms-azuretools.vscode-docker",
+
+        // Git
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+
+        // Markdown
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+
+        // React/Frontend
+        "dsznajder.es7-react-js-snippets",
+        "bradlc.vscode-tailwindcss",
+
+        // Python
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+
+        // Testing
+        "vitest.explorer",
+
+        // Utilities
+        "editorconfig.editorconfig",
+        "christian-kohler.path-intellisense",
+        "visualstudioexptteam.vscodeintellicode",
+        "ms-vsliveshare.vsliveshare",
+
+        // Documentation
+        "jebbs.plantuml",
+        "shd101wyy.markdown-preview-enhanced"
+      ],
+
+      // Settings
+      "settings": {
+        // Editor
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+
+        // TypeScript/JavaScript
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+
+        // Python
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python",
+          "editor.formatOnSave": true
+        },
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+
+        // Files
+        "files.exclude": {
+          "**/.git": true,
+          "**/.DS_Store": true,
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.next": true,
+          "**/__pycache__": true,
+          "**/*.pyc": true
+        },
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/dist/**": true,
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true
+        },
+
+        // Terminal
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.fontSize": 13,
+
+        // Git
+        "git.autofetch": true,
+        "git.confirmSync": false,
+        "gitlens.showWelcomeOnInstall": false,
+
+        // Docker
+        "docker.host": "unix:///var/run/docker.sock",
+
+        // Workspace
+        "workbench.colorTheme": "Default Dark Modern",
+        "workbench.iconTheme": "vs-seti"
+      }
+    }
+  },
+
+  // Port forwarding (auto-forward all service ports)
+  "forwardPorts": [
+    3103,  // Dashboard
+    3404,  // Documentation Hub
+    3200,  // Workspace API
+    4005,  // TP Capital
+    3405,  // Documentation API
+    3600,  // Firecrawl Proxy
+    8202,  // LlamaIndex Query
+    5432,  // PostgreSQL (TimescaleDB)
+    6379,  // Redis
+    5672,  // RabbitMQ
+    9090,  // Prometheus
+    3100   // Grafana
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "3103": {
+      "label": "Dashboard",
+      "onAutoForward": "notify"
+    },
+    "3404": {
+      "label": "Documentation Hub",
+      "onAutoForward": "notify"
+    },
+    "3200": {
+      "label": "Workspace API",
+      "onAutoForward": "silent"
+    },
+    "8202": {
+      "label": "RAG System",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Container user
+  "remoteUser": "vscode",
+
+  // Environment variables
+  "containerEnv": {
+    "TZ": "America/Sao_Paulo",
+    "NODE_ENV": "development",
+    "NPM_CONFIG_UPDATE_NOTIFIER": "false"
+  },
+
+  // Lifecycle hooks
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+  "postAttachCommand": "bash .devcontainer/scripts/post-attach.sh",
+
+  // Mount Docker socket (for Docker-in-Docker)
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
+
+  // Override command (keep container running)
+  "overrideCommand": true,
+
+  // Update remote user UID/GID to match host
+  "updateRemoteUserUID": true,
+
+  // Run args
+  "runArgs": [
+    "--init",
+    "--privileged"
+  ]
+}

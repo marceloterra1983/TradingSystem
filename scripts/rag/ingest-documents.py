@@ -12,7 +12,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from qdrant_client import QdrantClient
 
 # Configuration
-QDRANT_HOST = os.getenv("QDRANT_HOST", "data-qdrant")
+QDRANT_HOST = os.getenv("QDRANT_HOST", "rag-qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://rag-ollama:11434")
 DOCS_PATH = "/app/docs/content"

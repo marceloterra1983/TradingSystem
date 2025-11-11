@@ -118,7 +118,7 @@ export const myService = new MyService();
 ### 2. Docker Compose Configuration
 
 ```yaml
-# tools/compose/docker-compose.dashboard.yml
+# tools/compose/docker-compose.1-dashboard-stack.yml
 services:
   dashboard:
     environment:
@@ -215,7 +215,7 @@ lastReviewed: "2025-11-08"
    # Must show: ✓ No VITE_ prefix misuse
 
    # Rebuild container
-   docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
+   docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
 
    # Test endpoint
    curl -s http://localhost:3103/api/workspace/categories | jq '.success'
@@ -240,7 +240,7 @@ lastReviewed: "2025-11-08"
 
 2. **Add Environment Variables**
    ```bash
-   # In docker-compose.dashboard.yml (server-side)
+   # In docker-compose.1-dashboard-stack.yml (server-side)
    - MY_SERVICE_PROXY_TARGET=http://my-service-api:PORT
 
    # In .env (browser-side)
@@ -423,7 +423,7 @@ docker exec workspace-api wget -q -O- http://localhost:3200/api/categories | jq 
 docker logs dashboard-ui --tail 50 | grep -i "error\|fail\|proxy"
 
 # Rebuild container (after config changes)
-docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
 
 # Run ESLint
 cd frontend/dashboard && npm run lint
@@ -478,7 +478,7 @@ bash scripts/env/validate-env.sh && curl -s http://localhost:3103/api/[service]/
 
 **One-line rebuild:**
 ```bash
-docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
 ```
 
 lastReviewed: "2025-11-08"

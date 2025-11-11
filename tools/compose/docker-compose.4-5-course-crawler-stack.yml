@@ -1,0 +1,114 @@
+name: 4-5-course-crawler-stack
+
+services:
+  course-crawler-db:
+    image: postgres:15
+    container_name: course-crawler-db
+    environment:
+      POSTGRES_PASSWORD: ${COURSE_CRAWLER_DB_PASSWORD:-coursecrawler}
+      POSTGRES_DB: ${COURSE_CRAWLER_DB_NAME:-coursecrawler}
+      POSTGRES_USER: ${COURSE_CRAWLER_DB_USER:-postgres}
+    ports:
+      - "${COURSE_CRAWLER_DB_PORT:-55433}:5432"
+    volumes:
+      - course_crawler_db_data:/var/lib/postgresql/data
+      - ../../backend/api/course-crawler/scripts/init-schema.sql:/docker-entrypoint-initdb.d/01-init-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coursecrawler"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  course-crawler-api:
+    build:
+      context: ../../backend/api/course-crawler
+    container_name: course-crawler-api
+    depends_on:
+      course-crawler-db:
+        condition: service_healthy
+    environment:
+      COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
+      COURSE_CRAWLER_JWT_SECRET: ${COURSE_CRAWLER_JWT_SECRET:-course-crawler-jwt-secret-change-me-in-production-min-32-chars}
+      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:3103,http://localhost:4201}
+      COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
+      COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
+      COURSE_CRAWLER_API_PORT: ${COURSE_CRAWLER_API_PORT:-3601}
+      NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_BROWSER_USE_ENABLED: "false"
+      COURSE_CRAWLER_MAX_CLASSES_PER_MODULE: ${COURSE_CRAWLER_MAX_CLASSES_PER_MODULE:-50}
+      COURSE_CRAWLER_ADMIN_USERNAME: ${COURSE_CRAWLER_ADMIN_USERNAME:-admin}
+      COURSE_CRAWLER_ADMIN_PASSWORD: ${COURSE_CRAWLER_ADMIN_PASSWORD:-changeme}
+    volumes:
+      - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
+      - ../../outputs/course-crawler:/app/outputs
+    ports:
+      - "${COURSE_CRAWLER_API_PORT:-3601}:3601"
+    command: ["npm", "run", "start"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3601/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  course-crawler-worker:
+    build:
+      context: ../../backend/api/course-crawler
+    container_name: course-crawler-worker
+    depends_on:
+      course-crawler-db:
+        condition: service_healthy
+    environment:
+      COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
+      COURSE_CRAWLER_JWT_SECRET: ${COURSE_CRAWLER_JWT_SECRET:-course-crawler-jwt-secret-change-me-in-production-min-32-chars}
+      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:3103,http://localhost:4201}
+      COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
+      COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
+      NEON_DATABASE_URL: ${COURSE_CRAWLER_NEON_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
+      COURSE_CRAWLER_BROWSER_USE_ENABLED: "false"
+      COURSE_CRAWLER_MAX_CLASSES_PER_MODULE: ${COURSE_CRAWLER_MAX_CLASSES_PER_MODULE:-50}
+      COURSE_CRAWLER_TIMEOUT_MS: ${COURSE_CRAWLER_TIMEOUT_MS:-3600000}
+      COURSE_CRAWLER_ADMIN_USERNAME: ${COURSE_CRAWLER_ADMIN_USERNAME:-admin}
+      COURSE_CRAWLER_ADMIN_PASSWORD: ${COURSE_CRAWLER_ADMIN_PASSWORD:-changeme}
+    volumes:
+      - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
+      - ../../outputs/course-crawler:/app/outputs
+    command: ["npm", "run", "worker:start"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f worker || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  course-crawler-ui:
+    build:
+      context: ../../frontend/course-crawler
+      args:
+        VITE_COURSE_CRAWLER_API_URL: ${VITE_COURSE_CRAWLER_API_URL:-http://localhost:3601}
+        VITE_COURSE_CRAWLER_APP_URL: ${VITE_COURSE_CRAWLER_APP_URL:-http://localhost:4201}
+        VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9876}
+    container_name: course-crawler-ui
+    depends_on:
+      course-crawler-api:
+        condition: service_healthy
+    ports:
+      - "${COURSE_CRAWLER_APP_PORT:-4201}:80"
+    networks:
+      - default
+      - tradingsystem_backend  # Connect to Dashboard network for iframe access
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  course_crawler_db_data:
+
+networks:
+  tradingsystem_backend:
+    external: true

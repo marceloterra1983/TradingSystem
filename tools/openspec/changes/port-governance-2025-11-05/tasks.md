@@ -496,7 +496,7 @@ networks:
 **Effort:** 0.5 days  
 **Priority:** P1  
 **Dependencies:** TASK-007  
-**Status:** 🟢 Concluído (dashboard container em `docker-compose.dashboard.yml`)
+**Status:** 🟢 Concluído (dashboard container em `docker-compose.1-dashboard-stack.yml`)
 
 **Objective:** Generate health check script
 
@@ -708,7 +708,7 @@ CMD ["node", "src/index.js"]
 
 **Acceptance Criteria:**
 
--   [x] Workspace API roda via stack docker-compose.workspace-stack.yml (`WORKSPACE_API_PORT`)
+-   [x] Workspace API roda via stack docker-compose.4-3-workspace-stack.yml (`WORKSPACE_API_PORT`)
 -   [x] Docs Hub + Documentation API usam `.env.shared` (ports 3400/3401)
 -   [x] Firecrawl proxy e dependências usam `.env.shared`
 -   [x] TP Capital stack expõe `${TP_CAPITAL_API_PORT:-4008}`

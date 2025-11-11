@@ -45,13 +45,13 @@ echo ""
 # Stop CPU-only stack
 echo "3️⃣ Parando stack CPU-only..."
 cd "$(dirname "$0")/../.."
-docker compose -f tools/compose/docker-compose.rag.yml down
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml down
 echo "   ✅ Stack CPU parado"
 echo ""
 
 # Deploy GPU stack
 echo "4️⃣ Deployando stack GPU..."
-docker compose -f tools/compose/docker-compose.rag-gpu.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.gpu.yml up -d
 echo "   ✅ Stack GPU iniciado"
 echo ""
 

@@ -1135,7 +1135,7 @@ REDIS_URL=redis://localhost:6380
 REDIS_CACHE_TTL=600
 OLLAMA_BASE_URL=http://rag-ollama:11434
 OLLAMA_EMBEDDING_MODEL=mxbai-embed-large
-QDRANT_URL=http://data-qdrant:6333
+QDRANT_URL=http://rag-qdrant:6333
 JWT_SECRET_KEY=dev-secret
 INTER_SERVICE_SECRET=dev-secret
 ```
@@ -1587,7 +1587,7 @@ NEW_SECRET=$(openssl rand -hex 32)
 sed -i "s/INTER_SERVICE_SECRET=.*/INTER_SERVICE_SECRET=${NEW_SECRET}/" .env
 
 # Restart services
-docker compose -f tools/compose/docker-compose.rag.yml restart
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart
 
 # Log rotation
 echo "[$(date)] Inter-service secret rotated" >> /var/log/tradingsystem/secret-rotation.log
@@ -1842,7 +1842,7 @@ services:
 **Effort:** 3 days | **Impact:** High
 
 ```yaml
-# tools/compose/docker-compose.monitoring.yml
+# tools/compose/docker-compose.6-1-monitoring-stack.yml
 version: '3.8'
 services:
   prometheus:

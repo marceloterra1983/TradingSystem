@@ -1,9 +1,9 @@
 #!/bin/bash
-# Script para corrigir e iniciar todos os containers da stack 3-database-stack
+# Script para corrigir e iniciar todos os containers da stack 4-0-database-ui-stack
 
 set -e
 
-echo "🔧 Corrigindo containers da stack 3-database-stack..."
+echo "🔧 Corrigindo containers da stack 4-0-database-ui-stack..."
 echo ""
 
 # 1. Parar processo QuestDB órfão se existir
@@ -35,21 +35,21 @@ echo ""
 
 # 2. Parar todos os containers da stack
 echo "2️⃣ Parando containers existentes..."
-docker compose -f tools/compose/docker-compose.database-ui.yml down 2>/dev/null || true
+docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml down 2>/dev/null || true
 echo "   ✅ Containers parados"
 
 echo ""
 
 # 3. Rebuild launcher-api (com Docker CLI)
 echo "3️⃣ Rebuild dbui-launcher-api (com Docker CLI)..."
-docker compose -f tools/compose/docker-compose.database-ui.yml build dbui-launcher-api
+docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml build dbui-launcher-api
 echo "   ✅ Build concluído"
 
 echo ""
 
 # 4. Iniciar todos os containers
 echo "4️⃣ Iniciando todos os containers..."
-docker compose -f tools/compose/docker-compose.database-ui.yml up -d
+docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
 echo "   ✅ Containers iniciados"
 
 echo ""

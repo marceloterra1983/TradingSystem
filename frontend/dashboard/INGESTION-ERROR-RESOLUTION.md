@@ -216,7 +216,7 @@ Exemplo com CHUNK_SIZE=512:
 1. Verifique logs: `docker logs rag-llamaindex-ingest --tail 100`
 2. Confirme modelo no Ollama: `docker exec rag-ollama ollama list`
 3. Verifique espaço em disco: `df -h`
-4. Reinicie stack completo: `docker compose -f tools/compose/docker-compose.rag.yml restart`
+4. Reinicie stack completo: `docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart`
 
 ---
 

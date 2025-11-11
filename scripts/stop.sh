@@ -205,16 +205,17 @@ stop_port() {
 stop_containers() {
     section "Stopping Docker Containers"
 
-    # Check if docker-compose.apps.yml exists
-    if [ ! -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" ]; then
-        log_info "No docker-compose.apps.yml found"
+    local TP_CAPITAL_COMPOSE="$PROJECT_ROOT/tools/compose/docker-compose.4-1-tp-capital-stack.yml"
+
+    if [ ! -f "$TP_CAPITAL_COMPOSE" ]; then
+        log_info "TP Capital compose file not found (skipping)"
         return 0
     fi
 
     # Check if containers are running
-    if docker ps --format '{{.Names}}' | grep -qE '^(apps-tp-capital|apps-workspace)$'; then
-        log_info "Stopping apps stack (apps-tp-capital, apps-workspace)..."
-        docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.apps.yml" down --remove-orphans
+    if docker ps --format '{{.Names}}' | grep -qE '^tp-capital-' ; then
+        log_info "Stopping TP Capital stack containers..."
+        docker compose -f "$TP_CAPITAL_COMPOSE" down --remove-orphans
         log_success "✓ Containers stopped"
     else
         log_info "No application containers running"
@@ -224,19 +225,19 @@ stop_containers() {
 # Function to stop database UI stack
 stop_db_stack() {
     section "Stopping Database UI Stack"
-    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml"
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml"
     if [ ! -f "$DB_UI_COMPOSE_FILE" ]; then
         log_info "Database UI compose file not found (skipping)"
         return 0
     fi
-    docker compose -p 3-database-stack -f "$DB_UI_COMPOSE_FILE" down --remove-orphans || true
+    docker compose -p 4-0-database-ui-stack -f "$DB_UI_COMPOSE_FILE" down --remove-orphans || true
     log_success "✓ Database UI stack stopped"
 }
 
 # Function to stop DOCS stack
 stop_docs_stack() {
     section "Stopping DOCS Stack"
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.docs.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.2-docs-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_info "Docs compose file not found (skipping)"
         return 0
@@ -260,7 +261,7 @@ stop_rag_stack() {
 # Function to stop MONITORING stack
 stop_monitoring_stack() {
     section "Stopping MONITORING Stack"
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.monitoring.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.6-1-monitoring-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_info "Monitoring compose file not found (skipping)"
         return 0
@@ -272,7 +273,6 @@ stop_monitoring_stack() {
 # Function to stop TOOLS stack
 stop_tools_stack() {
     section "Stopping TOOLS Stack"
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tools.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_info "Tools compose file not found (skipping)"
         return 0

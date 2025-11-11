@@ -354,7 +354,7 @@ architecture-rag-2025-11-03/
 
 ### Implementation Guides
 - [OpenSpec Change Proposal](../../../../tools/openspec/changes/enhance-rag-services-architecture/) - Detailed implementation specs
-- [Docker Compose Configuration](../../../../tools/compose/docker-compose.rag.yml) - Current deployment setup
+- [Docker Compose Configuration](../../../../tools/compose/docker-compose.4-4-rag-stack.yml) - Current deployment setup
 
 ### Testing Documentation
 - [Testing Strategy](../../../content/reference/testing-strategy.mdx) - Overall testing approach

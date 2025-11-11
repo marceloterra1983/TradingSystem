@@ -96,9 +96,21 @@ export default defineConfig(({ mode }) => {
   const isProd = mode === 'production';
   const dashboardPort = Number(env.VITE_DASHBOARD_PORT) || 3103;
 
-  const libraryProxy = resolveProxy(
+  const gatewayProxy = resolveProxy(
+    env.GATEWAY_HTTP_URL || env.VITE_GATEWAY_HTTP_URL,
+    'http://localhost:9080',
+  );
+  const workspaceProxy = resolveProxy(
     env.WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL,
-    'http://localhost:3210/api',  // Updated from 3201 → 3210 (PostgreSQL stack)
+    gatewayProxy.target || 'http://localhost:9080',
+    '/api/workspace',
+  );
+  const libraryProxy = resolveProxy(
+    env.WORKSPACE_LIBRARY_PROXY_TARGET ||
+      env.VITE_WORKSPACE_LIBRARY_PROXY_TARGET ||
+      env.VITE_WORKSPACE_LIBRARY_API_URL,
+    workspaceProxy.target,
+    '/api/library',
   );
   const tpCapitalProxy = resolveProxy(
     env.TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL,
@@ -107,7 +119,8 @@ export default defineConfig(({ mode }) => {
   // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX
   const docsApiProxy = resolveProxy(
     env.DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL,
-    'http://localhost:3405',
+    gatewayProxy.target,
+    '/api/docs',
   );
   // RAG Collections Service (Directories API) runs on 3403
   const ragCollectionsProxy = resolveProxy(
@@ -120,31 +133,36 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    'http://localhost:3404',
+    gatewayProxy.target,
+    '/docs',
   );
   const dbUiPgAdminProxy = resolveProxy(
     env.DB_UI_PGADMIN_PROXY_TARGET || env.VITE_DB_UI_PGADMIN_PROXY_TARGET,
-    'http://localhost:5050',
+    'http://localhost:9080',
+    '/db-ui/pgadmin',
   );
   const dbUiPgWebProxy = resolveProxy(
     env.DB_UI_PGWEB_PROXY_TARGET || env.VITE_DB_UI_PGWEB_PROXY_TARGET,
-    'http://localhost:8081',
+    'http://localhost:9080',
+    '/db-ui/pgweb',
   );
   const dbUiAdminerProxy = resolveProxy(
     env.DB_UI_ADMINER_PROXY_TARGET || env.VITE_DB_UI_ADMINER_PROXY_TARGET,
-    'http://localhost:8082',
+    'http://localhost:9080',
+    '/db-ui/adminer',
   );
   const dbUiQuestDbProxy = resolveProxy(
     env.DB_UI_QUESTDB_PROXY_TARGET || env.VITE_DB_UI_QUESTDB_PROXY_TARGET,
-    'http://localhost:9002',
+    'http://localhost:9080',
+    '/db-ui/questdb',
   );
   const firecrawlProxy = resolveProxy(
     env.VITE_FIRECRAWL_PROXY_TARGET || env.VITE_FIRECRAWL_PROXY_URL,
-    'http://localhost:3600',
+    'http://localhost:9080/api/firecrawl',
   );
   const telegramGatewayProxy = resolveProxy(
     env.VITE_TELEGRAM_GATEWAY_PROXY_TARGET || env.VITE_TELEGRAM_GATEWAY_API_URL,
-    'http://localhost:4010',
+    'http://localhost:9080/api/telegram-gateway',
   );
   const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
   const n8nProxy = resolveProxy(
@@ -231,6 +249,16 @@ export default defineConfig(({ mode }) => {
     });
   };
 
+  const n8nAssetsRewriteTarget = n8nProxy.basePath
+    ? `${n8nProxy.basePath}/assets`
+    : '/assets';
+  const n8nStaticRewriteTarget = n8nProxy.basePath
+    ? `${n8nProxy.basePath}/static`
+    : '/static';
+  const n8nFaviconRewriteTarget = n8nProxy.basePath
+    ? `${n8nProxy.basePath}/favicon.ico`
+    : '/favicon.ico';
+
   return {
     resolve: {
       alias: {
@@ -281,22 +309,42 @@ export default defineConfig(({ mode }) => {
         '^/assets/css/.*': {
           target: docsProxy.target,
           changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/assets\/css/,
+            docsProxy.basePath ? `${docsProxy.basePath}/assets/css` : '/assets/css',
+          ),
         },
         '^/assets/js/.*': {
           target: docsProxy.target,
           changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/assets\/js/,
+            docsProxy.basePath ? `${docsProxy.basePath}/assets/js` : '/assets/js',
+          ),
         },
         '^/assets/images/.*': {
           target: docsProxy.target,
           changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/assets\/images/,
+            docsProxy.basePath ? `${docsProxy.basePath}/assets/images` : '/assets/images',
+          ),
         },
         '^/assets/fonts/.*': {
           target: docsProxy.target,
           changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/assets\/fonts/,
+            docsProxy.basePath ? `${docsProxy.basePath}/assets/fonts` : '/assets/fonts',
+          ),
         },
         '^/img/.*': {
           target: docsProxy.target,
           changeOrigin: true,
+          rewrite: createRewrite(
+            /^\/img/,
+            docsProxy.basePath ? `${docsProxy.basePath}/img` : '/img',
+          ),
         },
         '/mcp': {
           target: mcpProxy.target,
@@ -309,9 +357,9 @@ export default defineConfig(({ mode }) => {
           rewrite: createRewrite(/^\/api\/library/, libraryProxy.basePath),
         },
         '/api/workspace': {
-          target: libraryProxy.target,
+          target: workspaceProxy.target,
           changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/workspace/, libraryProxy.basePath),
+          rewrite: createRewrite(/^\/api\/workspace/, workspaceProxy.basePath),
         },
         '/api/tp-capital': {
           target: tpCapitalProxy.target,
@@ -391,9 +439,19 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
         '/api/telegram-photo': {
-          target: 'http://localhost:4008',
+          target: telegramGatewayProxy.target,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/telegram-photo/, '/photo'),
+          rewrite: (incomingPath) => {
+            const stripped = incomingPath.replace(/^\/api\/telegram-photo/, '');
+            const ensured = stripped.startsWith('/') ? stripped : `/${stripped}`;
+            const basePrefix = telegramGatewayProxy.basePath
+              ? telegramGatewayProxy.basePath.startsWith('/')
+                ? telegramGatewayProxy.basePath
+                : `/${telegramGatewayProxy.basePath}`
+              : '';
+            const composed = `${basePrefix}/photo${ensured}`.replace(/\/{2,}/g, '/');
+            return composed.length > 1 ? composed.replace(/\/+$/, '') : composed;
+          },
         },
         '/docs': docsProxyConfig,
         '^/next/.*': docsProxyConfig,
@@ -426,6 +484,40 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           configure: (proxy, _options) => {
             attachN8nBasicAuth(proxy);
+          },
+        },
+        // n8n prefixed static assets introduced by N8N_PATH (e.g., /n8nassets/*, /n8nstatic/*)
+        '^/n8nassets': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/n8nassets/, n8nAssetsRewriteTarget),
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            stripFrameBlockingHeaders(proxy);
+            proxy.on('error', (err, req) => {
+              console.warn('[n8n assets proxy]', req.url, err.message);
+            });
+          },
+        },
+        '^/n8nstatic': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/n8nstatic/, n8nStaticRewriteTarget),
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            stripFrameBlockingHeaders(proxy);
+            proxy.on('error', (err, req) => {
+              console.warn('[n8n static proxy]', req.url, err.message);
+            });
+          },
+        },
+        '^/n8nfavicon.ico$': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          rewrite: createRewrite(/^\/n8nfavicon\.ico$/, n8nFaviconRewriteTarget),
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            stripFrameBlockingHeaders(proxy);
           },
         },
         // n8n proxy - routes /n8n/* to n8n service (captures all paths including assets)
@@ -500,15 +592,19 @@ export default defineConfig(({ mode }) => {
             preserveProxyLocation(proxy, '/db-ui/adminer');
           },
         },
-        '/db-ui/questdb': {
-          target: dbUiQuestDbProxy.target,
-          changeOrigin: true,
-          rewrite: createRewrite(/^\/db-ui\/questdb/, dbUiQuestDbProxy.basePath),
-          configure: (proxy, _options) => {
-            stripFrameBlockingHeaders(proxy);
-            preserveProxyLocation(proxy, '/db-ui/questdb');
-          },
-        },
+        // QuestDB proxy is disabled due to connection timeout issues
+        // QuestDB returns 301 redirects with malformed responses that hang the Vite proxy
+        // Access QuestDB directly at: http://localhost:9002
+        // See: https://github.com/questdb/questdb/issues/...
+        // '/db-ui/questdb': {
+        //   target: dbUiQuestDbProxy.target,
+        //   changeOrigin: true,
+        //   rewrite: createRewrite(/^\/db-ui\/questdb/, dbUiQuestDbProxy.basePath),
+        //   configure: (proxy, _options) => {
+        //     stripFrameBlockingHeaders(proxy);
+        //     preserveProxyLocation(proxy, '/db-ui/questdb');
+        //   },
+        // },
         // Note: /specs/ files are served directly from public/specs/ by Vite
         // No proxy needed - files are static assets served from same origin
         // This avoids CORS issues in API viewers (redoc, swagger, rapidoc)

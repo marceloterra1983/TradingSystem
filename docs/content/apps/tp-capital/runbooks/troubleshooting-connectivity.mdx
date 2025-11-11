@@ -300,7 +300,7 @@ docker exec dashboard-ui printenv | grep "VITE_TP_CAPITAL"
 # CORRECT: VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005  (Vite proxies)
 ```
 
-**Fix**: Update `docker-compose.dashboard.yml`:
+**Fix**: Update `docker-compose.1-dashboard-stack.yml`:
 ```yaml
 environment:
   # ❌ REMOVE this (causes browser to try direct access)
@@ -504,7 +504,7 @@ lastReviewed: "2025-11-08"
 cd tools/compose
 bash run-telegram-compose.sh down
 docker compose -f docker-compose.4-1-tp-capital-stack.yml down
-docker compose -f docker-compose.dashboard.yml down
+docker compose -f docker-compose.1-dashboard-stack.yml down
 
 # 2. Validate environment
 bash ../../scripts/validation/validate-env.sh
@@ -516,7 +516,7 @@ sleep 30  # Wait for databases to initialize
 docker compose -f docker-compose.4-1-tp-capital-stack.yml up -d
 sleep 20  # Wait for TP-Capital to connect
 
-docker compose -f docker-compose.dashboard.yml up -d
+docker compose -f docker-compose.1-dashboard-stack.yml up -d
 
 # 4. Validate
 bash ../../scripts/validation/validate-network.sh --test-all

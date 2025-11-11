@@ -8,6 +8,8 @@ interface IframeWithUrlProps
   urlLabel?: string;
   linkTarget?: string;
   showLink?: boolean;
+  allowFeatures?: string[];
+  sandboxPermissions?: string[];
 }
 
 export const IframeWithUrl = React.forwardRef<
@@ -22,12 +24,24 @@ export const IframeWithUrl = React.forwardRef<
       urlLabel,
       showLink = true,
       linkTarget = "_blank",
+      allow,
+      sandbox,
+      allowFeatures,
+      sandboxPermissions,
       ...props
     },
     ref,
   ) => {
     const displayUrl = urlLabel ?? src ?? "";
     const shouldRenderUrl = Boolean(displayUrl);
+    const normalizedAllow =
+      allow ?? (allowFeatures && allowFeatures.length > 0
+        ? allowFeatures.join("; ")
+        : undefined);
+    const normalizedSandbox =
+      sandbox ?? (sandboxPermissions && sandboxPermissions.length > 0
+        ? sandboxPermissions.join(" ")
+        : undefined);
 
     return (
       <div
@@ -58,7 +72,14 @@ export const IframeWithUrl = React.forwardRef<
             {displayUrl}
           </span>
         )}
-        <iframe ref={ref} src={src} className={className} {...props} />
+        <iframe
+          ref={ref}
+          src={src}
+          className={className}
+          allow={normalizedAllow}
+          sandbox={normalizedSandbox}
+          {...props}
+        />
       </div>
     );
   },

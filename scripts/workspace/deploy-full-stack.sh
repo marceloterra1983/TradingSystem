@@ -244,7 +244,7 @@ step_start_stack() {
         sleep 60
         
         # Verify all containers are up
-        local container_count=$(docker compose -f tools/compose/docker-compose.workspace-stack.yml ps --format json | jq -s 'length')
+        local container_count=$(docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps --format json | jq -s 'length')
         log_info "Running containers: $container_count/4"
         
     else
@@ -361,10 +361,10 @@ display_success() {
     echo "=============================================="
     echo ""
     echo "# View logs"
-    echo "docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f"
+    echo "docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f"
     echo ""
     echo "# Check status"
-    echo "docker compose -f tools/compose/docker-compose.workspace-stack.yml ps"
+    echo "docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps"
     echo ""
     echo "# Stop stack"
     echo "bash scripts/docker/stop-workspace-stack.sh"

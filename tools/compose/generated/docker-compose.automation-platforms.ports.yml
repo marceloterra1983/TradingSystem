@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "automation-platforms"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   kestra-orchestrator:
@@ -12,9 +12,13 @@ x-tradingsystem-ports:
     protocol: http
     owner: "ToolingGuild"
     description: "Kestra orchestrator UI"
+    exposure: gateway
+    gatewayPath: /kestra
   kestra-management:
     env: KESTRA_MANAGEMENT_PORT
     port: 8685
     protocol: http
     owner: "ToolingGuild"
     description: "Kestra management/worker endpoint"
+    exposure: gateway
+    gatewayPath: /kestra-management

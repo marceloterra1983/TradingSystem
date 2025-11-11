@@ -1,0 +1,302 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/dashboard/**'
+      - 'backend/api/**'
+      - '.github/workflows/playwright.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/dashboard/**'
+      - 'backend/api/**'
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Browser to test'
+        required: false
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+          - all
+
+jobs:
+  playwright-tests:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend/dashboard
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Setup Docker Compose
+        run: |
+          docker compose version
+          echo "Docker Compose is ready"
+
+      - name: Create .env file
+        run: |
+          cp config/.env.defaults .env
+          # Add test-specific environment variables
+          echo "NODE_ENV=test" >> .env
+          echo "CI=true" >> .env
+
+      - name: Start backend services
+        run: |
+          # Start essential services for E2E tests
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+          docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d
+
+          # Wait for services to be healthy
+          echo "Waiting for services to start..."
+          sleep 10
+
+      - name: Check service health
+        run: |
+          # Check Workspace API
+          curl --retry 5 --retry-delay 3 --retry-connrefused http://localhost:3200/health || echo "Workspace API not ready"
+
+          # Check Documentation API
+          curl --retry 5 --retry-delay 3 --retry-connrefused http://localhost:3405/health || echo "Documentation API not ready"
+
+      - name: Build frontend
+        working-directory: frontend/dashboard
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run Playwright tests (${{ matrix.browser }})
+        working-directory: frontend/dashboard
+        run: npx playwright test --project=${{ matrix.browser }}
+        env:
+          CI: true
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: frontend/dashboard/playwright-report/
+          retention-days: 30
+
+      - name: Upload test videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-videos-${{ matrix.browser }}
+          path: frontend/dashboard/test-results/
+          retention-days: 7
+
+      - name: Comment PR with test results
+        uses: daun/playwright-report-comment@v3
+        if: github.event_name == 'pull_request' && always()
+        with:
+          report-path: frontend/dashboard/playwright-report/results.json
+          comment-title: 'Playwright Test Results (${{ matrix.browser }})'
+
+      - name: Stop backend services
+        if: always()
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml down
+          docker compose -f tools/compose/docker-compose.2-docs-stack.yml down
+
+  smoke-tests-only:
+    name: Quick Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Install Playwright browsers (Chromium only)
+        working-directory: frontend/dashboard
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend services
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+          sleep 10
+
+      - name: Run smoke tests only
+        working-directory: frontend/dashboard
+        run: npx playwright test --grep smoke --project=chromium
+        env:
+          CI: true
+
+      - name: Upload smoke test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-smoke-report
+          path: frontend/dashboard/playwright-report/
+          retention-days: 7
+
+      - name: Stop backend services
+        if: always()
+        run: docker compose -f tools/compose/docker-compose.apps.yml down
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [playwright-tests]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: playwright-reports
+
+      - name: Generate test summary
+        run: |
+          echo "# Playwright E2E Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results by Browser" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for browser in chromium firefox webkit; do
+            report_path="playwright-reports/playwright-report-${browser}/results.json"
+            if [ -f "$report_path" ]; then
+              total=$(jq '.suites | length' "$report_path")
+              echo "- **${browser}**: ${total} test suites" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test artifacts uploaded successfully ✅" >> $GITHUB_STEP_SUMMARY
+
+  visual-regression:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend/dashboard
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend services
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+          sleep 10
+
+      - name: Run visual regression tests
+        working-directory: frontend/dashboard
+        run: npx playwright test --grep visual --project=chromium
+        env:
+          CI: true
+
+      - name: Upload visual diffs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-regression-diffs
+          path: frontend/dashboard/test-results/**/*.png
+          retention-days: 14
+
+      - name: Stop backend services
+        if: always()
+        run: docker compose -f tools/compose/docker-compose.apps.yml down
+
+  accessibility-tests:
+    name: Accessibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend/dashboard
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend/dashboard
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend services
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+          sleep 10
+
+      - name: Run accessibility tests
+        working-directory: frontend/dashboard
+        run: npx playwright test --grep accessibility --project=chromium
+        env:
+          CI: true
+
+      - name: Upload a11y report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: frontend/dashboard/playwright-report/
+          retention-days: 14
+
+      - name: Stop backend services
+        if: always()
+        run: docker compose -f tools/compose/docker-compose.apps.yml down

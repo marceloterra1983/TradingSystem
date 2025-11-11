@@ -105,7 +105,7 @@ This resulted in:
 1. **Performance Improvement**: Achieved **60% faster response times** (20ms → 8ms)
 2. **Scalability**: Shared cache supports horizontal scaling
 3. **Reliability**: Memory fallback ensures service continuity during Redis outages
-4. **Infrastructure**: Redis already deployed in RAG stack (`docker-compose.rag.yml`)
+4. **Infrastructure**: Redis already deployed in RAG stack (`docker-compose.4-4-rag-stack.yml`)
 5. **Flexibility**: TTL and invalidation strategies configurable via environment
 
 ### Implementation Details

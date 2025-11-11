@@ -96,18 +96,15 @@ const unifiedConfig: ApiConfig = {
 const directConfig: ApiConfig = {
   baseUrl: "",
   libraryApi:
-    resolveEnv("VITE_WORKSPACE_API_URL") || "http://localhost:3200/api", // Updated: LowDB Stack - WSL2 workaround (PORT 3200)
+    resolveEnv("VITE_WORKSPACE_API_URL") || "/api/workspace",
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || "/api/tp-capital",
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || "/api/docs",
   telegramGatewayApi: import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "",
   firecrawlProxyApi:
-    import.meta.env.VITE_FIRECRAWL_PROXY_URL || "http://localhost:3600",
-  docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs", // Proxied through Vite to NGINX (localhost:3400)
-  // Note: Port 3400 serves static Docusaurus via NGINX (documentation container)
-  // Port 3402 serves RAG Service (Documentation API) with RAG/LlamaIndex integration
-  // Vite proxy configuration: /docs -> http://localhost:3400 (no CORS issues)
-  // See docker-compose.rag.yml for complete RAG stack architecture
-  docsApiUrl: import.meta.env.VITE_DOCSPECS_URL || "http://localhost:3402",
+    import.meta.env.VITE_FIRECRAWL_PROXY_URL || "/api/firecrawl",
+  docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs",
+  docsApiUrl:
+    import.meta.env.VITE_DOCSPECS_URL || "/docs/api/documentation-api",
   questdbConsoleUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,

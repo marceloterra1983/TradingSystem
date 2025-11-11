@@ -44,10 +44,10 @@ echo "✅ TypeScript compilation successful!"
 # Rebuild Docker container
 cd /home/marce/Projetos/TradingSystem
 echo "🐳 Building Docker container (this may take a minute)..."
-docker compose -f tools/compose/docker-compose.rag.yml build rag-collections-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-collections-service
 
 echo "🚀 Restarting container..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-collections-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-collections-service
 
 echo ""
 echo "✅ Done! Container updated with improved logs."

@@ -179,7 +179,7 @@ tools/llamaindex/collection-config.json
 
 ### Docker Compose
 ```
-tools/compose/docker-compose.rag.yml
+tools/compose/docker-compose.4-4-rag-stack.yml
 ```
 
 ### Dockerfile

@@ -67,14 +67,12 @@
 ```
 tools/
 ├── compose/
-│   ├── docker-compose.neon.yml          ⭐ Deploy Neon
+│   ├── ~~docker-compose.neon.yml~~          (removido em 2025-11-11)
 │   ├── docker-compose.qdrant-cluster.yml ⭐ Deploy Qdrant
 │   ├── docker-compose.kong.yml           ⭐ Deploy Kong
 │   ├── qdrant-nginx.conf
 │   └── ...
-├── neon/
-│   ├── neon.conf
-│   └── README.md
+├── neon/ (removido em 2025-11-11)
 ├── qdrant/
 │   └── README.md
 └── kong/
@@ -192,7 +190,7 @@ echo "VITE_KONG_GATEWAY_URL=http://localhost:8000" >> frontend/dashboard/.env
 echo "VITE_RAG_SERVICE_MODE=kong" >> frontend/dashboard/.env
 
 # 2. Restart services com nova configuração
-docker compose -f tools/compose/docker-compose.rag.yml restart
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart
 
 # 3. Test end-to-end via browser
 # Abrir http://localhost:3103
@@ -315,7 +313,7 @@ npm run test:load
 
 ```bash
 # Check logs
-docker compose -f tools/compose/docker-compose.neon.yml logs -f
+# Stack Neon removido — comando descontinuado.
 
 # Check ports (may be in use)
 sudo netstat -tulnp | grep -E "5435|6333|8000"

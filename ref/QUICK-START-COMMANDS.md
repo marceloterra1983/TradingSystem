@@ -36,8 +36,11 @@ bash scripts/maintenance/health-check-all.sh
 # JSON output
 bash scripts/maintenance/health-check-all.sh --format json | jq '.overallHealth'
 
-# Via API (cached 30s)
-curl http://localhost:3500/api/health/full | jq
+# Via API Gateway (recommended)
+curl http://localhost:9080/api/health/full | jq
+
+# Traefik Gateway health
+curl http://localhost:9080/health | jq
 ```
 
 ### Logs
@@ -169,7 +172,7 @@ curl http://localhost:7040/  # QuestDB
 
 ```bash
 # Start database tooling stack
-docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d
+docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
 
 # Restart unhealthy containers
 bash scripts/docker/fix-unhealthy-containers.sh

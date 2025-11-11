@@ -15,12 +15,12 @@ TradingSystem infrastructure runs on **Docker Compose** with multiple stacks for
 
 | Stack | File | Services | Purpose |
 |-------|------|----------|---------|
-| **Database UI** | docker-compose.database-ui.yml | pgAdmin, Adminer, pgWeb, QuestDB | Database tooling |
+| **Database UI** | docker-compose.4-0-database-ui-stack.yml | pgAdmin, Adminer, pgWeb, QuestDB | Database tooling |
 | **TP Capital** | docker-compose.4-1-tp-capital-stack.yml | TimescaleDB, PgBouncer, Redis, API | Domain stack (signals) |
 | **Qdrant** | docker-compose.qdrant-ha.yml | Qdrant cluster (3 nodes) | Vector database (RAG) |
-| **Monitoring** | docker-compose.monitoring.yml | Prometheus, Grafana | Observability |
-| **RAG** | docker-compose.rag.yml | LlamaIndex, Ollama | AI/RAG system |
-| **Documentation** | docker-compose.docs.yml | Docusaurus, NGINX | Docs hub |
+| **Monitoring** | docker-compose.6-1-monitoring-stack.yml | Prometheus, Grafana | Observability |
+| **RAG** | docker-compose.4-4-rag-stack.yml | LlamaIndex, Ollama | AI/RAG system |
+| **Documentation** | docker-compose.2-docs-stack.yml | Docusaurus, NGINX | Docs hub |
 | **Apps** | docker-compose.apps.yml | Workspace, TP Capital | Application services |
 
 ### Stack Management
@@ -33,8 +33,8 @@ bash scripts/docker/start-stacks.sh
 bash scripts/docker/stop-stacks.sh
 
 # Individual stack
-docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d
-docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml down
+docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d
+docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml down
 ```
 
 ## Databases

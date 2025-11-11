@@ -40,8 +40,8 @@ The TradingSystem employs a **dual-track retrieval architecture** combining:
 **Qdrant Vector Database**
 
 ```yaml
-Service: data-qdrant
-Container: data-qdrant
+Service: rag-qdrant
+Container: rag-qdrant
 Status: Up 5 hours (healthy)
 Ports: 0.0.0.0:6333-6334 -> 6333-6334/tcp
 Host: localhost
@@ -116,7 +116,7 @@ Source: tools/llamaindex/ingestion_service/main.py
 ```bash
 LLAMAINDEX_INGESTION_PORT=8201
 LLAMAINDEX_INGESTION_URL=http://localhost:8201
-QDRANT_HOST=data-qdrant (container network)
+QDRANT_HOST=rag-qdrant (container network)
 QDRANT_PORT=6333
 OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_EMBED_MODEL=nomic-embed-text

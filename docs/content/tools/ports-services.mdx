@@ -7,21 +7,18 @@ tags:
   - governance
 slug: /tools/ports-services/overview
 owner: Platform Architecture
-lastReviewed: '2025-11-08'
+lastReviewed: '2025-11-11'
 ---
 
-<!-- AUTO-GENERATED SECTIONS by docs:auto - DO NOT EDIT MANUALLY -->
-<!-- Source: docs/context/ops/service-port-map.md -->
-<!-- Last generated: 2025-11-09T23:17:27.761Z -->
 > **⚠️ Arquivo gerado automaticamente. Não editar manualmente.**
-> Última geração: 2025-11-09T23:17:27.761Z
+> Última geração: 2025-11-11T19:38:00.129Z
 
 ## Port Ranges
 
 | Stack | Range |
 |-------|-------|
 | Admin Ui High | 15000-15999 |
-| Automation | 3500-3699 |
+| Automation | 3500-5799 |
 | Automation Platforms | 8180-8899 |
 | Cache | 6300-6399 |
 | Dashboard Ui | 3100-3199 |
@@ -44,19 +41,19 @@ lastReviewed: '2025-11-08'
 |---------|------|----------|-------|--------|-------------|
 | telegram-rabbitmq-admin | 15672 | http | Telegram Squad | ✅ Active | Console de gerenciamento do RabbitMQ |
 
-### Automation (3500-3699)
+### Automation (3500-5799)
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
-| firecrawl-proxy | 3600 | http | Pesquisa | ✅ Active | Proxy Express que protege o Firecrawl upstream |
-| n8n | 3680 | http | ToolingGuild | ✅ Active | Editor n8n para orquestrações low-code |
+| firecrawl-proxy | 3600 | http | Pesquisa | ✅ Active | Proxy Express que protege o Firecrawl upstream (Traefik /api/firecrawl) |
+| n8n | 5678 | http | ToolingGuild | ✅ Active | Editor n8n para orquestrações low-code (Traefik /n8n) |
 
 ### Automation Platforms (8180-8899)
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
-| kestra-orchestrator | 8180 | http | ToolingGuild | ✅ Active | Kestra orchestrator UI |
-| kestra-management | 8685 | http | ToolingGuild | ✅ Active | Kestra management/worker endpoint |
+| kestra-orchestrator | 8180 | http | ToolingGuild | ✅ Active | Kestra orchestrator UI (Traefik /kestra) |
+| kestra-management | 8685 | http | ToolingGuild | ✅ Active | Kestra management/worker endpoint (Traefik /kestra-management) |
 
 ### Cache (6300-6399)
 
@@ -73,7 +70,7 @@ lastReviewed: '2025-11-08'
 |---------|------|----------|-------|--------|-------------|
 | api-viewer | 3101 | http | Documentacao | ✅ Active | Visualização de especificações OpenAPI/AsyncAPI |
 | documentation-api-viewer | 3102 | http | Documentacao | ⚠️ Deprecated | Viewer secundário usado em validações internas |
-| dashboard | 3103 | http | Frontend Guild | ✅ Active | Frontend principal do TradingSystem |
+| dashboard | 3103 | http | Frontend Guild | ✅ Active | Frontend principal do TradingSystem (Traefik /) |
 
 ### Db Core (5000-5499)
 
@@ -94,16 +91,16 @@ lastReviewed: '2025-11-08'
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
-| documentation-hub | 3400 | http | Documentacao | ✅ Active | Hub de documentação (Docusaurus v3) |
-| documentation-api | 3401 | http | Documentacao | ✅ Active | API de documentação (Express + FlexSearch) |
+| documentation-hub | 3400 | http | Documentacao | ✅ Active | Hub de documentação (Docusaurus v3) (Traefik /docs) |
+| documentation-api | 3401 | http | Documentacao | ✅ Active | API de documentação (Express + FlexSearch) (Traefik /api/docs) |
 
 ### External Integrations (4000-4099)
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
+| tp-capital-api | 4005 | http | TP Capital Squad | ✅ Active | API ingestora de sinais do TP Capital (Traefik /api/tp-capital) |
 | telegram-mtproto | 4007 | http | Telegram Squad | ✅ Active | Gateway MTProto principal (HTTP + metrics) |
-| tp-capital-api | 4008 | http | TP Capital Squad | ✅ Active | API ingestora de sinais do TP Capital |
-| telegram-gateway-api | 4010 | http | Telegram Squad | ✅ Active | API REST do Telegram Gateway (consulta e sync) |
+| telegram-gateway-api | 4010 | http | Telegram Squad | ✅ Active | API REST do Telegram Gateway (consulta e sync) (Traefik /api/telegram-gateway) |
 
 ### Frontend Ui (3000-3099)
 
@@ -117,7 +114,7 @@ lastReviewed: '2025-11-08'
 
 | Service | Port | Protocol | Owner | Status | Description |
 |---------|------|----------|-------|--------|-------------|
-| workspace-api | 3200 | http | Workspace Team | ✅ Active | API Workspace/Library para automações locais |
+| workspace-api | 3200 | http | Workspace Team | ✅ Active | API Workspace/Library para automações locais (Traefik /api/workspace) |
 
 ### Messaging (5600-5699)
 

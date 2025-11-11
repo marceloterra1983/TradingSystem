@@ -1,0 +1,150 @@
+name: 0-gateway-stack
+
+# ==============================================================================
+# TradingSystem - API Gateway Stack (Traefik)
+# ==============================================================================
+# Purpose: Centralized reverse proxy for all HTTP services
+# Features:
+#   - Automatic service discovery via Docker labels
+#   - JWT authentication middleware
+#   - Rate limiting (100 req/min per IP)
+#   - CORS configuration
+#   - Circuit breakers
+#   - Request compression (gzip/brotli)
+#   - Prometheus metrics export
+#   - Access logs (JSON format)
+# ==============================================================================
+#
+# Usage:
+#   docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+#   docker compose -f tools/compose/docker-compose.0-gateway-stack.yml logs -f
+#   docker compose -f tools/compose/docker-compose.0-gateway-stack.yml down
+#
+# Access:
+#   Gateway:    http://localhost:9080
+#   Dashboard:  http://localhost:9081
+#   Metrics:    http://localhost:9080/metrics
+#
+# Last Updated: 2025-11-11
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # Traefik API Gateway
+  # ============================================================================
+  traefik:
+    image: traefik:v3.0
+    container_name: api-gateway
+    restart: unless-stopped
+
+    # Configuration via file (traefik-minimal.yml) - simpler and less error-prone
+    # command arguments commented out to avoid conflicts
+
+    ports:
+      - "9080:9080"   # HTTP Gateway
+      - "9081:9080"   # Dashboard
+      - "9443:9443"   # HTTPS Gateway (future)
+
+    volumes:
+      # Docker socket (service discovery)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      # Static configuration (using minimal config for testing)
+      - ../../tools/traefik/traefik-minimal.yml:/etc/traefik/traefik.yml:ro
+
+      # Dynamic configuration (routes, middlewares)
+      - ../../tools/traefik/dynamic:/etc/traefik/dynamic:ro
+
+      # Access logs
+      - traefik-logs:/var/log/traefik
+
+      # Certificates (future - Let's Encrypt)
+      - traefik-certs:/letsencrypt
+
+    environment:
+      - TZ=America/Sao_Paulo
+
+    networks:
+      - tradingsystem_backend
+      - tradingsystem_frontend
+      - tp_capital_backend
+
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+    labels:
+      - "com.tradingsystem.stack=0-gateway-stack"
+      - "com.tradingsystem.service=api-gateway"
+      - "com.tradingsystem.type=infrastructure"
+
+      # Dashboard routing (Traefik monitoring itself)
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+
+# ==============================================================================
+# Volumes
+# ==============================================================================
+volumes:
+  traefik-logs:
+    driver: local
+    labels:
+      - "com.tradingsystem.component=logs"
+
+  traefik-certs:
+    driver: local
+    labels:
+      - "com.tradingsystem.component=certificates"
+
+# ==============================================================================
+# Networks
+# ==============================================================================
+networks:
+  tradingsystem_backend:
+    external: true
+  tradingsystem_frontend:
+    external: true
+  tp_capital_backend:
+    external: true
+
+# ==============================================================================
+# MIGRATION GUIDE
+# ==============================================================================
+#
+# Phase 1: Enable gateway for 1 service (Workspace API)
+# -------------------------------------------------------
+# 1. Start gateway:
+#      docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+#
+# 2. Add Traefik labels to workspace-api in docker-compose.4-3-workspace-stack.yml:
+#      labels:
+#        - "traefik.enable=true"
+#        - "traefik.http.routers.workspace.rule=PathPrefix(`/api/workspace`)"
+#        - "traefik.http.routers.workspace.entrypoints=web"
+#        - "traefik.http.services.workspace.loadbalancer.server.port=3200"
+#
+# 3. Test:
+#      curl http://localhost:8080/api/workspace/health
+#
+# 4. Validate in Traefik Dashboard:
+#      Open http://localhost:8081/dashboard/
+#      Check "HTTP Routers" → should see "workspace" router
+#
+# Phase 2: Add rate limiting
+# ---------------------------
+# 1. Add middleware label:
+#      - "traefik.http.routers.workspace.middlewares=rate-limit@file"
+#
+# 2. Test rate limit (should get 429 after 100 requests):
+#      for i in {1..110}; do curl http://localhost:8080/api/workspace/health; done
+#
+# Phase 3: Add all services
+# --------------------------
+# Repeat labels for each service (dashboard, docs, tp-capital, telegram, etc.)
+#
+# ==============================================================================

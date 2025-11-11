@@ -3,15 +3,17 @@
 version: "3.9"
 
 x-tradingsystem-stack: "external-integrations"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   tp-capital-api:
     env: TP_CAPITAL_API_PORT
-    port: 4008
+    port: 4005
     protocol: http
     owner: "TP Capital Squad"
     description: "API ingestora de sinais do TP Capital"
+    exposure: gateway
+    gatewayPath: /api/tp-capital
   telegram-mtproto:
     env: TELEGRAM_MTPROTO_PORT
     port: 4007
@@ -24,3 +26,5 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Telegram Squad"
     description: "API REST do Telegram Gateway (consulta e sync)"
+    exposure: gateway
+    gatewayPath: /api/telegram-gateway

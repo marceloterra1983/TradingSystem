@@ -1,0 +1,7 @@
+# Ignore all sudo scripts (they may contain sensitive commands)
+*.sh
+*.txt
+
+# Keep directory structure
+!.gitignore
+!README.md

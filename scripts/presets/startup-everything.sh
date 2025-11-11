@@ -36,13 +36,13 @@ echo ""
 
 # Step 3: RAG Stack (CRITICAL)
 echo "3️⃣ Starting RAG Stack..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d 2>&1 | tail -10
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d 2>&1 | tail -10
 echo "   ✅ RAG Services started"
 echo ""
 
 # Step 4: Monitoring Stack
 echo "4️⃣ Starting Monitoring Stack..."
-docker compose -f tools/compose/docker-compose.monitoring.yml up -d 2>&1 | tail -5 || echo "   ⚠️  Monitoring stack issue (optional)"
+docker compose -f tools/compose/docker-compose.6-1-monitoring-stack.yml up -d 2>&1 | tail -5 || echo "   ⚠️  Monitoring stack issue (optional)"
 echo ""
 
 # Step 5: Kong Gateway
@@ -52,9 +52,9 @@ echo ""
 
 # Step 6: Qdrant (single-node)
 echo "6️⃣ Ensuring Qdrant is running..."
-if ! docker ps | grep -q data-qdrant; then
+if ! docker ps | grep -q rag-qdrant; then
     docker run -d \
-      --name data-qdrant \
+      --name rag-qdrant \
       --network tradingsystem_backend \
       -p 6333:6333 -p 6334:6334 \
       -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \

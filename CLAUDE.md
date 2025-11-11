@@ -85,13 +85,16 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 
 ### Active Services & Ports
 
--   **Dashboard**: http://localhost:3103 (React + Vite)
--   **Documentation Hub**: http://localhost:${DOCS_PORT:-3404? can't use variable}. We'll just set 3404.
--   **Workspace API**: http://localhost:3200 (Express + TimescaleDB - Docker container only)
--   **TP Capital**: http://localhost:4005 (Express + Telegraf - Docker container only)
--   **Documentation API**: http://localhost:3405 (Express + FlexSearch + RAG Proxy)
--   **Firecrawl Proxy**: http://localhost:3600 (Express + Firecrawl)
--   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system)
+**⚠️ IMPORTANT: All services are accessed via Traefik API Gateway**
+
+-   **API Gateway (Traefik)**: http://localhost:9080 (main entrypoint)
+    -   **Dashboard UI**: http://localhost:9080/ (React + Vite)
+    -   **Documentation Hub**: http://localhost:9080/docs/ (Docusaurus)
+    -   **Workspace API**: http://localhost:9080/api/workspace/*
+    -   **TP Capital API**: http://localhost:9080/api/tp-capital/*
+    -   **Documentation API**: http://localhost:9080/api/docs/*
+-   **Traefik Dashboard**: http://localhost:9081 (monitoring UI)
+-   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system - direct access only)
 
 ### 🐍 Python Environment (Auto-Activation with direnv)
 
@@ -225,6 +228,43 @@ Claude Code has the following permissions in this project:
 -   ✅ Scripts provided for start/stop (`start-all-stacks.sh`, `stop-all-stacks.sh`)
 -   ✅ Services: APIs, documentation, monitoring, databases
 -   📖 See: `scripts/start-all-services.sh` and infrastructure compose files for details
+
+### Telegram Stack (Official Production Stack)
+
+**Complete Telegram integration with 12 containers (8 core + 4 monitoring):**
+
+**Official Compose File:** `tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml`
+
+**Core Services (8):**
+- TimescaleDB (5434) - Time-series database for messages
+- PgBouncer (6434) - Connection pooling
+- Redis Master/Replica/Sentinel (6379/6385/26379) - HA caching
+- RabbitMQ (5672/15672) - Message broker
+- MTProto (14007) - Telegram client gateway
+- Gateway API (14010) - REST API for Telegram operations
+
+**Monitoring Services (4):**
+- Prometheus (9090) - Metrics collection
+- Grafana (3100) - Visualization dashboards
+- Postgres Exporter (9187) - Database metrics
+- Redis Exporter (9121) - Cache metrics
+
+**Quick Start:**
+```bash
+cd tools/compose
+docker compose -f docker-compose.4-2-telegram-stack-minimal-ports.yml up -d
+```
+
+**Documentation:**
+- 📖 Deployment Guide: `docs/content/tools/telegram/deployment-guide.mdx`
+- 📖 Issues & Solutions: `TELEGRAM-ISSUES-SUMMARY.md`
+- 📖 Monitoring Integration: `docs/TELEGRAM-MONITORING-INTEGRATION.md`
+- 📖 Port Registry: `docs/content/tools/ports-services.mdx`
+
+**Health Check:**
+```bash
+docker ps --filter "label=com.tradingsystem.stack=telegram-gateway"
+```
 
 ## 🏗️ Project Structure (v2.1)
 
@@ -386,24 +426,51 @@ if (bMarketConnected && bAtivo) {
 -   Buffer: 10,000 msgs (FIFO overflow)
 -   Auto-reconnect: Every 5s
 
-### HTTP REST (Current Services)
+### HTTP REST - Traefik API Gateway (PRODUCTION)
 
--   **Dashboard**: `http://localhost:3103` (React + Vite)
--   **Documentation Hub**: `http://localhost:3404` (Docusaurus v3 via NGINX)
--   **Workspace API**: `http://localhost:3200` (Express + TimescaleDB - Docker container)
--   **TP Capital**: `http://localhost:4005` (Express + Telegraf - Docker container)
--   **Documentation API**: `http://localhost:3405` (Express + FlexSearch)
--   **Firecrawl Proxy**: `http://localhost:3600` (Express + Firecrawl)
+**⚠️ IMPORTANT:** All HTTP services are now routed through Traefik API Gateway.
 
-### Current API Endpoints
+**API Gateway:**
+- **HTTP Gateway**: `http://localhost:9080` (main entrypoint)
+- **Dashboard**: `http://localhost:9081` (Traefik monitoring UI)
+- **Metrics**: `http://localhost:9080/metrics` (Prometheus format)
 
--   **Workspace**: `GET/POST /api/items` - Manage workspace items (runs as Docker container)
--   **TP Capital**: `POST /webhook/telegram` - Telegram message ingestion
--   **Documentation**: `GET/POST /api/docs` - Documentation management
--   **Firecrawl Proxy**: `POST /api/scrape` - Web scraping via Firecrawl
+**Services via Gateway (RECOMMENDED):**
+- **Dashboard UI**: `http://localhost:9080/` (React + Vite)
+- **Workspace API**: `http://localhost:9080/api/workspace/*` → `/api/*`
+- **Docs Hub**: `http://localhost:9080/docs/` (Docusaurus v3)
+- **Docs API**: `http://localhost:9080/api/docs/*` → `/api/*`
+- **TP Capital**: `http://localhost:9080/api/tp-capital/*` → `/*`
+
+**Direct Access (Development/Debug Only):**
+- Dashboard: `http://localhost:3103`
+- Workspace API: `http://localhost:3210`
+- Docs Hub: `http://localhost:3404`
+- Docs API: `http://localhost:3405`
+- TP Capital: `http://localhost:4008`
+
+### Gateway Features
+
+- ✅ **Automatic Service Discovery** - Docker labels
+- ✅ **CORS** - Configured for localhost:3103, localhost:9080
+- ✅ **Security Headers** - X-Frame-Options, XSS protection
+- ✅ **Rate Limiting** - 100 req/min per IP (burst 50)
+- ✅ **Compression** - gzip/brotli (>1KB responses)
+- ✅ **Circuit Breaker** - Opens at 20% error rate
+- ✅ **Health Checks** - All services monitored at 30s intervals
+- ✅ **Access Logs** - JSON format for analysis
+- ✅ **Prometheus Metrics** - Request counts, latencies, errors
+
+### Current API Endpoints (via Gateway)
+
+-   **Workspace**: `GET/POST /api/workspace/items` - Manage workspace items
+-   **TP Capital**: `GET /api/tp-capital/signals` - Get trading signals
+-   **TP Capital**: `POST /api/tp-capital/webhook/telegram` - Telegram ingestion
+-   **Documentation**: `GET/POST /api/docs/search` - Search documentation
+-   **Firecrawl Proxy**: `POST /api/scrape` - Web scraping (direct access only)
 -   **RAG System** (via Documentation API proxy):
-    -   `GET /api/v1/rag/search` - Semantic search across documentation (JWT minted server-side)
-    -   `POST /api/v1/rag/query` - Q&A with RAG context (JWT minted server-side)
+    -   `GET /api/docs/rag/search` - Semantic search (JWT minted server-side)
+    -   `POST /api/docs/rag/query` - Q&A with RAG context (JWT minted server-side)
 
 ### Future Trading Endpoints (Planned)
 
@@ -510,13 +577,13 @@ cd frontend/dashboard
 npm install && npm run dev
 
 # Documentation Hub (Port 3400) - runs as Docker container (docs-hub)
-# Started automatically by `start` command via docker-compose.docs.yml
-# For manual start: docker compose -f tools/compose/docker-compose.docs.yml up -d
+# Started automatically by `start` command via docker-compose.2-docs-stack.yml
+# For manual start: docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d
 
 # API Services (Ports 3200-3600)
 # Workspace API, TP Capital, Documentation API, and Firecrawl Proxy run as Docker containers:
 docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
-docker compose -f tools/compose/docker-compose.docs.yml up -d documentation-api
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d documentation-api
 docker compose -f tools/compose/docker-compose.firecrawl.yml up -d firecrawl-proxy
 ```
 
@@ -628,6 +695,64 @@ Aguardando sua confirmação após a execução...
 - `scripts/setup/` - Scripts de configuração inicial
 - `scripts/maintenance/` - Scripts de manutenção do sistema
 - `scripts/docker/` - Scripts relacionados ao Docker
+
+---
+
+### ⚠️ CRITICAL: Traefik API Gateway Requirements
+
+**RULE: ALL new HTTP services MUST be integrated with Traefik API Gateway.**
+
+**Mandatory Requirements:**
+
+1. **Docker Labels** - All services MUST have proper Traefik labels:
+   ```yaml
+   labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.{service}.rule=PathPrefix(`/path`)"
+     - "traefik.http.routers.{service}.priority={number}"
+     - "traefik.http.services.{service}.loadbalancer.server.port={port}"
+     - "traefik.http.routers.{service}.middlewares=api-standard@file"
+   ```
+
+2. **Health Endpoint** - MUST implement `/health` endpoint:
+   ```json
+   {
+     "status": "healthy",
+     "service": "service-name",
+     "timestamp": "2025-11-11T12:00:00Z"
+   }
+   ```
+
+3. **Network Membership** - Gateway MUST be in service's network:
+   ```yaml
+   networks:
+     - tradingsystem_backend  # For APIs
+     # or
+     - tradingsystem_frontend  # For UIs
+   ```
+
+4. **Priority Allocation**:
+   - Catch-all routes (Dashboard): 1-10
+   - Standard APIs: 50-89
+   - Specific path prefixes: 90-100
+
+5. **Path Transformation** - Document expected paths clearly:
+   ```yaml
+   # Gateway: /api/workspace/items → Backend: /api/items
+   - "traefik.http.middlewares.{service}-path-transform.chain.middlewares={service}-strip,{service}-addapi"
+   ```
+
+**Validation:**
+```bash
+# Before committing, validate configuration
+bash scripts/gateway/validate-traefik.sh --verbose
+
+# Test service via gateway
+curl http://localhost:9080/{your-path}
+```
+
+**Policy Document:** `governance/policies/api-gateway-policy.md`
+**Migration Guide:** `docs/TRAEFIK-GATEWAY-MIGRATION.md`
 
 ---
 
@@ -766,7 +891,7 @@ bash scripts/env/validate-env.sh
 
 4. **ALWAYS rebuild container after config changes**
    ```bash
-   docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build
+   docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
    ```
 
 5. **ESLint will catch hardcoded URLs** - Fix immediately if you see:

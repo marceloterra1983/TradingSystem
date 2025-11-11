@@ -31,7 +31,7 @@ npm start        # Executa o bundle compilado
 | `WAHA_HOOK_URL`         | -       | URL configurada no WAHA para apontar para este app  |
 | `WAHA_HOOK_EVENTS`      | -       | Lista de eventos (ex.: `message,message.ack`)       |
 
-No `docker-compose.waha.yml` o serviço é exposto como `waha-webhook`. A URL
+No `docker-compose.5-3-waha-stack.yml` o serviço é exposto como `waha-webhook`. A URL
 interna padrão utilizada pelo WAHA é
 `http://waha-webhook:3908/webhooks/waha`.
 
@@ -51,7 +51,7 @@ interna padrão utilizada pelo WAHA é
 
    ```bash
    set -a && source .env
-   docker compose -f tools/compose/docker-compose.waha.yml up -d --build
+   docker compose -f tools/compose/docker-compose.5-3-waha-stack.yml up -d --build
    ```
 
 3. Valide enviando/recebendo mensagens no WAHA; os eventos aparecerão nos logs

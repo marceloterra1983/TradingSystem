@@ -35,7 +35,7 @@
 - [ ] 5.3 Implementar componentes: KPIs, tabela dinâmica, timeline de evidências, alertas de freshness.
 - [ ] 5.4 Integrar hook de dados (SWR/React Query) para auto-atualizar quando JSON/registry mudarem; incluir fallback offline.
 - [ ] 5.5 Adicionar testes end-to-end/Vitest cobrindo renderização dos KPIs e estados de erro.
-- [ ] 5.6 Garantir que o dashboard execute apenas via container (`docker compose -f tools/compose/docker-compose.dashboard.yml up --build`) e atualizar scripts/README para refletir isso.
+- [ ] 5.6 Garantir que o dashboard execute apenas via container (`docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up --build`) e atualizar scripts/README para refletir isso.
 
 ## Phase 6 – Cutover & Comunicação (1-2 dias)
 - [ ] 6.1 Atualizar `CLAUDE.md`, `AGENTS.md`, `docs/README.md` e `README.md` raiz com a nova referência ao Governance Hub e ao frontend Knowledge.

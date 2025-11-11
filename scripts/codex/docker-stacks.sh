@@ -12,18 +12,18 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
 
 declare -A STACK_TO_COMPOSE=(
-  [apps]="tools/compose/docker-compose.apps.yml"
-  [apps-prod]="tools/compose/docker-compose.apps.prod.yml"
+  [tp-capital]="tools/compose/docker-compose.4-1-tp-capital-stack.yml"
   [data]="tools/compose/docker-compose.data.yml"
-  [docs]="tools/compose/docker-compose.docs.yml"
+  [docs]="tools/compose/docker-compose.2-docs-stack.yml"
   [infra]="tools/compose/docker-compose.infra.yml"
   [monitoring]="tools/monitoring/docker-compose.yml"
   [rag]="tools/compose/docker-compose.rag.yml"
   [rag-gpu]="tools/compose/docker-compose.rag-gpu.yml"
-  [tools]="tools/compose/docker-compose.tools.yml"
   [timescale]="tools/compose/docker-compose.timescale.yml"
   [frontend-apps]="tools/compose/docker-compose.frontend-apps.yml"
   [firecrawl]="tools/compose/docker-compose.firecrawl.yml"
+  [workspace]="tools/compose/docker-compose.4-3-workspace-stack.yml"
+  [telegram]="tools/compose/docker-compose.4-2-telegram-stack.yml"
 )
 
 STACK_LIST=$(IFS=,; echo "${!STACK_TO_COMPOSE[*]}" | tr ' ' ',')

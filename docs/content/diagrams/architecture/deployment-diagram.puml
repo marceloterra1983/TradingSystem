@@ -71,10 +71,10 @@ Rel(backend_stack, telegram, "MTProto", "TCP/IP")
 note right of docker_engine
   **Docker Compose Stacks:**
   • docker-compose.apps.yml
-  • docker-compose.rag.yml
-  • docker-compose.database-ui.yml
+  • docker-compose.4-4-rag-stack.yml
+  • docker-compose.4-0-database-ui-stack.yml
   • docker-compose.4-1-tp-capital-stack.yml
-  • docker-compose.monitoring.yml
+  • docker-compose.6-1-monitoring-stack.yml
   • docker-compose.docs.yml
 
   **Total: 15 compose files**

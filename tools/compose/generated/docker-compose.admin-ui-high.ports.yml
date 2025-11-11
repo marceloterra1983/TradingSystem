@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "admin-ui-high"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   telegram-rabbitmq-admin:

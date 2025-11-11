@@ -1,0 +1,142 @@
+name: 4-0-database-ui-stack
+
+services:
+  dbui-launcher-api:
+    container_name: dbui-launcher-api
+    image: database-ui-dbui-launcher-api
+    build:
+      context: ../../backend/api/launcher-api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      LAUNCHER_API_PORT: ${LAUNCHER_API_PORT:-3909}
+      LAUNCHER_API_TOKEN: ${LAUNCHER_API_TOKEN:-devlocal-launcher-token}
+    ports:
+      - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - tradingsystem_backend
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3909/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  dbui-questdb:
+    container_name: dbui-questdb
+    image: questdb/questdb:latest
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    ports:
+      - "${QUESTDB_HTTP_PORT:-9000}:9000"
+      - "${QUESTDB_ILP_PORT:-9009}:9009"
+      - "${QUESTDB_PG_PORT:-8812}:8812"
+    volumes:
+      - questdb-data:/var/lib/questdb
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      - dbui-launcher-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-questdb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/questdb`)"
+      - "traefik.http.routers.dbui-questdb.entrypoints=web"
+      - "traefik.http.routers.dbui-questdb.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.services.dbui-questdb.loadbalancer.server.port=9000"
+
+  dbui-pgadmin:
+    container_name: dbui-pgadmin
+    image: dpage/pgadmin4:${PGADMIN_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT:-5050}
+    ports:
+      - "${PGADMIN_LISTEN_PORT:-5050}:${PGADMIN_LISTEN_PORT:-5050}"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      - dbui-questdb
+    healthcheck:
+      test: ['CMD', '/pgadmin4/bin/pgadmin4.py', 'check']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-pgadmin.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgadmin`)"
+      - "traefik.http.routers.dbui-pgadmin.entrypoints=web"
+      - "traefik.http.routers.dbui-pgadmin.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.services.dbui-pgadmin.loadbalancer.server.port=80"
+
+  dbui-adminer:
+    container_name: dbui-adminer
+    image: adminer:latest
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    ports:
+      - "${ADMINER_PORT:-3908}:8080"
+    environment:
+      ADMINER_DESIGN: ${ADMINER_DESIGN:-flat}
+    volumes:
+      - ../compose/adminer-loader.php:/var/www/html/plugins-enabled/0-loader.php
+      - ../compose/adminer-iframe-plugin.php:/var/www/html/plugins-enabled/iframe.php
+      - ../compose/adminer-custom.php:/var/www/html/plugins-enabled/topbar.php
+    networks:
+      - tradingsystem_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-adminer.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/adminer`)"
+      - "traefik.http.routers.dbui-adminer.entrypoints=web"
+      - "traefik.http.routers.dbui-adminer.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.services.dbui-adminer.loadbalancer.server.port=8080"
+
+  dbui-pgweb:
+    container_name: dbui-pgweb
+    image: sosedoff/pgweb:latest
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+    environment:
+      DATABASE_URL: ${PGWEB_DATABASE_URL:-postgres://postgres:postgres@dbui-pgadmin:5432/postgres?sslmode=disable}
+    ports:
+      - "${PGWEB_PORT:-5051}:8081"
+    networks:
+      - tradingsystem_backend
+    depends_on:
+      - dbui-pgadmin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.dbui-pgweb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgweb`)"
+      - "traefik.http.routers.dbui-pgweb.entrypoints=web"
+      - "traefik.http.routers.dbui-pgweb.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.services.dbui-pgweb.loadbalancer.server.port=8081"
+
+networks:
+  tradingsystem_backend:
+    external: true
+
+volumes:
+  questdb-data:
+    driver: local
+  pgadmin-data:
+    driver: local

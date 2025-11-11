@@ -17,20 +17,20 @@ echo "1️⃣ Starting Docker Services..."
 echo ""
 
 echo "   📦 RAG Services Stack..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 echo "   ✅ RAG Services started"
 echo ""
 
 echo "   📦 Documentation Hub..."
-docker compose -f tools/compose/docker-compose.docs.yml up -d 2>/dev/null || echo "   ⚠️  Docs hub already running or build error"
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d 2>/dev/null || echo "   ⚠️  Docs hub already running or build error"
 echo ""
 
-echo "   📦 Apps Stack (Workspace, TP Capital)..."
-docker compose -f tools/compose/docker-compose.apps.yml up -d 2>/dev/null || echo "   ⚠️  Some apps may have port conflicts"
+echo "   ⚡ TP Capital Stack..."
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d 2>/dev/null || echo "   ⚠️  TP Capital pode ter dependências pendentes"
 echo ""
 
 echo "   📦 Monitoring Stack..."
-docker compose -f tools/compose/docker-compose.monitoring.yml up -d 2>/dev/null || echo "   ⚠️  Monitoring optional"
+docker compose -f tools/compose/docker-compose.6-1-monitoring-stack.yml up -d 2>/dev/null || echo "   ⚠️  Monitoring optional"
 echo ""
 
 # Step 2: Wait for Docker services
@@ -42,7 +42,7 @@ echo ""
 # Step 3: Check running containers
 echo "3️⃣ Services Status:"
 echo ""
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(NAMES|rag-|docs-|apps-|prometheus|grafana)" | head -20
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(NAMES|rag-|docs-|tp-capital-|prometheus|grafana)" | head -20
 echo ""
 
 # Step 4: Node.js Services

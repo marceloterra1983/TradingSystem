@@ -161,7 +161,7 @@ CORS_ORIGIN=http://localhost:3103,http://localhost:3400
 
 ```bash
 # 1. Container status
-docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps
 
 # Expected: All "Up (healthy)"
 
@@ -212,7 +212,7 @@ docker logs workspace-db-compute
 # - Port conflict (check port 5433)
 
 # Restart
-docker compose -f tools/compose/docker-compose.workspace-stack.yml restart workspace-db-compute
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart workspace-db-compute
 ```
 
 ---
@@ -228,7 +228,7 @@ docker exec workspace-api env | grep LIBRARY_DB_STRATEGY
 
 # If wrong, fix .env and restart
 echo "LIBRARY_DB_STRATEGY=neon" >> .env
-docker compose -f tools/compose/docker-compose.workspace-stack.yml restart workspace-api
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart workspace-api
 ```
 
 ---
@@ -268,7 +268,7 @@ bash scripts/database/init-neon-workspace.sh
 bash scripts/docker/start-workspace-stack.sh
 
 # Or manually
-docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
 ```
 
 ### Stop Stack
@@ -278,24 +278,24 @@ docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
 bash scripts/docker/stop-workspace-stack.sh
 
 # Or manually
-docker compose -f tools/compose/docker-compose.workspace-stack.yml down
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml down
 ```
 
 ### Restart Stack
 
 ```bash
 # Restart all containers
-docker compose -f tools/compose/docker-compose.workspace-stack.yml restart
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart
 
 # Restart specific service
-docker compose -f tools/compose/docker-compose.workspace-stack.yml restart workspace-api
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart workspace-api
 ```
 
 ### View Logs
 
 ```bash
 # All services
-docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f
 
 # Specific service
 docker logs workspace-api -f

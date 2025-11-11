@@ -42,8 +42,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "dashboard (3103) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3103/" || true)
+echo -n "dashboard (gateway /) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -51,8 +51,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "workspace-api (3200) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3200/" || true)
+echo -n "workspace-api (gateway /api/workspace) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/api/workspace/" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -60,8 +60,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "tp-capital-api (4008) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:4008/health" || true)
+echo -n "tp-capital-api (gateway /api/tp-capital) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/api/tp-capital/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -69,8 +69,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "documentation-hub (3400) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3400/" || true)
+echo -n "documentation-hub (gateway /docs) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/docs/" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -78,8 +78,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "documentation-api (3401) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3401/health" || true)
+echo -n "documentation-api (gateway /api/docs) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/api/docs/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -87,8 +87,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "firecrawl-proxy (3600) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3600/" || true)
+echo -n "firecrawl-proxy (gateway /api/firecrawl) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/api/firecrawl/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -96,8 +96,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "n8n (3680) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3680/healthz" || true)
+echo -n "n8n (gateway /n8n) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/n8n/healthz" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -114,8 +114,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "telegram-gateway-api (4010) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:4010/health" || true)
+echo -n "telegram-gateway-api (gateway /api/telegram-gateway) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/api/telegram-gateway/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -204,8 +204,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "kestra-orchestrator (8180) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8180/actuator/health" || true)
+echo -n "kestra-orchestrator (gateway /kestra) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/kestra/" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else
@@ -213,8 +213,8 @@ else
   FAILURES=$((FAILURES + 1))
 fi
 
-echo -n "kestra-management (8685) ... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8685/actuator/health" || true)
+echo -n "kestra-management (gateway /kestra-management) ... "
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9080/kestra-management/health" || true)
 if [ "$STATUS" = "200" ]; then
   echo "✅ healthy"
 else

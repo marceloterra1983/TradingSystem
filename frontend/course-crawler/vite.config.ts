@@ -48,11 +48,18 @@ export default defineConfig(({ mode }) => {
       open: false,
       host: '0.0.0.0',
       proxy: {
-        // Course Crawler API proxy (when backend is implemented)
-        '/api/course-crawler': {
-          target: env.COURSE_CRAWLER_API_URL || 'http://localhost:3600',
+        // Course Crawler API proxy - Forward all /courses, /runs, /health to backend
+        '/courses': {
+          target: env.COURSE_CRAWLER_API_URL || 'http://localhost:3601',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/course-crawler/, '/api'),
+        },
+        '/runs': {
+          target: env.COURSE_CRAWLER_API_URL || 'http://localhost:3601',
+          changeOrigin: true,
+        },
+        '/health': {
+          target: env.COURSE_CRAWLER_API_URL || 'http://localhost:3601',
+          changeOrigin: true,
         },
       },
     },

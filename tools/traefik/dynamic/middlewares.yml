@@ -1,0 +1,112 @@
+# ==============================================================================
+# Traefik Dynamic Configuration - Middlewares (Simplified)
+# ==============================================================================
+# Simplified middleware configuration without template errors
+# ==============================================================================
+
+http:
+  middlewares:
+    # ==========================================================================
+    # SECURITY
+    # ==========================================================================
+
+    # CORS Configuration (global)
+    cors-global:
+      headers:
+        accessControlAllowOriginList:
+          - "http://localhost:3103"
+          - "http://localhost:9080"
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "PATCH"
+          - "OPTIONS"
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+          - "X-Requested-With"
+          - "X-Api-Key"
+        accessControlExposeHeaders:
+          - "Content-Length"
+          - "X-Request-Id"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 3600
+
+    # Security Headers
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "same-origin"
+
+    # ==========================================================================
+    # RATE LIMITING
+    # ==========================================================================
+
+    # Global rate limit (100 req/min per IP)
+    rate-limit-global:
+      rateLimit:
+        average: 100
+        period: "1m"
+        burst: 50
+
+    # ==========================================================================
+    # COMPRESSION
+    # ==========================================================================
+
+    # Compress responses (gzip/brotli)
+    compress:
+      compress:
+        minResponseBodyBytes: 1024
+
+    # ==========================================================================
+    # CIRCUIT BREAKER
+    # ==========================================================================
+
+    # Circuit breaker (opens after 20% error rate)
+    circuit-breaker:
+      circuitBreaker:
+        expression: "ResponseCodeRatio(500, 600, 0, 600) > 0.20 || NetworkErrorRatio() > 0.20"
+
+    # Prefix stripping for admin/db-ui paths
+    strip-dbui-prefix:
+      stripPrefix:
+        prefixes:
+          - "/db-ui/pgadmin"
+          - "/db-ui/adminer"
+          - "/db-ui/pgweb"
+          - "/db-ui/questdb"
+        forceSlash: true
+
+    # ==========================================================================
+    # COMBINED MIDDLEWARES (Chains)
+    # ==========================================================================
+
+    # Standard API middleware chain
+    api-standard:
+      chain:
+        middlewares:
+          - cors-global
+          - security-headers
+          - rate-limit-global
+          - compress
+          - circuit-breaker
+
+    # Admin UI middleware chain
+    admin-standard:
+      chain:
+        middlewares:
+          - security-headers
+          - rate-limit-global
+          - compress
+
+    # Public static assets middleware chain
+    static-standard:
+      chain:
+        middlewares:
+          - cors-global
+          - security-headers
+          - compress

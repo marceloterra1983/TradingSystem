@@ -1,0 +1,505 @@
+---
+title: Dev Container Guide
+sidebar_position: 1
+tags: [development, devcontainer, docker, vscode]
+domain: tools
+type: guide
+summary: Complete guide for using the TradingSystem Dev Container for consistent development environments
+status: active
+last_review: "2025-11-11"
+---
+
+# 🐳 Dev Container Guide
+
+**One-click development environment setup - Part of Phase 1.5**
+
+## 📋 Overview
+
+The TradingSystem Dev Container provides a fully configured, containerized development environment that eliminates "works on my machine" issues and ensures 100% consistency across all developers.
+
+## ✨ Features
+
+### Pre-installed Tools
+
+- **Node.js 20 LTS** - Matches CI environment exactly
+- **Python 3.12** - Latest stable version
+- **Docker-in-Docker** - Run Docker commands inside container
+- **Git + GitHub CLI** - Full version control integration
+- **Zsh + Oh My Zsh** - Enhanced terminal experience
+
+### Global Packages
+
+**Node.js Ecosystem:**
+- npm, pnpm, yarn
+- TypeScript, ts-node
+- ESLint, Prettier
+- Nodemon, PM2
+
+**Python Ecosystem:**
+- black, flake8, pylint, mypy
+- pytest, ipython
+
+### VS Code Extensions (25+)
+
+Automatically installed:
+- ESLint, Prettier, TypeScript
+- Docker, GitLens
+- React snippets, Tailwind CSS
+- Python, Pylance
+- Markdown, PlantUML
+- Vitest Explorer
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+1. **VS Code** with Dev Containers extension:
+   ```bash
+   code --install-extension ms-vscode-remote.remote-containers
+   ```
+
+2. **Docker Desktop** (Windows/Mac) or **Docker Engine** (Linux):
+   ```bash
+   docker --version  # Should show 20.10+ or later
+   ```
+
+### First Time Setup
+
+1. **Open Project in VS Code:**
+   ```bash
+   code /path/to/TradingSystem
+   ```
+
+2. **Reopen in Container:**
+   - Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+   - Select: **"Dev Containers: Reopen in Container"**
+   - Or click the notification: **"Reopen in Container"**
+
+3. **Wait for Setup** (10-15 minutes first time):
+   - Container image builds (5-8 min)
+   - Dependencies install (5-7 min)
+   - Post-create scripts run automatically
+
+4. **Configure Environment:**
+   ```bash
+   # Create .env from example
+   cp .env.example .env
+
+   # Edit with your values
+   nano .env
+
+   # Validate configuration
+   npm run env:validate
+   ```
+
+5. **Start Services:**
+   ```bash
+   npm run start  # or just: start
+   ```
+
+### Daily Workflow
+
+**Morning Routine:**
+```bash
+# Open VS Code
+code /path/to/TradingSystem
+
+# Reopen in container (if not already)
+# Command Palette → "Dev Containers: Reopen in Container"
+
+# Start services
+start  # alias for npm run start
+```
+
+**During Development:**
+```bash
+# Run tests
+cd frontend/dashboard && npm run test
+
+# Lint code
+npm run lint
+
+# Type check
+npm run type-check
+
+# Build
+npm run build
+```
+
+**End of Day:**
+```bash
+# Stop services
+stop  # alias for npm run stop
+
+# Close container
+# VS Code → File → Close Remote Connection
+```
+
+## 🛠️ Container Features
+
+### Automatic Setup
+
+The Dev Container runs three lifecycle scripts:
+
+#### 1. `post-create.sh` (Runs Once After Creation)
+- Installs all npm dependencies (root, dashboard, docs)
+- Sets up Python virtual environment
+- Installs Python dependencies
+- Configures Git hooks (husky)
+- Creates .env from .env.example (if needed)
+- Validates environment configuration
+- Builds TypeScript projects
+- Generates commands/agents databases
+
+#### 2. `post-start.sh` (Runs Every Container Start)
+- Checks Docker daemon status
+- Activates Python virtual environment
+- Verifies .env file exists
+- Checks port availability
+- Displays environment status
+
+#### 3. `post-attach.sh` (Runs When Terminal Attaches)
+- Displays welcome banner with quick commands
+- Shows environment information
+- Lists useful aliases
+- Shows service ports
+- Auto-activates Python venv
+
+### Port Forwarding
+
+All service ports are automatically forwarded to your host machine:
+
+| Service | Port | URL |
+|---------|------|-----|
+| **Dashboard** | 3103 | http://localhost:3103 |
+| **Documentation** | 3404 | http://localhost:3404 |
+| **Workspace API** | 3200 | http://localhost:3200 |
+| **TP Capital** | 4005 | http://localhost:4005 |
+| **Documentation API** | 3405 | http://localhost:3405 |
+| **RAG System** | 8202 | http://localhost:8202 |
+| **PostgreSQL** | 5432 | localhost:5432 |
+| **Redis** | 6379 | localhost:6379 |
+
+### Terminal Aliases
+
+Pre-configured shortcuts:
+- `ll` - ls -alh
+- `dc` - docker compose
+- `npm-check` - npm run env:validate
+- `start` - npm run start
+- `stop` - npm run stop
+
+## 📚 Common Tasks
+
+### Running Services
+
+```bash
+# Start all services
+start                 # npm run start (with force-kill)
+npm run start:soft    # Start without killing
+
+# Stop all services
+stop                  # npm run stop
+npm run stop:all      # Stop + prune networks
+```
+
+### Development Commands
+
+```bash
+# Linting
+npm run lint          # Lint code
+npm run lint:fix      # Auto-fix issues
+
+# Type checking
+npm run type-check    # Check all TypeScript
+
+# Building
+npm run build         # Parallel build
+npm run build:clean   # Clean + build
+```
+
+### Testing
+
+```bash
+# Unit tests (dashboard)
+cd frontend/dashboard
+npm run test
+npm run test:coverage
+
+# Component tests
+npm run test:ui
+
+# E2E tests (when available)
+npm run test:e2e
+```
+
+### Docker Operations
+
+```bash
+# List containers
+docker ps             # Running containers
+dc ps                 # Using alias
+
+# View logs
+docker logs -f <container-name>
+docker compose logs -f
+
+# Manage stacks
+cd tools/compose
+docker compose -f docker-compose.1-dashboard-stack.yml up -d
+docker compose down
+```
+
+### Python Development
+
+```bash
+# Virtual environment (auto-activated)
+source venv/bin/activate  # Manual activation if needed
+
+# Install dependencies
+pip install -r requirements.txt
+pip install <package-name>
+
+# Run scripts
+python scripts/docs/validate-frontmatter.py
+python scripts/rag/ingest-documents.py
+```
+
+## 🐛 Troubleshooting
+
+### Container Won't Start
+
+**Symptoms:** Container fails to build or start
+
+**Solutions:**
+```bash
+# 1. Rebuild container from scratch
+# Command Palette → "Dev Containers: Rebuild Container"
+
+# 2. Clean Docker resources
+docker system prune -a
+docker volume prune
+
+# 3. Check Docker daemon
+sudo service docker start  # Linux
+# Or restart Docker Desktop (Windows/Mac)
+
+# 4. Check VS Code logs
+# View → Output → Dev Containers
+```
+
+### Port Already in Use
+
+**Symptoms:** Error "port 3103 is already allocated"
+
+**Solutions:**
+```bash
+# Find process using port
+lsof -i :3103
+netstat -tuln | grep 3103
+
+# Kill process
+kill -9 <PID>
+
+# Or change port in .env
+DASHBOARD_PORT=3104
+```
+
+### Docker-in-Docker Issues
+
+**Symptoms:** Docker commands fail inside container
+
+**Solutions:**
+```bash
+# Check Docker socket permissions
+ls -la /var/run/docker.sock
+sudo chmod 666 /var/run/docker.sock
+
+# Verify Docker daemon
+docker info
+
+# Restart Docker service
+sudo service docker restart
+```
+
+### Python venv Not Activated
+
+**Symptoms:** Python packages not found
+
+**Solutions:**
+```bash
+# Manual activation
+source /workspace/venv/bin/activate
+
+# Or recreate venv
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Node Modules Missing
+
+**Symptoms:** Module not found errors
+
+**Solutions:**
+```bash
+# Re-run post-create script
+bash .devcontainer/scripts/post-create.sh
+
+# Or install manually
+npm ci                            # Root
+cd frontend/dashboard && npm ci   # Dashboard
+cd docs && npm ci                 # Docs
+```
+
+## ⚙️ Configuration
+
+### Adding VS Code Extensions
+
+1. Edit `.devcontainer/devcontainer.json`
+2. Add extension ID to `customizations.vscode.extensions` array
+3. Rebuild container: **"Dev Containers: Rebuild Container"**
+
+**Example:**
+```json
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "existing.extension-id",
+        "new.extension-id"  // Add here
+      ]
+    }
+  }
+}
+```
+
+### Customizing Environment
+
+Edit `.devcontainer/docker-compose.yml` to add environment variables:
+
+```yaml
+services:
+  app:
+    environment:
+      - CUSTOM_VAR=value
+      - ANOTHER_VAR=value
+```
+
+### Modifying Lifecycle Scripts
+
+Scripts location: `.devcontainer/scripts/`
+
+- `post-create.sh` - Initial setup
+- `post-start.sh` - Startup tasks
+- `post-attach.sh` - Terminal attach
+
+Make executable after editing:
+```bash
+chmod +x .devcontainer/scripts/*.sh
+```
+
+## 📊 Performance Tips
+
+### Resource Allocation
+
+**Docker Desktop Settings:**
+- **CPU:** 4+ cores recommended
+- **Memory:** 8GB+ RAM recommended
+- **Disk:** 50GB+ available space
+
+### Named Volumes
+
+The Dev Container uses named volumes for better performance:
+- `node-modules` - Root node_modules
+- `dashboard-node-modules` - Frontend dependencies
+- `docs-node-modules` - Docs dependencies
+- `venv` - Python virtual environment
+
+**Benefits:**
+- 10x faster rebuilds
+- Persistent dependencies
+- Better disk I/O
+- Reduced host filesystem overhead
+
+### File Watcher Optimization
+
+Already configured in `.devcontainer/devcontainer.json`:
+
+```json
+{
+  "settings": {
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/dist/**": true,
+      "**/.git/objects/**": true
+    }
+  }
+}
+```
+
+## 🔐 Security Considerations
+
+### Mounted Volumes
+
+**Safe to Mount:**
+- ✅ Project directory
+- ✅ Git config (`~/.gitconfig`)
+- ✅ SSH keys (`~/.ssh`)
+- ✅ Docker socket (for Docker-in-Docker)
+
+**Never Mount:**
+- ❌ Entire home directory
+- ❌ System directories
+- ❌ Sensitive credential files
+
+### Privileged Mode
+
+The container runs in privileged mode for Docker-in-Docker support:
+
+- ✅ Safe for local development
+- ⚠️ Not recommended for shared/production environments
+- ✅ Isolated from host by Docker
+
+## 📖 References
+
+### Official Documentation
+
+- [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)
+- [Dev Container Features](https://containers.dev/features)
+- [Docker-in-Docker](https://github.com/microsoft/vscode-dev-containers/tree/main/script-library/docs)
+
+### TradingSystem Documentation
+
+- [Environment Setup](./environment-setup.mdx)
+- [Development Workflow](./workflow-guide.mdx)
+- [CI/CD Pipeline](../ci-cd/pipeline-guide.mdx)
+
+### Configuration Files
+
+- `.devcontainer/devcontainer.json` - Main configuration
+- `.devcontainer/docker-compose.yml` - Service definition
+- `.devcontainer/Dockerfile` - Custom image
+- `.devcontainer/README.md` - Detailed guide
+
+## 🆘 Getting Help
+
+### Documentation Resources
+
+1. **In-Container README:** `.devcontainer/README.md`
+2. **Project Docs:** `docs/README.md`
+3. **Claude Instructions:** `CLAUDE.md`
+
+### Support Channels
+
+1. Check [Troubleshooting](#-troubleshooting) section
+2. Review VS Code Output → Dev Containers
+3. Check Docker logs: `docker logs <container-id>`
+4. Ask in project Slack/Discord
+
+---
+
+**Last Updated:** 2025-11-11
+**Version:** 1.0 (Phase 1.5 Implementation)
+**Status:** Active

@@ -148,7 +148,7 @@ npm run dev
 npm run build && npm start
 
 # Docker
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-collections-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-collections-service
 ```
 
 ### Frontend

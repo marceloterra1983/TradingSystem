@@ -228,7 +228,7 @@ async function validateCompose(results) {
     path.join(repoRoot, 'tools/compose/docker-compose.4-1-tp-capital-stack.yml'),
   );
   const dashCompose = await readFileSafe(
-    path.join(repoRoot, 'tools/compose/docker-compose.dashboard.yml'),
+    path.join(repoRoot, 'tools/compose/docker-compose.1-dashboard-stack.yml'),
   );
   const telegramCompose = await readFileSafe(
     path.join(repoRoot, 'tools/compose/docker-compose.4-2-telegram-stack.yml'),

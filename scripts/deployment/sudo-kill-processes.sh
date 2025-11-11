@@ -72,6 +72,6 @@ echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "Next steps:"
 echo "  cd /home/marce/Projetos/TradingSystem"
-echo "  docker compose -f tools/compose/docker-compose.rag.yml up -d"
+echo "  docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d"
 echo ""
 

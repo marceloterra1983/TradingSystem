@@ -10,6 +10,36 @@ import { IframeWithUrl } from "../common/IframeWithUrl";
 
 type DocsView = "overview" | "docs" | "metrics" | "docsApi" | "docsHybrid";
 
+const ABSOLUTE_URL_REGEX = /^https?:\/\//i;
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
+const ensureLeadingSlash = (value: string) =>
+  value.startsWith("/") ? value : `/${value}`;
+
+const resolveDocsBaseUrl = (): string => {
+  const candidate = apiConfig.docsUrl || "/docs";
+
+  if (ABSOLUTE_URL_REGEX.test(candidate)) {
+    return trimTrailingSlash(candidate);
+  }
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    const origin = trimTrailingSlash(window.location.origin);
+    const normalized =
+      candidate && candidate !== "/"
+        ? ensureLeadingSlash(candidate)
+        : "/docs";
+    return trimTrailingSlash(`${origin}${normalized}`);
+  }
+
+  if (candidate.startsWith("/")) {
+    return trimTrailingSlash(
+      `http://localhost:9080${ensureLeadingSlash(candidate)}`,
+    );
+  }
+
+  return trimTrailingSlash(candidate || "http://localhost:9080/docs");
+};
+
 const VIEW_KEYS: DocsView[] = [
   "overview",
   "docs",
@@ -35,6 +65,7 @@ const resolveInitialView = (): DocsView => {
 
 export function DocusaurusPageNew() {
   const [activeView, setActiveView] = useState<DocsView>(resolveInitialView);
+  const docsBaseUrl = resolveDocsBaseUrl();
   const isOverview = activeView === "overview";
   const isDocsView = activeView === "docs";
   const isMetricsView = activeView === "metrics";
@@ -42,7 +73,7 @@ export function DocusaurusPageNew() {
   const isDocsHybridView = activeView === "docsHybrid";
 
   // Iframe source for Docusaurus (version next for development/unreleased docs)
-  const iframeSrc = isDocsView ? "http://localhost:3404/next/" : undefined;
+  const iframeSrc = isDocsView ? `${docsBaseUrl}/next/` : undefined;
   const iframeTitle =
     activeView === "docs" ? "TradingSystem Documentation Portal" : undefined;
 
@@ -93,8 +124,8 @@ export function DocusaurusPageNew() {
         "_blank",
         "noopener,noreferrer",
       );
-    } else if (iframeSrc) {
-      window.open(iframeSrc, "_blank", "noopener,noreferrer");
+    } else if (isDocsView) {
+      window.open(`${docsBaseUrl}/next/`, "_blank", "noopener,noreferrer");
     }
   };
 

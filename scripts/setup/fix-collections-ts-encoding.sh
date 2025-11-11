@@ -31,10 +31,10 @@ echo "✅ TypeScript compilation successful!"
 # Rebuild container
 cd /home/marce/Projetos/TradingSystem
 echo "🐳 Rebuilding container..."
-docker compose -f tools/compose/docker-compose.rag.yml build rag-collections-service --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-collections-service --no-cache
 
 echo "🚀 Restarting container..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-collections-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-collections-service
 
 echo "✅ Done! Container updated with improved logs."
 echo ""

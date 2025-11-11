@@ -81,7 +81,7 @@ npm run lint && npm run type-check && npm run validate:env
 
 # Test container locally
 cd ../../tools/compose
-docker compose -f docker-compose.dashboard.yml up -d --force-recreate
+docker compose -f docker-compose.1-dashboard-stack.yml up -d --force-recreate
 docker logs dashboard-ui | grep -E "\[vite\] VITE_GATEWAY_TOKEN"
 ```
 

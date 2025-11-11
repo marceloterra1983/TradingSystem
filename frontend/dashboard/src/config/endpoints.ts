@@ -50,14 +50,14 @@ export const ENDPOINTS = {
    * @remarks Protected Range: 7100-7199
    */
 
-  /** PgAdmin - PostgreSQL/TimescaleDB Web UI - Port 5050 */
-  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:5050",
+  /** PgAdmin - PostgreSQL/TimescaleDB Web UI (Traefik: /db-ui/pgadmin) */
+  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:9080/db-ui/pgadmin",
 
-  /** Adminer - Lightweight database management - Port 8082 */
-  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:8082",
+  /** Adminer - Lightweight database management (Traefik: /db-ui/adminer) */
+  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:9080/db-ui/adminer",
 
-  /** PgWeb - Lightweight PostgreSQL browser - Port 8081 */
-  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:8081",
+  /** PgWeb - Lightweight PostgreSQL browser (Traefik: /db-ui/pgweb) */
+  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:9080/db-ui/pgweb",
 
   /**
    * Database Services - Direct Access
@@ -75,8 +75,8 @@ export const ENDPOINTS = {
     url: `http://localhost:${import.meta.env.VITE_TIMESCALEDB_PORT || "7000"}`,
   },
 
-  /** QuestDB - High-performance time-series database - Port 9002 (HTTP Console) */
-  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9002",
+  /** QuestDB - High-performance time-series database (Traefik: /db-ui/questdb) */
+  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9080/db-ui/questdb",
 
   /** Qdrant - Vector database for RAG/AI - Port 7020 (HTTP API) */
   qdrant: import.meta.env.VITE_QDRANT_URL || "http://localhost:7020",

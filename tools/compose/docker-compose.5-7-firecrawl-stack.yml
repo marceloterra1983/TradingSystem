@@ -1,0 +1,285 @@
+name: 5-7-firecrawl-stack
+
+services:
+  # ============================================================================
+  # PostgreSQL 15 - persistent store for Firecrawl
+  # ============================================================================
+  firecrawl-postgres:
+    container_name: firecrawl-postgres
+    image: "${IMG_FIRECRAWL_POSTGRES:-postgres}:${IMG_VERSION:-15-alpine}"
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    environment:
+      POSTGRES_DB: ${FIRECRAWL_DB_NAME:-firecrawl}
+      POSTGRES_USER: ${FIRECRAWL_DB_USER:-firecrawl}
+      POSTGRES_PASSWORD: ${FIRECRAWL_DB_PASSWORD:-firecrawl}
+
+    volumes:
+      - firecrawl-postgres-data:/var/lib/postgresql/data
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          pg_isready -U ${FIRECRAWL_DB_USER:-firecrawl}
+          -d ${FIRECRAWL_DB_NAME:-firecrawl}
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+    networks:
+      firecrawl_backend:
+        aliases:
+          - firecrawl-postgres
+
+    labels:
+      - "com.tradingsystem.stack=5-7-firecrawl"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=postgres"
+
+  # ============================================================================
+  # Redis - caching / job coordination
+  # ============================================================================
+  firecrawl-redis:
+    container_name: firecrawl-redis
+    image: "${IMG_FIRECRAWL_REDIS:-redis}:${IMG_VERSION:-alpine}"
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    command: >
+      redis-server
+      --port 6379
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+
+    volumes:
+      - firecrawl-redis-data:/data
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    networks:
+      firecrawl_backend:
+        aliases:
+          - firecrawl-redis
+
+    labels:
+      - "com.tradingsystem.stack=5-7-firecrawl"
+      - "com.tradingsystem.tier=cache"
+      - "com.tradingsystem.service=redis"
+
+  # ============================================================================
+  # Firecrawl API (core service)
+  # ============================================================================
+  firecrawl-api:
+    container_name: firecrawl-api
+    image: "${IMG_FIRECRAWL_API:-nginx}:${IMG_VERSION:-alpine}"
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:80/
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      firecrawl_backend:
+        aliases:
+          - firecrawl-api
+
+    labels:
+      - "com.tradingsystem.stack=5-7-firecrawl"
+      - "com.tradingsystem.tier=application"
+      - "com.tradingsystem.service=firecrawl-api"
+
+  # ============================================================================
+  # Firecrawl Playwright worker (browser automation)
+  # ============================================================================
+  firecrawl-playwright:
+    container_name: firecrawl-playwright
+    image: "${IMG_FIRECRAWL_PLAYWRIGHT:-nginx}:${IMG_VERSION:-alpine}"
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:80/
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      firecrawl_backend:
+        aliases:
+          - firecrawl-playwright
+
+    labels:
+      - "com.tradingsystem.stack=5-7-firecrawl"
+      - "com.tradingsystem.tier=workers"
+      - "com.tradingsystem.service=firecrawl-playwright"
+
+  # ============================================================================
+  # Firecrawl Proxy (TradingSystem gateway)
+  # ============================================================================
+  firecrawl-proxy:
+    container_name: firecrawl-proxy
+    image: "${IMG_TOOLS_FIRECRAWL_PROXY:-img-firecrawl-proxy}:${IMG_VERSION:-latest}"
+    platform: linux/amd64
+    restart: unless-stopped
+
+    build:
+      context: ../../backend
+      dockerfile: api/firecrawl-proxy/Dockerfile
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    environment:
+      PORT: 3600
+      FIRECRAWL_API_URL: ${FIRECRAWL_API_URL:-https://api.firecrawl.dev}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-your_api_key_here}
+      LOG_LEVEL: ${FIRECRAWL_LOG_LEVEL:-info}
+      FIRECRAWL_REDIS_URL: ${FIRECRAWL_REDIS_URL:-redis://firecrawl-redis:6379/0}
+      FIRECRAWL_DATABASE_URL: postgresql://${FIRECRAWL_DB_USER:-firecrawl}:${FIRECRAWL_DB_PASSWORD:-firecrawl}@firecrawl-postgres:5432/${FIRECRAWL_DB_NAME:-firecrawl}
+
+    depends_on:
+      firecrawl-postgres:
+        condition: service_healthy
+      firecrawl-redis:
+        condition: service_healthy
+      firecrawl-api:
+        condition: service_healthy
+      firecrawl-playwright:
+        condition: service_healthy
+
+    volumes:
+      - ../../backend/api/firecrawl-proxy/src:/app/src:ro
+      - ../../backend/shared:/app/shared:ro
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3600/health
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+    networks:
+      firecrawl_backend:
+        aliases:
+          - firecrawl-proxy
+      tradingsystem_backend:
+        aliases:
+          - firecrawl-proxy
+
+    labels:
+      - "com.tradingsystem.stack=5-7-firecrawl"
+      - "com.tradingsystem.tier=edge"
+      - "com.tradingsystem.service=firecrawl-proxy"
+      - "traefik.enable=true"
+      - "traefik.http.routers.firecrawl-proxy.rule=PathPrefix(`/api/firecrawl`)"
+      - "traefik.http.routers.firecrawl-proxy.entrypoints=web"
+      - "traefik.http.routers.firecrawl-proxy.service=firecrawl-proxy"
+      - "traefik.http.routers.firecrawl-proxy.middlewares=firecrawl-proxy-strip,api-standard@file"
+      - "traefik.http.middlewares.firecrawl-proxy-strip.stripprefix.prefixes=/api/firecrawl"
+      - "traefik.http.services.firecrawl-proxy.loadbalancer.server.port=3600"
+      - "traefik.http.services.firecrawl-proxy.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.firecrawl-proxy.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.firecrawl-proxy.loadbalancer.healthcheck.timeout=10s"
+
+volumes:
+  firecrawl-postgres-data:
+  firecrawl-redis-data:
+
+networks:
+  firecrawl_backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${FIRECRAWL_NETWORK_SUBNET:-172.37.0.0/24}
+  tradingsystem_backend:
+    external: true

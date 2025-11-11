@@ -1,0 +1,348 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scans weekly on Monday at 2 AM
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/dashboard/package-lock.json
+            backend/api/workspace/package-lock.json
+            docs/package-lock.json
+
+      - name: Scan frontend dependencies
+        working-directory: frontend/dashboard
+        run: |
+          npm ci
+          npm audit --audit-level=moderate --json > ../../audit-frontend.json || true
+
+      - name: Scan backend dependencies
+        working-directory: backend/api/workspace
+        run: |
+          npm ci
+          npm audit --audit-level=moderate --json > ../../../audit-backend.json || true
+
+      - name: Scan docs dependencies
+        working-directory: docs
+        run: |
+          npm ci
+          npm audit --audit-level=moderate --json > ../audit-docs.json || true
+
+      - name: Generate audit summary
+        run: |
+          echo "# Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Frontend Dashboard" >> $GITHUB_STEP_SUMMARY
+          if [ -f audit-frontend.json ]; then
+            critical=$(jq '.metadata.vulnerabilities.critical // 0' audit-frontend.json)
+            high=$(jq '.metadata.vulnerabilities.high // 0' audit-frontend.json)
+            echo "- Critical: $critical" >> $GITHUB_STEP_SUMMARY
+            echo "- High: $high" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Backend API" >> $GITHUB_STEP_SUMMARY
+          if [ -f audit-backend.json ]; then
+            critical=$(jq '.metadata.vulnerabilities.critical // 0' audit-backend.json)
+            high=$(jq '.metadata.vulnerabilities.high // 0' audit-backend.json)
+            echo "- Critical: $critical" >> $GITHUB_STEP_SUMMARY
+            echo "- High: $high" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload audit reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-reports
+          path: |
+            audit-frontend.json
+            audit-backend.json
+            audit-docs.json
+          retention-days: 30
+
+      - name: Fail on critical vulnerabilities
+        run: |
+          frontend_critical=$(jq '.metadata.vulnerabilities.critical // 0' audit-frontend.json)
+          backend_critical=$(jq '.metadata.vulnerabilities.critical // 0' audit-backend.json)
+
+          if [ "$frontend_critical" -gt 0 ] || [ "$backend_critical" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found!"
+            exit 1
+          fi
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better detection
+
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified --json
+
+      - name: Generate secret scan summary
+        if: always()
+        run: |
+          echo "# Secret Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Secret scan completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Scanned entire repository history for:" >> $GITHUB_STEP_SUMMARY
+          echo "- API keys" >> $GITHUB_STEP_SUMMARY
+          echo "- Passwords" >> $GITHUB_STEP_SUMMARY
+          echo "- Tokens" >> $GITHUB_STEP_SUMMARY
+          echo "- Private keys" >> $GITHUB_STEP_SUMMARY
+          echo "- Credentials" >> $GITHUB_STEP_SUMMARY
+
+  owasp-zap-scan:
+    name: OWASP ZAP Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name != 'pull_request' # Only on main/develop or scheduled
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create .env file
+        run: |
+          cp config/.env.defaults .env
+          echo "NODE_ENV=test" >> .env
+          echo "CI=true" >> .env
+
+      - name: Start services for scanning
+        run: |
+          # Start workspace API
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+
+          # Wait for services
+          sleep 15
+
+      - name: Check service health
+        run: |
+          curl --retry 5 --retry-delay 3 http://localhost:3200/health || echo "Workspace API not ready"
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:3200'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          fail_action: false # Don't fail build, just report
+          allow_issue_writing: true
+
+      - name: OWASP ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.6.0
+        with:
+          target: 'http://localhost:3200'
+          format: openapi
+          api_url: 'http://localhost:3200/api-docs/swagger.json'
+          fail_action: false
+
+      - name: Upload ZAP reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-reports
+          path: |
+            zap_baseline_report.html
+            zap_api_report.html
+          retention-days: 30
+
+      - name: Stop services
+        if: always()
+        run: docker compose -f tools/compose/docker-compose.apps.yml down
+
+  security-headers-check:
+    name: Security Headers Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Start services
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml up -d workspace
+          sleep 10
+
+      - name: Check security headers
+        run: |
+          echo "# Security Headers Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check Workspace API headers
+          response=$(curl -I http://localhost:3200/health 2>/dev/null)
+
+          echo "## Workspace API (:3200)" >> $GITHUB_STEP_SUMMARY
+
+          # Check for important security headers
+          if echo "$response" | grep -qi "X-Content-Type-Options"; then
+            echo "✅ X-Content-Type-Options present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ X-Content-Type-Options missing" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if echo "$response" | grep -qi "X-Frame-Options"; then
+            echo "✅ X-Frame-Options present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ X-Frame-Options missing" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if echo "$response" | grep -qi "Strict-Transport-Security"; then
+            echo "✅ Strict-Transport-Security present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️  Strict-Transport-Security missing (ok for local)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if echo "$response" | grep -qi "Content-Security-Policy"; then
+            echo "✅ Content-Security-Policy present" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️  Content-Security-Policy missing" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Stop services
+        if: always()
+        run: docker compose -f tools/compose/docker-compose.apps.yml down
+
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'
+          upload: true
+
+  docker-security-scan:
+    name: Docker Image Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker images
+        run: |
+          docker compose -f tools/compose/docker-compose.apps.yml build workspace
+
+      - name: Scan workspace image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'tradingsystem-workspace:latest'
+          format: 'sarif'
+          output: 'trivy-workspace.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-workspace.sarif'
+          category: 'docker-workspace'
+
+      - name: Generate Docker scan summary
+        if: always()
+        run: |
+          echo "# Docker Security Scan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Docker images scanned for vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Images scanned:" >> $GITHUB_STEP_SUMMARY
+          echo "- workspace-api" >> $GITHUB_STEP_SUMMARY
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, secret-scan, security-headers-check, codeql-analysis]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Completed Scans" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Dependency vulnerability scan" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Secret detection (TruffleHog)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Security headers validation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ CodeQL static analysis" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "- ✅ OWASP ZAP dynamic scan" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Docker image scan" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review artifacts for detailed findings" >> $GITHUB_STEP_SUMMARY
+          echo "2. Fix critical and high vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          echo "3. Update dependencies regularly" >> $GITHUB_STEP_SUMMARY
+          echo "4. Follow security best practices" >> $GITHUB_STEP_SUMMARY

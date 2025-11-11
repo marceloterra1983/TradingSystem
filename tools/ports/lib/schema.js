@@ -1,6 +1,7 @@
 const SEMVER_REGEX = /^\d+\.\d+\.\d+$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const SERVICE_NAME_REGEX = /^[a-z][a-z0-9-]*$/;
+const SUPPORTED_EXPOSURES = new Set(['direct', 'gateway', 'internal']);
 
 export const SUPPORTED_PROTOCOLS = new Set([
   'http',
@@ -89,6 +90,28 @@ export function validateRegistry(registry) {
       errors.push(`Duplicate service name detected: ${service.name}`);
     } else {
       allNames.add(service.name);
+    }
+
+    if (service.exposure && !SUPPORTED_EXPOSURES.has(service.exposure)) {
+      errors.push(
+        `Service ${service.name} exposure "${service.exposure}" is invalid. Use one of: ${[...SUPPORTED_EXPOSURES].join(', ')}`,
+      );
+    }
+
+    if (typeof service.gatewayPath !== 'undefined') {
+      if (typeof service.gatewayPath !== 'string' || service.gatewayPath.trim().length === 0) {
+        errors.push(`Service ${service.name} gatewayPath must be a non-empty string when provided`);
+      } else if (!service.gatewayPath.startsWith('/')) {
+        errors.push(`Service ${service.name} gatewayPath must start with '/'`);
+      }
+    } else if (service.exposure === 'gateway') {
+      warnings.push(`Service ${service.name} is marked as gateway exposure but has no gatewayPath`);
+    }
+
+    if (service.exposure !== 'gateway' && typeof service.gatewayPath !== 'undefined') {
+      warnings.push(
+        `Service ${service.name} defines gatewayPath but exposure is ${service.exposure ?? 'not set'}. gatewayPath will be ignored.`,
+      );
     }
 
     if (!service.stack || !rangeMap.has(service.stack)) {

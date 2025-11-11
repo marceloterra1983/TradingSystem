@@ -66,7 +66,7 @@ CODE_FILES=(
     # Add files here as you modify them
     # Example:
     # "frontend/dashboard/src/components/pages/DocsHybridSearchPage.tsx"
-    # "tools/compose/docker-compose.rag.yml"
+    # "tools/compose/docker-compose.4-4-rag-stack.yml"
 )
 
 # =============================================================================

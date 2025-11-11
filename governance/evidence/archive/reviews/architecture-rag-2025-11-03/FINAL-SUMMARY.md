@@ -53,7 +53,7 @@ Docker Stacks: 3 complete stacks (Neon, Qdrant, Kong)
 ### Infrastructure (12 files)
 
 **Docker Compose:**
-11. `tools/compose/docker-compose.neon.yml` - Neon stack (3 services)
+11. `tools/compose/docker-compose.neon.yml` (removido em 2025-11-11) - Neon stack (3 services)
 12. `tools/compose/docker-compose.qdrant-cluster.yml` - Qdrant cluster (4 services)
 13. `tools/compose/docker-compose.kong.yml` - Kong Gateway (4 services)
 

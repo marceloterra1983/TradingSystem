@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
+import type { StringValue } from "ms";
 import { env } from "../config/environment.js";
 
 export interface JWTPayload {
@@ -91,6 +92,10 @@ export function optionalAuth(
 /**
  * Generate JWT token
  */
-export function generateToken(payload: JWTPayload, expiresIn = "24h"): string {
-  return jwt.sign(payload, env.COURSE_CRAWLER_JWT_SECRET, { expiresIn });
+export function generateToken(
+  payload: JWTPayload,
+  expiresIn: StringValue | number = "24h"
+): string {
+  const options: SignOptions = { expiresIn };
+  return jwt.sign(payload, env.COURSE_CRAWLER_JWT_SECRET, options);
 }

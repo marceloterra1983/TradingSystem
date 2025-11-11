@@ -16,7 +16,7 @@ export const TOOL_COMMANDS: Record<string, ToolCommand> = {
     id: "pgadmin",
     label: "pgAdmin",
     command: `docker compose -f "${composePath(
-      "tools/compose/docker-compose.database-ui.yml",
+      "tools/compose/docker-compose.4-0-database-ui-stack.yml",
     )}" up -d dbui-pgadmin`,
     description: "Inicia o container pgAdmin (porta 5050).",
   },
@@ -24,7 +24,7 @@ export const TOOL_COMMANDS: Record<string, ToolCommand> = {
     id: "pgweb",
     label: "pgweb",
     command: `docker compose -f "${composePath(
-      "tools/compose/docker-compose.database-ui.yml",
+      "tools/compose/docker-compose.4-0-database-ui-stack.yml",
     )}" up -d dbui-pgweb`,
     description: "Inicia o container pgweb (porta 8081).",
   },
@@ -32,7 +32,7 @@ export const TOOL_COMMANDS: Record<string, ToolCommand> = {
     id: "adminer",
     label: "Adminer",
     command: `docker compose -f "${composePath(
-      "tools/compose/docker-compose.database-ui.yml",
+      "tools/compose/docker-compose.4-0-database-ui-stack.yml",
     )}" up -d dbui-adminer`,
     description: "Inicia o container Adminer (porta 8082).",
   },
@@ -40,7 +40,7 @@ export const TOOL_COMMANDS: Record<string, ToolCommand> = {
     id: "questdb",
     label: "QuestDB",
     command: `docker compose -f "${composePath(
-      "tools/compose/docker-compose.database-ui.yml",
+      "tools/compose/docker-compose.4-0-database-ui-stack.yml",
     )}" up -d dbui-questdb`,
     description: "Inicia o serviço QuestDB (porta 9002).",
   },

@@ -62,8 +62,15 @@ export async function generateDocs(registry, { targetPath = DEFAULTS.docsPath, n
 
     for (const svc of services) {
       const status = svc.deprecated ? '⚠️ Deprecated' : '✅ Active';
+      const exposureNote = (() => {
+        if (svc.exposure === 'gateway') {
+          const path = svc.gatewayPath ? ` ${svc.gatewayPath}` : '';
+          return ` (Traefik${path})`;
+        }
+        return '';
+      })();
       lines.push(
-        `| ${svc.name} | ${svc.port} | ${svc.protocol} | ${svc.owner} | ${status} | ${svc.description} |`
+        `| ${svc.name} | ${svc.port} | ${svc.protocol} | ${svc.owner} | ${status} | ${svc.description}${exposureNote} |`
       );
     }
 

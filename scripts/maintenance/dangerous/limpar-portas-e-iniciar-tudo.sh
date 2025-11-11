@@ -34,7 +34,7 @@ echo ""
 sleep 3
 
 echo "3️⃣ Iniciando RAG Stack (PRIORIDADE)..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 echo "   ✅ RAG Services iniciando..."
 echo ""
 
@@ -49,10 +49,10 @@ echo "   ✅ Redis iniciando..."
 echo ""
 
 echo "6️⃣ Garantindo Qdrant..."
-if ! docker ps | grep -q "data-qdrant.*Up"; then
-    if docker ps -a | grep -q data-qdrant; then
-        docker start data-qdrant || docker run -d \
-          --name data-qdrant \
+if ! docker ps | grep -q "rag-qdrant.*Up"; then
+    if docker ps -a | grep -q rag-qdrant; then
+        docker start rag-qdrant || docker run -d \
+          --name rag-qdrant \
           --network tradingsystem_backend \
           -p 6333:6333 -p 6334:6334 \
           -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
@@ -60,7 +60,7 @@ if ! docker ps | grep -q "data-qdrant.*Up"; then
           qdrant/qdrant:v1.7.4
     else
         docker run -d \
-          --name data-qdrant \
+          --name rag-qdrant \
           --network tradingsystem_backend \
           -p 6333:6333 -p 6334:6334 \
           -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
@@ -80,12 +80,12 @@ echo ""
 
 # Database UI stack (pode ter conflito, mas tentamos)
 echo "   📦 Database UI Stack..."
-docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
+docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
 echo ""
 
-# Apps stack
-echo "   📦 Apps Stack..."
-docker compose -f tools/compose/docker-compose.apps.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
+# TP Capital stack
+echo "   ⚡ TP Capital Stack..."
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d 2>&1 | tail -3 || echo "      ⚠️  Conflito de porta (ok se já existir)"
 echo ""
 
 echo "9️⃣ STATUS FINAL:"

@@ -25,7 +25,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-COMPOSE_FILE="tools/compose/docker-compose.workspace-stack.yml"
+COMPOSE_FILE="tools/compose/docker-compose.4-3-workspace-stack.yml"
 BUILD_FLAG=""
 RECREATE_FLAG=""
 DETACH_FLAG="-d"

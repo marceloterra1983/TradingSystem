@@ -46,13 +46,18 @@ export default defineConfig({
         'scripts/**',
       ],
       thresholds: {
-        // TODO: Gradually increase these thresholds as test coverage improves
-        // Target: 80% (currently ~10-60%)
-        branches: 50,      // Current: 59.42%
-        functions: 10,     // Current: ~10%
-        lines: 10,         // Current: ~10%
-        statements: 10,    // Current: 10.02%
+        // Progressive thresholds (Phase 1 baseline - Improvement Plan v1.0)
+        // These values will gradually increase as test coverage improves
+        // Current baseline: ~10-60% | Target (Phase 2): 75% | Final target: 85%
+        branches: 50,      // Current: 59.42% → Phase 2: 70% → Final: 80%
+        functions: 30,     // Current: ~10% → Phase 2: 70% → Final: 85%
+        lines: 30,         // Current: ~10% → Phase 2: 75% → Final: 85%
+        statements: 30,    // Current: 10.02% → Phase 2: 75% → Final: 85%
       },
+      // Report all uncovered lines in console
+      all: true,
+      // Include source files for accurate coverage mapping
+      include: ['src/**/*.{ts,tsx}'],
     },
   },
 });

@@ -163,7 +163,7 @@ function ServiceHealthSection() {
     {
       name: "RAG Service",
       description:
-        "Documentation API + LlamaIndex + RAG (docker-compose.rag.yml)",
+        "Documentation API + LlamaIndex + RAG (docker-compose.4-4-rag-stack.yml)",
       port: "3402",
       scope: "Container",
       check: "curl http://localhost:3402/health",

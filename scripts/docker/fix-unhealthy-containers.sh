@@ -30,18 +30,18 @@ echo ""
 echo -e "${YELLOW}━━━ Problem 1: Qdrant Container Missing ━━━${NC}"
 echo ""
 echo -e "${CYAN}Affected services:${NC}"
-echo -e "  • rag-llamaindex-ingest (tries to connect to data-qdrant:6333)"
-echo -e "  • rag-service (tries to connect to data-qdrant:6333)"
+echo -e "  • rag-llamaindex-ingest (tries to connect to rag-qdrant:6333)"
+echo -e "  • rag-service (tries to connect to rag-qdrant:6333)"
 echo ""
 
-if docker ps -a --format '{{.Names}}' | grep -qx "data-qdrant"; then
+if docker ps -a --format '{{.Names}}' | grep -qx "rag-qdrant"; then
     echo -e "${GREEN}✓ Qdrant container exists${NC}"
     
-    if docker ps --format '{{.Names}}' | grep -qx "data-qdrant"; then
+    if docker ps --format '{{.Names}}' | grep -qx "rag-qdrant"; then
         echo -e "${GREEN}✓ Qdrant is running${NC}"
     else
         echo -e "${YELLOW}⚠ Qdrant is stopped, starting...${NC}"
-        docker start data-qdrant
+        docker start rag-qdrant
         sleep 3
         echo -e "${GREEN}✓ Qdrant started${NC}"
     fi
@@ -50,21 +50,21 @@ else
     echo ""
     echo -e "${CYAN}Criando contêiner Qdrant standalone...${NC}"
     docker run -d \
-      --name data-qdrant \
+      --name rag-qdrant \
       --network tradingsystem_backend \
       -p 6333:6333 -p 6334:6334 \
       -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
       --restart unless-stopped \
       qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || {
         echo -e "${YELLOW}⚠ Falha ao criar contêiner, tentando iniciar se já existir...${NC}"
-        docker start data-qdrant >/dev/null 2>&1 || true
+        docker start rag-qdrant >/dev/null 2>&1 || true
       }
     
     echo ""
     echo -e "${CYAN}Waiting for Qdrant to be healthy (max 30s)...${NC}"
     waited=0
     while [ $waited -lt 30 ]; do
-        if docker ps --filter "name=data-qdrant" --filter "health=healthy" --format '{{.Names}}' | grep -q "data-qdrant"; then
+        if docker ps --filter "name=rag-qdrant" --filter "health=healthy" --format '{{.Names}}' | grep -q "rag-qdrant"; then
             echo -e "${GREEN}✓ Qdrant is healthy${NC}"
             break
         fi
@@ -105,7 +105,6 @@ if docker ps --format '{{.Names}}' | grep -qx "tools-kestra"; then
     export KESTRA_HTTP_PORT="${KESTRA_HTTP_PORT:-8100}"
     
     # Restart Kestra
-    docker compose -f tools/compose/docker-compose.tools.yml restart kestra
     
     echo ""
     echo -e "${CYAN}Waiting for Kestra to start (max 60s)...${NC}"
@@ -126,7 +125,6 @@ if docker ps --format '{{.Names}}' | grep -qx "tools-kestra"; then
     fi
 else
     echo -e "${YELLOW}⚠ Kestra is not running${NC}"
-    echo -e "${CYAN}Start it with: docker compose -f tools/compose/docker-compose.tools.yml up -d kestra${NC}"
 fi
 
 echo ""
@@ -139,7 +137,7 @@ echo -e "${YELLOW}━━━ Step 3: Restart Affected RAG Services ━━━${NC}
 echo ""
 
 # Wait a bit for Qdrant to be fully ready
-if docker ps --format '{{.Names}}' | grep -qx "data-qdrant"; then
+if docker ps --format '{{.Names}}' | grep -qx "rag-qdrant"; then
     echo -e "${CYAN}Giving Qdrant 5 seconds to fully initialize...${NC}"
     sleep 5
     

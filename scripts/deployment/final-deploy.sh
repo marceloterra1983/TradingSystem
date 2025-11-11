@@ -67,14 +67,14 @@ echo -e "${GREEN}[3/4] Starting Qdrant...${NC}"
 cd /home/marce/Projetos/TradingSystem
 
 docker run -d \
-  --name data-qdrant \
+  --name rag-qdrant \
   --network tradingsystem_backend \
   -p 6333:6333 -p 6334:6334 \
   -v "/home/marce/Projetos/TradingSystem/backend/data/qdrant:/qdrant/storage" \
   --restart unless-stopped \
   qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || {
     echo -e "${YELLOW}  Qdrant may already be running or port conflict${NC}"
-    docker start data-qdrant >/dev/null 2>&1 || true
+    docker start rag-qdrant >/dev/null 2>&1 || true
 }
 
 sleep 5
@@ -83,9 +83,9 @@ sleep 5
 echo ""
 echo -e "${GREEN}[4/4] Starting RAG services...${NC}"
 
-docker compose -f tools/compose/docker-compose.rag.yml down 2>/dev/null || true
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml down 2>/dev/null || true
 sleep 2
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 
 echo ""
 echo "Waiting 30 seconds for services to be healthy..."

@@ -59,26 +59,8 @@ else
   echo "[ok] Network tradingsystem_backend already exists"
 fi
 
-echo "[step] Start Qdrant"
-if docker ps -a --format '{{.Names}}' | grep -qx data-qdrant; then
-  if ! docker ps --format '{{.Names}}' | grep -qx data-qdrant; then
-    echo "[step] Starting existing Qdrant container (data-qdrant)"
-    docker start data-qdrant >/dev/null
-  else
-    echo "[ok] Qdrant already running"
-  fi
-else
-  echo "[step] Creating standalone Qdrant container"
-  docker run -d \
-    --name data-qdrant \
-    --network tradingsystem_backend \
-    -p 6333:6333 -p 6334:6334 \
-    -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \
-    --restart unless-stopped \
-    qdrant/qdrant:v1.7.4 >/dev/null || docker start data-qdrant >/dev/null
-fi
-# Ensure Qdrant container is on shared network
-docker network connect tradingsystem_backend data-qdrant 2>/dev/null || true
+echo "[step] Start Qdrant (rag stack service)"
+dc -f tools/compose/docker-compose.4-4-rag-stack.yml up -d qdrant
 wait_http "http://localhost:6333/collections" "Qdrant"
 
 echo "[step] Start/Detect Ollama"

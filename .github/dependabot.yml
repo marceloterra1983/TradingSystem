@@ -1,0 +1,421 @@
+# Dependabot Configuration
+# Automated dependency updates for npm, pip, and Docker
+# Part of: Phase 1.2 - Security Improvements (Improvement Plan v1.0)
+# Created: 2025-11-11
+
+version: 2
+
+updates:
+  # ============================================================================
+  # Frontend - Dashboard (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/frontend/dashboard"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+
+    # Grouping strategy - combine compatible updates
+    groups:
+      # Production dependencies
+      production-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "@testing-library/*"
+          - "@playwright/*"
+          - "@vitest/*"
+          - "vitest"
+          - "eslint*"
+          - "prettier"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Development dependencies
+      development-dependencies:
+        patterns:
+          - "@types/*"
+          - "@testing-library/*"
+          - "@playwright/*"
+          - "@vitest/*"
+          - "vitest"
+          - "eslint*"
+          - "prettier"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Version updates
+    versioning-strategy: "increase"
+
+    # Commit message customization
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+    # Labels for categorization
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+
+    # Security-only updates get special label
+    ignore:
+      # Ignore major updates for stable dependencies
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major"]
+
+    # Reviewers (optional - add GitHub usernames)
+    # reviewers:
+    #   - "username1"
+    #   - "username2"
+
+    # Assignees (optional)
+    # assignees:
+    #   - "username"
+
+  # ============================================================================
+  # Backend - Workspace API (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/backend/api/workspace"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      backend-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "backend"
+      - "workspace-api"
+      - "automated"
+
+  # ============================================================================
+  # Backend - Documentation API (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/backend/api/documentation-api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      backend-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "backend"
+      - "docs-api"
+      - "automated"
+
+  # ============================================================================
+  # Backend - TP Capital (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/tp-capital"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      backend-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "backend"
+      - "tp-capital"
+      - "automated"
+
+  # ============================================================================
+  # Backend - Telegram Gateway (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/telegram-gateway"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      backend-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "backend"
+      - "telegram-gateway"
+      - "automated"
+
+  # ============================================================================
+  # Documentation - Docusaurus (npm)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      docusaurus-dependencies:
+        patterns:
+          - "@docusaurus/*"
+          - "docusaurus-*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "documentation"
+      - "automated"
+
+    ignore:
+      # Docusaurus major updates need careful planning
+      - dependency-name: "@docusaurus/*"
+        update-types: ["version-update:semver-major"]
+
+  # ============================================================================
+  # Python - RAG System (pip)
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/tools/llamaindex"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "python"
+      - "rag-system"
+      - "automated"
+
+  # ============================================================================
+  # Python - Ingest Scripts (pip)
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/scripts/rag"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    versioning-strategy: "increase"
+
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "python"
+      - "scripts"
+      - "automated"
+
+  # ============================================================================
+  # Docker - Infrastructure Compose Files
+  # ============================================================================
+  - package-ecosystem: "docker"
+    directory: "/tools/compose"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+      - "automated"
+
+  # ============================================================================
+  # Docker - Monitoring Stack
+  # ============================================================================
+  - package-ecosystem: "docker"
+    directory: "/tools/monitoring"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "docker"
+      - "monitoring"
+      - "automated"
+
+  # ============================================================================
+  # Docker - AI/RAG Stack
+  # ============================================================================
+  - package-ecosystem: "docker"
+    directory: "/ai/compose"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "docker"
+      - "ai"
+      - "automated"
+
+  # ============================================================================
+  # GitHub Actions (github-actions)
+  # ============================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "ci-cd"
+      - "automated"

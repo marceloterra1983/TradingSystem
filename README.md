@@ -20,6 +20,7 @@ last_review: "2025-10-23"
 
 [![Code Quality](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Code%20Quality/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/code-quality.yml)
 [![Tests](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Automated%20Tests/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/YOUR_USERNAME/TradingSystem/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/TradingSystem)
 [![Bundle Size](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Bundle%20Size%20Check/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/bundle-size-check.yml)
 [![Docker](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Docker%20Build%20%26%20Security/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/docker-build.yml)
 [![Security](https://github.com/YOUR_USERNAME/TradingSystem/workflows/Security%20Audit/badge.svg)](https://github.com/YOUR_USERNAME/TradingSystem/actions/workflows/security-audit.yml)
@@ -75,8 +76,9 @@ last_review: "2025-10-23"
 **TradingSystem has comprehensive documentation powered by Docusaurus v3:**
 
 **Quick Links**:
-- 📖 [Documentation Hub](http://localhost:3400) (local runtime)
-- 📖 [Documentation Hub](http://tradingsystem.local/docs) (unified domain)
+- 📖 [Documentation Hub](http://localhost:9080/docs/) (via Traefik Gateway)
+- 📖 [Dashboard UI](http://localhost:9080/) (via Traefik Gateway)
+- 📖 [Traefik Monitoring](http://localhost:9081/) (API Gateway dashboard)
 - 🗂️ [Content Directory](docs/content/) - Browse all documentation
 - 📋 [Validation Guide](governance/controls/VALIDATION-GUIDE.md) - How to validate docs
 - ✅ [Review Checklist](governance/controls/REVIEW-CHECKLIST.md) - Quality standards
@@ -424,20 +426,21 @@ health
     In a second terminal start the **dashboard container** (mandatory from now on):
     ```bash
     # Dashboard (Port 3103) - runs in Docker container
-    docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml up --build
+    docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml up --build
     # or run `docker compose ... up -d` to daemonize (stop with the same command + down)
     ```
-    Stop with `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml down`.
+    Stop with `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml down`.
 6. **(Optional) Bring up supporting services** from WSL using Docker Compose:
     ```bash
     bash tools/scripts/start-all-stacks.sh
     ```
 7. **Access the portals from Windows** via your browser:
-    - Documentation: http://localhost:3400
-    - Dashboard: http://localhost:3103
-    - API Hub (via Documentation Hub): http://localhost:3400/shared/integrations/frontend-backend-api-hub
+    - **Dashboard**: http://localhost:9080/ (via Traefik Gateway)
+    - **Documentation Hub**: http://localhost:9080/docs/ (via Traefik Gateway)
+    - **Traefik Monitoring**: http://localhost:9081/ (API Gateway dashboard)
+    - **API Hub (via Documentation Hub)**: http://localhost:9080/docs/shared/integrations/frontend-backend-api-hub
 
-Refer back to the [Operations Quick Start Guides](http://localhost:3400/tools/onboarding/start-services) for service-specific instructions.
+Refer back to the [Operations Quick Start Guides](http://localhost:9080/docs/tools/onboarding/start-services) for service-specific instructions.
 
 ### Prerequisites
 
@@ -489,7 +492,7 @@ cd docs && npm run start -- --host 0.0.0.0 --port 3400
 npm run dev:dashboard-docs
 ```
 
-`npm run dev:dashboard-docs` now invokes `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.dashboard.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
+`npm run dev:dashboard-docs` now invokes `docker compose -p 1-dashboard-stack -f tools/compose/docker-compose.1-dashboard-stack.yml up --build`, so the dashboard always runs inside its container (port `3103`). Stop it with `Ctrl+C` or `docker compose ... down`.
 
 #### Pre-commit Hooks
 
@@ -515,20 +518,20 @@ For detailed setup instructions, see:
 
 You can access the system in two ways:
 
-1. **Unified Domain (Recommended)**
+1. **Traefik API Gateway (PRODUCTION - Default)**
 
-    - All services through `http://tradingsystem.local`
-    - No CORS configuration needed
-    - Production-ready architecture
-    - Single domain for all APIs
+    - **All services through Traefik Gateway**: `http://localhost:9080`
+    - **Dashboard UI**: `http://localhost:9080/`
+    - **Documentation Hub**: `http://localhost:9080/docs/`
+    - **Workspace API**: `http://localhost:9080/api/workspace/*`
+    - **TP Capital API**: `http://localhost:9080/api/tp-capital/*`
+    - **Documentation API**: `http://localhost:9080/api/docs/*`
+    - **Traefik Dashboard**: `http://localhost:9081/` (monitoring UI)
+    - **Benefits**: Centralized routing, CORS handling, rate limiting, compression, health checks
 
-2. **Direct Port Access (Docker Containers)**
-    - Frontend (Dashboard): `http://localhost:3103` (Docker container)
-    - Workspace API: `http://localhost:3200` (Docker container)
-    - TP Capital API: `http://localhost:4005`
-    - DocsAPI: `http://localhost:3400`
-    - Launcher: `http://localhost:3500`
-    - Documentation Hub: `http://localhost:3400`
+2. **Direct Container Access (Development/Debug Only)**
+    - **Not recommended for regular use** - Ports not exposed by default
+    - Use Traefik Gateway (`http://localhost:9080`) instead
 
 ## 📊 Architecture & Quality Status
 

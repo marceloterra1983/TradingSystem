@@ -1,0 +1,231 @@
+name: 4-3-workspace-stack
+
+# ==============================================================================
+# Workspace Stack - 2 Dedicated Containers
+# ==============================================================================
+# Architecture: Dedicated PostgreSQL database + REST API
+# Purpose: Workspace management for projects, notes, and items
+# Resources: 2 CPU, 3GB RAM total
+# ==============================================================================
+#
+# Related: backend/api/workspace/
+# Database: PostgreSQL 17 Alpine
+# API: Node.js Express + PostgreSQL
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # 1. PostgreSQL - Dedicated Database for Workspace
+  # ============================================================================
+  workspace-db:
+    image: postgres:17-alpine
+    container_name: workspace-db
+    platform: linux/amd64
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${WORKSPACE_DB_PASSWORD:-workspace_secure_pass}
+      POSTGRES_DB: workspace
+      POSTGRES_MAX_CONNECTIONS: 100
+      POSTGRES_SHARED_BUFFERS: 256MB
+
+    volumes:
+      - workspace-db-data:/var/lib/postgresql/data
+      - ./init-workspace-schema.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+    networks:
+      - tradingsystem_backend
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d workspace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.tier=data"
+      - "com.tradingsystem.service=postgresql"
+      - "com.tradingsystem.component=database"
+
+  # ============================================================================
+  # 2. Workspace API - Application Layer
+  # ============================================================================
+  workspace-api:
+    image: img-apps-workspace:latest
+    build:
+      context: ../..
+      dockerfile: backend/api/workspace/Dockerfile.dev
+    container_name: workspace-api
+    restart: unless-stopped
+
+    env_file:
+      - ../../.env
+      - ../../.env.shared
+
+    environment:
+      # Server
+      - WORKSPACE_PORT=3200
+      - NODE_ENV=${NODE_ENV:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+
+      # Database Strategy
+      - LIBRARY_DB_STRATEGY=postgresql
+
+      # PostgreSQL Connection (via internal Docker network)
+      - POSTGRES_HOST=workspace-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=workspace
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${WORKSPACE_DB_PASSWORD:-workspace_secure_pass}
+      - POSTGRES_SCHEMA=workspace
+
+      # Connection Pool
+      - POSTGRES_POOL_MAX=50
+      - POSTGRES_POOL_MIN=2
+      - POSTGRES_IDLE_TIMEOUT=30000
+      - POSTGRES_CONNECTION_TIMEOUT=30000  # Aumentado de 10000ms para 30000ms (30s)
+
+      # CORS
+      - CORS_ORIGIN=http://localhost:3103,http://localhost:3400
+
+      # Rate Limiting
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX=120
+
+    volumes:
+      # Hot-reload: mount source code
+      - ../../backend/api/workspace/src:/app/src:ro
+      - ../../backend/api/workspace/scripts:/app/scripts:ro
+
+      # Mount shared modules for hot-reload
+      - ../../backend/shared:/app/backend/shared:ro
+
+      # Anonymous volume prevents overwrite
+      - /app/node_modules
+
+    networks:
+      - tradingsystem_backend
+
+    depends_on:
+      workspace-db:
+        condition: service_healthy
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3200/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.tier=application"
+      - "com.tradingsystem.service=api"
+      - "com.tradingsystem.component=workspace-management"
+
+      # ============================================================================
+      # Traefik Configuration - API Gateway Integration
+      # ============================================================================
+      # Enable Traefik routing for this service
+      - "traefik.enable=true"
+
+      # HTTP Router Configuration
+      - "traefik.http.routers.workspace-api.rule=PathPrefix(`/api/workspace`)"
+      - "traefik.http.routers.workspace-api.entrypoints=web"
+      - "traefik.http.routers.workspace-api.service=workspace-api"
+      - "traefik.http.routers.workspace-api.priority=100"
+
+      # Service Configuration (backend target)
+      - "traefik.http.services.workspace-api.loadbalancer.server.port=3200"
+
+      # Middlewares (CORS, rate limit, compression, circuit breaker)
+      - "traefik.http.routers.workspace-api.middlewares=workspace-path-transform,api-standard@file"
+
+      # Path transformation: /api/workspace/X → /api/X
+      # Step 1: Strip /api/workspace → /X
+      # Step 2: Add /api prefix → /api/X
+      - "traefik.http.middlewares.workspace-path-transform.chain.middlewares=workspace-strip,workspace-addapi"
+      - "traefik.http.middlewares.workspace-strip.stripprefix.prefixes=/api/workspace"
+      - "traefik.http.middlewares.workspace-addapi.addprefix.prefix=/api"
+
+      # Health Check
+      - "traefik.http.services.workspace-api.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.workspace-api.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.workspace-api.loadbalancer.healthcheck.timeout=5s"
+
+networks:
+  tradingsystem_backend:
+    name: tradingsystem_backend
+    external: true
+
+volumes:
+  workspace-db-data:
+    name: workspace-db-data
+    driver: local
+    labels:
+      - "com.tradingsystem.stack=workspace"
+      - "com.tradingsystem.component=database"
+
+# ==============================================================================
+# USAGE EXAMPLES
+# ==============================================================================
+#
+# Start entire Workspace stack:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
+#
+# View logs (all services):
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f
+#
+# View logs (specific service):
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f workspace-api
+#
+# Check status:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps
+#
+# Restart specific service:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart workspace-api
+#
+# Stop entire stack:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml down
+#
+# Stop and remove volumes (CAUTION - deletes data):
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml down -v
+#
+# Connect to database:
+#   docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml exec workspace-db \
+#     psql -U postgres -d workspace
+#
+# Check API health (via Traefik gateway):
+#   curl http://localhost:9080/api/workspace/health | jq '.'
+#
+# List workspace items (via Traefik gateway):
+#   curl http://localhost:9080/api/workspace/items | jq '.'
+#
+# ==============================================================================

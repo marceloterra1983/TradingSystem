@@ -20,7 +20,6 @@ compose() {
   fi
 }
 
-PHASES=("docker-compose.infra.yml" "docker-compose.database-ui.yml" "docker-compose.4-2-telegram-stack.yml" "docker-compose.redis.yml" "docker-compose.monitoring.yml")
 for file in "${PHASES[@]}"; do
   path="${REPO_ROOT}/tools/compose/${file}"
   [[ -f "$path" ]] && compose -f "$path" down || true

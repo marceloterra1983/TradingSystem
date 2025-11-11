@@ -1,5 +1,9 @@
-import { ExternalLink, Maximize2 } from "lucide-react";
+import { ExternalLink, Maximize2, RefreshCw } from "lucide-react";
+import { useState } from "react";
+
 import { IframeWithUrl } from "../common/IframeWithUrl";
+import { ComponentLoadingSpinner } from "../ui/PageLoadingSpinner";
+import { Button } from "../ui/button";
 
 /**
  * MiroPage Component
@@ -15,9 +19,16 @@ import { IframeWithUrl } from "../common/IframeWithUrl";
 export function MiroPage() {
   const miroUrl = "https://miro.com/app/board/uXjVJ3tP9YI=/";
   const miroEmbedUrl = "https://miro.com/app/live-embed/uXjVJ3tP9YI=/";
+  const [iframeKey, setIframeKey] = useState(0);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   const handleOpenExternal = () => {
     window.open(miroUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleRetry = () => {
+    setStatus("loading");
+    setIframeKey((prev) => prev + 1);
   };
 
   return (
@@ -60,8 +71,36 @@ export function MiroPage() {
       </div>
 
       {/* Miro Board iframe - Maximum Size */}
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="relative flex-1 w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+        {status === "loading" && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur transition-opacity">
+            <ComponentLoadingSpinner />
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-white dark:bg-slate-900 px-6 text-center">
+            <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              Não foi possível carregar o board do Miro.
+            </h4>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Verifique sua conexão ou tente abrir o board em uma nova aba.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button size="sm" onClick={handleRetry}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Tentar novamente
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleOpenExternal}>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Abrir no Miro
+              </Button>
+            </div>
+          </div>
+        )}
+
         <IframeWithUrl
+          key={iframeKey}
           src={miroEmbedUrl}
           className="w-full h-full"
           style={{
@@ -69,10 +108,19 @@ export function MiroPage() {
             height: "calc(100vh - 60px)", // Subtrai a altura do header
             minHeight: "calc(100vh - 60px)",
           }}
-          allow="fullscreen; clipboard-read; clipboard-write"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+          allowFeatures={["fullscreen", "clipboard-read", "clipboard-write"]}
+          sandboxPermissions={[
+            "allow-same-origin",
+            "allow-scripts",
+            "allow-popups",
+            "allow-forms",
+            "allow-modals",
+          ]}
           title="Miro Board - TradingSystem"
           wrapperClassName="h-full"
+          onLoad={() => setStatus("ready")}
+          onError={() => setStatus("error")}
+          hidden={status === "error"}
         />
       </div>
     </div>

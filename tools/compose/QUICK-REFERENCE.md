@@ -88,7 +88,7 @@ WORKSPACE_DB_PASSWORD=secure_pass
 ```bash
 # Pattern: <SERVICE>_URL or <SERVICE>_<COMPONENT>_URL
 LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query:8000
-QDRANT_URL=http://data-qdrant:6333
+QDRANT_URL=http://rag-qdrant:6333
 OLLAMA_BASE_URL=http://rag-ollama:11434
 ```
 

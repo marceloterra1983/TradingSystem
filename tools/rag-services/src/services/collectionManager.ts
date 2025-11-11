@@ -57,7 +57,7 @@ export class CollectionManager {
 
   constructor(configPath?: string) {
     this.configPath = configPath || process.env.COLLECTIONS_CONFIG_PATH || '/app/collections-config.json';
-    this.qdrantUrl = process.env.QDRANT_URL || 'http://data-qdrant:6333';
+    this.qdrantUrl = process.env.QDRANT_URL || 'http://rag-qdrant:6333';
   }
 
   /**

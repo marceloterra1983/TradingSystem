@@ -39,7 +39,7 @@ Implementação completa da migração do sistema RAG para arquitetura moderna c
 #### Neon Self-Hosted Stack
 
 **Arquivos:**
-- `tools/compose/docker-compose.neon.yml` - 3 services (compute, pageserver, safekeeper)
+- `tools/compose/docker-compose.neon.yml` (removido em 2025-11-11) - 3 services (compute, pageserver, safekeeper)
 - `tools/neon/neon.conf` - PostgreSQL configuration
 - `backend/data/neon/init/01-create-extensions.sql` - Extensions (pgvector, uuid-ossp, etc.)
 - `backend/data/neon/init/02-create-rag-schema.sql` - Complete RAG schema
@@ -248,15 +248,15 @@ KONG_GATEWAY_URL=http://localhost:8000
 
 ```bash
 # Stop old RAG stack
-docker compose -f tools/compose/docker-compose.rag.yml down
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml down
 
 # Start new stack (Neon, Qdrant cluster, Kong)
-docker compose -f tools/compose/docker-compose.neon.yml up -d
+# Stack Neon removido — comando descontinuado.
 docker compose -f tools/compose/docker-compose.qdrant-cluster.yml up -d
 docker compose -f tools/compose/docker-compose.kong.yml up -d
 
 # Start RAG services (updated to use new infrastructure)
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 ```
 
 ---
@@ -458,7 +458,7 @@ bash scripts/testing/smoke-test-rag-stack.sh
 
 ### Infrastructure (9 files)
 
-1. `tools/compose/docker-compose.neon.yml`
+1. `tools/compose/docker-compose.neon.yml` (removido em 2025-11-11)
 2. `tools/compose/docker-compose.qdrant-cluster.yml`
 3. `tools/compose/docker-compose.kong.yml`
 4. `tools/neon/neon.conf`
@@ -573,7 +573,7 @@ Se migração falhar, rollback em 15 minutos:
 
 ```bash
 # 1. Stop new stack
-docker compose -f tools/compose/docker-compose.neon.yml down
+# Stack Neon removido — comando descontinuado.
 docker compose -f tools/compose/docker-compose.qdrant-cluster.yml down
 docker compose -f tools/compose/docker-compose.kong.yml down
 
@@ -582,7 +582,7 @@ cp .env.backup.TIMESTAMP .env
 
 # 3. Restart old stack
 docker compose -f tools/compose/docker-compose.database.yml up -d
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 ```
 
 ---

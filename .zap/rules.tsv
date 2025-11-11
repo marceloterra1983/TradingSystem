@@ -1,0 +1,62 @@
+# OWASP ZAP Rules Configuration
+# Part of Phase 2.2 - Security Infrastructure
+#
+# Format: RULE_ID	THRESHOLD	[IGNORE_URL_PATTERN]
+# THRESHOLD: IGNORE, INFO, WARN, FAIL
+#
+# See: https://www.zaproxy.org/docs/docker/baseline-scan/
+
+# Ignore rules for local development
+10003	IGNORE	# Ignore Cookie No HttpOnly Flag in dev
+10010	IGNORE	# Ignore Cookie Without Secure Flag in dev
+10015	IGNORE	# Ignore Re-examine Cache-control Directives in dev
+10021	IGNORE	# Ignore X-Content-Type-Options Header Missing in dev
+10020	IGNORE	# Ignore X-Frame-Options Header in dev (handled by Helmet)
+
+# High severity - FAIL
+10023	FAIL	# Information Disclosure - Debug Error Messages
+10027	FAIL	# Information Disclosure - Suspicious Comments
+10038	FAIL	# Content Security Policy (CSP) Header Not Set
+10055	FAIL	# CSP: Wildcard Directive
+10056	FAIL	# CSP: Unsafe Inline
+
+# Medium severity - WARN
+10017	WARN	# Cross-Domain JavaScript Source File Inclusion
+10019	WARN	# Content-Type Header Missing
+10037	WARN	# Server Leaks Information via "X-Powered-By"
+10040	WARN	# Secure Pages Include Mixed Content
+10054	WARN	# Cookie without SameSite Attribute
+
+# Low severity - INFO
+10009	INFO	# In Page Banner Information Leak
+10011	INFO	# Cookie Without Domain Attribute
+10016	INFO	# Web Browser XSS Protection Not Enabled
+10049	INFO	# Storable but Non-Cacheable Content
+
+# API-specific rules
+90001	WARN	# Insecure HTTP Method - TRACE Enabled
+90002	WARN	# Insecure HTTP Method - OPTIONS Enabled without proper CORS
+90019	FAIL	# Server Side Code Injection
+90020	FAIL	# Remote OS Command Injection
+90021	FAIL	# XPath Injection
+90022	FAIL	# Application Error Disclosure
+90023	FAIL	# XML External Entity Attack
+90024	FAIL	# Generic Padding Oracle
+90025	FAIL	# Expression Language Injection
+90026	FAIL	# SOAP Action Spoofing
+90027	FAIL	# SQL Injection
+90028	FAIL	# Insecure HTTP Method
+90029	FAIL	# LDAP Injection
+90030	FAIL	# CRLF Injection
+
+# Authentication/Authorization
+10096	FAIL	# Timestamp Disclosure
+10097	FAIL	# Hash Disclosure
+10098	FAIL	# Cross-Domain Misconfiguration
+10099	WARN	# Source Code Disclosure
+
+# Information Leakage
+10105	WARN	# Weak Authentication Method
+10108	FAIL	# Reverse Tabnabbing
+10109	WARN	# Modern Web Application
+10110	WARN	# Dangerous JS Functions

@@ -93,7 +93,7 @@ npm run dev  # http://localhost:3400
 
 **Docker (Recomendado):**
 ```bash
-docker compose -f tools/compose/docker-compose.docs.yml up -d docs-api
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d docs-api
 curl http://localhost:3400/health
 ```
 
@@ -715,7 +715,7 @@ bash scripts/startup/start-dashboard-stack.sh
 
 ```bash
 # Documentation API
-docker compose -f tools/compose/docker-compose.docs.yml up -d docs-api
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d docs-api
 
 # TimescaleDB
 docker compose -f tools/compose/docker-compose.timescale.yml up -d

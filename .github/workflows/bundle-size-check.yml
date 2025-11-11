@@ -1,6 +1,12 @@
 name: Bundle Size Check
 
+# Enhanced bundle size monitoring with trend tracking and regression detection
+# Part of: Phase 1.4 - Performance Improvements (Improvement Plan v1.0)
+# Updated: 2025-11-11
+
 on:
+  schedule:
+    - cron: '0 3 * * 1' # Every Monday at 3 AM UTC (weekly baseline)
   pull_request:
     branches: [main, develop]
     paths:
@@ -10,6 +16,12 @@ on:
     branches: [main]
     paths:
       - 'frontend/dashboard/**'
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+  pull-requests: write # For PR comments
+  issues: write # For PR comments
 
 jobs:
   check-bundle-size:
@@ -50,9 +62,37 @@ jobs:
           npm run check:bundle:size:strict > bundle-check-output.txt 2>&1 || echo "CHECK_FAILED=true" >> $GITHUB_ENV
           cat bundle-check-output.txt
 
-          # Extract total bundle size
-          TOTAL_SIZE=$(grep "Total bundle size:" bundle-check-output.txt | grep -oP '\d+\.\d+KB' || echo "N/A")
-          echo "TOTAL_SIZE=$TOTAL_SIZE" >> $GITHUB_ENV
+          # Extract total bundle size from dist directory
+          TOTAL_SIZE_BYTES=$(du -sb dist/assets | awk '{print $1}')
+          TOTAL_SIZE_KB=$(awk "BEGIN {printf \"%.2f\", $TOTAL_SIZE_BYTES / 1024}")
+          TOTAL_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $TOTAL_SIZE_BYTES / 1024 / 1024}")
+
+          echo "total_bytes=$TOTAL_SIZE_BYTES" >> $GITHUB_OUTPUT
+          echo "total_kb=$TOTAL_SIZE_KB" >> $GITHUB_OUTPUT
+          echo "total_mb=$TOTAL_SIZE_MB" >> $GITHUB_OUTPUT
+          echo "TOTAL_SIZE=${TOTAL_SIZE_KB}KB" >> $GITHUB_ENV
+
+          # Count chunks
+          JS_CHUNKS=$(find dist/assets -name "*.js" -type f | wc -l)
+          CSS_FILES=$(find dist/assets -name "*.css" -type f | wc -l)
+
+          echo "js_chunks=$JS_CHUNKS" >> $GITHUB_OUTPUT
+          echo "css_files=$CSS_FILES" >> $GITHUB_OUTPUT
+
+          # Get largest chunks (gzipped)
+          echo "### 📦 Largest Chunks (Top 5)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          find dist/assets -name "*.js.gz" -type f -exec ls -lh {} \; | \
+            sort -rh -k5 | head -5 | \
+            awk '{print $9, $5}' | \
+            sed 's|dist/assets/||g' | \
+            awk '{printf "| `%s` | %s |\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total Size:** ${TOTAL_SIZE_KB}KB (${TOTAL_SIZE_MB}MB)" >> $GITHUB_STEP_SUMMARY
+          echo "**JS Chunks:** $JS_CHUNKS | **CSS Files:** $CSS_FILES" >> $GITHUB_STEP_SUMMARY
 
           # Check if passed
           if grep -q "✓ Bundle size check passed" bundle-check-output.txt; then
@@ -163,6 +203,14 @@ jobs:
           script: |
             const fs = require('fs');
 
+            // Get metrics from previous step
+            const totalKB = '${{ steps.bundle-check.outputs.total_kb }}';
+            const totalMB = '${{ steps.bundle-check.outputs.total_mb }}';
+            const jsChunks = '${{ steps.bundle-check.outputs.js_chunks }}';
+            const cssFiles = '${{ steps.bundle-check.outputs.css_files }}';
+            const status = '${{ env.STATUS }}';
+            const checkResult = '${{ env.CHECK_RESULT }}';
+
             // Read bundle report
             let bundleReport = '';
             try {
@@ -179,17 +227,81 @@ jobs:
               comparisonReport = '';
             }
 
-            const comment = `
-            ${comparisonReport}
+            // Determine emoji based on status
+            let emoji = '✅';
+            if (checkResult === 'failure') {
+              emoji = '❌';
+            } else if (comparisonReport.includes('increased')) {
+              emoji = '⚠️';
+            }
 
-            ${bundleReport}
+            const comment = `### ${emoji} Bundle Size Check
 
-            <details>
-            <summary>📦 View bundle visualization</summary>
+**Status:** ${status}
 
-            Download the \`bundle-analysis\` artifact from this workflow run to view the interactive bundle visualization (\`stats.html\`).
+| Metric | Value |
+|--------|-------|
+| **Total Size** | ${totalKB}KB (${totalMB}MB) |
+| **JS Chunks** | ${jsChunks} |
+| **CSS Files** | ${cssFiles} |
 
-            </details>
+${comparisonReport}
+
+${checkResult === 'failure' ? `
+### ⚠️ Bundle Size Budget Exceeded
+
+One or more chunks exceed their size budgets. Please optimize before merging:
+
+1. Review the detailed report below
+2. Consider code splitting for large chunks
+3. Use dynamic imports for routes
+4. Remove unused dependencies
+5. Check bundle visualization in artifacts
+
+` : ''}
+
+${checkResult === 'success' && comparisonReport.includes('increased') ? `
+### 📊 Bundle Size Increased
+
+While still within budget, the bundle size has increased. Consider:
+
+- Reviewing the added dependencies
+- Checking if lazy loading can be applied
+- Verifying tree-shaking is working correctly
+
+` : ''}
+
+${checkResult === 'success' && comparisonReport.includes('decreased') ? `
+### 🎉 Great Job!
+
+Bundle size decreased! This helps improve:
+- ✅ Initial load time
+- ✅ Parse/compile time
+- ✅ Network transfer cost
+
+` : ''}
+
+<details>
+<summary>📋 View Detailed Bundle Report</summary>
+
+${bundleReport}
+
+</details>
+
+<details>
+<summary>📦 View Bundle Visualization</summary>
+
+Download the \`bundle-analysis\` artifact from this workflow run to view:
+- **stats.html** - Interactive bundle visualization
+- **bundle-report.md** - Detailed text report
+- **bundle-check-output.txt** - Raw check output
+
+[View workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+</details>
+
+---
+*Automated bundle size check by [Bundle Size Check workflow](https://github.com/${{ github.repository }}/actions/workflows/bundle-size-check.yml)*
             `;
 
             // Find existing comment
@@ -201,7 +313,7 @@ jobs:
 
             const botComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('Bundle Size Report')
+              comment.body.includes('Bundle Size Check')
             );
 
             // Update or create comment

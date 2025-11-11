@@ -5,10 +5,22 @@ function buildHealthBlock(service) {
   const endpoint = service.healthcheck.endpoint || '/health';
   const expected = service.healthcheck.expected ?? 200;
   const scheme = service.protocol === 'https' ? 'https' : 'http';
-  const url = `${scheme}://localhost:${service.port}${endpoint}`;
+
+  let displayTarget = `${service.port}`;
+  let url;
+
+  if (service.exposure === 'gateway' && service.gatewayPath) {
+    const gatewayPath = service.gatewayPath.startsWith('/') ? service.gatewayPath : `/${service.gatewayPath}`;
+    const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const combinedPath = `${gatewayPath.replace(/\/$/, '')}${endpointPath}`;
+    url = `${scheme}://localhost:9080${combinedPath}`;
+    displayTarget = `gateway ${service.gatewayPath}`;
+  } else {
+    url = `${scheme}://localhost:${service.port}${endpoint}`;
+  }
 
   return [
-    `echo -n "${service.name} (${service.port}) ... "`,
+    `echo -n "${service.name} (${displayTarget}) ... "`,
     `STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${url}" || true)`,
     `if [ "$STATUS" = "${expected}" ]; then`,
     '  echo "✅ healthy"',

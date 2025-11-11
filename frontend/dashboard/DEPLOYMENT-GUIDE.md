@@ -71,10 +71,10 @@ npm run build
 
 # 2. Rebuild Docker image
 cd ../..
-docker compose -f frontend/compose/docker-compose.dashboard.yml build
+docker compose -f frontend/compose/docker-compose.1-dashboard-stack.yml build
 
 # 3. Deploy updated container
-docker compose -f frontend/compose/docker-compose.dashboard.yml up -d
+docker compose -f frontend/compose/docker-compose.1-dashboard-stack.yml up -d
 
 # 4. Verify deployment
 curl http://localhost:3103/
@@ -237,13 +237,13 @@ npm run build
 
 # Build Docker image
 cd ../..
-docker compose -f frontend/compose/docker-compose.dashboard.yml build
+docker compose -f frontend/compose/docker-compose.1-dashboard-stack.yml build
 
 # Stop old container
-docker compose -f frontend/compose/docker-compose.dashboard.yml down
+docker compose -f frontend/compose/docker-compose.1-dashboard-stack.yml down
 
 # Start new container
-docker compose -f frontend/compose/docker-compose.dashboard.yml up -d
+docker compose -f frontend/compose/docker-compose.1-dashboard-stack.yml up -d
 
 # Verify container is running
 docker ps | grep dashboard

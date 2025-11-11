@@ -15,8 +15,8 @@ echo ""
 
 # Clean ports
 echo "0️⃣ Cleaning conflicting ports..."
-echo "   Killing processes on: 3103, 3200, 3400, 3401, 3500, 3600, 4005, 9090..."
-for PORT in 3103 3200 3400 3401 3500 3600 4005 9090; do
+echo "   Killing processes on: 3103, 3200, 3400, 3401, 3500, 3600, 4008, 9090..."
+for PORT in 3103 3200 3400 3401 3500 3600 4008 9090; do
     lsof -ti:$PORT | xargs kill -9 2>/dev/null || true
 done
 echo "   ✅ Ports cleared"
@@ -34,12 +34,11 @@ echo "1️⃣ Starting Docker Stacks..."
 echo ""
 
 COMPOSE_FILES=(
-    "tools/compose/docker-compose.database-ui.yml"
+    "tools/compose/docker-compose.4-0-database-ui-stack.yml"
     "tools/compose/docker-compose.timescale.yml"
-    "tools/compose/docker-compose.redis.yml"
-    "tools/compose/docker-compose.rag.yml"
-    "tools/compose/docker-compose.apps.yml"
-    "tools/compose/docker-compose.docs.yml"
+    "tools/compose/docker-compose.4-4-rag-stack.yml"
+    "tools/compose/docker-compose.4-1-tp-capital-stack.yml"
+    "tools/compose/docker-compose.2-docs-stack.yml"
     "tools/compose/docker-compose.firecrawl.yml"
     "tools/compose/docker-compose.kong.yml"
 )
@@ -48,8 +47,8 @@ for COMPOSE_FILE in "${COMPOSE_FILES[@]}"; do
     if [ -f "$COMPOSE_FILE" ]; then
         NAME=$(basename "$COMPOSE_FILE" .yml | sed 's/docker-compose.//')
         echo "   📦 Starting $NAME..."
-        if [ "$COMPOSE_FILE" = "tools/compose/docker-compose.database-ui.yml" ]; then
-            docker compose -p 3-database-stack -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
+        if [ "$COMPOSE_FILE" = "tools/compose/docker-compose.4-0-database-ui-stack.yml" ]; then
+            docker compose -p 4-0-database-ui-stack -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
         else
             docker compose -f "$COMPOSE_FILE" up -d 2>&1 | tail -3 || echo "      ⚠️  Some services may have issues"
         fi
@@ -62,9 +61,9 @@ echo ""
 
 # Ensure Qdrant single-node
 echo "2️⃣ Ensuring Qdrant single-node..."
-if ! docker ps | grep -q data-qdrant; then
+if ! docker ps | grep -q rag-qdrant; then
     docker run -d \
-      --name data-qdrant \
+      --name rag-qdrant \
       --network tradingsystem_backend \
       -p 6333:6333 -p 6334:6334 \
       -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \

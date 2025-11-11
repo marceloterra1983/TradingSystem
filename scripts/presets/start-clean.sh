@@ -21,10 +21,10 @@ echo ""
 # 1. RAG Stack (CRÍTICO)
 echo "1️⃣ Iniciando RAG Stack (apenas serviços funcionais)..."
 # Iniciar base primeiro (Redis + Ollama)
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-redis ollama
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-redis ollama
 sleep 15
 # Iniciar serviços principais (Query + APIs, sem ingest)
-docker compose -f tools/compose/docker-compose.rag.yml up -d llamaindex-query rag-service rag-collections-service --no-deps
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d llamaindex-query rag-service rag-collections-service --no-deps
 echo "   ✅ RAG Services iniciados"
 echo ""
 
@@ -36,12 +36,12 @@ echo ""
 
 # 3. Qdrant standalone (se não estiver no RAG stack)
 echo "3️⃣ Garantindo Qdrant standalone..."
-if ! docker ps | grep -q "data-qdrant.*Up"; then
-    if docker ps -a | grep -q data-qdrant; then
-        docker start data-qdrant
+if ! docker ps | grep -q "rag-qdrant.*Up"; then
+    if docker ps -a | grep -q rag-qdrant; then
+        docker start rag-qdrant
     else
         docker run -d \
-          --name data-qdrant \
+          --name rag-qdrant \
           --network tradingsystem_backend \
           -p 6333:6333 -p 6334:6334 \
           -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \

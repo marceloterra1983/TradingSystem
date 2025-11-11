@@ -125,7 +125,7 @@ check_local_services() {
     fi
 
     local services=(
-        # NOTE: telegram-gateway removed - conflicts with apps-tpcapital container (port 4006)
+        # NOTE: telegram-gateway removed - conflicts with tp-capital-api container (port 4008)
         "telegram-gateway-api:4010"
         "dashboard:3103"
         "status:3500"
@@ -203,12 +203,13 @@ check_docker_containers() {
     local CYAN="${CYAN:-\033[0;36m}"
     local YELLOW="${YELLOW:-\033[1;33m}"
 
-    for stack in "apps" "data" "docs" "rag" "monitor" "tools"; do
+    for stack in "tp-capital" "apps" "data" "docs" "rag" "monitor" "tools"; do
         local stack_containers=$(docker ps --filter "name=${stack}-" --format "{{.Names}}" 2>/dev/null)
 
         if [ -n "$stack_containers" ]; then
             # Stack header
             case $stack in
+                tp-capital) echo -e "${CYAN}⚡ TP Capital Stack:${NC}" ;;
                 apps) echo -e "${CYAN}📦 APPS Stack:${NC}" ;;
                 data) echo -e "${CYAN}🗄️  DATA Stack:${NC}" ;;
                 docs) echo -e "${CYAN}📚 DOCS Stack:${NC}" ;;
@@ -321,7 +322,10 @@ show_summary() {
     echo -e "  Kestra:                   ${CYAN}http://localhost:8100${NC}  (Workflow orchestration)"
     echo -e "  Grafana:                  ${CYAN}http://localhost:3104${NC}  (Monitoring)"
     echo -e "  Prometheus:               ${CYAN}http://localhost:9091${NC}  (Metrics)"
-    echo -e "  pgAdmin:                  ${CYAN}http://localhost:8082${NC}  (DB admin)"
+    echo -e "  pgAdmin:                  ${CYAN}http://localhost:9080/db-ui/pgadmin${NC}  (gateway)"
+    echo -e "  Adminer:                  ${CYAN}http://localhost:9080/db-ui/adminer${NC}  (gateway)"
+    echo -e "  PgWeb:                    ${CYAN}http://localhost:9080/db-ui/pgweb${NC}  (gateway)"
+    echo -e "  QuestDB Console:          ${CYAN}http://localhost:9080/db-ui/questdb${NC}  (gateway)"
     echo ""
     echo -e "${CYAN}📝 Management:${NC}"
     echo -e "  Full health check:  ${BLUE}bash scripts/maintenance/health-check-all.sh${NC}"

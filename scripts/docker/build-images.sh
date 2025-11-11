@@ -36,7 +36,7 @@ main() {
   local base_images=(
     "data-frontend-apps=timescale/timescaledb:2.16.1-pg16"
     "infra-postgres-dev=postgres:16-alpine"
-    "data-qdrant=qdrant/qdrant:v1.15.1"
+    "rag-qdrant=qdrant/qdrant:v1.15.1"
     "data-questdb=questdb/questdb:8.2.1"
     "mon-prometheus=prom/prometheus:v2.54.1"
     "mon-alertmanager=prom/alertmanager:v0.27.0"

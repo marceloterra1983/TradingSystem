@@ -1,4 +1,4 @@
-import { Pool, type PoolClient, type QueryConfig, type QueryResult } from "pg";
+import { Pool, type PoolClient, type QueryConfig, type QueryResult, type QueryResultRow } from "pg";
 import { env } from "../config/environment.js";
 import {
   createCircuitBreaker,
@@ -26,11 +26,11 @@ protectedQuery.fallback(createDbFallback());
 
 // Export wrapped pool with circuit breaker protection
 export const pool = {
-  async query<T>(
+  async query<T extends QueryResultRow = any>(
     text: string | QueryConfig,
     params?: unknown[],
   ): Promise<QueryResult<T>> {
-    return protectedQuery.fire(text, params) as Promise<QueryResult<T>>;
+    return (await protectedQuery.fire(text, params)) as QueryResult<T>;
   },
   async connect(): Promise<PoolClient> {
     return rawPool.connect();

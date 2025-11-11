@@ -21,18 +21,18 @@ echo ""
 
 # Build only the services that changed
 echo -e "${GREEN}Building llamaindex-query...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build llamaindex-query --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build llamaindex-query --no-cache
 
 echo -e "${GREEN}Building rag-service...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build rag-service --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-service --no-cache
 
 echo -e "${GREEN}Building rag-collections-service...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build rag-collections-service --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-collections-service --no-cache
 
 echo ""
 echo -e "${GREEN}✅ Build complete!${NC}"
 echo ""
 echo -e "${YELLOW}Now restart the services:${NC}"
-echo "  docker compose -f tools/compose/docker-compose.rag.yml up -d --force-recreate llamaindex-query rag-service rag-collections-service"
+echo "  docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d --force-recreate llamaindex-query rag-service rag-collections-service"
 echo ""
 

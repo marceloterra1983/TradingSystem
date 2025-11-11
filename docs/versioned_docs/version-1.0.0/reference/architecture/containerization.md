@@ -114,7 +114,7 @@ lastReviewed: '2025-10-27'
 - ✅ Deve estar sempre disponível
 - ✅ Integração com Prometheus/Grafana
 
-**Abordagem**: Adicionar ao `docker-compose.monitoring.yml`
+**Abordagem**: Adicionar ao `docker-compose.6-1-monitoring-stack.yml`
 
 **Complexidade**: 🟢 Baixa (1-2 horas)
 
@@ -219,7 +219,7 @@ Deploy: Consistente e versionado
 
 3. **Status Monitor** (1-2h)
    - Criar `apps/status/Dockerfile`
-   - Adicionar ao `docker-compose.monitoring.yml`
+   - Adicionar ao `docker-compose.6-1-monitoring-stack.yml`
 
 **Total Fase 1**: ~18-24 horas
 
@@ -383,7 +383,7 @@ Existe proposta OpenSpec **alternativa** (`containerize-tp-capital-workspace`) q
 ### Docker Compose Files Existentes
 
 - `tools/compose/docker-compose.timescale.yml` - Databases
-- `tools/compose/docker-compose.monitoring.yml` - Prometheus/Grafana
+- `tools/compose/docker-compose.6-1-monitoring-stack.yml` - Prometheus/Grafana
 - `tools/compose/docker-compose.firecrawl.yml` - Web scraping
 - `tools/compose/docker-compose.infrastructure.yml` - AI/ML
 - `tools/compose/docker-compose.docs.yml` - Documentation
@@ -440,7 +440,7 @@ cd apps/tp-capital/telegram-gateway && node src/index.js
 # Iniciar todos os containers (incluindo Dashboard e Docusaurus produção)
 docker compose \
   -f tools/compose/docker-compose.infra.yml \
-  -f tools/compose/docker-compose.monitoring.yml \
+  -f tools/compose/docker-compose.6-1-monitoring-stack.yml \
   -f tools/compose/docker-compose.apis.yml \
   -f tools/compose/docker-compose.tp-capital.yml \
   -f tools/compose/docker-compose.frontend.yml \

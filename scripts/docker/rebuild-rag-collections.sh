@@ -9,7 +9,7 @@ set -euo pipefail
 
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 SERVICE_NAME="rag-collections-service"
-COMPOSE_FILE="tools/compose/docker-compose.rag.yml"
+COMPOSE_FILE="tools/compose/docker-compose.4-4-rag-stack.yml"
 
 echo "🔧 Rebuild RAG Collections Service"
 echo ""

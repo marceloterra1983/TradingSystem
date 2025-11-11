@@ -39,13 +39,13 @@ echo ""
 # Step 3: List all compose files
 echo -e "${CYAN}Step 3: Detecting compose files...${NC}"
 COMPOSE_FILES=(
-    "tools/compose/docker-compose.database-ui.yml"
-    "tools/compose/docker-compose.workspace-stack.yml"
+    "tools/compose/docker-compose.4-0-database-ui-stack.yml"
+    "tools/compose/docker-compose.4-3-workspace-stack.yml"
     "tools/compose/docker-compose.4-2-telegram-stack.yml"
     "tools/compose/docker-compose.4-1-tp-capital-stack.yml"
-    "tools/compose/docker-compose.docs.yml"
-    "tools/compose/docker-compose.rag.yml"
-    "tools/compose/docker-compose.monitoring.yml"
+    "tools/compose/docker-compose.2-docs-stack.yml"
+    "tools/compose/docker-compose.4-4-rag-stack.yml"
+    "tools/compose/docker-compose.6-1-monitoring-stack.yml"
     "tools/compose/docker-compose.tools.yml"
     "tools/compose/docker-compose.firecrawl.yml"
 )
@@ -65,8 +65,8 @@ echo ""
 
 # 4.1 Database UI Stack
 echo -e "${CYAN}📊 Starting Database UI Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml" ]; then
-    if docker compose -p 3-database-stack -f "$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml" ]; then
+    if docker compose -p 4-0-database-ui-stack -f "$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml" up -d; then
         echo -e "${GREEN}✓ Database UI stack started (QuestDB + pgAdmin/Adminer)${NC}"
     else
         echo -e "${RED}✗ Failed to start Database UI stack${NC}"
@@ -78,8 +78,8 @@ echo ""
 
 # 4.2 WORKSPACE Stack
 echo -e "${CYAN}🧱 Starting WORKSPACE Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.workspace-stack.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.workspace-stack.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-3-workspace-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.4-3-workspace-stack.yml" up -d; then
         echo -e "${GREEN}✓ Workspace stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start Workspace stack${NC}"
@@ -117,8 +117,8 @@ echo ""
 
 # 4.5 DOCS Stack (independent)
 echo -e "${CYAN}📚 Starting DOCS Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.docs.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.docs.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.2-docs-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.2-docs-stack.yml" up -d; then
         echo -e "${GREEN}✓ DOCS stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start DOCS stack${NC}"
@@ -130,8 +130,8 @@ echo ""
 
 # 4.6 RAG Stack (independent)
 echo -e "${CYAN}🧠 Starting RAG Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.rag.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.rag.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.4-4-rag-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.4-4-rag-stack.yml" up -d; then
         echo -e "${GREEN}✓ RAG stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start RAG stack${NC}"
@@ -143,8 +143,8 @@ echo ""
 
 # 4.7 MONITORING Stack (independent)
 echo -e "${CYAN}📊 Starting MONITORING Stack...${NC}"
-if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.monitoring.yml" ]; then
-    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.monitoring.yml" up -d; then
+if [ -f "$PROJECT_ROOT/tools/compose/docker-compose.6-1-monitoring-stack.yml" ]; then
+    if docker compose -f "$PROJECT_ROOT/tools/compose/docker-compose.6-1-monitoring-stack.yml" up -d; then
         echo -e "${GREEN}✓ MONITORING stack started${NC}"
     else
         echo -e "${RED}✗ Failed to start MONITORING stack${NC}"

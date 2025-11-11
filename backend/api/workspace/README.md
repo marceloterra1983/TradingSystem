@@ -12,7 +12,7 @@ The Workspace Stack is a **self-contained deployment** containing:
   - Safekeeper (WAL service)
   - Compute (PostgreSQL endpoint)
 
-**Total**: 4 containers managed as one unit via `docker-compose.workspace-stack.yml`
+**Total**: 4 containers managed as one unit via `docker-compose.4-3-workspace-stack.yml`
 
 ## 🏗️ Architecture
 
@@ -73,10 +73,10 @@ curl http://localhost:3200/health
 docker build -f tools/compose/neon.Dockerfile -t neon-local:latest .
 
 # Start stack
-docker compose -f tools/compose/docker-compose.workspace-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
 
 # Check status
-docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps
 
 # Initialize database
 bash scripts/database/init-neon-workspace.sh
@@ -174,17 +174,17 @@ bash scripts/docker/stop-workspace-stack.sh
 bash scripts/docker/stop-workspace-stack.sh --remove-volumes
 
 # Restart stack
-docker compose -f tools/compose/docker-compose.workspace-stack.yml restart
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml restart
 
 # View logs
-docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f
 ```
 
 ### Container Status
 
 ```bash
 # Check all 4 containers
-docker compose -f tools/compose/docker-compose.workspace-stack.yml ps
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml ps
 
 # Expected output:
 # workspace-api            Up (healthy)   0.0.0.0:3200->3200/tcp

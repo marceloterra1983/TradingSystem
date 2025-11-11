@@ -136,7 +136,7 @@ legend right
   **Management**
   Start: bash scripts/docker/start-workspace-stack.sh
   Stop: bash scripts/docker/stop-workspace-stack.sh
-  Logs: docker compose -f tools/compose/docker-compose.workspace-stack.yml logs -f
+  Logs: docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml logs -f
   
   **Rollback**
   LIBRARY_DB_STRATEGY=timescaledb

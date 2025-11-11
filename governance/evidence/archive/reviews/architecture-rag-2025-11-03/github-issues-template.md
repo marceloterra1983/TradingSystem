@@ -402,7 +402,7 @@ Deploy Prometheus for metrics collection and Grafana for visualization.
 - [ ] Documentation updated with dashboards guide
 
 ## Implementation Guide
-- **File:** `tools/compose/docker-compose.monitoring.yml`
+- **File:** `tools/compose/docker-compose.6-1-monitoring-stack.yml`
 - **Dashboards:** `tools/monitoring/grafana-dashboards/`
 - **Reference:** See architecture review section 9.4.1
 

@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "dashboard-ui"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   api-viewer:
@@ -18,6 +18,8 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Frontend Guild"
     description: "Frontend principal do TradingSystem"
+    exposure: gateway
+    gatewayPath: /
   documentation-api-viewer:
     env: DOCUMENTATION_API_VIEWER_PORT
     port: 3102

@@ -108,13 +108,13 @@ fi
 
 # Step 3: Stop container
 log_info "Step 3/5: Stopping docs-hub container..."
-docker compose -f tools/compose/docker-compose.docs.yml stop documentation || {
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml stop documentation || {
   log_warning "Container may not be running"
 }
 
 # Step 4: Rebuild and start container
 log_info "Step 4/5: Rebuilding container..."
-docker compose -f tools/compose/docker-compose.docs.yml up -d --build --force-recreate documentation || {
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d --build --force-recreate documentation || {
   log_error "Container restart failed"
   exit 2
 }

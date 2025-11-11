@@ -58,12 +58,12 @@ stop --clean-logs
 | Serviço | URL | Porta |
 |---------|-----|-------|
 | Dashboard | http://localhost:3103 | 3103 |
-| Workspace API | http://localhost:3200 | 3200 |
-| Documentation Hub | http://localhost:3400 | 3400 |
-| Documentation API | http://localhost:3401 | 3401 |
+| Workspace API | http://localhost:9080/api/workspace | (Traefik) |
+| Documentation Hub | http://localhost:9080/docs | (Traefik) |
+| Documentation API | http://localhost:9080/api/docs | (Traefik) |
 | Status API | http://localhost:3500 | 3500 |
-| TP-Capital | http://localhost:4005 | 4005 |
-| Firecrawl Proxy | http://localhost:3600 | 3600 |
+| TP-Capital | http://localhost:9080/api/tp-capital | (Traefik) |
+| Firecrawl Proxy | http://localhost:9080/api/firecrawl | (Traefik) |
 | LlamaIndex Query | http://localhost:8202 | 8202 |
 | LlamaIndex Ingestion | http://localhost:8201 | 8201 |
 | Qdrant Vector DB | http://localhost:6333 | 6333 |
@@ -72,20 +72,23 @@ stop --clean-logs
 ## 📊 Health Checks
 
 ```bash
-# Documentation Hub (NGINX container)
-curl -I http://localhost:3400
+# Documentation Hub (Traefik)
+curl -I http://localhost:9080/docs
 
 # Documentation API
-curl http://localhost:3401/health
+curl http://localhost:9080/api/docs/health
 
 # Workspace API
-curl http://localhost:3200/health
+curl http://localhost:9080/api/workspace/health
 
 # Status API
 curl http://localhost:3500/api/status
 
 # TP-Capital
-curl http://localhost:4005/health
+curl http://localhost:9080/api/tp-capital/health
+
+# Firecrawl Proxy
+curl http://localhost:9080/api/firecrawl/health
 ```
 
 ## 📝 Ver Logs

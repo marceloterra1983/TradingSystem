@@ -26,7 +26,7 @@ lastReviewed: '2025-11-02'
 | Container | Imagem | Status | Tipo |
 |-----------|--------|--------|------|
 | `data-questdb` | `questdb/questdb:latest` | ⏱️ 22 horas | QuestDB (market data) |
-| `data-qdrant` | `qdrant/qdrant` | ⏱️ 13 horas | Qdrant (Vector DB) |
+| `rag-qdrant` | `qdrant/qdrant` | ⏱️ 13 horas | Qdrant (Vector DB) |
 
 ---
 
@@ -83,7 +83,7 @@ lastReviewed: '2025-11-02'
 | Uptime | Quantidade | Containers |
 |--------|-----------|-----------|
 | < 1 hora | 3 | `apps-tp-capital`, `docs-api`, `tools-llamaindex-ingestion` |
-| 11-13 horas | 5 | `apps-workspace`, `documentation`, `data-qdrant`, `ollama`, `tools-llamaindex-query` |
+| 11-13 horas | 5 | `apps-workspace`, `documentation`, `rag-qdrant`, `ollama`, `tools-llamaindex-query` |
 | 22 horas | 21 | Infraestrutura principal (QuestDB, monitoring, firecrawl) |
 
 ### Serviços por Categoria
@@ -108,7 +108,7 @@ Estes containers foram reiniciados recentemente e merecem atenção:
 - ✅ apps-tp-capital
 - ✅ apps-workspace
 - ✅ data-questdb
-- ✅ data-qdrant
+- ✅ rag-qdrant
 - ✅ docs-api
 - ✅ documentation
 - ✅ firecrawl-proxy

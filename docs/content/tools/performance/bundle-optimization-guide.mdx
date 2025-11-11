@@ -1,0 +1,591 @@
+---
+title: Bundle Optimization Guide
+sidebar_position: 1
+tags: [performance, bundle, optimization, webpack, vite]
+domain: tools
+type: guide
+summary: Comprehensive guide for optimizing JavaScript bundle sizes and improving frontend performance
+status: active
+last_review: "2025-11-11"
+---
+
+# 📦 Bundle Optimization Guide
+
+**Complete guide for monitoring and optimizing bundle sizes - Part of Phase 1.4**
+
+## 📋 Overview
+
+This guide provides systematic procedures for monitoring, analyzing, and optimizing JavaScript bundle sizes in the TradingSystem Dashboard to ensure fast load times and optimal user experience.
+
+## 🎯 Performance Targets
+
+| Metric | Target | Current | Status |
+|--------|--------|---------|--------|
+| **Total Bundle Size** | < 3000KB | ~8000KB | ⚠️ Needs Optimization |
+| **Initial Load Time** | < 3s | TBD | 📊 Monitoring |
+| **Time to Interactive** | < 5s | TBD | 📊 Monitoring |
+| **First Contentful Paint** | < 1.5s | TBD | 📊 Monitoring |
+| **Largest Contentful Paint** | < 2.5s | TBD | 📊 Monitoring |
+
+## 🏗️ Bundle Size Budgets
+
+### Current Budgets
+
+Bundle size budgets are defined in `frontend/dashboard/scripts/bundle-size-budgets.json`:
+
+```json
+{
+  "budgets": {
+    "total": {
+      "limit": "3000kb",
+      "warning": "2500kb"
+    },
+    "chunks": {
+      "react-vendor": { "limit": "150kb" },
+      "vendor": { "limit": "650kb" },
+      "charts-vendor": { "limit": "280kb" },
+      "agents-catalog": { "limit": "50kb" },
+      "page-llama": { "limit": "90kb" }
+    }
+  }
+}
+```
+
+### Critical Optimization Areas
+
+1. **Agents Catalog** - Currently 1262KB, target 50KB
+   - ✅ **IMPLEMENTED:** Split into metadata + lazy-loaded content
+2. **Commands Catalog** - Currently 286KB, target 50KB
+   - ✅ **IMPLEMENTED:** Lazy load via `useCommandsData` hook
+3. **Charts Vendor** - Currently 273KB, target 280KB
+   - ⚠️ Consider lazy loading charts only when needed
+4. **Animation Vendor** - Currently 75KB, target 80KB
+   - ⚠️ Load animations on demand
+
+## 🔍 Monitoring Bundle Size
+
+### Automated CI Checks
+
+**Workflow:** `.github/workflows/bundle-size-check.yml`
+
+**Triggers:**
+- Every PR to main/develop
+- Every push to main
+- Weekly scheduled scan (Monday 3 AM UTC)
+- Manual workflow dispatch
+
+**What It Checks:**
+1. Total bundle size against budget
+2. Individual chunk sizes
+3. Regression detection (vs base branch)
+4. Generates interactive visualization
+
+### Local Development
+
+```bash
+# Check bundle sizes (strict mode)
+npm run check:bundle:size:strict
+
+# Generate bundle analysis
+npm run build
+npm run analyze:bundle
+
+# View interactive visualization
+# Open dist/stats.html in browser
+```
+
+### Understanding Bundle Reports
+
+**Example Output:**
+```
+✓  react-vendor: 136.42KB / 150KB (90.9%)
+✓  vendor: 608.15KB / 650KB (93.6%)
+⚠  charts-vendor: 273.28KB / 280KB (97.6%)
+✖  agents-catalog: 1262.45KB / 50KB (2524.9%)  ❌ CRITICAL
+```
+
+**Status Indicators:**
+- ✓ (Green) - Within budget
+- ⚠ (Yellow) - Approaching limit (>90%)
+- ✖ (Red) - Exceeds budget
+
+## 🛠️ Optimization Techniques
+
+### 1. Code Splitting
+
+**Route-Based Splitting:**
+
+```tsx
+// ❌ BAD: Import everything upfront
+import LlamaIndexPage from './components/pages/LlamaIndexPage';
+import WorkspacePage from './components/pages/WorkspacePage';
+
+// ✅ GOOD: Lazy load routes
+import { lazy, Suspense } from 'react';
+
+const LlamaIndexPage = lazy(() => import('./components/pages/LlamaIndexPage'));
+const WorkspacePage = lazy(() => import('./components/pages/WorkspacePage'));
+
+function App() {
+  return (
+    <Routes>
+      <Route
+        path="/llama"
+        element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <LlamaIndexPage />
+          </Suspense>
+        }
+      />
+    </Routes>
+  );
+}
+```
+
+**Component-Based Splitting:**
+
+```tsx
+// ❌ BAD: Import heavy components eagerly
+import { Chart } from 'recharts';
+
+// ✅ GOOD: Lazy load heavy components
+const ChartComponent = lazy(() => import('./components/ChartComponent'));
+
+function Dashboard() {
+  const [showChart, setShowChart] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setShowChart(true)}>Show Chart</button>
+      {showChart && (
+        <Suspense fallback={<div>Loading chart...</div>}>
+          <ChartComponent />
+        </Suspense>
+      )}
+    </div>
+  );
+}
+```
+
+### 2. Tree Shaking
+
+**Use Named Imports:**
+
+```tsx
+// ❌ BAD: Imports entire lodash library (~70KB)
+import _ from 'lodash';
+const result = _.debounce(fn, 100);
+
+// ✅ GOOD: Import only what you need (~2KB)
+import { debounce } from 'lodash-es';
+const result = debounce(fn, 100);
+```
+
+**Mark Side-Effect-Free Code:**
+
+```json
+// package.json
+{
+  "sideEffects": false  // All code is side-effect free
+}
+
+// or
+
+{
+  "sideEffects": [
+    "*.css",  // CSS has side effects
+    "./src/polyfills.ts"
+  ]
+}
+```
+
+### 3. Dynamic Imports
+
+**Data Loading:**
+
+```tsx
+// ❌ BAD: Import large JSON files statically
+import agentsCatalog from './data/agents-catalog.json';
+
+// ✅ GOOD: Load dynamically when needed
+async function loadAgentsCatalog() {
+  const catalog = await import('./data/agents-catalog.json');
+  return catalog.default;
+}
+
+// Even better: Lazy load via custom hook
+function useAgentsCatalog() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    import('./data/agents-catalog.json')
+      .then(module => setData(module.default));
+  }, []);
+
+  return data;
+}
+```
+
+**Library Loading:**
+
+```tsx
+// ❌ BAD: Import heavy library upfront
+import Prism from 'prismjs';
+
+// ✅ GOOD: Load when needed
+async function highlightCode(code: string) {
+  const Prism = await import('prismjs');
+  return Prism.highlight(code, Prism.languages.javascript, 'javascript');
+}
+```
+
+### 4. Dependency Optimization
+
+**Replace Heavy Libraries:**
+
+```bash
+# ❌ BAD: moment.js (70KB gzipped)
+npm install moment
+
+# ✅ GOOD: date-fns (2-5KB per function)
+npm install date-fns
+
+# ✅ EVEN BETTER: Native Intl API (0KB)
+new Intl.DateTimeFormat('en-US').format(new Date());
+```
+
+**Audit Dependencies:**
+
+```bash
+# Analyze bundle
+npm run build -- --report
+
+# Find large dependencies
+npx webpack-bundle-analyzer dist/stats.json
+
+# Check for duplicates
+npm ls <package-name>
+
+# Update dependencies
+npm outdated
+npm update
+```
+
+### 5. Image Optimization
+
+```tsx
+// ❌ BAD: Large unoptimized images
+<img src="/images/hero.jpg" />  // 2MB
+
+// ✅ GOOD: WebP with fallback + lazy loading
+<picture>
+  <source srcSet="/images/hero.webp" type="image/webp" />
+  <img
+    src="/images/hero.jpg"
+    loading="lazy"
+    alt="Hero"
+  />
+</picture>
+```
+
+**Image Optimization Tools:**
+
+```bash
+# Install image optimization tools
+npm install -D imagemin imagemin-webp
+
+# Optimize images
+npx imagemin src/assets/*.{jpg,png} --out-dir=dist/assets --plugin=webp
+```
+
+### 6. CSS Optimization
+
+**Critical CSS Extraction:**
+
+```tsx
+// Extract critical CSS (above-the-fold)
+// Load non-critical CSS asynchronously
+
+// index.html
+<style>
+  /* Critical CSS inline */
+  .header { /* ... */ }
+</style>
+
+<link
+  rel="preload"
+  href="/styles/non-critical.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+```
+
+**CSS Modules:**
+
+```tsx
+// ✅ Use CSS Modules for automatic code splitting
+import styles from './Button.module.css';
+
+function Button() {
+  return <button className={styles.button}>Click</button>;
+}
+```
+
+### 7. Vite Configuration
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor splitting
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dropdown-menu', '@radix-ui/react-dialog'],
+          'chart-vendor': ['recharts'],
+
+          // Dynamic splitting for routes
+          'page-llama': ['./src/components/pages/LlamaIndexPage.tsx'],
+          'page-workspace': ['./src/components/pages/WorkspacePage.tsx']
+        }
+      }
+    },
+    // Minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    // Source maps (disable in production)
+    sourcemap: false
+  }
+});
+```
+
+## 📊 Measuring Impact
+
+### Before Optimization
+
+```bash
+# Build current version
+npm run build
+
+# Record metrics
+BEFORE_SIZE=$(du -sb dist | awk '{print $1}')
+echo "Before: $BEFORE_SIZE bytes"
+```
+
+### After Optimization
+
+```bash
+# Build optimized version
+npm run build
+
+# Compare metrics
+AFTER_SIZE=$(du -sb dist | awk '{print $1}')
+DIFF=$((BEFORE_SIZE - AFTER_SIZE))
+IMPROVEMENT=$(awk "BEGIN {printf \"%.1f\", ($DIFF / $BEFORE_SIZE) * 100}")
+
+echo "After: $AFTER_SIZE bytes"
+echo "Improvement: $IMPROVEMENT%"
+```
+
+### Load Time Testing
+
+```bash
+# Using Lighthouse
+npm install -g lighthouse
+
+# Test production build
+npm run build
+npm run preview
+
+# Run Lighthouse audit
+lighthouse http://localhost:4173 --only-categories=performance --view
+```
+
+## 🎯 Optimization Workflow
+
+### 1. Identify Bottlenecks
+
+```bash
+# Generate bundle analysis
+npm run build
+npm run analyze:bundle
+
+# Open stats.html
+# Identify largest chunks
+```
+
+### 2. Prioritize Optimizations
+
+Focus on:
+1. **Largest chunks** - Biggest impact
+2. **Rarely used code** - Good candidates for lazy loading
+3. **Heavy dependencies** - Replace or lazy load
+
+### 3. Implement Changes
+
+Choose optimization technique:
+- Code splitting (routes/components)
+- Dynamic imports (data/libraries)
+- Dependency replacement
+- Tree shaking improvements
+
+### 4. Validate Results
+
+```bash
+# Check bundle size
+npm run check:bundle:size:strict
+
+# Run tests
+npm run test
+
+# Manual testing
+npm run dev
+# Test affected features
+```
+
+### 5. Monitor in CI
+
+Create PR → CI automatically:
+- Checks bundle sizes
+- Compares with base branch
+- Comments on PR with results
+- Fails if budgets exceeded
+
+## 📚 Best Practices
+
+### ✅ DO
+
+1. **Lazy Load Routes** - Use React.lazy() for all page components
+2. **Code Split Heavy Components** - Charts, editors, modals
+3. **Use Named Imports** - Better tree shaking
+4. **Monitor Bundle Size** - Check CI reports on every PR
+5. **Set Realistic Budgets** - Based on actual needs, not arbitrary limits
+6. **Optimize Images** - WebP format, lazy loading, compression
+7. **Review Dependencies Quarterly** - Remove unused, update to smaller alternatives
+8. **Use Native APIs** - When available (Intl, Fetch, Promises)
+
+### ❌ DON'T
+
+1. **Don't Import Entire Libraries** - Import only needed functions
+2. **Don't Ignore Warnings** - Bundle size warnings indicate problems
+3. **Don't Optimize Prematurely** - Measure first, then optimize
+4. **Don't Skip Testing** - Ensure lazy loading doesn't break functionality
+5. **Don't Hardcode Large Data** - Load dynamically or from API
+6. **Don't Bundle Node Modules Unnecessarily** - Use externals when appropriate
+7. **Don't Forget About Caching** - Use cache busting for updated bundles
+
+## 🔧 Troubleshooting
+
+### Bundle Size Suddenly Increased
+
+**Problem:** PR shows 50KB+ increase
+
+**Solutions:**
+1. Check diff for new dependencies: `git diff main package.json`
+2. Analyze specific chunks: `npm run analyze:bundle`
+3. Verify tree shaking works: Check if imports are from `/es/` or `/esm/` folders
+4. Consider lazy loading the new feature
+
+### Chunk Exceeds Budget
+
+**Problem:** `agents-catalog` chunk is 1262KB (limit: 50KB)
+
+**Solutions:**
+1. **Split into metadata + content**:
+   ```tsx
+   // Metadata (30KB) - loaded upfront
+   import agentsMetadata from './agents-metadata.json';
+
+   // Content (650KB) - lazy loaded on demand
+   async function loadAgentContent(id: string) {
+     const content = await import(`./agents/${id}.json`);
+     return content.default;
+   }
+   ```
+
+2. **Virtualize long lists** - Only render visible items
+3. **Paginate data** - Load on-demand
+4. **Move to API** - Fetch from backend instead of bundling
+
+### Code Splitting Not Working
+
+**Problem:** Expected separate chunks not created
+
+**Diagnostics:**
+```bash
+# Check Vite config
+cat vite.config.ts | grep manualChunks
+
+# Verify dynamic imports
+grep -r "import('" src/
+
+# Check build output
+npm run build -- --debug
+```
+
+**Solutions:**
+1. Use `import()` not `require()`
+2. Ensure `manualChunks` configuration is correct
+3. Check if module is marked as side-effect free
+4. Verify Vite/Rollup version compatibility
+
+## 📈 Success Metrics
+
+### Phase 1 Targets (Monitoring Baseline)
+
+| Metric | Baseline | Target (Phase 2) | Target (Phase 3) |
+|--------|----------|------------------|------------------|
+| **Total Bundle** | ~8000KB | < 4000KB | < 3000KB |
+| **Initial Load** | TBD | < 4s | < 3s |
+| **Time to Interactive** | TBD | < 6s | < 5s |
+| **Lighthouse Score** | TBD | > 80 | > 90 |
+
+### Weekly Monitoring
+
+**Metrics to Track:**
+- Total bundle size (KB)
+- Largest chunk size (KB)
+- Number of chunks
+- Load time (3G network)
+- Time to Interactive
+
+**Review Cadence:**
+- **Daily:** CI bundle size checks
+- **Weekly:** Team review of trends
+- **Monthly:** Comprehensive audit + optimization sprint
+- **Quarterly:** Budget review + goal adjustment
+
+## 📖 References
+
+### Tools & Resources
+
+- [Vite Build Optimizations](https://vitejs.dev/guide/build.html)
+- [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)
+- [Lighthouse Performance Audits](https://developers.google.com/web/tools/lighthouse)
+- [Web.dev Performance](https://web.dev/performance/)
+- [Bundlephobia](https://bundlephobia.com/) - Package size checker
+
+### TradingSystem Guides
+
+- [Performance Monitoring](./performance-monitoring-guide.mdx)
+- [Code Splitting Guide](./code-splitting-guide.mdx)
+- [CI/CD Performance](../ci-cd/performance-guide.mdx)
+
+### Internal Documentation
+
+- **Bundle Budgets:** `frontend/dashboard/scripts/bundle-size-budgets.json`
+- **Check Script:** `frontend/dashboard/scripts/check-bundle-size.mjs`
+- **Analyze Script:** `frontend/dashboard/scripts/analyze-bundle.js`
+- **CI Workflow:** `.github/workflows/bundle-size-check.yml`
+
+---
+
+**Last Updated:** 2025-11-11
+**Version:** 1.0 (Phase 1.4 Implementation)
+**Next Review:** After first major optimization (Phase 2)

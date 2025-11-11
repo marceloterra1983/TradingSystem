@@ -1,0 +1,141 @@
+# ==============================================================================
+# Traefik Static Configuration
+# ==============================================================================
+# This file defines the global configuration for Traefik.
+# Changes require container restart.
+#
+# For dynamic configuration (routes, middlewares), use dynamic/*.yml files.
+# ==============================================================================
+
+# ==============================================================================
+# Global
+# ==============================================================================
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+# ==============================================================================
+# API & Dashboard
+# ==============================================================================
+api:
+  dashboard: true
+  insecure: true  # WARN: Set to false in production, use auth middleware
+  debug: false
+
+# ==============================================================================
+# Entry Points
+# ==============================================================================
+entryPoints:
+  web:
+    address: ":8080"
+    http:
+      # Redirect HTTP → HTTPS (future)
+      # redirections:
+      #   entryPoint:
+      #     to: websecure
+      #     scheme: https
+
+  websecure:
+    address: ":8443"
+    # http:
+    #   tls:
+    #     certResolver: letsencrypt
+
+# ==============================================================================
+# Providers
+# ==============================================================================
+providers:
+  # Docker Provider (automatic service discovery)
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: "tradingsystem_backend"
+    watch: true
+
+  # File Provider (dynamic config)
+  file:
+    directory: "/etc/traefik/dynamic"
+    watch: true
+
+# ==============================================================================
+# Certificate Resolvers (Let's Encrypt - Future)
+# ==============================================================================
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: "admin@tradingsystem.local"
+#       storage: "/letsencrypt/acme.json"
+#       httpChallenge:
+#         entryPoint: web
+
+# ==============================================================================
+# Logging
+# ==============================================================================
+log:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+  format: "json"
+  filePath: "/var/log/traefik/traefik.log"
+
+accessLog:
+  format: "json"
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
+  filters:
+    statusCodes:
+      - "200-299"
+      - "400-499"
+      - "500-599"
+    retryAttempts: true
+    minDuration: "10ms"
+  fields:
+    defaultMode: "keep"
+    names:
+      # Hide sensitive headers
+      Authorization: "drop"
+      Cookie: "drop"
+      Set-Cookie: "drop"
+    headers:
+      defaultMode: "keep"
+      names:
+        User-Agent: "keep"
+        Authorization: "drop"
+        Cookie: "drop"
+
+# ==============================================================================
+# Metrics (Prometheus)
+# ==============================================================================
+metrics:
+  prometheus:
+    entryPoint: "web"
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.0
+      - 3.0
+      - 5.0
+
+# ==============================================================================
+# Ping (Health Check)
+# ==============================================================================
+ping:
+  entryPoint: "web"
+
+# ==============================================================================
+# Tracing (Future - Jaeger/Zipkin)
+# ==============================================================================
+# tracing:
+#   serviceName: "traefik"
+#   jaeger:
+#     samplingServerURL: "http://jaeger:5778/sampling"
+#     localAgentHostPort: "jaeger:6831"
+
+# ==============================================================================
+# Host Resolver (DNS)
+# ==============================================================================
+hostResolver:
+  cnameFlattening: true
+  resolvConfig: "/etc/resolv.conf"
+  resolvDepth: 5

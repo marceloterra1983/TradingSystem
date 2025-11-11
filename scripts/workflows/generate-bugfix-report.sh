@@ -197,7 +197,7 @@ const collectionSwitchInitialized = useRef(false);
 
 ## 3. Infrastructure Fix
 
-### File: tools/compose/docker-compose.rag.yml
+### File: tools/compose/docker-compose.4-4-rag-stack.yml
 
 **Problem**: rag-service container did not have docs volume mounted, resulting in FlexSearch indexing 0 files.
 
@@ -260,7 +260,7 @@ cat >> "$REPORT_FILE" << 'SECTION4'
 
 #### 02:40 UTC - Fix #6: Docker Volume Mount
 - **Issue**: rag-service had no docs volume → 0 files indexed
-- **Solution**: Add docs volume to docker-compose.rag.yml
+- **Solution**: Add docs volume to docker-compose.4-4-rag-stack.yml
 - **Result**: 211 files indexed ✅
 - **Status**: Resolved
 
@@ -468,7 +468,7 @@ cat >> "$REPORT_FILE" << 'SECTION7'
 ### Files Modified (3)
 
 1. **DocsHybridSearchPage.tsx** - 6 code fixes applied
-2. **docker-compose.rag.yml** - Added docs volume mount
+2. **docker-compose.4-4-rag-stack.yml** - Added docs volume mount
 3. **BUGFIX-SUMMARY.md** - Complete documentation
 
 ---
@@ -485,7 +485,7 @@ cat >> "$REPORT_FILE" << 'SECTION7'
 ### Service Management
 ```bash
 # Restart rag-service with new volume
-docker compose -f tools/compose/docker-compose.rag.yml up -d rag-service
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d rag-service
 
 # Check service health
 docker ps --format "table {{.Names}}\t{{.Status}}"

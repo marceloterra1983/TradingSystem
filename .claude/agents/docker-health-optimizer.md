@@ -51,7 +51,7 @@ You are working within the TradingSystem project which has:
 - Monitoring: `tools/monitoring/docker-compose.yml`
 - Frontend: `frontend/compose/`
 - AI tools: `ai/compose/`
-- Documentation: `tools/compose/docker-compose.docs.yml`
+- Documentation: `tools/compose/docker-compose.2-docs-stack.yml`
 
 **Critical Requirements from CLAUDE.md**:
 - ALL containers MUST reference root .env file (never local .env files)

@@ -5,6 +5,8 @@ import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/index.js';
 import input from 'input';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import { config, validateConfig } from './config.js';
 import { logger } from './logger.js';
 import { publishWithRetry } from './httpPublisher.js';

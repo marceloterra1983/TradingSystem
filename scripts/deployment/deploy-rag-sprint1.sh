@@ -47,15 +47,15 @@ echo ""
 
 # Rebuild LlamaIndex Query Service (includes circuitbreaker library)
 echo -e "${BLUE}  Building llamaindex-query (container: rag-llamaindex-query)...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build llamaindex-query --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build llamaindex-query --no-cache
 
 # Rebuild RAG Service / Documentation API (includes opossum library)
 echo -e "${BLUE}  Building rag-service...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build rag-service --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-service --no-cache
 
 # Rebuild RAG Collections Service (includes service auth)
 echo -e "${BLUE}  Building rag-collections-service...${NC}"
-docker compose -f tools/compose/docker-compose.rag.yml build rag-collections-service --no-cache
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml build rag-collections-service --no-cache
 
 echo -e "${GREEN}  ✅ Docker images rebuilt${NC}"
 echo ""
@@ -65,7 +65,7 @@ echo ""
 # ==============================================================================
 echo -e "${GREEN}[3/5] Stopping existing RAG services...${NC}"
 
-docker compose -f tools/compose/docker-compose.rag.yml down
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml down
 
 echo -e "${GREEN}  ✅ Services stopped${NC}"
 echo ""
@@ -75,7 +75,7 @@ echo ""
 # ==============================================================================
 echo -e "${GREEN}[4/5] Starting RAG services with new features...${NC}"
 
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 
 echo ""
 echo -e "${YELLOW}  Waiting for services to be healthy (30 seconds)...${NC}"
@@ -144,7 +144,7 @@ echo "  - Redis: http://localhost:6380"
 echo ""
 echo "Next Steps:"
 echo "  1. Manual testing: bash scripts/testing/test-circuit-breaker.sh"
-echo "  2. Monitor logs: docker compose -f tools/compose/docker-compose.rag.yml logs -f"
+echo "  2. Monitor logs: docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml logs -f"
 echo "  3. Check metrics: curl http://localhost:8202/health | jq"
 echo ""
 echo -e "${YELLOW}Monitor for 48 hours before promoting to staging/production.${NC}"

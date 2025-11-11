@@ -16,6 +16,8 @@ NC='\033[0m' # No Color
 
 CONTAINER_NAME="dashboard-ui"
 DASHBOARD_PORT="${DASHBOARD_PORT:-3103}"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+COMPOSE_FILE="${PROJECT_ROOT}/tools/compose/docker-compose.1-dashboard-stack.yml"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║  Restart Dashboard + Cleanup                                   ║${NC}"
@@ -62,16 +64,16 @@ if [ "$CONTAINER_STATUS" = "not-found" ]; then
   echo -e "${YELLOW}→ Container not found, starting with docker compose...${NC}"
   SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
   cd "$SCRIPT_DIR" || exit 1
-  if docker compose -f tools/compose/docker-compose.dashboard.yml up -d dashboard 2>&1; then
+  if docker compose -f "${COMPOSE_FILE}" up -d dashboard 2>&1; then
     echo -e "${GREEN}✓ Container started successfully${NC}"
   else
     echo -e "${RED}✗ Failed to start container${NC}"
-    echo -e "${RED}  Check logs with: docker compose -f tools/compose/docker-compose.dashboard.yml logs dashboard${NC}"
+    echo -e "${RED}  Check logs with: docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml logs dashboard${NC}"
     exit 1
   fi
 elif [ "$CONTAINER_STATUS" = "running" ]; then
   echo -e "${YELLOW}→ Container is running, restarting...${NC}"
-  if docker restart ${CONTAINER_NAME} 2>&1; then
+  if docker compose -f "${COMPOSE_FILE}" restart dashboard 2>&1; then
     echo -e "${GREEN}✓ Container restarted successfully${NC}"
   else
     echo -e "${RED}✗ Failed to restart container${NC}"
@@ -80,7 +82,7 @@ elif [ "$CONTAINER_STATUS" = "running" ]; then
   fi
 else
   echo -e "${YELLOW}→ Container is stopped (${CONTAINER_STATUS}), starting...${NC}"
-  if docker start ${CONTAINER_NAME} 2>&1; then
+  if docker compose -f "${COMPOSE_FILE}" start dashboard 2>&1; then
     echo -e "${GREEN}✓ Container started successfully${NC}"
   else
     echo -e "${RED}✗ Failed to start container${NC}"

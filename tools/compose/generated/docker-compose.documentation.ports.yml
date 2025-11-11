@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "documentation"
-x-tradingsystem-generated-at: "2025-11-08T13:59:24.760Z"
+x-tradingsystem-generated-at: "2025-11-11T19:19:20.063Z"
 
 x-tradingsystem-ports:
   documentation-hub:
@@ -12,9 +12,13 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Documentacao"
     description: "Hub de documentação (Docusaurus v3)"
+    exposure: gateway
+    gatewayPath: /docs
   documentation-api:
     env: DOCUMENTATION_API_PORT
     port: 3401
     protocol: http
     owner: "Documentacao"
     description: "API de documentação (Express + FlexSearch)"
+    exposure: gateway
+    gatewayPath: /api/docs

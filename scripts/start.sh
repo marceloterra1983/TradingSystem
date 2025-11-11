@@ -412,7 +412,7 @@ start_containers() {
     done
 
     # Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)
-    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.database-ui.yml"
+    local DB_UI_COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-0-database-ui-stack.yml"
     if [ -f "$DB_UI_COMPOSE_FILE" ]; then
         export IMG_VERSION="${IMG_VERSION:-latest}"
         export QUESTDB_HTTP_PORT="${QUESTDB_HTTP_PORT:-9002}"
@@ -429,15 +429,15 @@ start_containers() {
                 log_success "✓ Database UI stack já em execução (QuestDB saudável)"
             else
                 log_warning "Database UI stack em execução porém com healthcheck $dbui_health"
-                log_info "Para reiniciar manualmente: docker compose -p 3-database-stack -f $DB_UI_COMPOSE_FILE restart"
+                log_info "Para reiniciar manualmente: docker compose -p 4-0-database-ui-stack -f $DB_UI_COMPOSE_FILE restart"
             fi
         else
             log_info "Iniciando Database UI stack (pgAdmin, Adminer, pgWeb, QuestDB)"
-            if docker compose -p 3-database-stack -f "$DB_UI_COMPOSE_FILE" up -d --remove-orphans; then
+            if docker compose -p 4-0-database-ui-stack -f "$DB_UI_COMPOSE_FILE" up -d --remove-orphans; then
                 log_success "✓ Database UI stack iniciada"
             else
                 log_error "✗ Falha ao iniciar Database UI stack"
-                log_info "  Tente: docker compose -p 3-database-stack -f $DB_UI_COMPOSE_FILE up -d"
+                log_info "  Tente: docker compose -p 4-0-database-ui-stack -f $DB_UI_COMPOSE_FILE up -d"
                 return 1
             fi
         fi
@@ -760,7 +760,7 @@ start_docs_stack() {
         return 0
     fi
     
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.docs.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.2-docs-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Docs compose file not found, skipping"
         return 0
@@ -862,7 +862,7 @@ start_docs_stack() {
 
 # Function to start RAG stack
 start_rag_stack() {
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.rag.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.4-4-rag-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "RAG compose file not found, skipping"
         return 0
@@ -883,7 +883,7 @@ start_rag_stack() {
 
         log_warning "RAG containers already exist but are not running (status: $ollama_state)."
         log_info "Skip automatic recreate to avoid overwriting existing state."
-        log_info "Start manually if needed: docker compose -f tools/compose/docker-compose.rag.yml up -d"
+        log_info "Start manually if needed: docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d"
         return 0
     fi
 
@@ -929,7 +929,7 @@ start_monitoring_stack() {
         return 0
     fi
     
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.monitoring.yml"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.6-1-monitoring-stack.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Monitoring compose file not found, skipping"
         return 0
@@ -955,7 +955,7 @@ start_monitoring_stack() {
     compose_status=$?
     set -e
     if [ $compose_status -ne 0 ]; then
-        log_warning "⚠ MONITORING stack failed to start (docker compose exit $compose_status). Inspect tools/compose/docker-compose.monitoring.yml manually."
+        log_warning "⚠ MONITORING stack failed to start (docker compose exit $compose_status). Inspect tools/compose/docker-compose.6-1-monitoring-stack.yml manually."
         return 0
     fi
 
@@ -972,7 +972,6 @@ start_tools_stack() {
         return 0
     fi
     
-    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tools.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_warning "Tools compose file not found, skipping"
         return 0

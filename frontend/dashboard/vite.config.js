@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => {
     const libraryProxy = resolveProxy(env.WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_PROXY_TARGET || env.VITE_WORKSPACE_API_URL, 'http://localhost:3210/api');
     const tpCapitalProxy = resolveProxy(env.TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_PROXY_TARGET || env.VITE_TP_CAPITAL_API_URL, 'http://localhost:4008');
     // Docs API (FlexSearch + CRUD) runs on 3405; 3400 serves Docusaurus dev/NGINX
-    const docsApiProxy = resolveProxy(env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL, 'http://localhost:3405');
+    const docsApiProxy = resolveProxy(env.DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_PROXY_TARGET || env.VITE_DOCS_API_URL, 'http://localhost:3405');
     // RAG Collections Service (Directories API) runs on 3403
     const ragCollectionsProxy = resolveProxy(env.VITE_RAG_COLLECTIONS_PROXY_TARGET || env.VITE_RAG_COLLECTIONS_API_URL, 'http://localhost:3403');
     const serviceLauncherProxy = resolveProxy(env.VITE_SERVICE_LAUNCHER_PROXY_TARGET || env.VITE_SERVICE_LAUNCHER_API_URL, 'http://localhost:3500');
@@ -87,6 +87,13 @@ export default defineConfig(({ mode }) => {
     const telegramGatewayProxy = resolveProxy(env.VITE_TELEGRAM_GATEWAY_PROXY_TARGET || env.VITE_TELEGRAM_GATEWAY_API_URL, 'http://localhost:4010');
     const mcpProxy = resolveProxy(env.VITE_MCP_PROXY_TARGET, 'http://localhost:3847');
     const n8nProxy = resolveProxy(env.N8N_PROXY_TARGET || env.VITE_N8N_PROXY_TARGET || env.VITE_N8N_URL, 'http://localhost:3680');
+    const n8nBasePath = (() => {
+        const configured = normalizePath(env.N8N_PATH || '/n8n');
+        if (!configured || configured === '/') {
+            return '/n8n';
+        }
+        return configured.startsWith('/') ? configured : `/${configured}`;
+    })();
     const docsProxyConfig = {
         target: docsProxy.target,
         changeOrigin: true,
@@ -149,6 +156,15 @@ export default defineConfig(({ mode }) => {
                 normalizedMount ? `${normalizedMount}${ensured}`.replace(/\/{2,}/g, '/') : ensured;
         });
     };
+    const n8nAssetsRewriteTarget = n8nProxy.basePath
+        ? `${n8nProxy.basePath}/assets`
+        : '/assets';
+    const n8nStaticRewriteTarget = n8nProxy.basePath
+        ? `${n8nProxy.basePath}/static`
+        : '/static';
+    const n8nFaviconRewriteTarget = n8nProxy.basePath
+        ? `${n8nProxy.basePath}/favicon.ico`
+        : '/favicon.ico';
     return {
         resolve: {
             alias: {
@@ -333,7 +349,7 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     configure: (proxy, _options) => {
                         attachN8nBasicAuth(proxy);
-                        proxy.on('error', (err, req, _res) => {
+                        proxy.on('error', (err, req, res) => {
                             console.warn('[n8n assets proxy]', req.url, err.message);
                         });
                     },
@@ -344,6 +360,39 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     configure: (proxy, _options) => {
                         attachN8nBasicAuth(proxy);
+                    },
+                },
+                '^/n8nassets': {
+                    target: n8nProxy.target,
+                    changeOrigin: true,
+                    rewrite: createRewrite(/^\/n8nassets/, n8nAssetsRewriteTarget),
+                    configure: (proxy, _options) => {
+                        attachN8nBasicAuth(proxy);
+                        stripFrameBlockingHeaders(proxy);
+                        proxy.on('error', (err, req) => {
+                            console.warn('[n8n assets proxy]', req.url, err.message);
+                        });
+                    },
+                },
+                '^/n8nstatic': {
+                    target: n8nProxy.target,
+                    changeOrigin: true,
+                    rewrite: createRewrite(/^\/n8nstatic/, n8nStaticRewriteTarget),
+                    configure: (proxy, _options) => {
+                        attachN8nBasicAuth(proxy);
+                        stripFrameBlockingHeaders(proxy);
+                        proxy.on('error', (err, req) => {
+                            console.warn('[n8n static proxy]', req.url, err.message);
+                        });
+                    },
+                },
+                '^/n8nfavicon.ico$': {
+                    target: n8nProxy.target,
+                    changeOrigin: true,
+                    rewrite: createRewrite(/^\/n8nfavicon\.ico$/, n8nFaviconRewriteTarget),
+                    configure: (proxy, _options) => {
+                        attachN8nBasicAuth(proxy);
+                        stripFrameBlockingHeaders(proxy);
                     },
                 },
                 // n8n proxy - routes /n8n/* to n8n service (captures all paths including assets)
@@ -366,6 +415,32 @@ export default defineConfig(({ mode }) => {
                     target: dbUiPgAdminProxy.target,
                     changeOrigin: true,
                     rewrite: createRewrite(/^\/db-ui\/pgadmin/, dbUiPgAdminProxy.basePath),
+                    configure: (proxy, _options) => {
+                        stripFrameBlockingHeaders(proxy);
+                        preserveProxyLocation(proxy, '/db-ui/pgadmin');
+                    },
+                },
+                // pgAdmin core endpoints referenced with absolute paths inside the app
+                // (login flows, assets, misc APIs, etc.)
+                '/static/': {
+                    target: dbUiPgAdminProxy.target,
+                    changeOrigin: true,
+                    rewrite: createRewrite(/^\/static/, path.posix.join(dbUiPgAdminProxy.basePath, '/static')),
+                    configure: (proxy, _options) => {
+                        stripFrameBlockingHeaders(proxy);
+                    },
+                },
+                '^/(authenticate|browser|misc|settings|user_management|preferences|sqleditor|tools)(/|$)': {
+                    target: dbUiPgAdminProxy.target,
+                    changeOrigin: true,
+                    configure: (proxy, _options) => {
+                        stripFrameBlockingHeaders(proxy);
+                        preserveProxyLocation(proxy, '/db-ui/pgadmin');
+                    },
+                },
+                '^/(api|favicon.ico)(/|$)': {
+                    target: dbUiPgAdminProxy.target,
+                    changeOrigin: true,
                     configure: (proxy, _options) => {
                         stripFrameBlockingHeaders(proxy);
                         preserveProxyLocation(proxy, '/db-ui/pgadmin');

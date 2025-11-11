@@ -1,0 +1,627 @@
+---
+title: Test Coverage Guide
+sidebar_position: 2
+tags: [testing, quality, ci-cd]
+domain: tools
+type: guide
+summary: Comprehensive guide for automated test coverage reporting and quality gates
+status: active
+last_review: "2025-11-11"
+---
+
+# 📊 Test Coverage Guide
+
+**Complete guide for understanding and improving test coverage in TradingSystem**
+
+## 📋 Overview
+
+TradingSystem implements **automated test coverage reporting** with progressive quality gates. This guide covers how to use the coverage system, interpret reports, and improve coverage over time.
+
+## 🎯 Coverage Goals
+
+### Phase 1: Baseline (Current)
+**Target Date:** Week 4 (2025-11-11 - 2025-12-08)
+
+| Metric | Threshold | Current | Status |
+|--------|-----------|---------|--------|
+| Branches | 50% | 59.42% | ✅ Passing |
+| Functions | 30% | ~10% | ⚠️ Below Target |
+| Lines | 30% | ~10% | ⚠️ Below Target |
+| Statements | 30% | 10.02% | ⚠️ Below Target |
+
+### Phase 2: Improvement (Target)
+**Target Date:** Weeks 5-12 (2025-12-09 - 2026-02-02)
+
+| Metric | Threshold |
+|--------|-----------|
+| Branches | 70% |
+| Functions | 70% |
+| Lines | 75% |
+| Statements | 75% |
+
+### Phase 3: Excellence (Final)
+**Target Date:** Weeks 13-20 (2026-02-03 - 2026-03-30)
+
+| Metric | Threshold |
+|--------|-----------|
+| Branches | 80% |
+| Functions | 85% |
+| Lines | 85% |
+| Statements | 85% |
+
+## 🏗️ Architecture
+
+### Components
+
+```
+TradingSystem/
+├── frontend/dashboard/          # Frontend tests (Vitest)
+│   ├── src/__tests__/          # Test files
+│   ├── coverage/               # Coverage reports
+│   └── vitest.config.ts        # Vitest configuration
+│
+├── backend/api/workspace/      # Backend tests (Node.js)
+│   ├── tests/                  # Test files
+│   └── coverage/               # Coverage reports
+│
+├── apps/tp-capital/            # TP Capital tests
+│   └── tests/
+│
+├── tools/llamaindex/           # Python tests (pytest)
+│   ├── tests/
+│   └── htmlcov/                # Coverage HTML reports
+│
+└── .github/workflows/
+    ├── test.yml                # Main test workflow
+    └── coverage.yml            # Dedicated coverage workflow
+```
+
+### Test Stack
+
+| Component | Framework | Coverage Tool | Reporter |
+|-----------|-----------|---------------|----------|
+| **Frontend** | Vitest | @vitest/coverage-v8 | JSON, HTML, Text |
+| **Backend (Node.js)** | Vitest | @vitest/coverage-v8 | JSON, HTML, Text |
+| **Backend (Python)** | pytest | pytest-cov | XML, HTML, Terminal |
+
+## 🚀 Running Tests Locally
+
+### Frontend (Dashboard)
+
+```bash
+cd frontend/dashboard
+
+# Run tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# View HTML coverage report
+open coverage/index.html   # macOS
+xdg-open coverage/index.html  # Linux
+```
+
+### Backend (Workspace API)
+
+```bash
+cd backend/api/workspace
+
+# Run tests
+npm run test
+
+# Run tests with coverage
+npm run test:coverage
+
+# View coverage report
+xdg-open coverage/index.html
+```
+
+### Backend (TP Capital)
+
+```bash
+cd apps/tp-capital
+
+# Run tests
+npm run test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Python (RAG System)
+
+```bash
+cd tools/llamaindex
+
+# Activate virtual environment
+source ../../venv/bin/activate
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=. --cov-report=html --cov-report=term
+
+# View coverage report
+xdg-open htmlcov/index.html
+```
+
+## 📊 Understanding Coverage Reports
+
+### Coverage Metrics
+
+#### Lines Coverage
+```
+Percentage of executable lines that were executed during tests.
+
+Example:
+Total Lines: 1000
+Covered Lines: 750
+Coverage: 75%
+```
+
+#### Branches Coverage
+```
+Percentage of conditional branches (if/else, switch) that were tested.
+
+Example:
+if (condition) {  // Branch 1
+  doSomething();
+} else {          // Branch 2
+  doOtherThing();
+}
+
+Full coverage requires testing BOTH branches.
+```
+
+#### Functions Coverage
+```
+Percentage of functions that were called during tests.
+
+Example:
+Total Functions: 100
+Called Functions: 80
+Coverage: 80%
+```
+
+#### Statements Coverage
+```
+Percentage of statements that were executed.
+Similar to lines coverage but counts individual statements.
+```
+
+### Reading HTML Reports
+
+Coverage reports use color coding:
+
+| Color | Meaning | Action |
+|-------|---------|--------|
+| 🟢 **Green** | &gt;75% covered | ✅ Good coverage |
+| 🟡 **Yellow** | 50-75% covered | ⚠️ Needs improvement |
+| 🔴 **Red** | &lt;50% covered | ❌ Priority for testing |
+
+## 🔄 CI/CD Integration
+
+### Automated Coverage Workflows
+
+#### Main Test Workflow (`test.yml`)
+Runs on every PR and push to `main`/`develop`:
+
+```yaml
+jobs:
+  test-frontend:
+    - Runs Vitest tests
+    - Generates coverage
+    - Uploads to Codecov
+    - Fails if tests fail
+
+  test-backend-workspace:
+    - Runs backend tests
+    - Requires TimescaleDB service
+    - Uploads coverage
+
+  test-python-rag:
+    - Runs pytest
+    - Uploads Python coverage
+```
+
+#### Coverage Report Workflow (`coverage.yml`)
+Dedicated workflow for detailed coverage analysis:
+
+```yaml
+jobs:
+  coverage-frontend:
+    - Generates detailed HTML reports
+    - Creates PR comments with coverage table
+    - Uploads artifacts (30 days retention)
+    - Posts summary to GitHub Actions
+
+  coverage-summary:
+    - Combines all coverage reports
+    - Generates project-wide summary
+    - Tracks progress against phase targets
+```
+
+### PR Coverage Comments
+
+When you create a PR, the coverage workflow automatically posts a comment:
+
+```markdown
+### 📊 Frontend Test Coverage Report
+
+| Metric | Coverage | Threshold |
+|--------|----------|-----------|
+| Branches | 59.42% | 50% |
+| Functions | 28.5% | 30% |
+| Lines | 32.1% | 30% |
+| Statements | 31.8% | 30% |
+
+**Status:** ⚠️ Functions below threshold
+
+**Coverage Details:**
+- Covered Lines: 1234 / 3850
+- Covered Branches: 456 / 768
+- Covered Functions: 123 / 432
+
+[View Full Coverage Report](https://app.codecov.io/gh/...)
+```
+
+## 🎯 Improving Coverage
+
+### 1. Identify Gaps
+
+Use the HTML coverage report to find uncovered code:
+
+```bash
+# Generate coverage report
+npm run test:coverage
+
+# Open report
+xdg-open coverage/index.html
+
+# Look for:
+# - Red/yellow files (low coverage)
+# - Uncovered branches (E branch, I branch markers)
+# - Unused functions (0x marker)
+```
+
+### 2. Write Tests for Critical Paths
+
+**Priority Order:**
+1. **Critical Business Logic** (85%+ target)
+   - Order execution
+   - Risk calculations
+   - Signal generation
+   - Price calculations
+
+2. **API Endpoints** (80%+ target)
+   - Request validation
+   - Error handling
+   - Authentication/authorization
+
+3. **UI Components** (70%+ target)
+   - User interactions
+   - State management
+   - Error states
+
+4. **Utility Functions** (75%+ target)
+   - Data transformations
+   - Validators
+   - Formatters
+
+### 3. Test Patterns
+
+#### Unit Tests (Vitest)
+
+```typescript
+// src/utils/formatPrice.test.ts
+import { describe, it, expect } from 'vitest';
+import { formatPrice } from './formatPrice';
+
+describe('formatPrice', () => {
+  it('should format positive price with 2 decimals', () => {
+    expect(formatPrice(1234.56)).toBe('R$ 1.234,56');
+  });
+
+  it('should handle zero price', () => {
+    expect(formatPrice(0)).toBe('R$ 0,00');
+  });
+
+  it('should handle negative price', () => {
+    expect(formatPrice(-100.5)).toBe('-R$ 100,50');
+  });
+
+  it('should handle null/undefined', () => {
+    expect(formatPrice(null)).toBe('R$ 0,00');
+    expect(formatPrice(undefined)).toBe('R$ 0,00');
+  });
+});
+```
+
+#### Component Tests (React Testing Library)
+
+```typescript
+// src/components/PriceDisplay.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { PriceDisplay } from './PriceDisplay';
+
+describe('PriceDisplay', () => {
+  it('should render price in green when positive', () => {
+    render(<PriceDisplay value={100.5} change={5.2} />);
+
+    const price = screen.getByText('R$ 100,50');
+    expect(price).toHaveClass('text-green-600');
+  });
+
+  it('should render price in red when negative', () => {
+    render(<PriceDisplay value={100.5} change={-3.1} />);
+
+    const price = screen.getByText('R$ 100,50');
+    expect(price).toHaveClass('text-red-600');
+  });
+
+  it('should show loading state', () => {
+    render(<PriceDisplay value={null} loading={true} />);
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+});
+```
+
+#### Integration Tests (API)
+
+```typescript
+// backend/api/workspace/tests/items.integration.test.ts
+import { describe, it, expect, beforeEach } from 'vitest';
+import request from 'supertest';
+import { app } from '../src/app';
+import { resetDatabase } from './helpers/database';
+
+describe('POST /api/items', () => {
+  beforeEach(async () => {
+    await resetDatabase();
+  });
+
+  it('should create item with valid data', async () => {
+    const response = await request(app)
+      .post('/api/items')
+      .send({
+        title: 'Test Item',
+        description: 'Test Description',
+      })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      title: 'Test Item',
+      id: expect.any(String),
+    });
+  });
+
+  it('should return 400 for invalid data', async () => {
+    await request(app)
+      .post('/api/items')
+      .send({
+        title: '', // Invalid: empty title
+      })
+      .expect(400);
+  });
+});
+```
+
+## 📈 Tracking Progress
+
+### Codecov Dashboard
+
+Access your coverage dashboard:
+```
+https://app.codecov.io/gh/YOUR_USERNAME/TradingSystem
+```
+
+**Features:**
+- **Sunburst Chart** - Visual coverage breakdown by directory
+- **Coverage Trend** - Historical coverage over time
+- **Pull Request Impact** - Coverage changes per PR
+- **File Browser** - Drill down to specific files
+
+### GitHub Actions Summary
+
+Every workflow run generates a summary:
+
+```markdown
+# 📊 Combined Test Coverage Summary
+
+## Coverage Reports by Component
+
+- **Frontend (Dashboard):** 32.1%
+- **Backend (Workspace API):** 45.3%
+- **Backend (TP Capital):** 38.7%
+- **Python (RAG System):** 52.4%
+
+### 📈 Progress Tracking
+
+| Phase | Target | Status |
+|-------|--------|--------|
+| Phase 1 (Current) | 30% lines, 50% branches | ⏳ In Progress |
+| Phase 2 | 75% global coverage | 🎯 Next |
+| Final Target | 85% critical modules | 🏁 Future |
+```
+
+## 🔧 Configuration
+
+### Vitest Configuration
+
+```typescript
+// vitest.config.ts
+export default defineConfig({
+  test: {
+    coverage: {
+      enabled: true,
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'json-summary'],
+      reportsDirectory: './coverage',
+
+      // Exclude patterns
+      exclude: [
+        'node_modules',
+        'dist',
+        'coverage',
+        '**/*.d.ts',
+        '**/*.test.{ts,tsx}',
+        '**/setup.ts',
+      ],
+
+      // Thresholds (enforced)
+      thresholds: {
+        branches: 50,
+        functions: 30,
+        lines: 30,
+        statements: 30,
+      },
+
+      // Report all files
+      all: true,
+
+      // Include source files
+      include: ['src/**/*.{ts,tsx}'],
+    },
+  },
+});
+```
+
+### pytest Configuration
+
+```python
+# pyproject.toml or setup.cfg
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+```
+
+## 🛠️ Troubleshooting
+
+### Coverage Not Generated
+
+**Problem:** No coverage report after running tests
+
+**Solutions:**
+```bash
+# 1. Ensure coverage is enabled
+npm run test:coverage  # Not just `npm run test`
+
+# 2. Check vitest.config.ts
+# Ensure coverage.enabled = true
+
+# 3. Check for errors in console
+npm run test:coverage 2>&1 | grep -i error
+```
+
+### Thresholds Failing
+
+**Problem:** Build fails due to coverage below thresholds
+
+**Solutions:**
+```bash
+# 1. Check current coverage
+npm run test:coverage
+
+# 2. See which files are below threshold
+# Look at HTML report: coverage/index.html
+
+# 3. Options:
+#    a) Write more tests (RECOMMENDED)
+#    b) Temporarily lower thresholds (not recommended)
+#    c) Exclude non-critical files from coverage
+```
+
+### Codecov Upload Fails
+
+**Problem:** Coverage not appearing on Codecov
+
+**Solutions:**
+1. **Check CODECOV_TOKEN secret is set**
+   ```bash
+   # GitHub → Settings → Secrets → Actions
+   # Add CODECOV_TOKEN
+   ```
+
+2. **Verify coverage file exists**
+   ```bash
+   # Local check
+   ls -la coverage/coverage-final.json
+
+   # In CI, check upload step logs
+   ```
+
+3. **Check Codecov action version**
+   ```yaml
+   # Use latest version
+   - uses: codecov/codecov-action@v4
+   ```
+
+## 📚 Best Practices
+
+### ✅ DO
+
+1. **Write tests as you code** - Don't leave testing for later
+2. **Test edge cases** - null, undefined, empty arrays, boundary values
+3. **Test error paths** - Ensure error handling is covered
+4. **Use descriptive test names** - `should return error when price is negative`
+5. **Keep tests focused** - One assertion per test (when possible)
+6. **Mock external dependencies** - Database, APIs, file system
+7. **Review coverage reports** - Before submitting PRs
+
+### ❌ DON'T
+
+1. **Don't test implementation details** - Test behavior, not internals
+2. **Don't aim for 100%** - Focus on critical paths (85% is excellent)
+3. **Don't skip flaky tests** - Fix them or remove them
+4. **Don't mock everything** - Some integration is good
+5. **Don't write tests just for coverage** - Write meaningful tests
+6. **Don't ignore failing tests** - Fix immediately or remove
+
+## 🎓 Learning Resources
+
+### Official Documentation
+- [Vitest Documentation](https://vitest.dev/)
+- [React Testing Library](https://testing-library.com/react)
+- [pytest Documentation](https://docs.pytest.org/)
+- [Codecov Documentation](https://docs.codecov.com/)
+
+### TradingSystem Guides
+- [Testing Best Practices](./testing-best-practices.mdx)
+- [E2E Testing Guide](./e2e-testing-guide.mdx)
+- [Mocking Strategies](./mocking-strategies.mdx)
+
+## 🆘 Support
+
+**Questions or issues with coverage?**
+
+1. Check [GitHub Discussions](https://github.com/YOUR_USERNAME/TradingSystem/discussions)
+2. Review [CI/CD logs](https://github.com/YOUR_USERNAME/TradingSystem/actions)
+3. Ask in project Slack (#testing channel)
+
+---
+
+**Last Updated:** 2025-11-11
+**Version:** 1.0 (Phase 1 Implementation)
+**Next Review:** Phase 2 Start (2025-12-09)

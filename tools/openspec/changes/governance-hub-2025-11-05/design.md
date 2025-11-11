@@ -102,7 +102,7 @@ Todos os scripts ficam acessíveis via npm scripts no root:
   - Alertas automáticos quando `governance:check` falhar ou houver itens >90 dias.
 - **Auto-atualização:** build do dashboard observa mudanças em `/governance`; pipeline `governance:auto` gera JSON + invalida cache. Na aplicação, hook `useGovernanceData` faz polling leve (ex.: 60s) em ambiente dev e utiliza SWR/React Query para revalidar após deploys.
 - **Estados offline:** se JSON não estiver acessível, renderiza cards com fallback e link para `/governance`.
-- **Deployment obrigatório via container:** dashboard deve ser iniciado através de `tools/compose/docker-compose.dashboard.yml` (ex.: `npm run dev:dashboard-docs` → `docker compose ... up --build`) para manter parity com ambientes QA/Prod.
+- **Deployment obrigatório via container:** dashboard deve ser iniciado através de `tools/compose/docker-compose.1-dashboard-stack.yml` (ex.: `npm run dev:dashboard-docs` → `docker compose ... up --build`) para manter parity com ambientes QA/Prod.
 
 ## 5. Data Flows
 

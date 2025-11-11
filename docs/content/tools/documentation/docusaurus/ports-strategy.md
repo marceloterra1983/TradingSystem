@@ -18,9 +18,10 @@ lastReviewed: '2025-11-02'
 
 ## 🎯 Estratégia Unificada
 
-### Porta Padrão: **3400**
+### Exposição
 
-A porta **3400** é o padrão oficial e único para o Docusaurus, independentemente do modo de execução:
+- **Desenvolvimento local:** porta **3400** (servidor Docusaurus/Vite)
+- **Produção (containers):** rota Traefik `http://localhost:9080/docs` (sem porta dedicada)
 
 #### Modo Desenvolvimento (Local)
 ```bash
@@ -33,15 +34,15 @@ npm run docs:dev  # Roda em http://localhost:3400
 - **Fast refresh** para desenvolvimento rápido
 - Acessível diretamente em `http://localhost:3400`
 
-#### Modo Produção (Container)
+#### Modo Produção (Container via Traefik)
 ```bash
-docker compose -f tools/compose/docker-compose.docs.yml up -d documentation
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d
 ```
 
-- **NGINX** servindo build estático
-- **Build otimizado** (`docs/build/`)
-- Acessível em `http://localhost:3400`
-- Volume montado: `docs/build` → container
+- **NGINX** servindo build estático (porta interna 80)
+- **Roteamento externo:** Traefik → `http://localhost:9080/docs`
+- **Sem** `ports:` publicados no compose (apenas redes internas)
+- Recomenda-se validar pelo gateway: `curl http://localhost:9080/docs/health`
 
 ---
 
@@ -57,15 +58,15 @@ DEVELOPMENT MODE (Local)
 ├─ Hot reload: ✅
 └─ URL: http://localhost:3400
 
-PRODUCTION MODE (Container)
-├─ Port: 3400 (NGINX)
-├─ Source: docs/build/ (static files)
-└─ URL: http://localhost:3400
+PRODUCTION MODE (Containers)
+├─ Porta interna: 80 (NGINX)
+├─ Traefik Router: http://localhost:9080/docs
+└─ Sem publicação direta de porta
 
 FRONTEND INTEGRATION
-├─ Dev: http://localhost:3400 (direct) ou /docs (Vite proxy)
-├─ Prod: /docs (Vite proxy → http://localhost:3400)
-└─ Iframe: Usa URL acima dependendo do ambiente
+├─ Dev: proxy `/docs` → http://localhost:3400
+├─ Prod: proxy `/docs` → http://localhost:9080/docs
+└─ Iframe: usa rota acima conforme ambiente
 ```
 
 ---
@@ -97,7 +98,7 @@ docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || '/docs',
 ```typescript
 const docsProxy = resolveProxy(
   env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-  'http://localhost:3400',  // Padrão: 3400
+  'http://localhost:9080/docs',  // Default via Traefik em produção
 );
 ```
 
@@ -121,8 +122,10 @@ const docsProxy = resolveProxy(
 ```yaml
 services:
   documentation:
-    ports:
-      - "${DOCS_PORT:-3404}:80"  # Porta 3404 → NGINX porta 80
+    # Nenhuma porta publicada (Traefik cuida da exposição)
+    networks:
+      - tradingsystem_frontend
+      - tradingsystem_backend
 ```
 
 ### 4. Service Manifest
@@ -204,17 +207,20 @@ npm run docs:dev
 cd docs
 npm run docs:build
 
-# Start container
-docker compose -f tools/compose/docker-compose.docs.yml up -d documentation
+# Start container (sem publicar porta)
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d
 
-# Acesse: http://localhost:3400
+# Acesse via Traefik
+docs_url="http://localhost:9080/docs"
+open "$docs_url"  # macOS
+xdg-open "$docs_url"  # Linux
 ```
 
 ### No Dashboard (Iframe)
 
-O Dashboard automaticamente usa `/docs` (via Vite proxy) que redireciona para `http://localhost:3400`, garantindo:
+O Dashboard usa `/docs` (Vite proxy → Traefik), garantindo:
 - ✅ Mesma origem (sem CORS)
-- ✅ Funciona tanto em dev quanto em produção
+- ✅ Funciona tanto em dev (`http://localhost:3400`) quanto em produção (`http://localhost:9080/docs`)
 - ✅ Assets carregam corretamente
 
 ---

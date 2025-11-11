@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_KESTRA_HTTP_URL = "http://localhost:8180";
+const DEFAULT_KESTRA_HTTP_URL = "http://localhost:9080/kestra";
 
 const sanitizeUrl = (value: string | undefined, fallback: string): string => {
   if (!value || typeof value !== "string") {

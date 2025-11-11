@@ -143,10 +143,10 @@ jobs:
         run: docker compose -f tools/compose/docker-compose.docs.yml config > /dev/null
 
       - name: Validate dashboard stack
-        run: docker compose -f tools/compose/docker-compose.dashboard.yml config > /dev/null
+        run: docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml config > /dev/null
 
       - name: Validate RAG stack
-        run: docker compose -f ai/compose/docker-compose.rag.yml config > /dev/null
+        run: docker compose -f ai/compose/docker-compose.4-4-rag-stack.yml config > /dev/null
 
       - name: Check port conflicts
         run: |

@@ -1,0 +1,199 @@
+name: Course Crawler CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/api/course-crawler/**'
+      - 'tools/compose/docker-compose.4-5-course-crawler-stack.yml'
+      - '.github/workflows/course-crawler-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/api/course-crawler/**'
+      - 'tools/compose/docker-compose.4-5-course-crawler-stack.yml'
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/api/course-crawler/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend/api/course-crawler
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd backend/api/course-crawler
+          npm run lint
+
+      - name: TypeScript Build
+        run: |
+          cd backend/api/course-crawler
+          npm run build
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/api/course-crawler/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend/api/course-crawler
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd backend/api/course-crawler
+          npm run test
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, unit-tests]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: coursecrawler
+          POSTGRES_DB: coursecrawler
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/api/course-crawler/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd backend/api/course-crawler
+          npm ci
+
+      - name: Initialize Database
+        env:
+          COURSE_CRAWLER_DATABASE_URL: postgresql://postgres:coursecrawler@localhost:5432/coursecrawler
+        run: |
+          cd backend/api/course-crawler
+          PGPASSWORD=coursecrawler psql -h localhost -U postgres -d coursecrawler -f scripts/init-schema.sql
+
+      - name: Run integration tests
+        env:
+          COURSE_CRAWLER_DATABASE_URL: postgresql://postgres:coursecrawler@localhost:5432/coursecrawler
+          COURSE_CRAWLER_ENCRYPTION_KEY: test-encryption-key-32-chars-min
+          COURSE_CRAWLER_JWT_SECRET: test-jwt-secret-32-characters-min
+          COURSE_CRAWLER_CORS_ORIGINS: http://localhost:3103,http://localhost:4201
+        run: |
+          cd backend/api/course-crawler
+          npm run test
+
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/api/course-crawler
+          push: false
+          tags: course-crawler-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  stack-health-check:
+    name: Stack Health Check
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create necessary directories
+        run: |
+          mkdir -p apps/course-crawler
+          mkdir -p outputs/course-crawler
+          mkdir -p frontend/course-crawler
+
+      - name: Start Course Crawler Stack
+        run: |
+          cd tools/compose
+          docker compose -f docker-compose.4-5-course-crawler-stack.yml up -d
+
+      - name: Wait for Database Health
+        run: |
+          timeout 60 bash -c 'until docker ps --filter "name=course-crawler-db" --filter "health=healthy" | grep -q course-crawler-db; do sleep 2; done'
+
+      - name: Wait for API Health
+        run: |
+          timeout 90 bash -c 'until docker ps --filter "name=course-crawler-api" --filter "health=healthy" | grep -q course-crawler-api; do sleep 2; done'
+
+      - name: Test API Health Endpoint
+        run: |
+          curl -f http://localhost:3601/health || exit 1
+
+      - name: Test API Authentication
+        run: |
+          TOKEN=$(curl -s -X POST http://localhost:3601/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"changeme"}' | jq -r '.token')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "❌ Authentication failed"
+            exit 1
+          fi
+          echo "✅ Authentication successful"
+
+      - name: Test Metrics Endpoint
+        run: |
+          curl -f http://localhost:3601/metrics | grep -q "http_request_duration_seconds" || exit 1
+
+      - name: Show Container Status
+        if: always()
+        run: |
+          docker ps -a --filter "name=course-crawler"
+
+      - name: Show Container Logs
+        if: failure()
+        run: |
+          docker logs course-crawler-api
+          docker logs course-crawler-worker
+          docker logs course-crawler-db
+
+      - name: Cleanup
+        if: always()
+        run: |
+          cd tools/compose
+          docker compose -f docker-compose.4-5-course-crawler-stack.yml down -v

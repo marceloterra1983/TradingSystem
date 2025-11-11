@@ -734,7 +734,7 @@ fileWatcher.on('change', async (filePath) => {
 ⚠️ **PROBLEM**: Single point of failure for vector database
 
 ```yaml
-# ❌ ATUAL: docker-compose.rag.yml
+# ❌ ATUAL: docker-compose.4-4-rag-stack.yml
 services:
   qdrant:
     image: qdrant/qdrant:latest
@@ -749,7 +749,7 @@ services:
 services:
   qdrant-primary:
     image: qdrant/qdrant:latest
-    container_name: data-qdrant-primary
+    container_name: rag-qdrant-primary
     ports: ["6333:6333"]
     volumes:
       - qdrant_data_primary:/qdrant/storage
@@ -759,25 +759,25 @@ services:
 
   qdrant-replica-1:
     image: qdrant/qdrant:latest
-    container_name: data-qdrant-replica-1
+    container_name: rag-qdrant-replica-1
     ports: ["6334:6333"]
     volumes:
       - qdrant_data_replica1:/qdrant/storage
     environment:
       - QDRANT__CLUSTER__ENABLED=true
       - QDRANT__CLUSTER__NODE_ID=replica1
-      - QDRANT__CLUSTER__P2P__PEERS=data-qdrant-primary:6335
+      - QDRANT__CLUSTER__P2P__PEERS=rag-qdrant-primary:6335
 
   qdrant-replica-2:
     image: qdrant/qdrant:latest
-    container_name: data-qdrant-replica-2
+    container_name: rag-qdrant-replica-2
     ports: ["6335:6333"]
     volumes:
       - qdrant_data_replica2:/qdrant/storage
     environment:
       - QDRANT__CLUSTER__ENABLED=true
       - QDRANT__CLUSTER__NODE_ID=replica2
-      - QDRANT__CLUSTER__P2P__PEERS=data-qdrant-primary:6335
+      - QDRANT__CLUSTER__P2P__PEERS=rag-qdrant-primary:6335
 ```
 
 **Benefits:**
@@ -806,12 +806,12 @@ RETENTION_DAYS=7
 # Create snapshot for each collection
 for collection in documentation__nomic documentation__mxbai documentation__gemma; do
   echo "Creating snapshot for $collection..."
-  docker exec data-qdrant curl -X POST "http://localhost:6333/collections/$collection/snapshots" \
+  docker exec rag-qdrant curl -X POST "http://localhost:6333/collections/$collection/snapshots" \
     -H "Content-Type: application/json"
   
   # Download snapshot
   snapshot_name="${collection}_${TIMESTAMP}.snapshot"
-  docker exec data-qdrant cat "/qdrant/storage/snapshots/$collection/latest.snapshot" \
+  docker exec rag-qdrant cat "/qdrant/storage/snapshots/$collection/latest.snapshot" \
     > "$BACKUP_DIR/$snapshot_name"
   
   echo "Snapshot created: $snapshot_name"

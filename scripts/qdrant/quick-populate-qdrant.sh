@@ -55,7 +55,7 @@ echo "   ✅ Total vectors: $FINAL_COUNT"
 echo ""
 
 echo "4️⃣ Restart LlamaIndex para reconhecer dados..."
-docker compose -f tools/compose/docker-compose.rag.yml restart llamaindex-query
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart llamaindex-query
 echo "   ✅ LlamaIndex reiniciado"
 echo ""
 

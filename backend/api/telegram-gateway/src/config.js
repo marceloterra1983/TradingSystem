@@ -142,7 +142,7 @@ export const config = {
       ),
       connectionTimeoutMs: toInt(
         process.env.TELEGRAM_GATEWAY_DB_CONNECTION_TIMEOUT_MS,
-        5000,
+        30000, // Aumentado de 5000ms para 30000ms (30s) - PgBouncer pode demorar na primeira conexão
       ),
     },
   },

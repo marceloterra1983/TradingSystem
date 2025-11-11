@@ -1,0 +1,30 @@
+# Traefik Minimal Configuration
+# Test configuration to ensure basics work
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":9080"
+
+providers:
+  docker:
+    exposedByDefault: false
+  file:
+    directory: "/etc/traefik/dynamic"
+    watch: true
+
+log:
+  level: "DEBUG"
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  format: "json"
+
+ping: {}

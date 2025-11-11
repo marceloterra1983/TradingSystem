@@ -20,35 +20,35 @@ const ADMINER_URL = ENDPOINTS.adminer;
 const QUESTDB_URL = ENDPOINTS.questdb;
 
 const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: PGADMIN_URL, label: "Direto (.env)" },
-  pgweb: { url: PGWEB_URL, label: "Direto (.env)" },
-  adminer: { url: "/db-ui/adminer", label: "Proxy (/db-ui/adminer)" },
-  questdb: { url: QUESTDB_URL, label: "Direto (.env)" },
+  pgadmin: { url: PGADMIN_URL, label: "Traefik (.env)" },
+  pgweb: { url: PGWEB_URL, label: "Traefik (.env)" },
+  adminer: { url: ADMINER_URL, label: "Traefik (.env)" },
+  questdb: { url: QUESTDB_URL, label: "Traefik (.env)" },
 };
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: "Direto (.env)", url: PGADMIN_URL },
+    { label: "Traefik (.env)", url: PGADMIN_URL },
+    { label: "Traefik (/db-ui/pgadmin)", url: "http://localhost:9080/db-ui/pgadmin" },
     { label: "Porta 5050", url: "http://localhost:5050" },
-    { label: "Proxy (/db-ui/pgadmin)", url: "/db-ui/pgadmin/login" },
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
-    { label: "Direto (.env)", url: PGWEB_URL },
+    { label: "Traefik (.env)", url: PGWEB_URL },
+    { label: "Traefik (/db-ui/pgweb)", url: "http://localhost:9080/db-ui/pgweb" },
     { label: "Porta 8081", url: "http://localhost:8081" },
-    { label: "Proxy (/db-ui/pgweb)", url: "/db-ui/pgweb" },
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: "Proxy (/db-ui/adminer)", url: "/db-ui/adminer" },
-    { label: "Porta 8082", url: "http://localhost:8082" },
-    { label: "Direto (.env)", url: ADMINER_URL },
+    { label: "Traefik (.env)", url: ADMINER_URL },
+    { label: "Traefik (/db-ui/adminer)", url: "http://localhost:9080/db-ui/adminer" },
+    { label: "Porta 3910", url: "http://localhost:3910" },
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
-    { label: "Direto (.env)", url: QUESTDB_URL },
+    { label: "Traefik (.env)", url: QUESTDB_URL },
+    { label: "Traefik (/db-ui/questdb)", url: "http://localhost:9080/db-ui/questdb" },
     { label: "HTTP 9002", url: "http://localhost:9002" },
-    { label: "Proxy (/db-ui/questdb)", url: "/db-ui/questdb" },
     { label: "Legacy 7010", url: "http://localhost:7010" },
   ],
 };
@@ -199,7 +199,7 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     connectionUri:
       "postgresql://${WAHA_POSTGRES_USER:-waha}:${WAHA_POSTGRES_PASSWORD}@localhost:5438/${WAHA_POSTGRES_DB:-waha}",
     dockerService: "waha-postgres",
-    composeFile: "tools/compose/docker-compose.waha.yml",
+    composeFile: "tools/compose/docker-compose.5-3-waha-stack.yml",
     notes: "Armazena sessões, mensagens e webhooks do WAHA (Noweb).",
   },
   {
@@ -225,12 +225,12 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     id: "questdb",
     name: "QuestDB Console",
     engine: "QuestDB (HTTP + ILP)",
-    host: "http://localhost:9002",
+    host: "http://localhost:9080/db-ui/questdb",
     port: "HTTP 9002 / ILP 9009",
     database: "N/A (SQL over HTTP)",
     user: "N/A",
     dockerService: "dbui-questdb",
-    composeFile: "tools/compose/docker-compose.database-ui.yml",
+    composeFile: "tools/compose/docker-compose.4-0-database-ui-stack.yml",
     notes:
       "Console SQL para séries temporais. ILP (Influx Line Protocol) exposto em localhost:9009.",
   },
@@ -259,7 +259,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#pgadmin",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase timescale",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgadmin",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-pgadmin",
     ],
   },
   {
@@ -273,7 +273,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#pgweb",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-pgweb",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-pgweb",
     ],
   },
   {
@@ -287,7 +287,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/ops/database-ui#adminer",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-adminer",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-adminer",
     ],
   },
   {
@@ -301,7 +301,7 @@ const TOOLS: DatabaseTool[] = [
     docsLink: "/docs/tools/rag/architecture#questdb",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
-      "ou execute manualmente: docker compose -f tools/compose/docker-compose.database-ui.yml up -d dbui-questdb",
+      "ou execute manualmente: docker compose -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d dbui-questdb",
     ],
   },
 ];

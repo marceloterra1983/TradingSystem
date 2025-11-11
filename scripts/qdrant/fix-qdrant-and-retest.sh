@@ -16,7 +16,7 @@ echo ""
 # Step 2: Start single-node Qdrant
 echo "2️⃣ Starting single-node Qdrant..."
 docker run -d \
-  --name data-qdrant \
+  --name rag-qdrant \
   --network tradingsystem_backend \
   -p 6333:6333 \
   -p 6334:6334 \
@@ -44,7 +44,7 @@ echo ""
 # Step 5: Restart LlamaIndex services
 echo "5️⃣ Restarting LlamaIndex services..."
 cd "$(dirname "$0")/.."
-docker compose -f tools/compose/docker-compose.rag.yml restart llamaindex-query llamaindex-ingestion 2>/dev/null || true
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml restart llamaindex-query llamaindex-ingestion 2>/dev/null || true
 echo "   ✅ LlamaIndex services restarted"
 echo ""
 

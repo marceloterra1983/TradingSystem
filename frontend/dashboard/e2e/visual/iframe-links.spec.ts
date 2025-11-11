@@ -8,7 +8,7 @@ const MOCK_HTML = (label: string) =>
     </style></head><body><h1>${label}</h1></body></html>`;
 
 const IFRAME_MOCKS: Array<{ pattern: string; label: string }> = [
-  { pattern: 'http://localhost:8180/**', label: 'Kestra Mock' },
+  { pattern: 'http://localhost:9080/kestra/**', label: 'Kestra Mock' },
   { pattern: 'http://localhost:3404/**', label: 'Docs Portal Mock' },
   { pattern: 'http://localhost:3402/**', label: 'Docs API Mock' },
   { pattern: 'http://localhost:5175/viewers/**', label: 'Docs Viewer Mock' },
@@ -30,7 +30,7 @@ const TEST_CASES: TestCase[] = [
   {
     name: 'kestra',
     hash: '/#/kestra-orchestrator',
-    expectedHref: 'http://localhost:8180/ui',
+    expectedHref: 'http://localhost:9080/kestra/ui',
   },
   {
     name: 'miro',

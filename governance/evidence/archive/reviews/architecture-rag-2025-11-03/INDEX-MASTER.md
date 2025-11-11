@@ -60,7 +60,7 @@
 #### 3.2 Infrastructure (12 files)
 
 **Docker Compose:**
-14. `tools/compose/docker-compose.neon.yml`
+14. `tools/compose/docker-compose.neon.yml` (removido em 2025-11-11)
 15. `tools/compose/docker-compose.qdrant-cluster.yml`
 16. `tools/compose/docker-compose.kong.yml`
 

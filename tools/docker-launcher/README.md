@@ -175,7 +175,7 @@ Por padrão, apenas estes containers podem ser controlados:
 - `firecrawl-proxy`
 - `data-timescaledb`
 - `data-questdb`
-- `data-qdrant`
+- `rag-qdrant`
 - `data-redis`
 - `rag-ollama`
 - `rag-llamaindex`

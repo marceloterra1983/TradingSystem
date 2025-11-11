@@ -100,7 +100,7 @@ docker logs qdrant-node-2 --tail 50
 
 ```bash
 # Parar nova infraestrutura
-docker compose -f tools/compose/docker-compose.neon.yml down
+# Stack Neon removido — comando descontinuado.
 docker compose -f tools/compose/docker-compose.qdrant-cluster.yml down
 docker compose -f tools/compose/docker-compose.kong.yml down
 
@@ -109,7 +109,7 @@ cp .env.backup.TIMESTAMP .env
 
 # Religar infraestrutura antiga
 docker compose -f tools/compose/docker-compose.database.yml up -d
-docker compose -f tools/compose/docker-compose.rag.yml up -d
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d
 ```
 
 **Tempo de rollback:** < 5 minutos

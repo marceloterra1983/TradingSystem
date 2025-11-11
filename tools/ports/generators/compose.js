@@ -27,6 +27,12 @@ export async function generateComposeDictionary(
     lines.push(`    stack: ${service.stack}`);
     lines.push(`    owner: "${escapeQuotes(service.owner)}"`);
     lines.push(`    description: "${escapeQuotes(service.description)}"`);
+    if (service.exposure) {
+      lines.push(`    exposure: ${service.exposure}`);
+    }
+    if (service.gatewayPath) {
+      lines.push(`    gatewayPath: ${service.gatewayPath}`);
+    }
   }
 
   lines.push('');
@@ -62,6 +68,8 @@ export async function generateStackComposeFiles(
             `    protocol: ${svc.protocol}`,
             `    owner: "${escapeQuotes(svc.owner)}"`,
             `    description: "${escapeQuotes(svc.description)}"`,
+            ...(svc.exposure ? [`    exposure: ${svc.exposure}`] : []),
+            ...(svc.gatewayPath ? [`    gatewayPath: ${svc.gatewayPath}`] : []),
           ].join('\n');
         })
         .join('\n');

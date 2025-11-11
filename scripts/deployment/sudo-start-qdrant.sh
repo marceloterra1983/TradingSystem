@@ -37,19 +37,19 @@ sleep 2
 # Remove old container
 echo ""
 echo -e "${GREEN}[2/3] Removing old Qdrant container...${NC}"
-docker rm -f data-qdrant 2>/dev/null || echo "  No old container found"
+docker rm -f rag-qdrant 2>/dev/null || echo "  No old container found"
 
 # Start Qdrant
 echo ""
 echo -e "${GREEN}[3/3] Starting Qdrant...${NC}"
 cd /home/marce/Projetos/TradingSystem
 docker run -d \
-  --name data-qdrant \
+  --name rag-qdrant \
   --network tradingsystem_backend \
   -p 6333:6333 -p 6334:6334 \
   -v "/home/marce/Projetos/TradingSystem/backend/data/qdrant:/qdrant/storage" \
   --restart unless-stopped \
-  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || docker start data-qdrant >/dev/null 2>&1
+  qdrant/qdrant:v1.7.4 >/dev/null 2>&1 || docker start rag-qdrant >/dev/null 2>&1
 
 sleep 5
 

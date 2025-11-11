@@ -116,7 +116,7 @@ lastReviewed: "2025-11-08"
 
 ### 1. Docker Compose Configuration
 
-**File:** `tools/compose/docker-compose.dashboard.yml`
+**File:** `tools/compose/docker-compose.1-dashboard-stack.yml`
 
 ```yaml
 services:
@@ -280,7 +280,7 @@ bash scripts/env/validate-env.sh
 1. Remove `VITE_` prefix from proxy target in `docker-compose.yml`
 2. Change browser-facing URL to relative path in `.env`
 3. Update `vite.config.ts` to prioritize non-VITE variable
-4. Rebuild container: `docker compose -f tools/compose/docker-compose.dashboard.yml up -d --build`
+4. Rebuild container: `docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build`
 
 ### Symptom: "Failed to fetch" Error
 

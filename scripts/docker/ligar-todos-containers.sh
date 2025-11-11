@@ -43,23 +43,23 @@ echo "3️⃣ Iniciando stacks via docker-compose..."
 echo ""
 
 echo "   📦 RAG Stack (CRÍTICO)..."
-docker compose -f tools/compose/docker-compose.rag.yml up -d 2>&1 | tail -5
+docker compose -f tools/compose/docker-compose.4-4-rag-stack.yml up -d 2>&1 | tail -5
 echo ""
 
 echo "   📦 Database UI Stack..."
-docker compose -p 3-database-stack -f tools/compose/docker-compose.database-ui.yml up -d 2>&1 | tail -5
+docker compose -p 4-0-database-ui-stack -f tools/compose/docker-compose.4-0-database-ui-stack.yml up -d 2>&1 | tail -5
 echo ""
 
 echo "   📦 Timescale Stack..."
 docker compose -f tools/compose/docker-compose.timescale.yml up -d 2>&1 | tail -5
 echo ""
 
-echo "   📦 Apps Stack..."
-docker compose -f tools/compose/docker-compose.apps.yml up -d 2>&1 | tail -5 || echo "      ⚠️  Alguns podem ter conflito de porta"
+echo "   ⚡ TP Capital Stack..."
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d 2>&1 | tail -5 || echo "      ⚠️  Alguns serviços podem ter conflito de porta"
 echo ""
 
 echo "   📦 Docs Stack..."
-docker compose -f tools/compose/docker-compose.docs.yml up -d 2>&1 | tail -5 || echo "      ⚠️  Docs pode ter erro de build"
+docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d 2>&1 | tail -5 || echo "      ⚠️  Docs pode ter erro de build"
 echo ""
 
 echo "   📦 Firecrawl Stack..."
@@ -72,14 +72,14 @@ echo ""
 
 # 4. Garantir Qdrant
 echo "4️⃣ Garantindo Qdrant está rodando..."
-if ! docker ps | grep -q "data-qdrant.*Up"; then
-    if docker ps -a | grep -q data-qdrant; then
+if ! docker ps | grep -q "rag-qdrant.*Up"; then
+    if docker ps -a | grep -q rag-qdrant; then
         echo "   ▶️  Iniciando Qdrant existente..."
-        docker start data-qdrant
+        docker start rag-qdrant
     else
         echo "   ▶️  Criando novo container Qdrant..."
         docker run -d \
-          --name data-qdrant \
+          --name rag-qdrant \
           --network tradingsystem_backend \
           -p 6333:6333 -p 6334:6334 \
           -v "$PROJECT_ROOT/backend/data/qdrant:/qdrant/storage" \

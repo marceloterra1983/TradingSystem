@@ -1,0 +1,25 @@
+[Unit]
+Description=TradingSystem Health Monitor
+Documentation=https://github.com/YOUR_USERNAME/TradingSystem
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=marce
+WorkingDirectory=/home/marce/Projetos/TradingSystem
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/home/marce/Projetos/TradingSystem/.env
+
+# Continuous monitoring mode
+ExecStart=/bin/bash /home/marce/Projetos/TradingSystem/scripts/maintenance/monitor-system-health.sh monitor --alert slack
+
+# Restart on failure
+Restart=on-failure
+RestartSec=60s
+
+# Logging
+StandardOutput=append:/home/marce/Projetos/TradingSystem/logs/health-monitoring/monitor.log
+StandardError=append:/home/marce/Projetos/TradingSystem/logs/health-monitoring/monitor-error.log
+
+[Install]
+WantedBy=multi-user.target

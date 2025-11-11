@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { Router } from "express";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { z } from "zod";
 import { env } from "../config/environment.js";
 import {
   enqueueRun,
@@ -12,6 +13,13 @@ import {
 import { getCourse } from "../services/course-service.js";
 import { workerState } from "../jobs/worker.js";
 import { authenticateJWT } from "../middleware/auth.js";
+
+const artifactQuerySchema = z.object({
+  path: z
+    .string()
+    .min(1, "Artifact path is required")
+    .refine((value) => !path.isAbsolute(value), "Path must be relative"),
+});
 
 async function listArtifacts(outputsDir: string) {
   const entries = await fs.readdir(outputsDir, { withFileTypes: true });
