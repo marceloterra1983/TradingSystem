@@ -13,6 +13,10 @@ export interface AttachmentResource {
   name: string;
   url: string;
   mimeType?: string;
+  localPath?: string; // Local filesystem path after download
+  downloadStatus?: 'pending' | 'downloading' | 'completed' | 'failed';
+  fileSizeBytes?: number; // File size in bytes
+  downloadError?: string; // Error message if download failed
 }
 
 export interface ClassResource {
@@ -55,6 +59,10 @@ export interface ExtractionMetrics {
   minConfidence: number;
   avgConfidence: number;
   selectorFailures: number;
+  totalAttachments?: number; // Total attachments found
+  downloadedAttachments?: number; // Successfully downloaded attachments
+  downloadFailures?: number; // Failed downloads
+  totalDownloadSizeBytes?: number; // Total size of downloaded files
 }
 
 export interface ExtractionRun {

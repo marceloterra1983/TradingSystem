@@ -74,6 +74,8 @@ async function processRun() {
     COURSE_CRAWLER_LOGIN_PASSWORD: course.password,
     COURSE_CRAWLER_OUTPUTS_DIR: runBaseDir,
     COURSE_CRAWLER_TARGET_URLS: course.targetUrls.join(","),
+    // Explicitly pass NEON_DATABASE_URL to CLI (overrides any compiled defaults)
+    NEON_DATABASE_URL: process.env.NEON_DATABASE_URL || process.env.COURSE_CRAWLER_DATABASE_URL || "",
   };
 
   if (selectorsOverride) {

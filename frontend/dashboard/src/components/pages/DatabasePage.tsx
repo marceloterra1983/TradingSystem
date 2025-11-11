@@ -28,27 +28,19 @@ const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: "Traefik (.env)", url: PGADMIN_URL },
-    { label: "Traefik (/db-ui/pgadmin)", url: "http://localhost:9080/db-ui/pgadmin" },
-    { label: "Porta 5050", url: "http://localhost:5050" },
+    { label: "Porta 5050 (Recomendado)", url: "http://localhost:5050" },
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
-    { label: "Traefik (.env)", url: PGWEB_URL },
-    { label: "Traefik (/db-ui/pgweb)", url: "http://localhost:9080/db-ui/pgweb" },
-    { label: "Porta 8081", url: "http://localhost:8081" },
+    { label: "Porta 5051 (Recomendado)", url: "http://localhost:5051" },
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: "Traefik (.env)", url: ADMINER_URL },
-    { label: "Traefik (/db-ui/adminer)", url: "http://localhost:9080/db-ui/adminer" },
-    { label: "Porta 3910", url: "http://localhost:3910" },
+    { label: "Porta 3910 (Recomendado)", url: "http://localhost:3910" },
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
-    { label: "Traefik (.env)", url: QUESTDB_URL },
-    { label: "Traefik (/db-ui/questdb)", url: "http://localhost:9080/db-ui/questdb" },
-    { label: "HTTP 9002", url: "http://localhost:9002" },
+    { label: "HTTP 9002 (Recomendado)", url: "http://localhost:9002" },
     { label: "Legacy 7010", url: "http://localhost:7010" },
   ],
 };
@@ -729,6 +721,23 @@ export default function DatabasePageNew() {
                 </div>
               </section>
             )}
+
+            <section className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 shadow-sm dark:border-amber-500/40 dark:bg-amber-900/10 dark:text-amber-200">
+              <h3 className="text-base font-semibold">
+                ⚠️ Importante: Carregamento via Iframe
+              </h3>
+              <p className="mt-2">
+                Os Database UIs (pgAdmin, Adminer, pgweb, QuestDB) podem apresentar problemas ao carregar em iframe devido a:
+              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Políticas de CORS e X-Frame-Options</li>
+                <li>Mixed content (HTTPS vs HTTP)</li>
+                <li>Restrições de segurança do navegador</li>
+              </ul>
+              <p className="mt-2 font-semibold">
+                ✅ Solução: Use o botão "Open in new tab" para abrir cada ferramenta em uma janela separada.
+              </p>
+            </section>
 
             <section className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
               <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">

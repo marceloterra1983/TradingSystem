@@ -50,14 +50,14 @@ export const ENDPOINTS = {
    * @remarks Protected Range: 7100-7199
    */
 
-  /** PgAdmin - PostgreSQL/TimescaleDB Web UI (Traefik: /db-ui/pgadmin) */
-  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:9080/db-ui/pgadmin",
+  /** PgAdmin - PostgreSQL/TimescaleDB Web UI (Direct access - subpath not supported) */
+  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:5050",
 
-  /** Adminer - Lightweight database management (Traefik: /db-ui/adminer) */
-  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:9080/db-ui/adminer",
+  /** Adminer - Lightweight database management (Direct access - subpath not supported) */
+  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:3910",
 
-  /** PgWeb - Lightweight PostgreSQL browser (Traefik: /db-ui/pgweb) */
-  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:9080/db-ui/pgweb",
+  /** PgWeb - Lightweight PostgreSQL browser (Direct access - subpath not supported) */
+  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:5051",
 
   /**
    * Database Services - Direct Access
@@ -75,8 +75,8 @@ export const ENDPOINTS = {
     url: `http://localhost:${import.meta.env.VITE_TIMESCALEDB_PORT || "7000"}`,
   },
 
-  /** QuestDB - High-performance time-series database (Traefik: /db-ui/questdb) */
-  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9080/db-ui/questdb",
+  /** QuestDB - High-performance time-series database (Direct access - subpath not supported) */
+  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9002",
 
   /** Qdrant - Vector database for RAG/AI - Port 7020 (HTTP API) */
   qdrant: import.meta.env.VITE_QDRANT_URL || "http://localhost:7020",

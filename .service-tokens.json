@@ -1,0 +1,32 @@
+{
+  "workspace-api": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6IndvcmtzcGFjZS1hcGkiLCJpc3N1ZXIiOiJ0cmFkaW5nc3lzdGVtIiwiaWF0IjoxNzYyODkwNTgwLCJleHAiOjE3NjI5NzY5ODAsImlzcyI6InRyYWRpbmdzeXN0ZW0ifQ.KrB6siUclf-xbwGUPEX15ZsQRWv9a7Rw2yNReqUoNWE",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  },
+  "documentation-api": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6ImRvY3VtZW50YXRpb24tYXBpIiwiaXNzdWVyIjoidHJhZGluZ3N5c3RlbSIsImlhdCI6MTc2Mjg5MDU4MCwiZXhwIjoxNzYyOTc2OTgwLCJpc3MiOiJ0cmFkaW5nc3lzdGVtIn0.04ovUQwtlZfhMce_3zSqfv310V0vETd4fDf57JXKYMY",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  },
+  "telegram-gateway": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6InRlbGVncmFtLWdhdGV3YXkiLCJpc3N1ZXIiOiJ0cmFkaW5nc3lzdGVtIiwiaWF0IjoxNzYyODkwNTgwLCJleHAiOjE3NjI5NzY5ODAsImlzcyI6InRyYWRpbmdzeXN0ZW0ifQ.jVdriVPNRUq2Qeib6A2kS9SARq42eo0P96g-uwwVycg",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  },
+  "tp-capital": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6InRwLWNhcGl0YWwiLCJpc3N1ZXIiOiJ0cmFkaW5nc3lzdGVtIiwiaWF0IjoxNzYyODkwNTgwLCJleHAiOjE3NjI5NzY5ODAsImlzcyI6InRyYWRpbmdzeXN0ZW0ifQ.3rjuuGB3fcIcDFGTppUFxMKDEx-pKVn5BWEu-z7RAms",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  },
+  "firecrawl-proxy": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6ImZpcmVjcmF3bC1wcm94eSIsImlzc3VlciI6InRyYWRpbmdzeXN0ZW0iLCJpYXQiOjE3NjI4OTA1ODAsImV4cCI6MTc2Mjk3Njk4MCwiaXNzIjoidHJhZGluZ3N5c3RlbSJ9.ZL3ggaB0vleh-6GIPi6j8-4Zp62yECpsaStRdHV1arQ",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  },
+  "health-monitor": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlTmFtZSI6ImhlYWx0aC1tb25pdG9yIiwiaXNzdWVyIjoidHJhZGluZ3N5c3RlbSIsImlhdCI6MTc2Mjg5MDU4MCwiZXhwIjoxNzYyOTc2OTgwLCJpc3MiOiJ0cmFkaW5nc3lzdGVtIn0.SGhQdDdKXj03HondV0vmSmshKoZ9rayjRS2Y_Mbbx5s",
+    "expiresAt": "2025-11-12T19:49:40.000Z",
+    "issuedAt": "2025-11-11T19:49:40.000Z"
+  }
+}

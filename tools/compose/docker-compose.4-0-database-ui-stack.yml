@@ -49,7 +49,8 @@ services:
       - "traefik.docker.network=tradingsystem_backend"
       - "traefik.http.routers.dbui-questdb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/questdb`)"
       - "traefik.http.routers.dbui-questdb.entrypoints=web"
-      - "traefik.http.routers.dbui-questdb.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.routers.dbui-questdb.priority=100"
+      - "traefik.http.routers.dbui-questdb.middlewares=admin-standard@file"
       - "traefik.http.services.dbui-questdb.loadbalancer.server.port=9000"
 
   dbui-pgadmin:
@@ -80,8 +81,10 @@ services:
       - "traefik.docker.network=tradingsystem_backend"
       - "traefik.http.routers.dbui-pgadmin.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgadmin`)"
       - "traefik.http.routers.dbui-pgadmin.entrypoints=web"
-      - "traefik.http.routers.dbui-pgadmin.middlewares=strip-dbui-prefix@file,admin-standard@file"
-      - "traefik.http.services.dbui-pgadmin.loadbalancer.server.port=80"
+      - "traefik.http.routers.dbui-pgadmin.priority=100"
+      - "traefik.http.routers.dbui-pgadmin.middlewares=pgadmin-stripprefix,admin-standard@file"
+      - "traefik.http.middlewares.pgadmin-stripprefix.stripprefix.prefixes=/db-ui/pgadmin"
+      - "traefik.http.services.dbui-pgadmin.loadbalancer.server.port=5050"
 
   dbui-adminer:
     container_name: dbui-adminer
@@ -94,10 +97,6 @@ services:
       - "${ADMINER_PORT:-3908}:8080"
     environment:
       ADMINER_DESIGN: ${ADMINER_DESIGN:-flat}
-    volumes:
-      - ../compose/adminer-loader.php:/var/www/html/plugins-enabled/0-loader.php
-      - ../compose/adminer-iframe-plugin.php:/var/www/html/plugins-enabled/iframe.php
-      - ../compose/adminer-custom.php:/var/www/html/plugins-enabled/topbar.php
     networks:
       - tradingsystem_backend
     labels:
@@ -105,7 +104,9 @@ services:
       - "traefik.docker.network=tradingsystem_backend"
       - "traefik.http.routers.dbui-adminer.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/adminer`)"
       - "traefik.http.routers.dbui-adminer.entrypoints=web"
-      - "traefik.http.routers.dbui-adminer.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.routers.dbui-adminer.priority=100"
+      - "traefik.http.routers.dbui-adminer.middlewares=adminer-stripprefix,admin-standard@file"
+      - "traefik.http.middlewares.adminer-stripprefix.stripprefix.prefixes=/db-ui/adminer"
       - "traefik.http.services.dbui-adminer.loadbalancer.server.port=8080"
 
   dbui-pgweb:
@@ -116,19 +117,21 @@ services:
       - ../../.env
       - ../../.env.shared
     environment:
-      DATABASE_URL: ${PGWEB_DATABASE_URL:-postgres://postgres:postgres@dbui-pgadmin:5432/postgres?sslmode=disable}
+      # Override .env setting - pgWeb should start without pre-configured connection
+      # Users should manually select database from UI
+      DATABASE_URL: ""
     ports:
       - "${PGWEB_PORT:-5051}:8081"
     networks:
       - tradingsystem_backend
-    depends_on:
-      - dbui-pgadmin
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
       - "traefik.http.routers.dbui-pgweb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgweb`)"
       - "traefik.http.routers.dbui-pgweb.entrypoints=web"
-      - "traefik.http.routers.dbui-pgweb.middlewares=strip-dbui-prefix@file,admin-standard@file"
+      - "traefik.http.routers.dbui-pgweb.priority=100"
+      - "traefik.http.routers.dbui-pgweb.middlewares=pgweb-stripprefix,admin-standard@file"
+      - "traefik.http.middlewares.pgweb-stripprefix.stripprefix.prefixes=/db-ui/pgweb"
       - "traefik.http.services.dbui-pgweb.loadbalancer.server.port=8081"
 
 networks:

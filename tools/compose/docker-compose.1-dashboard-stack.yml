@@ -59,10 +59,10 @@ services:
       - "traefik.enable=true"
 
       # HTTP Router Configuration
-      - "traefik.http.routers.dashboard-ui.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard-ui.rule=PathPrefix(`/`) && !PathPrefix(`/db-ui/`) && !PathPrefix(`/api/`) && !PathPrefix(`/docs/`)"
       - "traefik.http.routers.dashboard-ui.entrypoints=web"
       - "traefik.http.routers.dashboard-ui.service=dashboard-ui"
-      - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all
+      - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
 
       # Service Configuration (backend target)
       - "traefik.http.services.dashboard-ui.loadbalancer.server.port=3103"
