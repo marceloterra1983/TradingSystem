@@ -112,7 +112,7 @@ services:
       # Traefik routing
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
-      - "traefik.http.routers.dbui-pgadmin.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgadmin`)"
+      - "traefik.http.routers.dbui-pgadmin.rule=PathPrefix(`/db-ui/pgadmin`)"
       - "traefik.http.routers.dbui-pgadmin.entrypoints=web"
       - "traefik.http.routers.dbui-pgadmin.priority=100"
       - "traefik.http.routers.dbui-pgadmin.middlewares=pgadmin-stripprefix,admin-standard@file"
@@ -137,7 +137,7 @@ services:
       # Traefik routing
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
-      - "traefik.http.routers.dbui-adminer.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/adminer`)"
+      - "traefik.http.routers.dbui-adminer.rule=PathPrefix(`/db-ui/adminer`)"
       - "traefik.http.routers.dbui-adminer.entrypoints=web"
       - "traefik.http.routers.dbui-adminer.priority=100"
       - "traefik.http.routers.dbui-adminer.middlewares=adminer-stripprefix,admin-standard@file"

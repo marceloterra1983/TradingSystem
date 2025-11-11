@@ -1,0 +1,16 @@
+# Auto-generated from config/ports/registry.yaml
+# Stack: dashboard-gateway
+version: "3.9"
+
+x-tradingsystem-stack: "dashboard-gateway"
+x-tradingsystem-generated-at: "2025-11-11T22:01:27.530Z"
+
+x-tradingsystem-ports:
+  dashboard:
+    env: DASHBOARD_PORT
+    port: 9080
+    protocol: http
+    owner: "Frontend Guild"
+    description: "Frontend principal do TradingSystem"
+    exposure: gateway
+    gatewayPath: /

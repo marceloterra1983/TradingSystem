@@ -3,7 +3,7 @@
 version: "3.9"
 
 x-tradingsystem-stack: "frontend-ui"
-x-tradingsystem-generated-at: "2025-11-11T19:38:00.129Z"
+x-tradingsystem-generated-at: "2025-11-11T22:01:27.530Z"
 
 x-tradingsystem-ports:
   grafana:

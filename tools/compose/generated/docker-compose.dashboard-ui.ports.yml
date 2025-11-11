@@ -1,9 +1,9 @@
 # Auto-generated from config/ports/registry.yaml
-# Stack: dashboard-gateway
+# Stack: dashboard-ui
 version: "3.9"
 
-x-tradingsystem-stack: "dashboard-gateway"
-x-tradingsystem-generated-at: "2025-11-11T19:38:00.129Z"
+x-tradingsystem-stack: "dashboard-ui"
+x-tradingsystem-generated-at: "2025-11-11T22:01:27.530Z"
 
 x-tradingsystem-ports:
   api-viewer:
@@ -12,14 +12,6 @@ x-tradingsystem-ports:
     protocol: http
     owner: "Documentacao"
     description: "Visualização de especificações OpenAPI/AsyncAPI"
-  dashboard:
-    env: DASHBOARD_PORT
-    port: 9080
-    protocol: http
-    owner: "Frontend Guild"
-    description: "Frontend principal do TradingSystem"
-    exposure: gateway
-    gatewayPath: /
   documentation-api-viewer:
     env: DOCUMENTATION_API_VIEWER_PORT
     port: 3102
