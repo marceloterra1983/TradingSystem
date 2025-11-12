@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#0f172a"/>
+
+  <!-- Chart Line (simplified trading symbol) -->
+  <polyline
+    points="4.8,22.4 9.6,16 16,19.2 22.4,9.6 27.2,12.8"
+    fill="none"
+    stroke="#3b82f6"
+    stroke-width="1.28"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Accent points -->
+  <circle cx="9.6" cy="16" r="1.6" fill="#3b82f6"/>
+  <circle cx="16" cy="19.2" r="1.6" fill="#3b82f6"/>
+  <circle cx="22.4" cy="9.6" r="1.6" fill="#10b981"/>
+
+  <!-- Text -->
+  <text
+    x="16"
+    y="28.8"
+    font-family="Arial, sans-serif"
+    font-size="2.56"
+    font-weight="bold"
+    fill="#e2e8f0"
+    text-anchor="middle"
+  >TRADING</text>
+</svg>

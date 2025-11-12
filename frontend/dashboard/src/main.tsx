@@ -2,22 +2,22 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { registerServiceWorker } from "./registerSW";
 
 // Register service worker for PWA (Phase 2.3 - Browser Caching)
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then((registration) => {
-      console.log('[PWA] Service worker registered:', registration.scope);
-
-      // Check for updates every 5 minutes
-      setInterval(() => {
-        registration.update();
-      }, 5 * 60 * 1000);
-    }).catch((error) => {
-      console.error('[PWA] Service worker registration failed:', error);
-    });
-  });
-}
+// Manual implementation for Vite 7 compatibility
+registerServiceWorker({
+  onSuccess: (registration) => {
+    console.log('[PWA] Service worker active:', registration.scope);
+  },
+  onUpdate: () => {
+    console.log('[PWA] New version available');
+    // Update notification is handled by registerSW module
+  },
+  onError: (error) => {
+    console.error('[PWA] Service worker error:', error);
+  },
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

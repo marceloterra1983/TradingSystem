@@ -28,7 +28,7 @@
 ### 2.2 React Dashboard Page
 
 - **Location**: `frontend/dashboard/src/components/pages/DocumentationMetricsPage.tsx`
-- **URL**: `http://localhost:3103/documentation/metrics`
+- **URL**: `http://localhost:9080/documentation/metrics`
 - **Technology**: React + TypeScript + Recharts + Tailwind CSS
 - **Data Source**: `/api/docs/api/v1/docs/health/dashboard-metrics`
 - **Features**:
@@ -192,7 +192,7 @@ npm run docs:dev
 # React dashboard
 cd frontend/dashboard
 npm run dev
-# Navigate to http://localhost:3103/documentation/metrics
+# Navigate to http://localhost:9080/documentation/metrics
 
 # Grafana
 docker compose -f tools/compose/docker-compose.apps.yml up -d grafana

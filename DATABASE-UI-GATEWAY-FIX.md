@@ -2,6 +2,7 @@
 
 **Date:** 2025-11-11
 **Status:** ✅ **RESOLVED**
+**Related:** See [PORT-3103-MIGRATION-REPORT.md](PORT-3103-MIGRATION-REPORT.md) for Dashboard port migration (3103 → 9080)
 
 ---
 
@@ -12,6 +13,7 @@ Database UIs (pgAdmin, Adminer) were returning HTTP 404 when accessed via Traefi
 **Final Result:**
 - ✅ pgAdmin: `http://localhost:9080/db-ui/pgadmin` → HTTP 302 (redirect to `/login`)
 - ✅ Adminer: `http://localhost:9080/db-ui/adminer` → HTTP 200
+- ✅ Dashboard: `http://localhost:9080/` → HTTP 200 (port migrated from 3103 to 9080)
 
 ---
 

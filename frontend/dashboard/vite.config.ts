@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import viteCompression from 'vite-plugin-compression';
-import { VitePWA } from 'vite-plugin-pwa';
 import { preloadHints } from './vite-plugin-preload-hints';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -298,8 +297,7 @@ export default defineConfig(({ mode }) => {
         ext: '.br',
       }),
       // PWA with Service Worker (Phase 2.3 - Browser Caching)
-      // MINIMAL CONFIG FOR TESTING
-      VitePWA(),
+      // Using manual implementation (vite-plugin-pwa incompatible with Vite 7)
     ],
     server: {
       port: dashboardPort,
