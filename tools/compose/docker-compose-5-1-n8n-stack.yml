@@ -115,16 +115,65 @@ services:
       - "com.tradingsystem.tier=application"
       - "com.tradingsystem.service=n8n"
       - "com.tradingsystem.component=automation-platform"
+      # Traefik disabled on n8n-app (routed via n8n-proxy instead)
 
+  # ----------------------------------------------------------------------------
+  # Nginx proxy for iframe embedding support
+  # ----------------------------------------------------------------------------
+  n8n-proxy:
+    container_name: n8n-proxy
+    image: nginx:alpine
+    restart: unless-stopped
+
+    volumes:
+      - ./n8n-nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      n8n-app:
+        condition: service_healthy
+
+    networks:
+      - n8n_backend
+      - tradingsystem_backend
+
+    logging: *logging-json
+
+    healthcheck:
+      test:
+        - CMD
+        - /bin/sh
+        - -c
+        - wget --spider --quiet --tries=1 --timeout=5 http://127.0.0.1:80/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    labels:
+      - "com.tradingsystem.stack=automation"
+      - "com.tradingsystem.tier=gateway"
+      - "com.tradingsystem.service=n8n-proxy"
+      - "com.tradingsystem.component=nginx-proxy"
+
+      # Traefik Configuration (routes to proxy on port 80)
       - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+
+      # HTTP Router
       - "traefik.http.routers.n8n.rule=PathPrefix(`/n8n`)"
       - "traefik.http.routers.n8n.entrypoints=web"
       - "traefik.http.routers.n8n.service=n8n"
       - "traefik.http.routers.n8n.priority=80"
-      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
-      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix,static-allow-iframe@file"
+
+      # Service (proxy listens on port 80)
+      - "traefik.http.services.n8n.loadbalancer.server.port=80"
+
+      # Middleware (strip /n8n prefix)
+      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix,api-standard@file"
       - "traefik.http.middlewares.n8n-stripprefix.stripprefix.prefixes=/n8n"
-      - "traefik.http.services.n8n.loadbalancer.healthcheck.path=/healthz"
+
+      # Health checks
+      - "traefik.http.services.n8n.loadbalancer.healthcheck.path=/"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.interval=30s"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.timeout=10s"
 

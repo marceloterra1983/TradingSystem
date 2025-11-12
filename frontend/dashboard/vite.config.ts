@@ -298,79 +298,8 @@ export default defineConfig(({ mode }) => {
         ext: '.br',
       }),
       // PWA with Service Worker (Phase 2.3 - Browser Caching)
-      VitePWA({
-        disable: false,
-        mode: isProd ? 'production' : 'development',
-        registerType: 'autoUpdate',
-        injectRegister: 'auto',
-        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-        manifest: {
-          name: 'TradingSystem Dashboard',
-          short_name: 'Dashboard',
-          description: 'Documentation System Dashboard with React + Tailwind + TypeScript',
-          theme_color: '#0f172a',
-          background_color: '#0f172a',
-          display: 'standalone',
-          icons: [
-            {
-              src: '/icon-192.png',
-              sizes: '192x192',
-              type: 'image/png',
-            },
-            {
-              src: '/icon-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-            },
-            {
-              src: '/icon-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable',
-            },
-          ],
-        },
-        workbox: {
-          // Cache-first strategy for static assets
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          // Runtime caching for API requests
-          runtimeCaching: [
-            {
-              urlPattern: /^https?:\/\/localhost:9080\/api\/.*/i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'api-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 5, // 5 minutes
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-            {
-              urlPattern: /^https?:\/\/localhost:9080\/docs\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'docs-cache',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
-                },
-              },
-            },
-          ],
-          // Clean up old caches
-          cleanupOutdatedCaches: true,
-          // Increase maximum cache size
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-        },
-        devOptions: {
-          enabled: false, // Disable in development for easier debugging
-          type: 'module',
-        },
-      }),
+      // MINIMAL CONFIG FOR TESTING
+      VitePWA(),
     ],
     server: {
       port: dashboardPort,

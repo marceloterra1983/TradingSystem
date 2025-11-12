@@ -56,10 +56,11 @@
       "start": "npm run dev",
       "build": "npm run build",
       "test": "npm test",
-      "port": 3103,
+      "port": 9080,
       "env": ".env.example",
       "workspace": true,
-      "managed": "internal"
+      "managed": "internal",
+      "note": "Runs on port 9080 (Traefik API Gateway)"
     },
     {
       "id": "docusaurus",
