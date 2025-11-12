@@ -5,15 +5,13 @@ WORKDIR /app
 ENV SKIP_DASHBOARD_PREBUILD=1 \
     DASHBOARD_PORT=9080
 
-ARG DASHBOARD_DIR=frontend/dashboard
-
 RUN apk add --no-cache curl
 
-COPY ${DASHBOARD_DIR}/package*.json ./
+COPY package*.json ./
 
 RUN npm ci
 
-COPY ${DASHBOARD_DIR} ./
+COPY . ./
 
 EXPOSE 9080
 
