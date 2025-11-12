@@ -223,9 +223,12 @@ services:
       # Middlewares (CORS, rate limit, compression, circuit breaker)
       - "traefik.http.routers.workspace-api.middlewares=workspace-path-transform,api-standard@file"
 
-      # Path transformation: /api/workspace/X → /X
-      # Strip /api/workspace prefix only (API has routes at root like /health, /items)
-      - "traefik.http.middlewares.workspace-path-transform.stripprefix.prefixes=/api/workspace"
+      # Path transformation: /api/workspace/X → /api/X
+      # Step 1: Strip /api/workspace → /X
+      # Step 2: Add /api prefix → /api/X (API routes are /api/items, /api/categories, except /health)
+      - "traefik.http.middlewares.workspace-path-transform.chain.middlewares=workspace-strip,workspace-addapi"
+      - "traefik.http.middlewares.workspace-strip.stripprefix.prefixes=/api/workspace"
+      - "traefik.http.middlewares.workspace-addapi.addprefix.prefix=/api"
 
       # Health Check
       - "traefik.http.services.workspace-api.loadbalancer.healthcheck.path=/health"

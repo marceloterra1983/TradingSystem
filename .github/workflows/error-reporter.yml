@@ -1,0 +1,210 @@
+name: Error Reporter
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline", "Security", "E2E Tests", "Docker Build"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: read
+  contents: read
+
+jobs:
+  collect-errors:
+    name: Collect and Report Errors
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download workflow logs
+        uses: actions/github-script@v7
+        id: download_logs
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Get workflow run details
+            const runId = context.payload.workflow_run.id;
+            const workflowName = context.payload.workflow_run.name;
+            
+            console.log(`Analyzing workflow: ${workflowName} (ID: ${runId})`);
+            
+            // Get jobs for this workflow run
+            const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
+            
+            // Filter failed jobs
+            const failedJobs = jobs.jobs.filter(job => job.conclusion === 'failure');
+            
+            console.log(`Found ${failedJobs.length} failed jobs`);
+            
+            // Extract error information
+            const errors = [];
+            for (const job of failedJobs) {
+              const failedSteps = job.steps.filter(step => step.conclusion === 'failure');
+              
+              for (const step of failedSteps) {
+                errors.push({
+                  job: job.name,
+                  step: step.name,
+                  started_at: step.started_at,
+                  completed_at: step.completed_at,
+                });
+              }
+            }
+            
+            // Save to file
+            fs.writeFileSync('errors.json', JSON.stringify({
+              workflow: workflowName,
+              run_id: runId,
+              run_url: context.payload.workflow_run.html_url,
+              branch: context.payload.workflow_run.head_branch,
+              commit: context.payload.workflow_run.head_sha.substring(0, 7),
+              errors: errors,
+              total_errors: errors.length,
+            }, null, 2));
+            
+            return errors.length;
+
+      - name: Generate error report
+        id: generate_report
+        run: |
+          if [ ! -f errors.json ]; then
+            echo "No errors file found"
+            exit 0
+          fi
+          
+          # Parse errors
+          WORKFLOW=$(jq -r '.workflow' errors.json)
+          RUN_URL=$(jq -r '.run_url' errors.json)
+          BRANCH=$(jq -r '.branch' errors.json)
+          COMMIT=$(jq -r '.commit' errors.json)
+          TOTAL_ERRORS=$(jq -r '.total_errors' errors.json)
+          
+          # Create markdown report
+          cat > error_report.md << EOF
+          ## 🚨 Workflow Failure Report
+          
+          **Workflow:** ${WORKFLOW}  
+          **Branch:** ${BRANCH}  
+          **Commit:** ${COMMIT}  
+          **Total Errors:** ${TOTAL_ERRORS}
+          
+          ### Failed Jobs and Steps
+          
+          EOF
+          
+          # Add error details
+          jq -r '.errors[] | "- **Job:** \(.job)\n  - **Step:** \(.step)\n  - **Duration:** \(.started_at) to \(.completed_at)\n"' errors.json >> error_report.md
+          
+          cat >> error_report.md << EOF
+          
+          ### 🔗 Links
+          
+          - [View Workflow Run](${RUN_URL})
+          - [View Commit](https://github.com/${{ github.repository }}/commit/${COMMIT})
+          
+          ---
+          
+          **Note:** This report contains only the errors found. Please check the workflow logs for detailed information.
+          EOF
+          
+          echo "report_generated=true" >> $GITHUB_OUTPUT
+          echo "total_errors=${TOTAL_ERRORS}" >> $GITHUB_OUTPUT
+
+      - name: Post error summary
+        if: steps.generate_report.outputs.report_generated == 'true'
+        run: |
+          cat error_report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Create or update issue
+        if: steps.generate_report.outputs.report_generated == 'true' && steps.generate_report.outputs.total_errors != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const errorReport = fs.readFileSync('error_report.md', 'utf8');
+            const errorsData = JSON.parse(fs.readFileSync('errors.json', 'utf8'));
+            
+            // Check for existing open issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'ci-failure,automated',
+              per_page: 1,
+            });
+            
+            const issueTitle = `🚨 CI Failure: ${errorsData.workflow} (${errorsData.branch})`;
+            
+            if (issues.length > 0) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: errorReport,
+              });
+              
+              console.log(`Updated issue #${issues[0].number}`);
+            } else {
+              // Create new issue
+              const { data: issue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: errorReport,
+                labels: ['ci-failure', 'automated', 'bug'],
+              });
+              
+              console.log(`Created issue #${issue.number}`);
+            }
+
+      - name: Upload error artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-report-${{ github.event.workflow_run.id }}
+          path: |
+            errors.json
+            error_report.md
+          retention-days: 30
+
+  # ============================================================================
+  # Job 2: Notify on repeated failures
+  # ============================================================================
+  check-repeated-failures:
+    name: Check Repeated Failures
+    runs-on: ubuntu-latest
+    needs: collect-errors
+    if: always()
+    steps:
+      - name: Check failure frequency
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get recent workflow runs
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 20,
+            });
+            
+            // Count recent failures
+            const recentFailures = runs.workflow_runs.filter(run => 
+              run.conclusion === 'failure' && 
+              new Date(run.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+            ).length;
+            
+            console.log(`Recent failures (last 24h): ${recentFailures}`);
+            
+            if (recentFailures >= 5) {
+              core.setFailed(`⚠️ High failure rate detected: ${recentFailures} failures in the last 24 hours`);
+            }

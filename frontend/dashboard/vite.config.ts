@@ -299,7 +299,10 @@ export default defineConfig(({ mode }) => {
       }),
       // PWA with Service Worker (Phase 2.3 - Browser Caching)
       VitePWA({
+        disable: false,
+        mode: isProd ? 'production' : 'development',
         registerType: 'autoUpdate',
+        injectRegister: 'auto',
         includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
         manifest: {
           name: 'TradingSystem Dashboard',

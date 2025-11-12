@@ -6,11 +6,11 @@
 # iframe embedding in the Dashboard.
 #
 # Variables to replace:
-#   kestra  - Name of the backend service (e.g., n8n, kestra)
-#   8080  - Port where service is listening (e.g., 5678, 8080)
+#   {{SERVICE_NAME}}  - Name of the backend service (e.g., n8n, kestra)
+#   {{SERVICE_PORT}}  - Port where service is listening (e.g., 5678, 8080)
 #
 # Usage:
-#   sed 's/kestra/n8n/g; s/8080/5678/g' \
+#   sed 's/{{SERVICE_NAME}}/n8n/g; s/{{SERVICE_PORT}}/5678/g' \
 #       nginx-iframe-proxy.conf.template > n8n-nginx-proxy.conf
 #
 # =============================================================================
@@ -19,9 +19,9 @@ server {
     listen 80;
     server_name localhost;
 
-    # Proxy to kestra container
+    # Proxy to {{SERVICE_NAME}} container
     location / {
-        proxy_pass http://kestra:8080;
+        proxy_pass http://{{SERVICE_NAME}}:{{SERVICE_PORT}};
 
         # Standard proxy headers
         proxy_set_header Host $host;

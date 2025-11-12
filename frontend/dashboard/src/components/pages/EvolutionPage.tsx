@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_EVOLUTION_MANAGER_URL = "http://localhost:4203";
+const DEFAULT_EVOLUTION_MANAGER_URL = "http://localhost:4203/manager";
 
 const resolveEvolutionUrl = (): string => {
   const env = import.meta.env as Record<string, string | undefined>;
@@ -13,7 +13,10 @@ const resolveEvolutionUrl = (): string => {
 
   try {
     const parsed = new URL(configuredUrl);
-    parsed.pathname = parsed.pathname.replace(/\/+$/, "");
+    // Ensure /manager path is present
+    if (!parsed.pathname.includes('/manager')) {
+      parsed.pathname = parsed.pathname.replace(/\/+$/, "") + "/manager";
+    }
     return parsed.toString();
   } catch {
     return DEFAULT_EVOLUTION_MANAGER_URL;
