@@ -1,6 +1,5 @@
 #!/bin/bash
 # Post-attach script - Runs every time a terminal is attached
-# Part of: Phase 1.5 - Dev Container Setup (Improvement Plan v1.0)
 
 # Colors
 GREEN='\033[0;32m'
@@ -46,22 +45,17 @@ echo -e "  ${GREEN}ll${NC}                 - List files (ls -alh)"
 
 # Display service ports
 echo -e "\n${BLUE}🌐 Service Ports:${NC}"
-echo -e "  Dashboard:         http://localhost:3103"
-echo -e "  Documentation:     http://localhost:3404"
-echo -e "  Workspace API:     http://localhost:3200"
-echo -e "  TP Capital:        http://localhost:4005"
-echo -e "  RAG System:        http://localhost:8202"
+echo -e "  Dashboard:         ${GREEN}http://localhost:8090${NC}"
+echo -e "  API Gateway:       ${GREEN}http://localhost:9080${NC} (Traefik dashboard on 9081)"
+echo -e "  Documentation:     Via Gateway (check routes)"
+echo -e "  Workspace API:     Via Gateway (port 3200)"
+echo -e "  TP Capital:        ${GREEN}http://localhost:4005${NC}"
+echo -e "  RAG System:        ${GREEN}http://localhost:8202${NC}"
 
 # Display documentation links
 echo -e "\n${BLUE}📚 Documentation:${NC}"
 echo -e "  • README:          cat README.md | less"
 echo -e "  • CLAUDE.md:       cat CLAUDE.md | less"
 echo -e "  • Quick Start:     cat .devcontainer/README.md | less"
-
-# Activate Python venv automatically
-#if [ -d "/workspace/venv" ] && [ -z "$VIRTUAL_ENV" ]; then
-#    echo -e "\n${BLUE}🐍 Activating Python virtual environment...${NC}"
-#    source /workspace/venv/bin/activate
-#fi
 
 echo -e "\n${GREEN}✨ Ready to code! Happy hacking! ✨${NC}\n"
