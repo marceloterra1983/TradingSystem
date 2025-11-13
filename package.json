@@ -11,6 +11,7 @@
     "markdown-it": "^14.1.0",
     "markdown-it-multimd-table": "^4.2.3",
     "supertest": "^7.1.4",
+    "typedoc": "^0.28.14",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -90,6 +91,9 @@
     "governance:validate-envs": "node governance/automation/validate-envs.mjs",
     "governance:scan-secrets": "node governance/automation/scan-secrets.mjs",
     "governance:check": "npm run governance:validate-policies && npm run governance:validate-envs && npm run governance:scan-secrets",
-    "governance:full": "node governance/automation/validate-registry.mjs && npm run governance:auto && npm run governance:metrics && npm run governance:check"
+    "governance:full": "node governance/automation/validate-registry.mjs && npm run governance:auto && npm run governance:metrics && npm run governance:check",
+    "docs:validate-links": "bash scripts/docs/validate-docs-links.sh",
+    "docs:fix-links": "bash scripts/docs/fix-docs-links.sh",
+    "docs:links-report": "bash scripts/docs/validate-docs-links.sh > docs-links-report.txt && cat docs-links-report.txt"
   }
 }

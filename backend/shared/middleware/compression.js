@@ -68,9 +68,8 @@ export function configureCompression(options = {}) {
 /**
  * Middleware to add compression-related headers for monitoring
  */
-export function compressionMetrics(req, res, next) {
+export function compressionMetrics(_req, res, next) {
   const originalEnd = res.end.bind(res);
-  const chunks = [];
   let uncompressedSize = 0;
 
   // Capture response chunks
@@ -87,14 +86,18 @@ export function compressionMetrics(req, res, next) {
       uncompressedSize += chunk.length;
     }
 
-    // Add custom headers for monitoring
-    if (res.getHeader('Content-Encoding') === 'gzip') {
+    // Add custom headers for monitoring (only if headers not sent yet)
+    if (
+      !res.headersSent &&
+      res.getHeader('Content-Encoding') === 'gzip' &&
+      uncompressedSize > 0
+    ) {
       const compressedSize = parseInt(res.getHeader('Content-Length') || '0');
-      const ratio = compressedSize > 0
-        ? ((1 - compressedSize / uncompressedSize) * 100).toFixed(1)
-        : 0;
+      if (compressedSize > 0) {
+        const ratio = ((1 - compressedSize / uncompressedSize) * 100).toFixed(1);
+        res.setHeader('X-Compression-Ratio', `${ratio}%`);
+      }
 
-      res.setHeader('X-Compression-Ratio', `${ratio}%`);
       res.setHeader('X-Original-Size', uncompressedSize);
     }
 

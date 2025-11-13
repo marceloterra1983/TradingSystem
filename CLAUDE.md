@@ -128,13 +128,14 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 
 **⚠️ IMPORTANT: All services are accessed via Traefik API Gateway**
 
--   **API Gateway (Traefik)**: http://localhost:9080 (main entrypoint)
-    -   **Dashboard UI**: http://localhost:9080/ (React + Vite)
-    -   **Documentation Hub**: http://localhost:9080/docs/ (Docusaurus)
-    -   **Workspace API**: http://localhost:9080/api/workspace/*
-    -   **TP Capital API**: http://localhost:9080/api/tp-capital/*
-    -   **Documentation API**: http://localhost:9080/api/docs/*
--   **Traefik Dashboard**: http://localhost:9081 (monitoring UI)
+-   **API Gateway (Traefik)**: http://localhost:9082 (main entrypoint)
+    -   **Dashboard UI**: http://localhost:9082/ (React + Vite)
+    -   **Documentation Hub**: http://localhost:9082/docs/ (Docusaurus)
+    -   **Workspace API**: http://localhost:9082/api/workspace/*
+    -   **TP Capital API**: http://localhost:9082/api/tp-capital/*
+    -   **Telegram Gateway API**: http://localhost:9082/api/telegram-gateway/*
+    -   **Documentation API**: http://localhost:9082/api/docs/*
+-   **Traefik Dashboard**: http://localhost:9083/dashboard/ (monitoring UI)
 -   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system - direct access only)
 
 ### 🐍 Python Environment (Auto-Activation with direnv)
@@ -472,28 +473,30 @@ if (bMarketConnected && bAtivo) {
 **⚠️ IMPORTANT:** All HTTP services are now routed through Traefik API Gateway.
 
 **API Gateway:**
-- **HTTP Gateway**: `http://localhost:9080` (main entrypoint)
-- **Dashboard**: `http://localhost:9081` (Traefik monitoring UI)
-- **Metrics**: `http://localhost:9080/metrics` (Prometheus format)
+- **HTTP Gateway**: `http://localhost:9082` (main entrypoint)
+- **Dashboard**: `http://localhost:9083/dashboard/` (Traefik monitoring UI)
+- **Metrics**: `http://localhost:9082/metrics` (Prometheus format)
 
 **Services via Gateway (RECOMMENDED):**
-- **Dashboard UI**: `http://localhost:9080/` (React + Vite)
-- **Workspace API**: `http://localhost:9080/api/workspace/*` → `/api/*`
-- **Docs Hub**: `http://localhost:9080/docs/` (Docusaurus v3)
-- **Docs API**: `http://localhost:9080/api/docs/*` → `/api/*`
-- **TP Capital**: `http://localhost:9080/api/tp-capital/*` → `/*`
+- **Dashboard UI**: `http://localhost:9082/` (React + Vite)
+- **Workspace API**: `http://localhost:9082/api/workspace/*` → `/api/*`
+- **Docs Hub**: `http://localhost:9082/docs/` (Docusaurus v3)
+- **Docs API**: `http://localhost:9082/api/docs/*` → `/api/*`
+- **TP Capital**: `http://localhost:9082/api/tp-capital/*` → `/*`
+- **Telegram Gateway**: `http://localhost:9082/api/telegram-gateway/*`
 
 **Direct Access (Development/Debug Only):**
-- Dashboard: `http://localhost:9080`
+- Dashboard: `http://localhost:8092`
 - Workspace API: `http://localhost:3210`
 - Docs Hub: `http://localhost:3404`
 - Docs API: `http://localhost:3405`
 - TP Capital: `http://localhost:4008`
+- Telegram MTProto: `http://localhost:14007`
 
 ### Gateway Features
 
 - ✅ **Automatic Service Discovery** - Docker labels
-- ✅ **CORS** - Configured para localhost:9080
+- ✅ **CORS** - Configured para localhost:9082
 - ✅ **Security Headers** - X-Frame-Options, XSS protection
 - ✅ **Rate Limiting** - 100 req/min per IP (burst 50)
 - ✅ **Compression** - gzip/brotli (>1KB responses)
@@ -789,7 +792,7 @@ Aguardando sua confirmação após a execução...
 bash scripts/gateway/validate-traefik.sh --verbose
 
 # Test service via gateway
-curl http://localhost:9080/{your-path}
+curl http://localhost:9082/{your-path}
 ```
 
 **Policy Document:** `governance/policies/api-gateway-policy.md`

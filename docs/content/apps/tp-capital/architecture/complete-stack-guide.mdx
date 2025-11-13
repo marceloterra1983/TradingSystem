@@ -1,0 +1,1107 @@
+---
+title: "TP Capital - Complete Stack Architecture"
+sidebar_label: "Complete Stack Guide"
+sidebar_position: 1
+tags: [tp-capital, architecture, docker, traefik, timescaledb, redis, technical-guide]
+domain: apps
+type: architecture
+summary: "Comprehensive technical guide covering the complete TP Capital stack: all 5 containers, API Gateway integration, network topology, and operational procedures"
+status: active
+last_review: "2025-11-12"
+---
+
+# TP Capital - Complete Stack Architecture
+
+Comprehensive technical documentation for the TP Capital trading signals ingestion and analytics stack.
+
+## Executive Summary
+
+**What**: Multi-container stack for ingesting, storing, caching, and serving trading signals from Telegram channels
+**Why**: Centralized signal aggregation with high-performance caching and time-series analytics
+**When**: Operational since 2025-11-12 with Traefik API Gateway integration
+**Stack**: 5 containers + API Gateway + Dashboard integration
+**Scale**: 87 signals, 79.4% cache hit rate, &lt;3ms average response time
+
+---
+
+## Architecture Overview
+
+### System Components
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Windows Host                              │
+│                                                                   │
+│  Browser (http://localhost:8092)                                 │
+│     ↓ GET /api/tp-capital/signals                                │
+│     ↓ Header: X-API-Key                                          │
+│     ↓                                                             │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │             Docker Desktop (WSL2 Backend)                  │  │
+│  │                                                             │  │
+│  │  Port 9082:9080 ─────────────────────┐                    │  │
+│  │                                        ↓                    │  │
+│  │  ┌──────────────────────────────────────────────────────┐ │  │
+│  │  │  API Gateway (Traefik v3.0)                          │ │  │
+│  │  │  Network: tradingsystem_backend                      │ │  │
+│  │  │  Port: 9080 (internal)                               │ │  │
+│  │  │                                                        │ │  │
+│  │  │  Middlewares:                                         │ │  │
+│  │  │  1. StripPrefix: /api/tp-capital                     │ │  │
+│  │  │  2. CORS: Allow localhost:9082,8092                  │ │  │
+│  │  │  3. Forward to: tp-capital-api:4005                  │ │  │
+│  │  └───────────────────┬──────────────────────────────────┘ │  │
+│  │                      │ http://tp-capital-api:4005/signals│  │
+│  │                      ↓ Header: X-API-Key                 │  │
+│  │  ┌──────────────────────────────────────────────────────┐ │  │
+│  │  │  TP Capital API (Node.js/Express)                    │ │  │
+│  │  │  Network: tradingsystem_backend + tp_capital_backend│ │  │
+│  │  │  Port: 4005 (internal only)                          │ │  │
+│  │  │                                                        │ │  │
+│  │  │  1. Validate X-API-Key                               │ │  │
+│  │  │  2. Check Redis cache (TTL 30s)                      │ │  │
+│  │  │  3. Query TimescaleDB if cache miss                  │ │  │
+│  │  │  4. Return JSON response                             │ │  │
+│  │  └───────────────┬──────────┬──────────────────────────┘ │  │
+│  │                  │          │                             │  │
+│  │                  │          └─────────────────┐           │  │
+│  │                  ↓                            ↓           │  │
+│  │  ┌───────────────────────────┐  ┌─────────────────────┐  │  │
+│  │  │  Redis Master (Cache)     │  │  TimescaleDB        │  │  │
+│  │  │  Network: tp_capital_backend │ Network: tp_capital_│  │  │
+│  │  │  Port: 6379 (internal)    │  │  backend            │  │  │
+│  │  │                             │  │  Port: 5432         │  │  │
+│  │  │  TTL: 30s                  │  │  (internal)         │  │  │
+│  │  │  Hit Rate: 79.4%           │  │                     │  │  │
+│  │  │  Keys: ~10                 │  │  87 signals stored  │  │  │
+│  │  └───────────┬─────────────────┘  └─────────────────────┘  │  │
+│  │              │ Async replication                           │  │
+│  │              ↓                                              │  │
+│  │  ┌───────────────────────────┐                            │  │
+│  │  │  Redis Replica             │                            │  │
+│  │  │  Network: tp_capital_backend │                          │  │
+│  │  │  Port: 6379 (internal)    │                            │  │
+│  │  │  Read-only                 │                            │  │
+│  │  └───────────────────────────┘                            │  │
+│  │                                                             │  │
+│  │  ┌───────────────────────────┐                            │  │
+│  │  │  PgBouncer (Disabled)      │                            │  │
+│  │  │  Network: tp_capital_backend │                          │  │
+│  │  │  Port: 6432 (internal)    │                            │  │
+│  │  │  Status: BYPASSED          │                            │  │
+│  │  └───────────────────────────┘                            │  │
+│  └─────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Container Specifications
+
+### Container 1: API Gateway (Traefik v3.0)
+
+**Purpose**: Centralized reverse proxy and API gateway for all HTTP services
+
+**Image**: `traefik:v3.0`
+**Container Name**: `api-gateway`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `9082:9080` - HTTP Gateway (host:container)
+- `9083:8080` - Traefik Dashboard (host:container)
+- `9443:9443` - HTTPS (future, currently disabled)
+
+**Networks:**
+- `tradingsystem_backend` - Routes to all APIs
+- `tradingsystem_frontend` - Routes to dashboard
+- `tp_capital_backend` - Routes to TP Capital stack
+
+**Configuration:**
+```yaml
+command:
+  - "--api.dashboard=true"
+  - "--api.insecure=true"
+  - "--entrypoints.web.address=:9080"
+  - "--providers.docker=true"
+  - "--providers.docker.exposedbydefault=false"
+  - "--log.level=DEBUG"
+  - "--accesslog=true"
+  - "--accesslog.format=json"
+  - "--ping=true"
+```
+
+**Volumes:**
+- `/var/run/docker.sock:/var/run/docker.sock:ro` - Docker socket for service discovery
+- `../traefik/dynamic:/etc/traefik/dynamic:ro` - Dynamic configuration (currently unused - WSL2 mount issues)
+- `traefik-logs:/var/log/traefik` - Access logs
+- `traefik-certs:/letsencrypt` - SSL certificates (future)
+
+**Health Check:**
+```yaml
+test: ["CMD", "traefik", "healthcheck", "--ping"]
+interval: 10s
+timeout: 5s
+retries: 3
+start_period: 5s
+```
+
+**Key Features:**
+- ✅ Automatic service discovery via Docker labels
+- ✅ Path-based routing (`/api/tp-capital/*`, `/api/workspace/*`, etc.)
+- ✅ CORS middleware (inline configuration)
+- ✅ StripPrefix middleware (path transformation)
+- ✅ Health checks for all backend services
+- ✅ JSON access logs for analysis
+- ✅ Prometheus metrics export
+
+**Access:**
+- Gateway: http://localhost:9082
+- Dashboard: http://localhost:9083/dashboard/
+- Metrics: http://localhost:9082/metrics
+
+---
+
+### Container 2: TP Capital API (Node.js/Express)
+
+**Purpose**: REST API for trading signal ingestion, caching, and retrieval
+
+**Image**: Custom build from `apps/tp-capital/Dockerfile`
+**Container Name**: `tp-capital-api`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `4005` (internal only, no host exposure)
+
+**Networks:**
+- `tradingsystem_backend` - Gateway access
+- `tp_capital_backend` - Database/Redis access
+
+**Environment Variables:**
+```bash
+# API Configuration
+NODE_ENV=production
+TP_CAPITAL_API_PORT=4005
+TP_CAPITAL_API_KEY=bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1
+
+# Database (TimescaleDB)
+TP_CAPITAL_DB_HOST=tp-capital-timescale
+TP_CAPITAL_DB_PORT=5432
+TP_CAPITAL_DB_USER=tp_capital
+TP_CAPITAL_DB_PASSWORD=<secure_password>
+TP_CAPITAL_DB_DATABASE=tp_capital_db
+
+# Cache (Redis)
+REDIS_HOST=tp-capital-redis-master
+REDIS_PORT=6379
+REDIS_TTL=30  # 30 seconds
+
+# Telegram Gateway
+TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010
+TELEGRAM_GATEWAY_API_TOKEN=gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA
+```
+
+**Traefik Labels:**
+```yaml
+labels:
+  # Enable routing
+  - "traefik.enable=true"
+  - "traefik.docker.network=tradingsystem_backend"
+
+  # HTTP Router
+  - "traefik.http.routers.tp-capital-api.rule=PathPrefix(`/api/tp-capital`)"
+  - "traefik.http.routers.tp-capital-api.entrypoints=web"
+  - "traefik.http.routers.tp-capital-api.priority=95"
+
+  # Service
+  - "traefik.http.services.tp-capital-api.loadbalancer.server.port=4005"
+
+  # Middlewares
+  - "traefik.http.routers.tp-capital-api.middlewares=tpcapital-stripprefix,tpcapital-cors"
+
+  # StripPrefix: /api/tp-capital/* → /*
+  - "traefik.http.middlewares.tpcapital-stripprefix.stripprefix.prefixes=/api/tp-capital"
+
+  # CORS
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082,http://localhost:8092"
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowheaders=*"
+
+  # Health Check
+  - "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.path=/health"
+  - "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.interval=30s"
+```
+
+**API Endpoints:**
+```
+GET  /health                     - Health check
+GET  /signals                    - Get all signals (with pagination)
+GET  /signals/:id                - Get signal by ID
+POST /sync-messages              - Force sync from Telegram Gateway
+GET  /metrics                    - Prometheus metrics
+```
+
+**Caching Strategy:**
+```javascript
+// Cache key structure
+const cacheKey = 'tp-capital:signals:all';
+
+// Cache flow
+1. Check Redis for cacheKey
+2. If hit (TTL < 30s), return cached data (79.4% hit rate)
+3. If miss, query TimescaleDB
+4. Store in Redis with TTL 30s
+5. Return fresh data
+```
+
+**Circuit Breaker:**
+```javascript
+// Protects Telegram Gateway integration
+const breaker = new CircuitBreaker(fetchFromGateway, {
+  threshold: 5,          // Open after 5 failures
+  timeout: 30000,        // 30s timeout
+  resetTimeout: 30000    // Try to close after 30s
+});
+```
+
+**Health Check:**
+```yaml
+test: ["CMD", "curl", "-f", "http://localhost:4005/health"]
+interval: 30s
+timeout: 10s
+retries: 3
+start_period: 40s
+```
+
+---
+
+### Container 3: TimescaleDB (PostgreSQL 16)
+
+**Purpose**: Time-series database for trading signals with hypertable partitioning
+
+**Image**: `timescale/timescaledb:latest-pg16`
+**Container Name**: `tp-capital-timescale`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `5432` (internal only, no host exposure)
+
+**Networks:**
+- `tp_capital_backend` - API access
+
+**Environment Variables:**
+```bash
+POSTGRES_USER=tp_capital
+POSTGRES_PASSWORD=<secure_password>
+POSTGRES_DB=tp_capital_db
+PGDATA=/var/lib/postgresql/data
+```
+
+**Volumes:**
+```yaml
+volumes:
+  - tp-capital-timescale-data:/var/lib/postgresql/data
+  - ../../backend/data/timescaledb/tp-capital:/docker-entrypoint-initdb.d:ro
+```
+
+**Database Schema:**
+
+**Schema: signals**
+```sql
+CREATE TABLE signals.tp_capital_signals (
+    id SERIAL,
+    channel TEXT NOT NULL,
+    signal_type TEXT NOT NULL,
+    asset TEXT NOT NULL,
+    buy_min DECIMAL(12, 2),
+    buy_max DECIMAL(12, 2),
+    target_1 DECIMAL(12, 2),
+    target_2 DECIMAL(12, 2),
+    target_final DECIMAL(12, 2),
+    stop DECIMAL(12, 2),
+    raw_message TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'telegram',
+    ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ts BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Convert to hypertable (1-day chunks)
+SELECT create_hypertable(
+    'signals.tp_capital_signals',
+    'ingested_at',
+    chunk_time_interval => INTERVAL '1 day',
+    if_not_exists => TRUE
+);
+
+-- Indexes
+CREATE INDEX idx_tp_capital_signals_asset ON signals.tp_capital_signals(asset);
+CREATE INDEX idx_tp_capital_signals_channel ON signals.tp_capital_signals(channel);
+CREATE INDEX idx_tp_capital_signals_type ON signals.tp_capital_signals(signal_type);
+CREATE INDEX idx_tp_capital_signals_ingested ON signals.tp_capital_signals(ingested_at DESC);
+```
+
+**Schema: forwarded_messages**
+```sql
+CREATE TABLE forwarded_messages.messages (
+    message_id BIGINT PRIMARY KEY,
+    channel_id TEXT NOT NULL,
+    text TEXT,
+    timestamp TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Convert to hypertable
+SELECT create_hypertable(
+    'forwarded_messages.messages',
+    'timestamp',
+    chunk_time_interval => INTERVAL '1 day',
+    if_not_exists => TRUE
+);
+```
+
+**Schema: metrics**
+```sql
+CREATE TABLE metrics.processing_stats (
+    stat_id SERIAL PRIMARY KEY,
+    messages_processed INT NOT NULL DEFAULT 0,
+    signals_created INT NOT NULL DEFAULT 0,
+    errors INT NOT NULL DEFAULT 0,
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+**Retention Policy:**
+```sql
+-- Keep signals for 1 year
+SELECT add_retention_policy('signals.tp_capital_signals', INTERVAL '1 year');
+
+-- Keep messages for 6 months
+SELECT add_retention_policy('forwarded_messages.messages', INTERVAL '6 months');
+
+-- Keep metrics for 3 months
+SELECT add_retention_policy('metrics.processing_stats', INTERVAL '3 months');
+```
+
+**Health Check:**
+```yaml
+test: ["CMD-SHELL", "pg_isready -U tp_capital"]
+interval: 10s
+timeout: 5s
+retries: 5
+```
+
+**Performance:**
+- **Cache Hit Ratio**: 99.57% (excellent)
+- **Current Load**: 87 signals
+- **Query Time**: &lt;5ms for indexed queries
+
+---
+
+### Container 4: Redis Master (Cache Layer)
+
+**Purpose**: Primary cache for hot signal data (30s TTL)
+
+**Image**: `redis:7-alpine`
+**Container Name**: `tp-capital-redis-master`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `6379` (internal only, no host exposure)
+
+**Networks:**
+- `tp_capital_backend` - API access
+
+**Configuration:**
+```bash
+redis-server
+  --maxmemory 256mb
+  --maxmemory-policy allkeys-lru
+  --save 900 1
+  --save 300 10
+  --save 60 10000
+  --appendonly yes
+```
+
+**Volumes:**
+```yaml
+volumes:
+  - tp-capital-redis-master-data:/data
+```
+
+**Health Check:**
+```yaml
+test: ["CMD", "redis-cli", "ping"]
+interval: 10s
+timeout: 3s
+retries: 5
+```
+
+**Cache Keys:**
+```bash
+# All signals cache
+tp-capital:signals:all  # TTL 30s
+
+# Health check cache
+tp-capital:health  # TTL 10s
+
+# Individual signal cache (future)
+tp-capital:signal:{id}  # TTL 60s
+```
+
+**Performance Metrics:**
+```bash
+# Cache hit rate
+keyspace_hits / (keyspace_hits + keyspace_misses) = 79.4%
+
+# Average latency
+GET: &lt;1ms
+SET: &lt;2ms
+
+# Memory usage
+~2MB for 87 signals
+```
+
+---
+
+### Container 5: Redis Replica (Read Scaling)
+
+**Purpose**: Read-only replica for future load distribution
+
+**Image**: `redis:7-alpine`
+**Container Name**: `tp-capital-redis-replica`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `6379` (internal only, no host exposure)
+
+**Networks:**
+- `tp_capital_backend` - Replication from master
+
+**Configuration:**
+```bash
+redis-server
+  --replicaof tp-capital-redis-master 6379
+  --replica-read-only yes
+  --maxmemory 256mb
+  --maxmemory-policy allkeys-lru
+```
+
+**Volumes:**
+```yaml
+volumes:
+  - tp-capital-redis-replica-data:/data
+```
+
+**Health Check:**
+```yaml
+test: ["CMD", "redis-cli", "ping"]
+interval: 10s
+timeout: 3s
+retries: 5
+```
+
+**Replication:**
+```bash
+# Master-replica link
+MASTER_HOST: tp-capital-redis-master
+MASTER_PORT: 6379
+REPL_MODE: async
+REPL_PING_PERIOD: 10s
+```
+
+**Status**: Configured but not actively used (master handles all r/w)
+
+---
+
+### Container 6 (Disabled): PgBouncer (Connection Pooling)
+
+**Purpose**: PostgreSQL connection pooling (currently bypassed)
+
+**Image**: `edoburu/pgbouncer:latest`
+**Container Name**: `tp-capital-pgbouncer`
+**Restart Policy**: `unless-stopped`
+
+**Port Mappings:**
+- `6432` (internal only, no host exposure)
+
+**Status**: ❌ **DISABLED** - API connects directly to TimescaleDB
+
+**Why Disabled?**
+1. PgBouncer uses MD5 authentication
+2. PostgreSQL 16 requires SCRAM-SHA-256
+3. Userlist.txt not configured for SCRAM hashes
+4. Direct connection performance acceptable (&lt;5ms query time)
+
+**Configuration (if re-enabled):**
+```ini
+[databases]
+tp_capital_db = host=tp-capital-timescale port=5432 dbname=tp_capital_db
+
+[pgbouncer]
+pool_mode = transaction
+max_client_conn = 100
+default_pool_size = 20
+auth_type = scram-sha-256  # Requires SCRAM password hashes
+auth_file = /etc/pgbouncer/userlist.txt
+```
+
+**Re-enablement Steps:**
+1. Generate SCRAM hashes: `psql -c "SELECT concat('\"', usename, '\" \"', passwd, '\"') FROM pg_shadow;"`
+2. Update userlist.txt with hashes
+3. Change `TP_CAPITAL_DB_HOST` to `tp-capital-pgbouncer`
+4. Change `TP_CAPITAL_DB_PORT` to `6432`
+5. Restart API container
+
+---
+
+## Network Architecture
+
+### Network Topology
+
+**tradingsystem_backend** (`172.80.0.0/24`)
+- **Purpose**: Gateway + all public-facing APIs
+- **Members**:
+  - `api-gateway` (172.80.0.2)
+  - `dashboard-ui` (172.80.0.3)
+  - `tp-capital-api` (172.80.0.20)
+  - `workspace-api` (172.80.0.10)
+  - `documentation-api` (172.80.0.15)
+
+**tp_capital_backend** (`172.80.0.0/24` - same subnet, different network)
+- **Purpose**: TP Capital internal services
+- **Members**:
+  - `tp-capital-api` (172.80.0.20) - Bridge between networks
+  - `tp-capital-timescale` (172.80.0.21)
+  - `tp-capital-pgbouncer` (172.80.0.22) - disabled
+  - `tp-capital-redis-master` (172.80.0.23)
+  - `tp-capital-redis-replica` (172.80.0.24)
+
+**tradingsystem_frontend** (`172.81.0.0/24`)
+- **Purpose**: Static assets and frontend-only services
+- **Members**:
+  - `dashboard-ui`
+  - `docs-hub`
+
+**Security Zones:**
+```
+┌────────────────────────────────────────────┐
+│          Public Zone (Internet)            │
+│  Browser → Gateway (Port 9082)             │
+└───────────────────┬────────────────────────┘
+                    │
+┌───────────────────▼────────────────────────┐
+│       tradingsystem_backend (DMZ)          │
+│  - API Gateway (Traefik)                   │
+│  - TP Capital API (authenticated)          │
+│  - Workspace API                           │
+│  - Docs API                                │
+└───────────────────┬────────────────────────┘
+                    │
+┌───────────────────▼────────────────────────┐
+│       tp_capital_backend (Private)         │
+│  - TimescaleDB (no external access)        │
+│  - Redis (no external access)              │
+│  - PgBouncer (disabled)                    │
+└────────────────────────────────────────────┘
+```
+
+---
+
+## Request Flow
+
+### Happy Path: Retrieve Signals
+
+**1. Browser Request**
+```http
+GET http://localhost:9082/api/tp-capital/signals?limit=10 HTTP/1.1
+Host: localhost:9082
+Origin: http://localhost:8092
+X-API-Key: bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1
+```
+
+**2. Gateway Processing (Traefik)**
+```
+Traefik receives:
+  - Checks router: tp-capital-api (priority 95)
+  - Matches rule: PathPrefix(`/api/tp-capital`)
+  - Applies middleware chain:
+    1. tpcapital-stripprefix: Remove /api/tp-capital
+    2. tpcapital-cors: Add CORS headers
+  - Forwards to: http://tp-capital-api:4005/signals?limit=10
+  - Includes header: X-API-Key
+```
+
+**3. API Processing (TP Capital API)**
+```javascript
+1. Validate X-API-Key header
+   - Expected: bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1
+   - If missing/invalid: Return 401 Unauthorized
+
+2. Check Redis cache
+   - Key: tp-capital:signals:all
+   - TTL: 30s
+   - If hit (79.4% probability): Return cached data (3ms response)
+
+3. Query TimescaleDB (if cache miss)
+   - Query: SELECT * FROM signals.tp_capital_signals WHERE asset != '__checkpoint__' ORDER BY ingested_at DESC LIMIT 10
+   - Time: ~5ms (with indexes)
+   - Store in Redis with TTL 30s
+
+4. Return JSON response
+```
+
+**4. Gateway Response**
+```http
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:8092
+Access-Control-Allow-Methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+Access-Control-Allow-Headers: *
+Content-Type: application/json
+
+{
+  "success": true,
+  "data": [...87 signals...],
+  "count": 87,
+  "cached": true
+}
+```
+
+**5. Dashboard Rendering**
+```javascript
+// Frontend receives response
+const signals = await tpCapitalFetch('/signals?limit=10');
+
+// Renders table with:
+// - Asset, Signal Type, Buy Range, Targets, Stop
+// - Pagination (10 per page)
+// - Real-time updates (polling every 30s)
+```
+
+**Total Response Time:**
+- **Cache Hit**: 3ms (API) + 2ms (network) = 5ms
+- **Cache Miss**: 5ms (DB) + 2ms (cache write) + 2ms (network) = 9ms
+
+---
+
+### Error Paths
+
+**Error 1: Missing API Key**
+```http
+GET http://localhost:9082/api/tp-capital/signals HTTP/1.1
+# Missing: X-API-Key header
+
+Response:
+HTTP/1.1 401 Unauthorized
+{
+  "error": "X-API-Key header is required"
+}
+```
+
+**Error 2: Invalid API Key**
+```http
+GET http://localhost:9082/api/tp-capital/signals HTTP/1.1
+X-API-Key: invalid_key
+
+Response:
+HTTP/1.1 403 Forbidden
+{
+  "error": "Invalid API key"
+}
+```
+
+**Error 3: Database Connection Failed**
+```http
+GET http://localhost:9082/api/tp-capital/signals HTTP/1.1
+X-API-Key: valid_key
+
+API Logs:
+Error: connect ECONNREFUSED 172.80.0.21:5432
+
+Response:
+HTTP/1.1 503 Service Unavailable
+{
+  "error": "Database unavailable",
+  "retry_after": 30
+}
+```
+
+**Error 4: Gateway Not Found**
+```http
+GET http://localhost:9082/api/tp-capital/signals HTTP/1.1
+
+Traefik Logs:
+No router matches rule for path /api/tp-capital/signals
+
+Response:
+HTTP/1.1 404 Not Found
+{
+  "message": "404 page not found"
+}
+```
+
+---
+
+## Operational Procedures
+
+### Startup Sequence
+
+**Recommended Order:**
+```bash
+# 1. Create networks (if not exist)
+docker network create tradingsystem_backend
+docker network create tp_capital_backend
+
+# 2. Start database + cache (wait for health checks)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-timescale tp-capital-redis-master tp-capital-redis-replica
+
+# Wait 10 seconds for initialization
+sleep 10
+
+# 3. Start API (wait for database readiness)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d tp-capital-api
+
+# Wait 5 seconds for API startup
+sleep 5
+
+# 4. Start Gateway
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+
+# Wait 5 seconds for Gateway routing
+sleep 5
+
+# 5. Start Dashboard
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d
+```
+
+**Validation:**
+```bash
+# Check all containers running
+docker ps --filter "label=com.tradingsystem.stack=tp-capital" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Test Gateway routing
+curl -s http://localhost:9082/api/tp-capital/health
+
+# Test with authentication
+curl -s -H "X-API-Key: ${TP_CAPITAL_API_KEY}" http://localhost:9082/api/tp-capital/signals?limit=1 | jq '.count'
+```
+
+---
+
+### Shutdown Sequence
+
+**Graceful Shutdown:**
+```bash
+# 1. Stop Dashboard (no state loss)
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml down
+
+# 2. Stop Gateway (no state loss)
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml down
+
+# 3. Stop API (flushes Redis cache)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml stop tp-capital-api
+
+# 4. Stop Redis (saves RDB snapshots)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml stop tp-capital-redis-master tp-capital-redis-replica
+
+# Wait for Redis saves
+sleep 5
+
+# 5. Stop TimescaleDB (flushes WAL)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml stop tp-capital-timescale
+
+# Wait for database checkpoint
+sleep 10
+
+# 6. Remove all containers (optional - preserves volumes)
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml down
+```
+
+---
+
+### Backup & Restore
+
+**Database Backup:**
+```bash
+# Full database dump
+docker exec tp-capital-timescale pg_dump -U tp_capital -d tp_capital_db -F custom -f /var/lib/postgresql/data/backup_$(date +%Y%m%d).dump
+
+# Copy to host
+docker cp tp-capital-timescale:/var/lib/postgresql/data/backup_20251112.dump ./backups/
+
+# Backup specific schema
+docker exec tp-capital-timescale pg_dump -U tp_capital -d tp_capital_db -n signals -F custom -f /var/lib/postgresql/data/signals_backup.dump
+```
+
+**Database Restore:**
+```bash
+# Copy dump to container
+docker cp ./backups/backup_20251112.dump tp-capital-timescale:/tmp/
+
+# Restore
+docker exec -it tp-capital-timescale pg_restore -U tp_capital -d tp_capital_db -c /tmp/backup_20251112.dump
+```
+
+**Redis Backup:**
+```bash
+# Trigger immediate save
+docker exec tp-capital-redis-master redis-cli SAVE
+
+# Copy RDB file
+docker cp tp-capital-redis-master:/data/dump.rdb ./backups/redis_dump_$(date +%Y%m%d).rdb
+```
+
+---
+
+## Monitoring & Observability
+
+### Health Checks
+
+**All Services:**
+```bash
+# TP Capital API
+curl -s http://localhost:9082/api/tp-capital/health | jq .
+
+# TimescaleDB
+docker exec tp-capital-timescale pg_isready -U tp_capital
+
+# Redis Master
+docker exec tp-capital-redis-master redis-cli ping
+
+# Gateway
+curl -s http://localhost:9082/ping
+```
+
+**Comprehensive Health Script:**
+```bash
+bash scripts/maintenance/health-check-all.sh --services-only
+```
+
+---
+
+### Prometheus Metrics
+
+**Available Metrics:**
+```promql
+# HTTP Request Duration
+tp_capital_http_request_duration_seconds{method="GET",route="/signals",status="200"}
+
+# Database Query Duration
+tp_capital_db_query_duration_seconds{query="get_signals"}
+
+# Cache Hit Rate
+tp_capital_cache_hit_total / (tp_capital_cache_hit_total + tp_capital_cache_miss_total)
+
+# Active Signals Count
+tp_capital_signals_total{status="active"}
+
+# Circuit Breaker Status
+tp_capital_circuit_breaker_open{service="telegram-gateway"}
+```
+
+**Query Examples:**
+```bash
+# Cache hit rate (last 5 minutes)
+curl -s http://localhost:9082/api/tp-capital/metrics | grep cache_hit
+
+# P95 response time
+curl -s http://localhost:9082/api/tp-capital/metrics | grep http_request_duration | grep quantile
+```
+
+---
+
+### Logging
+
+**Access Logs (Traefik):**
+```bash
+# Follow Gateway access logs
+docker logs api-gateway -f | jq '.ClientHost, .RequestMethod, .RequestPath, .Duration'
+
+# Count requests by path
+docker logs api-gateway --since 1h | jq -r '.RequestPath' | sort | uniq -c
+```
+
+**Application Logs (TP Capital API):**
+```bash
+# Follow API logs
+docker logs tp-capital-api -f | jq '.level, .message, .duration'
+
+# Filter errors
+docker logs tp-capital-api --since 30m | jq 'select(.level == "error")'
+```
+
+**Database Logs (TimescaleDB):**
+```bash
+# Follow PostgreSQL logs
+docker logs tp-capital-timescale -f | grep -i error
+
+# Check slow queries
+docker exec -it tp-capital-timescale psql -U tp_capital -d tp_capital_db -c "
+SELECT query, calls, mean_exec_time
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
+LIMIT 10;
+"
+```
+
+---
+
+## Performance Benchmarks
+
+### Current Performance (2025-11-12)
+
+**API Response Times:**
+- Cache Hit: 3ms (79.4% of requests)
+- Cache Miss: 9ms (20.6% of requests)
+- Average: 4.2ms
+
+**Database Performance:**
+- Query Time (indexed): &lt;5ms
+- Cache Hit Ratio: 99.57%
+- Connections: 2/100 (2% utilization)
+
+**Redis Performance:**
+- GET Latency: &lt;1ms
+- SET Latency: &lt;2ms
+- Memory Usage: 2MB / 256MB (0.8%)
+- Hit Rate: 79.4%
+
+**Network Performance:**
+- Gateway → API: &lt;1ms (container-to-container)
+- API → Database: &lt;1ms (same host)
+- API → Redis: &lt;0.5ms (same host)
+
+---
+
+## Security Considerations
+
+### Authentication & Authorization
+
+**API Key Validation:**
+- Header: `X-API-Key`
+- Format: 64-character hex string
+- Storage: Environment variable (`TP_CAPITAL_API_KEY`)
+- Rotation: Every 90 days (manual process)
+
+**Exposed to Browser:**
+```javascript
+// Dashboard includes API key in bundle (Vite build)
+// Variable: VITE_TP_CAPITAL_API_KEY
+// Risk: Low (API is read-only, no sensitive data manipulation)
+```
+
+**Network Isolation:**
+- TimescaleDB: No host port mapping (internal only)
+- Redis: No host port mapping (internal only)
+- API: No host port mapping (Gateway routes all traffic)
+
+---
+
+### CORS Policy
+
+**Allowed Origins:**
+- `http://localhost:9082` (Gateway)
+- `http://localhost:8092` (Dashboard)
+
+**Allowed Methods:**
+- `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `OPTIONS`
+
+**Allowed Headers:**
+- `*` (all headers, including `X-API-Key`)
+
+**Credentials:**
+- `Access-Control-Allow-Credentials: true`
+
+---
+
+### Rate Limiting
+
+**Current Limits:**
+- 100 requests per minute per IP (configured in API)
+- No Gateway-level rate limiting (future enhancement)
+
+**Future Enhancements:**
+1. Traefik rate limiting middleware (per IP + per API key)
+2. Distributed rate limiting (Redis-backed)
+3. Dynamic rate limits based on API key tier
+
+---
+
+## Troubleshooting
+
+For comprehensive troubleshooting procedures, see:
+- **[Troubleshooting Guide](/docs/apps/tp-capital/runbooks/troubleshooting-connectivity)** - Complete runbook with all common issues
+- **[Environment Variables](/docs/apps/tp-capital/configuration/environment-variables)** - Configuration reference
+- **[ADR 007](/docs/reference/adrs/007-tp-capital-api-gateway-integration)** - Architectural decisions
+
+**Quick Diagnostics:**
+```bash
+# Check all containers
+docker ps --filter "label=com.tradingsystem.stack=tp-capital"
+
+# Test Gateway routing
+curl -v http://localhost:9082/api/tp-capital/health
+
+# Test authentication
+curl -H "X-API-Key: ${TP_CAPITAL_API_KEY}" http://localhost:9082/api/tp-capital/signals?limit=1
+
+# Check logs
+docker logs tp-capital-api --tail 50
+docker logs api-gateway --tail 50
+```
+
+---
+
+## Future Enhancements
+
+### Phase 1: Performance (Q1 2025)
+
+- [ ] Re-enable PgBouncer with SCRAM authentication
+- [ ] Implement Redis read replicas for load distribution
+- [ ] Add TimescaleDB read replicas
+- [ ] Enable compression middleware (gzip/brotli)
+- [ ] Implement HTTP/2 at Gateway level
+
+### Phase 2: Security (Q2 2025)
+
+- [ ] Migrate to JWT authentication (replace API keys)
+- [ ] Enable HTTPS with Let's Encrypt certificates
+- [ ] Implement API key rotation automation
+- [ ] Add request signing for inter-service communication
+- [ ] Enable Web Application Firewall (ModSecurity)
+
+### Phase 3: Observability (Q3 2025)
+
+- [ ] Integrate with Grafana dashboards
+- [ ] Add distributed tracing (Jaeger/Zipkin)
+- [ ] Implement structured logging with correlation IDs
+- [ ] Set up automated alerting (PagerDuty/Slack)
+- [ ] Add performance budgets and SLO tracking
+
+### Phase 4: Scalability (Q4 2025)
+
+- [ ] Horizontal scaling for API (multiple instances)
+- [ ] Database sharding for historical data
+- [ ] Implement Redis Cluster for cache HA
+- [ ] Add CDN for static assets
+- [ ] Geographic load distribution
+
+---
+
+## Related Documentation
+
+- **[ADR 007 - TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)** - Architectural decision record
+- **[Network Architecture Diagram](/docs/assets/diagrams/source/apps/tp-capital-network-architecture.puml)** - PlantUML diagram
+- **[Request Flow Diagram](/docs/assets/diagrams/source/apps/tp-capital-api-gateway-flow.puml)** - Sequence diagram
+- **[Environment Variables](/docs/apps/tp-capital/configuration/environment-variables)** - Complete reference
+- **[Troubleshooting Guide](/docs/apps/tp-capital/runbooks/troubleshooting-connectivity)** - Operational runbook
+- **[Port Registry](/docs/tools/ports-services)** - Port allocation table
+- **[PROXY-BEST-PRACTICES](/docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md)** - Vite proxy guide
+
+---
+
+**Document Version**: 1.0
+**Last Updated**: 2025-11-12
+**Authors**: DevOps Team, Architecture Review Board
+**Next Review**: 2025-12-12 (monthly)
+**Status**: Active, Production-Ready

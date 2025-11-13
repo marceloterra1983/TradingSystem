@@ -73,9 +73,9 @@ last_review: "2025-10-23"
 **TradingSystem has comprehensive documentation powered by Docusaurus v3:**
 
 **Quick Links**:
-- 📖 [Documentation Hub](http://localhost:9080/docs/) (via Traefik Gateway)
-- 📖 [Dashboard UI](http://localhost:9080/) (via Traefik Gateway)
-- 📖 [Traefik Monitoring](http://localhost:9081/) (API Gateway dashboard)
+- 📖 [Documentation Hub](http://localhost:9082/docs/) (via Traefik Gateway)
+- 📖 [Dashboard UI](http://localhost:9082/) (via Traefik Gateway)
+- 📖 [Traefik Monitoring](http://localhost:9083/dashboard/) (API Gateway dashboard)
 - 🗂️ [Content Directory](docs/content/) - Browse all documentation
 - 📋 [Validation Guide](governance/controls/VALIDATION-GUIDE.md) - How to validate docs
 - ✅ [Review Checklist](governance/controls/REVIEW-CHECKLIST.md) - Quality standards
@@ -432,12 +432,12 @@ health
     bash tools/scripts/start-all-stacks.sh
     ```
 7. **Access the portals from Windows** via your browser:
-    - **Dashboard**: http://localhost:9080/ (via Traefik Gateway)
-    - **Documentation Hub**: http://localhost:9080/docs/ (via Traefik Gateway)
-    - **Traefik Monitoring**: http://localhost:9081/ (API Gateway dashboard)
-    - **API Hub (via Documentation Hub)**: http://localhost:9080/docs/shared/integrations/frontend-backend-api-hub
+    - **Dashboard**: http://localhost:9082/ (via Traefik Gateway)
+    - **Documentation Hub**: http://localhost:9082/docs/ (via Traefik Gateway)
+    - **Traefik Monitoring**: http://localhost:9083/dashboard/ (API Gateway dashboard)
+    - **API Hub (via Documentation Hub)**: http://localhost:9082/docs/shared/integrations/frontend-backend-api-hub
 
-Refer back to the [Operations Quick Start Guides](http://localhost:9080/docs/tools/onboarding/start-services) for service-specific instructions.
+Refer back to the [Operations Quick Start Guides](http://localhost:9082/docs/tools/onboarding/start-services) for service-specific instructions.
 
 ### Prerequisites
 
@@ -517,18 +517,19 @@ You can access the system in two ways:
 
 1. **Traefik API Gateway (PRODUCTION - Default)**
 
-    - **All services through Traefik Gateway**: `http://localhost:9080`
-    - **Dashboard UI**: `http://localhost:9080/`
-    - **Documentation Hub**: `http://localhost:9080/docs/`
-    - **Workspace API**: `http://localhost:9080/api/workspace/*`
-    - **TP Capital API**: `http://localhost:9080/api/tp-capital/*`
-    - **Documentation API**: `http://localhost:9080/api/docs/*`
-    - **Traefik Dashboard**: `http://localhost:9081/` (monitoring UI)
+    - **All services through Traefik Gateway**: `http://localhost:9082`
+    - **Dashboard UI**: `http://localhost:9082/`
+    - **Documentation Hub**: `http://localhost:9082/docs/`
+    - **Workspace API**: `http://localhost:9082/api/workspace/*`
+    - **TP Capital API**: `http://localhost:9082/api/tp-capital/*`
+    - **Telegram Gateway API**: `http://localhost:9082/api/telegram-gateway/*`
+    - **Documentation API**: `http://localhost:9082/api/docs/*`
+    - **Traefik Dashboard**: `http://localhost:9083/dashboard/` (monitoring UI)
     - **Benefits**: Centralized routing, CORS handling, rate limiting, compression, health checks
 
 2. **Direct Container Access (Development/Debug Only)**
     - **Not recommended for regular use** - Ports not exposed by default
-    - Use Traefik Gateway (`http://localhost:9080`) instead
+    - Use Traefik Gateway (`http://localhost:9082`) instead
 
 ## 📊 Architecture & Quality Status
 

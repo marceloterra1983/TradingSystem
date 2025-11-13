@@ -1,0 +1,966 @@
+---
+title: Dev Container - Gateway & Proxy
+sidebar_label: Gateway & Proxy
+sidebar_position: 4
+tags: [dev-container, traefik, vite, proxy, gateway, routing]
+domain: tools
+type: guide
+summary: "Guia completo do Traefik API Gateway e Vite Proxy: service discovery, routing rules, middlewares, debugging e troubleshooting"
+status: active
+last_review: "2025-11-12"
+---
+
+# Dev Container - Gateway & Proxy
+
+## 🎯 Visão Geral
+
+O TradingSystem usa **dois sistemas de proxy**:
+
+1. **Traefik API Gateway** - Reverse proxy para produção (containers Docker)
+2. **Vite Dev Server Proxy** - Proxy de desenvolvimento (hot reload)
+
+Cada um tem **propósitos e configurações específicas**.
+
+---
+
+## 🚪 Traefik API Gateway
+
+### O que é Traefik?
+
+**Traefik** é um **reverse proxy e load balancer** moderno que:
+- ✅ Descobre serviços automaticamente (Docker labels)
+- ✅ Roteia requests baseado em rules (path, host, headers)
+- ✅ Aplica middlewares (CORS, rate limit, compression, circuit breaker)
+- ✅ Expõe métricas Prometheus
+- ✅ Possui dashboard de monitoramento
+- ✅ Suporta múltiplos backends (Docker, Kubernetes, Consul, etc)
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Browser (http://localhost:9082)                        │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  Traefik Gateway (Port 9082)                            │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │  Entrypoint: web (9080 internal, 9082 external)  │ │
+│  └───────────────────────────────────────────────────┘ │
+│                        ↓                                │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │  Routers (priority-based)                         │ │
+│  │  ├─> /api/workspace → Priority 100                │ │
+│  │  ├─> /api/telegram-gateway → Priority 95          │ │
+│  │  ├─> /api/tp-capital → Priority 90                │ │
+│  │  ├─> /api/docs → Priority 85                      │ │
+│  │  ├─> /docs → Priority 50                          │ │
+│  │  └─> / → Priority 1                               │ │
+│  └───────────────────────────────────────────────────┘ │
+│                        ↓                                │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │  Middlewares Chain                                │ │
+│  │  ├─> CORS (localhost:5173, localhost:9082)        │ │
+│  │  ├─> Rate Limit (100 req/min per IP)              │ │
+│  │  ├─> Compression (gzip/brotli, >1KB)              │ │
+│  │  ├─> Circuit Breaker (20% error → open)           │ │
+│  │  └─> Security Headers (X-Frame-Options, XSS)      │ │
+│  └───────────────────────────────────────────────────┘ │
+│                        ↓                                │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │  Services (Docker containers)                     │ │
+│  │  ├─> workspace-api:3200                           │ │
+│  │  ├─> telegram-gateway-api:4010                    │ │
+│  │  ├─> tp-capital-api:4005                          │ │
+│  │  ├─> documentation-api:3000                       │ │
+│  │  ├─> dashboard-ui:3103                            │ │
+│  │  └─> docs-hub:80                                  │ │
+│  └───────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Configuration Files
+
+**Traefik Gateway Compose:**
+- **File:** `tools/compose/docker-compose.0-gateway-stack.yml`
+- **Container:** `api-gateway` (Traefik v3.0)
+- **Ports:** 9082 (HTTP), 9083 (Dashboard)
+
+**Dynamic Configuration:**
+- **File:** `tools/traefik/dynamic/middlewares.yml`
+- **Purpose:** CORS, rate limiting, compression rules
+
+### Service Discovery (Docker Labels)
+
+Traefik usa **Docker labels** para descobrir serviços automaticamente.
+
+**Exemplo: Workspace API**
+```yaml
+# tools/compose/docker-compose.4-3-workspace-stack.yml
+services:
+  workspace-api:
+    container_name: workspace-api
+    build: ./backend/api/workspace
+    networks:
+      - tradingsystem_backend
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+
+      # Router configuration
+      - "traefik.http.routers.workspace.rule=PathPrefix(`/api/workspace`)"
+      - "traefik.http.routers.workspace.priority=100"
+      - "traefik.http.routers.workspace.entrypoints=web"
+
+      # Service configuration (load balancer)
+      - "traefik.http.services.workspace.loadbalancer.server.port=3200"
+
+      # Middlewares (optional)
+      - "traefik.http.routers.workspace.middlewares=api-standard@file"
+
+      # Path transformation (optional)
+      - "traefik.http.middlewares.workspace-path-transform.stripprefix.prefixes=/api/workspace"
+```
+
+**Label Breakdown:**
+
+| Label | Propósito | Valor Exemplo |
+|-------|-----------|---------------|
+| `traefik.enable` | Habilita discovery | `true` |
+| `traefik.http.routers.<name>.rule` | Routing rule | `PathPrefix(\`/api/workspace\`)` |
+| `traefik.http.routers.<name>.priority` | Priority (higher wins) | `100` |
+| `traefik.http.routers.<name>.entrypoints` | Entrypoint | `web` |
+| `traefik.http.services.<name>.loadbalancer.server.port` | Container port | `3200` |
+| `traefik.http.routers.<name>.middlewares` | Middleware chain | `api-standard@file` |
+
+### Routing Rules
+
+**PathPrefix (Recomendado para APIs):**
+```yaml
+- "traefik.http.routers.workspace.rule=PathPrefix(`/api/workspace`)"
+```
+
+Matches:
+- ✅ `/api/workspace/items`
+- ✅ `/api/workspace/items/123`
+- ✅ `/api/workspace/health`
+- ❌ `/api/workspace-extra` (não começa com `/api/workspace/`)
+
+**Host (Para múltiplos domínios):**
+```yaml
+- "traefik.http.routers.api.rule=Host(`api.tradingsystem.local`)"
+```
+
+**Combined Rules (AND/OR logic):**
+```yaml
+# AND logic
+- "traefik.http.routers.api.rule=Host(`api.local`) && PathPrefix(`/v1`)"
+
+# OR logic
+- "traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/v1`)"
+```
+
+### Priority System
+
+**Como funciona:**
+- Traefik avalia routers em **ordem decrescente de priority**
+- **Maior número** = **maior prioridade**
+- Se request match múltiplas rules, usa a de maior prioridade
+
+**TradingSystem Priority Allocation:**
+
+| Service | Priority | Rule | Rationale |
+|---------|----------|------|-----------|
+| Workspace API | 100 | `/api/workspace` | Specific path, high priority |
+| Telegram Gateway | 95 | `/api/telegram-gateway` | Specific path |
+| TP Capital API | 90 | `/api/tp-capital` | Specific path |
+| Documentation API | 85 | `/api/docs` | Specific path |
+| Docs Hub | 50 | `/docs` | Specific path, lower than APIs |
+| Dashboard UI | 1 | `/` | Catch-all, lowest priority |
+
+**Por que essa ordem?**
+- ✅ Rotas específicas (`/api/workspace`) antes de genéricas (`/`)
+- ✅ APIs (100-85) antes de UIs (50-1)
+- ✅ Catch-all (`/`) por último (default route)
+
+### Path Rewriting
+
+**Problema:**
+```
+Browser → http://localhost:9082/api/workspace/items
+Traefik (sem rewrite) → workspace-api:3200/api/workspace/items
+Workspace API expects → workspace-api:3200/api/items
+Result: 404 Not Found
+```
+
+**Solution 1: StripPrefix Middleware**
+```yaml
+labels:
+  - "traefik.http.middlewares.workspace-strip.stripprefix.prefixes=/api/workspace"
+  - "traefik.http.routers.workspace.middlewares=workspace-strip"
+```
+
+**Result:**
+```
+Browser → /api/workspace/items
+Traefik (stripprefix) → /items
+Workspace API → Handles /items correctly
+```
+
+**Solution 2: API Design (No Rewrite Needed)**
+```javascript
+// Workspace API routes
+app.get('/api/workspace/items', ...);
+app.get('/api/workspace/items/:id', ...);
+```
+
+**TradingSystem usa Solution 2** (API handles full path).
+
+### Middlewares
+
+**File:** `tools/traefik/dynamic/middlewares.yml`
+
+#### CORS Middleware
+```yaml
+http:
+  middlewares:
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        accessControlAllowOriginList:
+          - "http://localhost:5173"  # Vite Dev Server
+          - "http://localhost:9082"  # Production Dashboard
+          - "http://localhost:8092"  # Dashboard Direct Access
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+          - "X-API-Key"
+          - "X-Requested-With"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 100
+```
+
+**Aplicação:**
+```yaml
+labels:
+  - "traefik.http.routers.workspace.middlewares=cors-headers@file"
+```
+
+#### Rate Limiting
+```yaml
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 100        # 100 requests per minute
+        period: "1m"
+        burst: 50           # Allow bursts up to 50
+        sourceCriterion:
+          ipStrategy:
+            depth: 1        # Use first IP in X-Forwarded-For
+```
+
+**Purpose:**
+- ✅ Protege contra DDoS
+- ✅ Evita abuse de API
+- ✅ Garante fair usage
+
+#### Compression
+```yaml
+http:
+  middlewares:
+    compress:
+      compress:
+        excludedContentTypes:
+          - "text/event-stream"  # SSE streams
+          - "application/grpc"   # gRPC
+        minResponseBodyBytes: 1024  # Only compress >1KB
+```
+
+**Algoritmos suportados:**
+- gzip (default)
+- brotli (se cliente suporta)
+
+#### Circuit Breaker
+```yaml
+http:
+  middlewares:
+    circuit-breaker:
+      circuitBreaker:
+        expression: "NetworkErrorRatio() > 0.20"  # Open if >20% errors
+        checkPeriod: "10s"
+        fallbackDuration: "30s"
+        recoveryDuration: "10s"
+```
+
+**States:**
+1. **Closed** - Normal operation (requests passam)
+2. **Open** - Muitos erros (requests rejeitados imediatamente)
+3. **Half-Open** - Testing recovery (alguns requests passam)
+
+**Use case:**
+- ✅ API backend está down → Circuit breaker abre
+- ✅ Requests retornam 503 Service Unavailable (rápido)
+- ✅ Evita sobrecarregar API já problemática
+
+#### Security Headers
+```yaml
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true                     # X-Frame-Options: DENY
+        contentTypeNosniff: true            # X-Content-Type-Options: nosniff
+        browserXssFilter: true              # X-XSS-Protection: 1; mode=block
+        stsSeconds: 31536000                # Strict-Transport-Security (HTTPS only)
+        stsIncludeSubdomains: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+```
+
+#### Middleware Chain
+```yaml
+http:
+  middlewares:
+    api-standard:
+      chain:
+        middlewares:
+          - "cors-headers"
+          - "rate-limit"
+          - "compress"
+          - "circuit-breaker"
+          - "security-headers"
+```
+
+**Aplicação:**
+```yaml
+labels:
+  - "traefik.http.routers.workspace.middlewares=api-standard@file"
+```
+
+**Ordem de execução:**
+```
+Request → CORS → Rate Limit → Compress → Circuit Breaker → Security Headers → Backend
+```
+
+### Health Checks
+
+**Traefik auto-detecta health de serviços:**
+
+**Configuração (Workspace API):**
+```yaml
+services:
+  workspace-api:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3200/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+```
+
+**Traefik behavior:**
+- ✅ Se health check **passa** → Roteie requests
+- ❌ Se health check **falha** → Marque como unhealthy (não roteia)
+- ⚠️ Se **todos backends unhealthy** → 503 Service Unavailable
+
+**Dashboard:** http://localhost:9083/dashboard/ mostra health status de todos os serviços.
+
+### Traefik Dashboard
+
+**Access:** http://localhost:9083/dashboard/
+
+**Features:**
+- ✅ Visualizar routers (rules, priorities, middlewares)
+- ✅ Visualizar services (backends, health status)
+- ✅ Visualizar middlewares (configurações)
+- ✅ Visualizar entrypoints (portas expostas)
+- ✅ Métricas em tempo real (requests/s, errors/s)
+- ✅ Access logs (last 100 requests)
+
+**Debugging workflow:**
+1. Abrir dashboard
+2. HTTP → Routers → Encontrar seu router
+3. Verificar rule, priority, middlewares
+4. Clicar em Service → Ver health status
+5. Verificar se requests estão chegando (metrics)
+
+---
+
+## ⚡ Vite Dev Server Proxy
+
+### O que é Vite Proxy?
+
+**Vite** possui um **built-in development proxy** que:
+- ✅ Intercepta requests no dev server
+- ✅ Forwards para backend services
+- ✅ Mantém hot reload funcionando
+- ✅ Evita CORS issues (same-origin)
+- ✅ Permite usar paths relativos no código
+
+### Configuration
+
+**File:** `frontend/dashboard/vite.config.ts`
+
+```typescript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  server: {
+    port: 5173,
+    host: true, // Allow external access (from host)
+    proxy: {
+      // Workspace API
+      '/api/workspace': {
+        target: process.env.WORKSPACE_PROXY_TARGET || 'http://workspace-api:3200',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workspace/, '/api'),
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log(`[Vite Proxy] ${req.method} ${req.url} → ${options.target}${proxyReq.path}`);
+          });
+        }
+      },
+
+      // TP Capital API
+      '/api/tp-capital': {
+        target: process.env.TP_CAPITAL_PROXY_TARGET || 'http://tp-capital-api:4005',
+        changeOrigin: true,
+      },
+
+      // Telegram Gateway API
+      '/api/telegram-gateway': {
+        target: process.env.TELEGRAM_GATEWAY_PROXY_TARGET || 'http://telegram-gateway-api:4010',
+        changeOrigin: true,
+      },
+
+      // Documentation API
+      '/api/docs': {
+        target: process.env.DOCUMENTATION_PROXY_TARGET || 'http://documentation-api:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/docs/, '/api'),
+      },
+
+      // Docs Hub
+      '/docs': {
+        target: 'http://docs-hub:80',
+        changeOrigin: true,
+      }
+    }
+  }
+});
+```
+
+### Proxy Options
+
+| Option | Type | Purpose | Example |
+|--------|------|---------|---------|
+| `target` | string | Backend URL | `http://workspace-api:3200` |
+| `changeOrigin` | boolean | Change `Host` header | `true` |
+| `rewrite` | function | Path transformation | `path.replace(...)` |
+| `configure` | function | Proxy event handlers | Logging, headers |
+| `secure` | boolean | Verify SSL certs | `false` (dev) |
+| `ws` | boolean | Proxy WebSocket | `true` |
+| `headers` | object | Add/override headers | `{'X-Custom': 'value'}` |
+
+### Environment Variables (.env)
+
+**CRITICAL RULE: NO `VITE_` PREFIX FOR PROXY TARGETS!**
+
+```bash
+# ❌ WRONG - Exposed to browser (security risk)
+VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+VITE_TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+
+# ✅ CORRECT - Server-side only (not exposed)
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+TELEGRAM_GATEWAY_PROXY_TARGET=http://telegram-gateway-api:4010
+DOCUMENTATION_PROXY_TARGET=http://documentation-api:3000
+
+# ✅ OK - Safe to expose (browser uses this)
+VITE_API_BASE_URL=http://localhost:9082
+VITE_ENVIRONMENT=development
+```
+
+**Why no `VITE_` prefix?**
+- ❌ Vite expõe `VITE_*` variables ao browser bundle
+- ❌ Browser tenta conectar em `http://workspace-api:3200` (falha)
+- ❌ Revela topologia interna da rede
+- ✅ Server-side variables ficam apenas no Vite dev server
+
+### Path Rewriting
+
+**Example 1: Workspace API**
+
+```
+Browser → http://localhost:5173/api/workspace/items
+         ↓
+Vite Proxy detects: /api/workspace
+         ↓
+Rewrite: /api/workspace/items → /api/items
+         ↓
+Forward to: http://workspace-api:3200/api/items
+         ↓
+Backend handles /api/items
+```
+
+**Config:**
+```typescript
+'/api/workspace': {
+  target: 'http://workspace-api:3200',
+  rewrite: (path) => path.replace(/^\/api\/workspace/, '/api')
+}
+```
+
+**Example 2: TP Capital API (No Rewrite)**
+
+```
+Browser → http://localhost:5173/api/tp-capital/signals
+         ↓
+Vite Proxy detects: /api/tp-capital
+         ↓
+NO rewrite (API handles full path)
+         ↓
+Forward to: http://tp-capital-api:4005/api/tp-capital/signals
+         ↓
+Backend handles /api/tp-capital/signals
+```
+
+**Config:**
+```typescript
+'/api/tp-capital': {
+  target: 'http://tp-capital-api:4005',
+  // NO rewrite - API expects /api/tp-capital/* path
+}
+```
+
+### Logging Proxy Requests
+
+**Configure logger:**
+```typescript
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    configure: (proxy, options) => {
+      proxy.on('proxyReq', (proxyReq, req, res) => {
+        const originalUrl = req.url;
+        const targetUrl = `${options.target}${proxyReq.path}`;
+        console.log(`[Vite Proxy] ${req.method} ${originalUrl} → ${targetUrl}`);
+      });
+
+      proxy.on('proxyRes', (proxyRes, req, res) => {
+        console.log(`[Vite Proxy] Response ${proxyRes.statusCode} for ${req.url}`);
+      });
+
+      proxy.on('error', (err, req, res) => {
+        console.error(`[Vite Proxy] Error for ${req.url}:`, err.message);
+      });
+    }
+  }
+}
+```
+
+**Output:**
+```
+[Vite Proxy] GET /api/workspace/items → http://workspace-api:3200/api/items
+[Vite Proxy] Response 200 for /api/workspace/items
+```
+
+### WebSocket Proxy
+
+**Enable WS proxying:**
+```typescript
+'/api/websocket': {
+  target: 'ws://websocket-server:8080',
+  ws: true,  // Enable WebSocket proxy
+  changeOrigin: true,
+}
+```
+
+**Browser code:**
+```typescript
+const ws = new WebSocket('ws://localhost:5173/api/websocket');
+// Vite proxies to ws://websocket-server:8080
+```
+
+---
+
+## 🔍 Debugging
+
+### Traefik Gateway Debugging
+
+#### 1. Check Dashboard
+```
+URL: http://localhost:9083/dashboard/
+Steps:
+1. HTTP → Routers → Find your router
+2. Verify rule, priority, middlewares
+3. Click Service → Check health status
+4. HTTP → Services → See backend servers
+```
+
+#### 2. Check Logs
+```bash
+# Real-time logs
+docker logs -f api-gateway
+
+# Filter for specific service
+docker logs api-gateway 2>&1 | grep workspace
+
+# Filter errors only
+docker logs api-gateway 2>&1 | grep -i error
+```
+
+#### 3. Check Container Networks
+```bash
+# Gateway must be in service networks
+docker network inspect tradingsystem_backend | grep -A 5 api-gateway
+docker network inspect tradingsystem_frontend | grep -A 5 api-gateway
+```
+
+#### 4. Validate Service Labels
+```bash
+# Check Workspace API labels
+docker inspect workspace-api | jq '.[0].Config.Labels'
+
+# Expected:
+# "traefik.enable": "true"
+# "traefik.http.routers.workspace.rule": "PathPrefix(`/api/workspace`)"
+# "traefik.http.routers.workspace.priority": "100"
+```
+
+#### 5. Test Routing Manually
+```bash
+# Via Gateway
+curl -i http://localhost:9082/api/workspace/health
+
+# Expected:
+# HTTP/1.1 200 OK
+# Access-Control-Allow-Origin: http://localhost:5173
+# Content-Encoding: gzip
+# X-Frame-Options: DENY
+```
+
+#### 6. Check Middleware Application
+```bash
+# Check CORS headers
+curl -i http://localhost:9082/api/workspace/items \
+  -H "Origin: http://localhost:5173"
+
+# Expected:
+# Access-Control-Allow-Origin: http://localhost:5173
+# Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+```
+
+### Vite Proxy Debugging
+
+#### 1. Enable Debug Logs
+```typescript
+// vite.config.ts
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api/workspace': {
+        target: 'http://workspace-api:3200',
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log(`→ ${req.method} ${req.url} → ${proxyReq.path}`);
+          });
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log(`← ${proxyRes.statusCode} for ${req.url}`);
+          });
+          proxy.on('error', (err, req) => {
+            console.error(`✗ Proxy error for ${req.url}:`, err.message);
+          });
+        }
+      }
+    }
+  }
+});
+```
+
+#### 2. Test Direct Container Access
+```bash
+# Inside Dev Container
+curl http://workspace-api:3200/api/items
+
+# If this fails, container networking is broken
+# Check: docker network inspect tradingsystem_backend
+```
+
+#### 3. Validate Environment Variables
+```bash
+# Inside Dev Container
+node -e "console.log(process.env.WORKSPACE_PROXY_TARGET)"
+
+# Expected: http://workspace-api:3200
+# If undefined, .env is not loaded correctly
+```
+
+#### 4. Check Browser Network Tab
+```
+1. Open DevTools (F12)
+2. Network tab
+3. Make request to /api/workspace/items
+4. Check:
+   - Request URL: http://localhost:5173/api/workspace/items
+   - Status: 200 OK
+   - Response Headers: Content-Type, etc
+   - Response Body: JSON data
+```
+
+#### 5. Test Path Rewriting
+```bash
+# Terminal 1: Start Vite with logs
+cd frontend/dashboard
+npm run dev
+
+# Terminal 2: Make request
+curl http://localhost:5173/api/workspace/items
+
+# Check Terminal 1 logs:
+# [Vite Proxy] GET /api/workspace/items → http://workspace-api:3200/api/items
+# ← 200 for /api/workspace/items
+```
+
+---
+
+## ⚠️ Common Issues
+
+### Issue 1: "API Indisponível" - Vite Proxy
+
+**Symptoms:**
+- Dashboard shows "API Indisponível"
+- Console: `Failed to fetch`
+- Network tab: Status (failed)
+
+**Root Cause:** `VITE_` prefix em proxy target
+
+**Fix:**
+```bash
+# .env - REMOVE VITE_ prefix
+# BEFORE:
+VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+# AFTER:
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
+
+**Rebuild:**
+```bash
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+```
+
+### Issue 2: 404 Not Found - Traefik
+
+**Symptoms:**
+- Gateway returns 404
+- Dashboard shows router exists
+- Health check passes
+
+**Root Cause:** Path rewriting incorreto
+
+**Debug:**
+```bash
+# Check backend logs
+docker logs workspace-api 2>&1 | grep -i "not found"
+
+# Expected request path: /api/items
+# Actual request path: /api/workspace/items (wrong!)
+```
+
+**Fix:**
+```yaml
+# Add stripprefix middleware
+labels:
+  - "traefik.http.middlewares.workspace-strip.stripprefix.prefixes=/api/workspace"
+  - "traefik.http.routers.workspace.middlewares=workspace-strip"
+```
+
+### Issue 3: CORS Blocked
+
+**Symptoms:**
+- Console: `CORS policy: No 'Access-Control-Allow-Origin' header`
+- Network tab: Status 200, but response blocked
+
+**Root Cause:** CORS middleware não aplicado
+
+**Fix:**
+```yaml
+# Apply CORS middleware to router
+labels:
+  - "traefik.http.routers.workspace.middlewares=cors-headers@file"
+```
+
+**Verify:**
+```bash
+curl -i http://localhost:9082/api/workspace/items \
+  -H "Origin: http://localhost:5173"
+
+# Expected header:
+# Access-Control-Allow-Origin: http://localhost:5173
+```
+
+### Issue 4: Rate Limit Exceeded
+
+**Symptoms:**
+- Status 429 Too Many Requests
+- Header: `X-Rate-Limit-Limit: 100`
+
+**Root Cause:** Burst limit atingido
+
+**Temporary Fix:**
+```yaml
+# Increase limits (dev only!)
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 1000  # 1000 req/min
+        burst: 500     # Burst 500
+```
+
+**Permanent Fix:** Optimize frontend code (reduce API calls, add caching)
+
+### Issue 5: Circuit Breaker Opened
+
+**Symptoms:**
+- Status 503 Service Unavailable
+- Traefik Dashboard: Circuit breaker "Open"
+
+**Root Cause:** Backend teve >20% error rate
+
+**Debug:**
+```bash
+# Check backend health
+docker logs workspace-api 2>&1 | grep -i error | tail -20
+
+# Check health endpoint
+curl http://workspace-api:3200/api/health
+```
+
+**Fix:**
+1. Resolver erro no backend
+2. Aguardar recovery period (30s)
+3. Circuit breaker volta para "Half-Open" → "Closed"
+
+---
+
+## 📖 Documentação Relacionada
+
+### Guias Complementares
+- **[Overview](./overview.mdx)** - Visão geral do Dev Container
+- **[Architecture](./architecture.mdx)** - Arquitetura detalhada
+- **[API Access](./api-access.mdx)** - Padrões de acesso a APIs
+- **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
+- **[Troubleshooting](./troubleshooting.mdx)** - Problemas comuns
+
+### Governança
+- **[Dev Container Policy](../../../governance/policies/dev-container-policy.md)** - Políticas de uso
+- **[API Gateway Policy](../../../governance/policies/api-gateway-policy.md)** - Traefik governance
+
+### Frontend Engineering
+- **[Proxy Best Practices](../../frontend/engineering/PROXY-BEST-PRACTICES.md)** - Guia completo
+- **[AI Agent Proxy Guide](../../frontend/engineering/AI-AGENT-PROXY-GUIDE.md)** - Para AI agents
+
+---
+
+## ❓ FAQ
+
+### Qual a diferença entre Traefik e Vite Proxy?
+
+**Traefik:**
+- ✅ Production-ready reverse proxy
+- ✅ Múltiplas backends, load balancing
+- ✅ Middlewares (CORS, rate limit, etc)
+- ✅ Health checks, circuit breakers
+- ✅ Métricas Prometheus
+- ⚠️ Requer rebuild para mudanças
+
+**Vite Proxy:**
+- ✅ Development-only proxy
+- ✅ Hot reload preservado
+- ✅ Simples de configurar
+- ✅ Fast feedback loop
+- ⚠️ Sem middlewares avançados
+- ⚠️ Apenas para dev mode
+
+### Posso usar ambos ao mesmo tempo?
+
+**Sim!** É exatamente o que fazemos:
+
+```
+Development: Browser → Vite Proxy → APIs
+Production: Browser → Traefik Gateway → APIs
+```
+
+Vite automaticamente desativa proxy em production build.
+
+### Como adicionar um novo serviço ao Traefik?
+
+**1. Add Docker labels ao compose file:**
+```yaml
+services:
+  new-service:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.newservice.rule=PathPrefix(`/api/new`)"
+      - "traefik.http.routers.newservice.priority=80"
+      - "traefik.http.services.newservice.loadbalancer.server.port=3000"
+```
+
+**2. Add service à rede Traefik:**
+```yaml
+networks:
+  - tradingsystem_backend
+```
+
+**3. Restart stack:**
+```bash
+docker compose -f tools/compose/docker-compose.new-service.yml up -d
+```
+
+**4. Verify no Traefik Dashboard:**
+```
+http://localhost:9083/dashboard/
+→ HTTP → Routers → "newservice" deve aparecer
+```
+
+### Como adicionar novo proxy no Vite?
+
+**1. Add environment variable:**
+```bash
+# .env
+NEW_SERVICE_PROXY_TARGET=http://new-service:3000
+```
+
+**2. Update vite.config.ts:**
+```typescript
+proxy: {
+  '/api/new': {
+    target: process.env.NEW_SERVICE_PROXY_TARGET,
+    changeOrigin: true,
+  }
+}
+```
+
+**3. Rebuild container:**
+```bash
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+```
+
+**4. Test:**
+```bash
+curl http://localhost:5173/api/new/health
+```
+
+---
+
+**Última revisão:** 2025-11-12
+**Status:** ✅ Ativo
+**Próxima revisão:** 2026-02-12 (3 meses)

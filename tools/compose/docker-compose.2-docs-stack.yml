@@ -34,7 +34,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       # Docusaurus build (static site)
-      - ../../docs/build:/usr/share/nginx/html:ro
+      - ../../docs/build:/usr/share/nginx/html
       # OpenAPI/AsyncAPI specifications (shared with dashboard)
       - ../../frontend/dashboard/public/specs:/data/specs:ro
     restart: unless-stopped
@@ -67,8 +67,8 @@ services:
       # Service Configuration (backend target)
       - "traefik.http.services.docs-hub.loadbalancer.server.port=80"
 
-      # Middlewares (strip /docs prefix)
-      - "traefik.http.routers.docs-hub.middlewares=docs-stripprefix,static-standard@file"
+      # Middlewares (strip /docs prefix only - no @file middleware due to WSL2 issues)
+      - "traefik.http.routers.docs-hub.middlewares=docs-stripprefix"
       - "traefik.http.middlewares.docs-stripprefix.stripprefix.prefixes=/docs"
 
       # Health Check
@@ -148,8 +148,8 @@ services:
       # Service Configuration (backend target)
       - "traefik.http.services.docs-api.loadbalancer.server.port=3000"
 
-      # Middlewares (path transformation + standard API chain)
-      - "traefik.http.routers.docs-api.middlewares=docs-api-stripprefix,api-standard@file"
+      # Middlewares (path transformation only - no @file middleware due to WSL2 issues)
+      - "traefik.http.routers.docs-api.middlewares=docs-api-stripprefix"
 
       # Path transformation: /api/docs/X → /X (API has routes at root like /health, /search)
       - "traefik.http.middlewares.docs-api-stripprefix.stripprefix.prefixes=/api/docs"

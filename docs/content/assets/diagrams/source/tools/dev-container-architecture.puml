@@ -1,0 +1,194 @@
+@startuml dev-container-architecture
+!theme blueprint
+title Dev Container - Complete Architecture (2025-11-12)
+
+' ==============================================================================
+' LEGEND
+' ==============================================================================
+legend right
+  |= Color |= Component Type |
+  |<#lightblue> | Dev Container Components |
+  |<#lightgreen> | Docker Services (Host) |
+  |<#lightyellow> | Infrastructure |
+  |<#lightcoral> | Host System |
+  |<#lavender> | External Access |
+endlegend
+
+' ==============================================================================
+' HOST SYSTEM
+' ==============================================================================
+package "Host System (Windows/Mac/Linux)" #lightcoral {
+  component "Docker Desktop\n(Docker Daemon)" as docker_desktop #lightcoral
+  component "VS Code\n(UI Interface)" as vscode_host #lightcoral
+  component "Browser\n(Chrome/Firefox)" as browser #lavender
+}
+
+' ==============================================================================
+' DEV CONTAINER
+' ==============================================================================
+package "Dev Container (Docker Container)" #lightblue {
+  component "VS Code Server\n(Remote Extension Host)" as vscode_server #lightblue
+  component "Zsh + Oh My Zsh\n(Shell with Powerlevel10k)" as shell #lightblue
+  component "Node.js 20 LTS\n(via nvm)" as nodejs #lightblue
+  component "Python 3.12\n(via pyenv)" as python #lightblue
+  component "Docker CLI\n(connected to host daemon)" as docker_cli #lightblue
+  component "Git + GitHub CLI\n(Version Control)" as git #lightblue
+  component "direnv\n(Auto-activate venv)" as direnv #lightblue
+}
+
+' ==============================================================================
+' DOCKER SERVICES (Host Daemon)
+' ==============================================================================
+package "Docker Services (Running on Host)" #lightgreen {
+  component "Traefik Gateway\n(Ports: 9082, 9083)" as traefik #lightyellow
+
+  package "Backend APIs" {
+    component "Workspace API\n(Port: 3200)" as workspace_api #lightgreen
+    component "TP Capital API\n(Port: 4005)" as tp_api #lightgreen
+    component "Telegram Gateway API\n(Port: 4010)" as telegram_api #lightgreen
+    component "Documentation API\n(Port: 3000)" as docs_api #lightgreen
+  }
+
+  package "Frontend Apps" {
+    component "Dashboard UI\n(Port: 3103)" as dashboard #lightgreen
+    component "Docs Hub\n(Docusaurus)" as docs_hub #lightgreen
+  }
+
+  package "Databases" {
+    database "workspace-db\n(PostgreSQL)" as workspace_db #lightyellow
+    database "tp-capital-timescale\n(TimescaleDB)" as tp_db #lightyellow
+    database "telegram-timescale\n(TimescaleDB)" as telegram_db #lightyellow
+    database "Redis HA\n(Master + Replica + Sentinel)" as redis #lightyellow
+  }
+
+  package "Monitoring" {
+    component "Prometheus\n(Port: 9090)" as prometheus #lightyellow
+    component "Grafana\n(Port: 3100)" as grafana #lightyellow
+  }
+}
+
+' ==============================================================================
+' CONNECTIONS - HOST TO DEV CONTAINER
+' ==============================================================================
+vscode_host --> vscode_server : "Remote Extension\n(SSH-like connection)"
+browser --> traefik : "http://localhost:9082"
+
+' ==============================================================================
+' CONNECTIONS - DEV CONTAINER TO DOCKER
+' ==============================================================================
+vscode_server --> shell : "Integrated Terminal"
+shell --> nodejs : "npm/node commands"
+shell --> python : "python/pip commands"
+shell --> docker_cli : "docker/docker compose"
+shell --> git : "git/gh commands"
+shell --> direnv : "Auto-activate on cd"
+
+docker_cli --> docker_desktop : "/var/run/docker.sock\n(Docker Socket Mount)"
+
+' ==============================================================================
+' CONNECTIONS - DOCKER SERVICES
+' ==============================================================================
+docker_desktop --> traefik : "Manage Container"
+docker_desktop --> workspace_api : "Manage Container"
+docker_desktop --> tp_api : "Manage Container"
+docker_desktop --> telegram_api : "Manage Container"
+docker_desktop --> docs_api : "Manage Container"
+docker_desktop --> dashboard : "Manage Container"
+docker_desktop --> docs_hub : "Manage Container"
+docker_desktop --> workspace_db : "Manage Container"
+docker_desktop --> tp_db : "Manage Container"
+docker_desktop --> telegram_db : "Manage Container"
+docker_desktop --> redis : "Manage Container"
+docker_desktop --> prometheus : "Manage Container"
+docker_desktop --> grafana : "Manage Container"
+
+' ==============================================================================
+' CONNECTIONS - TRAEFIK ROUTING
+' ==============================================================================
+traefik --> dashboard : "Route: /\n(Priority: 1)"
+traefik --> docs_hub : "Route: /docs\n(Priority: 50)"
+traefik --> workspace_api : "Route: /api/workspace\n(Priority: 100)"
+traefik --> tp_api : "Route: /api/tp-capital\n(Priority: 90)"
+traefik --> telegram_api : "Route: /api/telegram-gateway\n(Priority: 95)"
+traefik --> docs_api : "Route: /api/docs\n(Priority: 85)"
+
+' ==============================================================================
+' CONNECTIONS - APIs TO DATABASES
+' ==============================================================================
+workspace_api --> workspace_db : "SQL Queries"
+tp_api --> tp_db : "TimescaleDB Queries"
+telegram_api --> telegram_db : "TimescaleDB Queries"
+
+workspace_api --> redis : "Cache Read/Write"
+tp_api --> redis : "Cache Read/Write"
+telegram_api --> redis : "Cache Read/Write"
+
+' ==============================================================================
+' CONNECTIONS - MONITORING
+' ==============================================================================
+prometheus --> workspace_api : "Scrape /metrics"
+prometheus --> tp_api : "Scrape /metrics"
+prometheus --> telegram_api : "Scrape /metrics"
+prometheus --> workspace_db : "DB Metrics (via exporter)"
+prometheus --> redis : "Cache Metrics (via exporter)"
+
+grafana --> prometheus : "Query Metrics\n(PromQL)"
+
+' ==============================================================================
+' NOTES
+' ==============================================================================
+note right of docker_cli
+  **Docker Socket Mount:**
+  - Dev Container CLI connects to Host Daemon
+  - Commands executed INSIDE container
+  - Containers created ON HOST
+  - Full access to Docker API
+  ⚠️ Security: Equivalent to root access
+end note
+
+note bottom of vscode_server
+  **VS Code Server:**
+  - Installed automatically by Remote Extension
+  - Extensions run INSIDE container
+  - Terminal is inside container
+  - Full access to workspace mount
+end note
+
+note bottom of traefik
+  **Traefik Features:**
+  - Automatic service discovery (Docker labels)
+  - Health checks (every 30s)
+  - Rate limiting (100 req/min per IP)
+  - CORS configuration
+  - Request compression (gzip/brotli)
+  - Circuit breakers
+  - Prometheus metrics export
+  - JSON access logs
+end note
+
+note right of shell
+  **Zsh Configuration:**
+  - Default shell (chsh -s zsh)
+  - Oh My Zsh framework
+  - Powerlevel10k theme
+  - Plugins: git, docker, docker-compose, npm, node
+  - direnv hook for auto-activation
+end note
+
+note left of nodejs
+  **Node.js via nvm:**
+  - Version: 20.x LTS
+  - Global packages: npm@latest, pnpm@latest
+  - Path: ~/.nvm/versions/node/v20.x.x/bin/node
+  - Isolated from host Node.js
+end note
+
+note left of python
+  **Python via pyenv:**
+  - Version: 3.12.x
+  - Virtual env: /workspace/.venv (named volume)
+  - Auto-activated by direnv on cd /workspace
+  - Isolated from host Python
+end note
+
+@enduml

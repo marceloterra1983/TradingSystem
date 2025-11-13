@@ -1,0 +1,169 @@
+@startuml tp-capital-network-architecture
+!theme vibrant
+title TP Capital - Network Architecture & Container Communication (2025-11-12)
+
+!define CONTAINER_COLOR #4A90E2
+!define NETWORK_COLOR #E8F4F8
+!define DATABASE_COLOR #2ECC71
+!define CACHE_COLOR #F39C12
+
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+package "Windows Host (localhost)" {
+    [Browser] <<Windows>> #FFE6E6
+    note right of Browser
+        Accesses:
+        http://localhost:9082
+
+        Environment:
+        - Native Windows
+        - No Docker access
+    end note
+}
+
+cloud "Docker Desktop\n(WSL2 Backend)" {
+
+    rectangle "tradingsystem_backend network\n172.80.0.0/24" as BackendNet #NETWORK_COLOR {
+
+        component "api-gateway" as Gateway CONTAINER_COLOR {
+            port "9080" as gw_internal
+            port "9082" as gw_external
+            note bottom of Gateway
+                **Traefik v3.0**
+                Internal: :9080
+                Host: :9082
+
+                **Labels:**
+                - Service Discovery
+                - Auto Routing
+                - Health Checks
+            end note
+        }
+
+        component "dashboard-ui" as Dashboard CONTAINER_COLOR {
+            port "3103" as dash_internal
+            port "8092" as dash_external
+            note bottom of Dashboard
+                **React + Vite**
+                Internal: :3103
+                Host: :8092
+
+                **Env:**
+                VITE_API_BASE_URL=
+                  http://localhost:9082
+                VITE_TP_CAPITAL_API_KEY=
+                  bbf913da...
+            end note
+        }
+
+        component "tp-capital-api" as TPCapitalAPI CONTAINER_COLOR {
+            port "4005" as api_port
+            note bottom of TPCapitalAPI
+                **Node.js/Express**
+                Port: :4005 (internal only)
+
+                **Features:**
+                - X-API-Key validation
+                - Redis caching
+                - Rate limiting
+            end note
+        }
+
+        component "workspace-api" as WorkspaceAPI CONTAINER_COLOR {
+            port "3200" as ws_port
+        }
+    }
+
+    rectangle "tp_capital_backend network\n172.80.0.0/24" as TPCapitalNet #NETWORK_COLOR {
+
+        database "tp-capital-timescale" as TimescaleDB DATABASE_COLOR {
+            port "5432" as db_port
+            note bottom of TimescaleDB
+                **TimescaleDB/PostgreSQL 16**
+                Port: :5432 (internal only)
+
+                **Schemas:**
+                - signals.tp_capital_signals
+                - forwarded_messages.messages
+                - metrics.processing_stats
+
+                **Data:**
+                87 signals stored
+            end note
+        }
+
+        component "tp-capital-pgbouncer" as PgBouncer CONTAINER_COLOR {
+            port "6432" as pgb_port
+            note right of PgBouncer
+                **Connection Pooling**
+                Max Connections: 100
+                Pool Mode: Transaction
+            end note
+        }
+
+        database "tp-capital-redis-master" as RedisMaster CACHE_COLOR {
+            port "6379" as redis_master_port
+            note bottom of RedisMaster
+                **Redis 7 Alpine**
+                Cache TTL: 30s
+                Hit Rate: ~80%
+            end note
+        }
+
+        database "tp-capital-redis-replica" as RedisReplica CACHE_COLOR {
+            port "6379" as redis_replica_port
+        }
+    }
+
+    rectangle "tradingsystem_frontend network" as FrontendNet #NETWORK_COLOR {
+        note bottom of FrontendNet
+            Used for static assets
+            and frontend-only services
+        end note
+    }
+}
+
+' External connections
+Browser -down-> gw_external : **HTTP**\nhttp://localhost:9082/api/tp-capital/*\n**Header:** X-API-Key
+gw_external -up-> Browser : **Response**\n+ CORS headers
+
+' Internal gateway routing
+Gateway -right-> TPCapitalAPI : **Internal**\nhttp://tp-capital-api:4005/*\n**StripPrefix applied**
+Gateway -left-> Dashboard : **Health checks**\nhttp://dashboard-ui:3103/health
+Gateway --> WorkspaceAPI : http://workspace-api:3200
+
+' TP Capital API connections
+TPCapitalAPI -down-> TimescaleDB : **Direct**\npostgres://tp-capital-timescale:5432
+TPCapitalAPI --> RedisMaster : **Cache**\nredis://tp-capital-redis-master:6379
+TPCapitalAPI -.-> PgBouncer : **Disabled**\n(auth issues)
+
+' Database replication
+RedisMaster -.-> RedisReplica : **Replication**\nAsync
+PgBouncer -.-> TimescaleDB : **Connection Pool**
+
+' Network membership
+TPCapitalAPI -[hidden]- TimescaleDB
+Gateway -[hidden]- TPCapitalAPI
+
+legend right
+    **Port Mapping Convention:**
+    - 9080-9099: API Gateway range
+    - 8090-8099: Dashboard UI range
+    - 4000-4099: Application APIs
+    - 5432: PostgreSQL/TimescaleDB
+    - 6379: Redis
+    - 6432: PgBouncer
+
+    **Network Strategy:**
+    - tradingsystem_backend: Gateway + APIs
+    - tp_capital_backend: TP Capital stack internal
+    - tradingsystem_frontend: Static assets
+
+    **Security:**
+    - No direct database port exposure to host
+    - All traffic through Gateway (port 9082)
+    - API key validation at application layer
+end legend
+
+@enduml

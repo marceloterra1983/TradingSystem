@@ -44,6 +44,7 @@ const sharedCacheCandidates = [
   path.resolve(__dirname, "../../../../shared/cache/redis-cache.js"),
   path.resolve(process.cwd(), "backend/shared/cache/redis-cache.js"),
   "/app/backend/shared/cache/redis-cache.js",
+  "/shared/cache/redis-cache.js",
 ];
 
 let redisCacheModule = null;

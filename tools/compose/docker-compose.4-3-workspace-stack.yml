@@ -127,9 +127,10 @@ services:
       - WORKSPACE_PORT=3200
       - NODE_ENV=${NODE_ENV:-development}
       - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_PATH=/app/node_modules
 
-      # Database Strategy (TEMPORARY: lowdb due to Docker network issues after system reboot)
-      - LIBRARY_DB_STRATEGY=lowdb
+      # Database Strategy (ensure Timescale/Postgres is used for full CRUD support)
+      - LIBRARY_DB_STRATEGY=postgresql
 
       # PostgreSQL Connection (via internal Docker network)
       - POSTGRES_HOST=workspace-db
@@ -158,16 +159,13 @@ services:
       - RATE_LIMIT_WINDOW_MS=60000
       - RATE_LIMIT_MAX=120
 
-    volumes:
-      # Hot-reload: mount source code
-      - ../../backend/api/workspace/src:/app/src:ro
-      - ../../backend/api/workspace/scripts:/app/scripts:ro
-
-      # Mount shared modules for hot-reload
-      - ../../backend/shared:/app/backend/shared:ro
-
-      # Anonymous volume prevents overwrite
-      - /app/node_modules
+    # NOTE:
+    #   Bind mounts for source code were removed because the devcontainer mount
+    #   (`/workspace`) uses private propagation, which results in empty folders
+    #   when nested containers try to mount the same paths. The image already
+    #   bundles the source and shared modules during build, so running without
+    #   bind mounts guarantees the API boots correctly. Rebuild the image to
+    #   pick up local changes.
 
     networks:
       - tradingsystem_backend
@@ -223,12 +221,11 @@ services:
       - "traefik.http.services.workspace-api.loadbalancer.server.port=3200"
 
       # Middlewares (path transformation, CORS, compression, rate limit)
-      - "traefik.http.routers.workspace-api.middlewares=workspace-strip,workspace-cors,workspace-compress,workspace-ratelimit"
+      - "traefik.http.routers.workspace-api.middlewares=workspace-pathrewrite,workspace-cors,workspace-compress,workspace-ratelimit"
 
-      # Path transformation: Strip /api/workspace prefix
-      # /api/workspace/health → /health
-      # /api/workspace/items → /api/items (the /api is already in the target path)
-      - "traefik.http.middlewares.workspace-strip.stripprefix.prefixes=/api/workspace"
+      # Path transformation: rewrite /api/workspace/* → /api/*
+      - "traefik.http.middlewares.workspace-pathrewrite.replacepathregex.regex=^/api/workspace/?(.*)"
+      - "traefik.http.middlewares.workspace-pathrewrite.replacepathregex.replacement=/$$1"
 
       # CORS Middleware
       - "traefik.http.middlewares.workspace-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,PATCH,OPTIONS"

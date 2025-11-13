@@ -14,15 +14,14 @@ services:
     environment:
       LAUNCHER_API_PORT: ${LAUNCHER_API_PORT:-3909}
       LAUNCHER_API_TOKEN: ${LAUNCHER_API_TOKEN:-devlocal-launcher-token}
-    # TEMP: Direct port disabled due to Docker socket conflict - access via Traefik
-    # ports:
-    #   - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
+    ports:
+      - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - tradingsystem_backend
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3909/healthz']
+      test: ["CMD", "curl", "-f", "http://localhost:3909/healthz"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -30,16 +29,15 @@ services:
 
   dbui-questdb:
     container_name: dbui-questdb
-    image: questdb/questdb:latest
+    image: questdb/questdb:${QUESTDB_IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - ../../.env
       - ../../.env.shared
-    # TEMP: Direct ports disabled - access via Traefik at /db-ui/questdb
-    # ports:
-    #   - "${QUESTDB_HTTP_PORT:-9000}:9000"
-    #   - "${QUESTDB_ILP_PORT:-9009}:9009"
-    #   - "${QUESTDB_PG_PORT:-8812}:8812"
+    ports:
+      - "${QUESTDB_HTTP_PORT:-9000}:9000"
+      - "${QUESTDB_ILP_PORT:-9009}:9009"
+      - "${QUESTDB_PG_PORT:-8812}:8812"
     volumes:
       - questdb-data:/var/lib/questdb
     networks:
@@ -52,7 +50,7 @@ services:
       - "traefik.http.routers.dbui-questdb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/questdb`)"
       - "traefik.http.routers.dbui-questdb.entrypoints=web"
       - "traefik.http.routers.dbui-questdb.priority=100"
-      - "traefik.http.routers.dbui-questdb.middlewares=admin-standard@file"
+      # - "traefik.http.routers.dbui-questdb.middlewares=admin-standard@file"  # Disabled - file middlewares not working in WSL2
       - "traefik.http.services.dbui-questdb.loadbalancer.server.port=9000"
 
   dbui-pgadmin:
@@ -66,13 +64,33 @@ services:
       PGADMIN_LISTEN_PORT: 5050
       # Disable enhanced cookie protection for iframe support
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      PGADMIN_CONFIG_CHECK_EMAIL_DELIVERABILITY: "False"
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-tradingsystem}
     networks:
       - tradingsystem_backend
-    # Note: No direct port exposure - accessed via nginx proxy (in 0-gateway-stack)
+    expose:
+      - "5050"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  dbui-pgadmin-proxy:
+    container_name: dbui-pgadmin-proxy
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    depends_on:
+      - dbui-pgadmin
+    volumes:
+      - ./nginx-proxies/pgadmin:/etc/nginx/conf.d:ro
+    networks:
+      - tradingsystem_backend
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    command: ["nginx", "-g", "daemon off;"]
 
   dbui-adminer:
     container_name: dbui-adminer
-    image: adminer:latest
+    image: adminer:${ADMINER_IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - ../../.env
@@ -81,18 +99,31 @@ services:
       ADMINER_DESIGN: ${ADMINER_DESIGN:-flat}
     networks:
       - tradingsystem_backend
-    # Note: No direct port exposure - accessed via nginx proxy (in 0-gateway-stack)
+    expose:
+      - "8080"
+
+  dbui-adminer-proxy:
+    container_name: dbui-adminer-proxy
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    depends_on:
+      - dbui-adminer
+    volumes:
+      - ./nginx-proxies/adminer:/etc/nginx/conf.d:ro
+    networks:
+      - tradingsystem_backend
+    ports:
+      - "${ADMINER_PORT:-3910}:80"
+    command: ["nginx", "-g", "daemon off;"]
 
   dbui-pgweb:
     container_name: dbui-pgweb
-    image: sosedoff/pgweb:latest
+    image: sosedoff/pgweb:${PGWEB_IMAGE_TAG:-latest}
     restart: unless-stopped
     # NOTE: No env_file loaded to prevent DATABASE_URL from being set
     # pgWeb should start without pre-configured connection - users select DB from UI
-    # TEMPORARY: Port 5052 disabled due to Docker socket conflict
-    # Access via Traefik: http://localhost:9080/db-ui/pgweb
-    # ports:
-    #   - "${PGWEB_PORT:-5052}:8081"
+    ports:
+      - "${PGWEB_PORT:-5052}:8081"
     networks:
       - tradingsystem_backend
     labels:
@@ -101,7 +132,7 @@ services:
       - "traefik.http.routers.dbui-pgweb.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/db-ui/pgweb`)"
       - "traefik.http.routers.dbui-pgweb.entrypoints=web"
       - "traefik.http.routers.dbui-pgweb.priority=100"
-      - "traefik.http.routers.dbui-pgweb.middlewares=pgweb-stripprefix,admin-standard@file"
+      - "traefik.http.routers.dbui-pgweb.middlewares=pgweb-stripprefix" # Removed admin-standard@file due to WSL2 issues
       - "traefik.http.middlewares.pgweb-stripprefix.stripprefix.prefixes=/db-ui/pgweb"
       - "traefik.http.services.dbui-pgweb.loadbalancer.server.port=8081"
 

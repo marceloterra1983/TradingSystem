@@ -297,7 +297,7 @@ http:
 | **Rate limiting (Redis)** | ✅ Native | ⚠️ Plugin | **Kong** |
 | **Health checks** | ✅ | ✅ | Tie |
 | **Prometheus metrics** | ✅ Plugin | ✅ Built-in | **Traefik** |
-| **Low latency (<10ms)** | ⚠️ 8ms avg | ✅ 3ms avg | **Traefik** |
+| **Low latency (&lt;10ms)** | ⚠️ 8ms avg | ✅ 3ms avg | **Traefik** |
 | **Easy configuration** | ❌ Admin API | ✅ YAML | **Traefik** |
 | **Local development** | ⚠️ Requires DB | ✅ Standalone | **Traefik** |
 
@@ -332,7 +332,7 @@ http:
 
 1. **Native Docker Integration** - Zero-config service discovery saves weeks of maintenance
 2. **Simpler Operations** - YAML configuration vs Kong's Admin API + DB
-3. **Better Performance** - 3ms avg latency vs 8ms (meets <10ms requirement)
+3. **Better Performance** - 3ms avg latency vs 8ms (meets &lt;10ms requirement)
 4. **Lower Overhead** - 50MB RAM vs 200MB + PostgreSQL
 5. **Faster Development** - Live reload enables rapid iteration
 6. **Built-in Observability** - Prometheus metrics + dashboard out-of-the-box

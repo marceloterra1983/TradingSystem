@@ -74,3 +74,15 @@ fi
 
 echo "✅ Pre-commit validation passed"
 echo "ℹ️  Note: Run 'bash scripts/maintenance/validate-md-structure.sh' manually if needed"
+
+# Validate documentation links
+echo "🔍 Validating documentation links..."
+DOCS_CHANGED=$(git diff --cached --name-only | grep -E '^docs/content/.*\.(md|mdx)$' || true)
+
+if [ -n "$DOCS_CHANGED" ]; then
+    if ! npm run docs:validate-links; then
+        echo "❌ Documentation validation failed!"
+        echo "Run: npm run docs:validate-links to see errors"
+        exit 1
+    fi
+fi

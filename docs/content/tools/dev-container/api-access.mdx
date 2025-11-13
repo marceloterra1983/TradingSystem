@@ -1,0 +1,791 @@
+---
+title: Dev Container - API Access Patterns
+sidebar_label: API Access
+sidebar_position: 3
+tags: [dev-container, api, proxy, vite, traefik]
+domain: tools
+type: guide
+summary: "Padrões de acesso a APIs no Dev Container: embedded services vs external APIs, Vite Proxy, Traefik Gateway, e quando usar cada abordagem"
+status: active
+last_review: "2025-11-12"
+---
+
+# Dev Container - API Access Patterns
+
+## 🎯 Visão Geral
+
+O TradingSystem possui **dois tipos de serviços**:
+
+1. **Embedded Services** - Rodam **dentro do Dev Container** (desenvolvimento)
+2. **External Services** - Rodam em **containers Docker separados** (produção-like)
+
+Cada tipo tem **padrões de acesso específicos** que você precisa entender para desenvolver eficientemente.
+
+---
+
+## 📦 Embedded Services (Dev Container)
+
+### O que são Embedded Services?
+
+Serviços que **rodam diretamente dentro do Dev Container** usando ferramentas de desenvolvimento (Vite, Nodemon, etc).
+
+**Características:**
+- ✅ Hot reload ativo (alterações refletem instantaneamente)
+- ✅ Debugging direto (breakpoints funcionam)
+- ✅ Fast feedback loop (sem rebuild de containers)
+- ✅ Logs diretos no terminal
+- ⚠️ Apenas para desenvolvimento
+
+### Serviços Embedded
+
+#### 1. Dashboard UI (Vite Dev Server)
+
+**Execução:**
+```bash
+# Dentro do Dev Container
+cd /workspace/frontend/dashboard
+npm run dev
+```
+
+**Acesso:**
+```
+Browser → http://localhost:5173
+         ↓ (Vite Dev Server dentro do Dev Container)
+Dev Container → Vite process (PID ~15000)
+```
+
+**Configuração (vite.config.ts):**
+```typescript
+export default defineConfig({
+  server: {
+    port: 5173,
+    host: true, // Permite acesso externo ao container
+    proxy: {
+      // Proxy para APIs externas
+      '/api/workspace': {
+        target: 'http://workspace-api:3200',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workspace/, '/api')
+      },
+      '/api/tp-capital': {
+        target: 'http://tp-capital-api:4005',
+        changeOrigin: true,
+      },
+      '/api/telegram-gateway': {
+        target: 'http://telegram-gateway-api:4010',
+        changeOrigin: true,
+      },
+      '/api/docs': {
+        target: 'http://documentation-api:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/docs/, '/api')
+      }
+    }
+  }
+});
+```
+
+**Environment Variables (.env):**
+```bash
+# ⚠️ CRITICAL: Sem prefixo VITE_ (server-side only)
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+TELEGRAM_GATEWAY_PROXY_TARGET=http://telegram-gateway-api:4010
+DOCUMENTATION_PROXY_TARGET=http://documentation-api:3000
+
+# ✅ Com prefixo VITE_ (exposed to browser)
+VITE_API_BASE_URL=http://localhost:9082
+VITE_ENVIRONMENT=development
+```
+
+**Por que essa configuração?**
+- ❌ `VITE_WORKSPACE_PROXY_TARGET` → Exposto ao browser (vazamento de hostname interno)
+- ✅ `WORKSPACE_PROXY_TARGET` → Server-side apenas (seguro)
+- ✅ Browser usa paths relativos (`/api/workspace/*`)
+- ✅ Vite Proxy intercepta e roteia para container correto
+
+#### 2. Node.js APIs em Desenvolvimento (Nodemon)
+
+**Exemplo:** Testando Workspace API localmente
+
+```bash
+# Dentro do Dev Container
+cd /workspace/backend/api/workspace
+npm run dev  # Inicia com nodemon
+```
+
+**Acesso:**
+```
+# Direct access (sem proxy)
+curl http://localhost:3200/api/items
+
+# Via Vite Proxy (do browser)
+http://localhost:5173/api/workspace/items
+```
+
+**Quando usar:**
+- ✅ Debugando API com breakpoints
+- ✅ Testando mudanças rápidas sem rebuild
+- ✅ Desenvolvendo novos endpoints
+- ❌ Não para testes de produção
+
+---
+
+## 🐳 External Services (Docker Containers)
+
+### O que são External Services?
+
+Serviços que **rodam em containers Docker separados** do Dev Container, gerenciados via Docker Compose.
+
+**Características:**
+- ✅ Ambiente production-like
+- ✅ Isolamento completo
+- ✅ Escalabilidade (múltiplas instâncias)
+- ✅ Health checks automáticos
+- ⚠️ Rebuild necessário para mudanças
+
+### Serviços External
+
+#### 1. Backend APIs
+
+**Workspace API** (Port 3200)
+```yaml
+# tools/compose/docker-compose.4-3-workspace-stack.yml
+services:
+  workspace-api:
+    container_name: workspace-api
+    build: ./backend/api/workspace
+    ports:
+      - "3210:3200"  # Debug access
+    networks:
+      - tradingsystem_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.workspace.rule=PathPrefix(`/api/workspace`)"
+      - "traefik.http.routers.workspace.priority=100"
+      - "traefik.http.services.workspace.loadbalancer.server.port=3200"
+```
+
+**Acesso:**
+```bash
+# Via Traefik Gateway (RECOMENDADO - produção)
+curl http://localhost:9082/api/workspace/items
+
+# Via Vite Proxy (desenvolvimento - browser)
+http://localhost:5173/api/workspace/items
+
+# Direct access (debug apenas - containers mesma rede)
+curl http://workspace-api:3200/api/items
+
+# Direct access via port mapping (debug - host)
+curl http://localhost:3210/api/items
+```
+
+**TP Capital API** (Port 4005)
+```yaml
+services:
+  tp-capital-api:
+    container_name: tp-capital-api
+    build: ./backend/api/tp-capital
+    ports:
+      - "4008:4005"  # Debug access
+    networks:
+      - tradingsystem_backend
+      - tp_capital_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tp-capital.rule=PathPrefix(`/api/tp-capital`)"
+      - "traefik.http.routers.tp-capital.priority=90"
+```
+
+**Telegram Gateway API** (Port 4010)
+```yaml
+services:
+  telegram-gateway-api:
+    container_name: telegram-gateway-api
+    build: ./backend/api/telegram-gateway
+    networks:
+      - tradingsystem_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.telegram.rule=PathPrefix(`/api/telegram-gateway`)"
+      - "traefik.http.routers.telegram.priority=95"
+```
+
+#### 2. Databases
+
+**PostgreSQL / TimescaleDB**
+```yaml
+services:
+  workspace-db:
+    image: postgres:16-alpine
+    container_name: workspace-db
+    ports:
+      - "5444:5432"  # Direct access para debug
+    networks:
+      - tradingsystem_backend
+    environment:
+      POSTGRES_USER: workspace
+      POSTGRES_PASSWORD: ${WORKSPACE_DB_PASSWORD}
+      POSTGRES_DB: workspace
+```
+
+**Acesso:**
+```bash
+# Via container networking (APIs)
+postgresql://workspace:password@workspace-db:5432/workspace
+
+# Via host port mapping (psql local)
+psql -h localhost -p 5444 -U workspace -d workspace
+```
+
+**Redis (Cache)**
+```yaml
+services:
+  workspace-redis:
+    image: redis:7-alpine
+    container_name: workspace-redis
+    ports:
+      - "6388:6379"  # Direct access
+    networks:
+      - tradingsystem_backend
+```
+
+**Acesso:**
+```bash
+# Via container networking (APIs)
+redis://workspace-redis:6379
+
+# Via host port mapping (redis-cli local)
+redis-cli -h localhost -p 6388
+```
+
+#### 3. Frontend (Production Build)
+
+**Dashboard UI** (Port 3103)
+```yaml
+services:
+  dashboard-ui:
+    container_name: dashboard-ui
+    build:
+      context: ./frontend/dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "8092:3103"  # Direct access
+    networks:
+      - tradingsystem_frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.priority=1"
+```
+
+**Docs Hub** (Port 80)
+```yaml
+services:
+  docs-hub:
+    container_name: docs-hub
+    build: ./docs
+    networks:
+      - tradingsystem_frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.docs.rule=PathPrefix(`/docs`)"
+      - "traefik.http.routers.docs.priority=50"
+```
+
+---
+
+## 🔀 Padrões de Acesso
+
+### Pattern 1: Browser → Vite Proxy → External API (Development)
+
+**Fluxo:**
+```
+Browser → http://localhost:5173/api/workspace/items
+         ↓ (Vite Dev Server dentro do Dev Container)
+Vite Proxy → workspace-api:3200/api/items
+         ↓ (Container networking)
+Workspace API → PostgreSQL
+         ↓
+Response (JSON) → Vite → Browser (Hot Reload)
+```
+
+**Quando usar:**
+- ✅ Desenvolvendo frontend (UI components)
+- ✅ Testando integração API em tempo real
+- ✅ Querendo hot reload automático
+- ✅ Debugando chamadas de API
+
+**Configuração necessária:**
+```typescript
+// vite.config.ts
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api/workspace': {
+        target: 'http://workspace-api:3200',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workspace/, '/api')
+      }
+    }
+  }
+});
+```
+
+```bash
+# .env (root do projeto)
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
+
+**Código no Browser:**
+```typescript
+// ✅ CORRETO - Path relativo
+const response = await fetch('/api/workspace/items');
+
+// ❌ ERRADO - Hardcoded localhost
+const response = await fetch('http://localhost:3200/api/items');
+```
+
+---
+
+### Pattern 2: Browser → Traefik Gateway → External API (Production-like)
+
+**Fluxo:**
+```
+Browser → http://localhost:9082/api/workspace/items
+         ↓ (Traefik Gateway container)
+Traefik → Route detection (PathPrefix: /api/workspace)
+         ↓ (Priority: 100)
+Path Rewrite: /api/workspace/* → /api/*
+         ↓
+Workspace API (workspace-api:3200/api/items)
+         ↓
+Response (JSON) → Traefik (CORS, Compression) → Browser
+```
+
+**Quando usar:**
+- ✅ Testando ambiente production-like
+- ✅ Validando CORS configuration
+- ✅ Testando rate limiting
+- ✅ Verificando health checks
+- ✅ E2E tests
+
+**Configuração necessária:**
+```yaml
+# docker-compose (Traefik labels)
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.workspace.rule=PathPrefix(`/api/workspace`)"
+  - "traefik.http.routers.workspace.priority=100"
+  - "traefik.http.routers.workspace.entrypoints=web"
+  - "traefik.http.services.workspace.loadbalancer.server.port=3200"
+  - "traefik.http.routers.workspace.middlewares=api-standard@file"
+```
+
+**Código no Browser:**
+```typescript
+// ✅ CORRETO - Via gateway
+const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/workspace/items`);
+// URL real: http://localhost:9082/api/workspace/items
+
+// ✅ ALTERNATIVA - Path relativo (se base URL = /)
+const response = await fetch('/api/workspace/items');
+```
+
+---
+
+### Pattern 3: Dev Container → External API (Container Networking)
+
+**Fluxo:**
+```
+Dev Container (shell) → curl http://workspace-api:3200/api/items
+         ↓ (Docker network: tradingsystem_backend)
+Docker DNS → Resolve workspace-api → Container IP
+         ↓
+Workspace API (3200)
+         ↓
+Response (JSON)
+```
+
+**Quando usar:**
+- ✅ Testando API com curl/Postman dentro do Dev Container
+- ✅ Scripts de automação (migrations, seeding)
+- ✅ Health checks de serviços
+- ✅ Debugging direto de API
+
+**Exemplos:**
+```bash
+# Dentro do Dev Container
+# Health check
+curl http://workspace-api:3200/api/health
+
+# Get items
+curl http://workspace-api:3200/api/items | jq .
+
+# Post item
+curl -X POST http://workspace-api:3200/api/items \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Test Item", "status": "active"}'
+
+# Database connection test
+psql -h workspace-db -p 5432 -U workspace -d workspace -c "SELECT COUNT(*) FROM items;"
+```
+
+**Requisitos:**
+- ✅ Dev Container deve estar na mesma rede Docker (`tradingsystem_backend`)
+- ✅ Usar hostname do container (não `localhost`)
+- ✅ Usar porta interna (3200, não 3210)
+
+---
+
+### Pattern 4: Direct Port Access (Debug Only)
+
+**Fluxo:**
+```
+Browser/curl → http://localhost:3210/api/items
+         ↓ (Port mapping: 3210 → 3200)
+Host Docker → Forward to workspace-api:3200
+         ↓
+Workspace API
+         ↓
+Response (JSON) → BUT: CORS ERROR if from browser!
+```
+
+**Quando usar:**
+- ⚠️ Debug apenas
+- ⚠️ Testando com Postman/Insomnia (não browser)
+- ⚠️ Troubleshooting direto de serviço
+- ❌ NUNCA em produção
+- ❌ NUNCA do browser (CORS bloqueado)
+
+**Por que CORS bloqueia:**
+```
+Origin: http://localhost:5173 (Vite)
+Request: http://localhost:3210/api/items (API)
+         ↓
+API não tem header: Access-Control-Allow-Origin: http://localhost:5173
+         ↓
+Browser: ❌ CORS policy blocked
+```
+
+**Solução:** Use Vite Proxy ou Traefik Gateway (ambos configurados com CORS).
+
+---
+
+## 🔐 Authentication Flows
+
+### Development Mode (Vite Proxy)
+
+```typescript
+// Browser code
+const token = localStorage.getItem('auth_token');
+
+const response = await fetch('/api/workspace/items', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// ↓ Vite Proxy forwards to workspace-api:3200 with headers intact
+```
+
+**Fluxo:**
+```
+Browser → /api/workspace/items (with Authorization header)
+       ↓
+Vite Proxy → workspace-api:3200/api/items (headers forwarded)
+       ↓
+API validates JWT → Returns data
+```
+
+### Production Mode (Traefik Gateway)
+
+```typescript
+// Browser code (same as development!)
+const token = localStorage.getItem('auth_token');
+
+const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/workspace/items`, {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+**Fluxo:**
+```
+Browser → http://localhost:9082/api/workspace/items
+       ↓
+Traefik → Middleware: JWT validation (optional)
+       ↓
+Traefik → Route to workspace-api:3200 (headers forwarded)
+       ↓
+API validates JWT → Returns data
+       ↓
+Traefik → Add CORS headers → Browser
+```
+
+**Traefik JWT Middleware (opcional):**
+```yaml
+# tools/traefik/dynamic/middlewares.yml
+http:
+  middlewares:
+    jwt-validation:
+      plugin:
+        jwt:
+          secret: "${JWT_SECRET}"
+          algorithm: "HS256"
+```
+
+---
+
+## 🌍 Environment Variables
+
+### Rules (CRITICAL!)
+
+**❌ NEVER use `VITE_` prefix for proxy targets:**
+```bash
+# ❌ WRONG - Exposed to browser (security risk)
+VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
+
+**✅ ALWAYS use server-side only variables:**
+```bash
+# ✅ CORRECT - Server-side only (not exposed)
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
+TELEGRAM_GATEWAY_PROXY_TARGET=http://telegram-gateway-api:4010
+```
+
+**✅ Use `VITE_` only for browser-safe values:**
+```bash
+# ✅ CORRECT - Safe to expose
+VITE_API_BASE_URL=http://localhost:9082
+VITE_ENVIRONMENT=development
+VITE_APP_NAME=TradingSystem
+```
+
+### Environment Variable Precedence
+
+```
+1. .env.local (highest priority, git-ignored)
+2. .env (project root, committed as .env.example)
+3. docker-compose env_file
+4. docker-compose environment section
+5. Dockerfile ENV statements (lowest priority)
+```
+
+**Validation:**
+```bash
+# Inside Dev Container
+bash scripts/env/validate-env.sh
+
+# Check for VITE_ proxy targets (should be ZERO)
+grep -r "VITE_.*PROXY_TARGET" .env
+# Expected: no matches
+```
+
+---
+
+## 📊 Comparison Table
+
+| Aspect | Vite Proxy (Dev) | Traefik Gateway (Prod) | Direct Access (Debug) |
+|--------|------------------|------------------------|----------------------|
+| **Use Case** | Frontend development | Production testing | Troubleshooting |
+| **Hot Reload** | ✅ Yes | ❌ No | ❌ No |
+| **CORS** | ✅ Configured | ✅ Configured | ❌ Blocked |
+| **Rate Limiting** | ❌ No | ✅ Yes (100 req/min) | ❌ No |
+| **Compression** | ❌ No | ✅ Yes (gzip/brotli) | ❌ No |
+| **Health Checks** | ❌ No | ✅ Yes (30s interval) | ❌ No |
+| **Circuit Breaker** | ❌ No | ✅ Yes | ❌ No |
+| **Metrics** | ❌ No | ✅ Yes (Prometheus) | ❌ No |
+| **Security Headers** | ❌ No | ✅ Yes | ❌ No |
+| **Access Logs** | ✅ Dev logs | ✅ JSON format | ❌ No |
+| **Path Rewrite** | ✅ Yes | ✅ Yes | ❌ No |
+| **Browser Access** | ✅ Yes | ✅ Yes | ⚠️ CORS error |
+| **Container Network** | ✅ Yes | ✅ Yes | ⚠️ Port mapping |
+
+---
+
+## 🔍 Debugging API Issues
+
+### Issue: "API Indisponível" in Dashboard
+
+**Symptoms:**
+- Dashboard shows "API Indisponível"
+- Console error: `Failed to fetch`
+- Network tab: Status (failed)
+
+**Root Causes:**
+
+#### 1. Vite Proxy Target com prefixo `VITE_`
+```bash
+# ❌ WRONG (.env)
+VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+# Browser can see this! Tries to connect directly → fails
+```
+
+**Fix:**
+```bash
+# ✅ CORRECT
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+# vite.config.ts
+proxy: {
+  '/api/workspace': {
+    target: process.env.WORKSPACE_PROXY_TARGET, // Server-side only
+    // ...
+  }
+}
+```
+
+#### 2. Hardcoded localhost URLs no código
+
+```typescript
+// ❌ WRONG
+const url = 'http://localhost:3200/api/items';
+```
+
+**Fix:**
+```typescript
+// ✅ CORRECT
+const url = '/api/workspace/items'; // Relative path
+```
+
+#### 3. Container não está na rede correta
+
+**Verificar:**
+```bash
+# Dev Container deve estar em tradingsystem_backend
+docker network inspect tradingsystem_backend | grep -A 5 "tradingsystem-dev"
+```
+
+**Fix (devcontainer.json):**
+```json
+{
+  "runArgs": [
+    "--network=tradingsystem_backend",
+    "--network=tradingsystem_frontend"
+  ]
+}
+```
+
+#### 4. API container não está rodando
+
+**Verificar:**
+```bash
+docker ps --filter "name=workspace-api"
+```
+
+**Fix:**
+```bash
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
+```
+
+#### 5. Path rewriting incorreto
+
+**Problema:**
+```
+Browser → /api/workspace/items
+Vite Proxy → workspace-api:3200/api/workspace/items (WRONG!)
+API espera: workspace-api:3200/api/items
+```
+
+**Fix (vite.config.ts):**
+```typescript
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/api\/workspace/, '/api') // CRITICAL!
+  }
+}
+```
+
+---
+
+## 📖 Documentação Relacionada
+
+### Guias Complementares
+- **[Overview](./overview.mdx)** - Visão geral do Dev Container
+- **[Architecture](./architecture.mdx)** - Arquitetura detalhada
+- **[Gateway & Proxy](./gateway-proxy.mdx)** - Traefik e Vite em profundidade
+- **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
+- **[Troubleshooting](./troubleshooting.mdx)** - Problemas comuns
+
+### Governança
+- **[Dev Container Policy](../../../governance/policies/dev-container-policy.md)** - Políticas de uso
+- **[Security Guide](../../../governance/controls/dev-container-security.md)** - Segurança
+
+### Frontend Engineering
+- **[Proxy Best Practices](../../frontend/engineering/PROXY-BEST-PRACTICES.md)** - Guia completo de proxy
+- **[AI Agent Proxy Guide](../../frontend/engineering/AI-AGENT-PROXY-GUIDE.md)** - Para AI agents
+
+---
+
+## ❓ FAQ
+
+### Como sei qual padrão de acesso usar?
+
+**Decisão rápida:**
+- Desenvolvendo UI? → **Vite Proxy** (hot reload)
+- Testando produção? → **Traefik Gateway** (production-like)
+- Debugando API? → **Container Networking** (curl dentro do Dev Container)
+- Troubleshooting? → **Direct Port Access** (Postman, não browser)
+
+### Posso misturar padrões?
+
+**Sim!** É comum:
+```typescript
+// Development: Vite Proxy
+const apiUrl = import.meta.env.DEV ? '/api/workspace' : `${import.meta.env.VITE_API_BASE_URL}/api/workspace`;
+```
+
+Vite automaticamente usa proxy em dev mode e gateway em prod build.
+
+### Por que não usar sempre Direct Access?
+
+**Problemas:**
+1. ❌ CORS bloqueado (browser)
+2. ❌ Sem rate limiting (DDoS risk)
+3. ❌ Sem compression (slow)
+4. ❌ Sem health checks (availability)
+5. ❌ Sem metrics (observability)
+
+**Direct Access é APENAS para debug.**
+
+### Como testar CORS configuration?
+
+**Use Traefik Gateway:**
+```bash
+# Check CORS headers
+curl -i http://localhost:9082/api/workspace/items \
+  -H "Origin: http://localhost:5173"
+
+# Expected headers:
+# Access-Control-Allow-Origin: http://localhost:5173
+# Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+# Access-Control-Allow-Headers: Content-Type, Authorization
+```
+
+### Embedded service vs External service - como escolher?
+
+**Use Embedded quando:**
+- ✅ Desenvolvendo UI (precisa hot reload)
+- ✅ Debugando código (precisa breakpoints)
+- ✅ Mudanças rápidas (sem rebuild)
+
+**Use External quando:**
+- ✅ Testando integração completa
+- ✅ Validando configuração de produção
+- ✅ E2E tests
+- ✅ Performance testing
+
+---
+
+**Última revisão:** 2025-11-12
+**Status:** ✅ Ativo
+**Próxima revisão:** 2026-02-12 (3 meses)

@@ -1,0 +1,86 @@
+@startuml tp-capital-api-gateway-flow
+!theme vibrant
+title TP Capital - API Gateway Request Flow (2025-11-12)
+
+actor "Browser\n(Windows Host)" as Browser
+participant "Traefik Gateway\n:9082" as Gateway
+participant "TP Capital API\n:4005" as API
+database "TimescaleDB\n:5432" as DB
+database "Redis Cache\n:6379" as Redis
+
+== Signal Fetch Request ==
+
+Browser -> Gateway: GET http://localhost:9082/api/tp-capital/signals\n**Header:** X-API-Key: <key>
+activate Gateway
+
+note right of Gateway
+  **Middleware Chain:**
+  1. StripPrefix: /api/tp-capital
+  2. CORS headers
+  3. Health check backend
+end note
+
+Gateway -> Gateway: Apply StripPrefix\n(/api/tp-capital → /)
+Gateway -> Gateway: Add CORS headers\n(Access-Control-Allow-Origin: http://localhost:9082)
+Gateway -> Gateway: Forward request to\nhttp://tp-capital-api:4005/signals
+
+Gateway -> API: GET /signals\n**Header:** X-API-Key: <key>
+activate API
+
+API -> API: Validate API Key\n(bbf913da...)
+alt API Key Valid
+    API -> Redis: Check cache\nKEY: signals:latest
+    activate Redis
+
+    alt Cache Hit
+        Redis --> API: Cached data (30s TTL)
+        API --> Gateway: 200 OK\n**Header:** X-Cache-Hit: true\n**Body:** {data: [...]}
+    else Cache Miss
+        Redis --> API: null
+        deactivate Redis
+
+        API -> DB: SELECT * FROM signals.tp_capital_signals\nORDER BY ingested_at DESC\nLIMIT 100
+        activate DB
+
+        DB --> API: 87 signals
+        deactivate DB
+
+        API -> Redis: SET signals:latest <data>\nEX 30
+        activate Redis
+        Redis --> API: OK
+        deactivate Redis
+
+        API --> Gateway: 200 OK\n**Header:** X-Cache-Hit: false\n**Body:** {data: [87 signals]}
+    end
+else API Key Invalid
+    API --> Gateway: 401 Unauthorized\n**Body:** {error: "X-API-Key header is required"}
+end
+
+deactivate API
+
+Gateway -> Gateway: Add response headers:\n- Access-Control-Allow-Origin\n- Access-Control-Allow-Credentials\n- Vary: Origin
+
+Gateway --> Browser: 200 OK\n**CORS Headers Applied**\n**Body:** {data: [87 signals]}
+deactivate Gateway
+
+Browser -> Browser: React updates UI\nwith signal data
+
+== Sync Messages Request ==
+
+Browser -> Gateway: POST http://localhost:9082/api/tp-capital/sync-messages\n**Header:** X-API-Key: <key>
+activate Gateway
+
+Gateway -> Gateway: Apply middleware chain
+Gateway -> API: POST /sync-messages\n**Header:** X-API-Key: <key>
+activate API
+
+API -> API: Validate API Key
+API -> API: Trigger Historical Sync\nworker
+
+API --> Gateway: 202 Accepted\n**Body:** {success: true, message: "Sync started"}
+deactivate API
+
+Gateway --> Browser: 202 Accepted (with CORS)
+deactivate Gateway
+
+@enduml

@@ -104,7 +104,7 @@ services:
       - DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
       - DB_NAME=tp_capital_db
       - LISTEN_PORT=6432
-      - AUTH_TYPE=md5  # PostgreSQL 16 uses SCRAM-SHA-256 by default
+      - AUTH_TYPE=scram-sha-256  # PostgreSQL 16 uses SCRAM-SHA-256 by default
       - POOL_MODE=transaction
       - MAX_CLIENT_CONN=1000
       - DEFAULT_POOL_SIZE=25
@@ -273,9 +273,9 @@ services:
       # Database Strategy (neon = dedicated via PgBouncer)
       - TP_CAPITAL_DB_STRATEGY=neon
       
-      # TimescaleDB Connection (via PgBouncer - internal container network)
-      - TP_CAPITAL_DB_HOST=tp-capital-pgbouncer
-      - TP_CAPITAL_DB_PORT=6432
+      # TimescaleDB Connection (direct - bypassing PgBouncer temporarily due to auth issues)
+      - TP_CAPITAL_DB_HOST=tp-capital-timescale
+      - TP_CAPITAL_DB_PORT=5432
       - TP_CAPITAL_DB_NAME=tp_capital_db
       - TP_CAPITAL_DB_USER=${TP_CAPITAL_DB_USER:-tp_capital}
       - TP_CAPITAL_DB_PASSWORD=${TP_CAPITAL_DB_PASSWORD:-tp_capital_secure_pass_2024}
@@ -388,11 +388,20 @@ services:
       # Service Configuration (backend target)
       - "traefik.http.services.tp-capital-api.loadbalancer.server.port=4005"
 
-      # Middlewares (path transformation + standard API chain)
-      - "traefik.http.routers.tp-capital-api.middlewares=tpcapital-stripprefix,api-standard@file"
+      # Middlewares: StripPrefix + CORS (inline - no @file reference)
+      - "traefik.http.routers.tp-capital-api.middlewares=tpcapital-stripprefix,tpcapital-cors"
 
       # Path transformation: /api/tp-capital/X → /X (TP Capital uses /signals, /webhook, not /api/signals)
       - "traefik.http.middlewares.tpcapital-stripprefix.stripprefix.prefixes=/api/tp-capital"
+
+      # CORS headers for browser access
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,PATCH,OPTIONS"
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082,http://localhost:8092"
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolexposeheaders=*"
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.tpcapital-cors.headers.addvaryheader=true"
 
       # Health Check
       - "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.path=/health"
@@ -408,12 +417,10 @@ networks:
     external: true
     name: tradingsystem_backend
   
-  # Internal network for TP Capital stack only (simplified, no IPAM conflicts)
+  # Internal network for TP Capital stack only (use existing network created by gateway)
   tp_capital_backend:
+    external: true
     name: tp_capital_backend
-    driver: bridge
-    labels:
-      - "com.tradingsystem.stack=tp-capital"
   
   telegram_backend:
     name: telegram_backend

@@ -33,14 +33,50 @@ services:
 
     command: >
       postgres
-      -c config_file=/etc/postgresql/postgresql.conf
+      -c listen_addresses='*'
+      -c port=5432
+      -c max_connections=500
+      -c superuser_reserved_connections=5
+      -c shared_buffers=512MB
+      -c effective_cache_size=1536MB
+      -c maintenance_work_mem=256MB
+      -c work_mem=8MB
+      -c wal_buffers=16MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c checkpoint_completion_target=0.9
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c synchronous_commit=off
+      -c max_wal_senders=0
+      -c autovacuum=on
+      -c autovacuum_naptime=15s
+      -c autovacuum_max_workers=5
+      -c autovacuum_vacuum_scale_factor=0.02
+      -c autovacuum_analyze_scale_factor=0.01
+      -c shared_preload_libraries='pg_stat_statements'
+      -c "pg_stat_statements.max=5000"
+      -c "pg_stat_statements.track=all"
+      -c log_destination='stderr'
+      -c logging_collector=on
+      -c log_directory='log'
+      -c log_filename='postgresql-%Y-%m-%d.log'
+      -c log_rotation_age='1d'
+      -c log_rotation_size=0
+      -c log_connections=on
+      -c log_disconnections=on
+      -c log_checkpoints=on
+      -c log_lock_waits=on
+      -c log_min_duration_statement='250ms'
+      -c log_statement='ddl'
+      -c timezone='UTC'
 
     ports:
       - "${EVOLUTION_DB_HOST_BIND:-127.0.0.1}:${EVOLUTION_DB_PORT:-5437}:5432"
 
     volumes:
       - evolution-postgres-data:/var/lib/postgresql/data
-      - ./evolution/postgresql.conf:/etc/postgresql/postgresql.conf:ro
 
     deploy:
       resources:
@@ -359,6 +395,7 @@ services:
 
     networks:
       - evolution_backend
+      - tradingsystem_backend
 
     labels:
       - "com.tradingsystem.stack=evolution-api"
@@ -386,11 +423,62 @@ services:
     environment:
       API_BASE_URL: ${EVOLUTION_MANAGER_API_BASE_URL:-http://evolution-api:8080}
 
+    entrypoint: >
+      /bin/sh -c "
+        set -euo pipefail;
+        rm -f /etc/nginx/conf.d/*.conf;
+        cat <<'EOF' >/etc/nginx/conf.d/manager.conf
+        server {
+            listen 80;
+            server_name localhost;
+            root /usr/share/nginx/html;
+            index index.html;
+
+            gzip on;
+            gzip_vary on;
+            gzip_min_length 1024;
+            gzip_proxied expired no-cache no-store private auth;
+            gzip_types
+                text/plain
+                text/css
+                text/xml
+                text/javascript
+                application/javascript
+                application/xml+rss
+                application/json;
+
+            add_header X-Frame-Options \"SAMEORIGIN\" always;
+            add_header X-XSS-Protection \"1; mode=block\" always;
+            add_header X-Content-Type-Options \"nosniff\" always;
+            add_header Referrer-Policy \"no-referrer-when-downgrade\" always;
+            add_header Content-Security-Policy \"default-src 'self' http: https: data: blob: 'unsafe-inline'\" always;
+
+            location / {
+                try_files $$uri $$uri/ /index.html;
+            }
+
+            location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                expires 1y;
+                add_header Cache-Control \"public, immutable\";
+            }
+
+            location ~* \\.html$ {
+                expires 1h;
+                add_header Cache-Control \"public\";
+            }
+
+            location /health {
+                access_log off;
+                return 200 \"healthy\\n\";
+                add_header Content-Type text/plain;
+            }
+        }
+        EOF
+        exec /bin/sh /start.sh
+      "
+
     ports:
       - "${EVOLUTION_MANAGER_HOST_BIND:-127.0.0.1}:${EVOLUTION_MANAGER_PORT:-4203}:80"
-
-    volumes:
-      - ./evolution/nginx-manager.conf:/etc/nginx/conf.d/nginx.conf:ro
 
     deploy:
       resources:
@@ -413,6 +501,7 @@ services:
 
     networks:
       - evolution_backend
+      - tradingsystem_backend
 
     labels:
       - "com.tradingsystem.stack=evolution-api"
@@ -428,5 +517,9 @@ volumes:
   evolution-api-instances:
 
 networks:
-  evolution_backend:
+  tradingsystem_backend:
     external: true
+    name: tradingsystem_backend
+
+  evolution_backend:
+    name: evolution_backend

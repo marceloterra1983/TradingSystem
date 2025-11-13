@@ -69,6 +69,63 @@ This checklist MUST be completed **before deploying** any Docker Compose stack, 
 
 ---
 
+### Phase 1.5: Dev Container Validation ✅
+
+#### 1.5.1 Dev Container Configuration
+```bash
+[ ] Verify devcontainer.json is valid
+    Command: cat .devcontainer/devcontainer.json | jq . > /dev/null
+
+    Expected: Valid JSON
+```
+
+#### 1.5.2 Network Connectivity
+```bash
+[ ] Verify Dev Container can reach Docker networks
+    Command: docker network inspect tradingsystem_backend | grep tradingsystem-dev
+
+    Expected: Dev Container connected to required networks
+```
+
+#### 1.5.3 Vite Proxy Configuration
+```bash
+[ ] Verify NO VITE_ prefix for proxy targets
+    Command: grep "VITE_.*PROXY_TARGET" .env
+
+    Expected: NO matches (VITE_ prefix exposes to browser)
+
+    CORRECT:
+    - WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+    WRONG:
+    - VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
+
+#### 1.5.4 Relative Paths in Frontend Code
+```bash
+[ ] Verify frontend uses relative paths (not hardcoded localhost)
+    Command: grep -r "http://localhost:" frontend/dashboard/src | grep -v ".test." | grep -v "//.*http://"
+
+    Expected: NO matches in production code
+
+    CORRECT:
+    - fetch('/api/workspace/items')
+
+    WRONG:
+    - fetch('http://localhost:3200/api/items')
+```
+
+#### 1.5.5 Docker Socket Access
+```bash
+[ ] Verify Docker socket is mounted correctly
+    Command: docker inspect tradingsystem-dev-container | grep "/var/run/docker.sock"
+
+    Expected: Socket mounted as read-only
+    "/var/run/docker.sock:/var/run/docker.sock:ro"
+```
+
+---
+
 ### Phase 2: Docker Compose Validation ✅
 
 #### 2.1 Syntax Check

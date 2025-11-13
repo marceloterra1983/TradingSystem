@@ -15,6 +15,10 @@ COPY backend/api/workspace/package*.json ./
 # Copy backend/shared modules (for logger, middleware, config)
 COPY backend/shared /shared
 
+# Link shared modules to application dependencies so that imports from /shared
+# can resolve workspace API packages (e.g., ioredis) without bind mounts.
+RUN ln -s /app/node_modules /shared/node_modules
+
 # Install workspace dependencies
 RUN npm ci
 

@@ -1,0 +1,166 @@
+@startuml dev-container-network
+!theme blueprint
+title Dev Container - Network Topology (2025-11-12)
+
+' ==============================================================================
+' LEGEND
+' ==============================================================================
+legend right
+  |= Color |= Network Type |
+  |<#lightblue> | Host Network (Port Forwarding) |
+  |<#lightgreen> | Dev Container Network |
+  |<#lightyellow> | Docker Custom Networks |
+  |<#lightcoral> | External Access |
+endlegend
+
+' ==============================================================================
+' EXTERNAL ACCESS (Browser)
+' ==============================================================================
+actor "Developer" as dev
+component "Browser\n(Chrome/Firefox)" as browser #lightcoral
+
+' ==============================================================================
+' HOST NETWORK (Port Forwarding)
+' ==============================================================================
+cloud "Host Network (localhost)" #lightblue {
+  port "9082" as port_9082 #lightblue
+  port "9083" as port_9083 #lightblue
+  port "5173" as port_5173 #lightblue
+  port "8092" as port_8092 #lightblue
+}
+
+' ==============================================================================
+' DEV CONTAINER NETWORK
+' ==============================================================================
+node "Dev Container Network\n(Container: tradingsystem-dev)" #lightgreen {
+  component "Vite Dev Server\n(Dashboard in Dev Mode)\nPort: 5173" as vite #lightgreen
+  component "VS Code Server\nPort: 8080" as vscode #lightgreen
+  component "Zsh Shell\n(Developer Terminal)" as shell #lightgreen
+}
+
+' ==============================================================================
+' DOCKER CUSTOM NETWORKS
+' ==============================================================================
+cloud "Docker Custom Networks" #lightyellow {
+
+  node "tradingsystem_backend" #lightyellow {
+    component "workspace-api\nPort: 3200" as workspace_api #lightyellow
+    component "tp-capital-api\nPort: 4005" as tp_api #lightyellow
+    component "telegram-gateway-api\nPort: 4010" as telegram_api #lightyellow
+    component "documentation-api\nPort: 3000" as docs_api #lightyellow
+  }
+
+  node "tradingsystem_frontend" #lightyellow {
+    component "Traefik Gateway\nPorts: 9080 (HTTP), 8080 (Dashboard)" as traefik #lightyellow
+    component "docs-hub\n(Docusaurus)\nPort: 80" as docs_hub #lightyellow
+    component "dashboard-ui\n(Production Build)\nPort: 3103" as dashboard_ui #lightyellow
+  }
+
+  node "tp_capital_backend" #lightyellow {
+    component "TP Capital Services\n(Isolated Network)" as tp_isolated #lightyellow
+  }
+}
+
+' ==============================================================================
+' CONNECTIONS - BROWSER TO HOST PORTS
+' ==============================================================================
+dev --> browser : "Open http://localhost:9082"
+browser --> port_9082 : "HTTP Request"
+browser --> port_9083 : "Traefik Dashboard"
+browser --> port_5173 : "Dev Mode (Vite)"
+browser --> port_8092 : "Dashboard Direct"
+
+' ==============================================================================
+' CONNECTIONS - HOST PORTS TO CONTAINERS
+' ==============================================================================
+port_9082 --> traefik : "Port Forwarding\n(9082 → 9080)"
+port_9083 --> traefik : "Port Forwarding\n(9083 → 8080)"
+port_5173 --> vite : "Port Forwarding\n(5173 → 5173)"
+port_8092 --> dashboard_ui : "Port Forwarding\n(8092 → 3103)"
+
+' ==============================================================================
+' CONNECTIONS - TRAEFIK ROUTING
+' ==============================================================================
+traefik --> dashboard_ui : "Route: /\n(Priority: 1)"
+traefik --> docs_hub : "Route: /docs\n(Priority: 50)"
+traefik --> workspace_api : "Route: /api/workspace\n(Priority: 100)\nPath: /api/workspace/* → /api/*"
+traefik --> tp_api : "Route: /api/tp-capital\n(Priority: 90)"
+traefik --> telegram_api : "Route: /api/telegram-gateway\n(Priority: 95)"
+traefik --> docs_api : "Route: /api/docs\n(Priority: 85)\nPath: /api/docs/* → /api/*"
+
+' ==============================================================================
+' CONNECTIONS - VITE DEV SERVER PROXY
+' ==============================================================================
+vite --> workspace_api : "Proxy: /api/workspace\n→ workspace-api:3200"
+vite --> tp_api : "Proxy: /api/tp-capital\n→ tp-capital-api:4005"
+vite --> telegram_api : "Proxy: /api/telegram-gateway\n→ telegram-gateway-api:4010"
+vite --> docs_api : "Proxy: /api/docs\n→ documentation-api:3000"
+vite --> docs_hub : "Proxy: /docs\n→ docs-hub:80"
+
+' ==============================================================================
+' CONNECTIONS - DEV CONTAINER TO DOCKER NETWORKS
+' ==============================================================================
+shell --> workspace_api : "Container Networking\n(via tradingsystem_backend)"
+shell --> traefik : "Container Networking\n(via tradingsystem_frontend)"
+
+' ==============================================================================
+' NOTES
+' ==============================================================================
+note right of port_9082
+  **Port Forwarding:**
+  - Docker maps container ports to host
+  - Browser accesses localhost:9082
+  - Forwarded to Traefik container (port 9080)
+  - Traefik routes to appropriate service
+end note
+
+note right of vite
+  **Vite Dev Server:**
+  - Runs INSIDE Dev Container
+  - Hot reload enabled (HMR)
+  - Proxy configuration in vite.config.ts
+  - Environment variables: WORKSPACE_PROXY_TARGET
+  ⚠️ No VITE_ prefix (server-side only)
+end note
+
+note bottom of traefik
+  **Traefik Gateway:**
+  - Service discovery (Docker labels)
+  - Automatic routing based on PathPrefix
+  - Health checks every 30s
+  - Middlewares: CORS, Rate Limit, Compression
+  - Dashboard: http://localhost:9083/dashboard/
+end note
+
+note right of workspace_api
+  **Container Networking:**
+  - Services communicate by name
+  - DNS resolution by Docker
+  - No localhost/hardcoded IPs
+  - Example: workspace-api:3200
+  - Network: tradingsystem_backend
+end note
+
+note left of shell
+  **Dev Container Access:**
+  - Connected to multiple Docker networks
+  - Can reach services by name
+  - docker compose commands affect host
+  - Terminal is INSIDE container
+end note
+
+note bottom of browser
+  **Access Patterns:**
+
+  **Development Mode (Vite):**
+  http://localhost:5173 → Vite Dev Server
+
+  **Production Mode (Gateway):**
+  http://localhost:9082 → Traefik → Services
+
+  **Direct Access (Debug):**
+  http://localhost:8092 → Dashboard UI
+  http://localhost:14007 → Telegram MTProto
+end note
+
+@enduml

@@ -1,0 +1,236 @@
+@startuml api-access-patterns
+!theme blueprint
+title API Access Patterns - Dev Container (2025-11-12)
+
+' ==============================================================================
+' LEGEND
+' ==============================================================================
+legend right
+  |= Pattern |= Description |
+  | Pattern 1 | Development Mode (Vite Proxy) |
+  | Pattern 2 | Production Mode (Traefik Gateway) |
+  | Pattern 3 | Direct Container Access (Debug) |
+endlegend
+
+' ==============================================================================
+' ACTORS
+' ==============================================================================
+actor Developer as dev
+participant "Browser" as browser
+participant "Vite Dev Server\n(Dev Container)" as vite
+participant "Traefik Gateway\n(Docker)" as traefik
+participant "Workspace API\n(Docker)" as workspace_api
+participant "TP Capital API\n(Docker)" as tp_api
+participant "Telegram Gateway API\n(Docker)" as telegram_api
+database "PostgreSQL\n(Docker)" as db
+database "Redis\n(Docker)" as redis
+
+' ==============================================================================
+' PATTERN 1: DEVELOPMENT MODE (VITE PROXY)
+' ==============================================================================
+group Pattern 1: Development Mode (Hot Reload)
+
+dev -> vite : npm run dev
+activate vite
+vite -> browser : Vite Server Started\nhttp://localhost:5173
+deactivate vite
+
+browser -> vite : GET /api/workspace/items
+activate vite
+note right of vite
+  **Vite Proxy Configuration:**
+  - Detects /api/workspace prefix
+  - Target: workspace-api:3200
+  - Rewrite: /api/workspace/* → /api/*
+  - No VITE_ prefix (server-side)
+end note
+
+vite -> workspace_api : Proxy → workspace-api:3200/api/items
+activate workspace_api
+
+workspace_api -> db : SQL Query\nSELECT * FROM items
+activate db
+db --> workspace_api : Results
+deactivate db
+
+workspace_api -> redis : Cache Write
+activate redis
+redis --> workspace_api : OK
+deactivate redis
+
+workspace_api --> vite : JSON Response\n{ items: [...] }
+deactivate workspace_api
+
+vite --> browser : Display Data\n(Hot Reload Active)
+deactivate vite
+
+end
+
+' ==============================================================================
+' SEPARATOR
+' ==============================================================================
+...
+
+' ==============================================================================
+' PATTERN 2: PRODUCTION MODE (TRAEFIK GATEWAY)
+' ==============================================================================
+group Pattern 2: Production Mode (via Gateway)
+
+browser -> traefik : GET http://localhost:9082/api/workspace/items
+activate traefik
+note right of traefik
+  **Traefik Routing:**
+  - Rule: PathPrefix(`/api/workspace`)
+  - Priority: 100
+  - Target: workspace-api:3200
+  - Middlewares: CORS, Rate Limit, Compression
+  - Health Check: Every 30s
+end note
+
+traefik -> workspace_api : Route → workspace-api:3200/api/items\n(Path rewritten)
+activate workspace_api
+
+workspace_api -> db : SQL Query\nSELECT * FROM items
+activate db
+db --> workspace_api : Results
+deactivate db
+
+workspace_api -> redis : Cache Read
+activate redis
+redis --> workspace_api : Hit (79.4%)
+deactivate redis
+
+workspace_api --> traefik : JSON Response\n{ items: [...] }
+deactivate workspace_api
+
+traefik --> browser : Display Data\n(Compressed, CORS Headers)
+deactivate traefik
+
+end
+
+' ==============================================================================
+' SEPARATOR
+' ==============================================================================
+...
+
+' ==============================================================================
+' PATTERN 3: DIRECT CONTAINER ACCESS (DEBUG)
+' ==============================================================================
+group Pattern 3: Direct Container Access (Debug Only)
+
+browser -> workspace_api : GET http://localhost:3210/api/items\n(Direct port mapping)
+activate workspace_api
+note right of workspace_api
+  **Direct Access:**
+  - Port: 3210 (host) → 3200 (container)
+  - No proxy/gateway
+  - No CORS (blocked by browser)
+  - No rate limiting
+  - ⚠️ Debug only, not for production
+end note
+
+workspace_api -> db : SQL Query
+activate db
+db --> workspace_api : Results
+deactivate db
+
+workspace_api --> browser : CORS Error\n(No Access-Control-Allow-Origin)
+deactivate workspace_api
+
+note right of browser
+  **CORS Error:**
+  - Origin: http://localhost:5173
+  - Requested: http://localhost:3210
+  - Missing CORS headers
+  - ❌ Request blocked
+end note
+
+end
+
+' ==============================================================================
+' SEPARATOR
+' ==============================================================================
+...
+
+' ==============================================================================
+' PATTERN 4: TELEGRAM SYNC FLOW (COMPLEX)
+' ==============================================================================
+group Pattern 4: Telegram Message Sync (Multi-Service)
+
+browser -> traefik : POST http://localhost:9082/api/telegram-gateway/sync-messages
+activate traefik
+
+traefik -> telegram_api : Route → telegram-gateway-api:4010/api/telegram-gateway/sync-messages
+activate telegram_api
+
+telegram_api -> telegram_api : Validate API Key\n(X-API-Key header)
+
+telegram_api -> db : SELECT * FROM channels\nWHERE is_active = true
+activate db
+db --> telegram_api : Active channels list
+deactivate db
+
+telegram_api -> telegram_api : Prepare sync request
+note right of telegram_api
+  **MTProto Delegation:**
+  - Target: telegram-mtproto:4007
+  - Endpoint: POST /sync-messages
+  - Payload: { limit: 100 }
+  - Timeout: 180s
+end note
+
+telegram_api -> telegram_api : Call MTProto Service\nhttp://telegram-mtproto:4007/sync-messages
+activate telegram_api #DarkSalmon
+
+telegram_api -> telegram_api : MTProto Client\n(gramJS 2.26.21)
+note right
+  **MTProto Flow:**
+  - Session file: .session/telegram-gateway.session
+  - Protocol: Telegram MTProto
+  - Authentication: Phone + 2FA
+  - API: Telegram Servers (external)
+end note
+
+telegram_api -> db : INSERT INTO messages\n(channel_id, text, timestamp, ...)
+activate db
+db --> telegram_api : Messages saved
+deactivate db
+
+telegram_api --> telegram_api : Return sync result
+deactivate telegram_api
+
+telegram_api --> traefik : JSON Response\n{ success: true, totalMessagesSynced: 15 }
+deactivate telegram_api
+
+traefik --> browser : Display Success\n"✅ 15 mensagem(ns) recuperada(s)"
+deactivate traefik
+
+end
+
+' ==============================================================================
+' NOTES
+' ==============================================================================
+note over dev, redis
+  **Access Pattern Selection:**
+
+  **Use Pattern 1 (Vite Proxy) when:**
+  - ✅ Developing frontend (hot reload needed)
+  - ✅ Working on UI components
+  - ✅ Testing API integration locally
+  - ✅ Want fast feedback loop
+
+  **Use Pattern 2 (Traefik Gateway) when:**
+  - ✅ Testing production-like setup
+  - ✅ Verifying CORS configuration
+  - ✅ Testing rate limiting
+  - ✅ Debugging gateway routing
+  - ✅ Running E2E tests
+
+  **Use Pattern 3 (Direct Access) when:**
+  - ⚠️ Debugging container directly
+  - ⚠️ Testing API endpoints with Postman/curl
+  - ⚠️ Bypassing proxy/gateway for troubleshooting
+  - ❌ NOT for browser access (CORS blocked)
+end note
+
+@enduml

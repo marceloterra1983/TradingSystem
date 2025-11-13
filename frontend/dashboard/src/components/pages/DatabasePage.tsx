@@ -1,6 +1,7 @@
 import * as React from "react";
-import { ExternalLink, Loader2, Play } from '@/icons';
+import { ExternalLink, Loader2, Play, RefreshCcw } from '@/icons';
 import { Button } from "../ui/button";
+import { ButtonWithDropdown } from "../ui/button-with-dropdown";
 import { ENDPOINTS } from "../../config/endpoints";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 import { useToast } from "../../hooks/useToast";
@@ -19,16 +20,13 @@ const PGWEB_URL = ENDPOINTS.pgWeb;
 const ADMINER_URL = ENDPOINTS.adminer;
 const QUESTDB_URL = ENDPOINTS.questdb;
 
-const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
-  pgadmin: { url: PGADMIN_URL, label: "Gateway Traefik (Recomendado)" },
-  pgweb: { url: PGWEB_URL, label: "Gateway Traefik (Recomendado)" },
-  adminer: { url: ADMINER_URL, label: "Gateway Traefik (Recomendado)" },
-  questdb: { url: QUESTDB_URL, label: "Gateway Traefik (Recomendado)" },
-};
+const normalizeUrlValue = (url: string): string =>
+  typeof url === "string" ? url.replace(/\/+$/, "") : "";
 
 const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
   pgadmin: [
-    { label: "Porta 5050 (Recomendado)", url: "http://localhost:5050" },
+    { label: "Proxy Local 5050 (Recomendado)", url: "http://localhost:5050" },
+    { label: "Gateway 9080", url: "http://localhost:9080/db-ui/pgadmin" },
     { label: "Legacy 7100", url: "http://localhost:7100" },
   ],
   pgweb: [
@@ -36,13 +34,29 @@ const DIRECT_ENDPOINT_OPTIONS: Record<ToolId, EndpointOption[]> = {
     { label: "Legacy 7102", url: "http://localhost:7102" },
   ],
   adminer: [
-    { label: "Porta 3910 (Recomendado)", url: "http://localhost:3910" },
+    { label: "Proxy Local 3910 (Recomendado)", url: "http://localhost:3910" },
+    { label: "Gateway 9080", url: "http://localhost:9080/db-ui/adminer" },
     { label: "Legacy 7101", url: "http://localhost:7101" },
   ],
   questdb: [
     { label: "HTTP 9000 (Recomendado)", url: "http://localhost:9000" },
+    { label: "HTTP 9002 (Backup)", url: "http://localhost:9002" },
     { label: "Legacy 7010", url: "http://localhost:7010" },
+    { label: "Gateway Traefik (Proxy)", url: QUESTDB_URL },
   ],
+};
+
+const DATABASE_UI_DEFAULTS: Record<ToolId, { url: string; label: string }> = {
+  pgadmin: { url: PGADMIN_URL, label: "Proxy Local (Recomendado)" },
+  pgweb: { url: PGWEB_URL, label: "Gateway Traefik (Recomendado)" },
+  adminer: { url: ADMINER_URL, label: "Proxy Local (Recomendado)" },
+  questdb: {
+    url:
+      DIRECT_ENDPOINT_OPTIONS.questdb[0]?.url ?? QUESTDB_URL,
+    label:
+      DIRECT_ENDPOINT_OPTIONS.questdb[0]?.label ??
+      "HTTP 9000 (Recomendado)",
+  },
 };
 
 type DatabaseOverviewEntry = {
@@ -217,8 +231,8 @@ const DATABASES_OVERVIEW: DatabaseOverviewEntry[] = [
     id: "questdb",
     name: "QuestDB Console",
     engine: "QuestDB (HTTP + ILP)",
-    host: "http://localhost:9080/db-ui/questdb",
-    port: "HTTP 9002 / ILP 9009",
+    host: "localhost",
+    port: "HTTP 9000 / ILP 9009",
     database: "N/A (SQL over HTTP)",
     user: "N/A",
     dockerService: "dbui-questdb",
@@ -289,7 +303,11 @@ const TOOLS: DatabaseTool[] = [
       "Console SQL para séries temporais e análises de mercado (dados do TP Capital / ingestão histórica).",
     defaultUrl: DATABASE_UI_DEFAULTS.questdb.url,
     defaultLabel: DATABASE_UI_DEFAULTS.questdb.label,
-    fallbackUrls: DIRECT_ENDPOINT_OPTIONS.questdb,
+    fallbackUrls: DIRECT_ENDPOINT_OPTIONS.questdb.filter(
+      (option) =>
+        normalizeUrlValue(option.url) !==
+        normalizeUrlValue(DATABASE_UI_DEFAULTS.questdb.url),
+    ),
     docsLink: "/docs/tools/rag/architecture#questdb",
     startHints: [
       "bash scripts/docker/start-stacks.sh --phase database-ui",
@@ -302,6 +320,55 @@ const NAV_TABS: { id: TabId; label: string }[] = [
   { id: "overview", label: "Overview" },
   ...TOOLS.map((tool) => ({ id: tool.id, label: tool.name })),
 ];
+
+const uniqueByUrl = (options: EndpointOption[]): EndpointOption[] => {
+  const seen = new Set<string>();
+  return options
+    .map((option) => ({
+      label: option.label,
+      url: normalizeUrlValue(option.url),
+    }))
+    .filter((option) => {
+      if (!option.url || seen.has(option.url)) {
+        return false;
+      }
+      seen.add(option.url);
+      return true;
+    });
+};
+
+const getEndpointOptionsForTool = (tool: DatabaseTool): EndpointOption[] => {
+  const combined: EndpointOption[] = [
+    {
+      label: tool.defaultLabel ?? `${tool.name} (Default)`,
+      url: tool.defaultUrl,
+    },
+    ...(tool.fallbackUrls ?? []),
+  ];
+  return uniqueByUrl(combined);
+};
+
+const getNextEndpointOption = (
+  tool: DatabaseTool,
+  currentUrl: string,
+): EndpointOption | null => {
+  const options = getEndpointOptionsForTool(tool);
+  if (options.length <= 1) {
+    return null;
+  }
+  const normalizedCurrent = normalizeUrlValue(currentUrl);
+  const currentIndex = options.findIndex(
+    (option) => normalizeUrlValue(option.url) === normalizedCurrent,
+  );
+  const startIndex = currentIndex >= 0 ? currentIndex : 0;
+  for (let offset = 1; offset <= options.length; offset += 1) {
+    const nextOption = options[(startIndex + offset) % options.length];
+    if (normalizeUrlValue(nextOption.url) !== normalizedCurrent) {
+      return nextOption;
+    }
+  }
+  return null;
+};
 
 const MAINTENANCE_ACTIONS: {
   id: "dashboard-rebuild" | "docker-prune";
@@ -330,6 +397,7 @@ interface ToolContentFrameProps {
   activeUrl: string;
   iframeError: boolean;
   onError: () => void;
+  refreshKey: number;
 }
 
 function ToolContentFrame({
@@ -337,6 +405,7 @@ function ToolContentFrame({
   activeUrl,
   iframeError,
   onError,
+  refreshKey,
 }: ToolContentFrameProps) {
   const baseClasses =
     "h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-900";
@@ -374,7 +443,7 @@ function ToolContentFrame({
   return (
     <div className={baseClasses}>
       <IframeWithUrl
-        key={`${tool.id}-${activeUrl}`}
+        key={`${tool.id}-${refreshKey}-${activeUrl}`}
         src={activeUrl}
         title={`${tool.name} Dashboard`}
         wrapperClassName="h-full"
@@ -486,13 +555,14 @@ export default function DatabasePageNew() {
     TOOLS.reduce(
       (acc, tool) => ({
         ...acc,
-        [tool.id]: tool.defaultUrl,
+        [tool.id]: normalizeUrlValue(tool.defaultUrl),
       }),
       {} as Record<ToolId, string>,
     ),
   );
   const [activeTab, setActiveTab] = React.useState<TabId>("overview");
   const [iframeError, setIframeError] = React.useState(false);
+  const [iframeRefreshKey, setIframeRefreshKey] = React.useState(0);
   const [launchingTool, setLaunchingTool] = React.useState<string | null>(null);
   const [maintenanceAction, setMaintenanceAction] = React.useState<
     string | null
@@ -505,23 +575,60 @@ export default function DatabasePageNew() {
     activeTab === "overview"
       ? null
       : TOOLS.find((tool) => tool.id === activeTab);
-  const activeUrl = activeToolData ? selectedUrls[activeToolData.id] : "";
+  React.useEffect(() => {
+    if (!activeToolData) {
+      return;
+    }
+    setSelectedUrls((prev) => {
+      if (prev[activeToolData.id]) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [activeToolData.id]: normalizeUrlValue(activeToolData.defaultUrl),
+      };
+    });
+  }, [activeToolData]);
+
+  React.useEffect(() => {
+    setIframeRefreshKey(0);
+  }, [activeToolData?.id]);
+
+  const activeUrl = React.useMemo(() => {
+    if (!activeToolData) {
+      return "";
+    }
+    return (
+      selectedUrls[activeToolData.id] ??
+      normalizeUrlValue(activeToolData.defaultUrl)
+    );
+  }, [activeToolData, selectedUrls]);
+
+  const activeToolOptions = React.useMemo(
+    () =>
+      activeToolData
+        ? getEndpointOptionsForTool(activeToolData).map((option) => ({
+            label: option.label,
+            value: option.url,
+          }))
+        : [],
+    [activeToolData],
+  );
 
   const handleEndpointError = React.useCallback(
     (tool: DatabaseTool) => {
-      const currentUrl = selectedUrls[tool.id];
-      const fallbackOption = tool.fallbackUrls?.find(
-        (option) => option.url !== currentUrl,
-      );
-
-      if (fallbackOption) {
+      const currentUrl = selectedUrls[tool.id] ?? tool.defaultUrl;
+      const nextOption = getNextEndpointOption(tool, currentUrl);
+      if (nextOption) {
+        const normalizedNext = normalizeUrlValue(nextOption.url);
         setSelectedUrls((prev) => ({
           ...prev,
-          [tool.id]: fallbackOption.url,
+          [tool.id]: normalizedNext,
         }));
         setIframeError(false);
+        setIframeRefreshKey((prev) => prev + 1);
         toast.info(
-          `${tool.name}: alternando automaticamente para ${fallbackOption.label}`,
+          `${tool.name}: alternando automaticamente para ${nextOption.label}`,
         );
         return;
       }
@@ -532,13 +639,46 @@ export default function DatabasePageNew() {
     [selectedUrls, toast],
   );
 
+  const handleEndpointSelect = React.useCallback(
+    (tool: DatabaseTool, url: string) => {
+      const normalizedNext = normalizeUrlValue(url);
+      const previousUrl = normalizeUrlValue(selectedUrls[tool.id] ?? "");
+      setSelectedUrls((prev) => {
+        if (prev[tool.id] === normalizedNext) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [tool.id]: normalizedNext,
+        };
+      });
+      setIframeError(false);
+      setIframeRefreshKey((prev) => prev + 1);
+      const selectedOption = getEndpointOptionsForTool(tool).find(
+        (option) => normalizeUrlValue(option.url) === normalizedNext,
+      );
+      if (selectedOption && normalizedNext !== previousUrl) {
+        toast.info(`${tool.name}: utilizando ${selectedOption.label}`);
+      }
+    },
+    [selectedUrls, toast],
+  );
+
   const handleTabChange = (tabId: TabId) => {
     setActiveTab(tabId);
     setIframeError(false);
   };
 
+  const handleReloadIframe = React.useCallback(() => {
+    if (!activeToolData || !activeUrl) {
+      return;
+    }
+    setIframeError(false);
+    setIframeRefreshKey((prev) => prev + 1);
+  }, [activeToolData, activeUrl]);
+
   const handleOpenInNewTab = () => {
-    if (activeTab !== "overview" && activeUrl) {
+    if (activeToolData && activeUrl) {
       window.open(activeUrl, "_blank", "noopener,noreferrer");
     }
   };
@@ -575,15 +715,40 @@ export default function DatabasePageNew() {
               </Button>
             ))}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenInNewTab}
-            disabled={activeTab === "overview" || !activeUrl}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open in new tab
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {isToolTab && activeToolData ? (
+              <>
+                {activeToolOptions.length > 0 && (
+                  <ButtonWithDropdown
+                    label="Endpoint"
+                    options={activeToolOptions}
+                    selectedValue={activeUrl}
+                    onSelect={(value) => handleEndpointSelect(activeToolData, value)}
+                    variant="outline"
+                    size="sm"
+                  />
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReloadIframe}
+                  disabled={!activeUrl}
+                >
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                  Recarregar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenInNewTab}
+                  disabled={!activeUrl}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Abrir em nova aba
+                </Button>
+              </>
+            ) : null}
+          </div>
         </div>
 
         {/* Content & sections */}
@@ -595,6 +760,7 @@ export default function DatabasePageNew() {
                 activeUrl={activeUrl}
                 iframeError={iframeError}
                 onError={() => handleEndpointError(activeToolData)}
+                refreshKey={iframeRefreshKey}
               />
             </div>
           )

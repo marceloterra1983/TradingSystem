@@ -1,0 +1,652 @@
+---
+title: Dev Container - Troubleshooting
+sidebar_label: Troubleshooting
+sidebar_position: 6
+tags: [dev-container, troubleshooting, debugging, errors]
+domain: tools
+type: guide
+summary: "Guia de troubleshooting do Dev Container: problemas comuns, diagnóstico, soluções e quando rebuild vs restart"
+status: active
+last_review: "2025-11-12"
+---
+
+# Dev Container - Troubleshooting
+
+## 🎯 Quick Diagnostic Commands
+
+```bash
+# Container status
+docker ps -a | grep tradingsystem-dev
+
+# Services health
+health
+
+# Container logs
+docker logs tradingsystem-dev-container
+
+# Network connectivity
+docker network inspect tradingsystem_backend | grep tradingsystem-dev
+
+# Disk space
+df -h
+
+# Memory usage
+free -h
+
+# Running processes
+ps aux | grep node
+```
+
+---
+
+## ❌ Common Issues Matrix
+
+| Issue | Symptom | Quick Fix | Detailed Section |
+|-------|---------|-----------|------------------|
+| Container won't start | VS Code stuck on "Starting Dev Container" | Rebuild without cache | [#1](#issue-1-container-wont-start) |
+| Port conflicts | "Port already in use" | Kill process on port | [#2](#issue-2-port-conflicts) |
+| Network issues | "Cannot reach workspace-api" | Reconnect networks | [#3](#issue-3-network-connectivity) |
+| Permission denied | "EACCES: permission denied" | Fix file permissions | [#4](#issue-4-permission-errors) |
+| API Indisponível | Dashboard can't reach API | Fix Vite proxy config | [#5](#issue-5-api-indisponível) |
+| Hot reload broken | Changes not reflecting | Restart Vite dev server | [#6](#issue-6-hot-reload-not-working) |
+| Docker socket error | "Cannot connect to Docker daemon" | Remount socket | [#7](#issue-7-docker-socket-errors) |
+| Out of disk space | "No space left on device" | Clean Docker volumes | [#8](#issue-8-disk-space) |
+| Services not accessible | 503 Service Unavailable | Check service health | [#9](#issue-9-services-not-accessible) |
+
+---
+
+## Issue #1: Container Won't Start
+
+### Symptoms
+- VS Code stuck on "Starting Dev Container..."
+- Error: "Failed to create container"
+- Container exits immediately
+
+### Diagnosis
+```bash
+# Check container status
+docker ps -a | grep tradingsystem-dev
+
+# Check logs
+docker logs tradingsystem-dev-container
+
+# Check disk space
+df -h
+```
+
+### Solutions
+
+#### Solution A: Rebuild Without Cache
+```
+1. Ctrl+Shift+P
+2. "Dev Containers: Rebuild Container (No Cache)"
+3. Wait 10-15 minutes
+```
+
+#### Solution B: Remove and Recreate
+```bash
+# Remove container
+docker rm -f tradingsystem-dev-container
+
+# Remove volumes (CAUTION: loses non-committed code)
+docker volume rm tradingsystem-node-modules
+docker volume rm tradingsystem-python-venv
+
+# Reopen in container
+# Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+```
+
+#### Solution C: Check Docker Desktop
+```
+1. Open Docker Desktop
+2. Settings → Resources → Advanced
+3. Increase Memory to 8GB minimum
+4. Increase Disk space to 100GB minimum
+5. Apply & Restart
+```
+
+---
+
+## Issue #2: Port Conflicts
+
+### Symptoms
+- Error: "Port 9082 is already allocated"
+- Error: "Address already in use"
+- Services fail to start
+
+### Diagnosis
+```bash
+# Find process using port
+lsof -i :9082
+
+# Or use netstat
+netstat -tulpn | grep 9082
+```
+
+### Solutions
+
+#### Solution A: Kill Process
+```bash
+# Find PID
+lsof -i :9082
+# Output: node 12345 user ...
+
+# Kill process
+kill -9 12345
+
+# Or use script
+bash scripts/docker/find-port-9080.sh
+```
+
+#### Solution B: Change Port
+```yaml
+# docker-compose.0-gateway-stack.yml
+ports:
+  - "9082:9080"  # Change 9082 to 9084 (or any free port)
+```
+
+#### Solution C: Stop Conflicting Service
+```bash
+# Stop all stacks
+stop
+
+# Start only needed services
+start-minimal
+```
+
+---
+
+## Issue #3: Network Connectivity
+
+### Symptoms
+- "Cannot reach workspace-api"
+- "getaddrinfo ENOTFOUND workspace-api"
+- Vite proxy fails
+
+### Diagnosis
+```bash
+# Check if container is in network
+docker network inspect tradingsystem_backend | grep tradingsystem-dev
+
+# Test connectivity
+docker exec tradingsystem-dev-container ping workspace-api
+
+# Check DNS resolution
+docker exec tradingsystem-dev-container nslookup workspace-api
+```
+
+### Solutions
+
+#### Solution A: Reconnect Networks
+```bash
+# Disconnect
+docker network disconnect tradingsystem_backend tradingsystem-dev-container
+
+# Reconnect
+docker network connect tradingsystem_backend tradingsystem-dev-container
+
+# Restart container
+docker restart tradingsystem-dev-container
+```
+
+#### Solution B: Recreate Networks
+```bash
+# Stop all services
+stop
+
+# Remove networks
+docker network rm tradingsystem_backend
+docker network rm tradingsystem_frontend
+
+# Recreate networks
+docker network create tradingsystem_backend
+docker network create tradingsystem_frontend
+
+# Start services
+start
+```
+
+#### Solution C: Check devcontainer.json
+```json
+// .devcontainer/devcontainer.json
+{
+  "runArgs": [
+    "--network=tradingsystem_backend",
+    "--network=tradingsystem_frontend"
+  ]
+}
+```
+
+**If missing:** Add networks and rebuild container.
+
+---
+
+## Issue #4: Permission Errors
+
+### Symptoms
+- "EACCES: permission denied"
+- "Cannot write to /workspace/node_modules"
+- Git operations fail
+
+### Diagnosis
+```bash
+# Check file permissions
+ls -la /workspace
+
+# Check current user
+whoami  # Should be: vscode
+
+# Check user ID
+id  # Should be: uid=1000(vscode)
+```
+
+### Solutions
+
+#### Solution A: Fix Workspace Permissions
+```bash
+# Inside Dev Container
+sudo chown -R vscode:vscode /workspace
+```
+
+#### Solution B: Fix Node Modules Volume
+```bash
+# Outside container
+docker volume rm tradingsystem-node-modules
+
+# Rebuild container
+# Ctrl+Shift+P → "Dev Containers: Rebuild Container"
+```
+
+#### Solution C: Check Host Permissions
+```bash
+# Outside container (host terminal)
+cd /home/marce/Projetos/TradingSystem
+sudo chown -R $USER:$USER .
+```
+
+---
+
+## Issue #5: API Indisponível
+
+### Symptoms
+- Dashboard shows "API Indisponível"
+- Console: `Failed to fetch`
+- Network tab: Status (failed)
+
+### Diagnosis
+```bash
+# Check API health
+curl http://workspace-api:3200/api/health
+
+# Check Vite proxy config
+cat frontend/dashboard/vite.config.ts | grep -A 5 "proxy:"
+
+# Check environment variables
+env | grep PROXY_TARGET
+```
+
+### Solutions
+
+#### Solution A: Fix VITE_ Prefix
+```bash
+# .env - REMOVE VITE_ prefix from proxy targets
+# WRONG:
+# VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+
+# CORRECT:
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
+
+**Rebuild container:**
+```bash
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+```
+
+#### Solution B: Fix Hardcoded URLs
+```typescript
+// WRONG:
+const url = 'http://localhost:3200/api/items';
+
+// CORRECT:
+const url = '/api/workspace/items';  // Relative path
+```
+
+#### Solution C: Check API Container
+```bash
+# Is API running?
+docker ps | grep workspace-api
+
+# If not running:
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
+```
+
+---
+
+## Issue #6: Hot Reload Not Working
+
+### Symptoms
+- Changes don't reflect in browser
+- Need manual refresh
+- HMR update fails
+
+### Diagnosis
+```bash
+# Check Vite process
+ps aux | grep vite
+
+# Check Vite logs
+# Terminal running npm run dev shows errors?
+```
+
+### Solutions
+
+#### Solution A: Restart Vite
+```bash
+# Kill Vite process
+pkill -f vite
+
+# Restart
+cd /workspace/frontend/dashboard
+npm run dev
+```
+
+#### Solution B: Clear Cache
+```bash
+# Remove Vite cache
+rm -rf frontend/dashboard/node_modules/.vite
+
+# Restart Vite
+npm run dev
+```
+
+#### Solution C: Check File Watcher
+```bash
+# Increase file watchers (host terminal)
+echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+---
+
+## Issue #7: Docker Socket Errors
+
+### Symptoms
+- "Cannot connect to Docker daemon"
+- `docker ps` fails inside container
+- `docker compose` commands fail
+
+### Diagnosis
+```bash
+# Check socket mount
+docker inspect tradingsystem-dev-container | grep "/var/run/docker.sock"
+
+# Check socket permissions
+ls -la /var/run/docker.sock
+```
+
+### Solutions
+
+#### Solution A: Restart Docker Desktop
+```
+1. Docker Desktop → Quit
+2. Wait 10 seconds
+3. Start Docker Desktop
+4. Reopen container
+```
+
+#### Solution B: Fix Socket Permissions
+```bash
+# Host terminal
+sudo chmod 666 /var/run/docker.sock
+```
+
+#### Solution C: Rebuild Container
+```
+Ctrl+Shift+P → "Dev Containers: Rebuild Container"
+```
+
+---
+
+## Issue #8: Disk Space
+
+### Symptoms
+- "No space left on device"
+- Container build fails
+- Cannot save files
+
+### Diagnosis
+```bash
+# Check disk usage
+df -h
+
+# Check Docker disk usage
+docker system df
+
+# Check large files
+du -sh /workspace/* | sort -h
+```
+
+### Solutions
+
+#### Solution A: Clean Docker
+```bash
+# Remove unused images
+docker image prune -a -f
+
+# Remove unused volumes
+docker volume prune -f
+
+# Remove unused build cache
+docker builder prune -a -f
+
+# Complete cleanup
+docker system prune -a --volumes -f
+```
+
+#### Solution B: Clean Node Modules
+```bash
+# Inside Dev Container
+find /workspace -name "node_modules" -type d -prune -exec du -sh {} \;
+find /workspace -name "node_modules" -type d -prune -exec rm -rf {} \;
+
+# Reinstall
+npm install
+```
+
+#### Solution C: Increase Docker Disk
+```
+Docker Desktop → Settings → Resources → Disk image size
+Increase from 64GB to 128GB
+Apply & Restart
+```
+
+---
+
+## Issue #9: Services Not Accessible
+
+### Symptoms
+- 503 Service Unavailable
+- Health checks failing
+- Traefik shows unhealthy backends
+
+### Diagnosis
+```bash
+# Check service health
+docker ps --filter "name=workspace-api"
+
+# Check health endpoint
+curl http://workspace-api:3200/api/health
+
+# Check Traefik dashboard
+# http://localhost:9083/dashboard/
+```
+
+### Solutions
+
+#### Solution A: Restart Services
+```bash
+# Restart specific service
+docker restart workspace-api
+
+# Or restart all
+stop && start
+```
+
+#### Solution B: Check Logs
+```bash
+# Service logs
+docker logs workspace-api 2>&1 | tail -50
+
+# Look for errors:
+# - Database connection failed
+# - Port binding failed
+# - Missing environment variables
+```
+
+#### Solution C: Rebuild Service
+```bash
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d --build workspace-api
+```
+
+---
+
+## 🔧 When to Rebuild vs Restart
+
+### Restart Container (Quick - 30 seconds)
+
+**When:**
+- Container sluggish
+- Network connectivity issues
+- Process stuck
+- Minor glitches
+
+**How:**
+```bash
+docker restart tradingsystem-dev-container
+```
+
+**Or:**
+```
+VS Code → Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+```
+
+---
+
+### Rebuild Container (Slow - 2-15 minutes)
+
+**When:**
+- Modified `.devcontainer/devcontainer.json`
+- Modified `.devcontainer/Dockerfile`
+- Added VS Code extensions
+- Changed Node.js/Python version
+- Added system packages
+- Persistent issues after restart
+
+**How (with cache):**
+```
+Ctrl+Shift+P → "Dev Containers: Rebuild Container"
+```
+
+**How (without cache - clean build):**
+```
+Ctrl+Shift+P → "Dev Containers: Rebuild Container (No Cache)"
+```
+
+---
+
+## 📊 Diagnostic Tools
+
+### Health Check Script
+```bash
+# Complete system health
+bash scripts/maintenance/health-check-all.sh
+
+# JSON output
+bash scripts/maintenance/health-check-all.sh --format json | jq .
+```
+
+### Network Diagnostics
+```bash
+# List all networks
+docker network ls
+
+# Inspect network
+docker network inspect tradingsystem_backend
+
+# Test connectivity
+docker exec tradingsystem-dev-container ping workspace-api
+```
+
+### Resource Monitoring
+```bash
+# Container resource usage
+docker stats tradingsystem-dev-container
+
+# Disk usage
+df -h
+
+# Memory usage
+free -h
+
+# Process list
+ps aux
+```
+
+---
+
+## 🆘 Emergency Recovery
+
+### Nuclear Option (Last Resort)
+
+**⚠️ WARNING: Deletes all data! Commit code first!**
+
+```bash
+# 1. Commit and push all changes
+git add .
+git commit -m "WIP: before emergency recovery"
+git push
+
+# 2. Stop everything
+docker stop $(docker ps -q)
+
+# 3. Remove containers
+docker rm -f $(docker ps -aq)
+
+# 4. Remove volumes (DATA LOSS!)
+docker volume rm $(docker volume ls -q | grep tradingsystem)
+
+# 5. Remove networks
+docker network rm tradingsystem_backend tradingsystem_frontend tp_capital_backend
+
+# 6. Clean system
+docker system prune -a --volumes -f
+
+# 7. Restart Docker Desktop
+
+# 8. Rebuild Dev Container (No Cache)
+# VS Code → Ctrl+Shift+P → "Dev Containers: Rebuild Container (No Cache)"
+
+# 9. Recreate networks
+docker network create tradingsystem_backend
+docker network create tradingsystem_frontend
+docker network create tp_capital_backend
+
+# 10. Start services
+start
+```
+
+---
+
+## 📖 Documentação Relacionada
+
+- **[Overview](./overview.mdx)** - Visão geral
+- **[Architecture](./architecture.mdx)** - Arquitetura
+- **[API Access](./api-access.mdx)** - Acesso a APIs
+- **[Gateway & Proxy](./gateway-proxy.mdx)** - Traefik/Vite
+- **[Workflows](./workflows.mdx)** - Fluxo de trabalho
+
+---
+
+**Última revisão:** 2025-11-12
+**Status:** ✅ Ativo
+**Próxima revisão:** 2026-02-12 (3 meses)

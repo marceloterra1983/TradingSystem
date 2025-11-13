@@ -11,7 +11,7 @@ const config = {
   title: 'TradingSystem Docs',
   tagline: 'Product knowledge, runbooks, and specs in one place',
   url: 'https://docs.tradingsystem.local',
-  baseUrl: '/',
+  baseUrl: '/docs/',
   onBrokenLinks: 'warn',
   favicon: 'img/favicon.svg',
   organizationName: 'marceloterra1983',

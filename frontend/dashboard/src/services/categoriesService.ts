@@ -7,7 +7,8 @@
 // Extract base URL from VITE_WORKSPACE_API_URL (remove /items if present)
 const getBaseApiUrl = () => {
   const workspaceUrl =
-    import.meta.env.VITE_WORKSPACE_API_URL || "http://localhost:9080/api/workspace"; // Default via Traefik gateway (fallback mantém compatibilidade local)
+    import.meta.env.VITE_WORKSPACE_API_URL ||
+    "http://localhost:9080/api/workspace"; // Default via Traefik gateway (fallback mantém compatibilidade local)
   // Remove /items from the end if present
   return workspaceUrl.replace(/\/items$/, "");
 };
@@ -19,6 +20,7 @@ console.warn("[CategoriesService] WORKSPACE_API_URL:", WORKSPACE_API_URL);
 export interface Category {
   id: string;
   name: string;
+  display_name?: string;
   description?: string;
   color?: string;
   icon?: string;
@@ -31,6 +33,7 @@ export interface Category {
 
 export interface CreateCategoryDTO {
   name: string;
+  display_name?: string;
   description?: string;
   color?: string;
   icon?: string;
@@ -41,6 +44,7 @@ export interface CreateCategoryDTO {
 
 export interface UpdateCategoryDTO {
   name?: string;
+  display_name?: string;
   description?: string;
   color?: string;
   icon?: string;
@@ -67,7 +71,7 @@ class CategoriesService {
 
     console.warn(
       "[CategoriesService] Using relative path (Vite proxy):",
-      this.baseUrl,
+      this.baseUrl
     );
   }
 
@@ -157,7 +161,7 @@ class CategoriesService {
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || "Failed to create category",
+        result.error || result.message || "Failed to create category"
       );
     }
 
@@ -188,7 +192,7 @@ class CategoriesService {
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || "Failed to update category",
+        result.error || result.message || "Failed to update category"
       );
     }
 
@@ -214,7 +218,7 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || "Failed to delete category",
+        result.error || result.message || "Failed to delete category"
       );
     }
   }
@@ -234,7 +238,7 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || "Failed to toggle category",
+        result.error || result.message || "Failed to toggle category"
       );
     }
 

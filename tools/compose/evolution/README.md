@@ -14,7 +14,7 @@ Containerized reference stack for [Evolution API](https://github.com/EvolutionAP
 | `evolution-api` | Core API (Baileys/official WhatsApp bridge) | `${EVOLUTION_API_PORT:-4100} → 8080` |
 | `evolution-manager` | Web UI for provisioning connections | `${EVOLUTION_MANAGER_PORT:-4203} → 80` |
 
-All services live on the isolated `evolution_backend` network. Named volumes persist data/sessions (`evolution-postgres-data`, `evolution-redis-data`, `evolution-minio-data`, `evolution-api-instances`).
+The core services share a private `evolution_backend` network, while `evolution-api` and `evolution-manager` also join the project-wide `tradingsystem_backend` bridge so they are reachable from the API gateway and dashboard embed. Named volumes persist data/sessions (`evolution-postgres-data`, `evolution-redis-data`, `evolution-minio-data`, `evolution-api-instances`).
 
 ## Required `.env` keys
 
@@ -59,13 +59,13 @@ Override or extend as needed (TLS certs, metrics credentials, etc.). Defaults ar
 
 ```bash
 # start everything
-docker compose -f tools/compose/docker-compose.evolution-api.yml up -d
+docker compose -f tools/compose/docker-compose.5-2-evolution-api-stack.yml up -d
 
 # only the API + UI (DB/cache already running)
-docker compose -f tools/compose/docker-compose.evolution-api.yml up -d evolution-api evolution-manager
+docker compose -f tools/compose/docker-compose.5-2-evolution-api-stack.yml up -d evolution-api evolution-manager
 
 # inspect status/health
-docker compose -f tools/compose/docker-compose.evolution-api.yml ps
+docker compose -f tools/compose/docker-compose.5-2-evolution-api-stack.yml ps
 ```
 
 ### Health validation
@@ -83,4 +83,6 @@ docker compose -f tools/compose/docker-compose.evolution-api.yml ps
 - MinIO can be replaced with any S3 endpoint by overriding `EVOLUTION_S3_ENDPOINT`, `S3_USE_SSL`, and `S3_PORT`.  
 - Telemetry is disabled (`TELEMETRY_ENABLED=false`) but can be re-enabled via `.env`.
 
-See `tools/compose/docker-compose.evolution-api.yml` for full details.
+- PostgreSQL tuning is applied via explicit `postgres -c` flags inside the compose file, ensuring compatibility with the devcontainer's rootless Docker runtime.
+
+See `tools/compose/docker-compose.5-2-evolution-api-stack.yml` for full details.

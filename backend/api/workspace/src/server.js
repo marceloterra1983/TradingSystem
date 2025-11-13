@@ -196,9 +196,11 @@ app.get("/metrics", async (_req, res) => {
   res.end(await promClient.register.metrics());
 });
 
-// API routes
+// API routes (support legacy /api/* and rewritten /* paths)
 app.use("/api/items", itemsRouter);
+app.use("/items", itemsRouter);
 app.use("/api/categories", categoriesRouter);
+app.use("/categories", categoriesRouter);
 
 // ============================================================================
 // ERROR HANDLING (using shared modules)

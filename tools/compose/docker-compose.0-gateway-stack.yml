@@ -53,16 +53,16 @@ services:
       - "--ping=true"
 
     ports:
-      - "9080:9080"   # HTTP Gateway
-      - "9081:9080"   # Dashboard
+      - "9082:9080"   # HTTP Gateway
+      - "9083:8080"   # Dashboard
       # - "9443:9443"   # HTTPS Gateway (future) - DISABLED: porta em uso no sistema
 
     volumes:
       # Docker socket (service discovery)
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-      # Dynamic configuration (routes, middlewares)
-      - /workspace/tools/traefik/dynamic:/etc/traefik/dynamic:rw
+      # Dynamic configuration (routes, middlewares) - RELATIVE PATH from compose file location
+      - ../traefik/dynamic:/etc/traefik/dynamic:ro
 
       # Access logs
       - traefik-logs:/var/log/traefik

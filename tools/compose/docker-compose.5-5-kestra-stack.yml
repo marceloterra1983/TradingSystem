@@ -68,7 +68,7 @@ services:
       - "traefik.http.routers.kestra.rule=PathPrefix(`/kestra`)"
       - "traefik.http.routers.kestra.entrypoints=web"
       - "traefik.http.routers.kestra.service=kestra-ui"
-      - "traefik.http.routers.kestra.middlewares=kestra-strip,static-standard@file"
+      - "traefik.http.routers.kestra.middlewares=kestra-strip"  # Removed static-standard@file due to WSL2 issues
       - "traefik.http.middlewares.kestra-strip.stripprefix.prefixes=/kestra"
       - "traefik.http.services.kestra-ui.loadbalancer.server.port=8080"
       - "traefik.http.services.kestra-ui.loadbalancer.healthcheck.path=/"
@@ -77,7 +77,7 @@ services:
       - "traefik.http.routers.kestra-management.rule=PathPrefix(`/kestra-management`)"
       - "traefik.http.routers.kestra-management.entrypoints=web"
       - "traefik.http.routers.kestra-management.service=kestra-management"
-      - "traefik.http.routers.kestra-management.middlewares=kestra-management-strip,api-standard@file"
+      - "traefik.http.routers.kestra-management.middlewares=kestra-management-strip"  # Removed api-standard@file due to WSL2 issues
       - "traefik.http.middlewares.kestra-management-strip.stripprefix.prefixes=/kestra-management"
       - "traefik.http.services.kestra-management.loadbalancer.server.port=8081"
       - "traefik.http.services.kestra-management.loadbalancer.healthcheck.path=/health"

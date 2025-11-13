@@ -1,0 +1,285 @@
+---
+title: "ADR 007: TP Capital API Gateway Integration"
+tags: [adr, architecture, api-gateway, tp-capital, traefik]
+domain: infrastructure
+type: adr
+summary: "Architectural decision to route TP Capital API through Traefik API Gateway instead of direct container access"
+status: accepted
+last_review: "2025-11-12"
+---
+
+# ADR 007: TP Capital API Gateway Integration
+
+## Status
+
+**Accepted** - 2025-11-12
+
+## Context
+
+The TP Capital application consists of a multi-container stack (5 containers: TimescaleDB, PgBouncer, Redis Master, Redis Replica, and REST API) that needs to be accessible from the React dashboard running in the browser. Initially, the architecture allowed direct port mapping for each service, but this approach presented several challenges:
+
+### Problems with Direct Port Mapping
+
+1. **Port Management Complexity**: Each service required unique host port mappings, leading to port conflicts in development environments
+2. **CORS Configuration Duplication**: CORS headers had to be configured individually for each API service
+3. **No Centralized Authentication**: API keys and auth tokens were managed per-service without unified validation
+4. **Lack of Request Routing**: No intelligent routing, load balancing, or circuit breaking capabilities
+5. **Security Exposure**: Direct exposure of backend services to the browser without intermediate security layer
+6. **Monitoring Gaps**: No centralized logging or metrics collection for API requests
+
+### Available Options
+
+1. **Continue with Direct Port Mapping** (status quo)
+2. **Implement Traefik API Gateway** (chosen solution)
+3. **Use NGINX as Reverse Proxy**
+4. **Use Envoy Proxy**
+
+## Decision
+
+We have decided to **route all HTTP services, including TP Capital API, through Traefik v3.0 API Gateway**.
+
+### Implementation Details
+
+**Gateway Configuration:**
+- Container: `api-gateway` (Traefik v3.0)
+- HTTP Port: `9082:9080` (host:container)
+- Dashboard Port: `9083:8080`
+- Network: `tradingsystem_backend` (shared with all APIs)
+
+**TP Capital API Integration:**
+- Route: `http://localhost:9082/api/tp-capital/*`
+- Backend: `http://tp-capital-api:4005/*`
+- Middleware Chain: `tpcapital-stripprefix` → `tpcapital-cors`
+- Priority: 95 (higher than catch-all, lower than workspace)
+
+**Path Transformation:**
+```
+Browser Request:  http://localhost:9082/api/tp-capital/signals
+Gateway Strips:   /api/tp-capital
+Backend Receives: /signals
+Backend Response: 200 OK with JSON data
+```
+
+**Authentication Flow:**
+```
+1. Dashboard (browser) includes header: X-API-Key: <key from VITE_TP_CAPITAL_API_KEY>
+2. Traefik forwards header to backend
+3. TP Capital API validates key
+4. Response flows back through Traefik with CORS headers
+```
+
+## Consequences
+
+### Positive
+
+✅ **Unified Entry Point**: Single URL (`localhost:9082`) for all APIs instead of multiple ports
+✅ **Centralized CORS**: CORS headers applied by Traefik, no per-service configuration needed
+✅ **Service Discovery**: Traefik auto-discovers containers via Docker labels
+✅ **Security**: Middleware chain applies security headers, rate limiting, compression automatically
+✅ **Observability**: Centralized access logs in JSON format, Prometheus metrics available
+✅ **Zero-Downtime Updates**: Traefik health checks ensure only healthy backends receive traffic
+✅ **Path-Based Routing**: Clean URLs without port numbers (`/api/tp-capital` vs `:4005`)
+✅ **Production Ready**: Same architecture works for both development and production
+
+### Negative
+
+⚠️ **Additional Hop**: Extra network hop adds ~5-10ms latency (acceptable for non-HFT use case)
+⚠️ **Complexity**: Requires understanding of Traefik labels and middleware configuration
+⚠️ **Volume Mount Issues**: Dynamic configuration files require careful mounting (resolved with inline middlewares)
+⚠️ **Port Mapping**: Gateway requires available ports 9082/9083 on host
+
+### Mitigations
+
+**For Volume Mount Issues:**
+- Use **inline middlewares** (Docker labels) instead of file-based configuration
+- Reduces dependency on volume mounts which can fail in WSL2 environments
+- Example: `traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082`
+
+**For Port Conflicts:**
+- Document all port mappings in centralized registry (`docs/content/tools/ports-services.mdx`)
+- Use port range 9080-9099 for API Gateway and related services
+- Provide startup scripts that check port availability before launching
+
+**For Configuration Complexity:**
+- Provide template compose files with complete Traefik label examples
+- Document common patterns in `docs/content/tools/docker/traefik-integration.mdx`
+- Create validation scripts to check label syntax before deployment
+
+## Technical Details
+
+### Docker Compose Labels (TP Capital API)
+
+```yaml
+labels:
+  # Enable Traefik routing
+  - "traefik.enable=true"
+  - "traefik.docker.network=tradingsystem_backend"
+
+  # HTTP Router
+  - "traefik.http.routers.tp-capital-api.rule=PathPrefix(`/api/tp-capital`)"
+  - "traefik.http.routers.tp-capital-api.entrypoints=web"
+  - "traefik.http.routers.tp-capital-api.priority=95"
+
+  # Backend Service
+  - "traefik.http.services.tp-capital-api.loadbalancer.server.port=4005"
+
+  # Middleware Chain
+  - "traefik.http.routers.tp-capital-api.middlewares=tpcapital-stripprefix,tpcapital-cors"
+
+  # StripPrefix Middleware
+  - "traefik.http.middlewares.tpcapital-stripprefix.stripprefix.prefixes=/api/tp-capital"
+
+  # CORS Middleware (inline configuration)
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082,http://localhost:8092"
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowheaders=*"
+  - "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowcredentials=true"
+
+  # Health Check
+  - "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.path=/health"
+  - "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.interval=30s"
+```
+
+### Dashboard Configuration
+
+```yaml
+environment:
+  # Gateway URL (browser-facing)
+  - VITE_API_BASE_URL=http://localhost:9082
+
+  # TP Capital API Key (browser includes in X-API-Key header)
+  - VITE_TP_CAPITAL_API_KEY=${TP_CAPITAL_API_KEY}
+
+  # Proxy target (server-side, NOT exposed to browser)
+  - TP_CAPITAL_PROXY_TARGET=http://api-gateway:9080/api/tp-capital
+```
+
+### Network Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Windows Host                          │
+│                                                               │
+│  ┌──────────────────┐                                        │
+│  │  Browser         │                                        │
+│  │  (Windows)       │                                        │
+│  └────────┬─────────┘                                        │
+│           │ http://localhost:9082/api/tp-capital/signals     │
+│           │ Header: X-API-Key: <key>                         │
+│           ▼                                                   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │           Docker Desktop (WSL2 Backend)              │   │
+│  │                                                        │   │
+│  │  Port 9082:9080 ──────────────────┐                  │   │
+│  │                                    ▼                  │   │
+│  │  ┌─────────────────────────────────────────────┐     │   │
+│  │  │  api-gateway (Traefik v3.0)                 │     │   │
+│  │  │  Network: tradingsystem_backend             │     │   │
+│  │  │  Port: 9080 (internal)                      │     │   │
+│  │  │                                              │     │   │
+│  │  │  Middleware Chain:                          │     │   │
+│  │  │  1. StripPrefix: /api/tp-capital            │     │   │
+│  │  │  2. CORS headers                            │     │   │
+│  │  │  3. Forward to backend                      │     │   │
+│  │  └────────────────┬────────────────────────────┘     │   │
+│  │                   │ http://tp-capital-api:4005/signals│   │
+│  │                   │ Header: X-API-Key: <key>         │   │
+│  │                   ▼                                  │   │
+│  │  ┌─────────────────────────────────────────────┐    │   │
+│  │  │  tp-capital-api (Node.js/Express)           │    │   │
+│  │  │  Network: tradingsystem_backend             │    │   │
+│  │  │  Port: 4005 (internal only)                 │    │   │
+│  │  │                                              │    │   │
+│  │  │  1. Validates X-API-Key header              │    │   │
+│  │  │  2. Queries database                        │    │   │
+│  │  │  3. Returns JSON response                   │    │   │
+│  │  └────────────────┬────────────────────────────┘    │   │
+│  │                   │                                  │   │
+│  │                   ▼                                  │   │
+│  │  ┌─────────────────────────────────┐                │   │
+│  │  │  tp-capital-timescale           │                │   │
+│  │  │  (TimescaleDB/PostgreSQL 16)    │                │   │
+│  │  │  Network: tp_capital_backend    │                │   │
+│  │  │  Port: 5432 (internal only)     │                │   │
+│  │  │                                  │                │   │
+│  │  │  87 signals stored               │                │   │
+│  │  └─────────────────────────────────┘                │   │
+│  │                                                       │   │
+│  └───────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────┘
+```
+
+## Alternatives Considered
+
+### 1. NGINX Reverse Proxy
+
+**Pros:**
+- Mature, well-documented technology
+- Simple configuration files
+- Lower resource usage than Traefik
+
+**Cons:**
+- No automatic service discovery
+- Requires manual configuration updates when services change
+- No built-in metrics/tracing
+- Harder to configure dynamic routing
+
+**Decision:** Rejected due to lack of service discovery and manual configuration overhead
+
+### 2. Envoy Proxy
+
+**Pros:**
+- Advanced traffic management features
+- Built-in observability (Zipkin, Jaeger integration)
+- gRPC support
+
+**Cons:**
+- Complex configuration (YAML + xDS protocol)
+- Steeper learning curve
+- Overkill for current scale (5 services)
+- Requires external control plane for service discovery
+
+**Decision:** Rejected due to complexity and overkill for current needs
+
+### 3. Direct Port Mapping (Status Quo)
+
+**Pros:**
+- Simplest architecture
+- No additional components
+- Minimal latency
+
+**Cons:**
+- Port management nightmare (already experiencing conflicts)
+- No CORS centralization
+- No security middleware layer
+- Difficult to add rate limiting/caching later
+- Not production-ready architecture
+
+**Decision:** Rejected as it doesn't scale beyond development
+
+## References
+
+- **Traefik Documentation**: https://doc.traefik.io/traefik/v3.0/
+- **Docker Label Configuration**: https://doc.traefik.io/traefik/providers/docker/
+- **Middleware Reference**: https://doc.traefik.io/traefik/middlewares/overview/
+- **TP Capital Stack Compose File**: `/workspace/tools/compose/docker-compose.4-1-tp-capital-stack.yml`
+- **Gateway Compose File**: `/workspace/tools/compose/docker-compose.0-gateway-stack.yml`
+- **Dashboard Compose File**: `/workspace/tools/compose/docker-compose.1-dashboard-stack.yml`
+
+## Future Improvements
+
+1. **Enable File-Based Middlewares**: Resolve volume mount issues to use centralized middleware definitions
+2. **Add Rate Limiting**: Implement per-IP and per-API-key rate limits
+3. **Enable HTTPS**: Configure Let's Encrypt certificates for production
+4. **Add Circuit Breaker**: Protect against cascading failures
+5. **Implement Request ID Tracing**: Add correlation IDs for distributed tracing
+6. **JWT Authentication**: Replace API keys with short-lived JWT tokens
+7. **Response Caching**: Cache GET requests in Redis to reduce database load
+
+## Lessons Learned
+
+1. **Inline Middlewares Work Better in WSL2**: File-based configuration had volume mount issues; inline Docker labels are more reliable
+2. **Port Conflicts are Common**: Reserve port ranges early and document them centrally
+3. **API Key Management**: Centralize API keys in `.env` with `VITE_` prefix for browser exposure
+4. **Network Isolation**: Use multiple networks (`tradingsystem_backend`, `tp_capital_backend`) for security boundaries
+5. **Health Checks are Critical**: Traefik only routes to healthy containers; invest in proper `/health` endpoints

@@ -53,7 +53,12 @@ services:
       - default
 
     # Keep container running
-    command: sleep infinity
+    command: >
+          sh -c "
+            sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true;
+            sleep infinity
+          "
+    # command: sleep infinity
 
     # Privileged mode (required for Docker-in-Docker)
     privileged: true

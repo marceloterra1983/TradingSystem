@@ -91,3 +91,8 @@ echo -e "  ${GREEN}bash .devcontainer/scripts/start-all-stacks.sh${NC}        - 
 echo -e "  ${GREEN}bash .devcontainer/scripts/stop-all-stacks.sh${NC}         - Stop all stacks"
 echo -e "  ${GREEN}docker compose -f <stack-file> logs -f${NC}                - View logs"
 echo -e "\n"
+
+# Fix Docker socket permissions
+if [ -S /var/run/docker-host.sock ]; then
+    sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true
+fi

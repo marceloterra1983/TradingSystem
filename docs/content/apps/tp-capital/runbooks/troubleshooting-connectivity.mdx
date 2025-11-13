@@ -2,25 +2,52 @@
 title: "Troubleshooting: TP-Capital Connectivity Issues"
 sidebar_label: "Troubleshooting Connectivity"
 sidebar_position: 10
-tags: [runbook, troubleshooting, tp-capital, connectivity, networking]
+tags: [runbook, troubleshooting, tp-capital, connectivity, networking, api-gateway, traefik]
 domain: backend
 owner: DocsOps
 type: runbook
-summary: "Comprehensive troubleshooting guide for TP-Capital API connectivity issues, based on incident 2025-11-05"
-description: "Comprehensive troubleshooting guide for TP-Capital API connectivity issues, based on incident 2025-11-05"
+summary: "Comprehensive troubleshooting guide for TP-Capital API connectivity issues with Traefik API Gateway integration"
+description: "Complete troubleshooting guide covering Traefik API Gateway routing, authentication, CORS, and database connectivity for TP-Capital stack"
 status: active
-last_review: "2025-11-05"
-lastReviewed: "2025-11-08"
+last_review: "2025-11-12"
+lastReviewed: "2025-11-12"
 ---
 
 # Troubleshooting: TP-Capital Connectivity Issues
 
-**Type**: Operational Runbook  
-**Audience**: DevOps Engineers, Developers  
-**Incident**: Based on 2025-11-05 TP-Capital Service Outage  
-**Last Updated**: November 5, 2025
+**Type**: Operational Runbook
+**Audience**: DevOps Engineers, Developers
+**Based On**: 2025-11-05 Incident + 2025-11-12 API Gateway Integration
+**Last Updated**: November 12, 2025
+---
 
-lastReviewed: "2025-11-08"
+## Architecture Overview
+
+**Current Setup (as of 2025-11-12):**
+- All HTTP traffic routes through **Traefik v3.0 API Gateway**
+- Gateway Port: `9082` (host) → `9080` (container)
+- Dashboard Port: `8092` (host) → `3103` (container)
+- TP Capital API: `4005` (internal only, no direct host access)
+- Authentication: X-API-Key header validation
+- Path Transformation: `/api/tp-capital/*` → `/*` (via StripPrefix middleware)
+
+```
+Browser (localhost:8092)
+  ↓ http://localhost:9082/api/tp-capital/signals
+  ↓ Header: X-API-Key
+  ↓
+API Gateway (Traefik) - Port 9082
+  ↓ Middleware: StripPrefix + CORS
+  ↓ http://tp-capital-api:4005/signals
+  ↓
+TP Capital API (Port 4005 - internal)
+  ↓ Query: SELECT * FROM signals.tp_capital_signals
+  ↓
+TimescaleDB (Port 5432 - internal)
+```
+
+**See Full Architecture**: [ADR 007 - TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
+
 ---
 
 ## Quick Diagnosis
@@ -99,9 +126,309 @@ docker exec tp-capital-timescale psql -U tp_capital -d tp_capital_db -c \
 lastReviewed: "2025-11-08"
 ---
 
-## Detailed Troubleshooting
+## Detailed Troubleshooting (API Gateway Integration)
 
-### Problem 1: Gateway API Unreachable
+### Problem 1: Dashboard Shows "Failed to fetch" via Gateway
+
+**Symptoms:**
+- Dashboard displays "Serviço TP-Capital indisponível"
+- Browser console shows: `Failed to fetch` or `net::ERR_CONNECTION_REFUSED`
+- Curl to Gateway works: `curl http://localhost:9082/api/tp-capital/signals` returns data
+
+**Root Causes:**
+
+#### Cause 1.1: Port Mismatch (Gateway vs Dashboard)
+
+**Diagnosis:**
+```bash
+# Check Gateway port mapping
+docker inspect api-gateway | jq '.[0].NetworkSettings.Ports."9080/tcp"'
+
+# Should show: [{"HostIp": "0.0.0.0", "HostPort": "9082"}]
+
+# Check Dashboard environment
+docker exec dashboard-ui printenv | grep VITE_API_BASE_URL
+
+# Should be: VITE_API_BASE_URL=http://localhost:9082
+```
+
+**Fix:**
+```bash
+# Edit docker-compose.1-dashboard-stack.yml
+# Line 19:
+# - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9082}
+
+# Rebuild dashboard (VITE variables are embedded at build time!)
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+```
+
+**Why Rebuild?**: Vite embeds `VITE_*` variables during build, changing .env alone won't work!
+
+---
+
+#### Cause 1.2: Missing X-API-Key Header
+
+**Symptoms:**
+- Gateway returns: `{"error": "X-API-Key header is required"}`
+- Dashboard button "Checar Mensagens" shows error
+
+**Diagnosis:**
+```bash
+# Check if API key is set in dashboard
+docker exec dashboard-ui printenv | grep VITE_TP_CAPITAL_API_KEY
+
+# Should output the full API key (64 characters)
+# If empty or not found, that's the problem
+```
+
+**Fix:**
+```bash
+# 1. Verify .env has the key
+grep TP_CAPITAL_API_KEY .env
+
+# Should show:
+# TP_CAPITAL_API_KEY=bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1
+
+# 2. Add to dashboard compose file (line 35):
+# - VITE_TP_CAPITAL_API_KEY=${TP_CAPITAL_API_KEY:-bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1}
+
+# 3. Rebuild dashboard (CRITICAL - env vars are baked into bundle!)
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+
+# 4. Verify API key is in browser bundle
+curl -s http://localhost:8092/assets/index-*.js | grep -o "bbf913da[a-f0-9]*" | head -1
+# Should output the API key (confirms it's embedded)
+```
+
+---
+
+#### Cause 1.3: CORS Errors in Browser Console
+
+**Symptoms:**
+```
+Access to fetch at 'http://localhost:9082/api/tp-capital/signals' from origin 'http://localhost:8092'
+has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present
+```
+
+**Diagnosis:**
+```bash
+# Check CORS headers from Gateway
+curl -v -H "Origin: http://localhost:8092" http://localhost:9082/api/tp-capital/health 2>&1 | grep -i "access-control"
+
+# Should see:
+# Access-Control-Allow-Origin: http://localhost:8092
+# Access-Control-Allow-Methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+# Access-Control-Allow-Headers: *
+```
+
+**Fix:**
+```bash
+# Verify Traefik labels in docker-compose.4-1-tp-capital-stack.yml (lines 393-400)
+docker inspect tp-capital-api | jq -r '.[0].Config.Labels | to_entries[] | select(.key | contains("cors")) | "\(.key)=\(.value)"'
+
+# Should show:
+# traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082,http://localhost:8092
+# traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowheaders=*
+
+# If missing, add to compose file and restart:
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d --force-recreate tp-capital-api
+```
+
+---
+
+### Problem 2: Gateway Not Routing to TP Capital
+
+**Symptoms:**
+- Gateway returns 404 for `/api/tp-capital/*`
+- Traefik dashboard (http://localhost:9083/dashboard) doesn't show `tp-capital-api` router
+
+**Diagnosis:**
+```bash
+# Check Traefik dashboard
+curl -s http://localhost:9083/api/http/routers | jq '.[] | select(.name | contains("tp-capital")) | {name, rule, priority, status}'
+
+# Should output:
+# {
+#   "name": "tp-capital-api@docker",
+#   "rule": "PathPrefix(`/api/tp-capital`)",
+#   "priority": 95,
+#   "status": "enabled"
+# }
+```
+
+**Root Causes:**
+
+#### Cause 2.1: Missing Traefik Labels
+
+**Fix:**
+```bash
+# Verify required labels exist
+docker inspect tp-capital-api | jq -r '.[0].Config.Labels | to_entries[] | select(.key | startswith("traefik")) | "\(.key)=\(.value)"'
+
+# Must have at minimum:
+# traefik.enable=true
+# traefik.http.routers.tp-capital-api.rule=PathPrefix(`/api/tp-capital`)
+# traefik.http.routers.tp-capital-api.entrypoints=web
+# traefik.http.routers.tp-capital-api.priority=95
+# traefik.http.services.tp-capital-api.loadbalancer.server.port=4005
+
+# If missing, add to docker-compose.4-1-tp-capital-stack.yml (lines 379-404)
+# Then recreate:
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d --force-recreate tp-capital-api
+```
+
+#### Cause 2.2: Wrong Network
+
+**Diagnosis:**
+```bash
+# Check if API is in tradingsystem_backend network
+docker network inspect tradingsystem_backend | jq -r '.[] | .Containers | to_entries[] | select(.value.Name | contains("tp-capital-api")) | .value.Name'
+
+# Should output: tp-capital-api
+# If empty, API is not in the correct network
+```
+
+**Fix:**
+```bash
+# Edit docker-compose.4-1-tp-capital-stack.yml
+# Add tradingsystem_backend to networks section (lines 300-303):
+# networks:
+#   - tradingsystem_backend  # Required for Gateway communication
+#   - tp_capital_backend      # Internal stack network
+
+# Recreate container:
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml up -d --force-recreate tp-capital-api
+```
+
+---
+
+### Problem 3: Gateway Port Conflicts
+
+**Symptoms:**
+```
+Error starting userland proxy: listen tcp4 0.0.0.0:9082: bind: address already in use
+```
+
+**Diagnosis:**
+```bash
+# Find process using port 9082
+sudo lsof -i :9082 | grep LISTEN
+
+# Or using netstat
+sudo netstat -tulpn | grep :9082
+```
+
+**Solutions:**
+
+**Option A: Kill Conflicting Process**
+```bash
+# Kill process using port 9082
+sudo lsof -ti :9082 | xargs sudo kill -9
+
+# Restart Gateway
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+```
+
+**Option B: Change Port Mapping**
+```bash
+# Edit docker-compose.0-gateway-stack.yml (lines 56-58)
+# Change to available port:
+# ports:
+#   - "9085:9080"   # New available port
+#   - "9086:8080"
+
+# Update dashboard to match:
+# Edit docker-compose.1-dashboard-stack.yml (line 19)
+# - VITE_API_BASE_URL=http://localhost:9085
+
+# Restart both:
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+```
+
+---
+
+### Problem 4: Database Connection Errors (via Gateway)
+
+**Symptoms:**
+- API returns 500 Internal Server Error
+- API logs show: `Error: connect ECONNREFUSED 172.80.0.22:5432`
+
+**Diagnosis:**
+```bash
+# Check if TimescaleDB is running and healthy
+docker exec tp-capital-timescale pg_isready -U tp_capital
+
+# Should output: /var/run/postgresql:5432 - accepting connections
+
+# Test connection from API container
+docker exec tp-capital-api sh -c 'nc -zv tp-capital-timescale 5432'
+
+# Should output: Connection to tp-capital-timescale (172.80.0.22) 5432 port [tcp/postgresql] succeeded
+```
+
+**Root Causes:**
+
+#### Cause 4.1: Wrong Database Host (PgBouncer vs TimescaleDB)
+
+**Note**: PgBouncer currently disabled due to SCRAM-SHA-256 authentication issues (see [tp-capital-network-architecture.puml](docs/content/assets/diagrams/source/apps/tp-capital-network-architecture.puml) line 139)
+
+**Check Current Configuration:**
+```bash
+docker exec tp-capital-api printenv | grep TP_CAPITAL_DB
+
+# Should be (current working config):
+# TP_CAPITAL_DB_HOST=tp-capital-timescale
+# TP_CAPITAL_DB_PORT=5432
+
+# NOT:
+# TP_CAPITAL_DB_HOST=tp-capital-pgbouncer  # Currently bypassed!
+# TP_CAPITAL_DB_PORT=6432
+```
+
+**Fix if Needed:**
+```bash
+# Edit docker-compose.4-1-tp-capital-stack.yml (lines 276-278)
+# Use direct TimescaleDB connection:
+# - TP_CAPITAL_DB_HOST=tp-capital-timescale
+# - TP_CAPITAL_DB_PORT=5432
+
+# Restart API:
+docker compose -f tools/compose/docker-compose.4-1-tp-capital-stack.yml restart tp-capital-api
+```
+
+#### Cause 4.2: Missing Database Schemas
+
+**Diagnosis:**
+```bash
+# Check if schemas exist
+docker exec -it tp-capital-timescale psql -U tp_capital -d tp_capital_db -c "\dn"
+
+# Should show:
+#     Name        |  Owner
+# ----------------+-----------
+#  public         | tp_capital
+#  signals        | tp_capital
+#  forwarded_messages | tp_capital
+#  metrics        | tp_capital
+```
+
+**Fix:**
+```bash
+# Run initialization script manually
+docker exec -i tp-capital-timescale psql -U tp_capital -d tp_capital_db < backend/data/timescaledb/tp-capital/01-init-schema.sql
+
+# Verify tables created
+docker exec -it tp-capital-timescale psql -U tp_capital -d tp_capital_db -c "\dt signals.*"
+
+# Should show: tp_capital_signals table with hypertable
+```
+
+---
+
+## Detailed Troubleshooting (Legacy Issues)
+
+### Problem 5: Gateway API Unreachable
 
 #### Diagnosis
 

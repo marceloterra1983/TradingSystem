@@ -39,11 +39,11 @@ services:
     volumes:
       - telegram-timescaledb-data:/var/lib/postgresql/data
       - ../../backend/data/timescaledb/telegram-gateway:/docker-entrypoint-initdb.d:ro
-      - ./telegram/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      # Commented out: mount error causing restart loop
+      # - ./telegram/postgresql.conf:/etc/postgresql/postgresql.conf:ro
 
     command: >
       postgres
-      -c config_file=/etc/postgresql/postgresql.conf
       -c shared_buffers=512MB
       -c effective_cache_size=1536MB
       -c maintenance_work_mem=128MB
@@ -407,7 +407,7 @@ services:
       - "traefik.http.routers.telegram-gateway.service=telegram-gateway"
       - "traefik.http.routers.telegram-gateway.priority=90"
       - "traefik.http.services.telegram-gateway.loadbalancer.server.port=4010"
-      - "traefik.http.routers.telegram-gateway.middlewares=api-standard@file"
+      # - "traefik.http.routers.telegram-gateway.middlewares=api-standard@file"  # Disabled - file middlewares not working in WSL2
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.interval=30s"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.timeout=10s"

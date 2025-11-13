@@ -1,0 +1,191 @@
+@startuml trading-system-architecture
+!theme blueprint
+title TradingSystem - Complete Architecture (2025-11-12)
+
+' ==============================================================================
+' LEGEND
+' ==============================================================================
+legend right
+  |= Color |= Component Type |
+  |<#lightblue> | Frontend Applications |
+  |<#lightgreen> | Backend APIs |
+  |<#lightyellow> | Databases |
+  |<#lightcoral> | Infrastructure |
+  |<#lavender> | External Services |
+endlegend
+
+' ==============================================================================
+' USER
+' ==============================================================================
+actor User as user
+
+' ==============================================================================
+' FRONTEND LAYER
+' ==============================================================================
+package "Frontend Layer" {
+  component "Dashboard UI\n(React + Vite)\nPort: 9082" as dashboard #lightblue
+  component "Docs Hub\n(Docusaurus v3)\nPort: 9082/docs" as docs_hub #lightblue
+}
+
+' ==============================================================================
+' API GATEWAY LAYER
+' ==============================================================================
+package "API Gateway" {
+  component "Traefik Gateway\n(Reverse Proxy)\nPorts: 9082 (HTTP), 9083 (Dashboard)" as traefik #lightcoral
+}
+
+' ==============================================================================
+' BACKEND API LAYER
+' ==============================================================================
+package "Backend APIs" {
+  package "Workspace Stack" {
+    component "Workspace API\n(Express + Node.js)\nPort: 3200" as workspace_api #lightgreen
+    database "Workspace DB\n(PostgreSQL)\nPort: 5432" as workspace_db #lightyellow
+    database "Workspace Redis\n(Cache)\nPort: 6379" as workspace_redis #lightyellow
+  }
+
+  package "TP Capital Stack" {
+    component "TP Capital API\n(Express + Node.js)\nPort: 4005" as tp_api #lightgreen
+    database "TP Capital TimescaleDB\n(PostgreSQL + TimescaleDB)\nPort: 5432" as tp_db #lightyellow
+    database "TP Capital Redis\n(Cache)\nPort: 6379" as tp_redis #lightyellow
+    component "TP Capital PgBouncer\n(Connection Pooling)\nPort: 5432" as tp_pgbouncer #lightcoral
+  }
+
+  package "Telegram Stack" {
+    component "Telegram Gateway API\n(Express + Node.js)\nPort: 4010" as telegram_api #lightgreen
+    component "Telegram MTProto\n(gramJS Client)\nPort: 4007" as telegram_mtproto #lightgreen
+    database "Telegram TimescaleDB\n(PostgreSQL + TimescaleDB)\nPort: 5432" as telegram_db #lightyellow
+    database "Telegram Redis\n(HA: Master + Replica + Sentinel)\nPorts: 6379, 6385, 26379" as telegram_redis #lightyellow
+    component "Telegram PgBouncer\n(Connection Pooling)\nPort: 5432" as telegram_pgbouncer #lightcoral
+    queue "Telegram RabbitMQ\n(Message Broker)\nPorts: 5672, 15672" as telegram_rabbitmq #lightcoral
+  }
+
+  package "Documentation Stack" {
+    component "Documentation API\n(Express + FlexSearch)\nPort: 3000" as docs_api #lightgreen
+  }
+}
+
+' ==============================================================================
+' EXTERNAL SERVICES
+' ==============================================================================
+package "External Services" {
+  cloud "Telegram Servers\n(MTProto Protocol)" as telegram_external #lavender
+}
+
+' ==============================================================================
+' MONITORING LAYER
+' ==============================================================================
+package "Monitoring & Observability" {
+  component "Prometheus\n(Metrics Collection)\nPort: 9090" as prometheus #lightcoral
+  component "Grafana\n(Dashboards)\nPort: 3100" as grafana #lightcoral
+  component "Postgres Exporter\n(DB Metrics)\nPort: 9187" as postgres_exporter #lightcoral
+  component "Redis Exporter\n(Cache Metrics)\nPort: 9121" as redis_exporter #lightcoral
+}
+
+' ==============================================================================
+' CONNECTIONS - USER TO FRONTEND
+' ==============================================================================
+user --> traefik : "HTTP Requests\n(http://localhost:9082)"
+
+' ==============================================================================
+' CONNECTIONS - GATEWAY TO FRONTEND
+' ==============================================================================
+traefik --> dashboard : "Route: /\n(Priority: 1)"
+traefik --> docs_hub : "Route: /docs\n(Priority: 50)"
+
+' ==============================================================================
+' CONNECTIONS - GATEWAY TO BACKEND APIS
+' ==============================================================================
+traefik --> workspace_api : "Route: /api/workspace\n(Priority: 100)\nPath Rewrite: /api/*"
+traefik --> tp_api : "Route: /api/tp-capital\n(Priority: 90)"
+traefik --> telegram_api : "Route: /api/telegram-gateway\n(Priority: 95)"
+traefik --> docs_api : "Route: /api/docs\n(Priority: 85)"
+
+' ==============================================================================
+' CONNECTIONS - DASHBOARD VITE PROXY
+' ==============================================================================
+note right of dashboard
+  **Vite Dev Proxy Configuration:**
+  - /api/workspace → workspace-api:3200
+  - /api/tp-capital → tp-capital-api:4005
+  - /api/telegram-gateway → telegram-gateway-api:4010
+  - /api/docs → documentation-api:3000
+  - /docs → docs-hub:80
+end note
+
+' ==============================================================================
+' CONNECTIONS - WORKSPACE STACK
+' ==============================================================================
+workspace_api --> workspace_db : "SQL Queries"
+workspace_api --> workspace_redis : "Cache Read/Write"
+
+' ==============================================================================
+' CONNECTIONS - TP CAPITAL STACK
+' ==============================================================================
+tp_api --> tp_pgbouncer : "Connection Pool"
+tp_pgbouncer --> tp_db : "SQL Queries"
+tp_api --> tp_redis : "Cache Read/Write"
+
+' ==============================================================================
+' CONNECTIONS - TELEGRAM STACK
+' ==============================================================================
+telegram_api --> telegram_pgbouncer : "Connection Pool"
+telegram_pgbouncer --> telegram_db : "SQL Queries"
+telegram_api --> telegram_redis : "Cache Read/Write"
+telegram_api --> telegram_mtproto : "Message Sync Delegation\nPOST /sync-messages"
+telegram_mtproto --> telegram_external : "MTProto Protocol\n(Authenticated Session)"
+telegram_mtproto --> telegram_db : "Save Messages"
+telegram_mtproto --> telegram_rabbitmq : "Publish Events"
+
+' ==============================================================================
+' CONNECTIONS - MONITORING
+' ==============================================================================
+prometheus --> workspace_api : "Scrape /metrics"
+prometheus --> tp_api : "Scrape /metrics"
+prometheus --> telegram_api : "Scrape /metrics"
+prometheus --> telegram_mtproto : "Scrape /metrics"
+prometheus --> postgres_exporter : "Scrape /metrics"
+prometheus --> redis_exporter : "Scrape /metrics"
+
+postgres_exporter --> workspace_db : "Collect DB Metrics"
+postgres_exporter --> tp_db : "Collect DB Metrics"
+postgres_exporter --> telegram_db : "Collect DB Metrics"
+
+redis_exporter --> workspace_redis : "Collect Cache Metrics"
+redis_exporter --> tp_redis : "Collect Cache Metrics"
+redis_exporter --> telegram_redis : "Collect Cache Metrics"
+
+grafana --> prometheus : "Query Metrics\n(PromQL)"
+
+' ==============================================================================
+' NOTES
+' ==============================================================================
+note bottom of traefik
+  **Traefik Features:**
+  - Automatic service discovery (Docker labels)
+  - Health checks (every 30s)
+  - Rate limiting (100 req/min per IP, burst 50)
+  - CORS configuration
+  - Request compression (gzip/brotli)
+  - Circuit breakers
+  - Prometheus metrics export
+  - JSON access logs
+end note
+
+note bottom of telegram_mtproto
+  **MTProto Session:**
+  - File: /app/.session/telegram-gateway.session
+  - Protocol: Telegram MTProto (gramJS 2.26.21)
+  - Authentication: Phone + SMS + 2FA
+  - Status: Connected (validated 2025-11-12)
+end note
+
+note bottom of telegram_redis
+  **High Availability Redis:**
+  - Master: Read/Write (6379)
+  - Replica: Read-only (6385)
+  - Sentinel: Failover monitoring (26379)
+  - Replication lag: <1ms
+end note
+
+@enduml

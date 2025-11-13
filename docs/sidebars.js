@@ -212,6 +212,24 @@ const sidebars = {
           ],
         },
 
+        // Dev Container
+        {
+          type: 'category',
+          label: 'Dev Container',
+          link: {
+            type: 'doc',
+            id: 'tools/dev-container/overview',
+          },
+          items: [
+            'tools/dev-container/overview',
+            'tools/dev-container/architecture',
+            'tools/dev-container/api-access',
+            'tools/dev-container/gateway-proxy',
+            'tools/dev-container/workflows',
+            'tools/dev-container/troubleshooting',
+          ],
+        },
+
         // Runtime Environments
         {
           type: 'category',

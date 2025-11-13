@@ -1,0 +1,919 @@
+---
+title: Dev Container - Development Workflows
+sidebar_label: Workflows
+sidebar_position: 5
+tags: [dev-container, workflow, development, git, testing]
+domain: tools
+type: guide
+summary: "Fluxo de trabalho diário no Dev Container: startup, desenvolvimento, debugging, testing, commits e troubleshooting"
+status: active
+last_review: "2025-11-12"
+---
+
+# Dev Container - Development Workflows
+
+## 🎯 Visão Geral
+
+Este guia descreve o **fluxo de trabalho completo** para desenvolvedores usando o Dev Container, desde o startup até o commit de código.
+
+---
+
+## 🚀 Daily Workflow
+
+### Morning Startup (5 minutos)
+
+#### 1. Abrir Projeto no VS Code
+
+```bash
+# Terminal (fora do Dev Container)
+cd /home/marce/Projetos/TradingSystem
+code .
+```
+
+**VS Code abre automaticamente:**
+- ✅ Detecta `.devcontainer/devcontainer.json`
+- ✅ Mostra notificação: "Reopen in Container"
+- ✅ Clique em "Reopen in Container"
+
+**Ou use Command Palette:**
+```
+Ctrl+Shift+P → Dev Containers: Reopen in Container
+```
+
+#### 2. Aguardar Container Start
+
+**Primeira vez do dia:**
+- ⏱️ ~30 segundos (container já existe)
+- ✅ VS Code Server inicia
+- ✅ Extensions carregam
+- ✅ Terminal abre automaticamente **dentro do container**
+
+**Indicador de sucesso:**
+```bash
+# Terminal mostra:
+➜  workspace git:(main) ✗
+```
+
+#### 3. Start Services
+
+**Opção 1: Universal Startup (Recomendado)**
+```bash
+# Dentro do Dev Container
+start
+
+# Output:
+# 🚀 Starting TradingSystem...
+# ✅ Docker containers started
+# ✅ Node.js services started
+# 🎉 All services healthy!
+```
+
+**Opção 2: Granular Startup**
+```bash
+# Apenas Docker containers
+start-docker
+
+# Apenas Node.js services
+start-services
+
+# Modo mínimo (essenciais apenas)
+start-minimal
+```
+
+**Services iniciados:**
+- ✅ Traefik Gateway (9082, 9083)
+- ✅ Dashboard UI (3103) - Production build
+- ✅ Workspace API (3200)
+- ✅ TP Capital API (4005)
+- ✅ Telegram Gateway (4010)
+- ✅ Docs Hub (80)
+- ✅ Databases (PostgreSQL, TimescaleDB, Redis)
+- ✅ Monitoring (Prometheus, Grafana)
+
+#### 4. Validate Health
+
+```bash
+# Health check completo
+health
+
+# Output:
+# ✅ Traefik Gateway: Healthy
+# ✅ Workspace API: Healthy (8ms)
+# ✅ TP Capital API: Healthy (12ms)
+# ✅ Telegram Gateway: Healthy (4ms)
+# ✅ workspace-db: Up (2 connections)
+# ✅ workspace-redis: Up (Hit rate: 79.4%)
+```
+
+**Browser validation:**
+- Dashboard: http://localhost:9082
+- Traefik Dashboard: http://localhost:9083/dashboard/
+- Docs Hub: http://localhost:9082/docs/
+
+#### 5. Pull Latest Changes
+
+```bash
+# Atualizar branch main
+git checkout main
+git pull origin main
+
+# Criar nova branch para feature
+git checkout -b feature/new-feature
+```
+
+**Agora você está pronto para desenvolver! ✅**
+
+---
+
+## 💻 Development Workflow
+
+### Frontend Development (Dashboard)
+
+#### 1. Start Vite Dev Server
+
+```bash
+# Terminal 1 (Dev Container)
+cd /workspace/frontend/dashboard
+npm run dev
+```
+
+**Output:**
+```
+VITE v5.0.0  ready in 500 ms
+
+➜  Local:   http://localhost:5173/
+➜  Network: use --host to expose
+➜  press h + enter to show help
+```
+
+#### 2. Open Browser
+
+```
+http://localhost:5173
+```
+
+**Hot Reload ativo:**
+- ✅ Alterações em `.tsx` refletem instantaneamente
+- ✅ Alterações em `.css` aplicadas sem reload
+- ✅ State preservado (Fast Refresh)
+
+#### 3. Make Changes
+
+**Exemplo: Adicionar novo componente**
+
+```bash
+# Create component
+touch src/components/NewComponent.tsx
+```
+
+```typescript
+// src/components/NewComponent.tsx
+import React from 'react';
+
+export const NewComponent: React.FC = () => {
+  return (
+    <div className="p-4 bg-blue-500 text-white rounded">
+      <h2>New Component</h2>
+    </div>
+  );
+};
+```
+
+**Use component:**
+```typescript
+// src/App.tsx
+import { NewComponent } from './components/NewComponent';
+
+function App() {
+  return (
+    <div>
+      <NewComponent />
+    </div>
+  );
+}
+```
+
+**Browser atualiza automaticamente! 🔥**
+
+#### 4. API Integration
+
+**Call API (relative path - Vite Proxy handles routing):**
+```typescript
+// src/services/api.ts
+export const fetchItems = async () => {
+  const response = await fetch('/api/workspace/items');
+  if (!response.ok) throw new Error('Failed to fetch items');
+  return response.json();
+};
+```
+
+**Vite Proxy flow:**
+```
+Browser → /api/workspace/items
+       ↓
+Vite Proxy → workspace-api:3200/api/items
+       ↓
+Response (JSON)
+```
+
+#### 5. Debugging
+
+**Browser DevTools:**
+```
+1. F12 → Sources
+2. Find file (Ctrl+P): NewComponent.tsx
+3. Set breakpoint (click line number)
+4. Trigger code execution
+5. Inspect variables, step through code
+```
+
+**VS Code Debugging:**
+```json
+// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Dashboard (Chrome)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/dashboard/src",
+      "sourceMaps": true
+    }
+  ]
+}
+```
+
+**Uso:**
+```
+1. F5 (Start Debugging)
+2. Chrome abre com debugger attached
+3. Breakpoints no VS Code funcionam!
+```
+
+---
+
+### Backend Development (APIs)
+
+#### 1. Choose Development Mode
+
+**Option A: Container Mode (Production-like)**
+```bash
+# Already running (from start command)
+docker ps | grep workspace-api
+
+# Logs
+docker logs -f workspace-api
+```
+
+**Option B: Local Mode (Hot Reload)**
+```bash
+# Stop container
+docker stop workspace-api
+
+# Start with nodemon (Dev Container)
+cd /workspace/backend/api/workspace
+npm run dev
+
+# Output:
+# [nodemon] starting `node src/index.js`
+# Server listening on port 3200
+```
+
+#### 2. Make Changes
+
+**Example: Add new endpoint**
+
+```javascript
+// backend/api/workspace/src/routes/items.js
+import express from 'express';
+const router = express.Router();
+
+// New endpoint
+router.get('/stats', async (req, res) => {
+  const stats = await db.query('SELECT COUNT(*) as total FROM items');
+  res.json({ total: stats.rows[0].total });
+});
+
+export default router;
+```
+
+**Nodemon reloads automatically:**
+```
+[nodemon] restarting due to changes...
+[nodemon] starting `node src/index.js`
+Server listening on port 3200
+```
+
+#### 3. Test Endpoint
+
+**From Dev Container:**
+```bash
+curl http://workspace-api:3200/api/items/stats
+
+# or via localhost (port mapping)
+curl http://localhost:3210/api/items/stats
+```
+
+**From Browser (via Vite Proxy):**
+```typescript
+const stats = await fetch('/api/workspace/items/stats');
+console.log(await stats.json()); // { total: 42 }
+```
+
+#### 4. Debugging
+
+**VS Code Node.js Debugger:**
+```json
+// .vscode/launch.json
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Debug Workspace API",
+  "cwd": "${workspaceFolder}/backend/api/workspace",
+  "runtimeExecutable": "npm",
+  "runtimeArgs": ["run", "dev"],
+  "console": "integratedTerminal",
+  "skipFiles": ["<node_internals>/**"]
+}
+```
+
+**Uso:**
+```
+1. Set breakpoint in src/routes/items.js
+2. F5 (Start Debugging)
+3. Make request to API
+4. Breakpoint hits!
+5. Inspect req, res, variables
+```
+
+---
+
+## 🧪 Testing Workflow
+
+### Unit Tests
+
+**Run tests:**
+```bash
+# Frontend tests
+cd /workspace/frontend/dashboard
+npm run test
+
+# Backend tests
+cd /workspace/backend/api/workspace
+npm run test
+
+# Watch mode (re-run on changes)
+npm run test:watch
+```
+
+**Coverage report:**
+```bash
+npm run test:coverage
+
+# Opens coverage/index.html in browser
+```
+
+### Integration Tests
+
+**Test API integration:**
+```bash
+cd /workspace/backend/api/workspace
+npm run test:integration
+
+# Example test:
+# ✓ GET /api/items returns 200
+# ✓ POST /api/items creates item
+# ✓ PUT /api/items/:id updates item
+# ✓ DELETE /api/items/:id deletes item
+```
+
+### E2E Tests (Future)
+
+**Playwright/Cypress:**
+```bash
+cd /workspace/frontend/dashboard
+npm run test:e2e
+
+# Runs full browser automation tests
+```
+
+---
+
+## 📝 Git Workflow
+
+### Conventional Commits
+
+**TradingSystem usa Conventional Commits:**
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat:` - Nova feature
+- `fix:` - Bug fix
+- `docs:` - Documentação
+- `style:` - Formatação (sem mudança de código)
+- `refactor:` - Refatoração (sem mudança de comportamento)
+- `perf:` - Melhoria de performance
+- `test:` - Adicionar/corrigir tests
+- `chore:` - Manutenção (build, deps, etc)
+
+**Examples:**
+```bash
+git commit -m "feat(dashboard): add new component for item stats"
+
+git commit -m "fix(workspace-api): resolve race condition in item creation"
+
+git commit -m "docs(dev-container): add workflow documentation"
+
+git commit -m "refactor(telegram-gateway): extract message parser to separate module"
+```
+
+### Commit Workflow
+
+#### 1. Check Status
+
+```bash
+git status
+
+# Output:
+# On branch feature/new-feature
+# Changes not staged for commit:
+#   modified:   frontend/dashboard/src/components/NewComponent.tsx
+#   modified:   backend/api/workspace/src/routes/items.js
+```
+
+#### 2. Review Changes
+
+```bash
+# Diff specific file
+git diff frontend/dashboard/src/components/NewComponent.tsx
+
+# Diff all changes
+git diff
+```
+
+#### 3. Stage Changes
+
+```bash
+# Stage specific file
+git add frontend/dashboard/src/components/NewComponent.tsx
+
+# Stage all changes
+git add .
+
+# Interactive staging
+git add -p  # Choose which hunks to stage
+```
+
+#### 4. Commit (via Claude Code if available)
+
+**Let Claude Code create commit:**
+```
+User: "commit these changes"
+Claude: [Creates descriptive commit message following conventions]
+```
+
+**Or manual commit:**
+```bash
+git commit -m "feat(dashboard): add stats component
+
+- Create NewComponent displaying item statistics
+- Integrate with workspace API /items/stats endpoint
+- Add loading state and error handling
+- Update App.tsx to render component
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+#### 5. Push to Remote
+
+```bash
+# First push (set upstream)
+git push -u origin feature/new-feature
+
+# Subsequent pushes
+git push
+```
+
+#### 6. Create Pull Request
+
+**Via GitHub CLI (inside Dev Container):**
+```bash
+gh pr create \
+  --title "feat(dashboard): add stats component" \
+  --body "## Summary
+- Add stats component for item metrics
+- Integrate with workspace API
+- Add error handling and loading states
+
+## Test Plan
+- [x] Unit tests passing
+- [x] Integration tests passing
+- [x] Manual testing in dev environment
+- [ ] Code review
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+```
+
+---
+
+## 🔄 Handling Conflicts
+
+### Merge Conflicts
+
+**Scenario: main branch has changes conflicting with your branch**
+
+#### 1. Update main
+
+```bash
+git checkout main
+git pull origin main
+```
+
+#### 2. Rebase your branch
+
+```bash
+git checkout feature/new-feature
+git rebase main
+
+# Output:
+# CONFLICT (content): Merge conflict in frontend/dashboard/src/App.tsx
+# error: could not apply abc1234... feat(dashboard): add stats component
+```
+
+#### 3. Resolve Conflicts
+
+**VS Code Conflict Editor:**
+```
+1. Open conflicted file (App.tsx)
+2. VS Code shows conflict markers:
+   <<<<<<< HEAD (main)
+   [main branch code]
+   =======
+   [your branch code]
+   >>>>>>> abc1234 (your branch)
+3. Choose:
+   - Accept Current Change (main)
+   - Accept Incoming Change (yours)
+   - Accept Both Changes
+   - Manual edit
+```
+
+**Manual resolution:**
+```typescript
+// frontend/dashboard/src/App.tsx
+// BEFORE (conflict):
+<<<<<<< HEAD
+import { OldComponent } from './components/OldComponent';
+=======
+import { NewComponent } from './components/NewComponent';
+>>>>>>> abc1234
+
+// AFTER (resolved):
+import { OldComponent } from './components/OldComponent';
+import { NewComponent } from './components/NewComponent';
+```
+
+#### 4. Continue Rebase
+
+```bash
+# Mark as resolved
+git add frontend/dashboard/src/App.tsx
+
+# Continue rebase
+git rebase --continue
+
+# If all conflicts resolved:
+# Successfully rebased and updated refs/heads/feature/new-feature
+```
+
+#### 5. Force Push (Rebase changed history)
+
+```bash
+# WARNING: Force push rewrites history
+git push --force-with-lease origin feature/new-feature
+```
+
+---
+
+## 🔧 Container Management
+
+### Rebuild Container
+
+**When to rebuild:**
+- ✅ Updated `.devcontainer/devcontainer.json`
+- ✅ Updated `.devcontainer/Dockerfile`
+- ✅ Added VS Code extensions
+- ✅ Changed base image
+- ✅ Modified system packages
+
+**How to rebuild:**
+```
+1. Ctrl+Shift+P
+2. "Dev Containers: Rebuild Container"
+3. Choose:
+   - Rebuild (uses cache, faster)
+   - Rebuild Without Cache (clean, slower)
+```
+
+**Rebuild time:**
+- With cache: ~2-5 minutes
+- Without cache: ~10-15 minutes
+
+### Restart Container
+
+**When to restart:**
+- ✅ Container acting sluggish
+- ✅ Network connectivity issues
+- ✅ Processes stuck
+
+**How to restart:**
+```bash
+# Outside container (host terminal)
+docker restart tradingsystem-dev-container
+
+# Or via VS Code:
+# Ctrl+Shift+P → "Dev Containers: Rebuild and Reopen in Container"
+```
+
+### Stop Container
+
+**Graceful shutdown:**
+```bash
+# Stop all services first
+stop
+
+# Then close VS Code
+# Container stops automatically when VS Code closes
+```
+
+**Manual stop:**
+```bash
+# Outside container
+docker stop tradingsystem-dev-container
+```
+
+---
+
+## 🎨 Customization
+
+### VS Code Settings
+
+**User settings (sync across containers):**
+```
+File → Preferences → Settings
+Toggle "Settings Sync" ON
+```
+
+**Container-specific settings:**
+```json
+// .devcontainer/devcontainer.json
+{
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        }
+      }
+    }
+  }
+}
+```
+
+### Shell Customization
+
+**Zsh config (persistent across rebuilds):**
+```bash
+# .devcontainer/zshrc.local (create if doesn't exist)
+echo 'alias gst="git status"' >> ~/.zshrc
+echo 'alias gco="git checkout"' >> ~/.zshrc
+echo 'alias gp="git push"' >> ~/.zshrc
+
+# Reload shell
+source ~/.zshrc
+```
+
+**Oh My Zsh plugins:**
+```bash
+# .zshrc
+plugins=(
+  git
+  docker
+  docker-compose
+  npm
+  node
+  # Add more plugins here
+)
+```
+
+### Environment Variables
+
+**Project-level (.env):**
+```bash
+# Edit .env (root of project)
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+CUSTOM_VARIABLE=custom_value
+```
+
+**User-level (container-specific):**
+```bash
+# .devcontainer/.env.local (git-ignored)
+MY_API_KEY=secret_key_here
+DATABASE_PASSWORD=my_password
+```
+
+---
+
+## 📊 Monitoring Workflow
+
+### Real-time Logs
+
+**Services logs:**
+```bash
+# All services
+logs
+
+# Specific service
+docker logs -f workspace-api
+
+# Multiple services
+docker logs -f workspace-api & docker logs -f tp-capital-api &
+```
+
+**Vite dev server:**
+```bash
+# Terminal running npm run dev shows:
+# [vite] hmr update /src/components/NewComponent.tsx
+# [vite] page reload src/App.tsx
+```
+
+### Metrics
+
+**Prometheus:**
+```
+http://localhost:9090
+
+Query examples:
+- http_requests_total{job="workspace-api"}
+- rate(http_requests_total[5m])
+- histogram_quantile(0.95, http_request_duration_seconds_bucket)
+```
+
+**Grafana:**
+```
+http://localhost:3100
+
+Dashboards:
+- System Overview
+- API Performance
+- Database Metrics
+- Redis Cache
+```
+
+---
+
+## 🚨 Emergency Procedures
+
+### Kill All Processes
+
+**Force kill services:**
+```bash
+# Stop with force
+stop --force
+
+# Or manual kill
+pkill -f "node"
+pkill -f "npm"
+```
+
+### Reset Environment
+
+**Complete reset:**
+```bash
+# 1. Stop all services
+stop --force
+
+# 2. Remove all containers
+docker compose -f tools/compose/*.yml down
+
+# 3. Remove volumes (CAUTION: deletes data!)
+docker volume rm $(docker volume ls -q | grep tradingsystem)
+
+# 4. Rebuild Dev Container
+# Ctrl+Shift+P → "Dev Containers: Rebuild Container (No Cache)"
+
+# 5. Start fresh
+start
+```
+
+### Recover from Crash
+
+**Container crashed:**
+```bash
+# Check status
+docker ps -a | grep tradingsystem-dev
+
+# Restart
+docker start tradingsystem-dev-container
+
+# Reopen in VS Code
+# Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+```
+
+---
+
+## 📖 Documentação Relacionada
+
+### Guias Complementares
+- **[Overview](./overview.mdx)** - Visão geral do Dev Container
+- **[Architecture](./architecture.mdx)** - Arquitetura detalhada
+- **[API Access](./api-access.mdx)** - Padrões de acesso a APIs
+- **[Gateway & Proxy](./gateway-proxy.mdx)** - Traefik e Vite
+- **[Troubleshooting](./troubleshooting.mdx)** - Problemas comuns
+
+### Governança
+- **[Dev Container Policy](../../../governance/policies/dev-container-policy.md)** - Políticas de uso
+- **[Security Guide](../../../governance/controls/dev-container-security.md)** - Segurança
+
+---
+
+## ❓ FAQ
+
+### Quanto tempo leva o workflow diário?
+
+**Startup completo:** ~5 minutos
+- Reopen container: 30s
+- Start services: 2 min
+- Health check: 30s
+- Pull latest: 1 min
+- Create branch: 10s
+
+**Desenvolvimento:** Imediato (hot reload)
+**Commit + Push:** ~2 minutos
+**PR creation:** ~3 minutos
+
+### Preciso rebuild toda vez que faço push?
+
+**Não!** Rebuild é necessário apenas quando:
+- Modificar `.devcontainer/*` files
+- Adicionar system packages
+- Atualizar Node.js/Python version
+
+**Código normal (JS/TS/React):** Sem rebuild necessário.
+
+### Como trabalhar offline?
+
+**Dev Container funciona offline:**
+- ✅ Container já está baixado
+- ✅ Dependencies já instaladas
+- ✅ Pode desenvolver normalmente
+- ❌ Não pode push para GitHub (obviously)
+- ❌ Não pode pull latest
+
+**Services externos (Telegram API):** Não funcionam offline.
+
+### Posso usar Docker Compose fora do Dev Container?
+
+**Sim!** Services rodam no Docker daemon do **host**.
+
+```bash
+# Fora do Dev Container (host terminal)
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+
+# Containers criados no host (não dentro do Dev Container)
+```
+
+**Dev Container apenas gerencia** via Docker socket mount.
+
+### Como compartilhar configuração com a equipe?
+
+**Committar:**
+- ✅ `.devcontainer/devcontainer.json`
+- ✅ `.devcontainer/Dockerfile`
+- ✅ `.env.example` (template)
+- ✅ `vite.config.ts`
+
+**NÃO committar:**
+- ❌ `.env` (secrets)
+- ❌ `.devcontainer/.env.local` (user-specific)
+- ❌ `node_modules`
+- ❌ `.vscode/settings.json` (user preferences)
+
+---
+
+**Última revisão:** 2025-11-12
+**Status:** ✅ Ativo
+**Próxima revisão:** 2026-02-12 (3 meses)

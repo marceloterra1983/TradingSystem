@@ -1,0 +1,536 @@
+---
+title: "TP Capital - Environment Variables Reference"
+sidebar_label: "Environment Variables"
+sidebar_position: 5
+tags: [tp-capital, configuration, environment, docker, security]
+domain: apps
+type: reference
+summary: "Complete environment variables reference for TP Capital stack with descriptions, defaults, and security notes"
+status: active
+last_review: "2025-11-12"
+---
+
+# TP Capital - Environment Variables Reference
+
+Complete reference for all environment variables used in the TP Capital stack (5 containers + Gateway + Dashboard integration).
+
+## Overview
+
+**Configuration Sources:**
+1. **Root `.env` file**: `/workspace/.env` (canonical source - NEVER create local .env!)
+2. **Docker Compose**: `tools/compose/docker-compose.4-1-tp-capital-stack.yml`
+3. **Gateway Compose**: `tools/compose/docker-compose.0-gateway-stack.yml`
+4. **Dashboard Compose**: `tools/compose/docker-compose.1-dashboard-stack.yml`
+
+**Important Notes:**
+- ✅ **Always use root `.env`** - All services load from project root
+- ✅ **VITE_ variables require rebuild** - Changes need `docker compose up -d --build`
+- ✅ **No VITE_ prefix for proxy targets** - Server-side only (see [PROXY-BEST-PRACTICES.md](docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md))
+- ❌ **Never commit `.env`** - Use `.env.example` as template
+
+---
+
+## Database Variables (TimescaleDB + PgBouncer)
+
+### TimescaleDB Configuration
+
+```bash
+# Database Connection
+TP_CAPITAL_DB_HOST=tp-capital-timescale  # Container hostname (NOT localhost!)
+TP_CAPITAL_DB_PORT=5432                   # Internal port (PostgreSQL default)
+TP_CAPITAL_DB_USER=tp_capital             # Database user
+TP_CAPITAL_DB_PASSWORD=<secure_password>  # REQUIRED - Generate with: openssl rand -hex 32
+TP_CAPITAL_DB_DATABASE=tp_capital_db      # Database name
+
+# PostgreSQL Settings
+POSTGRES_USER=tp_capital                  # PostgreSQL superuser
+POSTGRES_PASSWORD=<secure_password>       # REQUIRED - Same as TP_CAPITAL_DB_PASSWORD
+POSTGRES_DB=tp_capital_db                 # Initial database
+```
+
+**Security Notes:**
+- 🔒 **Password Strength**: Minimum 32 characters, use `openssl rand -hex 32`
+- 🔒 **No Host Exposure**: Port 5432 is internal only (no port mapping to host)
+- 🔒 **Connection Pooling**: PgBouncer currently disabled (SCRAM-SHA-256 auth issues)
+
+**Schema Details:**
+- **signals**: Trading signals from Telegram channels
+- **forwarded_messages**: Raw message data with metadata
+- **metrics**: Processing statistics and performance data
+
+**Hypertables:**
+- `signals.tp_capital_signals` - Partitioned by `ingested_at` (1-day chunks)
+- `forwarded_messages.messages` - Partitioned by `created_at` (1-day chunks)
+
+---
+
+### PgBouncer Configuration (Currently Disabled)
+
+```bash
+# PgBouncer Settings - NOT IN USE (bypassed due to SCRAM auth issues)
+TP_CAPITAL_PGBOUNCER_HOST=tp-capital-pgbouncer  # Container hostname
+TP_CAPITAL_PGBOUNCER_PORT=6432                   # PgBouncer port
+PGBOUNCER_POOL_MODE=transaction                  # Pool mode
+PGBOUNCER_MAX_CLIENT_CONN=100                    # Max client connections
+PGBOUNCER_DEFAULT_POOL_SIZE=20                   # Pool size per user/db pair
+```
+
+**Status**: Disabled in compose file (lines 276-278) - API connects directly to TimescaleDB
+
+**Why Disabled?**
+- PgBouncer uses MD5 authentication
+- PostgreSQL 16 requires SCRAM-SHA-256
+- Userlist.txt not configured for SCRAM (complex setup)
+- Direct connection performance acceptable for current load (~87 signals)
+
+**Future Re-enablement:**
+1. Generate SCRAM password hashes: `psql -c "SELECT concat('\"', usename, '\" \"', passwd, '\"') FROM pg_shadow;"`
+2. Update userlist.txt with SCRAM hashes
+3. Set `AUTH_TYPE=scram-sha-256` in PgBouncer
+4. Change `TP_CAPITAL_DB_HOST` to `tp-capital-pgbouncer`
+5. Change `TP_CAPITAL_DB_PORT` to `6432`
+
+---
+
+## Redis Cache Variables
+
+### Redis Master Configuration
+
+```bash
+# Redis Master (Primary Cache)
+REDIS_HOST=tp-capital-redis-master  # Container hostname
+REDIS_PORT=6379                      # Redis default port
+REDIS_PASSWORD=                      # Optional - currently no auth
+REDIS_TTL=30                         # Cache TTL in seconds (30s for hot data)
+REDIS_MAX_MEMORY=256mb               # Max memory allocation
+REDIS_EVICTION_POLICY=allkeys-lru    # Eviction policy when maxmemory reached
+```
+
+**Cache Strategy:**
+- **Signals Cache**: Key `tp-capital:signals:all`, TTL 30s
+- **Health Check**: Key `tp-capital:health`, TTL 10s
+- **Hit Rate Target**: >80% (currently ~79.4%)
+
+**Performance:**
+- Average GET latency: &lt;1ms
+- Average SET latency: &lt;2ms
+- Memory usage: ~2MB for 87 signals
+
+---
+
+### Redis Replica Configuration
+
+```bash
+# Redis Replica (Read Scaling - Future)
+REDIS_REPLICA_HOST=tp-capital-redis-replica  # Container hostname
+REDIS_REPLICA_PORT=6379                       # Same port as master
+REDIS_REPLICA_READ_ONLY=yes                   # Prevent writes to replica
+
+# Replication Settings
+REDIS_REPL_PING_REPLICA_PERIOD=10    # Ping interval (seconds)
+REDIS_REPL_TIMEOUT=60                 # Replication timeout
+```
+
+**Status**: Configured but not actively used by API (master handles all r/w)
+
+**Future Load Balancing:**
+```javascript
+// Future: Distribute reads across master + replica
+const readClient = loadBalancer.pick(['redis-master', 'redis-replica']);
+const data = await readClient.get('tp-capital:signals:all');
+```
+
+---
+
+## API Configuration (TP Capital API)
+
+### Core API Settings
+
+```bash
+# Server Configuration
+TP_CAPITAL_API_PORT=4005             # Internal port (NO host exposure!)
+TP_CAPITAL_API_HOST=0.0.0.0          # Listen on all interfaces
+NODE_ENV=production                   # Environment (development|production)
+LOG_LEVEL=info                        # Logging level (debug|info|warn|error)
+
+# API Authentication
+TP_CAPITAL_API_KEY=bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1  # REQUIRED - 64-char hex
+TP_CAPITAL_API_KEY_HEADER=X-API-Key  # Header name for authentication
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=60000           # 1 minute window
+RATE_LIMIT_MAX_REQUESTS=100          # 100 requests per window per IP
+```
+
+**Security Best Practices:**
+- 🔒 **Generate Strong Keys**: `openssl rand -hex 32` (produces 64-char hex)
+- 🔒 **No Direct Access**: API only accessible via Gateway (Traefik routing)
+- 🔒 **HTTPS in Production**: Enable TLS at Gateway level (future)
+- 🔒 **Rotate Keys**: Change API keys every 90 days
+
+---
+
+### Telegram Gateway Integration
+
+```bash
+# Telegram Gateway Connection (for ingestion)
+TELEGRAM_GATEWAY_URL=http://telegram-gateway-api:4010  # Container hostname (NOT localhost!)
+TELEGRAM_GATEWAY_API_TOKEN=gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA  # Gateway API token
+TELEGRAM_GATEWAY_TIMEOUT_MS=30000    # Request timeout (30 seconds)
+
+# Polling Configuration
+TELEGRAM_POLL_INTERVAL_MS=30000      # Poll every 30 seconds
+TELEGRAM_MAX_MESSAGES_PER_POLL=50    # Max messages to fetch per poll
+TELEGRAM_CHANNEL_ID=-1001649127710   # TP Capital channel ID
+```
+
+**Channel Configuration:**
+```json
+{
+  "channel_id": "-1001649127710",
+  "channel_name": "TP Capital Sinais",
+  "is_active": true,
+  "poll_interval": 30000,
+  "message_types": ["text", "photo_with_caption"]
+}
+```
+
+**Circuit Breaker Settings:**
+```bash
+# Circuit Breaker (Protects against Gateway failures)
+CIRCUIT_BREAKER_THRESHOLD=5          # Failures before opening circuit
+CIRCUIT_BREAKER_TIMEOUT_MS=30000     # Reset attempt after 30s
+CIRCUIT_BREAKER_ROLLING_COUNT=10     # Rolling window size
+```
+
+---
+
+## Gateway Variables (Traefik v3.0)
+
+### Traefik Configuration
+
+```bash
+# Traefik Entrypoints
+TRAEFIK_HTTP_PORT=9080               # Internal HTTP port
+TRAEFIK_HTTPS_PORT=9443              # Internal HTTPS port (future)
+TRAEFIK_DASHBOARD_PORT=8080          # Internal dashboard port
+
+# Port Mappings (Host:Container)
+GATEWAY_HTTP_HOST_PORT=9082          # External HTTP (host)
+GATEWAY_HTTPS_HOST_PORT=9443         # External HTTPS (host) - DISABLED (port conflict)
+GATEWAY_DASHBOARD_HOST_PORT=9083     # External dashboard (host)
+
+# Service Discovery
+TRAEFIK_DOCKER_NETWORK=tradingsystem_backend  # Network for service discovery
+TRAEFIK_EXPOSE_BY_DEFAULT=false              # Only route services with traefik.enable=true
+```
+
+**Traefik Labels (Applied to TP Capital API):**
+```yaml
+# See docker-compose.4-1-tp-capital-stack.yml lines 379-404
+labels:
+  - "traefik.enable=true"
+  - "traefik.docker.network=tradingsystem_backend"
+  - "traefik.http.routers.tp-capital-api.rule=PathPrefix(`/api/tp-capital`)"
+  - "traefik.http.routers.tp-capital-api.entrypoints=web"
+  - "traefik.http.routers.tp-capital-api.priority=95"
+  - "traefik.http.services.tp-capital-api.loadbalancer.server.port=4005"
+  - "traefik.http.routers.tp-capital-api.middlewares=tpcapital-stripprefix,tpcapital-cors"
+```
+
+**Middleware Configuration (Inline):**
+```yaml
+# StripPrefix Middleware (removes /api/tp-capital from path)
+- "traefik.http.middlewares.tpcapital-stripprefix.stripprefix.prefixes=/api/tp-capital"
+
+# CORS Middleware (allows browser access)
+- "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,PATCH,OPTIONS"
+- "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolalloworiginlist=http://localhost:9082,http://localhost:8092"
+- "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowheaders=*"
+- "traefik.http.middlewares.tpcapital-cors.headers.accesscontrolallowcredentials=true"
+```
+
+**Health Check:**
+```yaml
+- "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.path=/health"
+- "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.interval=30s"
+- "traefik.http.services.tp-capital-api.loadbalancer.healthcheck.timeout=5s"
+```
+
+---
+
+## Dashboard Variables (React + Vite)
+
+### Browser-Facing Configuration (VITE_ prefix)
+
+```bash
+# API Gateway Base URL (browser connects here)
+VITE_API_BASE_URL=http://localhost:9082  # MUST match Gateway host port!
+
+# TP Capital API Key (embedded in browser bundle)
+VITE_TP_CAPITAL_API_KEY=${TP_CAPITAL_API_KEY}  # Exposes API key to browser
+
+# Unified Domain Mode
+VITE_USE_UNIFIED_DOMAIN=true  # Enable unified domain routing (via Gateway)
+```
+
+**⚠️ CRITICAL: VITE Variables Require Rebuild!**
+```bash
+# After changing ANY VITE_* variable:
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
+
+# Why? Vite embeds these at BUILD TIME, not runtime!
+```
+
+**Validation:**
+```bash
+# Verify API key is embedded in bundle
+curl -s http://localhost:8092/assets/index-*.js | grep -o "bbf913da[a-f0-9]*" | head -1
+
+# Should output the full API key (confirms embedding worked)
+```
+
+---
+
+### Server-Side Proxy Configuration (NO VITE_ prefix)
+
+```bash
+# TP Capital Proxy Target (server-side only)
+TP_CAPITAL_PROXY_TARGET=http://api-gateway:9080/api/tp-capital  # Via Gateway
+
+# ❌ WRONG - Do NOT use VITE_ prefix for proxy targets!
+# VITE_TP_CAPITAL_API_URL=http://tp-capital-api:4005  # Browser cannot resolve!
+
+# ✅ CORRECT - Server proxies, browser uses relative paths
+# Browser requests:  /api/tp-capital/signals
+# Vite proxies to:   http://api-gateway:9080/api/tp-capital/signals
+```
+
+**Proxy Configuration (vite.config.ts):**
+```typescript
+server: {
+  proxy: {
+    '/api/tp-capital': {
+      target: process.env.TP_CAPITAL_PROXY_TARGET || 'http://api-gateway:9080',
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/api\/tp-capital/, '/api/tp-capital')  // Keep prefix
+    }
+  }
+}
+```
+
+**Flow:**
+```
+Browser → GET /api/tp-capital/signals
+         ↓ (Vite proxy)
+Container → GET http://api-gateway:9080/api/tp-capital/signals
+         ↓ (Traefik StripPrefix)
+API → GET /signals (receives without prefix)
+```
+
+---
+
+## Network Variables
+
+### Docker Networks
+
+```bash
+# Primary Networks
+TRADINGSYSTEM_BACKEND_NETWORK=tradingsystem_backend      # Gateway + APIs
+TP_CAPITAL_BACKEND_NETWORK=tp_capital_backend            # TP Capital internal
+TRADINGSYSTEM_FRONTEND_NETWORK=tradingsystem_frontend    # Dashboard + static
+
+# Network Driver
+NETWORK_DRIVER=bridge                # Default Docker bridge network
+```
+
+**Network Membership:**
+```yaml
+tp-capital-api:
+  networks:
+    - tradingsystem_backend  # For Gateway communication
+    - tp_capital_backend      # For database/Redis access
+
+api-gateway:
+  networks:
+    - tradingsystem_backend  # For routing to APIs
+    - tradingsystem_frontend # For dashboard routing
+    - tp_capital_backend      # For TP Capital routing
+```
+
+**Network Isolation Strategy:**
+- **tradingsystem_backend**: Public-facing APIs (workspace, tp-capital, docs)
+- **tp_capital_backend**: TP Capital internal services (database, cache, not exposed)
+- **tradingsystem_frontend**: UI services (dashboard, docs UI)
+
+---
+
+## Logging & Monitoring
+
+### Logging Configuration
+
+```bash
+# Log Levels
+LOG_LEVEL=info                       # Application log level (debug|info|warn|error)
+LOG_FORMAT=json                      # Log format (json|text)
+LOG_OUTPUT=stdout                    # Output destination (stdout|file)
+LOG_FILE_PATH=/var/log/tp-capital/app.log  # Log file path (if file output)
+
+# Structured Logging Fields
+LOG_INCLUDE_TIMESTAMP=true           # Include ISO 8601 timestamps
+LOG_INCLUDE_LEVEL=true               # Include log level
+LOG_INCLUDE_SERVICE=true             # Include service name
+LOG_INCLUDE_REQUEST_ID=true          # Include request correlation ID
+```
+
+**Example Log Entry:**
+```json
+{
+  "timestamp": "2025-11-12T10:30:45.123Z",
+  "level": "info",
+  "service": "tp-capital-api",
+  "requestId": "req_abc123",
+  "message": "Signal processed successfully",
+  "signal": {
+    "asset": "WINZ25",
+    "type": "BUY",
+    "channel": "TP Capital Sinais"
+  }
+}
+```
+
+---
+
+### Prometheus Metrics
+
+```bash
+# Metrics Endpoint
+METRICS_ENABLED=true                 # Enable /metrics endpoint
+METRICS_PORT=9090                    # Metrics port (separate from API port)
+METRICS_PATH=/metrics                # Metrics path
+
+# Metric Prefixes
+METRICS_PREFIX=tp_capital_           # Prefix for all metrics
+METRICS_INCLUDE_DEFAULTS=true        # Include default Node.js metrics
+```
+
+**Available Metrics:**
+```promql
+# HTTP Request Duration
+tp_capital_http_request_duration_seconds{method="GET",route="/signals",status="200"}
+
+# Database Query Duration
+tp_capital_db_query_duration_seconds{query="get_signals"}
+
+# Cache Hit Rate
+tp_capital_cache_hit_total / (tp_capital_cache_hit_total + tp_capital_cache_miss_total)
+
+# Circuit Breaker Status
+tp_capital_circuit_breaker_open{service="telegram-gateway"} = 0|1
+```
+
+---
+
+## Environment-Specific Overrides
+
+### Development Environment
+
+```bash
+# Development-specific settings (.env.development - NOT COMMITTED)
+NODE_ENV=development
+LOG_LEVEL=debug
+VITE_API_BASE_URL=http://localhost:9082  # Local Gateway
+TP_CAPITAL_API_PORT=4005
+REDIS_TTL=10  # Shorter TTL for testing
+```
+
+---
+
+### Production Environment
+
+```bash
+# Production settings (.env.production - NOT COMMITTED)
+NODE_ENV=production
+LOG_LEVEL=warn
+LOG_FORMAT=json
+VITE_API_BASE_URL=https://trading.example.com  # Production domain
+REDIS_TTL=30
+REDIS_MAX_MEMORY=512mb
+RATE_LIMIT_MAX_REQUESTS=1000  # Higher limits in production
+```
+
+---
+
+## Validation & Debugging
+
+### Validate Environment Variables
+
+```bash
+# Run validation script
+bash scripts/validation/validate-env.sh
+
+# Check specific service environment
+docker exec tp-capital-api printenv | grep TP_CAPITAL
+docker exec dashboard-ui printenv | grep VITE_
+docker exec api-gateway printenv | grep TRAEFIK
+```
+
+### Common Issues
+
+#### Issue: Dashboard can't connect to API
+
+**Check:**
+```bash
+docker exec dashboard-ui printenv | grep VITE_API_BASE_URL
+# Should match Gateway host port: http://localhost:9082
+```
+
+#### Issue: API can't connect to database
+
+**Check:**
+```bash
+docker exec tp-capital-api printenv | grep TP_CAPITAL_DB
+# Should use container hostname: tp-capital-timescale
+```
+
+#### Issue: Gateway not routing requests
+
+**Check:**
+```bash
+docker inspect tp-capital-api | jq '.[0].Config.Labels' | grep traefik.enable
+# Should be: "traefik.enable": "true"
+```
+
+---
+
+## Security Checklist
+
+Before deploying to production:
+
+- [ ] Change all default passwords (database, Redis, API keys)
+- [ ] Generate strong API keys: `openssl rand -hex 32`
+- [ ] Set `NODE_ENV=production`
+- [ ] Enable HTTPS at Gateway level
+- [ ] Rotate API keys every 90 days
+- [ ] Never commit `.env` file
+- [ ] Use `.env.example` as template
+- [ ] Validate no `VITE_` prefix on proxy targets
+- [ ] Verify all inter-container URLs use container hostnames
+- [ ] Check no sensitive data in logs (`LOG_LEVEL=warn` in production)
+
+---
+
+## References
+
+- **ADR 007**: [TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
+- **Network Diagram**: [TP Capital Network Architecture](/docs/assets/diagrams/source/apps/tp-capital-network-architecture.puml)
+- **Proxy Best Practices**: [PROXY-BEST-PRACTICES.md](/docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md)
+- **Troubleshooting**: [TP Capital Connectivity Issues](/docs/apps/tp-capital/runbooks/troubleshooting-connectivity)
+- **Environment Policy**: [POL-0002 Addendum 001: Empty Value Validation](/governance/policies/addendums/pol-0002-addendum-001-empty-value-validation)
+
+---
+
+**Version**: 1.0
+**Last Updated**: 2025-11-12
+**Next Review**: 2025-12-12 (monthly)

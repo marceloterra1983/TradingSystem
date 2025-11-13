@@ -1,0 +1,433 @@
+---
+title: Dev Container - Visão Geral
+sidebar_label: Visão Geral
+sidebar_position: 1
+tags: [dev-container, docker, development, vscode]
+domain: tools
+type: guide
+summary: "Visão geral do ambiente de desenvolvimento em container: o que é, por que usamos, e como começar em 15 minutos"
+status: active
+last_review: "2025-11-12"
+---
+
+# Dev Container - Visão Geral
+
+## 🎯 O que é o Dev Container?
+
+O **Dev Container** é um ambiente de desenvolvimento completamente containerizado que garante que todos os desenvolvedores trabalhem com exatamente as mesmas ferramentas, versões e configurações.
+
+### Conceito
+
+Em vez de instalar Node.js, Python, Docker, Git e outras ferramentas diretamente no seu sistema operacional, você trabalha **dentro de um container Docker** que já vem com tudo pré-configurado.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Seu Computador (Windows/Mac/Linux)                    │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │  VS Code (Interface)                              │ │
+│  │  ↓ Remote Extension                               │ │
+│  │  ┌─────────────────────────────────────────────┐ │ │
+│  │  │  Dev Container (Docker)                     │ │ │
+│  │  │  ✅ Node.js 20 LTS                           │ │ │
+│  │  │  ✅ Python 3.12                              │ │ │
+│  │  │  ✅ Docker CLI                               │ │ │
+│  │  │  ✅ Git + GitHub CLI                         │ │ │
+│  │  │  ✅ Zsh + Oh My Zsh                          │ │ │
+│  │  │  ✅ VS Code Server                           │ │ │
+│  │  │  ✅ Todas as extensões                       │ │ │
+│  │  └─────────────────────────────────────────────┘ │ │
+│  └───────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
+## 💡 Por que usamos Dev Container?
+
+### 1. **"Funciona na minha máquina" → Problema Resolvido**
+
+Todos os desenvolvedores têm **exatamente o mesmo ambiente**:
+- ✅ Mesma versão do Node.js (20.x LTS)
+- ✅ Mesma versão do Python (3.12)
+- ✅ Mesmas dependências instaladas
+- ✅ Mesmas configurações de linting/formatação
+- ✅ Mesmos scripts disponíveis
+
+**Resultado:** Se funciona para um desenvolvedor, funciona para todos.
+
+### 2. **Setup em &lt;15 minutos**
+
+Sem Dev Container:
+```bash
+# Instalar Node.js
+# Instalar Python
+# Instalar Docker
+# Instalar Git
+# Configurar ambiente virtual Python
+# Instalar dependências globais
+# Configurar VS Code extensões
+# Configurar linters/formatters
+# ... 1-2 horas de configuração
+```
+
+Com Dev Container:
+```bash
+# 1. Abrir projeto no VS Code
+# 2. Clicar em "Reopen in Container"
+# 3. Aguardar build (5-10 min)
+# 4. Pronto! ✅
+```
+
+### 3. **Isolamento Total**
+
+- ✅ Não polui seu sistema com ferramentas
+- ✅ Múltiplos projetos com diferentes versões
+- ✅ Fácil de resetar (rebuild container)
+- ✅ Nada instalado globalmente no seu OS
+
+### 4. **Reprodutibilidade**
+
+- ✅ CI/CD usa mesmo ambiente
+- ✅ Novos desenvolvedores produtivos no dia 1
+- ✅ Onboarding padronizado
+- ✅ Testes rodam no mesmo ambiente que desenvolvimento
+
+### 5. **Docker-in-Docker (Acesso aos Serviços)**
+
+O Dev Container tem acesso ao Docker daemon do host, permitindo:
+- ✅ Gerenciar containers de serviços (APIs, DBs, etc)
+- ✅ Executar `docker compose` commands
+- ✅ Debugar serviços em tempo real
+- ✅ Hot reload para desenvolvimento
+
+## 🚀 Quick Start (15 minutos)
+
+### Pré-requisitos
+
+1. **VS Code** instalado ([download](https://code.visualstudio.com/))
+2. **Docker Desktop** rodando ([download](https://www.docker.com/products/docker-desktop/))
+3. **Extensão Dev Containers** instalada no VS Code
+
+### Passo a Passo
+
+#### 1. Clonar o Repositório
+
+```bash
+git clone https://github.com/seu-usuario/TradingSystem.git
+cd TradingSystem
+```
+
+#### 2. Abrir no VS Code
+
+```bash
+code .
+```
+
+#### 3. Reabrir em Container
+
+Quando o VS Code abrir, você verá uma notificação:
+
+```
+📦 Folder contains a Dev Container configuration file.
+   [Reopen in Container]  [Open in Local]
+```
+
+Clique em **"Reopen in Container"**.
+
+**Ou use o Command Palette:**
+1. `Ctrl+Shift+P` (Windows/Linux) ou `Cmd+Shift+P` (Mac)
+2. Digite: `Dev Containers: Reopen in Container`
+3. Enter
+
+#### 4. Aguardar Build Inicial
+
+**Primeira vez:**
+- Build leva ~5-10 minutos (download de imagens, install de dependências)
+- Progress bar no canto inferior direito do VS Code
+- Terminal mostra logs detalhados
+
+**Próximas vezes:**
+- Reopen leva ~30 segundos (container já existe)
+
+#### 5. Validar Ambiente
+
+Quando o terminal abrir **dentro do container**, execute:
+
+```bash
+# Verificar Node.js
+node --version
+# Esperado: v20.x.x
+
+# Verificar Python
+python3 --version
+# Esperado: Python 3.12.x
+
+# Verificar Docker
+docker --version
+# Esperado: Docker version 24.x.x
+
+# Verificar Git
+git --version
+# Esperado: git version 2.x.x
+
+# Verificar GitHub CLI
+gh --version
+# Esperado: gh version 2.x.x
+```
+
+#### 6. Iniciar Serviços
+
+```bash
+# Startup universal (Docker + Node.js)
+start
+
+# Ou apenas Docker containers
+start-docker
+
+# Ou apenas serviços Node.js
+start-services
+```
+
+#### 7. Validar Dashboard
+
+Abra no navegador: [http://localhost:9082](http://localhost:9082)
+
+Você deve ver o **TradingSystem Dashboard** carregado.
+
+✅ **Pronto! Ambiente configurado e operacional.**
+
+## 📋 Arquitetura de Alto Nível
+
+### Camadas do Dev Container
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Base Image (mcr.microsoft.com/devcontainers/base:jammy)│
+│  └─> Ubuntu 22.04 LTS (Jammy)                          │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  Runtime Tools                                          │
+│  ✅ Node.js 20 LTS (via nvm)                            │
+│  ✅ Python 3.12 (via pyenv)                             │
+│  ✅ Docker CLI (connected to host daemon)               │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  Development Tools                                      │
+│  ✅ Git + GitHub CLI                                    │
+│  ✅ Zsh + Oh My Zsh + Powerlevel10k                     │
+│  ✅ direnv (auto-activate Python venv)                  │
+│  ✅ jq, curl, wget, etc                                 │
+└─────────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  VS Code Integration                                    │
+│  ✅ VS Code Server                                      │
+│  ✅ Extensions (ESLint, Prettier, Docker, etc)          │
+│  ✅ Settings synchronized                               │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Redes e Comunicação
+
+```
+┌──────────────────┐
+│  Browser         │ ──> http://localhost:9082
+└──────────────────┘
+         ↓
+┌──────────────────────────────────────────────────────────┐
+│  Traefik Gateway (Docker)                                │
+│  Port: 9082 (HTTP), 9083 (Dashboard)                     │
+└──────────────────────────────────────────────────────────┘
+         ↓ Routes to...
+┌──────────────────────────────────────────────────────────┐
+│  Backend Services (Docker Containers)                    │
+│  ├─> Dashboard UI (dashboard-ui:3103)                    │
+│  ├─> Workspace API (workspace-api:3200)                  │
+│  ├─> TP Capital API (tp-capital-api:4005)                │
+│  ├─> Telegram Gateway (telegram-gateway-api:4010)        │
+│  └─> Docs Hub (docs-hub:80)                              │
+└──────────────────────────────────────────────────────────┘
+         ↓ Data Layer
+┌──────────────────────────────────────────────────────────┐
+│  Databases (Docker Containers)                           │
+│  ├─> workspace-db (PostgreSQL)                           │
+│  ├─> tp-capital-timescale (TimescaleDB)                  │
+│  ├─> telegram-timescale (TimescaleDB)                    │
+│  └─> Redis instances (3 stacks)                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Detalhes:** Ver [Architecture Guide](./architecture.mdx)
+
+## 🔧 Fluxos de Desenvolvimento
+
+### Embedded Services (Dentro do Dev Container)
+
+**Dashboard UI** roda **dentro do Dev Container** em modo desenvolvimento:
+
+```bash
+# Dentro do Dev Container
+cd frontend/dashboard
+npm run dev
+# Vite Dev Server: http://localhost:5173 (forwarded to host)
+```
+
+**Acesso pelo navegador:**
+- Desenvolvimento: `http://localhost:5173` (Vite dev server)
+- Produção: `http://localhost:9082` (via Gateway)
+
+### External Services (Docker Compose Stacks)
+
+**APIs e Databases** rodam em **containers Docker separados**:
+
+```bash
+# Dentro do Dev Container (tem acesso ao Docker daemon do host)
+docker compose -f tools/compose/docker-compose.0-gateway-stack.yml up -d
+docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d
+docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
+# ... outros stacks
+```
+
+**Comunicação:**
+- Dev Container → Docker networks (tradingsystem_backend, tradingsystem_frontend)
+- Containers podem se comunicar pelo nome (ex: `workspace-api:3200`)
+
+**Detalhes:** Ver [API Access Patterns](./api-access.mdx)
+
+## 📖 Documentação Relacionada
+
+### Guias de Implementação
+
+- **[Architecture Guide](./architecture.mdx)** - Detalhes técnicos da arquitetura
+- **[API Access Patterns](./api-access.mdx)** - Como acessar APIs (embedded vs external)
+- **[Gateway & Proxy](./gateway-proxy.mdx)** - Traefik Gateway e Vite Proxy
+- **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
+- **[Troubleshooting](./troubleshooting.mdx)** - Soluções para problemas comuns
+
+### Governança
+
+- **[Dev Container Policy](../../../governance/policies/dev-container-policy.md)** - Políticas de uso obrigatório
+- **[Security Guide](../../../governance/controls/dev-container-security.md)** - Segurança e controles
+
+### Referências
+
+- **[.devcontainer/README.md](../../../../.devcontainer/README.md)** - Configuração técnica
+- **[CLAUDE.md](../../../../CLAUDE.md)** - Instruções para AI agents
+
+## ❓ FAQ
+
+### Por que não instalar ferramentas diretamente no meu OS?
+
+**Problemas com instalação local:**
+- ❌ "Funciona na minha máquina" (diferentes versões)
+- ❌ Conflitos entre projetos (Node.js 18 vs 20)
+- ❌ Setup demorado (1-2h para novos devs)
+- ❌ Difícil de resetar ambiente
+- ❌ CI/CD pode ter ambiente diferente
+
+**Vantagens do Dev Container:**
+- ✅ Ambiente idêntico para todos
+- ✅ Setup em &lt;15 minutos
+- ✅ Isolamento total
+- ✅ Fácil de resetar (rebuild)
+- ✅ CI/CD usa mesmo ambiente
+
+### Preciso ter Node.js/Python instalado no meu OS?
+
+**Não!** Tudo roda dentro do container.
+
+Você só precisa:
+1. Docker Desktop (para rodar containers)
+2. VS Code (para conectar ao container)
+
+### Como faço debug de código?
+
+**Normalmente!** VS Code está conectado ao container via Remote Extension.
+
+- ✅ Breakpoints funcionam
+- ✅ Terminal integrado está dentro do container
+- ✅ Extensions rodam dentro do container
+- ✅ Hot reload funciona (Vite, Nodemon)
+
+### E se eu quiser modificar o Dev Container?
+
+**Modificações devem ser aprovadas pela equipe!**
+
+1. Edite `.devcontainer/devcontainer.json`
+2. Abra PR para revisão
+3. Após aprovação, faça rebuild: `Dev Containers: Rebuild Container`
+
+**Política:** Ver [Dev Container Policy](../../../governance/policies/dev-container-policy.md)
+
+### Como funciona o acesso ao Docker?
+
+O Dev Container **monta o Docker socket do host** (`/var/run/docker.sock`).
+
+Isso permite executar `docker` commands **dentro do container** que afetam o **Docker daemon do host**.
+
+```bash
+# Dentro do Dev Container
+docker ps
+# Lista containers do host (incluindo o próprio Dev Container!)
+
+docker compose up -d
+# Inicia containers no host
+```
+
+**Segurança:** Ver [Security Guide](../../../governance/controls/dev-container-security.md)
+
+### Posso usar outros editores além do VS Code?
+
+**Tecnicamente sim**, mas **não recomendado**.
+
+O Dev Container é otimizado para VS Code:
+- ✅ Remote Extension nativa
+- ✅ Extensions auto-instaladas
+- ✅ Settings sincronizadas
+- ✅ Terminal integrado
+
+**Outros editores** (JetBrains, Vim, Emacs) precisam de configuração manual.
+
+### Como atualizo o Dev Container?
+
+**Atualizações menores** (dependências):
+```bash
+# Dentro do Dev Container
+npm install
+pip install -r requirements.txt
+```
+
+**Atualizações maiores** (Node.js, Python, base image):
+1. Editar `.devcontainer/Dockerfile`
+2. Abrir PR
+3. Após merge: `Dev Containers: Rebuild Container`
+
+### E se eu precisar de uma ferramenta que não está instalada?
+
+**Temporariamente** (apenas sua sessão):
+```bash
+# Dentro do Dev Container
+sudo apt-get update && sudo apt-get install -y nome-do-pacote
+```
+
+**Permanentemente** (para toda a equipe):
+1. Adicionar ao `.devcontainer/Dockerfile`
+2. Abrir PR
+3. Após merge: Rebuild
+
+**Política:** Ferramentas permanentes devem ser justificadas e aprovadas.
+
+## 🎯 Próximos Passos
+
+Agora que você entende o conceito, explore:
+
+1. **[Architecture Guide](./architecture.mdx)** - Detalhes técnicos
+2. **[API Access Patterns](./api-access.mdx)** - Como acessar serviços
+3. **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
+4. **[Troubleshooting](./troubleshooting.mdx)** - Resolver problemas
+
+---
+
+**Última revisão:** 2025-11-12
+**Status:** ✅ Ativo
+**Próxima revisão:** 2026-02-12 (3 meses)

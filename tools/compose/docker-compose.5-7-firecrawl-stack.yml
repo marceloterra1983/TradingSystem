@@ -264,7 +264,7 @@ services:
       - "traefik.http.routers.firecrawl-proxy.rule=PathPrefix(`/api/firecrawl`)"
       - "traefik.http.routers.firecrawl-proxy.entrypoints=web"
       - "traefik.http.routers.firecrawl-proxy.service=firecrawl-proxy"
-      - "traefik.http.routers.firecrawl-proxy.middlewares=firecrawl-proxy-strip,api-standard@file"
+      - "traefik.http.routers.firecrawl-proxy.middlewares=firecrawl-proxy-strip"  # Removed api-standard@file due to WSL2 issues
       - "traefik.http.middlewares.firecrawl-proxy-strip.stripprefix.prefixes=/api/firecrawl"
       - "traefik.http.services.firecrawl-proxy.loadbalancer.server.port=3600"
       - "traefik.http.services.firecrawl-proxy.loadbalancer.healthcheck.path=/health"

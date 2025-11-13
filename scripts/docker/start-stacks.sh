@@ -241,6 +241,32 @@ start_phase() {
         echo -e "${YELLOW}↳ No tools services defined (skipping).${NC}"
       fi
       ;;
+    database-ui)
+      local compose="tools/compose/docker-compose.5-0-database-stack.yml"
+      local gateway_compose="tools/compose/docker-compose.0-gateway-stack.yml"
+      ensure_network "tradingsystem_backend"
+
+      if has_compose_services "${gateway_compose}"; then
+        if ! docker ps --format '{{.Names}}' | grep -q '^api-gateway$'; then
+          echo -e "${YELLOW}↳ Gateway stack not running. Starting Traefik proxy...${NC}"
+          set +e
+          compose_cmd -f "${REPO_ROOT}/${gateway_compose}" up -d
+          local gateway_status=$?
+          set -euo pipefail
+          if (( gateway_status != 0 )); then
+            echo -e "${RED}❌ Failed to start Traefik gateway. Please run docker compose -f ${gateway_compose} up -d manually after resolving port conflicts.${NC}"
+          else
+            echo -e "${GREEN}✓ Traefik gateway started${NC}"
+          fi
+        fi
+      fi
+
+      if has_compose_services "${compose}"; then
+        compose_cmd -f "${REPO_ROOT}/${compose}" up -d
+      else
+        echo -e "${YELLOW}↳ No database-ui services defined (skipping).${NC}"
+      fi
+      ;;
     firecrawl)
       local firecrawl_dir="${REPO_ROOT}/tools/firecrawl/firecrawl-source"
       if [[ ! -d "${firecrawl_dir}" ]]; then
@@ -389,10 +415,10 @@ echo "  QuestDB API:            http://localhost:9000"
 echo "  QuestDB UI:             http://localhost:9009"
 echo ""
 echo -e "${GREEN}Database UI Tools (TimescaleDB):${NC}"
-echo "  pgAdmin:                http://localhost:9080/db-ui/pgadmin"
-echo "  pgweb:                  http://localhost:8081"
-echo "  Adminer (optional):     http://localhost:9080/db-ui/adminer"
-echo "  Azimutt (optional):     http://localhost:8084"
+echo "  pgAdmin:                http://localhost:${PGADMIN_PORT:-5050}"
+echo "  pgweb:                  http://localhost:${PGWEB_PORT:-5052}"
+echo "  Adminer (optional):     http://localhost:${ADMINER_PORT:-3910}"
+echo "  QuestDB Console:        http://localhost:${QUESTDB_HTTP_PORT:-9000}"
 echo ""
 echo -e "${GREEN}Monitoring:${NC}"
 echo "  Prometheus:             http://localhost:9090"
@@ -416,7 +442,3 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${GREEN}✅ Stack startup complete${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
 echo ""
-    database-ui)
-      ensure_network "tradingsystem_backend"
-      compose_cmd -f "${REPO_ROOT}/tools/compose/docker-compose.5-0-database-stack.yml" up -d
-      ;;
