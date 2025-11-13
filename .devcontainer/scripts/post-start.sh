@@ -1,98 +1,155 @@
 #!/bin/bash
-# Post-start script - Runs every time the container starts
-# Part of: Phase 1.5 - Dev Container Setup (Improvement Plan v1.0)
-
 set -e
 
 echo "🔄 TradingSystem Dev Container - Post-Start"
 echo "==========================================="
 
-# Colors
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-# 1. Check Docker daemon is running
-echo -e "\n${BLUE}🐳 Checking Docker daemon...${NC}"
-if docker info &> /dev/null; then
-    echo -e "${GREEN}✅ Docker daemon is running${NC}"
-else
-    echo -e "${YELLOW}⚠️  Docker daemon is not running. Starting...${NC}"
-    sudo service docker start || echo -e "${YELLOW}⚠️  Failed to start Docker daemon${NC}"
+# Check Docker connection
+echo "🐳 Checking Docker connection..."
+if ! docker ps >/dev/null 2>&1; then
+    echo "⚠️  Docker not available"
+    exit 0
 fi
+echo "✅ Docker connection successful"
 
-# 2. Activate Python virtual environment
-echo -e "\n${BLUE}🐍 Activating Python virtual environment...${NC}"
-if [ -d "/workspace/venv" ]; then
-    source /workspace/venv/bin/activate
-    echo -e "${GREEN}✅ Python venv activated${NC}"
-else
-    echo -e "${YELLOW}⚠️  Python venv not found. Run post-create.sh first.${NC}"
-fi
-
-# 3. Check environment file
-echo -e "\n${BLUE}⚙️  Checking environment configuration...${NC}"
-if [ -f "/workspace/.env" ]; then
-    echo -e "${GREEN}✅ .env file exists${NC}"
-else
-    echo -e "${YELLOW}⚠️  .env file not found. Please create it from .env.example${NC}"
-fi
-
-# 4. Check if ports are available
-echo -e "\n${BLUE}🔌 Checking port availability...${NC}"
-PORTS_TO_CHECK=(9080 9081 8090 3404 3200 4005)
-PORTS_IN_USE=()
-
-for PORT in "${PORTS_TO_CHECK[@]}"; do
-    if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1 || netstat -tuln 2>/dev/null | grep -q ":$PORT "; then
-        PORTS_IN_USE+=($PORT)
-    fi
-done
-
-if [ ${#PORTS_IN_USE[@]} -gt 0 ]; then
-    echo -e "${YELLOW}⚠️  The following ports are already in use: ${PORTS_IN_USE[*]}${NC}"
-    echo -e "${YELLOW}   You may need to stop other services or use different ports.${NC}"
-else
-    echo -e "${GREEN}✅ All ports are available${NC}"
-fi
-
-# 5. Start TradingSystem stacks (using existing compose files)
-echo -e "\n${BLUE}🚀 Starting TradingSystem stacks...${NC}"
+# Check workspace
 cd /workspace
 
-# Check if any stack is already running
-if docker ps --filter "label=com.tradingsystem.stack" --format "{{.Names}}" | grep -q .; then
-    echo -e "${GREEN}✅ Some stacks are already running${NC}"
-    docker ps --filter "label=com.tradingsystem.stack" --format "table {{.Names}}\t{{.Status}}" | head -10
+# Verify node_modules
+if [ ! -d "node_modules" ]; then
+    echo "⚠️  node_modules not found"
+fi
+
+# Verify Python venv
+if [ ! -d "venv" ]; then
+    echo "⚠️  Python venv not found"
+fi
+
+# ============================================================================
+# Auto-start TradingSystem Stacks
+# ============================================================================
+
+echo ""
+echo "🚀 TradingSystem Stacks Management"
+echo "=================================="
+
+# Check if stacks are already running
+GATEWAY_RUNNING=$(docker ps --filter "name=api-gateway" --format "{{.Names}}" 2>/dev/null | wc -l)
+
+if [ "$GATEWAY_RUNNING" -gt 0 ]; then
+    echo "✅ Stacks already running"
+    docker ps --format "table {{.Names}}\t{{.Status}}" | head -15
+    exit 0
+fi
+
+# Define essential stacks (always start)
+ESSENTIAL_STACKS=(
+    "docker-compose.0-gateway-stack.yml"
+    "docker-compose.5-0-database-stack.yml"
+    "docker-compose.4-3-workspace-stack.yml"
+    "docker-compose.1-dashboard-stack.yml"
+    "docker-compose.2-docs-stack.yml"
+)
+
+# Define optional stacks (start if AUTOSTART_OPTIONAL_STACKS is set)
+OPTIONAL_STACKS=(
+    "docker-compose.4-1-tp-capital-stack.yml"
+    "docker-compose.6-1-monitoring-stack.yml"
+    "docker-compose-5-1-n8n-stack.yml"
+    "docker-compose.5-7-firecrawl-stack.yml"
+)
+
+# Read configuration from .env or environment
+AUTOSTART_OPTIONAL="${AUTOSTART_OPTIONAL_STACKS:-false}"
+
+echo "⚙️  Configuration:"
+echo "  Essential stacks: ${#ESSENTIAL_STACKS[@]}"
+echo "  Optional stacks: ${#OPTIONAL_STACKS[@]}"
+echo "  Auto-start optional: $AUTOSTART_OPTIONAL"
+echo ""
+
+# Function to start a stack
+start_stack() {
+    local stack_file="$1"
+    local stack_name=$(basename "$stack_file" .yml)
+    
+    if [ ! -f "tools/compose/$stack_file" ]; then
+        echo "  ⚠️  Skipping $stack_name (file not found)"
+        return 1
+    fi
+    
+    echo "  🚀 Starting: $stack_name..."
+    if docker compose -f "tools/compose/$stack_file" up -d 2>&1 | grep -v "Container.*Running"; then
+        echo "     ✅ Started"
+        return 0
+    else
+        echo "     ⚠️  Failed or already running"
+        return 1
+    fi
+}
+
+# Start essential stacks
+echo "📦 Starting Essential Stacks:"
+echo "=============================="
+STARTED_COUNT=0
+for stack in "${ESSENTIAL_STACKS[@]}"; do
+    if start_stack "$stack"; then
+        STARTED_COUNT=$((STARTED_COUNT + 1))
+    fi
+    sleep 2
+done
+
+# Start optional stacks if enabled
+if [ "$AUTOSTART_OPTIONAL" = "true" ]; then
+    echo ""
+    echo "📦 Starting Optional Stacks:"
+    echo "============================="
+    for stack in "${OPTIONAL_STACKS[@]}"; do
+        if start_stack "$stack"; then
+            STARTED_COUNT=$((STARTED_COUNT + 1))
+        fi
+        sleep 2
+    done
 else
-    echo -e "${BLUE}Starting all stacks (this may take 1-2 minutes)...${NC}"
-    bash .devcontainer/scripts/start-all-stacks.sh
+    echo ""
+    echo "ℹ️  Optional stacks not started (set AUTOSTART_OPTIONAL_STACKS=true to enable)"
 fi
 
-# 6. Display status
-echo -e "\n${GREEN}✅ Post-start completed!${NC}"
-echo -e "\n${BLUE}📊 Environment Status:${NC}"
-echo -e "  Node.js: $(node --version)"
-echo -e "  npm: $(npm --version)"
-echo -e "  Python: $(python3 --version)"
-echo -e "  Docker: $(docker --version | cut -d' ' -f3 | cut -d',' -f1)"
+# Wait for services to initialize
+echo ""
+echo "⏳ Waiting for services to initialize (15 seconds)..."
+sleep 15
 
-echo -e "\n${BLUE}🌐 Service URLs (via Port Forwarding):${NC}"
-echo -e "  ${GREEN}http://localhost:9080${NC}      - API Gateway (Traefik)"
-echo -e "  ${GREEN}http://localhost:9081${NC}      - Traefik Dashboard"
-echo -e "  ${GREEN}http://localhost:8090${NC}      - Dashboard UI"
-echo -e "  ${GREEN}http://localhost:3404${NC}      - Documentation Hub"
-echo -e "  ${GREEN}http://localhost:3200${NC}      - Workspace API"
+# Show status
+echo ""
+echo "📊 Container Status:"
+echo "===================="
+docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "(NAMES|api-gateway|dashboard|docs|workspace|dbui|tp-capital|prometheus|grafana)" | head -20
 
-echo -e "\n${BLUE}💡 Quick Commands:${NC}"
-echo -e "  ${GREEN}docker ps --filter \"label=com.tradingsystem.stack\"${NC}  - Check services"
-echo -e "  ${GREEN}bash .devcontainer/scripts/start-all-stacks.sh${NC}        - Start all stacks"
-echo -e "  ${GREEN}bash .devcontainer/scripts/stop-all-stacks.sh${NC}         - Stop all stacks"
-echo -e "  ${GREEN}docker compose -f <stack-file> logs -f${NC}                - View logs"
-echo -e "\n"
+# Health summary
+TOTAL=$(docker ps --format "{{.Names}}" | wc -l)
+HEALTHY=$(docker ps --filter "health=healthy" --format "{{.Names}}" | wc -l)
+UNHEALTHY=$(docker ps --filter "health=unhealthy" --format "{{.Names}}" | wc -l)
 
-# Fix Docker socket permissions
-if [ -S /var/run/docker-host.sock ]; then
-    sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true
+echo ""
+echo "📈 Summary:"
+echo "  Stacks started: $STARTED_COUNT"
+echo "  Total containers: $TOTAL"
+echo "  Healthy: $HEALTHY"
+echo "  Unhealthy: $UNHEALTHY"
+
+if [ "$UNHEALTHY" -gt 0 ]; then
+    echo ""
+    echo "⚠️  Unhealthy containers:"
+    docker ps --filter "health=unhealthy" --format "  - {{.Names}}: {{.Status}}"
+    echo ""
+    echo "💡 Tip: Check logs with: docker logs <container-name>"
 fi
+
+echo ""
+echo "✅ Post-start completed!"
+echo ""
+echo "🎯 Quick Commands:"
+echo "  npm run start     - Start all services"
+echo "  npm run stop      - Stop all services"
+echo "  dc ps             - Check containers"
