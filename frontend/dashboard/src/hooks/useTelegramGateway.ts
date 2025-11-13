@@ -6,22 +6,16 @@ const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
   /\/$/,
   ""
 );
-const ensureLeadingSlash = (value: string) =>
-  value.startsWith("/") ? value : `/${value}`;
-const hasUnifiedGatewayPrefix = TELEGRAM_GATEWAY_API_BASE.endsWith(
+const ensureSuffix = (base: string, suffix: string) =>
+  base.endsWith(suffix) ? base : `${base}${suffix}`;
+const TELEGRAM_GATEWAY_SERVICE_BASE = ensureSuffix(
+  TELEGRAM_GATEWAY_API_BASE,
   "/api/telegram-gateway"
 );
-const buildServiceUrl = (suffix = "") => {
-  const base = hasUnifiedGatewayPrefix
-    ? TELEGRAM_GATEWAY_API_BASE
-    : `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
-  return `${base}${suffix ? ensureLeadingSlash(suffix) : ""}`;
-};
-const buildApiUrl = (suffix: string) =>
-  `${TELEGRAM_GATEWAY_API_BASE}/api${ensureLeadingSlash(suffix)}`;
-const TELEGRAM_GATEWAY_SERVICE_BASE = buildServiceUrl();
-const TELEGRAM_GATEWAY_MESSAGES_BASE = buildApiUrl("messages");
-const TELEGRAM_GATEWAY_CHANNELS_BASE = buildApiUrl("channels");
+const appendServicePath = (path: string) =>
+  `${TELEGRAM_GATEWAY_SERVICE_BASE}/${path.replace(/^\/+/, "")}`;
+const TELEGRAM_GATEWAY_MESSAGES_BASE = appendServicePath("messages");
+const TELEGRAM_GATEWAY_CHANNELS_BASE = appendServicePath("channels");
 export const TELEGRAM_GATEWAY_TOKEN =
   (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
   (
