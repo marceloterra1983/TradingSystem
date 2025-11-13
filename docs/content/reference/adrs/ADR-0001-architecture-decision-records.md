@@ -106,9 +106,9 @@ See: [ADR Template](/docs/reference/templates/adr)
 
 ## Related Decisions
 
-- [ADR-003: API Gateway Implementation](/docs/reference/adrs/ADR-003-api-gateway-implementation)
-- [ADR-007: TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
-- [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
+- [ADR-003: API Gateway Implementation](./ADR-003-api-gateway-implementation)
+- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration)
+- [ADR-008: HTTP Client Standardization](./ADR-008-http-client-standardization)
 
 ## References
 

@@ -264,10 +264,10 @@ Before deploying proxy configuration:
 
 ## Related Documentation
 
-- [HTTP Client Implementation Guide](/docs/frontend/engineering/http-client-implementation-guide)
-- [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
-- [Environment Variables Guide](/docs/tools/security-config/env)
-- [API Gateway Policy](/docs/governance/policies/api-gateway-policy)
+- [HTTP Client Implementation Guide](./http-client-implementation-guide)
+- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization)
+- [Environment Variables Guide](../../tools/security-config/env)
+- [API Gateway Policy](../../governance/policies/api-gateway-policy)
 
 ---
 

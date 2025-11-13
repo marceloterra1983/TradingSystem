@@ -183,15 +183,15 @@ open http://localhost:9083/dashboard/
 
 ## Related Decisions
 
-- [ADR-0001: Architecture Decision Records](/docs/reference/adrs/ADR-0001-architecture-decision-records)
-- [ADR-007: TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
-- [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
+- [ADR-0001: Architecture Decision Records](./ADR-0001-architecture-decision-records)
+- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration)
+- [ADR-008: HTTP Client Standardization](./ADR-008-http-client-standardization)
 
 ## References
 
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [API Gateway Pattern - Microsoft](https://docs.microsoft.com/en-us/azure/architecture/microservices/design/gateway)
-- [Governance Policy: API Gateway Policy](/docs/governance/policies/api-gateway-policy)
+- [Governance Policy: API Gateway Policy](../../governance/policies/api-gateway-policy)
 
 ---
 

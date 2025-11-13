@@ -80,18 +80,45 @@ export function DatabasePage() {
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-2">⚠️ Troubleshooting</h2>
-          <p className="text-sm mb-2">
-            If links don't work, check if database UI containers are running:
-          </p>
-          <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs">
-            docker ps | grep dbui
-          </code>
-          <p className="text-sm mt-3">
-            Start containers if needed:
-          </p>
-          <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs">
-            docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d
-          </code>
+
+          <div className="space-y-4 text-sm">
+            <div>
+              <strong>If links show "ERR_EMPTY_RESPONSE" or "This page is not working":</strong>
+              <p className="mt-1 mb-2">
+                This is a <strong>WSL2 port forwarding issue</strong>. Database UI containers are running in WSL2,
+                but Windows cannot access them without port forwarding.
+              </p>
+              <p className="mb-2">
+                <strong>Solution:</strong> Run the port forwarding script on Windows as Administrator:
+              </p>
+              <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs mb-1">
+                # Open PowerShell as Administrator, then:
+              </code>
+              <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs">
+                cd \\wsl$\Ubuntu\home\marce\Projetos\TradingSystem\scripts\windows
+              </code>
+              <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs mt-1">
+                .\forward-database-ui-ports.ps1
+              </code>
+              <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                📖 See detailed instructions: <code>scripts/windows/README-WSL2-PORT-FORWARDING.md</code>
+              </p>
+            </div>
+
+            <div className="border-t border-yellow-200 dark:border-yellow-700 pt-3">
+              <strong>Check if containers are running:</strong>
+              <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs mt-1">
+                docker ps | grep dbui
+              </code>
+            </div>
+
+            <div>
+              <strong>Start containers if needed:</strong>
+              <code className="block bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs mt-1">
+                docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d
+              </code>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -234,15 +234,15 @@ npm run test:load -- --clients 100 --duration 60s
 
 ## Related Decisions
 
-- [ADR-003: API Gateway Implementation](/docs/reference/adrs/ADR-003-api-gateway-implementation)
-- [ADR-007: TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
+- [ADR-003: API Gateway Implementation](./ADR-003-api-gateway-implementation)
+- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration)
 
 ## References
 
 - [Implementing Circuit Breaker Pattern - Martin Fowler](https://martinfowler.com/bliki/CircuitBreaker.html)
 - [Exponential Backoff - Google Cloud](https://cloud.google.com/iot/docs/how-tos/exponential-backoff)
-- [Governance Standard: STD-020 HTTP Client Standard](/docs/governance/standards/STD-020-http-client-standard)
-- [Architecture Review: 2025-11-01](/docs/governance/evidence/reports/reviews/architecture-2025-11-01/index)
+- [Governance Standard: STD-020 HTTP Client Standard](../../governance/standards/STD-020-http-client-standard)
+- [Architecture Review: 2025-11-01](../../governance/evidence/reports/reviews/architecture-2025-11-01/index)
 
 ---
 

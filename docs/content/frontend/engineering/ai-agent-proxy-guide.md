@@ -22,7 +22,7 @@ Are you configuring a Vite proxy?
 │
 ├─ YES → Read this entire guide
 │
-└─ NO → Skip to [HTTP Client Guide](/docs/frontend/engineering/http-client-implementation-guide)
+└─ NO → Skip to [HTTP Client Guide](./http-client-implementation-guide)
 ```
 
 ## Critical Instructions for AI Agents
@@ -293,9 +293,9 @@ Response:            { data: [...] }
 
 ## Related Documentation
 
-- [Proxy Best Practices](/docs/frontend/engineering/PROXY-BEST-PRACTICES)
-- [HTTP Client Implementation Guide](/docs/frontend/engineering/http-client-implementation-guide)
-- [Environment Variables Guide](/docs/tools/security-config/env)
+- [Proxy Best Practices](./PROXY-BEST-PRACTICES)
+- [HTTP Client Implementation Guide](./http-client-implementation-guide)
+- [Environment Variables Guide](../../tools/security-config/env)
 
 ---
 

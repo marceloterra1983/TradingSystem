@@ -118,9 +118,9 @@ bash scripts/governance/validate-http-client-standard.sh
 
 ## See Also
 
-- [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
-- [HTTP Client Implementation Guide](/docs/frontend/engineering/http-client-implementation-guide)
-- [Proxy Best Practices](/docs/frontend/engineering/PROXY-BEST-PRACTICES)
+- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization)
+- [HTTP Client Implementation Guide](../../frontend/engineering/http-client-implementation-guide)
+- [Proxy Best Practices](../../frontend/engineering/PROXY-BEST-PRACTICES)
 
 ---
 
