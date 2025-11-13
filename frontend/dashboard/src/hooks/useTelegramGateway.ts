@@ -2,20 +2,40 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "../config/api";
 
-export const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
+const RAW_TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
   /\/$/,
   ""
 );
-const unifiedMatch = TELEGRAM_GATEWAY_API_BASE.match(
+const unifiedMatch = RAW_TELEGRAM_GATEWAY_API_BASE.match(
   /^(.*)\/api\/telegram-gateway$/
 );
-const domainBase = (unifiedMatch ? unifiedMatch[1] : TELEGRAM_GATEWAY_API_BASE)
+const resolveOrigin = () => {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+  return "http://localhost:9082";
+};
+const origin = resolveOrigin();
+const resolvedServiceUrl = new URL(
+  unifiedMatch ? RAW_TELEGRAM_GATEWAY_API_BASE : `${RAW_TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`,
+  origin
+);
+export const TELEGRAM_GATEWAY_SERVICE_BASE = resolvedServiceUrl
+  .toString()
   .replace(/\/$/, "");
-export const TELEGRAM_GATEWAY_SERVICE_BASE = unifiedMatch
-  ? TELEGRAM_GATEWAY_API_BASE
-  : `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
-export const TELEGRAM_GATEWAY_MESSAGES_BASE = `${domainBase}/api/messages`;
-export const TELEGRAM_GATEWAY_CHANNELS_BASE = `${domainBase}/api/channels`;
+const serviceOrigin = `${resolvedServiceUrl.protocol}//${resolvedServiceUrl.host}`;
+export const TELEGRAM_GATEWAY_MESSAGES_BASE = new URL(
+  "/api/messages",
+  serviceOrigin
+)
+  .toString()
+  .replace(/\/$/, "");
+export const TELEGRAM_GATEWAY_CHANNELS_BASE = new URL(
+  "/api/channels",
+  serviceOrigin
+)
+  .toString()
+  .replace(/\/$/, "");
 export const TELEGRAM_GATEWAY_TOKEN =
   (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
   (

@@ -5,7 +5,7 @@
 
 import { useCallback, useMemo } from "react";
 import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
-import { getApiUrl } from "@/config/api";
+import { TELEGRAM_GATEWAY_CHANNELS_API_URL } from "../utils/constants";
 
 export interface ChannelData {
   channelId: string;
@@ -77,10 +77,7 @@ export function useChannelManager(
   onSuccess?: () => Promise<void>,
 ): UseChannelManagerReturn {
   const gatewayToken = TELEGRAM_GATEWAY_TOKEN;
-  const channelsEndpoint = useMemo(() => {
-    const base = getApiUrl("telegramGateway").replace(/\/$/, "");
-    return `${base}/api/channels`;
-  }, []);
+  const channelsEndpoint = TELEGRAM_GATEWAY_CHANNELS_API_URL;
 
   const getHeaders = useCallback(
     () => ({
