@@ -12,7 +12,7 @@ import {
   AlertCircle,
   XCircle,
   Pause,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../../ui/button";
 
 interface BatchIngestionJob {

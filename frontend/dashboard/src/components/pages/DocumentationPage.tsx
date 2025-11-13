@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Search } from "lucide-react";
+import { ExternalLink, Search } from '@/icons';
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

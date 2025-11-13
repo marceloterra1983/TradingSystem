@@ -9,7 +9,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-} from "lucide-react";
+} from '@/icons';
 import {
   ResponsiveContainer,
   LineChart,

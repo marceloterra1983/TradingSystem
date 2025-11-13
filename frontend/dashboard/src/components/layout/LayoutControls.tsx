@@ -6,7 +6,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   Rows,
-} from "lucide-react";
+} from '@/icons';
 import type { LucideIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 import type { ColumnCount } from "../../hooks/useCustomLayout";

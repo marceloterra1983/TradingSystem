@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Calendar, Shield, AlertTriangle } from "lucide-react";
+import { Calendar, Shield, AlertTriangle } from '@/icons';
 
 export function RiskLimitsPage() {
   const sections = [

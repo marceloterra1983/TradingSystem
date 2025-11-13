@@ -1,4 +1,9 @@
-import * as React from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { cn } from "../../lib/utils";
 
 export interface DropdownOption {
@@ -20,7 +25,7 @@ export interface ButtonWithDropdownProps {
  * Button with integrated dropdown menu
  * Click on button to show options (no arrow indicator)
  */
-export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
+export function ButtonWithDropdown({
   label,
   options,
   selectedValue,
@@ -28,12 +33,12 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
   variant = "default",
   size = "sm",
   disabled = false,
-}) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
+}: ButtonWithDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -83,7 +88,7 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       ? `${label} (${selectedOption.label})`
       : label;
 
-  const handleButtonClick = React.useCallback(() => {
+  const handleButtonClick = useCallback(() => {
     if (disabled || options.length === 0) {
       return;
     }
@@ -146,6 +151,6 @@ export const ButtonWithDropdown: React.FC<ButtonWithDropdownProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default ButtonWithDropdown;

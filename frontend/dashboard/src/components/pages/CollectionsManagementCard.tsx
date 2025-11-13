@@ -7,7 +7,7 @@ import {
   RefreshCw,
   Trash,
   AlertCircle,
-} from "lucide-react";
+} from '@/icons';
 import { useToast } from "../../hooks/useToast";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";

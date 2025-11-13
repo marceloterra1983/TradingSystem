@@ -14,8 +14,9 @@ services:
     environment:
       LAUNCHER_API_PORT: ${LAUNCHER_API_PORT:-3909}
       LAUNCHER_API_TOKEN: ${LAUNCHER_API_TOKEN:-devlocal-launcher-token}
-    ports:
-      - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
+    # TEMP: Direct port disabled due to Docker socket conflict - access via Traefik
+    # ports:
+    #   - "${LAUNCHER_API_PORT:-3909}:${LAUNCHER_API_PORT:-3909}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -34,10 +35,11 @@ services:
     env_file:
       - ../../.env
       - ../../.env.shared
-    ports:
-      - "${QUESTDB_HTTP_PORT:-9000}:9000"
-      - "${QUESTDB_ILP_PORT:-9009}:9009"
-      - "${QUESTDB_PG_PORT:-8812}:8812"
+    # TEMP: Direct ports disabled - access via Traefik at /db-ui/questdb
+    # ports:
+    #   - "${QUESTDB_HTTP_PORT:-9000}:9000"
+    #   - "${QUESTDB_ILP_PORT:-9009}:9009"
+    #   - "${QUESTDB_PG_PORT:-8812}:8812"
     volumes:
       - questdb-data:/var/lib/questdb
     networks:
@@ -87,8 +89,10 @@ services:
     restart: unless-stopped
     # NOTE: No env_file loaded to prevent DATABASE_URL from being set
     # pgWeb should start without pre-configured connection - users select DB from UI
-    ports:
-      - "${PGWEB_PORT:-5052}:8081"
+    # TEMPORARY: Port 5052 disabled due to Docker socket conflict
+    # Access via Traefik: http://localhost:9080/db-ui/pgweb
+    # ports:
+    #   - "${PGWEB_PORT:-5052}:8081"
     networks:
       - tradingsystem_backend
     labels:

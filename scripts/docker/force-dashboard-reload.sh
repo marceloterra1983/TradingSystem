@@ -38,13 +38,13 @@ fi
 
 echo ""
 echo "3️⃣  Teste rápido da API de canais..."
-CHANNELS_COUNT=$(curl -s "http://localhost:3103/api/channels" -H "X-Gateway-Token: gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA" | jq -r '.data | length' || echo "0")
+CHANNELS_COUNT=$(curl -s "http://localhost:9080/api/channels" -H "X-Gateway-Token: gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA" | jq -r '.data | length' || echo "0")
 
 echo "✅ API retornando $CHANNELS_COUNT canais"
 
 echo ""
 echo "📋 Instruções para o navegador:"
-echo "   1. Abra http://localhost:3103"
+echo "   1. Abra http://localhost:9080"
 echo "   2. Pressione Ctrl+Shift+R (hard refresh)"
 echo "   3. Ou abra DevTools (F12) → Application → Clear Storage → Clear site data"
 echo "   4. Navegue para a página Telegram Gateway"

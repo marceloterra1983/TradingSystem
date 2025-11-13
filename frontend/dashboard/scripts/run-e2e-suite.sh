@@ -29,8 +29,8 @@ echo ""
 echo -e "${YELLOW}[1/6] Pre-flight checks...${NC}"
 
 # Check if Dashboard is running
-if ! curl -s http://localhost:3103 > /dev/null; then
-  echo -e "${RED}✗ Dashboard not running on port 3103${NC}"
+if ! curl -s http://localhost:9080 > /dev/null; then
+  echo -e "${RED}✗ Dashboard not running on port 9080${NC}"
   echo -e "${YELLOW}Starting Dashboard...${NC}"
   npm run dev &
   sleep 10

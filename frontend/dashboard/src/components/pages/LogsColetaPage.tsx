@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Wifi, AlertTriangle } from "lucide-react";
+import { Wifi, AlertTriangle } from '@/icons';
 
 export function LogsColetaPage() {
   const sections = [

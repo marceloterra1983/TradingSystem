@@ -22,7 +22,9 @@
     "@typescript-eslint",
     "react",
     "react-hooks",
-    "promise"  ],
+    "promise",
+    "jsdoc"
+  ],
   "settings": {
     "react": {
       "version": "detect"
@@ -81,7 +83,34 @@
         "selector": "Literal[value=/^https?:\\/\\/[a-z0-9-]+-service:/]",
         "message": "❌ Container hostnames like 'my-service' only work within Docker networks. Use relative paths. See docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md"
       }
-    ]  },
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/utils/validation.ts",
+        "src/services/firecrawlService.ts"
+      ],
+      "rules": {
+        "jsdoc/require-jsdoc": [
+          "warn",
+          {
+            "publicOnly": true,
+            "require": {
+              "FunctionDeclaration": true,
+              "MethodDefinition": true,
+              "ClassDeclaration": true
+            }
+          }
+        ],
+        "jsdoc/check-alignment": "warn",
+        "jsdoc/check-tag-names": "warn",
+        "jsdoc/check-types": "warn",
+        "jsdoc/require-param": "warn",
+        "jsdoc/require-returns": "warn"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
     "dist/",

@@ -538,6 +538,21 @@ export default defineConfig(({ mode }) => {
           },
           ws: true, // Enable WebSocket support for n8n real-time features
         },
+        // N8N static assets - must be proxied when embedded in iframe
+        // N8N uses absolute paths (/static/, /assets/) that need to be rewritten
+        '^/(static|assets)/': {
+          target: n8nProxy.target,
+          changeOrigin: true,
+          rewrite: (path) => {
+            // When N8N requests /static/file.js or /assets/file.js
+            // Route to n8n-proxy with proper base path
+            return path; // n8n-proxy serves these at root level
+          },
+          configure: (proxy, _options) => {
+            attachN8nBasicAuth(proxy);
+            stripFrameBlockingHeaders(proxy);
+          },
+        },
         // Database UI Tools - Proxy to avoid CORS and X-Frame-Options issues
         '/db-ui/pgadmin': {
           target: dbUiPgAdminProxy.target,
@@ -645,6 +660,11 @@ export default defineConfig(({ mode }) => {
         },
       },
       rollupOptions: {
+        treeshake: {
+          moduleSideEffects: 'no-external',
+          propertyReadSideEffects: false,
+          tryCatchDeoptimization: false,
+        },
         output: {
           // Aggressive code splitting for better caching
           experimentalMinChunkSize: 10240, // 10KB minimum chunk size
@@ -766,8 +786,8 @@ export default defineConfig(({ mode }) => {
         'zustand',
         '@tanstack/react-query',
         'axios',
-        'lucide-react',
       ],
+      exclude: ['lucide-react'],
     },
   };
 });

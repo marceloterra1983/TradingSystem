@@ -230,6 +230,70 @@ python scripts/docs/validate-frontmatter.py
 python scripts/rag/ingest-documents.py
 ```
 
+## 🏗️ Self-Contained Architecture (NEW!)
+
+**ALL services run INSIDE the dev container!** No external Docker stacks needed.
+
+### Architecture
+
+The dev container automatically starts all required services:
+
+- **API Gateway (Traefik)** - Port 9080
+- **Workspace API** - Port 3200
+- **Documentation Hub** - Port 3404
+- **Dashboard UI** - Port 3103
+- **PostgreSQL Database** - Port 5432
+- **Redis Cache** - Port 6379
+
+### Before Starting Dev Container
+
+**IMPORTANT:** Stop all external Docker stacks first:
+
+```bash
+# On HOST (outside dev container)
+bash .devcontainer/scripts/stop-external-stacks.sh
+```
+
+This ensures no port conflicts and resources are available.
+
+### How It Works
+
+1. **Dev Container Starts** → VSCode launches the container
+2. **post-start.sh Runs** → Automatically starts internal services
+3. **Services Initialize** → Docker-in-Docker starts all containers
+4. **Port Forwarding Active** → VSCode forwards ports to your browser
+
+### Accessing Services
+
+All services are accessible via **localhost** on your host machine:
+
+```bash
+# From your browser (Windows/Linux host)
+http://localhost:9080      # API Gateway
+http://localhost:9081      # Traefik Dashboard
+http://localhost:3103      # Dashboard UI
+http://localhost:3404      # Documentation Hub
+http://localhost:3200      # Workspace API (direct)
+```
+
+### Managing Services
+
+Inside the dev container terminal:
+
+```bash
+# Check service status
+docker compose -f .devcontainer/docker-compose.services.yml ps
+
+# View logs
+docker compose -f .devcontainer/docker-compose.services.yml logs -f
+
+# Restart services
+docker compose -f .devcontainer/docker-compose.services.yml restart
+
+# Stop services
+docker compose -f .devcontainer/docker-compose.services.yml down
+```
+
 ## 📁 File Structure
 
 ```
@@ -240,28 +304,36 @@ python scripts/rag/ingest-documents.py
 ├── scripts/
 │   ├── post-create.sh      # Initial setup
 │   ├── post-start.sh       # Startup tasks
-│   └── post-attach.sh      # Terminal attach tasks
+│   ├── post-attach.sh      # Terminal attach tasks
+│   └── reconnect-networks.sh # Network connectivity
 └── README.md               # This file
 ```
 
 ## 🔌 Port Forwarding
 
+**⚠️ IMPORTANT:** All services now use Traefik API Gateway!
+
 Ports are automatically forwarded to your host machine:
 
-| Service | Port | URL |
-|---------|------|-----|
-| **Dashboard** | 3103 | http://localhost:3103 |
-| **Documentation** | 3404 | http://localhost:3404 |
-| **Workspace API** | 3200 | http://localhost:3200 |
-| **TP Capital** | 4005 | http://localhost:4005 |
-| **Documentation API** | 3405 | http://localhost:3405 |
-| **Firecrawl Proxy** | 3600 | http://localhost:3600 |
-| **RAG System** | 8202 | http://localhost:8202 |
-| **PostgreSQL** | 5432 | localhost:5432 |
-| **Redis** | 6379 | localhost:6379 |
-| **RabbitMQ** | 5672/15672 | localhost:5672/15672 |
-| **Prometheus** | 9090 | http://localhost:9090 |
-| **Grafana** | 3100 | http://localhost:3100 |
+| Service | Port | URL | Notes |
+|---------|------|-----|-------|
+| **API Gateway** | 9080 | http://localhost:9080 | **Main entry point** |
+| **Traefik Dashboard** | 9081 | http://localhost:9081 | Gateway monitoring |
+| **Dashboard UI** | 9080 | http://localhost:9080/ | Via gateway |
+| **Documentation Hub** | 9080 | http://localhost:9080/docs/ | Via gateway |
+| **Workspace API** | 9080 | http://localhost:9080/api/workspace/ | Via gateway |
+| **Docs API** | 9080 | http://localhost:9080/api/docs/ | Via gateway |
+| **TP Capital** | 9080 | http://localhost:9080/api/tp-capital/ | Via gateway |
+| **PostgreSQL** | 5432 | localhost:5432 | Direct |
+| **Redis** | 6379 | localhost:6379 | Direct |
+| **RabbitMQ** | 5672/15672 | localhost:5672/15672 | Direct |
+| **Prometheus** | 9090 | http://localhost:9090 | Direct |
+| **Grafana** | 3100 | http://localhost:3100 | Direct |
+
+**For development/debugging only:**
+- Direct Workspace API: http://localhost:3200
+- Direct Docs Hub: http://localhost:3404
+- Direct Docs API: http://localhost:3405
 
 ## 🎨 VS Code Integration
 

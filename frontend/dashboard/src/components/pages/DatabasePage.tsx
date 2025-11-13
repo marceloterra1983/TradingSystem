@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ExternalLink, Loader2, Play } from "lucide-react";
+import { ExternalLink, Loader2, Play } from '@/icons';
 import { Button } from "../ui/button";
 import { ENDPOINTS } from "../../config/endpoints";
 import { IframeWithUrl } from "../common/IframeWithUrl";

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, GripVertical } from '@/icons';
 import { cn } from "../../lib/utils";
 import { NAVIGATION_DATA, Section } from "../../data/navigation";
 import { isBrowser } from "../../utils/browser";

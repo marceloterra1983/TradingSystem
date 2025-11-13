@@ -39,7 +39,7 @@ import {
   Filter,
   Loader2,
   Search,
-} from "lucide-react";
+} from '@/icons';
 
 import { useAgentsDataOptimized, useAgentContent, type AgentsData } from "@/hooks/useAgentsDataOptimized";
 

@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "../../../ui/select";
 import { Input } from "../../../ui/input";
-import { RefreshCcw, RotateCcw, FileDown, FileSpreadsheet } from "lucide-react";
+import { RefreshCcw, RotateCcw, FileDown, FileSpreadsheet } from '@/icons';
 import { LIMIT_OPTIONS } from "../constants";
 
 export interface SignalsFilterBarProps {

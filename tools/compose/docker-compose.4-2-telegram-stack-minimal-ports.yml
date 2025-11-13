@@ -422,7 +422,10 @@ services:
 
     # External port exposure removed; service reachable only via Docker network
     volumes:
-      - ./telegram/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - type: bind
+        source: ./telegram/monitoring/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
       - ./telegram/monitoring/alerts:/etc/prometheus/alerts:ro
       - telegram-prometheus-data:/prometheus
 
@@ -608,8 +611,7 @@ services:
 
 networks:
   telegram_backend:
-    driver: bridge
-    name: telegram_backend
+    external: true
   tradingsystem_backend:
     external: true
 

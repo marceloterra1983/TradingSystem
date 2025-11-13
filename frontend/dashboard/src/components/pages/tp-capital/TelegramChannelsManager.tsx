@@ -15,7 +15,7 @@ import {
   Settings,
   CheckCircle,
   XCircle,
-} from "lucide-react";
+} from '@/icons';
 
 interface TelegramChannel {
   id: string;

@@ -1,4 +1,4 @@
-import { ExternalLink, Maximize2, RefreshCw } from "lucide-react";
+import { ExternalLink, Maximize2, RefreshCw } from '@/icons';
 import { useState } from "react";
 
 import { IframeWithUrl } from "../common/IframeWithUrl";

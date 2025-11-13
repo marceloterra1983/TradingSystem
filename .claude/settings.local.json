@@ -1,0 +1,521 @@
+{
+  "permissions": {
+    "allow": [
+      "*",
+      
+      // === System Management ===
+      "Bash(status)",
+      "Bash(start)",
+      "Bash(stop)",
+      "Bash(stop:*)",
+      "Bash(health)",
+      "Bash(logs)",
+      
+      // === Project Scripts ===
+      "Bash(/home/marce/Projetos/TradingSystem/.bin/status:*)",
+      "Bash(/home/marce/Projetos/TradingSystem/reload-shortcuts.sh )",
+      "Bash(/home/marce/Projetos/TradingSystem/verify-shortcuts.sh )",
+      "Bash(/home/marce/Projetos/TradingSystem/scripts/**)",
+      
+      // === Temporary Files ===
+      "Bash(/tmp/start.sh.backup )",
+      "Bash(/tmp/status.sh.backup )",
+      "Bash(/tmp/stop.sh.backup )",
+      "Bash(/tmp/fix-status-now.sh )",
+      "Bash(/tmp/SCRIPTS-UPDATE-RECOMMENDATIONS.md )",
+      "Bash(/tmp/cleanup-list.txt)",
+      
+      // === Process Management ===
+      "Bash(pgrep:*)",
+      "Bash(pkill:*)",
+      "Bash(ps:*)",
+      "Bash(kill:*)",
+      "Bash(killall:*)",
+      
+      // === Docker Commands ===
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker network inspect:*)",
+      "Bash(docker network connect:*)",
+      "Bash(docker network ls:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker start:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker stats:*)",
+      "Bash(docker system:*)",
+      "Bash(docker volume:*)",
+      "Bash(docker images:*)",
+      "Bash(docker container:*)",
+      
+      // === Node.js & NPM ===
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx:*)",
+      "Bash(npx eslint:*)",
+      "Bash(node:*)",
+      
+      // === PM2 Process Manager ===
+      "Bash(pm2:*)",
+      "Bash(pm2 list:*)",
+      "Bash(pm2 logs:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(pm2 stop:*)",
+      "Bash(pm2 start:*)",
+      "Bash(pm2 delete:*)",
+      "Bash(pm2 monit:*)",
+      "Read(//home/marce/.pm2/logs/**)",
+      
+      // === Network & Ports ===
+      "Bash(curl:*)",
+      "Bash(timeout 10 curl:*)",
+      "Bash(timeout 60 curl:*)",
+      "Bash(timeout 180 curl:*)",
+      "Bash(timeout 300 curl:*)",
+      "Bash(time curl:*)",
+      "Bash(time curl -s \"http://localhost:3401/api/v1/systems\")",
+      "Bash(lsof:*)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(ping:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      
+      // === File System ===
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(du:*)",
+      "Bash(df:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(less:*)",
+      "Bash(more:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(xargs:*)",
+      
+      // === Git Commands ===
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(git reset:*)",
+      "Bash(git show:*)",
+      
+      // === Database Commands ===
+      "Bash(psql:*)",
+      "Bash(mysql:*)",
+      "Bash(sqlite3:*)",
+      "Bash(redis-cli:*)",
+      
+      // === Text Processing ===
+      "Bash(jq:*)",
+      "Bash(yq:*)",
+      "Bash(json:*)",
+      "Bash(xmllint:*)",
+      
+      // === System Info ===
+      "Bash(uname:*)",
+      "Bash(hostname:*)",
+      "Bash(uptime:*)",
+      "Bash(free:*)",
+      "Bash(top:*)",
+      "Bash(htop:*)",
+      "Bash(vmstat:*)",
+      "Bash(iostat:*)",
+      
+      // === Loops & Control Flow ===
+      "Bash(for port in 3200 3401 3500 8202)",
+      "Bash(do echo \"Port $port:\")",
+      "Bash(done)",
+      "Bash(while:*)",
+      "Bash(if:*)",
+      "Bash(case:*)",
+      
+      // === Environment ===
+      "Bash(echo:*)",
+      "Bash(export:*)",
+      "Bash(env:*)",
+      "Bash(printenv:*)",
+      "Bash(source:*)",
+      
+      // === Compression ===
+      "Bash(tar:*)",
+      "Bash(gzip:*)",
+      "Bash(gunzip:*)",
+      "Bash(zip:*)",
+      "Bash(unzip:*)",
+      
+      // === Testing & JWT ===
+      "Bash(JWT=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXNoYm9hcmQiLCJleHAiOjE3OTMyNDU1NjR9.XbMb7jduH5DP3ErWodUZ7AWSn0l02aKGr1_BTbH1vgs\")",
+      "Bash(__NEW_LINE__ timeout 60 curl -s -X POST http://localhost:8202/query )",
+      "Bash(echo \"=== Test 1: Semantic Search (works) ===\" timeout 10 curl -s -X GET \"http://localhost:8202/search?query=docker&max_results=1\" -H \"Authorization: Bearer $JWT\")",
+      "Bash(echo -e \"\\n=== Test 2: Query with LLM (fails) ===\" timeout 60 curl -v -X POST http://localhost:8202/query -H \"Content-Type: application/json\" -H \"Authorization: Bearer $JWT\" -d '{\"\"\"\"query\"\"\"\": \"\"\"\"What is Docker?\"\"\"\", \"\"\"\"max_results\"\"\"\": 2}')",
+      "Bash(echo \"=== Testing Query Endpoint ===\" timeout 60 curl -s -X POST http://localhost:8202/query -H \"Content-Type: application/json\" -H \"Authorization: Bearer $JWT\" -d '{\"\"\"\"query\"\"\"\": \"\"\"\"What is Docker?\"\"\"\", \"\"\"\"max_results\"\"\"\": 2}')",
+      
+      // === Bash Scripts ===
+      "Bash(bash:*)",
+      "Bash(sh:*)",
+      "Bash(chmod:*)",
+      
+      // === Health Checks ===
+      "Bash(/home/marce/Projetos/TradingSystem/scripts/maintenance/health-check-all.sh:*)",
+      "Bash(/home/marce/Projetos/TradingSystem/scripts/docker/validate-llamaindex-local.sh:*)",
+      "Bash(/home/marce/Projetos/TradingSystem/scripts/tools/query-llamaindex.sh:*)",
+      
+      // === Python & Pip ===
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(pip install:*)",
+      "Bash(pip list:*)",
+      "Bash(pip show:*)",
+      "Bash(pip freeze:*)",
+      "Bash(pipenv:*)",
+      "Bash(poetry:*)",
+      "Bash(pytest:*)",
+      "Bash(pytest:*)",
+      "Bash(black:*)",
+      "Bash(flake8:*)",
+      "Bash(mypy:*)",
+      "Bash(pylint:*)",
+      "Bash(autopep8:*)",
+      
+      // === Yarn ===
+      "Bash(yarn:*)",
+      "Bash(yarn install:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn remove:*)",
+      "Bash(yarn test:*)",
+      "Bash(yarn build:*)",
+      "Bash(yarn dev:*)",
+      
+      // === Build & CI/CD ===
+      "Bash(make:*)",
+      "Bash(cmake:*)",
+      "Bash(gcc:*)",
+      "Bash(g++:*)",
+      "Bash(mvn:*)",
+      "Bash(gradle:*)",
+      "Bash(dotnet:*)",
+      "Bash(msbuild:*)",
+      "Bash(cargo:*)",
+      "Bash(rustc:*)",
+      
+      // === Monitoring & Metrics ===
+      "Bash(prometheus:*)",
+      "Bash(promtool:*)",
+      "Bash(grafana-cli:*)",
+      "Bash(telegraf:*)",
+      "Bash(influx:*)",
+      "Bash(collectd:*)",
+      "Bash(statsd:*)",
+      
+      // === Logs & Journaling ===
+      "Bash(journalctl:*)",
+      "Bash(logrotate:*)",
+      "Bash(logger:*)",
+      "Bash(syslog:*)",
+      "Bash(dmesg:*)",
+      "Bash(last:*)",
+      "Bash(lastlog:*)",
+      "Bash(w:*)",
+      "Bash(who:*)",
+      
+      // === Debugging & Profiling ===
+      "Bash(strace:*)",
+      "Bash(ltrace:*)",
+      "Bash(gdb:*)",
+      "Bash(valgrind:*)",
+      "Bash(perf:*)",
+      "Bash(objdump:*)",
+      "Bash(nm:*)",
+      "Bash(readelf:*)",
+      "Bash(ldd:*)",
+      "Bash(strings:*)",
+      "Bash(file:*)",
+      "Bash(xxd:*)",
+      "Bash(hexdump:*)",
+      
+      // === Security & SSL ===
+      "Bash(openssl:*)",
+      "Bash(ssh:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(gpg:*)",
+      "Bash(certbot:*)",
+      "Bash(vault:*)",
+      "Bash(age:*)",
+      "Bash(sops:*)",
+      
+      // === Backup & Restore ===
+      "Bash(rsync:*)",
+      "Bash(scp:*)",
+      "Bash(sftp:*)",
+      "Bash(rclone:*)",
+      "Bash(restic:*)",
+      "Bash(borg:*)",
+      "Bash(duplicity:*)",
+      "Bash(pg_dump:*)",
+      "Bash(pg_restore:*)",
+      "Bash(mysqldump:*)",
+      
+      // === Docusaurus & Documentation ===
+      "Bash(docusaurus:*)",
+      "Bash(npm run docusaurus:*)",
+      "Bash(npm run docs:*)",
+      "Bash(markdown-link-check:*)",
+      "Bash(markdownlint:*)",
+      "Bash(vale:*)",
+      "Bash(pandoc:*)",
+      
+      // === Code Analysis ===
+      "Bash(cloc:*)",
+      "Bash(scc:*)",
+      "Bash(tokei:*)",
+      "Bash(sonar-scanner:*)",
+      "Bash(semgrep:*)",
+      "Bash(shellcheck:*)",
+      "Bash(hadolint:*)",
+      "Bash(yamllint:*)",
+      "Bash(jsonlint:*)",
+      
+      // === TimescaleDB & QuestDB ===
+      "Bash(timescaledb:*)",
+      "Bash(tsdb:*)",
+      "Bash(questdb:*)",
+      "Bash(parquet-tools:*)",
+      "Bash(duckdb:*)",
+      
+      // === Ollama & LLamaIndex ===
+      "Bash(ollama:*)",
+      "Bash(ollama list:*)",
+      "Bash(ollama pull:*)",
+      "Bash(ollama run:*)",
+      "Bash(ollama ps:*)",
+      "Bash(llama:*)",
+      "Bash(llama-index:*)",
+      
+      // === Systemd & Services ===
+      "Bash(systemctl:*)",
+      "Bash(systemctl status:*)",
+      "Bash(systemctl start:*)",
+      "Bash(systemctl stop:*)",
+      "Bash(systemctl restart:*)",
+      "Bash(systemctl enable:*)",
+      "Bash(systemctl disable:*)",
+      "Bash(systemctl list-units:*)",
+      "Bash(service:*)",
+      
+      // === Kubernetes & Orchestration (future) ===
+      "Bash(kubectl:*)",
+      "Bash(k9s:*)",
+      "Bash(helm:*)",
+      "Bash(minikube:*)",
+      "Bash(kind:*)",
+      
+      // === AWS CLI (future) ===
+      "Bash(aws:*)",
+      "Bash(aws s3:*)",
+      "Bash(aws ec2:*)",
+      "Bash(aws lambda:*)",
+      
+      // === Terraform & IaC (future) ===
+      "Bash(terraform:*)",
+      "Bash(terragrunt:*)",
+      "Bash(ansible:*)",
+      "Bash(ansible-playbook:*)",
+      
+      // === HTTP Testing ===
+      "Bash(httpie:*)",
+      "Bash(http:*)",
+      "Bash(https:*)",
+      "Bash(ab:*)",
+      "Bash(wrk:*)",
+      "Bash(siege:*)",
+      "Bash(hey:*)",
+      "Bash(vegeta:*)",
+      
+      // === WebSocket Testing ===
+      "Bash(wscat:*)",
+      "Bash(websocat:*)",
+      
+      // === Message Queues ===
+      "Bash(rabbitmqctl:*)",
+      "Bash(kafka:*)",
+      "Bash(kafka-console-producer:*)",
+      "Bash(kafka-console-consumer:*)",
+      "Bash(nats:*)",
+      
+      // === Container Tools ===
+      "Bash(buildah:*)",
+      "Bash(podman:*)",
+      "Bash(skopeo:*)",
+      "Bash(dive:*)",
+      "Bash(trivy:*)",
+      "Bash(grype:*)",
+      
+      // === Cloud Tools ===
+      "Bash(gcloud:*)",
+      "Bash(az:*)",
+      "Bash(doctl:*)",
+      
+      // === API Tools ===
+      "Bash(swagger:*)",
+      "Bash(openapi:*)",
+      "Bash(spectral:*)",
+      "Bash(redocly:*)",
+      
+      // === PlantUML & Diagrams ===
+      "Bash(plantuml:*)",
+      "Bash(java -jar plantuml.jar:*)",
+      "Bash(mmdc:*)",
+      "Bash(graphviz:*)",
+      "Bash(dot:*)",
+      
+      // === Performance Testing ===
+      "Bash(stress:*)",
+      "Bash(stress-ng:*)",
+      "Bash(sysbench:*)",
+      "Bash(iperf:*)",
+      "Bash(iperf3:*)",
+      "Bash(fio:*)",
+      
+      // === Cron & Scheduling ===
+      "Bash(crontab:*)",
+      "Bash(at:*)",
+      "Bash(atq:*)",
+      "Bash(atrm:*)",
+      
+      // === User & Permissions ===
+      "Bash(id:*)",
+      "Bash(whoami:*)",
+      "Bash(groups:*)",
+      "Bash(chown:*)",
+      "Bash(chgrp:*)",
+      "Bash(useradd:*)",
+      "Bash(usermod:*)",
+      "Bash(passwd:*)",
+      
+      // === Disk & Storage ===
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Bash(lsblk:*)",
+      "Bash(blkid:*)",
+      "Bash(mount:*)",
+      "Bash(umount:*)",
+      "Bash(mkfs:*)",
+      "Bash(fsck:*)",
+      "Bash(smartctl:*)",
+      
+      // === Network Analysis ===
+      "Bash(tcpdump:*)",
+      "Bash(wireshark:*)",
+      "Bash(tshark:*)",
+      "Bash(nmap:*)",
+      "Bash(ngrep:*)",
+      "Bash(iftop:*)",
+      "Bash(nethogs:*)",
+      "Bash(iptables:*)",
+      "Bash(ufw:*)",
+      "Bash(firewall-cmd:*)",
+      
+      // === DNS Tools ===
+      "Bash(dig:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)",
+      "Bash(whois:*)",
+      
+      // === Package Managers ===
+      "Bash(apt:*)",
+      "Bash(apt-get:*)",
+      "Bash(apt-cache:*)",
+      "Bash(dpkg:*)",
+      "Bash(yum:*)",
+      "Bash(dnf:*)",
+      "Bash(pacman:*)",
+      "Bash(brew:*)",
+      "Bash(snap:*)",
+      "Bash(flatpak:*)",
+      
+      // === Screen & Tmux ===
+      "Bash(screen:*)",
+      "Bash(tmux:*)",
+      "Bash(tmux ls:*)",
+      "Bash(tmux attach:*)",
+      "Bash(tmux new:*)",
+      
+      // === Misc Utilities ===
+      "Bash(watch:*)",
+      "Bash(yes:*)",
+      "Bash(seq:*)",
+      "Bash(bc:*)",
+      "Bash(expr:*)",
+      "Bash(date:*)",
+      "Bash(cal:*)",
+      "Bash(sleep:*)",
+      "Bash(wait:*)",
+      "Bash(nohup:*)",
+      "Bash(disown:*)",
+      "Bash(jobs:*)",
+      "Bash(fg:*)",
+      "Bash(bg:*)",
+      "Bash(trap:*)",
+      "Bash(tee:*)",
+      "Bash(parallel:*)",
+      "Bash(xclip:*)",
+      "Bash(pbcopy:*)",
+      "Bash(pbpaste:*)",
+      
+      // === Read Permissions ===
+      "Read(/home/marce/.pm2/logs/**)",
+      "Read(/home/marce/Projetos/TradingSystem/**)",
+      "Read(/var/log/**)",
+      "Read(/tmp/**)",
+      "Read(/etc/**)",
+      
+      // === Write Permissions ===
+      "Write(/home/marce/Projetos/TradingSystem/**)",
+      "Write(/tmp/**)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v osascript >/dev/null 2>&1; then osascript -e 'display notification \"Tool: $CLAUDE_TOOL_NAME completed\" with title \"Claude Code\"'; elif command -v notify-send >/dev/null 2>&1; then notify-send 'Claude Code' \"Tool: $CLAUDE_TOOL_NAME completed\"; fi"
+          }
+        ]
+      }
+    ]
+  },
+  "outputStyle": "default",
+  "spinnerTipsEnabled": false
+}

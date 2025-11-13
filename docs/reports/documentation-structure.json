@@ -1,0 +1,829 @@
+{
+  "name": "content",
+  "path": ".",
+  "directories": [
+    {
+      "name": "agents",
+      "path": "agents",
+      "directories": [],
+      "files": [
+        "overview.mdx"
+      ]
+    },
+    {
+      "name": "api",
+      "path": "api",
+      "directories": [],
+      "files": [
+        "alert-router.mdx",
+        "API-DOCUMENTATION-GUIDE.mdx",
+        "api-hub.mdx",
+        "data-capture.mdx",
+        "documentation-api.mdx",
+        "firecrawl-proxy.mdx",
+        "integration-status.mdx",
+        "order-manager.mdx",
+        "overview.mdx",
+        "rag-services.mdx",
+        "telegram-gateway-api.mdx",
+        "telegram-gateway-quickstart.mdx",
+        "tp-capital-api.mdx",
+        "workspace-api.mdx"
+      ]
+    },
+    {
+      "name": "apps",
+      "path": "apps",
+      "directories": [
+        {
+          "name": "data-capture",
+          "path": "apps/data-capture",
+          "directories": [],
+          "files": [
+            "api.mdx",
+            "architecture.mdx",
+            "changelog.mdx",
+            "config.mdx",
+            "deployment.mdx",
+            "operations.mdx",
+            "overview.mdx",
+            "requirements.mdx",
+            "runbook.mdx"
+          ]
+        },
+        {
+          "name": "order-manager",
+          "path": "apps/order-manager",
+          "directories": [],
+          "files": [
+            "api.mdx",
+            "architecture.mdx",
+            "changelog.mdx",
+            "config.mdx",
+            "deployment.mdx",
+            "operations.mdx",
+            "overview.mdx",
+            "requirements.mdx",
+            "risk-controls.mdx",
+            "runbook.mdx"
+          ]
+        },
+        {
+          "name": "telegram-gateway",
+          "path": "apps/telegram-gateway",
+          "directories": [
+            {
+              "name": "configuration",
+              "path": "apps/telegram-gateway/configuration"
+            }
+          ],
+          "files": [
+            "architecture.mdx",
+            "changelog.mdx",
+            "config.mdx",
+            "hybrid-deployment.mdx",
+            "migration-runbook.mdx",
+            "monitoring-guide.mdx",
+            "operations.mdx",
+            "overview.mdx",
+            "performance-tuning.mdx",
+            "redis-cache-guide.mdx",
+            "runbook.mdx",
+            "troubleshooting.mdx"
+          ]
+        },
+        {
+          "name": "tp-capital",
+          "path": "apps/tp-capital",
+          "directories": [
+            {
+              "name": "architecture",
+              "path": "apps/tp-capital/architecture"
+            },
+            {
+              "name": "runbooks",
+              "path": "apps/tp-capital/runbooks"
+            }
+          ],
+          "files": [
+            "api.mdx",
+            "architecture.mdx",
+            "autonomous-stack-migration-guide.mdx",
+            "changelog.mdx",
+            "config.mdx",
+            "deployment.mdx",
+            "operations.mdx",
+            "overview.mdx",
+            "requirements.mdx",
+            "runbook.mdx"
+          ]
+        },
+        {
+          "name": "workspace",
+          "path": "apps/workspace",
+          "directories": [],
+          "files": [
+            "api.mdx",
+            "architecture.mdx",
+            "changelog.mdx",
+            "config.mdx",
+            "deployment.mdx",
+            "operations.mdx",
+            "overview.mdx",
+            "requirements.mdx",
+            "runbook.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "overview.mdx"
+      ]
+    },
+    {
+      "name": "archive",
+      "path": "archive",
+      "directories": [
+        {
+          "name": "2025-Q4",
+          "path": "archive/2025-Q4",
+          "directories": [
+            {
+              "name": "deprecated-features",
+              "path": "archive/2025-Q4/deprecated-features"
+            }
+          ],
+          "files": []
+        }
+      ],
+      "files": []
+    },
+    {
+      "name": "assets",
+      "path": "assets",
+      "directories": [
+        {
+          "name": "diagrams",
+          "path": "assets/diagrams",
+          "directories": [
+            {
+              "name": "source",
+              "path": "assets/diagrams/source"
+            }
+          ],
+          "files": []
+        }
+      ],
+      "files": []
+    },
+    {
+      "name": "database",
+      "path": "database",
+      "directories": [],
+      "files": [
+        "migrations.mdx",
+        "neon-setup.mdx",
+        "overview.mdx",
+        "rag-schema.mdx",
+        "retention-backup.mdx",
+        "schema.mdx"
+      ]
+    },
+    {
+      "name": "development",
+      "path": "development",
+      "directories": [],
+      "files": []
+    },
+    {
+      "name": "diagrams",
+      "path": "diagrams",
+      "directories": [
+        {
+          "name": "architecture",
+          "path": "diagrams/architecture",
+          "directories": [],
+          "files": []
+        },
+        {
+          "name": "database",
+          "path": "diagrams/database",
+          "directories": [],
+          "files": []
+        }
+      ],
+      "files": [
+        "diagrams.mdx"
+      ]
+    },
+    {
+      "name": "frontend",
+      "path": "frontend",
+      "directories": [
+        {
+          "name": "architecture",
+          "path": "frontend/architecture",
+          "directories": [],
+          "files": [
+            "dashboard.mdx"
+          ]
+        },
+        {
+          "name": "design-system",
+          "path": "frontend/design-system",
+          "directories": [],
+          "files": [
+            "components.mdx",
+            "patterns.mdx",
+            "theming.mdx",
+            "tokens.mdx"
+          ]
+        },
+        {
+          "name": "engineering",
+          "path": "frontend/engineering",
+          "directories": [],
+          "files": [
+            "architecture.mdx",
+            "build-ci.mdx",
+            "components.mdx",
+            "conventions.mdx",
+            "lint-format.mdx",
+            "testing.mdx"
+          ]
+        },
+        {
+          "name": "guidelines",
+          "path": "frontend/guidelines",
+          "directories": [],
+          "files": [
+            "accessibility.mdx",
+            "i18n.mdx",
+            "performance.mdx",
+            "style-guide.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "overview.mdx"
+      ]
+    },
+    {
+      "name": "governance",
+      "path": "governance",
+      "directories": [
+        {
+          "name": "communications",
+          "path": "governance/communications",
+          "directories": [],
+          "files": [
+            "port-governance-kickoff.mdx"
+          ]
+        },
+        {
+          "name": "controls",
+          "path": "governance/controls",
+          "directories": [],
+          "files": [
+            "docusaurus-deployment-sop.mdx",
+            "governance-json-sanitization-sop.mdx",
+            "pre-deploy-checklist.mdx",
+            "secrets-rotation-sop.mdx",
+            "tp-capital-network-validation.mdx"
+          ]
+        },
+        {
+          "name": "evidence",
+          "path": "governance/evidence",
+          "directories": [
+            {
+              "name": "incidents",
+              "path": "governance/evidence/incidents"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "policies",
+          "path": "governance/policies",
+          "directories": [
+            {
+              "name": "addendums",
+              "path": "governance/policies/addendums"
+            }
+          ],
+          "files": [
+            "container-infrastructure-policy.mdx",
+            "environment-variables-policy.mdx",
+            "generated-docs-freshness-policy.mdx",
+            "hardcoded-urls-policy.mdx",
+            "secrets-env-policy.mdx"
+          ]
+        },
+        {
+          "name": "port-governance",
+          "path": "governance/port-governance",
+          "directories": [],
+          "files": [
+            "port-ranges.mdx"
+          ]
+        },
+        {
+          "name": "reports",
+          "path": "governance/reports",
+          "directories": [],
+          "files": [
+            "governance-improvement-plan.mdx"
+          ]
+        },
+        {
+          "name": "standards",
+          "path": "governance/standards",
+          "directories": [],
+          "files": [
+            "secrets-standard.mdx"
+          ]
+        },
+        {
+          "name": "strategy",
+          "path": "governance/strategy",
+          "directories": [],
+          "files": [
+            "ci-cd-integration.mdx",
+            "communication-plan.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "automated-maintenance-guide.mdx",
+        "ci-cd-integration.mdx",
+        "code-docs-sync.mdx",
+        "communication-plan.mdx",
+        "cutover-plan.mdx",
+        "diagram-migration-guide.mdx",
+        "documentation-index.mdx",
+        "governance-action-plan.mdx",
+        "governance-summary.mdx",
+        "index.mdx",
+        "link-migration-reference.mdx",
+        "maintenance-automation-guide.mdx",
+        "maintenance-checklist.mdx",
+        "plano-revisao-api-docs.mdx",
+        "review-checklist.mdx",
+        "technical-debt-tracker.mdx",
+        "test-plan.mdx",
+        "validation-guide.mdx",
+        "versioning-automation.mdx",
+        "versioning-guide.mdx"
+      ]
+    },
+    {
+      "name": "mcp",
+      "path": "mcp",
+      "directories": [],
+      "files": [
+        "connectors.mdx",
+        "permissions.mdx",
+        "registry.mdx",
+        "transports.mdx"
+      ]
+    },
+    {
+      "name": "operations",
+      "path": "operations",
+      "directories": [
+        {
+          "name": "runbooks",
+          "path": "operations/runbooks",
+          "directories": [],
+          "files": [
+            "alertmanager-escalation.mdx",
+            "loki-troubleshooting.mdx"
+          ]
+        }
+      ],
+      "files": []
+    },
+    {
+      "name": "prd",
+      "path": "prd",
+      "directories": [
+        {
+          "name": "archive",
+          "path": "prd/archive",
+          "directories": [],
+          "files": [
+            "deprecated-features.mdx"
+          ]
+        },
+        {
+          "name": "products",
+          "path": "prd/products",
+          "directories": [
+            {
+              "name": "trading-app",
+              "path": "prd/products/trading-app"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "templates",
+          "path": "prd/templates",
+          "directories": [],
+          "files": [
+            "feature-template.mdx",
+            "prd-template.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "overview.mdx"
+      ]
+    },
+    {
+      "name": "prompts",
+      "path": "prompts",
+      "directories": [],
+      "files": [
+        "overview.mdx",
+        "patterns.mdx",
+        "style-guide.mdx",
+        "variables.mdx"
+      ]
+    },
+    {
+      "name": "reference",
+      "path": "reference",
+      "directories": [
+        {
+          "name": "adrs",
+          "path": "reference/adrs",
+          "directories": [
+            {
+              "name": "rag-services",
+              "path": "reference/adrs/rag-services"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "architecture",
+          "path": "reference/architecture",
+          "directories": [],
+          "files": [
+            "service-map.mdx",
+            "technical-specification.mdx"
+          ]
+        },
+        {
+          "name": "deployment",
+          "path": "reference/deployment",
+          "directories": [],
+          "files": [
+            "checklist.mdx"
+          ]
+        },
+        {
+          "name": "evaluations",
+          "path": "reference/evaluations",
+          "directories": [],
+          "files": []
+        },
+        {
+          "name": "migrations",
+          "path": "reference/migrations",
+          "directories": [],
+          "files": [
+            "v1-to-v2.mdx"
+          ]
+        },
+        {
+          "name": "templates",
+          "path": "reference/templates",
+          "directories": [],
+          "files": [
+            "adr.mdx",
+            "guide.mdx",
+            "page.mdx",
+            "prd.mdx",
+            "runbook.mdx",
+            "sdd.mdx",
+            "tool.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "api-guidelines.mdx",
+        "cli.mdx",
+        "env-variables.mdx",
+        "overview.mdx",
+        "ports.mdx",
+        "quick-wins-index.mdx",
+        "testing-strategy.mdx"
+      ]
+    },
+    {
+      "name": "reports",
+      "path": "reports",
+      "directories": [
+        {
+          "name": "daily",
+          "path": "reports/daily",
+          "directories": [],
+          "files": [
+            "2025-10-27.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "governance-status.mdx"
+      ]
+    },
+    {
+      "name": "sdd",
+      "path": "sdd",
+      "directories": [
+        {
+          "name": "api",
+          "path": "sdd/api",
+          "directories": [
+            {
+              "name": "data-capture",
+              "path": "sdd/api/data-capture"
+            },
+            {
+              "name": "order-manager",
+              "path": "sdd/api/order-manager"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "domain",
+          "path": "sdd/domain",
+          "directories": [
+            {
+              "name": "schemas",
+              "path": "sdd/domain/schemas"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "events",
+          "path": "sdd/events",
+          "directories": [
+            {
+              "name": "v1",
+              "path": "sdd/events/v1"
+            }
+          ],
+          "files": []
+        },
+        {
+          "name": "flows",
+          "path": "sdd/flows",
+          "directories": [
+            {
+              "name": "v1",
+              "path": "sdd/flows/v1"
+            }
+          ],
+          "files": []
+        }
+      ],
+      "files": [
+        "overview.mdx",
+        "process.mdx"
+      ]
+    },
+    {
+      "name": "structure",
+      "path": "structure",
+      "directories": [],
+      "files": [
+        "index.mdx"
+      ]
+    },
+    {
+      "name": "tools",
+      "path": "tools",
+      "directories": [
+        {
+          "name": "ai",
+          "path": "tools/ai",
+          "directories": [],
+          "files": [
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "automation",
+          "path": "tools/automation",
+          "directories": [],
+          "files": [
+            "docusaurus-daily-agent.mdx"
+          ]
+        },
+        {
+          "name": "development",
+          "path": "tools/development",
+          "directories": [],
+          "files": [
+            "dev-container-guide.mdx",
+            "github-actions-debugging.mdx",
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "docker",
+          "path": "tools/docker",
+          "directories": [],
+          "files": [
+            "env-var-precedence.mdx"
+          ]
+        },
+        {
+          "name": "documentation",
+          "path": "tools/documentation",
+          "directories": [
+            {
+              "name": "docusaurus",
+              "path": "tools/documentation/docusaurus"
+            },
+            {
+              "name": "plantuml",
+              "path": "tools/documentation/plantuml"
+            },
+            {
+              "name": "redocusaurus",
+              "path": "tools/documentation/redocusaurus"
+            }
+          ],
+          "files": [
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "gateway",
+          "path": "tools/gateway",
+          "directories": [],
+          "files": []
+        },
+        {
+          "name": "infrastructure",
+          "path": "tools/infrastructure",
+          "directories": [],
+          "files": [
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "linting",
+          "path": "tools/linting",
+          "directories": [],
+          "files": [
+            "commitlint-husky.mdx",
+            "markdownlint.mdx",
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "mcp",
+          "path": "tools/mcp",
+          "directories": [],
+          "files": []
+        },
+        {
+          "name": "monitoring",
+          "path": "tools/monitoring",
+          "directories": [],
+          "files": [
+            "health-checks-guide.mdx",
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "performance",
+          "path": "tools/performance",
+          "directories": [],
+          "files": [
+            "bundle-optimization-guide.mdx"
+          ]
+        },
+        {
+          "name": "rag",
+          "path": "tools/rag",
+          "directories": [],
+          "files": [
+            "architecture.mdx",
+            "multi-collection-architecture.mdx",
+            "qdrant-ha-architecture.mdx"
+          ]
+        },
+        {
+          "name": "runtime",
+          "path": "tools/runtime",
+          "directories": [
+            {
+              "name": "docker-wsl",
+              "path": "tools/runtime/docker-wsl"
+            },
+            {
+              "name": "dotnet",
+              "path": "tools/runtime/dotnet"
+            },
+            {
+              "name": "node-npm",
+              "path": "tools/runtime/node-npm"
+            },
+            {
+              "name": "python",
+              "path": "tools/runtime/python"
+            }
+          ],
+          "files": [
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "security",
+          "path": "tools/security",
+          "directories": [],
+          "files": [
+            "dependency-management-guide.mdx",
+            "inter-service-auth.mdx",
+            "overview.mdx",
+            "rate-limiting.mdx",
+            "vulnerability-remediation-guide.mdx"
+          ]
+        },
+        {
+          "name": "security-config",
+          "path": "tools/security-config",
+          "directories": [],
+          "files": [
+            "audit.mdx",
+            "env.mdx",
+            "overview.mdx",
+            "risk-limits.mdx"
+          ]
+        },
+        {
+          "name": "telegram",
+          "path": "tools/telegram",
+          "directories": [],
+          "files": [
+            "deployment-guide.mdx"
+          ]
+        },
+        {
+          "name": "testing",
+          "path": "tools/testing",
+          "directories": [],
+          "files": [
+            "e2e-testing-guide.mdx",
+            "test-coverage-guide.mdx"
+          ]
+        },
+        {
+          "name": "trading",
+          "path": "tools/trading",
+          "directories": [
+            {
+              "name": "profitdll",
+              "path": "tools/trading/profitdll"
+            }
+          ],
+          "files": [
+            "overview.mdx"
+          ]
+        },
+        {
+          "name": "troubleshooting",
+          "path": "tools/troubleshooting",
+          "directories": [],
+          "files": [
+            "telegram-gateway-sync.mdx"
+          ]
+        }
+      ],
+      "files": [
+        "kestra.mdx",
+        "overview.mdx",
+        "ports-services.mdx"
+      ]
+    },
+    {
+      "name": "troubleshooting",
+      "path": "troubleshooting",
+      "directories": [],
+      "files": []
+    }
+  ],
+  "files": [
+    "changelog.mdx",
+    "faq.mdx",
+    "index.mdx"
+  ]
+}

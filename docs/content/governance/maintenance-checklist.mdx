@@ -216,7 +216,7 @@ grep -r "TODO\|TBD\|FIXME" docs/content/ | wc -l
 5. **Ownership Distribution**: Files by owner (pie chart)
 6. **Quarterly Trends**: Metrics over time (line chart)
 
-**Dashboard Location**: `http://localhost:3400/dashboard/` (standalone), `http://localhost:3103/documentation/metrics` (React), `http://localhost:3000/d/docs-health` (Grafana)
+**Dashboard Location**: `http://localhost:3400/dashboard/` (standalone), `http://localhost:9080/documentation/metrics` (React), `http://localhost:3000/d/docs-health` (Grafana)
 
 **Access Dashboards**:
 - **Standalone HTML**: Start docs site (`npm run docs:dev`), open `http://localhost:3400/dashboard/`
@@ -238,6 +238,13 @@ npm run docs:metrics
 ### Week 4: Automation, Versioning & Tooling Review
 
 **Objective**: Ensure automation scripts work correctly, manage documentation versions, and maintain build performance.
+
+#### Dependabot Auto Merge Policy
+
+- [ ] Verificar se o workflow [`dependabot-auto-merge.yml`](https://github.com/marceloterra1983/TradingSystem/blob/main/.github/workflows/dependabot-auto-merge.yml) está ativo.
+- [ ] Confirmar que PRs de `version-update:semver-patch` ou advisories de segurança entram em auto merge (`enablePullRequestAutoMerge` via GraphQL).
+- [ ] Para PRs que não devem ser mesclados automaticamente, adicionar o label `blocked` ou desabilitar o auto-merge diretamente no PR.
+- [ ] Registrar exceções ou merges manuais em `governance/change-log.csv` indicando motivo e follow-up.
 
 #### Step 1: Version Health Check
 

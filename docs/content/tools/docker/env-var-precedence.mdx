@@ -1,0 +1,311 @@
+---
+title: Docker Compose Environment Variable Precedence
+sidebar_position: 5
+tags: [docker, environment, configuration, debugging]
+domain: infrastructure
+type: reference
+summary: Complete guide to Docker Compose environment variable precedence and debugging strategies
+status: active
+last_review: "2025-11-11"
+---
+
+# Docker Compose Environment Variable Precedence
+
+## Overview
+
+Understanding environment variable precedence in Docker Compose is **critical** for debugging configuration issues. This guide explains the hierarchy and provides practical debugging strategies.
+
+## Precedence Order (Highest to Lowest)
+
+Docker Compose resolves environment variables in the following order:
+
+```
+1. environment: section in docker-compose.yml (HIGHEST PRIORITY)
+   ↓
+2. .env file (project root)
+   ↓
+3. .env.defaults file (if loaded via direnv/shell)
+   ↓
+4. Shell environment variables
+   ↓
+5. Default values in docker-compose.yml (${VAR:-default})
+```
+
+### Example Demonstrating Precedence
+
+Given these configurations:
+
+```yaml title="docker-compose.yml"
+services:
+  app:
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://hardcoded:8080  # HIGHEST PRIORITY
+      - DATABASE_URL=${DATABASE_URL:-http://default:5432}
+```
+
+```bash title=".env"
+API_URL=http://from-env-file:8080
+DATABASE_URL=http://from-env-file:5432
+```
+
+```bash title=".env.defaults"
+API_URL=http://from-defaults:8080
+DATABASE_URL=http://from-defaults:5432
+```
+
+**Result in container:**
+```bash
+API_URL=http://hardcoded:8080        # From docker-compose.yml (highest)
+DATABASE_URL=http://from-env-file:5432  # From .env file (no hardcode)
+```
+
+## Common Pitfalls
+
+### Pitfall 1: Hardcoded Values in docker-compose.yml
+
+❌ **WRONG:**
+```yaml
+environment:
+  - N8N_PROXY_TARGET=http://n8n-app:5678  # Hardcoded!
+```
+
+✅ **CORRECT:**
+```yaml
+environment:
+  - N8N_PROXY_TARGET=${N8N_PROXY_TARGET:-http://n8n-proxy:80}  # Uses .env or default
+```
+
+**Why:** Hardcoded values **cannot be overridden** by `.env` files, making configuration inflexible.
+
+### Pitfall 2: localhost URLs in Container Context
+
+❌ **WRONG:**
+```bash
+# .env
+N8N_PROXY_TARGET=http://localhost:3680  # Doesn't work in containers!
+```
+
+✅ **CORRECT:**
+```bash
+# .env
+N8N_PROXY_TARGET=http://n8n-proxy:80  # Docker internal network
+```
+
+**Why:** `localhost` inside a container refers to **that container**, not the Docker host.
+
+### Pitfall 3: Forgetting to Check All Three Locations
+
+When debugging, developers often check `.env` but forget to verify:
+- Hardcoded values in `docker-compose.yml`
+- Default values in `.env.defaults`
+- Shell environment variables
+
+**Always check ALL locations!**
+
+## Debugging Strategy
+
+### Step 1: Identify the Variable Source
+
+```bash
+# Check value in running container
+docker exec <container-name> printenv <VARIABLE_NAME>
+
+# Compare with expected sources
+grep "<VARIABLE_NAME>" .env
+grep "<VARIABLE_NAME>" .env.defaults
+grep "<VARIABLE_NAME>" docker-compose.yml
+```
+
+### Step 2: Verify Precedence
+
+```bash
+# Check docker-compose.yml for hardcoded values
+grep -A5 "environment:" docker-compose.yml | grep "<VARIABLE_NAME>"
+
+# Check .env file
+grep "^<VARIABLE_NAME>=" .env
+
+# Check .env.defaults
+grep "^<VARIABLE_NAME>=" config/.env.defaults
+```
+
+### Step 3: Test Connectivity (if applicable)
+
+```bash
+# Test network connectivity from container
+docker exec <container-name> wget -q -O - http://<target>:<port>
+
+# Or use curl
+docker exec <container-name> curl -I http://<target>:<port>
+```
+
+### Step 4: Force Reload Configuration
+
+```bash
+# Recreate container to reload env vars
+docker compose -f <compose-file> up -d --force-recreate <service>
+
+# Verify new value
+docker exec <container-name> printenv <VARIABLE_NAME>
+```
+
+## Best Practices
+
+### 1. Use Variable Substitution in docker-compose.yml
+
+✅ **GOOD:**
+```yaml
+environment:
+  - API_URL=${API_URL:-http://default:8080}
+  - DATABASE_URL=${DATABASE_URL}  # Required, no default
+```
+
+This allows `.env` file to override the value while providing a fallback.
+
+### 2. Document Expected Variables
+
+```yaml
+# docker-compose.yml
+services:
+  app:
+    environment:
+      # Required variables (no defaults)
+      - DATABASE_URL=${DATABASE_URL}
+      - API_SECRET=${API_SECRET}
+
+      # Optional with sensible defaults
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CACHE_TTL=${CACHE_TTL:-3600}
+```
+
+### 3. Prefer Docker Service Names for Container-to-Container Communication
+
+✅ **GOOD:**
+```bash
+# .env - Use Docker service names
+N8N_PROXY_TARGET=http://n8n-proxy:80
+DATABASE_HOST=postgres-db
+REDIS_HOST=redis-cache
+```
+
+❌ **BAD:**
+```bash
+# .env - localhost doesn't work in containers
+N8N_PROXY_TARGET=http://localhost:3680
+DATABASE_HOST=localhost
+REDIS_HOST=127.0.0.1
+```
+
+### 4. Use Separate Networks for Different Stacks
+
+```yaml
+services:
+  frontend:
+    networks:
+      - frontend_net
+      - backend_net  # Can talk to backend services
+
+  backend:
+    networks:
+      - backend_net
+      - database_net  # Can talk to database services
+
+  database:
+    networks:
+      - database_net  # Isolated from frontend
+
+networks:
+  frontend_net:
+    external: true
+  backend_net:
+    external: true
+  database_net:
+    external: true
+```
+
+## Real-World Case Study: N8N Proxy Configuration
+
+### Problem
+
+Dashboard showing "Error connecting to n8n - Could not connect to server"
+
+### Investigation
+
+```bash
+# Step 1: Check variable in container
+docker exec dashboard-ui printenv N8N_PROXY_TARGET
+# Result: http://n8n-app:5678
+
+# Step 2: Check expected value in .env
+grep N8N_PROXY_TARGET .env
+# Result: N8N_PROXY_TARGET=http://n8n-proxy:80
+
+# Step 3: Check docker-compose.yml
+grep N8N_PROXY_TARGET docker-compose.1-dashboard-stack.yml
+# Result: - N8N_PROXY_TARGET=http://n8n-app:5678  # FOUND THE CULPRIT!
+```
+
+### Root Cause
+
+The variable was defined in **three locations** with conflicting values:
+
+1. **`docker-compose.yml` (Line 34):** `http://n8n-app:5678` ❌ **WINNING (highest priority)**
+2. **`.env` (Line 108):** `http://localhost:9080/n8n` ❌
+3. **`.env.defaults` (Line 193):** `http://localhost:3680` ❌
+
+### Solution
+
+Updated all three locations to use Docker internal networking:
+
+```bash
+# All three now consistent
+N8N_PROXY_TARGET=http://n8n-proxy:80  ✅
+```
+
+**Key Lesson:** When debugging env vars, check **all three configuration sources**, not just `.env`!
+
+## Quick Reference
+
+### Debug Commands
+
+```bash
+# Check variable in container
+docker exec <container> printenv <VAR_NAME>
+
+# Find variable in all config files
+grep -r "<VAR_NAME>" .env* docker-compose*.yml
+
+# Test network connectivity
+docker exec <container> wget -qO- http://<target>:<port> | head -n5
+
+# Force reload config
+docker compose -f <file> up -d --force-recreate <service>
+
+# Verify container health
+docker ps --filter "name=<container>" --format "table {{.Names}}\t{{.Status}}"
+```
+
+### Priority Checklist
+
+When debugging environment variables:
+
+- [ ] Check `environment:` section in `docker-compose.yml` (HIGHEST)
+- [ ] Check `.env` file in project root
+- [ ] Check `.env.defaults` or other included env files
+- [ ] Check shell environment: `printenv <VAR_NAME>`
+- [ ] Verify default values: `${VAR_NAME:-default}` in compose file
+
+## Related Documentation
+
+- [Environment Variables Guide](../security-config/env.mdx)
+- [Docker Networking](./networking.mdx)
+- [N8N Proxy Fix](../../../../N8N-PROXY-FIX.md)
+- [Port Migration Report](../../../../PORT-3103-MIGRATION-REPORT.md)
+
+---
+
+**Last Updated:** 2025-11-11
+**Maintainer:** DevOps Team
+**Related Issues:** N8N-001, DASHBOARD-003

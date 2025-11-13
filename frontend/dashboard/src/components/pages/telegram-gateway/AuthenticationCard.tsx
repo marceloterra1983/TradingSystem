@@ -19,7 +19,7 @@ import {
   ScrollText,
   StopCircle,
   Terminal,
-} from "lucide-react";
+} from '@/icons';
 import {
   Dialog,
   DialogContent,

@@ -1,0 +1,65 @@
+---
+title: Índice Mestre da Documentação
+description: Visão consolidada dos diretórios e coleções da base de documentação do TradingSystem.
+tags:
+  - governance
+  - documentation
+owner: DocsOps
+lastReviewed: "2025-11-12"
+sidebar_label: Structure Index
+sidebar_position: 5
+---
+
+# Índice Mestre da Documentação
+
+> Fonte canônica gerada via `node scripts/docs/generate-structure-index.mjs`. Relatório bruto disponível em `docs/reports/documentation-structure.json`.
+
+## 📂 Resumo por Diretório Raiz
+
+| Diretório | Subdiretórios | Arquivos `.mdx` |
+|-----------|---------------|-----------------|
+| agents | 0 | 1 |
+| api | 0 | 14 |
+| apps | 5 | 1 |
+| archive | 1 | 0 |
+| assets | 1 | 0 |
+| database | 0 | 6 |
+| development | 0 | 0 |
+| diagrams | 2 | 1 |
+| frontend | 4 | 1 |
+| governance | 8 | 20 |
+| mcp | 0 | 4 |
+| prd | 3 | 1 |
+| prompts | 0 | 4 |
+| reference | 6 | 7 |
+| reports | 1 | 1 |
+| sdd | 4 | 2 |
+| tools | 19 | 3 |
+| troubleshooting | 0 | 0 |
+
+## 🔍 Destaques
+
+- **Governance** concentra o maior número de arquivos (20) distribuídos em 8 subpastas (controls, policies, strategy, etc.).
+- **Tools** possui 19 subdiretórios. Os mais ativos: `documentation`, `docker`, `rag`, `security-config`.
+- **Apps/** mantém subpastas completas para cada serviço (Workspace, TP Capital, Order Manager, Telegram Gateway, Data Capture).
+- **Archive/** armazena material legado versionado por trimestre (`archive/2025-Q4`).
+
+## 🧭 Como Navegar
+
+1. Gere a árvore atualizada:  
+   ```bash
+   node scripts/docs/generate-structure-index.mjs
+   ```
+2. Consulte o JSON resultante em `docs/reports/documentation-structure.json`.
+3. Para verificar uma subpasta específica, busque pelo `path` listado no JSON.
+
+## ✅ Próximos Passos (Fase 2)
+
+- Normalizar o diretório `development/` (atualmente vazio) – mover guias para `frontend/` ou `backend/`.
+- Rever `troubleshooting/` e `reports/` para consolidar conteúdo redundante.
+- Automatizar publicação deste índice no Dashboard (`Knowledge → Governance → Documentation Map`).
+
+---
+
+**Última geração**: `2025-11-12` — ver `docs/reports/documentation-structure.json` para a árvore completa (profundidade 2).
+

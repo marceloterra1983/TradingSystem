@@ -29,7 +29,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'json-summary'],
+      reporter: ['text', 'json', 'html', 'json-summary', 'lcov'],
       reportsDirectory: './coverage',
       exclude: [
         'node_modules',
@@ -46,13 +46,11 @@ export default defineConfig({
         'scripts/**',
       ],
       thresholds: {
-        // Progressive thresholds (Phase 1 baseline - Improvement Plan v1.0)
-        // These values will gradually increase as test coverage improves
-        // Current baseline: ~10-60% | Target (Phase 2): 75% | Final target: 85%
-        branches: 50,      // Current: 59.42% → Phase 2: 70% → Final: 80%
-        functions: 30,     // Current: ~10% → Phase 2: 70% → Final: 85%
-        lines: 30,         // Current: ~10% → Phase 2: 75% → Final: 85%
-        statements: 30,    // Current: 10.02% → Phase 2: 75% → Final: 85%
+        // Progressive thresholds (baseline enforced in CI via coverage-gate script)
+        branches: 50,
+        functions: 30,
+        lines: 30,
+        statements: 30,
       },
       // Report all uncovered lines in console
       all: true,

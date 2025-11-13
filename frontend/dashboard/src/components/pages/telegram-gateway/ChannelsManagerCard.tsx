@@ -22,7 +22,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Trash2,
-} from "lucide-react";
+} from '@/icons';
 
 export function ChannelsManagerCard() {
   const { data: channels = [], isLoading } = useTelegramGatewayChannels();

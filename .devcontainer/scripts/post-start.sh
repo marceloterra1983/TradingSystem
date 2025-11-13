@@ -41,7 +41,7 @@ fi
 
 # 4. Check if ports are available
 echo -e "\n${BLUE}🔌 Checking port availability...${NC}"
-PORTS_TO_CHECK=(3103 3404 3200 4005)
+PORTS_TO_CHECK=(9080 9081 8090 3404 3200 4005)
 PORTS_IN_USE=()
 
 for PORT in "${PORTS_TO_CHECK[@]}"; do
@@ -57,14 +57,37 @@ else
     echo -e "${GREEN}✅ All ports are available${NC}"
 fi
 
-# 5. Display status
+# 5. Start TradingSystem stacks (using existing compose files)
+echo -e "\n${BLUE}🚀 Starting TradingSystem stacks...${NC}"
+cd /workspace
+
+# Check if any stack is already running
+if docker ps --filter "label=com.tradingsystem.stack" --format "{{.Names}}" | grep -q .; then
+    echo -e "${GREEN}✅ Some stacks are already running${NC}"
+    docker ps --filter "label=com.tradingsystem.stack" --format "table {{.Names}}\t{{.Status}}" | head -10
+else
+    echo -e "${BLUE}Starting all stacks (this may take 1-2 minutes)...${NC}"
+    bash .devcontainer/scripts/start-all-stacks.sh
+fi
+
+# 6. Display status
 echo -e "\n${GREEN}✅ Post-start completed!${NC}"
 echo -e "\n${BLUE}📊 Environment Status:${NC}"
 echo -e "  Node.js: $(node --version)"
 echo -e "  npm: $(npm --version)"
 echo -e "  Python: $(python3 --version)"
 echo -e "  Docker: $(docker --version | cut -d' ' -f3 | cut -d',' -f1)"
-echo -e "\n${BLUE}💡 Quick Start:${NC}"
-echo -e "  ${GREEN}npm run start${NC}      - Start all services"
-echo -e "  ${GREEN}npm run env:validate${NC} - Validate .env configuration"
+
+echo -e "\n${BLUE}🌐 Service URLs (via Port Forwarding):${NC}"
+echo -e "  ${GREEN}http://localhost:9080${NC}      - API Gateway (Traefik)"
+echo -e "  ${GREEN}http://localhost:9081${NC}      - Traefik Dashboard"
+echo -e "  ${GREEN}http://localhost:8090${NC}      - Dashboard UI"
+echo -e "  ${GREEN}http://localhost:3404${NC}      - Documentation Hub"
+echo -e "  ${GREEN}http://localhost:3200${NC}      - Workspace API"
+
+echo -e "\n${BLUE}💡 Quick Commands:${NC}"
+echo -e "  ${GREEN}docker ps --filter \"label=com.tradingsystem.stack\"${NC}  - Check services"
+echo -e "  ${GREEN}bash .devcontainer/scripts/start-all-stacks.sh${NC}        - Start all stacks"
+echo -e "  ${GREEN}bash .devcontainer/scripts/stop-all-stacks.sh${NC}         - Stop all stacks"
+echo -e "  ${GREEN}docker compose -f <stack-file> logs -f${NC}                - View logs"
 echo -e "\n"

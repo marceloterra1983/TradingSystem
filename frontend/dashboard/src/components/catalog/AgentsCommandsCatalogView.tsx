@@ -33,7 +33,7 @@ import {
   FileWarning,
   Filter,
   Search,
-} from "lucide-react";
+} from '@/icons';
 
 import type { AgentDirectoryEntry } from "../../data/aiAgentsDirectory.types";
 import agentDirectoryData from "../../data/aiAgentsDirectory.json";

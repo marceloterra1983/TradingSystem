@@ -107,6 +107,6 @@ echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}  Metrics Update Complete!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
-echo -e "\n${BLUE}Dashboard:${NC} http://localhost:3103/documentation-metrics"
+echo -e "\n${BLUE}Dashboard:${NC} http://localhost:9080/documentation-metrics"
 echo ""
 

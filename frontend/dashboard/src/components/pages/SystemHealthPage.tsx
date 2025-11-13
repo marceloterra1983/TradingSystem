@@ -19,7 +19,7 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
-} from 'lucide-react';
+} from '@/icons';
 
 // Types
 interface HealthCheck {

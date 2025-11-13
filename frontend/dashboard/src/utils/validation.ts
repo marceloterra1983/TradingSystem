@@ -1,5 +1,11 @@
 import type { ScrapeOptions, CrawlOptions } from "../services/firecrawlService";
 
+/**
+ * Checks whether the provided string is a valid HTTP(S) URL.
+ *
+ * @param url - Candidate URL string.
+ * @returns True when the string parses to a http or https URL.
+ */
 export function isValidUrl(url: string): boolean {
   if (!url) return false;
   try {
@@ -10,6 +16,12 @@ export function isValidUrl(url: string): boolean {
   }
 }
 
+/**
+ * Validates the crawl limit respecting Firecrawl constraints.
+ *
+ * @param limit - Desired number of pages to crawl.
+ * @returns True when the limit is within the allowed range (1-1000).
+ */
 export function isValidCrawlLimit(limit: number | undefined): boolean {
   if (limit === undefined || Number.isNaN(limit)) {
     return false;
@@ -17,6 +29,12 @@ export function isValidCrawlLimit(limit: number | undefined): boolean {
   return limit >= 1 && limit <= 1000;
 }
 
+/**
+ * Validates the crawl depth respecting Firecrawl constraints.
+ *
+ * @param depth - Desired crawl depth.
+ * @returns True when the depth is within the allowed range (1-10).
+ */
 export function isValidCrawlDepth(depth: number | undefined): boolean {
   if (depth === undefined || Number.isNaN(depth)) {
     return false;
@@ -61,6 +79,13 @@ function isGenericSelector(selector: string): boolean {
   return generic.includes(selector.trim().toLowerCase());
 }
 
+/**
+ * Validates Firecrawl scrape options before submitting them to the proxy.
+ *
+ * @param options - Scrape options coming from the UI or templates.
+ * @param config - Optional validation overrides.
+ * @returns Validation result containing errors and warnings.
+ */
 export function validateScrapeOptions(
   options: Partial<ScrapeOptions>,
   config: ScrapeValidationOptions = {},
@@ -152,6 +177,12 @@ export function validateScrapeOptions(
   };
 }
 
+/**
+ * Validates Firecrawl crawl options, including nested scrape settings.
+ *
+ * @param options - Crawl options provided by the user.
+ * @returns Validation result summarising errors and warnings.
+ */
 export function validateCrawlOptions(
   options: Partial<CrawlOptions>,
 ): ValidationResult {

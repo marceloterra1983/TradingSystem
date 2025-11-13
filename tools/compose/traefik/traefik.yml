@@ -1,0 +1,88 @@
+# ============================================================
+# Traefik Static Configuration (Phase 3 Epic 1)
+# ============================================================
+# This file defines global Traefik settings that don't change
+# at runtime. For dynamic routing rules, see dynamic.yml.
+# ============================================================
+
+# API and Dashboard
+api:
+  dashboard: true
+  insecure: true  # TODO: Change to false and use auth in production
+
+# Entry Points
+entryPoints:
+  web:
+    address: ":80"
+    # HTTP to HTTPS redirect (future)
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+
+  websecure:
+    address: ":443"
+    # TLS configuration (future)
+    # http:
+    #   tls:
+    #     certResolver: letsencrypt
+
+  traefik:
+    address: ":8080"
+
+# Providers
+providers:
+  # Docker provider for automatic service discovery
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: tradingsystem-network
+    watch: true
+
+  # File provider for dynamic configuration
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+# Logging
+log:
+  level: INFO
+  format: json
+  filePath: /var/log/traefik/traefik.log
+
+# Access Logs
+accessLog:
+  format: json
+  filePath: /var/log/traefik/access.log
+  fields:
+    defaultMode: keep
+    headers:
+      defaultMode: keep
+
+# Metrics
+metrics:
+  prometheus:
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.0
+      - 3.0
+      - 5.0
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+    entryPoint: traefik
+
+# Health Check
+ping:
+  entryPoint: web
+
+# Certificate Resolvers (future - Let's Encrypt)
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: your-email@example.com
+#       storage: /etc/traefik/certs/acme.json
+#       httpChallenge:
+#         entryPoint: web

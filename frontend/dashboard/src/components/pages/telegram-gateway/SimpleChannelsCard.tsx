@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Radio, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Radio, Plus, Trash2, ToggleLeft, ToggleRight } from '@/icons';
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";

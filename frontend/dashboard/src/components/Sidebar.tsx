@@ -11,7 +11,7 @@ import {
   Shield,
   BookOpen,
   Settings,
-} from "lucide-react";
+} from '@/icons';
 
 export interface SidebarProps {
   currentView: string;

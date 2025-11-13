@@ -301,7 +301,7 @@ display_success() {
     echo "  ├─ Schema:         workspace"
     echo "  └─ User:           postgres"
     echo ""
-    echo "• Dashboard:         http://localhost:3103/#/workspace"
+    echo "• Dashboard:         http://localhost:9080/#/workspace"
     echo ""
     echo "=============================================="
     echo "Quick Commands"

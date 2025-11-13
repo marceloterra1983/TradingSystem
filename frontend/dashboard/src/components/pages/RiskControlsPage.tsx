@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Power, Zap, Bell } from "lucide-react";
+import { Power, Zap, Bell } from '@/icons';
 
 export function RiskControlsPage() {
   const sections = [

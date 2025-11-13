@@ -13,7 +13,7 @@ import {
   STATUS_CONFIG,
 } from "../constants/workspace.constants";
 import type { Item } from "../types/workspace.types";
-import { Tag, Folder } from "lucide-react";
+import { Tag, Folder } from '@/icons';
 
 interface ViewItemDialogProps {
   item: Item;

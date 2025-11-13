@@ -1,0 +1,103 @@
+---
+title: Plano de Evolução de Cobertura de Testes
+description: Estratégia faseada para elevar a cobertura de testes do TradingSystem até as metas do Plano de Melhoria v1.0.
+tags:
+  - governance
+  - testing
+  - quality
+owner: QAOps
+lastReviewed: "2025-11-12"
+sidebar_label: Test Coverage Roadmap
+sidebar_position: 45
+---
+
+# Plano de Evolução de Cobertura de Testes
+
+**Contexto**: O Plano de Melhoria (v1.0) estabelece meta de cobertura mínima de 75% (linhas) na Fase 2 e 85% ao final da Fase 4. Este documento detalha como alcançaremos os marcos intermediários a partir do baseline de novembro/2025.
+
+## 🎯 Metas por Fase
+
+| Fase | Branches | Functions | Lines | Statements | Observações |
+|------|----------|-----------|-------|------------|-------------|
+| Baseline (2025-11-10) | 50% | 30% | 30% | 30% | Cobertura majoritariamente em testes de UI isolados |
+| **Fase 2** (Nova) | **70%** | **60%** | **65%** | **65%** | Thresholds já configurados em `vitest.config.ts` |
+| Fase 3 | 75% | 70% | 75% | 75% | Entra suíte integrada (Playwright + Pact) |
+| Fase 4 | 80% | 80% | 85% | 85% | Cobertura consolidada com contratos + tracing |
+
+> ⚠️ Ao quebrar um threshold, o pipeline `CI Pipeline / Test Coverage` falhará automaticamente. Mantenha o arquivo `frontend/dashboard/vitest.config.ts` como fonte de verdade.
+
+## 🧭 Roadmap (Sprints 46-49)
+
+| Sprint | Objetivo | Serviços / Apps | Entregáveis |
+|--------|----------|-----------------|-------------|
+| 46 | Cobertura de utilitários críticos | `frontend/dashboard/src/utils`, `services/*` | Novos testes unitários cobrindo validações do Firecrawl, formatação de datas e adaptadores de API |
+| 47 | Cobertura de hooks de negócio | `hooks/useAgentsData`, `hooks/useCollections` | Mock de React Query + dados fakes com Vitest |
+| 48 | Cobertura de stores Zustand | `store/appStore.ts`, `store/toastStore.ts` | Testes de reducers + selectors |
+| 49 | Reforço de integrações | `services/*`, `components/pages/*` | Smoke tests com Vitest + MSW para fluxos principais |
+
+## ✅ Módulos Prioritários (Fase 2)
+
+1. **Firecrawl Scraper** – Funções de `utils/validation.ts` e `services/firecrawlService.ts`
+2. **Gateway TP Capital** – Utilidades de filtros (`components/pages/tp-capital/utils.ts`)
+3. **Coleções RAG** – Hooks `hooks/llamaIndex/*`
+4. **Workspace Library** – `services/workspaceService.ts` e `services/collectionsService.ts`
+
+Cada módulo precisa de cobertura mínima de **60%** até o final da sprint 48. Relatórios por módulo serão publicados em `docs/reports/coverage/module-<name>.json`.
+
+## 🔄 Processos Atualizados
+
+- `npm run test:coverage` agora gera e envia `coverage/lcov.info` para o Codecov.
+- `node scripts/testing/enforce-coverage-targets.mjs` roda no CI (modo warn-only) comparando com `config/quality/coverage-targets.json`.
+- Novos testes devem incluir `describe` com contexto e cobrir branches alternativos (erros + caminhos felizes).
+- Adotamos `@testing-library/react` e `@testing-library/user-event` para componentes. Para hooks, usar `renderHook`.
+- Mock de `fetch/axios` com `vi.mock` e `vi.spyOn`.
+
+## 📂 Estrutura de Pastas Recomendada
+
+```
+src/
+  utils/
+    __tests__/validation.test.ts      # Novos testes desta fase
+  services/
+    __tests__/firecrawlService.test.ts
+  hooks/
+    __tests__/useAgentsData.test.tsx
+```
+
+> Padronize com `__tests__` ao lado do módulo quando possível. Para grandes suítes, prefira `src/__tests__/integration`.
+
+## 🧪 Reporte de Métricas
+
+- `npm run test:coverage -- --reporter=json-summary` → gera `coverage/coverage-summary.json`
+- Script `scripts/testing/export-module-coverage.mjs` (em desenvolvimento) agregará cobertura por diretório.
+- Dashboard no Codecov: `https://app.codecov.io/gh/marceloterra1983/TradingSystem`.
+- Badge atualizado em `README.md`.
+
+## 👥 Responsáveis
+
+| Atividade | Responsável | When |
+|-----------|-------------|------|
+| Revisão semanal dos gaps | QAOps + Eng. responsável do módulo | Segundas, stand-up |
+| Pull Request Review | Pelo menos 1 revisores com foco em testes | Todas as PRs |
+| Atualização deste plano | QAOps | Mensal ou quando thresholds mudarem |
+
+## 📌 Checklist por PR
+
+- [ ] Incluiu testes cobrindo o fluxo alterado?
+- [ ] Rodou `npm run test:coverage` localmente?
+- [ ] Verificou alerta do Codecov (comentário no PR)?
+- [ ] Atualizou mocks/dados de teste para cenários novos?
+- [ ] Documentou exceções (quando teste não é aplicável) em comentário na PR?
+
+## 🚨 Plano de Contingência
+
+Caso um threshold seja quebrado:
+
+1. Pipeline trava o merge.
+2. Dono da PR executa `npm run test -- --runInBand --coverage false` para identificar suites problemáticas.
+3. Se queda for decorrente de remoção planejada, abrir issue `quality debt` com plano de reposição em até 2 sprints.
+
+---
+
+**Última atualização**: `2025-11-12` — Thresholds ajustados e roadmap de módulos críticos definido.
+

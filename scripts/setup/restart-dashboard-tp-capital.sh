@@ -13,6 +13,8 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DASHBOARD_DIR="$PROJECT_ROOT/frontend/dashboard"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_DASHBOARD_PORT=3103
 
 echo ""
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
@@ -58,7 +60,10 @@ echo -e "  ${GREEN}✓${NC} API Key: $(grep "^VITE_TP_CAPITAL_API_KEY=" "$DASHBO
 echo ""
 
 # Kill existing Dashboard process
-DASHBOARD_PID=$(lsof -ti:3103 2>/dev/null || true)
+DASHBOARD_PID=$(lsof -ti:"${DASHBOARD_PORT}" 2>/dev/null || true)
+if [ -z "$DASHBOARD_PID" ]; then
+    DASHBOARD_PID=$(lsof -ti:"${LEGACY_DASHBOARD_PORT}" 2>/dev/null || true)
+fi
 
 if [ -n "$DASHBOARD_PID" ]; then
     echo -e "${YELLOW}⚠ Parando Dashboard existente (PID: $DASHBOARD_PID)...${NC}"
@@ -66,16 +71,17 @@ if [ -n "$DASHBOARD_PID" ]; then
     
     # Wait for graceful shutdown
     for i in {1..10}; do
-        if ! lsof -ti:3103 >/dev/null 2>&1; then
+        if ! lsof -ti:"${DASHBOARD_PORT}" >/dev/null 2>&1 && ! lsof -ti:"${LEGACY_DASHBOARD_PORT}" >/dev/null 2>&1; then
             break
         fi
         sleep 0.5
     done
     
     # Force kill if still running
-    if lsof -ti:3103 >/dev/null 2>&1; then
+    if lsof -ti:"${DASHBOARD_PORT}" >/dev/null 2>&1 || lsof -ti:"${LEGACY_DASHBOARD_PORT}" >/dev/null 2>&1; then
         echo -e "${RED}   Forçando parada...${NC}"
-        kill -9 $(lsof -ti:3103) 2>/dev/null || true
+        kill -9 $(lsof -ti:"${DASHBOARD_PORT}") 2>/dev/null || true
+        kill -9 $(lsof -ti:"${LEGACY_DASHBOARD_PORT}") 2>/dev/null || true
         sleep 1
     fi
     
@@ -103,10 +109,10 @@ DASHBOARD_NEW_PID=$!
 # Wait for startup
 echo -e "${YELLOW}   Aguardando inicialização...${NC}"
 for i in {1..30}; do
-    if curl -s http://localhost:3103 > /dev/null 2>&1; then
+    if curl -s http://localhost:${DASHBOARD_PORT} > /dev/null 2>&1; then
         echo -e "${GREEN}✓ Dashboard iniciado com sucesso!${NC}"
         echo -e "  ${BLUE}PID:${NC} $DASHBOARD_NEW_PID"
-        echo -e "  ${BLUE}URL:${NC} http://localhost:3103"
+        echo -e "  ${BLUE}URL:${NC} http://localhost:${DASHBOARD_PORT}"
         echo ""
         
         # Display logs location
@@ -130,7 +136,7 @@ for i in {1..30}; do
         echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
         echo ""
         echo -e "${BLUE}Próximos passos:${NC}"
-        echo -e "  1. Abra http://localhost:3103 no navegador"
+        echo -e "  1. Abra http://localhost:${DASHBOARD_PORT} no navegador"
         echo -e "  2. Navegue até a página TP Capital"
         echo -e "  3. Clique em 'Checar Mensagens'"
         echo -e "  4. Verifique que NÃO aparece mais o erro de API Key!"

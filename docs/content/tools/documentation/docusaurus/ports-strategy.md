@@ -71,6 +71,16 @@ FRONTEND INTEGRATION
 
 ---
 
+## 📊 Resumo Rápido
+
+| Modo | Comando | URL | Observações |
+|------|---------|-----|-------------|
+| Dev local | `npm run docs:dev` | `http://localhost:3400` | Hot reload e watch mode habilitados |
+| Container | `docker compose -f tools/compose/docker-compose.2-docs-stack.yml up -d` | `http://localhost:9080/docs` (via Traefik) | Servido pelo NGINX interno na porta 80 |
+| Frontend (iframe) | Proxy `/docs` do Vite | `/docs` → ambiente atual | Same-origin, sem CORS; respeita dev/prod automaticamente |
+
+---
+
 ## 📋 Configurações
 
 ### 1. Frontend Dashboard

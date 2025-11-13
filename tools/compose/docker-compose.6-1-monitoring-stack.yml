@@ -11,7 +11,10 @@ services:
     ports:
       - "${PROMETHEUS_PORT:-9091}:9090"
     volumes:
-      - ../monitoring/prometheus-rag.yml:/etc/prometheus/prometheus.yml:ro
+      - type: bind
+        source: ../../tools/monitoring/prometheus-rag.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

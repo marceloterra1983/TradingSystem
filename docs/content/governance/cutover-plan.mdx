@@ -260,14 +260,14 @@ bash docs/migration/CUTOVER-AUTOMATION-SCRIPT.sh --auto-commit
 
    ```bash
    # Update .env
-   # CORS_ORIGIN=http://localhost:3103,http://localhost:3400
+   # CORS_ORIGIN=http://localhost:9080,http://localhost:3400
    bash scripts/startup/start-all.sh
    ```
 
 3. **Verify Integration**
 
    ```bash
-   curl http://localhost:3103
+   curl http://localhost:9080
    ```
 
 ### Phase 4: CI/CD Updates (T+2 to T+3 hours)

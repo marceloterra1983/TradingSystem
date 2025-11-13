@@ -1,4 +1,4 @@
-import * as React from "react";
+import { lazy, ReactNode } from "react";
 import {
   BookOpen,
   BarChart3,
@@ -18,45 +18,35 @@ import {
   Layout,
   GitBranch,
   MessageCircle,
-} from "lucide-react";
+  FolderTree,
+} from '@/icons';
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
 // This ensures only the current page's code is loaded, reducing initial bundle size by 40-60%
 
-const WorkspacePageNew = React.lazy(
-  () => import("../components/pages/WorkspacePageNew"),
-);
-const TPCapitalOpcoesPage = React.lazy(
+const WorkspacePageNew = lazy(() => import("../components/pages/WorkspacePageNew"));
+const TPCapitalOpcoesPage = lazy(
   () => import("../components/pages/TPCapitalOpcoesPage"),
 );
-const DocusaurusPageNew = React.lazy(
-  () => import("../components/pages/DocusaurusPage"),
-);
-const DatabasePageNew = React.lazy(
-  () => import("../components/pages/DatabasePage"),
-);
-const MiroPage = React.lazy(() => import("../components/pages/MiroPage"));
-const LlamaIndexPage = React.lazy(
-  () => import("../components/pages/LlamaIndexPage"),
-);
-const KestraPage = React.lazy(() => import("../components/pages/KestraPage"));
-const CatalogPage = React.lazy(() => import("../components/pages/CatalogPage"));
-const CourseCrawlerPage = React.lazy(
+const DocusaurusPageNew = lazy(() => import("../components/pages/DocusaurusPage"));
+const DatabasePageNew = lazy(() => import("../components/pages/DatabasePage"));
+const MiroPage = lazy(() => import("../components/pages/MiroPage"));
+const LlamaIndexPage = lazy(() => import("../components/pages/LlamaIndexPage"));
+const KestraPage = lazy(() => import("../components/pages/KestraPage"));
+const CatalogPage = lazy(() => import("../components/pages/CatalogPage"));
+const CourseCrawlerPage = lazy(
   () => import("../components/pages/CourseCrawlerPage"),
 );
-const GovernancePage = React.lazy(
-  () => import("../components/pages/GovernancePage"),
-);
-const TelegramGatewayFinal = React.lazy(
+const GovernancePage = lazy(() => import("../components/pages/GovernancePage"));
+const TelegramGatewayFinal = lazy(
   () => import("../components/pages/TelegramGatewayFinal"),
 );
-const N8nPage = React.lazy(() => import("../components/pages/N8nPage"));
-const WahaPage = React.lazy(() => import("../components/pages/WahaPage"));
-const EvolutionPage = React.lazy(
-  () => import("../components/pages/EvolutionPage"),
-);
-const FirecrawlPage = React.lazy(
-  () => import("../components/pages/FirecrawlPage"),
+const N8nPage = lazy(() => import("../components/pages/N8nPage"));
+const WahaPage = lazy(() => import("../components/pages/WahaPage"));
+const EvolutionPage = lazy(() => import("../components/pages/EvolutionPage"));
+const FirecrawlPage = lazy(() => import("../components/pages/FirecrawlPage"));
+const StructureMapPage = lazy(
+  () => import("../components/pages/StructureMapPage"),
 );
 
 // ✅ FUNCTIONAL LAZY LOADING - Components created only when page is navigated to
@@ -77,6 +67,7 @@ const n8nContent = () => <N8nPage />;
 const wahaContent = () => <WahaPage />;
 const evolutionContent = () => <EvolutionPage />;
 const firecrawlContent = () => <FirecrawlPage />;
+const structureMapContent = () => <StructureMapPage />;
 
 /**
  * Page Part - Collapsible section within a page
@@ -84,7 +75,7 @@ const firecrawlContent = () => <FirecrawlPage />;
 export interface PagePart {
   id: string;
   title: string;
-  content: React.ReactNode;
+  content: ReactNode;
 }
 
 /**
@@ -109,8 +100,8 @@ export interface Page {
     subtitle?: string;
   };
   parts: PagePart[];
-  customContent?: React.ReactNode | (() => React.ReactNode);
-  icon?: React.ReactNode;
+  customContent?: ReactNode | (() => ReactNode);
+  icon?: ReactNode;
 }
 
 /**
@@ -390,6 +381,18 @@ export const NAVIGATION_DATA: Section[] = [
         customContent: docusaurusContent,
         icon: <FileText className="h-4 w-4" />,
       },
+      {
+        id: "structure-map",
+        title: "Structure Map",
+        header: {
+          title: "Structure Map",
+          subtitle:
+            "Visualização interativa da árvore de diretórios e arquivos de documentação.",
+        },
+        parts: [],
+        customContent: structureMapContent,
+        icon: <FolderTree className="h-4 w-4" />,
+      },
     ],
   },
 ];
@@ -398,6 +401,8 @@ const LEGACY_PAGE_ALIASES: Record<string, string> = {
   "ai-agents-directory": "catalog",
   "claude-commands": "catalog",
   waha: "waha-dashboard",
+  "structure": "structure-map",
+  "structure-index": "structure-map",
 };
 
 const resolvePageId = (pageId: string) => LEGACY_PAGE_ALIASES[pageId] ?? pageId;

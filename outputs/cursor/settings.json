@@ -1,0 +1,21 @@
+{
+  "terminal.integrated.enableBell": true,
+  "terminal.integrated.enableVisualBell": true,
+  "terminalKeeper.enabled": true,
+  "terminalKeeper.showButtons": true,
+  "terminalKeeper.buttonPosition": "right",
+  "terminalKeeper.autoSave": true,
+  "terminalKeeper.maxHistory": 100,
+  "accessibility.signals.terminalBell": {
+    "sound": "on"
+  },
+  "statusbar.command.commands": [
+    {
+      "text": "$(copy) Copy last",
+      "tooltip": "Copiar último comando e saída do terminal",
+      "command": "workbench.action.terminal.copyLastCommandAndOutput",
+      "alignment": "right",
+      "priority": 100
+    }
+  ]
+}

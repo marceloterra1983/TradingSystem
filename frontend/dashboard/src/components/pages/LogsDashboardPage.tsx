@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { FileText, Shield } from "lucide-react";
+import { FileText, Shield } from '@/icons';
 
 /**
  * System Logs Page - Centralized logging and audit trail

@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { AlertTriangle, Loader2, X } from "lucide-react";
+import { AlertTriangle, Loader2, X } from '@/icons';
 import documentationService from "../../services/documentationService";
 
 // Lazy load markdown rendering to reduce bundle size

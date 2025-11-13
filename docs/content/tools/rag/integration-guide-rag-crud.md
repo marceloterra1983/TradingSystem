@@ -68,8 +68,8 @@ Encontre a seção "Ingestão e saúde" no LlamaIndexPage.tsx (por volta da linh
 cd tools/rag-services
 npm run dev
 
-# Em outro terminal, acessar dashboard
-# http://localhost:3103/#/rag-services
+# Em outro terminal, acessar dashboard (porta 9080 via Traefik)
+# http://localhost:9080/#/rag-services
 ```
 
 ---
@@ -213,7 +213,7 @@ Certifique-se que todos os componentes estão acessíveis:
 curl http://localhost:3402/health
 
 # Verificar CORS no console do navegador
-# Deve permitir: http://localhost:3103
+# Deve permitir: http://localhost:9080 (3103 legado apenas para troubleshooting)
 
 # Verificar variável de ambiente
 echo $VITE_API_BASE_URL
@@ -391,7 +391,7 @@ npm run dev
 # <CollectionsManagementCard />
 
 # 3. Testar
-# http://localhost:3103/#/rag-services
+# http://localhost:9080/#/rag-services
 ```
 
 ---

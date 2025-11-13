@@ -31,9 +31,9 @@ The TradingSystem Dashboard is the primary user interface for interacting with a
 
 ### Key Metrics
 
-- **Port:** 3103
+- **Port:** 9080 (exposto pelo Traefik; 3103 permanece como legado para casos isolados)
 - **Deployment:** Docker container (for consistency across all environments)
-- **Base URL:** `http://localhost:3103`
+- **Base URL:** `http://localhost:9080`
 - **Bundle Size:** ~2.5 MB (optimized with code splitting)
 - **Performance:** Lazy loading reduces initial load by 40-60%
 - **Repository:** `frontend/dashboard/`
@@ -47,7 +47,7 @@ The TradingSystem Dashboard is the primary user interface for interacting with a
 The dashboard is organized into **6 primary sections**, each containing specialized pages:
 
 ```
-Dashboard (Port 3103)
+Dashboard (Port 9080 via Traefik)
 ├── 1. Apps (Cyan)
 │   ├── TP Capital → TPCapitalOpcoesPage
 │   ├── Telegram Gateway → TelegramGatewayFinal
@@ -429,7 +429,7 @@ docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d
 bash scripts/start.sh
 ```
 
-**Dev Server:** `http://localhost:3103` (Docker container)
+**Dev Server:** `http://localhost:9080` (Docker container; 3103 permanece legado apenas para troubleshooting)
 
 **Features:**
 

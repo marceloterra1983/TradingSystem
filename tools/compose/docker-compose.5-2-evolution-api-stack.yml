@@ -429,7 +429,4 @@ volumes:
 
 networks:
   evolution_backend:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: ${EVOLUTION_NETWORK_SUBNET:-172.35.0.0/24}
+    external: true

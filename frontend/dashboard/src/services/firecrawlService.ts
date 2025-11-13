@@ -132,7 +132,19 @@ function normalizeFirecrawlError(message: string): string {
   return message;
 }
 
+/**
+ * High-level client for interacting with the Firecrawl proxy.
+ *
+ * Provides helpers to start scrape/crawl jobs, query their status and run
+ * health checks. Every method normaliza mensagens de erro para o dashboard.
+ */
 export const firecrawlService = {
+  /**
+   * Executa uma operação de scrape de página única.
+   *
+   * @param options - Configurações do scrape (URL, formatos, filtros, timeouts).
+   * @returns Resultado padronizado contendo dados ou mensagem de erro.
+   */
   async scrape(options: ScrapeOptions): Promise<ScrapeResult> {
     try {
       const response = await fetch(`${API_V1_BASE_URL}/scrape`, {
@@ -188,6 +200,12 @@ export const firecrawlService = {
     }
   },
 
+  /**
+   * Inicia um job de crawl multi-páginas no Firecrawl.
+   *
+   * @param options - Configurações do crawl (limites, profundidade, filtros).
+   * @returns Resultado com ID do job ou mensagem de erro.
+   */
   async crawl(options: CrawlOptions): Promise<CrawlResult> {
     try {
       const response = await fetch(`${API_V1_BASE_URL}/crawl`, {
@@ -235,6 +253,12 @@ export const firecrawlService = {
     }
   },
 
+  /**
+   * Consulta o status atual de um job de crawl.
+   *
+   * @param crawlId - Identificador retornado por {@link crawl}.
+   * @returns Status detalhado contendo progresso e dados coletados.
+   */
   async getCrawlStatus(crawlId: string): Promise<CrawlStatus> {
     try {
       const response = await fetch(
@@ -278,6 +302,11 @@ export const firecrawlService = {
     }
   },
 
+  /**
+   * Verifica a saúde do proxy Firecrawl configurado.
+   *
+   * @returns Resposta simplificada (`ok` ou detalhes do erro).
+   */
   async healthCheck(): Promise<FirecrawlHealthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/health`);

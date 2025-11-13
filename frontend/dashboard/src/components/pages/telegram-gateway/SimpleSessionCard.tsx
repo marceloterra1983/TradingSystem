@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { ShieldCheck, Info, Clock, Hash } from "lucide-react";
+import { ShieldCheck, Info, Clock, Hash } from '@/icons';
 import { Badge } from "../../ui/badge";
 
 interface SimpleSessionCardProps {

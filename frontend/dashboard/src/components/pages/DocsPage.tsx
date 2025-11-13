@@ -4,7 +4,7 @@ import {
   FileText,
   CheckCircle2,
   Sparkles,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../ui/button";
 import { apiConfig } from "../../config/api";
 

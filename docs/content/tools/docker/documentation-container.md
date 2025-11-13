@@ -50,16 +50,16 @@ lastReviewed: '2025-10-27'
 
 **Fix Applied**:
 
-- Added `X-Frame-Options: ALLOW-FROM http://localhost:3103` header
-- Added `Content-Security-Policy: frame-ancestors 'self' http://localhost:3103 http://localhost:*` header
-- Added CORS headers: `Access-Control-Allow-Origin: http://localhost:3103`
+- Added `X-Frame-Options: ALLOW-FROM http://localhost:9080` header
+- Added `Content-Security-Policy: frame-ancestors 'self' http://localhost:9080 http://localhost:*` header
+- Added CORS headers: `Access-Control-Allow-Origin: http://localhost:9080`
 - Rebuilt and restarted documentation container
 
 **Status**:
 
 - ✅ Container: `documentation` (healthy)
 - ✅ NGINX: Serving Docusaurus at `http://localhost:3400`
-- ✅ Dashboard: Iframe embedding working at `http://localhost:3103/#/docs`
+- ✅ Dashboard: Iframe embedding working at `http://localhost:9080/#/docs`
 - ✅ Headers: X-Frame-Options, CSP, CORS configured correctly
 
 ---
@@ -93,14 +93,14 @@ lastReviewed: '2025-10-27'
 
 **Docusaurus Iframe Loading** - ✅ **WORKING!**
 
-**Problem Solved**: Docusaurus was not loading in the Dashboard iframe due to cross-origin issues (port 3103 → port 3400).
+**Problem Solved**: Docusaurus was not loading in the Dashboard iframe devido a diferenças de origem (porta 9080 → porta 3400; 3103 permanece apenas como referência histórica).
 
 **Fix Applied**:
 
 - Updated `vite.config.ts` - Changed docs proxy target from port 3205 to 3400
 - Added asset proxies for `/assets/*` and `/img/*` to proxy Docusaurus assets
 - Updated `api.ts` - Changed docsUrl from `http://localhost:3400` to `/docs` (relative URL)
-- Result: Docusaurus now served from same origin (localhost:3103) via Vite proxy
+- Result: Docusaurus now served from same origin (localhost:9080) via Vite proxy
 
 **Technical Solution**:
 
@@ -120,7 +120,7 @@ lastReviewed: '2025-10-27'
 **Architecture**:
 
 ```
-Dashboard (localhost:3103)
+Dashboard (localhost:9080)
   ├─ /docs → Vite proxy → NGINX (localhost:3400) → Docusaurus HTML
   ├─ /assets/* → Vite proxy → NGINX (localhost:3400) → CSS/JS
   └─ /img/* → Vite proxy → NGINX (localhost:3400) → Images
@@ -303,7 +303,7 @@ services:
 ```bash
 # Health check
 declare -A HEALTH_URLS=(
-    ["Dashboard"]="http://localhost:3103"
+    ["Dashboard"]="http://localhost:9080"
     ["Workspace API"]="http://localhost:3200/health"
     ["Status API"]="http://localhost:3500/api/status"
     ["TP-Capital"]="http://localhost:4005/health"
@@ -422,7 +422,7 @@ bash scripts/universal/start.sh
 
 ### 4. **Separação do Dashboard**
 
-- Dashboard (porta 3103) → UI principal + React
+- Dashboard (porta 9080) → UI principal + React (3103 legado)
 - Documentation (porta 3400) → Docusaurus + Specs
 - Responsabilidades claras
 

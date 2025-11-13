@@ -10,6 +10,8 @@ services:
     env_file:
       - ../../.env
       - ../../.env.shared
+    ports:
+      - "8090:3103"  # Expose dashboard on port 8090
     environment:
       - DASHBOARD_PORT=${DASHBOARD_PORT:-9080}
       - SKIP_DASHBOARD_PREBUILD=1
@@ -31,7 +33,7 @@ services:
       - VITE_API_SECRET_TOKEN=${API_SECRET_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       # n8n proxy configuration (server-side only, NOT exposed to browser)
       # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
-      - N8N_PROXY_TARGET=http://n8n-app:5678
+      - N8N_PROXY_TARGET=http://n8n-proxy:80
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-automation}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
       # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
@@ -45,7 +47,7 @@ services:
       - tradingsystem_frontend
       - tradingsystem_backend  # Hub network for API access (proxy)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9080/ || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3103/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -68,7 +70,7 @@ services:
       - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
 
       # Service Configuration (backend target)
-      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=9080"
+      - "traefik.http.services.dashboard-ui.loadbalancer.server.port=3103"
 
       # Middlewares (no path transformation needed - direct passthrough)
       - "traefik.http.routers.dashboard-ui.middlewares=static-standard@file"

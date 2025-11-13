@@ -1,3 +1,6 @@
+# Configuração de porta do dashboard
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_DASHBOARD_PORT=3103
 #!/usr/bin/bash
 #
 # validar-tp-capital-completo.sh
@@ -38,10 +41,13 @@ else
 fi
 
 # Dashboard
-if curl -I http://localhost:3103 2>/dev/null | grep -q "200\|304"; then
-  echo -e "   ${GREEN}✅ Dashboard (3103)${NC}"
+if curl -I http://localhost:${DASHBOARD_PORT} 2>/dev/null | grep -q "200\\|304"; then
+  echo -e "   ${GREEN}✅ Dashboard (${DASHBOARD_PORT})${NC}"
 else
-  echo -e "   ${YELLOW}⚠️  Dashboard (3103) - Verificar${NC}"
+  echo -e "   ${YELLOW}⚠️  Dashboard (${DASHBOARD_PORT}) - Verificar${NC}"
+  if [ "$LEGACY_DASHBOARD_PORT" != "$DASHBOARD_PORT" ] && curl -I http://localhost:${LEGACY_DASHBOARD_PORT} 2>/dev/null | grep -q "200\\|304"; then
+    echo -e "   ${YELLOW}⚠️  Instância legada detectada na porta ${LEGACY_DASHBOARD_PORT}. Considere migrar para ${DASHBOARD_PORT}.${NC}"
+  fi
 fi
 
 echo ""
@@ -149,7 +155,7 @@ echo -e "${GREEN}🎉 TP Capital está 100% funcional!${NC}"
 echo "=========================================================="
 echo ""
 echo "📝 Próximos Passos:"
-echo "   1. Abrir Dashboard: http://localhost:3103/tp-capital"
+echo "   1. Abrir Dashboard: http://localhost:${DASHBOARD_PORT}/tp-capital"
 echo "   2. Clicar em 'Checar Mensagens'"
 echo "   3. Verificar se sincroniza sem erro de porta"
 echo ""

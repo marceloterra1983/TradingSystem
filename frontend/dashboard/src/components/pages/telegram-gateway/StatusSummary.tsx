@@ -5,7 +5,7 @@ import {
   RefreshCw,
   Server,
   Zap,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../../ui/button";
 import {
   CollapsibleCard,

@@ -15,16 +15,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Build essentials
     build-essential \
     pkg-config \
-    # Node.js native modules dependencies
     libnode-dev \
     python3-dev \
-    # Python build dependencies
     libffi-dev \
     libssl-dev \
-    # Common utilities
     curl \
     wget \
     git \
@@ -36,28 +32,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     lsb-release \
-    # Docker CLI
-    docker-ce-cli \
-    # Network tools
     iputils-ping \
     netcat-openbsd \
-    # Process management
     htop \
-    # Compression
     gzip \
     bzip2 \
-    # PostgreSQL client (for TimescaleDB)
     postgresql-client \
-    # Redis client
     redis-tools \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Docker CLI
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
+    chmod a+r /etc/apt/keyrings/docker.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" > /etc/apt/sources.list.d/docker.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin; \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Node.js using official NodeSource repository
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.12 (if not already installed)
+# Install Node.js global packages
+RUN npm i -g ts-node eslint prettier nodemon pm2
+# Update npm to latest version
+RUN npm install -g npm@latest
+
+# Install Python 3.12
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
@@ -70,52 +76,40 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTH
     && update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1
 
 # Upgrade pip and install Python tools globally
-RUN python3 -m pip install --upgrade pip setuptools wheel \
-    && pip3 install --no-cache-dir \
-    black \
-    flake8 \
-    pylint \
-    mypy \
-    pytest \
-    ipython
+RUN python3 -m venv /opt/pytools \
+    && /opt/pytools/bin/pip install -U pip setuptools wheel \
+    && /opt/pytools/bin/pip install --no-cache-dir black flake8 pylint mypy pytest ipython
 
-# Install global npm packages
-RUN npm install -g \
-    npm@latest \
-    pnpm \
-    yarn \
-    typescript \
-    ts-node \
-    eslint \
-    prettier \
-    nodemon \
-    pm2
+ENV PATH="/opt/pytools/bin:${PATH}"
 
 # Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-    && apt-get update \
-    && apt-get install -y gh \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y ca-certificates curl gnupg; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
+    chmod a+r /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list; \
+    apt-get update; \
+    apt-get install -y gh; \
+    rm -rf /var/lib/apt/lists/*
 
 # Configure user (matches host UID/GID)
 RUN if [ "$USER_UID" != "1000" ] || [ "$USER_GID" != "1000" ]; then \
-    groupmod --gid $USER_GID $USERNAME 2>/dev/null || true \
-    && usermod --uid $USER_UID --gid $USER_GID $USERNAME 2>/dev/null || true \
-    && chown -R $USER_UID:$USER_GID /home/$USERNAME; \
+        groupmod --gid $USER_GID $USERNAME 2>/dev/null || true; \
+        usermod --uid $USER_UID --gid $USER_GID $USERNAME 2>/dev/null || true; \
+        chown -R $USER_UID:$USER_GID /home/$USERNAME; \
     fi
 
-# Add user to docker group (for Docker-in-Docker)
+# Add user to docker group
 RUN usermod -aG docker $USERNAME || true
 
 # Setup workspace directory
 WORKDIR /workspace
 
-# Setup Oh My Zsh for better terminal experience
+# Configure zsh (Oh My Zsh already exists in base image)
 USER $USERNAME
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended \
-    && echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc \
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc \
     && echo 'export PYTHONPATH="/workspace:$PYTHONPATH"' >> ~/.zshrc \
     && echo 'alias ll="ls -alh"' >> ~/.zshrc \
     && echo 'alias dc="docker compose"' >> ~/.zshrc \
@@ -135,5 +129,5 @@ RUN chsh -s /usr/bin/zsh $USERNAME
 # Set user back to vscode
 USER $USERNAME
 
-# Default command (overridden by docker-compose)
+# Default command
 CMD ["sleep", "infinity"]

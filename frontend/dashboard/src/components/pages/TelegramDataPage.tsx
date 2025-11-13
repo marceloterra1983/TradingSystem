@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { MessageSquare, Zap } from "lucide-react";
+import { MessageSquare, Zap } from '@/icons';
 
 export function TelegramDataPage() {
   const sections = [

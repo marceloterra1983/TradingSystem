@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from '@/icons';
 import { fetchSignals } from "./api";
 import { toCsv, downloadFile } from "./utils";
 import { searchInMultiple } from "./utils/filterHelpers";

@@ -43,11 +43,11 @@ services:
     volumes:
       - tp-capital-timescaledb-data:/var/lib/postgresql/data
       - ../../backend/data/timescaledb/tp-capital:/docker-entrypoint-initdb.d:ro
-      - ./tp-capital/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      # Temporarily disabled: postgresql.conf bind mount causing scanner errors
+      # - ./tp-capital/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     
     command: >
       postgres
-      -c config_file=/etc/postgresql/postgresql.conf
       -c shared_buffers=1GB
       -c effective_cache_size=3GB
       -c maintenance_work_mem=256MB
@@ -329,12 +329,12 @@ services:
       - CIRCUIT_BREAKER_RESET_TIMEOUT=30000
     
     volumes:
-      # Hot-reload: mount source code
-      - ../../apps/tp-capital/src:/app/src:ro
-      - ../../apps/tp-capital/api:/app/api:ro
+      # Hot-reload: temporarily disabled to test
+      # - ../../apps/tp-capital/src:/app/src:ro
+      # - ../../apps/tp-capital/api:/app/api:ro
       
       # Mount shared modules for hot-reload
-      - ../../backend/shared:/app/backend/shared:ro
+      # - ../../backend/shared:/app/backend/shared:ro
       
       # Anonymous volume prevents overwrite
       - /app/node_modules

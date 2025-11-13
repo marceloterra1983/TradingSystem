@@ -5,7 +5,7 @@ import {
   Lightbulb,
   FileText,
   TrendingUp,
-} from "lucide-react";
+} from '@/icons';
 import documentationService from "../../services/documentationService";
 
 interface DocumentationStatsPayload {

@@ -1,5 +1,5 @@
 import React from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from '@/icons';
 import { TradingData } from "../../hooks/useTradingData";
 
 // ✅ Componente funcional seguindo as regras React do Playbooks

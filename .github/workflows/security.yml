@@ -31,21 +31,26 @@ jobs:
 
       - name: Run npm audit
         run: |
-          npm audit --audit-level=moderate --json > audit-report.json || true
+          npm audit --audit-level=moderate --json > audit-report.json
           
-          # Check for critical/high vulnerabilities
           CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-report.json)
           HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
+          MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-report.json)
+          LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-report.json)
           
           echo "Critical vulnerabilities: $CRITICAL"
           echo "High vulnerabilities: $HIGH"
+          echo "Moderate vulnerabilities: $MODERATE"
+          echo "Low vulnerabilities: $LOW"
+          
+          node scripts/security/npm-audit-to-sarif.mjs \
+            --input audit-report.json \
+            --output audit-report.sarif
           
           if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
             echo "::error::Found $CRITICAL critical and $HIGH high vulnerabilities"
-            npm audit --audit-level=moderate
             exit 1
           fi
-        continue-on-error: true
         id: npm_audit
 
       - name: Upload audit report
@@ -55,6 +60,12 @@ jobs:
           name: npm-audit-report
           path: audit-report.json
           retention-days: 30
+
+      - name: Upload audit SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: audit-report.sarif
 
   # ============================================================================
   # Job 2: Secret Scanning

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { MessageSquare, RefreshCw } from "lucide-react";
+import { MessageSquare, RefreshCw } from '@/icons';
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { useState } from "react";

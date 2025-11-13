@@ -14,9 +14,35 @@ After the port 3103 → 9080 migration, the Dashboard was unable to connect to N
 
 The N8N stack was reconfigured to remove external port exposure (comment: "External port exposure removed; service publicado via Traefik gateway"), but the Dashboard Vite proxy configuration was still trying to connect to the old external port.
 
-**Incorrect Configuration:**
+### Variable Precedence Issue (CRITICAL)
+
+The problem was **tripled** due to Docker Compose environment variable precedence:
+
+1. **`.env.defaults`** (Line 193): `N8N_PROXY_TARGET=http://localhost:3680` ❌
+2. **`.env`** (Line 108): `N8N_PROXY_TARGET=http://localhost:9080/n8n` ❌
+3. **`docker-compose.yml`** (Line 34): `N8N_PROXY_TARGET=http://n8n-app:5678` ❌ **HIGHEST PRIORITY**
+
+**Docker Compose Precedence Order:**
+```
+environment: section (HIGHEST - Line 34)
+    ↓
+.env file (MEDIUM - Line 108)
+    ↓
+.env.defaults file (LOWEST - Line 193)
+```
+
+All three had incorrect values! The `docker-compose.yml` value was winning because it has the highest precedence.
+
+**Incorrect Configurations:**
 ```bash
+# .env.defaults (Line 193)
 N8N_PROXY_TARGET=http://localhost:3680  # ❌ Port not exposed on host!
+
+# .env (Line 108)
+N8N_PROXY_TARGET=http://localhost:9080/n8n  # ❌ localhost doesn't work in container!
+
+# docker-compose.yml (Line 34)
+- N8N_PROXY_TARGET=http://n8n-app:5678  # ❌ Skips n8n-proxy NGINX layer!
 ```
 
 **Network Flow (BROKEN):**
@@ -49,6 +75,22 @@ Browser → http://localhost:9080/n8n
 ```diff
 - N8N_PROXY_TARGET=http://localhost:3680
 + N8N_PROXY_TARGET=http://n8n-proxy:80
+```
+
+### 2. `.env` (Line 108) ⚠️ CRITICAL
+```diff
+-# Dashboard proxy configuration - points to Gateway
+-N8N_PROXY_TARGET=http://localhost:9080/n8n
++# Dashboard proxy configuration - points to n8n-proxy container
++N8N_PROXY_TARGET=http://n8n-proxy:80
+```
+
+### 3. `tools/compose/docker-compose.1-dashboard-stack.yml` (Line 34) ⚠️ CRITICAL
+```diff
+       # n8n proxy configuration (server-side only, NOT exposed to browser)
+       # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
+-      - N8N_PROXY_TARGET=http://n8n-app:5678
++      - N8N_PROXY_TARGET=http://n8n-proxy:80
 ```
 
 ## Verification Steps
@@ -120,15 +162,33 @@ n8n-app (n8n_backend)
 2. **Docker Internal Networking:** Prefer Docker service names (`n8n-proxy:80`) over localhost ports for container-to-container communication
 3. **Configuration Consistency:** Environment variables must match actual Docker network topology
 4. **Testing After Changes:** Always verify container connectivity after configuration changes
+5. **Variable Precedence (CRITICAL):** Docker Compose has 3 levels of precedence:
+   - **HIGHEST:** `environment:` section in `docker-compose.yml` (hardcoded values)
+   - **MEDIUM:** `.env` file (secrets and overrides)
+   - **LOWEST:** `.env.defaults` file (default values)
+
+   **RULE:** When debugging env vars, check ALL THREE locations!
+
+6. **Verification Commands:**
+   ```bash
+   # Check variable in running container
+   docker exec <container> printenv <VARIABLE_NAME>
+
+   # Test connectivity between containers
+   docker exec <container> wget -q -O - http://<target>:<port>
+   ```
 
 ## Validation Checklist
 
-- ✅ N8N_PROXY_TARGET updated to use Docker internal network
-- ✅ Dashboard container restarted to apply changes
+- ✅ N8N_PROXY_TARGET updated in `.env.defaults` (Line 193)
+- ✅ N8N_PROXY_TARGET updated in `.env` (Line 108)
+- ✅ N8N_PROXY_TARGET updated in `docker-compose.yml` (Line 34) **CRITICAL**
+- ✅ Dashboard container recreated with `--force-recreate`
 - ✅ Container health check passing
-- ✅ Internal connectivity verified (wget test successful)
+- ✅ Variable verified in container: `docker exec dashboard-ui printenv N8N_PROXY_TARGET`
+- ✅ Internal connectivity verified: `wget http://n8n-proxy:80` returns HTML
 - ✅ No external port dependencies remaining
-- ✅ Documentation updated
+- ✅ Documentation updated with precedence explanation
 
 ## Next Steps (Optional)
 

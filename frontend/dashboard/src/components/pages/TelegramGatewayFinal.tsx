@@ -52,7 +52,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-} from "lucide-react";
+} from '@/icons';
 import { cn } from "../../lib/utils";
 import { GatewayLogsCard } from "../telegram/GatewayLogsCard";
 import { TwitterPreview } from "../telegram/TwitterPreview";

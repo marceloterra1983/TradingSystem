@@ -1,0 +1,12 @@
+{
+  "phase": "phase-2",
+  "description": "Targets from Improvement Plan v1.0 - Fase 2",
+  "targets": {
+    "lines": 65,
+    "branches": 70,
+    "functions": 60,
+    "statements": 65
+  },
+  "warnOnly": true
+}
+

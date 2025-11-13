@@ -1,5 +1,17 @@
-import * as React from "react";
-import { ChevronDown } from "lucide-react";
+import {
+  Children,
+  cloneElement,
+  createElement,
+  forwardRef,
+  isValidElement,
+  useEffect,
+  useState,
+  type HTMLAttributes,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
+import { ChevronDown } from '@/icons';
 import { cn } from "../../lib/utils";
 import {
   isBrowser,
@@ -7,14 +19,13 @@ import {
   safeLocalStorageSet,
 } from "../../utils/browser";
 
-export interface CollapsibleCardProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+export interface CollapsibleCardProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
   defaultCollapsed?: boolean;
   cardId?: string;
 }
 
-export const CollapsibleCard = React.forwardRef<
+export const CollapsibleCard = forwardRef<
   HTMLDivElement,
   CollapsibleCardProps
 >(
@@ -22,7 +33,7 @@ export const CollapsibleCard = React.forwardRef<
     { className, children, defaultCollapsed = false, cardId, ...props },
     ref,
   ) => {
-    const [isCollapsed, setIsCollapsed] = React.useState(() => {
+    const [isCollapsed, setIsCollapsed] = useState(() => {
       if (cardId) {
         const stored = safeLocalStorageGet(`card-collapsed-${cardId}`);
         if (!stored) {
@@ -38,7 +49,7 @@ export const CollapsibleCard = React.forwardRef<
     });
 
     // Listen to collapse-all-cards event for collapse/expand all functionality
-    React.useEffect(() => {
+    useEffect(() => {
       if (!cardId || !isBrowser) return;
 
       const handleCollapseAll = (event: Event) => {
@@ -73,13 +84,13 @@ export const CollapsibleCard = React.forwardRef<
         )}
         {...props}
       >
-        {React.Children.map(children, (child) => {
+        {Children.map(children, (child) => {
           if (
-            React.isValidElement<CollapsibleCardHeaderProps>(child) &&
+            isValidElement<CollapsibleCardHeaderProps>(child) &&
             (child.type === CollapsibleCardHeader ||
               child.props.__collapsibleType === "header")
           ) {
-            return React.cloneElement(child, {
+            return cloneElement(child, {
               isCollapsed,
               onToggle: toggleCollapsed,
               __collapsibleType: "header" as const,
@@ -87,11 +98,11 @@ export const CollapsibleCard = React.forwardRef<
           }
 
           if (
-            React.isValidElement<CollapsibleCardContentProps>(child) &&
+            isValidElement<CollapsibleCardContentProps>(child) &&
             (child.type === CollapsibleCardContent ||
               child.props.__collapsibleType === "content")
           ) {
-            return React.cloneElement(child, {
+            return cloneElement(child, {
               isCollapsed,
               __collapsibleType: "content" as const,
             });
@@ -107,14 +118,14 @@ export const CollapsibleCard = React.forwardRef<
 CollapsibleCard.displayName = "CollapsibleCard";
 
 export interface CollapsibleCardHeaderProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
   isCollapsed?: boolean;
   onToggle?: () => void;
   __collapsibleType?: "header";
 }
 
-const CollapsibleCardHeaderComponent = React.forwardRef<
+const CollapsibleCardHeaderComponent = forwardRef<
   HTMLDivElement,
   CollapsibleCardHeaderProps
 >(
@@ -122,14 +133,14 @@ const CollapsibleCardHeaderComponent = React.forwardRef<
     { className, children, isCollapsed, onToggle, __collapsibleType, ...props },
     ref,
   ) => {
-    const handleChevronClick = (event: React.MouseEvent) => {
+    const handleChevronClick = (event: MouseEvent) => {
       event.stopPropagation();
       if (onToggle) {
         onToggle();
       }
     };
 
-    const handleChevronKeyDown = (event: React.KeyboardEvent) => {
+    const handleChevronKeyDown = (event: KeyboardEvent) => {
       if (!onToggle) {
         return;
       }
@@ -185,18 +196,18 @@ export const CollapsibleCardHeader = Object.assign(
 );
 
 export interface CollapsibleCardTitleProps
-  extends React.HTMLAttributes<HTMLHeadingElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLHeadingElement> {
+  children: ReactNode;
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-export const CollapsibleCardTitle = React.forwardRef<
+export const CollapsibleCardTitle = forwardRef<
   HTMLHeadingElement,
   CollapsibleCardTitleProps
 >(({ className, children, level = 3, ...props }, ref) => {
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
 
-  return React.createElement(
+  return createElement(
     HeadingTag,
     {
       ref,
@@ -213,11 +224,11 @@ export const CollapsibleCardTitle = React.forwardRef<
 CollapsibleCardTitle.displayName = "CollapsibleCardTitle";
 
 export interface CollapsibleCardDescriptionProps
-  extends React.HTMLAttributes<HTMLParagraphElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLParagraphElement> {
+  children: ReactNode;
 }
 
-export const CollapsibleCardDescription = React.forwardRef<
+export const CollapsibleCardDescription = forwardRef<
   HTMLParagraphElement,
   CollapsibleCardDescriptionProps
 >(({ className, children, ...props }, ref) => {
@@ -238,13 +249,13 @@ export const CollapsibleCardDescription = React.forwardRef<
 CollapsibleCardDescription.displayName = "CollapsibleCardDescription";
 
 export interface CollapsibleCardContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
   isCollapsed?: boolean;
   __collapsibleType?: "content";
 }
 
-const CollapsibleCardContentComponent = React.forwardRef<
+const CollapsibleCardContentComponent = forwardRef<
   HTMLDivElement,
   CollapsibleCardContentProps
 >(({ className, children, isCollapsed, __collapsibleType, ...props }, ref) => {
@@ -273,11 +284,11 @@ export const CollapsibleCardContent = Object.assign(
 );
 
 export interface CollapsibleCardFooterProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
 }
 
-export const CollapsibleCardFooter = React.forwardRef<
+export const CollapsibleCardFooter = forwardRef<
   HTMLDivElement,
   CollapsibleCardFooterProps
 >(({ className, children, ...props }, ref) => {

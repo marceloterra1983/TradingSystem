@@ -5,7 +5,7 @@ import {
   AlertCircle,
   Info,
   AlertTriangle,
-} from "lucide-react";
+} from '@/icons';
 import { Toast as ToastType, useToastStore } from "../../store/toastStore";
 import { cn } from "../../lib/utils";
 

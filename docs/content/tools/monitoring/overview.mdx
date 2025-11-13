@@ -21,13 +21,29 @@ Comprehensive monitoring solution with metrics collection, visualization, alerti
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │  Services    │────▶│  Prometheus  │────▶│   Grafana    │
 │  (Metrics)   │     │  (Collector) │     │  (Visualize) │
-└──────────────┘     └──────┬───────┘     └──────────────┘
-                            │
-                            ▼
-                     ┌──────────────┐     ┌──────────────┐
-                     │ Alertmanager │────▶│ Alert Router │
-                     │  (Routing)   │     │(GitHub Issue)│
-                     └──────────────┘     └──────────────┘
+└──────────────┘     └──────┬───────┘     └──────┬───────┘
+                           │                    │
+                           ▼                    ▼
+                    ┌──────────────┐     ┌──────────────┐
+                    │ Alertmanager │────▶│ Alert Router │
+                    │  (Routing)   │     │(GitHub Issue)│
+                    └──────────────┘     └──────────────┘
+
+┌──────────────┐     ┌──────────────┐
+│ Docker Logs  │────▶│   Promtail   │
+└──────────────┘     │ (Log shipper)│
+                      └──────┬──────┘
+                             ▼
+                      ┌──────────────┐
+                      │    Loki      │
+                      │ (Log store)  │
+                      └──────────────┘
+                             │
+                             ▼
+                      ┌──────────────┐
+                      │   Grafana    │
+                      │ (Log UX)     │
+                      └──────────────┘
 ```
 
 ---
@@ -103,18 +119,35 @@ rate(http_requests_total{status=~"5.."}[5m])
 - Alert grouping (related alerts)
 - Notification routing (route to different channels)
 - Silencing and inhibition
+- Multi-receiver fanout (Alert Router + Slack + Email)
 
 **Configuration:**
 - **Config:** `tools/monitoring/alertmanager/alertmanager.yml`
+- **Env Vars:** `ALERTMANAGER_SLACK_WEBHOOK_URL`, `ALERTMANAGER_EMAIL_TO`, SMTP credentials
 
 **Routing:**
 ```yaml
 route:
-  receiver: 'alert-router'
-  group_by: ['alertname', 'severity']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 4h
+  receiver: alert-router-default
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: alert-router-critical
+      continue: true
+    - matchers:
+        - severity = "critical"
+      receiver: slack-critical
+      continue: true
+    - matchers:
+        - severity = "critical"
+      receiver: email-critical
+    - matchers:
+        - severity = "warning"
+      receiver: alert-router-warning
+      continue: true
+    - matchers:
+        - severity = "warning"
+      receiver: slack-warning
 ```
 
 **Access:** [http://localhost:9093](http://localhost:9093)
@@ -147,6 +180,36 @@ route:
 
 **Access:** [http://localhost:8080](http://localhost:8080)
 
+### 5. Loki (Port 3100)
+
+**Armazenamento de logs centralizado.**
+
+**Features:**
+- Armazenamento baseado em chunks (boltdb-shipper)
+- Retenção configurável (30 dias por padrão)
+- Compatível com queries LogQL via Grafana
+
+**Configuração:**
+- **Config:** `tools/monitoring/loki/config.yml`
+- **Dados:** Volume Docker `loki-data`
+
+**Access:** [http://localhost:3100/ready](http://localhost:3100/ready) (health endpoint)
+
+### 6. Promtail
+
+**Coletor de logs dos containers Docker.**
+
+**Features:**
+- Pipeline `docker` para parsing automático
+- Persistência de `positions` em `/var/promtail`
+- Rótulos `job=docker-containers` e `host=$HOSTNAME`
+
+**Configuração:**
+- **Config:** `tools/monitoring/promtail/config.yml`
+- Monta `/var/lib/docker/containers` + `docker.sock`
+
+**Access:** [http://localhost:9080/metrics](http://localhost:9080/metrics)
+
 ---
 
 ## 🚀 Quick Start
@@ -172,6 +235,8 @@ docker compose -f tools/monitoring/docker-compose.yml logs -f
 | Grafana | http://localhost:3000 | `admin / admin` |
 | Alertmanager | http://localhost:9093 | None |
 | Alert Router | http://localhost:8080 | None |
+| Loki | http://localhost:3100 | None (API) |
+| Promtail | http://localhost:9080/metrics | None |
 
 ### Stop Monitoring Stack
 

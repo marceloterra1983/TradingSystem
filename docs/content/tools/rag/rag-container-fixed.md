@@ -100,7 +100,7 @@ Pressione: Ctrl + Shift + R
 
 ### 2. Abrir a Página RAG
 ```
-http://localhost:3103/#/rag-services
+http://localhost:9080/#/rag-services
 ```
 
 ### 3. Testar Funcionalidades
@@ -265,6 +265,6 @@ npm run dev
 
 **Depois:**
 - Hard refresh no navegador (Ctrl+Shift+R)
-- Abrir http://localhost:3103/#/rag-services
+- Abrir http://localhost:9080/#/rag-services
 - Testar criação de nova coleção
 - Me dizer o resultado! 🎯

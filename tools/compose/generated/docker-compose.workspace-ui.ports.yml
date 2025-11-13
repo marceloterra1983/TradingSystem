@@ -14,7 +14,7 @@ x-tradingsystem-ports:
     description: "Visualização de especificações OpenAPI/AsyncAPI"
   dashboard:
     env: DASHBOARD_PORT
-    port: 3103
+    port: 9080
     protocol: http
     owner: "Frontend Guild"
     description: "Frontend principal do TradingSystem"

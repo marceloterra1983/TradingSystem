@@ -6,7 +6,7 @@ import {
   FileJson,
   ChevronDown,
   Server,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../ui/button";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 

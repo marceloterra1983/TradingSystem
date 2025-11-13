@@ -247,13 +247,13 @@ This checklist MUST be completed **before deploying** any Docker Compose stack, 
     Commands:
     curl http://localhost:4008/health  # TP-Capital
     curl http://localhost:4010/health  # Telegram Gateway
-    curl http://localhost:3103/        # Dashboard
+    curl http://localhost:9080/        # Dashboard (via Traefik)
 ```
 
 #### 6.5 Test Proxies (Frontend)
 ```bash
 [ ] Verify Vite proxies work correctly
-    Command: curl http://localhost:3103/api/tp-capital/health
+    Command: curl http://localhost:9080/api/tp-capital/health
     
     Expected: {"status":"healthy", ...}
 ```

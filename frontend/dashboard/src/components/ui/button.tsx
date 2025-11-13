@@ -1,11 +1,15 @@
-import * as React from "react";
+import {
+  forwardRef,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { cn } from "../../lib/utils";
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "outline" | "ghost" | "destructive" | "primary";
   size?: "sm" | "md" | "lg" | "icon";
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**
@@ -18,7 +22,7 @@ export interface ButtonProps
  * <Button variant="destructive">Kill Switch</Button>
  * ```
  */
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { className, variant = "default", size = "md", children, ...props },
     ref,

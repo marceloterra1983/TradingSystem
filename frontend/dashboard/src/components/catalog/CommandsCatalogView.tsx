@@ -35,7 +35,7 @@ import {
   Filter,
   Loader2,
   Search,
-} from "lucide-react";
+} from '@/icons';
 
 type CommandRecord = {
   command: string;

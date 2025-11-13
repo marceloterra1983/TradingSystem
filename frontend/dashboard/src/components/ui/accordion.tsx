@@ -1,5 +1,14 @@
-import * as React from "react";
-import { ChevronDown } from "lucide-react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  forwardRef,
+  type HTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from "react";
+import { ChevronDown } from '@/icons';
 import { cn } from "../../lib/utils";
 
 type AccordionContextValue = {
@@ -8,12 +17,10 @@ type AccordionContextValue = {
   onValueChange: (value: string) => void;
 };
 
-const AccordionContext = React.createContext<AccordionContextValue | null>(
-  null,
-);
+const AccordionContext = createContext<AccordionContextValue | null>(null);
 
 function useAccordionContext() {
-  const context = React.useContext(AccordionContext);
+  const context = useContext(AccordionContext);
   if (!context) {
     throw new Error("Accordion components must be used within Accordion");
   }
@@ -24,7 +31,7 @@ export interface AccordionProps {
   type?: "single" | "multiple";
   defaultValue?: string | string[];
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**
@@ -46,7 +53,7 @@ export function Accordion({
   className,
   children,
 }: AccordionProps) {
-  const [value, setValue] = React.useState<string | string[]>(
+  const [value, setValue] = useState<string | string[]>(
     type === "single"
       ? Array.isArray(defaultValue)
         ? defaultValue[0] || ""
@@ -56,7 +63,7 @@ export function Accordion({
         : [defaultValue],
   );
 
-  const onValueChange = React.useCallback(
+  const onValueChange = useCallback(
     (itemValue: string) => {
       setValue((prev) => {
         if (type === "single") {
@@ -81,15 +88,14 @@ export function Accordion({
 }
 
 // Context for AccordionItem value
-const AccordionItemContext = React.createContext<string>("");
+const AccordionItemContext = createContext<string>("");
 
-export interface AccordionItemProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const AccordionItem = React.forwardRef<
+export const AccordionItem = forwardRef<
   HTMLDivElement,
   AccordionItemProps
 >(({ value, className, children, ...props }, ref) => {
@@ -113,16 +119,16 @@ export const AccordionItem = React.forwardRef<
 AccordionItem.displayName = "AccordionItem";
 
 export interface AccordionTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
 }
 
-export const AccordionTrigger = React.forwardRef<
+export const AccordionTrigger = forwardRef<
   HTMLButtonElement,
   AccordionTriggerProps
 >(({ className, children, ...props }, ref) => {
   const context = useAccordionContext();
-  const itemValue = React.useContext(AccordionItemContext);
+  const itemValue = useContext(AccordionItemContext);
 
   const isOpen =
     context.type === "single"
@@ -157,16 +163,16 @@ export const AccordionTrigger = React.forwardRef<
 AccordionTrigger.displayName = "AccordionTrigger";
 
 export interface AccordionContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+  extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
 }
 
-export const AccordionContent = React.forwardRef<
+export const AccordionContent = forwardRef<
   HTMLDivElement,
   AccordionContentProps
 >(({ className, children, ...props }, ref) => {
   const context = useAccordionContext();
-  const itemValue = React.useContext(AccordionItemContext);
+  const itemValue = useContext(AccordionItemContext);
 
   const isOpen =
     context.type === "single"

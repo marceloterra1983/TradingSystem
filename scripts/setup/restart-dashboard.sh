@@ -11,6 +11,8 @@ set -e
 PROJECT_ROOT="/home/marce/Projetos/TradingSystem"
 LOG_DIR="$PROJECT_ROOT/frontend/dashboard/logs"
 LOG_FILE="$LOG_DIR/dev-server.log"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_DASHBOARD_PORT=3103
 
 # Create logs directory if doesn't exist
 mkdir -p "$LOG_DIR"
@@ -21,12 +23,15 @@ echo "=================================================="
 echo ""
 
 # 1. Kill process on port 3103
-echo "1. Liberando porta 3103..."
-lsof -ti:3103 | xargs kill -9 2>/dev/null || true
+echo "1. Liberando porta ${DASHBOARD_PORT}..."
+lsof -ti:"${DASHBOARD_PORT}" | xargs kill -9 2>/dev/null || true
+if [ "$LEGACY_DASHBOARD_PORT" != "$DASHBOARD_PORT" ]; then
+  lsof -ti:"${LEGACY_DASHBOARD_PORT}" | xargs kill -9 2>/dev/null || true
+fi
 pkill -9 -f "vite.*dashboard" 2>/dev/null || true
 pkill -9 -f "npm.*dashboard.*dev" 2>/dev/null || true
 sleep 2
-echo "   ✅ Porta 3103 liberada"
+echo "   ✅ Porta ${DASHBOARD_PORT} liberada"
 echo ""
 
 # 2. Start Dashboard
@@ -54,12 +59,12 @@ echo ""
 
 # 4. Check if running
 echo "4. Verificando status..."
-if curl -s http://localhost:3103 > /dev/null 2>&1; then
+if curl -s http://localhost:${DASHBOARD_PORT} > /dev/null 2>&1; then
     echo "   ✅ Dashboard respondendo!"
     echo ""
     
     # Check for Vite in logs
-    if grep -q "Local:.*http://localhost:3103" "$LOG_FILE" 2>/dev/null; then
+    if grep -q "Local:.*http://localhost:${DASHBOARD_PORT}" "$LOG_FILE" 2>/dev/null; then
         echo "   ✅ Vite dev server ativo"
         echo ""
         grep "Local:" "$LOG_FILE" | tail -1
@@ -74,7 +79,7 @@ echo "=================================================="
 echo "Dashboard Status"
 echo "=================================================="
 echo ""
-echo "  🌐 URL: http://localhost:3103"
+echo "  🌐 URL: http://localhost:${DASHBOARD_PORT}"
 echo "  📋 PID: $DASH_PID"
 echo "  📝 Log: $LOG_FILE"
 echo ""
@@ -83,7 +88,7 @@ echo "  Ver logs: tail -f $LOG_FILE"
 echo "  Parar: kill $DASH_PID"
 echo ""
 echo "Próximo passo:"
-echo "  Abrir http://localhost:3103 no navegador"
+echo "  Abrir http://localhost:${DASHBOARD_PORT} no navegador"
 echo "  Navegar para TP Capital e testar sincronização"
 echo ""
 echo "=================================================="

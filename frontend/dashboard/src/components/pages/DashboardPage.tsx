@@ -8,7 +8,7 @@ import {
 } from "../ui/card";
 import { useTradingStore } from "../../store/appStore";
 import type { Trade } from "../../store/appStore";
-import { TrendingUp, TrendingDown, Activity, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, DollarSign } from '@/icons';
 import { cn } from "../../lib/utils";
 
 /**

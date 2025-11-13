@@ -18,21 +18,30 @@ const __dirname = path.dirname(__filename);
 // Budget thresholds (gzipped sizes in KB)
 // TODO: Gradually reduce these as bundle is optimized
 const BUDGETS = {
-  'index': 15,           // Main entry point
-  'react-vendor': 50,    // React core
-  'markdown-vendor': 5,  // Markdown (lazy loaded)
-  'ui-radix': 25,        // Radix UI
-  'icons-vendor': 10,    // Lucide icons
-  'utils-vendor': 25,    // Utilities
-  'dnd-vendor': 20,      // DnD Kit
-  'state-vendor': 5,     // Zustand + React Query
-  'vendor': 350,         // Other vendors (current: ~320KB, needs optimization)
-  'total': 850,          // Total bundle size (current: ~806KB, target: 400KB)
+  'index': 12,                 // Main entry point
+  'react-vendor': 42,          // React core
+  'markdown-vendor': 5,        // Markdown (lazy loaded)
+  'ui-radix': 24,              // Radix UI compound components
+  'icons-vendor': 8,           // Lucide icons
+  'utils-vendor': 20,          // Utilities
+  'dnd-vendor': 18,            // DnD Kit
+  'state-vendor': 5,           // Zustand + React Query
+  'vendor': 200,               // Remaining vendor chunk
+  'aiAgentsDirectory-CH8l': 180, // Lazy chunk - target to refactor (phase D follow-up)
+  'AgentsCommandsCatalogView': 150, // Catalog lazy chunk
+  'commands-db': 90,           // Commands data chunk
+  'charts-vendor': 80,         // Charting libraries
+  'total': 940,                // Total bundle size (Phase D target: <900KB)
 };
 
 const WARNINGS = {
-  'vendor': 'Large vendor chunk detected! Consider splitting further or removing unused dependencies.',
-  'total': 'Total bundle size exceeds budget! Review large chunks and lazy load when possible.',
+  'vendor': 'Large vendor chunk detectado! Avalie dividir dependências ou mover uso para carregamento dinâmico.',
+  'aiAgentsDirectory-CH8l':
+    'Chunk dos agentes Claude ainda muito grande. Planeje particionar dados ou usar streaming sob demanda.',
+  'AgentsCommandsCatalogView':
+    'Chunk do catálogo de comandos com peso elevado. Avalie dividir componentes ou usar busca paginada.',
+  'commands-db': 'Banco de comandos carregado como JSON pesado. Investigue geração incremental ou API dedicada.',
+  'total': 'Bundle total acima da meta. Revise chunks acima do orçamento e considere lazy loading adicional.',
 };
 
 function analyzeBuildOutput() {

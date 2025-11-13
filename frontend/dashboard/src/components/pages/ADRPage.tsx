@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { FileText } from "lucide-react";
+import { FileText } from '@/icons';
 
 export function ADRPage() {
   const sections = [

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink } from '@/icons';
 import { Button } from "../ui/button";
 import EscopoPageNew from "./EscopoPageNew";
 import APIViewerPage from "./APIViewerPage";

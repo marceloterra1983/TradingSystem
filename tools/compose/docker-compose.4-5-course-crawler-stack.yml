@@ -117,7 +117,6 @@ services:
     ports:
       - "${COURSE_CRAWLER_APP_PORT:-4201}:80"
     networks:
-      - default
       - tradingsystem_backend  # Connect to Dashboard network for iframe access
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost || exit 1"]

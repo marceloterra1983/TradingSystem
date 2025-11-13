@@ -7,7 +7,7 @@ import {
   Search,
   Trash2,
   Undo,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import {

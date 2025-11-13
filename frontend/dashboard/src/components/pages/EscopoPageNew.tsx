@@ -6,7 +6,7 @@ import {
   Building2,
   ListChecks,
   AlertTriangle,
-} from "lucide-react";
+} from '@/icons';
 
 /**
  * Escopo Page (New) - TradingSystem Project Overview

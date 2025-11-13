@@ -177,7 +177,7 @@ lastReviewed: "2025-11-08"
 2. **Diagnose Root Cause**
    ```bash
    # Test the proxy endpoint
-   curl -s http://localhost:3103/api/workspace/categories | jq '.success'
+   curl -s http://localhost:9080/api/workspace/categories | jq '.success'
    # Expected: true
    # If fails: Proxy misconfigured
 
@@ -218,7 +218,7 @@ lastReviewed: "2025-11-08"
    docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build
 
    # Test endpoint
-   curl -s http://localhost:3103/api/workspace/categories | jq '.success'
+   curl -s http://localhost:9080/api/workspace/categories | jq '.success'
    # Must return: true
    ```
 
@@ -257,7 +257,7 @@ lastReviewed: "2025-11-08"
    ```bash
    bash scripts/env/validate-env.sh
    docker compose up -d --build
-   curl http://localhost:3103/api/my-service/test
+   curl http://localhost:9080/api/my-service/test
    ```
 
 lastReviewed: "2025-11-08"
@@ -274,7 +274,7 @@ Before marking any proxy-related task as complete:
 - [ ] ✅ Browser-facing URL uses **relative path**
 - [ ] ✅ **Validation script** passes (`bash scripts/env/validate-env.sh`)
 - [ ] ✅ Container **rebuilt** with `--build` flag
-- [ ] ✅ Proxy endpoint **returns data** (`curl http://localhost:3103/api/...`)
+- [ ] ✅ Proxy endpoint **returns data** (`curl http://localhost:9080/api/...`)
 - [ ] ✅ No **browser console errors**
 - [ ] ✅ **ESLint** passes (no hardcoded URL warnings)
 - [ ] ✅ **Service health check** passes
@@ -318,7 +318,7 @@ lastReviewed: "2025-11-08"
                             │ (relative path - no hostname)
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Vite Dev Server (Port 3103 on host)               │
+│           Vite Dev Server (Port 9080 via Traefik)           │
 │                                                              │
 │  - Reads process.env (server-side variables)               │
 │  - Has access to Docker network DNS                         │
@@ -371,7 +371,7 @@ lastReviewed: "2025-11-08"
 
 **Verification:**
 \`\`\`bash
-$ curl http://localhost:3103/api/workspace/categories | jq '.success'
+$ curl http://localhost:9080/api/workspace/categories | jq '.success'
 true
 \`\`\`
 
@@ -411,9 +411,9 @@ docker exec dashboard-ui env | grep -E "(PROXY_TARGET|API_URL)" | sort
 bash scripts/env/validate-env.sh
 
 # Test proxy endpoints
-curl -s http://localhost:3103/api/workspace/items | jq '.'
-curl -s http://localhost:3103/api/workspace/categories | jq '.'
-curl -s http://localhost:3103/api/tp-capital | jq '.'
+curl -s http://localhost:9080/api/workspace/items | jq '.'
+curl -s http://localhost:9080/api/workspace/categories | jq '.'
+curl -s http://localhost:9080/api/tp-capital | jq '.'
 
 # Test backend directly (from container)
 docker exec workspace-api wget -q -O- http://localhost:3200/api/items | jq '.'
@@ -473,7 +473,7 @@ this.baseUrl = '/api/[service-name]/[endpoint]';
 
 **One-line validation:**
 ```bash
-bash scripts/env/validate-env.sh && curl -s http://localhost:3103/api/[service]/[endpoint] | jq '.success'
+bash scripts/env/validate-env.sh && curl -s http://localhost:9080/api/[service]/[endpoint] | jq '.success'
 ```
 
 **One-line rebuild:**
@@ -499,7 +499,7 @@ If user reports "API Indisponível":
 2. Replace with `/api/service-name/endpoint`
 3. Run `bash scripts/env/validate-env.sh`
 4. Rebuild: `docker compose ... up -d --build`
-5. Test: `curl http://localhost:3103/api/... | jq '.success'`
+5. Test: `curl http://localhost:9080/api/... | jq '.success'`
 6. Done ✅
 
 **Never violate:** No `VITE_` prefix on container hostnames. Always use relative paths in browser code.

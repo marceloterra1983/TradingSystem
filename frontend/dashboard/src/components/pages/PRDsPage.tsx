@@ -7,7 +7,7 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { ExternalLink, Loader2, AlertTriangle } from "lucide-react";
+import { ExternalLink, Loader2, AlertTriangle } from '@/icons';
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

@@ -12,7 +12,7 @@ import {
   CollapsibleCardContent,
 } from "../../../ui/collapsible-card";
 import CategoriesCRUDCard from "../CategoriesCRUDCard";
-import { Folder } from "lucide-react";
+import { Folder } from '@/icons';
 
 export function CategoriesSection() {
   return (

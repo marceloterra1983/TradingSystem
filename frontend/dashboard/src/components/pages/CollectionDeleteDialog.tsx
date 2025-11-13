@@ -14,7 +14,7 @@ import {
   Database,
   FileText,
   Package,
-} from "lucide-react";
+} from '@/icons';
 import {
   Dialog,
   DialogContent,

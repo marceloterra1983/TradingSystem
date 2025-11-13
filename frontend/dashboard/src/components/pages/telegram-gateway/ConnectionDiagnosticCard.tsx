@@ -4,7 +4,7 @@ import {
   XCircle,
   Info,
   ExternalLink,
-} from "lucide-react";
+} from '@/icons';
 import {
   Card,
   CardContent,

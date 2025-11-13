@@ -5,7 +5,7 @@ import {
   LayoutList,
   MoveLeft,
   MoveRight,
-} from "lucide-react";
+} from '@/icons';
 import {
   Dialog,
   DialogContent,

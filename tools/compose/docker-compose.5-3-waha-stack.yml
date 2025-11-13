@@ -250,4 +250,4 @@ volumes:
 
 networks:
   waha_backend:
-    driver: bridge
+    external: true

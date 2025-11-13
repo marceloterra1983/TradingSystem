@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { History, Play } from "lucide-react";
+import { History, Play } from '@/icons';
 
 export function BacktestingPage() {
   const sections = [

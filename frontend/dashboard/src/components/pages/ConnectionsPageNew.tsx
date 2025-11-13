@@ -1,4 +1,4 @@
-import { Activity, Network, PlugZap, ShieldCheck } from "lucide-react";
+import { Activity, Network, PlugZap, ShieldCheck } from '@/icons';
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import {
   Card,

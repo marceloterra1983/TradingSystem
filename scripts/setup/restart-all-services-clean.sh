@@ -6,6 +6,9 @@
 
 set -e
 
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_DASHBOARD_PORT=3103
+
 echo "=========================================================="
 echo "🔄 Restart Completo - Todos os Serviços"
 echo "=========================================================="
@@ -20,13 +23,13 @@ echo ""
 
 # 2. Verificar portas
 echo "2️⃣  Verificando portas..."
-for port in 4005 4010 3103; do
+for port in 4005 4010 "${DASHBOARD_PORT}" "${LEGACY_DASHBOARD_PORT}"; do
   if lsof -ti:$port > /dev/null 2>&1; then
     echo "   ⚠️  Porta $port ainda em uso, liberando..."
     lsof -ti:$port | xargs kill -9 2>/dev/null || true
   fi
 done
-echo "   ✅ Portas 4005, 4010, 3103 livres"
+echo "   ✅ Portas 4005, 4010, ${DASHBOARD_PORT} livres (3103 tratado como legado)"
 echo ""
 
 # 3. Iniciar Telegram Gateway
@@ -66,7 +69,8 @@ fi
 echo ""
 
 # 5. Iniciar Dashboard
-echo "5️⃣  Iniciando Dashboard (porta 3103)..."
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+echo "5️⃣  Iniciando Dashboard (porta ${DASHBOARD_PORT})..."
 cd /home/marce/Projetos/TradingSystem/frontend/dashboard
 mkdir -p logs
 nohup npm run dev > logs/dashboard.log 2>&1 &
@@ -74,7 +78,7 @@ DASHBOARD_PID=$!
 echo "   PID: $DASHBOARD_PID"
 sleep 15
 
-if curl -I http://localhost:3103 2>/dev/null | grep -q "200\|304"; then
+if curl -I "http://localhost:${DASHBOARD_PORT}" 2>/dev/null | grep -q "200\\|304"; then
   echo "   ✅ Dashboard ONLINE"
 else
   echo "   ⚠️  Dashboard pode demorar mais - verifique manualmente"
@@ -89,7 +93,7 @@ echo ""
 echo "📊 Status:"
 echo "   • Telegram Gateway: http://localhost:4010 (PID: $GATEWAY_PID)"
 echo "   • TP Capital:       http://localhost:4005 (PID: $TP_CAPITAL_PID)"
-echo "   • Dashboard:        http://localhost:3103 (PID: $DASHBOARD_PID)"
+echo "   • Dashboard:        http://localhost:${DASHBOARD_PORT} (PID: $DASHBOARD_PID)"
 echo ""
 echo "🧪 Teste de Sincronização:"
 echo ""
@@ -105,7 +109,7 @@ echo "🎉 Restart Completo Concluído!"
 echo "=========================================================="
 echo ""
 echo "📝 Próximos Passos:"
-echo "   1. Abrir Dashboard: http://localhost:3103/tp-capital"
+echo "   1. Abrir Dashboard: http://localhost:${DASHBOARD_PORT}/tp-capital"
 echo "   2. Clicar em 'Checar Mensagens'"
 echo "   3. Verificar se funciona sem erro de porta"
 echo ""

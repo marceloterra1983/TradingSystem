@@ -46,7 +46,12 @@ fi
 
 cd "$PROJECT_ROOT"
 
-# Load versioned defaults + generated .env.shared for port mapping
+# Load environment files in order: main .env, then defaults, then shared
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    . "$PROJECT_ROOT/.env"
+    set +a
+fi
 if [ -f "$PROJECT_ROOT/config/.env.defaults" ]; then
     set -a
     . "$PROJECT_ROOT/config/.env.defaults"

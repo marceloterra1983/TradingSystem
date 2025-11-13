@@ -4,7 +4,7 @@ import {
   Repeat,
   ShieldAlert,
   TrendingUp,
-} from "lucide-react";
+} from '@/icons';
 import {
   CollapsibleCard,
   CollapsibleCardContent,

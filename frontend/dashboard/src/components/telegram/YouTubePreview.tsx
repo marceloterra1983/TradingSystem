@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Youtube, Play, ExternalLink } from "lucide-react";
+import { Youtube, Play, ExternalLink } from '@/icons';
 
 interface YouTubeAuthor {
   name: string;

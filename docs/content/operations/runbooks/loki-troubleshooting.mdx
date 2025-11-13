@@ -1,0 +1,105 @@
+---
+title: Loki & Promtail Troubleshooting
+description: Guia operacional para investigar falhas no pipeline de logs centralizado (Promtail → Loki → Grafana).
+tags:
+  - observability
+  - runbook
+  - loki
+owner: SRE
+lastReviewed: "2025-11-12"
+---
+
+# Loki & Promtail Troubleshooting
+
+## 🧭 Visão Geral
+
+```
+Docker JSON Logs → Promtail (9080) → Loki (3100) → Grafana Datasource “Loki”
+```
+
+## ✅ Checklist rápido
+
+1. `docker compose -f tools/monitoring/docker-compose.yml ps promtail loki`
+2. Health endpoints:
+   - Promtail: `curl http://localhost:9080/ready`
+   - Loki: `curl http://localhost:3100/ready`
+3. Grafana > Datasources > Loki → botão **Save & test**
+
+## 🔍 Diagnóstico Promtail
+
+- Logs:  
+  ```bash
+  docker compose -f tools/monitoring/docker-compose.yml logs -f promtail
+  ```
+- Conferir posição do arquivo: `/var/promtail/positions.yaml`
+- Certificar que `docker.sock` está montado:
+  ```bash
+  docker inspect mon-promtail --format '{{ json .Mounts }}'
+  ```
+- Query Loki temporária:
+  ```bash
+  docker compose -f tools/monitoring/docker-compose.yml exec promtail promtail --version
+  ```
+
+### Erros comuns
+
+| Mensagem | Ação |
+|----------|------|
+| `permission denied` | Verificar permissões do host `/var/lib/docker/containers` |
+| `client error: 404` | Confirmar URL do Loki (`http://loki:3100/loki/api/v1/push`) |
+| `too many open files` | Ajustar `ulimit -n` no host (sugerido 65536) |
+
+## 🔍 Diagnóstico Loki
+
+- Logs:
+  ```bash
+  docker compose -f tools/monitoring/docker-compose.yml logs -f loki
+  ```
+- Verificar armazenamento:
+  ```bash
+  docker compose -f tools/monitoring/docker-compose.yml exec loki ls -R /var/loki | head
+  ```
+- Testar consulta:
+  ```bash
+  curl -G http://localhost:3100/loki/api/v1/query \
+    --data-urlencode 'query={job="docker-containers"}|= "ERROR"' \
+    --data-urlencode 'limit=20'
+  ```
+
+### Erros comuns
+
+| Mensagem | Ação |
+|----------|------|
+| `failed to flush user` | Checar espaço em disco do volume `loki-data` |
+| `data corruption` | Limpar cache: `rm -rf /var/loki/cache/*` e reiniciar |
+| `rpc error` | Garantir `common.ring` usando `inmemory` (não misturar instâncias) |
+
+## 📊 Grafana
+
+- Dashboard: `Logs / Loki Live`
+- Query builder:
+  ```logql
+  {container="workspace-api"} |= "ERROR"
+  ```
+- Exportar logs: `Explore → Download JSON`
+
+## 🛠️ Recuperação
+
+1. Reiniciar promtail:
+   ```bash
+   docker compose -f tools/monitoring/docker-compose.yml restart promtail
+   ```
+2. Reiniciar loki (após backup):
+   ```bash
+   docker compose -f tools/monitoring/docker-compose.yml stop loki
+   sudo tar -czf loki-backup.tgz ./tools/monitoring/loki-data
+   docker compose -f tools/monitoring/docker-compose.yml up -d loki
+   ```
+3. Re-testar Grafana datasource.
+
+## 📌 Pós-Incidente
+
+- Registrar incidente na issue aberta pelo Alert Router (se aplicável).
+- Atualizar este runbook em caso de nova causa raiz.
+- Considerar alerta específico no Prometheus: `loki_request_duration_seconds`.
+

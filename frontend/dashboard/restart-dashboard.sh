@@ -3,7 +3,7 @@
 echo "🔄 Restarting Dashboard to pick up environment changes..."
 
 # Find and kill existing dashboard process
-DASHBOARD_PID=$(ps aux | grep -E "vite.*3103" | grep -v grep | awk '{print $2}' | head -1)
+DASHBOARD_PID=$(ps aux | grep -E "vite.*9080" | grep -v grep | awk '{print $2}' | head -1)
 
 if [ -n "$DASHBOARD_PID" ]; then
   echo "📍 Found dashboard running (PID: $DASHBOARD_PID)"
@@ -30,12 +30,12 @@ fi
 
 # Start dashboard
 cd "$(dirname "$0")"
-echo "🚀 Starting dashboard on port 3103..."
+echo "🚀 Starting dashboard on port 9080..."
 npm run dev > /tmp/dashboard.log 2>&1 &
 NEW_PID=$!
 
 sleep 2
 
 echo "✅ Dashboard started (PID: $NEW_PID)"
-echo "📊 Access at: http://localhost:3103/#/rag-services"
+echo "📊 Access at: http://localhost:9080/#/rag-services"
 echo "📝 Logs: tail -f /tmp/dashboard.log"

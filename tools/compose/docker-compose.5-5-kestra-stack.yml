@@ -118,7 +118,7 @@ networks:
   tradingsystem_backend:
     external: true
   kestra_internal:
-    driver: bridge
+    external: true
 
 volumes:
   kestra-postgres-data:

@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Activity, TrendingUp } from "lucide-react";
+import { Activity, TrendingUp } from '@/icons';
 
 /**
  * Market Overview Page - Current market conditions

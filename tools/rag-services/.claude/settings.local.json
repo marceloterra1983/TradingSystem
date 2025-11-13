@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(curl:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run lint:fix:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "memory",
+    "fetch",
+    "browser-server",
+    "filesystem",
+    "chrome-devtools",
+    "firecrawl-mcp"
+  ]
+}

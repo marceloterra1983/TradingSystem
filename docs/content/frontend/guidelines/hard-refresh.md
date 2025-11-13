@@ -55,12 +55,12 @@ curl http://localhost:3402/api/v1/rag/directories | jq '.data.total'
 
 ### 2. Frontend Carregando
 ```bash
-curl -s http://localhost:3103 > /dev/null && echo "OK"
+curl -s http://localhost:9080 > /dev/null && echo "OK"
 # Expected: OK ✅
 ```
 
 ### 3. Página RAG Services
-Abra: **http://localhost:3103/#/rag-services**
+Abra: **http://localhost:9080/#/rag-services**
 
 Você deve ver:
 - ✅ Seção "RAG Status" (primeira)
@@ -111,7 +111,7 @@ Pressione `F12` e vá na aba **Console**
 - ✅ Se não ver erros → página carregou bem!
 
 ### Passo 4: Testar Formulário
-1. Navegar para: http://localhost:3103/#/rag-services
+1. Navegar para: http://localhost:9080/#/rag-services
 2. Scroll até "Gerenciamento de Coleções" (ícone roxo Boxes)
 3. Clicar "Nova Coleção"
 4. Verificar se o dialog abre
@@ -184,10 +184,10 @@ Pressione `F12` e vá na aba **Console**
 - ✅ Health: healthy
 - ✅ Modelos: 2 retornados (nomic, mxbai)
 - ✅ Diretórios: 2 bases disponíveis
-- ✅ CORS configurado para localhost:3103
+- ✅ CORS configurado para localhost:9080 (3103 permanece legado apenas para casos antigos)
 
 **Frontend:**
-- ✅ Dashboard rodando na porta 3103
+- ✅ Dashboard rodando na porta 9080 (via Traefik)
 - ✅ Vite servindo arquivos
 - ⏳ Aguardando hard refresh do navegador
 

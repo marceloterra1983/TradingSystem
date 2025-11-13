@@ -25,7 +25,7 @@ import {
   ChevronDown,
   Loader2,
   AlertTriangle,
-} from "lucide-react";
+} from '@/icons';
 import documentationService, {
   DocsHybridItem,
 } from "../../services/documentationService";

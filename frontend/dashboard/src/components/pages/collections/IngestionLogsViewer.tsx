@@ -30,7 +30,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-} from "lucide-react";
+} from '@/icons';
 import { Badge } from "../../ui/badge";
 import {
   Table,

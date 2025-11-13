@@ -1,0 +1,73 @@
+---
+title: Alertmanager Escalation Runbook
+description: Procedimento operacional para responder a alertas críticos em múltiplos canais (GitHub, Slack, Email).
+tags:
+  - observability
+  - runbook
+  - alertmanager
+owner: SRE
+lastReviewed: "2025-11-12"
+---
+
+# Alertmanager Escalation Runbook
+
+> **Escopo:** alertas gerados pelo stack Prometheus → Alertmanager → Alert Router com fanout para Slack e e-mail.
+
+## 🚨 Detecção
+
+1. **GitHub Issue** criado automaticamente pelo Alert Router (`trading-alerts` label).
+2. **Slack** recebe mensagem no canal `{{ env "ALERTMANAGER_SLACK_CHANNEL" }}`:
+   - Título: `[STATUS] ALERTNAME`
+   - Emoji `:rotating_light:` para `critical`, `:warning:` para `warning`.
+3. **Email** enviado para `ALERTMANAGER_EMAIL_TO` com resumo e descrição formatados em HTML.
+
+## ✅ Primeira resposta (T+5 minutos)
+
+1. Reconhecer o alerta no Slack com reação ✅.
+2. Atribuir a issue no GitHub para o on-call.
+3. Registrar no comentário da issue:
+   - Hora do reconhecimento
+   - Canal de contato escolhido (Slack huddle / Zoom)
+
+## 🔍 Investigação
+
+1. Abrir dashboards no Grafana:
+   - `TradingSystem Overview`
+   - `Logs / Loki Live`
+2. Se necessário, rodar query LogQL:
+
+```logql
+{job="docker-containers", container=~"workspace-api|telegram-gateway"} |~ "ERROR"
+```
+
+3. Validar dependências (Prometheus targets, status Docker).
+
+## 🛠️ Mitigação
+
+- **Restart controlado:** `docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml restart <service>`
+- **Feature flag:** usar `config/services-manifest.json` se disponível.
+- **Escalonamento:** se MTTR > 30 min, acionar `ops@tradingsystem.local` e Product Manager.
+
+## 📦 Encerramento
+
+1. Confirmar resolução → Alertmanager envia `resolved`.
+2. Alert Router fecha issue automaticamente.
+3. Adicionar nota pós-mortem na issue:
+   - Causa raiz
+   - Ação corretiva
+   - Follow-up (ticket ou ADR)
+
+## 🧾 Logs e Artefatos
+
+- Logs brutos: Loki (`http://localhost:3100`)
+- Issue GitHub: repos `TradingSystem`
+- Email: caixa `ops@tradingsystem.local`
+
+---
+
+**Checklist semanal**
+
+- [ ] Validar variáveis `ALERTMANAGER_*` no `.env`.
+- [ ] Rodar `docker compose -f tools/monitoring/docker-compose.yml logs alertmanager`.
+- [ ] Testar webhook Slack com `amtool alert add`.
+

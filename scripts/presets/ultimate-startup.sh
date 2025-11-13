@@ -16,7 +16,7 @@ echo ""
 
 # Clean ports
 echo "0️⃣ Cleaning conflicting ports..."
-echo "   Killing processes on: ${DASHBOARD_PORT}, 3103, 3200, 3400, 3401, 3500, 3600, 4008, 9090..."
+echo "   Killing processes on: ${DASHBOARD_PORT} (dashboard atual), 3103 (porta legada), 3200, 3400, 3401, 3500, 3600, 4008, 9090..."
 for PORT in "${DASHBOARD_PORT}" 3103 3200 3400 3401 3500 3600 4008 9090; do
     lsof -ti:$PORT | xargs kill -9 2>/dev/null || true
 done

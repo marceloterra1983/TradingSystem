@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Save, RefreshCcw } from "lucide-react";
+import { Save, RefreshCcw } from '@/icons';
 
 export function BackupRestorePage() {
   const sections = [

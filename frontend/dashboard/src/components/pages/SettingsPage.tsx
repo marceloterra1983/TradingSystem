@@ -8,7 +8,7 @@ import {
   Shield,
   Database,
   Zap,
-} from "lucide-react";
+} from '@/icons';
 
 /**
  * Settings Page - System configuration and user preferences

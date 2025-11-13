@@ -1,0 +1,764 @@
+{
+  "metadata": {
+    "scan_date": "2025-11-12T10:35:08.903126",
+    "docs_directory": [
+      "/home/marce/Projetos/TradingSystem/docs/content"
+    ],
+    "title_threshold": 0.8,
+    "summary_threshold": 0.7,
+    "content_threshold": 0.9,
+    "script_version": "1.0.0"
+  },
+  "summary": {
+    "total_files": 54,
+    "files_with_frontmatter": 49,
+    "exact_duplicates": 0,
+    "total_exact_duplicate_files": 0,
+    "similar_titles": 1,
+    "similar_summaries": 0,
+    "similar_content": 0,
+    "similar_filenames": 0,
+    "cross_domain_duplicates": 0
+  },
+  "exact_duplicates": [],
+  "similar_titles": [
+    {
+      "file1": {
+        "file_path": "docs/content/tools/documentation/docusaurus/ports-strategy.md",
+        "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/ports-strategy.md",
+        "title": "Docusaurus Ports Strategy",
+        "summary": null,
+        "domain": null,
+        "type": null,
+        "status": null,
+        "has_frontmatter": true,
+        "content_preview": "Estratégia de Portas do Docusaurus Data: 2025-10-29   Status: ✅ Padronizado   Versão: 1.0 --- 🎯 Estratégia Unificada Exposição - Desenvolvimento local: porta 3400 (servidor Docusaurus/Vite) - Produção (containers): rota Traefik http://localhost:9080/docs (sem porta dedicada) Modo Desenvolvimento (Local) bash cd docs npm run docs:dev  Roda em http://localhost:3400 - Hot reload habilitado - Watch mode para mudanças em arquivos - Fast refresh para desenvolvimento rápido - Acessível diretamente em h",
+        "content_hash": "8eb9ac78861872edea30bb6eb1e1309a"
+      },
+      "file2": {
+        "file_path": "docs/content/tools/documentation/docusaurus/ports-summary.md",
+        "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/ports-summary.md",
+        "title": "Docusaurus Ports Summary",
+        "summary": null,
+        "domain": null,
+        "type": null,
+        "status": null,
+        "has_frontmatter": true,
+        "content_preview": "Resumo da Padronização de Portas - Docusaurus Data: 2025-10-29   Status: ✅ COMPLETO --- ✅ Mudanças Aplicadas 1. Frontend Dashboard - ✅ Arquivo: frontend/dashboard/src/components/pages/DocusaurusPage.tsx - ✅ Mudança: Removida referência à porta 3205 - ✅ Estratégia: Sempre usa /docs (proxy Vite) → http://localhost:3400 2. Configuração NGINX - ✅ Arquivo: tools/compose/documentation/nginx.conf - ✅ Mudança: Configurado para servir /next/ como versão padrão - ✅ Estratégia: Redireciona / → /next/ (vers",
+        "content_hash": "8774ebc71fa5fe00d7854020521dce77"
+      },
+      "title_similarity": 0.816,
+      "title1": "Docusaurus Ports Strategy",
+      "title2": "Docusaurus Ports Summary",
+      "recommendation": "Review for potential consolidation"
+    }
+  ],
+  "similar_summaries": [],
+  "similar_content": [],
+  "similar_filenames": [],
+  "domain_analysis": {
+    "cross_domain_duplicates": [],
+    "domain_specific_duplicates": {},
+    "domain_patterns": {
+      "null": {
+        "total_files": 39,
+        "files_with_duplicates": 0
+      },
+      "backend": {
+        "total_files": 1,
+        "files_with_duplicates": 0
+      },
+      "governance": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      },
+      "development": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      },
+      "database": {
+        "total_files": 1,
+        "files_with_duplicates": 0
+      },
+      "frontend": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      },
+      "architecture": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      },
+      "infrastructure": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      },
+      "development-process": {
+        "total_files": 1,
+        "files_with_duplicates": 0
+      },
+      "rag-services": {
+        "total_files": 2,
+        "files_with_duplicates": 0
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "medium",
+      "category": "similar_titles",
+      "description": "Found 1 pairs with similar titles",
+      "action": "Review for potential consolidation",
+      "affected_files": 2
+    }
+  ],
+  "file_data": [
+    {
+      "file_path": "docs/content/apps/tp-capital/architecture/TELEGRAM-ARCHITECTURE-SUMMARY.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/architecture/TELEGRAM-ARCHITECTURE-SUMMARY.md",
+      "title": null,
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": false,
+      "content_preview": "📊 Telegram Architecture Review - Executive Summary Date: 2025-11-03 | Status: Production-Ready | Grade: B+ (83/100) 🟢 > Full Report: telegram-architecture-2025-11-03.md --- 🎯 Quick Stats | Metric | Value | Status | |--------|-------|--------| | Overall Grade | 83/100 | 🟢 Good | | Test Coverage | 40% | 🔴 Critical | | End-to-End Latency | 5-6s | ✅ Excellent | | Availability | 99.0% | 🟡 Acceptable | | Security Score | 82/100 | 🟢 Good | | Lines of Code | ~5,000 | 📊 Moderate | --- ✅ Strengths 1. Clea",
+      "content_hash": "b00a09eceb7274ece1262ff58b84ccc3"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/architecture/TELEGRAM-DATABASE-SUMMARY.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/architecture/TELEGRAM-DATABASE-SUMMARY.md",
+      "title": null,
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": false,
+      "content_preview": "🗄️ Telegram Database Decision - Executive Summary Date: 2025-11-03 | Status: Recommendation Ready | Grade: B+ (85/100) > Full Analysis: telegram-database-architecture-2025-11-03.md --- 🎯 The Question \"Should we change the database for Telegram Gateway to improve performance?\" ✅ The Answer NO, keep TimescaleDB but implement 3-tier storage strategy (Redis + Queue + TimescaleDB). --- 📊 Current State What We Have Today Telegram → Gateway → TimescaleDB (Only) → TP Capital Polling                     ",
+      "content_hash": "edc06d00673dd1c6ff1a70ead1ca43f5"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/architecture/telegram-architecture-2025-11-03.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/architecture/telegram-architecture-2025-11-03.md",
+      "title": null,
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": false,
+      "content_preview": "🏛️ Telegram Architecture Review - TradingSystem Date: 2025-11-03   Reviewer: AI Architecture Assistant   Scope: Telegram Gateway + TP Capital Integration   Version: Current (v1.0.0)   Status: ✅ Production-Ready with Improvement Recommendations --- 📋 Executive Summary Overall Assessment: B+ (83/100) 🟢 O componente Telegram do TradingSystem apresenta uma arquitetura bem projetada com separação clara de responsabilidades, segurança implementada, e padrões de resiliência. A integração entre Telegram",
+      "content_hash": "23b77f369ec07474e4be3a4cfec1a4e2"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/architecture/telegram-database-architecture-2025-11-03.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/architecture/telegram-database-architecture-2025-11-03.md",
+      "title": null,
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": false,
+      "content_preview": "🗄️ Telegram Database Architecture Analysis Date: 2025-11-03   Architect: Database Architecture Specialist   Scope: Telegram Gateway Data Storage Strategy   Current DB: TimescaleDB (PostgreSQL + Time-Series Extension)   Focus: Dedicated Database for Telegram Component --- 📊 Executive Summary Current State Assessment: B+ (85/100) 🟢 A implementação atual com TimescaleDB é sólida e adequada para o caso de uso time-series do Telegram Gateway. No entanto, existem oportunidades significativas de otimiz",
+      "content_hash": "7332972d271607d481fc0dca7f8f4223"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/architecture/telegram-migration-summary-2025-11-03.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/architecture/telegram-migration-summary-2025-11-03.md",
+      "title": null,
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": false,
+      "content_preview": "📋 Telegram Hybrid Stack Migration - Implementation Summary Date: 2025-11-03   Change ID: migrate-telegram-to-hybrid-stack-complete   Status: ✅ Ready for Deployment   Total Files Created: 42 --- 🎯 What Was Delivered OpenSpec Proposal (Complete) ✅ - 3 files: proposal.md, design.md, tasks.md - 8 spec deltas: 5 ADDED + 3 MODIFIED capabilities - Validation: Ready for npm run openspec -- validate --strict Infrastructure (20 files) ✅ Docker Compose (2 files): - docker-compose.4-2-telegram-stack.yml - 7",
+      "content_hash": "62591deea24c11af606e833ebd014210"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/mtproto-frontend-mockup.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/mtproto-frontend-mockup.md",
+      "title": "MTProto Frontend Mockup",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🎨 MTProto no Frontend - Mockup Visual --- 1️⃣  PÁGINA TP CAPITAL (/tp-capital) ANTES do MTProto (Mock): ╔══════════════════════════════════════════════════════════╗ ║  Sinais de Opções                                        ║ ║  Sinais ingestados do canal TP Capital via Telegram     ║ ╟──────────────────────────────────────────────────────────╢ ║                                                          ║ ║  [ Checar Mensagens ]                                    ║ ║                              ",
+      "content_hash": "48bafb1d8c499246b120cf1cdd0e125d"
+    },
+    {
+      "file_path": "docs/content/apps/tp-capital/plan-implementation-complete.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/tp-capital/plan-implementation-complete.md",
+      "title": "Plan Implementation Complete",
+      "summary": "Validation report confirming all 6 to-dos from tp-capital-autonomous-stack.plan.md are implemented",
+      "domain": "backend",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "TP-Capital Autonomous Stack - Plan Implementation Complete Date: 2025-11-04   Plan: tp-capital-autonomous-stack.plan.md   Status: ✅ ALL 6 TO-DOS COMPLETED lastReviewed: \"2025-11-08\" --- 📋 Executive Summary Implementação 100% completa do plano tp-capital-autonomous-stack.plan.md. Todos os 6 to-dos foram validados e estão em produção. Decisão Arquitetural Principal Plano Original: Stack Neon (7 containers)   Implementado: Stack TimescaleDB Dedicado (5 containers)   Razão: Build complexity do Neon.",
+      "content_hash": "8bd7fb438c307dea3d970fa8d4692813"
+    },
+    {
+      "file_path": "docs/content/apps/workspace/categories-crud-overview.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/workspace/categories-crud-overview.md",
+      "title": "Workspace Categories CRUD",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Workspace Categories CRUD - Implementation Complete ✅ 📋 Resumo Executivo Sistema completo de gerenciamento de categorias para o Workspace, com CRUD completo (Create, Read, Update, Delete), auditoria automática e interface React/TypeScript. Status: ✅ 100% Funcional e Testado 🎯 Features Implementadas 1. Database Layer (Migration 004) Arquivo: backend/data/migrations/workspace/004createcategoriestable.sql Tabela workspacecategories | Campo | Tipo | Descrição | |-------|------|-----------| | id | UU",
+      "content_hash": "497ee3bd944b577ea1709705340194b4"
+    },
+    {
+      "file_path": "docs/content/apps/workspace/categories-integration.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/apps/workspace/categories-integration.md",
+      "title": "Workspace Categories Integration",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Workspace Categories - Integração Completa ✅ 📋 Resumo Card CRUD de categorias totalmente integrado ao Workspace - não é mais uma página separada, é uma seção dentro da página Workspace com layout customizável. Status: ✅ Pronto para uso 🎯 Mudanças Implementadas Antes ❌ Navegação:   Apps/     ├── TP Capital     ├── Telegram Gateway     ├── Workspace     └── Categories ← página separada Depois ✅ Navegação:   Apps/     ├── TP Capital     ├── Telegram Gateway     └── Workspace ← categorias integradas",
+      "content_hash": "ff61ce5ef751d0cae7b5decc266d0edd"
+    },
+    {
+      "file_path": "docs/content/archive/2025-Q4/README.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/archive/2025-Q4/README.md",
+      "title": "2025 Q4 Archive",
+      "summary": "Archive folder for documentation retired during 2025 Q4",
+      "domain": "governance",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "--- 2025 Q4 Archive This folder is prepped for documentation that will be retired during the 2025 Q4 cycle. Mirror the original file paths when you move items here so we keep the historical breadcrumb trail intact. When You Archive - Add archiveddate and archivereason to each document's frontmatter. - Note the related maintenance ticket or audit report in the document body. - Update navigation configs to remove the archived entry from active sidebars once the move is complete. Document each arch",
+      "content_hash": "4f7050603389c6273f9f7425b7c6f245"
+    },
+    {
+      "file_path": "docs/content/archive/README.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/archive/README.md",
+      "title": "Archive Workspace",
+      "summary": "Documentation archive workspace for retired content with historical context",
+      "domain": "governance",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "--- Archive Workspace This directory collects documentation that has moved out of the active TradingSystem knowledge base but must remain available for governance, audits, or historical context. Policy - Archive only content that has been superseded, deprecated, or formally retired from production workflows. - Every archived file needs archiveddate (YYYY-MM-DD) and archivereason in the frontmatter while retaining the original authoring metadata. - Items removed from here must follow the deletion",
+      "content_hash": "166051641e8fda27ed2b8e49a3679e40"
+    },
+    {
+      "file_path": "docs/content/development/SHARED-MODULES-MIGRATION.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/development/SHARED-MODULES-MIGRATION.md",
+      "title": "Shared Modules Migration Report",
+      "summary": "Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project",
+      "domain": "development",
+      "type": "migration-report",
+      "status": "completed",
+      "has_frontmatter": true,
+      "content_preview": "Shared Modules Migration Report Migration Date: October 29, 2025 Status: ✅ Completed Scope: Backend APIs (Workspace, TP Capital, Documentation, Firecrawl Proxy) Executive Summary This document reports the successful migration of 4 backend services to use centralized shared modules, eliminating code duplication and establishing standardized patterns across the TradingSystem project. Key Achievements - ✅ Eliminated 24+ instances of code duplication across logger, middleware, and error handlers - ✅",
+      "content_hash": "e888f92fc122bfbdf9172d04aa7cc0aa"
+    },
+    {
+      "file_path": "docs/content/development/code-quality-checklist.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/development/code-quality-checklist.md",
+      "title": "Code Quality Checklist",
+      "summary": "Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código",
+      "domain": "development",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "Code Quality Checklist Guia completo de comandos para verificar qualidade, limpeza e eficiência do código no TradingSystem. --- 🎯 Quick Start - Verificação Completa Script All-in-One (Recomendado) bash Executar verificação completa de qualidade bash scripts/maintenance/code-quality-check.sh Ou com auto-fix bash scripts/maintenance/code-quality-check.sh --fix Verificação Manual Rápida bash Frontend (Dashboard) cd frontend/dashboard npm run lint              Linting npm run type-check        TypeS",
+      "content_hash": "053406da2cf035aba2847bc42ece28a3"
+    },
+    {
+      "file_path": "docs/content/development/npm-run-dev-pattern.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/development/npm-run-dev-pattern.md",
+      "title": "Padrão npm run dev com Auto-Kill de Porta",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Visão Geral Todos os serviços Node.js no projeto devem implementar auto-kill de porta no comando npm run dev para evitar erros EADDRINUSE: address already in use. Motivação Durante o desenvolvimento, é comum deixar processos rodando em background. Isso causa erros como: bash Error: listen EADDRINUSE: address already in use :::4005 A solução manual (identificar e matar o processo) interrompe o fluxo de desenvolvimento. Implementação Padrão 1. package.json Adicione dois scripts: json {   \"scripts\"",
+      "content_hash": "97e58453a8826d2a623b881baa513119"
+    },
+    {
+      "file_path": "docs/content/diagrams/database/README.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/diagrams/database/README.md",
+      "title": "Workspace - Neon PostgreSQL Architecture Diagrams",
+      "summary": "PlantUML architecture diagrams for Workspace application after Neon PostgreSQL migration",
+      "domain": "database",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "--- Workspace - Neon PostgreSQL Architecture Diagrams Status: ✅ Complete   Last Updated: 2025-11-03   Diagrams: 3 PlantUML files --- Overview This directory contains PlantUML diagrams documenting the Workspace application architecture after migration to Neon PostgreSQL. Diagrams Available 1. workspace-neon-architecture.puml - Full system architecture (C4 Model) 2. workspace-neon-data-flow.puml - Request/response sequence diagram 3. workspace-neon-database-schema.puml - Complete database schema (",
+      "content_hash": "ef4bb3edf2d93e932b3d07037ce06a03"
+    },
+    {
+      "file_path": "docs/content/frontend/engineering/AI-AGENT-PROXY-GUIDE.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/frontend/engineering/AI-AGENT-PROXY-GUIDE.md",
+      "title": "AI Agent Guide - Vite Proxy Configuration",
+      "summary": "Comprehensive guide for AI agents working with Vite proxy configuration",
+      "domain": "frontend",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "AI Agent Guide - Vite Proxy Configuration Audience: AI Assistants (Claude, ChatGPT, Copilot, etc.) Last Updated: 2025-11-06 Status: ✅ Production-Ready Pattern Priority: P0 - Critical lastReviewed: \"2025-11-08\" --- 🎯 Purpose This document provides AI-optimized instructions for working with Vite proxy configuration in the TradingSystem project. Why This Matters: Between 2025-10-27 and 2025-11-06, we experienced 4 recurring incidents of \"API Indisponível\" errors caused by incorrect proxy configurat",
+      "content_hash": "f7f4764235ca637b97056d05f889a990"
+    },
+    {
+      "file_path": "docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md",
+      "title": "Vite Proxy Configuration - Best Practices",
+      "summary": "Comprehensive guide for configuring Vite proxy to connect browser code to Docker containers",
+      "domain": "frontend",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "Vite Proxy Configuration - Best Practices Last Updated: 2025-11-06 Status: ✅ Production-Ready Pattern Priority: P0 - Critical (Security & Connectivity) lastReviewed: \"2025-11-08\" --- 🎯 Overview This document establishes the canonical pattern for connecting frontend browser code to backend Docker containers through Vite's development proxy. Why This Matters: Incorrect proxy configuration causes \"API Indisponível\" errors that are difficult to debug because they appear as silent network failures in",
+      "content_hash": "320c5fdf7d904ba8da8aadda124951ef"
+    },
+    {
+      "file_path": "docs/content/frontend/guidelines/hard-refresh.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/frontend/guidelines/hard-refresh.md",
+      "title": "Hard Refresh Checklist",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🔄 Como Atualizar o Frontend ⚡ Hard Refresh do Navegador IMPORTANTE: O frontend precisa de um hard refresh para carregar os novos componentes! No Chrome/Edge/Brave: Ctrl + Shift + R ou Ctrl + F5 No Firefox: Ctrl + Shift + R ou Ctrl + F5 Alternativa (Limpar Cache): 1. Pressione F12 para abrir DevTools 2. Clique com botão direito no ícone de refresh 3. Selecione \"Empty Cache and Hard Reload\" --- ✅ Verificações 1. Backend Funcionando bash curl http://localhost:3402/health Status: healthy ✅ curl http",
+      "content_hash": "0aeae818112a72e9002d533708342326"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/007-workspace-neon-migration.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/007-workspace-neon-migration.md",
+      "title": "ADR 007: Workspace Database Migration to Neon PostgreSQL",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "ADR 007: Workspace Database Migration to Neon PostgreSQL Status: Proposed   Date: 2025-11-03   Deciders: Architecture Team, Database Team   Technical Story: Migrate Workspace app from shared TimescaleDB to dedicated Neon PostgreSQL instance --- Context The Workspace application currently uses a shared TimescaleDB instance (APPS-WORKSPACE database) that also hosts the TP Capital application. This shared approach was pragmatic for initial development but presents several challenges: Current Archit",
+      "content_hash": "d9d83802dca806764a3fce23a53b0676"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/009-tp-capital-neon-vs-timescale.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/009-tp-capital-neon-vs-timescale.md",
+      "title": "ADR-009: TP-Capital Database Choice - Neon vs TimescaleDB",
+      "summary": "Architecture decision record for TP-Capital database selection between Neon PostgreSQL and TimescaleDB",
+      "domain": "architecture",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "--- ADR-009: TP-Capital Database Choice - Neon vs TimescaleDB Status: 🟡 Proposta   Data: 2025-11-04   Autor: Architecture Review Agent   Relacionado a: ADR-008 (TP-Capital Autonomous Stack) --- 🎯 Contexto Após definir a arquitetura autônoma do TP-Capital (ADR-008), precisamos escolher entre Neon PostgreSQL e TimescaleDB como banco de dados dedicado. Requisitos do TP-Capital Workload: - Ingestion de sinais de trading do Telegram - Volume atual: ~50-100 sinais/dia - Projeção 12 meses: ~1.000 sinai",
+      "content_hash": "ec0523c3692c8183065d1a75942076d3"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/015-port-governance.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/015-port-governance.md",
+      "title": "ADR-015: Port Governance Policy",
+      "summary": "Architecture decision record for port allocation governance policy to prevent conflicts",
+      "domain": "architecture",
+      "type": "guide",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "--- ADR-015: Port Governance Policy Status: 🟢 Aprovação em andamento   Data: 2025-11-05   Autores: Platform Architecture   Relacionado a: port-governance-2025-11-05 --- 🎯 Contexto - 8–12 conflitos de portas por mês (porta duplicada em scripts, Compose e serviços locais). - Documentação desatualizada (menos de 70% de acurácia) e .env divergentes. - Integrações como Telegram MTProto dependiam de processos nativos (localhost:4007), quebrando containers. ✅ Decisão 1. Registro Único (config/ports/reg",
+      "content_hash": "6934c9af8a7c5b6ae76e069ac7f51cd1"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/ADR-0001.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/ADR-0001.md",
+      "title": "ADR-0001 – Example Decision",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Context Describe the problem space and constraints. Decision Summarize the chosen approach. Consequences List positive, negative, and neutral consequences of the decision.",
+      "content_hash": "10d6a59409425d921fa571269485c54c"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/ADR-003-api-gateway-implementation.md",
+      "title": "ADR-003: API Gateway Implementation for Centralized Authentication and Routing",
+      "summary": "Architecture Decision Record for implementing an API Gateway to centralize authentication, routing, and security policies across microservices",
+      "domain": "infrastructure",
+      "type": "adr",
+      "status": "proposed",
+      "has_frontmatter": true,
+      "content_preview": "ADR-003: API Gateway Implementation for Centralized Authentication and Routing Status Proposed - Under review for implementation in Q1 2026 Context Current Situation The TradingSystem currently operates with a direct service-to-client architecture: - Frontend (Dashboard) connects directly to multiple backend services - Each service implements its own CORS, rate limiting, and authentication - No centralized point for request routing, logging, or security policy enforcement - Services trust each o",
+      "content_hash": "b8118805a7d2ec6792480294d4267b79"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/ADR-005-test-coverage-strategy.md",
+      "title": "ADR-005: Test Coverage Strategy - Systematic Quality Improvement",
+      "summary": "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend",
+      "domain": "development-process",
+      "type": "adr",
+      "status": "proposed",
+      "has_frontmatter": true,
+      "content_preview": "ADR-005: Test Coverage Strategy - Systematic Quality Improvement Status Proposed - Pending approval for implementation in Q1 2026 Context Current Situation The TradingSystem has critically low test coverage: Total Source Files:  43,536 Total Test Files:    2,505 Current Coverage:    ~5.8% Target Coverage:     80% Coverage Breakdown: - Backend APIs: ~2% (15 test files) - Frontend: ~1% (8 test files) - Integration Tests: 0 (non-existent) - E2E Tests: 0 (non-existent) - Load Tests: 0 (non-existent)",
+      "content_hash": "f4367d5818c552727a02c2235dd10076"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/ADR-007-env-governance-separation.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/ADR-007-env-governance-separation.md",
+      "title": "ADR-007: Separação de Secrets e Defaults em Variáveis de Ambiente",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": "proposed",
+      "has_frontmatter": true,
+      "content_preview": "ADR-007: Separação de Secrets e Defaults em Variáveis de Ambiente Status PROPOSED - Aguardando aprovação Context O TradingSystem vem enfrentando conflitos recorrentes relacionados ao gerenciamento de variáveis de ambiente: Problema 1: Arquivo .env Monolítico - .env contém 394 linhas misturando secrets e configurações - Scripts sobrescrevem .env regularmente, causando perda de customizações locais - Developer commitam secrets acidentalmente (~5% dos PRs) - Dificuldade em identificar quais variáve",
+      "content_hash": "4f6a815f7eccbc2ad2840b6d0947b02b"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/rag-services/ADR-001-redis-caching-strategy.md",
+      "title": "ADR-001: Redis Caching Strategy for Collection Stats",
+      "summary": "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load",
+      "domain": "rag-services",
+      "type": "adr",
+      "status": "accepted",
+      "has_frontmatter": true,
+      "content_preview": "ADR-001: Redis Caching Strategy for Collection Stats Status: Accepted Date: 2025-11-01 Deciders: Development Team Technical Story: Implementation details tracked in project commits Context and Problem Statement The RAG Collections Service was experiencing performance issues when retrieving collection statistics. Each request to list collections required: 1. Querying Qdrant for collection metadata 2. Scanning filesystem to count documents 3. Computing metrics (indexed files, chunks, etc.) This re",
+      "content_hash": "1e4a1c608cf7c0d79eea80a35b49ece1"
+    },
+    {
+      "file_path": "docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md",
+      "title": "ADR-002: File Watcher Auto-Ingestion Architecture",
+      "summary": "Decision to implement automatic document ingestion using Chokidar file watcher with debouncing and auto-update configuration per collection",
+      "domain": "rag-services",
+      "type": "adr",
+      "status": "accepted",
+      "has_frontmatter": true,
+      "content_preview": "ADR-002: File Watcher Auto-Ingestion Architecture Status: Accepted Date: 2025-10-30 Deciders: Development Team, DevOps Team Technical Story: RAG Services Phase 1 Implementation Context and Problem Statement TradingSystem documentation is continuously evolving with: - Multiple contributors updating markdown files - New features requiring documentation updates - Architecture changes reflected in diagrams - API specifications evolving with code Problem: Manual ingestion workflow was inefficient: 1.",
+      "content_hash": "6634a6a850226817464d6fbdef42bf30"
+    },
+    {
+      "file_path": "docs/content/reference/architecture/containerization.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/architecture/containerization.md",
+      "title": "Estratégia de Containerização",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Estratégia de Containerização - TradingSystem Data: 2025-10-25 Status: 📋 Planejamento Aprovado Referência: OpenSpec Change split-tp-capital-into-gateway-api --- 📊 Status Atual (Inventário Completo) Containers Docker: 27 rodando (100%) - ✅ Databases: 7 containers - ✅ Database Tools: 4 containers - ✅ Monitoring: 4 containers - ✅ AI/ML: 6 containers - ✅ Documentation: 3 containers - ✅ Web Scraping: 3 containers Serviços Locais Node.js: 3 de 6 rodando (50%) - ✅ Workspace API (Port 3200) - CRUD Idea ",
+      "content_hash": "297d498f9149b06eefaa97445148ce40"
+    },
+    {
+      "file_path": "docs/content/reference/evaluations/api-gateway-comparison.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/reference/evaluations/api-gateway-comparison.md",
+      "title": "API Gateway Evaluation - Kong vs Traefik",
+      "summary": "Comprehensive comparison of Kong and Traefik for TradingSystem API Gateway implementation (Phase 3 Epic 1)",
+      "domain": "infrastructure",
+      "type": "evaluation",
+      "status": "active",
+      "has_frontmatter": true,
+      "content_preview": "API Gateway Evaluation: Kong vs Traefik Executive Summary Recommendation: Traefik 🎯 Traefik is the recommended choice for TradingSystem's API Gateway due to: - Native Docker integration (zero-config service discovery) - Simpler configuration (YAML/labels vs complex Kong Admin API) - Lower resource footprint (~50MB vs ~200MB) - Built-in Let's Encrypt support - Active community (50k+ GitHub stars) - Better fit for our microservices architecture Trade-offs accepted: - Less plugin ecosystem than Kon",
+      "content_hash": "9044a11618e7c48357f78e2fb23e049b"
+    },
+    {
+      "file_path": "docs/content/tools/ai/claude-commands-ready.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/ai/claude-commands-ready.md",
+      "title": "Claude Commands Overview",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Comandos Claude Code - Prontos para Uso! 🚀 Data: 2025-11-02 Status: ✅ Completo --- 📦 Comandos Criados Criei 7 comandos customizados do Claude Code para verificação de qualidade de código: .claude/commands/ ├── README.md              📚 Índice completo de todos os comandos ├── quality-check.md       ⭐ Verificação completa (PRINCIPAL) ├── lint.md                🔍 ESLint ├── type-check.md          📘 TypeScript ├── test.md                🧪 Testes ├── format.md              ✨ Prettier ├── audit.md    ",
+      "content_hash": "384598dde6a94b5a14abd619e89bad91"
+    },
+    {
+      "file_path": "docs/content/tools/ai/claude-commands-reference.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/ai/claude-commands-reference.md",
+      "title": "Claude Commands Reference",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Lista de Comandos Claude Code - TradingSystem Comandos customizados disponíveis no Claude Code CLI --- 🎯 Comandos de Qualidade de Código (Novos!) /quality-check ⭐ PRINCIPAL Verificação completa de qualidade de código (linting, types, tests, security, docker). bash /quality-check                      Verificação básica /quality-check --fix                Com auto-fix /quality-check --full               Análise completa (inclui duplication, dead code) /quality-check --full --format html Gera relat",
+      "content_hash": "35581dd8c8c15df6d65a37ffdf9628a5"
+    },
+    {
+      "file_path": "docs/content/tools/automation/system-quick-start.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/automation/system-quick-start.md",
+      "title": "TradingSystem Quick Start",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🚀 TradingSystem - Quick Start Guide Guia rápido para iniciar e gerenciar o TradingSystem. ⚡ Instalação Inicial (Executar Uma Vez) bash cd /home/marce/Projetos/TradingSystem bash install-shortcuts.sh source ~/.bashrc  ou: exec $SHELL 📋 Comandos Essenciais Iniciar Sistema bash start Parar Sistema bash stop Ver Status bash status Opções Avançadas bash Forçar reinício (mata processos existentes) start --force-kill Iniciar sem stack RAG (Qdrant/Ollama/LlamaIndex) start --skip-vectors Parar com força ",
+      "content_hash": "70cc8e2fd625312947125cfde61af3ae"
+    },
+    {
+      "file_path": "docs/content/tools/automation/workflow-auditoria-completa.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/automation/workflow-auditoria-completa.md",
+      "title": "Audit Workflow Blueprint",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🔍 Workflow de Auditoria Completa do TradingSystem Proposta de Análise, Revisão e Correção Sistemática > Versão: 1.0 > Data: 2025-11-02 > Objetivo: Criar um workflow inteligente utilizando os melhores agentes e comandos disponíveis para análise profunda, revisão e correção do projeto TradingSystem. --- Indice 1. Visão Geral do Workflow 2. Fases do Workflow 3. Detalhamento por Fase 4. Outputs Esperados 5. Dependências e Pré-requisitos 6. Cronograma Estimado --- Visao Geral do Workflow Princípios F",
+      "content_hash": "800b40def3d14d2283ef27a372c6f20e"
+    },
+    {
+      "file_path": "docs/content/tools/development/code-quality-commands.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/development/code-quality-commands.md",
+      "title": "Code Quality Commands",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Code Quality Commands - Quick Reference 🚀 Comandos essenciais para verificação de qualidade, limpeza e eficiência do código --- ⚡ Quick Start bash Verificação completa automatizada (RECOMENDADO) bash scripts/maintenance/code-quality-check.sh Com auto-fix bash scripts/maintenance/code-quality-check.sh --fix Análise completa (incluindo testes lentos) bash scripts/maintenance/code-quality-check.sh --full Gerar relatório HTML bash scripts/maintenance/code-quality-check.sh --full --format html --- 📋 ",
+      "content_hash": "0ee184a4127cf6b1b511d94461fdcf6f"
+    },
+    {
+      "file_path": "docs/content/tools/docker/container-inventory.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/docker/container-inventory.md",
+      "title": "Docker Container Inventory",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "📊 Inventário de Containers - Trading System 📱 APPS (Aplicações) | Container | Imagem | Status | Health | |-----------|--------|--------|--------| | apps-tp-capital | img-apps-tp-capital:latest | ⏱️ 7 minutos | ✅ Healthy | | apps-workspace | img-apps-workspace:latest | ⏱️ 11 horas | ✅ Healthy | --- 🗄️ DATABASE (Bancos de Dados Compartilhados) > Desde novembro/2025 o TimescaleDB compartilhado foi desativado. Cada produto possui o próprio stack (tp-capital-, workspace-, telegram-). Esta seção lista",
+      "content_hash": "c187e28bae3605a7e52909405098f1b3"
+    },
+    {
+      "file_path": "docs/content/tools/docker/documentation-container.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/docker/documentation-container.md",
+      "title": "Documentation Container",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Documentation Container - 2-Container Solution Data: 2025-10-26 00:30 UTC-03 Status: ✅ COMPLETO (NGINX + DocsAPI) Update: 2025-10-26 03:53 UTC (DocsAPI crash loop FIXED) Update: 2025-10-26 04:15 UTC (Dashboard iframe embedding FIXED) Update: 2025-10-26 04:20 UTC (DocsAPI viewer buttons FIXED - See DOCSAPI-VIEWER-FIX.md) Update: 2025-10-26 04:30 UTC (Docusaurus iframe loading FIXED - See DOCUSAURUS-IFRAME-FIX.md) --- ⚠️ UPDATE (2025-10-26 03:53 UTC) DocsAPI Container - ✅ WORKING! Problem Solved: ",
+      "content_hash": "2d31a6b8bc34cdf06323aa691812302d"
+    },
+    {
+      "file_path": "docs/content/tools/documentation/docusaurus/algolia-setup-guide.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/algolia-setup-guide.md",
+      "title": "Algolia DocSearch Setup",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Algolia DocSearch Setup Guide Purpose: Step-by-step guide to apply for and configure Algolia DocSearch for TradingSystem documentation   Estimated Time: 2 hours (+ 1-3 days for approval)   Owner: DocsOps   Priority: P1 (High) --- Overview Algolia DocSearch provides free, high-quality search for open-source documentation. It's the recommended search solution for Docusaurus sites. Benefits: - ✅ Free for open-source projects - ✅ Instant, relevant results - ✅ Keyboard shortcuts (Ctrl+K) - ✅ Mobile-o",
+      "content_hash": "6fc3720418ab80e0e9d781f569d0be38"
+    },
+    {
+      "file_path": "docs/content/tools/documentation/docusaurus/deployment-guide.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/deployment-guide.md",
+      "title": "Documentation Deployment Guide",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Documentation Deployment Guide Purpose: Step-by-step guide to deploy TradingSystem Docusaurus documentation to staging and production   Audience: DevOps, Release Engineers   Last Updated: 2025-11-02 --- Deployment Overview Current Architecture Development (localhost:3400): npm run docs:dev → Docusaurus dev server → Hot reload enabled → Not optimized Staging/Production: npm run docs:build → Static HTML/CSS/JS in build/ → Optimized and minified → Ready for web server (NGINX/Apache) --- Option 1: N",
+      "content_hash": "b14f1dfcd03e6ac03faeb2642ecbcb86"
+    },
+    {
+      "file_path": "docs/content/tools/documentation/docusaurus/ports-strategy.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/ports-strategy.md",
+      "title": "Docusaurus Ports Strategy",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Estratégia de Portas do Docusaurus Data: 2025-10-29   Status: ✅ Padronizado   Versão: 1.0 --- 🎯 Estratégia Unificada Exposição - Desenvolvimento local: porta 3400 (servidor Docusaurus/Vite) - Produção (containers): rota Traefik http://localhost:9080/docs (sem porta dedicada) Modo Desenvolvimento (Local) bash cd docs npm run docs:dev  Roda em http://localhost:3400 - Hot reload habilitado - Watch mode para mudanças em arquivos - Fast refresh para desenvolvimento rápido - Acessível diretamente em h",
+      "content_hash": "8eb9ac78861872edea30bb6eb1e1309a"
+    },
+    {
+      "file_path": "docs/content/tools/documentation/docusaurus/ports-summary.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/ports-summary.md",
+      "title": "Docusaurus Ports Summary",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Resumo da Padronização de Portas - Docusaurus Data: 2025-10-29   Status: ✅ COMPLETO --- ✅ Mudanças Aplicadas 1. Frontend Dashboard - ✅ Arquivo: frontend/dashboard/src/components/pages/DocusaurusPage.tsx - ✅ Mudança: Removida referência à porta 3205 - ✅ Estratégia: Sempre usa /docs (proxy Vite) → http://localhost:3400 2. Configuração NGINX - ✅ Arquivo: tools/compose/documentation/nginx.conf - ✅ Mudança: Configurado para servir /next/ como versão padrão - ✅ Estratégia: Redireciona / → /next/ (vers",
+      "content_hash": "8774ebc71fa5fe00d7854020521dce77"
+    },
+    {
+      "file_path": "docs/content/tools/documentation/docusaurus/quick-commands.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/documentation/docusaurus/quick-commands.md",
+      "title": "Docusaurus Quick Commands",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Quick Commands Reference - Docusaurus Last Updated: 2025-11-02   Purpose: Fast reference for common Docusaurus operations --- 🚀 Daily Operations Start Development Server bash cd /home/marce/Projetos/TradingSystem/docs npm run docs:dev Access: http://localhost:3400 --- Build for Production bash cd /home/marce/Projetos/TradingSystem/docs npm run docs:build Output: build/ directory (797 pages) --- Serve Built Site Locally bash cd /home/marce/Projetos/TradingSystem/docs npm run docs:serve Access: ht",
+      "content_hash": "a32273ee2997d08d6cf2883073b97787"
+    },
+    {
+      "file_path": "docs/content/tools/gateway/traefik-quickstart.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/gateway/traefik-quickstart.md",
+      "title": "Traefik API Gateway - Quick Start",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🚀 Traefik API Gateway - Quick Start Este guia irá configurar o Traefik como API Gateway centralizado para todos os serviços HTTP do TradingSystem em 30 minutos. 📋 Pré-requisitos - Docker e Docker Compose instalados - Serviços básicos rodando (Dashboard, Workspace API, Docs) - Redes Docker criadas: tradingsystembackend, tradingsystemfrontend 🎯 O que será implementado - ✅ API Gateway centralizado (Traefik) na porta 8080 - ✅ Dashboard de monitoramento (porta 8081) - ✅ Roteamento automático para tod",
+      "content_hash": "dd8df17d52a3510c2af3279803ff54fd"
+    },
+    {
+      "file_path": "docs/content/tools/mcp/resumo.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/mcp/resumo.md",
+      "title": "Resumo MCP",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🎯 Resumo da Instalação de MCPs para o TradingSystem ✅ O que foi feito 1. Backup da Configuração Original - ✅ Backup criado em: ~/.cursor/mcp.json.backup 2. MCPs Instalados e Configurados 🟢 Funcionando Imediatamente (Sem Configuração) | MCP | Função | Status | |-----|--------|--------| | GitKraken | Operações Git avançadas | ✅ Ativo | | Filesystem | Navegação rápida no projeto | ✅ Ativo | | Docker | Gerenciar containers | ✅ Ativo | | NPM | Buscar pacotes e documentação | ✅ Ativo | 🟡 Precisam de C",
+      "content_hash": "8ad3ed1d6121e51a57792900deacfecc"
+    },
+    {
+      "file_path": "docs/content/tools/mcp/setup.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/mcp/setup.md",
+      "title": "Setup MCP",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🚀 Instruções de Configuração dos MCPs no Cursor ✅ MCPs Instalados e Funcionando Imediatamente Os seguintes MCPs já estão prontos para uso (não precisam de configuração adicional): 1. GitKraken - Operações Git avançadas 2. Filesystem - Navegação rápida no projeto 3. Docker - Gerenciamento de containers 4. NPM - Pesquisa de pacotes e documentação ⚙️ MCPs que Precisam de Configuração 1. GitHub MCP 🐙 Para que serve: Gerenciar repositórios, issues, pull requests diretamente do Cursor Como configurar:",
+      "content_hash": "162a23f4ec223fadae13c669bf278326"
+    },
+    {
+      "file_path": "docs/content/tools/rag/integration-guide-rag-crud.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/rag/integration-guide-rag-crud.md",
+      "title": "RAG Collections Integration Guide",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🔗 Guia de Integração - RAG Collections CRUD Objetivo: Integrar os novos componentes de gerenciamento de coleções no LlamaIndexPage.tsx --- 📝 Opção 1: Integração Simples (Recomendada) Adicione o CollectionsManagementCard como um novo componente na página existente. Passo 1: Importar o Componente tsx // frontend/dashboard/src/components/pages/LlamaIndexPage.tsx // Adicionar no início do arquivo, junto com os outros imports import { CollectionsManagementCard } from './CollectionsManagementCard'; Pa",
+      "content_hash": "e5d19baa930c930dd583eb3d6ee091ed"
+    },
+    {
+      "file_path": "docs/content/tools/rag/rag-container-fixed.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/rag/rag-container-fixed.md",
+      "title": "RAG Container Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "✅ RAG Container Corrigido! 🎯 O Que Foi Feito O RAG Collections Service agora está rodando como container Docker (como deveria ser desde o início). Problema Anterior - ❌ Serviço rodando como processo Node.js local - ❌ Não conseguia acessar Ollama (que está na rede Docker) - ❌ Modelos apareciam como \"indisponíveis\" Solução Implementada - ✅ Container rag-collections-service construído e iniciado - ✅ Conectado à rede Docker tradingsystembackend - ✅ Acesso direto ao Ollama via http://rag-ollama:11434",
+      "content_hash": "69827d0bfbc746ac4d0a418f2947d839"
+    },
+    {
+      "file_path": "docs/content/tools/rag/refactor-plan-rag-services.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/rag/refactor-plan-rag-services.md",
+      "title": "RAG Services Refactor Plan",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🔄 Plano de Refatoração: RAG Services Page URL: http://localhost:3103/#/rag-services Componente Principal: LlamaIndexPage.tsx (1655 linhas) Status: 🔴 Necessita refatoração urgente --- 📊 Análise Pré-Refatoração Problemas Identificados 1. Arquivo Monolítico (1655 linhas) - Componente Principal: LlamaIndexPage.tsx - Problema: Viola princípio de responsabilidade única - Impacto: Difícil manutenção, testes complexos, merge conflicts frequentes 2. Múltiplas Responsabilidades O componente faz TUDO: - Ge",
+      "content_hash": "a40be2947e0c32898c52de8434e9cef7"
+    },
+    {
+      "file_path": "docs/content/tools/rag/urgent-fix-timeout.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/rag/urgent-fix-timeout.md",
+      "title": "RAG Collections Timeout Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "CORREÇÃO URGENTE - Timeout no Endpoint Collections Problema Encontrado O endpoint GET /api/v1/rag/collections está travando devido ao método computeCollectionMetrics que faz scroll de TODOS os pontos no Qdrant para cada requisição. Localização: tools/rag-services/src/services/collectionManager.ts:373-453 Código Problemático: typescript do {   const response = await axios.post(     ${this.qdrantUrl}/collections/${collection.name}/points/scroll,     payload,     { timeout: 5000 }   );   const poin",
+      "content_hash": "162417ecdc2bff1c1411f929d43ab975"
+    },
+    {
+      "file_path": "docs/content/tools/security-config/p0-security-implementation.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/tools/security-config/p0-security-implementation.md",
+      "title": "P0 Security Implementation",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "🔐 P0 Security Implementation - Complete ✅ Status: IMPLEMENTED All 3 critical (P0) security fixes have been fully implemented and are ready for deployment. --- 🎯 What Was Implemented 1. Session Encryption (AES-256-GCM) ✅ - File: backend/api/telegram-gateway/src/services/SecureSessionStorage.js - Security: Military-grade encryption with authentication tags - Location: ~/.config/telegram-gateway/session.enc (secure directory) - Permissions: 0600 (owner read/write only) 2. Distributed Locking (Postg",
+      "content_hash": "0913fc726fac6e9b8fe8ec67bce70d41"
+    },
+    {
+      "file_path": "docs/content/troubleshooting/dashboard-port-issue-fix.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/troubleshooting/dashboard-port-issue-fix.md",
+      "title": "Dashboard Port Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "✅ Problema da Porta Corrigido! 🔧 O Que Foi o Problema O arquivo .env estava configurado com a porta errada: - ❌ Antes: VITEAPIBASEURL=http://localhost:3401 - ✅ Agora: VITEAPIBASEURL=http://localhost:3402 🚀 Como Resolver Opção 1: Reiniciar Manualmente (Recomendado) No terminal onde o dashboard está rodando: 1. Pressione Ctrl+C para parar o dashboard 2. Execute novamente: bash cd /home/marce/Projetos/TradingSystem/frontend/dashboard npm run dev Opção 2: Usar Script Automático bash cd /home/marce/P",
+      "content_hash": "7c65a59db8e40a7e3d5a0e6ed94a7869"
+    },
+    {
+      "file_path": "docs/content/troubleshooting/docsapi-viewer-fix.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/troubleshooting/docsapi-viewer-fix.md",
+      "title": "DocsAPI Viewer Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "DocsAPI Viewer Fix Date: 2025-10-26 01:10 UTC-03 Status: ✅ COMPLETE Issue: Redoc and Select API button in DocsAPI tab not working --- 🎯 Problem When accessing the Dashboard at http://localhost:3103/#/docs and clicking the \"DocsAPI\" button, the API viewers (Redoc, Swagger, RapiDoc) were not working: 1. Redoc viewer - Pointed to wrong port (3400 instead of local viewer) 2. Select API button - Port references were outdated 3. Missing Redoc HTML - Only Swagger and RapiDoc viewers existed --- ✅ Solut",
+      "content_hash": "9c80f47ce512a8ef4484c276d5ae442e"
+    },
+    {
+      "file_path": "docs/content/troubleshooting/docusaurus-iframe-fix.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/troubleshooting/docusaurus-iframe-fix.md",
+      "title": "Docusaurus Iframe Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "Docusaurus Iframe Loading Fix Date: 2025-10-29 (Updated) Status: ✅ COMPLETE Issue: Docusaurus not loading in Dashboard iframe at http://localhost:3103/#/docs Port Strategy: Docusaurus always uses port 3400 (dev server or NGINX container). See DOCUSAURUS-PORTS-STRATEGY.md for details. --- 🎯 Problem When accessing the Dashboard at http://localhost:3103/#/docs and clicking the \"Docusaurus\" tab, the Docusaurus documentation was not loading in the iframe. The iframe remained blank or showed errors. R",
+      "content_hash": "f197c4e35ad6d7211708d5b3ff07b957"
+    },
+    {
+      "file_path": "docs/content/troubleshooting/general.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/troubleshooting/general.md",
+      "title": "Troubleshooting Guide",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "TradingSystem Troubleshooting Guide Comprehensive troubleshooting for Docker containers, database connections, and common issues 🔍 Quick Diagnostics Run these commands first to gather information: bash Check all container status docker ps -a | grep -E \"tp-capital|workspace|timescaledb\" Check container health docker inspect tp-capital-api --format='{{.State.Health.Status}}' docker inspect workspace-service --format='{{.State.Health.Status}}' Test API endpoints curl http://localhost:4005/health cu",
+      "content_hash": "da5ae694ff4af78b67643bcec419a21b"
+    },
+    {
+      "file_path": "docs/content/troubleshooting/infinite-loop-fixed.md",
+      "absolute_path": "/home/marce/Projetos/TradingSystem/docs/content/troubleshooting/infinite-loop-fixed.md",
+      "title": "Collections Infinite Loop Fix",
+      "summary": null,
+      "domain": null,
+      "type": null,
+      "status": null,
+      "has_frontmatter": true,
+      "content_preview": "✅ Loop Infinito Corrigido! 🐛 O Problema A tela ficava \"carregando coleções\" infinitamente e não liberava os modelos para seleção. Causa: Loop infinito de re-renders no hook useCollections O useEffect tinha as funções refreshCollections e refreshModels nas dependências, causando re-renders infinitos: typescript // ❌ ANTES (Errado) useEffect(() => {   refreshCollections();   if (loadModels) {     refreshModels();   } }, [refreshCollections, refreshModels, loadModels]); // ❌ Funções nas deps ✅ A So",
+      "content_hash": "64303dd8bb2ed19f4da702abe430dfba"
+    }
+  ]
+}

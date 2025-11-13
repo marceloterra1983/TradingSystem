@@ -5,7 +5,7 @@ import {
   Repeat2,
   MessageCircle,
   ExternalLink,
-} from "lucide-react";
+} from '@/icons';
 
 interface TwitterAuthor {
   id: string;

@@ -26,71 +26,137 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     steps:
-      - name: Checkout
+      - name: Checkout current revision
         uses: actions/checkout@v4
+        with:
+          path: current
+
+      - name: Checkout baseline revision
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: baseline
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            current/frontend/dashboard/package-lock.json
+            baseline/frontend/dashboard/package-lock.json
 
-      - name: Install dependencies
-        working-directory: frontend/dashboard
+      - name: Install dependencies (current)
+        working-directory: current/frontend/dashboard
         run: npm ci
 
-      - name: Build and analyze
-        working-directory: frontend/dashboard
+      - name: Build and analyze (current)
+        id: bundle_current
+        working-directory: current/frontend/dashboard
         run: |
           npm run build
           
-          # Get bundle sizes
-          TOTAL_SIZE=$(du -sb dist | cut -f1)
-          TOTAL_SIZE_MB=$(echo "scale=2; $TOTAL_SIZE / 1024 / 1024" | bc)
-          
-          echo "Total bundle size: ${TOTAL_SIZE_MB} MB"
-          echo "bundle_size_mb=${TOTAL_SIZE_MB}" >> $GITHUB_OUTPUT
-        id: bundle_analysis
+          node scripts/analyze-bundle.js --json > dist/bundle-report.json
 
-      - name: Check bundle size threshold
+      - name: Install dependencies (baseline)
+        if: github.event_name == 'pull_request'
+        working-directory: baseline/frontend/dashboard
+        run: npm ci
+
+      - name: Build and analyze (baseline)
+        if: github.event_name == 'pull_request'
+        working-directory: baseline/frontend/dashboard
         run: |
-          MAX_SIZE=5.0  # 5 MB threshold
-          CURRENT_SIZE=${{ steps.bundle_analysis.outputs.bundle_size_mb }}
-          
-          if (( $(echo "$CURRENT_SIZE > $MAX_SIZE" | bc -l) )); then
-            echo "::warning::Bundle size ${CURRENT_SIZE}MB exceeds threshold ${MAX_SIZE}MB"
-          fi
+          npm run build
+          node scripts/analyze-bundle.js --json > dist/bundle-report.json
+
+      - name: Compare bundle with baseline
+        if: github.event_name == 'pull_request'
+        id: compare_bundle
+        working-directory: current/frontend/dashboard
+        run: |
+          node scripts/compare-bundle-size.mjs \
+            --current-report dist/bundle-report.json \
+            --baseline-report ../../baseline/frontend/dashboard/dist/bundle-report.json \
+            --output dist/bundle-diff.json \
+            --threshold 5
 
       - name: Comment PR with bundle size
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
-            const bundleSize = '${{ steps.bundle_analysis.outputs.bundle_size_mb }}';
+            const fs = require('fs');
+            const path = require('path');
+            const diffPath = path.join('current', 'frontend', 'dashboard', 'dist', 'bundle-diff.json');
+            let body = `### 📦 Bundle Size Report\n\n`;
+            const threshold = 5;
             
-            const comment = `### 📦 Bundle Size Report
-            
-            **Total Size:** ${bundleSize} MB
-            **Threshold:** 5.0 MB
-            **Status:** ${parseFloat(bundleSize) <= 5.0 ? '✅ Within limits' : '⚠️ Exceeds threshold'}
-            
-            <details>
-            <summary>💡 Tips to reduce bundle size</summary>
-            
-            - Use dynamic imports for code splitting
-            - Remove unused dependencies
-            - Optimize images and assets
-            - Enable tree shaking
-            
-            </details>
-            `;
-            
-            github.rest.issues.createComment({
+            if (fs.existsSync(diffPath)) {
+              const summary = JSON.parse(fs.readFileSync(diffPath, 'utf8'));
+              const { total } = summary;
+              const format = (value) => `${value.toFixed(2)} KB`;
+              const formatPercent = (value) => `${value.toFixed(2)}%`;
+              const statusEmoji = Math.abs(total.diffPercent) > threshold ? '⚠️' : '✅';
+              
+              body += `| Metric | Baseline | Current | Δ | Δ% |\n`;
+              body += `|--------|----------|---------|----|----|\n`;
+              body += `| gzip total | ${format(total.baseline)} | ${format(total.current)} | ${format(total.diff)} | ${formatPercent(total.diffPercent)} |\n\n`;
+              body += `${statusEmoji} Limite configurado: ±${threshold}%\n\n`;
+
+              const offenders = summary.chunks
+                .filter((chunk) => Math.abs(chunk.diffPercent) > threshold)
+                .slice(0, 5);
+
+              if (offenders.length > 0) {
+                body += `<details>\n<summary>Chunks acima do limite</summary>\n\n`;
+                body += offenders
+                  .map((chunk) => `- \`${chunk.name}\`: ${format(chunk.current)} (Δ ${formatPercent(chunk.diffPercent)})`)
+                  .join('\n');
+                body += `\n\n</details>\n\n`;
+              }
+            } else {
+              body += 'Não foi possível gerar o diff de bundle nesta execução.';
+            }
+
+            body += `<details>\n<summary>💡 Dicas para reduzir o bundle</summary>\n\n`;
+            body += '- Use dynamic imports para code splitting\n';
+            body += '- Remova dependências não utilizadas\n';
+            body += '- Otimize imagens e assets\n';
+            body += '- Habilite tree shaking\n';
+            body += '\n</details>';
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body
             });
+
+      - name: Prepare artifact directories
+        if: always()
+        run: |
+          mkdir -p current/frontend/dashboard/dist
+          mkdir -p baseline/frontend/dashboard/dist
+          if [ ! -f current/frontend/dashboard/dist/bundle-diff.json ]; then
+            echo '{}' > current/frontend/dashboard/dist/bundle-diff.json
+          fi
+          if [ ! -f baseline/frontend/dashboard/dist/bundle-report.json ]; then
+            echo '{}' > baseline/frontend/dashboard/dist/bundle-report.json
+          fi
+
+      - name: Upload bundle artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-${{ github.run_attempt }}
+          path: |
+            current/frontend/dashboard/dist/stats.html
+            current/frontend/dashboard/dist/bundle-report.txt
+            current/frontend/dashboard/dist/bundle-report.json
+            current/frontend/dashboard/dist/bundle-diff.json
+            baseline/frontend/dashboard/dist/bundle-report.json
 
   # ============================================================================
   # Job 2: Health Check

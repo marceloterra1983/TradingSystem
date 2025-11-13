@@ -14,7 +14,7 @@ import {
   ChevronRight,
   RefreshCw,
   AlertCircle,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";

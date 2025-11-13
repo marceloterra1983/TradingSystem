@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # Traefik API Gateway (Phase 3 Epic 1)
+  # ============================================================
+  # Centralized routing, authentication, rate limiting, and metrics
+  # Dashboard: http://localhost:8080
+  # API: http://localhost (port 80)
+  # ============================================================
+
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"       # HTTP entry point
+      - "443:443"     # HTTPS entry point (future)
+      - "8080:8080"   # Dashboard and API
+    volumes:
+      # Docker socket for service discovery
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Static configuration
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      # Dynamic configuration (middlewares, JWT)
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      # SSL certificates (future)
+      - ./traefik/certs:/etc/traefik/certs:ro
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - tradingsystem-network
+      - tradingsystem_backend
+    labels:
+      - "com.tradingsystem.service=api-gateway"
+      - "com.tradingsystem.version=1.0.0"
+      - "com.tradingsystem.phase=3"
+    command:
+      # Enable API and dashboard
+      - --api.dashboard=true
+      - --api.insecure=true  # TODO: Secure in production
+
+      # Docker provider for service discovery
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=tradingsystem-network
+
+      # File provider for dynamic configuration
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+
+      # Entry points
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+
+      # Logging
+      - --log.level=INFO
+      - --accesslog=true
+      - --accesslog.format=json
+      - --accesslog.filepath=/var/log/traefik/access.log
+
+      # Metrics (Prometheus)
+      - --metrics.prometheus=true
+      - --metrics.prometheus.buckets=0.1,0.3,1.0,3.0,5.0
+      - --metrics.prometheus.addEntryPointsLabels=true
+      - --metrics.prometheus.addServicesLabels=true
+
+      # Health check
+      - --ping=true
+      - --ping.entrypoint=web
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  tradingsystem-network:
+    name: tradingsystem-network
+    external: true
+  tradingsystem_backend:
+    name: tradingsystem_backend
+    external: true

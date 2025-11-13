@@ -15,7 +15,7 @@ import {
   Zap,
   Target,
   Sparkles,
-} from "lucide-react";
+} from '@/icons';
 import {
   Select,
   SelectContent,

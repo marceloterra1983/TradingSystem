@@ -11,7 +11,7 @@ api:
 
 entryPoints:
   web:
-    address: ":9080"
+    address: "0.0.0.0:9080"  # Listen on all interfaces, not just localhost
 
 providers:
   docker:

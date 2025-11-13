@@ -274,6 +274,7 @@ stop_monitoring_stack() {
 # Function to stop TOOLS stack
 stop_tools_stack() {
     section "Stopping TOOLS Stack"
+    local COMPOSE_FILE="$PROJECT_ROOT/tools/compose/docker-compose.tools.yml"
     if [ ! -f "$COMPOSE_FILE" ]; then
         log_info "Tools compose file not found (skipping)"
         return 0

@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { Activity } from '@/icons';
 
 interface ConnectionStatusProps {
   showDetails?: boolean;

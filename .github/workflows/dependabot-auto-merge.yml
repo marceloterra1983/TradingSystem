@@ -1,0 +1,79 @@
+name: Dependabot Auto Merge
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - ready_for_review
+      - reopened
+
+jobs:
+  auto-merge:
+    name: Enable auto-merge for eligible Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+
+      - name: Enable auto-merge
+        if: >
+          steps.metadata.outputs.security-advisory-severity != '' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pullRequestId = context.payload.pull_request.node_id;
+            const mergeMethod = 'SQUASH';
+
+            await github.graphql(
+              `
+              mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                enablePullRequestAutoMerge(
+                  input: { pullRequestId: $pullRequestId, mergeMethod: $mergeMethod }
+                ) {
+                  pullRequest {
+                    number
+                    autoMergeRequest {
+                      enabledAt
+                    }
+                  }
+                }
+              }
+              `,
+              { pullRequestId, mergeMethod }
+            );
+
+      - name: Comment auto-merge status
+        if: >
+          steps.metadata.outputs.security-advisory-severity != '' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const severity = '${{ steps.metadata.outputs.security-advisory-severity || 'none' }}';
+            const updateType = '${{ steps.metadata.outputs.update-type }}';
+            const labels = context.payload.pull_request.labels.map(label => label.name);
+
+            const note = [
+              '🤖 Auto-merge ativado para este PR do Dependabot.',
+              '',
+              `- Tipo de atualização: ${updateType}`,
+              `- Severidade da advisory: ${severity}`,
+              `- Labels atuais: ${labels.length ? labels.join(', ') : 'nenhum'}`
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: note
+            });
+

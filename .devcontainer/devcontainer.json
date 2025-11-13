@@ -159,11 +159,12 @@
 
   // Port forwarding (auto-forward all service ports)
   "forwardPorts": [
-    3103,  // Dashboard
-    3404,  // Documentation Hub
+    9080,  // API Gateway (Traefik)
+    9081,  // Traefik Dashboard
     3200,  // Workspace API
-    4005,  // TP Capital
+    3404,  // Documentation Hub
     3405,  // Documentation API
+    4005,  // TP Capital
     3600,  // Firecrawl Proxy
     8202,  // LlamaIndex Query
     5432,  // PostgreSQL (TimescaleDB)
@@ -175,13 +176,17 @@
 
   // Port attributes
   "portsAttributes": {
-    "3103": {
-      "label": "Dashboard",
+    "9080": {
+      "label": "API Gateway",
+      "onAutoForward": "openBrowser"
+    },
+    "9081": {
+      "label": "Traefik Dashboard",
       "onAutoForward": "notify"
     },
     "3404": {
       "label": "Documentation Hub",
-      "onAutoForward": "notify"
+      "onAutoForward": "silent"
     },
     "3200": {
       "label": "Workspace API",

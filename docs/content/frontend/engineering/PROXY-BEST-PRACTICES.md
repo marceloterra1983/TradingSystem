@@ -43,7 +43,7 @@ lastReviewed: "2025-11-08"
                             │ (relative path)
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Vite Dev Server (Port 3103 on host)               │
+│           Vite Dev Server (Port 9080 via Traefik)           │
 │  - Reads process.env (server-side variables)               │
 │  - Proxy configured in vite.config.ts                       │
 │  - Has access to Docker network DNS                         │
@@ -86,7 +86,7 @@ VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
 ```typescript
 // ✅ CORRECT - Relative path (Vite proxy intercepts)
 const baseUrl = '/api/workspace/items';
-fetch(baseUrl); // → http://localhost:3103/api/workspace/items → Vite proxy → container
+fetch(baseUrl); // → http://localhost:9080/api/workspace/items → Traefik/Vite proxy → container
 
 // ❌ WRONG - Absolute localhost URL (bypasses proxy, wrong port)
 const baseUrl = 'http://localhost:3200/api/items';
@@ -265,7 +265,7 @@ docker exec dashboard-ui env | grep -E "(PROXY_TARGET|API_URL)"
 
 ```bash
 # 2. Test proxy endpoint
-curl -s http://localhost:3103/api/workspace/items | jq '.success'
+curl -s http://localhost:9080/api/workspace/items | jq '.success'
 # Should return: true
 ```
 
@@ -302,7 +302,7 @@ GET http://workspace-api:3200/api/items net::ERR_NAME_NOT_RESOLVED
 GET http://localhost:3200/api/items net::ERR_CONNECTION_REFUSED
 ```
 
-**Fix:** Change to relative path `/api/workspace/items` (goes through proxy on port 3103).
+**Fix:** Change to relative path `/api/workspace/items` (passará pelo Traefik/Vite na porta 9080).
 
 lastReviewed: "2025-11-08"
 ---
@@ -392,7 +392,7 @@ Before deploying a new service:
 - [ ] ✅ Browser-facing URL uses relative path
 - [ ] ✅ Validation script passes (`bash scripts/env/validate-env.sh`)
 - [ ] ✅ Container rebuilt with `--build` flag
-- [ ] ✅ Proxy endpoint returns data (`curl http://localhost:3103/api/...`)
+- [ ] ✅ Proxy endpoint returns data (`curl http://localhost:9080/api/...`)
 - [ ] ✅ No browser console errors
 - [ ] ✅ Service health check passes
 

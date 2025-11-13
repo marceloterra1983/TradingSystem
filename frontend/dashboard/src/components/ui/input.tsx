@@ -1,8 +1,11 @@
-import * as React from "react";
+import {
+  forwardRef,
+  type InputHTMLAttributes,
+} from "react";
 import { cn } from "../../lib/utils";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends InputHTMLAttributes<HTMLInputElement> {}
 
 /**
  * Input component following shadcn/ui patterns
@@ -13,7 +16,7 @@ export interface InputProps
  * <Input type="number" min="0" step="0.01" />
  * ```
  */
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", ...props }, ref) => {
     return (
       <input

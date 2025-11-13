@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink } from '@/icons';
 import { Button } from "../../ui/button";
 import { IframeWithUrl } from "../../common/IframeWithUrl";
 

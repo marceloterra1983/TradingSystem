@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, Server, Plus } from "lucide-react";
+import { RefreshCw, Server, Plus } from '@/icons';
 import documentationService, {
   System,
 } from "../../services/documentationService";

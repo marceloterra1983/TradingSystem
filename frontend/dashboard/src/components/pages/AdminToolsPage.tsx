@@ -7,7 +7,7 @@ import {
   Workflow,
   GaugeCircle,
   LifeBuoy,
-} from "lucide-react";
+} from '@/icons';
 
 /**
  * Admin Tools Page - Operational tooling and observability shortcuts

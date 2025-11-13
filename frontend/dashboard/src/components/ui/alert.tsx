@@ -1,4 +1,7 @@
-import * as React from "react";
+import {
+  forwardRef,
+  type HTMLAttributes,
+} from "react";
 import { cn } from "@/lib/utils";
 
 const alertVariants: Record<"default" | "destructive", string> = {
@@ -8,11 +11,11 @@ const alertVariants: Record<"default" | "destructive", string> = {
     "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200",
 };
 
-export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "destructive";
 }
 
-export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+export const Alert = forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant = "default", ...props }, ref) => (
     <div
       ref={ref}
@@ -28,9 +31,9 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 );
 Alert.displayName = "Alert";
 
-export const AlertTitle = React.forwardRef<
+export const AlertTitle = forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
@@ -43,9 +46,9 @@ export const AlertTitle = React.forwardRef<
 ));
 AlertTitle.displayName = "AlertTitle";
 
-export const AlertDescription = React.forwardRef<
+export const AlertDescription = forwardRef<
   HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
+  HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}

@@ -17,6 +17,8 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+LEGACY_DASHBOARD_PORT=3103
 cd "$PROJECT_ROOT"
 
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -101,7 +103,10 @@ echo ""
 echo -e "${CYAN}Restarting Dashboard to load updated environment...${NC}"
 
 # Stop Dashboard
-DASHBOARD_PID=$(lsof -ti :3103 2>/dev/null | head -1)
+DASHBOARD_PID=$(lsof -ti :"${DASHBOARD_PORT}" 2>/dev/null | head -1)
+if [ -z "$DASHBOARD_PID" ]; then
+    DASHBOARD_PID=$(lsof -ti :"${LEGACY_DASHBOARD_PORT}" 2>/dev/null | head -1)
+fi
 if [ -n "$DASHBOARD_PID" ]; then
     echo -e "${YELLOW}Stopping Dashboard (PID: $DASHBOARD_PID)...${NC}"
     kill "$DASHBOARD_PID" 2>/dev/null || true
@@ -126,7 +131,7 @@ echo -e "${GREEN}✓ Dashboard restarted (PID: $NEW_DASHBOARD_PID)${NC}"
 echo -e "${CYAN}Waiting for Dashboard to be ready...${NC}"
 waited=0
 while [ $waited -lt 20 ]; do
-    if curl -sf --max-time 2 "http://localhost:3103" >/dev/null 2>&1; then
+    if curl -sf --max-time 2 "http://localhost:${DASHBOARD_PORT}" >/dev/null 2>&1; then
         echo -e "${GREEN}✓ Dashboard is responding${NC}"
         break
     fi
@@ -153,7 +158,7 @@ echo -e "   • Or go to DevTools → Network → Disable cache"
 echo ""
 
 echo -e "${BOLD}2. Open Dashboard:${NC}"
-echo -e "   • ${BLUE}http://localhost:3103${NC}"
+echo -e "   • ${BLUE}http://localhost:${DASHBOARD_PORT}${NC}"
 echo -e "   • Navigate to ${CYAN}TP Capital${NC} page"
 echo ""
 

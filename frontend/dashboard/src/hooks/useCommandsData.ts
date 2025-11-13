@@ -73,7 +73,9 @@ export function useCommandsData() {
 
     queryFn: async () => {
       // Dynamic import - chunk loaded only when this function executes
-      const module = await import("../data/commands-db.json");
+      const module = await import("../data/commands-db.json", {
+        with: { type: "json" },
+      });
       const db = module.default;
       validateCommandsDatabase(db);
 

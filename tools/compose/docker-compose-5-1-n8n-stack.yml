@@ -307,7 +307,7 @@ services:
 
 networks:
   n8n_backend:
-    driver: bridge
+    external: true
   tradingsystem_backend:
     external: true
 

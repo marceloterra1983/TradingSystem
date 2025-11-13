@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   app:
@@ -46,8 +45,12 @@ services:
       # Terminal colors
       - TERM=xterm-256color
 
-    # Network mode (for accessing host services)
-    network_mode: "bridge"
+    # Networks (connect to existing TradingSystem networks)
+    networks:
+      - tradingsystem_backend
+      - tradingsystem_frontend
+      - tradingsystem_monitoring
+      - default
 
     # Keep container running
     command: sleep infinity
@@ -74,3 +77,14 @@ volumes:
   dashboard-node-modules:
   docs-node-modules:
   venv:
+
+# External networks (created by TradingSystem stacks)
+networks:
+  tradingsystem_backend:
+    external: true
+  tradingsystem_frontend:
+    external: true
+  tradingsystem_monitoring:
+    external: true
+  default:
+    driver: bridge

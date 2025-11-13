@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Clock as ClockIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clock as ClockIcon } from '@/icons';
 import { cn } from "../../lib/utils";
 
 export interface ClockProps {
@@ -31,9 +31,9 @@ export function Clock({
   showDate = false,
   timezone,
 }: ClockProps) {
-  const [time, setTime] = React.useState(new Date());
+  const [time, setTime] = useState(new Date());
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);

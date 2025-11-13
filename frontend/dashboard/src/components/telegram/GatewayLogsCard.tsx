@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle, Clock, AlertTriangle, Terminal } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Terminal } from '@/icons';
 import {
   CollapsibleCard,
   CollapsibleCardHeader,

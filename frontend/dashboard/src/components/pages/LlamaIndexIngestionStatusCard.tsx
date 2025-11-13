@@ -6,7 +6,7 @@ import {
   FileText,
   Plus,
   FolderOpen,
-} from "lucide-react";
+} from '@/icons';
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import {

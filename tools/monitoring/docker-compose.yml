@@ -58,6 +58,14 @@ services:
     volumes:
       - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
+    environment:
+      - ALERTMANAGER_SLACK_WEBHOOK_URL=${ALERTMANAGER_SLACK_WEBHOOK_URL:-}
+      - ALERTMANAGER_SLACK_CHANNEL=${ALERTMANAGER_SLACK_CHANNEL:-#trading-alerts}
+      - ALERTMANAGER_EMAIL_TO=${ALERTMANAGER_EMAIL_TO:-}
+      - ALERTMANAGER_SMTP_HOST=${ALERTMANAGER_SMTP_HOST:-smtp:587}
+      - ALERTMANAGER_SMTP_FROM=${ALERTMANAGER_SMTP_FROM:-alerts@tradingsystem.local}
+      - ALERTMANAGER_SMTP_USER=${ALERTMANAGER_SMTP_USER:-}
+      - ALERTMANAGER_SMTP_PASS=${ALERTMANAGER_SMTP_PASS:-}
     networks:
       - monitoring
     labels:
@@ -146,6 +154,62 @@ services:
       - alertmanager
 
   # ============================================================================
+  # Loki - Centralised log storage
+  # ============================================================================
+  loki:
+    container_name: mon-loki
+    image: grafana/loki:2.9.4
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/loki/config.yml"
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/var/loki
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=loki'
+      - 'com.tradingsystem.description=Aggregated log storage'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3100/ready']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================================
+  # Promtail - Log shipper for docker containers
+  # ============================================================================
+  promtail:
+    container_name: mon-promtail
+    image: grafana/promtail:2.9.4
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - promtail-data:/var/promtail
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+    labels:
+      - 'com.tradingsystem.stack=monitoring'
+      - 'com.tradingsystem.service=promtail'
+      - 'com.tradingsystem.description=Ships docker logs to Loki'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9080/ready']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - loki
+
+  # ============================================================================
   # Node Exporter - Host metrics (Linux)
   # ============================================================================
   node-exporter:
@@ -184,3 +248,5 @@ volumes:
   prometheus-data:
   alertmanager-data:
   grafana-data:
+  loki-data:
+  promtail-data:

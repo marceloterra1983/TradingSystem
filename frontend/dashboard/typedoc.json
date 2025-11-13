@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "TradingSystem Dashboard API",
+  "entryPoints": [
+    "src/utils/validation.ts",
+    "src/services/firecrawlService.ts"
+  ],
+  "tsconfig": "tsconfig.json",
+  "out": "../../docs/static/api/frontend-dashboard",
+  "plugin": ["typedoc-plugin-markdown"],
+  "readme": "none",
+  "exclude": ["**/__tests__/**", "**/*.test.ts", "**/*.spec.ts"],
+  "categorizeByGroup": false,
+  "sort": ["source-order"]
+}
+

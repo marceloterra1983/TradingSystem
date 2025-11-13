@@ -99,7 +99,7 @@ export const postgresqlConfig = {
   min: Number(process.env.POSTGRES_POOL_MIN ?? 2),
   idleTimeoutMillis: Number(process.env.POSTGRES_IDLE_TIMEOUT ?? 30000),
   connectionTimeoutMillis: Number(
-    process.env.POSTGRES_CONNECTION_TIMEOUT ?? 5000,
+    process.env.POSTGRES_CONNECTION_TIMEOUT ?? 30000, // Increased from 5000 to 30000 for container startup
   ),
   schema: process.env.POSTGRES_SCHEMA ?? "workspace",
   table: process.env.POSTGRES_TABLE_NAME ?? "workspace_items",

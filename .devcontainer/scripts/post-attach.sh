@@ -59,9 +59,9 @@ echo -e "  • CLAUDE.md:       cat CLAUDE.md | less"
 echo -e "  • Quick Start:     cat .devcontainer/README.md | less"
 
 # Activate Python venv automatically
-if [ -d "/workspace/venv" ] && [ -z "$VIRTUAL_ENV" ]; then
-    echo -e "\n${BLUE}🐍 Activating Python virtual environment...${NC}"
-    source /workspace/venv/bin/activate
-fi
+#if [ -d "/workspace/venv" ] && [ -z "$VIRTUAL_ENV" ]; then
+#    echo -e "\n${BLUE}🐍 Activating Python virtual environment...${NC}"
+#    source /workspace/venv/bin/activate
+#fi
 
 echo -e "\n${GREEN}✨ Ready to code! Happy hacking! ✨${NC}\n"

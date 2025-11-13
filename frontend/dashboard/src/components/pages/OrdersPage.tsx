@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Clock, History, Edit } from "lucide-react";
+import { Clock, History, Edit } from '@/icons';
 
 export function OrdersPage() {
   const sections = [
