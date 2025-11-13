@@ -1,0 +1,204 @@
+---
+title: "HTTP Client Standardization - Index"
+sidebar_position: 1
+tags: [frontend, http, resilience, governance]
+domain: frontend
+type: index
+summary: "Navigation hub for HTTP Client standardization documentation"
+status: active
+last_review: "2025-11-13"
+---
+
+# HTTP Client Standardization - Documentation Index
+
+**Status:** ✅ Approved for Implementation (2025-11-18 to 2025-12-06)
+
+---
+
+## 📋 Governance Documents
+
+### Architecture Decision Record (ADR)
+📄 **[ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)**
+- **Purpose:** Architecture decision and rationale
+- **Audience:** Architects, Tech Leads
+- **Status:** Approved
+- **Key Sections:**
+  - Context and Problems Identified
+  - Technology Stack (Axios + axios-retry + Circuit Breaker)
+  - Implementation Plan (5 phases, 10-15 days)
+  - Metrics for Success (failure rate, MTTR, test coverage)
+  - Validation Checklist
+
+### Technical Standard (STD)
+📏 **[STD-020: HTTP Client Standard](/governance/standards/STD-020-http-client-standard)**
+- **Purpose:** Testable requirements and validation
+- **Audience:** Developers, QA Engineers, CI/CD
+- **Status:** Active (effective 2025-12-06)
+- **Key Sections:**
+  - 10 Mandatory Requirements (REQ-HTTP-001 to REQ-HTTP-010)
+  - Security Requirements (REQ-SEC-001)
+  - Test Coverage Requirements (>80%)
+  - Performance Requirements (P95 &lt;10ms overhead)
+  - Validation Scripts and Checklists
+
+---
+
+## 🔧 Implementation Guides
+
+### Developer Guide
+📖 **[HTTP Client Implementation Guide](/docs/frontend/engineering/http-client-implementation-guide)**
+- **Purpose:** Practical implementation instructions
+- **Audience:** Frontend Developers
+- **Sections:**
+  - Quick Start (installation, setup)
+  - Code Examples (HttpClient, Circuit Breaker, Service Clients)
+  - React Integration (hooks, components)
+  - Health Monitoring
+  - Environment Variables
+  - Testing Examples
+  - Troubleshooting
+
+### Service Client Template
+📝 **[Service Client Template](/governance/registry/templates/service-client.template.ts)**
+- **Purpose:** Boilerplate code for new service clients
+- **Audience:** Developers creating new API integrations
+- **Includes:**
+  - TypeScript interfaces
+  - CRUD methods
+  - JSDoc documentation
+  - Error handling
+  - Health check
+  - File upload example
+
+---
+
+## ✅ Validation & Compliance
+
+### Validation Script
+🔍 **[validate-http-client-standard.sh](/workspace/scripts/governance/validate-http-client-standard.sh)**
+- **Purpose:** Automated compliance checking
+- **Usage:** `bash scripts/governance/validate-http-client-standard.sh`
+- **Checks:**
+  - REQ-HTTP-001: Axios version >= 1.6.0
+  - REQ-HTTP-002: axios-retry installed
+  - REQ-HTTP-009: No hardcoded service URLs
+  - REQ-HTTP-003: CircuitBreaker implementation
+  - REQ-HTTP-004: Timeout configuration
+  - REQ-SEC-001: Inter-service authentication
+  - REQ-DOC-001: JSDoc documentation
+  - REQ-TEST-001: Test coverage >80%
+
+### Manual Checklist
+📋 **Included in STD-020 Document**
+- Circuit breaker compliance
+- Observability (logging, metrics)
+- Traefik integration
+- Testing coverage
+- Documentation completeness
+
+---
+
+## 📊 Related Documents
+
+### Upstream Dependencies
+- **[ADR-003: API Gateway Implementation](/docs/reference/adrs/ADR-003-api-gateway-implementation)** - Traefik gateway requirement
+- **[Architecture Review 2025-11-01](/governance/evidence/reports/reviews/architecture-2025-11-01/index)** - Circuit breaker gap identification
+
+### Downstream Documents
+- **[Proxy Best Practices](/docs/frontend/engineering/PROXY-BEST-PRACTICES)** - Vite proxy configuration
+- **[API Gateway Policy](/governance/policies/api-gateway-policy)** - Gateway usage requirements
+
+---
+
+## 🚀 Implementation Roadmap
+
+### Phase 0: Preparation (1 day) - 2025-11-18
+- [ ] Create feature branch
+- [ ] Configure environment variables
+- [ ] Review ADR and STD documents
+
+### Phase 1: Infrastructure (2-3 days) - 2025-11-19 to 2025-11-21
+- [ ] Implement `HttpClient` class
+- [ ] Implement `CircuitBreaker` state machine
+- [ ] Implement `HealthMonitor`
+- [ ] Write unit tests (coverage >80%)
+
+### Phase 2: Service Clients (2-3 days) - 2025-11-22 to 2025-11-24
+- [ ] Create `WorkspaceClient`
+- [ ] Create `TelegramGatewayClient`
+- [ ] Create `TPCapitalClient`
+- [ ] Create `DocsClient`
+
+### Phase 3: Component Migration (3-4 days) - 2025-11-25 to 2025-11-28
+- [ ] Refactor `TelegramGatewayFinal.tsx`
+- [ ] Refactor `WorkspacePage.tsx`
+- [ ] Refactor `TPCapitalPage.tsx`
+- [ ] Integrate `HttpClientMonitor` in layout
+
+### Phase 4: Testing & Validation (2-3 days) - 2025-11-29 to 2025-12-01
+- [ ] Integration tests (E2E)
+- [ ] Load testing (100+ req/s)
+- [ ] Resilience testing
+- [ ] Run validation script
+
+### Phase 5: Observability (1-2 days) - 2025-12-02 to 2025-12-06
+- [ ] Configure Grafana dashboards
+- [ ] Set up Prometheus alerts
+- [ ] Create troubleshooting runbook
+
+**Target Completion:** 2025-12-06
+
+---
+
+## 📈 Success Metrics
+
+| Metric | Before | After (Target) | Measurement |
+|--------|--------|----------------|-------------|
+| Request Failure Rate | 5-10% | &lt;0.5% | Prometheus |
+| Mean Time to Recovery | Manual (minutes) | Automatic (seconds) | Logs |
+| Requests with Retry | 0% | 100% | Circuit Breaker stats |
+| Timeout Misconfigurations | ~60% | &lt;5% | Code review |
+| Clear Error Feedback | ~30% | 100% | User testing |
+| Connection Pool Exhaustion | Frequent | Rare (&lt;1/week) | Monitoring |
+| Test Coverage (HTTP layer) | 0% | >80% | Jest coverage |
+
+---
+
+## 🆘 Quick Links
+
+### For Developers
+- 🚀 [Quick Start Guide](/docs/frontend/engineering/http-client-implementation-guide#quick-start)
+- 📝 [Service Client Template](/governance/registry/templates/service-client.template.ts)
+- 🧪 [Testing Examples](/docs/frontend/engineering/http-client-implementation-guide#testing)
+
+### For Reviewers
+- ✅ [Manual Checklist](/governance/standards/STD-020-http-client-standard#manual-checklist)
+- 🔍 [Validation Script](/workspace/scripts/governance/validate-http-client-standard.sh)
+- 📊 [Compliance Timeline](/governance/standards/STD-020-http-client-standard#compliance-timeline)
+
+### For Troubleshooting
+- 🔧 [Common Issues](/docs/frontend/engineering/http-client-implementation-guide#troubleshooting)
+- 📖 [Best Practices](/docs/frontend/engineering/http-client-implementation-guide#best-practices)
+- 🏛️ [Traefik Integration](/docs/reference/adrs/ADR-003-api-gateway-implementation)
+
+---
+
+## 📞 Support & Feedback
+
+**Questions?** Open a discussion: [GitHub Discussions](https://github.com/marceloterra1983/TradingSystem/discussions)
+
+**Issues?** Report a bug: [GitHub Issues](https://github.com/marceloterra1983/TradingSystem/issues/new)
+
+**Ownership:**
+- **ADR-008:** FrontendGuild, Backend Guild
+- **STD-020:** FrontendGuild
+- **Implementation:** Frontend Team Lead
+
+**Review Cycle:** Every 90 days
+**Next Review:** 2026-02-13
+
+---
+
+**Last Updated:** 2025-11-13
+**Document Version:** 1.0
+**Status:** Active

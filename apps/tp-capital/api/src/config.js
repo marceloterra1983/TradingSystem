@@ -70,6 +70,7 @@ export const config = {
   timescale: resolveTimescaleConfig(),
 
   gateway: {
+    url: process.env.TELEGRAM_GATEWAY_URL || 'http://telegram-gateway-api:4010',
     secretToken: process.env.GATEWAY_SECRET_TOKEN || '',
   },
 

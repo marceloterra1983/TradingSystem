@@ -65,12 +65,16 @@ start_gateway() {
 
     cd "$COMPOSE_DIR"
 
-    if docker ps --filter name=traefik-gateway --filter status=running | grep -q traefik-gateway; then
+    if docker ps --filter name=api-gateway --filter status=running | grep -q api-gateway; then
         log_warning "Traefik gateway is already running"
+
+        # Start port forwarding even if gateway is already running
+        start_port_forwarding
+
         return 0
     fi
 
-    docker compose -f docker-compose.gateway.yml up -d
+    docker compose -f docker-compose.0-gateway-stack.yml up -d
 
     # Wait for gateway to be healthy
     log_info "Waiting for gateway to become healthy..."
@@ -78,8 +82,12 @@ start_gateway() {
     local count=0
 
     while [ $count -lt $max_wait ]; do
-        if docker ps --filter name=traefik-gateway --filter health=healthy | grep -q traefik-gateway; then
+        if docker ps --filter name=api-gateway --filter health=healthy | grep -q api-gateway; then
             log_success "Traefik gateway is healthy"
+
+            # Start port forwarding after gateway is healthy
+            start_port_forwarding
+
             return 0
         fi
 
@@ -89,8 +97,29 @@ start_gateway() {
     done
 
     log_error "Traefik gateway failed to become healthy within ${max_wait}s"
-    docker logs traefik-gateway --tail 50
+    docker logs api-gateway --tail 50
     return 1
+}
+
+# WSL2 Port Forwarding (workaround for Docker Desktop port binding issues)
+start_port_forwarding() {
+    log_info "Setting up WSL2 port forwarding..."
+
+    # Check if we're in WSL2
+    if ! grep -qi microsoft /proc/version; then
+        log_info "Not running in WSL2, skipping port forwarding"
+        return 0
+    fi
+
+    # Run the port forwarding script
+    if [ -f "$SCRIPT_DIR/wsl2-port-forward.sh" ]; then
+        bash "$SCRIPT_DIR/wsl2-port-forward.sh" start > /dev/null 2>&1 || {
+            log_warning "Port forwarding failed, trying to continue anyway"
+        }
+        log_success "WSL2 port forwarding active (localhost:9082, localhost:9083)"
+    else
+        log_warning "Port forwarding script not found at $SCRIPT_DIR/wsl2-port-forward.sh"
+    fi
 }
 
 # Start workspace stack

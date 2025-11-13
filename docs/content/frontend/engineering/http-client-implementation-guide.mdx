@@ -1,0 +1,854 @@
+---
+title: "HTTP Client Implementation Guide"
+sidebar_position: 5
+tags: [frontend, http, resilience, implementation]
+domain: frontend
+type: guide
+summary: "Practical guide for implementing standardized HTTP client with circuit breaker, retry logic, and observability"
+status: active
+last_review: "2025-11-13"
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# HTTP Client Implementation Guide
+
+**Related Documents:**
+- 📋 [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
+- 📏 [STD-020: HTTP Client Standard](/governance/standards/STD-020-http-client-standard)
+- 🏛️ [ADR-003: API Gateway Implementation](/docs/reference/adrs/ADR-003-api-gateway-implementation)
+
+---
+
+## Quick Start
+
+### 1. Installation
+
+```bash
+cd frontend/dashboard
+npm install axios@^1.6.0 axios-retry@^4.0.0
+```
+
+### 2. Create HttpClient
+
+<Tabs>
+<TabItem value="http-client" label="http-client.ts" default>
+
+```typescript title="frontend/dashboard/src/lib/http-client.ts"
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import axiosRetry, { exponentialDelay } from 'axios-retry';
+import { CircuitBreaker, CircuitState } from './circuit-breaker';
+
+export enum OperationType {
+  HEALTH_CHECK = 'health_check',
+  QUICK_READ = 'quick_read',
+  STANDARD_READ = 'standard_read',
+  WRITE = 'write',
+  LONG_OPERATION = 'long_operation',
+  FILE_UPLOAD = 'file_upload',
+}
+
+const TIMEOUT_CONFIG: Record<OperationType, number> = {
+  [OperationType.HEALTH_CHECK]: 5000,
+  [OperationType.QUICK_READ]: 10000,
+  [OperationType.STANDARD_READ]: 15000,
+  [OperationType.WRITE]: 30000,
+  [OperationType.LONG_OPERATION]: 120000,
+  [OperationType.FILE_UPLOAD]: 300000,
+};
+
+const RETRY_CONFIG: Record<OperationType, number> = {
+  [OperationType.HEALTH_CHECK]: 2,
+  [OperationType.QUICK_READ]: 3,
+  [OperationType.STANDARD_READ]: 3,
+  [OperationType.WRITE]: 2,
+  [OperationType.LONG_OPERATION]: 1,
+  [OperationType.FILE_UPLOAD]: 1,
+};
+
+interface HttpClientConfig {
+  baseURL: string;
+  defaultTimeout?: number;
+  enableCircuitBreaker?: boolean;
+  enableRetry?: boolean;
+  enableLogging?: boolean;
+  maxConcurrentRequests?: number;
+}
+
+export class HttpClient {
+  private client: AxiosInstance;
+  private circuitBreaker?: CircuitBreaker;
+  private activeRequests = 0;
+  private maxConcurrentRequests: number;
+
+  constructor(config: HttpClientConfig) {
+    this.maxConcurrentRequests = config.maxConcurrentRequests || 10;
+
+    this.client = axios.create({
+      baseURL: config.baseURL,
+      timeout: config.defaultTimeout || 15000,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Service-Token': import.meta.env.VITE_INTER_SERVICE_SECRET,
+      },
+    });
+
+    if (config.enableRetry !== false) {
+      this.setupRetry();
+    }
+
+    if (config.enableCircuitBreaker) {
+      this.circuitBreaker = new CircuitBreaker({
+        failureThreshold: 5,
+        resetTimeout: 30000,
+        monitoringPeriod: 10000,
+      });
+    }
+
+    this.setupInterceptors(config.enableLogging);
+  }
+
+  private setupRetry() {
+    axiosRetry(this.client, {
+      retries: 3,
+      retryDelay: exponentialDelay,
+      retryCondition: (error: AxiosError) => {
+        if (!error.response) return true;
+        const status = error.response.status;
+        return status >= 500 || status === 429;
+      },
+      onRetry: (retryCount, error, requestConfig) => {
+        console.warn(
+          `[HttpClient] Retry ${retryCount} for ${requestConfig.url}`,
+          error.message
+        );
+      },
+    });
+  }
+
+  private setupInterceptors(enableLogging?: boolean) {
+    this.client.interceptors.request.use(
+      (config) => {
+        config.metadata = { startTime: Date.now() };
+        if (enableLogging) {
+          console.log(`[HttpClient] → ${config.method?.toUpperCase()} ${config.url}`);
+        }
+        return config;
+      }
+    );
+
+    this.client.interceptors.response.use(
+      (response) => {
+        const duration = Date.now() - (response.config.metadata?.startTime || 0);
+        if (enableLogging) {
+          console.log(
+            `[HttpClient] ← ${response.status} ${response.config.url} (${duration}ms)`
+          );
+        }
+        this.recordMetrics({ url: response.config.url, status: response.status, duration });
+        return response;
+      },
+      (error: AxiosError) => {
+        const duration = Date.now() - (error.config?.metadata?.startTime || 0);
+        console.error(`[HttpClient] ✗ ${error.config?.url} (${duration}ms)`, error.message);
+        return Promise.reject(this.normalizeError(error));
+      }
+    );
+  }
+
+  private normalizeError(error: AxiosError): Error {
+    if (!error.response) {
+      return new Error(
+        error.code === 'ECONNABORTED'
+          ? 'Tempo limite de conexão excedido. Tente novamente.'
+          : 'Erro de conexão. Verifique sua internet e tente novamente.'
+      );
+    }
+
+    const status = error.response.status;
+    const data = error.response.data as any;
+
+    if (status >= 500) {
+      return new Error(data?.message || 'Erro no servidor. Tente novamente em alguns instantes.');
+    }
+    if (status === 429) {
+      return new Error('Muitas requisições. Aguarde um momento e tente novamente.');
+    }
+    if (status === 401 || status === 403) {
+      return new Error('Não autorizado. Verifique suas credenciais.');
+    }
+    if (status === 404) {
+      return new Error('Recurso não encontrado.');
+    }
+
+    return new Error(data?.message || 'Erro desconhecido.');
+  }
+
+  private recordMetrics(metrics: { url?: string; status: number; duration: number }) {
+    if (metrics.duration > 1000) {
+      console.warn(`[HttpClient] Slow request: ${metrics.url} (${metrics.duration}ms)`);
+    }
+  }
+
+  private async waitForSlot(): Promise<void> {
+    while (this.activeRequests >= this.maxConcurrentRequests) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
+  async request<T = any>(
+    config: AxiosRequestConfig & { operationType?: OperationType }
+  ): Promise<T> {
+    const operationType = config.operationType || OperationType.STANDARD_READ;
+    const timeout = TIMEOUT_CONFIG[operationType];
+    const retries = RETRY_CONFIG[operationType];
+
+    await this.waitForSlot();
+    this.activeRequests++;
+
+    try {
+      if (this.circuitBreaker && !this.circuitBreaker.canRequest()) {
+        throw new Error('Serviço temporariamente indisponível (circuit breaker aberto)');
+      }
+
+      const response = await this.client.request<T>({
+        ...config,
+        timeout,
+        'axios-retry': { retries },
+      });
+
+      this.circuitBreaker?.recordSuccess();
+      return response.data;
+    } catch (error) {
+      this.circuitBreaker?.recordFailure();
+      throw error;
+    } finally {
+      this.activeRequests--;
+    }
+  }
+
+  async get<T = any>(
+    url: string,
+    config?: AxiosRequestConfig & { operationType?: OperationType }
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: 'GET', url });
+  }
+
+  async post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig & { operationType?: OperationType }
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: 'POST', url, data });
+  }
+
+  async put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig & { operationType?: OperationType }
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: 'PUT', url, data });
+  }
+
+  async delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig & { operationType?: OperationType }
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: 'DELETE', url });
+  }
+
+  async healthCheck(url: string = '/health'): Promise<boolean> {
+    try {
+      await this.get(url, { operationType: OperationType.HEALTH_CHECK });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+```
+
+</TabItem>
+
+<TabItem value="circuit-breaker" label="circuit-breaker.ts">
+
+```typescript title="frontend/dashboard/src/lib/circuit-breaker.ts"
+export enum CircuitState {
+  CLOSED = 'CLOSED',
+  OPEN = 'OPEN',
+  HALF_OPEN = 'HALF_OPEN',
+}
+
+interface CircuitBreakerConfig {
+  failureThreshold: number;
+  resetTimeout: number;
+  monitoringPeriod: number;
+}
+
+export class CircuitBreaker {
+  private state: CircuitState = CircuitState.CLOSED;
+  private failures: number[] = [];
+  private lastFailureTime: number = 0;
+  private config: CircuitBreakerConfig;
+
+  constructor(config: CircuitBreakerConfig) {
+    this.config = config;
+  }
+
+  canRequest(): boolean {
+    if (this.state === CircuitState.CLOSED) {
+      return true;
+    }
+
+    if (this.state === CircuitState.OPEN) {
+      const timeSinceLastFailure = Date.now() - this.lastFailureTime;
+      if (timeSinceLastFailure >= this.config.resetTimeout) {
+        console.log('[CircuitBreaker] Transitioning to HALF_OPEN');
+        this.state = CircuitState.HALF_OPEN;
+        return true;
+      }
+      return false;
+    }
+
+    return true; // HALF_OPEN: allow test request
+  }
+
+  recordSuccess(): void {
+    if (this.state === CircuitState.HALF_OPEN) {
+      console.log('[CircuitBreaker] Success in HALF_OPEN, closing circuit');
+      this.state = CircuitState.CLOSED;
+      this.failures = [];
+    }
+  }
+
+  recordFailure(): void {
+    const now = Date.now();
+    this.lastFailureTime = now;
+
+    this.failures = this.failures.filter(
+      (timestamp) => now - timestamp < this.config.monitoringPeriod
+    );
+
+    this.failures.push(now);
+
+    if (this.failures.length >= this.config.failureThreshold) {
+      if (this.state !== CircuitState.OPEN) {
+        console.warn(`[CircuitBreaker] Opening circuit (${this.failures.length} failures)`);
+        this.state = CircuitState.OPEN;
+      }
+    }
+  }
+
+  getState(): CircuitState {
+    return this.state;
+  }
+
+  reset(): void {
+    this.state = CircuitState.CLOSED;
+    this.failures = [];
+    this.lastFailureTime = 0;
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+## Create Service Clients
+
+### Example: Workspace Client
+
+```typescript title="frontend/dashboard/src/services/workspace-client.ts"
+import { HttpClient, OperationType } from '../lib/http-client';
+
+export interface WorkspaceItem {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export class WorkspaceClient {
+  private http: HttpClient;
+
+  constructor() {
+    this.http = new HttpClient({
+      baseURL: 'http://localhost:9082/api/workspace', // ✅ Via Traefik
+      enableCircuitBreaker: true,
+      enableRetry: true,
+      enableLogging: import.meta.env.DEV,
+      maxConcurrentRequests: 5,
+    });
+  }
+
+  /**
+   * Get all workspace items
+   * @returns Promise<WorkspaceItem[]>
+   */
+  async getItems(): Promise<WorkspaceItem[]> {
+    return this.http.get<WorkspaceItem[]>('/items', {
+      operationType: OperationType.STANDARD_READ,
+    });
+  }
+
+  /**
+   * Get workspace item by ID
+   * @param id - Item ID
+   * @returns Promise<WorkspaceItem>
+   */
+  async getItemById(id: string): Promise<WorkspaceItem> {
+    return this.http.get<WorkspaceItem>(`/items/${id}`, {
+      operationType: OperationType.QUICK_READ,
+    });
+  }
+
+  /**
+   * Create new workspace item
+   * @param item - Item data
+   * @returns Promise<WorkspaceItem>
+   */
+  async createItem(
+    item: Omit<WorkspaceItem, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<WorkspaceItem> {
+    return this.http.post<WorkspaceItem>('/items', item, {
+      operationType: OperationType.WRITE,
+    });
+  }
+
+  /**
+   * Update workspace item
+   * @param id - Item ID
+   * @param item - Partial item data
+   * @returns Promise<WorkspaceItem>
+   */
+  async updateItem(id: string, item: Partial<WorkspaceItem>): Promise<WorkspaceItem> {
+    return this.http.put<WorkspaceItem>(`/items/${id}`, item, {
+      operationType: OperationType.WRITE,
+    });
+  }
+
+  /**
+   * Delete workspace item
+   * @param id - Item ID
+   */
+  async deleteItem(id: string): Promise<void> {
+    return this.http.delete(`/items/${id}`, {
+      operationType: OperationType.WRITE,
+    });
+  }
+
+  /**
+   * Health check
+   * @returns Promise<boolean>
+   */
+  async healthCheck(): Promise<boolean> {
+    return this.http.healthCheck('/health');
+  }
+}
+
+// Singleton instance
+export const workspaceClient = new WorkspaceClient();
+```
+
+---
+
+## Use in React Components
+
+### Basic Usage
+
+```tsx title="WorkspacePage.tsx"
+import { useState, useEffect } from 'react';
+import { workspaceClient, WorkspaceItem } from '../services/workspace-client';
+
+export function WorkspacePage() {
+  const [items, setItems] = useState<WorkspaceItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  async function loadItems() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await workspaceClient.getItems();
+      setItems(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCreateItem(title: string, content: string) {
+    try {
+      const newItem = await workspaceClient.createItem({ title, content });
+      setItems((prev) => [...prev, newItem]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar item');
+    }
+  }
+
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div>
+      <h1>Workspace</h1>
+      {items.map((item) => (
+        <div key={item.id}>{item.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+### With Health Monitoring
+
+```tsx title="TelegramGatewayPage.tsx"
+import { useState } from 'react';
+import { telegramGatewayClient } from '../services/telegram-gateway-client';
+import { useServiceHealth } from '../hooks/useServiceHealth';
+
+export function TelegramGatewayPage() {
+  const [syncing, setSyncing] = useState(false);
+  const serviceHealth = useServiceHealth('Telegram Gateway');
+
+  async function handleSyncMessages() {
+    // Fail-fast if service unhealthy
+    if (!serviceHealth?.healthy) {
+      alert('Serviço Telegram Gateway está indisponível. Tente novamente em alguns instantes.');
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      const result = await telegramGatewayClient.syncMessages();
+      alert(`✅ ${result.data.totalMessagesSynced} mensagem(ns) recuperada(s)!`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Erro ao sincronizar');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  return (
+    <div>
+      <ServiceStatusBadge health={serviceHealth} />
+
+      <button
+        onClick={handleSyncMessages}
+        disabled={syncing || !serviceHealth?.healthy}
+      >
+        {serviceHealth?.healthy ? '✓' : '⚠️'}
+        {syncing ? 'Sincronizando...' : 'Sincronizar Mensagens'}
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## Health Monitoring
+
+### Health Monitor
+
+```typescript title="frontend/dashboard/src/lib/health-monitor.ts"
+import { workspaceClient } from '../services/workspace-client';
+import { telegramGatewayClient } from '../services/telegram-gateway-client';
+
+export interface ServiceHealth {
+  name: string;
+  healthy: boolean;
+  lastCheck: Date;
+  consecutiveFailures: number;
+}
+
+export class HealthMonitor {
+  private services: Map<string, ServiceHealth> = new Map();
+  private intervalId?: number;
+  private listeners: Set<(services: Map<string, ServiceHealth>) => void> = new Set();
+
+  constructor(private checkInterval: number = 30000) {}
+
+  start() {
+    this.checkAll();
+    this.intervalId = window.setInterval(() => this.checkAll(), this.checkInterval);
+  }
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  private async checkAll() {
+    const checks = [
+      { name: 'Workspace', client: workspaceClient },
+      { name: 'Telegram Gateway', client: telegramGatewayClient },
+    ];
+
+    for (const { name, client } of checks) {
+      try {
+        const healthy = await client.healthCheck();
+        this.updateServiceHealth(name, healthy);
+      } catch {
+        this.updateServiceHealth(name, false);
+      }
+    }
+
+    this.notifyListeners();
+  }
+
+  private updateServiceHealth(name: string, healthy: boolean) {
+    const current = this.services.get(name);
+
+    this.services.set(name, {
+      name,
+      healthy,
+      lastCheck: new Date(),
+      consecutiveFailures: healthy ? 0 : (current?.consecutiveFailures || 0) + 1,
+    });
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach((listener) => listener(this.services));
+  }
+
+  subscribe(listener: (services: Map<string, ServiceHealth>) => void) {
+    this.listeners.add(listener);
+    listener(this.services);
+  }
+
+  unsubscribe(listener: (services: Map<string, ServiceHealth>) => void) {
+    this.listeners.delete(listener);
+  }
+
+  isServiceHealthy(name: string): boolean {
+    return this.services.get(name)?.healthy ?? false;
+  }
+}
+
+export const healthMonitor = new HealthMonitor();
+```
+
+### React Hook
+
+```typescript title="frontend/dashboard/src/hooks/useServiceHealth.ts"
+import { useState, useEffect } from 'react';
+import { healthMonitor, ServiceHealth } from '../lib/health-monitor';
+
+export function useServiceHealth(serviceName?: string) {
+  const [services, setServices] = useState<Map<string, ServiceHealth>>(new Map());
+
+  useEffect(() => {
+    const listener = (updatedServices: Map<string, ServiceHealth>) => {
+      setServices(new Map(updatedServices));
+    };
+
+    healthMonitor.subscribe(listener);
+
+    return () => {
+      healthMonitor.unsubscribe(listener);
+    };
+  }, []);
+
+  if (serviceName) {
+    return services.get(serviceName);
+  }
+
+  return Array.from(services.values());
+}
+```
+
+---
+
+## Environment Variables
+
+```bash title=".env"
+# HTTP Client Configuration
+VITE_API_GATEWAY_URL=http://localhost:9082
+VITE_INTER_SERVICE_SECRET=your-secret-key-here
+
+# Optional: Override timeouts
+VITE_HTTP_TIMEOUT_DEFAULT=15000
+VITE_HTTP_TIMEOUT_HEALTH_CHECK=5000
+VITE_HTTP_TIMEOUT_LONG_OPERATION=120000
+
+# Circuit Breaker
+VITE_CIRCUIT_BREAKER_ENABLED=true
+VITE_CIRCUIT_BREAKER_FAILURE_THRESHOLD=5
+VITE_CIRCUIT_BREAKER_RESET_TIMEOUT=30000
+
+# Retry
+VITE_HTTP_RETRY_ENABLED=true
+VITE_HTTP_RETRY_MAX_ATTEMPTS=3
+
+# Logging
+VITE_HTTP_LOGGING_ENABLED=true
+```
+
+---
+
+## Testing
+
+### Unit Tests
+
+```typescript title="__tests__/http-client.test.ts"
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import MockAdapter from 'axios-mock-adapter';
+import { HttpClient, OperationType } from '../http-client';
+
+describe('HttpClient', () => {
+  let client: HttpClient;
+  let mock: MockAdapter;
+
+  beforeEach(() => {
+    client = new HttpClient({
+      baseURL: 'http://localhost:9082',
+      enableRetry: true,
+      enableCircuitBreaker: true,
+    });
+    mock = new MockAdapter(client['client']);
+  });
+
+  it('should retry on 5xx errors', async () => {
+    mock.onGet('/test').replyOnce(500).onGet('/test').reply(200, { ok: true });
+
+    const result = await client.get('/test');
+    expect(result).toEqual({ ok: true });
+    expect(mock.history.get.length).toBe(2);
+  });
+
+  it('should open circuit breaker after threshold', async () => {
+    mock.onGet('/test').reply(500);
+
+    for (let i = 0; i < 5; i++) {
+      try {
+        await client.get('/test');
+      } catch {}
+    }
+
+    await expect(client.get('/test')).rejects.toThrow('circuit breaker aberto');
+  });
+
+  it('should respect timeout by operation type', async () => {
+    mock.onGet('/test').reply(() => new Promise(() => {}));
+
+    await expect(
+      client.get('/test', { operationType: OperationType.HEALTH_CHECK })
+    ).rejects.toThrow('Tempo limite de conexão excedido');
+  }, 6000);
+});
+```
+
+---
+
+## Troubleshooting
+
+### Problem: "API Indisponível"
+
+**Symptoms:**
+- Error message: "Erro de conexão. Verifique sua internet..."
+- Browser console shows CORS errors
+
+**Diagnosis:**
+```bash
+# Check if Traefik gateway is running
+curl http://localhost:9082/health
+
+# Check service client configuration
+grep -r "baseURL" frontend/dashboard/src/services/*.ts
+```
+
+**Solution:**
+1. Ensure Traefik is running: `docker ps | grep traefik`
+2. Verify base URL uses port 9082 (NOT 3200, 4005, etc.)
+3. Check `.env` has `VITE_API_GATEWAY_URL=http://localhost:9082`
+
+---
+
+### Problem: Circuit Breaker Keeps Opening
+
+**Symptoms:**
+- Frequent "circuit breaker aberto" errors
+- Service becomes unresponsive
+
+**Diagnosis:**
+```typescript
+// Check circuit breaker state
+console.log(client['circuitBreaker']?.getState());
+```
+
+**Solutions:**
+1. **Backend is actually down** → Fix backend service
+2. **Timeout too aggressive** → Increase timeout for operation type
+3. **Failure threshold too low** → Increase from 5 to 10 failures
+
+```typescript
+// Temporary fix: Reset circuit breaker
+client['circuitBreaker']?.reset();
+```
+
+---
+
+### Problem: Slow Requests (>1s)
+
+**Symptoms:**
+- Console warning: "Slow request: /api/... (1523ms)"
+- UI feels sluggish
+
+**Diagnosis:**
+```bash
+# Check backend performance
+curl -w "@curl-format.txt" http://localhost:9082/api/workspace/items
+```
+
+**Solutions:**
+1. **Backend optimization needed** → Profile backend API
+2. **Network latency** → Check Docker network performance
+3. **Database query slow** → Add indexes, optimize queries
+
+---
+
+## Best Practices
+
+### ✅ DO
+
+- Use `OperationType` enum for all requests
+- Implement health checks for all service clients
+- Add JSDoc comments to public methods
+- Test retry logic and circuit breaker
+- Use error boundaries in React components
+- Monitor Prometheus metrics
+
+### ❌ DON'T
+
+- Hardcode service URLs (use Traefik gateway)
+- Skip error handling (always try/catch)
+- Ignore circuit breaker state
+- Use generic error messages
+- Make requests without operation type
+- Bypass health monitoring
+
+---
+
+## Related Documentation
+
+- 📋 [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
+- 📏 [STD-020: HTTP Client Standard](/governance/standards/STD-020-http-client-standard)
+- 🔧 [Proxy Best Practices](/docs/frontend/engineering/PROXY-BEST-PRACTICES)
+- 🏛️ [API Gateway Policy](/governance/policies/api-gateway-policy)
+
+---
+
+**Last Updated:** 2025-11-13
+**Status:** Active
+**Feedback:** [Open Issue](https://github.com/marceloterra1983/TradingSystem/issues/new)

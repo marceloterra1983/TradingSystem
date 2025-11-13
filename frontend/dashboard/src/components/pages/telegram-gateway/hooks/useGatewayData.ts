@@ -46,9 +46,9 @@ export function useGatewayData(
       const limit = filterLimit === "all" ? "10000" : filterLimit || "50";
       const cacheBuster = Date.now();
 
-      let messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_BASE}?limit=${limit}&sort=desc&_=${cacheBuster}`;
+      let messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_API_URL}?limit=${limit}&sort=desc&_=${cacheBuster}`;
       if (filterChannel !== "all") {
-        messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_BASE}?channelId=${encodeURIComponent(
+        messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_API_URL}?channelId=${encodeURIComponent(
           filterChannel,
         )}&limit=${limit}&sort=desc&_=${cacheBuster}`;
       }
@@ -64,7 +64,7 @@ export function useGatewayData(
           fetchOptions,
         ),
         fetch(
-          `${TELEGRAM_GATEWAY_CHANNELS_BASE}?_=${cacheBuster}`,
+          `${TELEGRAM_GATEWAY_CHANNELS_API_URL}?_=${cacheBuster}`,
           fetchOptions,
         ),
         fetch(messagesUrl, fetchOptions),

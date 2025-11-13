@@ -30,7 +30,7 @@ services:
       COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
       COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
       COURSE_CRAWLER_JWT_SECRET: ${COURSE_CRAWLER_JWT_SECRET:-course-crawler-jwt-secret-change-me-in-production-min-32-chars}
-      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:9080,http://localhost:4201}
+      COURSE_CRAWLER_CORS_ORIGINS: ${COURSE_CRAWLER_CORS_ORIGINS:-http://localhost:9082,http://localhost:9080,http://localhost:4201}
       COURSE_CRAWLER_OUTPUT_BASE: /app/outputs
       COURSE_CRAWLER_CLI_PATH: /workspace/apps/course-crawler/dist/index.js
       COURSE_CRAWLER_API_PORT: ${COURSE_CRAWLER_API_PORT:-3601}
@@ -44,6 +44,20 @@ services:
       - ../../outputs/course-crawler:/app/outputs
     ports:
       - "${COURSE_CRAWLER_API_PORT:-3601}:3601"
+    networks:
+      - default
+      - tradingsystem_backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.course-crawler.rule=PathPrefix(`/api/courses`)"
+      - "traefik.http.routers.course-crawler.priority=85"
+      - "traefik.http.routers.course-crawler.entrypoints=web"
+      - "traefik.http.services.course-crawler.loadbalancer.server.port=3601"
+      - "traefik.http.middlewares.course-crawler-strip.stripprefix.prefixes=/api/courses"
+      - "traefik.http.routers.course-crawler.middlewares=course-crawler-strip"
+      - "com.tradingsystem.stack=course-crawler"
+      - "com.tradingsystem.service=api"
     command: ["npm", "run", "start"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3601/health || exit 1"]
