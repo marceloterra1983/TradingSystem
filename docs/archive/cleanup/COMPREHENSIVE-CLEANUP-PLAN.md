@@ -5,6 +5,8 @@
 
 ---
 
+> ⚠️ **Atualização:** a stack `crawler-course-meta` foi oficialmente removida do repositório em 2025-11-13. As menções a seguir refletem apenas o estado anterior à desativação e foram mantidas para registro histórico.
+
 ## 📊 Executive Summary
 
 Análise completa identificou **~188MB** de arquivos potencialmente removíveis:
@@ -29,7 +31,7 @@ Análise completa identificou **~188MB** de arquivos potencialmente removíveis:
 360KB - reports/                (relatórios CI/CD)
 184KB - waha/                   (dados temporários)
 76KB  - env-backups/            (backups de .env)
-24KB  - crawler-course-meta/    (metadados temporários)
+~~24KB  - crawler-course-meta/    (metadados temporários)~~ (removido em 2025-11-13)
 ```
 
 **Ação Recomendada:**
@@ -51,7 +53,8 @@ rm -rf outputs/*
 
 **Justificativa:**
 - ✅ Dados temporários/logs de desenvolvimento
-- ✅ Dados de course-crawler (sistema descontinuado?)
+- ✅ Dados de course-crawler (sistema descontinuado?)  
+- ❌ Dados de crawler-course-meta (serviço removido permanentemente)
 - ✅ Logs de GitHub Actions (disponíveis no GitHub)
 - ✅ Relatórios CI/CD antigos
 - ✅ Não afeta funcionalidade do sistema

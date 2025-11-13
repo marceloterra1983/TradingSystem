@@ -5,11 +5,13 @@ tags: [crawler, metadata, automation]
 domain: data-ingestion
 type: spec
 summary: Template full-stack para extração de metadados de cursos com backend Node.js/Crawlee e frontend Next.js.
-status: draft
-last_review: "2025-11-08"
+status: archived
+last_review: "2025-11-13"
 ---
 
 # Crawler Course Meta Specification
+
+> ⚠️ **Status:** Este capability foi descontinuado em 2025-11-13 com a remoção da stack `crawler-course-meta`. A especificação permanece arquivada apenas para consulta histórica.
 
 ## Purpose
 Garantir que o template `Crawler Course Meta` entregue captura segura de metadados de cursos (Hotmart, Udemy, Moodle e similares) com backend Node.js + Crawlee + Playwright, frontend Next.js 15 e observabilidade completa (jobs, métricas, logs e artefatos).

@@ -1,3 +1,5 @@
+> ⚠️ **Status:** Proposta cancelada em 2025-11-13 com a remoção da stack `crawler-course-meta`. Conteúdo mantido apenas para histórico de decisões.
+
 ## Why
 
 O repositório já possui a especificação `Crawler Course Meta` (tools/openspec/specs/crawler-course-meta/spec.md), mas ainda não há plano de implantação que leve o template do papel para uma stack operacional. Precisamos transformar o design em entregáveis concretos para:

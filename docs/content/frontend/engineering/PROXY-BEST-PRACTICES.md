@@ -1,506 +1,276 @@
 ---
-title: Vite Proxy Configuration - Best Practices
-sidebar_position: 5
-tags: [frontend, vite, proxy, configuration, best-practices]
+title: "Proxy Configuration Best Practices"
+sidebar_position: 20
+tags: [frontend, proxy, vite, docker, best-practices]
 domain: frontend
-owner: FrontendGuild
 type: guide
-summary: "Comprehensive guide for configuring Vite proxy to connect browser code to Docker containers"
-description: "Best practices for Vite proxy configuration to prevent API errors and connectivity issues"
+summary: "Best practices for configuring Vite proxy in containerized environments"
 status: active
-last_review: "2025-11-06"
-lastReviewed: "2025-11-08"
+last_review: "2025-11-13"
 ---
 
-# Vite Proxy Configuration - Best Practices
+# Proxy Configuration Best Practices
 
-**Last Updated:** 2025-11-06
-**Status:** ✅ Production-Ready Pattern
-**Priority:** P0 - Critical (Security & Connectivity)
+## Overview
 
-lastReviewed: "2025-11-08"
----
+This guide documents best practices for configuring Vite proxy in Docker containers to prevent common issues like "API Indisponível" errors.
 
-## 🎯 Overview
+## The #1 Cause of Proxy Errors
 
-This document establishes the **canonical pattern** for connecting frontend browser code to backend Docker containers through Vite's development proxy.
+**Using `VITE_` prefix for container hostnames exposes them to the browser, causing connection failures.**
 
-**Why This Matters:** Incorrect proxy configuration causes "API Indisponível" errors that are difficult to debug because they appear as silent network failures in the browser.
+## Critical Rules
 
-lastReviewed: "2025-11-08"
----
+### Rule 1: Never Use `VITE_` Prefix for Proxy Targets
 
-## 🏗️ Architecture Flow
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Browser (Client)                        │
-│  - Can only resolve: localhost, public domains             │
-│  - CANNOT resolve: Docker container hostnames              │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            │ fetch('/api/workspace/items')
-                            │ (relative path)
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Vite Dev Server (Port 9080 via Traefik)           │
-│  - Reads process.env (server-side variables)               │
-│  - Proxy configured in vite.config.ts                       │
-│  - Has access to Docker network DNS                         │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            │ http://workspace-api:3200/api/items
-                            │ (container hostname)
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│        Docker Container (workspace-api:3200)                │
-│  - Only accessible within Docker network                    │
-│  - Hostname resolves via Docker DNS                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-lastReviewed: "2025-11-08"
----
-
-## 🔑 Critical Rules (NEVER VIOLATE)
-
-### Rule 1: Variable Scoping
-
+❌ **WRONG**:
 ```bash
-# ✅ CORRECT - Server-side only (Vite proxy reads this)
-WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
-
-# ✅ CORRECT - Browser-side (relative path)
-VITE_WORKSPACE_API_URL=/api/workspace
-
-# ❌ WRONG - Container hostname exposed to browser
-VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
+# .env
+VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200
 ```
 
-**Golden Rule:**
-> **NEVER use `VITE_` prefix for container hostnames**
-> `VITE_*` variables are automatically exposed to browser code via `import.meta.env`
+✅ **CORRECT**:
+```bash
+# .env
+WORKSPACE_PROXY_TARGET=http://workspace-api:3200
+```
 
-### Rule 2: Browser Code Uses Relative Paths
+**Why?** Vite automatically exposes all `VITE_*` variables to the browser. Container hostnames like `workspace-api` are NOT resolvable from the browser!
+
+### Rule 2: Always Use Relative Paths in Browser Code
+
+❌ **WRONG**:
+```typescript
+// Browser code
+const url = 'http://localhost:3200/api/items';
+const url = `${import.meta.env.VITE_API_URL}/items`;
+```
+
+✅ **CORRECT**:
+```typescript
+// Browser code
+const url = '/api/workspace/items'; // Vite proxy handles this
+```
+
+**Why?** The browser should ONLY know about relative paths. The Vite dev server (or production reverse proxy) handles routing to the backend.
+
+### Rule 3: Vite Proxy Configuration
 
 ```typescript
-// ✅ CORRECT - Relative path (Vite proxy intercepts)
-const baseUrl = '/api/workspace/items';
-fetch(baseUrl); // → http://localhost:9080/api/workspace/items → Traefik/Vite proxy → container
-
-// ❌ WRONG - Absolute localhost URL (bypasses proxy, wrong port)
-const baseUrl = 'http://localhost:3200/api/items';
-fetch(baseUrl); // → Connection refused (port not exposed)
-
-// ❌ WRONG - Container hostname (browser can't resolve)
-const baseUrl = 'http://workspace-api:3200/api/items';
-fetch(baseUrl); // → DNS lookup failed
+// vite.config.ts
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api/workspace': {
+        target: process.env.WORKSPACE_PROXY_TARGET || 'http://localhost:3200',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/workspace/, '/api'),
+      },
+    },
+  },
+});
 ```
 
-### Rule 3: Proxy Configuration Priority
+**Key Points**:
+- Use non-`VITE_` environment variables for targets
+- `changeOrigin: true` prevents CORS issues
+- `rewrite` transforms `/api/workspace/items` → `/api/items`
 
+### Rule 4: ESLint Validation
+
+```javascript
+// .eslintrc.cjs
+module.exports = {
+  rules: {
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'Literal[value=/^http:\\/\\/(localhost|127\\.0\\.0\\.1):\\d+/]',
+        message: 'Use relative paths instead of localhost URLs',
+      },
+    ],
+  },
+};
+```
+
+**This prevents**:
 ```typescript
-// vite.config.ts - Correct priority order
-const proxy = resolveProxy(
-  env.SERVICE_PROXY_TARGET,           // ✅ 1. Server-side (prioritized)
-  env.VITE_SERVICE_PROXY_TARGET,      // ⚠️  2. Legacy fallback
-  env.VITE_SERVICE_API_URL,           // ⚠️  3. Browser URL (last resort)
-  'http://localhost:PORT/path',       // ✅ 4. Local dev fallback
-);
+const url = 'http://localhost:3200/api/items'; // ❌ ESLint error
 ```
 
-lastReviewed: "2025-11-08"
----
+## Container vs Host Networking
 
-## 📋 Complete Configuration Checklist
-
-### 1. Docker Compose Configuration
-
-**File:** `tools/compose/docker-compose.1-dashboard-stack.yml`
+### In Docker Compose
 
 ```yaml
 services:
   dashboard:
+    build: ./frontend/dashboard
     environment:
-      # ✅ Server-side proxy targets (no VITE_ prefix!)
-      - WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
-      - TP_CAPITAL_PROXY_TARGET=http://tp-capital-api:4005
-      - DOCUSAURUS_PROXY_TARGET=http://docs-hub:80
-
-      # ✅ Browser-facing URLs (relative paths only)
-      # These are set in .env file, not docker-compose
+      # ✅ Container hostname (server-side only)
+      WORKSPACE_PROXY_TARGET: http://workspace-api:3200
+      
+      # ❌ DO NOT use VITE_ prefix
+      # VITE_WORKSPACE_PROXY_TARGET: http://workspace-api:3200
+    networks:
+      - tradingsystem_backend
+  
+  workspace-api:
+    image: workspace-api
+    networks:
+      - tradingsystem_backend
 ```
 
-**Why Separate?**
-- `WORKSPACE_PROXY_TARGET` → Server-side (Vite reads from `process.env`)
-- `VITE_WORKSPACE_API_URL` → Browser-side (exposed via `import.meta.env`)
+**Network Resolution**:
+- `dashboard` container → `workspace-api:3200` ✅ (same Docker network)
+- Browser → `workspace-api:3200` ❌ (hostname not in DNS)
+- Browser → `/api/workspace/items` ✅ (Vite proxy routes to container)
 
-### 2. Environment File (.env)
+### Development vs Production
 
-```bash
-# ✅ Browser-facing URLs (relative paths)
-VITE_WORKSPACE_API_URL=/api/workspace
-VITE_TP_CAPITAL_API_URL=/api/tp-capital
-VITE_DOCUSAURUS_URL=/
+| Environment | Browser URL       | Proxied To                    |
+|-------------|-------------------|-------------------------------|
+| Development | `/api/workspace/` | `http://workspace-api:3200`   |
+| Production  | `/api/workspace/` | `http://localhost:9082` (via Gateway) |
 
-# ❌ DO NOT add VITE_ prefix to these:
-# WORKSPACE_PROXY_TARGET - set in docker-compose.yml
-# TP_CAPITAL_PROXY_TARGET - set in docker-compose.yml
-```
+## Common Pitfalls
 
-### 3. Vite Configuration (vite.config.ts)
+### Pitfall 1: Exposing Container Hostnames
 
 ```typescript
-import { defineConfig, loadEnv } from 'vite';
+// ❌ WRONG - Exposed to browser
+const API_URL = import.meta.env.VITE_WORKSPACE_API_URL;
+// Value: "http://workspace-api:3200" (not resolvable from browser)
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-
-  // ✅ Resolve proxy targets (server-side only)
-  const workspaceProxy = resolveProxy(
-    env.WORKSPACE_PROXY_TARGET ||           // Server-side (prioritized)
-    env.VITE_WORKSPACE_PROXY_TARGET ||      // Legacy fallback
-    env.VITE_WORKSPACE_API_URL,             // Browser URL
-    'http://localhost:3200/api',            // Local dev fallback
-  );
-
-  return {
-    server: {
-      proxy: {
-        // ✅ Proxy route (browser → Vite → container)
-        '/api/workspace': {
-          target: workspaceProxy.target,      // http://workspace-api:3200
-          changeOrigin: true,
-          rewrite: createRewrite(/^\/api\/workspace/, workspaceProxy.basePath),
-        },
-      },
-    },
-  };
-});
-
-// ✅ Helper function to parse proxy URLs
-function resolveProxy(
-  ...candidates: Array<string | undefined>
-): { target: string; basePath: string } {
-  const url = candidates.find(c => c && c.length > 0) || '';
-  const match = url.match(/^(https?:\/\/[^/]+)(\/.*)?$/);
-
-  if (!match) {
-    return { target: url, basePath: '' };
-  }
-
-  return {
-    target: match[1],           // http://workspace-api:3200
-    basePath: match[2] || '',   // /api
-  };
-}
-
-// ✅ Helper to create rewrite rules
-function createRewrite(pattern: RegExp, replacement: string) {
-  return (path: string) => path.replace(pattern, replacement);
-}
+// ✅ CORRECT - Use relative path
+const url = '/api/workspace/items';
 ```
 
-### 4. Browser Service Code
+### Pitfall 2: Hardcoded Localhost URLs
 
 ```typescript
-// ✅ CORRECT Pattern
-class WorkspaceService {
-  private baseUrl: string;
+// ❌ WRONG - Breaks in Docker
+fetch('http://localhost:3200/api/items');
 
-  constructor() {
-    // Use relative path to leverage Vite proxy
-    this.baseUrl = '/api/workspace/items';
-  }
-
-  async getItems() {
-    // Vite proxy intercepts and forwards to container
-    const response = await fetch(this.baseUrl);
-    return response.json();
-  }
-}
-
-// ❌ WRONG Pattern
-class WorkspaceServiceBad {
-  private baseUrl: string;
-
-  constructor() {
-    // Direct localhost URL bypasses proxy
-    this.baseUrl = 'http://localhost:3200/api/items';
-  }
-
-  async getItems() {
-    // Connection refused (port not exposed to browser)
-    const response = await fetch(this.baseUrl);
-    return response.json();
-  }
-}
+// ✅ CORRECT - Use relative path
+fetch('/api/workspace/items');
 ```
 
-lastReviewed: "2025-11-08"
----
-
-## 🔍 Troubleshooting Guide
-
-### Symptom: "API Indisponível" Error
-
-**Root Causes:**
-1. Container hostname exposed to browser via `VITE_` prefix
-2. Hardcoded localhost URL with wrong port
-3. Direct container hostname in browser code
-
-**Diagnosis:**
-
-```bash
-# 1. Check environment variables in container
-docker exec dashboard-ui env | grep -E "(PROXY_TARGET|API_URL)"
-
-# Expected output:
-# WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api  ← No VITE_ prefix
-# VITE_WORKSPACE_API_URL=/api/workspace                 ← Relative path
-
-# ❌ BAD output:
-# VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200  ← Exposed to browser!
-```
-
-```bash
-# 2. Test proxy endpoint
-curl -s http://localhost:9080/api/workspace/items | jq '.success'
-# Should return: true
-```
-
-```bash
-# 3. Run validation script
-bash scripts/env/validate-env.sh
-# Should pass: ✓ No VITE_ prefix misuse
-```
-
-**Fix:**
-
-1. Remove `VITE_` prefix from proxy target in `docker-compose.yml`
-2. Change browser-facing URL to relative path in `.env`
-3. Update `vite.config.ts` to prioritize non-VITE variable
-4. Rebuild container: `docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml up -d --build`
-
-### Symptom: "Failed to fetch" Error
-
-**Root Cause:** Browser trying to connect directly to container hostname
-
-**Browser Console Shows:**
-```
-GET http://workspace-api:3200/api/items net::ERR_NAME_NOT_RESOLVED
-```
-
-**Fix:** Ensure service uses relative path, not container hostname.
-
-### Symptom: "Connection refused" Error
-
-**Root Cause:** Browser trying to connect to unexposed port
-
-**Browser Console Shows:**
-```
-GET http://localhost:3200/api/items net::ERR_CONNECTION_REFUSED
-```
-
-**Fix:** Change to relative path `/api/workspace/items` (passará pelo Traefik/Vite na porta 9080).
-
-lastReviewed: "2025-11-08"
----
-
-## 📝 Service Template
-
-Use this template for all new services:
+### Pitfall 3: Missing `changeOrigin`
 
 ```typescript
-/**
- * [Service Name] - [Brief Description]
- *
- * Manages [resource] through REST API
- */
-
-// ✅ Extract base URL from environment (relative path)
-const getBaseApiUrl = (): string => {
-  const apiUrl = import.meta.env.VITE_MY_SERVICE_API_URL;
-
-  // Default to relative path (Vite proxy)
-  return apiUrl || '/api/my-service';
-};
-
-const BASE_API_URL = getBaseApiUrl();
-
-console.warn('[MyService] Using base URL:', BASE_API_URL);
-
-export interface MyResource {
-  id: string;
-  name: string;
-  // ... other fields
+// ❌ WRONG - CORS errors
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    // Missing changeOrigin!
+  },
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
+// ✅ CORRECT
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    changeOrigin: true, // Prevents CORS issues
+  },
 }
-
-class MyService {
-  private baseUrl: string;
-
-  constructor() {
-    // ✅ ALWAYS use relative path for Vite proxy
-    this.baseUrl = BASE_API_URL;
-  }
-
-  async getResources(): Promise<MyResource[]> {
-    const response = await fetch(this.baseUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch resources');
-    }
-
-    const result: ApiResponse<MyResource[]> = await response.json();
-
-    if (!result.success || !result.data) {
-      throw new Error(result.error || 'Failed to fetch resources');
-    }
-
-    return result.data;
-  }
-
-  // ... other methods
-}
-
-export const myService = new MyService();
 ```
 
-lastReviewed: "2025-11-08"
----
+## Validation
 
-## 🧪 Testing Checklist
-
-Before deploying a new service:
-
-- [ ] ✅ Service uses relative paths (no localhost URLs)
-- [ ] ✅ No `VITE_` prefix on container hostnames in `.env`
-- [ ] ✅ Proxy target configured in `docker-compose.yml`
-- [ ] ✅ Proxy route added to `vite.config.ts`
-- [ ] ✅ Browser-facing URL uses relative path
-- [ ] ✅ Validation script passes (`bash scripts/env/validate-env.sh`)
-- [ ] ✅ Container rebuilt with `--build` flag
-- [ ] ✅ Proxy endpoint returns data (`curl http://localhost:9080/api/...`)
-- [ ] ✅ No browser console errors
-- [ ] ✅ Service health check passes
-
-lastReviewed: "2025-11-08"
----
-
-## 🚨 Common Mistakes
-
-### Mistake 1: Using VITE_ Prefix for Proxy Targets
+### Step 1: Check Environment Variables
 
 ```bash
-# ❌ WRONG - Exposes container hostname to browser
-VITE_WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
+# In .env file
+grep "^VITE_.*_PROXY_TARGET" .env
 
-# ✅ CORRECT - Server-side only
-WORKSPACE_PROXY_TARGET=http://workspace-api:3200/api
+# Should return NOTHING
+# If you see results, remove the VITE_ prefix
 ```
 
-**Impact:** Browser tries to resolve `workspace-api` hostname → DNS lookup fails → "API Indisponível"
-
-### Mistake 2: Hardcoding Localhost URLs in Browser Code
-
-```typescript
-// ❌ WRONG - Bypasses proxy, wrong port
-const baseUrl = 'http://localhost:3200/api/items';
-
-// ✅ CORRECT - Goes through Vite proxy
-const baseUrl = '/api/workspace/items';
-```
-
-**Impact:** Browser connects to unexposed port → Connection refused
-
-### Mistake 3: Missing Base Path in Proxy Rewrite
-
-```typescript
-// ❌ WRONG - Strips base path incorrectly
-'/api/workspace': {
-  target: 'http://workspace-api:3200',  // Missing /api base path
-  rewrite: (path) => path.replace(/^\/api\/workspace/, ''),
-}
-// Result: http://workspace-api:3200/items (404 - should be /api/items)
-
-// ✅ CORRECT - Preserves base path
-'/api/workspace': {
-  target: 'http://workspace-api:3200',
-  rewrite: (path) => path.replace(/^\/api\/workspace/, '/api'),
-}
-// Result: http://workspace-api:3200/api/items (200 OK)
-```
-
-### Mistake 4: Forgetting Container Rebuild
+### Step 2: Check Source Code
 
 ```bash
-# ❌ WRONG - Vite embeds env vars at build time
+# Search for hardcoded localhost URLs
+grep -r "localhost:[0-9]" src/
+
+# Search for VITE_ proxy variables in code
+grep -r "VITE_.*PROXY" src/
+```
+
+### Step 3: Test Proxy
+
+```bash
+# Start containers
 docker compose up -d
-# Old environment variables still active in container
 
-# ✅ CORRECT - Force rebuild to pick up new variables
-docker compose up -d --build
+# Test from browser console
+fetch('/api/workspace/health').then(r => r.json()).then(console.log)
+
+# Should return: { status: 'healthy', service: 'workspace-api' }
 ```
 
-lastReviewed: "2025-11-08"
----
+## Troubleshooting
 
-## 📊 Service Inventory (Current Status)
+### Error: "API Indisponível"
 
-| Service | URL | Proxy Target | Status |
-|---------|-----|--------------|--------|
-| **Workspace Items** | `/api/workspace/items` | `workspace-api:3200/api` | ✅ Working |
-| **Workspace Categories** | `/api/workspace/categories` | `workspace-api:3200/api` | ✅ Working |
-| **TP Capital API** | `/api/tp-capital` | `tp-capital-api:4005` | ✅ Working |
-| **Docusaurus** | `/next/*` | `docs-hub:80` | ✅ Working |
-| **LlamaIndex RAG** | `/api/v1/rag/*` | `llamaindex-query:8202` | ✅ Working |
+**Cause**: Browser trying to connect to container hostname
 
-lastReviewed: "2025-11-08"
----
-
-## 🔗 Related Documentation
-
-- **Arquivo `frontend/dashboard/docs/PROXY-CONFIGURATION-GUIDE.md`** - guia detalhado na pasta do dashboard
-- **Relatório `outputs/WORKSPACE-API-FIX-2025-11-06.md`** - incidente Workspace API
-- **Relatório `outputs/CATEGORIES-API-FIX-2025-11-06.md`** - correções de categorias
-- **Relatório `outputs/PROXY-FIXES-COMPLETE-2025-11-06.md`** - resumo completo
-- **CLAUDE.md (raiz do repositório)** - seção “When Working with Vite Proxy Configuration”
-
-lastReviewed: "2025-11-08"
----
-
-## 🤖 Instructions for AI Assistants
-
-When working with Vite proxy configuration:
-
-1. **ALWAYS read this document first** before modifying proxy config
-2. **NEVER use `VITE_` prefix** for container hostnames
-3. **ALWAYS use relative paths** in browser code (`/api/...`)
-4. **ALWAYS run validation script** after changes (`bash scripts/env/validate-env.sh`)
-5. **ALWAYS rebuild container** with `--build` flag after config changes
-6. **ALWAYS test endpoints** with `curl` before marking as complete
-
-**If you encounter "API Indisponível" errors:**
+**Solution**:
 1. Check for `VITE_` prefix on proxy targets → Remove it
-2. Check for hardcoded localhost URLs in services → Change to relative paths
-3. Rebuild container → Test with curl → Verify in browser
+2. Check for hardcoded localhost URLs → Use relative paths
+3. Rebuild container: `docker compose up -d --build`
 
-lastReviewed: "2025-11-08"
+### Error: "CORS policy blocked"
+
+**Cause**: Missing `changeOrigin: true` in proxy config
+
+**Solution**:
+```typescript
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    changeOrigin: true, // ADD THIS
+  },
+}
+```
+
+### Error: "404 Not Found" on API calls
+
+**Cause**: Path rewrite not configured correctly
+
+**Solution**:
+```typescript
+proxy: {
+  '/api/workspace': {
+    target: 'http://workspace-api:3200',
+    rewrite: (path) => path.replace(/^\/api\/workspace/, '/api'),
+  },
+}
+```
+
+## Checklist
+
+Before deploying proxy configuration:
+
+- [ ] No `VITE_` prefix on proxy target variables
+- [ ] All browser code uses relative paths (no `localhost` URLs)
+- [ ] `changeOrigin: true` in proxy config
+- [ ] `rewrite` function transforms paths correctly
+- [ ] ESLint rule prevents hardcoded URLs
+- [ ] Container build successful
+- [ ] Proxy test passes (fetch from browser)
+- [ ] No console errors in browser
+
+## Related Documentation
+
+- [HTTP Client Implementation Guide](/docs/frontend/engineering/http-client-implementation-guide)
+- [ADR-008: HTTP Client Standardization](/docs/reference/adrs/ADR-008-http-client-standardization)
+- [Environment Variables Guide](/docs/tools/security-config/env)
+- [API Gateway Policy](/docs/governance/policies/api-gateway-policy)
+
 ---
 
-**Last Updated:** 2025-11-06
-**Maintained By:** TradingSystem Core Team
-**Review Frequency:** After each proxy-related incident (immediately)
-**Status:** ✅ Production-Ready Pattern
+**Last Updated**: 2025-11-13  
+**Status**: Active  
+**Applies To**: All Frontend Applications

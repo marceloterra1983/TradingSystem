@@ -82,13 +82,6 @@ ls -t | tail -n +11 | xargs rm -rf
 
 ⚠️ **DO NOT DELETE** - These are intentional backup files!
 
-#### crawler-course-meta/ (24KB)
-**Purpose:** Course Crawler metadata cache
-**Retention:** Keep active sessions
-**Content:**
-- Course metadata
-- Session information
-
 #### cursor/ (12KB)
 **Purpose:** Cursor IDE outputs and artifacts
 **Retention:** Keep recent

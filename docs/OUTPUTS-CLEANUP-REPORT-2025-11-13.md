@@ -4,6 +4,8 @@
 **Scope:** `/workspace/outputs/` directory
 **Result:** 52.5% size reduction (373MB → 177MB)
 
+> ⚠️ **Atualização 2025-11-13:** a stack `crawler-course-meta` foi descontinuada após esta limpeza. As referências a seguir permanecem apenas para manter o registro histórico do estado antes da remoção.
+
 ---
 
 ## 📊 Executive Summary
@@ -35,7 +37,7 @@
 | reports | 360KB | Multiple | Keep |
 | waha | 184KB | Multiple | Keep |
 | env-backups | 76KB | 3 files | **Preserve!** |
-| crawler-course-meta | 24KB | Multiple | Keep |
+| crawler-course-meta | 24KB | Multiple | Removido em 2025-11-13 |
 | Obsolete docs | 140KB | 11 files | Move to archive |
 | cursor | 12KB | Multiple | Keep |
 | compose | 8KB | Multiple | Keep |
@@ -52,7 +54,7 @@
 | reports | 360KB | Multiple | No change |
 | waha | 184KB | Multiple | No change |
 | env-backups | 76KB | 3 files | No change |
-| crawler-course-meta | 24KB | Multiple | No change |
+| crawler-course-meta | — | — | Removido em 2025-11-13 |
 | cursor | 12KB | Multiple | No change |
 | compose | 8KB | Multiple | No change |
 
@@ -136,7 +138,7 @@
 
 **Other Directories:**
 - waha/ (184KB) - Active WhatsApp API data
-- crawler-course-meta/ (24KB) - Metadata cache
+- ~~crawler-course-meta/ (24KB) - Metadata cache~~ (serviço removido)
 - cursor/ (12KB) - IDE outputs
 - compose/ (8KB) - Docker Compose artifacts
 

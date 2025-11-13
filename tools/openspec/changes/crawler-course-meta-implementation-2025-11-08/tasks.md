@@ -1,5 +1,7 @@
 # Tasks - Crawler Course Meta Implementation
 
+> ⚠️ **Status:** Plano cancelado em 2025-11-13 após a remoção da stack `crawler-course-meta`. Lista mantida apenas como referência histórica.
+
 ## Phase 0 – Kickoff & Foundations (1 dia)
 - [ ] 0.1 Revisar spec `tools/openspec/specs/crawler-course-meta/spec.md` com stakeholders e confirmar escopo (backend, frontend, observabilidade).
 - [ ] 0.2 Criar `apps/crawler-course-meta` e `apps/crawler-course-meta-ui` (ou reutilizar diretórios dedicados) com `package.json`, lint e tsconfig alinhados ao monorepo.

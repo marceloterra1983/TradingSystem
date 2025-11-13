@@ -9,6 +9,8 @@
 
 > **Open-source template** para extração de metadados de cursos online (Hotmart, Udemy, Moodle e outros) com autenticação segura, frontend integrado e observabilidade completa.
 
+> ⚠️ **Atualização 2025-11-13:** a implementação `crawler-course-meta` foi removida do repositório principal. Este documento permanece arquivado apenas como referência histórica da proposta original.
+
 ---
 
 ## 🎯 Visão Geral
