@@ -425,16 +425,12 @@ services:
       - "traefik.http.routers.telegram-gateway.rule=PathPrefix(`/api/telegram-gateway`)"
       - "traefik.http.routers.telegram-gateway.entrypoints=web"
       - "traefik.http.routers.telegram-gateway.service=telegram-gateway"
-      - "traefik.http.routers.telegram-gateway.middlewares=telegram-gateway-rewrite"
       - "traefik.http.routers.telegram-gateway.priority=90"
       - "traefik.http.services.telegram-gateway.loadbalancer.server.port=4010"
       - "traefik.docker.network=tradingsystem_backend"
-      # - "traefik.http.routers.telegram-gateway.middlewares=api-standard@file"  # Disabled - file middlewares not working in WSL2
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.interval=30s"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.timeout=10s"
-      - "traefik.http.middlewares.telegram-gateway-rewrite.replacepathregex.regex=^/api/telegram-gateway/?(.*)$"
-      - "traefik.http.middlewares.telegram-gateway-rewrite.replacepathregex.replacement=/$$1"
 
   # ============================================================================
   # 9. Prometheus - Metrics Collection & Alerting
