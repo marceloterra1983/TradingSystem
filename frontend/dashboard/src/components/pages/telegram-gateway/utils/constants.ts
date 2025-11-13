@@ -21,30 +21,12 @@ export const DEFAULT_POLLING_INTERVAL = 10000; // 10 seconds
 export const DEFAULT_MESSAGE_LIMIT = 50;
 export const DEFAULT_FILTER_CHANNEL = "all";
 
-// API endpoints derived from environment configuration (fallback to Traefik path)
-const fallbackServiceBase = "http://localhost:9082/api/telegram-gateway";
-const fallbackMessagesApi = "http://localhost:9082/api/messages";
-const fallbackChannelsApi = "http://localhost:9082/api/channels";
-
-export const TELEGRAM_GATEWAY_SERVICE_BASE =
-  import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL ||
-  import.meta.env.VITE_API_BASE_URL
-    ? `${(import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL ||
-        import.meta.env.VITE_API_BASE_URL || ""
-      ).replace(/\/$/, "")}/api/telegram-gateway`
-    : fallbackServiceBase;
-
-export const TELEGRAM_GATEWAY_MESSAGES_API_URL =
-  import.meta.env.VITE_TELEGRAM_MESSAGES_API_URL ||
-  (import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/, "")}/api/messages`
-    : fallbackMessagesApi);
-
-export const TELEGRAM_GATEWAY_CHANNELS_API_URL =
-  import.meta.env.VITE_TELEGRAM_CHANNELS_API_URL ||
-  (import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/, "")}/api/channels`
-    : fallbackChannelsApi);
+// API endpoints shared with hooks
+export {
+  TELEGRAM_GATEWAY_SERVICE_BASE,
+  TELEGRAM_GATEWAY_MESSAGES_BASE as TELEGRAM_GATEWAY_MESSAGES_API_URL,
+  TELEGRAM_GATEWAY_CHANNELS_BASE as TELEGRAM_GATEWAY_CHANNELS_API_URL,
+} from "@/hooks/useTelegramGateway";
 
 // Gateway Token (from environment)
 export const getGatewayToken = () => {
