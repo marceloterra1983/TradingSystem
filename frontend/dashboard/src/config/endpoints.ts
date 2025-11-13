@@ -148,25 +148,13 @@ export const ENDPOINTS = {
    */
 
   /** PgAdmin - PostgreSQL/TimescaleDB Web UI (Direct access - subpath not supported) */
-  pgAdmin: resolveGatewayUrl(
-    import.meta.env.VITE_PGADMIN_URL as string | undefined,
-    "/db-ui/pgadmin",
-    ["http://localhost:5050"],
-  ),
+  pgAdmin: import.meta.env.VITE_PGADMIN_URL || "http://localhost:5050",
 
   /** Adminer - Lightweight database management (Direct access - subpath not supported) */
-  adminer: resolveGatewayUrl(
-    import.meta.env.VITE_ADMINER_URL as string | undefined,
-    "/db-ui/adminer",
-    ["http://localhost:3910", "http://localhost:8082"],
-  ),
+  adminer: import.meta.env.VITE_ADMINER_URL || "http://localhost:3910",
 
   /** PgWeb - Lightweight PostgreSQL browser (Direct access - subpath not supported) */
-  pgWeb: resolveGatewayUrl(
-    import.meta.env.VITE_PGWEB_URL as string | undefined,
-    "/db-ui/pgweb",
-    ["http://localhost:5052", "http://localhost:8081"],
-  ),
+  pgWeb: import.meta.env.VITE_PGWEB_URL || "http://localhost:5052",
 
   /**
    * Database Services - Direct Access
