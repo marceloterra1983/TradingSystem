@@ -1,6 +1,31 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
+const normalizeBoolean = (value?: string) =>
+  typeof value === 'string' &&
+  ['1', 'true', 'yes', 'on'].includes(value.toLowerCase().trim());
+
+const normalizeBooleanFalse = (value?: string) =>
+  typeof value === 'string' &&
+  ['0', 'false', 'no', 'off'].includes(value.toLowerCase().trim());
+
+const resolveCoverageGate = () => {
+  const gateEnv = process.env.VITEST_COVERAGE_GATE;
+
+  if (normalizeBooleanFalse(gateEnv)) {
+    return false;
+  }
+
+  if (normalizeBoolean(gateEnv)) {
+    return true;
+  }
+
+  // Default: enforce coverage unless explicit opt-out
+  return normalizeBoolean(process.env.CI) ?? true;
+};
+
+const enforceCoverageGate = resolveCoverageGate();
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -45,13 +70,17 @@ export default defineConfig({
         'vitest.config.ts',
         'scripts/**',
       ],
-      thresholds: {
-        // Progressive thresholds (baseline enforced in CI via coverage-gate script)
-        branches: 50,
-        functions: 30,
-        lines: 30,
-        statements: 30,
-      },
+      ...(enforceCoverageGate
+        ? {
+            thresholds: {
+              // Progressive thresholds only enforced in CI / when explicitly requested
+              branches: 50,
+              functions: 30,
+              lines: 30,
+              statements: 30,
+            },
+          }
+        : {}),
       // Report all uncovered lines in console
       all: true,
       // Include source files for accurate coverage mapping

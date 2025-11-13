@@ -13,7 +13,7 @@ STACKS=(
     "docker-compose.2-docs-stack.yml"
     "docker-compose.4-3-workspace-stack.yml"
     "docker-compose.4-1-tp-capital-stack.yml"
-    "docker-compose.4-2-telegram-stack-minimal-ports.yml"
+    "docker-compose.4-2-telegram-stack.yml"
     "docker-compose.4-4-rag-stack.yml"
     "docker-compose.4-5-course-crawler-stack.yml"
     "docker-compose-5-1-n8n-stack.yml"

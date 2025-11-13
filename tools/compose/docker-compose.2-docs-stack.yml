@@ -98,8 +98,8 @@ services:
       - PORT=3000
       - DOCS_DIR=/app/docs
       - LLAMAINDEX_DOCS_DIR=/app/docs/content
-      - LLAMAINDEX_INGESTION_DOCS_DIR=/data/docs
-      - LLAMAINDEX_REPOSITORY_DIR=/data/tradingsystem
+      - LLAMAINDEX_INGESTION_DOCS_DIR=/app/docs/content
+      - LLAMAINDEX_REPOSITORY_DIR=/app
       - DOCUMENTATION_DB_STRATEGY=none
       - LOG_LEVEL=info
       # RAG Features (Optional - Graceful Degradation)
@@ -112,9 +112,6 @@ services:
       - LLAMAINDEX_QUERY_URL=http://rag-llamaindex-query:8000
       - LLAMAINDEX_INGESTION_URL=http://rag-llamaindex-ingest:8000
     volumes:
-      # Documentation source files
-      - ../../docs:/app/docs:ro
-      - ../../:/data/tradingsystem:ro
       # Database (SQLite)
       - docs-api-data:/app/db
     restart: unless-stopped

@@ -39,7 +39,7 @@ COMPOSE_FILES=(
     # Communication & Integration
     "tools/compose/docker-compose.5-3-waha-stack.yml"                    # WAHA
     "tools/compose/docker-compose.5-2-evolution-api-stack.yml"           # Evolution API
-    "tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml"  # Telegram Gateway
+    "tools/compose/docker-compose.4-2-telegram-stack.yml"  # Telegram Gateway
 
     # Core Application Services
     "tools/compose/docker-compose.4-1-tp-capital-stack.yml"    # TP Capital

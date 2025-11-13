@@ -55,24 +55,22 @@ const getBaseUrl = () => {
   const explicitConfig = resolveEnv(
     "VITE_GATEWAY_HTTP_URL",
     "VITE_API_BASE_URL",
-    "VITE_UNIFIED_DOMAIN_URL",
+    "VITE_UNIFIED_DOMAIN_URL"
   );
-
   if (explicitConfig) {
     return normalizeBase(explicitConfig);
   }
+
+  const fallbackPort =
+    resolveEnv("VITE_GATEWAY_PORT", "VITE_DASHBOARD_PORT") || "9082";
 
   if (typeof window !== "undefined") {
     try {
       const url = new URL(window.location.origin);
       const isLocalHost =
         url.hostname === "localhost" || url.hostname === "127.0.0.1";
-      if (url.protocol.startsWith("http")) {
-        if (isLocalHost && url.port !== "9080") {
-          url.port = "9080";
-        } else if (!url.port && isLocalHost) {
-          url.port = "9080";
-        }
+      if (url.protocol.startsWith("http") && isLocalHost) {
+        url.port = fallbackPort;
       }
       return normalizeBase(url.toString());
     } catch {
@@ -80,7 +78,7 @@ const getBaseUrl = () => {
     }
   }
 
-  return "http://localhost:9080";
+  return `http://localhost:${fallbackPort}`;
 };
 
 const apiBase = getBaseUrl();
@@ -99,14 +97,14 @@ const unifiedConfig: ApiConfig = {
       import.meta.env.VITE_QUESTDB_CONSOLE_URL,
       import.meta.env.VITE_QUESTDB_CONSOLE_INTERNAL_URL,
       composeUrl(apiBase, "/db-ui/questdb"),
-      ENDPOINTS.questdb,
+      ENDPOINTS.questdb
     ) || composeUrl(apiBase, "/db-ui/questdb"),
   questdbUiUrl:
     pickFirst(
       import.meta.env.VITE_QUESTDB_UI_URL,
       import.meta.env.VITE_QUESTDB_UI_INTERNAL_URL,
       composeUrl(apiBase, "/db-ui/questdb"),
-      "http://localhost:9010",
+      "http://localhost:9010"
     ) || composeUrl(apiBase, "/db-ui/questdb"),
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
@@ -116,15 +114,16 @@ const unifiedConfig: ApiConfig = {
 // Direct port configuration (legacy)
 const directConfig: ApiConfig = {
   baseUrl: "",
-  libraryApi:
-    resolveEnv("VITE_WORKSPACE_API_URL") || "/api/workspace",
+  libraryApi: resolveEnv("VITE_WORKSPACE_API_URL") || "/api/workspace",
   tpCapitalApi: import.meta.env.VITE_TP_CAPITAL_API_URL || "/api/tp-capital",
   documentationApi: import.meta.env.VITE_DOCUMENTATION_API_URL || "/api/docs",
   telegramGatewayApi:
     import.meta.env.VITE_TELEGRAM_GATEWAY_API_URL || "/api/telegram-gateway",
   firecrawlProxyApi:
     import.meta.env.VITE_FIRECRAWL_PROXY_URL || "/api/firecrawl",
-  docsUrl: import.meta.env.VITE_DOCUSAURUS_URL || "/docs",
+  docsUrl:
+    import.meta.env.VITE_DOCUSAURUS_URL ||
+    (import.meta.env.DEV ? "http://localhost:3400/docs" : "/docs"),
   docsApiUrl:
     import.meta.env.VITE_DOCSPECS_URL || "/docs/api/documentation-api",
   questdbConsoleUrl:
@@ -134,7 +133,7 @@ const directConfig: ApiConfig = {
       ENDPOINTS.questdb,
       "http://localhost:9000",
       "http://localhost:8813",
-      "http://localhost:9002",
+      "http://localhost:9002"
     ) || ENDPOINTS.questdb,
   questdbUiUrl:
     pickFirst(
@@ -143,7 +142,7 @@ const directConfig: ApiConfig = {
       ENDPOINTS.questdb,
       "http://localhost:9010",
       "http://localhost:8813",
-      "http://localhost:9009",
+      "http://localhost:9009"
     ) || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,

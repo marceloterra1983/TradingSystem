@@ -32,8 +32,34 @@
  *   });
  */
 
-import Redis from 'ioredis';
-import crypto from 'crypto';
+import { createRequire } from "module";
+import crypto from "crypto";
+
+const appRequire = createRequire("/app/package.json");
+
+let Redis = null;
+
+function loadRedisClient() {
+  if (Redis) {
+    return Redis;
+  }
+
+  try {
+    const resolved = appRequire("ioredis");
+    Redis = resolved?.default ?? resolved;
+    return Redis;
+  } catch (primaryError) {
+    const localRequire = createRequire(import.meta.url);
+    try {
+      const resolved = localRequire("ioredis");
+      Redis = resolved?.default ?? resolved;
+      return Redis;
+    } catch (secondaryError) {
+      secondaryError.cause = primaryError;
+      throw secondaryError;
+    }
+  }
+}
 
 /**
  * Redis client singleton
@@ -52,16 +78,18 @@ function getRedisClient(options = {}) {
     return redisClient;
   }
 
+  const RedisCtor = loadRedisClient();
+
   const {
-    host = process.env.REDIS_HOST || 'localhost',
+    host = process.env.REDIS_HOST || "localhost",
     port = process.env.REDIS_PORT || 6379,
     password = process.env.REDIS_PASSWORD,
     db = process.env.REDIS_CACHE_DB || 0,
-    keyPrefix = 'cache:',
+    keyPrefix = "cache:",
   } = options;
 
   try {
-    redisClient = new Redis({
+    redisClient = new RedisCtor({
       host,
       port,
       password,
@@ -76,19 +104,19 @@ function getRedisClient(options = {}) {
       lazyConnect: false,
     });
 
-    redisClient.on('error', (err) => {
-      console.error('Redis error:', err.message);
+    redisClient.on("error", (err) => {
+      console.error("Redis error:", err.message);
       redisError = err;
     });
 
-    redisClient.on('ready', () => {
-      console.log('Redis cache connected successfully');
+    redisClient.on("ready", () => {
+      console.log("Redis cache connected successfully");
       redisError = null;
     });
 
     return redisClient;
   } catch (error) {
-    console.error('Failed to initialize Redis client:', error);
+    console.error("Failed to initialize Redis client:", error);
     redisError = error;
     return null;
   }
@@ -101,13 +129,13 @@ function getRedisClient(options = {}) {
  * @param {string} prefix - Cache key prefix
  * @returns {string} Cache key
  */
-function generateCacheKey(req, prefix = '') {
+function generateCacheKey(req, prefix = "") {
   // Include method, path, query params, and user ID
   const parts = [
     req.method,
     req.path,
     JSON.stringify(req.query || {}),
-    req.user?.id || 'anonymous',
+    req.user?.id || "anonymous",
   ];
 
   if (prefix) {
@@ -116,12 +144,12 @@ function generateCacheKey(req, prefix = '') {
 
   // Hash for shorter keys
   const hash = crypto
-    .createHash('sha256')
-    .update(parts.join(':'))
-    .digest('hex')
+    .createHash("sha256")
+    .update(parts.join(":"))
+    .digest("hex")
     .substring(0, 16);
 
-  return `${req.path.replace(/\//g, ':')}:${hash}`;
+  return `${req.path.replace(/\//g, ":")}:${hash}`;
 }
 
 /**
@@ -175,13 +203,13 @@ function createCacheEntry(body) {
 export function createCacheMiddleware(options = {}) {
   const {
     ttl = 300, // 5 minutes default
-    keyPrefix = '',
+    keyPrefix = "",
     keyGenerator = generateCacheKey,
-    enabled = process.env.REDIS_CACHE_ENABLED !== 'false',
+    enabled = process.env.REDIS_CACHE_ENABLED !== "false",
     logger,
     shouldCache = (req, res) => {
       // Only cache GET requests with 200 status
-      return req.method === 'GET' && res.statusCode === 200;
+      return req.method === "GET" && res.statusCode === 200;
     },
   } = options;
 
@@ -194,13 +222,16 @@ export function createCacheMiddleware(options = {}) {
 
   // Skip middleware if Redis unavailable
   if (!redis || redisError) {
-    logger?.warn({ error: redisError?.message }, 'Redis unavailable, skipping cache');
+    logger?.warn(
+      { error: redisError?.message },
+      "Redis unavailable, skipping cache"
+    );
     return (req, res, next) => next();
   }
 
   return async (req, res, next) => {
     // Only cache GET requests
-    if (req.method !== 'GET') {
+    if (req.method !== "GET") {
       return next();
     }
 
@@ -213,42 +244,55 @@ export function createCacheMiddleware(options = {}) {
       if (cached) {
         const entry = parseCacheEntry(cached);
 
-        logger?.debug({
-          cacheKey,
-          age: Date.now() - entry.createdAt,
-        }, 'Cache hit');
+        logger?.debug(
+          {
+            cacheKey,
+            age: Date.now() - entry.createdAt,
+          },
+          "Cache hit"
+        );
 
         // Cache hit - return cached response
-        res.setHeader('X-Cache', 'HIT');
-        res.setHeader('X-Cache-Age', Math.floor((Date.now() - entry.createdAt) / 1000));
+        res.setHeader("X-Cache", "HIT");
+        res.setHeader(
+          "X-Cache-Age",
+          Math.floor((Date.now() - entry.createdAt) / 1000)
+        );
         return res.json(entry.body);
       }
 
       // Cache miss - continue to route handler
-      logger?.debug({ cacheKey }, 'Cache miss');
-      res.setHeader('X-Cache', 'MISS');
+      logger?.debug({ cacheKey }, "Cache miss");
+      res.setHeader("X-Cache", "MISS");
 
       // 2. Intercept res.json() to cache response
       const originalJson = res.json.bind(res);
 
-      res.json = function(body) {
+      res.json = function (body) {
         // Only cache if shouldCache returns true
         if (shouldCache(req, res)) {
           const entry = createCacheEntry(body);
 
-          redis.setex(cacheKey, ttl, entry)
+          redis
+            .setex(cacheKey, ttl, entry)
             .then(() => {
-              logger?.debug({
-                cacheKey,
-                ttl,
-                size: entry.length,
-              }, 'Response cached');
+              logger?.debug(
+                {
+                  cacheKey,
+                  ttl,
+                  size: entry.length,
+                },
+                "Response cached"
+              );
             })
             .catch((err) => {
-              logger?.warn({
-                error: err.message,
-                cacheKey,
-              }, 'Failed to cache response');
+              logger?.warn(
+                {
+                  error: err.message,
+                  cacheKey,
+                },
+                "Failed to cache response"
+              );
             });
         }
 
@@ -257,10 +301,13 @@ export function createCacheMiddleware(options = {}) {
 
       next();
     } catch (error) {
-      logger?.error({
-        error: error.message,
-        cacheKey,
-      }, 'Cache middleware error');
+      logger?.error(
+        {
+          error: error.message,
+          cacheKey,
+        },
+        "Cache middleware error"
+      );
 
       // Continue without caching on error
       next();
@@ -281,38 +328,47 @@ export async function invalidateCache(pattern, options = {}) {
   const redis = getRedisClient();
 
   if (!redis || redisError) {
-    logger?.warn({ error: redisError?.message }, 'Redis unavailable, cannot invalidate cache');
+    logger?.warn(
+      { error: redisError?.message },
+      "Redis unavailable, cannot invalidate cache"
+    );
     return 0;
   }
 
   try {
     // Convert pattern to Redis pattern
-    const redisPattern = pattern.includes('*')
+    const redisPattern = pattern.includes("*")
       ? pattern
-      : `${pattern.replace(/\//g, ':')}:*`;
+      : `${pattern.replace(/\//g, ":")}:*`;
 
     // Find matching keys
     const keys = await redis.keys(redisPattern);
 
     if (keys.length === 0) {
-      logger?.debug({ pattern: redisPattern }, 'No keys to invalidate');
+      logger?.debug({ pattern: redisPattern }, "No keys to invalidate");
       return 0;
     }
 
     // Delete keys
     const deleted = await redis.del(...keys);
 
-    logger?.info({
-      pattern: redisPattern,
-      keysDeleted: deleted,
-    }, 'Cache invalidated');
+    logger?.info(
+      {
+        pattern: redisPattern,
+        keysDeleted: deleted,
+      },
+      "Cache invalidated"
+    );
 
     return deleted;
   } catch (error) {
-    logger?.error({
-      error: error.message,
-      pattern,
-    }, 'Failed to invalidate cache');
+    logger?.error(
+      {
+        error: error.message,
+        pattern,
+      },
+      "Failed to invalidate cache"
+    );
 
     return 0;
   }
@@ -330,20 +386,26 @@ export async function clearCache(options = {}) {
   const redis = getRedisClient();
 
   if (!redis || redisError) {
-    logger?.warn({ error: redisError?.message }, 'Redis unavailable, cannot clear cache');
+    logger?.warn(
+      { error: redisError?.message },
+      "Redis unavailable, cannot clear cache"
+    );
     return false;
   }
 
   try {
     await redis.flushdb();
 
-    logger?.info('Cache cleared');
+    logger?.info("Cache cleared");
 
     return true;
   } catch (error) {
-    logger?.error({
-      error: error.message,
-    }, 'Failed to clear cache');
+    logger?.error(
+      {
+        error: error.message,
+      },
+      "Failed to clear cache"
+    );
 
     return false;
   }
@@ -365,24 +427,24 @@ export async function getCacheStats() {
   }
 
   try {
-    const info = await redis.info('stats');
-    const keyspace = await redis.info('keyspace');
+    const info = await redis.info("stats");
+    const keyspace = await redis.info("keyspace");
 
     // Parse info strings
     const stats = {};
 
-    info.split('\r\n').forEach((line) => {
-      if (line && !line.startsWith('#')) {
-        const [key, value] = line.split(':');
+    info.split("\r\n").forEach((line) => {
+      if (line && !line.startsWith("#")) {
+        const [key, value] = line.split(":");
         if (key && value) {
           stats[key] = value;
         }
       }
     });
 
-    keyspace.split('\r\n').forEach((line) => {
-      if (line && !line.startsWith('#')) {
-        const [key, value] = line.split(':');
+    keyspace.split("\r\n").forEach((line) => {
+      if (line && !line.startsWith("#")) {
+        const [key, value] = line.split(":");
         if (key && value) {
           stats[key] = value;
         }
@@ -391,12 +453,20 @@ export async function getCacheStats() {
 
     return {
       connected: true,
-      keyspaceHits: parseInt(stats.keyspace_hits || '0', 10),
-      keyspaceMisses: parseInt(stats.keyspace_misses || '0', 10),
-      hitRate: stats.keyspace_hits && stats.keyspace_misses
-        ? (parseInt(stats.keyspace_hits, 10) / (parseInt(stats.keyspace_hits, 10) + parseInt(stats.keyspace_misses, 10)) * 100).toFixed(2)
-        : '0.00',
-      totalKeys: stats.db0 ? parseInt(stats.db0.split('=')[1].split(',')[0], 10) : 0,
+      keyspaceHits: parseInt(stats.keyspace_hits || "0", 10),
+      keyspaceMisses: parseInt(stats.keyspace_misses || "0", 10),
+      hitRate:
+        stats.keyspace_hits && stats.keyspace_misses
+          ? (
+              (parseInt(stats.keyspace_hits, 10) /
+                (parseInt(stats.keyspace_hits, 10) +
+                  parseInt(stats.keyspace_misses, 10))) *
+              100
+            ).toFixed(2)
+          : "0.00",
+      totalKeys: stats.db0
+        ? parseInt(stats.db0.split("=")[1].split(",")[0], 10)
+        : 0,
     };
   } catch (error) {
     return {

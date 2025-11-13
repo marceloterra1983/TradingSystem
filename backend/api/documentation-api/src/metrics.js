@@ -25,6 +25,14 @@ const httpRequestsTotal = new client.Counter({
 register.registerMetric(httpRequestDurationSeconds);
 register.registerMetric(httpRequestsTotal);
 
+const docsIndexLenientGauge = new client.Gauge({
+  name: "tradingsystem_docs_index_lenient_mode",
+  help: "Flag indicating whether the documentation index health check is in lenient mode (1=active).",
+  labelNames: ["service"],
+});
+
+register.registerMetric(docsIndexLenientGauge);
+
 const normalizeRoute = (req) => {
   if (req.route?.path) {
     return `${req.baseUrl || ""}${req.route.path}`;
@@ -59,9 +67,19 @@ const metricsHandler = async (_req, res) => {
   res.send(await register.metrics());
 };
 
+const setDocsIndexLenientMode = (active) => {
+  docsIndexLenientGauge.set(
+    {
+      service: SERVICE_NAME,
+    },
+    active ? 1 : 0,
+  );
+};
+
 export {
   register,
   metricsMiddleware,
   metricsHandler,
   stopDefaultMetricsCollection,
+  setDocsIndexLenientMode,
 };

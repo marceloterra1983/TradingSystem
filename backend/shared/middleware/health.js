@@ -175,10 +175,41 @@ async function runHealthChecks(checks, logger) {
         const result = await checkFn();
         const duration = Date.now() - startTime;
 
+        let status = HealthStatus.HEALTHY;
+        let message = 'OK';
+        let details;
+
+        if (result === false) {
+          status = HealthStatus.UNHEALTHY;
+          message = 'Failed';
+        } else if (typeof result === 'string') {
+          message = result;
+        } else if (
+          typeof result === 'object' &&
+          result !== null
+        ) {
+          if (
+            typeof result.status === 'string' &&
+            Object.values(HealthStatus).includes(result.status)
+          ) {
+            status = result.status;
+          }
+          if (typeof result.message === 'string') {
+            message = result.message;
+          }
+          if (result.details ?? result.meta) {
+            details = result.details ?? result.meta;
+          }
+        } else if (result === HealthStatus.DEGRADED) {
+          status = HealthStatus.DEGRADED;
+          message = 'Degraded';
+        }
+
         results[name] = {
-          status: result === false ? HealthStatus.UNHEALTHY : HealthStatus.HEALTHY,
-          message: typeof result === 'string' ? result : 'OK',
+          status,
+          message,
           responseTime: duration,
+          ...(details ? { details } : {}),
         };
       } catch (error) {
         const duration = Date.now() - startTime;

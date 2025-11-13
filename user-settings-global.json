@@ -9,6 +9,8 @@
   "accessibility.signals.terminalBell": {
     "sound": "on"
   },
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromCodeNavigation": false,
   "statusbar.command.commands": [
     {
       "text": "$(copy) Copy last",

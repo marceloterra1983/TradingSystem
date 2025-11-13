@@ -10,18 +10,22 @@ services:
     env_file:
       - ../../.env
       - ../../.env.shared
-    ports:
-      - "8092:3103"  # Expose dashboard on port 8092 (8090 was in use)
+    # ⚠️ REMOVED: Direct port exposure
+    # Dashboard is ONLY accessible via Traefik Gateway (http://localhost:9082)
+    # Direct container access removed to prevent duplication and confusion
+    # ports:
+    #   - "8092:3103"  # ❌ DISABLED - Use gateway instead
     environment:
       - DASHBOARD_PORT=${DASHBOARD_PORT:-9080}
       - SKIP_DASHBOARD_PREBUILD=1
       - VITE_USE_UNIFIED_DOMAIN=${VITE_USE_UNIFIED_DOMAIN:-true}
+      - VITE_GATEWAY_HTTP_URL=${VITE_GATEWAY_HTTP_URL:-http://localhost:9082}
       - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9082}
       # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
       # Traefik Gateway defaults (override via env caso seja necessário expor portas diretas)
       - TP_CAPITAL_PROXY_TARGET=${TP_CAPITAL_PROXY_TARGET:-http://api-gateway:9080/api/tp-capital}
       - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=${VITE_TELEGRAM_GATEWAY_PROXY_TARGET:-http://telegram-gateway-api:4010}
-      - VITE_TELEGRAM_GATEWAY_API_URL=${VITE_TELEGRAM_GATEWAY_API_URL:-http://localhost:9080/api/telegram-gateway}
+      - VITE_TELEGRAM_GATEWAY_API_URL=${VITE_TELEGRAM_GATEWAY_API_URL:-http://localhost:9082/api/telegram-gateway}
       - WORKSPACE_PROXY_TARGET=${WORKSPACE_PROXY_TARGET:-http://api-gateway:9080/api/workspace}
       - WORKSPACE_LIBRARY_PROXY_TARGET=${WORKSPACE_LIBRARY_PROXY_TARGET:-http://api-gateway:9080/api/library}
       - DOCUSAURUS_PROXY_TARGET=${DOCUSAURUS_PROXY_TARGET:-http://api-gateway:9080/docs}
@@ -35,7 +39,8 @@ services:
       - VITE_TP_CAPITAL_API_KEY=${TP_CAPITAL_API_KEY:-bbf913dad93ae879f1fbbec4490303a2c0d49be1d717342a64173a192f99f1a1}
       # n8n proxy configuration (server-side only, NOT exposed to browser)
       # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
-      - N8N_PROXY_TARGET=http://n8n-proxy:80
+      # MUST include /n8n path to match nginx location in n8n-proxy
+      - N8N_PROXY_TARGET=http://n8n-proxy:80/n8n
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-automation}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
       # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
@@ -47,7 +52,11 @@ services:
       - DB_UI_QUESTDB_PROXY_TARGET=${DB_UI_QUESTDB_PROXY_TARGET:-http://api-gateway:9080/db/questdb}
     networks:
       - tradingsystem_frontend
-      - tradingsystem_backend  # Hub network for API access (proxy)
+      - tradingsystem_backend # Hub network for API access (proxy)
+      # Service-specific networks for embedded iframe services
+      - n8n_backend            # n8n automation platform
+      - evolution_backend      # Evolution API (WhatsApp)
+      - waha_backend           # WAHA (WhatsApp HTTP API)
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3103/ || exit 1"]
       interval: 30s
@@ -69,10 +78,14 @@ services:
       - "traefik.http.routers.dashboard-ui.rule=PathPrefix(`/`) && !PathPrefix(`/db-ui/`) && !PathPrefix(`/api/`) && !PathPrefix(`/docs/`)"
       - "traefik.http.routers.dashboard-ui.entrypoints=web"
       - "traefik.http.routers.dashboard-ui.service=dashboard-ui"
-      - "traefik.http.routers.dashboard-ui.priority=1"  # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
+      - "traefik.http.routers.dashboard-ui.priority=1" # Lowest priority - catch-all (excluding /db-ui/, /api/, /docs/)
 
       # Service Configuration (backend target)
       - "traefik.http.services.dashboard-ui.loadbalancer.server.port=3103"
+
+      # CRITICAL: Specify which Docker network Traefik should use to reach this container
+      # Without this, Traefik may choose wrong network when container is on multiple networks
+      - "traefik.docker.network=tradingsystem_backend"
 
       # Middlewares (inline - no @file reference due to WSL2 volume mount issues)
       # - "traefik.http.routers.dashboard-ui.middlewares=static-standard@file"  # Disabled - file middlewares not working
@@ -86,4 +99,11 @@ networks:
   tradingsystem_frontend:
     external: true
   tradingsystem_backend:
+    external: true
+  # Service-specific networks (external - created by their respective stacks)
+  n8n_backend:
+    external: true
+  evolution_backend:
+    external: true
+  waha_backend:
     external: true

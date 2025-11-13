@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -12,7 +13,10 @@ import {
   createNotFoundHandler,
   createCorrelationIdMiddleware,
 } from "../../../shared/middleware/index.js";
-import { createHealthCheckHandler } from "../../../shared/middleware/health.js";
+import {
+  HealthStatus,
+  createHealthCheckHandler,
+} from "../../../shared/middleware/health.js";
 import {
   configureCompression,
   compressionMetrics,
@@ -40,7 +44,11 @@ import apiV1Router from "./routes/api-v1.js";
 // Application services
 import MarkdownSearchService from "./services/markdownSearchService.js";
 import searchMetrics from "./services/searchMetrics.js";
-import { metricsMiddleware, metricsHandler } from "./metrics.js";
+import {
+  metricsMiddleware,
+  metricsHandler,
+  setDocsIndexLenientMode,
+} from "./metrics.js";
 import questdbClient from "./utils/questDBClient.js";
 import {
   config,
@@ -85,6 +93,34 @@ const logger = createLogger("documentation-api", {
         : "flexsearch",
   },
 });
+
+setDocsIndexLenientMode(false);
+
+const skipSearchIndexHealth =
+  process.env.DOCS_SKIP_SEARCH_INDEX_HEALTH === "true" ||
+  process.env.ENABLE_RAG_FEATURES === "false";
+
+const lenientAlertLevel =
+  (
+    process.env.DOCS_LENIENT_ALERT_LEVEL ||
+    (process.env.NODE_ENV === "production" ? "error" : "warn")
+  )
+    .toLowerCase()
+    .trim() || "warn";
+
+const supportedAlertLevels = new Set([
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "fatal",
+]);
+
+const resolvedLenientAlertLevel = supportedAlertLevels.has(lenientAlertLevel)
+  ? lenientAlertLevel
+  : "warn";
+
+let lenientAlertEmitted = false;
 
 // Middleware stack
 app.use(createCorrelationIdMiddleware());
@@ -169,8 +205,75 @@ app.get(
       searchIndex: async () => {
         const count = markdownSearchService.getIndexedCount?.() || 0;
         if (count === 0) {
+          if (skipSearchIndexHealth) {
+            const docsPath = markdownSearchService.docsDir;
+            let docsDirExists = false;
+            let docsHasEntries = false;
+            try {
+              docsDirExists = fs.existsSync(docsPath);
+              docsHasEntries =
+                docsDirExists && fs.readdirSync(docsPath).length > 0;
+            } catch (error) {
+              logger?.warn(
+                { err: error, docsPath },
+                "Health check: failed to inspect docs directory",
+              );
+            }
+
+            logger?.warn(
+              {
+                docsPath,
+                docsDirExists,
+                docsHasEntries,
+              },
+              "Documentation index vazio - tolerando em modo leniente",
+            );
+
+            if (!lenientAlertEmitted) {
+              lenientAlertEmitted = true;
+              setDocsIndexLenientMode(true);
+              const payload = {
+                alert: "documentation-index-lenient-mode",
+                docsPath,
+                docsDirExists,
+                docsHasEntries,
+                skipSearchIndexHealth: true,
+              };
+              const alertMessage =
+                "Documentation API rodando em modo leniente para indexação de docs";
+              const logFn =
+                resolvedLenientAlertLevel === "fatal"
+                  ? logger?.fatal?.bind(logger)
+                  : logger?.[resolvedLenientAlertLevel]?.bind(logger);
+              logFn?.(payload, alertMessage);
+            }
+
+            return {
+              status: HealthStatus.DEGRADED,
+              message:
+                "0 documentos indexados (modo leniente habilitado - verifique montagem de docs)",
+              details: {
+                docsPath,
+                docsDirExists,
+                docsHasEntries,
+                skipSearchIndexHealth: true,
+              },
+            };
+          }
           throw new Error("No documents indexed");
         }
+
+        if (lenientAlertEmitted) {
+          lenientAlertEmitted = false;
+          setDocsIndexLenientMode(false);
+          logger?.info(
+            {
+              indexedCount: count,
+            },
+            "Documentação indexada com sucesso — modo leniente desativado",
+          );
+        }
+
         return `${count} documents indexed`;
       },
     },

@@ -99,7 +99,7 @@ export interface Page {
     title: string;
     subtitle?: string;
   };
-  parts: PagePart[];
+  parts?: PagePart[];
   customContent?: ReactNode | (() => ReactNode);
   icon?: ReactNode;
 }

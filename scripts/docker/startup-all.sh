@@ -35,7 +35,7 @@ echo ""
 
 # 4. Telegram Stack (12 containers)
 echo "4️⃣  Iniciando Telegram Stack (12 containers)..."
-docker compose -f docker-compose.4-2-telegram-stack-minimal-ports.yml up -d
+docker compose -f docker-compose.4-2-telegram-stack.yml up -d
 echo "   ⏳ Aguardando 10s para todos os containers..."
 sleep 10
 echo ""

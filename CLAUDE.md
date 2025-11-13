@@ -124,19 +124,44 @@ The project uses **Docusaurus v3** for comprehensive documentation under `/docs/
 -   **Health Monitoring**: `docs/content/tools/monitoring/`
 -   **Knowledge Dashboard**: Dashboard → Knowledge → Governance (live snapshot fed by `/governance`)
 
-### Active Services & Ports
+### 🌐 Single Entry Point - API Gateway (Traefik)
 
-**⚠️ IMPORTANT: All services are accessed via Traefik API Gateway**
+**⚠️ CRITICAL: ALL services MUST be accessed via Traefik API Gateway**
 
--   **API Gateway (Traefik)**: http://localhost:9082 (main entrypoint)
-    -   **Dashboard UI**: http://localhost:9082/ (React + Vite)
-    -   **Documentation Hub**: http://localhost:9082/docs/ (Docusaurus)
-    -   **Workspace API**: http://localhost:9082/api/workspace/*
-    -   **TP Capital API**: http://localhost:9082/api/tp-capital/*
-    -   **Telegram Gateway API**: http://localhost:9082/api/telegram-gateway/*
-    -   **Documentation API**: http://localhost:9082/api/docs/*
--   **Traefik Dashboard**: http://localhost:9083/dashboard/ (monitoring UI)
--   **LlamaIndex Query**: http://localhost:8202 (FastAPI + Qdrant + Ollama - RAG system - direct access only)
+**Main Entry Point:**
+-   **API Gateway**: http://localhost:9082 (ONLY access point for all services)
+
+**Services via Gateway:**
+-   **Dashboard UI**: http://localhost:9082/ (React + Vite)
+-   **Documentation Hub**: http://localhost:9082/docs/ (Docusaurus)
+-   **Workspace API**: http://localhost:9082/api/workspace/*
+-   **TP Capital API**: http://localhost:9082/api/tp-capital/*
+-   **Telegram Gateway API**: http://localhost:9082/api/telegram-gateway/*
+-   **Documentation API**: http://localhost:9082/api/docs/*
+
+**Administrative Interfaces:**
+-   **Traefik Dashboard**: http://localhost:9083/dashboard/ (gateway monitoring UI)
+-   **LlamaIndex Query**: http://localhost:8202 (RAG system - direct access only for development)
+
+**❌ NEVER Access Directly:**
+-   ~~http://localhost:9080~~ - Port reserved but NOT exposed (prevents native Vite conflicts)
+-   ~~http://localhost:8092~~ - Dashboard container has NO direct port exposure
+-   All backend APIs are ONLY accessible via gateway (no direct container ports)
+
+**Validation:**
+```bash
+# Test that duplicate instances don't exist
+bash scripts/maintenance/test-gateway-routing.sh
+```
+
+**Why Single Entry Point?**
+- ✅ Consistent content across all requests
+- ✅ Centralized authentication and rate limiting
+- ✅ No port conflicts or duplicate instances
+- ✅ Clear separation between development and production configs
+- ✅ Easy to scale and maintain
+
+**See:** [Architecture Review - Dashboard Duplication Fix](docs/ARCHITECTURE-REVIEW-DASHBOARD-DUPLICATION.md)
 
 ### 🐍 Python Environment (Auto-Activation with direnv)
 

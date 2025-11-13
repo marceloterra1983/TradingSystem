@@ -15,8 +15,34 @@ const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 const ensureLeadingSlash = (value: string) =>
   value.startsWith("/") ? value : `/${value}`;
 
+const normalizeLegacyDocsPort = (value: string): string => {
+  if (typeof value !== "string" || value.trim() === "") {
+    return value;
+  }
+  if (!import.meta.env.DEV) {
+    return value;
+  }
+  try {
+    const parsed = new URL(value, "http://localhost");
+    const host = parsed.hostname;
+    if (
+      (host === "localhost" || host === "127.0.0.1") &&
+      parsed.port === "3404"
+    ) {
+      parsed.port = "3400";
+      if (!parsed.pathname || parsed.pathname === "/") {
+        parsed.pathname = "/docs";
+      }
+      return trimTrailingSlash(parsed.toString());
+    }
+  } catch {
+    // Ignore parsing errors; keep original value.
+  }
+  return value;
+};
+
 const resolveDocsBaseUrl = (): string => {
-  const candidate = apiConfig.docsUrl || "/docs";
+  const candidate = normalizeLegacyDocsPort(apiConfig.docsUrl || "/docs");
 
   if (ABSOLUTE_URL_REGEX.test(candidate)) {
     return trimTrailingSlash(candidate);

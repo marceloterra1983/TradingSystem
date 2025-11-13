@@ -133,8 +133,7 @@ export default defineConfig(({ mode }) => {
   );
   const docsProxy = resolveProxy(
     env.DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_PROXY_TARGET || env.VITE_DOCUSAURUS_URL,
-    gatewayProxy.target,
-    '/docs',
+    'http://localhost:3400',
   );
   const dbUiPgAdminProxy = resolveProxy(
     env.DB_UI_PGADMIN_PROXY_TARGET || env.VITE_DB_UI_PGADMIN_PROXY_TARGET,

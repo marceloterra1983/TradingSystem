@@ -53,7 +53,8 @@ sizes.forEach(size => {
   const svg = generateSVG(size);
   const filename = `icon-${size}.png`;
   const svgPath = path.join(publicDir, `icon-${size}.svg`);
-  const pngPath = path.join(publicDir, filename);
+  // Note: PNG conversion would use pngPath, but we're only generating SVG sources
+  // const _pngPath = path.join(publicDir, filename);
 
   // Write SVG first
   fs.writeFileSync(svgPath, svg);

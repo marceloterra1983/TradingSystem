@@ -4,11 +4,24 @@ import { getApiUrl } from "../config/api";
 
 const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
   /\/$/,
-  "",
+  ""
 );
-const TELEGRAM_GATEWAY_SERVICE_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
-const TELEGRAM_GATEWAY_MESSAGES_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/messages`;
-const TELEGRAM_GATEWAY_CHANNELS_BASE = `${TELEGRAM_GATEWAY_API_BASE}/api/channels`;
+const ensureLeadingSlash = (value: string) =>
+  value.startsWith("/") ? value : `/${value}`;
+const hasUnifiedGatewayPrefix = TELEGRAM_GATEWAY_API_BASE.endsWith(
+  "/api/telegram-gateway"
+);
+const buildServiceUrl = (suffix = "") => {
+  const base = hasUnifiedGatewayPrefix
+    ? TELEGRAM_GATEWAY_API_BASE
+    : `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
+  return `${base}${suffix ? ensureLeadingSlash(suffix) : ""}`;
+};
+const buildApiUrl = (suffix: string) =>
+  `${TELEGRAM_GATEWAY_API_BASE}/api${ensureLeadingSlash(suffix)}`;
+const TELEGRAM_GATEWAY_SERVICE_BASE = buildServiceUrl();
+const TELEGRAM_GATEWAY_MESSAGES_BASE = buildApiUrl("messages");
+const TELEGRAM_GATEWAY_CHANNELS_BASE = buildApiUrl("channels");
 export const TELEGRAM_GATEWAY_TOKEN =
   (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
   (
@@ -20,7 +33,7 @@ export const TELEGRAM_GATEWAY_TOKEN =
 if (import.meta.env.DEV && TELEGRAM_GATEWAY_TOKEN.length === 0) {
   // eslint-disable-next-line no-console
   console.warn(
-    "[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401",
+    "[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401"
   );
 }
 
@@ -199,13 +212,30 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
     },
   });
 
+  const parseBody = async () => {
+    const rawText = await response.text();
+    if (!rawText) {
+      return undefined;
+    }
+
+    try {
+      return JSON.parse(rawText) as T;
+    } catch (error) {
+      const reason =
+        error instanceof Error ? error.message : "Unexpected JSON payload";
+      throw new Error(
+        `Failed to parse Telegram Gateway response: ${reason}. Raw payload: ${rawText}`
+      );
+    }
+  };
+
   if (!response.ok) {
     let details: unknown;
 
     try {
-      details = await response.json();
-    } catch {
-      details = await response.text();
+      details = await parseBody();
+    } catch (error) {
+      details = error instanceof Error ? error.message : String(error);
     }
 
     const error = new Error(
@@ -215,7 +245,7 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
           : typeof details === "object" && details
             ? JSON.stringify(details)
             : "unknown error"
-      }`,
+      }`
     );
     (error as Error & { status?: number; details?: unknown }).status =
       response.status;
@@ -223,7 +253,8 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
     throw error;
   }
 
-  return response.json() as Promise<T>;
+  const parsed = await parseBody();
+  return (parsed ?? ({} as T)) as T;
 }
 
 export function useTelegramGatewayOverview(pollingMs = 10000) {
@@ -258,7 +289,7 @@ export interface TelegramGatewayMessagesFilters {
 }
 
 export function useTelegramGatewayMessages(
-  filters: TelegramGatewayMessagesFilters,
+  filters: TelegramGatewayMessagesFilters
 ) {
   const queryParams = useMemo(() => {
     const params = new URLSearchParams();
@@ -267,7 +298,7 @@ export function useTelegramGatewayMessages(
     if (filters.channelId) {
       if (Array.isArray(filters.channelId)) {
         filters.channelId.forEach((channelId) =>
-          params.append("channelId", channelId),
+          params.append("channelId", channelId)
         );
       } else {
         params.set("channelId", filters.channelId);
@@ -298,7 +329,7 @@ export function useTelegramGatewayMessages(
     queryKey: ["telegram-gateway", "messages", filters],
     queryFn: async () => {
       const payload = await fetchJson<TelegramGatewayMessagesResponse>(
-        `${TELEGRAM_GATEWAY_MESSAGES_BASE}?${queryParams.toString()}`,
+        `${TELEGRAM_GATEWAY_MESSAGES_BASE}?${queryParams.toString()}`
       );
       return payload;
     },
@@ -314,7 +345,7 @@ export function useTelegramGatewayReload() {
     mutationFn: async () => {
       await fetchJson<{ success: boolean; timestamp: string }>(
         `${TELEGRAM_GATEWAY_SERVICE_BASE}/actions/reload`,
-        { method: "POST" },
+        { method: "POST" }
       );
     },
     onSuccess: () => {
@@ -345,7 +376,7 @@ export function useTelegramGatewayReprocess() {
             ? {
                 requestedBy,
               }
-            : {},
+            : {}
         ),
       });
       return payload.data;
@@ -468,7 +499,7 @@ export function useDeleteTelegramGatewayChannel() {
         `${TELEGRAM_GATEWAY_CHANNELS_BASE}/${id}`,
         {
           method: "DELETE",
-        },
+        }
       );
     },
     onSuccess: () => {
@@ -503,7 +534,7 @@ export function useTelegramGatewayAuthStart() {
         `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/start`,
         {
           method: "POST",
-        },
+        }
       );
     },
     onSuccess: () => {
@@ -524,7 +555,7 @@ export function useTelegramGatewayAuthSubmit() {
         {
           method: "POST",
           body: JSON.stringify({ value }),
-        },
+        }
       );
     },
     onSuccess: () => {
@@ -544,7 +575,7 @@ export function useTelegramGatewayAuthCancel() {
         `${TELEGRAM_GATEWAY_SERVICE_BASE}/auth/cancel`,
         {
           method: "POST",
-        },
+        }
       );
     },
     onSuccess: () => {

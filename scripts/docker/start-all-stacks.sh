@@ -258,7 +258,7 @@ echo ""
 
 # Step 9: Telegram Stack
 log_step 9 $TOTAL_STEPS "Iniciando Telegram Stack..."
-start_stack "${COMPOSE_DIR}/docker-compose.4-2-telegram-stack-minimal-ports.yml" "Telegram Stack" "" 30
+start_stack "${COMPOSE_DIR}/docker-compose.4-2-telegram-stack.yml" "Telegram Stack" "" 30
 echo ""
 
 # Step 10: Monitoring Stack

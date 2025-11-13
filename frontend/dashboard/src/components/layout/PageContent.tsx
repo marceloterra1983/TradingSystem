@@ -12,6 +12,46 @@ export interface PageContentProps {
   defaultExpandedParts?: string[];
 }
 
+interface PageErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+class PageErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  PageErrorBoundaryState
+> {
+  state: PageErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(error: Error): PageErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.error("Page content failed to load", error, errorInfo);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+            <div className="font-medium">Falha ao carregar a página.</div>
+            <div className="text-xs opacity-80">
+              {this.state.error?.message || "Erro desconhecido"}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children as React.ReactElement;
+  }
+}
+
 /**
  * Page Content Component
  *
@@ -30,38 +70,9 @@ export function PageContent({
 }: PageContentProps) {
   // If page has customContent, render it with Suspense wrapper for lazy loading
   if (page.customContent) {
-    // Basic error boundary to avoid blank screen if a lazy chunk fails
-    class ErrorBoundary extends React.Component<
-      { children: React.ReactNode },
-      { hasError: boolean; error?: Error }
-    > {
-      constructor(props: { children: React.ReactNode }) {
-        super(props);
-        this.state = { hasError: false };
-      }
-      static getDerivedStateFromError(error: Error) {
-        return { hasError: true, error };
-      }
-      componentDidCatch() {}
-      render() {
-        if (this.state.hasError) {
-          return (
-            <div className="flex items-center justify-center p-8">
-              <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
-                <div className="font-medium">Falha ao carregar a página.</div>
-                <div className="text-xs opacity-80">
-                  {this.state.error?.message || "Erro desconhecido"}
-                </div>
-              </div>
-            </div>
-          );
-        }
-        return this.props.children as React.ReactElement;
-      }
-    }
     return (
       <div data-testid="page-content">
-        <ErrorBoundary>
+        <PageErrorBoundary>
           <React.Suspense
             fallback={
               <div className="flex items-center justify-center p-8">
@@ -78,17 +89,19 @@ export function PageContent({
               ? page.customContent()
               : page.customContent}
           </React.Suspense>
-        </ErrorBoundary>
+        </PageErrorBoundary>
       </div>
     );
   }
+
+  const parts = page.parts ?? [];
 
   // By default, expand first part if no defaults provided
   const defaultValues =
     defaultExpandedParts.length > 0
       ? defaultExpandedParts
-      : page.parts.length > 0
-        ? [page.parts[0].id]
+      : parts.length > 0
+        ? [parts[0].id]
         : [];
 
   return (
@@ -106,9 +119,9 @@ export function PageContent({
       </div>
 
       {/* Accordion Parts */}
-      {page.parts.length > 0 ? (
+      {parts.length > 0 ? (
         <Accordion type="multiple" defaultValue={defaultValues}>
-          {page.parts.map((part) => (
+          {parts.map((part) => (
             <AccordionItem key={part.id} value={part.id}>
               <AccordionTrigger>{part.title}</AccordionTrigger>
               <AccordionContent>

@@ -36,6 +36,9 @@ RUN cd /shared/logger && npm ci && \
 # Copy source code
 COPY backend/api/documentation-api .
 
+# Copy documentation sources (FlexSearch + static assets)
+COPY docs ./docs
+
 # Expose port
 EXPOSE 3000
 
@@ -66,6 +69,7 @@ COPY --chown=nodejs:nodejs backend/api/documentation-api/package*.json ./
 COPY --from=development --chown=nodejs:nodejs /shared /shared
 COPY --chown=nodejs:nodejs backend/api/documentation-api/prisma ./prisma
 COPY --chown=nodejs:nodejs backend/api/documentation-api/src ./src
+COPY --chown=nodejs:nodejs docs ./docs
 
 # Create uploads directory with proper permissions
 RUN mkdir -p uploads && \

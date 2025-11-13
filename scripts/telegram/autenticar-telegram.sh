@@ -24,7 +24,7 @@ if ! docker ps | grep -q telegram-mtproto; then
     echo "❌ Container telegram-mtproto não está rodando!"
     echo ""
     echo "Inicie o container primeiro:"
-    echo "  docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml up -d telegram-mtproto"
+    echo "  docker compose -f tools/compose/docker-compose.4-2-telegram-stack.yml up -d telegram-mtproto"
     exit 1
 fi
 

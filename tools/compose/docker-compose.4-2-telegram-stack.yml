@@ -26,7 +26,7 @@ services:
       POSTGRES_DB: telegram_gateway
       POSTGRES_USER: ${TELEGRAM_DB_USER:-telegram}
       POSTGRES_PASSWORD: ${TELEGRAM_DB_PASSWORD}
-      TIMESCALEDB_TELEMETRY: 'off'
+      TIMESCALEDB_TELEMETRY: "off"
       POSTGRES_INITDB_ARGS: >-
         --encoding=UTF-8
         --locale=C
@@ -61,14 +61,18 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 2G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
 
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U telegram -d telegram_gateway && psql -U telegram -d telegram_gateway -c "SELECT 1" > /dev/null 2>&1']
+      test:
+        [
+          "CMD-SHELL",
+          'pg_isready -U telegram -d telegram_gateway && psql -U telegram -d telegram_gateway -c "SELECT 1" > /dev/null 2>&1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -112,7 +116,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
 
     depends_on:
@@ -120,7 +124,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -h localhost -p 6432']
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -155,15 +159,18 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
 
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
       start_period: 10s
+
+    volumes:
+      - telegram-redis-master-data:/data
 
     networks:
       telegram_backend:
@@ -197,11 +204,14 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
       start_period: 10s
+
+    volumes:
+      - telegram-redis-replica-data:/data
 
     networks:
       - telegram_backend
@@ -238,7 +248,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'redis-cli', '-p', '26379', 'ping']
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -274,11 +284,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
 
     healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -304,7 +314,7 @@ services:
 
     environment:
       - NODE_ENV=production
-      - GATEWAY_PORT=4007  # ✅ ALWAYS 4007 internally (for inter-container communication)
+      - GATEWAY_PORT=4007 # ✅ ALWAYS 4007 internally (for inter-container communication)
       - TELEGRAM_GATEWAY_DB_SCHEMA=telegram_gateway
       - TELEGRAM_GATEWAY_DB_TABLE=messages
       - TELEGRAM_GATEWAY_DB_SSL=${TELEGRAM_GATEWAY_DB_SSL:-false}
@@ -313,7 +323,7 @@ services:
       - TELEGRAM_REDIS_PORT=6379
 
     ports:
-      - "${TELEGRAM_MTPROTO_PORT:-14007}:4007"  # ✅ External 14007 → Internal 4007
+      - "${TELEGRAM_MTPROTO_PORT:-14007}:4007" # ✅ External 14007 → Internal 4007
 
     volumes:
       - ../../apps/telegram-gateway/.session:/usr/src/app/.session
@@ -326,7 +336,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'pgrep', '-f', 'node']
+      test: ["CMD", "pgrep", "-f", "node"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -352,7 +362,7 @@ services:
 
     environment:
       - NODE_ENV=production
-      - TELEGRAM_GATEWAY_API_PORT=4010  # ✅ ALWAYS 4010 internally (for inter-container communication)
+      - TELEGRAM_GATEWAY_API_PORT=4010 # ✅ ALWAYS 4010 internally (for inter-container communication)
       - TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN}
       - API_SECRET_TOKEN=${API_SECRET_TOKEN:-${TELEGRAM_GATEWAY_API_TOKEN}}
       - TELEGRAM_GATEWAY_DB_HOST=telegram-pgbouncer
@@ -366,16 +376,20 @@ services:
       - REDIS_HOST=telegram-redis-master
       - REDIS_PORT=6379
       - REDIS_ENABLED=${TELEGRAM_REDIS_ENABLED:-true}
-      - GATEWAY_SERVICE_URL=http://telegram-mtproto:4007  # ✅ Internal port 4007
-      - MTPROTO_SERVICE_URL=http://telegram-mtproto:4007  # ✅ Internal port 4007
+      - GATEWAY_SERVICE_URL=http://telegram-mtproto:4007 # ✅ Internal port 4007
+      - MTPROTO_SERVICE_URL=http://telegram-mtproto:4007 # ✅ Internal port 4007
       - TELEGRAM_GATEWAY_SESSION_FILE=/usr/src/app/.session/telegram-gateway.session
       - TELEGRAM_GATEWAY_FAILURE_QUEUE_PATH=/usr/src/app/data/failure-queue.jsonl
 
     # External port exposure removed; service published via Traefik gateway
+    volumes:
+      - ../../apps/telegram-gateway/.session:/usr/src/app/.session
+      - ../../apps/telegram-gateway/data:/usr/src/app/data
+
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
 
     depends_on:
@@ -385,7 +399,13 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:4010/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:4010/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -405,12 +425,16 @@ services:
       - "traefik.http.routers.telegram-gateway.rule=PathPrefix(`/api/telegram-gateway`)"
       - "traefik.http.routers.telegram-gateway.entrypoints=web"
       - "traefik.http.routers.telegram-gateway.service=telegram-gateway"
+      - "traefik.http.routers.telegram-gateway.middlewares=telegram-gateway-rewrite"
       - "traefik.http.routers.telegram-gateway.priority=90"
       - "traefik.http.services.telegram-gateway.loadbalancer.server.port=4010"
+      - "traefik.docker.network=tradingsystem_backend"
       # - "traefik.http.routers.telegram-gateway.middlewares=api-standard@file"  # Disabled - file middlewares not working in WSL2
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.interval=30s"
       - "traefik.http.services.telegram-gateway.loadbalancer.healthcheck.timeout=10s"
+      - "traefik.http.middlewares.telegram-gateway-rewrite.replacepathregex.regex=^/api/telegram-gateway/?(.*)$"
+      - "traefik.http.middlewares.telegram-gateway-rewrite.replacepathregex.replacement=/$$1"
 
   # ============================================================================
   # 9. Prometheus - Metrics Collection & Alerting
@@ -422,20 +446,16 @@ services:
 
     # External port exposure removed; service reachable only via Docker network
     volumes:
-      - type: bind
-        source: ./telegram/monitoring/prometheus.yml
-        target: /etc/prometheus/prometheus.yml
-        read_only: true
-      - ./telegram/monitoring/alerts:/etc/prometheus/alerts:ro
+      - ./telegram/monitoring:/etc/prometheus/custom:ro
       - telegram-prometheus-data:/prometheus
 
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/custom/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--web.enable-lifecycle"
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -443,14 +463,22 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9090/-/healthy']
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -494,14 +522,18 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
 
     healthcheck:
-      test: ['CMD-SHELL', 'wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1']
+      test:
+        [
+          "CMD-SHELL",
+          "wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -540,10 +572,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
 
     depends_on:
@@ -551,7 +583,15 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9187/metrics']
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9187/metrics",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -585,10 +625,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
         reservations:
-          cpus: '0.1'
+          cpus: "0.1"
           memory: 64M
 
     depends_on:
@@ -596,7 +636,15 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9121/metrics']
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9121/metrics",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3

@@ -16,7 +16,7 @@ http:
         browserXssFilter: true
         contentTypeNosniff: true
         frameDeny: true
-        sslRedirect: false  # TODO: Enable in production
+        sslRedirect: false # TODO: Enable in production
         stsSeconds: 31536000
         stsIncludeSubdomains: true
         stsPreload: true
@@ -36,8 +36,8 @@ http:
           - PATCH
           - OPTIONS
         accessControlAllowOriginList:
-          - "http://localhost:9080"  # Dashboard
-          - "http://localhost:3404"  # Docs
+          - "http://localhost:9080" # Dashboard
+          - "http://localhost:3404" # Docs
         accessControlAllowHeaders:
           - "*"
         accessControlExposeHeaders:
@@ -72,9 +72,9 @@ http:
     # Rate Limiting (Global)
     rate-limit-global:
       rateLimit:
-        average: 1000
+        average: 300
         period: 1m
-        burst: 100
+        burst: 50
 
     # Rate Limiting (Per User - future with Redis)
     rate-limit-user:
@@ -154,6 +154,14 @@ http:
           - security-headers
           - cors-dev
           - rate-limit-strict
+    n8n-dashboard-auth-header:
+      headers:
+        customRequestHeaders:
+          Authorization: "Basic YXV0b21hdGlvbjpNYXJjZWxvMTIzQA=="
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "dev:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/"
 
     static-allow-iframe:
       chain:
@@ -196,7 +204,6 @@ http:
   #     middlewares:
   #       - auth-chain
   #       - rate-limit-user
-
 # ============================================================
 # TCP/UDP Configuration (future)
 # ============================================================

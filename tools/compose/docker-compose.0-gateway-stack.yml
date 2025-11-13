@@ -40,29 +40,35 @@ services:
     # Configuration via command line (avoiding file mount issues)
     command:
       - "--api.dashboard=true"
-      - "--api.insecure=true"
+      - "--api=true"
+      - "--api.insecure=false"
       - "--entrypoints.web.address=:9080"
+      - "--entrypoints.traefik.address=:8080"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/dynamic"
       - "--providers.file.watch=true"
-      - "--log.level=DEBUG"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addRoutersLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--log.level=INFO"
       - "--accesslog=true"
       - "--accesslog.filepath=/var/log/traefik/access.log"
       - "--accesslog.format=json"
       - "--ping=true"
 
     ports:
-      - "9082:9080"   # HTTP Gateway
-      - "9083:8080"   # Dashboard
+      - "9082:9080" # HTTP Gateway
+      - "9083:8080" # Dashboard
       # - "9443:9443"   # HTTPS Gateway (future) - DISABLED: porta em uso no sistema
 
     volumes:
       # Docker socket (service discovery)
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-      # Dynamic configuration (routes, middlewares) - RELATIVE PATH from compose file location
-      - ../traefik/dynamic:/etc/traefik/dynamic:ro
+      # Dynamic configuration (routes, middlewares) - ABSOLUTE PATH for WSL2 compatibility
+      - /workspace/tools/traefik/dynamic:/etc/traefik/dynamic
 
       # Access logs
       - traefik-logs:/var/log/traefik
@@ -80,10 +86,19 @@ services:
 
     healthcheck:
       test: ["CMD", "traefik", "healthcheck", "--ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 2s
       retries: 3
-      start_period: 5s
+      start_period: 10s
+
+    deploy:
+      resources:
+        limits:
+          cpus: "0.75"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
 
     labels:
       - "com.tradingsystem.stack=0-gateway-stack"
@@ -92,9 +107,22 @@ services:
 
       # Dashboard routing (Traefik monitoring itself)
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.traefik-api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.traefik-api.service=api@internal"
+      - "traefik.http.routers.traefik-api.entrypoints=traefik"
+      - "traefik.http.routers.traefik-api.middlewares=dashboard-auth@docker"
+      - "traefik.http.routers.traefik-dashboard.rule=PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=traefik"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth@docker"
+      - "traefik.http.routers.traefik-metrics.rule=PathPrefix(`/metrics`)"
+      - "traefik.http.routers.traefik-metrics.service=prometheus@internal"
+      - "traefik.http.routers.traefik-metrics.entrypoints=traefik"
+      - "traefik.http.routers.traefik-metrics.middlewares=dashboard-auth@docker"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=dev:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.burst=50"
+      - "traefik.http.middlewares.dashboard-ratelimit.ratelimit.period=1m"
 
 volumes:
   traefik-logs:
@@ -117,7 +145,6 @@ networks:
     external: true
   tp_capital_backend:
     external: true
-
 # ==============================================================================
 # MIGRATION GUIDE
 # ==============================================================================

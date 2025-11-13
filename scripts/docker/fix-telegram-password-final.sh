@@ -33,5 +33,5 @@ docker restart telegram-pgbouncer telegram-gateway-api telegram-mtproto
 
 echo ""
 echo "Wait 15 seconds and check:"
-echo "  docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml ps"
+echo "  docker compose -f tools/compose/docker-compose.4-2-telegram-stack.yml ps"
 echo ""

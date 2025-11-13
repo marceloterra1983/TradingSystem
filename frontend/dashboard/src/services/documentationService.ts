@@ -226,6 +226,10 @@ const FALLBACK_DOCS_API_BASES = [
 const FALLBACK_DOCS_STATIC_BASES = [
   "http://localhost:9080/docs",
   "http://127.0.0.1:9080/docs",
+  "http://localhost:3400",
+  "http://127.0.0.1:3400",
+  "http://localhost:3400/docs",
+  "http://127.0.0.1:3400/docs",
   "http://localhost:3404",
   "http://127.0.0.1:3404",
 ];

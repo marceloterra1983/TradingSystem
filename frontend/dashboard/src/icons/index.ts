@@ -1,141 +1,144 @@
-// Auto-generated lucide icon re-exports for tree-shaking
-// Do not import directly from 'lucide-react'; use this module instead.
+// Lucide icon re-exports for tree-shaking optimization
+// Uses official lucide-react API for proper TypeScript support
+// See: https://lucide.dev/guide/packages/lucide-react
 
-export { default as Activity } from 'lucide-react/dist/esm/icons/activity.js';
-export { default as AlertCircle } from 'lucide-react/dist/esm/icons/alert-circle.js';
-export { default as AlertTriangle } from 'lucide-react/dist/esm/icons/alert-triangle.js';
-export { default as ArrowDown } from 'lucide-react/dist/esm/icons/arrow-down.js';
-export { default as ArrowDownUp } from 'lucide-react/dist/esm/icons/arrow-down-up.js';
-export { default as ArrowUp } from 'lucide-react/dist/esm/icons/arrow-up.js';
-export { default as ArrowUpDown } from 'lucide-react/dist/esm/icons/arrow-up-down.js';
-export { default as BarChart3 } from 'lucide-react/dist/esm/icons/bar-chart-3.js';
-export { default as Bell } from 'lucide-react/dist/esm/icons/bell.js';
-export { default as Book } from 'lucide-react/dist/esm/icons/book.js';
-export { default as BookOpen } from 'lucide-react/dist/esm/icons/book-open.js';
-export { default as Bot } from 'lucide-react/dist/esm/icons/bot.js';
-export { default as Brain } from 'lucide-react/dist/esm/icons/brain.js';
-export { default as BrainCircuit } from 'lucide-react/dist/esm/icons/brain-circuit.js';
-export { default as Briefcase } from 'lucide-react/dist/esm/icons/briefcase.js';
-export { default as Building2 } from 'lucide-react/dist/esm/icons/building-2.js';
-export { default as Calendar } from 'lucide-react/dist/esm/icons/calendar.js';
-export { default as Check } from 'lucide-react/dist/esm/icons/check.js';
-export { default as CheckCircle } from 'lucide-react/dist/esm/icons/check-circle.js';
-export { default as CheckCircle2 } from 'lucide-react/dist/esm/icons/check-circle-2.js';
-export { default as ChevronDown } from 'lucide-react/dist/esm/icons/chevron-down.js';
-export { default as ChevronLeft } from 'lucide-react/dist/esm/icons/chevron-left.js';
-export { default as ChevronRight } from 'lucide-react/dist/esm/icons/chevron-right.js';
-export { default as ChevronUp } from 'lucide-react/dist/esm/icons/chevron-up.js';
-export { default as ChevronsDownUp } from 'lucide-react/dist/esm/icons/chevrons-down-up.js';
-export { default as ChevronsUpDown } from 'lucide-react/dist/esm/icons/chevrons-up-down.js';
-export { default as Circle } from 'lucide-react/dist/esm/icons/circle.js';
-export { default as Clipboard } from 'lucide-react/dist/esm/icons/clipboard.js';
-export { default as Clock } from 'lucide-react/dist/esm/icons/clock.js';
-export { default as Code } from 'lucide-react/dist/esm/icons/code.js';
-export { default as Columns } from 'lucide-react/dist/esm/icons/columns.js';
-export { default as Columns2 } from 'lucide-react/dist/esm/icons/columns-2.js';
-export { default as Columns3 } from 'lucide-react/dist/esm/icons/columns-3.js';
-export { default as Columns4 } from 'lucide-react/dist/esm/icons/columns-4.js';
-export { default as Copy } from 'lucide-react/dist/esm/icons/copy.js';
-export { default as Cpu } from 'lucide-react/dist/esm/icons/cpu.js';
-export { default as Database } from 'lucide-react/dist/esm/icons/database.js';
-export { default as DollarSign } from 'lucide-react/dist/esm/icons/dollar-sign.js';
-export { default as Download } from 'lucide-react/dist/esm/icons/download.js';
-export { default as Edit } from 'lucide-react/dist/esm/icons/edit.js';
-export { default as Edit2 } from 'lucide-react/dist/esm/icons/edit-2.js';
-export { default as ExternalLink } from 'lucide-react/dist/esm/icons/external-link.js';
-export { default as Eye } from 'lucide-react/dist/esm/icons/eye.js';
-export { default as FileDiff } from 'lucide-react/dist/esm/icons/file-diff.js';
-export { default as FileDown } from 'lucide-react/dist/esm/icons/file-down.js';
-export { default as FileJson } from 'lucide-react/dist/esm/icons/file-json.js';
-export { default as FileSpreadsheet } from 'lucide-react/dist/esm/icons/file-spreadsheet.js';
-export { default as FileText } from 'lucide-react/dist/esm/icons/file-text.js';
-export { default as FileWarning } from 'lucide-react/dist/esm/icons/file-warning.js';
-export { default as Filter } from 'lucide-react/dist/esm/icons/filter.js';
-export { default as Flame } from 'lucide-react/dist/esm/icons/flame.js';
-export { default as Folder } from 'lucide-react/dist/esm/icons/folder.js';
-export { default as FolderOpen } from 'lucide-react/dist/esm/icons/folder-open.js';
-export { default as FolderTree } from 'lucide-react/dist/esm/icons/folder-tree.js';
-export { default as GaugeCircle } from 'lucide-react/dist/esm/icons/gauge-circle.js';
-export { default as GitBranch } from 'lucide-react/dist/esm/icons/git-branch.js';
-export { default as Globe } from 'lucide-react/dist/esm/icons/globe.js';
-export { default as GraduationCap } from 'lucide-react/dist/esm/icons/graduation-cap.js';
-export { default as GripVertical } from 'lucide-react/dist/esm/icons/grip-vertical.js';
-export { default as Hash } from 'lucide-react/dist/esm/icons/hash.js';
-export { default as Heart } from 'lucide-react/dist/esm/icons/heart.js';
-export { default as History } from 'lucide-react/dist/esm/icons/history.js';
-export { default as Home } from 'lucide-react/dist/esm/icons/home.js';
-export { default as Image } from 'lucide-react/dist/esm/icons/image.js';
-export { default as Info } from 'lucide-react/dist/esm/icons/info.js';
-export { default as Instagram } from 'lucide-react/dist/esm/icons/instagram.js';
-export { default as KeyRound } from 'lucide-react/dist/esm/icons/key-round.js';
-export { default as Layers } from 'lucide-react/dist/esm/icons/layers.js';
-export { default as Layout } from 'lucide-react/dist/esm/icons/layout.js';
-export { default as LayoutDashboard } from 'lucide-react/dist/esm/icons/layout-dashboard.js';
-export { default as LayoutList } from 'lucide-react/dist/esm/icons/layout-list.js';
-export { default as LifeBuoy } from 'lucide-react/dist/esm/icons/life-buoy.js';
-export { default as Lightbulb } from 'lucide-react/dist/esm/icons/lightbulb.js';
-export { default as LineChart } from 'lucide-react/dist/esm/icons/line-chart.js';
-export { default as List } from 'lucide-react/dist/esm/icons/list.js';
-export { default as ListChecks } from 'lucide-react/dist/esm/icons/list-checks.js';
-export { default as Loader2 } from 'lucide-react/dist/esm/icons/loader-2.js';
-export { default as Maximize2 } from 'lucide-react/dist/esm/icons/maximize-2.js';
-export { default as Menu } from 'lucide-react/dist/esm/icons/menu.js';
-export { default as MessageCircle } from 'lucide-react/dist/esm/icons/message-circle.js';
-export { default as MessageSquare } from 'lucide-react/dist/esm/icons/message-square.js';
-export { default as Minus } from 'lucide-react/dist/esm/icons/minus.js';
-export { default as MonitorUp } from 'lucide-react/dist/esm/icons/monitor-up.js';
-export { default as Moon } from 'lucide-react/dist/esm/icons/moon.js';
-export { default as MoveLeft } from 'lucide-react/dist/esm/icons/move-left.js';
-export { default as MoveRight } from 'lucide-react/dist/esm/icons/move-right.js';
-export { default as Network } from 'lucide-react/dist/esm/icons/network.js';
-export { default as NotebookPen } from 'lucide-react/dist/esm/icons/notebook-pen.js';
-export { default as Package } from 'lucide-react/dist/esm/icons/package.js';
-export { default as Palette } from 'lucide-react/dist/esm/icons/palette.js';
-export { default as Pause } from 'lucide-react/dist/esm/icons/pause.js';
-export { default as Pencil } from 'lucide-react/dist/esm/icons/pencil.js';
-export { default as Play } from 'lucide-react/dist/esm/icons/play.js';
-export { default as PlugZap } from 'lucide-react/dist/esm/icons/plug-zap.js';
-export { default as Plus } from 'lucide-react/dist/esm/icons/plus.js';
-export { default as PlusCircle } from 'lucide-react/dist/esm/icons/plus-circle.js';
-export { default as Power } from 'lucide-react/dist/esm/icons/power.js';
-export { default as Radio } from 'lucide-react/dist/esm/icons/radio.js';
-export { default as RefreshCcw } from 'lucide-react/dist/esm/icons/refresh-ccw.js';
-export { default as RefreshCw } from 'lucide-react/dist/esm/icons/refresh-cw.js';
-export { default as Repeat } from 'lucide-react/dist/esm/icons/repeat.js';
-export { default as Repeat2 } from 'lucide-react/dist/esm/icons/repeat-2.js';
-export { default as Rocket } from 'lucide-react/dist/esm/icons/rocket.js';
-export { default as RotateCcw } from 'lucide-react/dist/esm/icons/rotate-ccw.js';
-export { default as Rows } from 'lucide-react/dist/esm/icons/rows.js';
-export { default as Save } from 'lucide-react/dist/esm/icons/save.js';
-export { default as ScrollText } from 'lucide-react/dist/esm/icons/scroll-text.js';
-export { default as Search } from 'lucide-react/dist/esm/icons/search.js';
-export { default as Send } from 'lucide-react/dist/esm/icons/send.js';
-export { default as Server } from 'lucide-react/dist/esm/icons/server.js';
-export { default as ServerCog } from 'lucide-react/dist/esm/icons/server-cog.js';
-export { default as Settings } from 'lucide-react/dist/esm/icons/settings.js';
-export { default as Shield } from 'lucide-react/dist/esm/icons/shield.js';
-export { default as ShieldAlert } from 'lucide-react/dist/esm/icons/shield-alert.js';
-export { default as ShieldCheck } from 'lucide-react/dist/esm/icons/shield-check.js';
-export { default as Sparkles } from 'lucide-react/dist/esm/icons/sparkles.js';
-export { default as StopCircle } from 'lucide-react/dist/esm/icons/stop-circle.js';
-export { default as Sun } from 'lucide-react/dist/esm/icons/sun.js';
-export { default as Tag } from 'lucide-react/dist/esm/icons/tag.js';
-export { default as Target } from 'lucide-react/dist/esm/icons/target.js';
-export { default as Terminal } from 'lucide-react/dist/esm/icons/terminal.js';
-export { default as TimerReset } from 'lucide-react/dist/esm/icons/timer-reset.js';
-export { default as ToggleLeft } from 'lucide-react/dist/esm/icons/toggle-left.js';
-export { default as ToggleRight } from 'lucide-react/dist/esm/icons/toggle-right.js';
-export { default as Trash } from 'lucide-react/dist/esm/icons/trash.js';
-export { default as Trash2 } from 'lucide-react/dist/esm/icons/trash-2.js';
-export { default as TrendingDown } from 'lucide-react/dist/esm/icons/trending-down.js';
-export { default as TrendingUp } from 'lucide-react/dist/esm/icons/trending-up.js';
-export { default as Twitter } from 'lucide-react/dist/esm/icons/twitter.js';
-export { default as Undo } from 'lucide-react/dist/esm/icons/undo.js';
-export { default as User } from 'lucide-react/dist/esm/icons/user.js';
-export { default as Wallet } from 'lucide-react/dist/esm/icons/wallet.js';
-export { default as Wifi } from 'lucide-react/dist/esm/icons/wifi.js';
-export { default as Workflow } from 'lucide-react/dist/esm/icons/workflow.js';
-export { default as X } from 'lucide-react/dist/esm/icons/x.js';
-export { default as XCircle } from 'lucide-react/dist/esm/icons/x-circle.js';
-export { default as Youtube } from 'lucide-react/dist/esm/icons/youtube.js';
-export { default as Zap } from 'lucide-react/dist/esm/icons/zap.js';
+export {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowDown,
+  ArrowDownUp,
+  ArrowUp,
+  ArrowUpDown,
+  BarChart3,
+  Bell,
+  Book,
+  BookOpen,
+  Bot,
+  Brain,
+  BrainCircuit,
+  Briefcase,
+  Building2,
+  Calendar,
+  Check,
+  CheckCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Circle,
+  Clipboard,
+  Clock,
+  Code,
+  Columns,
+  Columns2,
+  Columns3,
+  Columns4,
+  Copy,
+  Cpu,
+  Database,
+  DollarSign,
+  Download,
+  Edit,
+  Edit2,
+  ExternalLink,
+  Eye,
+  FileDiff,
+  FileDown,
+  FileJson,
+  FileSpreadsheet,
+  FileText,
+  FileWarning,
+  Filter,
+  Flame,
+  Folder,
+  FolderOpen,
+  FolderTree,
+  GaugeCircle,
+  GitBranch,
+  Globe,
+  GraduationCap,
+  GripVertical,
+  Hash,
+  Heart,
+  History,
+  Home,
+  Image,
+  Info,
+  Instagram,
+  KeyRound,
+  Layers,
+  Layout,
+  LayoutDashboard,
+  LayoutList,
+  LifeBuoy,
+  Lightbulb,
+  LineChart,
+  List,
+  ListChecks,
+  Loader2,
+  Maximize2,
+  Menu,
+  MessageCircle,
+  MessageSquare,
+  Minus,
+  MonitorUp,
+  Moon,
+  MoveLeft,
+  MoveRight,
+  Network,
+  NotebookPen,
+  Package,
+  Palette,
+  Pause,
+  Pencil,
+  Play,
+  PlugZap,
+  Plus,
+  PlusCircle,
+  Power,
+  Radio,
+  RefreshCcw,
+  RefreshCw,
+  Repeat,
+  Repeat2,
+  Rocket,
+  RotateCcw,
+  Rows,
+  Save,
+  ScrollText,
+  Search,
+  Send,
+  Server,
+  ServerCog,
+  Settings,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  StopCircle,
+  Sun,
+  Tag,
+  Target,
+  Terminal,
+  TimerReset,
+  ToggleLeft,
+  ToggleRight,
+  Trash,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Twitter,
+  Undo,
+  User,
+  Wallet,
+  Wifi,
+  Workflow,
+  X,
+  XCircle,
+  Youtube,
+  Zap,
+} from 'lucide-react';

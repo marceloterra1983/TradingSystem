@@ -148,7 +148,7 @@ export function useChannelManager(
           },
         );
 
-        const result = await readGatewayResponse(response);
+        await readGatewayResponse(response);
 
         alert("✅ Canal atualizado com sucesso!");
         if (onSuccess) await onSuccess();

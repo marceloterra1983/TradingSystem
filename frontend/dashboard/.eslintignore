@@ -21,3 +21,6 @@ cypress/
 src/examples/
 src/__tests__/
 
+# Service Worker (has special globals: self, caches)
+public/sw.js
+

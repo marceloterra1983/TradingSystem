@@ -224,16 +224,16 @@ export const CollapsibleCardTitle = forwardRef<
 CollapsibleCardTitle.displayName = "CollapsibleCardTitle";
 
 export interface CollapsibleCardDescriptionProps
-  extends HTMLAttributes<HTMLParagraphElement> {
+  extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
 export const CollapsibleCardDescription = forwardRef<
-  HTMLParagraphElement,
+  HTMLDivElement,
   CollapsibleCardDescriptionProps
 >(({ className, children, ...props }, ref) => {
   return (
-    <p
+    <div
       ref={ref}
       className={cn(
         "mt-1 text-sm text-[color:var(--ts-text-muted)]",
@@ -242,7 +242,7 @@ export const CollapsibleCardDescription = forwardRef<
       {...props}
     >
       {children}
-    </p>
+    </div>
   );
 });
 
