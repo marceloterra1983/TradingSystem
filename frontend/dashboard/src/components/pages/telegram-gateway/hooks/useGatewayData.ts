@@ -4,12 +4,12 @@
  */
 
 import { useState, useCallback } from "react";
+import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
 import {
-  TELEGRAM_GATEWAY_TOKEN,
-  TELEGRAM_GATEWAY_CHANNELS_BASE,
-  TELEGRAM_GATEWAY_MESSAGES_BASE,
   TELEGRAM_GATEWAY_SERVICE_BASE,
-} from "@/hooks/useTelegramGateway";
+  TELEGRAM_GATEWAY_MESSAGES_API_URL,
+  TELEGRAM_GATEWAY_CHANNELS_API_URL,
+} from "../utils/constants";
 import type { GatewayData, Channel, TelegramMessage } from "../types";
 
 export interface UseGatewayDataReturn {
