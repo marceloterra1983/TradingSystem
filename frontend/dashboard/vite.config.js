@@ -189,6 +189,13 @@ export default defineConfig(({ mode }) => {
       return;
     }
     proxy.on("proxyReq", (proxyReq) => {
+      if (!proxyReq.getHeader("Authorization")) {
+        proxyReq.setHeader("Authorization", n8nBasicAuthHeader);
+        if (!isProd) {
+          console.log("[vite] injected n8n basic auth header");
+        }
+        return;
+      }
       proxyReq.setHeader("Authorization", n8nBasicAuthHeader);
     });
   };
