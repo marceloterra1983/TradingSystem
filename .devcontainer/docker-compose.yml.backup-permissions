@@ -25,7 +25,8 @@ services:
       - ../node_modules:/workspace/node_modules:cached
       - ../frontend/dashboard/node_modules:/workspace/frontend/dashboard/node_modules:cached
       - ../docs/node_modules:/workspace/docs/node_modules:cached
-      
+      - ../venv:/workspace/venv:cached
+
       # Git credentials (optional)
       - ~/.gitconfig:/home/vscode/.gitconfig:ro
       - ~/.ssh:/home/vscode/.ssh:ro
@@ -56,15 +57,8 @@ services:
     command: >
       sh -c "
         sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true;
-        sudo chown -R vscode:vscode /workspace/node_modules /workspace/frontend/dashboard/node_modules /workspace/docs/node_modules 2>/dev/null || true;
         sleep infinity
       "
-    
-    #command: >
-    #  sh -c "
-    #    sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true;
-    #    sleep infinity
-    #  "
 
     # Privileged mode (required for Docker-in-Docker)
     privileged: true

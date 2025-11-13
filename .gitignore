@@ -338,3 +338,4 @@ config/.env.local
 # Allow committed build helper scripts
 !scripts/build/
 !scripts/build/**
+venv/

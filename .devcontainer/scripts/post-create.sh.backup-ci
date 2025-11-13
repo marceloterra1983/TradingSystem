@@ -15,18 +15,18 @@ NC='\033[0m' # No Color
 
 # 1. Install root dependencies
 echo -e "\n${BLUE}📦 Installing root dependencies...${NC}"
-npm install --prefer-offline --no-audit --legacy-peer-deps
+npm ci --prefer-offline --no-audit --legacy-peer-deps
 
 # 2. Install frontend/dashboard dependencies
 echo -e "\n${BLUE}📦 Installing dashboard dependencies...${NC}"
 cd frontend/dashboard
-npm install --prefer-offline --no-audit --legacy-peer-deps
+npm ci --prefer-offline --no-audit --legacy-peer-deps
 cd ../..
 
 # 3. Install docs dependencies
 echo -e "\n${BLUE}📦 Installing documentation dependencies...${NC}"
 cd docs
-npm install --prefer-offline --no-audit --legacy-peer-deps
+npm ci --prefer-offline --no-audit --legacy-peer-deps
 cd ..
 
 # 4. Setup Python virtual environment
