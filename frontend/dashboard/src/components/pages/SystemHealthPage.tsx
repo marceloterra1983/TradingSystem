@@ -110,9 +110,14 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
             <Wifi className="w-4 h-4" />
             Endpoint
           </span>
-          <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+          <a
+            href={service.endpoint}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-mono"
+          >
             {service.endpoint}
-          </code>
+          </a>
         </div>
 
         {service.responseTime && (

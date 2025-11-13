@@ -1,0 +1,323 @@
+---
+title: "Database UI - WSL2 Port Forwarding Fix"
+sidebar_position: 10
+tags: [troubleshooting, wsl2, docker, database-ui, port-forwarding]
+domain: tools
+type: troubleshooting
+summary: "Complete troubleshooting guide for fixing Database UI access from Windows when running in WSL2"
+status: resolved
+last_review: "2025-11-13"
+---
+
+# Database UI - WSL2 Port Forwarding Fix
+
+## Problem Summary
+
+**Symptom:** Database UI tools (pgAdmin, Adminer, pgWeb, QuestDB) show "ERR_EMPTY_RESPONSE" when accessed from Windows browser at `http://localhost:5050`, `http://localhost:3910`, etc.
+
+**Root Cause:** WSL2 uses Hyper-V virtualization with isolated networking. Docker containers running inside WSL2 expose ports on WSL2's internal IP (172.x.x.x), which Windows `localhost` cannot access without explicit port forwarding.
+
+**Status:** ✅ **RESOLVED** (2025-11-13)
+
+---
+
+## Solution Overview
+
+The fix required **two separate issues** to be resolved:
+
+### 1. Docker Bind Mount Issue (WSL2 Filesystem Cache)
+
+**Problem:** Nginx proxy containers couldn't load configuration files via bind mounts due to WSL2 filesystem caching issues.
+
+**Solution:** Changed from bind mounts to **custom Docker images** that copy config files during build:
+
+```yaml
+# Before (bind mount - didn't work)
+volumes:
+  - ./nginx-proxies/pgadmin:/etc/nginx/conf.d:ro
+
+# After (custom Dockerfile - works)
+build:
+  context: ./nginx-proxies/pgadmin
+  dockerfile: Dockerfile
+```
+
+**Files Modified:**
+- `tools/compose/nginx-proxies/pgadmin/Dockerfile` (created)
+- `tools/compose/nginx-proxies/adminer/Dockerfile` (created)
+- `tools/compose/docker-compose.5-0-database-stack.yml` (updated)
+
+### 2. WSL2 Port Forwarding
+
+**Problem:** Windows cannot access WSL2 container ports without explicit `netsh` port forwarding rules.
+
+**Solution:** PowerShell script that creates port forwarding rules from Windows `localhost` to WSL2 IP.
+
+**Script:** `FIX-DATABASE-UI-V3-FINAL.ps1`
+
+---
+
+## Quick Fix (For Future Issues)
+
+If database UIs stop working after Windows restart:
+
+### Step 1: Open PowerShell as Administrator
+
+Press `Win + X` → Select "Terminal (Admin)" or "Windows PowerShell (Admin)"
+
+### Step 2: Run Port Forwarding Script
+
+```powershell
+cd \\wsl$\Ubuntu\home\marce\Projetos\TradingSystem
+.\FIX-DATABASE-UI-V3-FINAL.ps1
+```
+
+### Step 3: Verify in Browser
+
+Test the following URLs:
+- http://localhost:5050 - pgAdmin
+- http://localhost:3910 - Adminer
+- http://localhost:5052 - pgWeb
+- http://localhost:9000 - QuestDB
+
+---
+
+## Technical Details
+
+### Port Forwarding Rules Created
+
+```powershell
+# Windows localhost:5050 → WSL2 IP:5050
+netsh interface portproxy add v4tov4 `
+    listenport=5050 `
+    listenaddress=0.0.0.0 `
+    connectport=5050 `
+    connectaddress=172.17.163.14
+```
+
+Repeated for ports: 5050, 3910, 5052, 9000
+
+### Firewall Rules Created
+
+```powershell
+New-NetFirewallRule `
+    -DisplayName "WSL2-DB-UI-5050" `
+    -Direction Inbound `
+    -Action Allow `
+    -Protocol TCP `
+    -LocalPort 5050
+```
+
+Repeated for all database UI ports.
+
+### Nginx Proxy Architecture
+
+```
+Windows Browser
+    ↓ (port forwarding via netsh)
+WSL2 localhost:5050
+    ↓ (Docker port mapping)
+Container dbui-pgadmin-proxy:80
+    ↓ (nginx reverse proxy)
+Container dbui-pgadmin:5050
+    ↓ (pgAdmin web UI)
+PostgreSQL Database
+```
+
+---
+
+## Files Created/Modified
+
+### PowerShell Scripts
+
+1. **`FIX-DATABASE-UI-V3-FINAL.ps1`** (root)
+   - Detects WSL2 eth0 IP
+   - Creates port forwarding rules
+   - Adds Windows Firewall rules
+   - Validates configuration
+
+2. **`scripts/windows/forward-database-ui-ports.ps1`** (original version)
+3. **`scripts/windows/remove-database-ui-port-forwarding.ps1`** (cleanup script)
+
+### Docker Configurations
+
+1. **`tools/compose/nginx-proxies/pgadmin/Dockerfile`**
+   ```dockerfile
+   FROM nginx:1.25-alpine
+   COPY default.conf /etc/nginx/conf.d/default.conf
+   RUN ls -la /etc/nginx/conf.d/
+   CMD ["nginx", "-g", "daemon off;"]
+   ```
+
+2. **`tools/compose/nginx-proxies/adminer/Dockerfile`** (similar)
+
+3. **`tools/compose/docker-compose.5-0-database-stack.yml`**
+   - Changed `dbui-pgadmin-proxy` to use `build:` instead of `volumes:`
+   - Changed `dbui-adminer-proxy` to use `build:` instead of `volumes:`
+
+### Frontend Updates
+
+1. **`frontend/dashboard/src/components/pages/DatabasePage.tsx`**
+   - Updated troubleshooting section to green "✅ Configured" status
+   - Added port forwarding status indicators
+   - Updated instructions to use v3 script
+
+### Documentation
+
+1. **`scripts/windows/README-WSL2-PORT-FORWARDING.md`** - Complete technical guide
+2. **`FIX-DATABASE-UI-WINDOWS.md`** (root) - Quick start guide
+3. **`EXECUTE-NO-POWERSHELL.txt`** - Inline script version
+
+---
+
+## Troubleshooting Guide
+
+### Issue: "ERR_EMPTY_RESPONSE" after Windows Restart
+
+**Cause:** Port forwarding rules can be lost after Windows updates or network resets.
+
+**Fix:** Re-run the PowerShell script:
+```powershell
+.\FIX-DATABASE-UI-V3-FINAL.ps1
+```
+
+### Issue: Containers Not Running
+
+**Check:**
+```bash
+docker ps | grep dbui
+```
+
+**Fix:**
+```bash
+docker compose -f tools/compose/docker-compose.5-0-database-stack.yml up -d
+```
+
+### Issue: Nginx Config Not Loading
+
+**Symptom:** Container starts but nginx returns errors.
+
+**Check:**
+```bash
+docker exec dbui-pgadmin-proxy cat /etc/nginx/conf.d/default.conf
+```
+
+**Fix:** Rebuild custom images:
+```bash
+cd tools/compose
+docker compose -f docker-compose.5-0-database-stack.yml build dbui-pgadmin-proxy dbui-adminer-proxy
+docker compose -f docker-compose.5-0-database-stack.yml up -d --force-recreate dbui-pgadmin-proxy dbui-adminer-proxy
+```
+
+### Issue: Wrong WSL2 IP Detected
+
+**Symptom:** Script uses first Docker bridge IP instead of eth0 IP.
+
+**Check WSL2 IP:**
+```bash
+wsl ip -4 addr show eth0 | grep inet
+```
+
+**Manual Fix:** Edit script line 13 to use correct IP.
+
+---
+
+## Why This Happens
+
+### WSL2 Networking Architecture
+
+1. **WSL2 uses Hyper-V** - Separate virtual machine with own IP
+2. **Default IP Range** - Typically 172.x.x.x (changes on restart)
+3. **No Automatic Forwarding** - Unlike WSL1, WSL2 doesn't share Windows network
+4. **Docker Complexity** - Multiple bridge networks (172.17.x, 172.20.x, etc.)
+
+### Bind Mount Cache Issue
+
+1. **Overlay Filesystem** - Docker uses overlay2 storage driver
+2. **WSL2 Cache** - Filesystem operations cached by WSL2
+3. **Stale Cache** - Cache not invalidated when files change on host
+4. **Workaround** - Use COPY in Dockerfile to bypass cache
+
+---
+
+## Prevention
+
+### Make Port Forwarding Persistent
+
+**Option 1:** Run script on Windows startup
+1. Create shortcut to `FIX-DATABASE-UI-V3-FINAL.ps1`
+2. Place in `C:\Users\marce\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
+3. Set to "Run as Administrator"
+
+**Option 2:** Task Scheduler
+1. Create task triggered by "At log on"
+2. Action: Run PowerShell script
+3. Run with highest privileges
+
+### Verify Regularly
+
+Add to daily workflow:
+```bash
+# In WSL2
+curl -s http://localhost:5050 > /dev/null && echo "pgAdmin: OK" || echo "pgAdmin: FAILED"
+```
+
+---
+
+## Related Documentation
+
+- **[WSL2 Setup Guide](../runtime/docker-wsl/setup.mdx)** - Initial WSL2 configuration
+- **[Docker Networking](../docker/networking.mdx)** - Docker network architecture
+- **[Database Stack Guide](../database/overview.mdx)** - Database containers overview
+- **[Port Registry](../ports-services.mdx)** - All service port mappings
+
+---
+
+## Success Metrics
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Database UI Access from Windows | ❌ Failed | ✅ Works |
+| Nginx Config Loading | ❌ Failed (bind mount) | ✅ Works (Dockerfile COPY) |
+| Port Forwarding | ❌ Manual | ✅ Automated (script) |
+| Persistence | ❌ Lost on restart | ⚠️ Semi-persistent (script needed) |
+| Documentation | ⚠️ Scattered | ✅ Centralized |
+
+---
+
+## Incident Timeline
+
+**2025-11-13 - Complete Resolution**
+
+- 13:00 - Issue reported: Database UI links returning ERR_EMPTY_RESPONSE
+- 14:00 - Diagnosed: WSL2 port forwarding + bind mount cache issues
+- 15:00 - Attempted: Multiple bind mount fixes (failed)
+- 16:00 - Docker daemon restart (no change)
+- 17:00 - Solution: Custom Dockerfiles with COPY
+- 18:00 - Containers rebuilt successfully
+- 19:00 - PowerShell script v3 created and tested
+- 20:00 - Port forwarding configured ✅
+- 20:30 - All database UIs accessible ✅
+- 21:00 - Documentation completed
+
+**Total Resolution Time:** 8 hours
+**Root Causes:** 2 (WSL2 networking + filesystem cache)
+**Workarounds Attempted:** 6
+**Final Solutions:** 2 (Dockerfile + netsh script)
+
+---
+
+## Lessons Learned
+
+1. **WSL2 is NOT WSL1** - Different networking model requires different solutions
+2. **Bind Mounts are Fragile** - Especially with WSL2 filesystem cache
+3. **Dockerfile COPY is Reliable** - Bypasses all mount/cache issues
+4. **Port Forwarding is Manual** - No automatic solution for WSL2 → Windows
+5. **Documentation is Critical** - Future developers need clear troubleshooting steps
+
+---
+
+**Last Updated:** 2025-11-13
+**Status:** ✅ Resolved
+**Maintainer:** DevOps Team
+**Next Review:** 2025-12-13

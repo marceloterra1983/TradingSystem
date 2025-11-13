@@ -76,17 +76,17 @@ services:
 
   dbui-pgadmin-proxy:
     container_name: dbui-pgadmin-proxy
-    image: nginx:1.25-alpine
+    build:
+      context: ./nginx-proxies/pgadmin
+      dockerfile: Dockerfile
+    image: dbui-pgadmin-proxy:local
     restart: unless-stopped
     depends_on:
       - dbui-pgadmin
-    volumes:
-      - /workspace/tools/compose/nginx-proxies/pgadmin:/etc/nginx/conf.d:ro
     networks:
       - tradingsystem_backend
     ports:
       - "${PGADMIN_PORT:-5050}:80"
-    command: ["nginx", "-g", "daemon off;"]
 
   dbui-adminer:
     container_name: dbui-adminer
@@ -104,17 +104,17 @@ services:
 
   dbui-adminer-proxy:
     container_name: dbui-adminer-proxy
-    image: nginx:1.25-alpine
+    build:
+      context: ./nginx-proxies/adminer
+      dockerfile: Dockerfile
+    image: dbui-adminer-proxy:local
     restart: unless-stopped
     depends_on:
       - dbui-adminer
-    volumes:
-      - /workspace/tools/compose/nginx-proxies/adminer:/etc/nginx/conf.d:ro
     networks:
       - tradingsystem_backend
     ports:
       - "${ADMINER_PORT:-3910}:80"
-    command: ["nginx", "-g", "daemon off;"]
 
   dbui-pgweb:
     container_name: dbui-pgweb
