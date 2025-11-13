@@ -137,13 +137,50 @@ docker logs api-gateway --tail 50 | grep -i "course"
 
 **Solução:** Use o Traefik Gateway (`http://localhost:9082/api/courses/*`) em vez de acesso direto. O port binding WSL2 é não-confiável.
 
+## Dashboard Integration
+
+**✅ COMPLETO:** Interface do Course Crawler integrada ao Dashboard principal!
+
+### UI Customizada
+
+O dashboard agora possui uma interface dedicada que consome a API do course-crawler via Traefik Gateway:
+
+**Arquivo:** [frontend/dashboard/src/components/pages/CourseCrawlerPage.tsx](../frontend/dashboard/src/components/pages/CourseCrawlerPage.tsx)
+
+**Funcionalidades:**
+
+- ✅ **API Status Card** - Status em tempo real (healthy/unhealthy) com uptime
+- ✅ **Worker Status Card** - Estado do worker com timestamp do último poll
+- ✅ **Active Runs Card** - Contador de tarefas em execução
+- ✅ **API Integration Info** - Documentação de endpoints disponíveis
+- ✅ **Auto-refresh** - Health checks a cada 30 segundos
+
+**Acesso:** `http://localhost:9082/#/course-crawler`
+
+**Screenshot:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Course Crawler                                              │
+│ Sistema de extração automatizada de cursos online via      │
+│ Traefik API Gateway                                         │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│ API Status      │ Worker Status   │ Active Runs             │
+│ ● Healthy       │ ● Running       │ 0                       │
+│ Uptime: 16m     │ Ativo           │ Tarefas em execução     │
+├─────────────────┴─────────────────┴─────────────────────────┤
+│ Integração com API Gateway                                  │
+│ GET /api/courses/health ✅                                  │
+│ http://localhost:9082/api/courses/*                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Próximos Passos
 
+- [x] ~~Integrar UI do course-crawler no dashboard principal~~ ✅ COMPLETO
 - [ ] Documentar todos os endpoints da API course-crawler
 - [ ] Adicionar autenticação JWT via Traefik middleware
 - [ ] Configurar rate limiting específico para course-crawler
 - [ ] Adicionar métricas Prometheus específicas
-- [ ] Integrar UI do course-crawler no dashboard principal
 
 ## Referências
 

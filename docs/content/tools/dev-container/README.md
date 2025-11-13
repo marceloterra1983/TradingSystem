@@ -65,14 +65,14 @@
 ### Phase 4: Governance & Security (Completed)
 
 7. **Governance**
-   - **[Dev Container Policy](../../../governance/policies/dev-container-policy.md)** (3,500 lines)
+   - **[Dev Container Policy](/governance/policies/dev-container-policy)** (3,500 lines)
      - 7 mandatory policy statements
      - 3 security controls
      - Compliance & auditing
      - Policy violations and remediation
 
 8. **Security**
-   - **[Dev Container Security Guide](../../../governance/controls/dev-container-security.md)** (3,500 lines)
+   - **[Dev Container Security Guide](/governance/controls/dev-container-security)** (3,500 lines)
      - Defense in Depth (4 layers)
      - 5 security risks with mitigation
      - Security controls checklist
@@ -82,7 +82,7 @@
 ### Supporting Documentation
 
 9. **Pre-Deploy Checklist**
-   - **[Updated PRE-DEPLOY-CHECKLIST.md](../../../governance/controls/PRE-DEPLOY-CHECKLIST.md)**
+   - **[Updated PRE-DEPLOY-CHECKLIST.md](/governance/controls/pre-deploy-checklist)** 
      - Added Phase 1.5: Dev Container Validation (5 checks)
      - Environment variable validation
      - Vite proxy configuration checks
@@ -321,8 +321,8 @@ Access to Docker socket = root access on host machine.
 4. **Proxy configuration?** → Check [Gateway & Proxy](./gateway-proxy.mdx)
 5. **Daily development?** → Follow [Workflows](./workflows.mdx)
 6. **Having issues?** → Troubleshoot with [Troubleshooting](./troubleshooting.mdx)
-7. **Governance & policies?** → Review [Dev Container Policy](../../../governance/policies/dev-container-policy.md)
-8. **Security concerns?** → Study [Security Guide](../../../governance/controls/dev-container-security.md)
+7. **Governance & policies?** → Review [Dev Container Policy](/governance/policies/dev-container-policy)
+8. **Security concerns?** → Study [Security Guide](/governance/controls/dev-container-security)
 
 ---
 
