@@ -4,7 +4,12 @@
  */
 
 import { useState, useCallback } from "react";
-import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
+import {
+  TELEGRAM_GATEWAY_TOKEN,
+  TELEGRAM_GATEWAY_CHANNELS_BASE,
+  TELEGRAM_GATEWAY_MESSAGES_BASE,
+  TELEGRAM_GATEWAY_SERVICE_BASE,
+} from "@/hooks/useTelegramGateway";
 import type { GatewayData, Channel, TelegramMessage } from "../types";
 
 export interface UseGatewayDataReturn {
@@ -41,9 +46,11 @@ export function useGatewayData(
       const limit = filterLimit === "all" ? "10000" : filterLimit || "50";
       const cacheBuster = Date.now();
 
-      let messagesUrl = `/api/messages?limit=${limit}&sort=desc&_=${cacheBuster}`;
+      let messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_BASE}?limit=${limit}&sort=desc&_=${cacheBuster}`;
       if (filterChannel !== "all") {
-        messagesUrl = `/api/messages?channelId=${encodeURIComponent(filterChannel)}&limit=${limit}&sort=desc&_=${cacheBuster}`;
+        messagesUrl = `${TELEGRAM_GATEWAY_MESSAGES_BASE}?channelId=${encodeURIComponent(
+          filterChannel,
+        )}&limit=${limit}&sort=desc&_=${cacheBuster}`;
       }
 
       const fetchOptions = {
@@ -52,8 +59,14 @@ export function useGatewayData(
       };
 
       const [overviewRes, channelsRes, messagesRes] = await Promise.all([
-        fetch(`/api/telegram-gateway/overview?_=${cacheBuster}`, fetchOptions),
-        fetch(`/api/channels?_=${cacheBuster}`, fetchOptions),
+        fetch(
+          `${TELEGRAM_GATEWAY_SERVICE_BASE}/overview?_=${cacheBuster}`,
+          fetchOptions,
+        ),
+        fetch(
+          `${TELEGRAM_GATEWAY_CHANNELS_BASE}?_=${cacheBuster}`,
+          fetchOptions,
+        ),
         fetch(messagesUrl, fetchOptions),
       ]);
 

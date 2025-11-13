@@ -2,20 +2,20 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "../config/api";
 
-const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
+export const TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
   /\/$/,
   ""
 );
-const ensureSuffix = (base: string, suffix: string) =>
-  base.endsWith(suffix) ? base : `${base}${suffix}`;
-const TELEGRAM_GATEWAY_SERVICE_BASE = ensureSuffix(
-  TELEGRAM_GATEWAY_API_BASE,
-  "/api/telegram-gateway"
+const unifiedMatch = TELEGRAM_GATEWAY_API_BASE.match(
+  /^(.*)\/api\/telegram-gateway$/
 );
-const appendServicePath = (path: string) =>
-  `${TELEGRAM_GATEWAY_SERVICE_BASE}/${path.replace(/^\/+/, "")}`;
-const TELEGRAM_GATEWAY_MESSAGES_BASE = appendServicePath("messages");
-const TELEGRAM_GATEWAY_CHANNELS_BASE = appendServicePath("channels");
+const domainBase = (unifiedMatch ? unifiedMatch[1] : TELEGRAM_GATEWAY_API_BASE)
+  .replace(/\/$/, "");
+export const TELEGRAM_GATEWAY_SERVICE_BASE = unifiedMatch
+  ? TELEGRAM_GATEWAY_API_BASE
+  : `${TELEGRAM_GATEWAY_API_BASE}/api/telegram-gateway`;
+export const TELEGRAM_GATEWAY_MESSAGES_BASE = `${domainBase}/api/messages`;
+export const TELEGRAM_GATEWAY_CHANNELS_BASE = `${domainBase}/api/channels`;
 export const TELEGRAM_GATEWAY_TOKEN =
   (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
   (
