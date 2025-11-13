@@ -1,59 +1,12 @@
-# Prometheus Configuration for RAG Services
-# Scrapes metrics from circuit breakers, Kong, and LlamaIndex
-
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
-  external_labels:
-    cluster: 'tradingsystem-local'
-    environment: 'development'
 
-# Alertmanager configuration (optional)
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets:
-#           - localhost:9093
-
-# Scrape configurations
 scrape_configs:
-  # RAG Service (Documentation API) - Circuit Breaker Metrics
-  - job_name: 'rag-service'
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['rag-service:3000']
-    metrics_path: '/metrics'
-    scrape_interval: 10s
-    
-  # LlamaIndex Query Service - Python Metrics
-  - job_name: 'llamaindex-query'
-    static_configs:
-      - targets: ['rag-llamaindex-query:8000']
-    metrics_path: '/metrics'
-    scrape_interval: 10s
-    
-  # Kong Gateway - API Gateway Metrics
-  - job_name: 'kong'
-    static_configs:
-      - targets: ['kong-gateway:8001']
-    metrics_path: '/metrics'
-    scrape_interval: 15s
-    
-  # Qdrant - Vector DB Metrics
-  - job_name: 'qdrant'
-    static_configs:
-      - targets: ['rag-qdrant:6333']
-    metrics_path: '/metrics'
-    scrape_interval: 15s
-    
-  # Redis - Cache Metrics  
-  - job_name: 'redis'
-    static_configs:
-      - targets: ['rag-redis:6379']
-    scrape_interval: 30s
-    # Note: Requires redis_exporter sidecar
+      - targets: ['localhost:9090']
 
-# Recording rules (pre-compute common queries)
-# rule_files:
-#   - 'alerts.yml'
-#   - 'rules.yml'
-
+  - job_name: 'rag-services'
+    static_configs:
+      - targets: ['rag-service:3000', 'rag-ollama:11434']

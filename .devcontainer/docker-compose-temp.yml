@@ -1,6 +1,0 @@
-    command: >
-      sh -c "
-        sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true;
-        sudo chown -R vscode:vscode /workspace/node_modules /workspace/frontend/dashboard/node_modules /workspace/docs/node_modules /workspace/venv 2>/dev/null || true;
-        sleep infinity
-      "
