@@ -214,6 +214,7 @@ models/**
 /.backup-*/
 /*.backup-*/
 backups/rename-containers-*/env-backup/
+outputs-backup-*.tar.gz
 
 # ============================================
 # Infrastructure Inventory Snapshots
