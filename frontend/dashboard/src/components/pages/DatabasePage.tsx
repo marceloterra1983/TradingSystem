@@ -1,8 +1,4 @@
 import * as React from "react";
-import { PgAdminPage } from "./database/PgAdminPage";
-import { PgWebPage } from "./database/PgWebPage";
-import { QuestDbConsolePage } from "./database/QuestDbConsolePage";
-import { AdminerPage } from "./database/AdminerPage";
 
 type TabId = "overview" | "pgadmin" | "pgweb" | "adminer" | "questdb";
 
@@ -18,7 +14,10 @@ export default function DatabasePage() {
   const [activeTab, setActiveTab] = React.useState<TabId>("overview");
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full min-h-screen flex flex-col bg-white dark:bg-gray-900">
+      {/* DEBUG: Visible title to confirm rendering */}
+      <h1 className="text-4xl font-bold p-4 bg-red-500 text-white">DATABASE PAGE LOADED!</h1>
+
       {/* Tabs Navigation */}
       <div className="flex gap-2 p-4 bg-gray-100 dark:bg-gray-800 border-b-2 border-gray-300 dark:border-gray-600">
         {TABS.map((tab) => (
@@ -37,12 +36,12 @@ export default function DatabasePage() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto p-8">
         {activeTab === "overview" && <OverviewTab />}
-        {activeTab === "pgadmin" && <PgAdminPage />}
-        {activeTab === "pgweb" && <PgWebPage />}
-        {activeTab === "adminer" && <AdminerPage />}
-        {activeTab === "questdb" && <QuestDbConsolePage />}
+        {activeTab === "pgadmin" && <div className="text-white">pgAdmin em desenvolvimento...</div>}
+        {activeTab === "pgweb" && <div className="text-white">pgWeb em desenvolvimento...</div>}
+        {activeTab === "adminer" && <div className="text-white">Adminer em desenvolvimento...</div>}
+        {activeTab === "questdb" && <div className="text-white">QuestDB em desenvolvimento...</div>}
       </div>
     </div>
   );
