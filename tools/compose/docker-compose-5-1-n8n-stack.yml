@@ -181,6 +181,7 @@ services:
       - "traefik.http.services.n8n.loadbalancer.healthcheck.path=/health"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.interval=30s"
       - "traefik.http.services.n8n.loadbalancer.healthcheck.timeout=10s"
+      - "traefik.http.middlewares.n8n-dashboard-auth-header.headers.customrequestheaders.Authorization=Basic YXV0b21hdGlvbjpNYXJjZWxvMTIzQA=="
 
   # ----------------------------------------------------------------------------
   # Dedicated worker to execute jobs from the Bull queue

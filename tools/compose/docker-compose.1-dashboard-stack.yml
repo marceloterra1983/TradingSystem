@@ -40,7 +40,7 @@ services:
       # n8n proxy configuration (server-side only, NOT exposed to browser)
       # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
       # MUST include /n8n path to match nginx location in n8n-proxy
-      - N8N_PROXY_TARGET=http://n8n-proxy:80/n8n
+      - N8N_PROXY_TARGET=http://n8n-proxy:80
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-automation}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
       # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
