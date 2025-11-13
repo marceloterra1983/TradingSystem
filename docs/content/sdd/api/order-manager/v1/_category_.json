@@ -3,9 +3,7 @@
   "position": 1,
   "collapsed": false,
   "link": {
-    "type": "generated-index",
-    "title": "Order Manager API v1",
-    "slug": "/sdd/api/order-manager/v1/index",
-    "description": "Version 1 specification documents for the Order Manager API."
+    "type": "doc",
+    "id": "sdd/api/order-manager/v1/index"
   }
 }
