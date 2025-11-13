@@ -1,0 +1,41 @@
+@startuml tp-capital-network-architecture
+!theme plain
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+title TP Capital Network Architecture
+
+package "Docker Network: tradingsystem_backend" {
+  component "Traefik\nAPI Gateway\n:9082" as gateway
+  component "TP Capital API\n:4005" as api
+  database "TimescaleDB\n:5434" as db
+  component "PgBouncer\n:6434" as pgbouncer
+  component "Redis Master\n:6379" as redis_master
+  component "Redis Replica\n:6380" as redis_replica
+}
+
+actor "Browser\n(Dashboard)" as browser
+
+browser -down-> gateway : HTTP :9082
+gateway -down-> api : /api/tp-capital/*
+api -down-> pgbouncer : PostgreSQL :6434
+pgbouncer -down-> db : PostgreSQL :5434
+api -down-> redis_master : Cache :6379
+redis_master -right-> redis_replica : Replication
+
+note right of gateway
+  **Routing Rules:**
+  - /api/tp-capital/* → tp-capital-api:4005
+  - Priority: 85
+  - Middlewares: CORS, rate limiting
+end note
+
+note right of api
+  **TP Capital API**
+  - Port: 4005 (internal)
+  - Telegram webhook ingestion
+  - Signal processing
+  - Database writes
+end note
+
+@enduml

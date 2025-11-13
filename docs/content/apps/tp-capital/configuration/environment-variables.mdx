@@ -25,7 +25,7 @@ Complete reference for all environment variables used in the TP Capital stack (5
 **Important Notes:**
 - ✅ **Always use root `.env`** - All services load from project root
 - ✅ **VITE_ variables require rebuild** - Changes need `docker compose up -d --build`
-- ✅ **No VITE_ prefix for proxy targets** - Server-side only (see [PROXY-BEST-PRACTICES.md](docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md))
+- ✅ **No VITE_ prefix for proxy targets** - Server-side only (see [PROXY-BEST-PRACTICES.md](../../../frontend/engineering/PROXY-BEST-PRACTICES))
 - ❌ **Never commit `.env`** - Use `.env.example` as template
 
 ---
@@ -523,9 +523,9 @@ Before deploying to production:
 
 ## References
 
-- **ADR 007**: [TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
-- **Network Diagram**: [TP Capital Network Architecture](/docs/assets/diagrams/source/apps/tp-capital-network-architecture.puml)
-- **Proxy Best Practices**: [PROXY-BEST-PRACTICES.md](/docs/content/frontend/engineering/PROXY-BEST-PRACTICES.md)
+- **ADR 007**: [TP Capital API Gateway Integration](../../../reference/adrs/007-tp-capital-api-gateway-integration.mdx)
+- **Network Diagram**: [TP Capital Network Architecture](/assets/diagrams/source/apps/tp-capital-network-architecture.puml)
+- **Proxy Best Practices**: [PROXY-BEST-PRACTICES.md](../../../frontend/engineering/PROXY-BEST-PRACTICES)
 - **Troubleshooting**: [TP Capital Connectivity Issues](/docs/apps/tp-capital/runbooks/troubleshooting-connectivity)
 - **Environment Policy**: [POL-0002 Addendum 001: Empty Value Validation](/governance/policies/addendums/pol-0002-addendum-001-empty-value-validation)
 

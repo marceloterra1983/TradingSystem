@@ -46,7 +46,7 @@ TP Capital API (Port 4005 - internal)
 TimescaleDB (Port 5432 - internal)
 ```
 
-**See Full Architecture**: [ADR 007 - TP Capital API Gateway Integration](/docs/reference/adrs/007-tp-capital-api-gateway-integration)
+**See Full Architecture**: [ADR 007 - TP Capital API Gateway Integration](../../../reference/adrs/007-tp-capital-api-gateway-integration.mdx)
 
 ---
 
@@ -371,7 +371,7 @@ docker exec tp-capital-api sh -c 'nc -zv tp-capital-timescale 5432'
 
 #### Cause 4.1: Wrong Database Host (PgBouncer vs TimescaleDB)
 
-**Note**: PgBouncer currently disabled due to SCRAM-SHA-256 authentication issues (see [tp-capital-network-architecture.puml](docs/content/assets/diagrams/source/apps/tp-capital-network-architecture.puml) line 139)
+**Note**: PgBouncer currently disabled due to SCRAM-SHA-256 authentication issues (see [tp-capital-network-architecture.puml](/assets/diagrams/source/apps/tp-capital-network-architecture.puml) line 139)
 
 **Check Current Configuration:**
 ```bash

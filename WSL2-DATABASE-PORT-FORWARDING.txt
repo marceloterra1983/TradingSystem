@@ -1,0 +1,38 @@
+=====================================================
+WSL2 Database UI - Port Forwarding Instructions
+=====================================================
+
+The PowerShell script is located at:
+/home/marce/Projetos/TradingSystem/scripts/windows/forward-database-ui-ports.ps1
+
+To run it from Windows PowerShell (as Administrator):
+
+OPTION 1: Using WSL$ Path
+--------------------------
+cd \\wsl$\Ubuntu\home\marce\Projetos\TradingSystem\scripts\windows
+.\forward-database-ui-ports.ps1
+
+
+OPTION 2: Copy to Windows Desktop
+----------------------------------
+# From WSL2 terminal, run:
+cp /workspace/scripts/windows/forward-database-ui-ports.ps1 /mnt/c/Users/marce/Desktop/
+
+# Then from PowerShell (as Admin):
+cd C:\Users\marce\Desktop
+.\forward-database-ui-ports.ps1
+
+
+OPTION 3: Run Directly from PowerShell
+---------------------------------------
+# As Administrator:
+& "\\wsl$\Ubuntu\home\marce\Projetos\TradingSystem\scripts\windows\forward-database-ui-ports.ps1"
+
+
+After running successfully, you can access:
+  → pgAdmin:  http://localhost:5050
+  → Adminer:  http://localhost:3910
+  → pgWeb:    http://localhost:5052
+  → QuestDB:  http://localhost:9000
+
+=====================================================

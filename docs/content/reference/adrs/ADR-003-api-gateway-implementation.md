@@ -184,7 +184,7 @@ open http://localhost:9083/dashboard/
 ## Related Decisions
 
 - [ADR-0001: Architecture Decision Records](./ADR-0001-architecture-decision-records)
-- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration)
+- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration.mdx)
 - [ADR-008: HTTP Client Standardization](./ADR-008-http-client-standardization)
 
 ## References

@@ -81,7 +81,7 @@ services:
     depends_on:
       - dbui-pgadmin
     volumes:
-      - ./nginx-proxies/pgadmin:/etc/nginx/conf.d:ro
+      - /workspace/tools/compose/nginx-proxies/pgadmin:/etc/nginx/conf.d:ro
     networks:
       - tradingsystem_backend
     ports:
@@ -109,7 +109,7 @@ services:
     depends_on:
       - dbui-adminer
     volumes:
-      - ./nginx-proxies/adminer:/etc/nginx/conf.d:ro
+      - /workspace/tools/compose/nginx-proxies/adminer:/etc/nginx/conf.d:ro
     networks:
       - tradingsystem_backend
     ports:

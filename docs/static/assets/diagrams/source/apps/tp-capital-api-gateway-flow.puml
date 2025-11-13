@@ -1,0 +1,76 @@
+@startuml tp-capital-api-gateway-flow
+!theme plain
+skinparam backgroundColor white
+
+title TP Capital API Gateway Request Flow
+
+actor "Browser\nDashboard" as browser
+participant "Traefik\nGateway\n:9082" as gateway
+participant "TP Capital\nAPI\n:4005" as api
+database "TimescaleDB\n:5434" as db
+database "Redis\nCache" as cache
+
+== Webhook Ingestion Flow ==
+
+browser -> gateway : POST /api/tp-capital/webhook/telegram\n{signal_data}
+activate gateway
+
+gateway -> gateway : Apply middlewares:\n- CORS\n- Rate limiting\n- Security headers
+
+gateway -> api : POST /webhook/telegram\n{signal_data}
+activate api
+
+api -> api : Validate payload
+api -> api : Parse signal data
+
+api -> cache : Check duplicate\nGET signal_id
+activate cache
+cache --> api : Not found
+deactivate cache
+
+api -> db : INSERT signal\n(timestamp, symbol, direction, etc.)
+activate db
+db --> api : OK
+deactivate db
+
+api -> cache : Store signal_id\nSET signal_id, ttl=3600
+activate cache
+cache --> api : OK
+deactivate cache
+
+api --> gateway : 201 Created\n{signal_id, status}
+deactivate api
+
+gateway --> browser : 201 Created\n{signal_id, status}
+deactivate gateway
+
+== Signal Retrieval Flow ==
+
+browser -> gateway : GET /api/tp-capital/signals?limit=10
+activate gateway
+
+gateway -> api : GET /signals?limit=10
+activate api
+
+api -> cache : GET recent_signals
+activate cache
+cache --> api : Cache miss
+deactivate cache
+
+api -> db : SELECT * FROM signals\nORDER BY timestamp DESC\nLIMIT 10
+activate db
+db --> api : [signals]
+deactivate db
+
+api -> cache : SET recent_signals, ttl=60
+activate cache
+cache --> api : OK
+deactivate cache
+
+api --> gateway : 200 OK\n[signals]
+deactivate api
+
+gateway --> browser : 200 OK\n[signals]
+deactivate gateway
+
+@enduml
