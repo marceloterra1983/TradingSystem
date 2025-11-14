@@ -49,7 +49,12 @@ export default function DatabasePage() {
 
 function OverviewTab() {
   return (
-    <div className="container mx-auto p-8">
+    <div className="w-full p-8">
+      {/* DEBUG: Test if buttons are being hidden */}
+      <div className="mb-4 p-4 bg-yellow-300 border-2 border-red-500">
+        <p className="text-black font-bold">DEBUG: Se você vê isso, os botões devem estar ACIMA deste texto!</p>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8">Database Toolbox</h1>
 
       <div className="space-y-6">
