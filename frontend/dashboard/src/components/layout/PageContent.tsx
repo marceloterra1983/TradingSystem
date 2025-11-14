@@ -71,7 +71,7 @@ export function PageContent({
   // If page has customContent, render it with Suspense wrapper for lazy loading
   if (page.customContent) {
     return (
-      <div data-testid="page-content">
+      <div data-testid="page-content" className="w-full h-full overflow-auto">
         <PageErrorBoundary>
           <React.Suspense
             fallback={
