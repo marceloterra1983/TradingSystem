@@ -87,7 +87,7 @@ const unifiedConfig: ApiConfig = {
   documentationApi: `${apiBase}/api/docs`,
   telegramGatewayApi: `${apiBase}/api/telegram-gateway`,
   firecrawlProxyApi: `${apiBase}/api/firecrawl`,
-  docsUrl: composeUrl(apiBase, "/docs"),
+  docsUrl: `${apiBase}/docs`,  // Fixed: Docusaurus via Traefik at /docs (not /api/docs)
   docsApiUrl: composeUrl(apiBase, "/docs/api/documentation-api"),
   questdbConsoleUrl:
     import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
