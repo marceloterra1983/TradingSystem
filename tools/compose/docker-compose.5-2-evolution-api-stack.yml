@@ -427,7 +427,7 @@ services:
       - "${EVOLUTION_MANAGER_HOST_BIND:-127.0.0.1}:${EVOLUTION_MANAGER_PORT:-4203}:80"
 
     volumes:
-      - ../../tools/compose/evolution/nginx-manager.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - ../../tools/compose/evolution/nginx-conf:/etc/nginx/conf.d:ro
 
     deploy:
       resources:
