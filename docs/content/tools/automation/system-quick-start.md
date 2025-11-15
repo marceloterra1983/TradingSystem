@@ -1,5 +1,6 @@
 ---
 title: "TradingSystem Quick Start"
+slug: /tools/automation/system-quick-start
 sidebar_position: 1
 description: "Fast reference to install shortcuts and manage the automation wrappers."
 tags:

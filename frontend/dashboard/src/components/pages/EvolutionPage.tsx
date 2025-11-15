@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_DIRECT_URL = "http://localhost:4203/manager";
+const getDefaultDirectUrl = () =>
+  typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:4203/manager`
+    : "/apps/evolution-manager";
 
 const ensureManagerPath = (value: string): string => {
   if (!value) {
@@ -48,7 +51,7 @@ const resolveEvolutionUrl = (): string => {
     return defaultGatewayPath;
   }
 
-  return DEFAULT_DIRECT_URL;
+  return getDefaultDirectUrl();
 };
 
 export function EvolutionPage(): JSX.Element {

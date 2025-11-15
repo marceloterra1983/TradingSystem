@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from "react";
-import { ChevronDown, Info } from '@/icons';
+import { ChevronDown, Info } from "@/icons";
 import {
   Dialog,
   DialogContent,

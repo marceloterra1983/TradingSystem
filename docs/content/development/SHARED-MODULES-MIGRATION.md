@@ -1,5 +1,6 @@
 ---
 title: Shared Modules Migration Report
+slug: /development/SHARED-MODULES-MIGRATION
 sidebar_position: 1
 description: Complete report of the shared modules migration project - eliminating code duplication and standardizing services across the TradingSystem project
 tags: [development, architecture, refactoring, migration]

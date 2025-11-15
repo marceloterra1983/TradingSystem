@@ -1,5 +1,6 @@
 ---
 title: "Archive Workspace"
+slug: /archive/README
 description: "Root workspace for archiving retired TradingSystem documentation."
 tags: [documentation, archive, governance]
 domain: governance

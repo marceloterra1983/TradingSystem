@@ -1,10 +1,4 @@
-import {
-  Activity,
-  BarChart3,
-  Repeat,
-  ShieldAlert,
-  TrendingUp,
-} from '@/icons';
+import { Activity, BarChart3, Repeat, ShieldAlert, TrendingUp } from "@/icons";
 import {
   CollapsibleCard,
   CollapsibleCardContent,

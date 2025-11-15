@@ -1,4 +1,4 @@
-import { Menu, Activity } from '@/icons';
+import { Menu, Activity } from "@/icons";
 import ConnectionStatus from "./ConnectionStatus";
 
 export interface HeaderProps {

@@ -13,7 +13,7 @@ import {
   Zap,
   Server,
   Layers,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../ui/button";
 import {
   CustomizablePageLayout,

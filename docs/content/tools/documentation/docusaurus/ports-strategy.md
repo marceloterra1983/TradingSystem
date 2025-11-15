@@ -1,5 +1,6 @@
 ---
 title: "Docusaurus Ports Strategy"
+slug: /tools/documentation/docusaurus/ports-strategy
 description: "Port allocation strategy for docs services, API proxy, and previews."
 tags:
   - tools

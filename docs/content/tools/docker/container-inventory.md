@@ -1,5 +1,6 @@
 ---
 title: "Docker Container Inventory"
+slug: /tools/docker/container-inventory
 description: "Snapshot of core TradingSystem containers with status and roles."
 tags:
   - tools

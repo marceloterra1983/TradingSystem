@@ -131,7 +131,9 @@ describe("Endpoints Configuration", () => {
         status: 200,
       } as Response);
 
-      const result = await validateEndpoint("http://localhost:9080/api/workspace");
+      const result = await validateEndpoint(
+        "http://localhost:9080/api/workspace",
+      );
 
       expect(result).toBe(true);
       expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -169,7 +171,10 @@ describe("Endpoints Configuration", () => {
           });
         });
 
-      const result = await validateEndpoint("http://localhost:9080/api/workspace", 5);
+      const result = await validateEndpoint(
+        "http://localhost:9080/api/workspace",
+        5,
+      );
 
       expect(result).toBe(false);
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
@@ -183,7 +188,9 @@ describe("Endpoints Configuration", () => {
         status: 500,
       } as Response);
 
-      const result = await validateEndpoint("http://localhost:9080/api/workspace");
+      const result = await validateEndpoint(
+        "http://localhost:9080/api/workspace",
+      );
 
       expect(result).toBe(false);
     });
@@ -205,11 +212,17 @@ describe("Endpoints Configuration", () => {
       const { getDatabaseUIEndpoints } = endpointsModule;
       const uiEndpoints = getDatabaseUIEndpoints();
 
-    expect(uiEndpoints["PgAdmin"]).toMatch("http://localhost:9080/db-ui/pgadmin");
-    expect(uiEndpoints["Adminer"]).toMatch("http://localhost:9080/db-ui/adminer");
-    expect(uiEndpoints["PgWeb"]).toMatch("http://localhost:9080/db-ui/pgweb");
-    expect(uiEndpoints["QuestDB UI"]).toMatch("http://localhost:9080/db-ui/questdb");
-    expect(uiEndpoints["Qdrant Dashboard"]).toContain("7020");
+      expect(uiEndpoints["PgAdmin"]).toMatch(
+        "http://localhost:9080/db-ui/pgadmin",
+      );
+      expect(uiEndpoints["Adminer"]).toMatch(
+        "http://localhost:9080/db-ui/adminer",
+      );
+      expect(uiEndpoints["PgWeb"]).toMatch("http://localhost:9080/db-ui/pgweb");
+      expect(uiEndpoints["QuestDB UI"]).toMatch(
+        "http://localhost:9080/db-ui/questdb",
+      );
+      expect(uiEndpoints["Qdrant Dashboard"]).toContain("7020");
     });
 
     it("should return object with string values", () => {

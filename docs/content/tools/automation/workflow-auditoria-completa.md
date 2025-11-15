@@ -1,5 +1,6 @@
 ---
 title: "Audit Workflow Blueprint"
+slug: /tools/automation/workflow-auditoria-completa
 sidebar_position: 4
 description: "End to end workflow proposal for auditing TradingSystem with local agents."
 tags:

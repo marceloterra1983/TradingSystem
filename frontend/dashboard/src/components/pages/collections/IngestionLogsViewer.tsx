@@ -24,13 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import {
-  RefreshCcw,
-  Loader2,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-} from '@/icons';
+import { RefreshCcw, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from "@/icons";
 import { Badge } from "../../ui/badge";
 import {
   Table,

@@ -1,5 +1,6 @@
 ---
 title: Dev Container - Visão Geral
+slug: /tools/dev-container/overview
 sidebar_label: Visão Geral
 sidebar_position: 1
 tags: [dev-container, docker, development, vscode]
@@ -257,7 +258,7 @@ Você deve ver o **TradingSystem Dashboard** carregado.
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Detalhes:** Ver [Architecture Guide](./architecture.mdx)
+**Detalhes:** Ver [Architecture Guide](architecture.mdx)
 
 ## 🔧 Fluxos de Desenvolvimento
 
@@ -292,22 +293,22 @@ docker compose -f tools/compose/docker-compose.4-3-workspace-stack.yml up -d
 - Dev Container → Docker networks (tradingsystem_backend, tradingsystem_frontend)
 - Containers podem se comunicar pelo nome (ex: `workspace-api:3200`)
 
-**Detalhes:** Ver [API Access Patterns](./api-access.mdx)
+**Detalhes:** Ver [API Access Patterns](api-access.mdx)
 
 ## 📖 Documentação Relacionada
 
 ### Guias de Implementação
 
-- **[Architecture Guide](./architecture.mdx)** - Detalhes técnicos da arquitetura
-- **[API Access Patterns](./api-access.mdx)** - Como acessar APIs (embedded vs external)
-- **[Gateway & Proxy](./gateway-proxy.mdx)** - Traefik Gateway e Vite Proxy
-- **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
-- **[Troubleshooting](./troubleshooting.mdx)** - Soluções para problemas comuns
+- **[Architecture Guide](architecture.mdx)** - Detalhes técnicos da arquitetura
+- **[API Access Patterns](api-access.mdx)** - Como acessar APIs (embedded vs external)
+- **[Gateway & Proxy](gateway-proxy.mdx)** - Traefik Gateway e Vite Proxy
+- **[Workflows](workflows.mdx)** - Fluxo de trabalho diário
+- **[Troubleshooting](troubleshooting.mdx)** - Soluções para problemas comuns
 
 ### Governança
 
-- **[Dev Container Policy](../../governance/policies/dev-container-policy)** - Políticas de uso obrigatório
-- **[Security Guide](../../governance/controls/dev-container-security)** - Segurança e controles
+- **[Dev Container Policy](../../governance/policies/dev-container-policy.md)** - Políticas de uso obrigatório
+- **[Security Guide](../../governance/controls/dev-container-security.md)** - Segurança e controles
 
 ### Referências
 
@@ -357,7 +358,7 @@ Você só precisa:
 2. Abra PR para revisão
 3. Após aprovação, faça rebuild: `Dev Containers: Rebuild Container`
 
-**Política:** Ver [Dev Container Policy](../../governance/policies/dev-container-policy)
+**Política:** Ver [Dev Container Policy](../../governance/policies/dev-container-policy.md)
 
 ### Como funciona o acesso ao Docker?
 
@@ -374,7 +375,7 @@ docker compose up -d
 # Inicia containers no host
 ```
 
-**Segurança:** Ver [Security Guide](../../governance/controls/dev-container-security)
+**Segurança:** Ver [Security Guide](../../governance/controls/dev-container-security.md)
 
 ### Posso usar outros editores além do VS Code?
 
@@ -421,10 +422,10 @@ sudo apt-get update && sudo apt-get install -y nome-do-pacote
 
 Agora que você entende o conceito, explore:
 
-1. **[Architecture Guide](./architecture.mdx)** - Detalhes técnicos
-2. **[API Access Patterns](./api-access.mdx)** - Como acessar serviços
-3. **[Workflows](./workflows.mdx)** - Fluxo de trabalho diário
-4. **[Troubleshooting](./troubleshooting.mdx)** - Resolver problemas
+1. **[Architecture Guide](architecture.mdx)** - Detalhes técnicos
+2. **[API Access Patterns](api-access.mdx)** - Como acessar serviços
+3. **[Workflows](workflows.mdx)** - Fluxo de trabalho diário
+4. **[Troubleshooting](troubleshooting.mdx)** - Resolver problemas
 
 ---
 

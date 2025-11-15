@@ -1,5 +1,6 @@
 ---
 title: "Workspace Categories CRUD"
+slug: /apps/workspace/categories-crud-overview
 sidebar_position: 10
 description: "Summary of the Workspace categories CRUD implementation and data model."
 tags:

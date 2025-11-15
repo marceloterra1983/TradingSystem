@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { List, Plus } from '@/icons';
+import { List, Plus } from "@/icons";
 
 /**
  * Market Data Subscriptions Page

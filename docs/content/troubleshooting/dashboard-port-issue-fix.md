@@ -1,5 +1,6 @@
 ---
 title: "Dashboard Port Fix"
+slug: /troubleshooting/dashboard-port-issue-fix
 description: "Steps to realign the dashboard API base URL with the 3402 backend port."
 tags:
   - troubleshooting

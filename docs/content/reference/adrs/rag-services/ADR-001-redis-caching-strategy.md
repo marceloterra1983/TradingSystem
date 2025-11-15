@@ -1,5 +1,6 @@
 ---
 title: "ADR-001: Redis Caching Strategy for Collection Stats"
+slug: /reference/adrs/rag-services/ADR-001-redis-caching-strategy
 sidebar_position: 1
 description: "Decision to implement Redis-based caching with memory fallback for collection statistics to improve API response times and reduce database load"
 tags: [adr, rag-services, caching, performance]
@@ -235,7 +236,7 @@ real    0m0.008s  # 8ms (60% faster)
 ---
 
 **Related ADRs**:
-- [ADR-002: File Watcher Auto-Ingestion](./ADR-002-file-watcher-auto-ingestion)
+- [ADR-002: File Watcher Auto-Ingestion](ADR-002-file-watcher-auto-ingestion.md)
 - ADR-003: Collection Stats Performance Optimization (planned)
 
 **Change Log**:

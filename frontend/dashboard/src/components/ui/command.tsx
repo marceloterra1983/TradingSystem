@@ -6,7 +6,7 @@ import {
   type HTMLAttributes,
 } from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { Search } from '@/icons';
+import { Search } from "@/icons";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent } from "./dialog";

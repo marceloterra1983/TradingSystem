@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  X,
-  CheckCircle2,
-  AlertCircle,
-  Info,
-  AlertTriangle,
-} from '@/icons';
+import { X, CheckCircle2, AlertCircle, Info, AlertTriangle } from "@/icons";
 import { Toast as ToastType, useToastStore } from "../../store/toastStore";
 import { cn } from "../../lib/utils";
 

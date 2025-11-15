@@ -10,21 +10,21 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.svg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
@@ -38,9 +38,9 @@
       "url": "/#/workspace",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/icon-192.svg",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -51,9 +51,9 @@
       "url": "/#/tp-capital",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/icon-192.svg",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -64,9 +64,9 @@
       "url": "/#/docusaurus",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "/icon-192.svg",
           "sizes": "192x192",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     }

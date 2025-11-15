@@ -1,0 +1,12 @@
+src/__tests__/components/DocsHybridSearchPage.spec.tsx:48:  resolveDocsPreviewUrl: (url: string) => `http://localhost:9080${url}`,
+src/components/pages/DocusaurusPage.tsx:26:    const parsed = new URL(value, "http://localhost");
+src/components/pages/ConnectionsPageNew.tsx:21:  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:9080';
+src/components/pages/ConnectionsPageNew.tsx:179:      check: "curl http://localhost:3402/health",
+src/components/pages/URLsPage.tsx:81:        { name: "Firecrawl", url: "http://localhost:3002" },
+src/components/pages/URLsPage.tsx:83:        { name: "Agent MCP Dashboard", url: "http://localhost:8080" },
+src/components/pages/URLsPage.tsx:106:          url: "http://localhost:8084",
+src/components/pages/URLsPage.tsx:153:        { name: "Swagger / OpenAPI UI", url: "http://localhost:8200/docs" },
+src/components/pages/N8nPage.tsx:21:  const baseUrl = env.VITE_N8N_URL || "http://localhost:3680";
+src/components/pages/CourseCrawlerPage.tsx:7:const DEFAULT_DIRECT_URL = "http://localhost:4201";
+src/components/pages/MCPControlPage.tsx:7:        src="http://localhost:3847/"
+src/components/pages/KestraPage.tsx:4:const DEFAULT_KESTRA_HTTP_URL = "http://localhost:9080/kestra";

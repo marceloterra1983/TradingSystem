@@ -39,9 +39,6 @@ const resolveEnv = (...keys: string[]): string | undefined => {
   return undefined;
 };
 
-const pickFirst = (...values: Array<string | undefined>): string | undefined =>
-  values.find((value) => typeof value === "string" && value.trim() !== "");
-
 const normalizeBase = (value: string): string =>
   value.endsWith("/") ? value.slice(0, -1) : value;
 
@@ -55,7 +52,7 @@ const getBaseUrl = () => {
   const explicitConfig = resolveEnv(
     "VITE_GATEWAY_HTTP_URL",
     "VITE_API_BASE_URL",
-    "VITE_UNIFIED_DOMAIN_URL"
+    "VITE_UNIFIED_DOMAIN_URL",
   );
   if (explicitConfig) {
     return normalizeBase(explicitConfig);
@@ -92,7 +89,8 @@ const unifiedConfig: ApiConfig = {
   firecrawlProxyApi: `${apiBase}/api/firecrawl`,
   docsUrl: composeUrl(apiBase, "/docs"),
   docsApiUrl: composeUrl(apiBase, "/docs/api/documentation-api"),
-  questdbConsoleUrl: import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
+  questdbConsoleUrl:
+    import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
   questdbUiUrl: import.meta.env.VITE_QUESTDB_UI_URL || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
@@ -114,7 +112,8 @@ const directConfig: ApiConfig = {
     (import.meta.env.DEV ? "http://localhost:3400/docs" : "/docs"),
   docsApiUrl:
     import.meta.env.VITE_DOCSPECS_URL || "/docs/api/documentation-api",
-  questdbConsoleUrl: import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
+  questdbConsoleUrl:
+    import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
   questdbUiUrl: import.meta.env.VITE_QUESTDB_UI_URL || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,

@@ -8,7 +8,7 @@
  */
 
 import { Component, type ReactNode, type ErrorInfo } from "react";
-import { AlertTriangle } from '@/icons';
+import { AlertTriangle } from "@/icons";
 import { Button } from "../../../ui/button";
 import { createLogger } from "../utils/logger";
 

@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { DollarSign, TrendingUp, LineChart } from '@/icons';
+import { DollarSign, TrendingUp, LineChart } from "@/icons";
 
 /**
  * Trading Performance Page - P&L, metrics, and analytics

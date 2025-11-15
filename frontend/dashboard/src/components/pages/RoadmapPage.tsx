@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Calendar } from '@/icons';
+import { Calendar } from "@/icons";
 
 export function RoadmapPage() {
   const sections = [

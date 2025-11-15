@@ -1,5 +1,6 @@
 ---
 title: "API Documentation Guide - TradingSystem"
+slug: /api/API-DOCUMENTATION-GUIDE
 description: "Comprehensive guide to TradingSystem REST APIs with authentication, versioning, error handling, and best practices"
 tags: [api, documentation, openapi, rest, guide]
 owner: BackendGuild
@@ -64,7 +65,7 @@ lastReviewed: "2025-11-01"
 
 ### Planned Improvements (Architecture Review 2025-11-01)
 
-From [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation):
+From [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md):
 
 **Priority 1 (Critical):**
 1. **API Gateway** - Kong Gateway for centralized authentication/routing
@@ -164,7 +165,7 @@ app.use('/api/v1/*', (req, res, next) => {
 });
 ```
 
-**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation) - Proposes API versioning strategy
+**See:** [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md) - Proposes API versioning strategy
 
 ---
 
@@ -539,7 +540,7 @@ describe('POST /api/items', () => {
 });
 ```
 
-**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy) - Comprehensive testing roadmap
+**See:** [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md) - Comprehensive testing roadmap
 
 ---
 
@@ -709,8 +710,8 @@ new_item = client.create_item(
 
 ## 📖 Related Documentation
 
-- [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation)
-- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy)
+- [ADR-003: API Gateway Implementation](../reference/adrs/ADR-003-api-gateway-implementation.md)
+- [ADR-005: Test Coverage Strategy](../reference/adrs/ADR-005-test-coverage-strategy.md)
 - [Environment Variables Reference](../tools/security-config/env.mdx)
 - [Testing Strategy](../reference/testing-strategy.mdx)
 - [API Guidelines](../reference/api-guidelines.mdx)

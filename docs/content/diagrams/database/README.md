@@ -1,5 +1,6 @@
 ---
 title: "Workspace - Neon PostgreSQL Architecture Diagrams"
+slug: /diagrams/database/README
 description: "PlantUML diagrams documenting the Workspace stack after the Neon PostgreSQL migration."
 tags: [database, documentation, diagrams, plantuml]
 domain: database
@@ -26,9 +27,9 @@ This directory contains PlantUML diagrams documenting the Workspace application 
 
 ### Diagrams Available
 
-1. **[workspace-neon-architecture.puml](./workspace-neon-architecture.puml)** - Full system architecture (C4 Model)
-2. **[workspace-neon-data-flow.puml](./workspace-neon-data-flow.puml)** - Request/response sequence diagram
-3. **[workspace-neon-database-schema.puml](./workspace-neon-database-schema.puml)** - Complete database schema (ER diagram)
+1. **[workspace-neon-architecture.puml](workspace-neon-architecture.puml)** - Full system architecture (C4 Model)
+2. **[workspace-neon-data-flow.puml](workspace-neon-data-flow.puml)** - Request/response sequence diagram
+3. **[workspace-neon-database-schema.puml](workspace-neon-database-schema.puml)** - Complete database schema (ER diagram)
 
 ---
 
@@ -264,7 +265,7 @@ title: Workspace Architecture
 
 The Workspace application uses Neon PostgreSQL for data persistence.
 
-See the [architecture diagram source](./workspace-neon-architecture.puml) for the complete system design.
+See the [architecture diagram source](workspace-neon-architecture.puml) for the complete system design.
 
 ### Key Components
 
@@ -272,7 +273,7 @@ See the [architecture diagram source](./workspace-neon-architecture.puml) for th
 - **Neon Pageserver**: Manages persistent storage
 - **Neon Safekeeper**: Ensures durability via WAL
 
-See the [complete architecture diagram](./workspace-neon-architecture.puml) for details.
+See the [complete architecture diagram](workspace-neon-architecture.puml) for details.
 ```
 
 ---

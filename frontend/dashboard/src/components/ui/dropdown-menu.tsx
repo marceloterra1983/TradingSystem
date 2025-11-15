@@ -5,7 +5,7 @@ import {
   type HTMLAttributes,
 } from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronRight, Circle } from '@/icons';
+import { Check, ChevronRight, Circle } from "@/icons";
 import { cn } from "@/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;

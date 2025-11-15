@@ -55,7 +55,7 @@ function CopyButton({ value }: { value: string }) {
 export function URLsPage() {
   const gatewayRoot =
     ENDPOINTS.workspace.replace(/\/api\/workspace$/, "") ||
-    "http://localhost:9080";
+    (typeof window !== "undefined" ? window.location.origin : "");
 
   const appendPath = (base: string, path: string) => {
     const sanitizedBase = base.replace(/\/+$/, "");

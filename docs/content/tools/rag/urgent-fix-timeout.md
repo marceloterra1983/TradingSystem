@@ -1,5 +1,6 @@
 ---
 title: "RAG Collections Timeout Fix"
+slug: /tools/rag/urgent-fix-timeout
 sidebar_position: 9
 description: "Mitigation plan for the computeCollectionMetrics scroll timeout in Qdrant."
 tags:

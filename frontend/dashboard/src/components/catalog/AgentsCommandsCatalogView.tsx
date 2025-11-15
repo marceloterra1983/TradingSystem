@@ -33,7 +33,7 @@ import {
   FileWarning,
   Filter,
   Search,
-} from '@/icons';
+} from "@/icons";
 
 import type { AgentDirectoryEntry } from "../../data/aiAgentsDirectory.types";
 import agentDirectoryData from "../../data/aiAgentsDirectory.json";

@@ -2,7 +2,7 @@
 
 **Date:** 2025-11-03 | **Status:** Production-Ready | **Grade:** B+ (83/100) 🟢
 
-> **Full Report:** [telegram-architecture-2025-11-03.md](./telegram-architecture-2025-11-03.md)
+> **Full Report:** [telegram-architecture-2025-11-03.md](telegram-architecture-2025-11-03.md)
 
 ---
 
@@ -232,15 +232,15 @@ if (messageCache.has(cacheKey)) return true; // ✅ Cache hit
 
 ## 🔗 Quick Links
 
-- **Full Report:** [telegram-architecture-2025-11-03.md](./telegram-architecture-2025-11-03.md)
+- **Full Report:** [telegram-architecture-2025-11-03.md](telegram-architecture-2025-11-03.md)
 - **Source Code:**
   - Gateway MTProto: [`apps/telegram-gateway/`](https://github.com/marceloterra1983/TradingSystem/tree/main/apps/telegram-gateway)
   - Gateway REST API: [`backend/api/telegram-gateway/`](https://github.com/marceloterra1983/TradingSystem/tree/main/backend/api/telegram-gateway)
   - TP Capital: [`apps/tp-capital/`](https://github.com/marceloterra1983/TradingSystem/tree/main/apps/tp-capital)
 - **Documentation:**
   - [Security Implementation](../../../tools/security-config/p0-security-implementation.md)
-  - [Integration Guide](../../tp-capital/plan-implementation-complete.md)
-  - [Monitoring Setup](../../../tools/monitoring/overview)
+  - [Integration Guide](../plan-implementation-complete.md)
+  - [Monitoring Setup](../../../tools/monitoring/overview.mdx)
 
 ---
 

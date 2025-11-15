@@ -1,5 +1,6 @@
 ---
 title: Dev Container Policy
+slug: /governance/policies/dev-container-policy
 sidebar_position: 6
 tags: [governance, policy, dev-container, security]
 domain: tools
@@ -127,8 +128,8 @@ This policy applies to:
 ## Related Documents
 
 - [Dev Container Security Controls](../controls/dev-container-security.md)
-- [Environment Variables Policy](./environment-variables-policy.mdx)
-- [API Gateway Policy](./api-gateway-policy.md)
+- [Environment Variables Policy](environment-variables-policy.mdx)
+- [API Gateway Policy](api-gateway-policy.md)
 - [Pre-Deploy Checklist](../controls/pre-deploy-checklist.mdx)
 
 ## Review & Updates

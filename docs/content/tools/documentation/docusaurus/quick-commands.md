@@ -1,5 +1,6 @@
 ---
 title: "Docusaurus Quick Commands"
+slug: /tools/documentation/docusaurus/quick-commands
 description: "Frequently used npm scripts and helpers for the documentation workspace."
 tags:
   - tools
@@ -623,8 +624,8 @@ npm run docs:build 2>&1 | grep -c "WARNING"
 - `reports/2025-11-02/REVIEW-INDEX-2025-11-02.md` - Índice completo
 
 **Guides**:
-- [Deployment Guide](./deployment-guide) - Deploy procedures
-- [Algolia Setup](./algolia-setup-guide) - Search setup
+- [Deployment Guide](deployment-guide.md) - Deploy procedures
+- [Algolia Setup](algolia-setup-guide.md) - Search setup
 
 **Reports**:
 - `reports/2025-11-02/DOCUSAURUS-REVIEW-REPORT-2025-11-02.md` - Technical analysis

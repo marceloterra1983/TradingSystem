@@ -25,7 +25,7 @@ services:
     image: "${IMG_DOCS_HUB:-img-docs-hub}:${IMG_VERSION:-latest}"
     platform: linux/amd64
     # ports:
-    #   - "3404:80"  # Expose docs-hub on port 3404 (disabled - access via Traefik on 9080/docs)
+    #   - "3400:80"  # Disabled - Access via Traefik gateway at http://localhost:9082/docs/
     env_file:
       - ../../.env
       - ../../.env.shared

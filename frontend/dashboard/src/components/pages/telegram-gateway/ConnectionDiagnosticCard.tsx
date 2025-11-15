@@ -4,7 +4,7 @@ import {
   XCircle,
   Info,
   ExternalLink,
-} from '@/icons';
+} from "@/icons";
 import {
   Card,
   CardContent,
@@ -298,7 +298,7 @@ export function ConnectionDiagnosticCard({
                       size="sm"
                       className="mt-2"
                       onClick={() =>
-                        window.open("http://localhost:4008/metrics", "_blank")
+                        window.open("/api/tp-capital/metrics", "_blank")
                       }
                     >
                       <ExternalLink className="mr-2 h-3.5 w-3.5" />

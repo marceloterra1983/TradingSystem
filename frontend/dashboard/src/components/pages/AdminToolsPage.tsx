@@ -7,7 +7,7 @@ import {
   Workflow,
   GaugeCircle,
   LifeBuoy,
-} from '@/icons';
+} from "@/icons";
 
 /**
  * Admin Tools Page - Operational tooling and observability shortcuts

@@ -3,8 +3,7 @@ import { IframeWithUrl } from "../common/IframeWithUrl";
 
 const resolveWahaUrl = () => {
   const env = import.meta.env as Record<string, string | undefined>;
-  const baseUrl =
-    env.VITE_WAHA_DASHBOARD_URL || "http://localhost:3310/dashboard/";
+  const baseUrl = env.VITE_WAHA_DASHBOARD_URL || "/waha/dashboard/";
   return baseUrl;
 };
 

@@ -1,6 +1,6 @@
 import { ScrollArea } from "../../ui/scroll-area";
 import { TelegramGatewayQueueStatus } from "../../../hooks/useTelegramGateway";
-import { AlertTriangle, FileWarning, List, RefreshCw } from '@/icons';
+import { AlertTriangle, FileWarning, List, RefreshCw } from "@/icons";
 import { Button } from "../../ui/button";
 import {
   CollapsibleCard,

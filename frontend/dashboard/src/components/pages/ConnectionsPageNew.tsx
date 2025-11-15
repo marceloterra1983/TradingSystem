@@ -1,4 +1,4 @@
-import { Activity, Network, PlugZap, ShieldCheck } from '@/icons';
+import { Activity, Network, PlugZap, ShieldCheck } from "@/icons";
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import {
   Card,
@@ -15,6 +15,10 @@ import ConnectionStatus from "../ConnectionStatus";
  * Connections Page (New) - With Customizable Layout
  * System connections status with drag-and-drop grid layout
  */
+
+// Helper to get current origin dynamically
+const getOrigin = () =>
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:9080';
 
 export function ConnectionsPageNew() {
   const sections = [
@@ -71,7 +75,7 @@ function WebSocketStatusSection() {
             <li>
               • Traefik gateway ativo em{" "}
               <code className="rounded bg-slate-200 px-1 py-0.5 text-xs dark:bg-slate-800">
-                http://localhost:9080
+                {getOrigin()}
               </code>
               .
             </li>
@@ -84,7 +88,7 @@ function WebSocketStatusSection() {
             <p>
               <span className="font-medium">Status:</span>{" "}
               <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-900">
-                curl http://localhost:9080/api/workspace/health
+                curl {getOrigin()}/api/workspace/health
               </code>
             </p>
             <p>
@@ -157,14 +161,14 @@ function ServiceHealthSection() {
       description: "Processa autenticação, mensagens e fila de retry",
       port: "9080 • /api/telegram-gateway",
       scope: "Gateway",
-      check: "curl http://localhost:9080/api/telegram-gateway/overview",
+      check: `curl ${getOrigin()}/api/telegram-gateway/overview`,
     },
     {
       name: "Workspace API",
       description: "Comandos REST e eventos WebSocket do domínio Workspace",
       port: "9080 • /api/workspace",
       scope: "Gateway",
-      check: "curl http://localhost:9080/api/workspace/health",
+      check: `curl ${getOrigin()}/api/workspace/health`,
     },
     {
       name: "RAG Service",

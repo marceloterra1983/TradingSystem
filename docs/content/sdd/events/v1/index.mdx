@@ -1,5 +1,6 @@
 ---
 title: Event Catalogue v1
+slug: /sdd/events/v1/index
 description: Overview of events emitted in version 1.
 tags:
   - sdd
@@ -19,12 +20,12 @@ This catalogue lists all domain events emitted by TradingSystem v1. Events repre
 
 | Event | Description | Trigger | Consumers |
 |-------|-------------|---------|-----------|
-| [order.created](./order-created) | Order created and validated | POST /api/orders (success) | Dashboard, Audit, Analytics |
+| [order.created](order-created.mdx) | Order created and validated | POST /api/orders (success) | Dashboard, Audit, Analytics |
 | order.submitted | Order sent to broker | Broker acknowledgment | Dashboard, Audit |
 | order.filled | Order fully executed | Broker fill callback | Dashboard, Audit, Position Service |
 | order.partially-filled | Order partially executed | Broker partial fill callback | Dashboard, Audit |
-| [order.canceled](./order-canceled) | Order canceled | DELETE /api/orders (success) | Dashboard, Audit |
-| [order.failed](./order-failed) | Submission retries exhausted | Broker/network failure after retries | Dashboard, Audit, Alerting |
+| [order.canceled](order-canceled.mdx) | Order canceled | DELETE /api/orders (success) | Dashboard, Audit |
+| [order.failed](order-failed.mdx) | Submission retries exhausted | Broker/network failure after retries | Dashboard, Audit, Alerting |
 | order.rejected | Order rejected | Risk check failure or broker rejection | Dashboard, Audit |
 | risk.violation | Risk check failed | Risk validation failure | Dashboard, Audit, Alerting |
 | kill-switch.activated | Kill switch activated | POST /api/risk/kill-switch | Dashboard, Audit, Alerting |
@@ -84,7 +85,7 @@ interface EventMetadata {
 
 ## Related Documentation
 
-- [Schema Catalogue](../domain/schemas/v1/index)
-- [Flow Catalogue](../flows/v1/) (to be created)
-- [Order Manager API](../../api/order-manager)
-- [Event-Driven Architecture](../../../reference/architecture/event-driven) (when migrated)
+- [Schema Catalogue](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/sdd/events/domain/schemas/v1/index)
+- [Flow Catalogue](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/sdd/events/flows/v1) (to be created)
+- [Order Manager API](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/sdd/api/order-manager)
+- [Event-Driven Architecture](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/reference/architecture/event-driven) (when migrated)

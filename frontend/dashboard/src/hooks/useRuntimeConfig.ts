@@ -34,7 +34,8 @@ export function useRuntimeConfig() {
     queryKey: ["runtime-config"],
     queryFn: async () => {
       // Primeiro tenta pegar do Gateway API
-      const gatewayUrl = window.location.origin + "/api/telegram-gateway/config";
+      const gatewayUrl =
+        window.location.origin + "/api/telegram-gateway/config";
 
       const response = await fetch(gatewayUrl, {
         method: "GET",
@@ -46,7 +47,7 @@ export function useRuntimeConfig() {
 
       if (!response.ok) {
         throw new Error(
-          `Failed to fetch runtime config: ${response.status} ${response.statusText}`
+          `Failed to fetch runtime config: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -81,8 +82,11 @@ export function useApiUrls() {
   const { data: config } = useRuntimeConfig();
 
   return {
-    apiBaseUrl: config?.apiBaseUrl || "http://localhost:9082/api/telegram-gateway",
-    messagesBaseUrl: config?.messagesBaseUrl || "http://localhost:9082/api/messages",
-    channelsBaseUrl: config?.channelsBaseUrl || "http://localhost:9082/api/channels",
+    apiBaseUrl:
+      config?.apiBaseUrl || "http://localhost:9082/api/telegram-gateway",
+    messagesBaseUrl:
+      config?.messagesBaseUrl || "http://localhost:9082/api/messages",
+    channelsBaseUrl:
+      config?.channelsBaseUrl || "http://localhost:9082/api/channels",
   };
 }

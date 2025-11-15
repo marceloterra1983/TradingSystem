@@ -1,5 +1,6 @@
 ---
 title: "P0 Security Implementation"
+slug: /tools/security-config/p0-security-implementation
 description: "Summary of the critical Telegram gateway security fixes executed."
 tags:
   - tools

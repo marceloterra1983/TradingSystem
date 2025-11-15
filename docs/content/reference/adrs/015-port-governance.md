@@ -1,5 +1,6 @@
 ---
 title: "ADR-015: Port Governance Policy"
+slug: /reference/adrs/015-port-governance
 description: "Decision record defining TradingSystem's port governance process and automation."
 tags: [adr, architecture, governance, ports, infrastructure]
 domain: architecture
@@ -63,5 +64,5 @@ lastReviewed: '2025-11-08'
 ## 📚 Referências
 
 - Diretório `tools/openspec/changes/port-governance-2025-11-05`
-- [Port ranges doc](../../governance/port-governance/port-ranges)
+- [Port ranges doc](../../governance/port-governance/port-ranges.mdx)
 - Arquivo `config/ports/registry.yaml`

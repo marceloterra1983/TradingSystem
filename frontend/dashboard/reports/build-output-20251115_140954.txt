@@ -1,0 +1,122 @@
+
+> documentation-dashboard@1.2.0 prebuild
+> if [ "$SKIP_DASHBOARD_PREBUILD" = "1" ]; then echo "⚠️  Skipping agents:generate prebuild"; else node scripts/check-agents-cache.cjs || (npm --prefix ../.. run agents:generate && node scripts/convert-agents-to-json.mjs); fi
+
+✅ Agents directory cache valid, skipping generation
+
+> documentation-dashboard@1.2.0 build
+> npm run copy:docs && tsc && NODE_ENV=production vite build
+
+
+> documentation-dashboard@1.2.0 copy:docs
+> node scripts/copy-docs.js
+
+✅ Skipping PRD copy (not needed for build)
+vite v7.2.2 building client environment for production...
+transforming...
+✓ 3390 modules transformed.
+Initially, there are
+21 chunks, of which
+11 are below minChunkSize.
+After merging chunks, there are
+11 chunks, of which
+0 are below minChunkSize.
+rendering chunks...
+computing gzip size...
+dist/index.html                                       2.70 kB │ gzip:   0.85 kB
+dist/assets/index-D9tMyOxU.css                      142.43 kB │ gzip:  20.36 kB
+dist/assets/router-vendor-D30Ww-PO.js                 0.98 kB │ gzip:   0.52 kB
+dist/assets/state-vendor-Cv6lJcZc.js                  3.35 kB │ gzip:   1.54 kB
+dist/assets/markdown-vendor-CyJdby9w.js               3.40 kB │ gzip:   1.35 kB
+dist/assets/FirecrawlPage-J1GcFovr.js                 5.29 kB │ gzip:   2.11 kB
+dist/assets/StructureMapPage-rDpI2NhX.js              9.65 kB │ gzip:   3.12 kB
+dist/assets/GovernancePage-CC-kwwfp.js               17.29 kB │ gzip:   5.01 kB
+dist/assets/CommandsCatalogView-qvrA_kxa.js          21.44 kB │ gzip:   4.66 kB
+dist/assets/icons-vendor-U_QBXosu.js                 21.53 kB │ gzip:   7.09 kB
+dist/assets/CatalogPage-CVTb5cIb.js                  22.25 kB │ gzip:   5.49 kB
+dist/assets/page-tpcapital-igtgeb_n.js               22.53 kB │ gzip:   6.78 kB
+dist/assets/date-vendor-BR7UpLVT.js                  27.84 kB │ gzip:   8.22 kB
+dist/assets/index-B9m3v9ip.js                        36.97 kB │ gzip:  11.12 kB
+dist/assets/dnd-vendor-DuatobJK.js                   47.73 kB │ gzip:  15.68 kB
+dist/assets/TelegramGatewayFinal-CBd6xWhz.js         49.04 kB │ gzip:  11.51 kB
+dist/assets/page-workspace-Cb6eGvzW.js               51.43 kB │ gzip:  12.50 kB
+dist/assets/utils-vendor-VjidgP7o.js                 62.22 kB │ gzip:  21.83 kB
+dist/assets/aiAgentsDirectory.metadata-BwrfWbPl.js   68.24 kB │ gzip:  16.36 kB
+dist/assets/ui-radix-BMW4llz4.js                     72.52 kB │ gzip:  21.97 kB
+dist/assets/animation-vendor-DqVM065u.js             74.90 kB │ gzip:  23.05 kB
+dist/assets/page-llama-DR23mDY7.js                   87.22 kB │ gzip:  21.22 kB
+dist/assets/page-docusaurus-IYk3cKZ7.js             105.17 kB │ gzip:  28.25 kB
+dist/assets/react-vendor-CmKxXUBx.js                136.25 kB │ gzip:  43.90 kB
+dist/assets/commands-db-BSfGUecC.js                 266.26 kB │ gzip:  77.90 kB
+dist/assets/charts-vendor-Bw53h67L.js               282.87 kB │ gzip:  64.10 kB
+dist/assets/AgentsCommandsCatalogView-Ba6UzByH.js   574.71 kB │ gzip: 162.18 kB
+dist/assets/vendor-D_HSf5xJ.js                      615.50 kB │ gzip: 192.61 kB
+dist/assets/aiAgentsDirectory-CH8l-5vW.js           655.99 kB │ gzip: 190.12 kB
+
+(!) Some chunks are larger than 400 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 13.65s
+
+✨ [vite-plugin-compression]:algorithm=gzip - compressed file successfully: 
+dist//workspace/frontend/dashboard/assets/CatalogPage-CVTb5cIb.js.gz                  21.73kb / gzip: 5.36kb
+dist//workspace/frontend/dashboard/assets/CommandsCatalogView-qvrA_kxa.js.gz          20.93kb / gzip: 4.54kb
+dist//workspace/frontend/dashboard/assets/GovernancePage-CC-kwwfp.js.gz               16.89kb / gzip: 4.90kb
+dist//workspace/frontend/dashboard/assets/TelegramGatewayFinal-CBd6xWhz.js.gz         47.89kb / gzip: 11.18kb
+dist//workspace/frontend/dashboard/assets/dnd-vendor-DuatobJK.js.gz                   46.61kb / gzip: 15.29kb
+dist//workspace/frontend/dashboard/assets/date-vendor-BR7UpLVT.js.gz                  27.19kb / gzip: 8.02kb
+dist//workspace/frontend/dashboard/assets/aiAgentsDirectory.metadata-BwrfWbPl.js.gz   66.64kb / gzip: 15.95kb
+dist//workspace/frontend/dashboard/assets/icons-vendor-U_QBXosu.js.gz                 21.02kb / gzip: 6.84kb
+dist//workspace/frontend/dashboard/assets/index-B9m3v9ip.js.gz                        36.10kb / gzip: 10.83kb
+dist//workspace/frontend/dashboard/assets/page-tpcapital-igtgeb_n.js.gz               22.00kb / gzip: 6.61kb
+dist//workspace/frontend/dashboard/data/structure/documentation-structure.json.gz     19.03kb / gzip: 2.48kb
+dist//workspace/frontend/dashboard/assets/page-workspace-Cb6eGvzW.js.gz               50.23kb / gzip: 12.15kb
+dist//workspace/frontend/dashboard/viewers/redoc.html.gz                              18.70kb / gzip: 4.37kb
+dist//workspace/frontend/dashboard/assets/page-llama-DR23mDY7.js.gz                   85.18kb / gzip: 20.65kb
+dist//workspace/frontend/dashboard/assets/page-docusaurus-IYk3cKZ7.js.gz              102.71kb / gzip: 27.51kb
+dist//workspace/frontend/dashboard/assets/ui-radix-BMW4llz4.js.gz                     70.82kb / gzip: 21.42kb
+dist//workspace/frontend/dashboard/assets/index-D9tMyOxU.css.gz                       139.09kb / gzip: 19.57kb
+dist//workspace/frontend/dashboard/assets/animation-vendor-DqVM065u.js.gz             73.15kb / gzip: 22.42kb
+dist//workspace/frontend/dashboard/assets/utils-vendor-VjidgP7o.js.gz                 60.76kb / gzip: 21.31kb
+dist//workspace/frontend/dashboard/assets/react-vendor-CmKxXUBx.js.gz                 133.06kb / gzip: 42.79kb
+dist//workspace/frontend/dashboard/assets/charts-vendor-Bw53h67L.js.gz                276.24kb / gzip: 62.38kb
+dist//workspace/frontend/dashboard/data/governance/latest.json.gz                     198.80kb / gzip: 60.12kb
+dist//workspace/frontend/dashboard/assets/commands-db-BSfGUecC.js.gz                  260.01kb / gzip: 75.91kb
+dist//workspace/frontend/dashboard/assets/AgentsCommandsCatalogView-Ba6UzByH.js.gz    561.24kb / gzip: 158.12kb
+dist//workspace/frontend/dashboard/assets/aiAgentsDirectory-CH8l-5vW.js.gz            640.61kb / gzip: 185.37kb
+dist//workspace/frontend/dashboard/assets/vendor-D_HSf5xJ.js.gz                       601.07kb / gzip: 187.63kb
+dist//workspace/frontend/dashboard/stats.html.gz                                      1668.42kb / gzip: 176.87kb
+
+
+
+✨ [vite-plugin-compression]:algorithm=brotliCompress - compressed file successfully: 
+dist//workspace/frontend/dashboard/assets/GovernancePage-CC-kwwfp.js.br               16.89kb / brotliCompress: 4.36kb
+dist//workspace/frontend/dashboard/assets/CatalogPage-CVTb5cIb.js.br                  21.73kb / brotliCompress: 4.82kb
+dist//workspace/frontend/dashboard/assets/CommandsCatalogView-qvrA_kxa.js.br          20.93kb / brotliCompress: 4.07kb
+dist//workspace/frontend/dashboard/assets/TelegramGatewayFinal-CBd6xWhz.js.br         47.89kb / brotliCompress: 9.90kb
+dist//workspace/frontend/dashboard/assets/aiAgentsDirectory.metadata-BwrfWbPl.js.br   66.64kb / brotliCompress: 14.14kb
+dist//workspace/frontend/dashboard/assets/date-vendor-BR7UpLVT.js.br                  27.19kb / brotliCompress: 7.23kb
+dist//workspace/frontend/dashboard/assets/dnd-vendor-DuatobJK.js.br                   46.61kb / brotliCompress: 13.74kb
+dist//workspace/frontend/dashboard/assets/icons-vendor-U_QBXosu.js.br                 21.02kb / brotliCompress: 5.88kb
+dist//workspace/frontend/dashboard/assets/index-B9m3v9ip.js.br                        36.10kb / brotliCompress: 9.60kb
+dist//workspace/frontend/dashboard/assets/page-tpcapital-igtgeb_n.js.br               22.00kb / brotliCompress: 5.94kb
+dist//workspace/frontend/dashboard/assets/page-workspace-Cb6eGvzW.js.br               50.23kb / brotliCompress: 10.78kb
+dist//workspace/frontend/dashboard/assets/index-D9tMyOxU.css.br                       139.09kb / brotliCompress: 15.46kb
+dist//workspace/frontend/dashboard/viewers/redoc.html.br                              18.70kb / brotliCompress: 3.60kb
+dist//workspace/frontend/dashboard/data/structure/documentation-structure.json.br     19.03kb / brotliCompress: 2.13kb
+dist//workspace/frontend/dashboard/assets/animation-vendor-DqVM065u.js.br             73.15kb / brotliCompress: 20.10kb
+dist//workspace/frontend/dashboard/assets/page-docusaurus-IYk3cKZ7.js.br              102.71kb / brotliCompress: 23.89kb
+dist//workspace/frontend/dashboard/assets/page-llama-DR23mDY7.js.br                   85.18kb / brotliCompress: 18.04kb
+dist//workspace/frontend/dashboard/assets/utils-vendor-VjidgP7o.js.br                 60.76kb / brotliCompress: 18.92kb
+dist//workspace/frontend/dashboard/assets/ui-radix-BMW4llz4.js.br                     70.82kb / brotliCompress: 18.43kb
+dist//workspace/frontend/dashboard/assets/react-vendor-CmKxXUBx.js.br                 133.06kb / brotliCompress: 37.38kb
+dist//workspace/frontend/dashboard/data/governance/latest.json.br                     198.80kb / brotliCompress: 50.26kb
+dist//workspace/frontend/dashboard/assets/commands-db-BSfGUecC.js.br                  260.01kb / brotliCompress: 62.47kb
+dist//workspace/frontend/dashboard/assets/charts-vendor-Bw53h67L.js.br                276.24kb / brotliCompress: 49.99kb
+dist//workspace/frontend/dashboard/assets/AgentsCommandsCatalogView-Ba6UzByH.js.br    561.24kb / brotliCompress: 128.45kb
+dist//workspace/frontend/dashboard/assets/aiAgentsDirectory-CH8l-5vW.js.br            640.61kb / brotliCompress: 150.52kb
+dist//workspace/frontend/dashboard/assets/vendor-D_HSf5xJ.js.br                       601.07kb / brotliCompress: 154.09kb
+dist//workspace/frontend/dashboard/stats.html.br                                      1668.42kb / brotliCompress: 123.75kb
+
+

@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Zap, TrendingUp } from '@/icons';
+import { Zap, TrendingUp } from "@/icons";
 
 export function SignalsPage() {
   const sections = [

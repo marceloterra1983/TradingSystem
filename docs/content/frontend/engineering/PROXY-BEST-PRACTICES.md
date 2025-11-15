@@ -1,5 +1,6 @@
 ---
 title: "Proxy Configuration Best Practices"
+slug: /frontend/engineering/PROXY-BEST-PRACTICES
 sidebar_position: 20
 tags: [frontend, proxy, vite, docker, best-practices]
 domain: frontend
@@ -264,10 +265,10 @@ Before deploying proxy configuration:
 
 ## Related Documentation
 
-- [HTTP Client Implementation Guide](./http-client-implementation-guide)
-- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization)
-- [Environment Variables Guide](../../tools/security-config/env)
-- [API Gateway Policy](../../governance/policies/api-gateway-policy)
+- [HTTP Client Implementation Guide](http-client-implementation-guide.mdx)
+- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization.md)
+- [Environment Variables Guide](../../tools/security-config/env.mdx)
+- [API Gateway Policy](../../governance/policies/api-gateway-policy.md)
 
 ---
 

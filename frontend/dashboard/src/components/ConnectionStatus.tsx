@@ -1,4 +1,4 @@
-import { Activity } from '@/icons';
+import { Activity } from "@/icons";
 
 interface ConnectionStatusProps {
   showDetails?: boolean;

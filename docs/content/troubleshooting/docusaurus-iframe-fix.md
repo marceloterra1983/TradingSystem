@@ -1,5 +1,6 @@
 ---
 title: Docusaurus Iframe Fix
+slug: /troubleshooting/docusaurus-iframe-fix
 description: Fix para loading do Docusaurus no Dashboard iframe
 tags:
   - troubleshooting

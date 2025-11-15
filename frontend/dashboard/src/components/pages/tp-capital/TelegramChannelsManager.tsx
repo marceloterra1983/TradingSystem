@@ -15,7 +15,7 @@ import {
   Settings,
   CheckCircle,
   XCircle,
-} from '@/icons';
+} from "@/icons";
 
 interface TelegramChannel {
   id: string;

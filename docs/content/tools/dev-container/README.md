@@ -11,21 +11,21 @@
 
 ### Phase 1: Core Documentation (Completed)
 
-1. **[Overview](./overview.mdx)** (1,200 lines)
+1. **[Overview](overview.mdx)** (1,200 lines)
    - What is Dev Container and why use it
    - Technology stack (Debian + Node.js + Python + Docker)
    - Key benefits and features
    - Visual architecture diagram
    - Quick start guide
 
-2. **[Architecture](./architecture.mdx)** (1,800 lines)
+2. **[Architecture](architecture.mdx)** (1,800 lines)
    - Container structure and layers
    - Volume mounts (node_modules, Python venv, Docker socket)
    - Network configuration (tradingsystem_backend, tradingsystem_frontend)
    - VS Code integration and features
    - Security considerations
 
-3. **[API Access](./api-access.mdx)** (2,000 lines)
+3. **[API Access](api-access.mdx)** (2,000 lines)
    - Service access patterns
    - Container name resolution
    - Port mapping (internal vs external)
@@ -34,7 +34,7 @@
 
 ### Phase 2: Integration (Completed)
 
-4. **[Gateway & Proxy](./gateway-proxy.mdx)** (1,500 lines)
+4. **[Gateway & Proxy](gateway-proxy.mdx)** (1,500 lines)
    - Traefik API Gateway (Port 9080 → 9082 host mapping)
    - Vite Dev Proxy configuration
    - Proxy vs direct access
@@ -43,7 +43,7 @@
 
 ### Phase 3: Workflows (Completed)
 
-5. **[Workflows](./workflows.mdx)** (6,500 lines)
+5. **[Workflows](workflows.mdx)** (6,500 lines)
    - Daily development workflow (Morning Startup)
    - Frontend development (Vite + Hot Reload)
    - Backend development (Container + Local modes)
@@ -54,7 +54,7 @@
    - Customization and monitoring
    - Emergency procedures
 
-6. **[Troubleshooting](./troubleshooting.mdx)** (4,000 lines)
+6. **[Troubleshooting](troubleshooting.mdx)** (4,000 lines)
    - Common Issues Matrix (9 issues)
    - Detailed solutions (27 solutions total)
    - Quick diagnostic commands
@@ -65,14 +65,14 @@
 ### Phase 4: Governance & Security (Completed)
 
 7. **Governance**
-   - **[Dev Container Policy](../../governance/policies/dev-container-policy)** (3,500 lines)
+   - **[Dev Container Policy](../../governance/policies/dev-container-policy.md)** (3,500 lines)
      - 7 mandatory policy statements
      - 3 security controls
      - Compliance & auditing
      - Policy violations and remediation
 
 8. **Security**
-   - **[Dev Container Security Guide](../../governance/controls/dev-container-security)** (3,500 lines)
+   - **[Dev Container Security Guide](../../governance/controls/dev-container-security.md)** (3,500 lines)
      - Defense in Depth (4 layers)
      - 5 security risks with mitigation
      - Security controls checklist
@@ -82,7 +82,7 @@
 ### Supporting Documentation
 
 9. **Pre-Deploy Checklist**
-   - **[Updated PRE-DEPLOY-CHECKLIST.md](../../governance/controls/pre-deploy-checklist)**
+   - **[Updated PRE-DEPLOY-CHECKLIST.md](../../governance/controls/pre-deploy-checklist.mdx)**
      - Added Phase 1.5: Dev Container Validation (5 checks)
      - Environment variable validation
      - Vite proxy configuration checks
@@ -315,20 +315,20 @@ Access to Docker socket = root access on host machine.
 
 ## 📖 Read Next
 
-1. **New to Dev Container?** → Start with [Overview](./overview.mdx)
-2. **Understanding architecture?** → Read [Architecture](./architecture.mdx)
-3. **Accessing APIs?** → See [API Access](./api-access.mdx)
-4. **Proxy configuration?** → Check [Gateway & Proxy](./gateway-proxy.mdx)
-5. **Daily development?** → Follow [Workflows](./workflows.mdx)
-6. **Having issues?** → Troubleshoot with [Troubleshooting](./troubleshooting.mdx)
-7. **Governance & policies?** → Review [Dev Container Policy](../../governance/policies/dev-container-policy)
-8. **Security concerns?** → Study [Security Guide](../../governance/controls/dev-container-security)
+1. **New to Dev Container?** → Start with [Overview](overview.mdx)
+2. **Understanding architecture?** → Read [Architecture](architecture.mdx)
+3. **Accessing APIs?** → See [API Access](api-access.mdx)
+4. **Proxy configuration?** → Check [Gateway & Proxy](gateway-proxy.mdx)
+5. **Daily development?** → Follow [Workflows](workflows.mdx)
+6. **Having issues?** → Troubleshoot with [Troubleshooting](troubleshooting.mdx)
+7. **Governance & policies?** → Review [Dev Container Policy](../../governance/policies/dev-container-policy.md)
+8. **Security concerns?** → Study [Security Guide](../../governance/controls/dev-container-security.md)
 
 ---
 
 ## 🆘 Need Help?
 
-1. **Check Troubleshooting Guide** - [troubleshooting.mdx](./troubleshooting.mdx)
+1. **Check Troubleshooting Guide** - [troubleshooting.mdx](troubleshooting.mdx)
 2. **Run diagnostics** - `bash scripts/maintenance/health-check-all.sh`
 3. **Check logs** - `docker logs tradingsystem-dev-container`
 4. **Emergency recovery** - See Nuclear Option in Troubleshooting

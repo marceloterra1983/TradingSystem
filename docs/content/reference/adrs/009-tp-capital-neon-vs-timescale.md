@@ -1,5 +1,6 @@
 ---
 title: "ADR-009: TP-Capital Database Choice - Neon vs TimescaleDB"
+slug: /reference/adrs/009-tp-capital-neon-vs-timescale
 description: "Decision record comparing Neon PostgreSQL and TimescaleDB for the TP-Capital autonomous stack."
 tags: [adr, architecture, database, tp-capital]
 domain: architecture

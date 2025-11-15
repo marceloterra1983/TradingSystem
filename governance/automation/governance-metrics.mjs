@@ -64,7 +64,7 @@ async function readCsvRecords() {
       }, {});
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.warn('[governance:metrics] Unable to read review-tracking.csv:', error.message);
     return [];
   }
@@ -376,12 +376,12 @@ async function main() {
 
   await writeDocsReport(payload);
 
-  // eslint-disable-next-line no-console
+   
   console.log('[governance:metrics] Snapshot and report updated.');
 }
 
 main().catch((error) => {
-  // eslint-disable-next-line no-console
+   
   console.error('[governance:metrics] Failed to compute metrics:', error);
   process.exitCode = 1;
 });

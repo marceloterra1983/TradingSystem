@@ -1,5 +1,6 @@
 ---
 title: "AI Agent Proxy Configuration Guide"
+slug: /frontend/engineering/ai-agent-proxy-guide
 sidebar_position: 21
 tags: [frontend, proxy, ai-agents, automation]
 domain: frontend
@@ -22,7 +23,7 @@ Are you configuring a Vite proxy?
 │
 ├─ YES → Read this entire guide
 │
-└─ NO → Skip to [HTTP Client Guide](./http-client-implementation-guide)
+└─ NO → Skip to [HTTP Client Guide](http-client-implementation-guide.mdx)
 ```
 
 ## Critical Instructions for AI Agents
@@ -293,9 +294,9 @@ Response:            { data: [...] }
 
 ## Related Documentation
 
-- [Proxy Best Practices](./PROXY-BEST-PRACTICES)
-- [HTTP Client Implementation Guide](./http-client-implementation-guide)
-- [Environment Variables Guide](../../tools/security-config/env)
+- [Proxy Best Practices](PROXY-BEST-PRACTICES.md)
+- [HTTP Client Implementation Guide](http-client-implementation-guide.mdx)
+- [Environment Variables Guide](../../tools/security-config/env.mdx)
 
 ---
 

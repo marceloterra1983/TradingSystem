@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import clsx from "clsx";
-import { TrendingUp, TrendingDown, Minus } from '@/icons';
+import { TrendingUp, TrendingDown, Minus } from "@/icons";
 
 export interface MetricCardProps {
   title: string;

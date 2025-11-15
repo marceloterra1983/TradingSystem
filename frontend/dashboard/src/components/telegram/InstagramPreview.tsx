@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Instagram, ExternalLink, Play } from '@/icons';
+import { Instagram, ExternalLink, Play } from "@/icons";
 
 interface InstagramAuthor {
   name: string;

@@ -1,5 +1,6 @@
 ---
 title: Troubleshooting Guide
+slug: /troubleshooting/general
 description: Guia de troubleshooting para containers, databases e issues comuns
 tags:
   - troubleshooting

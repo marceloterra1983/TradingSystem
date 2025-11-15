@@ -19,16 +19,20 @@ import {
   GitBranch,
   MessageCircle,
   FolderTree,
-} from '@/icons';
+} from "@/icons";
 
 // ✅ LAZY LOADING - Pages loaded on-demand (Performance Optimization)
 // This ensures only the current page's code is loaded, reducing initial bundle size by 40-60%
 
-const WorkspacePageNew = lazy(() => import("../components/pages/WorkspacePageNew"));
+const WorkspacePageNew = lazy(
+  () => import("../components/pages/WorkspacePageNew"),
+);
 const TPCapitalOpcoesPage = lazy(
   () => import("../components/pages/TPCapitalOpcoesPage"),
 );
-const DocusaurusPageNew = lazy(() => import("../components/pages/DocusaurusPage"));
+const DocusaurusPageNew = lazy(
+  () => import("../components/pages/DocusaurusPage"),
+);
 const DatabasePageNew = lazy(() => import("../components/pages/DatabasePage"));
 const MiroPage = lazy(() => import("../components/pages/MiroPage"));
 const LlamaIndexPage = lazy(() => import("../components/pages/LlamaIndexPage"));
@@ -401,7 +405,7 @@ const LEGACY_PAGE_ALIASES: Record<string, string> = {
   "ai-agents-directory": "catalog",
   "claude-commands": "catalog",
   waha: "waha-dashboard",
-  "structure": "structure-map",
+  structure: "structure-map",
   "structure-index": "structure-map",
 };
 

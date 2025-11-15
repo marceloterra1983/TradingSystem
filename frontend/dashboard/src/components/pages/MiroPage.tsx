@@ -1,4 +1,4 @@
-import { ExternalLink, Maximize2, RefreshCw } from '@/icons';
+import { ExternalLink, Maximize2, RefreshCw } from "@/icons";
 import { useState } from "react";
 
 import { IframeWithUrl } from "../common/IframeWithUrl";
@@ -20,7 +20,9 @@ export function MiroPage() {
   const miroUrl = "https://miro.com/app/board/uXjVJ3tP9YI=/";
   const miroEmbedUrl = "https://miro.com/app/live-embed/uXjVJ3tP9YI=/";
   const [iframeKey, setIframeKey] = useState(0);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
 
   const handleOpenExternal = () => {
     window.open(miroUrl, "_blank", "noopener,noreferrer");

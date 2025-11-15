@@ -13,7 +13,10 @@ describe("docsUrl helpers", () => {
 
   it("builds urls for direct port mode without duplicating segments", () => {
     expect(
-      buildDocsUrl("tools/ports-services/overview", "http://localhost:9080/docs"),
+      buildDocsUrl(
+        "tools/ports-services/overview",
+        "http://localhost:9080/docs",
+      ),
     ).toBe("http://localhost:9080/docs/tools/ports-services/overview");
   });
 

@@ -1,5 +1,6 @@
 ---
 title: "MTProto Frontend Mockup"
+slug: /apps/tp-capital/mtproto-frontend-mockup
 sidebar_position: 12
 description: "Visual walkthrough of the TP Capital page before and after MTProto integration."
 tags:

@@ -160,7 +160,7 @@ async function main() {
     const records = parseCsv(csvRaw);
     reviewSummary = summarizeReviewTracking(records);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.warn('[governance:index] Review tracking CSV unavailable:', error.message);
   }
 
@@ -189,12 +189,12 @@ async function main() {
   await ensureDir(docsIndexPath);
   await fs.writeFile(docsIndexPath, `${docsFrontmatter}${body}\n`, 'utf-8');
 
-  // eslint-disable-next-line no-console
+   
   console.log('[governance:index] Generated index successfully.');
 }
 
 main().catch((error) => {
-  // eslint-disable-next-line no-console
+   
   console.error('[governance:index] Failed to generate index:', error);
   process.exitCode = 1;
 });

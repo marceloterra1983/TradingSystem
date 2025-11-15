@@ -9,7 +9,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-} from '@/icons';
+} from "@/icons";
 import {
   ResponsiveContainer,
   LineChart,
@@ -153,7 +153,9 @@ const emptyMetricsMessage = (
   </div>
 );
 
-const hasMeaningfulMetrics = (payload: DocumentationMetrics | null): boolean => {
+const hasMeaningfulMetrics = (
+  payload: DocumentationMetrics | null,
+): boolean => {
   if (!payload) return false;
   if (payload.hasData === false) return false;
 
@@ -214,8 +216,7 @@ const BUILD_COMMAND = "npm --prefix docs run docs:build";
 const LINK_CHECK_COMMAND = "npm --prefix docs run docs:links";
 const REDEPLOY_DOCS_COMMAND =
   "docker compose -f tools/compose/docker-compose.docs.yml up -d documentation";
-const WATCHER_RESTART_COMMAND =
-  "sudo systemctl restart docs-hub-guard.service";
+const WATCHER_RESTART_COMMAND = "sudo systemctl restart docs-hub-guard.service";
 
 export default function DocumentationMetricsPage() {
   const [metrics, setMetrics] = useState<DocumentationMetrics | null>(null);

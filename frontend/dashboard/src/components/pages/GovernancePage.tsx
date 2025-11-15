@@ -57,7 +57,7 @@ import {
   Search,
   Sparkles,
   TimerReset,
-} from '@/icons';
+} from "@/icons";
 
 type StatusCode = "healthy" | "warning" | "overdue" | "unknown";
 type StatusFilter = "all" | "healthy" | "warning" | "overdue" | "unknown";

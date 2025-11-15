@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import { useEffect } from "react";
 import { libraryService } from "../../../../services/libraryService";
 import type { Item, ItemFormWithStatus } from "../types/workspace.types";

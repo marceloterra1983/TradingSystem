@@ -41,9 +41,15 @@ const sanitizeAbsoluteUrl = (value?: string): string | undefined => {
 
 const resolveBaseUrl = () => {
   const explicit =
-    sanitizeAbsoluteUrl(import.meta.env.VITE_GATEWAY_HTTP_URL as string | undefined) ??
-    sanitizeAbsoluteUrl(import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-    sanitizeAbsoluteUrl(import.meta.env.VITE_UNIFIED_DOMAIN_URL as string | undefined);
+    sanitizeAbsoluteUrl(
+      import.meta.env.VITE_GATEWAY_HTTP_URL as string | undefined,
+    ) ??
+    sanitizeAbsoluteUrl(
+      import.meta.env.VITE_API_BASE_URL as string | undefined,
+    ) ??
+    sanitizeAbsoluteUrl(
+      import.meta.env.VITE_UNIFIED_DOMAIN_URL as string | undefined,
+    );
 
   if (explicit) {
     return explicit;
@@ -72,7 +78,9 @@ const composeUrl = (base: string, path: string): string => {
   try {
     const normalizedBase = base.endsWith("/") ? base : `${base}/`;
     const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
-    return new URL(normalizedPath, normalizedBase).toString().replace(/\/+$/, "");
+    return new URL(normalizedPath, normalizedBase)
+      .toString()
+      .replace(/\/+$/, "");
   } catch {
     const sanitizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
     const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -99,8 +107,10 @@ const resolveGatewayUrl = (
   candidates.push(composeUrl(GATEWAY_BASE, gatewayPath), ...legacyFallbacks);
 
   const resolved =
-    candidates.find((candidate) => typeof candidate === "string" && candidate.trim().length > 0) ??
-    composeUrl(GATEWAY_BASE, gatewayPath);
+    candidates.find(
+      (candidate) =>
+        typeof candidate === "string" && candidate.trim().length > 0,
+    ) ?? composeUrl(GATEWAY_BASE, gatewayPath);
 
   return resolved.replace(/\/+$/, "");
 };

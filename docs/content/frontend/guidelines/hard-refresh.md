@@ -1,5 +1,6 @@
 ---
 title: "Hard Refresh Checklist"
+slug: /frontend/guidelines/hard-refresh
 description: "Steps to force a full reload of cached assets across supported browsers."
 tags:
   - frontend

@@ -1,5 +1,6 @@
 ---
 title: "API Gateway Policy"
+slug: /governance/policies/api-gateway-policy
 policy_id: "POL-GATEWAY-001"
 version: "1.0.0"
 status: "active"
@@ -352,10 +353,10 @@ Breaking changes to gateway configuration:
 
 ## 7. References
 
-- [Traefik Migration Guide](../docs/TRAEFIK-GATEWAY-MIGRATION.md)
-- [Validation Script](../scripts/gateway/validate-traefik.sh)
-- [Docker Compose - Gateway](../tools/compose/docker-compose.0-gateway-stack.yml)
-- [Middleware Configuration](../tools/traefik/dynamic/middlewares.yml)
+- [Traefik Migration Guide](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/TRAEFIK-GATEWAY-MIGRATION.md)
+- [Validation Script](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/governance/scripts/gateway/validate-traefik.sh)
+- [Docker Compose - Gateway](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/governance/tools/compose/docker-compose.0-gateway-stack.yml)
+- [Middleware Configuration](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/governance/tools/traefik/dynamic/middlewares.yml)
 
 ## 8. Revision History
 

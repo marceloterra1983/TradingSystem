@@ -17,7 +17,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-} from '@/icons';
+} from "@/icons";
 import { useItemFilters } from "../hooks/useItemFilters";
 import { AddItemDialog } from "./AddItemDialog";
 import { ItemActions } from "./ItemActions";

@@ -1943,10 +1943,10 @@ O **componente Telegram do TradingSystem** demonstra **maturidade arquitetural a
 ## 📚 13. References
 
 ### Internal Documentation
-- [Telegram Gateway Architecture](../../telegram-gateway/architecture)
-- [TP Capital Deployment Guide](../../tp-capital/plan-implementation-complete.md)
+- [Telegram Gateway Architecture](../../telegram-gateway/architecture.mdx)
+- [TP Capital Deployment Guide](../plan-implementation-complete.md)
 - [Security Implementation](../../../tools/security-config/p0-security-implementation.md)
-- [Health Monitoring](../../../tools/monitoring/overview)
+- [Health Monitoring](../../../tools/monitoring/overview.mdx)
 
 ### External Resources
 - [Circuit Breaker Pattern](https://martinfowler.com/bliki/CircuitBreaker.html)

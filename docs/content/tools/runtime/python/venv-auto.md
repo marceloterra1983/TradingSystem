@@ -1,5 +1,6 @@
 ---
 title: "Venv Auto"
+slug: /tools/runtime/python/venv-auto
 tags: [documentation]
 domain: devops
 type: guide

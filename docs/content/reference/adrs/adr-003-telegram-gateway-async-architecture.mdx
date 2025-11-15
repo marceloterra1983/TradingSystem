@@ -1,5 +1,6 @@
 ---
 title: "ADR-003: Telegram Gateway Async Architecture"
+slug: /reference/adrs/adr-003-telegram-gateway-async-architecture
 sidebar_position: 3
 tags: [adr, architecture, telegram, async, rabbitmq, mtproto]
 domain: backend
@@ -17,7 +18,7 @@ last_review: "2025-11-14"
 
 **Date**: 2025-11-14
 
-**Technical Story**: [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md)
+**Technical Story**: [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md)
 
 ---
 
@@ -185,32 +186,32 @@ A arquitetura assíncrona resolve **TODOS os problemas identificados**:
 ### Fase 1: Preparação (1-2 dias)
 
 **Tasks**:
-- [ ] Criar volume Docker para sessão Telegram
-- [ ] Script de autenticação interativa one-time
-- [ ] Configurar RabbitMQ queues e exchanges
-- [ ] Documentar processo de autenticação inicial
+* [ ] Criar volume Docker para sessão Telegram
+* [ ] Script de autenticação interativa one-time
+* [ ] Configurar RabbitMQ queues e exchanges
+* [ ] Documentar processo de autenticação inicial
 
 **Deliverables**:
-- Volume `telegram-mtproto-session` criado
-- Script `scripts/telegram/authenticate-interactive.sh`
-- Queues `telegram.sync.requests` e `telegram.sync.responses` configuradas
+* Volume `telegram-mtproto-session` criado
+* Script `scripts/telegram/authenticate-interactive.sh`
+* Queues `telegram.sync.requests` e `telegram.sync.responses` configuradas
 
 ---
 
 ### Fase 2: MTProto Worker Isolado (2-3 dias)
 
 **Tasks**:
-- [ ] Criar `apps/telegram-gateway/src/worker.js`
-- [ ] Implementar consumidor RabbitMQ
-- [ ] Adicionar health check via RabbitMQ connection
-- [ ] Implementar graceful shutdown handler
-- [ ] Testar sessão persistence entre restarts
+* [ ] Criar `apps/telegram-gateway/src/worker.js`
+* [ ] Implementar consumidor RabbitMQ
+* [ ] Adicionar health check via RabbitMQ connection
+* [ ] Implementar graceful shutdown handler
+* [ ] Testar sessão persistence entre restarts
 
 **Deliverables**:
-- MTProto Worker rodando 24/7
-- Sessão persiste em `/data/.session`
-- Health check funcional
-- Dockerfile atualizado (worker mode)
+* MTProto Worker rodando 24/7
+* Sessão persiste em `/data/.session`
+* Health check funcional
+* Dockerfile atualizado (worker mode)
 
 **Code Example**:
 
@@ -274,17 +275,17 @@ main();
 ### Fase 3: Gateway API Refactoring (2-3 dias)
 
 **Tasks**:
-- [ ] Implementar cache-first logic (Redis)
-- [ ] Criar endpoint `/api/telegram-gateway/jobs/:id`
-- [ ] Refatorar `/sync-messages` para async (202 Accepted)
-- [ ] Adicionar RabbitMQ producer logic
-- [ ] Consumer de `telegram.sync.responses`
+* [ ] Implementar cache-first logic (Redis)
+* [ ] Criar endpoint `/api/telegram-gateway/jobs/:id`
+* [ ] Refatorar `/sync-messages` para async (202 Accepted)
+* [ ] Adicionar RabbitMQ producer logic
+* [ ] Consumer de `telegram.sync.responses`
 
 **Deliverables**:
-- Gateway API retorna 202 Accepted
-- Redis cache funcionando (5 min TTL)
-- Job polling endpoint funcional
-- RabbitMQ producer implementado
+* Gateway API retorna 202 Accepted
+* Redis cache funcionando (5 min TTL)
+* Job polling endpoint funcional
+* RabbitMQ producer implementado
 
 **Code Example**:
 
@@ -350,15 +351,15 @@ telegramGatewayRouter.get('/jobs/:jobId', async (req, res) => {
 ### Fase 4: Frontend Updates (1 dia)
 
 **Tasks**:
-- [ ] Implementar polling logic no `useTelegramGateway.ts`
-- [ ] Adicionar loading states (queued, processing, completed)
-- [ ] Tratamento de erros async
-- [ ] UI feedback para cache hit/miss
+* [ ] Implementar polling logic no `useTelegramGateway.ts`
+* [ ] Adicionar loading states (queued, processing, completed)
+* [ ] Tratamento de erros async
+* [ ] UI feedback para cache hit/miss
 
 **Deliverables**:
-- Polling implementado com intervalo de 2s
-- Loading states no dashboard
-- Error handling gracioso
+* Polling implementado com intervalo de 2s
+* Loading states no dashboard
+* Error handling gracioso
 
 **Code Example**:
 
@@ -423,16 +424,16 @@ export function useSyncMessages() {
 ### Fase 5: Validação E2E (1 dia)
 
 **Tasks**:
-- [ ] Testar full flow: Frontend → Gateway → RabbitMQ → Worker → Telegram
-- [ ] Validar cache hit/miss scenarios
-- [ ] Testar MTProto Worker offline/online
-- [ ] Verificar sessão persistence
-- [ ] Load testing (100 concurrent requests)
+* [ ] Testar full flow: Frontend → Gateway → RabbitMQ → Worker → Telegram
+* [ ] Validar cache hit/miss scenarios
+* [ ] Testar MTProto Worker offline/online
+* [ ] Verificar sessão persistence
+* [ ] Load testing (100 concurrent requests)
 
 **Deliverables**:
-- Test suite E2E passing
-- Load test results (< 200ms p99 latency)
-- Documentação de testes
+* Test suite E2E passing
+* Load test results (< 200ms p99 latency)
+* Documentação de testes
 
 ---
 
@@ -465,9 +466,9 @@ export function useSyncMessages() {
 
 ### Documentation
 
-* [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md) - Proposta completa
-* [Diagram PlantUML](/docs/content/diagrams/telegram-gateway-async-architecture.puml) - Arquitetura visual
-* [RUNTIME-CONFIG-API-ARCHITECTURE.md](/docs/RUNTIME-CONFIG-API-ARCHITECTURE.md) - Runtime Config (já implementado)
+* [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md) - Proposta completa
+* [Diagram PlantUML](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/diagrams/telegram-gateway-async-architecture.puml) - Arquitetura visual
+* [RUNTIME-CONFIG-API-ARCHITECTURE.md](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/RUNTIME-CONFIG-API-ARCHITECTURE.md) - Runtime Config (já implementado)
 
 ### External References
 

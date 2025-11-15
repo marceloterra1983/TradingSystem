@@ -14,7 +14,7 @@ import {
   ChevronRight,
   RefreshCw,
   AlertCircle,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
@@ -60,7 +60,7 @@ interface DirectorySelectorProps {
 export const DirectorySelector: React.FC<DirectorySelectorProps> = ({
   value,
   onChange,
-  baseUrl = "http://localhost:3403",
+  baseUrl = "/api/v1/rag",
   className = "",
   disabled = false,
 }) => {

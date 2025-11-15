@@ -10,7 +10,7 @@
  * @module tp-capital/components
  */
 
-import { AlertTriangle } from '@/icons';
+import { AlertTriangle } from "@/icons";
 import { formatNumber, formatTimestamp } from "../utils";
 import { SignalRow as SignalRowType } from "../types";
 

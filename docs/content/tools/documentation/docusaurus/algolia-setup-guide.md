@@ -1,5 +1,6 @@
 ---
 title: "Algolia DocSearch Setup"
+slug: /tools/documentation/docusaurus/algolia-setup-guide
 description: "How to request DocSearch access and configure the crawler for TradingSystem docs."
 tags:
   - tools

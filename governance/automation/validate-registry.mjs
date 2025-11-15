@@ -151,14 +151,14 @@ async function main() {
   }
 
   if (errors.length) {
-    // eslint-disable-next-line no-console
+     
     console.error('[governance:validate] Validation failed:');
     for (const err of errors) {
-      // eslint-disable-next-line no-console
+       
       console.error(`  - ${err}`);
     }
     if (warnings.length) {
-      // eslint-disable-next-line no-console
+       
       console.warn('[governance:validate] Warnings:');
       warnings.forEach((warning) => console.warn(`  - ${warning}`));
     }
@@ -166,19 +166,19 @@ async function main() {
     return;
   }
 
-  // eslint-disable-next-line no-console
+   
   console.log(
     `[governance:validate] Registry OK (${registry.artifacts.length} artifacts).`,
   );
   if (warnings.length) {
-    // eslint-disable-next-line no-console
+     
     console.warn('[governance:validate] Warnings:');
     warnings.forEach((warning) => console.warn(`  - ${warning}`));
   }
 }
 
 main().catch((error) => {
-  // eslint-disable-next-line no-console
+   
   console.error('[governance:validate] Unexpected error:', error);
   process.exitCode = 1;
 });

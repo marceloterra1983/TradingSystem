@@ -9,7 +9,7 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import {

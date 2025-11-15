@@ -1,0 +1,80 @@
+src/main.tsx:11:    console.log("[PWA] Service worker active:", registration.scope);
+src/main.tsx:14:    console.log("[PWA] New version available");
+src/main.tsx:18:    console.error("[PWA] Service worker error:", error);
+src/components/catalog/AgentsCatalogView.tsx:216:      console.error("Clipboard API indisponível.");
+src/components/catalog/AgentsCatalogView.tsx:222:      console.error("Falha ao copiar nome do agente.", error);
+src/components/catalog/CommandsCatalogView.tsx:240:        console.error("Failed to copy text", error);
+src/components/ui/logo.tsx:104:        console.error("Logo failed to load:", logoSrc);
+src/components/layout/PageContent.tsx:33:      console.error("Page content failed to load", error, errorInfo);
+src/components/layout/LayoutHeader.tsx:41:      console.error("Failed to copy URL:", error);
+src/components/pages/DocsHybridSearchPage.tsx:212:    console.error("[DocsSearch] Failed to persist key", { key, error });
+src/components/pages/DocsHybridSearchPage.tsx:223:    console.error("[DocsSearch] Failed to remove key", { key, error });
+src/components/pages/DocsHybridSearchPage.tsx:269:    console.warn("[DocsSearch] Stored results malformed, resetting cache");
+src/components/pages/DocsHybridSearchPage.tsx:272:    console.error("[DocsSearch] Failed to parse cached results", error);
+src/components/pages/DocusaurusPage.tsx:121:  console.log("[DocusaurusPage] activeView:", activeView);
+src/components/pages/DocusaurusPage.tsx:122:  console.log("[DocusaurusPage] iframeSrc:", iframeSrc);
+src/components/pages/DocusaurusPage.tsx:123:  console.log("[DocusaurusPage] DEV mode:", import.meta.env.DEV);
+src/components/pages/DocusaurusPage.tsx:157:    console.log("[DocusaurusPage] Changing view to:", view);
+src/components/pages/DocusaurusPage.tsx:267:                console.log("[DocusaurusPage] Iframe carregado com sucesso")
+src/components/pages/DocusaurusPage.tsx:270:                console.error("[DocusaurusPage] Erro ao carregar iframe")
+src/components/pages/StructureMapPage.tsx:223:      console.error("[StructureMap] load failed", error);
+src/components/pages/MarkdownViewer.tsx:35:        console.log("[MarkdownViewer] Fetching:", docsUrl);
+src/components/pages/MarkdownViewer.tsx:45:        console.error("[MarkdownViewer] Failed to fetch document:", err);
+src/components/pages/telegram-gateway/SimpleChannelsCard.tsx:61:      console.error("Failed to toggle channel:", error);
+src/components/pages/CollectionFormDialog.tsx:146:      // console.log('🔍 [CollectionFormDialog] Initializing form:', { mode });
+src/components/pages/CollectionFormDialog.tsx:264:      console.error("❌ Validation errors:", validationErrors);
+src/components/pages/CollectionFormDialog.tsx:269:    // console.log('✅ Validation passed, starting submission...');
+src/components/pages/CollectionFormDialog.tsx:273:      // console.log('📤 Calling onSubmit...');
+src/components/pages/CollectionFormDialog.tsx:284:      console.error("❌ Form submission error:", error);
+src/components/pages/CollectionFormDialog.tsx:290:      // console.log('🔄 Resetting isSubmitting to false');
+src/components/pages/CollectionsManagementCard.tsx:116:      console.log("🔄 Auto-refreshing collections stats...");
+src/components/pages/CollectionsManagementCard.tsx:198:      console.warn("Failed to persist toast log:", error);
+src/components/pages/CollectionsManagementCard.tsx:212:      console.log("🔄 Ingest triggered:", {
+src/components/pages/CollectionsManagementCard.tsx:228:        console.log("✓ No orphans or pending files to process");
+src/components/pages/CollectionsManagementCard.tsx:235:        console.log(
+src/components/pages/CollectionsManagementCard.tsx:274:          console.error("❌ Batch ingestion failed:", error);
+src/components/pages/CollectionsManagementCard.tsx:303:        console.log(`🧹 Limpando ${orphansCount} chunk(s) órfão(s)...`);
+src/components/pages/CollectionsManagementCard.tsx:324:            console.log(
+src/components/pages/CollectionsManagementCard.tsx:341:          console.error("Failed to clean orphans:", error);
+src/components/pages/CollectionsManagementCard.tsx:353:        console.log(`📥 Indexando ${pendingCount} arquivo(s) pendente(s)...`);
+src/components/pages/CollectionsManagementCard.tsx:354:        console.log(`⏱️  Estimativa: ~${pendingCount * 2}s (com GPU RTX 5090)`);
+src/components/pages/CollectionsManagementCard.tsx:391:          console.log(
+src/components/pages/CollectionsManagementCard.tsx:394:          console.log(`   📄 Arquivos NOVOS indexados: ${newFiles}`);
+src/components/pages/CollectionsManagementCard.tsx:395:          console.log(`   🗄️  Chunks NOVOS criados: ${newChunks}`);
+src/components/pages/CollectionsManagementCard.tsx:396:          console.log(
+src/components/pages/CollectionsManagementCard.tsx:399:          console.log(
+src/components/pages/CollectionsManagementCard.tsx:433:          console.error("❌ Ingestion failed:", error);
+src/components/pages/CollectionsManagementCard.tsx:434:          console.log(
+src/components/pages/CollectionsManagementCard.tsx:459:      console.log("✓ Ingest process completed");
+src/components/pages/CollectionsManagementCard.tsx:461:      console.error("Ingest process error:", error);
+src/components/pages/CollectionsManagementCard.tsx:526:                console.log("🔄 Manual refresh button clicked");
+src/components/pages/CollectionsManagementCard.tsx:527:                console.log(
+src/components/pages/CollectionsManagementCard.tsx:532:                console.log("✓ Refresh completed");
+src/components/pages/CollectionsManagementCard.tsx:647:                        console.log(
+src/components/pages/CollectionSelector.tsx:53:      console.error("Failed to load collections:", err);
+src/components/pages/GovernancePage.tsx:187:      console.error("[Governance] Snapshot load failed", error);
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:286:          console.error("Failed to fetch models:", err);
+src/components/pages/TestModelsPage.tsx:20:    console.log("🧪 [TestModelsPage] useEffect triggered");
+src/components/pages/TestModelsPage.tsx:26:        console.log("🧪 [TestModelsPage] Fetching models...");
+src/components/pages/TestModelsPage.tsx:28:        console.log("🧪 [TestModelsPage] Models received:", data);
+src/components/pages/TestModelsPage.tsx:35:        console.error("🧪 [TestModelsPage] Error:", err);
+src/components/pages/TestModelsPage.tsx:52:  console.log("🧪 [TestModelsPage] Render #", renderCountRef.current, {
+src/components/pages/collections/BatchIngestionProgressModal.tsx:63:      console.error("[BatchIngestion] Failed to fetch status:", err);
+src/components/pages/collections/BatchIngestionProgressModal.tsx:101:      console.error("[BatchIngestion] Failed to cancel:", err);
+src/components/pages/DocumentationMetricsPage.tsx:278:          console.error(
+src/components/pages/DocumentationMetricsPage.tsx:298:      console.error(
+src/components/pages/DocumentationMetricsPage.tsx:314:        console.error(
+src/components/pages/CollectionDeleteDialog.tsx:58:      console.error("Delete error:", error);
+src/components/pages/URLsPage.tsx:40:      console.error("Unable to copy to clipboard", error);
+src/components/pages/DocumentationSystemsPageSimple.tsx:24:      console.error("Error loading systems:", err);
+src/components/pages/PRDsPage.tsx:217:            console.warn("[PRD Viewer] attempt failed", candidate.url, message);
+src/components/pages/PRDsPage.tsx:228:        console.error(
+src/components/pages/workspace/components/AddItemDialog.tsx:71:        console.error("Failed to load categories:", error);
+src/components/pages/workspace/components/AddItemDialog.tsx:105:      console.error("Failed to create item:", error);
+src/components/pages/workspace/components/EditItemDialog.tsx:99:        console.error("Failed to load categories:", error);
+src/components/pages/workspace/components/EditItemDialog.tsx:133:      console.error("Failed to update item:", err);
+src/components/pages/workspace/components/DeleteItemDialog.tsx:45:      console.error("Failed to delete item:", err);
+src/components/pages/workspace/components/AddItemSection.tsx:66:      console.error("Failed to create item:", error);
+src/components/pages/DocumentationStatsPageSimple.tsx:41:      console.error("Error loading statistics:", err);
+src/hooks/useCustomLayout.tsx:97:        console.error(
+src/hooks/useCustomLayout.tsx:116:      console.error(

@@ -1,5 +1,6 @@
 ---
 title: API Gateway Evaluation - Kong vs Traefik
+slug: /reference/evaluations/api-gateway-comparison
 sidebar_position: 1
 tags: [evaluation, api-gateway, architecture, phase-3]
 domain: infrastructure

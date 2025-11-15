@@ -5,7 +5,7 @@ import {
   MessageSquare,
   Image as ImageIcon,
   Send,
-} from '@/icons';
+} from "@/icons";
 import { ENDPOINTS } from "../../../config/endpoints";
 import type { ForwardedMessage } from "./ForwardedMessagesTable";
 

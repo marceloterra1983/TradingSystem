@@ -1,5 +1,6 @@
 ---
 title: Telegram Stack - Guia Oficial de Deployment
+slug: /tools/telegram/deployment-guide
 description: Guia completo para deploy e operação da stack Telegram com monitoramento integrado
 tags:
   - telegram
@@ -87,6 +88,7 @@ watch -n 2 'docker ps --filter "label=com.tradingsystem.stack=telegram-gateway" 
 ### Core Services
 
 #### 1. TimescaleDB (telegram-timescale)
+
 - **Porta:** 5434 (interna), não exposta externamente
 - **Banco:** `telegram_gateway`
 - **Usuário:** `telegram`
@@ -94,11 +96,13 @@ watch -n 2 'docker ps --filter "label=com.tradingsystem.stack=telegram-gateway" 
 - **Recursos:** 2 CPU, 4GB RAM
 
 **Conexão:**
+
 ```bash
 docker exec telegram-timescale psql -U telegram -d telegram_gateway
 ```
 
 #### 2. PgBouncer (telegram-pgbouncer)
+
 - **Porta:** 6434 (interna), não exposta externamente
 - **Pool Size:** 50 conexões
 - **Health Check:** `pg_isready`
@@ -107,30 +111,35 @@ docker exec telegram-timescale psql -U telegram -d telegram_gateway
 **Uso:** Connection pooling para reduzir overhead de conexões ao TimescaleDB
 
 #### 3. Redis Master (telegram-redis-master)
+
 - **Porta:** 6379 (interna), não exposta externamente
 - **Persistência:** AOF + RDB
 - **Health Check:** `redis-cli ping`
 - **Recursos:** 0.5 CPU, 512MB RAM
 
 **Teste:**
+
 ```bash
 docker exec telegram-redis-master redis-cli ping
 # PONG
 ```
 
 #### 4. Redis Replica (telegram-redis-replica)
+
 - **Porta:** 6385 (interna)
 - **Modo:** Read-only replica
 - **Health Check:** `redis-cli ping`
 - **Recursos:** 0.5 CPU, 512MB RAM
 
 #### 5. Redis Sentinel (telegram-redis-sentinel)
+
 - **Porta:** 26379 (interna)
 - **Função:** HA monitoring e failover automático
 - **Health Check:** `redis-cli -p 26379 ping`
 - **Recursos:** 0.25 CPU, 128MB RAM
 
 #### 6. RabbitMQ (telegram-rabbitmq)
+
 - **Porta AMQP:** 5672 (interna)
 - **Porta Admin:** 15672 (http://localhost:15672)
 - **Credenciais:** `telegram` / `${TELEGRAM_RABBITMQ_PASSWORD}`
@@ -140,6 +149,7 @@ docker exec telegram-redis-master redis-cli ping
 **Admin UI:** http://localhost:15672
 
 #### 7. MTProto (telegram-mtproto)
+
 - **Porta Externa:** 14007
 - **Porta Interna:** 4007
 - **Protocolo:** HTTP + WebSocket
@@ -147,6 +157,7 @@ docker exec telegram-redis-master redis-cli ping
 - **Recursos:** 1 CPU, 1GB RAM
 
 **API:**
+
 ```bash
 # Health check (via exposição direta MTProto)
 curl http://localhost:14007/health
@@ -158,6 +169,7 @@ curl -X POST http://localhost:14007/sync-messages \
 ```
 
 #### 8. Gateway API (telegram-gateway-api)
+
 - **Exposição:** Traefik → `http://localhost:9080/api/telegram-gateway`
 - **Porta Interna:** 4010
 - **Protocolo:** HTTP REST
@@ -165,6 +177,7 @@ curl -X POST http://localhost:14007/sync-messages \
 - **Recursos:** 1 CPU, 1GB RAM
 
 **Endpoints (via Traefik):**
+
 ```bash
 # Listar canais
 curl http://localhost:9080/api/telegram-gateway/channels | jq '.data'
@@ -183,6 +196,7 @@ curl -X POST http://localhost:9080/api/telegram-gateway/sync-messages \
 ### Monitoring Services
 
 #### 9. Prometheus (telegram-prometheus)
+
 - **Exposição:** Interna (sem porta publicada)
 - **Retenção:** 30 dias
 - **Scrape Interval:** 15s
@@ -190,6 +204,7 @@ curl -X POST http://localhost:9080/api/telegram-gateway/sync-messages \
 - **Recursos:** 1 CPU, 1GB RAM
 
 **Acesso:**
+
 ```bash
 # Abrir shell interativo e usar port-forward temporário
 docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml \
@@ -198,10 +213,12 @@ docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.
 ```
 
 **Configuração:**
+
 - `tools/compose/telegram/monitoring/prometheus.yml`
 - `tools/compose/telegram/monitoring/alerts/telegram-alerts.yml`
 
 #### 10. Grafana (telegram-grafana)
+
 - **Exposição:** Interna (sem porta publicada). Planeje publicar via Traefik quando necessário.
 - **Porta Interna:** 3000
 - **Credenciais:** `admin` / `admin` (trocar no primeiro login)
@@ -209,20 +226,24 @@ docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.
 - **Recursos:** 0.5 CPU, 512MB RAM
 
 **Acesso temporário:**
+
 ```bash
 docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml \
   port telegram-grafana 3000
 ```
 
 **Plugins:**
+
 - `redis-datasource`
 - `marcusolsson-json-datasource`
 
 **Data Sources Provisionados:**
+
 - Telegram Prometheus (http://telegram-prometheus:9090)
 - Telegram TimescaleDB (telegram-timescale:5432)
 
 #### 11. Postgres Exporter (telegram-postgres-exporter)
+
 - **Exposição:** Interna (sem porta publicada)
 - **Target:** `telegram-timescale:5432/telegram_gateway`
 - **Health Check:** Metrics endpoint
@@ -231,18 +252,21 @@ docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.
 **Dica:** utilize Prometheus para consumir as métricas via rede interna.
 
 **Métricas Exportadas:**
+
 - `pg_up` - Database status
 - `pg_stat_database_*` - Database statistics
 - `pg_locks_*` - Lock statistics
 - `pg_database_size_bytes` - Database size
 
 #### 12. Redis Exporter (telegram-redis-exporter)
+
 - **Exposição:** Interna (sem porta publicada)
 - **Target:** `telegram-redis-master:6379`
 - **Health Check:** Metrics endpoint
 - **Recursos:** 0.25 CPU, 128MB RAM
 
 **Métricas Exportadas:**
+
 - `redis_up` - Redis status
 - `redis_connected_clients` - Client connections
 - `redis_used_memory_bytes` - Memory usage
@@ -280,6 +304,7 @@ telegram-grafana-data        # Grafana dashboards
 ```
 
 **Backup dos volumes:**
+
 ```bash
 # Listar volumes
 docker volume ls | grep telegram
@@ -329,36 +354,42 @@ EOF
 ### Verificação Individual
 
 **TimescaleDB:**
+
 ```bash
 docker exec telegram-timescale pg_isready -U telegram
 # /var/run/postgresql:5432 - accepting connections
 ```
 
 **Redis:**
+
 ```bash
 docker exec telegram-redis-master redis-cli ping
 # PONG
 ```
 
 **RabbitMQ:**
+
 ```bash
 docker exec telegram-rabbitmq rabbitmq-diagnostics ping
 # Ping succeeded
 ```
 
 **MTProto:**
+
 ```bash
 curl http://localhost:14007/health | jq
 # {"status": "healthy", "timestamp": "2025-11-11T..."}
 ```
 
 **Gateway API:**
+
 ```bash
 curl http://localhost:9080/api/telegram-gateway/health | jq
 # {"status": "healthy", "services": {...}}
 ```
 
 **Prometheus (acesso interno):**
+
 ```bash
 # Expor temporariamente
 PORT=$(docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml port telegram-prometheus 9090 | cut -d':' -f2)
@@ -366,6 +397,7 @@ curl http://localhost:${PORT}/-/healthy
 ```
 
 **Grafana (acesso interno):**
+
 ```bash
 PORT=$(docker compose -f tools/compose/docker-compose.4-2-telegram-stack-minimal-ports.yml port telegram-grafana 3000 | cut -d':' -f2)
 curl http://localhost:${PORT}/api/health | jq
@@ -385,6 +417,7 @@ curl http://localhost:${PORT}/api/health | jq
 ### Criar Dashboard Personalizado
 
 **Query Prometheus:**
+
 ```promql
 # Uso de memória do Redis
 redis_used_memory_bytes{job="telegram-redis"}
@@ -404,6 +437,7 @@ rate(telegram_messages_processed_total[5m])
 **Arquivo:** `tools/compose/telegram/monitoring/alerts/telegram-alerts.yml`
 
 **Alertas ativos:**
+
 - Database down (pg_up == 0)
 - Redis down (redis_up == 0)
 - High memory usage (> 90%)
@@ -556,10 +590,10 @@ docker exec telegram-prometheus kill -HUP 1
 
 ## 📚 Documentação Relacionada
 
-- **[Telegram Issues Summary](../../../TELEGRAM-ISSUES-SUMMARY.md)** - Problemas conhecidos e soluções
-- **[Telegram Channels Names Issue](../../../docs/TELEGRAM-CHANNELS-NAMES-ISSUE.md)** - Problema de nomes genéricos
-- **[Telegram Sync Button Timeout](../../../docs/TELEGRAM-SYNC-BUTTON-TIMEOUT.md)** - Timeout do botão de sync
-- **[Telegram Monitoring Integration](../../../docs/TELEGRAM-MONITORING-INTEGRATION.md)** - Detalhes da integração de monitoramento
+- **[Telegram Issues Summary](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/TELEGRAM-ISSUES-SUMMARY.md)** - Problemas conhecidos e soluções
+- **[Telegram Channels Names Issue](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/TELEGRAM-CHANNELS-NAMES-ISSUE.md)** - Problema de nomes genéricos
+- **[Telegram Sync Button Timeout](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/TELEGRAM-SYNC-BUTTON-TIMEOUT.md)** - Timeout do botão de sync
+- **[Telegram Monitoring Integration](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/TELEGRAM-MONITORING-INTEGRATION.md)** - Detalhes da integração de monitoramento
 - **[Port Allocation](../ports-services.mdx)** - Registro de portas do sistema
 
 ---
@@ -578,12 +612,14 @@ A stack usa **minimal port exposure** para segurança:
 ### Recomendações
 
 1. **Troque senhas default**
+
    ```bash
    # Gerar senha segura
    openssl rand -base64 32
    ```
 
 2. **Use firewall para portas expostas**
+
    ```bash
    # Exemplo com ufw
    sudo ufw allow from 192.168.0.0/24 to any port 14007    # MTProto
@@ -591,6 +627,7 @@ A stack usa **minimal port exposure** para segurança:
    ```
 
 3. **Habilite TLS/SSL** (future)
+
    - MTProto: TLS termination com Traefik
    - Gateway API: HTTPS com certificado válido
 
@@ -606,6 +643,7 @@ A stack usa **minimal port exposure** para segurança:
 ### Scaling Horizontal
 
 **Redis Cluster:**
+
 ```yaml
 # Adicionar mais replicas
 telegram-redis-replica-2:
@@ -614,6 +652,7 @@ telegram-redis-replica-2:
 ```
 
 **MTProto Workers:**
+
 ```yaml
 # Adicionar workers MTProto
 telegram-mtproto-worker-2:
@@ -625,13 +664,14 @@ telegram-mtproto-worker-2:
 ### Scaling Vertical
 
 **Aumentar recursos:**
+
 ```yaml
 telegram-timescale:
   deploy:
     resources:
       limits:
-        cpus: '4.0'      # 2 → 4 CPUs
-        memory: 8G       # 4G → 8G RAM
+        cpus: "4.0" # 2 → 4 CPUs
+        memory: 8G # 4G → 8G RAM
 ```
 
 ---

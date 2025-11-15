@@ -1,4 +1,4 @@
-import { Menu, Sun, Moon, Copy, Check } from '@/icons';
+import { Menu, Sun, Moon, Copy, Check } from "@/icons";
 import { Clock } from "../ui/clock";
 import { cn } from "../../lib/utils";
 import { Page, getSectionByPageId } from "../../data/navigation";

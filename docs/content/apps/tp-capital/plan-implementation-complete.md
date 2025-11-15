@@ -1,5 +1,6 @@
 ---
 title: Plan Implementation Complete
+slug: /apps/tp-capital/plan-implementation-complete
 tags: [tp-capital, autonomous-stack, deployment]
 domain: backend
 owner: BackendGuild

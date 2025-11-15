@@ -31,9 +31,9 @@
  */
 
 export enum CircuitState {
-  CLOSED = 'CLOSED',
-  OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN',
+  CLOSED = "CLOSED",
+  OPEN = "OPEN",
+  HALF_OPEN = "HALF_OPEN",
 }
 
 export interface CircuitBreakerConfig {
@@ -79,7 +79,7 @@ export class CircuitBreaker {
     if (this.state === CircuitState.OPEN) {
       const timeSinceLastFailure = Date.now() - this.lastFailureTime;
       if (timeSinceLastFailure >= this.config.resetTimeout) {
-        console.log('[CircuitBreaker] Transitioning to HALF_OPEN');
+        console.log("[CircuitBreaker] Transitioning to HALF_OPEN");
         this.state = CircuitState.HALF_OPEN;
         return true;
       }
@@ -97,7 +97,7 @@ export class CircuitBreaker {
    */
   recordSuccess(): void {
     if (this.state === CircuitState.HALF_OPEN) {
-      console.log('[CircuitBreaker] Success in HALF_OPEN, closing circuit');
+      console.log("[CircuitBreaker] Success in HALF_OPEN, closing circuit");
       this.state = CircuitState.CLOSED;
       this.failures = [];
     }
@@ -114,7 +114,7 @@ export class CircuitBreaker {
 
     // Remove failures outside monitoring period
     this.failures = this.failures.filter(
-      (timestamp) => now - timestamp < this.config.monitoringPeriod
+      (timestamp) => now - timestamp < this.config.monitoringPeriod,
     );
 
     // Add new failure
@@ -124,7 +124,7 @@ export class CircuitBreaker {
     if (this.failures.length >= this.config.failureThreshold) {
       if (this.state !== CircuitState.OPEN) {
         console.warn(
-          `[CircuitBreaker] Opening circuit (${this.failures.length} failures)`
+          `[CircuitBreaker] Opening circuit (${this.failures.length} failures)`,
         );
         this.state = CircuitState.OPEN;
       }
@@ -159,7 +159,7 @@ export class CircuitBreaker {
   getFailureCount(): number {
     const now = Date.now();
     return this.failures.filter(
-      (timestamp) => now - timestamp < this.config.monitoringPeriod
+      (timestamp) => now - timestamp < this.config.monitoringPeriod,
     ).length;
   }
 }

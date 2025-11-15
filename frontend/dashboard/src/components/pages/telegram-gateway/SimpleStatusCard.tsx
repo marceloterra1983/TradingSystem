@@ -9,7 +9,7 @@ import {
   Clock,
   Hash,
   Info,
-} from '@/icons';
+} from "@/icons";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 

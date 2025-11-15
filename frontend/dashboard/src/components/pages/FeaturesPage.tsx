@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { List, BarChart3 } from '@/icons';
+import { List, BarChart3 } from "@/icons";
 
 export function FeaturesPage() {
   const sections = [

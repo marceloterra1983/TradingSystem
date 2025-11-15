@@ -1,5 +1,6 @@
 ---
 title: RAG Services Architecture
+slug: /tools/rag/architecture
 sidebar_position: 1
 description: "Comprehensive architecture documentation for RAG (Retrieval-Augmented Generation) Services including system design, components, data flows, and deployment"
 tags: [rag, architecture, documentation]
@@ -749,8 +750,8 @@ docker logs rag-collections-service | grep "File change detected"
 - [File Watcher Auto-Ingestion](../../diagrams/rag-services-sequence-filewatcher.puml)
 
 ### Architecture Decision Records (ADRs)
-- [ADR-001: Redis Caching Strategy](../../reference/adrs/rag-services/ADR-001-redis-caching-strategy)
-- [ADR-002: File Watcher Auto-Ingestion](../../reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion)
+- [ADR-001: Redis Caching Strategy](../../reference/adrs/rag-services/ADR-001-redis-caching-strategy.md)
+- [ADR-002: File Watcher Auto-Ingestion](../../reference/adrs/rag-services/ADR-002-file-watcher-auto-ingestion.md)
 
 ### Implementation Details
 - **Cache Implementation**: See `tools/rag-services/src/services/cacheService.ts`

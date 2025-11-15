@@ -21,7 +21,7 @@ import {
   Info,
   ChevronDown,
   ChevronRight,
-} from '@/icons';
+} from "@/icons";
 import { LIMIT_OPTIONS } from "./constants";
 import { fetchLogs } from "./api";
 import { formatTimestamp, formatContext, getLevelIcon } from "./utils";

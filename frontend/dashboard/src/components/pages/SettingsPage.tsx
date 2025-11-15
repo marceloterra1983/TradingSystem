@@ -1,14 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import {
-  User,
-  Bell,
-  Palette,
-  Globe,
-  Shield,
-  Database,
-  Zap,
-} from '@/icons';
+import { User, Bell, Palette, Globe, Shield, Database, Zap } from "@/icons";
 
 /**
  * Settings Page - System configuration and user preferences

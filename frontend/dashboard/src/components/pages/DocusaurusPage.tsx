@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink } from '@/icons';
+import { ExternalLink } from "@/icons";
 import { Button } from "../ui/button";
 import EscopoPageNew from "./EscopoPageNew";
 import APIViewerPage from "./APIViewerPage";
@@ -51,19 +51,17 @@ const resolveDocsBaseUrl = (): string => {
   if (typeof window !== "undefined" && window.location?.origin) {
     const origin = trimTrailingSlash(window.location.origin);
     const normalized =
-      candidate && candidate !== "/"
-        ? ensureLeadingSlash(candidate)
-        : "/docs";
+      candidate && candidate !== "/" ? ensureLeadingSlash(candidate) : "/docs";
     return trimTrailingSlash(`${origin}${normalized}`);
   }
 
   if (candidate.startsWith("/")) {
     return trimTrailingSlash(
-      `http://localhost:9080${ensureLeadingSlash(candidate)}`,
+      `${window.location.origin}${ensureLeadingSlash(candidate)}`,
     );
   }
 
-  return trimTrailingSlash(candidate || "http://localhost:9080/docs");
+  return trimTrailingSlash(candidate || `${window.location.origin}/docs`);
 };
 
 const VIEW_KEYS: DocsView[] = [

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Youtube, Play, ExternalLink } from '@/icons';
+import { Youtube, Play, ExternalLink } from "@/icons";
 
 interface YouTubeAuthor {
   name: string;

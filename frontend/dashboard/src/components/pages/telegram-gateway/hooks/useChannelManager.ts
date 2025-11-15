@@ -3,7 +3,7 @@
  * Extracted from TelegramGatewayFinal.tsx
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { TELEGRAM_GATEWAY_TOKEN } from "@/hooks/useTelegramGateway";
 import { TELEGRAM_GATEWAY_CHANNELS_API_URL } from "../utils/constants";
 
@@ -65,11 +65,17 @@ const readGatewayResponse = async (
     if (parsed && typeof parsed === "object") {
       return parsed as { success?: boolean } & Record<string, unknown>;
     }
-    throw new Error("Resposta inesperada do Telegram Gateway (formato inválido)");
+    throw new Error(
+      "Resposta inesperada do Telegram Gateway (formato inválido)",
+    );
   } catch (error) {
     const reason =
-      error instanceof Error ? error.message : "JSON malformado recebido do gateway";
-    throw new Error(`Falha ao interpretar resposta do Telegram Gateway: ${reason}`);
+      error instanceof Error
+        ? error.message
+        : "JSON malformado recebido do gateway";
+    throw new Error(
+      `Falha ao interpretar resposta do Telegram Gateway: ${reason}`,
+    );
   }
 };
 
@@ -79,17 +85,23 @@ export function useChannelManager(
   const gatewayToken = TELEGRAM_GATEWAY_TOKEN;
   const channelsEndpoint = TELEGRAM_GATEWAY_CHANNELS_API_URL;
 
-  const getHeaders = useCallback(
-    () => ({
+  const getHeaders = useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
-    }),
-    [gatewayToken],
-  );
-  const getAuthHeaders = useCallback(
-    (): Record<string, string> => (gatewayToken ? { "X-Gateway-Token": gatewayToken } : {}),
-    [gatewayToken],
-  );
+    };
+    if (gatewayToken) {
+      headers["X-Gateway-Token"] = gatewayToken;
+    }
+    return headers;
+  }, [gatewayToken]);
+
+  const getAuthHeaders = useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {};
+    if (gatewayToken) {
+      headers["X-Gateway-Token"] = gatewayToken;
+    }
+    return headers;
+  }, [gatewayToken]);
 
   const createChannel = useCallback(
     async (data: ChannelData): Promise<boolean> => {
@@ -139,9 +151,9 @@ export function useChannelManager(
         const response = await fetch(
           `${channelsEndpoint}/${encodeURIComponent(id)}`,
           {
-          method: "PUT",
-          headers: getHeaders(),
-          body: JSON.stringify(data),
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
           },
         );
 

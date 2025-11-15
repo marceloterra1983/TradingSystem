@@ -1,5 +1,6 @@
 ---
 title: "Code Quality Commands"
+slug: /tools/development/code-quality-commands
 sidebar_position: 2
 description: "Reference for linting, type checking, testing, and security audit scripts."
 tags:
@@ -353,7 +354,7 @@ npm install -g snyk
 
 ## 📖 Documentação Completa
 
-**Ver guia completo**: [Code Quality Checklist](../../development/code-quality-checklist)
+**Ver guia completo**: [Code Quality Checklist](../../development/code-quality-checklist.md)
 
 Inclui:
 - ✅ 12 categorias de verificação
@@ -405,7 +406,7 @@ npx vite-bundle-visualizer
 ## 🔗 Links Úteis
 
 - **CLAUDE.md** (arquivo na raiz) - Instruções do projeto
-- [Code Quality Checklist](../../development/code-quality-checklist) - Guia completo
+- [Code Quality Checklist](../../development/code-quality-checklist.md) - Guia completo
 - `scripts/workflows/README.md` - Workflows automatizados
 - `scripts/maintenance/health-check-all.sh` - Verificação de serviços
 

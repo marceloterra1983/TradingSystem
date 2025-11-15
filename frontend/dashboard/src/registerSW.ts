@@ -12,12 +12,14 @@ interface ServiceWorkerConfig {
 /**
  * Register the service worker
  */
-export async function registerServiceWorker(config: ServiceWorkerConfig = {}): Promise<void> {
+export async function registerServiceWorker(
+  config: ServiceWorkerConfig = {},
+): Promise<void> {
   // Only register in production and if browser supports SW
-  if (import.meta.env.DEV || !('serviceWorker' in navigator)) {
-    console.log('[SW Registration] Skipped:', {
+  if (import.meta.env.DEV || !("serviceWorker" in navigator)) {
+    console.log("[SW Registration] Skipped:", {
       isDev: import.meta.env.DEV,
-      supportsServiceWorker: 'serviceWorker' in navigator,
+      supportsServiceWorker: "serviceWorker" in navigator,
     });
     return;
   }
@@ -25,34 +27,42 @@ export async function registerServiceWorker(config: ServiceWorkerConfig = {}): P
   try {
     // Wait for page to load before registering
     await new Promise<void>((resolve) => {
-      if (document.readyState === 'complete') {
+      if (document.readyState === "complete") {
         resolve();
       } else {
-        window.addEventListener('load', () => resolve());
+        window.addEventListener("load", () => resolve());
       }
     });
 
-    console.log('[SW Registration] Registering service worker...');
+    console.log("[SW Registration] Registering service worker...");
 
-    const registration = await navigator.serviceWorker.register('/sw.js', {
-      scope: '/',
-      updateViaCache: 'none', // Always check for updates
+    const registration = await navigator.serviceWorker.register("/sw.js", {
+      scope: "/",
+      updateViaCache: "none", // Always check for updates
     });
 
-    console.log('[SW Registration] Service worker registered:', registration.scope);
+    console.log(
+      "[SW Registration] Service worker registered:",
+      registration.scope,
+    );
 
     // Handle updates
-    registration.addEventListener('updatefound', () => {
+    registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
 
       if (!newWorker) return;
 
-      console.log('[SW Registration] New service worker found, installing...');
+      console.log("[SW Registration] New service worker found, installing...");
 
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+      newWorker.addEventListener("statechange", () => {
+        if (
+          newWorker.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
           // New service worker available
-          console.log('[SW Registration] New service worker installed, update available');
+          console.log(
+            "[SW Registration] New service worker installed, update available",
+          );
 
           if (config.onUpdate) {
             config.onUpdate(registration);
@@ -60,8 +70,8 @@ export async function registerServiceWorker(config: ServiceWorkerConfig = {}): P
             // Default behavior: notify user about update
             notifyUpdate(registration);
           }
-        } else if (newWorker.state === 'activated') {
-          console.log('[SW Registration] Service worker activated');
+        } else if (newWorker.state === "activated") {
+          console.log("[SW Registration] Service worker activated");
 
           if (config.onSuccess) {
             config.onSuccess(registration);
@@ -71,17 +81,20 @@ export async function registerServiceWorker(config: ServiceWorkerConfig = {}): P
     });
 
     // Check for updates every hour
-    setInterval(() => {
-      console.log('[SW Registration] Checking for updates...');
-      registration.update();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        console.log("[SW Registration] Checking for updates...");
+        registration.update();
+      },
+      60 * 60 * 1000,
+    );
 
     // Initial success callback
     if (registration.active && config.onSuccess) {
       config.onSuccess(registration);
     }
   } catch (error) {
-    console.error('[SW Registration] Registration failed:', error);
+    console.error("[SW Registration] Registration failed:", error);
 
     if (config.onError) {
       config.onError(error as Error);
@@ -93,7 +106,7 @@ export async function registerServiceWorker(config: ServiceWorkerConfig = {}): P
  * Unregister the service worker
  */
 export async function unregisterServiceWorker(): Promise<boolean> {
-  if (!('serviceWorker' in navigator)) {
+  if (!("serviceWorker" in navigator)) {
     return false;
   }
 
@@ -102,13 +115,13 @@ export async function unregisterServiceWorker(): Promise<boolean> {
 
     if (registration) {
       const success = await registration.unregister();
-      console.log('[SW Registration] Service worker unregistered:', success);
+      console.log("[SW Registration] Service worker unregistered:", success);
       return success;
     }
 
     return false;
   } catch (error) {
-    console.error('[SW Registration] Unregistration failed:', error);
+    console.error("[SW Registration] Unregistration failed:", error);
     return false;
   }
 }
@@ -117,7 +130,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
  * Check if service worker is registered
  */
 export async function isServiceWorkerRegistered(): Promise<boolean> {
-  if (!('serviceWorker' in navigator)) {
+  if (!("serviceWorker" in navigator)) {
     return false;
   }
 
@@ -129,7 +142,7 @@ export async function isServiceWorkerRegistered(): Promise<boolean> {
  * Get service worker version
  */
 export async function getServiceWorkerVersion(): Promise<string | null> {
-  if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
+  if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
     return null;
   }
 
@@ -145,10 +158,9 @@ export async function getServiceWorkerVersion(): Promise<string | null> {
       resolve(event.data.version || null);
     };
 
-    navigator.serviceWorker.controller.postMessage(
-      { type: 'GET_VERSION' },
-      [messageChannel.port2]
-    );
+    navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" }, [
+      messageChannel.port2,
+    ]);
 
     // Timeout after 2 seconds
     setTimeout(() => resolve(null), 2000);
@@ -159,8 +171,8 @@ export async function getServiceWorkerVersion(): Promise<string | null> {
  * Notify user about available update
  */
 function notifyUpdate(registration: ServiceWorkerRegistration): void {
-  const updateBanner = document.createElement('div');
-  updateBanner.id = 'sw-update-banner';
+  const updateBanner = document.createElement("div");
+  updateBanner.id = "sw-update-banner";
   updateBanner.innerHTML = `
     <div style="
       position: fixed;
@@ -210,17 +222,19 @@ function notifyUpdate(registration: ServiceWorkerRegistration): void {
   document.body.appendChild(updateBanner);
 
   // Reload button
-  document.getElementById('sw-update-reload')?.addEventListener('click', () => {
+  document.getElementById("sw-update-reload")?.addEventListener("click", () => {
     if (registration.waiting) {
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
     window.location.reload();
   });
 
   // Dismiss button
-  document.getElementById('sw-update-dismiss')?.addEventListener('click', () => {
-    updateBanner.remove();
-  });
+  document
+    .getElementById("sw-update-dismiss")
+    ?.addEventListener("click", () => {
+      updateBanner.remove();
+    });
 }
 
 /**
@@ -228,6 +242,6 @@ function notifyUpdate(registration: ServiceWorkerRegistration): void {
  */
 export function skipWaiting(): void {
   if (navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+    navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
   }
 }

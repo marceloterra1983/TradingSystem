@@ -1,5 +1,6 @@
 ---
 title: "Venv Activation"
+slug: /tools/runtime/python/venv-activation
 tags: [documentation]
 domain: devops
 type: guide

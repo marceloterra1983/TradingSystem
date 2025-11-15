@@ -82,14 +82,14 @@ async function main() {
 
   await Promise.all(publishable.map((artifact) => writeDoc(artifact, artifact.publish)));
 
-  // eslint-disable-next-line no-console
+   
   console.log(
     `[governance:sync] Published ${publishable.length} governance artifacts to docs.`,
   );
 }
 
 main().catch((error) => {
-  // eslint-disable-next-line no-console
+   
   console.error('[governance:sync] Failed to publish artifacts:', error);
   process.exitCode = 1;
 });

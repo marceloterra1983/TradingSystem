@@ -4,7 +4,7 @@ import {
   CollapsibleCardTitle,
   CollapsibleCardContent,
 } from "./collapsible-card";
-import { AlertCircle, Rocket } from '@/icons';
+import { AlertCircle, Rocket } from "@/icons";
 
 export interface PlaceholderSectionProps {
   cardId: string;

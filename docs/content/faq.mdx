@@ -1,5 +1,6 @@
 ---
 title: Frequently Asked Questions
+slug: /faq
 description: Common troubleshooting answers and onboarding guidance.
 tags:
   - faq
@@ -33,7 +34,7 @@ OPENAI_API_KEY=sk-proj-real-key-here
 TIMESCALEDB_PASSWORD=secure-password-here
 ```
 
-**See**: [Environment Variables](./tools/security-config/env)
+**See**: [Environment Variables](tools/security-config/env.mdx)
 
 ---
 
@@ -68,7 +69,7 @@ export MY_SERVICE_PORT=7000
 
 **A**: Check `config/.env.defaults` - all variables are documented there with comments.
 
-**See**: [Environment Variables Reference](./tools/security-config/env)
+**See**: [Environment Variables Reference](tools/security-config/env.mdx)
 
 ---
 
@@ -103,7 +104,7 @@ lsof -i :3103
 npm --prefix frontend/dashboard run dev
 ```
 
-**See**: [Dashboard Troubleshooting](./apps/workspace/operations#troubleshooting)
+**See**: [Dashboard Troubleshooting](apps/workspace/operations.mdx#troubleshooting)
 
 ---
 
@@ -228,7 +229,7 @@ psql -h localhost -p 5433 -U timescale -d tradingsystem -c "SELECT * FROM schema
 psql -h localhost -p 5433 -U timescale -d tradingsystem -c "\du"
 ```
 
-**See**: [Database Migrations](./database/migrations)
+**See**: [Database Migrations](database/migrations.mdx)
 
 ---
 
@@ -250,7 +251,7 @@ curl -G http://localhost:9002/exp \
   -o backup.csv
 ```
 
-**See**: [Database Backup & Restore](./database/retention-backup)
+**See**: [Database Backup & Restore](database/retention-backup.mdx)
 
 ## Monitoring & Health
 
@@ -310,7 +311,7 @@ curl http://localhost:3200/signals?limit=5
 curl http://localhost:9002
 ```
 
-**See**: [TP Capital Runbook](./apps/tp-capital/runbook)
+**See**: [TP Capital Runbook](apps/tp-capital/runbook.mdx)
 
 ---
 
@@ -330,7 +331,7 @@ psql -h localhost -p 5433 -U timescale -d tradingsystem -c "SELECT count(*) FROM
 # Check browser console (F12)
 ```
 
-**See**: [Workspace Troubleshooting](./apps/workspace/operations#troubleshooting)
+**See**: [Workspace Troubleshooting](apps/workspace/operations.mdx#troubleshooting)
 
 ## Security & Keys
 
@@ -347,7 +348,7 @@ psql -h localhost -p 5433 -U timescale -d tradingsystem -c "SELECT count(*) FROM
 5. Revoke old key from provider
 6. Document rotation in audit log
 
-**See**: [Security Configuration](./tools/security-config/overview)
+**See**: [Security Configuration](tools/security-config/overview)
 
 ---
 
@@ -390,4 +391,4 @@ ls -la .env
 - Quick start guide (migration pending)
 - Troubleshooting index (migration pending)
 - Runbook index (migration pending)
-- [Environment Configuration](./tools/security-config/env)
+- [Environment Configuration](tools/security-config/env.mdx)

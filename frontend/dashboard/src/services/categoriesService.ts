@@ -71,7 +71,7 @@ class CategoriesService {
 
     console.warn(
       "[CategoriesService] Using relative path (Vite proxy):",
-      this.baseUrl
+      this.baseUrl,
     );
   }
 
@@ -161,7 +161,7 @@ class CategoriesService {
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || "Failed to create category"
+        result.error || result.message || "Failed to create category",
       );
     }
 
@@ -192,7 +192,7 @@ class CategoriesService {
         throw new Error(errorMessages);
       }
       throw new Error(
-        result.error || result.message || "Failed to update category"
+        result.error || result.message || "Failed to update category",
       );
     }
 
@@ -218,7 +218,7 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || "Failed to delete category"
+        result.error || result.message || "Failed to delete category",
       );
     }
   }
@@ -238,7 +238,7 @@ class CategoriesService {
 
     if (!response.ok || !result.success) {
       throw new Error(
-        result.error || result.message || "Failed to toggle category"
+        result.error || result.message || "Failed to toggle category",
       );
     }
 

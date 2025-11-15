@@ -1,5 +1,5 @@
 import { Button } from "./button";
-import { Eye, Edit2, Trash2, Check, X, Plus } from '@/icons';
+import { Eye, Edit2, Trash2, Check, X, Plus } from "@/icons";
 import { cn } from "../../lib/utils";
 
 /**

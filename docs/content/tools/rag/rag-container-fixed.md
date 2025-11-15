@@ -1,5 +1,6 @@
 ---
 title: "RAG Container Fix"
+slug: /tools/rag/rag-container-fixed
 sidebar_position: 7
 description: "Running the collections service in Docker with native access to Ollama."
 tags:

@@ -1,5 +1,6 @@
 ---
 title: "RAG Services Refactor Plan"
+slug: /tools/rag/refactor-plan-rag-services
 sidebar_position: 8
 description: "Breakdown of the work required to split and stabilise LlamaIndexPage."
 tags:

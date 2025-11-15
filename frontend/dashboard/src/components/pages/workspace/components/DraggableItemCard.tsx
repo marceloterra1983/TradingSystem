@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "../../../ui/card";
-import { Eye, Folder } from '@/icons';
+import { Eye, Folder } from "@/icons";
 import { cn } from "../../../../lib/utils";
 import { PRIORITY_CONFIG } from "../constants/workspace.constants";
 import type { Item } from "../types/workspace.types";

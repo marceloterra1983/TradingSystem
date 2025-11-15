@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  RefreshCcw,
-  Play,
-  Trash2,
-  FileText,
-  Plus,
-  FolderOpen,
-} from '@/icons';
+import { RefreshCcw, Play, Trash2, FileText, Plus, FolderOpen } from "@/icons";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import {

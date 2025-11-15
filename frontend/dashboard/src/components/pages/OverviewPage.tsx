@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { BarChart3, Activity } from '@/icons';
+import { BarChart3, Activity } from "@/icons";
 
 /**
  * System Overview Page - KPIs and system health monitoring

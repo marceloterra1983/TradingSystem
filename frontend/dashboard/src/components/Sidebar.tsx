@@ -11,7 +11,7 @@ import {
   Shield,
   BookOpen,
   Settings,
-} from '@/icons';
+} from "@/icons";
 
 export interface SidebarProps {
   currentView: string;

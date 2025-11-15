@@ -8,13 +8,7 @@
  */
 
 import React, { useState } from "react";
-import {
-  AlertTriangle,
-  Trash2,
-  Database,
-  FileText,
-  Package,
-} from '@/icons';
+import { AlertTriangle, Trash2, Database, FileText, Package } from "@/icons";
 import {
   Dialog,
   DialogContent,

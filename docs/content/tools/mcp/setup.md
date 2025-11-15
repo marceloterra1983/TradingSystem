@@ -1,5 +1,6 @@
 ---
 title: Setup MCP
+slug: /tools/mcp/setup
 description: Instruções de configuração dos MCPs no Cursor
 tags:
   - tools

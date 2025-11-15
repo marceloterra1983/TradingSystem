@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { FolderTree, Search } from '@/icons';
+import { FolderTree, Search } from "@/icons";
 
 export function ParquetBrowserPage() {
   const sections = [

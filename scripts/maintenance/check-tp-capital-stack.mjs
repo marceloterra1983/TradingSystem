@@ -323,7 +323,7 @@ async function main() {
 
   const evidencePath = await writeEvidence(payload);
 
-  // eslint-disable-next-line no-console
+   
   console.log(
     `[tp-capital-check] ${failed ? 'FAIL' : 'PASS'} - evidência em ${path.relative(
       repoRoot,
@@ -337,7 +337,7 @@ async function main() {
 }
 
 main().catch((error) => {
-  // eslint-disable-next-line no-console
+   
   console.error('[tp-capital-check] Erro inesperado:', error);
   process.exitCode = 1;
 });

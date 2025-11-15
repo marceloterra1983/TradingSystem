@@ -7,7 +7,7 @@ import {
   RefreshCw,
   Trash,
   AlertCircle,
-} from '@/icons';
+} from "@/icons";
 import { useToast } from "../../hooks/useToast";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -245,7 +245,7 @@ export const CollectionsManagementCard: React.FC<
 
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_RAG_SERVICE_URL || "http://localhost:3403"}/api/v1/rag/ingestion/batch/${collection.name}`,
+            `${import.meta.env.VITE_RAG_SERVICE_URL || "/api/v1/rag"}/ingestion/batch/${collection.name}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

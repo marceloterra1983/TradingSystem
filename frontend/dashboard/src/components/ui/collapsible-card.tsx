@@ -11,7 +11,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { ChevronDown } from '@/icons';
+import { ChevronDown } from "@/icons";
 import { cn } from "../../lib/utils";
 import {
   isBrowser,
@@ -25,10 +25,7 @@ export interface CollapsibleCardProps extends HTMLAttributes<HTMLDivElement> {
   cardId?: string;
 }
 
-export const CollapsibleCard = forwardRef<
-  HTMLDivElement,
-  CollapsibleCardProps
->(
+export const CollapsibleCard = forwardRef<HTMLDivElement, CollapsibleCardProps>(
   (
     { className, children, defaultCollapsed = false, cardId, ...props },
     ref,

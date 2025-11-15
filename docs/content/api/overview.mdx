@@ -1,5 +1,6 @@
 ---
 title: API Catalog
+slug: /api/overview
 sidebar_position: 1
 description: Complete catalog of TradingSystem REST APIs with OpenAPI specs, endpoint behavior, and integration guidelines
 tags:
@@ -31,7 +32,7 @@ The TradingSystem platform exposes **11 REST APIs** organized into infrastructur
 
 ---
 
-### 🌐 [Firecrawl Proxy](./firecrawl-proxy.mdx)
+### 🌐 [Firecrawl Proxy](firecrawl-proxy.mdx)
 
 **Port:** 3600 | **Status:** ✅ Active
 
@@ -44,13 +45,13 @@ Web scraping proxy service with Firecrawl integration for content extraction.
 
 **Quick Links:**
 
-- [Full Documentation](./firecrawl-proxy.mdx)
+- [Full Documentation](firecrawl-proxy.mdx)
 - Health: `http://localhost:3600/health`
 - Scrape: `POST http://localhost:3600/api/scrape`
 
 ---
 
-### 🚨 [Alert Router](./alert-router.mdx)
+### 🚨 [Alert Router](alert-router.mdx)
 
 **Port:** 8080 | **Status:** ✅ Active
 
@@ -71,7 +72,7 @@ Prometheus alert routing service that creates and manages GitHub issues.
 
 ## Data Management APIs
 
-### 📚 [Documentation API](./documentation-api.mdx)
+### 📚 [Documentation API](documentation-api.mdx)
 
 **Port:** 3400 | **Status:** ✅ Active
 
@@ -84,13 +85,13 @@ Comprehensive documentation management with ideas, specs, search, and file attac
 
 **Quick Links:**
 
-- [Full Documentation](./documentation-api.mdx)
+- [Full Documentation](documentation-api.mdx)
 - Health: `http://localhost:3400/health`
 - Metrics: `http://localhost:3400/metrics`
 
 ---
 
-### 💡 [Workspace API (Idea Bank)](./workspace-api.mdx)
+### 💡 [Workspace API (Idea Bank)](workspace-api.mdx)
 
 **Port:** 3200 | **Status:** ✅ Active
 
@@ -103,7 +104,7 @@ Simple CRUD operations for workspace items with Kanban-style status management.
 
 **Quick Links:**
 
-- [Full Documentation](./workspace-api.mdx)
+- [Full Documentation](workspace-api.mdx)
 - Health: `http://localhost:3200/health`
 - Items: `GET http://localhost:3200/api/items`
 
@@ -111,7 +112,7 @@ Simple CRUD operations for workspace items with Kanban-style status management.
 
 ## Business Logic APIs
 
-### 📈 [TP Capital API](./tp-capital-api.mdx)
+### 📈 [TP Capital API](tp-capital-api.mdx)
 
 **Port:** 4005 | **Status:** ✅ Active
 
@@ -124,13 +125,13 @@ Trading signals ingestion from Telegram channels with comprehensive bot and chan
 
 **Quick Links:**
 
-- [Full Documentation](./tp-capital-api.mdx)
+- [Full Documentation](tp-capital-api.mdx)
 - Health: `http://localhost:4005/health`
 - Signals: `GET http://localhost:4005/signals`
 
 ---
 
-### 💬 [Telegram Gateway API](./telegram-gateway-api.mdx)
+### 💬 [Telegram Gateway API](telegram-gateway-api.mdx)
 
 **Port:** 4010 | **Status:** ✅ Active
 
@@ -143,7 +144,7 @@ REST API for accessing Telegram messages captured by the MTProto Gateway.
 
 **Quick Links:**
 
-- [Full Documentation](./telegram-gateway-api.mdx)
+- [Full Documentation](telegram-gateway-api.mdx)
 - Health: `http://localhost:4010/health`
 - Messages: `GET http://localhost:4010/api/messages`
 
@@ -151,7 +152,7 @@ REST API for accessing Telegram messages captured by the MTProto Gateway.
 
 ## Planned Trading APIs
 
-### 📊 [Data Capture API](./data-capture.mdx)
+### 📊 [Data Capture API](data-capture.mdx)
 
 **Port:** TBD | **Status:** 🚧 Planned
 
@@ -164,11 +165,11 @@ High-performance market data ingestion from ProfitDLL with WebSocket streaming.
 
 **Quick Links:**
 
-- [Full Documentation](./data-capture.mdx)
+- [Full Documentation](data-capture.mdx)
 
 ---
 
-### ⚡ [Order Manager API](./order-manager.mdx)
+### ⚡ [Order Manager API](order-manager.mdx)
 
 **Port:** TBD | **Status:** 🚧 Planned
 
@@ -181,13 +182,13 @@ Order execution engine with comprehensive risk management and validation.
 
 **Quick Links:**
 
-- [Full Documentation](./order-manager.mdx)
+- [Full Documentation](order-manager.mdx)
 
 ---
 
 ## Meta Documentation
 
-### 📋 [Integration Status](./integration-status.mdx)
+### 📋 [Integration Status](integration-status.mdx)
 
 Current integration status of all APIs with the Dashboard and infrastructure.
 
@@ -328,12 +329,12 @@ cd backend/api/telegram-gateway && npm run dev       # Port 4010
 Each API requires specific environment variables. See individual API documentation:
 
 - Status API Environment (legado)
-- [Firecrawl Proxy Environment](./firecrawl-proxy.mdx#configuration)
+- [Firecrawl Proxy Environment](firecrawl-proxy.mdx#configuration)
 - [Alert Router Environment](/api/alert-router/guide)
-- [Documentation API Environment](./documentation-api.mdx#environment-variables)
-- [Workspace API Environment](./workspace-api.mdx#environment-variables)
-- [TP Capital API Environment](./tp-capital-api.mdx#configuration)
-- [Telegram Gateway API Environment](./telegram-gateway-api.mdx#configuration)
+- [Documentation API Environment](documentation-api.mdx#environment-variables)
+- [Workspace API Environment](workspace-api.mdx#environment-variables)
+- [TP Capital API Environment](tp-capital-api.mdx#configuration)
+- [Telegram Gateway API Environment](telegram-gateway-api.mdx#configuration)
 
 ### Testing APIs
 

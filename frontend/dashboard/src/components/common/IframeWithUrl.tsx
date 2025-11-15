@@ -35,11 +35,13 @@ export const IframeWithUrl = React.forwardRef<
     const displayUrl = urlLabel ?? src ?? "";
     const shouldRenderUrl = Boolean(displayUrl);
     const normalizedAllow =
-      allow ?? (allowFeatures && allowFeatures.length > 0
+      allow ??
+      (allowFeatures && allowFeatures.length > 0
         ? allowFeatures.join("; ")
         : undefined);
     const normalizedSandbox =
-      sandbox ?? (sandboxPermissions && sandboxPermissions.length > 0
+      sandbox ??
+      (sandboxPermissions && sandboxPermissions.length > 0
         ? sandboxPermissions.join(" ")
         : undefined);
 

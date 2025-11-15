@@ -1,5 +1,6 @@
 ---
 title: "Bash Vs Venv"
+slug: /tools/runtime/python/bash-vs-venv
 tags: [documentation]
 domain: devops
 type: guide

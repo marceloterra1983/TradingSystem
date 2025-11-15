@@ -1,0 +1,8 @@
+
+/workspace/frontend/dashboard/vite.config.js
+   89:11  warning  'dbUiQuestDbProxy' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   94:11  warning  'n8nBasePath' is assigned a value but never used. Allowed unused vars must match /^_/u       no-unused-vars
+  373:54  warning  'res' is defined but never used. Allowed unused args must match /^_/u                        no-unused-vars
+
+✖ 3 problems (0 errors, 3 warnings)
+

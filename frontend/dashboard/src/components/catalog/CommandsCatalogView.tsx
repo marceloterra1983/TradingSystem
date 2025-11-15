@@ -35,7 +35,7 @@ import {
   Filter,
   Loader2,
   Search,
-} from '@/icons';
+} from "@/icons";
 
 type CommandRecord = {
   command: string;

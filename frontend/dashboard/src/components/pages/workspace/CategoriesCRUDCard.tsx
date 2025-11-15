@@ -84,7 +84,8 @@ function CategoryFormCard({
     <div
       className={cn(
         "rounded-lg border border-blue-200 bg-blue-50/60 p-4 shadow-sm dark:border-blue-900/40 dark:bg-blue-950/40",
-        mode === "edit" && "border-cyan-200 bg-cyan-50/70 dark:border-cyan-900/60 dark:bg-cyan-950/40",
+        mode === "edit" &&
+          "border-cyan-200 bg-cyan-50/70 dark:border-cyan-900/60 dark:bg-cyan-950/40",
       )}
     >
       <div className="mb-4 flex items-center justify-between">
@@ -784,7 +785,8 @@ export default function CategoriesCRUDCard() {
               </tr>
             ) : (
               sortedCategories.map((category) => {
-                const isEditing = mode === "edit" && activeCategory?.id === category.id;
+                const isEditing =
+                  mode === "edit" && activeCategory?.id === category.id;
                 return (
                   <tr
                     key={category.id}
@@ -800,14 +802,19 @@ export default function CategoriesCRUDCard() {
                       <div className="flex items-center gap-3">
                         <span
                           className="inline-block h-4 w-4 rounded border border-gray-200 shadow-sm dark:border-gray-800"
-                          style={{ backgroundColor: category.color || DEFAULT_COLOR }}
+                          style={{
+                            backgroundColor: category.color || DEFAULT_COLOR,
+                          }}
                           aria-hidden
                         />
                         <div className="flex flex-col gap-1">
                           <span className="font-medium">
                             {category.display_name || category.name}
                           </span>
-                          <Badge variant="secondary" className="w-fit text-[11px]">
+                          <Badge
+                            variant="secondary"
+                            className="w-fit text-[11px]"
+                          >
                             slug: {category.name}
                           </Badge>
                         </div>
@@ -845,7 +852,9 @@ export default function CategoriesCRUDCard() {
                         <button
                           onClick={() => beginEdit(category)}
                           disabled={
-                            syncing || apiUnavailable || (mode === "edit" && !isEditing)
+                            syncing ||
+                            apiUnavailable ||
+                            (mode === "edit" && !isEditing)
                           }
                           className="rounded p-1.5 text-blue-600 transition hover:bg-blue-50 dark:text-cyan-300 dark:hover:bg-cyan-900/30 disabled:cursor-not-allowed disabled:opacity-50"
                           title="Editar categoria"

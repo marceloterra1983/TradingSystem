@@ -34,7 +34,10 @@ describe("firecrawlService", () => {
         timeout: 2000,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${apiUrl}/scrape`, expect.anything());
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${apiUrl}/scrape`,
+        expect.anything(),
+      );
       expect(result.success).toBe(true);
       expect(result.data).toEqual(resultPayload);
       expect(result.error).toBeUndefined();
@@ -106,4 +109,3 @@ describe("firecrawlService", () => {
     });
   });
 });
-

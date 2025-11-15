@@ -1,5 +1,6 @@
 ---
 title: "Workspace Categories Integration"
+slug: /apps/workspace/categories-integration
 sidebar_position: 11
 description: "How the categories CRUD embeds inside the Workspace application experience."
 tags:

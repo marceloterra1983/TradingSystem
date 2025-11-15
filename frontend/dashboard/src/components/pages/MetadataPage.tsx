@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Tag, Database } from '@/icons';
+import { Tag, Database } from "@/icons";
 
 export function MetadataPage() {
   const sections = [

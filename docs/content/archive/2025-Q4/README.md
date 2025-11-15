@@ -1,5 +1,6 @@
 ---
 title: "2025 Q4 Archive"
+slug: /archive/2025-Q4/README
 description: "Archive folder tracking documentation retired during 2025 Q4."
 tags: [documentation, archive]
 domain: governance

@@ -8,7 +8,7 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
-import { ChevronDown } from '@/icons';
+import { ChevronDown } from "@/icons";
 import { cn } from "../../lib/utils";
 
 type AccordionContextValue = {
@@ -95,26 +95,25 @@ export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export const AccordionItem = forwardRef<
-  HTMLDivElement,
-  AccordionItemProps
->(({ value, className, children, ...props }, ref) => {
-  return (
-    <AccordionItemContext.Provider value={value}>
-      <div
-        ref={ref}
-        className={cn(
-          "border border-gray-200 rounded-2xl bg-white overflow-hidden dark:border-gray-700 dark:bg-gray-900",
-          className,
-        )}
-        data-value={value}
-        {...props}
-      >
-        {children}
-      </div>
-    </AccordionItemContext.Provider>
-  );
-});
+export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
+  ({ value, className, children, ...props }, ref) => {
+    return (
+      <AccordionItemContext.Provider value={value}>
+        <div
+          ref={ref}
+          className={cn(
+            "border border-gray-200 rounded-2xl bg-white overflow-hidden dark:border-gray-700 dark:bg-gray-900",
+            className,
+          )}
+          data-value={value}
+          {...props}
+        >
+          {children}
+        </div>
+      </AccordionItemContext.Provider>
+    );
+  },
+);
 
 AccordionItem.displayName = "AccordionItem";
 
@@ -162,8 +161,7 @@ export const AccordionTrigger = forwardRef<
 
 AccordionTrigger.displayName = "AccordionTrigger";
 
-export interface AccordionContentProps
-  extends HTMLAttributes<HTMLDivElement> {
+export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 

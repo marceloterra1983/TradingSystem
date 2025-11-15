@@ -1,5 +1,6 @@
 ---
 title: Security Infrastructure Overview
+slug: /tools/security/overview
 sidebar_position: 1
 tags: [security, authentication, authorization, rate-limiting, owasp]
 domain: security
@@ -50,7 +51,7 @@ graph TB
 - **Secret**: `INTER_SERVICE_SECRET` environment variable
 - **Header**: `x-service-token`
 
-**Implementation**: [`backend/shared/middleware/inter-service-auth.js`](../../../backend/shared/middleware/inter-service-auth.js)
+**Implementation**: [`backend/shared/middleware/inter-service-auth.js`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/backend/shared/middleware/inter-service-auth.js)
 
 ### 2. Advanced Rate Limiting
 **Tiered rate limiting** with per-user, per-IP, and Redis-backed distributed limiting.
@@ -63,7 +64,7 @@ graph TB
 | **Strict** | 10 req | 1 minute | Expensive operations |
 | **Auth** | 5 attempts | 15 minutes | Authentication endpoints |
 
-**Implementation**: [`backend/shared/middleware/advanced-rate-limit.js`](../../../backend/shared/middleware/advanced-rate-limit.js)
+**Implementation**: [`backend/shared/middleware/advanced-rate-limit.js`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/backend/shared/middleware/advanced-rate-limit.js)
 
 ### 3. Security Headers (Helmet)
 **HTTP security headers** to protect against common web vulnerabilities.
@@ -74,7 +75,7 @@ graph TB
 - ✅ **Content-Security-Policy**: Configurable directives
 - ✅ **Referrer-Policy**: `no-referrer`
 
-**Implementation**: [`backend/shared/middleware/index.js`](../../../backend/shared/middleware/index.js)
+**Implementation**: [`backend/shared/middleware/index.js`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/backend/shared/middleware/index.js)
 
 ### 4. OWASP ZAP Automation
 **Dynamic application security testing** with baseline and API scans.
@@ -84,7 +85,7 @@ graph TB
 - 📊 **SARIF Reports**: Uploaded to GitHub Security
 - ⚙️ **Custom Rules**: Configured thresholds per vulnerability
 
-**Configuration**: [`.zap/rules.tsv`](../../../.zap/rules.tsv)
+**Configuration**: [`.zap/rules.tsv`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/.zap/rules.tsv)
 
 ### 5. CI/CD Security Pipeline
 **Automated security scanning** on every commit and PR.
@@ -98,7 +99,7 @@ graph TB
 | **Static Analysis** | CodeQL | Security patterns |
 | **Container Scan** | Trivy | Docker vulnerabilities |
 
-**Workflow**: [`.github/workflows/security-scan.yml`](../../../.github/workflows/security-scan.yml)
+**Workflow**: [`.github/workflows/security-scan.yml`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/.github/workflows/security-scan.yml)
 
 ## Security Best Practices
 
@@ -244,15 +245,15 @@ gh workflow view security-scan.yml
 
 ## Related Documentation
 
-- [Inter-Service Authentication Guide](./inter-service-auth.mdx)
-- [Rate Limiting Guide](./rate-limiting.mdx)
-- [OWASP ZAP Configuration](./owasp-zap.mdx)
-- [Security CI/CD Pipeline](./security-cicd.mdx)
-- [Security Best Practices](./best-practices.mdx)
+- [Inter-Service Authentication Guide](inter-service-auth.mdx)
+- [Rate Limiting Guide](rate-limiting.mdx)
+- [OWASP ZAP Configuration](owasp-zap.mdx)
+- [Security CI/CD Pipeline](security-cicd.mdx)
+- [Security Best Practices](best-practices.mdx)
 
 ## Support
 
 For security issues or questions:
 - **Security Issues**: Report via GitHub Security Advisories
-- **Documentation**: See [docs/content/tools/security/](../../tools/security/)
+- **Documentation**: See [docs/content/tools/security/](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/tools/security)
 - **Contact**: security@tradingsystem.local

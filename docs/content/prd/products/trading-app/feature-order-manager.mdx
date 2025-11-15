@@ -1,5 +1,6 @@
 ---
 title: "Feature Brief \u2013 Order Manager"
+slug: /prd/products/trading-app/feature-order-manager
 description: Product requirements for the Order Manager feature within the Trading
   App.
 tags:
@@ -182,24 +183,24 @@ The Order Manager feature enables automated order execution with comprehensive r
 
 **SDD**
 
-- [Order Schema](../../../sdd/domain/schemas/v1/order) - Order entity definition
-- [Risk Rule Schema](../../../sdd/domain/schemas/v1/risk-rule) - Risk limit configuration
-- [Order Created Event](../../../sdd/events/v1/order-created) - Event payload contract
-- [Place Order Flow](../../../sdd/flows/v1/place-order) - Order placement sequence
-- [Cancel Order Flow](../../../sdd/flows/v1/cancel-order) - Order cancellation sequence
+- [Order Schema](../../../sdd/domain/schemas/v1/order.mdx) - Order entity definition
+- [Risk Rule Schema](../../../sdd/domain/schemas/v1/risk-rule.mdx) - Risk limit configuration
+- [Order Created Event](../../../sdd/events/v1/order-created.mdx) - Event payload contract
+- [Place Order Flow](../../../sdd/flows/v1/place-order.mdx) - Order placement sequence
+- [Cancel Order Flow](../../../sdd/flows/v1/cancel-order.mdx) - Order cancellation sequence
 
 **API**
 
-- [Order Manager API](../../../api/order-manager) - API summary
-- [Order Manager Spec](../../../sdd/api/order-manager/v1/spec) - Detailed API specification
-- [Order Manager Guidelines](../../../sdd/api/order-manager/v1/guidelines) - API conventions
+- [Order Manager API](../../../api/order-manager.mdx) - API summary
+- [Order Manager Spec](../../../sdd/api/order-manager/v1/spec.mdx) - Detailed API specification
+- [Order Manager Guidelines](../../../sdd/api/order-manager/v1/guidelines.mdx) - API conventions
 - Redoc: `/redoc/order-manager` (TODO - automated build pending)
 
 **Frontend**
 
-- [Frontend Architecture](../../../frontend/engineering/architecture) - React Router, Zustand, React Query
-- [Frontend Conventions](../../../frontend/engineering/conventions) - Component structure, imports
-- [Design System](../../../frontend/design-system/components) - UI components
+- [Frontend Architecture](../../../frontend/engineering/architecture.mdx) - React Router, Zustand, React Query
+- [Frontend Conventions](../../../frontend/engineering/conventions.mdx) - Component structure, imports
+- [Design System](../../../frontend/design-system/components.mdx) - UI components
 
 **External**
 
@@ -313,8 +314,8 @@ The Order Manager feature enables automated order execution with comprehensive r
 
 ## Related Documentation
 
-- [Trading App Overview](./prd-overview)
-- [Order Manager API](../../../api/order-manager)
-- [Order Schema](../../../sdd/domain/schemas/v1/order)
-- [Place Order Flow](../../../sdd/flows/v1/place-order)
-- [Risk Limits Configuration](../../../tools/security-config/risk-limits)
+- [Trading App Overview](prd-overview.mdx)
+- [Order Manager API](../../../api/order-manager.mdx)
+- [Order Schema](../../../sdd/domain/schemas/v1/order.mdx)
+- [Place Order Flow](../../../sdd/flows/v1/place-order.mdx)
+- [Risk Limits Configuration](../../../tools/security-config/risk-limits.mdx)

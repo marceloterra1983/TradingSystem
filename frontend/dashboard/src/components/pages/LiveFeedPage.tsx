@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Radio, BookOpen } from '@/icons';
+import { Radio, BookOpen } from "@/icons";
 
 export function LiveFeedPage() {
   const sections = [

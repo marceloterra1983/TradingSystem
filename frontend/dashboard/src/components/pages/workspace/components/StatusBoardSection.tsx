@@ -11,7 +11,7 @@ import {
   CollapsibleCardDescription,
   CollapsibleCardContent,
 } from "../../../ui/collapsible-card";
-import { BarChart3, RefreshCw } from '@/icons';
+import { BarChart3, RefreshCw } from "@/icons";
 import { STATUS_CONFIG } from "../constants/workspace.constants";
 import type { ItemStatus, Item } from "../types/workspace.types";
 

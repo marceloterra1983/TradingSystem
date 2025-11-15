@@ -10,7 +10,7 @@ import {
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
-import { Plus, Clock } from '@/icons';
+import { Plus, Clock } from "@/icons";
 import { useWorkspaceStore } from "../store/useWorkspaceStore";
 import type {
   ItemFormState,

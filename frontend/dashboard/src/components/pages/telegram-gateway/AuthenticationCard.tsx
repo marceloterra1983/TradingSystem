@@ -19,7 +19,7 @@ import {
   ScrollText,
   StopCircle,
   Terminal,
-} from '@/icons';
+} from "@/icons";
 import {
   Dialog,
   DialogContent,

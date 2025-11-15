@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock as ClockIcon } from '@/icons';
+import { Clock as ClockIcon } from "@/icons";
 import { cn } from "../../lib/utils";
 
 export interface ClockProps {

@@ -1,5 +1,6 @@
 ---
 title: "ADR-007: Separação de Secrets e Defaults em Variáveis de Ambiente"
+slug: /reference/adrs/ADR-007-env-governance-separation
 description: "Architecture decision record for environment variable governance and separation"
 status: proposed
 date: 2025-11-07
@@ -363,9 +364,9 @@ git revert <commit-hash-da-migração>
 ## References
 
 - **Analysis Report:** arquivo interno `outputs/GOVERNANCE-CONFLICTS-ANALYSIS-2025-11-07.md`
-- **Migration Script:** [scripts/governance/migrate-env-governance.sh](../../../../scripts/governance/migrate-env-governance.sh)
+- **Migration Script:** [scripts/governance/migrate-env-governance.sh](https://github.com/marceloterra1983/TradingSystem/blob/main/scripts/governance/migrate-env-governance.sh)
 - **Governance Policy:** [governance/controls/ENVIRONMENT-VARIABLES-POLICY.md](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/controls/ENVIRONMENT-VARIABLES-POLICY.md)
-- **Secrets Policy:** [governance/policies/secrets-env-policy.md](/governance/policies/secrets-env-policy)
+- **Secrets Policy:** [governance/policies/secrets-env-policy.md](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/policies/secrets-env-policy.md)
 - **Port Registry:** [docs/content/tools/ports-services.mdx](../../tools/ports-services.mdx)
 - **Related ADR:** ADR-003: Port Allocation Strategy (rascunho não publicado)
 

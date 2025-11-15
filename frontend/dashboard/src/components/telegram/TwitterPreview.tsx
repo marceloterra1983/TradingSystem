@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Twitter,
-  Heart,
-  Repeat2,
-  MessageCircle,
-  ExternalLink,
-} from '@/icons';
+import { Twitter, Heart, Repeat2, MessageCircle, ExternalLink } from "@/icons";
 
 interface TwitterAuthor {
   id: string;

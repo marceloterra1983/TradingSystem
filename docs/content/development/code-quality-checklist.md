@@ -1,5 +1,6 @@
 ---
 title: Code Quality Checklist
+slug: /development/code-quality-checklist
 sidebar_position: 5
 description: Comandos e ferramentas para verificação de qualidade, limpeza e eficiência do código
 tags: [development, quality, linting, testing]

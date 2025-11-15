@@ -1,5 +1,6 @@
 ---
 title: Estratégia de Containerização
+slug: /reference/architecture/containerization
 description: Estratégia de containerização para serviços TradingSystem
 tags:
   - reference

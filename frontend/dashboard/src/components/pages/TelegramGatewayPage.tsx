@@ -17,7 +17,7 @@ import { SessionCard } from "./telegram-gateway/SessionCard";
 import { ChannelsManagerCard } from "./telegram-gateway/ChannelsManagerCard";
 import { AuthenticationCard } from "./telegram-gateway/AuthenticationCard";
 import { ConnectionDiagnosticCard } from "./telegram-gateway/ConnectionDiagnosticCard";
-import { RefreshCw } from '@/icons';
+import { RefreshCw } from "@/icons";
 
 export function TelegramGatewayPage() {
   const [messageFilters, setMessageFilters] =

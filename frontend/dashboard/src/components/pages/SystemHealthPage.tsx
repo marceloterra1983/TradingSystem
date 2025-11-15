@@ -7,7 +7,7 @@
  * Part of: Phase 1.7 - Health Checks (Improvement Plan v1.0)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -19,18 +19,18 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
-} from '@/icons';
+} from "@/icons";
 
 // Types
 interface HealthCheck {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   message?: string;
   responseTime?: number;
 }
 
 interface ServiceHealth {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   endpoint: string;
   version?: string;
   uptime?: number;
@@ -40,7 +40,7 @@ interface ServiceHealth {
 }
 
 interface SystemHealthResponse {
-  overallHealth: 'healthy' | 'degraded' | 'unhealthy';
+  overallHealth: "healthy" | "degraded" | "unhealthy";
   timestamp: string;
   services: ServiceHealth[];
   infrastructure: ServiceHealth[];
@@ -53,32 +53,38 @@ interface SystemHealthResponse {
 }
 
 // Status badge component
-function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'unhealthy' }) {
+function StatusBadge({
+  status,
+}: {
+  status: "healthy" | "degraded" | "unhealthy";
+}) {
   const config = {
     healthy: {
       icon: CheckCircle2,
-      bg: 'bg-green-100 dark:bg-green-900/30',
-      text: 'text-green-700 dark:text-green-300',
-      label: 'Healthy',
+      bg: "bg-green-100 dark:bg-green-900/30",
+      text: "text-green-700 dark:text-green-300",
+      label: "Healthy",
     },
     degraded: {
       icon: AlertTriangle,
-      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-      text: 'text-yellow-700 dark:text-yellow-300',
-      label: 'Degraded',
+      bg: "bg-yellow-100 dark:bg-yellow-900/30",
+      text: "text-yellow-700 dark:text-yellow-300",
+      label: "Degraded",
     },
     unhealthy: {
       icon: AlertCircle,
-      bg: 'bg-red-100 dark:bg-red-900/30',
-      text: 'text-red-700 dark:text-red-300',
-      label: 'Unhealthy',
+      bg: "bg-red-100 dark:bg-red-900/30",
+      text: "text-red-700 dark:text-red-300",
+      label: "Unhealthy",
     },
   };
 
   const { icon: Icon, bg, text, label } = config[status];
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${text}`}
+    >
       <Icon className="w-3.5 h-3.5" />
       {label}
     </span>
@@ -95,9 +101,13 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
         <div className="flex items-center gap-3">
           <Server className="w-5 h-5 text-gray-400" />
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">{service.name}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              {service.name}
+            </h3>
             {service.version && (
-              <p className="text-xs text-gray-500 dark:text-gray-400">v{service.version}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                v{service.version}
+              </p>
             )}
           </div>
         </div>
@@ -126,7 +136,9 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
               <Clock className="w-4 h-4" />
               Response Time
             </span>
-            <span className="text-xs font-medium">{service.responseTime}ms</span>
+            <span className="text-xs font-medium">
+              {service.responseTime}ms
+            </span>
           </div>
         )}
 
@@ -136,7 +148,9 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
               <Activity className="w-4 h-4" />
               Uptime
             </span>
-            <span className="text-xs font-medium">{formatUptime(service.uptime)}</span>
+            <span className="text-xs font-medium">
+              {formatUptime(service.uptime)}
+            </span>
           </div>
         )}
       </div>
@@ -147,18 +161,27 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
             onClick={() => setExpanded(!expanded)}
             className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
           >
-            {expanded ? 'Hide' : 'Show'} dependency checks
-            <span className="text-xs">({Object.keys(service.checks).length})</span>
+            {expanded ? "Hide" : "Show"} dependency checks
+            <span className="text-xs">
+              ({Object.keys(service.checks).length})
+            </span>
           </button>
 
           {expanded && (
             <div className="mt-3 space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
               {Object.entries(service.checks).map(([name, check]) => (
-                <div key={name} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400 capitalize">{name}</span>
+                <div
+                  key={name}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <span className="text-gray-600 dark:text-gray-400 capitalize">
+                    {name}
+                  </span>
                   <div className="flex items-center gap-2">
                     {check.responseTime && (
-                      <span className="text-gray-500">{check.responseTime}ms</span>
+                      <span className="text-gray-500">
+                        {check.responseTime}ms
+                      </span>
                     )}
                     <StatusBadge status={check.status} />
                   </div>
@@ -183,7 +206,7 @@ export default function SystemHealthPage() {
   const fetchHealth = async () => {
     try {
       setError(null);
-      const response = await fetch('/api/health/system');
+      const response = await fetch("/api/health/system");
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -192,7 +215,9 @@ export default function SystemHealthPage() {
       const data = await response.json();
       setHealth(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch health data');
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch health data",
+      );
     } finally {
       setLoading(false);
     }
@@ -213,10 +238,10 @@ export default function SystemHealthPage() {
     if (!health) return;
 
     const blob = new Blob([JSON.stringify(health, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `health-report-${new Date().toISOString()}.json`;
     a.click();
@@ -228,7 +253,9 @@ export default function SystemHealthPage() {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-3">
           <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
-          <p className="text-gray-600 dark:text-gray-300">Loading system health...</p>
+          <p className="text-gray-600 dark:text-gray-300">
+            Loading system health...
+          </p>
         </div>
       </div>
     );
@@ -315,28 +342,36 @@ export default function SystemHealthPage() {
             <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
               {health.summary.total}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Total Services</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Total Services
+            </div>
           </div>
 
           <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <div className="text-2xl font-bold text-green-700 dark:text-green-300 mb-1">
               {health.summary.healthy}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Healthy</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Healthy
+            </div>
           </div>
 
           <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
             <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-300 mb-1">
               {health.summary.degraded}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Degraded</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Degraded
+            </div>
           </div>
 
           <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
             <div className="text-2xl font-bold text-red-700 dark:text-red-300 mb-1">
               {health.summary.unhealthy}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300">Unhealthy</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Unhealthy
+            </div>
           </div>
         </div>
 

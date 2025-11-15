@@ -1,5 +1,5 @@
 import React from "react";
-import { ExternalLink, Globe } from '@/icons';
+import { ExternalLink, Globe } from "@/icons";
 
 interface GenericLinkPreviewProps {
   preview: {

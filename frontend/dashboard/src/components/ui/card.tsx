@@ -1,8 +1,4 @@
-import {
-  forwardRef,
-  type ReactNode,
-  type HTMLAttributes,
-} from "react";
+import { forwardRef, type ReactNode, type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -51,8 +47,7 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = "CardHeader";
 
-export interface CardTitleProps
-  extends HTMLAttributes<HTMLHeadingElement> {
+export interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {
   children: ReactNode;
 }
 

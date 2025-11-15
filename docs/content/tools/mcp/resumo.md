@@ -1,5 +1,6 @@
 ---
 title: Resumo MCP
+slug: /tools/mcp/resumo
 description: Resumo da instalação de MCPs para o TradingSystem
 tags:
   - tools

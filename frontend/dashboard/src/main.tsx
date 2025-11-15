@@ -8,14 +8,14 @@ import { registerServiceWorker } from "./registerSW";
 // Manual implementation for Vite 7 compatibility
 registerServiceWorker({
   onSuccess: (registration) => {
-    console.log('[PWA] Service worker active:', registration.scope);
+    console.log("[PWA] Service worker active:", registration.scope);
   },
   onUpdate: () => {
-    console.log('[PWA] New version available');
+    console.log("[PWA] New version available");
     // Update notification is handled by registerSW module
   },
   onError: (error) => {
-    console.error('[PWA] Service worker error:', error);
+    console.error("[PWA] Service worker error:", error);
   },
 });
 

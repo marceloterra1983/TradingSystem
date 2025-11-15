@@ -1,5 +1,6 @@
 ---
 title: Documentation Container
+slug: /tools/docker/documentation-container
 description: Solução de 2 containers para documentação (NGINX + DocsAPI)
 tags:
   - tools

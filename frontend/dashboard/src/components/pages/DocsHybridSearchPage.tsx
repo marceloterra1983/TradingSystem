@@ -25,7 +25,7 @@ import {
   ChevronDown,
   Loader2,
   AlertTriangle,
-} from '@/icons';
+} from "@/icons";
 import documentationService, {
   DocsHybridItem,
 } from "../../services/documentationService";

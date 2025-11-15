@@ -1,5 +1,6 @@
 ---
 title: Dev Container Security Controls
+slug: /governance/controls/dev-container-security
 sidebar_position: 6
 tags: [governance, controls, dev-container, security]
 domain: tools
@@ -447,7 +448,7 @@ jobs:
 ## Related Documents
 
 - [Dev Container Policy](../policies/dev-container-policy.md)
-- [Pre-Deploy Checklist](./pre-deploy-checklist.mdx)
+- [Pre-Deploy Checklist](pre-deploy-checklist.mdx)
 - [Environment Variables Policy](../policies/environment-variables-policy.mdx)
 - [API Gateway Policy](../policies/api-gateway-policy.md)
 

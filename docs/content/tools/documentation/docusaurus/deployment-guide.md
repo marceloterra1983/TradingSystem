@@ -1,5 +1,6 @@
 ---
 title: "Documentation Deployment Guide"
+slug: /tools/documentation/docusaurus/deployment-guide
 description: "Pipeline and automation steps for deploying the Docusaurus site."
 tags:
   - tools

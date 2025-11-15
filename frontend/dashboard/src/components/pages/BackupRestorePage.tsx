@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Save, RefreshCcw } from '@/icons';
+import { Save, RefreshCcw } from "@/icons";
 
 export function BackupRestorePage() {
   const sections = [

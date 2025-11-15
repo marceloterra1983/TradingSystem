@@ -15,7 +15,7 @@ import {
   Zap,
   Target,
   Sparkles,
-} from '@/icons';
+} from "@/icons";
 import {
   Select,
   SelectContent,

@@ -72,7 +72,7 @@ curl http://localhost:8080/metrics | grep traefik_
 
 ### 2.1. Adicionar labels Traefik
 
-Editar [`tools/compose/docker-compose.4-3-workspace-stack.yml`](../../../tools/compose/docker-compose.4-3-workspace-stack.yml):
+Editar [`tools/compose/docker-compose.4-3-workspace-stack.yml`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/tools/compose/docker-compose.4-3-workspace-stack.yml):
 
 ```yaml
 services:
@@ -128,7 +128,7 @@ curl http://localhost:3210/health
 
 ### 3.1. Adicionar labels Traefik
 
-Editar [`tools/compose/docker-compose.1-dashboard-stack.yml`](../../../tools/compose/docker-compose.1-dashboard-stack.yml):
+Editar [`tools/compose/docker-compose.1-dashboard-stack.yml`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/tools/compose/docker-compose.1-dashboard-stack.yml):
 
 ```yaml
 services:
@@ -157,7 +157,7 @@ services:
 
 ### 3.2. Atualizar configuração do Vite
 
-Editar [`frontend/dashboard/vite.config.ts`](../../../frontend/dashboard/vite.config.ts):
+Editar [`frontend/dashboard/vite.config.ts`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/frontend/dashboard/vite.config.ts):
 
 ```typescript
 export default defineConfig({
@@ -200,7 +200,7 @@ curl http://localhost:8080/
 
 ### 4.1. Adicionar labels Traefik
 
-Editar [`tools/compose/docker-compose.2-docs-stack.yml`](../../../tools/compose/docker-compose.2-docs-stack.yml):
+Editar [`tools/compose/docker-compose.2-docs-stack.yml`](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/tools/compose/docker-compose.2-docs-stack.yml):
 
 ```yaml
 services:
@@ -477,5 +477,5 @@ curl http://localhost:8081/api/http/routers/workspace@docker | jq '.middlewares'
 Para dúvidas ou problemas:
 1. Verificar logs: `docker logs api-gateway`
 2. Executar validação: `bash scripts/gateway/validate-traefik.sh --verbose`
-3. Consultar [Architecture Review](../../../governance/evidence/reports/reviews/architecture-2025-11-01/)
+3. Consultar [Architecture Review](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/governance/evidence/reports/reviews/architecture-2025-11-01)
 4. Abrir issue no repositório

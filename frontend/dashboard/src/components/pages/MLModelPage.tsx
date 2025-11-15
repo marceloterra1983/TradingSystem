@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { Brain, Settings, History } from '@/icons';
+import { Brain, Settings, History } from "@/icons";
 
 export function MLModelPage() {
   const sections = [

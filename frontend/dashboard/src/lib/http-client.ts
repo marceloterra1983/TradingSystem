@@ -26,20 +26,33 @@
  * ```
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
-import axiosRetry, { exponentialDelay } from 'axios-retry';
-import { CircuitBreaker, CircuitState } from './circuit-breaker';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosError,
+} from "axios";
+import axiosRetry, { exponentialDelay } from "axios-retry";
+import { CircuitBreaker, CircuitState } from "./circuit-breaker";
+
+// Extend Axios types to include metadata
+declare module "axios" {
+  export interface InternalAxiosRequestConfig {
+    metadata?: {
+      startTime?: number;
+    };
+  }
+}
 
 /**
  * Operation types for timeout and retry configuration
  */
 export enum OperationType {
-  HEALTH_CHECK = 'health_check',      // 5s
-  QUICK_READ = 'quick_read',          // 10s
-  STANDARD_READ = 'standard_read',    // 15s
-  WRITE = 'write',                    // 30s
-  LONG_OPERATION = 'long_operation',  // 2min
-  FILE_UPLOAD = 'file_upload',        // 5min
+  HEALTH_CHECK = "health_check", // 5s
+  QUICK_READ = "quick_read", // 10s
+  STANDARD_READ = "standard_read", // 15s
+  WRITE = "write", // 30s
+  LONG_OPERATION = "long_operation", // 2min
+  FILE_UPLOAD = "file_upload", // 5min
 }
 
 /**
@@ -135,8 +148,8 @@ export class HttpClient {
       baseURL: config.baseURL,
       timeout: config.defaultTimeout || 15000,
       headers: {
-        'Content-Type': 'application/json',
-        'X-Service-Token': import.meta.env.VITE_INTER_SERVICE_SECRET || '',
+        "Content-Type": "application/json",
+        "X-Service-Token": import.meta.env.VITE_INTER_SERVICE_SECRET || "",
       },
     });
 
@@ -178,7 +191,7 @@ export class HttpClient {
       onRetry: (retryCount, error, requestConfig) => {
         console.warn(
           `[HttpClient] Retry ${retryCount} for ${requestConfig.url}`,
-          error.message
+          error.message,
         );
       },
     });
@@ -194,25 +207,28 @@ export class HttpClient {
         config.metadata = { startTime: Date.now() };
 
         if (enableLogging) {
-          console.log(`[HttpClient] → ${config.method?.toUpperCase()} ${config.url}`);
+          console.log(
+            `[HttpClient] → ${config.method?.toUpperCase()} ${config.url}`,
+          );
         }
 
         return config;
       },
       (error) => {
-        console.error('[HttpClient] Request error:', error);
+        console.error("[HttpClient] Request error:", error);
         return Promise.reject(error);
-      }
+      },
     );
 
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
-        const duration = Date.now() - (response.config.metadata?.startTime || 0);
+        const duration =
+          Date.now() - (response.config.metadata?.startTime || 0);
 
         if (enableLogging) {
           console.log(
-            `[HttpClient] ← ${response.status} ${response.config.url} (${duration}ms)`
+            `[HttpClient] ← ${response.status} ${response.config.url} (${duration}ms)`,
           );
         }
 
@@ -226,15 +242,16 @@ export class HttpClient {
         return response;
       },
       (error: AxiosError) => {
-        const duration = Date.now() - ((error.config as any)?.metadata?.startTime || 0);
+        const duration =
+          Date.now() - ((error.config as any)?.metadata?.startTime || 0);
 
         console.error(
           `[HttpClient] ✗ ${error.config?.url} (${duration}ms)`,
-          error.message
+          error.message,
         );
 
         return Promise.reject(this.normalizeError(error));
-      }
+      },
     );
   }
 
@@ -244,9 +261,9 @@ export class HttpClient {
   private normalizeError(error: AxiosError): Error {
     if (!error.response) {
       return new Error(
-        error.code === 'ECONNABORTED'
-          ? 'Tempo limite de conexão excedido. Tente novamente.'
-          : 'Erro de conexão. Verifique sua internet e tente novamente.'
+        error.code === "ECONNABORTED"
+          ? "Tempo limite de conexão excedido. Tente novamente."
+          : "Erro de conexão. Verifique sua internet e tente novamente.",
       );
     }
 
@@ -255,23 +272,26 @@ export class HttpClient {
 
     if (status >= 500) {
       return new Error(
-        data?.message || 'Erro no servidor. Tente novamente em alguns instantes.'
+        data?.message ||
+          "Erro no servidor. Tente novamente em alguns instantes.",
       );
     }
 
     if (status === 429) {
-      return new Error('Muitas requisições. Aguarde um momento e tente novamente.');
+      return new Error(
+        "Muitas requisições. Aguarde um momento e tente novamente.",
+      );
     }
 
     if (status === 401 || status === 403) {
-      return new Error('Não autorizado. Verifique suas credenciais.');
+      return new Error("Não autorizado. Verifique suas credenciais.");
     }
 
     if (status === 404) {
-      return new Error('Recurso não encontrado.');
+      return new Error("Recurso não encontrado.");
     }
 
-    return new Error(data?.message || 'Erro desconhecido.');
+    return new Error(data?.message || "Erro desconhecido.");
   }
 
   /**
@@ -284,7 +304,9 @@ export class HttpClient {
     duration: number;
   }) {
     if (metrics.duration > 1000) {
-      console.warn(`[HttpClient] Slow request: ${metrics.url} (${metrics.duration}ms)`);
+      console.warn(
+        `[HttpClient] Slow request: ${metrics.url} (${metrics.duration}ms)`,
+      );
     }
   }
 
@@ -312,13 +334,15 @@ export class HttpClient {
     try {
       // Circuit breaker check
       if (this.circuitBreaker && !this.circuitBreaker.canRequest()) {
-        throw new Error('Serviço temporariamente indisponível (circuit breaker aberto)');
+        throw new Error(
+          "Serviço temporariamente indisponível (circuit breaker aberto)",
+        );
       }
 
       const response = await this.client.request<T>({
         ...config,
         timeout,
-        'axios-retry': {
+        "axios-retry": {
           retries,
         },
       } as any);
@@ -340,34 +364,42 @@ export class HttpClient {
    * HTTP GET request
    */
   async get<T = any>(url: string, config?: HttpRequestConfig): Promise<T> {
-    return this.request<T>({ ...config, method: 'GET', url });
+    return this.request<T>({ ...config, method: "GET", url });
   }
 
   /**
    * HTTP POST request
    */
-  async post<T = any>(url: string, data?: any, config?: HttpRequestConfig): Promise<T> {
-    return this.request<T>({ ...config, method: 'POST', url, data });
+  async post<T = any>(
+    url: string,
+    data?: any,
+    config?: HttpRequestConfig,
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: "POST", url, data });
   }
 
   /**
    * HTTP PUT request
    */
-  async put<T = any>(url: string, data?: any, config?: HttpRequestConfig): Promise<T> {
-    return this.request<T>({ ...config, method: 'PUT', url, data });
+  async put<T = any>(
+    url: string,
+    data?: any,
+    config?: HttpRequestConfig,
+  ): Promise<T> {
+    return this.request<T>({ ...config, method: "PUT", url, data });
   }
 
   /**
    * HTTP DELETE request
    */
   async delete<T = any>(url: string, config?: HttpRequestConfig): Promise<T> {
-    return this.request<T>({ ...config, method: 'DELETE', url });
+    return this.request<T>({ ...config, method: "DELETE", url });
   }
 
   /**
    * Health check endpoint
    */
-  async healthCheck(url: string = '/health'): Promise<boolean> {
+  async healthCheck(url: string = "/health"): Promise<boolean> {
     try {
       await this.get(url, { operationType: OperationType.HEALTH_CHECK });
       return true;

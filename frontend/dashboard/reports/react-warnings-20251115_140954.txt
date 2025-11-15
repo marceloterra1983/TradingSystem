@@ -1,0 +1,330 @@
+# React Anti-patterns Found:
+
+## Missing Keys in Lists
+src/contexts/TradingContext.tsx:125:      const updatedPositions = portfolio.positions.map((position) =>
+src/components/history/JobStatistics.tsx:176:                      {statusData.map((entry, index) => (
+src/components/history/JobStatistics.tsx:204:                      {typeData.map((entry, index) => (
+src/components/history/ResultsComparison.tsx:258:              {comparableValues.map((item) => (
+src/components/history/ResultsComparison.tsx:359:                {diffResult?.chunks.map((chunk, index) => {
+src/components/trading/TradingList.tsx:30:        {Array.from({ length: 6 }).map((_, index) => (
+src/components/trading/TradingList.tsx:105:      {data.map((tradingData) => (
+src/components/catalog/__tests__/AgentsCatalogView.test.tsx:28:      {sections.map((section) => (
+src/components/catalog/AgentsCatalogView.tsx:66:  const existing = new Set<string>(agents.map((agent) => agent.category));
+src/components/catalog/AgentsCatalogView.tsx:303:                      {categories.map((category) => (
+src/components/catalog/AgentsCatalogView.tsx:320:                      {tagOptions.map((tag) => (
+src/components/catalog/AgentsCatalogView.tsx:371:                    {filteredAgents.map((agent) => {
+src/components/catalog/AgentsCatalogView.tsx:461:                              {agentTags.map((tag) => (
+src/components/catalog/AgentsCatalogView.tsx:550:                          {categories.map((category) => (
+src/components/catalog/AgentsCatalogView.tsx:570:                          {tagOptions.map((tag) => (
+src/components/catalog/AgentsCatalogView.tsx:682:                      {filteredAgents.map((agent) => {
+src/components/catalog/AgentsCatalogView.tsx:735:                                {agentTags.map((tag) => (
+src/components/catalog/AgentsCommandsCatalogView.tsx:99:    return AI_AGENTS_DIRECTORY.map((agent) => ({
+src/components/catalog/AgentsCommandsCatalogView.tsx:117:    return commandsDatabase.commands.map((cmd) => ({
+src/components/catalog/AgentsCommandsCatalogView.tsx:140:      new Set(allEntries.map((item) => item.category).filter(Boolean)),
+src/components/catalog/AgentsCommandsCatalogView.tsx:352:                      {categories.map((category) => (
+src/components/catalog/AgentsCommandsCatalogView.tsx:369:                      {tagOptions.map((tag) => (
+src/components/catalog/AgentsCommandsCatalogView.tsx:417:                    {filteredEntries.map((entry) => {
+src/components/catalog/AgentsCommandsCatalogView.tsx:485:                                    .map((ex, idx) => (
+src/components/catalog/AgentsCommandsCatalogView.tsx:504:                              {entry.tags.map((tag, idx) => (
+src/components/catalog/CommandsCatalogView.tsx:102:        ALL_COMMANDS.map((item) => item.category).filter(
+src/components/catalog/CommandsCatalogView.tsx:374:                      {categories.map((category) => (
+src/components/catalog/CommandsCatalogView.tsx:391:                      {tagOptions.map((tag) => (
+src/components/catalog/CommandsCatalogView.tsx:441:                    {filteredCommands.map((command) => (
+src/components/catalog/CommandsCatalogView.tsx:504:                            {command.exemplos.map((example) => (
+src/components/catalog/CommandsCatalogView.tsx:529:                            {command.tags.map((tag) => (
+src/components/catalog/CommandsCatalogView.tsx:628:                          {categories.map((category) => (
+src/components/catalog/CommandsCatalogView.tsx:648:                          {tagOptions.map((tag) => (
+src/components/catalog/CommandsCatalogView.tsx:774:                        {filteredCommands.map((command) => (
+src/components/catalog/CommandsCatalogView.tsx:839:                                {(command.tags ?? []).map((tag) => (
+src/components/catalog/CommandsCatalogView.tsx:853:                                  ? command.exemplos.map((example) => (
+src/components/ui/button-with-dropdown.tsx:122:            {options.map((option) => (
+src/components/ui/toast.tsx:82:      {toasts.map((toast) => (
+src/components/ui/PageLoadingSpinner.tsx:54:        {[1, 2, 3, 4, 5, 6].map((i) => (
+src/components/ui/collapsible-card.tsx:84:        {Children.map(children, (child) => {
+src/components/layout/CustomizablePageLayout.tsx:50:    componentIds: sections.map((s) => s.id),
+src/components/layout/PageContent.tsx:124:          {parts.map((part) => (
+src/components/layout/DraggableGridLayout.tsx:255:  const items = components.map((c) => c.id);
+src/components/layout/DraggableGridLayout.tsx:289:          {components.map((component, index) => (
+src/components/layout/LayoutControls.tsx:82:        {COLUMN_OPTIONS.map((option, index) => {
+src/components/layout/LayoutSidebar.tsx:41:      return new Set(NAVIGATION_DATA.map((section) => section.id));
+src/components/layout/LayoutSidebar.tsx:139:          {NAVIGATION_DATA.map((section) => (
+src/components/layout/LayoutSidebar.tsx:243:          {section.pages.map((page) => {
+src/components/scraping/ResultsViewer.tsx:35:    .map(([key]) => key);
+src/components/scraping/ResultsViewer.tsx:103:            {availableTabs.map((tab) => (
+src/components/scraping/ResultsViewer.tsx:109:          {availableTabs.map((tab) => (
+src/components/scraping/ScrapingForm.tsx:88:          {AVAILABLE_FORMATS.map((format) => (
+src/components/telegram/GatewayLogsCard.tsx:201:            logs.map((log, index) => (
+src/components/telegram/GatewayLogsCard.tsx:233:                      {Object.entries(log.data).map(([key, value]) => (
+src/components/Sidebar.tsx:100:        {menuItems.map((item) => {
+src/components/Sidebar.tsx:136:          {systemLinks.map((link) => {
+src/components/pages/SystemHealthPage.tsx:172:              {Object.entries(service.checks).map(([name, check]) => (
+src/components/pages/SystemHealthPage.tsx:393:            {health.services.map((service) => (
+src/components/pages/SystemHealthPage.tsx:410:            {health.infrastructure.map((service) => (
+src/components/pages/DocsHybridSearchPage.tsx:138:  return cleaned.split(/\s+/).filter(Boolean).map(toTitleCase).join(" ");
+src/components/pages/DocsHybridSearchPage.tsx:151:  return cleaned.split(" ").filter(Boolean).map(toTitleCase).join(" ");
+src/components/pages/DocsHybridSearchPage.tsx:174:    .map((item) => ({
+src/components/pages/DocsHybridSearchPage.tsx:554:      .map((option) => ({
+src/components/pages/DocsHybridSearchPage.tsx:573:      .map(({ sortOrder, ...rest }) => rest);
+src/components/pages/DocsHybridSearchPage.tsx:589:    () => tags.map(normalizeTag).filter(Boolean),
+src/components/pages/DocsHybridSearchPage.tsx:670:            const convertedResults = ragQuery.results.map(
+src/components/pages/DocsHybridSearchPage.tsx:782:                lexicalData.results.map((r) => {
+src/components/pages/DocsHybridSearchPage.tsx:877:          ? result.tags.map(normalizeTag).filter(Boolean)
+src/components/pages/DocsHybridSearchPage.tsx:913:      .map(([normalized, data]) => ({
+src/components/pages/DocsHybridSearchPage.tsx:1046:                        {domainOptions.slice(0, 40).map((option) => (
+src/components/pages/DocsHybridSearchPage.tsx:1072:                        {typeOptions.slice(0, 60).map((option) => (
+src/components/pages/DocsHybridSearchPage.tsx:1098:                        {statusOptions.map((option) => (
+src/components/pages/DocsHybridSearchPage.tsx:1114:                    {tags.map((t) => {
+src/components/pages/DocsHybridSearchPage.tsx:1143:                      {tagSuggestions.map((suggestion) => (
+src/components/pages/DocsHybridSearchPage.tsx:1242:                {filteredResults.map((r) => {
+src/components/pages/DocsHybridSearchPage.tsx:1314:                        {r.tags?.slice(0, 6).map((t) => {
+src/components/pages/tp-capital/LogsViewer.tsx:120:                  {LIMIT_OPTIONS.map((option) => (
+src/components/pages/tp-capital/LogsViewer.tsx:162:          {logs.map((log, idx) => {
+src/components/pages/tp-capital/SignalsTable.tsx:89:    const channels = new Set(signals.map((s) => s.channel));
+src/components/pages/tp-capital/SignalsTable.tsx:95:      signals.map((s) => s.signal_type).filter(Boolean),
+src/components/pages/tp-capital/SignalsTable.tsx:292:                {typeOptions.map((type) => (
+src/components/pages/tp-capital/SignalsTable.tsx:345:                {filteredSignals.map((signal) => (
+src/components/pages/tp-capital/TelegramChannelsManager.tsx:303:                {channels.map((channel) => (
+src/components/pages/tp-capital/ForwardedMessagesTable.tsx:76:      messages.map(
+src/components/pages/tp-capital/ForwardedMessagesTable.tsx:178:              {channelOptions.map((channel) => (
+src/components/pages/tp-capital/ForwardedMessagesTable.tsx:307:                  {filteredMessages.map((message: ForwardedMessage) => (
+src/components/pages/tp-capital/components/SignalsFilterBar.tsx:148:              {channelOptions.map((ch) => (
+src/components/pages/tp-capital/components/SignalsFilterBar.tsx:211:              {LIMIT_OPTIONS.map((opt) => (
+src/components/pages/DatabasePage.tsx:23:        {TABS.map((tab) => (
+src/components/pages/TelegramGatewayFinal.tsx:67:    const [year, month, day] = dateStr.split("-").map(Number);
+src/components/pages/TelegramGatewayFinal.tsx:161:    const currentMessageIds = new Set(messages.map((msg: any) => msg.id));
+src/components/pages/TelegramGatewayFinal.tsx:287:    return parts.map((part, index) => {
+src/components/pages/TelegramGatewayFinal.tsx:767:                      {channels.map((channel) => (
+src/components/pages/TelegramGatewayFinal.tsx:983:                      {filteredMessages.map((msg: any) => {
+src/components/pages/TelegramGatewayFinal.tsx:1153:                      {channels.map((channel) => (
+src/components/pages/StructureMapPage.tsx:68:    node.directories?.map((child) => convertToTreemap(child, depth + 1)) ?? [];
+src/components/pages/StructureMapPage.tsx:253:      .map((token) => token.trim())
+src/components/pages/StructureMapPage.tsx:425:                    {selectedNode.directories.map((directory) => (
+src/components/pages/StructureMapPage.tsx:458:                    {selectedNode.files.map((file) => (
+src/components/pages/StructureMapPage.tsx:488:                    {matchingNodes.map((node) => (
+src/components/pages/EscopoPageNew.tsx:139:            {["TypeScript", "JavaScript", "Python", "C#"].map((tech) => (
+src/components/pages/EscopoPageNew.tsx:161:            ].map((tech) => (
+src/components/pages/EscopoPageNew.tsx:176:            {["TimescaleDB", "QuestDB", "PostgreSQL", "Redis", "Qdrant"].map(
+src/components/pages/EscopoPageNew.tsx:229:        ].map((system) => (
+src/components/pages/EmbeddingModelSelector.tsx:112:          sortedModels.map((model) => (
+src/components/pages/EmbeddingModelSelector.tsx:176:                      {model.capabilities.slice(0, 3).map((capability) => (
+src/components/pages/telegram-gateway/ChannelsManagerCard.tsx:187:                channels.map((channel) => (
+src/components/pages/telegram-gateway/ConnectionDiagnosticCard.tsx:221:            {diagnostics.map((item) => (
+src/components/pages/telegram-gateway/MessagesTable.tsx:121:    const currentMessageIds = new Set(messages.map((msg) => msg.id));
+src/components/pages/telegram-gateway/MessagesTable.tsx:159:    const set = new Set(messages.map((message) => message.channelId));
+src/components/pages/telegram-gateway/MessagesTable.tsx:282:              {STATUS_OPTIONS.map((statusOption) => (
+src/components/pages/telegram-gateway/MessagesTable.tsx:295:              {uniqueChannels.map((channel) => (
+src/components/pages/telegram-gateway/MessagesTable.tsx:310:              {[10, 25, 50, 100].map((option) => (
+src/components/pages/telegram-gateway/MessagesTable.tsx:362:                  messages.map((message) => {
+src/components/pages/telegram-gateway/AuthenticationCard.tsx:414:                  logs.map((log, index) => {
+src/components/pages/telegram-gateway/AuthenticationCard.tsx:471:                  logs.map((log, index) => {
+src/components/pages/telegram-gateway/FailureQueueCard.tsx:135:                    {queue?.preview?.map((entry, index) => (
+src/components/pages/telegram-gateway/components/GatewayFilters.tsx:51:            {channels.map((ch) => (
+src/components/pages/telegram-gateway/SimpleChannelsCard.tsx:123:            {channels.map((channel) => (
+src/components/pages/telegram-gateway/MetricsOverview.tsx:78:            {Array.from({ length: 3 }).map((_, index) => (
+src/components/pages/telegram-gateway/MetricsOverview.tsx:87:            {cards.map(({ label, value, icon: Icon, description, accent }) => (
+src/components/pages/telegram-gateway/SimpleMessagesCard.tsx:127:            {filteredMessages.map((message) => (
+src/components/pages/DirectorySelector.tsx:238:                {directories.map((dir) => (
+src/components/pages/CollectionFormDialog.tsx:208:      .map((t) => t.trim())
+src/components/pages/CollectionFormDialog.tsx:234:        .map((t) => t.trim().replace(/^\./, "")) // Remove leading dots
+src/components/pages/CollectionFormDialog.tsx:248:      .map((t) => t.trim().replace(/^\./, ""))
+src/components/pages/CollectionFormDialog.tsx:498:                    {formState.fileTypes.map((type, index) => (
+src/components/pages/LlamaIndexPage.tsx:137:        {services.map((service) => {
+src/components/pages/CollectionsManagementCard.tsx:627:                filteredCollections.map((collection) => {
+src/components/pages/CollectionsManagementCard.tsx:817:            availableCollections={collections.map((c) => ({
+src/components/pages/CollectionSelector.tsx:94:        {collections.map((collection) => (
+src/components/pages/GovernancePage.tsx:230:    const rows = snapshot.artifacts.map((artifact) => ({
+src/components/pages/GovernancePage.tsx:474:                  {(["healthy", "warning", "overdue"] as const).map(
+src/components/pages/GovernancePage.tsx:521:                    {upcoming.map((item) => (
+src/components/pages/GovernancePage.tsx:555:                        ).map(([status, count]) => (
+src/components/pages/GovernancePage.tsx:576:                        ).map(([status, count]) => (
+src/components/pages/GovernancePage.tsx:628:                    {categories.map((category) => (
+src/components/pages/GovernancePage.tsx:641:                    {owners.map((owner) => (
+src/components/pages/GovernancePage.tsx:750:                  {filteredRows.map(({ artifact, status }) => {
+src/components/pages/GovernancePage.tsx:761:                            {artifact.tags?.map((tag) => (
+src/components/pages/CollectionsTable.tsx:223:              {collections.map((collection) => (
+src/components/pages/ConnectionsPageNew.tsx:200:          {services.map((service) => (
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:231:          const modelOptions: ModelOption[] = modelsData.map((model: any) => {
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:404:    const list = docAllFiles.map((file) => ({
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:550:                          {visibleCollections.map((option) => {
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:825:                  {visibleCollections.map((option) => {
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:993:                        {unifiedFileList.map((file, idx) => (
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:1118:                    .map((item, idx) => (
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:1133:                  {lastIngestion.largest_files.slice(0, 5).map((item, idx) => (
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:1202:                    {availableModels.map((model) => (
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:1268:                ].map((dir) => (
+src/components/pages/TestModelsPage.tsx:106:              {models.map((model) => (
+src/components/pages/APIViewerPage.tsx:213:                  {API_SPECS.map((api) => (
+src/components/pages/APIViewerPage.tsx:267:              {(["redoc", "swagger", "rapidoc", "raw"] as ViewerType[]).map(
+src/components/pages/collections/IngestionProgressModal.tsx:397:                  {logs.map((log, index) => (
+src/components/pages/collections/CollectionFilesTable.tsx:356:                  {availableCollections.map((col) => (
+src/components/pages/collections/CollectionFilesTable.tsx:543:                    filteredAndSortedFiles.map((file, index) => {
+src/components/pages/collections/IngestionLogsViewer.tsx:494:                  {logs.map((log, index) => (
+src/components/pages/collections/BatchIngestionProgressModal.tsx:272:                  {job.errors.map((err, idx) => (
+src/components/pages/DocumentationMetricsPage.tsx:362:    return metrics.historical.map((entry) => ({
+src/components/pages/DocumentationMetricsPage.tsx:441:          {Array.from({ length: 4 }).map((_, idx) => (
+src/components/pages/DocumentationMetricsPage.tsx:452:          {Array.from({ length: 4 }).map((_, idx) => (
+src/components/pages/DocumentationMetricsPage.tsx:680:              {SEVERITY_META.map(({ key, label, color }) => {
+src/components/pages/DocumentationMetricsPage.tsx:793:                    {metrics.freshness.distribution.map((item) => {
+src/components/pages/DocumentationMetricsPage.tsx:842:                    data={Object.entries(metrics.issues.breakdown).map(
+src/components/pages/DocumentationMetricsPage.tsx:854:                    {Object.entries(metrics.issues.breakdown).map(
+src/components/pages/DocumentationMetricsPage.tsx:882:                  data={metrics.coverage.byOwner.map((owner, idx) => ({
+src/components/pages/DocumentationMetricsPage.tsx:911:                    {metrics.coverage.byOwner.map((owner, idx) => (
+src/components/pages/DocumentationMetricsPage.tsx:937:                  data={metrics.coverage.byCategory.map((category, idx) => ({
+src/components/pages/DocumentationMetricsPage.tsx:966:                    {metrics.coverage.byCategory.map((category, idx) => (
+src/components/pages/DocumentationMetricsPage.tsx:991:          {recommendedTasks.map((task) => (
+src/components/pages/DocumentationMetricsPage.tsx:1003:                {task.commands.map((command) => (
+src/components/pages/CatalogPage.tsx:37:    CATALOG_SECTIONS.map((section) => {
+src/components/pages/URLsPage.tsx:158:  const pageSections: PageSection[] = sections.map((section) => ({
+src/components/pages/URLsPage.tsx:172:            {section.links.map((link) => (
+src/components/pages/DocumentationPage.tsx:176:                {sources.map((source) => (
+src/components/pages/DocumentationPage.tsx:195:              {suggestions.map((suggestion) => (
+src/components/pages/DocumentationPage.tsx:212:                {Array.from({ length: 4 }).map((_, index) => (
+src/components/pages/DocumentationPage.tsx:229:              filteredResults.map((result) => (
+src/components/pages/DocumentationSystemsPageSimple.tsx:104:          {systems.map((system) => (
+src/components/pages/DocumentationSystemsPageSimple.tsx:157:                    {system.tags.split(",").map((tag, idx) => (
+src/components/pages/TelegramGatewayPageNew.tsx:34:      .map((channel) => channel.channelId);
+src/components/pages/PRDsPage.tsx:286:                {prds.map((prd) => (
+src/components/pages/workspace/components/AddItemDialog.tsx:90:        .map((tag) => tag.trim())
+src/components/pages/workspace/components/AddItemDialog.tsx:180:                  categories.map((category) => (
+src/components/pages/workspace/components/AddItemDialog.tsx:205:                {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
+src/components/pages/workspace/components/DroppableColumn.tsx:57:          items={items.filter((item) => item.id).map((item) => item.id)}
+src/components/pages/workspace/components/DroppableColumn.tsx:62:            .map((item) => (
+src/components/pages/workspace/components/ViewItemDialog.tsx:120:                {item.tags.map((tag) => (
+src/components/pages/workspace/components/EditItemDialog.tsx:206:                    categories.map((category) => (
+src/components/pages/workspace/components/EditItemDialog.tsx:232:                  {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
+src/components/pages/workspace/components/EditItemDialog.tsx:253:                  {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+src/components/pages/workspace/components/WorkspaceListSection.tsx:247:                  sortedItems.map((item) => {
+src/components/pages/workspace/components/WorkspaceListSection.tsx:296:                              {item.tags.slice(0, 2).map((tag) => (
+src/components/pages/workspace/components/AddItemSection.tsx:52:        .map((tag) => tag.trim())
+src/components/pages/workspace/components/AddItemSection.tsx:135:                {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+src/components/pages/workspace/components/AddItemSection.tsx:156:                {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
+src/components/pages/workspace/components/StatusBoardSection.tsx:85:            {(Object.keys(STATUS_CONFIG) as ItemStatus[]).map((statusKey) => (
+src/components/pages/workspace/CategoriesCRUDCard.tsx:351:        data.map((category) => ({
+src/components/pages/workspace/CategoriesCRUDCard.tsx:627:        prev.map((item) =>
+src/components/pages/workspace/CategoriesCRUDCard.tsx:787:              sortedCategories.map((category) => {
+src/components/pages/DashboardPage.tsx:65:      {kpis.map((kpi) => {
+src/components/pages/DashboardPage.tsx:142:            {latestTrades.map((trade) => (
+src/components/pages/DashboardPage.tsx:199:              {recentTrades.map((trade, idx) => (
+src/components/pages/DashboardPage.tsx:238:              {recentOrders.map((order) => (
+src/components/pages/LlamaIndexQueryTool.tsx:223:              {collections.map((item) => (
+src/components/pages/LlamaIndexQueryTool.tsx:330:        {history.map((item) => (
+src/components/pages/LlamaIndexQueryTool.tsx:384:                  {item.results.map((r, idx) => (
+src/components/pages/LlamaIndexQueryTool.tsx:459:                    {item.answer.sources.map((s, idx) => (
+src/components/pages/DocumentationStatsPageSimple.tsx:173:            {Object.entries(stats.systems.by_status).map(([status, count]) => (
+src/components/pages/DocumentationStatsPageSimple.tsx:201:            {Object.entries(stats.ideas.by_status).map(([status, count]) => (
+src/components/pages/DocumentationStatsPageSimple.tsx:231:            {Object.entries(stats.ideas.by_category).map(
+src/components/pages/DocumentationStatsPageSimple.tsx:253:            {Object.entries(stats.ideas.by_priority).map(
+
+## useEffect Dependencies
+src/contexts/ThemeContext.tsx:62:  React.useEffect(() => {
+src/contexts/ThemeContext.tsx:86:  React.useEffect(() => {
+src/examples/documentation-api-usage.tsx:3:import { useState, useEffect } from "react";
+src/examples/documentation-api-usage.tsx:113:  useEffect(() => {
+src/components/history/ResultsComparison.tsx:1:import { useEffect, useMemo, useRef, useState } from "react";
+src/components/history/ResultsComparison.tsx:176:  useEffect(() => {
+src/components/history/ResultsComparison.tsx:204:  useEffect(() => {
+src/components/ui/clock.tsx:1:import { useEffect, useState } from "react";
+src/components/ui/clock.tsx:36:  useEffect(() => {
+src/components/ui/button-with-dropdown.tsx:1:import { useState, useRef, useEffect, useCallback } from "react";
+src/components/ui/button-with-dropdown.tsx:36:  useEffect(() => {
+src/components/ui/toast.tsx:1:import { useEffect, useState } from "react";
+src/components/ui/toast.tsx:21:  useEffect(() => {
+src/components/ui/collapsible-card.tsx:7:  useEffect,
+src/components/ui/collapsible-card.tsx:49:    useEffect(() => {
+src/components/layout/Layout.tsx:53:  React.useEffect(() => {
+src/components/layout/Layout.tsx:58:  React.useEffect(() => {
+src/components/layout/LayoutSidebar.tsx:80:  React.useEffect(() => {
+src/components/telegram/GatewayLogsCard.tsx:1:import React, { useState, useEffect } from "react";
+src/components/telegram/GatewayLogsCard.tsx:28:  useEffect(() => {
+src/components/pages/SystemHealthPage.tsx:10:import { useState, useEffect } from "react";
+src/components/pages/SystemHealthPage.tsx:227:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:3:  useEffect,
+src/components/pages/DocsHybridSearchPage.tsx:62:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:389:  // Filter states (must be declared before useEffects that use them)
+src/components/pages/DocsHybridSearchPage.tsx:395:  // 🔒 ALL REFS MUST BE DECLARED BEFORE ANY useEffect THAT USES THEM
+src/components/pages/DocsHybridSearchPage.tsx:483:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:495:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:499:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:504:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:532:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:594:  useEffect(() => {
+src/components/pages/DocsHybridSearchPage.tsx:612:  // Main search useEffect (handles debounced query changes)
+src/components/pages/DocsHybridSearchPage.tsx:613:  useEffect(() => {
+src/components/pages/tp-capital/LogsViewer.tsx:1:import { useEffect, useMemo, useState } from "react";
+src/components/pages/tp-capital/LogsViewer.tsx:62:  useEffect(() => {
+src/components/pages/tp-capital/SignalsTable.tsx:16:import { useEffect, useMemo, useState } from "react";
+src/components/pages/tp-capital/SignalsTable.tsx:154:  useEffect(() => {
+src/components/pages/tp-capital/SignalsTable.tsx:160:  useEffect(() => {
+src/components/pages/TelegramGatewayFinal.tsx:1:import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+src/components/pages/TelegramGatewayFinal.tsx:158:  useEffect(() => {
+src/components/pages/DocusaurusPage.tsx:1:import { useEffect, useState } from "react";
+src/components/pages/DocusaurusPage.tsx:104:  useEffect(() => {
+src/components/pages/StructureMapPage.tsx:1:import { useCallback, useEffect, useMemo, useState } from "react";
+src/components/pages/StructureMapPage.tsx:231:  useEffect(() => {
+src/components/pages/MarkdownViewer.tsx:1:import { useEffect, useState } from "react";
+src/components/pages/MarkdownViewer.tsx:20:  useEffect(() => {
+src/components/pages/telegram-gateway/MessagesTable.tsx:1:import { useEffect, useMemo, useRef, useState } from "react";
+src/components/pages/telegram-gateway/MessagesTable.tsx:118:  useEffect(() => {
+src/components/pages/telegram-gateway/AuthenticationCard.tsx:1:import { useEffect, useMemo, useRef, useState } from "react";
+src/components/pages/telegram-gateway/AuthenticationCard.tsx:220:  useEffect(() => {
+src/components/pages/telegram-gateway/AuthenticationCard.tsx:226:  useEffect(() => {
+src/components/pages/DirectorySelector.tsx:10:import React, { useState, useEffect } from "react";
+src/components/pages/DirectorySelector.tsx:149:  useEffect(() => {
+src/components/pages/CollectionFormDialog.tsx:10:import React, { useState, useEffect, useMemo } from "react";
+src/components/pages/CollectionFormDialog.tsx:144:  useEffect(() => {
+src/components/pages/CollectionFormDialog.tsx:221:  React.useEffect(() => {
+src/components/pages/LlamaIndexPage.tsx:8:import { useEffect, useMemo, useState } from "react";
+src/components/pages/LlamaIndexPage.tsx:192:  useEffect(() => {
+src/components/pages/CollectionsManagementCard.tsx:104:  React.useEffect(() => {
+src/components/pages/CollectionsManagementCard.tsx:112:  React.useEffect(() => {
+src/components/pages/CollectionSelector.tsx:1:import { useState, useEffect, useCallback } from "react";
+src/components/pages/CollectionSelector.tsx:59:  useEffect(() => {
+src/components/pages/GovernancePage.tsx:1:import { useCallback, useEffect, useMemo, useState } from "react";
+src/components/pages/GovernancePage.tsx:195:  useEffect(() => {
+src/components/pages/GovernancePage.tsx:308:  useEffect(() => {
+src/components/pages/CollectionsTable.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/CollectionsTable.tsx:45:  useEffect(() => {
+src/components/pages/DocPreviewModal.tsx:1:import { useEffect, useState, lazy, Suspense } from "react";
+src/components/pages/DocPreviewModal.tsx:35:  useEffect(() => {
+src/components/pages/DocPreviewModal.tsx:54:  useEffect(() => {
+src/components/pages/DocPreviewModal.tsx:61:  useEffect(() => {
+src/components/pages/LlamaIndexIngestionStatusCard.tsx:211:  React.useEffect(() => {
+src/components/pages/TestModelsPage.tsx:5:import React, { useState, useEffect } from "react";
+src/components/pages/TestModelsPage.tsx:19:  useEffect(() => {
+src/components/pages/TestModelsPage.tsx:20:    console.log("🧪 [TestModelsPage] useEffect triggered");
+src/components/pages/APIViewerPage.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/APIViewerPage.tsx:93:  useEffect(() => {
+src/components/pages/APIViewerPage.tsx:98:  useEffect(() => {
+src/components/pages/collections/IngestionProgressModal.tsx:15:import React, { useEffect, useMemo } from "react";
+src/components/pages/collections/IngestionProgressModal.tsx:160:  useEffect(() => {
+src/components/pages/collections/IngestionProgressModal.tsx:171:  useEffect(() => {
+src/components/pages/collections/CollectionFilesTable.tsx:1:import React, { useEffect, useState, useMemo } from "react";
+src/components/pages/collections/CollectionFilesTable.tsx:155:  useEffect(() => {
+src/components/pages/collections/BatchIngestionProgressModal.tsx:7:import { useEffect, useState, useCallback } from "react";
+src/components/pages/collections/BatchIngestionProgressModal.tsx:68:  useEffect(() => {
+src/components/pages/DocumentationMetricsPage.tsx:1:import { useEffect, useMemo, useState, useCallback } from "react";
+src/components/pages/DocumentationMetricsPage.tsx:338:  useEffect(() => {
+src/components/pages/DocumentationPage.tsx:1:import React, { useEffect, useMemo, useState } from "react";
+src/components/pages/DocumentationPage.tsx:35:  useEffect(() => {
+src/components/pages/CourseCrawlerPage.tsx:1:import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+src/components/pages/CourseCrawlerPage.tsx:72:  useEffect(() => {
+src/components/pages/CourseCrawlerPage.tsx:132:  useEffect(() => {
+src/components/pages/DocumentationSystemsPageSimple.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/DocumentationSystemsPageSimple.tsx:30:  useEffect(() => {
+src/components/pages/PRDsPage.tsx:11:import { useState, useEffect } from "react";
+src/components/pages/PRDsPage.tsx:167:  useEffect(() => {
+src/components/pages/workspace/components/AddItemDialog.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/workspace/components/AddItemDialog.tsx:54:  useEffect(() => {
+src/components/pages/workspace/components/EditItemDialog.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/workspace/components/EditItemDialog.tsx:69:  useEffect(() => {
+src/components/pages/workspace/components/EditItemDialog.tsx:87:  useEffect(() => {
+src/components/pages/workspace/CategoriesCRUDCard.tsx:1:import { useEffect, useMemo, useState } from "react";
+src/components/pages/workspace/CategoriesCRUDCard.tsx:369:  useEffect(() => {
+src/components/pages/LlamaIndexQueryTool.tsx:87:  React.useEffect(() => {
+src/components/pages/DocumentationStatsPageSimple.tsx:1:import { useState, useEffect } from "react";
+src/components/pages/DocumentationStatsPageSimple.tsx:47:  useEffect(() => {
+src/hooks/useCustomLayout.tsx:1:import { useState, useEffect, useCallback } from "react";
+src/hooks/useCustomLayout.tsx:109:  useEffect(() => {
+src/hooks/useCustomLayout.tsx:124:  useEffect(() => {
+src/App.tsx:14:import { useEffect, useMemo } from "react";
+src/App.tsx:48:  useEffect(() => {

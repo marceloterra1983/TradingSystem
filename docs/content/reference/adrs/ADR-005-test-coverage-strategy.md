@@ -1,5 +1,6 @@
 ---
 title: "ADR-005: Test Coverage Strategy - Systematic Quality Improvement"
+slug: /reference/adrs/ADR-005-test-coverage-strategy
 date: 2025-11-02
 description: "Architecture Decision Record for systematically increasing test coverage from 5.8% to 80% across backend and frontend"
 status: proposed

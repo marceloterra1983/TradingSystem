@@ -1,6 +1,4 @@
 import * as React from "react";
-import { ExternalLink } from '@/icons';
-import { Button } from "../../ui/button";
 import { IframeWithUrl } from "../../common/IframeWithUrl";
 
 interface AlternateUrl {
@@ -18,8 +16,6 @@ interface DatabaseEmbedFrameProps {
   alternateUrls?: AlternateUrl[];
 }
 
-const isBrowser = typeof window !== "undefined";
-
 const uniqueByUrl = (options: AlternateUrl[]): AlternateUrl[] => {
   const map = new Map<string, AlternateUrl>();
   for (const option of options) {
@@ -32,8 +28,6 @@ const uniqueByUrl = (options: AlternateUrl[]): AlternateUrl[] => {
 
 export function DatabaseEmbedFrame({
   url,
-  title,
-  openLabel,
   iframeTitle,
   sandbox = "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-modals",
   allow = "clipboard-read; clipboard-write",
@@ -44,15 +38,8 @@ export function DatabaseEmbedFrame({
     return uniqueByUrl([baseOption, ...alternateUrls]);
   }, [url, alternateUrls]);
 
-  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [activeIndex] = React.useState(0);
   const activeOption = options[activeIndex] ?? options[0];
-
-  const handleOpen = React.useCallback(() => {
-    if (!isBrowser || !activeOption) {
-      return;
-    }
-    window.open(activeOption.url, "_blank", "noopener,noreferrer");
-  }, [activeOption]);
 
   return (
     <IframeWithUrl

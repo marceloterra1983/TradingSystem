@@ -1,5 +1,6 @@
 ---
 title: DocsAPI Viewer Fix
+slug: /troubleshooting/docsapi-viewer-fix
 description: Fix para botões Redoc e Select API no DocsAPI tab
 tags:
   - troubleshooting

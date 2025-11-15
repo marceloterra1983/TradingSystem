@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Columns,
-  FileDiff,
-  LayoutList,
-  MoveLeft,
-  MoveRight,
-} from '@/icons';
+import { Columns, FileDiff, LayoutList, MoveLeft, MoveRight } from "@/icons";
 import {
   Dialog,
   DialogContent,

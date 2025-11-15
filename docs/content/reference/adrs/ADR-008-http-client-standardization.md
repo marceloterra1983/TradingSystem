@@ -1,5 +1,6 @@
 ---
 title: "ADR-008: HTTP Client Standardization"
+slug: /reference/adrs/ADR-008-http-client-standardization
 sidebar_position: 8
 tags: [adr, architecture, http, frontend, reliability]
 domain: architecture
@@ -234,15 +235,15 @@ npm run test:load -- --clients 100 --duration 60s
 
 ## Related Decisions
 
-- [ADR-003: API Gateway Implementation](./ADR-003-api-gateway-implementation)
-- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration.mdx)
+- [ADR-003: API Gateway Implementation](ADR-003-api-gateway-implementation.md)
+- [ADR-007: TP Capital API Gateway Integration](007-tp-capital-api-gateway-integration.mdx)
 
 ## References
 
 - [Implementing Circuit Breaker Pattern - Martin Fowler](https://martinfowler.com/bliki/CircuitBreaker.html)
 - [Exponential Backoff - Google Cloud](https://cloud.google.com/iot/docs/how-tos/exponential-backoff)
-- [Governance Standard: STD-020 HTTP Client Standard](../../governance/standards/STD-020-http-client-standard)
-- [Architecture Review: 2025-11-01](../../governance/evidence/reports/reviews/architecture-2025-11-01/index)
+- [Governance Standard: STD-020 HTTP Client Standard](../../governance/standards/STD-020-http-client-standard.md)
+- [Architecture Review: 2025-11-01](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/content/governance/evidence/reports/reviews/architecture-2025-11-01/index)
 
 ---
 

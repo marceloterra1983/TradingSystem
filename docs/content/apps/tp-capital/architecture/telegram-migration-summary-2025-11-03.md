@@ -285,8 +285,8 @@ bash scripts/telegram/start-telegram-stack.sh
 
 ## 🔗 Related Documentation
 
-- [Architecture Review](./telegram-architecture-2025-11-03.md)
-- [Database Analysis](./telegram-database-architecture-2025-11-03.md)
+- [Architecture Review](telegram-architecture-2025-11-03.md)
+- [Database Analysis](telegram-database-architecture-2025-11-03.md)
 - [Migration Runbook](../../telegram-gateway/migration-runbook.mdx)
 - [Monitoring Guide](../../telegram-gateway/monitoring-guide.mdx)
 - [Troubleshooting](../../telegram-gateway/troubleshooting.mdx)

@@ -1,11 +1,7 @@
-import {
-  forwardRef,
-  type LabelHTMLAttributes,
-} from "react";
+import { forwardRef, type LabelHTMLAttributes } from "react";
 import { cn } from "../../lib/utils";
 
-export interface LabelProps
-  extends LabelHTMLAttributes<HTMLLabelElement> {}
+export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {}
 
 /**
  * Label component following shadcn/ui patterns

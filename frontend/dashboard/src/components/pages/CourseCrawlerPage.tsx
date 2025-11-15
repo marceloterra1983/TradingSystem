@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, RefreshCcw } from "lucide-react";
 
 import { Button } from "../ui/button";
@@ -25,9 +19,10 @@ const resolveCourseCrawlerUrl = () => {
   const env = import.meta.env;
   const runtimeOrigin =
     typeof window !== "undefined" ? window.location.origin : undefined;
-  const preferDirect =
-    env.DEV || env.VITE_USE_DIRECT_COURSE_CRAWLER === "true";
-  const directUrl = preferDirect ? env.VITE_COURSE_CRAWLER_APP_URL?.trim() : undefined;
+  const preferDirect = env.DEV || env.VITE_USE_DIRECT_COURSE_CRAWLER === "true";
+  const directUrl = preferDirect
+    ? env.VITE_COURSE_CRAWLER_APP_URL?.trim()
+    : undefined;
 
   if (directUrl) {
     try {
@@ -99,7 +94,10 @@ export default function CourseCrawlerPage() {
 
     try {
       const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+      const timeoutId = window.setTimeout(
+        () => controller.abort(),
+        HEALTH_TIMEOUT_MS,
+      );
 
       const url = new URL(iframeUrl, window.location.origin);
       const healthUrl = buildHealthUrl(url);

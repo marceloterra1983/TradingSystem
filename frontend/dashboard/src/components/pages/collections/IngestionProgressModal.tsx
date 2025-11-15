@@ -23,7 +23,7 @@ import {
   Database,
   Clock,
   Zap,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../../ui/button";
 import {
   Dialog,

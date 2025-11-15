@@ -286,9 +286,9 @@ If Neon proves successful for Workspace:
 ## References
 
 - [Neon GitHub Repository](https://github.com/neondatabase/neon)
-- [Neon Setup Guide](../../database/neon-setup)
+- [Neon Setup Guide](../../database/neon-setup.mdx)
 - [Workspace Architecture Review](https://github.com/marceloterra1983/TradingSystem/blob/main/governance/reviews/architecture-2025-11-01/index.md)
-- [TimescaleDB vs Neon Notes](../../database/neon-setup)
+- [TimescaleDB vs Neon Notes](../../database/neon-setup.mdx)
 
 ---
 

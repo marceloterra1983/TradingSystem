@@ -1,0 +1,90 @@
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Logging
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json;
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Root directory
+        root /usr/share/nginx/html;
+
+        # Auto index disabled (we redirect to /next/ instead)
+        autoindex off;
+
+        # Security headers - Allow iframe embedding from Dashboard
+        add_header X-Frame-Options "ALLOW-FROM http://localhost:9080" always;
+        add_header Content-Security-Policy "frame-ancestors 'self' http://localhost:9080 http://localhost:*" always;
+
+        # CORS headers - Allow cross-origin requests from Dashboard
+        add_header Access-Control-Allow-Origin "http://localhost:9080" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type" always;
+
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 '{"status":"healthy","service":"documentation"}';
+            add_header Content-Type application/json;
+        }
+
+        # OpenAPI/AsyncAPI specifications
+        location /specs/ {
+            alias /data/specs/;
+            try_files $uri $uri/ =404;
+        }
+
+        # Documentation dashboards and metrics JSON
+        location /dashboard/ {
+            alias /usr/share/nginx/html/dashboard/;
+            autoindex off;
+            types { application/json json; }
+            default_type application/json;
+        }
+
+        location /metrics/ {
+            alias /usr/share/nginx/html/metrics/;
+            autoindex off;
+            types { application/json json; }
+            default_type application/json;
+        }
+
+        # Docusaurus documentation (root) - serve version 1.1 (stable)
+        location = / {
+            # For health checks, return healthy status
+            if ($http_accept ~* "application/json") {
+                return 200 '{"status":"healthy","service":"documentation","version":"1.1"}';
+                add_header Content-Type application/json;
+            }
+            index index.html;
+            try_files /index.html =404;
+        }
+        
+        # Docusaurus documentation - All paths use client-side routing
+        # Serve index.html for all paths to enable React Router
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Error pages
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}

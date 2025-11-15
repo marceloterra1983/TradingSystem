@@ -1,14 +1,18 @@
 import { useMemo } from "react";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_FIRECRAWL_UI_URL = "http://localhost:3002";
+const getDefaultFirecrawlUrl = () =>
+  typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:3002`
+    : "/firecrawl";
 
 const resolveFirecrawlUrl = (): string => {
   const env = import.meta.env as Record<string, string | undefined>;
-  const configuredUrl = env.VITE_FIRECRAWL_UI_URL || env.VITE_FIRECRAWL_PROXY_URL;
+  const configuredUrl =
+    env.VITE_FIRECRAWL_UI_URL || env.VITE_FIRECRAWL_PROXY_URL;
 
   if (!configuredUrl) {
-    return DEFAULT_FIRECRAWL_UI_URL;
+    return getDefaultFirecrawlUrl();
   }
 
   try {
@@ -16,7 +20,7 @@ const resolveFirecrawlUrl = (): string => {
     parsed.pathname = parsed.pathname.replace(/\/+$/, "");
     return parsed.toString();
   } catch {
-    return DEFAULT_FIRECRAWL_UI_URL;
+    return getDefaultFirecrawlUrl();
   }
 };
 

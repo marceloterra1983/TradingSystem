@@ -1,5 +1,6 @@
 ---
 title: "Environment Variables Policy Review"
+slug: /governance/evidence/audits/env-policy-review-2025-11-08
 date: "2025-11-08"
 tags: [governance, audit, environment-variables]
 domain: governance
@@ -40,8 +41,8 @@ None identified
 
 ## See Also
 
-- [POL-0002: Environment Variables Policy](/docs/governance/policies/environment-variables-policy)
-- [Environment Variables Guide](/docs/tools/security-config/env)
+- [POL-0002: Environment Variables Policy](../../policies/environment-variables-policy.mdx)
+- [Environment Variables Guide](../../../tools/security-config/env.mdx)
 
 ---
 

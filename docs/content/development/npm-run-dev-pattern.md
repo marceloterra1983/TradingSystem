@@ -1,5 +1,6 @@
 ---
 title: Padrão npm run dev com Auto-Kill de Porta
+slug: /development/npm-run-dev-pattern
 sidebar_position: 5
 description: Padrão de desenvolvimento para evitar erros EADDRINUSE em serviços Node.js
 tags:

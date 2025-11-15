@@ -1,5 +1,6 @@
 ---
 title: "ADR-003: API Gateway Implementation"
+slug: /reference/adrs/ADR-003-api-gateway-implementation
 sidebar_position: 3
 tags: [adr, architecture, api-gateway, traefik]
 domain: architecture
@@ -183,15 +184,15 @@ open http://localhost:9083/dashboard/
 
 ## Related Decisions
 
-- [ADR-0001: Architecture Decision Records](./ADR-0001-architecture-decision-records)
-- [ADR-007: TP Capital API Gateway Integration](./007-tp-capital-api-gateway-integration.mdx)
-- [ADR-008: HTTP Client Standardization](./ADR-008-http-client-standardization)
+- [ADR-0001: Architecture Decision Records](ADR-0001-architecture-decision-records.md)
+- [ADR-007: TP Capital API Gateway Integration](007-tp-capital-api-gateway-integration.mdx)
+- [ADR-008: HTTP Client Standardization](ADR-008-http-client-standardization.md)
 
 ## References
 
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [API Gateway Pattern - Microsoft](https://docs.microsoft.com/en-us/azure/architecture/microservices/design/gateway)
-- [Governance Policy: API Gateway Policy](../../governance/policies/api-gateway-policy)
+- [Governance Policy: API Gateway Policy](../../governance/policies/api-gateway-policy.md)
 
 ---
 

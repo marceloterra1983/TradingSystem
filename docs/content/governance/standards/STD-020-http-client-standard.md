@@ -1,5 +1,6 @@
 ---
 title: "STD-020: HTTP Client Standard"
+slug: /governance/standards/STD-020-http-client-standard
 sidebar_position: 20
 tags: [governance, standards, http, frontend]
 domain: governance
@@ -118,9 +119,9 @@ bash scripts/governance/validate-http-client-standard.sh
 
 ## See Also
 
-- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization)
-- [HTTP Client Implementation Guide](../../frontend/engineering/http-client-implementation-guide)
-- [Proxy Best Practices](../../frontend/engineering/PROXY-BEST-PRACTICES)
+- [ADR-008: HTTP Client Standardization](../../reference/adrs/ADR-008-http-client-standardization.md)
+- [HTTP Client Implementation Guide](../../frontend/engineering/http-client-implementation-guide.mdx)
+- [Proxy Best Practices](../../frontend/engineering/PROXY-BEST-PRACTICES.md)
 
 ---
 

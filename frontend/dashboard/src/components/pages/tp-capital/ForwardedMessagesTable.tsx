@@ -14,7 +14,7 @@ import {
   Image as ImageIcon,
   RefreshCw,
   Search,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { MessageDetailModal } from "./MessageDetailModal";

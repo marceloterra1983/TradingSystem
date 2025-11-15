@@ -29,6 +29,7 @@ services:
       POSTGRES_DB: ${EVOLUTION_DB_NAME:-evolution}
       POSTGRES_USER: ${EVOLUTION_DB_USER:-evolution}
       POSTGRES_PASSWORD: ${EVOLUTION_DB_PASSWORD:-evolutiondb}
+      POSTGRES_HOST_AUTH_METHOD: md5
       TZ: ${EVOLUTION_TZ:-UTC}
 
     command: >
@@ -81,10 +82,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 3G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1.5G
 
     healthcheck:
@@ -129,25 +130,40 @@ services:
       - POOL_MODE=transaction
       - MAX_CLIENT_CONN=800
       - DEFAULT_POOL_SIZE=20
+      - AUTH_TYPE=md5
+      - AUTH_FILE=/etc/pgbouncer/userlist.txt
 
     ports:
       - "${EVOLUTION_PGBOUNCER_HOST_BIND:-127.0.0.1}:${EVOLUTION_PGBOUNCER_PORT:-6436}:6432"
+
+    volumes:
+      - evolution-pgbouncer-config:/etc/pgbouncer
 
     depends_on:
       evolution-postgres:
         condition: service_healthy
 
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        mkdir -p /etc/pgbouncer
+        echo "\"${EVOLUTION_DB_USER:-evolution}\" \"md5$(echo -n '${EVOLUTION_DB_PASSWORD:-evolutiondb}${EVOLUTION_DB_USER:-evolution}' | md5sum | cut -d' ' -f1)\"" > /etc/pgbouncer/userlist.txt
+        chmod 600 /etc/pgbouncer/userlist.txt
+        exec /opt/pgbouncer/entrypoint.sh /etc/pgbouncer/pgbouncer.ini
+
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
 
     healthcheck:
-      test: ['CMD-SHELL', 'nc -z localhost 6432']
+      test: ["CMD-SHELL", "nc -z localhost 6432"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -194,14 +210,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 256M
 
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -248,10 +264,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
     healthcheck:
@@ -281,7 +297,7 @@ services:
   evolution-minio-init:
     container_name: evolution-minio-init
     image: quay.io/minio/mc:latest
-    restart: 'no'
+    restart: "no"
 
     env_file:
       - ../../.env
@@ -316,8 +332,6 @@ services:
     depends_on:
       evolution-postgres:
         condition: service_healthy
-      evolution-pgbouncer:
-        condition: service_healthy
       evolution-redis:
         condition: service_healthy
       evolution-minio-init:
@@ -335,10 +349,15 @@ services:
       SERVER_URL: ${EVOLUTION_API_PUBLIC_URL:-http://localhost:4100}
       SSL_CONF_PRIVKEY: ${EVOLUTION_SSL_KEY_PATH:-}
       SSL_CONF_FULLCHAIN: ${EVOLUTION_SSL_CERT_PATH:-}
-      DATABASE_PROVIDER: ${EVOLUTION_DATABASE_PROVIDER:-psql_bouncer}
-      DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolutiondb}@${EVOLUTION_DB_HOST:-evolution-pgbouncer}:${EVOLUTION_DB_POOL_PORT:-6432}/${EVOLUTION_DB_NAME:-evolution}?pgbouncer=true&schema=${EVOLUTION_DB_SCHEMA:-evolution_api}
-      DATABASE_BOUNCER_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolutiondb}@${EVOLUTION_DB_HOST:-evolution-pgbouncer}:${EVOLUTION_DB_POOL_PORT:-6432}/${EVOLUTION_DB_NAME:-evolution}?pgbouncer=true&schema=${EVOLUTION_DB_SCHEMA:-evolution_api}
+      DATABASE_ENABLED: true
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolutiondb}@evolution-postgres:5432/${EVOLUTION_DB_NAME:-evolution}?schema=${EVOLUTION_DB_SCHEMA:-evolution_api}
       DATABASE_CONNECTION_CLIENT_NAME: ${EVOLUTION_DB_CLIENT_NAME:-evolution-stack}
+      DATABASE_SAVE_DATA_INSTANCE: true
+      DATABASE_SAVE_DATA_NEW_MESSAGE: true
+      DATABASE_SAVE_MESSAGE_UPDATE: true
+      DATABASE_SAVE_DATA_CONTACTS: true
+      DATABASE_SAVE_DATA_CHATS: true
       CACHE_REDIS_ENABLED: ${EVOLUTION_CACHE_REDIS_ENABLED:-true}
       CACHE_REDIS_URI: ${EVOLUTION_CACHE_REDIS_URI:-redis://evolution-redis:6379/6}
       CACHE_REDIS_TTL: ${EVOLUTION_CACHE_REDIS_TTL:-604800}
@@ -373,14 +392,15 @@ services:
 
     volumes:
       - evolution-api-instances:/evolution/instances
+      - evolution-api-store:/evolution/store
 
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 2G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
 
     healthcheck:
@@ -422,6 +442,7 @@ services:
 
     environment:
       API_BASE_URL: ${EVOLUTION_MANAGER_API_BASE_URL:-http://evolution-api:8080}
+      PUBLIC_URL: ${EVOLUTION_MANAGER_PUBLIC_URL:-/apps/evolution-manager}
 
     entrypoint:
       - /bin/sh
@@ -459,6 +480,7 @@ services:
             sub_filter_once off;
             sub_filter 'href="/' 'href="/apps/evolution-manager/';
             sub_filter 'src="/' 'src="/apps/evolution-manager/';
+            sub_filter '<head>' '<head><base href="/apps/evolution-manager/">';
 
             location / {
                 try_files $$uri $$uri/ /index.html;
@@ -489,10 +511,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 256M
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 128M
 
     healthcheck:
@@ -532,6 +554,8 @@ volumes:
   evolution-redis-data:
   evolution-minio-data:
   evolution-api-instances:
+  evolution-api-store:
+  evolution-pgbouncer-config:
 
 networks:
   tradingsystem_backend:

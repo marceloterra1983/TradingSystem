@@ -1,5 +1,6 @@
 ---
 title: "RAG Collections Integration Guide"
+slug: /tools/rag/integration-guide-rag-crud
 sidebar_position: 6
 description: "How to embed the collections management card into LlamaIndexPage."
 tags:

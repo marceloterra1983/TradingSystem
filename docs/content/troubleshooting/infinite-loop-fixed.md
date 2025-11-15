@@ -1,5 +1,6 @@
 ---
 title: "Collections Infinite Loop Fix"
+slug: /troubleshooting/infinite-loop-fixed
 description: "Resolution for the collection selection render loop in the dashboard."
 tags:
   - troubleshooting

@@ -95,6 +95,7 @@
     "governance:full": "node governance/automation/validate-registry.mjs && npm run governance:auto && npm run governance:metrics && npm run governance:check",
     "docs:validate-links": "bash scripts/docs/validate-docs-links.sh",
     "docs:fix-links": "bash scripts/docs/fix-docs-links.sh",
-    "docs:links-report": "bash scripts/docs/validate-docs-links.sh > docs-links-report.txt && cat docs-links-report.txt"
+    "docs:links-report": "bash scripts/docs/validate-docs-links.sh > docs-links-report.txt && cat docs-links-report.txt",
+    "docs:auto:commit": "bash scripts/docs/auto-commit.sh"
   }
 }

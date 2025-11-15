@@ -7,7 +7,7 @@ import {
   CollapsibleCardHeader,
   CollapsibleCardTitle,
 } from "../../ui/collapsible-card";
-import { AlertTriangle, ShieldCheck, User, Hash, Clock } from '@/icons';
+import { AlertTriangle, ShieldCheck, User, Hash, Clock } from "@/icons";
 
 interface SessionCardProps {
   session?: TelegramGatewaySessionStatus;

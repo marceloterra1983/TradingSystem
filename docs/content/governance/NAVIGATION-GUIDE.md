@@ -1,5 +1,6 @@
 ---
 title: "Governance Documentation Navigation Guide"
+slug: /governance/NAVIGATION-GUIDE
 sidebar_position: 1
 tags: [governance, navigation]
 domain: governance
@@ -63,9 +64,9 @@ Strategic initiatives:
 
 ## Quick Links
 
-- [Governance Summary](/docs/governance/summary)
-- [Action Plan](/docs/governance/action-plan)
-- [Documentation Index](/docs/governance/documentation-index)
+- [Governance Summary](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/governance/summary)
+- [Action Plan](https://github.com/marceloterra1983/TradingSystem/blob/main/docs/governance/action-plan)
+- [Documentation Index](documentation-index.mdx)
 
 ---
 

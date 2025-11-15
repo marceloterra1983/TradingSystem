@@ -1,5 +1,6 @@
 ---
 title: "Claude Commands Overview"
+slug: /tools/ai/claude-commands-ready
 sidebar_position: 2
 description: "Summary of the custom Claude CLI commands available for TradingSystem."
 tags:
@@ -483,13 +484,13 @@ echo "npx lint-staged" > .husky/pre-commit
 
 ### Guias
 
-1. **[Code Quality Checklist](../../development/code-quality-checklist)** (3,600 linhas)
+1. **[Code Quality Checklist](../../development/code-quality-checklist.md)** (3,600 linhas)
    - 12 categorias de verificação
    - 100+ comandos detalhados
    - Integração CI/CD
    - Métricas recomendadas
 
-2. **[Code Quality Commands](../development/code-quality-commands)** (250 linhas)
+2. **[Code Quality Commands](../development/code-quality-commands.md)** (250 linhas)
    - Comandos mais usados
    - Checklists
    - Troubleshooting

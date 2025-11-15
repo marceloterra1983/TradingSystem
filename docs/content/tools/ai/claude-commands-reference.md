@@ -1,5 +1,6 @@
 ---
 title: "Claude Commands Reference"
+slug: /tools/ai/claude-commands-reference
 sidebar_position: 3
 description: "Detailed reference for each custom Claude CLI command and supported flags."
 tags:
@@ -374,9 +375,9 @@ ls -la .claude/commands/
 
 ### Documentação Adicional
 
-- [Code Quality Checklist](../../development/code-quality-checklist)
-- [Code Quality Commands](../development/code-quality-commands)
-- [Claude Commands Overview](./claude-commands-ready)
+- [Code Quality Checklist](../../development/code-quality-checklist.md)
+- [Code Quality Commands](../development/code-quality-commands.md)
+- [Claude Commands Overview](claude-commands-ready.md)
 - `reports/2025-11-02/WORKFLOW-SYSTEM-READY.md`
 
 ---

@@ -39,9 +39,13 @@ import {
   Filter,
   Loader2,
   Search,
-} from '@/icons';
+} from "@/icons";
 
-import { useAgentsDataOptimized, useAgentContent, type AgentsData } from "@/hooks/useAgentsDataOptimized";
+import {
+  useAgentsDataOptimized,
+  useAgentContent,
+  type AgentsData,
+} from "@/hooks/useAgentsDataOptimized";
 
 // Type will be inferred from hook data
 type AgentRecord = AgentsData["agents"][number] & { fileContent?: string };
@@ -84,13 +88,12 @@ export default function AgentsCatalogView({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-  const { data, isLoading, error, refetch, isFetching } = useAgentsDataOptimized();
+  const { data, isLoading, error, refetch, isFetching } =
+    useAgentsDataOptimized();
 
   // Load full content on-demand when dialog opens
-  const {
-    data: agentContentData,
-    isLoading: isLoadingContent
-  } = useAgentContent(selectedAgent?.id ?? null, dialogOpen);
+  const { data: agentContentData, isLoading: isLoadingContent } =
+    useAgentContent(selectedAgent?.id ?? null, dialogOpen);
 
   const sharedLayoutProps = {
     pageId: "ai-agents-directory",

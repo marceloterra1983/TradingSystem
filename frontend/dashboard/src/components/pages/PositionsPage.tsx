@@ -1,6 +1,6 @@
 import { CustomizablePageLayout } from "../layout/CustomizablePageLayout";
 import { PlaceholderSection } from "../ui/placeholder-section";
-import { TrendingUp, History } from '@/icons';
+import { TrendingUp, History } from "@/icons";
 
 export function PositionsPage() {
   const sections = [

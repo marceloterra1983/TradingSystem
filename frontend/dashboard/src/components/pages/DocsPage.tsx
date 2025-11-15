@@ -4,7 +4,7 @@ import {
   FileText,
   CheckCircle2,
   Sparkles,
-} from '@/icons';
+} from "@/icons";
 import { Button } from "../ui/button";
 import { apiConfig } from "../../config/api";
 

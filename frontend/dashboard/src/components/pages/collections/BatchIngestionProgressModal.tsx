@@ -5,14 +5,7 @@
  */
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  X,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-  Pause,
-} from '@/icons';
+import { X, Loader2, CheckCircle, AlertCircle, XCircle, Pause } from "@/icons";
 import { Button } from "../../ui/button";
 
 interface BatchIngestionJob {
@@ -38,7 +31,7 @@ interface Props {
 }
 
 const RAG_SERVICE_URL =
-  import.meta.env.VITE_RAG_SERVICE_URL || "http://localhost:3403";
+  import.meta.env.VITE_RAG_SERVICE_URL || "/api/v1/rag";
 
 export function BatchIngestionProgressModal({
   isOpen,

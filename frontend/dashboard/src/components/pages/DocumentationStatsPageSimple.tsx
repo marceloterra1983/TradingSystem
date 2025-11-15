@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  RefreshCw,
-  Server,
-  Lightbulb,
-  FileText,
-  TrendingUp,
-} from '@/icons';
+import { RefreshCw, Server, Lightbulb, FileText, TrendingUp } from "@/icons";
 import documentationService from "../../services/documentationService";
 
 interface DocumentationStatsPayload {

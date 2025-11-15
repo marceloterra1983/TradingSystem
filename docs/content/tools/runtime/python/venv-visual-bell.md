@@ -1,5 +1,6 @@
 ---
 title: "Venv Visual Bell"
+slug: /tools/runtime/python/venv-visual-bell
 tags: [documentation]
 domain: devops
 type: guide

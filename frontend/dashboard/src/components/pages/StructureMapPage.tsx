@@ -10,11 +10,8 @@ import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { Skeleton } from "../ui/skeleton";
-import {
-  ResponsiveContainer,
-  Treemap,
-} from "recharts";
-import { AlertCircle, FileText, FolderTree, RefreshCw } from '@/icons';
+import { ResponsiveContainer, Treemap } from "recharts";
+import { AlertCircle, FileText, FolderTree, RefreshCw } from "@/icons";
 import { Button } from "../ui/button";
 
 interface StructureNode {
@@ -71,7 +68,8 @@ function convertToTreemap(node: StructureNode, depth = 0): TreemapNode {
     node.directories?.map((child) => convertToTreemap(child, depth + 1)) ?? [];
   const directFiles = node.files?.length ?? 0;
   const size =
-    children.reduce((sum, child) => sum + child.size, 0) + Math.max(directFiles, 1);
+    children.reduce((sum, child) => sum + child.size, 0) +
+    Math.max(directFiles, 1);
   return {
     name: node.path === "." ? "docs" : node.name,
     path: node.path,
@@ -189,7 +187,9 @@ function TreemapRectangle({
   );
 }
 
-function TreemapContent(props: TreemapRectangleProps & { [key: string]: unknown }) {
+function TreemapContent(
+  props: TreemapRectangleProps & { [key: string]: unknown },
+) {
   const { selectedPath, onSelect, ...rest } = props;
   return (
     <TreemapRectangle
@@ -304,7 +304,9 @@ export default function StructureMapPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Arquivos totais</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Arquivos totais
+            </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
               Inclui recursivamente subdiretórios
             </CardDescription>
@@ -315,7 +317,9 @@ export default function StructureMapPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Diretório selecionado</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Diretório selecionado
+            </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
               Atual
             </CardDescription>
@@ -335,8 +339,8 @@ export default function StructureMapPage() {
               <div>
                 <CardTitle className="text-base">Mapa de diretórios</CardTitle>
                 <CardDescription>
-                  Clique em um bloco para navegar. Tamanhos representam a quantidade
-                  de arquivos contidos.
+                  Clique em um bloco para navegar. Tamanhos representam a
+                  quantidade de arquivos contidos.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -424,7 +428,9 @@ export default function StructureMapPage() {
                         type="button"
                         onClick={() => setSelectedPath(directory.path)}
                         className={`flex w-full justify-between rounded px-2 py-1 text-left transition hover:bg-muted ${
-                          selectedPath === directory.path ? "bg-muted font-medium" : ""
+                          selectedPath === directory.path
+                            ? "bg-muted font-medium"
+                            : ""
                         }`}
                       >
                         <span>{directory.name}</span>
@@ -436,7 +442,9 @@ export default function StructureMapPage() {
                   </div>
                 </ScrollArea>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum subdiretório.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum subdiretório.
+                </p>
               )}
             </div>
 
@@ -455,7 +463,9 @@ export default function StructureMapPage() {
                   </div>
                 </ScrollArea>
               ) : (
-                <p className="text-sm text-muted-foreground">Nenhum arquivo neste diretório.</p>
+                <p className="text-sm text-muted-foreground">
+                  Nenhum arquivo neste diretório.
+                </p>
               )}
             </div>
           </CardContent>
@@ -499,7 +509,8 @@ export default function StructureMapPage() {
               )
             ) : (
               <p className="text-sm text-muted-foreground">
-                Utilize a busca para localizar um diretório. Resultados são limitados às 25 primeiras ocorrências.
+                Utilize a busca para localizar um diretório. Resultados são
+                limitados às 25 primeiras ocorrências.
               </p>
             )}
           </CardContent>
@@ -509,10 +520,10 @@ export default function StructureMapPage() {
       <div className="h-px w-full bg-border" />
 
       <div className="text-xs text-muted-foreground">
-        Fonte: `docs/reports/documentation-structure.json` • Última atualização refletida ao rodar{" "}
+        Fonte: `docs/reports/documentation-structure.json` • Última atualização
+        refletida ao rodar{" "}
         <code>node scripts/docs/generate-structure-index.mjs</code>.
       </div>
     </div>
   );
 }
-
