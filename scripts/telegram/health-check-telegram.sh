@@ -81,10 +81,6 @@ check_containers() {
     "telegram-redis-sentinel"
     "telegram-rabbitmq"
     "telegram-gateway-api"
-    "telegram-prometheus"
-    "telegram-grafana"
-    "telegram-postgres-exporter"
-    "telegram-redis-exporter"
   )
   
   for container in "${containers[@]}"; do
@@ -151,8 +147,6 @@ check_http_endpoints() {
   endpoints=(
     "mtproto_gateway:http://localhost:${GATEWAY_PORT:-4006}/health"
     "gateway_api:http://localhost:4010/health"
-    "prometheus:http://localhost:9090/-/healthy"
-    "grafana:http://localhost:3100/api/health"
     "rabbitmq_mgmt:http://localhost:15672"
   )
   

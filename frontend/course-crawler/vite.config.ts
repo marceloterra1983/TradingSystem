@@ -6,10 +6,33 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const isProd = mode === 'production';
   const port = Number(env.VITE_COURSE_CRAWLER_PORT) || 4201;
+  const buildFlavor =
+    mode === 'gateway'
+      ? 'gateway'
+      : mode === 'standalone'
+        ? 'standalone'
+        : mode === 'development'
+          ? 'development'
+          : env.VITE_BUILD_FLAVOR || 'gateway';
+  const isDevServer = mode === 'development';
+  const enableCompression = buildFlavor !== 'development';
+  const normalizeBasePath = (value?: string) => {
+    if (!value || value.trim() === '/' || value.trim() === '') {
+      return '/';
+    }
+    const trimmed = value.trim().replace(/\/+$/, '');
+    const withLeading = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return `${withLeading}/`;
+  };
+  const normalizedBase = normalizeBasePath(
+    env.VITE_COURSE_CRAWLER_BASE_PATH || env.VITE_COURSE_CRAWLER_GATEWAY_PATH
+  );
+  const baseForBuild = buildFlavor === 'gateway' ? normalizedBase : '/';
+  const outDir = buildFlavor === 'standalone' ? 'dist-standalone' : 'dist';
 
   return {
+    base: isDevServer ? '/' : baseForBuild,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -19,7 +42,7 @@ export default defineConfig(({ mode }) => {
       react(),
       // Bundle analyzer
       visualizer({
-        filename: './dist/stats.html',
+        filename: path.join(`./${outDir}`, 'stats.html'),
         open: false,
         gzipSize: true,
         brotliSize: true,
@@ -28,7 +51,7 @@ export default defineConfig(({ mode }) => {
       // Gzip compression
       viteCompression({
         verbose: true,
-        disable: !isProd,
+        disable: !enableCompression,
         threshold: 10240, // Only compress files > 10KB
         algorithm: 'gzip',
         ext: '.gz',
@@ -36,7 +59,7 @@ export default defineConfig(({ mode }) => {
       // Brotli compression (better than gzip)
       viteCompression({
         verbose: true,
-        disable: !isProd,
+        disable: !enableCompression,
         threshold: 10240,
         algorithm: 'brotliCompress',
         ext: '.br',
@@ -68,14 +91,14 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     build: {
-      outDir: 'dist',
-      sourcemap: !isProd,
+      outDir,
+      sourcemap: isDevServer,
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: isProd,
+          drop_console: enableCompression,
           drop_debugger: true,
-          pure_funcs: isProd ? ['console.log', 'console.info', 'console.debug'] : [],
+          pure_funcs: enableCompression ? ['console.log', 'console.info', 'console.debug'] : [],
         },
       },
       rollupOptions: {

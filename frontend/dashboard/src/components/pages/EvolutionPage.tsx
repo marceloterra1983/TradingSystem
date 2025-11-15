@@ -1,26 +1,54 @@
 import { useMemo } from "react";
 import { IframeWithUrl } from "../common/IframeWithUrl";
 
-const DEFAULT_EVOLUTION_MANAGER_URL = "http://localhost:4203/manager";
+const DEFAULT_DIRECT_URL = "http://localhost:4203/manager";
+
+const ensureManagerPath = (value: string): string => {
+  if (!value) {
+    return "/manager";
+  }
+
+  if (/\/manager(?:\/|$)/.test(value)) {
+    return value;
+  }
+
+  return value.endsWith("/") ? `${value}manager` : `${value}/manager`;
+};
+
+const sanitizeBaseUrl = (value: string) => value.replace(/\/+$/, "");
 
 const resolveEvolutionUrl = (): string => {
   const env = import.meta.env as Record<string, string | undefined>;
-  const configuredUrl = env.VITE_EVOLUTION_MANAGER_URL;
+  const configuredUrl = env.VITE_EVOLUTION_MANAGER_URL?.trim();
+  const preferGateway = env.VITE_USE_UNIFIED_DOMAIN !== "false";
+  const defaultGatewayPath = ensureManagerPath("/apps/evolution-manager");
 
-  if (!configuredUrl) {
-    return DEFAULT_EVOLUTION_MANAGER_URL;
-  }
-
-  try {
-    const parsed = new URL(configuredUrl);
-    // Ensure /manager path is present
-    if (!parsed.pathname.includes('/manager')) {
-      parsed.pathname = parsed.pathname.replace(/\/+$/, "") + "/manager";
+  if (configuredUrl) {
+    if (/^https?:\/\//i.test(configuredUrl)) {
+      try {
+        const parsed = new URL(configuredUrl);
+        parsed.pathname = ensureManagerPath(parsed.pathname || "/");
+        return parsed.toString();
+      } catch {
+        return ensureManagerPath(configuredUrl);
+      }
     }
-    return parsed.toString();
-  } catch {
-    return DEFAULT_EVOLUTION_MANAGER_URL;
+
+    const normalized = configuredUrl.startsWith("/")
+      ? configuredUrl
+      : `/${configuredUrl}`;
+    return ensureManagerPath(normalized);
   }
+
+  if (preferGateway) {
+    const gatewayBase = env.VITE_GATEWAY_HTTP_URL?.trim();
+    if (gatewayBase) {
+      return `${sanitizeBaseUrl(gatewayBase)}${defaultGatewayPath}`;
+    }
+    return defaultGatewayPath;
+  }
+
+  return DEFAULT_DIRECT_URL;
 };
 
 export function EvolutionPage(): JSX.Element {

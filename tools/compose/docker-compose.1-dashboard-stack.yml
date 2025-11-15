@@ -19,18 +19,20 @@ services:
       - DASHBOARD_PORT=${DASHBOARD_PORT:-9080}
       - SKIP_DASHBOARD_PREBUILD=1
       - VITE_USE_UNIFIED_DOMAIN=${VITE_USE_UNIFIED_DOMAIN:-true}
-      - VITE_GATEWAY_HTTP_URL=${VITE_GATEWAY_HTTP_URL:-http://localhost:9082}
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:9082}
+      # Phase 2: Centralized via GATEWAY_PUBLIC_URL
+      - VITE_GATEWAY_HTTP_URL=${GATEWAY_PUBLIC_URL}
+      - VITE_API_BASE_URL=${GATEWAY_PUBLIC_URL}/api
       # Override URLs for containerized environment (use Vite proxy instead of direct URLs)
       # Traefik Gateway defaults (override via env caso seja necessário expor portas diretas)
       - TP_CAPITAL_PROXY_TARGET=${TP_CAPITAL_PROXY_TARGET:-http://api-gateway:9080/api/tp-capital}
       - VITE_TELEGRAM_GATEWAY_PROXY_TARGET=${VITE_TELEGRAM_GATEWAY_PROXY_TARGET:-http://telegram-gateway-api:4010}
-      - VITE_TELEGRAM_GATEWAY_API_URL=${VITE_TELEGRAM_GATEWAY_API_URL:-http://localhost:9082/api/telegram-gateway}
+      - VITE_TELEGRAM_GATEWAY_API_URL=${GATEWAY_PUBLIC_URL}/api/telegram-gateway
       - WORKSPACE_PROXY_TARGET=${WORKSPACE_PROXY_TARGET:-http://api-gateway:9080/api/workspace}
       - WORKSPACE_LIBRARY_PROXY_TARGET=${WORKSPACE_LIBRARY_PROXY_TARGET:-http://api-gateway:9080/api/library}
       - DOCUSAURUS_PROXY_TARGET=${DOCUSAURUS_PROXY_TARGET:-http://api-gateway:9080/docs}
       - VITE_DOCUSAURUS_URL=/
       - DOCS_API_PROXY_TARGET=${DOCS_API_PROXY_TARGET:-http://api-gateway:9080/api/docs}
+      - VITE_EVOLUTION_MANAGER_URL=/apps/evolution-manager/manager
       # Telegram Gateway API Keys (for frontend authentication)
       - VITE_GATEWAY_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
       - VITE_TELEGRAM_GATEWAY_API_TOKEN=${TELEGRAM_GATEWAY_API_TOKEN:-gw_secret_9K7j2mPq8nXwR5tY4vL1zD3fH6bN0sA}
@@ -40,11 +42,12 @@ services:
       # n8n proxy configuration (server-side only, NOT exposed to browser)
       # NOTE: No VITE_ prefix! This is server-side only (Vite proxy target)
       # MUST include /n8n path to match nginx location in n8n-proxy
-      - N8N_PROXY_TARGET=http://n8n-proxy:80
+      - N8N_PROXY_TARGET=http://n8n-proxy:80/n8n
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-automation}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-changeme}
-      # Course Crawler UI: Browser-facing URL (must use localhost for host browser access)
-      - VITE_COURSE_CRAWLER_APP_URL=http://localhost:4201
+      # Course Crawler UI exposed via gateway path (avoid host-specific URLs)
+      - VITE_COURSE_CRAWLER_GATEWAY_PATH=/apps/course-crawler
+      - VITE_DOCKER_CONTROL_URL=${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9880}
       # Database UI proxies - Via Docker bridge gateway (workaround for WSL2 network isolation)
       - DB_UI_PGADMIN_PROXY_TARGET=${DB_UI_PGADMIN_PROXY_TARGET:-http://api-gateway:9080/db/pgadmin}
       - DB_UI_PGWEB_PROXY_TARGET=${DB_UI_PGWEB_PROXY_TARGET:-http://api-gateway:9080/db/pgweb}
@@ -54,9 +57,9 @@ services:
       - tradingsystem_frontend
       - tradingsystem_backend # Hub network for API access (proxy)
       # Service-specific networks for embedded iframe services
-      - n8n_backend            # n8n automation platform
-      - evolution_backend      # Evolution API (WhatsApp)
-      - waha_backend           # WAHA (WhatsApp HTTP API)
+      - n8n_backend # n8n automation platform
+      - evolution_backend # Evolution API (WhatsApp)
+      - waha_backend # WAHA (WhatsApp HTTP API)
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3103/ || exit 1"]
       interval: 30s

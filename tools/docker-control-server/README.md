@@ -69,7 +69,7 @@ Response (error):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `9876` | Server port |
+| `PORT` | `9880` | Server port |
 
 ## Usage
 
@@ -90,15 +90,15 @@ docker compose -f docker-compose.4-5-course-crawler-stack.yml up -d docker-contr
 ### Test API
 ```bash
 # Health check
-curl http://localhost:9876/health
+curl http://localhost:9880/health
 
 # Fetch logs
-curl -X POST http://localhost:9876/ \
+curl -X POST http://localhost:9880/ \
   -H "Content-Type: application/json" \
   -d '{"action": "logs", "container": "course-crawler-worker"}'
 
 # Check status
-curl -X POST http://localhost:9876/ \
+curl -X POST http://localhost:9880/ \
   -H "Content-Type: application/json" \
   -d '{"action": "status", "container": "course-crawler-worker"}'
 ```
@@ -112,14 +112,14 @@ curl -X POST http://localhost:9876/ \
 
 ## Port Allocation
 
-- **9876** - Docker Control Server (HTTP API)
+- **9880** - Docker Control Server (HTTP API)
 
 Follows the project's port allocation strategy:
 - 9000-9999: Development tools and utilities
 
 ## Integration
 
-The Course Crawler UI (`WorkerLogsSection.tsx`) connects to this server at `http://127.0.0.1:9876` to fetch real-time logs without requiring users to run `docker logs` manually.
+The Course Crawler UI (`WorkerLogsSection.tsx`) connects to this server at `http://127.0.0.1:9880` to fetch real-time logs without requiring users to run `docker logs` manually.
 
 ## Troubleshooting
 

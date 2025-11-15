@@ -94,7 +94,7 @@ Containers disponíveis: veja a lista em `tools/docker-launcher/docker-control-s
 
 1. Verifique se o Docker Control Server está rodando:
    ```bash
-   curl http://127.0.0.1:9876/health
+   curl http://127.0.0.1:9880/health
    ```
 
 2. Se não estiver, reinicie:

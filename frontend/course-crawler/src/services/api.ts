@@ -9,12 +9,29 @@ import axios, { AxiosInstance } from 'axios';
  * - Artifact retrieval (Markdown/JSON outputs)
  */
 
-// Use relative path for nginx proxy, or explicit URL if provided
-const API_BASE_URL = import.meta.env.VITE_COURSE_CRAWLER_API_URL || '';
+const resolveApiBaseUrl = (): string => {
+  const explicit = import.meta.env.VITE_COURSE_CRAWLER_API_URL?.trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/apps/course-crawler')) {
+      return '/api/course-crawler';
+    }
+  }
+
+  // Fallback to relative paths so nginx inside course-crawler-ui proxies to the API
+  return '';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 class CourseCrawlerAPI {
   private client: AxiosInstance;
   private token: string | null = null;
+  private loginPromise: Promise<string | null> | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -74,10 +91,25 @@ class CourseCrawlerAPI {
       return this.token;
     }
 
+    if (!this.loginPromise) {
+      this.loginPromise = this.performLogin().finally(() => {
+        this.loginPromise = null;
+      });
+    }
+
+    return this.loginPromise;
+  }
+
+  private async performLogin(): Promise<string | null> {
     try {
-      // Auto-login with default admin credentials
-      const username = import.meta.env.VITE_COURSE_CRAWLER_ADMIN_USERNAME || 'admin';
-      const password = import.meta.env.VITE_COURSE_CRAWLER_ADMIN_PASSWORD || 'changeme';
+      const username =
+        import.meta.env.VITE_COURSE_CRAWLER_ADMIN_USERNAME ||
+        import.meta.env.VITE_COURSE_CRAWLER_ADMIN_USERNAME_DEFAULT ||
+        'admin';
+      const password =
+        import.meta.env.VITE_COURSE_CRAWLER_ADMIN_PASSWORD ||
+        import.meta.env.VITE_COURSE_CRAWLER_ADMIN_PASSWORD_DEFAULT ||
+        'changeme';
 
       const response = await this.client.post('/auth/login', {
         username,

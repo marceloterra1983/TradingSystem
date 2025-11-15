@@ -51,12 +51,8 @@ if systemctl is-active --quiet telegram-gateway; then
   echo "  ✅ Stopped native service"
 fi
 
-# Stop monitoring
-cd "$PROJECT_ROOT/tools/compose"
-docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml down
-echo "  ✅ Stopped monitoring stack"
-
 # Stop data layer
+cd "$PROJECT_ROOT/tools/compose"
 docker compose -f docker-compose.4-2-telegram-stack.yml down
 echo "  ✅ Stopped data stack"
 
@@ -126,7 +122,7 @@ echo ""
 echo -e "${YELLOW}[6/6] Cleanup options...${NC}"
 echo ""
 echo "  To remove dedicated stack volumes (⚠️  WARNING: deletes all data):"
-echo "  docker volume rm telegram-timescaledb-data telegram-rabbitmq-data telegram-prometheus-data telegram-grafana-data"
+echo "  docker volume rm telegram-timescaledb-data telegram-rabbitmq-data"
 echo ""
 echo "  To disable systemd service:"
 echo "  sudo systemctl disable telegram-gateway"

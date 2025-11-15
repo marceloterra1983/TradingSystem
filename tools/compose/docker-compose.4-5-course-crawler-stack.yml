@@ -12,20 +12,75 @@ services:
       - "${COURSE_CRAWLER_DB_PORT:-55433}:5432"
     volumes:
       - course_crawler_db_data:/var/lib/postgresql/data
-      - ../../backend/api/course-crawler/scripts/init-schema.sql:/docker-entrypoint-initdb.d/01-init-schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d coursecrawler"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  course-crawler-db-init:
+    image: postgres:15
+    container_name: course-crawler-db-init
+    depends_on:
+      course-crawler-db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${COURSE_CRAWLER_DB_PASSWORD:-coursecrawler}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        until pg_isready -h course-crawler-db -U ${COURSE_CRAWLER_DB_USER:-postgres} -d ${COURSE_CRAWLER_DB_NAME:-coursecrawler}; do
+          echo "⏳ Waiting for course-crawler-db..."
+          sleep 2
+        done
+        echo "🚀 Applying Course Crawler schema..."
+        psql -h course-crawler-db -U ${COURSE_CRAWLER_DB_USER:-postgres} -d ${COURSE_CRAWLER_DB_NAME:-coursecrawler} <<'SQL'
+        CREATE SCHEMA IF NOT EXISTS course_crawler;
+        CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        
+        CREATE TABLE IF NOT EXISTS course_crawler.courses (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          base_url TEXT NOT NULL,
+          username TEXT NOT NULL,
+          password_encrypted TEXT NOT NULL,
+          target_urls TEXT[] DEFAULT ARRAY[]::TEXT[],
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        
+        CREATE TABLE IF NOT EXISTS course_crawler.crawl_runs (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          course_id UUID NOT NULL REFERENCES course_crawler.courses(id) ON DELETE CASCADE,
+          status TEXT NOT NULL,
+          outputs_dir TEXT,
+          metrics JSONB,
+          error TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          started_at TIMESTAMPTZ,
+          finished_at TIMESTAMPTZ
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_course_crawler_runs_status
+          ON course_crawler.crawl_runs(status);
+        
+        GRANT ALL PRIVILEGES ON SCHEMA course_crawler TO postgres;
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA course_crawler TO postgres;
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA course_crawler TO postgres;
+        SQL
+    restart: "no"
+
   course-crawler-api:
     build:
       context: ../../backend/api/course-crawler
+    image: course-crawler-api:local
     container_name: course-crawler-api
     depends_on:
       course-crawler-db:
         condition: service_healthy
+      course-crawler-db-init:
+        condition: service_completed_successfully
     environment:
       COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
       COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
@@ -50,11 +105,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=tradingsystem_backend"
-      - "traefik.http.routers.course-crawler.rule=PathPrefix(`/api/courses`)"
+      - "traefik.http.routers.course-crawler.rule=PathPrefix(`/api/course-crawler`) || PathPrefix(`/api/courses`)"
       - "traefik.http.routers.course-crawler.priority=85"
       - "traefik.http.routers.course-crawler.entrypoints=web"
       - "traefik.http.services.course-crawler.loadbalancer.server.port=3601"
-      - "traefik.http.middlewares.course-crawler-strip.stripprefix.prefixes=/api/courses"
+      - "traefik.http.middlewares.course-crawler-strip.stripprefix.prefixes=/api/course-crawler,/api/courses"
       - "traefik.http.routers.course-crawler.middlewares=course-crawler-strip"
       - "com.tradingsystem.stack=course-crawler"
       - "com.tradingsystem.service=api"
@@ -67,12 +122,13 @@ services:
       start_period: 40s
 
   course-crawler-worker:
-    build:
-      context: ../../backend/api/course-crawler
+    image: course-crawler-api:local
     container_name: course-crawler-worker
     depends_on:
       course-crawler-db:
         condition: service_healthy
+      course-crawler-db-init:
+        condition: service_completed_successfully
     environment:
       COURSE_CRAWLER_DATABASE_URL: ${COURSE_CRAWLER_DATABASE_URL:-postgresql://postgres:coursecrawler@course-crawler-db:5432/coursecrawler}
       COURSE_CRAWLER_ENCRYPTION_KEY: ${COURSE_CRAWLER_ENCRYPTION_KEY:-change-me-please-32-bytes-minimum}
@@ -89,7 +145,7 @@ services:
     volumes:
       - ../../apps/course-crawler:/workspace/apps/course-crawler:ro
       - ../../outputs/course-crawler:/app/outputs
-    command: ["npm", "run", "worker:start"]
+    command: ["node", "dist/jobs/worker.js"]
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f worker || exit 1"]
       interval: 30s
@@ -103,13 +159,13 @@ services:
       dockerfile: Dockerfile
     container_name: docker-control-server
     ports:
-      - "9876:9876"
+      - "${DOCKER_CONTROL_PORT:-9880}:9880"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      PORT: 9876
+      PORT: 9880
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9876/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9880/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -121,7 +177,8 @@ services:
       args:
         VITE_COURSE_CRAWLER_API_URL: ${VITE_COURSE_CRAWLER_API_URL:-http://localhost:3601}
         VITE_COURSE_CRAWLER_APP_URL: ${VITE_COURSE_CRAWLER_APP_URL:-http://localhost:4201}
-        VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9876}
+        VITE_COURSE_CRAWLER_BASE_PATH: ${VITE_COURSE_CRAWLER_BASE_PATH:-/apps/course-crawler}
+        VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9880}
     container_name: course-crawler-ui
     depends_on:
       course-crawler-api:
@@ -138,6 +195,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.course-crawler-ui.rule=PathPrefix(`/apps/course-crawler`)"
+      - "traefik.http.routers.course-crawler-ui.entrypoints=web"
+      - "traefik.http.routers.course-crawler-ui.priority=75"
+      - "traefik.http.routers.course-crawler-ui.middlewares=course-crawler-ui-strip"
+      - "traefik.http.middlewares.course-crawler-ui-strip.stripprefix.prefixes=/apps/course-crawler"
+      - "traefik.http.services.course-crawler-ui.loadbalancer.server.port=80"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "com.tradingsystem.stack=course-crawler"
+      - "com.tradingsystem.service=ui"
 
 volumes:
   course_crawler_db_data:

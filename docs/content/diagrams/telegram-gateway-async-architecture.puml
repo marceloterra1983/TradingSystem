@@ -1,0 +1,265 @@
+@startuml Telegram Gateway - Async Architecture
+!theme plain
+skinparam BackgroundColor transparent
+skinparam DefaultTextAlignment center
+skinparam ArrowThickness 2
+skinparam ComponentStyle rectangle
+
+title Telegram Gateway - Arquitetura Assíncrona com MTProto Isolado
+
+' ============================================================================
+' FRONTEND LAYER
+' ============================================================================
+actor "👤 Usuário" as User
+participant "🌐 Browser\n(React)" as Browser #LightBlue
+
+' ============================================================================
+' API GATEWAY LAYER
+' ============================================================================
+participant "🚪 Traefik\nAPI Gateway\n(Port 9082)" as Traefik #Orange
+
+' ============================================================================
+' APPLICATION LAYER
+' ============================================================================
+participant "📡 Gateway API\n(Port 4010)\n✅ SEMPRE ONLINE" as GatewayAPI #LightGreen
+database "💾 Redis Cache\n(5 min TTL)" as Redis #Red
+database "📊 TimescaleDB\n(Historical)" as TimescaleDB #Blue
+
+' ============================================================================
+' MESSAGE BROKER LAYER
+' ============================================================================
+queue "📬 RabbitMQ\ntelegram.sync.requests" as RabbitMQ_Requests #Yellow
+queue "📨 RabbitMQ\ntelegram.sync.responses" as RabbitMQ_Responses #Yellow
+
+' ============================================================================
+' WORKER LAYER (ISOLATED)
+' ============================================================================
+participant "⚙️ MTProto Worker\n(ISOLATED)\n🔄 24/7 Running" as MTProtoWorker #Purple
+database "💾 Session Store\n/data/.session" as SessionStore #Pink
+
+' ============================================================================
+' EXTERNAL SERVICES
+' ============================================================================
+participant "📱 Telegram API\n(api.telegram.org)" as TelegramAPI #Gray
+
+' ============================================================================
+' SEQUENCE: Happy Path - Cache HIT
+' ============================================================================
+group 1️⃣ Cache HIT Scenario (Fast Path)
+  User -> Browser: Click "Sync Messages"
+  activate Browser
+
+  Browser -> Traefik: POST /api/telegram-gateway/sync-messages\n{ channelId: "jonas", limit: 50 }
+  activate Traefik
+
+  Traefik -> GatewayAPI: Forward request
+  activate GatewayAPI
+
+  GatewayAPI -> Redis: GET telegram:messages:jonas:50
+  activate Redis
+  Redis --> GatewayAPI: ✅ Cache HIT\n{ messages: [...] }
+  deactivate Redis
+
+  GatewayAPI --> Traefik: 200 OK\n{ success: true, messages: [...], source: "cache" }
+  deactivate GatewayAPI
+
+  Traefik --> Browser: Response
+  deactivate Traefik
+
+  Browser --> User: ✅ Exibe mensagens\n(< 100ms)
+  deactivate Browser
+end
+
+' ============================================================================
+' SEQUENCE: Cache MISS - Async Processing
+' ============================================================================
+group 2️⃣ Cache MISS Scenario (Async Path)
+  User -> Browser: Click "Sync Messages"\n(first time)
+  activate Browser
+
+  Browser -> Traefik: POST /api/telegram-gateway/sync-messages
+  activate Traefik
+
+  Traefik -> GatewayAPI: Forward request
+  activate GatewayAPI
+
+  GatewayAPI -> Redis: GET telegram:messages:jonas:50
+  activate Redis
+  Redis --> GatewayAPI: ❌ Cache MISS\n(null)
+  deactivate Redis
+
+  GatewayAPI -> GatewayAPI: Generate Job ID\njobId = "sync-abc123"
+
+  GatewayAPI -> RabbitMQ_Requests: Publish Job\n{ jobId, action: "sync-messages", params: {...} }
+  activate RabbitMQ_Requests
+
+  GatewayAPI -> Redis: SETEX job:sync-abc123 600\n{ status: "queued", ... }
+
+  GatewayAPI --> Traefik: 202 Accepted\n{ jobId: "sync-abc123", status: "queued",\npollUrl: "/api/telegram-gateway/jobs/sync-abc123" }
+  deactivate GatewayAPI
+
+  Traefik --> Browser: Response
+  deactivate Traefik
+
+  Browser --> User: ⏳ Exibe "Sincronizando..."\nInicia polling
+  deactivate Browser
+
+  ' ============================================================================
+  ' WORKER PROCESSING (Async)
+  ' ============================================================================
+  group 2.1️⃣ Background Processing
+    RabbitMQ_Requests -> MTProtoWorker: Consume message
+    deactivate RabbitMQ_Requests
+    activate MTProtoWorker
+
+    MTProtoWorker -> SessionStore: Load session\ntelegram.session
+    activate SessionStore
+    SessionStore --> MTProtoWorker: Session data
+    deactivate SessionStore
+
+    MTProtoWorker -> TelegramAPI: getMessages("jonas", 50)\nvia MTProto
+    activate TelegramAPI
+    TelegramAPI --> MTProtoWorker: Messages data
+    deactivate TelegramAPI
+
+    MTProtoWorker -> RabbitMQ_Responses: Publish Result\n{ jobId: "sync-abc123", status: "completed", result: {...} }
+    activate RabbitMQ_Responses
+
+    MTProtoWorker -> MTProtoWorker: ACK message
+    deactivate MTProtoWorker
+  end
+
+  ' ============================================================================
+  ' GATEWAY API CONSUMES RESPONSE
+  ' ============================================================================
+  group 2.2️⃣ Result Processing
+    RabbitMQ_Responses -> GatewayAPI: Consume response
+    deactivate RabbitMQ_Responses
+    activate GatewayAPI
+
+    GatewayAPI -> Redis: SETEX job:sync-abc123\n{ status: "completed", result: {...} }
+
+    GatewayAPI -> Redis: SETEX telegram:messages:jonas:50 300\n{ messages: [...] }
+    note right: Cache for 5 min
+
+    GatewayAPI -> TimescaleDB: INSERT INTO messages\n(persist historical)
+    activate TimescaleDB
+    deactivate TimescaleDB
+
+    deactivate GatewayAPI
+  end
+
+  ' ============================================================================
+  ' FRONTEND POLLING
+  ' ============================================================================
+  group 2.3️⃣ Frontend Polling
+    Browser -> Traefik: GET /api/telegram-gateway/jobs/sync-abc123
+    activate Browser
+    activate Traefik
+
+    Traefik -> GatewayAPI: Forward request
+    activate GatewayAPI
+
+    GatewayAPI -> Redis: GET job:sync-abc123
+    activate Redis
+    Redis --> GatewayAPI: { status: "completed", result: {...} }
+    deactivate Redis
+
+    GatewayAPI --> Traefik: 200 OK\n{ jobId, status: "completed", result: {...} }
+    deactivate GatewayAPI
+
+    Traefik --> Browser: Response
+    deactivate Traefik
+
+    Browser --> User: ✅ Exibe mensagens\nPara polling
+    deactivate Browser
+  end
+end
+
+' ============================================================================
+' SEQUENCE: MTProto Offline (Resilience)
+' ============================================================================
+group 3️⃣ MTProto Worker OFFLINE (Resilience)
+  User -> Browser: Click "Sync Messages"
+  activate Browser
+
+  Browser -> Traefik: POST /api/telegram-gateway/sync-messages
+  activate Traefik
+
+  Traefik -> GatewayAPI: Forward request
+  activate GatewayAPI
+
+  GatewayAPI -> Redis: GET telegram:messages:jonas:50
+  activate Redis
+  Redis --> GatewayAPI: ❌ Cache MISS
+  deactivate Redis
+
+  GatewayAPI -> RabbitMQ_Requests: Publish Job\n(mesmo com worker offline)
+  activate RabbitMQ_Requests
+  note right of RabbitMQ_Requests: Job fica na fila\naté worker voltar online
+  deactivate RabbitMQ_Requests
+
+  GatewayAPI --> Traefik: 202 Accepted\n{ jobId, status: "queued" }
+  deactivate GatewayAPI
+
+  Traefik --> Browser: Response
+  deactivate Traefik
+
+  Browser --> User: ⏳ "Sincronizando..."\n(polling mostra status: queued)
+  deactivate Browser
+
+  note over MTProtoWorker #Red: ❌ OFFLINE\n(mas Gateway API continua funcionando!)
+
+  ... Worker volta online ...
+
+  MTProtoWorker -> RabbitMQ_Requests: Consume backlog
+  activate MTProtoWorker
+  activate RabbitMQ_Requests
+  RabbitMQ_Requests --> MTProtoWorker: Mensagens enfileiradas
+  deactivate RabbitMQ_Requests
+
+  MTProtoWorker -> TelegramAPI: Process backlog
+  activate TelegramAPI
+  deactivate TelegramAPI
+
+  MTProtoWorker -> RabbitMQ_Responses: Publish results
+  deactivate MTProtoWorker
+end
+
+' ============================================================================
+' NOTES
+' ============================================================================
+note over Browser, TelegramAPI #LightYellow
+  **Benefícios da Nova Arquitetura:**
+
+  ✅ Gateway API **SEMPRE** responde (mesmo MTProto offline)
+  ✅ Frontend recebe resposta **IMEDIATA** (202 Accepted)
+  ✅ Cache Redis evita requests desnecessários
+  ✅ RabbitMQ absorve picos de carga
+  ✅ MTProto Worker processa no seu ritmo (24/7)
+  ✅ Sessão Telegram **persiste** entre restarts
+  ✅ Retry automático via RabbitMQ (x-retry-count)
+  ✅ Separação de responsabilidades (SRP)
+end note
+
+note over MTProtoWorker #Pink
+  **MTProto Worker (Isolated)**
+
+  🔄 Roda 24/7 mantendo sessão ativa
+  📬 Consome RabbitMQ assincronamente
+  💾 Sessão persiste em volume Docker
+  🔁 Auto-reconnect em caso de desconexão
+  ⚙️ Não expõe HTTP API (apenas worker)
+end note
+
+note over GatewayAPI #LightGreen
+  **Gateway API (Stateless)**
+
+  ✅ Sempre disponível (não depende MTProto)
+  💾 Cache-first (Redis TTL 5 min)
+  📨 Async request via RabbitMQ
+  🔍 Job polling endpoint
+  🛡️ Autenticação via X-Gateway-Token
+end note
+
+@enduml

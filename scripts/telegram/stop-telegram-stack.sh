@@ -22,21 +22,13 @@ else
   echo "  Already stopped"
 fi
 
-# ==============================================================================
-# Step 2: Stop Monitoring Stack
-# ==============================================================================
-echo ""
-echo "2️⃣ Stopping monitoring stack (4 containers)..."
 cd "$PROJECT_ROOT/tools/compose"
-docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml down
-
-echo "  ✅ Stopped"
 
 # ==============================================================================
-# Step 3: Stop Data Layer
+# Step 2: Stop Data Layer
 # ==============================================================================
 echo ""
-echo "3️⃣ Stopping data layer containers (7)..."
+echo "2️⃣ Stopping data layer containers (7)..."
 docker compose -f docker-compose.4-2-telegram-stack.yml down
 
 echo "  ✅ Stopped"
@@ -47,8 +39,6 @@ echo ""
 echo "ℹ️  Data preserved in Docker volumes:"
 echo "  • telegram-timescaledb-data"
 echo "  • telegram-rabbitmq-data"
-echo "  • telegram-prometheus-data"
-echo "  • telegram-grafana-data"
 echo ""
 echo "To restart: bash $PROJECT_ROOT/scripts/telegram/start-telegram-stack.sh"
 echo "To remove volumes: docker compose -f docker-compose.4-2-telegram-stack.yml down -v"

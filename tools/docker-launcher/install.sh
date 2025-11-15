@@ -105,7 +105,7 @@ function verify_installation() {
 
   # Test HTTP endpoint
   sleep 2
-  if curl -s http://127.0.0.1:9876/health | grep -q "ok"; then
+  if curl -s http://127.0.0.1:9880/health | grep -q "ok"; then
     echo -e "${GREEN}✓ Server is responding${NC}"
   else
     echo -e "${RED}✗ Server is not responding${NC}"
@@ -140,7 +140,7 @@ EOF
   echo "  • Restart:       tools/docker-launcher/docker-control-cli.sh restart <container>"
   echo ""
 
-  echo "API Endpoint: http://127.0.0.1:9876"
+  echo "API Endpoint: http://127.0.0.1:9880"
   echo ""
 }
 

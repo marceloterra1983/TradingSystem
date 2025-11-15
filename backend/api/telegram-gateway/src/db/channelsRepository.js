@@ -1,4 +1,9 @@
 import { getDatabasePool } from "./messagesRepository.js";
+import { config } from "../config.js";
+
+const quoteIdentifier = (value) => `"${String(value).replace(/"/g, '""')}"`;
+const schemaIdentifier = quoteIdentifier(config.database.schema);
+const channelsTableIdentifier = `${schemaIdentifier}."channels"`;
 
 const parseChannelId = (value) => {
   try {
@@ -31,12 +36,10 @@ const mapChannelRow = (row) => ({
 
 export const listChannels = async ({ logger }) => {
   const db = await getDatabasePool(logger);
-  // search_path is set by messagesRepository to the configured schema,
-  // so we can reference unqualified table names safely here.
   const result = await db.query(
     `SELECT id, channel_id, label, description, is_active, created_at, updated_at
-     FROM channels
-     ORDER BY created_at DESC`,
+     FROM ${channelsTableIdentifier}
+     ORDER BY created_at DESC`
   );
   return result.rows.map(mapChannelRow);
 };
@@ -52,10 +55,10 @@ export const createChannel = async ({
   const numericChannelId = parseChannelId(channelId);
 
   const result = await db.query(
-    `INSERT INTO channels (channel_id, label, description, is_active)
+    `INSERT INTO ${channelsTableIdentifier} (channel_id, label, description, is_active)
      VALUES ($1, $2, $3, $4)
      RETURNING id, channel_id, label, description, is_active, created_at, updated_at`,
-    [numericChannelId, label || null, description || null, Boolean(isActive)],
+    [numericChannelId, label || null, description || null, Boolean(isActive)]
   );
 
   return mapChannelRow(result.rows[0]);
@@ -64,7 +67,7 @@ export const createChannel = async ({
 export const updateChannel = async (
   id,
   { label, description, isActive, channelId },
-  { logger },
+  { logger }
 ) => {
   const db = await getDatabasePool(logger);
 
@@ -105,11 +108,11 @@ export const updateChannel = async (
   values.push(id);
 
   const result = await db.query(
-    `UPDATE channels
+    `UPDATE ${channelsTableIdentifier}
      SET ${updates.join(", ")}
      WHERE id = $${index}
      RETURNING id, channel_id, label, description, is_active, created_at, updated_at`,
-    values,
+    values
   );
 
   if (result.rows.length === 0) {
@@ -124,8 +127,8 @@ export const updateChannel = async (
 export const deleteChannel = async (id, { logger }) => {
   const db = await getDatabasePool(logger);
   const result = await db.query(
-    `DELETE FROM channels WHERE id = $1 RETURNING id`,
-    [id],
+    `DELETE FROM ${channelsTableIdentifier} WHERE id = $1 RETURNING id`,
+    [id]
   );
 
   if (result.rows.length === 0) {

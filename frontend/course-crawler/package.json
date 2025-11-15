@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4201 --strictPort",
-    "build": "tsc && NODE_ENV=production vite build",
+    "build": "npm run build:gateway",
+    "build:gateway": "tsc && NODE_ENV=production vite build --mode gateway",
+    "build:standalone": "tsc && NODE_ENV=production vite build --mode standalone",
+    "build:all": "npm run build:standalone && npm run build:gateway",
     "build:dev": "tsc && vite build",
     "build:analyze": "npm run build && npm run preview -- --open",
     "preview": "vite preview --port 4201 --host 0.0.0.0",

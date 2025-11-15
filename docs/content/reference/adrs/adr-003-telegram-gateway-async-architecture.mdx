@@ -1,0 +1,484 @@
+---
+title: "ADR-003: Telegram Gateway Async Architecture"
+sidebar_position: 3
+tags: [adr, architecture, telegram, async, rabbitmq, mtproto]
+domain: backend
+type: architecture-decision
+summary: "Redesenhar arquitetura do Telegram Gateway para isolar MTProto Worker e implementar comunicação assíncrona via RabbitMQ"
+status: proposed
+last_review: "2025-11-14"
+---
+
+# ADR-003: Telegram Gateway Async Architecture
+
+**Status**: 🎯 Proposed
+
+**Deciders**: Engineering Team, Product Owner
+
+**Date**: 2025-11-14
+
+**Technical Story**: [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md)
+
+---
+
+## Context and Problem Statement
+
+A arquitetura atual do Telegram Gateway apresenta **problemas recorrentes** que afetam a experiência do usuário:
+
+1. **Gateway API retorna 502 Bad Gateway** quando MTProto está offline ou desconectado
+2. **Sessão do Telegram não persiste** entre restarts do container MTProto
+3. **Acoplamento forte** entre Gateway API e MTProto (dependência síncrona)
+4. **Sem cache inteligente** - cada request baixa mensagens novamente
+5. **Sem fallback** - falha temporária do MTProto = erro imediato ao usuário
+6. **Autenticação interativa não funciona** dentro do container Docker
+
+### Sintomas Observados
+
+```javascript
+// Console do browser
+POST http://localhost:9082/api/telegram-gateway/sync-messages 502 (Bad Gateway)
+
+// Backend logs
+{
+  "status": 503,
+  "error": "Telegram client não está conectado. Execute a autenticação primeiro."
+}
+
+// Frontend logs
+[TelegramGateway] Using runtime configuration API
+Gateway: unhealthy
+Telegram: Desconectado - Verificar autenticação
+Sistema não está completamente operacional
+```
+
+### Pergunta do Usuário
+
+> "continua com os mesmos problemas. e se tentarmos uma arquitetura que o MTProto fica isolado fornecendo o acesso ao telegram? como rever esta arquitetura de funcionamento que fica repetindo o problema"
+
+---
+
+## Decision Drivers
+
+### Requisitos Técnicos
+
+* **R1**: Gateway API deve **SEMPRE** responder (mesmo com MTProto offline)
+* **R2**: Sessão do Telegram deve **persistir** entre container restarts
+* **R3**: Frontend deve receber **resposta imediata** (não aguardar sync completo)
+* **R4**: Cache de mensagens deve evitar requests desnecessários
+* **R5**: Sistema deve ser **resiliente** a falhas temporárias do MTProto
+* **R6**: Arquitetura deve seguir **Single Responsibility Principle (SRP)**
+
+### Requisitos de Negócio
+
+* **B1**: Usuário não deve ver erro 502 ao clicar "Sync Messages"
+* **B2**: Mensagens cacheadas devem aparecer instantaneamente (< 100ms)
+* **B3**: Sistema deve funcionar 24/7 sem intervenção manual
+* **B4**: Falhas do MTProto não devem derrubar o dashboard inteiro
+
+---
+
+## Considered Options
+
+### Option 1: Manter Arquitetura Atual (Síncrona)
+
+**Descrição**: Continuar com Gateway API → MTProto síncrono
+
+**Prós**:
+* ✅ Menos complexidade (sem message broker)
+* ✅ Resposta em tempo real (quando funciona)
+* ✅ Não requer refatoração
+
+**Contras**:
+* ❌ Gateway API depende 100% do MTProto
+* ❌ 502 Bad Gateway quando MTProto offline
+* ❌ Sem cache = requests lentos
+* ❌ Sessão não persiste
+* ❌ **Problemas recorrentes não resolvidos**
+
+**Decisão**: ❌ **REJEITADA** - Não resolve os problemas fundamentais
+
+---
+
+### Option 2: Nova Arquitetura Assíncrona (Recomendada)
+
+**Descrição**: Isolar MTProto Worker + RabbitMQ + Redis Cache
+
+```
+Browser → Gateway API → RabbitMQ → MTProto Worker → Telegram
+          ↓ (202 Accepted)      ↑
+      Redis Cache HIT/MISS    (async)
+```
+
+**Prós**:
+* ✅ Gateway API **SEMPRE** disponível (R1)
+* ✅ Sessão persiste em volume Docker (R2)
+* ✅ Response imediato: 202 Accepted (R3)
+* ✅ Cache Redis evita requests desnecessários (R4)
+* ✅ Resiliente a falhas MTProto (R5)
+* ✅ Separação de responsabilidades (R6)
+* ✅ RabbitMQ absorve picos de carga
+* ✅ Retry automático via message broker
+* ✅ Escalável (pode adicionar múltiplos workers)
+
+**Contras**:
+* ⚠️ Maior complexidade (RabbitMQ + polling)
+* ⚠️ Frontend precisa implementar polling
+* ⚠️ Latência adicional para cache miss (async)
+* ⚠️ Refatoração de código existente
+
+**Decisão**: ✅ **ACEITA** - Resolve todos os problemas fundamentais
+
+---
+
+### Option 3: WebSocket Real-time (Alternativa Futura)
+
+**Descrição**: Usar WebSocket para notificação real-time (em vez de polling)
+
+**Prós**:
+* ✅ Notificação instantânea ao frontend
+* ✅ Sem overhead de polling HTTP
+
+**Contras**:
+* ⚠️ Maior complexidade de implementação
+* ⚠️ Requer gerenciamento de conexões WebSocket
+* ⚠️ Pode ser implementada **APÓS** Option 2
+
+**Decisão**: 🔄 **FUTURE** - Implementar após validar Option 2
+
+---
+
+## Decision Outcome
+
+**Chosen option**: **Option 2 - Nova Arquitetura Assíncrona**
+
+### Justificativa
+
+A arquitetura assíncrona resolve **TODOS os problemas identificados**:
+
+1. ✅ **R1 (Gateway sempre disponível)**: Gateway API não depende do MTProto
+2. ✅ **R2 (Sessão persistente)**: Volume Docker `/data/.session`
+3. ✅ **R3 (Resposta imediata)**: 202 Accepted + Job ID
+4. ✅ **R4 (Cache inteligente)**: Redis cache com TTL 5 min
+5. ✅ **R5 (Resiliência)**: RabbitMQ queue + retry logic
+6. ✅ **R6 (SRP)**: Gateway API (HTTP) ≠ MTProto Worker (Telegram)
+
+### Positive Consequences
+
+* ✅ **UX Melhorada**: Usuário nunca vê 502 Bad Gateway
+* ✅ **Performance**: Cache Redis retorna dados em < 100ms
+* ✅ **Reliability**: Sistema funciona mesmo com MTProto offline
+* ✅ **Scalability**: Pode adicionar múltiplos MTProto Workers
+* ✅ **Maintainability**: Código mais limpo com responsabilidades separadas
+* ✅ **Observability**: Métricas RabbitMQ (queue depth, processing time)
+
+### Negative Consequences
+
+* ⚠️ **Complexidade**: Adiciona RabbitMQ como dependência
+* ⚠️ **Latência**: Cache miss = async processing (não instantâneo)
+* ⚠️ **Refactoring**: Requer mudanças em frontend + backend
+* ⚠️ **Learning Curve**: Time precisa entender RabbitMQ
+
+---
+
+## Implementation Plan
+
+### Fase 1: Preparação (1-2 dias)
+
+**Tasks**:
+- [ ] Criar volume Docker para sessão Telegram
+- [ ] Script de autenticação interativa one-time
+- [ ] Configurar RabbitMQ queues e exchanges
+- [ ] Documentar processo de autenticação inicial
+
+**Deliverables**:
+- Volume `telegram-mtproto-session` criado
+- Script `scripts/telegram/authenticate-interactive.sh`
+- Queues `telegram.sync.requests` e `telegram.sync.responses` configuradas
+
+---
+
+### Fase 2: MTProto Worker Isolado (2-3 dias)
+
+**Tasks**:
+- [ ] Criar `apps/telegram-gateway/src/worker.js`
+- [ ] Implementar consumidor RabbitMQ
+- [ ] Adicionar health check via RabbitMQ connection
+- [ ] Implementar graceful shutdown handler
+- [ ] Testar sessão persistence entre restarts
+
+**Deliverables**:
+- MTProto Worker rodando 24/7
+- Sessão persiste em `/data/.session`
+- Health check funcional
+- Dockerfile atualizado (worker mode)
+
+**Code Example**:
+
+```javascript
+// apps/telegram-gateway/src/worker.js
+const amqp = require('amqplib');
+const { TelegramClient } = require('telegram');
+
+let telegramClient;
+let rabbitChannel;
+
+async function processMessage(msg) {
+  const request = JSON.parse(msg.content.toString());
+  const { jobId, action, params } = request;
+
+  try {
+    let result;
+
+    switch (action) {
+      case 'sync-messages':
+        result = await syncMessages(params);
+        break;
+      case 'get-channels':
+        result = await getChannels(params);
+        break;
+    }
+
+    // Publish result
+    await rabbitChannel.sendToQueue('telegram.sync.responses',
+      Buffer.from(JSON.stringify({
+        jobId,
+        status: 'completed',
+        result,
+        timestamp: new Date().toISOString(),
+      }))
+    );
+
+    rabbitChannel.ack(msg);
+  } catch (error) {
+    // Publish error + retry logic
+    const retryCount = msg.properties.headers['x-retry-count'] || 0;
+    if (retryCount < 3) {
+      rabbitChannel.nack(msg, false, true); // Requeue
+    } else {
+      rabbitChannel.ack(msg); // Discard after 3 retries
+    }
+  }
+}
+
+async function main() {
+  await connectTelegram();
+  await connectRabbitMQ();
+  rabbitChannel.consume('telegram.sync.requests', processMessage);
+}
+
+main();
+```
+
+---
+
+### Fase 3: Gateway API Refactoring (2-3 dias)
+
+**Tasks**:
+- [ ] Implementar cache-first logic (Redis)
+- [ ] Criar endpoint `/api/telegram-gateway/jobs/:id`
+- [ ] Refatorar `/sync-messages` para async (202 Accepted)
+- [ ] Adicionar RabbitMQ producer logic
+- [ ] Consumer de `telegram.sync.responses`
+
+**Deliverables**:
+- Gateway API retorna 202 Accepted
+- Redis cache funcionando (5 min TTL)
+- Job polling endpoint funcional
+- RabbitMQ producer implementado
+
+**Code Example**:
+
+```javascript
+// backend/api/telegram-gateway/src/routes/telegramGateway.js
+
+// Async sync-messages endpoint
+telegramGatewayRouter.post('/sync-messages', async (req, res) => {
+  const { channelId, limit } = req.body;
+  const cacheKey = `telegram:messages:${channelId}:${limit}`;
+
+  // 1. Try cache first
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    return res.json({
+      success: true,
+      messages: JSON.parse(cached),
+      source: 'cache',
+    });
+  }
+
+  // 2. Enqueue job
+  const jobId = `sync-${Date.now()}-${randomId()}`;
+
+  await rabbitChannel.sendToQueue('telegram.sync.requests',
+    Buffer.from(JSON.stringify({
+      jobId,
+      action: 'sync-messages',
+      params: { channelId, limit },
+    }))
+  );
+
+  // 3. Store job metadata
+  await redis.setex(`job:${jobId}`, 600, JSON.stringify({
+    status: 'queued',
+    createdAt: new Date().toISOString(),
+  }));
+
+  // 4. Return job ID for polling
+  res.status(202).json({
+    success: true,
+    jobId,
+    status: 'queued',
+    pollUrl: `/api/telegram-gateway/jobs/${jobId}`,
+  });
+});
+
+// Job polling endpoint
+telegramGatewayRouter.get('/jobs/:jobId', async (req, res) => {
+  const { jobId } = req.params;
+  const jobData = await redis.get(`job:${jobId}`);
+
+  if (!jobData) {
+    return res.status(404).json({ error: 'Job not found' });
+  }
+
+  res.json(JSON.parse(jobData));
+});
+```
+
+---
+
+### Fase 4: Frontend Updates (1 dia)
+
+**Tasks**:
+- [ ] Implementar polling logic no `useTelegramGateway.ts`
+- [ ] Adicionar loading states (queued, processing, completed)
+- [ ] Tratamento de erros async
+- [ ] UI feedback para cache hit/miss
+
+**Deliverables**:
+- Polling implementado com intervalo de 2s
+- Loading states no dashboard
+- Error handling gracioso
+
+**Code Example**:
+
+```typescript
+// frontend/dashboard/src/hooks/useTelegramGateway.ts
+
+export function useSyncMessages() {
+  const [jobId, setJobId] = useState<string | null>(null);
+
+  // Mutation para iniciar sync
+  const syncMutation = useMutation({
+    mutationFn: async (params: SyncParams) => {
+      const response = await fetch('/api/telegram-gateway/sync-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      const data = await response.json();
+
+      if (data.source === 'cache') {
+        // Cache hit - retorna dados imediatamente
+        return data;
+      }
+
+      // Cache miss - retorna jobId para polling
+      setJobId(data.jobId);
+      return data;
+    },
+  });
+
+  // Polling query (apenas se jobId exists)
+  const pollingQuery = useQuery({
+    queryKey: ['telegram-job', jobId],
+    queryFn: async () => {
+      const response = await fetch(`/api/telegram-gateway/jobs/${jobId}`);
+      return response.json();
+    },
+    enabled: !!jobId,
+    refetchInterval: (data) => {
+      // Stop polling quando status = completed ou failed
+      if (data?.status === 'completed' || data?.status === 'failed') {
+        setJobId(null);
+        return false;
+      }
+      return 2000; // Poll every 2s
+    },
+  });
+
+  return {
+    sync: syncMutation.mutate,
+    isLoading: syncMutation.isPending || pollingQuery.isFetching,
+    status: pollingQuery.data?.status || 'idle',
+    result: pollingQuery.data?.result,
+    error: syncMutation.error || pollingQuery.error,
+  };
+}
+```
+
+---
+
+### Fase 5: Validação E2E (1 dia)
+
+**Tasks**:
+- [ ] Testar full flow: Frontend → Gateway → RabbitMQ → Worker → Telegram
+- [ ] Validar cache hit/miss scenarios
+- [ ] Testar MTProto Worker offline/online
+- [ ] Verificar sessão persistence
+- [ ] Load testing (100 concurrent requests)
+
+**Deliverables**:
+- Test suite E2E passing
+- Load test results (< 200ms p99 latency)
+- Documentação de testes
+
+---
+
+## Compliance
+
+### Architecture Principles
+
+* ✅ **Single Responsibility**: Gateway API (HTTP) ≠ MTProto Worker (Telegram)
+* ✅ **Dependency Inversion**: Gateway depends on abstractions (RabbitMQ), not MTProto
+* ✅ **Loose Coupling**: Components comunicam via message broker
+* ✅ **High Cohesion**: Cada serviço tem responsabilidade bem definida
+
+### Security
+
+* ✅ **Session Isolation**: Sessão Telegram em volume protegido
+* ✅ **Authentication**: X-Gateway-Token no Gateway API
+* ✅ **No Credentials in Logs**: Nunca logar session data
+* ✅ **Encrypted Volume**: Volume Docker com encryption at rest
+
+### Performance
+
+* 🎯 **Target**: Cache hit < 100ms, cache miss < 5s
+* 🎯 **Redis TTL**: 5 minutos (balance freshness vs performance)
+* 🎯 **RabbitMQ**: Prefetch 10 mensagens (worker throughput)
+* 🎯 **Polling Interval**: 2s (balance latency vs server load)
+
+---
+
+## Links
+
+### Documentation
+
+* [NOVA-ARQUITETURA-MTPROTO-ISOLADO.md](/docs/NOVA-ARQUITETURA-MTPROTO-ISOLADO.md) - Proposta completa
+* [Diagram PlantUML](/docs/content/diagrams/telegram-gateway-async-architecture.puml) - Arquitetura visual
+* [RUNTIME-CONFIG-API-ARCHITECTURE.md](/docs/RUNTIME-CONFIG-API-ARCHITECTURE.md) - Runtime Config (já implementado)
+
+### External References
+
+* [RabbitMQ Work Queues Tutorial](https://www.rabbitmq.com/tutorials/tutorial-two-javascript.html)
+* [GramJS Documentation](https://gram.js.org/)
+* [Job Queue Pattern](https://www.enterpriseintegrationpatterns.com/patterns/messaging/JobQueuePattern.html)
+
+---
+
+**Aprovação**: ⏳ Aguardando validação do Product Owner e Engineering Team
+
+**Próxima Ação**: Iniciar Fase 1 (Preparação) após aprovação formal
+
+**Tempo Estimado Total**: 7-10 dias úteis

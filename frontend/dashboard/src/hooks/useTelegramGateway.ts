@@ -1,54 +1,92 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getApiUrl } from "../config/api";
+import { useRuntimeConfig } from "./useRuntimeConfig";
 
-const RAW_TELEGRAM_GATEWAY_API_BASE = getApiUrl("telegramGateway").replace(
-  /\/$/,
-  ""
-);
+// Fallback configuration (usado enquanto runtime config carrega)
+const FALLBACK_ORIGIN = typeof window !== "undefined" && window.location?.origin
+  ? window.location.origin
+  : "http://localhost:9082";
 
-// Extract base origin (without /api/telegram-gateway path)
-const resolveOrigin = () => {
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin;
-  }
-  return "http://localhost:9082";
+const FALLBACK_CONFIG = {
+  apiBaseUrl: getApiUrl("telegramGateway").replace(/\/$/, ""),
+  messagesBaseUrl: `${FALLBACK_ORIGIN}/api/messages`,
+  channelsBaseUrl: `${FALLBACK_ORIGIN}/api/channels`,
+  authToken: "",
 };
 
-const origin = resolveOrigin();
+/**
+ * Hook para obter configuração ativa (runtime ou fallback)
+ * @internal
+ */
+function useActiveConfig() {
+  const { data: runtimeConfig, isLoading, error } = useRuntimeConfig();
 
-// Use the telegram gateway API base directly for service operations
-export const TELEGRAM_GATEWAY_SERVICE_BASE = RAW_TELEGRAM_GATEWAY_API_BASE;
+  return useMemo(() => {
+    if (runtimeConfig) {
+      // Runtime config disponível - usar sempre
+      return {
+        apiBaseUrl: runtimeConfig.apiBaseUrl,
+        messagesBaseUrl: runtimeConfig.messagesBaseUrl,
+        channelsBaseUrl: runtimeConfig.channelsBaseUrl,
+        authToken: runtimeConfig.authToken,
+        isRuntimeConfig: true,
+        isLoading: false,
+        error: null,
+      };
+    }
 
-// For messages and channels, use the origin + path (not the full service base)
-export const TELEGRAM_GATEWAY_MESSAGES_BASE = `${origin}/api/messages`;
-export const TELEGRAM_GATEWAY_CHANNELS_BASE = `${origin}/api/channels`;
+    if (isLoading) {
+      // Ainda carregando - usar fallback temporariamente
+      return {
+        ...FALLBACK_CONFIG,
+        isRuntimeConfig: false,
+        isLoading: true,
+        error: null,
+      };
+    }
+
+    // Erro ao carregar runtime config - usar fallback com warning
+    if (error && import.meta.env.DEV) {
+      console.warn(
+        "[TelegramGateway] Runtime config failed to load, using fallback:",
+        error
+      );
+    }
+
+    return {
+      ...FALLBACK_CONFIG,
+      isRuntimeConfig: false,
+      isLoading: false,
+      error,
+    };
+  }, [runtimeConfig, isLoading, error]);
+}
 
 // Debug logging in development
 if (import.meta.env.DEV) {
   // eslint-disable-next-line no-console
-  console.log("[TelegramGateway] Configuration:", {
-    SERVICE_BASE: TELEGRAM_GATEWAY_SERVICE_BASE,
-    MESSAGES_BASE: TELEGRAM_GATEWAY_MESSAGES_BASE,
-    CHANNELS_BASE: TELEGRAM_GATEWAY_CHANNELS_BASE,
-    origin,
-  });
+  console.log("[TelegramGateway] Using runtime configuration API");
 }
 
-export const TELEGRAM_GATEWAY_TOKEN =
-  (import.meta.env.VITE_GATEWAY_TOKEN as string | undefined)?.trim() ||
-  (
-    import.meta.env.VITE_TELEGRAM_GATEWAY_API_TOKEN as string | undefined
-  )?.trim() ||
-  (import.meta.env.VITE_API_SECRET_TOKEN as string | undefined)?.trim() ||
-  "";
+/**
+ * @deprecated Use useRuntimeConfig() hook instead
+ * Deprecated constant - kept for backward compatibility
+ * Will return empty string in runtime config mode
+ */
+export const TELEGRAM_GATEWAY_TOKEN = "";
 
-if (import.meta.env.DEV && TELEGRAM_GATEWAY_TOKEN.length === 0) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    "[TelegramGateway] Nenhum token configurado; requisições podem falhar com 401"
-  );
-}
+/**
+ * @deprecated Use useActiveConfig() hook instead
+ * Deprecated constants - kept for backward compatibility
+ * These are now derived from runtime config fallback
+ *
+ * TODO: Refactor all hooks to use config.apiBaseUrl/messagesBaseUrl/channelsBaseUrl
+ * instead of these global constants
+ */
+export const TELEGRAM_GATEWAY_SERVICE_BASE = FALLBACK_CONFIG.apiBaseUrl;
+export const TELEGRAM_GATEWAY_MESSAGES_BASE = FALLBACK_CONFIG.messagesBaseUrl;
+export const TELEGRAM_GATEWAY_CHANNELS_BASE = FALLBACK_CONFIG.channelsBaseUrl;
 
 export type GatewayHealthStatus = "healthy" | "unhealthy" | "unknown";
 
@@ -211,17 +249,18 @@ export interface TelegramGatewayAuthStatus {
 
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
+  authToken?: string; // Token passado explicitamente
 }
 
 async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
+  const { authToken, headers, ...fetchOptions } = options || {};
+
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers: {
       "Content-Type": "application/json",
-      ...(TELEGRAM_GATEWAY_TOKEN
-        ? { "X-Gateway-Token": TELEGRAM_GATEWAY_TOKEN }
-        : {}),
-      ...(options?.headers ?? {}),
+      ...(authToken ? { "X-Gateway-Token": authToken } : {}),
+      ...(headers ?? {}),
     },
   });
 
@@ -271,18 +310,23 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
 }
 
 export function useTelegramGatewayOverview(pollingMs = 10000) {
+  const config = useActiveConfig();
+
   return useQuery<TelegramGatewayOverview>({
     queryKey: ["telegram-gateway", "overview"],
     queryFn: async () => {
       const payload = await fetchJson<{
         success: boolean;
         data: TelegramGatewayOverview;
-      }>(`${TELEGRAM_GATEWAY_SERVICE_BASE}/overview`);
+      }>(`${config.apiBaseUrl}/overview`, {
+        authToken: config.authToken,
+      });
       return payload.data;
     },
     refetchInterval: pollingMs,
     staleTime: pollingMs / 2,
     retry: 1,
+    enabled: !config.isLoading, // Só executa quando config estiver carregada
     placeholderData: (previousData) => previousData, // Keep previous data during refetch to avoid flicker
   });
 }

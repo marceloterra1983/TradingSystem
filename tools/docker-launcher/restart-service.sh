@@ -17,7 +17,7 @@ sudo systemctl status docker-control --no-pager | head -10
 
 echo ""
 echo "Testing API..."
-curl -s http://127.0.0.1:9876/health | jq .
+curl -s http://127.0.0.1:9880/health | jq .
 
 echo ""
 echo "✓ Service restarted successfully!"

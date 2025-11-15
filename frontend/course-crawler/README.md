@@ -134,7 +134,7 @@ Configure API URL via environment variables:
 # .env or .env.local
 VITE_COURSE_CRAWLER_API_URL=http://localhost:3601
 VITE_COURSE_CRAWLER_APP_URL=http://localhost:4201
-VITE_DOCKER_CONTROL_URL=http://127.0.0.1:9876
+VITE_DOCKER_CONTROL_URL=http://127.0.0.1:9880
 COURSE_CRAWLER_TIMEOUT_MS=3600000
 ```
 
@@ -147,13 +147,13 @@ course-crawler-ui:
     args:
       VITE_COURSE_CRAWLER_API_URL: ${VITE_COURSE_CRAWLER_API_URL}
       VITE_COURSE_CRAWLER_APP_URL: ${VITE_COURSE_CRAWLER_APP_URL}
-      VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9876}
+      VITE_DOCKER_CONTROL_URL: ${VITE_DOCKER_CONTROL_URL:-http://127.0.0.1:9880}
       COURSE_CRAWLER_TIMEOUT_MS: ${COURSE_CRAWLER_TIMEOUT_MS:-3600000}
 ```
 
 > 💡 The optional `VITE_DOCKER_CONTROL_URL` is used by the **Worker Logs** card to pull
 > `docker logs --tail 50 course-crawler-worker` via the local Docker Control Server
-> (`tools/docker-launcher/docker-control-server.js`). Keep the server running (port 9876)
+> (`tools/docker-launcher/docker-control-server.js`). Keep the server running (port 9880)
 > to enable automatic log refresh inside the UI.
 
 ## 🎨 Styling
@@ -289,25 +289,19 @@ The Course Crawler UI is embedded in the main TradingSystem Dashboard via iframe
 **File:** `frontend/dashboard/src/components/pages/CourseCrawlerPage.tsx`
 
 ```tsx
-const APP_URL = import.meta.env.VITE_COURSE_CRAWLER_APP_URL ?? 'http://localhost:4201';
+const DEFAULT_GATEWAY_PATH = "/apps/course-crawler";
 
-export default function CourseCrawlerPage() {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="...">
-        <h2>Course Crawler</h2>
-        <p>Stack dedicada para cadastrar credenciais...</p>
-        <a href={APP_URL} target="_blank">Abrir em nova aba</a>
-      </div>
+const resolveCourseCrawlerUrl = () => {
+  const direct = import.meta.env.VITE_COURSE_CRAWLER_APP_URL?.trim();
+  if (direct) return direct; // Dev fallback
 
-      <iframe
-        title="Course Crawler"
-        src={APP_URL}
-        className="h-[72vh] w-full rounded-2xl border-0"
-      />
-    </div>
-  );
-}
+  const gateway =
+    import.meta.env.VITE_GATEWAY_HTTP_URL ?? window.location.origin;
+  const path =
+    import.meta.env.VITE_COURSE_CRAWLER_GATEWAY_PATH ?? DEFAULT_GATEWAY_PATH;
+
+  return `${gateway.replace(/\/+$/, "")}${path}`;
+};
 ```
 
 This allows users to access the Course Crawler UI:
@@ -326,7 +320,8 @@ This allows users to access the Course Crawler UI:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `VITE_COURSE_CRAWLER_API_URL` | `http://localhost:3601` | Course Crawler API base URL |
-| `VITE_COURSE_CRAWLER_APP_URL` | `http://localhost:4201` | Frontend app URL (for dashboard embed) |
+| `VITE_COURSE_CRAWLER_APP_URL` | `http://localhost:4201` | Dev fallback URL (direct access) |
+| `VITE_COURSE_CRAWLER_GATEWAY_PATH` | `/apps/course-crawler` | Caminho servido pelo Traefik/gateway |
 
 **Note:** Variables prefixed with `VITE_` are exposed to the browser. Never expose secrets!
 

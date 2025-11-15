@@ -9,7 +9,7 @@ import {
 import { Button } from './ui/button';
 import { Terminal, RefreshCcw, Copy } from 'lucide-react';
 
-const DEFAULT_CONTROL_URL = 'http://127.0.0.1:9876';
+const DEFAULT_CONTROL_URL = 'http://127.0.0.1:9880';
 const DOCKER_CONTROL_URL =
   (import.meta.env.VITE_DOCKER_CONTROL_URL as string | undefined)?.replace(/\/$/, '') ??
   DEFAULT_CONTROL_URL;

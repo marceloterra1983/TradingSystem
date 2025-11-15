@@ -5,7 +5,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 const app = express();
-const PORT = process.env.PORT || 9876;
+const PORT = Number(process.env.PORT) || 9880;
 
 // Middleware
 app.use(cors());

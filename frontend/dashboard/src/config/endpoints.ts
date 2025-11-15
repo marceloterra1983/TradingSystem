@@ -173,11 +173,7 @@ export const ENDPOINTS = {
   },
 
   /** QuestDB - High-performance time-series database (Direct access - subpath not supported) */
-  questdb: resolveGatewayUrl(
-    import.meta.env.VITE_QUESTDB_URL as string | undefined,
-    "/db-ui/questdb",
-    ["http://localhost:9000", "http://localhost:9002"],
-  ),
+  questdb: import.meta.env.VITE_QUESTDB_URL || "http://localhost:9000",
 
   /** Qdrant - Vector database for RAG/AI - Port 7020 (HTTP API) */
   qdrant: import.meta.env.VITE_QDRANT_URL || "http://localhost:7020",

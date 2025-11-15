@@ -60,7 +60,7 @@ fi
 # 6. Verificar portas em uso
 echo "6️⃣ Checking port conflicts..."
 PORT_8202=$(ss -tulpn 2>/dev/null | grep ":8202 " || echo "")
-PORT_9876=$(ss -tulpn 2>/dev/null | grep ":9876 " || echo "")
+PORT_9880=$(ss -tulpn 2>/dev/null | grep ":9880 " || echo "")
 
 if [ -n "$PORT_8202" ]; then
     echo "  ⚠️  Port 8202 is in use:"
@@ -68,9 +68,9 @@ if [ -n "$PORT_8202" ]; then
     echo "  💡 You may need to change RAG query port in docker-compose"
 fi
 
-if [ -n "$PORT_9876" ]; then
-    echo "  ⚠️  Port 9876 is in use:"
-    echo "$PORT_9876"
+if [ -n "$PORT_9880" ]; then
+    echo "  ⚠️  Port 9880 is in use:"
+    echo "$PORT_9880"
     echo "  💡 You may need to change docker-control port in docker-compose"
 fi
 

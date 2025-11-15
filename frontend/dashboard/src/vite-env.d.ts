@@ -17,6 +17,9 @@ interface ImportMetaEnv {
   readonly VITE_RAG_COLLECTIONS_URL?: string;
   readonly VITE_RAG_COLLECTIONS_INTERNAL_URL?: string;
   readonly VITE_COURSE_CRAWLER_APP_URL?: string;
+  readonly VITE_COURSE_CRAWLER_GATEWAY_PATH?: string;
+  readonly VITE_USE_DIRECT_COURSE_CRAWLER?: string;
+  readonly VITE_GATEWAY_HTTP_URL?: string;
   readonly VITE_DOCS_BASE_URL?: string;
   readonly VITE_DOCSPECS_URL?: string;
   readonly VITE_DOCUMENTATION_API_URL?: string;

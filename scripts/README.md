@@ -56,6 +56,7 @@ bash scripts/stop.sh [--force]
 
 ### `maintenance/`
 - `health-check-all.sh`, `code-quality-check.sh`, `restart-dashboard.sh` e afins.
+- `validate-n8n-gateway-login.sh` – valida login do n8n via API Gateway (previne regressões)
 - `ports/` concentra liberações rápidas (kill docker-proxy, Postgres nativo, porta 5050).
 - `dangerous/` ganhou README próprio com checklists para `cleanup-and-restart.sh`, `nuclear-reset.sh` e `limpar-portas-e-iniciar-tudo.sh`.
 
@@ -98,8 +99,21 @@ bash scripts/stop.sh [--force]
 - **Trabalhando na docs?** use os wrappers em `scripts/docs/`
 - **Precisa de startup minimalista?** consulte `scripts/presets/README.md`
 - **Vai rodar algum reset agressivo?** leia `scripts/maintenance/dangerous/README.md` antes
+- **Mudou configuração do gateway/n8n?** `bash scripts/maintenance/validate-n8n-gateway-login.sh`
+- **Precisa reverter centralização do gateway?** `bash scripts/maintenance/rollback-gateway-centralization.sh`
 
 Mantemos este arquivo enxuto de propósito: qualquer script ausente ou renomeado deve ser refletido aqui imediatamente.
+
+---
+
+## 📖 Gateway Centralization Project
+
+Uma iniciativa completa de centralização de URLs do gateway está documentada em:
+- **[Sumário Final](../docs/GATEWAY-CENTRALIZATION-FINAL-SUMMARY.md)** - Visão geral executiva
+- **[Índice](../docs/GATEWAY-CENTRALIZATION-INDEX.md)** - Hub de navegação
+- **[Guia de Implantação](../docs/DEPLOYMENT-CHECKLIST-GATEWAY-CENTRALIZATION.md)** - Checklist passo-a-passo
+
+Incluindo scripts de validação automática e rollback de emergência.
 
 ## 🆕 Fluxo para Novos Scripts
 

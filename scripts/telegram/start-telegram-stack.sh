@@ -69,19 +69,10 @@ for entry in "${services[@]}"; do
 done
 
 # ==============================================================================
-# Step 3: Start Monitoring Stack (4 containers)
+# Step 3: Start Native MTProto Service
 # ==============================================================================
 echo ""
-echo "3️⃣ Starting monitoring stack (4 containers)..."
-docker compose -f docker-compose.4-2-telegram-stack-monitoring.yml up -d
-
-sleep 10
-
-# ==============================================================================
-# Step 4: Start Native MTProto Service
-# ==============================================================================
-echo ""
-echo "4️⃣ Starting native MTProto service (systemd)..."
+echo "3️⃣ Starting native MTProto service (systemd)..."
 
 if command -v systemctl >/dev/null 2>&1; then
   if sudo -n systemctl is-active --quiet telegram-gateway 2>/dev/null; then
@@ -106,10 +97,10 @@ else
 fi
 
 # ==============================================================================
-# Step 5: Verify Stack Health
+# Step 4: Verify Stack Health
 # ==============================================================================
 echo ""
-echo "5️⃣ Verifying stack health..."
+echo "4️⃣ Verifying stack health..."
 
 checks=(
   "TimescaleDB:PGPASSWORD=\"${TELEGRAM_DB_PASSWORD}\" psql -h localhost -p \"${TELEGRAM_PGBOUNCER_PORT:-6434}\" -U \"${TELEGRAM_DB_USER:-telegram}\" -d telegram_gateway -c 'SELECT 1'"
@@ -117,8 +108,6 @@ checks=(
   "RabbitMQ:docker exec telegram-rabbitmq rabbitmq-diagnostics ping"
   "MTProto Gateway:curl -s http://localhost:${GATEWAY_PORT:-4006}/health"
   "Gateway API:curl -s http://localhost:4010/health"
-  "Prometheus:curl -s http://localhost:9090/-/healthy"
-  "Grafana:curl -s http://localhost:3100/api/health"
 )
 
 for entry in "${checks[@]}"; do
@@ -139,8 +128,6 @@ echo "📊 Monitoring:"
 echo "  • MTProto logs: sudo journalctl -u telegram-gateway -f"
 echo "  • Container logs: docker logs -f telegram-timescale"
 echo "  • Stack status: docker compose -f docker-compose.4-2-telegram-stack.yml ps"
-echo "  • Grafana: http://localhost:3100"
-echo "  • Prometheus: http://localhost:9090"
 echo "  • RabbitMQ UI: http://localhost:15672"
 echo ""
 echo "🔗 Health Endpoints:"

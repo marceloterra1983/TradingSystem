@@ -53,6 +53,7 @@ const cacheKeys = {
   QUEUE: "queue",
   SESSION: "session",
   MESSAGE_SUMMARY: "messageSummary",
+  HEALTH: "health",
 };
 
 const setCache = (key, data, ttl = cacheTtlMs) => {
@@ -169,16 +170,77 @@ const fetchWithTimeout = async (url, { timeout = 5000, ...options } = {}) => {
   }
 };
 
+const resolveMtprotoServiceBase = () => {
+  return (
+    process.env.MTPROTO_SERVICE_URL ||
+    process.env.GATEWAY_SERVICE_URL ||
+    gatewayBaseUrl
+  );
+};
+
+const normalizeServiceUrl = (url) => {
+  if (!url) return undefined;
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+};
+
+const requestMtprotoHealth = async () => {
+  const serviceBase = normalizeServiceUrl(resolveMtprotoServiceBase());
+  if (!serviceBase) {
+    throw new Error("MTPROTO_SERVICE_URL (or GATEWAY_SERVICE_URL) not configured");
+  }
+
+  const response = await fetchWithTimeout(`${serviceBase}/health`, {
+    timeout: 5000,
+  });
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  return { response, payload };
+};
+
 async function fetchGatewayHealth() {
-  // MOCK: Return mock health data (MTProto client not yet implemented)
-  // This avoids circular HTTP calls to self and always returns "connected" status
-  return {
-    status: "healthy",
-    telegram: "connected", // Mock connection status
-    service: "telegram-gateway-api",
-    timestamp: new Date().toISOString(),
-    note: "MTProto client not yet implemented - showing mock status",
-  };
+  const cached = getCached(cacheKeys.HEALTH);
+  if (cached) return cached;
+
+  const now = new Date().toISOString();
+
+  try {
+    const { response, payload } = await requestMtprotoHealth();
+
+    if (!response.ok) {
+      const data = {
+        status: payload?.status ?? "unhealthy",
+        telegram: payload?.telegram ?? "disconnected",
+        error:
+          payload?.error ||
+          `MTProto health endpoint returned HTTP ${response.status}`,
+        timestamp: payload?.timestamp || now,
+      };
+      return setCache(cacheKeys.HEALTH, data, 2000);
+    }
+
+    const data = {
+      status: payload?.status ?? "healthy",
+      telegram: payload?.telegram ?? "connected",
+      uptime: payload?.uptime,
+      timestamp: payload?.timestamp || now,
+    };
+
+    return setCache(cacheKeys.HEALTH, data);
+  } catch (error) {
+    const fallback = {
+      status: "unknown",
+      telegram: "disconnected",
+      error: error.message,
+      timestamp: now,
+    };
+    return setCache(cacheKeys.HEALTH, fallback, 2000);
+  }
 }
 
 const parsePrometheus = (text) => {
@@ -469,36 +531,27 @@ export const getSession = async () => {
   if (cached) return cached;
 
   try {
-    // When MTProto is containerized, check session via MTProto health endpoint
-    const mtprotoServiceUrl =
-      process.env.MTPROTO_SERVICE_URL ||
-      process.env.GATEWAY_SERVICE_URL;
+    const [health, metadataResult] = await Promise.all([
+      fetchGatewayHealth(),
+      readSessionMetadata().catch((error) => ({
+        exists: false,
+        path: sessionFilePath,
+        error: error.message,
+      })),
+    ]);
 
-    const response = await fetch(`${mtprotoServiceUrl}/health`, {
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!response.ok) {
-      return setCache(
-        cacheKeys.SESSION,
-        {
-          exists: false,
-          path: sessionFilePath,
-          error: "MTProto service not accessible",
-        },
-        2000,
-      );
-    }
-
-    const health = await response.json();
-    const isConnected = health.telegram === "connected";
+    const connectedToTelegram = health.telegram === "connected";
+    const sessionExists = connectedToTelegram;
 
     return setCache(cacheKeys.SESSION, {
-      exists: isConnected,
-      path: sessionFilePath,
-      connectedToTelegram: isConnected,
+      ...(metadataResult ?? { path: sessionFilePath }),
+      exists: sessionExists,
+      connectedToTelegram,
+      sessionFileExists: Boolean(metadataResult?.exists),
       mtprotoUptime: health.uptime,
+      mtprotoStatus: health.status,
       timestamp: health.timestamp,
+      error: sessionExists ? undefined : metadataResult?.error || health.error,
     });
   } catch (error) {
     return setCache(

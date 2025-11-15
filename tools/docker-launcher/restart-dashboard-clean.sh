@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 CONTAINER_NAME="dashboard-ui"
-DASHBOARD_PORT="${DASHBOARD_PORT:-9080}"
+DASHBOARD_PORT="${DASHBOARD_PORT:-9082}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 COMPOSE_FILE="${PROJECT_ROOT}/tools/compose/docker-compose.1-dashboard-stack.yml"
 
@@ -56,46 +56,49 @@ else
   echo -e "${GREEN}✓ Port ${DASHBOARD_PORT} is available${NC}"
 fi
 
-# Step 1: Check container status and restart/start accordingly
-echo -e "${YELLOW}→ Checking container status...${NC}"
-CONTAINER_STATUS=$(docker inspect ${CONTAINER_NAME} --format '{{.State.Status}}' 2>/dev/null || echo "not-found")
+# Step 1: Stop and remove container if exists
+echo -e "${YELLOW}→ Stopping and removing existing container...${NC}"
+CONTAINER_EXISTS=$(docker ps -a --filter "name=${CONTAINER_NAME}" --format '{{.Names}}' 2>/dev/null)
 
-if [ "$CONTAINER_STATUS" = "not-found" ]; then
-  echo -e "${YELLOW}→ Container not found, starting with docker compose...${NC}"
-  SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-  cd "$SCRIPT_DIR" || exit 1
-  if docker compose -f "${COMPOSE_FILE}" up -d dashboard 2>&1; then
-    echo -e "${GREEN}✓ Container started successfully${NC}"
+if [ -n "$CONTAINER_EXISTS" ]; then
+  echo -e "${YELLOW}  Container found, removing...${NC}"
+  if docker compose -f "${COMPOSE_FILE}" down dashboard 2>&1; then
+    echo -e "${GREEN}✓ Container removed${NC}"
   else
-    echo -e "${RED}✗ Failed to start container${NC}"
-    echo -e "${RED}  Check logs with: docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml logs dashboard${NC}"
-    exit 1
-  fi
-elif [ "$CONTAINER_STATUS" = "running" ]; then
-  echo -e "${YELLOW}→ Container is running, restarting...${NC}"
-  if docker compose -f "${COMPOSE_FILE}" restart dashboard 2>&1; then
-    echo -e "${GREEN}✓ Container restarted successfully${NC}"
-  else
-    echo -e "${RED}✗ Failed to restart container${NC}"
-    echo -e "${RED}  Check logs with: docker logs ${CONTAINER_NAME}${NC}"
+    echo -e "${RED}✗ Failed to remove container${NC}"
     exit 1
   fi
 else
-  echo -e "${YELLOW}→ Container is stopped (${CONTAINER_STATUS}), starting...${NC}"
-  if docker compose -f "${COMPOSE_FILE}" start dashboard 2>&1; then
-    echo -e "${GREEN}✓ Container started successfully${NC}"
-  else
-    echo -e "${RED}✗ Failed to start container${NC}"
-    echo -e "${RED}  Check logs with: docker logs ${CONTAINER_NAME}${NC}"
-    exit 1
-  fi
+  echo -e "${GREEN}✓ No existing container to remove${NC}"
 fi
 
-# Step 2: Wait for container to be ready
+# Step 2: Force rebuild without cache
+echo -e "${YELLOW}→ Rebuilding dashboard without cache...${NC}"
+SCRIPT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$SCRIPT_DIR" || exit 1
+
+if docker compose -f "${COMPOSE_FILE}" build --no-cache dashboard 2>&1; then
+  echo -e "${GREEN}✓ Build completed successfully${NC}"
+else
+  echo -e "${RED}✗ Failed to build container${NC}"
+  exit 1
+fi
+
+# Step 3: Start the new container
+echo -e "${YELLOW}→ Starting new container...${NC}"
+if docker compose -f "${COMPOSE_FILE}" up -d dashboard 2>&1; then
+  echo -e "${GREEN}✓ Container started successfully${NC}"
+else
+  echo -e "${RED}✗ Failed to start container${NC}"
+  echo -e "${RED}  Check logs with: docker compose -f tools/compose/docker-compose.1-dashboard-stack.yml logs dashboard${NC}"
+  exit 1
+fi
+
+# Step 4: Wait for container to be ready
 echo -e "${YELLOW}→ Waiting for container to be ready...${NC}"
 sleep 3
 
-# Step 3: Remove dangling images (images without tags)
+# Step 5: Remove dangling images (images without tags)
 echo -e "${YELLOW}→ Removing dangling images...${NC}"
 DANGLING_IMAGES=$(docker images -f "dangling=true" -q 2>/dev/null)
 
@@ -112,7 +115,7 @@ else
   fi
 fi
 
-# Step 4: Show disk space saved
+# Step 6: Show disk space saved
 echo -e "${YELLOW}→ Docker disk usage summary:${NC}"
 docker system df
 
@@ -124,5 +127,5 @@ echo ""
 echo -e "Container status:"
 docker ps --filter "name=${CONTAINER_NAME}" --format "  {{.Names}}: {{.Status}}"
 echo ""
-echo -e "Dashboard URL: ${BLUE}http://localhost:9080${NC}"
+echo -e "Dashboard URL: ${BLUE}http://localhost:9082${NC}"
 echo ""

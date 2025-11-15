@@ -92,20 +92,8 @@ const unifiedConfig: ApiConfig = {
   firecrawlProxyApi: `${apiBase}/api/firecrawl`,
   docsUrl: composeUrl(apiBase, "/docs"),
   docsApiUrl: composeUrl(apiBase, "/docs/api/documentation-api"),
-  questdbConsoleUrl:
-    pickFirst(
-      import.meta.env.VITE_QUESTDB_CONSOLE_URL,
-      import.meta.env.VITE_QUESTDB_CONSOLE_INTERNAL_URL,
-      composeUrl(apiBase, "/db-ui/questdb"),
-      ENDPOINTS.questdb
-    ) || composeUrl(apiBase, "/db-ui/questdb"),
-  questdbUiUrl:
-    pickFirst(
-      import.meta.env.VITE_QUESTDB_UI_URL,
-      import.meta.env.VITE_QUESTDB_UI_INTERNAL_URL,
-      composeUrl(apiBase, "/db-ui/questdb"),
-      "http://localhost:9010"
-    ) || composeUrl(apiBase, "/db-ui/questdb"),
+  questdbConsoleUrl: import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
+  questdbUiUrl: import.meta.env.VITE_QUESTDB_UI_URL || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
   adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,
@@ -126,24 +114,8 @@ const directConfig: ApiConfig = {
     (import.meta.env.DEV ? "http://localhost:3400/docs" : "/docs"),
   docsApiUrl:
     import.meta.env.VITE_DOCSPECS_URL || "/docs/api/documentation-api",
-  questdbConsoleUrl:
-    pickFirst(
-      import.meta.env.VITE_QUESTDB_CONSOLE_URL,
-      composeUrl(apiBase, "/db-ui/questdb"),
-      ENDPOINTS.questdb,
-      "http://localhost:9000",
-      "http://localhost:8813",
-      "http://localhost:9002"
-    ) || ENDPOINTS.questdb,
-  questdbUiUrl:
-    pickFirst(
-      import.meta.env.VITE_QUESTDB_UI_URL,
-      composeUrl(apiBase, "/db-ui/questdb"),
-      ENDPOINTS.questdb,
-      "http://localhost:9010",
-      "http://localhost:8813",
-      "http://localhost:9009"
-    ) || ENDPOINTS.questdb,
+  questdbConsoleUrl: import.meta.env.VITE_QUESTDB_CONSOLE_URL || ENDPOINTS.questdb,
+  questdbUiUrl: import.meta.env.VITE_QUESTDB_UI_URL || ENDPOINTS.questdb,
   pgAdminUrl: import.meta.env.VITE_PGADMIN_URL || ENDPOINTS.pgAdmin,
   pgWebUrl: import.meta.env.VITE_PGWEB_URL || ENDPOINTS.pgWeb,
   adminerUrl: import.meta.env.VITE_ADMINER_URL || ENDPOINTS.adminer,

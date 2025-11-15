@@ -2,6 +2,7 @@ import { Router } from "express";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync } from "fs";
+import { config } from "../config.js";
 import {
   buildMessageSummary,
   cancelAuthentication,
@@ -17,6 +18,55 @@ import {
 } from "../services/telegramGatewayFacade.js";
 
 export const telegramGatewayRouter = Router();
+
+/**
+ * GET /api/telegram-gateway/config
+ * Runtime configuration endpoint for frontend
+ * Returns auth token and API URLs dynamically
+ */
+telegramGatewayRouter.get("/config", (req, res) => {
+  try {
+    const frontendConfig = {
+      apiBaseUrl:
+        process.env.TELEGRAM_GATEWAY_API_URL ||
+        "http://localhost:9082/api/telegram-gateway",
+      messagesBaseUrl:
+        process.env.TELEGRAM_MESSAGES_API_URL ||
+        "http://localhost:9082/api/messages",
+      channelsBaseUrl:
+        process.env.TELEGRAM_CHANNELS_API_URL ||
+        "http://localhost:9082/api/channels",
+      authToken: config.apiToken, // Server-provided token
+      environment: config.env,
+      features: {
+        authEnabled: Boolean(config.apiToken),
+        metricsEnabled: true,
+        queueMonitoringEnabled: true,
+      },
+    };
+
+    req.log.info(
+      {
+        clientIp: req.ip,
+        userAgent: req.get("user-agent"),
+      },
+      "Frontend config requested"
+    );
+
+    res.json({
+      success: true,
+      data: frontendConfig,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    req.log.error({ err: error }, "Failed to generate frontend config");
+    res.status(500).json({
+      success: false,
+      error: "Failed to load configuration",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
 
 telegramGatewayRouter.post("/actions/reload", (_req, res) => {
   invalidateCaches();

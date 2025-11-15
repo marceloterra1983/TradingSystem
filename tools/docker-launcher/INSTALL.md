@@ -16,11 +16,11 @@ sudo bash tools/docker-launcher/install.sh
 
 **Após a instalação:**
 
-O servidor estará rodando em `http://127.0.0.1:9876`
+O servidor estará rodando em `http://127.0.0.1:9880`
 
 Teste com:
 ```bash
-curl http://127.0.0.1:9876/health
+curl http://127.0.0.1:9880/health
 ```
 
 ## Uso Básico
@@ -42,7 +42,7 @@ tools/docker-launcher/docker-control-cli.sh logs docs-hub
 
 ```bash
 # Reiniciar container
-curl -X POST http://127.0.0.1:9876 \
+curl -X POST http://127.0.0.1:9880 \
   -H "Content-Type: application/json" \
   -d '{"action":"restart","container":"dashboard"}'
 ```
@@ -129,11 +129,11 @@ sudo systemctl restart docker-control
 ### Porta já em uso
 
 ```bash
-# Ver o que está usando a porta 9876
-lsof -i :9876
+# Ver o que está usando a porta 9880
+lsof -i :9880
 
 # Matar processo
-fuser -k 9876/tcp
+fuser -k 9880/tcp
 ```
 
 ## Desinstalação

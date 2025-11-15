@@ -15,11 +15,11 @@ RUN npm install --production
 COPY index.js ./
 
 # Expose port
-EXPOSE 9876
+EXPOSE 9880
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:9876/health || exit 1
+  CMD curl -f http://localhost:9880/health || exit 1
 
 # Start server
 CMD ["node", "index.js"]

@@ -50,35 +50,35 @@ sudo systemctl status docker-control.service
 
 ### API HTTP
 
-**Base URL**: `http://127.0.0.1:9876`
+**Base URL**: `http://127.0.0.1:9880`
 
 #### Health Check
 ```bash
-curl http://127.0.0.1:9876/health
+curl http://127.0.0.1:9880/health
 ```
 
 #### Listar Containers
 ```bash
-curl http://127.0.0.1:9876/containers
+curl http://127.0.0.1:9880/containers
 ```
 
 #### Reiniciar Container
 ```bash
-curl -X POST http://127.0.0.1:9876 \
+curl -X POST http://127.0.0.1:9880 \
   -H "Content-Type: application/json" \
   -d '{"action":"restart","container":"dashboard"}'
 ```
 
 #### Parar Container
 ```bash
-curl -X POST http://127.0.0.1:9876 \
+curl -X POST http://127.0.0.1:9880 \
   -H "Content-Type: application/json" \
   -d '{"action":"stop","container":"docs-hub"}'
 ```
 
 #### Logs do Container
 ```bash
-curl -X POST http://127.0.0.1:9876 \
+curl -X POST http://127.0.0.1:9880 \
   -H "Content-Type: application/json" \
   -d '{"action":"logs","container":"workspace-api"}'
 ```
@@ -186,7 +186,7 @@ Para adicionar mais containers, edite a lista `ALLOWED_CONTAINERS` em `docker-co
 ### Acesso
 
 - **Bind**: `127.0.0.1` (apenas localhost)
-- **Porta**: `9876`
+- **Porta**: `9880`
 - **CORS**: Habilitado para `*` (apenas localhost)
 - **Validação**: Nomes de containers são validados contra lista permitida
 
@@ -234,11 +234,11 @@ newgrp docker
 ### Porta já em uso
 
 ```bash
-# Verificar o que está usando a porta 9876
-lsof -i :9876
+# Verificar o que está usando a porta 9880
+lsof -i :9880
 
 # Matar processo na porta
-fuser -k 9876/tcp
+fuser -k 9880/tcp
 ```
 
 ### Container não permitido

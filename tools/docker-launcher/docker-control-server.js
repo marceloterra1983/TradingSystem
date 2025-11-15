@@ -5,7 +5,7 @@
  * HTTP server para gerenciar containers Docker com privilégios elevados
  * Roda no host local para ter acesso direto ao Docker daemon
  *
- * Porta: 9876
+ * Porta: 9880
  * Requisitos: Usuário no grupo docker (sudo usermod -aG docker $USER)
  */
 
@@ -14,7 +14,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
-const PORT = 9876;
+const PORT = 9880;
 const HOST = '127.0.0.1';
 
 // Lista de containers permitidos para restart
@@ -48,10 +48,6 @@ const ALLOWED_CONTAINERS = [
   'telegram-redis-sentinel',
   'telegram-pgbouncer',
   'telegram-rabbitmq',
-  'telegram-prometheus',
-  'telegram-grafana',
-  'telegram-redis-exporter',
-  'telegram-postgres-exporter',
 
   // WAHA
   'waha-core',

@@ -423,62 +423,11 @@ services:
     environment:
       API_BASE_URL: ${EVOLUTION_MANAGER_API_BASE_URL:-http://evolution-api:8080}
 
-    entrypoint: >
-      /bin/sh -c "
-        set -euo pipefail;
-        rm -f /etc/nginx/conf.d/*.conf;
-        cat <<'EOF' >/etc/nginx/conf.d/manager.conf
-        server {
-            listen 80;
-            server_name localhost;
-            root /usr/share/nginx/html;
-            index index.html;
-
-            gzip on;
-            gzip_vary on;
-            gzip_min_length 1024;
-            gzip_proxied expired no-cache no-store private auth;
-            gzip_types
-                text/plain
-                text/css
-                text/xml
-                text/javascript
-                application/javascript
-                application/xml+rss
-                application/json;
-
-            add_header X-Frame-Options \"SAMEORIGIN\" always;
-            add_header X-XSS-Protection \"1; mode=block\" always;
-            add_header X-Content-Type-Options \"nosniff\" always;
-            add_header Referrer-Policy \"no-referrer-when-downgrade\" always;
-            add_header Content-Security-Policy \"default-src 'self' http: https: data: blob: 'unsafe-inline'\" always;
-
-            location / {
-                try_files $$uri $$uri/ /index.html;
-            }
-
-            location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-                expires 1y;
-                add_header Cache-Control \"public, immutable\";
-            }
-
-            location ~* \\.html$ {
-                expires 1h;
-                add_header Cache-Control \"public\";
-            }
-
-            location /health {
-                access_log off;
-                return 200 \"healthy\\n\";
-                add_header Content-Type text/plain;
-            }
-        }
-        EOF
-        exec /bin/sh /start.sh
-      "
-
     ports:
       - "${EVOLUTION_MANAGER_HOST_BIND:-127.0.0.1}:${EVOLUTION_MANAGER_PORT:-4203}:80"
+
+    volumes:
+      - ../../tools/compose/evolution/nginx-manager.conf:/etc/nginx/conf.d/nginx.conf:ro
 
     deploy:
       resources:
@@ -509,6 +458,17 @@ services:
       - "com.tradingsystem.service=evolution-manager"
       - "com.tradingsystem.component=dashboard"
       - "com.tradingsystem.description=Evolution Manager UI (NGINX static build)"
+      - "traefik.enable=true"
+      - "traefik.docker.network=tradingsystem_backend"
+      - "traefik.http.routers.evolution-manager.rule=PathPrefix(`/apps/evolution-manager`)"
+      - "traefik.http.routers.evolution-manager.entrypoints=web"
+      - "traefik.http.routers.evolution-manager.priority=70"
+      - "traefik.http.routers.evolution-manager.middlewares=evolution-manager-strip"
+      - "traefik.http.middlewares.evolution-manager-strip.stripprefix.prefixes=/apps/evolution-manager"
+      - "traefik.http.services.evolution-manager.loadbalancer.server.port=80"
+      - "traefik.http.services.evolution-manager.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.evolution-manager.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.evolution-manager.loadbalancer.healthcheck.timeout=5s"
 
 volumes:
   evolution-postgres-data:

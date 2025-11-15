@@ -61,7 +61,8 @@ A stack roda de forma independente do dashboard principal e oferece:
 - Formulário para cadastrar credenciais e URLs alvo
 - Botão para agendar execuções
 - Painel de execuções e detalhes (Markdown renderizado)
-- Disponível em: `${VITE_COURSE_CRAWLER_APP_URL}` (padrão `http://localhost:4201`)
+- Disponível via gateway em: `${GATEWAY_PUBLIC_URL}/apps/course-crawler` (padrão `http://localhost:9082/apps/course-crawler`)
+- Fallback direto para desenvolvimento: `${VITE_COURSE_CRAWLER_APP_URL}` (`http://localhost:4201`)
 
 O dashboard principal apresenta o Course Crawler via iframe (Menu **Apps → Course Crawler**), mantendo a stack original intacta.
 
@@ -86,7 +87,7 @@ Frontends:
 
 - API: `http://localhost:3601/health`
 - UI: `http://localhost:4201/`
-- Dashboard (iframe): `http://localhost:3103/#/course-crawler`
+- Dashboard (iframe): `http://localhost:9082/#/course-crawler` (iframe aponta para `/apps/course-crawler`)
 
 </TabItem>
   <TabItem value="local" label="Desenvolvimento local">
@@ -163,6 +164,7 @@ Executando esse checklist com `COURSE_CRAWLER_MAX_CLASSES_PER_MODULE` vazio gara
 | Variável | Função |
 |----------|--------|
 | `VITE_COURSE_CRAWLER_API_URL` | Endpoint usado pelo frontend para listar cursos/runs e baixar artefatos |
+| `VITE_COURSE_CRAWLER_GATEWAY_PATH` | Caminho servido pelo Traefik (default `/apps/course-crawler`) |
 | `COURSE_CRAWLER_APP_PORT` | Porta exposta pelo serviço `course-crawler-ui` (default `4201`) |
 
 O frontend lista cursos, agenda execuções (`POST /courses/:id/runs`) e consome os artefatos Markdown via `GET /runs/:id/artifacts` + `.../raw`. Cada clique já renderiza o Markdown no navegador, sem precisar baixar manualmente do volume `outputs/`.

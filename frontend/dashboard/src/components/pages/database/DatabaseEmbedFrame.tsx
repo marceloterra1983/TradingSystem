@@ -55,42 +55,14 @@ export function DatabaseEmbedFrame({
   }, [activeOption]);
 
   return (
-    <div className="h-[calc(100vh-160px)] w-full">
-      <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {title}
-          </h2>
-          {options.length > 1 && (
-            <div className="flex flex-wrap gap-2">
-              {options.map((option, index) => (
-                <Button
-                  key={option.url}
-                  variant={index === activeIndex ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveIndex(index)}
-                  disabled={index === activeIndex}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          )}
-        </div>
-        <Button variant="outline" size="sm" onClick={handleOpen}>
-          <ExternalLink className="mr-2 h-4 w-4" />
-          {openLabel}
-        </Button>
-      </div>
-      <IframeWithUrl
-        src={activeOption?.url}
-        title={iframeTitle}
-        className="h-[calc(100%-40px)] w-full rounded-lg border border-gray-200 shadow-sm dark:border-gray-700"
-        sandbox={sandbox}
-        allow={allow}
-        wrapperClassName="h-[calc(100%-40px)]"
-      />
-    </div>
+    <IframeWithUrl
+      src={activeOption?.url}
+      title={iframeTitle}
+      className="h-full w-full border-0"
+      sandbox={sandbox}
+      allow={allow}
+      wrapperClassName="h-full w-full"
+    />
   );
 }
 

@@ -6,7 +6,7 @@
 # Facilita reiniciar containers sem precisar de sudo
 ###############################################################################
 
-SERVER="http://127.0.0.1:9876"
+SERVER="http://127.0.0.1:9880"
 
 # Colors
 RED='\033[0;31m'
