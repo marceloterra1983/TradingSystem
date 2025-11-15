@@ -2,8 +2,8 @@
 
 **Date**: 2025-11-14 15:00 BRT
 **Severity**: HIGH (broken N8N UI)
-**Status**: ✅ FIXED
-**Time to Fix**: < 5 minutes
+**Status**: ✅ FIXED (Updated 22:02 BRT - Final)
+**Time to Fix**: < 10 minutes (iterative fixes)
 
 ---
 
@@ -53,13 +53,20 @@ location /n8n/ {
 
 ## ✅ Solution Applied
 
-### Fix (Updated 15:03 BRT - Comprehensive)
+### Fix (Updated 15:06 BRT - All Asset Paths)
 
 Added multiple location blocks to handle ALL N8N asset path variations:
 
 ```nginx
 # N8N assets - handle all asset path variations
 # N8N serves assets with "n8n" prefix (no slash) when VUE_APP_URL_BASE_API=/n8n
+
+# Polyfills stub - n8n 1.119.1 references this file but it doesn't exist
+location ~ ^/n8nassets/polyfills--.*\.js$ {
+    default_type application/javascript;
+    return 200 "// polyfills stub served by n8n-proxy to prevent 404\n";
+}
+
 location /n8nassets/ {
     rewrite ^/n8nassets/(.*)$ /assets/$1 break;
     proxy_pass http://n8n-app:5678;
@@ -67,6 +74,18 @@ location /n8nassets/ {
 
 location /n8nstatic/ {
     rewrite ^/n8nstatic/(.*)$ /static/$1 break;
+    proxy_pass http://n8n-app:5678;
+}
+
+# Handle types (nodes.json, credentials.json)
+location /n8ntypes/ {
+    rewrite ^/n8ntypes/(.*)$ /types/$1 break;
+    proxy_pass http://n8n-app:5678;
+}
+
+# Handle REST API calls with n8n prefix
+location /n8nrest/ {
+    rewrite ^/n8nrest/(.*)$ /rest/$1 break;
     proxy_pass http://n8n-app:5678;
 }
 
@@ -79,8 +98,35 @@ location = /n8nfavicon.ico {
 
 **Why these paths?**
 - N8N uses `VUE_APP_URL_BASE_API=/n8n` which causes frontend to concatenate paths incorrectly
-- Result: `/n8nassets/` instead of `/n8n/assets/`
+- Result: `/n8nassets/`, `/n8ntypes/`, `/n8nstatic/`, `/n8nrest/` instead of `/n8n/assets/`, `/n8n/types/`, etc.
+- Additionally: `/static/` is referenced directly (without prefix) for SVG icons
 - Solution: Rewrite rules to strip `n8n` prefix and proxy to correct backend paths
+
+**Complete Asset Path Mapping** (7 patterns discovered):
+1. `/n8nassets/*` → `/assets/*` (JS/CSS bundles)
+2. `/n8nstatic/*` → `/static/*` (prefixed static files)
+3. `/n8ntypes/*` → `/types/*` (nodes.json, credentials.json)
+4. `/n8nrest/*` → `/rest/*` (REST API calls)
+5. `/n8nfavicon.ico` → `/favicon.ico` (favicon)
+6. `/static/*` → `/static/*` (direct SVG references - webhook, form icons)
+7. `/n8nicons/*` → `/icons/*` (node icons - RemoveDuplicates, Limit, Aggregate, Code, etc.)
+
+### Traefik Router Configuration
+
+Added dedicated router for n8n asset paths with higher priority (85 vs 80):
+
+```yaml
+# docker-compose-5-1-n8n-stack.yml
+labels:
+  # Additional routers for n8n assets, static files, and REST API
+  - "traefik.http.routers.n8n-assets.rule=PathPrefix(`/n8nassets/`) || PathPrefix(`/n8nstatic/`) || PathPrefix(`/n8nrest/`) || PathPrefix(`/n8ntypes/`) || PathPrefix(`/n8nfavicon.ico`) || PathPrefix(`/static/`) || PathPrefix(`/n8nicons/`)"
+  - "traefik.http.routers.n8n-assets.entrypoints=web"
+  - "traefik.http.routers.n8n-assets.service=n8n"
+  - "traefik.http.routers.n8n-assets.priority=85"
+  - "traefik.http.routers.n8n-assets.middlewares=n8n-dashboard-auth-header"
+```
+
+**Note**: All 7 n8n asset path patterns now properly routed through Traefik → nginx-proxy → n8n-app
 
 ### File Modified
 

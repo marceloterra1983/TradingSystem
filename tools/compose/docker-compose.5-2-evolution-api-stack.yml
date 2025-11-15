@@ -423,10 +423,12 @@ services:
     environment:
       API_BASE_URL: ${EVOLUTION_MANAGER_API_BASE_URL:-http://evolution-api:8080}
 
-    entrypoint: >
-      /bin/sh -c "
-        set -euo pipefail;
-        rm -f /etc/nginx/conf.d/*.conf;
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -euo pipefail
+        rm -f /etc/nginx/conf.d/*.conf
         cat <<'EOF' >/etc/nginx/conf.d/nginx.conf
         server {
             listen 80;
@@ -447,11 +449,16 @@ services:
                 application/xml+rss
                 application/json;
 
-            add_header X-Frame-Options \"SAMEORIGIN\" always;
-            add_header X-XSS-Protection \"1; mode=block\" always;
-            add_header X-Content-Type-Options \"nosniff\" always;
-            add_header Referrer-Policy \"no-referrer-when-downgrade\" always;
-            add_header Content-Security-Policy \"default-src 'self' http: https: data: blob: 'unsafe-inline'\" always;
+            add_header X-Frame-Options 'SAMEORIGIN' always;
+            add_header X-XSS-Protection '1; mode=block' always;
+            add_header X-Content-Type-Options 'nosniff' always;
+            add_header Referrer-Policy 'no-referrer-when-downgrade' always;
+            add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+            sub_filter_types text/html application/javascript;
+            sub_filter_once off;
+            sub_filter 'href="/' 'href="/apps/evolution-manager/';
+            sub_filter 'src="/' 'src="/apps/evolution-manager/';
 
             location / {
                 try_files $$uri $$uri/ /index.html;
@@ -459,23 +466,22 @@ services:
 
             location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
-                add_header Cache-Control \"public, immutable\";
+                add_header Cache-Control "public, immutable";
             }
 
             location ~* \\.html$ {
                 expires 1h;
-                add_header Cache-Control \"public\";
+                add_header Cache-Control "public";
             }
 
             location /health {
                 access_log off;
-                return 200 \"healthy\\n\";
+                return 200 "healthy\n";
                 add_header Content-Type text/plain;
             }
         }
         EOF
         exec /bin/sh /start.sh
-      "
 
     ports:
       - "${EVOLUTION_MANAGER_HOST_BIND:-127.0.0.1}:${EVOLUTION_MANAGER_PORT:-4203}:80"
